@@ -12,7 +12,8 @@
     "world.entity.projectile.ProjectileMixin",
     "world.entity.projectile.ThrowableProjectileMixin",
     "world.entity.projectile.ThrownTridentMixin",
-    "world.entity.vehicle.BoatMixin"
+    
+    "world.item.CrossbowItemMixin"
   ],
   "client": [
     "client.main.MainMixin",
@@ -20,7 +21,8 @@
     "client.renderer.block.LiquidBlockRendererMixin",
     "client.renderer.entity.EntityRenderDispatcherMixin",
     "client.resources.language.ClientLanguageMixin",
-    "client.MinecraftMixin"
+    "client.MinecraftMixin",
+    "world.entity.vehicle.BoatMixin"
   ],
   "server": [
     

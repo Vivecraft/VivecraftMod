@@ -5,17 +5,13 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
 import net.minecraft.client.main.Main;
 
 @Mixin(Main.class)
@@ -30,7 +26,7 @@ public class MainMixin {
 	@Unique
 	private static boolean infinadeck;
 	
-	@Inject(at = @At(value = "INVOKE", target = "allowsUnrecognizedOptions()V", shift = At.Shift.AFTER), method = "main([Ljava/lang/String;)V", locals = LocalCapture.CAPTURE_FAILHARD)
+	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V"), method = "main([Ljava/lang/String;)V", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
 	private static void options(String[] p_129642_, CallbackInfo callback, OptionParser optionparser) {
 		optionparser.accepts("kiosk");
 		optionparser.accepts("viewonly");
@@ -48,7 +44,7 @@ public class MainMixin {
 		return 720;
 	}
 		
-	@Redirect(at = @At(value = "INVOKE", target = "parse([Ljava/lang/String;)Ljoptsimple/OptionSet;") , method = "main([Ljava/lang/String;)V")
+	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParserparse;([Ljava/lang/String;)Ljoptsimple/OptionSet;") , method = "main([Ljava/lang/String;)V", remap = false)
 	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
 		OptionSet optionset = optionparser.parse(p_129642_);
 		kiosk = optionset.has("kiosk");

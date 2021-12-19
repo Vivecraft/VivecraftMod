@@ -14,7 +14,7 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(ThrownTrident.class)
 public class ThrownTridentMixin {
 
-	@Redirect(at = @At(value = "INVOKE", target = "getEyePosition()Lnet/minecraft/world/phys/Vec3;"), method = "tick()V")
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getEyePosition()Lnet/minecraft/world/phys/Vec3;"), method = "tick()V")
 	public Vec3 tick(Entity entity) {
 		Vec3 vec3 = entity.getEyePosition();
 		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(entity.getUUID());

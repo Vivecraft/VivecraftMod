@@ -31,7 +31,7 @@ public class ClientPacketListenerMixin {
 	@Shadow
 	private Minecraft minecraft;
 
-	@Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/network/Connection;Lcom/mojang/authlib/GameProfile;Lnet/minecraft/client/ClientTelemetryManager;)V")
+	@Inject(at = @At("TAIL"), method = "Lnet/minecraft/client/multiplayer/ClientPacketListener;<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/network/Connection;Lcom/mojang/authlib/GameProfile;)V")
 	public void init(Minecraft p_104906_, Screen p_104907_, Connection p_104908_, GameProfile p_104909_,
 			CallbackInfo callback) {
 		NetworkHelper.resetServerSettings();
@@ -50,13 +50,13 @@ public class ClientPacketListenerMixin {
 //		
 //	}
 
-	@Inject(at = @At(value = "INVOKE", target = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V", shift = Shift.BY, by = 2), method = "handleRespawn(Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;)V")
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V", shift = Shift.BY, by = 2), method = "handleRespawn(Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;)V")
 	public void respawn(ClientboundRespawnPacket packet, CallbackInfo callback) {
 		NetworkHelper.resetServerSettings();
 		NetworkHelper.sendVersionInfo();
 	}
 
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "getData()Lnet/minecraft/network/FriendlyByteBuf;"), 
+	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getData()Lnet/minecraft/network/FriendlyByteBuf;"), 
 			method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;)V",
 			cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
 	public void handlepacket(ClientboundCustomPayloadPacket p_105004_, CallbackInfo info, ResourceLocation resourcelocation, FriendlyByteBuf friendlybytebuf) {

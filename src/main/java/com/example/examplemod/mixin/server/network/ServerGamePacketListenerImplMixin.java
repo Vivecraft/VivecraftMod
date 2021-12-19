@@ -44,8 +44,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 	@Shadow
 	private int aboveGroundTickCount;
 	
-	@Shadow
-	
 	
 	@Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;)V")
 	public void init(MinecraftServer p_9770_, Connection p_9771_, ServerPlayer p_9772_, CallbackInfo info) {

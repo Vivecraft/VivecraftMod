@@ -70,7 +70,7 @@ public abstract class ServerPlayerMixin extends Player {
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "tick()V", shift = Shift.AFTER), method = "doTick()V")
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;tick()V", shift = Shift.AFTER), method = "doTick()V")
 	public void tick(CallbackInfo info) {
 		NetworkHelper.overridePose(this);
 	}
@@ -133,8 +133,8 @@ public abstract class ServerPlayerMixin extends Player {
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "captureDrops()Ljava/util/Collection;", shift = Shift.BEFORE), method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
-			locals = LocalCapture.CAPTURE_FAILHARD)
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;captureDrops()Ljava/util/Collection;", shift = Shift.BEFORE), method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
+			locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
 	public void dropvive(ItemStack p_9085_, boolean p_9086_, boolean p_9087_, CallbackInfoReturnable<ItemEntity> info,
 			ItemEntity itementity) {
 		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.getUUID());

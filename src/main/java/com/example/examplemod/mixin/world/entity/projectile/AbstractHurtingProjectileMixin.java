@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(AbstractHurtingProjectile.class)
 public class AbstractHurtingProjectileMixin {
 	
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "getLookAngle()Lnet/minecraft/world/phys/Vec3;"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z" ,
+	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/entity/Entity;getLookAngle()Lnet/minecraft/world/phys/Vec3;"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z" ,
 			locals = LocalCapture.CAPTURE_FAILSOFT)
 	public void hurtvive(DamageSource pSource, float f, CallbackInfoReturnable<Boolean> info, Entity entity, Vec3 vec3) {
 		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(pSource.getEntity().getUUID());

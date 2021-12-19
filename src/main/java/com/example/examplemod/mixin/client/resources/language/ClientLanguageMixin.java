@@ -20,7 +20,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 public class ClientLanguageMixin {
 
 	//TODO replace
-	@Inject(at = @At(value = "INVOKE", target = "appendFrom(Ljava/util/List;Ljava/util/Map;)V", shift = Shift.AFTER), method = "loadFrom(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;)Lnet/minecraft/client/resources/language/ClientLanguage;", 
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/language/ClientLanguage;appendFrom(Ljava/util/List;Ljava/util/Map;)V", shift = Shift.AFTER), method = "loadFrom(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;)Lnet/minecraft/client/resources/language/ClientLanguage;", 
 			cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
 	private static void load(ResourceManager p_118917_, List<LanguageInfo> p_118918_, CallbackInfoReturnable<ClientLanguage> info, Map<String, String> map, boolean flag, Iterator iter, LanguageInfo languageinfo) {
 		 LangHelper.loadLocaleData(languageinfo.getCode(), map);

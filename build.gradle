@@ -17,7 +17,12 @@ apply plugin: 'org.spongepowered.mixin'
 
 mixin {
     config "mixins.examplemod.json"
+    add sourceSets.main, 'mixins.examplemod.refmap.json'
+    
+    debug.verbose = true
+    debug.export = true
 }
+
 
 version = '1.0'
 group = 'com.yourname.modid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -141,6 +146,9 @@ dependencies {
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
     // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
 
+	// Apply Mixin AP
+    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+	
     // Examples using mod jars from ./libs
     // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
 

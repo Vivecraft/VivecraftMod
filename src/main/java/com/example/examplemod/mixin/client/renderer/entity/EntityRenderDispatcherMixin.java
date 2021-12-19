@@ -3,7 +3,6 @@ package com.example.examplemod.mixin.client.renderer.entity;
 import java.util.Map;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
@@ -23,7 +22,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 
 @Mixin(EntityRenderDispatcher.class)
 public abstract class EntityRenderDispatcherMixin implements ResourceManagerReloadListener{
@@ -36,9 +34,6 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 	private VRPlayerRenderer playerRendererVR;
 	@Unique
 	private VRPlayerRenderer playerRendererVRSeated;
-	
-	@Shadow
-	private Map<String, EntityRenderer<? extends Player>> playerRenderers;
 	
 	@Inject(at = @At("HEAD"), method = "getRenderer(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/client/renderer/entity/EntityRenderer;", cancellable = true)
 	public void renderer(Entity pEntity, CallbackInfoReturnable<EntityRenderer<AbstractClientPlayer>> info) {
@@ -92,7 +87,7 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 //		}
 	}
 	
-	@Inject(at = @At(value = "INVOKE", target = "createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;", shift = Shift.AFTER), 
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;", shift = Shift.AFTER), 
 			method = "onResourceManagerReload(Lnet/minecraft/server/packs/resources/ResourceManager;)V", locals = LocalCapture.CAPTURE_FAILEXCEPTION)
 	public void reload(ResourceManager p_174004_, CallbackInfo info, EntityRendererProvider.Context context) {
 		//this.playerRenderers = new HashMap<>(this.playerRenderers);
