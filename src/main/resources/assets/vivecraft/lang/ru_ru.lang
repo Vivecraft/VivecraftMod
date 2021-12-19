@@ -1,0 +1,442 @@
+# Contributors: Hu4uTa, Krays, Shinomasu, link1107
+
+# Key bindings
+vivecraft.key.hotbarNext=Следующий Слот
+vivecraft.key.hotbarPrev=Предыдущий Слот
+vivecraft.key.hotbarScroll=Прокрутка Слотов
+vivecraft.key.hotbarSwipeX=Свайп (Влево/Вправо)
+vivecraft.key.hotbarSwipeY=Свайп (Вверх/Вниз)
+vivecraft.key.rotateLeft=Повернуться Налево
+vivecraft.key.rotateRight=Повернуться Направо
+vivecraft.key.rotateAxis=Только Вращение
+vivecraft.key.rotateFree=Свободно Поворачиваться 
+vivecraft.key.walkabout=Прогулка
+vivecraft.key.teleport=Телепортироваться
+vivecraft.key.teleportFallback=Идти вперед когда телепортирование выключено
+vivecraft.key.freeMoveRotate=Двигаться/Поворачиваться
+vivecraft.key.freeMoveStrafe=Двигаться/Стрейфить
+vivecraft.key.toggleMovement=Переключить режим перемещения
+vivecraft.key.quickTorch=Быстрый Факел
+vivecraft.key.ingameMenuButton=Игровое Меню
+vivecraft.key.exportWorld=Экспорт Мира Меню
+vivecraft.key.radialMenu=Открыть Радиальное Меню
+vivecraft.key.swapMirrorView=Выбрать зеркальный вид
+vivecraft.key.toggleKeyboard=Показать/Скрыть Клавиатуру
+vivecraft.key.moveThirdPersonCam=Передвинуть Камеру Третьего Лица
+vivecraft.key.togglePlayerList=Переключить Список Игроков
+vivecraft.key.trackpadTouch=Прикосновения к сенсорной панели
+vivecraft.key.vrInteract=Контекстное Взаимодействие
+vivecraft.key.guiLeftClick=Левый Клик
+vivecraft.key.guiRightClick=Правый Клик
+vivecraft.key.guiMiddleClick=Средний Клик
+vivecraft.key.guiShift=Shift
+vivecraft.key.guiCtrl=Ctrl
+vivecraft.key.guiAlt=Alt
+vivecraft.key.guiScrollUp=Scroll Up
+vivecraft.key.guiScrollDown=Scroll Down
+vivecraft.key.guiScrollAxis=Scroll
+vivecraft.key.keyboardClick=Click
+vivecraft.key.keyboardShift=Shift
+vivecraft.key.climbeyGrab=Когти Альпиниста
+vivecraft.key.climbeyJump=Прыжковые Ботинки
+
+# Key binding categories
+vivecraft.key.category.gui=GUI
+vivecraft.key.category.climbey=Движение на подъем
+vivecraft.key.category.keyboard=Клавиатура
+
+# Action set names
+vivecraft.actionset.ingame=В игре
+vivecraft.actionset.gui=GUI
+vivecraft.actionset.global=Глобальный
+vivecraft.actionset.mod=Модифицированный
+vivecraft.actionset.contextual=Контекстный
+vivecraft.actionset.keyboard=Клавиатура
+vivecraft.actionset.mixedReality=Смешанная Реальность
+vivecraft.actionset.technical=Технический
+
+# Option screens
+vivecraft.options.screen.main=Настройки VR
+vivecraft.options.screen.freemove=Параметры Свободного Перемещения
+vivecraft.options.screen.gui=Настройки Графического и Игрового Интерфейса
+vivecraft.options.screen.menuworld=Меню в игре
+vivecraft.options.screen.guiother=Чат/Прицел
+vivecraft.options.screen.quickcommands=Быстрые команды
+vivecraft.options.screen.radialmenu=Радиальное меню
+vivecraft.options.screen.stereorendering=Настройки Стерео Рендера
+vivecraft.options.screen.roomscale=Взаимодействие с комнатой
+vivecraft.options.screen.seated=Параметры Сидячего Режима
+vivecraft.options.screen.standing=Передвижение стоя
+vivecraft.options.screen.teleport=Параметры Телепортации
+vivecraft.options.screen.controls=Настройки Управления
+
+# Buttons that lead to the screen
+vivecraft.options.screen.main.button=Настройки VR...
+vivecraft.options.screen.gui.button=HUD и GUI...
+vivecraft.options.screen.stereorendering.button=Стерео рендер...
+vivecraft.options.screen.quickcommands.button=Быстрые команды...
+vivecraft.options.screen.guiother.button=Настройки чата и прицела...
+vivecraft.options.screen.standing.button=Настройки перемещения...
+vivecraft.options.screen.roomscale.button=Настройки взаимодействий...
+vivecraft.options.screen.controls.button=Настройки контроллера...
+vivecraft.options.screen.radialmenu.button=Радиальное меню...
+vivecraft.options.screen.seated.button=Настройки сидя...
+vivecraft.options.screen.menuworld.button=Меню в игре...
+vivecraft.options.screen.teleport.button=Настройки телепортации..
+vivecraft.options.screen.freemove.button=Свободное перемещение...
+
+# Option names
+vivecraft.options.HUD_SCALE=Размер HUD
+vivecraft.options.HUD_DISTANCE=Дистанция от HUD
+vivecraft.options.HUD_LOCK_TO=Фиксация HUD
+vivecraft.options.HUD_OPACITY=Прозрачность HUD
+vivecraft.options.HUD_HIDE=Спрятать Игровой Интерфейс (F1)
+vivecraft.options.RENDER_MENU_BACKGROUND=Фон HUD/GUI
+vivecraft.options.HUD_OCCLUSION=Непрозрачность HUD
+vivecraft.options.MENU_ALWAYS_FOLLOW_FACE=Преследование меню
+vivecraft.options.CROSSHAIR_OCCLUSION=Непрозрачность прицела
+vivecraft.options.CROSSHAIR_SCALE=Размер Прицела
+vivecraft.options.MENU_CROSSHAIR_SCALE=Размер Прицела в Меню
+vivecraft.options.RENDER_CROSSHAIR_MODE=Показать Прицел
+vivecraft.options.CHAT_NOTIFICATIONS=Оповещения в чате
+vivecraft.options.CHAT_NOTIFICATION_SOUND=Звук оповещения
+vivecraft.options.CROSSHAIR_SCALES_WITH_DISTANCE=Маштаб прицела
+vivecraft.options.RENDER_BLOCK_OUTLINE_MODE=Обводка блоков
+vivecraft.options.AUTO_OPEN_KEYBOARD=Статичная клавиатура
+vivecraft.options.RADIAL_MODE_HOLD=Режим радиального меню
+vivecraft.options.PHYSICAL_KEYBOARD=Тип Клавиатуры
+vivecraft.options.PHYSICAL_KEYBOARD_SCALE=Размер Клавиатуры
+vivecraft.options.GUI_APPEAR_OVER_BLOCK=Положение над блоком
+vivecraft.options.FSAA=Фильтр Ланцоша
+vivecraft.options.MIRROR_DISPLAY=Отражение РС
+vivecraft.options.MIRROR_EYE=Отражение глаз
+vivecraft.options.MIXED_REALITY_KEY_COLOR=Свет Кнопок
+vivecraft.options.MIXED_REALITY_RENDER_HANDS=Показывать Руки
+vivecraft.options.MIXED_REALITY_UNITY_LIKE=Слой
+vivecraft.options.MIXED_REALITY_UNDISTORTED=Прямая передача
+vivecraft.options.MIXED_REALITY_ALPHA_MASK=Альфа-маска
+vivecraft.options.MIXED_REALITY_FOV=Поле Зрения Камеры
+vivecraft.options.WALK_UP_BLOCKS=Хождение по блокам
+vivecraft.options.MOVEMENT_MULTIPLIER=Движение. Множитель скорости
+vivecraft.options.INERTIA_FACTOR=Инерция Игрока
+vivecraft.options.SIMULATE_FALLING=Симуляция падения
+vivecraft.options.WEAPON_COLLISION=Коллизия Оружия
+vivecraft.options.ALLOW_CRAWLING=Ползанье
+vivecraft.options.LIMIT_TELEPORT=Лимит в Выживании
+vivecraft.options.REVERSE_HANDS=Реверс рук
+vivecraft.options.STENCIL_ON=Использовать Трафарет Глаз
+vivecraft.options.BCB_ON=Показывать тело
+vivecraft.options.WORLD_SCALE=Маштаб мира
+vivecraft.options.WORLD_ROTATION=Ротация мира
+vivecraft.options.WORLD_ROTATION_INCREMENT=Прирост ротации
+vivecraft.options.TOUCH_HOTBAR=Прикосновения к хотбару
+vivecraft.options.PLAY_MODE_SEATED=Режим Игры
+vivecraft.options.RENDER_SCALEFACTOR=Разрешение
+vivecraft.options.MONO_FOV=Неискажённый FOV
+vivecraft.options.REALISTIC_JUMP=Прыжки
+vivecraft.options.REALISTIC_SNEAK=Приседания
+vivecraft.options.PHYSICAL_GUI=Физические GUI
+vivecraft.options.REALISTIC_CLIMB=Взбирание
+vivecraft.options.REALISTIC_SWIM=Плавание
+vivecraft.options.REALISTIC_ROW=Гребля
+vivecraft.options.WALK_MULTIPLIER=Ускорение хода
+vivecraft.options.FREEMOVE_MODE=Тип Свободного Перемещения
+vivecraft.options.VEHICLE_ROTATION=Ротация транспорта
+vivecraft.options.RESET_ORIGIN=Перезагрузка источника
+vivecraft.options.X_SENSITIVITY=Скорость Поворота
+vivecraft.options.Y_SENSITIVITY=Чувствительность по оси Y
+vivecraft.options.KEYHOLE=Замочная скважина
+vivecraft.options.FOV_REDUCTION=Снижение комфорта FOV
+vivecraft.options.FOV_REDUCTION_MIN=Уменьшение размера FOV
+vivecraft.options.FOV_REDUCTION_OFFSET=Уменьшение смещения FOV
+vivecraft.options.SEATED_HMD=Прямое направление
+vivecraft.options.SEATED_HUD_XHAIR=Следование HUD
+vivecraft.options.BACKPACK_SWITCH=Выбор рюкзака
+vivecraft.options.ANALOG_MOVEMENT=Аналог движений
+vivecraft.options.AUTO_SPRINT=Автоматический Бег
+vivecraft.options.AUTO_SPRINT_THRESHOLD=Предел Автоматического Бега
+vivecraft.options.BOW_MODE=Режим лука
+vivecraft.options.TELEPORT_DOWN_LIMIT=Лимит низа
+vivecraft.options.TELEPORT_UP_LIMIT=Лимит верха
+vivecraft.options.TELEPORT_HORIZ_LIMIT=Лимит дистанции
+vivecraft.options.ALLOW_STANDING_ORIGIN_OFFSET=Смещение координат
+vivecraft.options.SEATED_FREE_MOVE=Тип перемещания
+vivecraft.options.FORCE_STANDING_FREE_MOVE=Свободное движение
+vivecraft.options.ALLOW_ADVANCED_BINDINGS=Глобальные бинды
+vivecraft.options.MENU_WORLD_SELECTION=Миры
+vivecraft.options.HRTF_SELECTION=HRTF
+vivecraft.options.RELOAD_EXTERNAL_CAMERA=Перезагрузка камеры
+vivecraft.options.RIGHT_CLICK_DELAY=Повтор ПКМ
+vivecraft.options.ANIMAL_TOUCHING=Прикосновения к животным
+
+# Option tooltips
+vivecraft.options.HUD_SCALE.tooltip=Относительный размер HUD в поле зрения.\nЕдиницы измерения относительны, и не имеют привязки к градусам и т.д.
+
+vivecraft.options.HUD_DISTANCE.tooltip=Расстояние до HUD находящегося перед вами.\nРазмер HUD от этого не изменится.\nДистанция в метрах (независимо от блоков).
+
+vivecraft.options.HUD_LOCK_TO.tooltip=Указывает установленную ориентацию HUD.\n  Рука: HUD появится чуть выше вашей руки.\n  Голова: HUD появляется прямо перед вами.\n  Запястье: HUD будет со стороны основной руки. Оно появится при наведении.
+
+vivecraft.options.HUD_OPACITY.tooltip=Прозрачность HUD и UI.
+
+vivecraft.options.RENDER_MENU_BACKGROUND.tooltip=Показывает, имеет ли GUI прозрачность или нет.\n  Вкл: Полупрозрачный фон внутриигрового меню.\n  Выкл: Фон отсутствует.
+
+vivecraft.options.HUD_OCCLUSION.tooltip=Определяет отключение HUD приближёнными объектами.\n  Вкл: HUD будет скрыт при взаимодействии. Может быть полностью скрыт в замкнутом пространстве!\n  Выкл: HUD всегда виден. Возможны проблемы с глубиной.
+
+vivecraft.options.MENU_ALWAYS_FOLLOW_FACE.tooltip=Определяет, когда главное меню следует вашему направлению взгляда.\n  Сидя: Только в сидячем режиме.\n  Всегда: Следует всегда.
+
+vivecraft.options.CROSSHAIR_SCALE.tooltip=Устанавливает размер игрового прицела.
+
+vivecraft.options.MENU_CROSSHAIR_SCALE.tooltip=Устанавливает размер прицела в меню.
+
+vivecraft.options.RENDER_CROSSHAIR_MODE.tooltip=Режим отображения прицела.\n  Всегда: Виден всегда, если выключен HUD.\n  с HUD: Виден только вместе с HUD.\n  Никогда: Прицел никогда не показывается.
+
+vivecraft.options.CHAT_NOTIFICATIONS.tooltip=Действия происходящие при получении сообщения.\n  Нет: Ничего\n  Тактильно: Вибрация.\n  Звук: Звуковое уведомление.\n  Оба: Вибрация и звук.
+
+vivecraft.options.CHAT_NOTIFICATION_SOUND.tooltip=Установка уведомления в чате.
+
+vivecraft.options.CROSSHAIR_SCALES_WITH_DISTANCE.tooltip=Изменение прицела с расстоянием.\n  Вкл: Увеличивается с приближением к поверхности.\n  Выкл: Прицел всегда одного размера.
+
+vivecraft.options.RENDER_BLOCK_OUTLINE_MODE.tooltip=Режим отображения контура блоков.\n  Всегда: Контур всегда виден, если HUD выключен.\n  с HUD: Контур виден только с HUD.\n  Никогда: Контур не виден никогда.
+
+vivecraft.options.AUTO_OPEN_KEYBOARD.tooltip=Если выключено, клавиатура открывается только по нажатию на чат или на текстовое поле.\n\nЕсли включено, то клавиатура открывается при любом фокусе на текстовые поля. Может иметь проблемы с другими модами.
+
+vivecraft.options.RADIAL_MODE_HOLD.tooltip=Поведение радиального меню при нажатии на кнопку.\n  Удерживать: Зажмите кнопку наведитесь на выделение и отпустите.\n  Нажать: Обычный нажатия, нажмите дважды на кнопку чтобы закрыть.
+
+vivecraft.options.PHYSICAL_KEYBOARD.tooltip=Какой тип клавиатуры использовать.\n  Физическая: Клавиатура подобная настоящей.\n  Указатель: Выбор каждой буквы прицелом при помощи контроллера.
+
+vivecraft.options.PHYSICAL_KEYBOARD_SCALE.tooltip=Насколько большой должна быть физическая клавиатура, относительно базового размера.
+
+vivecraft.options.GUI_APPEAR_OVER_BLOCK.tooltip=Если включено, GUI для блоков (сундуки и печки) будут располагаться над блоком. В противном случае - в обычном положении.
+
+vivecraft.options.FSAA.tooltip=Использует более оптимизированный ресемплинг игры перед отправлением HMD. Лучше всего работает при большом объеме рендера.
+
+vivecraft.options.MIRROR_DISPLAY.tooltip=Отражает изображения для HMD для разделения окон.\nМожет быть установлено на Выкл, одиночный или двойной hmd-вид, 1-е лицо, 3-е лицо и смешанную реальность. FP, TP, MR обладают большей производительностью.
+
+vivecraft.options.MIRROR_EYE.tooltip=Какой глаз использовать в кадрированном и одиночном режимах.
+
+vivecraft.options.MIXED_REALITY_KEY_COLOR.tooltip=Цвет полупрозрачности для смешанной реальности. Другие цвета никак не взаимодействуют с этим.
+
+vivecraft.options.MIXED_REALITY_RENDER_HANDS.tooltip=Рендер рук в смешанной реальности. Касается только рук, предметы в любом случае отображаются.
+
+vivecraft.options.MIXED_REALITY_UNITY_LIKE.tooltip=Выбор между Unity стилями, 4-панельный слой или 2-панельный.
+
+vivecraft.options.MIXED_REALITY_UNDISTORTED.tooltip=Для неискажённого 4-х панельного слоя необходим сверх рендер. В противном случае будет использоваться вид HMD.
+
+vivecraft.options.MIXED_REALITY_ALPHA_MASK.tooltip=В Unity слое, если да, будет отображена серая градация альфа-маски в верхнем квадранте (как Unity) для использования при маскировке слоя переднего плана. В противном случае передний план будет отображаться с ключевым цветом.
+
+vivecraft.options.MIXED_REALITY_FOV.tooltip=FOV используется для смешанной реальности в зеркальном режиме.
+
+vivecraft.options.WALK_UP_BLOCKS.tooltip=Даёт возможность взбираться вверх без прыжка. Hotkey: RCtrl+B\n§cВНИМАНИЕ: Могут возникнуть проблемы с анти-читом!\n  Выкл: (Обычно) Нужно прыгать на блоки.\n  Вкл: Вы можете подняться на отдельные блоки. Может помочь при тошноте.
+
+vivecraft.options.MOVEMENT_MULTIPLIER.tooltip=Устанавливает умножение скорости, разрешает более медленные движения. Может помочь при тошноте.\n§cВНИМАНИЕ: Могут возникнуть проблемы с анти-читом!\nОбычная скорость в майнкрафте равна 1.0.
+
+vivecraft.options.INERTIA_FACTOR.tooltip=станавливает инерцию движения игрока в одиночном режиме. Меньшая инерция означает более быстрое ускорение, более высокая инерция означает медленное ускорение. Высокая инерция может уменьшить укачивание у некоторых, но остерегайтесь краев обрывов!\n\n  Нормально: (Default) Standard Minecraft player movement.\n  Автоматически < Нормально < Много < Даже Больше. Не может влиять на воду, лаву и прыжки.
+
+vivecraft.options.SIMULATE_FALLING.tooltip=Если этот параметр включен, игрок упадет на землю в режиме телепорта, когда стоит над пустым пространством. Также позволяет прыгать.
+
+vivecraft.options.WEAPON_COLLISION.tooltip=Позволяет взаимодействовать с блоками и объектами в пределах комнаты.\nАвтоматически включено в выживании.
+
+vivecraft.options.ALLOW_CRAWLING.tooltip=Если этот параметр включен, игрок сможет прятаться под блоком.
+
+vivecraft.options.LIMIT_TELEPORT.tooltip=При включении ограничивает телепортацию. Игрок не сможет прыгать по сторонам блоков, это будет затрачивать еду и появится полоска энергии.
+
+vivecraft.options.REVERSE_HANDS.tooltip=Выбор доминантной руки.\n  Вкл: Левая доминантная\n  Выкл: Правая доминантная\n\nДля смены кнопок, перезагрузите игру, и убедитесь, что настройки SteamVR не изменены.
+
+vivecraft.options.STENCIL_ON.tooltip=Скрывать области за пределами FOV.\nПовышает производительность.
+
+vivecraft.options.BCB_ON.tooltip=Показывает положения тела тенью на полу.\nЭто ваш Квадратный-Воображаемый-Друг-Тень™.\nНе потеряйте своего единственного друга...
+
+vivecraft.options.WORLD_SCALE.tooltip=Маштабирует игрока в мире.\nВыше 1 делает вас больше\nНиже - меньше\n1 как мать родила\nне трогай тут ничего, размер не главное.
+
+vivecraft.options.WORLD_ROTATION.tooltip=Увеличивает ротацию вашего HMD.\nПолезно использовать со стрелками.
+
+vivecraft.options.WORLD_ROTATION_INCREMENT.tooltip=На сколько градусов повернуть при вращении мира.
+
+vivecraft.options.TOUCH_HOTBAR.tooltip=Если этот параметр включен, вы можете касаться панели быстрого доступа основной рукой, чтобы выбрать элемент.
+
+vivecraft.options.PLAY_MODE_SEATED.tooltip=Режим игры стоя или сидя.\nСтоя - намного лучше.
+
+vivecraft.options.RENDER_SCALEFACTOR.tooltip=Масштаб внутреннего рендеринга игры относительно собственного дисплея HMD. Более высокие значения улучшают визуальное качество за счет производительности.
+
+vivecraft.options.MONO_FOV.tooltip=FOV используется для режима неискаженного зеркала.
+
+vivecraft.options.REALISTIC_JUMP.tooltip=Если включено, то ваш прыжок в игре эквивалентен реальному. Включает Ботинки-Прыгуны.
+
+vivecraft.options.REALISTIC_SNEAK.tooltip=Если включено, то при приседании ваш персонаж начнёт красться.
+
+vivecraft.options.PHYSICAL_GUI.tooltip=Если этот параметр включен то GUI будут заменены интерактивными трехмерными моделями.\nЕсли включен рюкзак, то он послужит вашим инвентарём.
+
+vivecraft.options.REALISTIC_CLIMB.tooltip=Если он включен, позволяйте подниматься по лестницам и лозам, дотрагиваясь до них. Также включает когти.
+
+vivecraft.options.REALISTIC_SWIM.tooltip=Если включено, то позволяет плавать при помощи гребли контроллерами.
+
+vivecraft.options.REALISTIC_ROW.tooltip=Греби как сумасшедший чтобы сдвинуться на этой чёртовой лодке.
+
+vivecraft.options.WALK_MULTIPLIER.tooltip=Умножает ваше положение в комнате на коэффициент.\nПозволяет больше ходить, но может вызвать укачивание.
+
+vivecraft.options.FREEMOVE_MODE.tooltip=Источник управления.\n  Контроллер: Главная рука управляется контроллером.\n  HMD: Направление гарнитуры.\n  Бег на месте: Трекинг движения контроллеров.\n  Комната: Режим следования VR. Перемещение при помощи гарнитуры. Режим лучше всего подходит для 180 сетапов.
+
+vivecraft.options.VEHICLE_ROTATION.tooltip=Езда на транспортном средстве будет вращать мир по мере вращения транспортного средства. Можно потеряться.
+
+vivecraft.options.RESET_ORIGIN.tooltip=Переносит игрока на высоту 1.62м от положения HMD. Для неабсолютных систем слежения или игры сидя.
+
+vivecraft.options.X_SENSITIVITY.tooltip=Ускорение при нажатии на край стика.
+
+vivecraft.options.Y_SENSITIVITY.tooltip=Вертикальная скорость прицела относительно мыши.
+
+vivecraft.options.KEYHOLE.tooltip=Количество градусов слева и справа от центра, откуда изображение начнет вращаться.
+
+vivecraft.options.FOV_REDUCTION.tooltip=Сужение поля зрения при движении. Может помочь с укачиванием.
+
+vivecraft.options.FOV_REDUCTION_MIN.tooltip=Окончательный размер сужения FOV.
+
+vivecraft.options.FOV_REDUCTION_OFFSET.tooltip=Смещает по горизонтали центр для сокращения FOV при нестандартных HMD.
+
+vivecraft.options.SEATED_HMD.tooltip=Направление (W) кнопки вперед.\nHMD направление взгляда или направление прицела.
+
+vivecraft.options.SEATED_HUD_XHAIR.tooltip=Направление, в котором будет размещен HUD.\nHMD направление взгляда или направление прицела.
+
+vivecraft.options.BACKPACK_SWITCH.tooltip=Если включено, то при перемещении правого контролера за голову будет выбран первый слот, или возврат к предыдущему слоту. Эти же действия левым контроллером меняют положение левого и правого предметов.
+
+vivecraft.options.ANALOG_MOVEMENT.tooltip=Скорость ходьбы будет определяться осью кнопки контроллера, если у кнопки есть такая возможность.\n\nДля полного аналогового управления лучше использовать "Move/Strafe" или "Move/Rotate".
+
+vivecraft.options.AUTO_SPRINT.tooltip=При использовании свободного перемещения, спринт автоматически активируется при достижении установленного порога.
+
+vivecraft.options.AUTO_SPRINT_THRESHOLD.tooltip=Порог оси, при котором активируется авто-спринт.
+
+vivecraft.options.BOW_MODE.tooltip=Устанавливает, когда использовать стрельбу из лука в масштабе комнаты\n  Выкл: Никогда.\n  Стандартно: Только для ванильного лука.\n  Вкл: Для любого предмета с механикой лука.
+
+vivecraft.options.TELEPORT_DOWN_LIMIT.tooltip=Ограничение блоков телепортации вниз.
+
+vivecraft.options.TELEPORT_UP_LIMIT.tooltip=Ограничение блоков телепортации вверх.
+
+vivecraft.options.TELEPORT_HORIZ_LIMIT.tooltip=Ограничение блоков телепортации на плоскости.
+
+vivecraft.options.ALLOW_STANDING_ORIGIN_OFFSET.tooltip=Разрешает "Reset Origin" для использования в режиме стоя, для играющих сидя, используя контроллер отслеживания.
+
+vivecraft.options.SEATED_FREE_MOVE.tooltip=Какой режим передвижения использовать в сидячем режиме.\n\n  Телепорт: Нажмите в любом направлении.\n  Свободное передвижение: WASD как в обычном майнкрафте.
+
+vivecraft.options.FORCE_STANDING_FREE_MOVE.tooltip=Заставляет использовать привязку перехода вперед (обычно левый триггер). Для больших опций, редактируйте SteamVR бинды.\n\nОбратите внимание, что это отключает привязку телепорта.
+
+vivecraft.options.ALLOW_ADVANCED_BINDINGS.tooltip=Показывает дополнительные бинды SteamVR для климбинга, клавиатуры и смешанной реальности.\n\nДля результата необходима перезагрузка.
+
+vivecraft.options.MENU_WORLD_SELECTION.tooltip=Какие миры меню загружать при запуске.\n\nЕсли пользовательских миров не найдено, будут использоваться официальные миры.
+
+vivecraft.options.HRTF_SELECTION.tooltip=HRTF для использования 3D аудио. Качество может отличаться в зависимости от оборудования.\n\n  Выкл: Отключение HRTF.\n  По умолчанию: Обычный режим HRTF.\n  Остальное: Пользовательский HRTF.
+
+vivecraft.options.RELOAD_EXTERNAL_CAMERA.tooltip=Перезагрузка конфигурации ExternalCamera.cfg
+
+vivecraft.options.RIGHT_CLICK_DELAY.tooltip=Количество тиков в игре между "ПКМ" при удержании вниз.
+
+vivecraft.options.ANIMAL_TOUCHING.tooltip=Если включено, при нажатии на животное (мирное) без оружия используйте ПКМ (взаимодействие) чтобы избежать атаки.\nВыключи, чтобы не бить по лицу поросят.
+
+# Option values
+vivecraft.options.gamma.cantseeshitcaptain=Я не вижу
+vivecraft.options.yes=ДА
+vivecraft.options.no=НЕТ
+vivecraft.options.auto=Авто
+vivecraft.options.default=По умолчанию
+vivecraft.options.opaque=Непрозрачный
+vivecraft.options.mirror.off=ВЫКЛ (быстро)
+vivecraft.options.mirror.dual=Двойной (быстро)
+vivecraft.options.mirror.single=Единичный (быстро)
+vivecraft.options.mirror.firstperson=1-е лицо (медленно)
+vivecraft.options.mirror.thirdperson=3-е лицо (медленно)
+vivecraft.options.mirror.mixedreality=Смешанная Реальность (медленно)
+vivecraft.options.mirror.cropped=Укороченно (быстро)
+vivecraft.options.left=Лево
+vivecraft.options.right=Право
+vivecraft.options.color.black=Чёрный
+vivecraft.options.color.red=Красный
+vivecraft.options.color.yellow=Жёлтый
+vivecraft.options.color.green=Зеленый
+vivecraft.options.color.cyan=Бирюзовый
+vivecraft.options.color.blue=Синий
+vivecraft.options.color.magenta=Пурпурный
+vivecraft.options.unity=Единство
+vivecraft.options.sidebyside=Бок о бок
+vivecraft.options.hand=Рука
+vivecraft.options.head=Голова
+vivecraft.options.wrist=Запястье
+vivecraft.options.body=Тело
+vivecraft.options.withhud=с HUD
+vivecraft.options.always=Всегда
+vivecraft.options.never=Никогда
+vivecraft.options.chatnotification.none=Нет
+vivecraft.options.chatnotification.haptic=Тактильно
+vivecraft.options.chatnotification.sound=Звук
+vivecraft.options.chatnotification.both=Оба
+vivecraft.options.seated=Сидя
+vivecraft.options.standing=Стоя
+vivecraft.options.inertia.none=Автоматически
+vivecraft.options.inertia.normal=Нормально
+vivecraft.options.inertia.large=Много
+vivecraft.options.inertia.massive=Даже Больше
+vivecraft.options.smooth=Сглаженно
+vivecraft.options.hmd=HMD
+vivecraft.options.crosshair=Прицел
+vivecraft.options.controller=Контроллер
+vivecraft.options.runinplace=Бег на месте
+vivecraft.options.room=Комната
+vivecraft.options.hold=Удерживать
+vivecraft.options.press=Нажать
+vivecraft.options.keyboard.physical=Физическая
+vivecraft.options.keyboard.pointer=Указатель
+vivecraft.options.vanilla=Стандартно
+vivecraft.options.teleportlimit=%dБлоков
+vivecraft.options.teleport=Телепортация
+vivecraft.options.freemove=Свободное Перемещение
+vivecraft.options.menuworld.both=Официальный и Пользовательский
+vivecraft.options.menuworld.custom=Только Пользовательский
+vivecraft.options.menuworld.official=Только Официальный
+vivecraft.options.menuworld.none=Нет
+vivecraft.options.rightclickdelay.slow=Медленно
+vivecraft.options.rightclickdelay.slower=Очень медленно
+vivecraft.options.rightclickdelay.slowest=Самый медленный
+
+# Button text
+vivecraft.gui.ok=Хорошо
+vivecraft.gui.clear=Очистить
+vivecraft.gui.loaddefaults=Сбросить
+vivecraft.gui.menuworld.refresh=Перезагрузить меню
+vivecraft.gui.menuworld.loadnew=Загрузить новое меню
+vivecraft.gui.radialmenu.mainset=Основной набор
+vivecraft.gui.radialmenu.alternateset=Альт-набор
+vivecraft.gui.chat=Чат
+vivecraft.gui.commands=Команды
+vivecraft.gui.overlay=Оверлей
+vivecraft.gui.profiler=Профайлер
+vivecraft.gui.screenshot=Скриншот
+vivecraft.gui.calibrateheight=Калибровка высоты
+vivecraft.gui.alignkatwalk=Выровняйте KAT WALK
+vivecraft.gui.movethirdpersoncam=Переместить камеру
+
+# Items
+vivecraft.item.jumpboots=Ботинки Прыгуны
+vivecraft.item.climbclaws=Когти
+vivecraft.item.telescope=Глаз Провидца
+
+# Messages
+vivecraft.messages.seatedmode=Переход в сидячий режим отключит контроллер. Продолжить?
+vivecraft.messages.radialmenubind.1=Убедитесь, что Открытое Радиальное Меню привязано.
+vivecraft.messages.radialmenubind.2=Зажмите (на клавиатуре Shift) с открытым радиальным меню, чтобы переключиться на этот набор.
+vivecraft.messages.controls.1=Бинды обрабатываются SteamVR.
+vivecraft.messages.controls.2=Отправляйтесь в Настройки > Контроллеры > Управление Биндами Контроллера на панели инструментов.
+vivecraft.messages.controls.3=§6Steam должен быть запущен §oперед§r§6 SteamVR, иначе бинды не сохранятся.
+vivecraft.messages.serverplugin=Vivecraft обнаружил серверный мод: %s
+vivecraft.messages.noserverplugin=Vivecraft не обнаружен. Этот сервер может не поддерживать телепортацию. Включен режим ограниченного передвижения (возврат к свободному перемещению).
+vivecraft.messages.calibrateheight=Пожалуйста, откаллибруйте высоту в меню паузы.
+vivecraft.messages.rendersetupfailed=Ошибка рендера: %s
+vivecraft.messages.intelgraphics=Интегрированная графика Intel не поддерживается. Если это ноутбук, пожалуйста, установите высокопроизводительный GPU. Найденное GPU: %s
+vivecraft.messages.menuworldexportcomplete.1=Экспорт завершен... размер области: %d
+vivecraft.messages.menuworldexportcomplete.2=Сохранено в %s
+vivecraft.messages.menuworldexportclientwarning=ВНИМАНИЕ: Сохранение мира с помощью клиентского мира может быть неполным, что приведет к утрате мира.
+vivecraft.messages.teleportdisabled=Ограниченное движение включено (без телепорта)
+vivecraft.messages.teleportenabled=Ограниченное движение выключено (с телепортом)
+vivecraft.messages.walkupblocks=Взобраться по блокам (RCTRL+B): %s
+vivecraft.messages.showaim=Показать цель (RCTRL+RSHIFT): включено
+vivecraft.messages.playerinertia=Инерция движения игрока (LCTRL+I): %s
+vivecraft.messages.movementmodeswitch=Режим движения переключен на: %s
+vivecraft.messages.coords=X: %.2f Y: %.2f Z: %.2f
+vivecraft.messages.angles=Наклон: %.1f Отклонение: %.1f Ролл: %.1f
+vivecraft.messages.heightset=Высота пользователя установлена на %d%%

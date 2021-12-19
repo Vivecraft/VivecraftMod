@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/resources/DefaultClientPackResources.java
++++ b/net/minecraft/client/resources/DefaultClientPackResources.java
+@@ -18,7 +18,7 @@
+ 
+     public DefaultClientPackResources(PackMetadataSection p_174827_, AssetIndex p_174828_)
+     {
+-        super(p_174827_, "minecraft", "realms");
++        super(p_174827_, "minecraft", "realms", "vivecraft");
+         this.assetIndex = p_174828_;
+     }
+ 

@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/resources/language/ClientLanguage.java
++++ b/net/minecraft/client/resources/language/ClientLanguage.java
+@@ -16,6 +16,7 @@
+ import net.optifine.Lang;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.vivecraft.utils.LangHelper;
+ 
+ public class ClientLanguage extends Language
+ {
+@@ -46,6 +47,9 @@
+                     ResourceLocation resourcelocation = new ResourceLocation(s1, s);
+                     appendFrom(p_118917_.getResources(resourcelocation), map);
+                     Lang.loadResources(p_118917_, languageinfo.getCode(), map);
++                    //Vivecraft
++                    LangHelper.loadLocaleData(languageinfo.getCode(), map);
++                    //
+                 }
+                 catch (FileNotFoundException filenotfoundexception)
+                 {

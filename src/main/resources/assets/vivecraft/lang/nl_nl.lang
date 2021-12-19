@@ -1,0 +1,442 @@
+# Contributors: BlockBanana123, Lelebees, marijnessen
+
+# Key bindings
+vivecraft.key.hotbarNext=Hotbar Volgende
+vivecraft.key.hotbarPrev=Hotbar Vorige
+vivecraft.key.hotbarScroll=Hotbar Rol
+vivecraft.key.hotbarSwipeX=Hotbar Veeg (Links/Rechts)
+vivecraft.key.hotbarSwipeY=Hotbar Veeg (Omhoog/Omlaag)
+vivecraft.key.rotateLeft=Draai Links
+vivecraft.key.rotateRight=Draai Rechts
+vivecraft.key.rotateAxis=Alleen Draaien
+vivecraft.key.rotateFree=Vrij draaien
+vivecraft.key.walkabout=Rondgang
+vivecraft.key.teleport=Teleporteer
+vivecraft.key.teleportFallback=Loop Vooruit Als Teleporteren Uitgeschakeld is
+vivecraft.key.freeMoveRotate=Beweeg/Draai
+vivecraft.key.freeMoveStrafe=Beweeg/Loop Zijwaarts
+vivecraft.key.toggleMovement=Verander Bewegingsmodus
+vivecraft.key.quickTorch=Snelle zaklamp
+vivecraft.key.ingameMenuButton=Spelmenu
+vivecraft.key.exportWorld=Exporteer Menuwereld
+vivecraft.key.radialMenu=Open Radiaal Menu
+vivecraft.key.swapMirrorView=Wissel Spiegelweergave
+vivecraft.key.toggleKeyboard=Toon/Verberg Toetsenbord
+vivecraft.key.moveThirdPersonCam=Verplaats Derde Persoon Camera
+vivecraft.key.togglePlayerList=Spelerslijst wisselen
+vivecraft.key.trackpadTouch=Trackpad aanraking
+vivecraft.key.vrInteract=Contextuele Interactie
+vivecraft.key.guiLeftClick=Linkermuisklik
+vivecraft.key.guiRightClick=Rechtermuisklik
+vivecraft.key.guiMiddleClick=Middelmuisklik
+vivecraft.key.guiShift=Shift
+vivecraft.key.guiCtrl=Ctrl
+vivecraft.key.guiAlt=Alt
+vivecraft.key.guiScrollUp=Rol Omhoog
+vivecraft.key.guiScrollDown=Rol Omlaag
+vivecraft.key.guiScrollAxis=Rol
+vivecraft.key.keyboardClick=Klik
+vivecraft.key.keyboardShift=Shift
+vivecraft.key.climbeyGrab=Klimklauwen
+vivecraft.key.climbeyJump=Springschoenen
+
+# Key binding categories
+vivecraft.key.category.gui=GUI
+vivecraft.key.category.climbey=Climbey Beweging
+vivecraft.key.category.keyboard=Toetsenbord
+
+# Action set names
+vivecraft.actionset.ingame=In-Spel
+vivecraft.actionset.gui=GUI
+vivecraft.actionset.global=Globaal
+vivecraft.actionset.mod=Gemodificeerd
+vivecraft.actionset.contextual=Contextueel
+vivecraft.actionset.keyboard=Toetsenbord
+vivecraft.actionset.mixedReality=Gemengde Realiteit
+vivecraft.actionset.technical=Technisch
+
+# Option screens
+vivecraft.options.screen.main=VR Instellingen
+vivecraft.options.screen.freemove=Vrij Bewegen Instellingen
+vivecraft.options.screen.gui=HUD en GUI Instellingen
+vivecraft.options.screen.menuworld=Menu Wereld Instellingen
+vivecraft.options.screen.guiother=Chat/Crosshair Instellingen
+vivecraft.options.screen.quickcommands=Snelle Commando's
+vivecraft.options.screen.radialmenu=Radiaal Menu Configuratie
+vivecraft.options.screen.stereorendering=Stereo Renderer Instellingen
+vivecraft.options.screen.roomscale=Kamerschaal Interactie Instellingen
+vivecraft.options.screen.seated=Zittend Instellingen
+vivecraft.options.screen.standing=Staand Bewegen Instellingen
+vivecraft.options.screen.teleport=Teleporteer-Instellingen
+vivecraft.options.screen.controls=Bedienings-Instellingen
+
+# Buttons that lead to the screen
+vivecraft.options.screen.main.button=VR Instellingen...
+vivecraft.options.screen.gui.button=HUD en GUI Instellingen...
+vivecraft.options.screen.stereorendering.button=Stereo Renderen...
+vivecraft.options.screen.quickcommands.button=Snelle Commando's...
+vivecraft.options.screen.guiother.button=Chat & Crosshair Instellingen...
+vivecraft.options.screen.standing.button=Bewegings-Instellingen...
+vivecraft.options.screen.roomscale.button=Interactie Instellingen...
+vivecraft.options.screen.controls.button=Bedienings Instellingen...
+vivecraft.options.screen.radialmenu.button=Radiaal Menu...
+vivecraft.options.screen.seated.button=Zittend Instellingen...
+vivecraft.options.screen.menuworld.button=Menu Wereld Instellingen...
+vivecraft.options.screen.teleport.button=Teleporteer-Instellingen...
+vivecraft.options.screen.freemove.button=Vrij Bewegen Instellingen...
+
+# Option names
+vivecraft.options.HUD_SCALE=Hoofd HUD Grootte
+vivecraft.options.HUD_DISTANCE=Hoofd HUD Afstand
+vivecraft.options.HUD_LOCK_TO=HUD Oriëntatie Slot
+vivecraft.options.HUD_OPACITY=HUD Doorzichtigheid
+vivecraft.options.HUD_HIDE=Verberg HUD (F1)
+vivecraft.options.RENDER_MENU_BACKGROUND=HUD/GUI Achtergrond
+vivecraft.options.HUD_OCCLUSION=HUD Occlusie
+vivecraft.options.MENU_ALWAYS_FOLLOW_FACE=Hoofdmenu Volg
+vivecraft.options.CROSSHAIR_OCCLUSION=Crosshair Occlusie
+vivecraft.options.CROSSHAIR_SCALE=Crosshair Grootte
+vivecraft.options.MENU_CROSSHAIR_SCALE=Menu Crosshair Grootte
+vivecraft.options.RENDER_CROSSHAIR_MODE=Toon Crosshair
+vivecraft.options.CHAT_NOTIFICATIONS=Chat Meldingen
+vivecraft.options.CHAT_NOTIFICATION_SOUND=Meldingsgeluid
+vivecraft.options.CROSSHAIR_SCALES_WITH_DISTANCE=Crosshair Schaling
+vivecraft.options.RENDER_BLOCK_OUTLINE_MODE=Toon Blokomlijning
+vivecraft.options.AUTO_OPEN_KEYBOARD=Toetsenbord Altijd Openen
+vivecraft.options.RADIAL_MODE_HOLD=Radiaal Menu Modus
+vivecraft.options.PHYSICAL_KEYBOARD=Toetsenbordtype
+vivecraft.options.PHYSICAL_KEYBOARD_SCALE=Toetsenbordgrootte
+vivecraft.options.GUI_APPEAR_OVER_BLOCK=Verschijnen boven blok
+vivecraft.options.FSAA=Lanczos Scaler
+vivecraft.options.MIRROR_DISPLAY=Desktop Mirror
+vivecraft.options.MIRROR_EYE=Spiegeloog
+vivecraft.options.MIXED_REALITY_KEY_COLOR=Sleutel kleur
+vivecraft.options.MIXED_REALITY_RENDER_HANDS=Toon Handen
+vivecraft.options.MIXED_REALITY_UNITY_LIKE=Indeling
+vivecraft.options.MIXED_REALITY_UNDISTORTED=Onvervormde pas
+vivecraft.options.MIXED_REALITY_ALPHA_MASK=Alfamasker
+vivecraft.options.MIXED_REALITY_FOV=Camera FOV
+vivecraft.options.WALK_UP_BLOCKS=Loop tegen blokken op
+vivecraft.options.MOVEMENT_MULTIPLIER=Bewegingssnelheid vermenigvuldiger
+vivecraft.options.INERTIA_FACTOR=Speler Traagheid
+vivecraft.options.SIMULATE_FALLING=Simuleer Vallen
+vivecraft.options.WEAPON_COLLISION=Wapens Botsen
+vivecraft.options.ALLOW_CRAWLING=Roomscale kruipen
+vivecraft.options.LIMIT_TELEPORT=Limiteer in Overleving
+vivecraft.options.REVERSE_HANDS=Keer Handen Om
+vivecraft.options.STENCIL_ON=Gebruik oogstencil
+vivecraft.options.BCB_ON=Toon Lichaamspositie
+vivecraft.options.WORLD_SCALE=Wereldschaal
+vivecraft.options.WORLD_ROTATION=Werelddraai
+vivecraft.options.WORLD_ROTATION_INCREMENT=Rotatieverhoging
+vivecraft.options.TOUCH_HOTBAR=Tik op Hotbar ingeschakeld
+vivecraft.options.PLAY_MODE_SEATED=Speelmodus
+vivecraft.options.RENDER_SCALEFACTOR=Resolutie
+vivecraft.options.MONO_FOV=Onvervormde kijkhoek
+vivecraft.options.REALISTIC_JUMP=Roomscale Springen
+vivecraft.options.REALISTIC_SNEAK=Roomscale sluipen
+vivecraft.options.PHYSICAL_GUI=Fysieke GUI's
+vivecraft.options.REALISTIC_CLIMB=Roomscale klimmen
+vivecraft.options.REALISTIC_SWIM=Roomscale zwemmen
+vivecraft.options.REALISTIC_ROW=Roomscale Roeien
+vivecraft.options.WALK_MULTIPLIER=Walking Multiplier
+vivecraft.options.FREEMOVE_MODE=Vrij bewegen Type
+vivecraft.options.VEHICLE_ROTATION=Voertuigrotatie
+vivecraft.options.RESET_ORIGIN=Oorsprong resetten
+vivecraft.options.X_SENSITIVITY=Rotatiesnelheid
+vivecraft.options.Y_SENSITIVITY=Y Gevoeligheid
+vivecraft.options.KEYHOLE=Sleutelgat
+vivecraft.options.FOV_REDUCTION=FOV Comfortvermindering
+vivecraft.options.FOV_REDUCTION_MIN=Grootte gezichtsveldreductie
+vivecraft.options.FOV_REDUCTION_OFFSET=FOV Reductie Offset
+vivecraft.options.SEATED_HMD=Voorwaartse richting
+vivecraft.options.SEATED_HUD_XHAIR=HUD volgt
+vivecraft.options.BACKPACK_SWITCH=Rugzak wisselen
+vivecraft.options.ANALOG_MOVEMENT=Analoge beweging
+vivecraft.options.AUTO_SPRINT=Auto-Sprint
+vivecraft.options.AUTO_SPRINT_THRESHOLD=Auto-sprintdrempel
+vivecraft.options.BOW_MODE=Roomscale Bow Mode
+vivecraft.options.TELEPORT_DOWN_LIMIT=Down Limit
+vivecraft.options.TELEPORT_UP_LIMIT=bovenlimiet
+vivecraft.options.TELEPORT_HORIZ_LIMIT=Afstandslimiet
+vivecraft.options.ALLOW_STANDING_ORIGIN_OFFSET=Origin-offset toestaan
+vivecraft.options.SEATED_FREE_MOVE=Bewegingstype
+vivecraft.options.FORCE_STANDING_FREE_MOVE=Forceer vrije beweging
+vivecraft.options.ALLOW_ADVANCED_BINDINGS=Geavanceerde bindingen weergeven
+vivecraft.options.MENU_WORLD_SELECTION=Werelden
+vivecraft.options.HRTF_SELECTION=HRTF
+vivecraft.options.RELOAD_EXTERNAL_CAMERA=Laad de externe camera opnieuw
+vivecraft.options.RIGHT_CLICK_DELAY=Klik met de rechtermuisknop op Herhalen
+vivecraft.options.ANIMAL_TOUCHING=Dier Betasting
+
+# Option tooltips
+vivecraft.options.HUD_SCALE.tooltip=Relatieve grootte HUD neemt in gezichtsveld in beslag.\nDe eenheden zijn slechts relatief, niet in graden of een fractie van FOV of zoiets.
+
+vivecraft.options.HUD_DISTANCE.tooltip=Afstand de zwevende HUD wordt voor je lichaam getekend.\nDe relatieve grootte van de HUD wordt hierdoor niet gewijzigd.\nAfstand is in meters (maar wordt niet belemmerd door blokken).
+
+vivecraft.options.HUD_LOCK_TO.tooltip=Geeft aan in welke richting de HUD is vergrendeld.\n  Hand: De HUD verschijnt net boven je hand.\n  Head: De HUD verschijnt altijd recht voor je in je gezichtsveld.\n  Pols: De HUD verschijnt aan de binnenkant van je off-hand arm. Het zal eruit springen als er naar wordt gekeken.
+
+vivecraft.options.HUD_OPACITY.tooltip=Hoe transparant om de in-game HUD en UI te tekenen.
+
+vivecraft.options.RENDER_MENU_BACKGROUND.tooltip=Geeft aan of de GUI-menu's in het spel een semi-transparante achtergrond hebben of niet.\n  AAN: semi-transparante achtergrond in in-game menu's.\n  UIT: Geen achtergrondinformatie over in-game menu's.
+
+vivecraft.options.HUD_OCCLUSION.tooltip=Specificeert of de HUD wordt afgesloten door dichterbijgelegen objecten.\n  AAN: De HUD wordt verborgen door objecten die dichterbij zijn. Kan volledig verborgen zijn in besloten omgevingen!\n  UIT: De HUD is altijd zichtbaar. Problemen met stereodiepte zijn mogelijk merkbaar.
+
+vivecraft.options.MENU_ALWAYS_FOLLOW_FACE.tooltip=Specificeert wanneer het hoofdmenu uw kijkrichting volgt.\n  Zittend: het hoofdmenu volgt alleen in zittende modus.\n  Altijd: het hoofdmenu volgt altijd.
+
+vivecraft.options.CROSSHAIR_SCALE.tooltip=Bepaalt de grootte van het in-game dradenkruis.
+
+vivecraft.options.MENU_CROSSHAIR_SCALE.tooltip=Stelt de grootte van het menu dradenkruis in.
+
+vivecraft.options.RENDER_CROSSHAIR_MODE.tooltip=Stel de in-game crosshair-weergavemodus in.\n  Altijd: het dradenkruis wordt altijd weergegeven, zelfs als de HUD is uitgeschakeld.\n  Met HUD: het dradenkruis wordt alleen weergegeven als de HUD is ingeschakeld.\n  Nooit: het dradenkruis wordt nooit getoond.
+
+vivecraft.options.CHAT_NOTIFICATIONS.tooltip=Stelt in wat er gebeurt wanneer u een chatbericht ontvangt. \n  Geen: niets! \n  Haptic: Pulse op de linker controller. \n  Geluid: speelt het geluid van de chatmelding af. \n  Beiden: zowel haptisch als geluid.
+
+vivecraft.options.CHAT_NOTIFICATION_SOUND.tooltip=Stelt het geluid voor chatmeldingen in.
+
+vivecraft.options.CROSSHAIR_SCALES_WITH_DISTANCE.tooltip=Bepaalt hoe het draadkruis verandert met de afstand.\n  AAN: Het dradenkruis zal in de verte groter worden om vanuit uw gezichtspunt dezelfde schijnbare grootte te behouden.\n  UIT: Het dradenkruis zal altijd dezelfde maat hebben in de wereld en lijkt te krimpen met de afstand.
+
+vivecraft.options.RENDER_BLOCK_OUTLINE_MODE.tooltip=Hiermee stelt u de weergavemodus van de blokweergave in het spel in.\n  Altijd: de blokomtrek wordt altijd weergegeven, zelfs als de HUD is uitgeschakeld.\n  Met HUD: de blokomtrek wordt alleen weergegeven als de HUD is ingeschakeld.\n  Nooit: de blokomtrek wordt nooit weergegeven.
+
+vivecraft.options.AUTO_OPEN_KEYBOARD.tooltip=Indien uitgeschakeld, wordt het toetsenbord alleen geopend wanneer u op een tekstveld klikt of als een tekstveld de focus niet kan verliezen.\n\nIndien ingeschakeld, wordt het toetsenbord automatisch geopend wanneer er een tekstveld in beeld komt. Als je dit inschakelt, wordt het geopend in ongewenste situaties met mods.
+
+vivecraft.options.RADIAL_MODE_HOLD.tooltip=Gedrag van het radiale menu bij het indrukken van de knop.\n  Houd ingedrukt: houd de radiale menuknop ingedrukt, beweeg over de selectie en laat los.\n  Druk op: Druk op de radiale menuknop, klik op de knoppen en druk nogmaals op de radiale menuknop om te sluiten.
+
+vivecraft.options.PHYSICAL_KEYBOARD.tooltip=Welk type VR-toetsenbord om te gebruiken om te typen.\n  Fysiek: een toetsenbord waarop u kunt typen als een echt toetsenbord.\n  Pointer: Een toetsenbord dat u kunt gebruiken door het dradenkruis van een van beide controllers te richten en op knoppen te drukken.
+
+vivecraft.options.PHYSICAL_KEYBOARD_SCALE.tooltip=Hoe groot het fysieke toetsenbord moet zijn, in verhouding tot zijn basismaat.
+
+vivecraft.options.GUI_APPEAR_OVER_BLOCK.tooltip=Indien ingeschakeld, wordt de GUI voor blokken (zoals kisten en ovens) boven het blok geplaatst. Anders bevindt het zich op de gebruikelijke positie.
+
+vivecraft.options.FSAA.tooltip=Gebruikt een liefhebber methode om het spel te resamplen voordat het naar de HMD wordt gestuurd. Werkt het beste bij hoge renderschalen.
+
+vivecraft.options.MIRROR_DISPLAY.tooltip=Spiegelt de afbeelding op HMD om het bureaubladvenster te scheiden.\nKan worden ingesteld op UIT, enkele of dubbele hmd-weergave, eerste persoon onvervormd, derde persoon onvervormd en gemengde realiteit. De onvervormde en gemengde realiteitsopvattingen hebben een prestatiekost.
+
+vivecraft.options.MIRROR_EYE.tooltip=Welk oog te gebruiken in bijgesneden en enkele modi.
+
+vivecraft.options.MIXED_REALITY_KEY_COLOR.tooltip=De kleur wordt getekend door de "transparante" gebieden van de mixed reality-weergave. Andere kleuren in de game worden hierdoor niet aangepast, zodat het geen gekheid veroorzaakt.
+
+vivecraft.options.MIXED_REALITY_RENDER_HANDS.tooltip=Geef handen op de mixed reality-weergave. Schakelt alleen de weergave van de daadwerkelijke handmodellen om, items worden nog steeds weergegeven.
+
+vivecraft.options.MIXED_REALITY_UNITY_LIKE.tooltip=Kies tussen Unity-stijl lay-out met 4 panelen of 2 vensters naast elkaar.
+
+vivecraft.options.MIXED_REALITY_UNDISTORTED.tooltip=Voeg een onvervormde weergave toe in de indeling met 4 panelen. Vereist een extra renderpas. Anders wordt de HMD-weergave gebruikt.
+
+vivecraft.options.MIXED_REALITY_ALPHA_MASK.tooltip=In Unity indeling, zal, indien ja, een alfa-masker in grijstinten naar het kwadrant rechtsboven tekenen (zoals Unity) voor gebruik bij het maskeren van de voorgrondlaag. Anders wordt de voorgrond getekend met toetskleur voor gebruik met kleurtoetseffect.
+
+vivecraft.options.MIXED_REALITY_FOV.tooltip=De kijkhoek wordt gebruikt voor de mixed reality-spiegelmodus.
+
+vivecraft.options.WALK_UP_BLOCKS.tooltip=Hiermee kunt u de mogelijkheid instellen om blokken op te lopen zonder te hoeven springen. Sneltoets: RCtrl + B\n§cWAARSCHUWING: Kan anti-cheat-waarschuwingen activeren als deze zich op een multiplayer-server bevinden !!\n  UIT: (standaard) Je moet blokken omhoog springen.\n  AAN: U kunt enkele blokken oplopen. Kan voor sommigen door voortbeweging veroorzaakte simulatorziekte verminderen.
+
+vivecraft.options.MOVEMENT_MULTIPLIER.tooltip=Stelt een bewegingsvermenigvuldiger in, waardoor langzamere bewegingen dan standaard mogelijk zijn. Dit kan de door voortbeweging veroorzaakte ziekte van de simulator helpen verminderen.\n§cWAARSCHUWING: Kan anti-cheat-waarschuwingen activeren als deze zich op een multiplayer-server bevinden !!\n\nWordt standaard ingesteld op de standaardsnelheid voor Minecraft-bewegingen (1.0).
+
+vivecraft.options.INERTIA_FACTOR.tooltip=Stelt de bewegingsinertie van de speler in de modus voor één speler in. Lagere traagheid betekent snellere acceleratie, hogere traagheid langzamere acceleratie. Hoge traagheid kan voor sommigen bewegingsziekte verminderen, maar pas op voor klifranden!\n  Normaal: (standaard) Standaardbeweging van Minecraft-speler.\n  Automan < Normaal < Veel < Nog meer. Heeft momenteel geen invloed op lava, water of springende bewegingen.
+
+vivecraft.options.SIMULATE_FALLING.tooltip=Indien ingeschakeld, valt de speler op de grond in teleporteermodus wanneer hij boven de lege ruimte staat. Maakt ook springen mogelijk.
+
+vivecraft.options.WEAPON_COLLISION.tooltip=Maakt het raken van blokken en entiteiten op ruimteschaal mogelijk.\nAuto staat aan in overleven en uit aan creatief.
+
+vivecraft.options.ALLOW_CRAWLING.tooltip=Indien ingeschakeld, kan de speler onder een blok duiken.
+
+vivecraft.options.LIMIT_TELEPORT.tooltip=Indien ingeschakeld, heeft de boogteleporter beperkingen in de overlevingsmodus. Het zal niet in staat zijn om tegen de zijkant van blokken op te springen, het zal voedsel consumeren en het zal een energiebalk hebben die na verloop van tijd opnieuw wordt gevuld.
+
+vivecraft.options.REVERSE_HANDS.tooltip=Wissel links / rechts als dominant.\n  AAN: Links dominant\n  UIT: Rechts dominant\n\nOm de knoppen te verwisselen, herstart je het spel en zorg je ervoor dat standaard bindingen zijn geselecteerd in SteamVR.
+
+vivecraft.options.STENCIL_ON.tooltip=Maskeer delen van het scherm buiten het gezichtsveld.\nVerbetert de prestaties.
+
+vivecraft.options.BCB_ON.tooltip=Toont uw lichaamshouding als een vierkante schaduw op de grond.\nDit is je Square Shadow Buddy ™.\nVerlies je Square Shadow Buddy niet.
+
+vivecraft.options.WORLD_SCALE.tooltip=Schaalt de speler in de wereld.\nBovenstaande maakt je groter\nEn hieronder maakt je klein\nEn degene die moeder je geeft\n\ndoet helemaal niets.
+
+vivecraft.options.WORLD_ROTATION.tooltip=Voegt extra rotatie toe aan uw HMD.\nHandiger gebonden aan een knop of gewijzigd met de pijltjestoetsen.
+
+vivecraft.options.WORLD_ROTATION_INCREMENT.tooltip=Hoeveel graden te draaien bij het draaien van de wereld.
+
+vivecraft.options.TOUCH_HOTBAR.tooltip=Indien ingeschakeld, kunt u de hotbar met uw hoofdhand aanraken om een item te selecteren.
+
+vivecraft.options.PLAY_MODE_SEATED.tooltip=Staande of zittende speelmodus.\nStaan is enorm superieur.
+
+vivecraft.options.RENDER_SCALEFACTOR.tooltip=De interne weergaveschaal van het spel, ten opzichte van het oorspronkelijke HMD-scherm. Hogere waarden verbeteren de visuele kwaliteit ten koste van de prestaties.
+
+vivecraft.options.MONO_FOV.tooltip=De kijkhoek wordt gebruikt voor de onvervormde spiegelmodus.
+
+vivecraft.options.REALISTIC_JUMP.tooltip=Indien ingeschakeld, zal je speler, zodra je in het echte leven springt, ook springen. Maakt ook Spring Schoenen mogelijk.
+
+vivecraft.options.REALISTIC_SNEAK.tooltip=Indien ingeschakeld, zal je speler, zodra je in het echte leven duikt, ook sluipen.
+
+vivecraft.options.PHYSICAL_GUI.tooltip=Indien ingeschakeld, worden GUI's vervangen door 3D-interactieve modellen.\nAls het volgen van rugzakken is ingeschakeld, wordt je inventariszak tevoorschijn gehaald als je op je rug reikt.
+
+vivecraft.options.REALISTIC_CLIMB.tooltip=Indien ingeschakeld, laat klimladders en wijnstokken klimmen door ze aan te raken. Maakt ook Beklim klauwen mogelijk.
+
+vivecraft.options.REALISTIC_SWIM.tooltip=Als het is ingeschakeld, Kan u zwemmen door de schoolslag te doen met de controllers.
+
+vivecraft.options.REALISTIC_ROW.tooltip=Roei, roei, roei je boot ... door met je armen te fladderen als een gek.
+
+vivecraft.options.WALK_MULTIPLIER.tooltip=Vermenigvuldigt uw positie in de kamer met een factor.\nLaat je meer rondlopen, maar kan bewegingsziekte veroorzaken.
+
+vivecraft.options.FREEMOVE_MODE.tooltip=De bron voor freemove-richting.\n\n  Controller: Offhand controller wijzende richting.\n  HMD: kijkrichting headset.\n  Run-In-Place: Yaw is gebaseerd op hoe controllers slingeren. Pitch is uw headset.\n  Kamer: Yaw is relatief ten opzichte van je VR-kamer vooruit. Pitch is uw headset. Deze modus is alleen het beste voor 180 opstellingen.
+
+vivecraft.options.VEHICLE_ROTATION.tooltip=Rijden in een voertuig zal de wereld draaien terwijl het voertuig draait. Kan desoriënterend zijn.
+
+vivecraft.options.RESET_ORIGIN.tooltip=Herhaal de voeten van de speler in de wereld tot 1,62 m onder de huidige HMD-positie. Voor niet-absolute volgsystemen of zittend spelen.
+
+vivecraft.options.X_SENSITIVITY.tooltip=Snelheid: het beeld draait wanneer het op de rand van het sleutelgat wordt geduwd.
+
+vivecraft.options.Y_SENSITIVITY.tooltip=Verticale snelheid van het draadkruis gerelateerd aan de muis.
+
+vivecraft.options.KEYHOLE.tooltip=Het aantal graden links en rechts van het midden waar de weergave begint te draaien.
+
+vivecraft.options.FOV_REDUCTION.tooltip=Verkleint het gezichtsveld tijdens het bewegen. Kan helpen bij bewegingsziekte.
+
+vivecraft.options.FOV_REDUCTION_MIN.tooltip=De uiteindelijke grootte van FOV-reductie.
+
+vivecraft.options.FOV_REDUCTION_OFFSET.tooltip=Verschuift horizontaal het midden van de FOV-reductie voor niet-standaard HMD's.
+
+vivecraft.options.SEATED_HMD.tooltip=De richting waarin de vooruit (W) -toets gaat.\nHMD kijkrichting of richtingskruis richting.
+
+vivecraft.options.SEATED_HUD_XHAIR.tooltip=De richting waarin de HUD wordt geplaatst.\nHMD kijkrichting of richtingskruis richting.
+
+vivecraft.options.BACKPACK_SWITCH.tooltip=Als deze optie is ingeschakeld en je met de rechter controller achter je hoofd reikt, wordt er overgeschakeld naar de eerste hotbar-sleuf of terug naar de vorige sleuf. Als u hetzelfde doet met de linkercontroller, worden de linker- en rechterhand items verwisseld.
+
+vivecraft.options.ANALOG_MOVEMENT.tooltip=De loopsnelheid wordt bepaald door de knopas van de controller, als de gebonden knop een variabele as heeft.\n\nVoor volledige analoge controle is het beter om "Beweeg / Strafe" of "Beweeg / Roteer" te gebruiken.
+
+vivecraft.options.AUTO_SPRINT.tooltip=Tijdens het gebruik van freemove wordt sprint automatisch geactiveerd wanneer de as de geconfigureerde drempel bereikt.
+
+vivecraft.options.AUTO_SPRINT_THRESHOLD.tooltip=De asdrempel waarop automatische sprint wordt geactiveerd.
+
+vivecraft.options.BOW_MODE.tooltip=Stelt in wanneer Room Scale Archery moet worden gebruikt\n  UIT: Nooit.\n  Normaal: Alleen voor de normaale boog, geen mod items.\n  AAN: Altijd voor elk item dat de actie "boog" gebruikt.
+
+vivecraft.options.TELEPORT_DOWN_LIMIT.tooltip=Beperk het aantal blokken dat u onder u kunt teleporteren.
+
+vivecraft.options.TELEPORT_UP_LIMIT.tooltip=Beperk het aantal blokken dat u boven u kunt teleporteren.
+
+vivecraft.options.TELEPORT_HORIZ_LIMIT.tooltip=Beperk het aantal blokken dat u zijwaarts kunt teleporteren.
+
+vivecraft.options.ALLOW_STANDING_ORIGIN_OFFSET.tooltip=Maakt het mogelijk de knop "Herstel oorsprong" te gebruiken in staande modus, voor degenen die fysiek zittend willen spelen terwijl ze bijgehouden controllers gebruiken.
+
+vivecraft.options.SEATED_FREE_MOVE.tooltip=Welke bewegingsmodus te gebruiken in zittende modus.\n\n  Teleporteren: druk op een willekeurige richting om te activeren.\n  Free Move: WASD-beweging zoals normale Minecraft.
+
+vivecraft.options.FORCE_STANDING_FREE_MOVE.tooltip=Dwingt het gebruik van de fallback walk forwards binding (standaard linker trigger). Bewerk de SteamVR-controllerbindingen voor meer bewegingsopties.\nMerk op dat dit de teleport-binding uitschakelt.
+
+vivecraft.options.ALLOW_ADVANCED_BINDINGS.tooltip=Onthult extra SteamVR-bindingen voor climbey, keyboard en mixed reality.\n\nVereist een herstart om van kracht te worden.
+
+vivecraft.options.MENU_WORLD_SELECTION.tooltip=Welke menuwerelden worden geladen bij het opstarten.\n\nAls er geen aangepaste werelden worden gevonden, worden officiële werelden gebruikt.
+
+vivecraft.options.HRTF_SELECTION.tooltip=HRTF-profiel voor positionele 3D-audio. De kwaliteit kan verschillen per apparaat en stuurprogramma.\n\n  UIT: HRTF expliciet uitschakelen.\n  Standaard: gebruik het standaard HRTF-profiel.\n  Overige: gebruik een specifiek HRTF-profiel.
+
+vivecraft.options.RELOAD_EXTERNAL_CAMERA.tooltip=Laadt de camera-configuratie opnieuw vanaf ExternalCamera.cfg
+
+vivecraft.options.RIGHT_CLICK_DELAY.tooltip=Het aantal van het spel tikt tussen 'rechtsklikken' terwijl je de knop ingedrukt houdt.
+
+vivecraft.options.ANIMAL_TOUCHING.tooltip=Indien ingeschakeld, zal het aanraken van een passieve menigte (dier) zonder wapen met de rechtermuisknop klikken (interactie) in plaats van aanvallen.\nZet uit voor varken Spanking, Bert.
+
+# Option values
+vivecraft.options.gamma.cantseeshitcaptain=Ik kan het niet zien
+vivecraft.options.yes=JA
+vivecraft.options.no=NEE
+vivecraft.options.auto=Auto
+vivecraft.options.default=Standaard
+vivecraft.options.opaque=Ondoorzichtig
+vivecraft.options.mirror.off=UIT (snel)
+vivecraft.options.mirror.dual=Dual (snel)
+vivecraft.options.mirror.single=Single (snel)
+vivecraft.options.mirror.firstperson=1e persoon (langzaam)
+vivecraft.options.mirror.thirdperson=3e persoon (langzaam)
+vivecraft.options.mirror.mixedreality=Mixed Reality (langzaam)
+vivecraft.options.mirror.cropped=Bijgesneden (snel)
+vivecraft.options.left=Links
+vivecraft.options.right=Rechts
+vivecraft.options.color.black=Zwart
+vivecraft.options.color.red=Rood
+vivecraft.options.color.yellow=Geel
+vivecraft.options.color.green=Groen
+vivecraft.options.color.cyan=Cyaan
+vivecraft.options.color.blue=Blauw 
+vivecraft.options.color.magenta=Roodpaars
+vivecraft.options.unity=Unity
+vivecraft.options.sidebyside=Zij aan zij
+vivecraft.options.hand=Hand
+vivecraft.options.head=Hooft
+vivecraft.options.wrist=Pols
+vivecraft.options.body=Lichaam
+vivecraft.options.withhud=Met HUD
+vivecraft.options.always=Altijd
+vivecraft.options.never=Nooit
+vivecraft.options.chatnotification.none=Geen
+vivecraft.options.chatnotification.haptic=haptisch 
+vivecraft.options.chatnotification.sound=Geluid
+vivecraft.options.chatnotification.both=Bijde
+vivecraft.options.seated=Zittend
+vivecraft.options.standing=Staand
+vivecraft.options.inertia.none=Automan
+vivecraft.options.inertia.normal=Normaal
+vivecraft.options.inertia.large=Veel
+vivecraft.options.inertia.massive=Nog meer
+vivecraft.options.smooth=Effen
+vivecraft.options.hmd=HMD
+vivecraft.options.crosshair=Crosshair
+vivecraft.options.controller=Controller
+vivecraft.options.runinplace=Run-In-Place
+vivecraft.options.room=Kamer
+vivecraft.options.hold=Houden
+vivecraft.options.press=Druk
+vivecraft.options.keyboard.physical=Fysiek
+vivecraft.options.keyboard.pointer=Wijzer
+vivecraft.options.vanilla=Vanilla
+vivecraft.options.teleportlimit=%d Blokken
+vivecraft.options.teleport=Teleporteer
+vivecraft.options.freemove=Vrij bewegen
+vivecraft.options.menuworld.both=Officieel & aangepast
+vivecraft.options.menuworld.custom=Alleen aangepast
+vivecraft.options.menuworld.official=Alleen officieel
+vivecraft.options.menuworld.none=Geen
+vivecraft.options.rightclickdelay.slow=Langzaam
+vivecraft.options.rightclickdelay.slower=Langzamer
+vivecraft.options.rightclickdelay.slowest=Traagst
+
+# Button text
+vivecraft.gui.ok=OK
+vivecraft.gui.clear=Verschoon
+vivecraft.gui.loaddefaults=Laad de standaardinstellingen
+vivecraft.gui.menuworld.refresh=Menuwereld vernieuwen
+vivecraft.gui.menuworld.loadnew=Laad nieuwe menuwereld
+vivecraft.gui.radialmenu.mainset=Hoofdset
+vivecraft.gui.radialmenu.alternateset=Alternatieve set
+vivecraft.gui.chat=Chat
+vivecraft.gui.commands=Commando's
+vivecraft.gui.overlay=Overlay
+vivecraft.gui.profiler=Profiler
+vivecraft.gui.screenshot=Schermafbeelding
+vivecraft.gui.calibrateheight=Hoogte kalibreren
+vivecraft.gui.alignkatwalk=Align KAT WALK
+vivecraft.gui.movethirdpersoncam=Verplaats Derde Camera
+
+# Items
+vivecraft.item.jumpboots=Spring Schoenen
+vivecraft.item.climbclaws=Beklim klauwen
+vivecraft.item.telescope=Oog van de telescoop
+
+# Messages
+vivecraft.messages.seatedmode=Overschakelen naar de zittende modus, Controllerinvoer wordt hierdoor uitgeschakeld. Doorgaan?
+vivecraft.messages.radialmenubind.1=Zorg ervoor dat Open Radial Menu is gebonden.
+vivecraft.messages.radialmenubind.2=Houd (Toetsenbord Shift) ingedrukt met het radial menu open om over te schakelen naar deze set.
+vivecraft.messages.controls.1=Bindingen worden gehandeld door SteamVR Input.
+vivecraft.messages.controls.2=Ga naar Instellingen > Controllers > Beheer Controller Bindingen in het dashboard.
+vivecraft.messages.controls.3=§6Steam moet actief §ozijn voordat§r§6 SteamVR wordt gestart, anders worden bindingen niet opgeslagen.
+vivecraft.messages.serverplugin=Vivecraft-servermod gedetecteerd: %s
+vivecraft.messages.noserverplugin=Vivecraft-servermod niet gedetecteerd. Deze server biedt mogelijk geen ondersteuning voor teleporteren. De beperkte bewegingsmodus (terugvallen op vrije beweging) is ingeschakeld.
+vivecraft.messages.calibrateheight=Kalibreer uw lengte in het pauzemenu.
+vivecraft.messages.rendersetupfailed=Installatie van weergave mislukt: %s
+vivecraft.messages.intelgraphics=Intel Integrated Graphics wordt niet ondersteund. Als dit een laptop is, forceer dan de krachtige GPU. Gedetecteerde GPU: %s
+vivecraft.messages.menuworldexportcomplete.1=Wereld export compleet ... gebiedsgrootte: %d
+vivecraft.messages.menuworldexportcomplete.2=Opgeslagen naar %s
+vivecraft.messages.menuworldexportclientwarning=WAARSCHUWING: Menuwereld opslaan met behulp van een clientwereld. Gegevens zijn mogelijk onvolledig. Het is aan te raden om menuwerelden in singleplayer op te slaan.
+vivecraft.messages.teleportdisabled=Beperkte beweging ingeschakeld (geen teleportatie)
+vivecraft.messages.teleportenabled=Beperkte beweging uitgeschakeld (teleporteren toegestaan)
+vivecraft.messages.walkupblocks=Walk-up blokken (RCTRL + B): %s
+vivecraft.messages.showaim=Doel tonen (RCTRL + RSHIFT): ingeschakeld
+vivecraft.messages.playerinertia=Traagheid van de spelersbeweging (LCTRL + I): %s
+vivecraft.messages.movementmodeswitch=Bewegingsmodus overgeschakeld naar: %s
+vivecraft.messages.coords=X: %.2f Y: %.2f Z: %.2f
+vivecraft.messages.angles=Pitch: %.1f Yaw: %.1f Roll: %.1f
+vivecraft.messages.heightset=Hoogte gebruiker ingesteld op %d%%

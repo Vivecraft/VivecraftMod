@@ -1,0 +1,21 @@
+--- a/net/minecraft/world/item/Item.java
++++ b/net/minecraft/world/item/Item.java
+@@ -141,14 +141,14 @@
+         {
+             ItemStack itemstack = pPlayer.getItemInHand(pHand);
+ 
+-            if (pPlayer.canEat(this.getFoodProperties().canAlwaysEat()))
++            if (!pPlayer.canEat(this.getFoodProperties().canAlwaysEat()) && !itemstack.getHoverName().getString().equals("EAT ME"))
+             {
+-                pPlayer.startUsingItem(pHand);
+-                return InteractionResultHolder.consume(itemstack);
++                return InteractionResultHolder.fail(itemstack);
+             }
+             else
+             {
+-                return InteractionResultHolder.fail(itemstack);
++                pPlayer.startUsingItem(pHand);
++                return InteractionResultHolder.consume(itemstack);
+             }
+         }
+         else

@@ -1,0 +1,433 @@
+--- a/net/minecraft/client/multiplayer/ClientPacketListener.java
++++ b/net/minecraft/client/multiplayer/ClientPacketListener.java
+@@ -246,6 +246,7 @@
+ import net.minecraft.world.level.GameType;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.LightLayer;
++import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.entity.BannerBlockEntity;
+ import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+ import net.minecraft.world.level.block.entity.BedBlockEntity;
+@@ -280,8 +281,11 @@
+ import net.minecraft.world.scores.Scoreboard;
+ import net.minecraft.world.scores.Team;
+ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
++import net.optifine.reflect.Reflector;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.vivecraft.api.NetworkHelper;
++import org.vivecraft.render.PlayerModelController;
+ 
+ public class ClientPacketListener implements ClientGamePacketListener
+ {
+@@ -315,6 +319,8 @@
+         this.localGameProfile = p_104909_;
+         this.advancements = new ClientAdvancements(p_104906_);
+         this.suggestionsProvider = new ClientSuggestionProvider(this, p_104906_);
++        NetworkHelper.resetServerSettings();
++        NetworkHelper.displayedChatMessage = false;
+     }
+ 
+     public ClientSuggestionProvider getSuggestionsProvider()
+@@ -369,6 +375,7 @@
+ 
+         this.minecraft.debugRenderer.clear();
+         this.minecraft.player.resetPos();
++        //Reflector.call(Reflector.ClientHooks_firePlayerLogin, this.minecraft.gameMode, this.minecraft.player, this.minecraft.getConnection().getConnection());
+         int i = pPacket.getPlayerId();
+         this.minecraft.player.setId(i);
+         this.level.addPlayer(i, this.minecraft.player);
+@@ -379,9 +386,12 @@
+         this.minecraft.player.setReducedDebugInfo(pPacket.isReducedDebugInfo());
+         this.minecraft.player.setShowDeathScreen(pPacket.shouldShowDeathScreen());
+         this.minecraft.gameMode.setLocalMode(pPacket.getGameType(), pPacket.getPreviousGameType());
++        //Reflector.call(Reflector.NetworkHooks_sendMCRegistryPackets, this.connection, "PLAY_TO_SERVER");
+         this.minecraft.options.broadcastOptions();
+         this.connection.send(new ServerboundCustomPayloadPacket(ServerboundCustomPayloadPacket.BRAND, (new FriendlyByteBuf(Unpooled.buffer())).writeUtf(ClientBrandRetriever.getClientModName())));
+         this.minecraft.getGame().onStartGameSession();
++        NetworkHelper.vivePlayers.clear();
++        NetworkHelper.sendVersionInfo();
+     }
+ 
+     public void handleAddEntity(ClientboundAddEntityPacket pPacket)
+@@ -650,9 +660,9 @@
+     {
+         PacketUtils.ensureRunningOnSameThread(pPacket, this, this.minecraft);
+         int i = 19 | (pPacket.shouldSuppressLightUpdates() ? 128 : 0);
+-        pPacket.runUpdates((p_104922_, p_104923_) ->
++        pPacket.runUpdates((p_243492_2_, p_243492_3_) ->
+         {
+-            this.level.setBlock(p_104922_, p_104923_, i);
++            this.level.setBlock(p_243492_2_, p_243492_3_, i);
+         });
+     }
+ 
+@@ -678,7 +688,11 @@
+ 
+                 if (blockentity != null)
+                 {
+-                    blockentity.load(compoundtag);
++                //	if(Reflector.IForgeTileEntity_handleUpdateTag.exists())
++                //		Reflector.call(blockentity, Reflector.IForgeTileEntity_handleUpdateTag,this.level.getBlockState(blockpos), compoundtag);
++                //	else
++                        blockentity.load(compoundtag);
++                //	}
+                 }
+             }
+         }
+@@ -784,7 +798,17 @@
+     public void handleChat(ClientboundChatPacket pPacket)
+     {
+         PacketUtils.ensureRunningOnSameThread(pPacket, this, this.minecraft);
+-        this.minecraft.gui.handleChat(pPacket.getType(), pPacket.getMessage(), pPacket.getSender());
++        Component component = (Component)Reflector.call(Reflector.ForgeEventFactory_onClientChat, pPacket.getType(), pPacket.getMessage(), pPacket.getSender());
++
++        if (component == null)
++        {
++            this.minecraft.gui.handleChat(pPacket.getType(), pPacket.getMessage(), pPacket.getSender());
++        }
++        else
++        {
++            this.minecraft.gui.handleChat(pPacket.getType(), component, pPacket.getSender());
++        }
++
+     }
+ 
+     public void handleAnimate(ClientboundAnimatePacket pPacket)
+@@ -894,7 +918,8 @@
+ 
+                     if (entity1 == this.minecraft.player && !flag)
+                     {
+-                        this.minecraft.gui.setOverlayMessage(new TranslatableComponent("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage()), false);
++                        this.minecraft.gui.setOverlayMessage(new TranslatableComponent("mount.onboard", this.minecraft.options.keyShift.getName()), false);
++                        this.minecraft.options.keyShift.getTranslatedKeyMessage();
+                     }
+                 }
+             }
+@@ -992,6 +1017,8 @@
+             this.level.addMapData(map);
+             this.minecraft.setLevel(this.level);
+             this.minecraft.setScreen(new ReceivingLevelScreen());
++            NetworkHelper.resetServerSettings();
++            NetworkHelper.sendVersionInfo();
+         }
+ 
+         String s = localplayer.getServerBrand();
+@@ -1015,6 +1042,7 @@
+ 
+         localplayer1.resetPos();
+         localplayer1.setServerBrand(s);
++        //Reflector.call(Reflector.ClientHooks_firePlayerRespawn, this.minecraft.gameMode, localplayer, localplayer1, localplayer1.connection.getConnection());
+         this.level.addPlayer(i, localplayer1);
+         localplayer1.setYRot(-180.0F);
+         localplayer1.input = new KeyboardInput(this.minecraft.options);
+@@ -1149,7 +1177,17 @@
+         int i = pPacket.getType();
+         boolean flag = i == 2 && blockentity instanceof CommandBlockEntity;
+ 
+-        if (i == 1 && blockentity instanceof SpawnerBlockEntity || flag || i == 3 && blockentity instanceof BeaconBlockEntity || i == 4 && blockentity instanceof SkullBlockEntity || i == 6 && blockentity instanceof BannerBlockEntity || i == 7 && blockentity instanceof StructureBlockEntity || i == 8 && blockentity instanceof TheEndGatewayBlockEntity || i == 9 && blockentity instanceof SignBlockEntity || i == 11 && blockentity instanceof BedBlockEntity || i == 5 && blockentity instanceof ConduitBlockEntity || i == 12 && blockentity instanceof JigsawBlockEntity || i == 13 && blockentity instanceof CampfireBlockEntity || i == 14 && blockentity instanceof BeehiveBlockEntity)
++        if ((i != 1 || !(blockentity instanceof SpawnerBlockEntity)) && !flag && (i != 3 || !(blockentity instanceof BeaconBlockEntity)) && (i != 4 || !(blockentity instanceof SkullBlockEntity)) && (i != 6 || !(blockentity instanceof BannerBlockEntity)) && (i != 7 || !(blockentity instanceof StructureBlockEntity)) && (i != 8 || !(blockentity instanceof TheEndGatewayBlockEntity)) && (i != 9 || !(blockentity instanceof SignBlockEntity)) && (i != 11 || !(blockentity instanceof BedBlockEntity)) && (i != 5 || !(blockentity instanceof ConduitBlockEntity)) && (i != 12 || !(blockentity instanceof JigsawBlockEntity)) && (i != 13 || !(blockentity instanceof CampfireBlockEntity)) && (i != 14 || !(blockentity instanceof BeehiveBlockEntity)))
++        {
++            if (blockentity == null)
++            {
++                LOGGER.error("Received invalid update packet for null tile entity at {} with data: {}", pPacket.getPos(), pPacket.getTag());
++                return;
++            }
++
++            Reflector.call(blockentity, Reflector.IForgeTileEntity_onDataPacket, this.connection, pPacket);
++        }
++        else
+         {
+             blockentity.load(pPacket.getTag());
+         }
+@@ -1178,9 +1216,9 @@
+ 
+         if (entity != null)
+         {
+-            pPacket.getSlots().forEach((p_104926_) ->
++            pPacket.getSlots().forEach((p_241664_1_) ->
+             {
+-                entity.setItemSlot(p_104926_.getFirst(), p_104926_.getSecond());
++                entity.setItemSlot(p_241664_1_.getFirst(), p_241664_1_.getSecond());
+             });
+         }
+     }
+@@ -1382,6 +1420,7 @@
+         clientrecipebook.setupCollections(this.recipeManager.getRecipes());
+         clientrecipebook.getCollections().forEach(mutablesearchtree::add);
+         mutablesearchtree.refresh();
++        Reflector.call(Reflector.ForgeHooksClient_onRecipesUpdated, this.recipeManager);
+     }
+ 
+     public void handleLookAt(ClientboundPlayerLookAtPacket pPacket)
+@@ -1455,18 +1494,18 @@
+             case ADD:
+                 for (ResourceLocation resourcelocation : pPacket.getRecipes())
+                 {
+-                    this.recipeManager.byKey(resourcelocation).ifPresent((p_104934_) ->
++                    this.recipeManager.byKey(resourcelocation).ifPresent((p_217278_2_) ->
+                     {
+-                        clientrecipebook.add(p_104934_);
+-                        clientrecipebook.addHighlight(p_104934_);
+-                        RecipeToast.addOrUpdate(this.minecraft.getToasts(), p_104934_);
++                        clientrecipebook.add(p_217278_2_);
++                        clientrecipebook.addHighlight(p_217278_2_);
++                        RecipeToast.addOrUpdate(this.minecraft.getToasts(), p_217278_2_);
+                     });
+                 }
+         }
+ 
+-        clientrecipebook.getCollections().forEach((p_104937_) ->
++        clientrecipebook.getCollections().forEach((p_199527_1_) ->
+         {
+-            p_104937_.updateKnownRecipes(clientrecipebook);
++            p_199527_1_.updateKnownRecipes(clientrecipebook);
+         });
+ 
+         if (this.minecraft.screen instanceof RecipeUpdateListener)
+@@ -1482,7 +1521,7 @@
+ 
+         if (entity instanceof LivingEntity)
+         {
+-            MobEffect mobeffect = MobEffect.byId(pPacket.getEffectId());
++            MobEffect mobeffect = MobEffect.byId(pPacket.getEffectId() & 255);
+ 
+             if (mobeffect != null)
+             {
+@@ -1497,8 +1536,23 @@
+     {
+         PacketUtils.ensureRunningOnSameThread(pPacket, this, this.minecraft);
+         TagContainer tagcontainer = TagContainer.deserializeFromNetwork(this.registryAccess, pPacket.getTags());
+-        Multimap < ResourceKey <? extends Registry<? >> , ResourceLocation > multimap = StaticTags.getAllMissingTags(tagcontainer);
+-
++        Multimap < ResourceKey <? extends Registry<? >> , ResourceLocation > multimap;
++    	//Forge
++        boolean vanillaConnection = false;
++    	if(Reflector.NetworkHooks_isVanillaConnection.exists()) {
++    	      multimap = StaticTags.getAllMissingTags(tagcontainer);
++    		//TODO: investigate
++//    		vanillaConnection = Reflector.callBoolean(Reflector.NetworkHooks_isVanillaConnection, netManager);
++//    		if(vanillaConnection) {
++//    			 multimap = StaticTags.getAllMissingTags((TagContainer)Reflector.call(Reflector.ForgeTagHandler_withNoCustom, tagcontainer));
++//    		else {
++//    			//multimap = (Multimap < ResourceKey <? extends Registry<? >> ) Reflector.call(Reflector.TagRegistryManager_validateVanillaTags, itagcollectionsupplier);
++//    		}
++    	} else {
++            multimap = StaticTags.getAllMissingTags(tagcontainer);
++    	}       
++        //
++    	
+         if (!multimap.isEmpty())
+         {
+             LOGGER.warn("Incomplete server tags, disconnecting. Missing: {}", (Object)multimap);
+@@ -1506,6 +1560,12 @@
+         }
+         else
+         {
++            if (Reflector.ForgeTagHandler_resetCachedTagCollections.exists())
++            {
++                Reflector.call(Reflector.ForgeTagHandler_resetCachedTagCollections, true, vanillaConnection);
++                tagcontainer = (TagContainer)Reflector.call(Reflector.ITagCollectionSupplier_reinjectOptionalTags, tagcontainer);
++            }
++
+             this.tags = tagcontainer;
+ 
+             if (!this.connection.isMemoryConnection())
+@@ -1860,16 +1920,16 @@
+             {
+                 throw new URISyntaxException(pUrl, "Wrong protocol");
+             }
+-            else if (!flag || !pUrl.contains("..") && pUrl.endsWith("/resources.zip"))
++            else if (flag && (pUrl.contains("..") || !pUrl.endsWith("/resources.zip")))
+             {
+-                return true;
++                throw new URISyntaxException(pUrl, "Invalid levelstorage resourcepack path");
+             }
+             else
+             {
+-                throw new URISyntaxException(pUrl, "Invalid levelstorage resourcepack path");
++                return true;
+             }
+         }
+-        catch (URISyntaxException urisyntaxexception)
++        catch (URISyntaxException urisyntaxexception1)
+         {
+             this.send(ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD);
+             return false;
+@@ -1881,7 +1941,7 @@
+         pFuture.thenRun(() ->
+         {
+             this.send(ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED);
+-        }).exceptionally((p_104948_) ->
++        }).exceptionally((p_217276_1_) ->
+         {
+             this.send(ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD);
+             return null;
+@@ -1941,6 +2001,7 @@
+         PacketUtils.ensureRunningOnSameThread(pPacket, this, this.minecraft);
+         ResourceLocation resourcelocation = pPacket.getIdentifier();
+         FriendlyByteBuf friendlybytebuf = null;
++        boolean release = true;
+ 
+         try
+         {
+@@ -2163,8 +2224,8 @@
+ 
+                 for (int i7 = 0; i7 < l6; ++i7)
+                 {
+-                    String s11 = friendlybytebuf.readUtf();
+-                    beedebugrenderer$beeinfo.goals.add(s11);
++                    String s16 = friendlybytebuf.readUtf();
++                    beedebugrenderer$beeinfo.goals.add(s16);
+                 }
+ 
+                 int j7 = friendlybytebuf.readVarInt();
+@@ -2215,14 +2276,86 @@
+                 int i5 = friendlybytebuf.readVarInt();
+                 this.minecraft.debugRenderer.gameEventListenerRenderer.trackListener(positionsource, i5);
+             }
++            else if (resourcelocation.getNamespace().equalsIgnoreCase("vivecraft"))
++            {
++                if (resourcelocation.getPath().equalsIgnoreCase("data"))
++                {
++                    byte b0 = friendlybytebuf.readByte();
++                    NetworkHelper.PacketDiscriminators networkhelper$packetdiscriminators = NetworkHelper.PacketDiscriminators.values()[b0];
++
++                    switch (networkhelper$packetdiscriminators)
++                    {
++                        case VERSION:
++                            String s11 = friendlybytebuf.readUtf(1024);
++
++                            if (!NetworkHelper.displayedChatMessage)
++                            {
++                                NetworkHelper.displayedChatMessage = true;
++                                this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.serverplugin", s11));
++                            }
++
++                            break;
++
++                        case REQUESTDATA:
++                            NetworkHelper.serverWantsData = true;
++                            break;
++
++                        case CLIMBING:
++
++                            break;
++
++                        case TELEPORT:
++                            NetworkHelper.serverSupportsDirectTeleport = true;
++                            break;
++
++                        case UBERPACKET:
++                            Long olong = friendlybytebuf.readLong();
++                            Long olong1 = friendlybytebuf.readLong();
++                            byte[] abyte = new byte[29];
++                            byte[] abyte1 = new byte[29];
++                            byte[] abyte2 = new byte[29];
++                            friendlybytebuf.readBytes(29).getBytes(0, abyte);
++                            friendlybytebuf.readBytes(29).getBytes(0, abyte1);
++                            friendlybytebuf.readBytes(29).getBytes(0, abyte2);
++                            UUID uuid2 = new UUID(olong, olong1);
++                            float f3 = 1.0F;
++                            float f4 = 1.0F;
++
++                            if (friendlybytebuf.isReadable())
++                            {
++                                f3 = friendlybytebuf.readFloat();
++                            }
++
++                            if (friendlybytebuf.isReadable())
++                            {
++                                f4 = friendlybytebuf.readFloat();
++                            }
++
++                            PlayerModelController.getInstance().Update(uuid2, abyte, abyte1, abyte2, f3, f4);
++                            break;
++
++                        case SETTING_OVERRIDE:
++
++                            break;
++
++                        case CRAWL:
++                            NetworkHelper.serverAllowsCrawling = true;
++                    }
++                }
++            }
+             else
+             {
+-                LOGGER.warn("Unknown custom packed identifier: {}", (Object)resourcelocation);
++            	release = false;
++
++                if (!Reflector.callBoolean(Reflector.NetworkHooks_onCustomPayload, pPacket, this.connection))
++                {
++                    LOGGER.warn("Unknown custom packet identifier: {}", (Object)resourcelocation);
++                }
+             }
+         }
+         finally
+         {
+-            if (friendlybytebuf != null)
++            if (friendlybytebuf != null && release)
+             {
+                 friendlybytebuf.release();
+             }
+@@ -2411,28 +2544,27 @@
+             {
+                 throw new IllegalStateException("Server tried to update attributes of a non-living entity (actually: " + entity + ")");
+             }
+-            else
++
++            AttributeMap attributemap = ((LivingEntity)entity).getAttributes();
++
++            for (ClientboundUpdateAttributesPacket.AttributeSnapshot clientboundupdateattributespacket$attributesnapshot : pPacket.getValues())
+             {
+-                AttributeMap attributemap = ((LivingEntity)entity).getAttributes();
++                AttributeInstance attributeinstance = attributemap.getInstance(clientboundupdateattributespacket$attributesnapshot.getAttribute());
+ 
+-                for (ClientboundUpdateAttributesPacket.AttributeSnapshot clientboundupdateattributespacket$attributesnapshot : pPacket.getValues())
++                if (attributeinstance == null)
+                 {
+-                    AttributeInstance attributeinstance = attributemap.getInstance(clientboundupdateattributespacket$attributesnapshot.getAttribute());
++                    LOGGER.warn("Entity {} does not have attribute {}", entity, Registry.ATTRIBUTE.getKey(clientboundupdateattributespacket$attributesnapshot.getAttribute()));
++                }
++                else
++                {
++                    attributeinstance.setBaseValue(clientboundupdateattributespacket$attributesnapshot.getBase());
++                    attributeinstance.removeModifiers();
+ 
+-                    if (attributeinstance == null)
++                    for (AttributeModifier attributemodifier : clientboundupdateattributespacket$attributesnapshot.getModifiers())
+                     {
+-                        LOGGER.warn("Entity {} does not have attribute {}", entity, Registry.ATTRIBUTE.getKey(clientboundupdateattributespacket$attributesnapshot.getAttribute()));
++                        attributeinstance.addTransientModifier(attributemodifier);
+                     }
+-                    else
+-                    {
+-                        attributeinstance.setBaseValue(clientboundupdateattributespacket$attributesnapshot.getBase());
+-                        attributeinstance.removeModifiers();
+ 
+-                        for (AttributeModifier attributemodifier : clientboundupdateattributespacket$attributesnapshot.getModifiers())
+-                        {
+-                            attributeinstance.addTransientModifier(attributemodifier);
+-                        }
+-                    }
+                 }
+             }
+         }
+@@ -2602,4 +2734,16 @@
+     {
+         return this.registryAccess;
+     }
++    boolean tryParseInt(String value)
++    {
++        try
++        {
++            Integer.parseInt(value);
++            return true;
++        }
++        catch (NumberFormatException numberformatexception)
++        {
++            return false;
++        }
++    }
+ }

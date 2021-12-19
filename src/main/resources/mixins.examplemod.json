@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "package": "com.example.examplemod.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "refmap": "examplemod.refmap.json",
+  "mixins": [
+    "server.level.ServerPlayerMixin",
+    "server.network.ServerGamePacketListenerImplMixin",
+    "world.entity.projectile.AbstractArrowMixin",
+    "world.entity.projectile.AbstractHurtingProjectileMixin",
+    "world.entity.projectile.FishingHookMixin",
+    "world.entity.projectile.ProjectileMixin",
+    "world.entity.projectile.ThrowableProjectileMixin",
+    "world.entity.projectile.ThrownTridentMixin",
+    "world.entity.vehicle.BoatMixin"
+  ],
+  "client": [
+    "client.main.MainMixin",
+    "client.multiplayer.ClientPacketListenerMixin",
+    "client.renderer.block.LiquidBlockRendererMixin",
+    "client.renderer.entity.EntityRenderDispatcherMixin",
+    "client.resources.language.ClientLanguageMixin",
+    "client.MinecraftMixin"
+  ],
+  "server": [
+    
+  ],
+  "minVersion": "0.8.4"
+}

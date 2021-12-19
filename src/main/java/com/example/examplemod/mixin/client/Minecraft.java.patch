@@ -1,0 +1,35 @@
+--- a/net/minecraft/client/Minecraft.java
++++ b/net/minecraft/client/Minecraft.java
+@@ -253,10 +253,12 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ import org.lwjgl.util.tinyfd.TinyFileDialogs;
++import org.vivecraft.render.PlayerModelController;
+ 
+ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements SnooperPopulator, WindowEventHandler
+ {
+     private static Minecraft instance;
++    public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-NONVR-1-b2";
+     private static final Logger LOGGER = LogManager.getLogger();
+     public static final boolean ON_OSX = Util.getPlatform() == Util.OS.OSX;
+     private static final int MAX_TICKS_PER_UPDATE = 10;
+@@ -586,7 +588,7 @@
+ 
+     private String createTitle()
+     {
+-        StringBuilder stringbuilder = new StringBuilder("Minecraft");
++        StringBuilder stringbuilder = new StringBuilder(minecriftVerString);
+ 
+         if (this.isProbablyModded())
+         {
+@@ -1985,6 +1987,10 @@
+             this.musicManager.tick();
+         }
+ 
++		// Vivecraft
++		PlayerModelController.getInstance().tick();
++		//
++		
+         this.soundManager.tick(this.pause);
+ 
+         if (this.level != null)

@@ -1,0 +1,442 @@
+# Contributors: PierraNova, Weelobeae, tomaveclevdsl
+
+# Key bindings
+vivecraft.key.hotbarNext=Case suivante
+vivecraft.key.hotbarPrev=Case précédente
+vivecraft.key.hotbarScroll=Faire défiler la barre d'action
+vivecraft.key.hotbarSwipeX=Défiler (Gauche/Droite)
+vivecraft.key.hotbarSwipeY=Défiler (Haut/Bas)
+vivecraft.key.rotateLeft=Rotation à gauche
+vivecraft.key.rotateRight=Rotation à droite
+vivecraft.key.rotateAxis=Rotation uniquement
+vivecraft.key.rotateFree=Rotation libre
+vivecraft.key.walkabout="Walkabout"
+vivecraft.key.teleport=Téléportation
+vivecraft.key.teleportFallback=Avancer lorsque la téléportation est désactivée
+vivecraft.key.freeMoveRotate=Déplacement/Rotation
+vivecraft.key.freeMoveStrafe=Déplacement/Strafe
+vivecraft.key.toggleMovement=Changer type de déplacement
+vivecraft.key.quickTorch=Torche rapide
+vivecraft.key.ingameMenuButton=Menu
+vivecraft.key.exportWorld=Exporter un fond avec votre monde
+vivecraft.key.radialMenu=Ouvrir le menu radial
+vivecraft.key.swapMirrorView=Échanger vue du bureau
+vivecraft.key.toggleKeyboard=Montrer le clavier
+vivecraft.key.moveThirdPersonCam=Bouger caméra 3ème personne
+vivecraft.key.togglePlayerList=Afficher la liste de joueurs
+vivecraft.key.trackpadTouch=Touché du pavé tactile
+vivecraft.key.vrInteract=Interactions contextuelles
+vivecraft.key.guiLeftClick=Clic gauche
+vivecraft.key.guiRightClick=Clic droit
+vivecraft.key.guiMiddleClick=Clic molette
+vivecraft.key.guiShift=Maj. gauche
+vivecraft.key.guiCtrl=Ctrl gauche
+vivecraft.key.guiAlt=Alt
+vivecraft.key.guiScrollUp=Défiler en haut
+vivecraft.key.guiScrollDown=Défiler en bas
+vivecraft.key.guiScrollAxis=Défiler
+vivecraft.key.keyboardClick=Clic
+vivecraft.key.keyboardShift=Maj. gauche
+vivecraft.key.climbeyGrab=Griffes d'escalade
+vivecraft.key.climbeyJump=Bottes de Saut
+
+# Key binding categories
+vivecraft.key.category.gui=Interface
+vivecraft.key.category.climbey=Déplacement style "Climbey"
+vivecraft.key.category.keyboard=Clavier
+
+# Action set names
+vivecraft.actionset.ingame=En jeu
+vivecraft.actionset.gui=Interface
+vivecraft.actionset.global=Global
+vivecraft.actionset.mod=Modée
+vivecraft.actionset.contextual=Contextuel
+vivecraft.actionset.keyboard=Clavier
+vivecraft.actionset.mixedReality=Réalité mixte
+vivecraft.actionset.technical=Technique
+
+# Option screens
+vivecraft.options.screen.main=Paramètres VR
+vivecraft.options.screen.freemove=Paramètres de déplacement libre
+vivecraft.options.screen.gui=Paramètres de l'interface
+vivecraft.options.screen.menuworld=Paramètres monde menu principal
+vivecraft.options.screen.guiother=Paramètres de discussion/réticule
+vivecraft.options.screen.quickcommands=Commandes rapides
+vivecraft.options.screen.radialmenu=Configuration du menu radial
+vivecraft.options.screen.stereorendering=Paramètres de l'affichage Stéréo
+vivecraft.options.screen.roomscale=Paramètres d’interactions à l'échelle de la pièce
+vivecraft.options.screen.seated=Paramètres assis
+vivecraft.options.screen.standing=Paramètres de Locomotion sur place
+vivecraft.options.screen.teleport=Paramètres de téléportation
+vivecraft.options.screen.controls=Paramètres de manette
+
+# Buttons that lead to the screen
+vivecraft.options.screen.main.button=Paramètres VR...
+vivecraft.options.screen.gui.button=Paramètres de l'interface...
+vivecraft.options.screen.stereorendering.button=Affichage Stéréo
+vivecraft.options.screen.quickcommands.button=Commandes rapides
+vivecraft.options.screen.guiother.button=Paramètres du réticule...
+vivecraft.options.screen.standing.button=Paramètres de locomotion...
+vivecraft.options.screen.roomscale.button=Paramètres d'interaction...
+vivecraft.options.screen.controls.button=Paramètres du manette...
+vivecraft.options.screen.radialmenu.button=Menu radial...
+vivecraft.options.screen.seated.button=Paramètres du mode assis...
+vivecraft.options.screen.menuworld.button=Paramètres monde menu principal...
+vivecraft.options.screen.teleport.button=Paramètres de téléportation...
+vivecraft.options.screen.freemove.button=Paramètres de déplacement libre...
+
+# Option names
+vivecraft.options.HUD_SCALE=Taille de l'ATH
+vivecraft.options.HUD_DISTANCE=Distance de l'ATH
+vivecraft.options.HUD_LOCK_TO=Verrouiller l'orientation de l'ATH
+vivecraft.options.HUD_OPACITY=Opacité de l'ATH
+vivecraft.options.HUD_HIDE=Cacher l'ATH (F1)
+vivecraft.options.RENDER_MENU_BACKGROUND=Fond de l'interface
+vivecraft.options.HUD_OCCLUSION=Occlusion de l'ATH
+vivecraft.options.MENU_ALWAYS_FOLLOW_FACE=Suivre visage ds. menu princi.
+vivecraft.options.CROSSHAIR_OCCLUSION=Réticule occlusion
+vivecraft.options.CROSSHAIR_SCALE=Taille du réticule
+vivecraft.options.MENU_CROSSHAIR_SCALE=Taille du réticule dans les menus
+vivecraft.options.RENDER_CROSSHAIR_MODE=Afficher le réticule
+vivecraft.options.CHAT_NOTIFICATIONS=Notification de chat
+vivecraft.options.CHAT_NOTIFICATION_SOUND=Son de notification
+vivecraft.options.CROSSHAIR_SCALES_WITH_DISTANCE=Taille du Curseur
+vivecraft.options.RENDER_BLOCK_OUTLINE_MODE=Afficher Contours Blocs
+vivecraft.options.AUTO_OPEN_KEYBOARD=Toujours afficher clavier
+vivecraft.options.RADIAL_MODE_HOLD=Mode du menu radiale
+vivecraft.options.PHYSICAL_KEYBOARD=Type du clavier
+vivecraft.options.PHYSICAL_KEYBOARD_SCALE=Taille du clavier
+vivecraft.options.GUI_APPEAR_OVER_BLOCK=Apparaître sur bloc
+vivecraft.options.FSAA=Algorithme de Lanczos
+vivecraft.options.MIRROR_DISPLAY=Miroiter jeu sur bureau
+vivecraft.options.MIRROR_EYE=Miroiter oeil
+vivecraft.options.MIXED_REALITY_KEY_COLOR=Couleur Clé Chroma
+vivecraft.options.MIXED_REALITY_RENDER_HANDS=Afficher les mains
+vivecraft.options.MIXED_REALITY_UNITY_LIKE=Disposition
+vivecraft.options.MIXED_REALITY_UNDISTORTED=Nombre de "passes" anti-distorsion
+vivecraft.options.MIXED_REALITY_ALPHA_MASK=Masque alpha
+vivecraft.options.MIXED_REALITY_FOV=Champ de vis. caméra
+vivecraft.options.WALK_UP_BLOCKS=Marcher au dessus des blocs
+vivecraft.options.MOVEMENT_MULTIPLIER=Multi. vitesse
+vivecraft.options.INERTIA_FACTOR=Inertie du joueur
+vivecraft.options.SIMULATE_FALLING=Simuler la chute
+vivecraft.options.WEAPON_COLLISION=Collision des armes
+vivecraft.options.ALLOW_CRAWLING=Ramper à l'échelle d'une pièce
+vivecraft.options.LIMIT_TELEPORT=Restrictions en mode Survie
+vivecraft.options.REVERSE_HANDS=Inverser Les Mains
+vivecraft.options.STENCIL_ON=Utiliser le Pochoir a œil 
+vivecraft.options.BCB_ON=Montre la position du corps
+vivecraft.options.WORLD_SCALE=Taille du monde
+vivecraft.options.WORLD_ROTATION=Rotation du monde
+vivecraft.options.WORLD_ROTATION_INCREMENT=Incréments de rotation
+vivecraft.options.TOUCH_HOTBAR=Interaction avec la barre d'action activée
+vivecraft.options.PLAY_MODE_SEATED=Mode de jeu
+vivecraft.options.RENDER_SCALEFACTOR=Résolution
+vivecraft.options.MONO_FOV=Champ de vision sans distorsions
+vivecraft.options.REALISTIC_JUMP=Sauter à l'échelle d'une pièce
+vivecraft.options.REALISTIC_SNEAK=S'accroupir à l'échelle d'une pièce
+vivecraft.options.PHYSICAL_GUI=Interface physique
+vivecraft.options.REALISTIC_CLIMB=Monter à l'échelle d'une pièce
+vivecraft.options.REALISTIC_SWIM=Nager a l'échelle d'une pièce
+vivecraft.options.REALISTIC_ROW=Aviron à l'échelle d'une pièce
+vivecraft.options.WALK_MULTIPLIER=Multi. marche Roomscale
+vivecraft.options.FREEMOVE_MODE=Type de déplacement libre
+vivecraft.options.VEHICLE_ROTATION=Rotation dans un véhicule
+vivecraft.options.RESET_ORIGIN=Réinitialiser l'origine
+vivecraft.options.X_SENSITIVITY=Vitesse du rotation
+vivecraft.options.Y_SENSITIVITY=Sensibilité verticale/"Y"
+vivecraft.options.KEYHOLE=Trou de serrure
+vivecraft.options.FOV_REDUCTION=Réduc. champ de vis. pr. confort
+vivecraft.options.FOV_REDUCTION_MIN=Taille réduc. champ de vis. pr. confort
+vivecraft.options.FOV_REDUCTION_OFFSET=Décalage réduc. champ de vis.
+vivecraft.options.SEATED_HMD=Vers l'avant
+vivecraft.options.SEATED_HUD_XHAIR=Faire suivre l'ATH
+vivecraft.options.BACKPACK_SWITCH=Changer le mode de sac à dos
+vivecraft.options.ANALOG_MOVEMENT=Déplacement analogue
+vivecraft.options.AUTO_SPRINT=Auto-sprint
+vivecraft.options.AUTO_SPRINT_THRESHOLD=Limite auto-sprint
+vivecraft.options.BOW_MODE=Arc à l'échelle d'une pièce
+vivecraft.options.TELEPORT_DOWN_LIMIT=Limite vers le bas
+vivecraft.options.TELEPORT_UP_LIMIT=Limite vers le haut
+vivecraft.options.TELEPORT_HORIZ_LIMIT=Limite de distance
+vivecraft.options.ALLOW_STANDING_ORIGIN_OFFSET=Autoriser décalage du point d'origine
+vivecraft.options.SEATED_FREE_MOVE=Changer type de déplacement
+vivecraft.options.FORCE_STANDING_FREE_MOVE=Forcer le déplacement libre
+vivecraft.options.ALLOW_ADVANCED_BINDINGS=Afficher contrôles avancés
+vivecraft.options.MENU_WORLD_SELECTION=Mondes
+vivecraft.options.HRTF_SELECTION=HRTF
+vivecraft.options.RELOAD_EXTERNAL_CAMERA=Recharger la caméra externe
+vivecraft.options.RIGHT_CLICK_DELAY=Répéter clic droit
+vivecraft.options.ANIMAL_TOUCHING=Toucher les animales
+
+# Option tooltips
+vivecraft.options.HUD_SCALE.tooltip=La taille relative que l'ATH prend dans le champ de vision. Les unités sont relatives, ni des degrés ni des fractions du champ de vision etc..
+
+vivecraft.options.HUD_DISTANCE.tooltip=La distance à laquelle l'ATH flottant est affiché devant vous. La taille relative de l'ATH n'est pas affectée par ce paramètre. La distance est en mètres (mais n'est pas obstrué par des blocs).
+
+vivecraft.options.HUD_LOCK_TO.tooltip=Spécifie à quelle orientation l'ATH sera bloqué.\n  Main: L'ATH s'affichera juste au dessus de la main non-principale.\n  Tête: L'ATH s'affichera droit devant votre champ de vision.\n  Poignet: L'ATH apparaîtra à l'intérieur de votre main non-principale. Il ne deviendra visible qu'en regardant la paume.
+
+vivecraft.options.HUD_OPACITY.tooltip=La transparence de l'ATH et de l'interface.
+
+vivecraft.options.RENDER_MENU_BACKGROUND.tooltip=Spécifie si l'interface graphique doit avoir un fond semi-transparent ou non.\n  Oui: fonds semi-transparents dans les menus.\n  Non: aucun fond dans les menus.
+
+vivecraft.options.HUD_OCCLUSION.tooltip=Spécifie si l'ATH doit être obstrué par des objets proches.\n  Oui: L'ATH sera caché par des objets proches. Peut être complétement caché dans des environnements confinés.\n  Non: L'ATH sera toujours visible. Des problèmes de profondeur Stéréo pourraient être visibles.
+
+vivecraft.options.MENU_ALWAYS_FOLLOW_FACE.tooltip=Spécifie si le menu principal suit votre regard.\n  Assis: Le menu principal ne suivra qu'en mode assis.\n  Toujours: Le menu principal suivra toujours.
+
+vivecraft.options.CROSSHAIR_SCALE.tooltip=Règle la taille du curseur hors-menus.
+
+vivecraft.options.MENU_CROSSHAIR_SCALE.tooltip=Règle la taille du curseur dans les menus.
+
+vivecraft.options.RENDER_CROSSHAIR_MODE.tooltip=Règle le mode d'affichage du curseur.\n  Toujours: Le curseur sera toujours affiché, même si l'ATH ne l'est pas.\n  Avec ATH: Le curseur ne sera affiché que quand l'ATH l'est.\n  Jamais: Le curseur n'est jamais affiché.
+
+vivecraft.options.CHAT_NOTIFICATIONS.tooltip=Séléctionne ce qu'il se passe lorsque vous recevez un message sur le chat.\n  Rien: Rien.\n  Haptique: Vibration sur la manette de gauche.\n  Son: Joue un bruit de notification.\n  Les deux: A ton avis?
+
+vivecraft.options.CHAT_NOTIFICATION_SOUND.tooltip=Séléctionne le bruit de notification.
+
+vivecraft.options.CROSSHAIR_SCALES_WITH_DISTANCE.tooltip=Détermine comment le curseur doit changer avec la distance.\n  Oui: Le curseur grossira pour garder la même taille relative à votre vue.\n  Non: Le curseur rétrécira avec la distance.
+
+vivecraft.options.RENDER_BLOCK_OUTLINE_MODE.tooltip=Séléctionne le mode d'affichage du contour des blocs.\n  Toujours: Le contour des blocs sera toujours affiché même lorsque l'ATH est désactivé.\n  Avec l'ATH: Le contour des blocs ne sera affiché que si l'ATH l'est aussi.\n  Jamais: Le contour des blocs n'est jamais affiché.
+
+vivecraft.options.AUTO_OPEN_KEYBOARD.tooltip=Si désactivé, le clavier ne s'ouvrira que quand vous cliquerez sur un champ de texte, ou si un champ de texte ne peut s'enlever.\n\nSi activé, le clavier s'ouvrira automatiquement dès qu'un champ de texte apparaît.\n(Attention, peut s'ouvrir involontairement avec certains mods!)
+
+vivecraft.options.RADIAL_MODE_HOLD.tooltip=Le comportement du menu radial lorsque la touche est appuyée.\n  Maintenir: Il faut garder la touche enfoncée, glisser sur la sélection et relâcher.\n  Appuyer: Il faut appuyer sur le bouton, cliquer sur la sélection et de nouveau appuyer sur la touche.
+
+vivecraft.options.PHYSICAL_KEYBOARD.tooltip=Le type de clavier VR que vous souhaitez utiliser.\n  Physique: Un clavier apparaîtra dans lequel vous pourrez taper comme un vrai clavier.\n  Pointeur: Un clavier qu'on utilise en cliquant sur des lettres avec les touches des manettes.
+
+vivecraft.options.PHYSICAL_KEYBOARD_SCALE.tooltip=La taille du clavier physique, par rapport à sa taille par défaut.
+
+vivecraft.options.GUI_APPEAR_OVER_BLOCK.tooltip=Si activé, l'interface graphique pour les blocs (tels que les coffres et les fours)  sera placée au dessus du bloc. Sinon, elle sera dans la position habituelle.
+
+vivecraft.options.FSAA.tooltip=Utilise une méthode plus complexe de sur-échantillonage du jeu avant d'envoyer au casque. Marche mieux avec de hautes échelles de rendu.
+
+vivecraft.options.MIRROR_DISPLAY.tooltip=Miroite les images du casque sur le bureau. Peut être réglé sur Désactivé, Seul ou Duo (un œil miroité ou deux), en première-personne sans distorsions, troisième personne sans distorsions et en réalité mixte. Les vues sans distorsions et en réalité mixte affectent les performances.
+
+vivecraft.options.MIRROR_EYE.tooltip=Quel oeil est utilisé pour les modes d'affichage coupé et seul.
+
+vivecraft.options.MIXED_REALITY_KEY_COLOR.tooltip=La couleur mise dans les zones "transparentes" de la vue en réalité mixte. D'autres couleurs similaires dans le jeu n'apparaîtront pas afin d'empêcher que des choses pas super réglo arrivent..
+
+vivecraft.options.MIXED_REALITY_RENDER_HANDS.tooltip=Affiche les mains en vue en réalité mixte. N'affecte que l'affichage des mains, les objets seront quand même affichés.
+
+vivecraft.options.MIXED_REALITY_UNITY_LIKE.tooltip=Choisissez entre la mise en page style "Unity" à 4 panneaux, ou 2 panneaux côte-à-côte.
+
+vivecraft.options.MIXED_REALITY_UNDISTORTED.tooltip=Inclure une vue sans distorsions en mise en page 4 panneaux. Requiert un passe d'affichage en plus. Sinon la vue du casque sera utilisée.
+
+vivecraft.options.MIXED_REALITY_ALPHA_MASK.tooltip=Dans la mise en page Unity, si activé, affichera un masque alpha "greyscale" quart en haut à droite (comme Unity) utilisé pour masquer la couche au premier plan. Sinon, le premier plan sera déssiné avec la couleur de clé pour utilisation avec l'effet couleur de clé.
+
+vivecraft.options.MIXED_REALITY_FOV.tooltip=Le champ de vision du mode réalité mixte
+
+vivecraft.options.WALK_UP_BLOCKS.tooltip=Vous permet de sélectionner la capacité à marcher au dessus des blocs sans avoir à sauter. (Raccourci: Ctrl Droit + B)\n§cATTENTION: Peut causer des alertes anti-triche si utilisé sur un serveur multijoueur!\n  Non: (Défaut) Vous devrez sauter au dessus des blocs.\n  Oui: Vous pouvez marcher au dessus des blocs. Peut aider contre la nausée liée au déplacement libre.
+
+vivecraft.options.MOVEMENT_MULTIPLIER.tooltip=Séléctionne un multiplicateur de mouvement, permettant des mouvements plus lents que par défaut. Peut aider contre la nausée causée par le déplacement.\n§cATTENTION: Peut causer des alertes anti-triche si utilisé sur un serveur multijoueur!\nLa valeur par défaut est celle de Minecraft de base (1.0)
+
+vivecraft.options.INERTIA_FACTOR.tooltip=Sélectionne la puissance d'inertie sur le joueur. Une inertie plus faible se traduit en une accélération plus rapide, et vice versa. Une inertie élevée peut réduire la nausée, mais faites gaffe aux précipices.\n  Normal: inertie par défaut.\n  Rien, que dalle < Normal < Beaucoup < Encore plus. N'affecte pas la lave, l'eau ou les sauts.
+
+vivecraft.options.SIMULATE_FALLING.tooltip=Si activé le joueur tombera au sol en mode téléportation si au dessus du vide. Permet aussi de sauter. Ne permet pas de téléporter du pain. Désolé.
+
+vivecraft.options.WEAPON_COLLISION.tooltip=Permet de taper les blocs et les entités avec vos armes.\nAutomatiquement activé en survie et désactivé en créatif.\n(En gros ça active les collisions avec les armes/outils.)
+
+vivecraft.options.ALLOW_CRAWLING.tooltip=Si activé, vous permet de ramper sous les blocs. On dit pas que quand c'est désactivé vous pouvez pas ramper, c'est juste que ça marchera pas.
+
+vivecraft.options.LIMIT_TELEPORT.tooltip=Si activé, la téléportation aura des restrictions en mode Survie. Elle ne sera pas capable de sauter sur les côtés des blocs, elle consommera de la nourriture et aura une barre d'énergie qui se remplira avec le temps.
+
+vivecraft.options.REVERSE_HANDS.tooltip=Echange les mains dominantes et secondaires.\n  Oui: Main gauche dominante.\n  Non: Main droite dominante (par défaut)\n\n§cPour échanger les touches, relancez le jeu et vérifiez que les contrôles par défaut sont utilisés sur SteamVR!
+
+vivecraft.options.STENCIL_ON.tooltip=Masque les zones de l'écran en dehors du champ de vision. Améliore les performances.
+
+vivecraft.options.BCB_ON.tooltip=Montre la position de votre corps avec une ombre carrée sur le sol.\nC'est votre propre ombre. Rien que pour vous.\n§4Si vous la perdez, aucun problème on la remplace!
+
+vivecraft.options.WORLD_SCALE.tooltip=Change la taille du joueur par rapport au monde. Des valeurs au dessus de un vous rendent plus grand et vice-versa.
+
+vivecraft.options.WORLD_ROTATION.tooltip=Donne une rotation en plus à votre casque.\nPlus utile si affecté a une touche ou changé avec les flèches directionnelles. 
+
+vivecraft.options.WORLD_ROTATION_INCREMENT.tooltip=Le nombre de degrés de rotation quand vous changez de rotation.
+
+vivecraft.options.TOUCH_HOTBAR.tooltip=Si activé, vous permet de toucher la barre d'action avec votre main principale pour sélectionner un objet.\n(Faites gaffe: c'est vachement cool.)
+
+vivecraft.options.PLAY_MODE_SEATED.tooltip=Jouer en mode debout ou assis.\nSpoiler: Jouer debout c'est vachement mieux.
+
+vivecraft.options.RENDER_SCALEFACTOR.tooltip=La résolution interne du jeu, relative à la résolution du casque. Des valeurs plus élevées améliorent la qualité en échange de performances. C'est en gros du suréchantillonage.
+
+vivecraft.options.MONO_FOV.tooltip=Le champ de vision utilisé pour le mode sans distorsions.
+
+vivecraft.options.REALISTIC_JUMP.tooltip=SI activé, vous permet de sauter dans le jeu en sautant dans la vraie vie. Au fait, ça active les bottes de saut.
+
+vivecraft.options.REALISTIC_SNEAK.tooltip=Si activé, quand vous serez accroupis dans la vraie vie, vous le serez aussi dans le jeu. Sympa, hein?
+
+vivecraft.options.PHYSICAL_GUI.tooltip=Si activé, l'interface graphique sera remplacée par des modèles en 3D interactifs.\nSi le sac-à-dos est activé, mettre la main à votre dos va afficher votre inventaire.
+
+vivecraft.options.REALISTIC_CLIMB.tooltip=Si activé, permet de grimper aux échelles et au vignes en les touchant. Active aussi les griffes d'escalade. (Oui on a ça.)
+
+vivecraft.options.REALISTIC_SWIM.tooltip=Si activé, permet de nager en brassant avec les manettes.
+
+vivecraft.options.REALISTIC_ROW.tooltip=Permet de ramer en bougeant vos bras vachement fort.
+
+vivecraft.options.WALK_MULTIPLIER.tooltip=Multiplie votre position dans la salle par un facteur.\nVous permet de marcher un peu plus, mais peut causer la nausée.\n(Si vous vomissez, c'est pas notre faute!)
+
+vivecraft.options.FREEMOVE_MODE.tooltip=Ce qui contrôle la direction en déplacement libre.\n\n  Manette: la manette de la main secondaire contrôle la direction.\n  Casque: le casque contrôle la direction.\n  Sur-place: la direction est déterminée par comment les manettes bougent.\n  Salle: Lacet est relatif a la salle, Tangage est le casque. Utilise pour le VR en configuration 180 dégrée.
+
+vivecraft.options.VEHICLE_ROTATION.tooltip=Conduire dans un véhicule va changer la rotation du monde avec le véhicule. Peut désorienter.
+
+vivecraft.options.RESET_ORIGIN.tooltip=Recentre les pieds du joueur à 1,62 mètres sous la position actuelle du casque. pour des systèmes de capteurs non-absolus ou en mode assis.
+
+vivecraft.options.X_SENSITIVITY.tooltip=Accélère la vitesse de rotation de la vue lorsque poussé sur le bord du trou de serrure.
+
+vivecraft.options.Y_SENSITIVITY.tooltip=La vitesse verticale du curseur par rapport à la souris.
+
+vivecraft.options.KEYHOLE.tooltip=Le nombre de degrés à gauche et à droite à partir desquels la vue commencera à pivoter.
+
+vivecraft.options.FOV_REDUCTION.tooltip=Réduit le champ de vision lorsque vous bougez. Peut aider contre la nausée.
+
+vivecraft.options.FOV_REDUCTION_MIN.tooltip=La taille finale de la réduction du champ de vis. pr. confort
+
+vivecraft.options.FOV_REDUCTION_OFFSET.tooltip=Décale horizontalement le centre de la réduction du champ de vision pour des casques non-standards.
+
+vivecraft.options.SEATED_HMD.tooltip=La direction dans laquelle la touche avancer va aller.\nla direction vue du casque ou réticule.
+
+vivecraft.options.SEATED_HUD_XHAIR.tooltip=La direction dans laquelle l'ATH sera mis.\nla direction vue du casque ou réticule.
+
+vivecraft.options.BACKPACK_SWITCH.tooltip=Si activé, mettre votre main droite derrière votre tête sélectionnera automatiquement le 1er emplacement de la barre d'outils. Faire la même chose avec la main gauche vous permet de mettre des trucs dans la main non dominante. (Exemple: bouclier dans main droite > main gauche derrière tête > bouclier dans main gauche)
+
+vivecraft.options.ANALOG_MOVEMENT.tooltip=La vitesse de marche sera déterminée par la position du joystick, si la touche avancer est configurée sur un joystick.\n\nPour des contrôles complètement analogues, meilleure idée d'utiliser "Déplacement/Strafe" ou "Déplacement/Rotation".
+
+vivecraft.options.AUTO_SPRINT.tooltip=Lors du déplacement libre, le sprint s'activera automatiquement lorsque le joystick dépassera la limite configurée.
+
+vivecraft.options.AUTO_SPRINT_THRESHOLD.tooltip=La limite à laquelle l'auto-sprint s'active.
+
+vivecraft.options.BOW_MODE.tooltip=Sélectionne quand utiliser l'arc à l'échelle de la pièce.\n  Non: Jamais!\n  Vanilla: Que pour l'arc par défaut.\n  Oui: Pour tous les objets qui marchent comme des arcs.
+
+vivecraft.options.TELEPORT_DOWN_LIMIT.tooltip=Limite le nombre de blocs que vous pouvez descendre en une téléportation.
+
+vivecraft.options.TELEPORT_UP_LIMIT.tooltip=Limite le nombre de blocs que vous pouvez grimper en une téléportation.
+
+vivecraft.options.TELEPORT_HORIZ_LIMIT.tooltip=Limite la distance que vous pouvez parcourir en une téléportation.
+
+vivecraft.options.ALLOW_STANDING_ORIGIN_OFFSET.tooltip=Permet le bouton pour "Réinitialiser l'origine" d'être utilisé debout, pour ceux qui veulent jouer assis mais avec les manettes.
+
+vivecraft.options.SEATED_FREE_MOVE.tooltip=Quel mode de locomotion doit être utilisé en mode assis.\n  Téléportation: Rien a ajouter je pense.\n  Déplacement libre: ZQSD comme le bon vieux Minecraft de base!
+
+vivecraft.options.FORCE_STANDING_FREE_MOVE.tooltip=Force l'utilisation de la touche pour avancer "d'urgence" (bouton téléportation pr. défaut). Pour plus d'options de déplacement, éditez les contrôles dans SteamVR.\nAh, et si c'était pas clair §cça désactive la téléportation!
+
+vivecraft.options.ALLOW_ADVANCED_BINDINGS.tooltip=Vous permet de changer les touches pour le mouvement Climbey, le clavier et la réalité mixte. Redémarrage nécessaire.\n\nVous vous débrouillez après, par contre.
+
+vivecraft.options.MENU_WORLD_SELECTION.tooltip=Quels mondes devraient être affichés au démarrage.\n\nSI aucun monde n'est trouvé, les mondes officiels seront utilisés.
+
+vivecraft.options.HRTF_SELECTION.tooltip=Le profile HRTF a utiliser pour la simulation de son 3D. La qualité peut varier en fonction du casque et des pilotes.\n\n  Non: Désactive le système HRTF.\n  Défaut: Utilise le profile HRTF par défaut.\n  Autres: Utilise un profile HRTF spécifique.
+
+vivecraft.options.RELOAD_EXTERNAL_CAMERA.tooltip=Recharge la configuration de la caméra depuis ExternalCamera.cfg
+
+vivecraft.options.RIGHT_CLICK_DELAY.tooltip=Le nombre de "ticks" entre chaque clic droit lorsque la touche est enfoncée.
+
+vivecraft.options.ANIMAL_TOUCHING.tooltip=Si activé, vous permet de toucher les animaux pour faire les actions du clic droit. Désactiver pour donner des coups de poing à des pauvres cochons.
+
+# Option values
+vivecraft.options.gamma.cantseeshitcaptain=Je ne peux pas voir
+vivecraft.options.yes=Oui
+vivecraft.options.no=Non
+vivecraft.options.auto=Automatique
+vivecraft.options.default=Défaut
+vivecraft.options.opaque=Opaque
+vivecraft.options.mirror.off=Désactivé (Rapide)
+vivecraft.options.mirror.dual=Duo (Rapide)
+vivecraft.options.mirror.single=Seul (Rapide)
+vivecraft.options.mirror.firstperson=1ère Personne (lent)
+vivecraft.options.mirror.thirdperson=3ème Personne (lent)
+vivecraft.options.mirror.mixedreality=Réalité mixte (Lent)
+vivecraft.options.mirror.cropped=Recadré (Rapide)
+vivecraft.options.left=Gauche
+vivecraft.options.right=Droite
+vivecraft.options.color.black=Noir
+vivecraft.options.color.red=Rouge
+vivecraft.options.color.yellow=Jaune
+vivecraft.options.color.green=Vert
+vivecraft.options.color.cyan=Cyan
+vivecraft.options.color.blue=Bleu
+vivecraft.options.color.magenta=Magenta
+vivecraft.options.unity=Unity
+vivecraft.options.sidebyside=Côte-a-côte
+vivecraft.options.hand=Main
+vivecraft.options.head=Tête
+vivecraft.options.wrist=Poignet
+vivecraft.options.body=Corps
+vivecraft.options.withhud=Avec ATH
+vivecraft.options.always=Toujours
+vivecraft.options.never=Jamais
+vivecraft.options.chatnotification.none=Aucun
+vivecraft.options.chatnotification.haptic=Haptique
+vivecraft.options.chatnotification.sound=Son
+vivecraft.options.chatnotification.both=Les deux
+vivecraft.options.seated=Assis
+vivecraft.options.standing=Debout
+vivecraft.options.inertia.none=Rien, que dalle
+vivecraft.options.inertia.normal=Normale
+vivecraft.options.inertia.large=Beaucoup
+vivecraft.options.inertia.massive=Encore plus
+vivecraft.options.smooth=Fluide
+vivecraft.options.hmd=HMD
+vivecraft.options.crosshair=Réticule
+vivecraft.options.controller=Manette
+vivecraft.options.runinplace=Sur-place (Run-In-Place)
+vivecraft.options.room=Salle
+vivecraft.options.hold=Tenir
+vivecraft.options.press=Appuyer
+vivecraft.options.keyboard.physical=Physique
+vivecraft.options.keyboard.pointer=Pointeur
+vivecraft.options.vanilla=Vanilla
+vivecraft.options.teleportlimit=%d Blocs
+vivecraft.options.teleport=Téléportation
+vivecraft.options.freemove=Déplacement libre
+vivecraft.options.menuworld.both=Officiel & Customisé
+vivecraft.options.menuworld.custom=Customisé uniquement
+vivecraft.options.menuworld.official=Officiel uniquement
+vivecraft.options.menuworld.none=Aucun 
+vivecraft.options.rightclickdelay.slow=Lent
+vivecraft.options.rightclickdelay.slower=Plus lent
+vivecraft.options.rightclickdelay.slowest=Le plus lent possible!
+
+# Button text
+vivecraft.gui.ok=OK
+vivecraft.gui.clear=Nettoyer
+vivecraft.gui.loaddefaults=Charger les paramètres par défaut
+vivecraft.gui.menuworld.refresh=Actualiser le monde du menu
+vivecraft.gui.menuworld.loadnew=Changer un nouveau monde du menu
+vivecraft.gui.radialmenu.mainset=Ensemble principal
+vivecraft.gui.radialmenu.alternateset=Ensemble alternatif
+vivecraft.gui.chat=Chat
+vivecraft.gui.commands=Commandes
+vivecraft.gui.overlay=Overlay
+vivecraft.gui.profiler=Profileur
+vivecraft.gui.screenshot=Capture d'écran
+vivecraft.gui.calibrateheight=Calibrer la hauteur
+vivecraft.gui.alignkatwalk=Aligner le KAT WALK
+vivecraft.gui.movethirdpersoncam=Bouger caméra 3ᵉ pers.
+
+# Items
+vivecraft.item.jumpboots=Bottes de saut
+vivecraft.item.climbclaws=Griffes d'escalade
+vivecraft.item.telescope=La moitié d'une paire de jumelles
+
+# Messages
+vivecraft.messages.seatedmode=Le passage en mode assis va désactiver l'entrée de commandes avec vos manettes? Voulez vous continuer?
+vivecraft.messages.radialmenubind.1=Veuillez affecter une touche pour "Ouvrir le menu radial"
+vivecraft.messages.radialmenubind.2=Restez appuyé sur Maj. avec le menu radial ouvert pour passer à cet ensemble.
+vivecraft.messages.controls.1=Les contrôles sont gérés par SteamVR, si vous voulez les changer, passez par SteamVR!
+vivecraft.messages.controls.2=Allez dans Paramètres>Manettes>Changer les contrôles dans le tableau de bord.
+vivecraft.messages.controls.3=§6Steam doit être en marche §oavant que§r§6 SteamVR soit lancé, sinon les commandes ne seront pas sauvegardées.
+vivecraft.messages.serverplugin=Mod/Plugin Vivecraft détecté sur le serveur: %s
+vivecraft.messages.noserverplugin=Le mod Vivecraft pour serveurs non détecté. Ce serveur pourrait ne pas supporter la téléportation. Dans le doute, on va restreindre vos déplacements. Ne le prenez pas mal hein, c'est pas contre vous.
+vivecraft.messages.calibrateheight=Calibrez votre hauteur dans le menu pause
+vivecraft.messages.rendersetupfailed=Erreur d'affichage! (Render setup failed: %s) 
+vivecraft.messages.intelgraphics=Les graphismes intégrés d'Intel ne sont pas supportés. Si ceci est un PC portable, veuillez forcer l'utilisation de la carte vidéo. Carte vidéo détectée: %s
+vivecraft.messages.menuworldexportcomplete.1=Exportation du monde finie... Taille de la zone: %d
+vivecraft.messages.menuworldexportcomplete.2=Sauvegardé sur %s
+vivecraft.messages.menuworldexportclientwarning=§cATTENTION: Sauvegarde du monde utilisant un monde client. Les données pourraient être incomplètes. Il est recommandé de sauvegarder les mondes pr. le menu principal en solo.
+vivecraft.messages.teleportdisabled=Déplacement restreint activé. (Téléportation interdite)
+vivecraft.messages.teleportenabled=Déplacement non restreint. (Téléportation autorisée)
+vivecraft.messages.walkupblocks=Marchez sur les blocs (Ctrl droit + B): %s
+vivecraft.messages.showaim=Montrer la visée (Ctrl Droit+Maj. droit): activé
+vivecraft.messages.playerinertia=Inertie du joueur (Ctrl gauche + I): %s
+vivecraft.messages.movementmodeswitch=Mode de déplacement changé a: %s
+vivecraft.messages.coords=X: %.2f Y: %.2f Z: %.2f
+vivecraft.messages.angles=Tangage: %.1f Lacet: %.1f Roulis: %.1f
+vivecraft.messages.heightset=Hauteur du joueur définie sur: %d%%
