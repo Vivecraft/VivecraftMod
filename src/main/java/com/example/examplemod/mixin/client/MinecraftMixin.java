@@ -9,17 +9,17 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.render.PlayerModelController;
 
-import com.example.examplemod.MinecriftVersion;
+import com.example.examplemod.DataHolder;
 
 import net.minecraft.client.Minecraft;
 
 @Mixin(Minecraft.class)
-public class MinecraftMixin implements MinecriftVersion{
+public class MinecraftMixin{
 
 	//TODO why in minecraft and not a constant?
 	@ModifyConstant(method = "createTitle", constant = @Constant(stringValue = "Minecraft"))
 	private String title(String s) {
-		return minecriftVerString;
+		return DataHolder.getInstance().minecriftVerString;
 	}
 	
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;tick(Z)V", shift = Shift.BEFORE), method = "tick()V", cancellable = true)

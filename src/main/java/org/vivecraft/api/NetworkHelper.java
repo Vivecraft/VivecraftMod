@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.example.examplemod.MinecriftVersion;
+import com.example.examplemod.DataHolder;
 import com.google.common.base.Charsets;
 
 import io.netty.buffer.Unpooled;
@@ -71,7 +71,7 @@ public class NetworkHelper
 
     public static void sendVersionInfo()
     {
-        byte[] abyte = ((MinecriftVersion)Minecraft.getInstance()).minecriftVerString.getBytes(Charsets.UTF_8);
+        byte[] abyte = DataHolder.getInstance().minecriftVerString.getBytes(Charsets.UTF_8);
         String s = channel.toString();
         FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
         friendlybytebuf.writeBytes(s.getBytes());

@@ -16,9 +16,8 @@ import org.vivecraft.api.AimFixHandler;
 import org.vivecraft.api.NetworkHelper;
 import org.vivecraft.api.ServerVivePlayer;
 
-import com.example.examplemod.MinecriftVersion;
+import com.example.examplemod.DataHolder;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
@@ -80,7 +79,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 			switch (networkhelper$packetdiscriminators)
 			{
 			case VERSION:
-				String s2 = ((MinecriftVersion)Minecraft.getInstance()).minecriftVerString;
+				String s2 = DataHolder.getInstance().minecriftVerString;
 				this.send(NetworkHelper.getVivecraftServerPacket(NetworkHelper.PacketDiscriminators.VERSION, s2));
 				this.send(NetworkHelper.getVivecraftServerPacket(NetworkHelper.PacketDiscriminators.REQUESTDATA, new byte[0]));
 				this.send(NetworkHelper.getVivecraftServerPacket(NetworkHelper.PacketDiscriminators.CLIMBING, new byte[] {1, 0}));
