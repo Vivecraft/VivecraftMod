@@ -28,75 +28,71 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
         ServerPlayer serverplayer = ((ServerGamePacketListenerImpl)this.netManager.getPacketListener()).player;
         boolean flag = msg instanceof ServerboundUseItemPacket || msg instanceof ServerboundUseItemOnPacket || msg instanceof ServerboundPlayerActionPacket;
 
-        if (NetworkHelper.isVive(serverplayer) && flag && serverplayer.getServer() != null)
+        if (!NetworkHelper.isVive(serverplayer) || !flag || serverplayer.getServer() == null) {
+            ctx.fireChannelRead(msg);
+            return;
+        }
+
+        serverplayer.getServer().submit(() ->
         {
-            serverplayer.getServer().submit(() ->
-            {
-                Vec3 vec3 = serverplayer.position();
-                Vec3 vec31 = new Vec3(serverplayer.xo, serverplayer.yo, serverplayer.zo);
-                float f = serverplayer.getXRot();
-                float f1 = serverplayer.getYRot();
-                float f2 = serverplayer.yHeadRot;
-                float f3 = serverplayer.xRotO;
-                float f4 = serverplayer.yRotO;
-                float f5 = serverplayer.yHeadRotO;
-                float f6 = serverplayer.getEyeHeight();
-                ServerVivePlayer serverviveplayer = null;
+            Vec3 position = serverplayer.position();
+            Vec3 positionO = new Vec3(serverplayer.xo, serverplayer.yo, serverplayer.zo);
+            float xRot = serverplayer.getXRot();
+            float yRot = serverplayer.getYRot();
+            float yHeadRot = serverplayer.yHeadRot;
+            float xRotO = serverplayer.xRotO;
+            float yRotO = serverplayer.yRotO;
+            float yHeadRotO = serverplayer.yHeadRotO;
+            float eyeHeight = serverplayer.getEyeHeight();
 
-                if (NetworkHelper.isVive(serverplayer))
+            ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(serverplayer.getGameProfile().getId());
+
+            if (serverviveplayer != null) {
+                Vec3 pos = serverviveplayer.getControllerPos(0, serverplayer, true);
+                Vec3 dir = serverviveplayer.getControllerDir(0);
+
+                serverplayer.setPosRaw(pos.x, pos.y, pos.z);
+                serverplayer.xo = pos.x;
+                serverplayer.yo = pos.y;
+                serverplayer.zo = pos.z;
+                serverplayer.setXRot((float)Math.toDegrees(Math.asin(-dir.y)));
+                serverplayer.setYRot((float)Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                serverplayer.xRotO = serverplayer.getXRot();
+                serverplayer.yRotO = serverplayer.yHeadRotO = serverplayer.yHeadRot = serverplayer.getYRot();
+                MCReflection.Entity_eyeHeight.set(serverplayer, 0);
+                serverviveplayer.offset = position.subtract(pos);
+                System.out.println("AimFix " + pos.x + " " + pos.y + " " + pos.z + " " + (float)Math.toDegrees(Math.asin(-dir.y)) + " " + (float)Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+            }
+
+            try {
+                if (this.netManager.isConnected())
                 {
-                    serverviveplayer = NetworkHelper.vivePlayers.get(serverplayer.getGameProfile().getId());
-                    Vec3 vec32 = serverviveplayer.getControllerPos(0, serverplayer);
-                    Vec3 vec33 = serverviveplayer.getControllerDir(0);
-                    serverplayer.setPosRaw(vec32.x, vec32.y, vec32.z);
-                    serverplayer.xo = vec32.x;
-                    serverplayer.yo = vec32.y;
-                    serverplayer.zo = vec32.z;
-                    serverplayer.setXRot((float)Math.toDegrees(Math.asin(-vec33.y)));
-                    serverplayer.setYRot((float)Math.toDegrees(Math.atan2(-vec33.x, vec33.z)));
-                    serverplayer.xRotO = serverplayer.getXRot();
-                    serverplayer.yRotO = serverplayer.yHeadRotO = serverplayer.yHeadRot = serverplayer.getYRot();
-                    MCReflection.Entity_eyeHeight.set(serverplayer, 0);
-                    serverviveplayer.offset = vec3.subtract(vec32);
-                }
-
-                try {
-                    if (this.netManager.isConnected())
+                    try
                     {
-                        try
-                        {
-                            ((Packet)msg).handle(this.netManager.getPacketListener());
-                        }
-                        catch (RunningOnDifferentThreadException runningondifferentthreadexception)
-                        {
-                        }
+                        ((Packet)msg).handle(this.netManager.getPacketListener());
+                    }
+                    catch (RunningOnDifferentThreadException runningondifferentthreadexception)
+                    {
                     }
                 }
-                finally {
-                    ReferenceCountUtil.release(msg);
-                }
+            }
+            finally {
+                ReferenceCountUtil.release(msg);
+            }
 
-                serverplayer.setPosRaw(vec3.x, vec3.y, vec3.z);
-                serverplayer.xo = vec31.x;
-                serverplayer.yo = vec31.y;
-                serverplayer.zo = vec31.z;
-                serverplayer.setXRot(f);
-                serverplayer.setYRot(f1);
-                serverplayer.yHeadRot = f2;
-                serverplayer.xRotO = f3;
-                serverplayer.yRotO = f4;
-                serverplayer.yHeadRotO = f5;
-                MCReflection.Entity_eyeHeight.set(serverplayer, f6);
-
-                if (serverviveplayer != null)
-                {
-                    serverviveplayer.offset = new Vec3(0.0D, 0.0D, 0.0D);
-                }
-            });
-        }
-        else
-        {
-            ctx.fireChannelRead(msg);
-        }
+            serverplayer.setPosRaw(position.x, position.y, position.z);
+            serverplayer.xo = positionO.x;
+            serverplayer.yo = positionO.y;
+            serverplayer.zo = positionO.z;
+            serverplayer.setXRot(xRot);
+            serverplayer.setYRot(yRot);
+            serverplayer.yHeadRot = yHeadRot;
+            serverplayer.xRotO = xRotO;
+            serverplayer.yRotO = yRotO;
+            serverplayer.yHeadRotO = yHeadRotO;
+            MCReflection.Entity_eyeHeight.set(serverplayer, eyeHeight);
+            if (serverviveplayer != null)
+                serverviveplayer.offset = new Vec3(0.0D, 0.0D, 0.0D);
+        });
     }
 }

@@ -33,10 +33,12 @@
                                  ++k1;
                              }
                          }
-@@ -749,15 +759,17 @@
+@@ -749,17 +759,22 @@
          if (this.isVehicle())
          {
              float f = 0.0F;
++            
++            //Vivecraft analog movement
 +            Minecraft minecraft = Minecraft.getInstance();
 +            float f1 = minecraft.player.input.leftImpulse;
  
@@ -51,9 +53,99 @@
 -                ++this.deltaRotation;
 +                this.deltaRotation -= f1;
              }
- 
+-
++            //
++            
              if (this.inputRight != this.inputLeft && !this.inputUp && !this.inputDown)
-@@ -1055,6 +1067,17 @@
+             {
+                 f += 0.005F;
+@@ -777,7 +792,84 @@
+                 f -= 0.005F;
+             }
+ 
+-            this.setDeltaMovement(this.getDeltaMovement().add((double)(Mth.sin(-this.getYRot() * ((float)Math.PI / 180F)) * f), 0.0D, (double)(Mth.cos(this.getYRot() * ((float)Math.PI / 180F)) * f)));
++			double mx, mz;
++
++    		if(this.inputUp && !minecraft.vrSettings.seated){
++    			//controller-based
++    			float yaw = minecraft.vrPlayer.vrdata_world_pre.getController(1).getYaw();     
++    			if(minecraft.vrSettings.vehicleRotation){
++    				//tank controls
++    				float end = this.getYRot() % 360;
++    				float start = yaw;
++    				float difference = Math.abs(end - start);
++
++    				if (difference > 180)
++    					if (end > start)
++    						start += 360;
++    					else
++    						end += 360;
++
++    				difference = end - start;
++
++    				f = 0;
++
++    				if (Math.abs(difference) < 30){
++    					f = 0.04f;
++    				} 
++    				else if (Math.abs(difference) > 150) {
++    					f = -0.005F;
++    				}
++    				else if(difference < 0){
++    					this.deltaRotation +=1;
++    					f = 0.005f;
++    				} else if(difference > 0) {
++    					this.deltaRotation -=1;
++    					f = 0.005f;
++    				}
++
++     				mx = (double)(Math.sin(-this.getYRot()* 0.017453292F) * f);
++    				mz = (double)(Math.cos(this.getYRot() * 0.017453292F) * f);
++    			} else {
++    				//point to move
++    				mx = (double)(Math.sin(-yaw* 0.017453292F) * f);
++    				mz = (double)(Math.cos(yaw * 0.017453292F) * f);
++    				this.setYRot(yaw);
++    			}
++    			
++
++    		} else {
++    			//roomscale or vanilla behavior
++    			if(minecraft.rowTracker.isRowing() && !minecraft.vrSettings.seated){
++    			
++    				this.deltaRotation += minecraft.rowTracker.LOar / 1.5;
++    				this.deltaRotation -= minecraft.rowTracker.ROar / 1.5;
++    				/*
++    				this.deltaRotation += mc.rowTracker.forces[0] *50;
++    				this.deltaRotation -= mc.rowTracker.forces[1] *50;
++    				 */
++    				
++    				if (deltaRotation < 0) this.inputLeft = true;
++    				if (deltaRotation > 0) this.inputRight = true;
++
++    				f = 0.06f * minecraft.rowTracker.Foar;
++    				if(f > 0) this.inputUp = true;
++    				
++    				/*
++    				f=(float)(mc.rowTracker.forces[0] + mc.rowTracker.forces[1]);
++    				if(f > 0.005) this.forwardInputDown = true;
++    				*/
++
++    				mx= (double)(Math.sin(-this.getYRot() * 0.017453292F) * f);
++    				mz= (double)(Math.cos(this.getYRot() * 0.017453292F) * f);
++    			}else{
++    				//default boat (seated mode)
++    				mx= (double)(Math.sin(-this.getYRot() * 0.017453292F) * f);
++    				mz= (double)(Math.cos(this.getYRot() * 0.017453292F) * f);
++    			}
++    		}
++            this.setDeltaMovement(this.getDeltaMovement().x + mx, this.getDeltaMovement().y, this.getDeltaMovement().z + mz);
++    		//  
++            
+             this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp);
+         }
+     }
+@@ -1055,6 +1147,17 @@
          return new ItemStack(this.getDropItem());
      }
  

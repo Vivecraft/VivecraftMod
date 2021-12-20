@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/tutorial/Tutorial.java
++++ b/net/minecraft/client/tutorial/Tutorial.java
+@@ -96,7 +96,7 @@
+             this.stop();
+         }
+ 
+-        this.instance = this.minecraft.options.tutorialStep.create(this);
++        this.instance = TutorialSteps.NONE.create(this);
+     }
+ 
+     public void addTimedToast(TutorialToast p_120573_, int p_120574_)
+@@ -147,7 +147,7 @@
+         }
+     }
+ 
+-    public Minecraft getMinecraft()
++    public Minecraft getInstance()
+     {
+         return this.minecraft;
+     }

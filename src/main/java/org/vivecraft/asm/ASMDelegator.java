@@ -1,6 +1,9 @@
 package org.vivecraft.asm;
 
-import net.minecraft.client.Minecraft;
+import org.vivecraft.api.VRData;
+
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.TextComponent;
@@ -39,10 +42,6 @@ public class ASMDelegator
             ItemStack itemstack4 = (new ItemStack(Items.SHEARS)).setHoverName(new TranslatableComponent("vivecraft.item.climbclaws"));
             itemstack4.getTag().putBoolean("Unbreakable", true);
             itemstack4.getTag().putInt("HideFlags", 4);
-            ItemStack itemstack2 = (new ItemStack(Items.ENDER_EYE)).setHoverName(new TranslatableComponent("vivecraft.item.telescope"));
-            itemstack2.getTag().putBoolean("Unbreakable", true);
-            itemstack2.getTag().putInt("HideFlags", 4);
-            list.add(itemstack2);
             list.add(itemstack3);
             list.add(itemstack4);
         }
@@ -59,6 +58,47 @@ public class ASMDelegator
             {
                 list.add(itemstack);
             }
+        }
+    }
+
+    public static float itemRayTracePitch(Player player, float orig)
+    {
+        if (player instanceof LocalPlayer)
+        {
+            VRData.VRDevicePose vrdata$vrdevicepose = DataHolder.getInstance().vrPlayer.vrdata_world_pre.getController(0);
+            Vec3 vec3 = vrdata$vrdevicepose.getDirection();
+            return (float)Math.toDegrees(Math.asin(-vec3.y / vec3.length()));
+        }
+        else
+        {
+            return orig;
+        }
+    }
+
+    public static float itemRayTraceYaw(Player player, float orig)
+    {
+        if (player instanceof LocalPlayer)
+        {
+            VRData.VRDevicePose vrdata$vrdevicepose = DataHolder.getInstance().vrPlayer.vrdata_world_pre.getController(0);
+            Vec3 vec3 = vrdata$vrdevicepose.getDirection();
+            return (float)Math.toDegrees(Math.atan2(-vec3.x, vec3.z));
+        }
+        else
+        {
+            return orig;
+        }
+    }
+
+    public static Vec3 itemRayTracePos(Player player, Vec3 orig)
+    {
+        if (player instanceof LocalPlayer)
+        {
+            VRData.VRDevicePose vrdata$vrdevicepose = DataHolder.getInstance().vrPlayer.vrdata_world_pre.getController(0);
+            return vrdata$vrdevicepose.getPosition();
+        }
+        else
+        {
+            return orig;
         }
     }
 

@@ -2,10 +2,13 @@ package org.vivecraft.render;
 
 import java.util.UUID;
 
+import com.example.examplemod.DataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -14,6 +17,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
 import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
@@ -24,7 +28,6 @@ import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
 import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -42,27 +45,23 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 
-public class VRPlayerRenderer extends PlayerRenderer
+public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>
 {
-
 	static LayerDefinition VRLayerDef = LayerDefinition.create(VRPlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64);
 	static LayerDefinition VRLayerDef_arms = LayerDefinition.create(VRPlayerModel_WithArms.createMesh(CubeDeformation.NONE, false), 64, 64);
 
     static LayerDefinition VRLayerDef_slim = LayerDefinition.create(VRPlayerModel.createMesh(CubeDeformation.NONE, true), 64, 64);
 	static LayerDefinition VRLayerDef_arms_slim = LayerDefinition.create(VRPlayerModel_WithArms.createMesh(CubeDeformation.NONE, true), 64, 64);
 
-	public VRPlayerRenderer(EntityRendererProvider.Context p_174557_, boolean p_174558_, boolean seated) 
+	public VRPlayerRenderer(EntityRendererProvider.Context p_174557_, boolean p_174558_, boolean seated)
 	{
-		super(p_174557_, p_174558_);
-		this.model = !p_174558_ ? (seated ? new VRPlayerModel<>(VRLayerDef.bakeRoot(), p_174558_) : new VRPlayerModel_WithArms<>(VRLayerDef_arms.bakeRoot(), p_174558_)) :
-					(seated ? new VRPlayerModel<>(VRLayerDef_slim.bakeRoot(), p_174558_) : new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), p_174558_));
-//		super(p_174557_, !p_174558_ ? (seated ? 
-//				new VRPlayerModel<>(VRLayerDef.bakeRoot(), p_174558_) : 
-//					new VRPlayerModel_WithArms<>(VRLayerDef_arms.bakeRoot(), p_174558_)) :
-//						(seated ? 
-//								new VRPlayerModel<>(VRLayerDef_slim.bakeRoot(), p_174558_) : 
-//									new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), p_174558_))
-//					, 0.5F);        
+		super(p_174557_, !p_174558_ ? (seated ? 
+				new VRPlayerModel<>(VRLayerDef.bakeRoot(), p_174558_) : 
+					new VRPlayerModel_WithArms<>(VRLayerDef_arms.bakeRoot(), p_174558_)) :
+						(seated ? 
+								new VRPlayerModel<>(VRLayerDef_slim.bakeRoot(), p_174558_) : 
+									new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), p_174558_))
+					, 0.5F);        
 		this.addLayer(new HumanoidArmorLayer<>(this, new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)), new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))));
 		this.addLayer(new PlayerItemInHandLayer<>(this));
 		this.addLayer(new ArrowLayer<>(p_174557_, this));
@@ -77,6 +76,17 @@ public class VRPlayerRenderer extends PlayerRenderer
 
     public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight)
     {
+        if (DataHolder.getInstance().currentPass == RenderPass.GUI && entityIn.isLocalPlayer())
+        {
+            Matrix4f matrix4f = matrixStackIn.last().pose();
+            double d0 = (new Vec3((double)matrix4f.m00, (double)matrix4f.m01, (double)matrix4f.m02)).length();
+            matrixStackIn.last().pose().setIdentity();
+            matrixStackIn.translate(0.0D, 0.0D, 1000.0D);
+            matrixStackIn.scale((float)d0, (float)d0, (float)d0);
+            matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+            matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F + DataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw()));
+        }
+
         PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(entityIn.getUUID());
 
         if (playermodelcontroller$rotinfo != null)

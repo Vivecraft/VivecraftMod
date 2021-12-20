@@ -1,0 +1,32 @@
+--- a/net/minecraft/client/gui/screens/OptionsScreen.java
++++ b/net/minecraft/client/gui/screens/OptionsScreen.java
+@@ -17,6 +17,7 @@
+ import net.minecraft.server.packs.repository.Pack;
+ import net.minecraft.server.packs.repository.PackRepository;
+ import net.minecraft.world.Difficulty;
++import org.vivecraft.gui.settings.GuiMainVRSettings;
+ 
+ public class OptionsScreen extends Screen
+ {
+@@ -41,7 +42,20 @@
+         {
+             int j = this.width / 2 - 155 + i % 2 * 160;
+             int k = this.height / 6 - 12 + 24 * (i >> 1);
+-            this.addRenderableWidget(option.createButton(this.minecraft.options, j, k, 150));
++             
++            if (option == Option.FOV)
++            {
++            	this.addRenderableWidget(new Button(j, k, 150, 20, new TranslatableComponent("vivecraft.options.screen.main.button"), (p) ->
++            	{
++            		this.minecraft.options.save();
++            		this.minecraft.setScreen(new GuiMainVRSettings(this));
++            	}));
++            }
++            else
++            {
++            	this.addRenderableWidget(option.createButton(this.minecraft.options, j, k, 150));
++            }
++
+             ++i;
+         }
+ 

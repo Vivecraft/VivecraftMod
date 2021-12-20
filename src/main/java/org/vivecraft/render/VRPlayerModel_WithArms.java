@@ -208,6 +208,11 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 		copyUV(leftShoulder.cubes.get(0).polygons[3], leftHand.cubes.get(0).polygons[3]);
 		copyUV(rightShoulder.cubes.get(0).polygons[3], this.rightHand.cubes.get(0).polygons[2]);	
 		copyUV(leftShoulder.cubes.get(0).polygons[3], leftHand.cubes.get(0).polygons[2]);
+		
+		copyUV(rightShoulder_sleeve.cubes.get(0).polygons[3], this.rightSleeve.cubes.get(0).polygons[3]);	
+		copyUV(leftShoulder_sleeve.cubes.get(0).polygons[3], leftSleeve.cubes.get(0).polygons[3]);
+		copyUV(rightShoulder_sleeve.cubes.get(0).polygons[3], this.rightSleeve.cubes.get(0).polygons[2]);	
+		copyUV(leftShoulder_sleeve.cubes.get(0).polygons[3], leftSleeve.cubes.get(0).polygons[2]);
 	}
 
 	public void setAllVisible(boolean pVisible)

@@ -25,8 +25,8 @@ public class MCReflection
 	//soundEngine
     public static final MCReflection.ReflectionField SoundHandler_sndManager = new MCReflection.ReflectionField(SoundManager.class, "f_120349_");
     
-    //unneeded
-    //public static final String BlockState_OnBlockActivated = "func_225533_a_";
+    //blocks for interact
+    public static final String BlockBehavior_Use = "m_6227_";
   
     //destroyDelay
     public static final MCReflection.ReflectionField PlayerController_blockHitDelay = new MCReflection.ReflectionField(MultiPlayerGameMode.class, "f_105195_");

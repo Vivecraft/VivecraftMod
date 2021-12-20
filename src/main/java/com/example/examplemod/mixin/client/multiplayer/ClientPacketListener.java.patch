@@ -8,7 +8,7 @@
  import net.minecraft.world.level.block.entity.BannerBlockEntity;
  import net.minecraft.world.level.block.entity.BeaconBlockEntity;
  import net.minecraft.world.level.block.entity.BedBlockEntity;
-@@ -280,8 +281,11 @@
+@@ -280,8 +281,14 @@
  import net.minecraft.world.scores.Scoreboard;
  import net.minecraft.world.scores.Team;
  import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -16,11 +16,14 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
 +import org.vivecraft.api.NetworkHelper;
++import org.vivecraft.provider.ControllerType;
++import org.vivecraft.provider.openvr_jna.control.VivecraftMovementInput;
 +import org.vivecraft.render.PlayerModelController;
++import org.vivecraft.settings.VRSettings;
  
  public class ClientPacketListener implements ClientGamePacketListener
  {
-@@ -315,6 +319,8 @@
+@@ -315,6 +322,8 @@
          this.localGameProfile = p_104909_;
          this.advancements = new ClientAdvancements(p_104906_);
          this.suggestionsProvider = new ClientSuggestionProvider(this, p_104906_);
@@ -29,7 +32,7 @@
      }
  
      public ClientSuggestionProvider getSuggestionsProvider()
-@@ -369,6 +375,7 @@
+@@ -369,19 +378,23 @@
  
          this.minecraft.debugRenderer.clear();
          this.minecraft.player.resetPos();
@@ -37,7 +40,11 @@
          int i = pPacket.getPlayerId();
          this.minecraft.player.setId(i);
          this.level.addPlayer(i, this.minecraft.player);
-@@ -379,9 +386,12 @@
+-        this.minecraft.player.input = new KeyboardInput(this.minecraft.options);
++        this.minecraft.player.input = new VivecraftMovementInput(this.minecraft.options);
+         this.minecraft.gameMode.adjustPlayer(this.minecraft.player);
+         this.minecraft.cameraEntity = this.minecraft.player;
+         this.minecraft.setScreen(new ReceivingLevelScreen());
          this.minecraft.player.setReducedDebugInfo(pPacket.isReducedDebugInfo());
          this.minecraft.player.setShowDeathScreen(pPacket.shouldShowDeathScreen());
          this.minecraft.gameMode.setLocalMode(pPacket.getGameType(), pPacket.getPreviousGameType());
@@ -50,7 +57,7 @@
      }
  
      public void handleAddEntity(ClientboundAddEntityPacket pPacket)
-@@ -650,9 +660,9 @@
+@@ -650,9 +663,9 @@
      {
          PacketUtils.ensureRunningOnSameThread(pPacket, this, this.minecraft);
          int i = 19 | (pPacket.shouldSuppressLightUpdates() ? 128 : 0);
@@ -62,7 +69,7 @@
          });
      }
  
-@@ -678,7 +688,11 @@
+@@ -678,7 +691,11 @@
  
                  if (blockentity != null)
                  {
@@ -75,7 +82,17 @@
                  }
              }
          }
-@@ -784,7 +798,17 @@
+@@ -711,6 +728,9 @@
+     public void handleDisconnect(ClientboundDisconnectPacket pPacket)
+     {
+         this.connection.disconnect(pPacket.getReason());
++        this.minecraft.vrPlayer.setTeleportSupported(false);
++        this.minecraft.vrPlayer.setTeleportOverride(false);
++        this.minecraft.vrSettings.overrides.resetAll();
+     }
+ 
+     public void onDisconnect(Component pReason)
+@@ -784,7 +804,37 @@
      public void handleChat(ClientboundChatPacket pPacket)
      {
          PacketUtils.ensureRunningOnSameThread(pPacket, this, this.minecraft);
@@ -91,10 +108,30 @@
 +            this.minecraft.gui.handleChat(pPacket.getType(), component, pPacket.getSender());
 +        }
 +
++        Minecraft minecraft = Minecraft.getInstance();
++        String s = minecraft.player.lastMsg;
++        minecraft.player.lastMsg = null;
++
++        if (minecraft.player == null || s == null || !pPacket.getMessage().getString().contains(s))
++        {
++            if (minecraft.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE)
++            {
++                if ((minecraft.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC || minecraft.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) && !minecraft.vrSettings.seated)
++                {
++                    minecraft.vr.triggerHapticPulse(ControllerType.LEFT, 0.2F, 1000.0F, 1.0F);
++                }
++
++                if (minecraft.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND || minecraft.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
++                {
++                    Vec3 vec3 = minecraft.vrPlayer.vrdata_world_pre.getController(1).getPosition();
++                    minecraft.level.playLocalSound(vec3.x(), vec3.y(), vec3.z(), Registry.SOUND_EVENT.get(new ResourceLocation(minecraft.vrSettings.chatNotificationSound)), SoundSource.NEUTRAL, 0.3F, 0.1F, false);
++                }
++            }
++        }
      }
  
      public void handleAnimate(ClientboundAnimatePacket pPacket)
-@@ -894,7 +918,8 @@
+@@ -894,7 +944,8 @@
  
                      if (entity1 == this.minecraft.player && !flag)
                      {
@@ -104,7 +141,7 @@
                      }
                  }
              }
-@@ -992,6 +1017,8 @@
+@@ -992,6 +1043,8 @@
              this.level.addMapData(map);
              this.minecraft.setLevel(this.level);
              this.minecraft.setScreen(new ReceivingLevelScreen());
@@ -113,15 +150,19 @@
          }
  
          String s = localplayer.getServerBrand();
-@@ -1015,6 +1042,7 @@
+@@ -1015,9 +1068,10 @@
  
          localplayer1.resetPos();
          localplayer1.setServerBrand(s);
 +        //Reflector.call(Reflector.ClientHooks_firePlayerRespawn, this.minecraft.gameMode, localplayer, localplayer1, localplayer1.connection.getConnection());
          this.level.addPlayer(i, localplayer1);
          localplayer1.setYRot(-180.0F);
-         localplayer1.input = new KeyboardInput(this.minecraft.options);
-@@ -1149,7 +1177,17 @@
+-        localplayer1.input = new KeyboardInput(this.minecraft.options);
++        localplayer1.input = new VivecraftMovementInput(this.minecraft.options);
+         this.minecraft.gameMode.adjustPlayer(localplayer1);
+         localplayer1.setReducedDebugInfo(localplayer.isReducedDebugInfo());
+         localplayer1.setShowDeathScreen(localplayer.shouldShowDeathScreen());
+@@ -1149,7 +1203,17 @@
          int i = pPacket.getType();
          boolean flag = i == 2 && blockentity instanceof CommandBlockEntity;
  
@@ -140,7 +181,7 @@
          {
              blockentity.load(pPacket.getTag());
          }
-@@ -1178,9 +1216,9 @@
+@@ -1178,9 +1242,9 @@
  
          if (entity != null)
          {
@@ -152,7 +193,7 @@
              });
          }
      }
-@@ -1382,6 +1420,7 @@
+@@ -1382,6 +1446,7 @@
          clientrecipebook.setupCollections(this.recipeManager.getRecipes());
          clientrecipebook.getCollections().forEach(mutablesearchtree::add);
          mutablesearchtree.refresh();
@@ -160,7 +201,7 @@
      }
  
      public void handleLookAt(ClientboundPlayerLookAtPacket pPacket)
-@@ -1455,18 +1494,18 @@
+@@ -1455,18 +1520,18 @@
              case ADD:
                  for (ResourceLocation resourcelocation : pPacket.getRecipes())
                  {
@@ -185,7 +226,7 @@
          });
  
          if (this.minecraft.screen instanceof RecipeUpdateListener)
-@@ -1482,7 +1521,7 @@
+@@ -1482,7 +1547,7 @@
  
          if (entity instanceof LivingEntity)
          {
@@ -194,7 +235,7 @@
  
              if (mobeffect != null)
              {
-@@ -1497,8 +1536,23 @@
+@@ -1497,8 +1562,23 @@
      {
          PacketUtils.ensureRunningOnSameThread(pPacket, this, this.minecraft);
          TagContainer tagcontainer = TagContainer.deserializeFromNetwork(this.registryAccess, pPacket.getTags());
@@ -220,7 +261,7 @@
          if (!multimap.isEmpty())
          {
              LOGGER.warn("Incomplete server tags, disconnecting. Missing: {}", (Object)multimap);
-@@ -1506,6 +1560,12 @@
+@@ -1506,6 +1586,12 @@
          }
          else
          {
@@ -233,7 +274,7 @@
              this.tags = tagcontainer;
  
              if (!this.connection.isMemoryConnection())
-@@ -1860,16 +1920,16 @@
+@@ -1860,16 +1946,16 @@
              {
                  throw new URISyntaxException(pUrl, "Wrong protocol");
              }
@@ -254,7 +295,7 @@
          {
              this.send(ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD);
              return false;
-@@ -1881,7 +1941,7 @@
+@@ -1881,7 +1967,7 @@
          pFuture.thenRun(() ->
          {
              this.send(ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED);
@@ -263,7 +304,7 @@
          {
              this.send(ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD);
              return null;
-@@ -1941,6 +2001,7 @@
+@@ -1941,6 +2027,7 @@
          PacketUtils.ensureRunningOnSameThread(pPacket, this, this.minecraft);
          ResourceLocation resourcelocation = pPacket.getIdentifier();
          FriendlyByteBuf friendlybytebuf = null;
@@ -271,7 +312,7 @@
  
          try
          {
-@@ -2163,8 +2224,8 @@
+@@ -2163,8 +2250,8 @@
  
                  for (int i7 = 0; i7 < l6; ++i7)
                  {
@@ -282,7 +323,7 @@
                  }
  
                  int j7 = friendlybytebuf.readVarInt();
-@@ -2215,14 +2276,86 @@
+@@ -2215,14 +2302,170 @@
                  int i5 = friendlybytebuf.readVarInt();
                  this.minecraft.debugRenderer.gameEventListenerRenderer.trackListener(positionsource, i5);
              }
@@ -297,11 +338,18 @@
 +                    {
 +                        case VERSION:
 +                            String s11 = friendlybytebuf.readUtf(1024);
++                            this.minecraft.vrPlayer.setTeleportSupported(true);
++                            this.minecraft.vrPlayer.teleportWarningTimer = -1;
 +
 +                            if (!NetworkHelper.displayedChatMessage)
 +                            {
 +                                NetworkHelper.displayedChatMessage = true;
 +                                this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.serverplugin", s11));
++                            }
++
++                            if (Minecraft.getInstance().vrSettings.manualCalibration == -1.0F && !Minecraft.getInstance().vrSettings.seated)
++                            {
++                                this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.calibrateheight"));
 +                            }
 +
 +                            break;
@@ -311,6 +359,24 @@
 +                            break;
 +
 +                        case CLIMBING:
++                            NetworkHelper.serverAllowsClimbey = friendlybytebuf.readBoolean();
++
++                            if (friendlybytebuf.readableBytes() > 0)
++                            {
++                                Minecraft.getInstance().climbTracker.serverblockmode = friendlybytebuf.readByte();
++                                Minecraft.getInstance().climbTracker.blocklist.clear();
++
++                                while (friendlybytebuf.readableBytes() > 0)
++                                {
++                                    String s12 = friendlybytebuf.readUtf(16384);
++                                    Block block = Registry.BLOCK.get(new ResourceLocation(s12));
++
++                                    if (block != null)
++                                    {
++                                        Minecraft.getInstance().climbTracker.blocklist.add(block);
++                                    }
++                                }
++                            }
 +
 +                            break;
 +
@@ -345,6 +411,65 @@
 +                            break;
 +
 +                        case SETTING_OVERRIDE:
++                            while (friendlybytebuf.readableBytes() > 0)
++                            {
++                                String s13 = friendlybytebuf.readUtf(16384);
++                                String s14 = friendlybytebuf.readUtf(16384);
++                                String[] astring = s13.split("\\.", 2);
++
++                                if (this.minecraft.vrSettings.overrides.hasSetting(astring[0]))
++                                {
++                                    VRSettings.ServerOverrides.Setting vrsettings$serveroverrides$setting = this.minecraft.vrSettings.overrides.getSetting(astring[0]);
++
++                                    try
++                                    {
++                                        if (astring.length > 1)
++                                        {
++                                            String s15 = astring[1];
++
++                                            switch (s15)
++                                            {
++                                                case "min":
++                                                    vrsettings$serveroverrides$setting.setValueMin(Float.parseFloat(s14));
++                                                    break;
++
++                                                case "max":
++                                                    vrsettings$serveroverrides$setting.setValueMax(Float.parseFloat(s14));
++                                            }
++                                        }
++                                        else
++                                        {
++                                            Object object = vrsettings$serveroverrides$setting.getOriginalValue();
++
++                                            if (object instanceof Boolean)
++                                            {
++                                                vrsettings$serveroverrides$setting.setValue(s14.equals("true"));
++                                            }
++                                            else if (!(object instanceof Integer) && !(object instanceof Byte) && !(object instanceof Short))
++                                            {
++                                                if (!(object instanceof Float) && !(object instanceof Double))
++                                                {
++                                                    vrsettings$serveroverrides$setting.setValue(s14);
++                                                }
++                                                else
++                                                {
++                                                    vrsettings$serveroverrides$setting.setValue(Float.parseFloat(s14));
++                                                }
++                                            }
++                                            else
++                                            {
++                                                vrsettings$serveroverrides$setting.setValue(Integer.parseInt(s14));
++                                            }
++                                        }
++
++                                        System.out.println("Server setting override: " + s13 + " = " + s14);
++                                    }
++                                    catch (Exception exception)
++                                    {
++                                        exception.printStackTrace();
++                                    }
++                                }
++                            }
 +
 +                            break;
 +
@@ -371,7 +496,7 @@
              {
                  friendlybytebuf.release();
              }
-@@ -2411,28 +2544,27 @@
+@@ -2411,27 +2654,25 @@
              {
                  throw new IllegalStateException("Server tried to update attributes of a non-living entity (actually: " + entity + ")");
              }
@@ -386,12 +511,12 @@
  
 -                for (ClientboundUpdateAttributesPacket.AttributeSnapshot clientboundupdateattributespacket$attributesnapshot : pPacket.getValues())
 +                if (attributeinstance == null)
-                 {
--                    AttributeInstance attributeinstance = attributemap.getInstance(clientboundupdateattributespacket$attributesnapshot.getAttribute());
++                {
 +                    LOGGER.warn("Entity {} does not have attribute {}", entity, Registry.ATTRIBUTE.getKey(clientboundupdateattributespacket$attributesnapshot.getAttribute()));
 +                }
 +                else
-+                {
+                 {
+-                    AttributeInstance attributeinstance = attributemap.getInstance(clientboundupdateattributespacket$attributesnapshot.getAttribute());
 +                    attributeinstance.setBaseValue(clientboundupdateattributespacket$attributesnapshot.getBase());
 +                    attributeinstance.removeModifiers();
  
@@ -399,25 +524,25 @@
 +                    for (AttributeModifier attributemodifier : clientboundupdateattributespacket$attributesnapshot.getModifiers())
                      {
 -                        LOGGER.warn("Entity {} does not have attribute {}", entity, Registry.ATTRIBUTE.getKey(clientboundupdateattributespacket$attributesnapshot.getAttribute()));
-+                        attributeinstance.addTransientModifier(attributemodifier);
-                     }
+-                    }
 -                    else
 -                    {
 -                        attributeinstance.setBaseValue(clientboundupdateattributespacket$attributesnapshot.getBase());
 -                        attributeinstance.removeModifiers();
- 
+-
 -                        for (AttributeModifier attributemodifier : clientboundupdateattributespacket$attributesnapshot.getModifiers())
 -                        {
 -                            attributeinstance.addTransientModifier(attributemodifier);
 -                        }
--                    }
++                        attributeinstance.addTransientModifier(attributemodifier);
+                     }
                  }
              }
-         }
-@@ -2602,4 +2734,16 @@
+@@ -2602,4 +2843,17 @@
      {
          return this.registryAccess;
      }
++
 +    boolean tryParseInt(String value)
 +    {
 +        try

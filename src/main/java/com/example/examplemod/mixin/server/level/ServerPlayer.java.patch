@@ -8,7 +8,13 @@
  import java.util.Optional;
  import java.util.OptionalInt;
  import java.util.Random;
-@@ -22,6 +23,8 @@
+@@ -17,11 +18,14 @@
+ import net.minecraft.ReportedException;
+ import net.minecraft.Util;
+ import net.minecraft.advancements.CriteriaTriggers;
++import net.minecraft.client.Minecraft;
+ import net.minecraft.commands.arguments.EntityAnchorArgument;
+ import net.minecraft.core.BlockPos;
  import net.minecraft.core.Direction;
  import net.minecraft.core.NonNullList;
  import net.minecraft.core.SectionPos;
@@ -17,7 +23,7 @@
  import net.minecraft.nbt.CompoundTag;
  import net.minecraft.nbt.NbtOps;
  import net.minecraft.network.chat.ChatType;
-@@ -53,6 +56,7 @@
+@@ -53,6 +57,7 @@
  import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
  import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
  import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
@@ -25,7 +31,7 @@
  import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
  import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
  import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
-@@ -109,7 +113,10 @@
+@@ -109,7 +114,10 @@
  import net.minecraft.world.item.ItemStack;
  import net.minecraft.world.item.Items;
  import net.minecraft.world.item.ServerItemCooldowns;
@@ -36,7 +42,7 @@
  import net.minecraft.world.item.crafting.Recipe;
  import net.minecraft.world.item.trading.MerchantOffers;
  import net.minecraft.world.level.ChunkPos;
-@@ -132,8 +139,12 @@
+@@ -132,8 +140,12 @@
  import net.minecraft.world.scores.Score;
  import net.minecraft.world.scores.Team;
  import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -49,7 +55,7 @@
  
  public class ServerPlayer extends Player
  {
-@@ -225,6 +236,9 @@
+@@ -225,6 +237,9 @@
      private int containerCounter;
      public int latency;
      public boolean wonGame;
@@ -59,7 +65,7 @@
  
      public ServerPlayer(MinecraftServer p_143384_, ServerLevel p_143385_, GameProfile p_143386_)
      {
-@@ -370,9 +384,9 @@
+@@ -370,9 +385,9 @@
              pCompound.putInt("SpawnZ", this.respawnPosition.getZ());
              pCompound.putBoolean("SpawnForced", this.respawnForced);
              pCompound.putFloat("SpawnAngle", this.respawnAngle);
@@ -71,7 +77,7 @@
              });
          }
      }
-@@ -405,8 +419,33 @@
+@@ -405,13 +420,38 @@
  
      private void initMenu(AbstractContainerMenu p_143400_)
      {
@@ -79,35 +85,40 @@
 -        p_143400_.setSynchronizer(this.containerSynchronizer);
 +    	p_143400_.addSlotListener(this.containerListener);
 +    	p_143400_.setSynchronizer(this.containerSynchronizer);
-+
-+    	ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.getUUID());
-+
-+    	//vivecraft
-+    	if (serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(20) == 3)
-+    	{
-+    		ItemStack itemstack;
-+
-+    		if (this.random.nextInt(2) == 1)
-+    		{
-+    			itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(new TextComponent("EAT ME"));
-+    		}
-+    		else
-+    		{
-+    			itemstack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER).setHoverName(new TextComponent("DRINK ME"));
-+    		}
-+
-+    		itemstack.getTag().putInt("HideFlags", 32);
-+
-+    		if (this.getInventory().add(itemstack))
-+    		{
-+    			this.inventoryMenu.broadcastChanges();
-+    		}
-+    	}
-+    	//
      }
  
      public void initInventoryMenu()
-@@ -491,6 +530,7 @@
+     {
+         this.initMenu(this.inventoryMenu);
++
++        ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.getUUID());
++
++        //vivecraft
++        if (!Minecraft.getInstance().vrSettings.disableFun && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3)
++        {
++            ItemStack itemstack;
++
++            if (this.random.nextInt(2) == 1)
++            {
++                itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(new TextComponent("EAT ME"));
++            }
++            else
++            {
++                itemstack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER).setHoverName(new TextComponent("DRINK ME"));
++            }
++
++            itemstack.getTag().putInt("HideFlags", 32);
++
++            if (this.getInventory().add(itemstack))
++            {
++                this.inventoryMenu.broadcastChanges();
++            }
++        }
++        //
+     }
+ 
+     public void onEnterCombat()
+@@ -491,6 +531,7 @@
              if (!this.isSpectator() || !this.touchingUnloadedChunk())
              {
                  super.tick();
@@ -115,7 +126,7 @@
              }
  
              for (int i = 0; i < this.getInventory().getContainerSize(); ++i)
-@@ -563,9 +603,9 @@
+@@ -563,9 +604,9 @@
                  CriteriaTriggers.LOCATION.trigger(this);
              }
          }
@@ -127,7 +138,7 @@
              CrashReportCategory crashreportcategory = crashreport.addCategory("Player being ticked");
              this.fillCrashReportCategory(crashreportcategory);
              throw new ReportedException(crashreport);
-@@ -777,76 +817,110 @@
+@@ -777,76 +818,110 @@
          }
      }
  
@@ -305,7 +316,7 @@
      }
  
      private void createEndPlatform(ServerLevel p_9007_, BlockPos p_9008_)
-@@ -938,6 +1012,18 @@
+@@ -938,6 +1013,18 @@
  
      public Either<Player.BedSleepingProblem, Unit> startSleepInBed(BlockPos pAt)
      {
@@ -324,7 +335,7 @@
          Direction direction = this.level.getBlockState(pAt).getValue(HorizontalDirectionalBlock.FACING);
  
          if (!this.isSleeping() && this.isAlive())
-@@ -957,8 +1043,14 @@
+@@ -957,8 +1044,14 @@
              else
              {
                  this.setRespawnPosition(this.level.dimension(), pAt, this.getYRot(), false, true);
@@ -341,7 +352,7 @@
                  {
                      return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_NOW);
                  }
-@@ -969,9 +1061,9 @@
+@@ -969,9 +1062,9 @@
                          double d0 = 8.0D;
                          double d1 = 5.0D;
                          Vec3 vec3 = Vec3.atBottomCenterOf(pAt);
@@ -353,7 +364,7 @@
                          });
  
                          if (!list.isEmpty())
-@@ -980,7 +1072,7 @@
+@@ -980,7 +1073,7 @@
                          }
                      }
  
@@ -362,7 +373,7 @@
                      {
                          this.awardStat(Stats.SLEEP_IN_BED);
                          CriteriaTriggers.SLEPT_IN_BED.trigger(this);
-@@ -1010,7 +1102,14 @@
+@@ -1010,7 +1103,14 @@
  
      private boolean bedInRange(BlockPos p_9117_, Direction p_9118_)
      {
@@ -378,7 +389,7 @@
      }
  
      private boolean isReachableBedBlock(BlockPos p_9223_)
-@@ -1151,6 +1250,7 @@
+@@ -1151,6 +1251,7 @@
                  this.connection.send(new ClientboundOpenScreenPacket(abstractcontainermenu.containerId, abstractcontainermenu.getType(), p_9033_.getDisplayName()));
                  this.initMenu(abstractcontainermenu);
                  this.containerMenu = abstractcontainermenu;
@@ -386,7 +397,7 @@
                  return OptionalInt.of(this.containerCounter);
              }
          }
-@@ -1172,6 +1272,7 @@
+@@ -1172,6 +1273,7 @@
          this.connection.send(new ClientboundHorseScreenOpenPacket(this.containerCounter, pInventory.getContainerSize(), pHorse.getId()));
          this.containerMenu = new HorseInventoryMenu(this.containerCounter, this.getInventory(), pInventory, pHorse);
          this.initMenu(this.containerMenu);
@@ -394,7 +405,7 @@
      }
  
      public void openItemGui(ItemStack pStack, InteractionHand pHand)
-@@ -1203,6 +1304,7 @@
+@@ -1203,6 +1305,7 @@
      {
          this.containerMenu.removed(this);
          this.inventoryMenu.transferState(this.containerMenu);
@@ -402,7 +413,7 @@
          this.containerMenu = this.inventoryMenu;
      }
  
-@@ -1228,9 +1330,9 @@
+@@ -1228,9 +1331,9 @@
      public void awardStat(Stat<?> pStat, int pAmount)
      {
          this.stats.increment(this, pStat, pAmount);
@@ -414,7 +425,7 @@
          });
      }
  
-@@ -1352,6 +1454,14 @@
+@@ -1352,6 +1455,14 @@
          this.enteredNetherPosition = pThat.enteredNetherPosition;
          this.setShoulderEntityLeft(pThat.getShoulderEntityLeft());
          this.setShoulderEntityRight(pThat.getShoulderEntityRight());
@@ -429,7 +440,7 @@
      }
  
      protected void onEffectAdded(MobEffectInstance p_143393_, @Nullable Entity p_143394_)
-@@ -1495,6 +1605,11 @@
+@@ -1495,6 +1606,11 @@
          this.textFilteringEnabled = pPacket.isTextFilteringEnabled();
          this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)pPacket.getModelCustomisation());
          this.getEntityData().set(DATA_PLAYER_MAIN_HAND, (byte)(pPacket.getMainHand() == HumanoidArm.LEFT ? 0 : 1));
@@ -441,7 +452,7 @@
      }
  
      public boolean canChatInColor()
-@@ -1606,7 +1721,13 @@
+@@ -1606,7 +1722,13 @@
      @Nullable
      public Component getTabListDisplayName()
      {
@@ -456,7 +467,7 @@
      }
  
      public void swing(InteractionHand pHand)
-@@ -1646,8 +1767,20 @@
+@@ -1646,8 +1768,20 @@
              this.connection.send(new ClientboundRespawnPacket(pX.dimensionType(), pX.dimension(), BiomeManager.obfuscateSeed(pX.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), pX.isDebug(), pX.isFlat(), true));
              this.connection.send(new ClientboundChangeDifficultyPacket(leveldata.getDifficulty(), leveldata.isDifficultyLocked()));
              this.server.getPlayerList().sendPlayerPermissionLevel(this);
@@ -479,7 +490,7 @@
              this.moveTo(p_9001_, pY, p_9003_, pZ, p_9005_);
              this.setLevel(pX);
              pX.addDuringCommandTeleport(this);
-@@ -1655,6 +1788,80 @@
+@@ -1655,6 +1789,80 @@
              this.connection.teleport(p_9001_, pY, p_9003_, pZ, p_9005_);
              this.server.getPlayerList().sendLevelInfo(this, pX);
              this.server.getPlayerList().sendAllPlayerInfo(this);
@@ -560,7 +571,7 @@
          }
      }
  
-@@ -1681,26 +1888,29 @@
+@@ -1681,26 +1889,29 @@
  
      public void setRespawnPosition(ResourceKey<Level> p_9159_, @Nullable BlockPos p_9160_, float p_9161_, boolean p_9162_, boolean p_9163_)
      {
@@ -571,13 +582,13 @@
 +            if (p_9160_ != null)
 +            {
 +                boolean flag = p_9160_.equals(this.respawnPosition) && p_9159_.equals(this.respawnDimension);
-+
+ 
+-            if (p_9163_ && !flag)
 +                if (p_9163_ && !flag)
 +                {
 +                    this.sendMessage(new TranslatableComponent("block.minecraft.set_spawn"), Util.NIL_UUID);
 +                }
- 
--            if (p_9163_ && !flag)
++
 +                this.respawnPosition = p_9160_;
 +                this.respawnDimension = p_9159_;
 +                this.respawnAngle = p_9161_;
@@ -606,7 +617,7 @@
          }
      }
  
-@@ -1748,7 +1958,28 @@
+@@ -1748,7 +1959,28 @@
          }
          else
          {
@@ -636,7 +647,7 @@
              ItemStack itemstack = itementity.getItem();
  
              if (pTraceItem)
-@@ -1850,4 +2081,21 @@
+@@ -1850,4 +2082,21 @@
          });
          return this.drop(itemstack, false, true) != null;
      }

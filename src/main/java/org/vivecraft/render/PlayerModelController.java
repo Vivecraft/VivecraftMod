@@ -7,18 +7,23 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
-import java.util.Map.Entry;
+
+import org.vivecraft.api.VRData;
+import org.vivecraft.utils.Utils;
+import org.vivecraft.utils.math.Quaternion;
+import org.vivecraft.utils.math.Vector3;
+
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.utils.Utils;
-import org.vivecraft.utils.math.Quaternion;
-import org.vivecraft.utils.math.Vector3;
 
 public class PlayerModelController
 {
@@ -302,6 +307,22 @@ public class PlayerModelController
         {
             return playermodelcontroller$rotinfo;
         }
+    }
+
+    public static PlayerModelController.RotInfo getMainPlayerRotInfo(VRData data)
+    {
+        PlayerModelController.RotInfo playermodelcontroller$rotinfo = new PlayerModelController.RotInfo();
+        Quaternion quaternion = new Quaternion(data.getController(1).getMatrix());
+        Quaternion quaternion1 = new Quaternion(data.getController(0).getMatrix());
+        Quaternion quaternion2 = new Quaternion(data.hmd.getMatrix());
+        playermodelcontroller$rotinfo.headQuat = quaternion2;
+        playermodelcontroller$rotinfo.leftArmQuat = quaternion;
+        playermodelcontroller$rotinfo.rightArmQuat = quaternion1;
+        playermodelcontroller$rotinfo.seated = DataHolder.getInstance().vrSettings.seated;
+        playermodelcontroller$rotinfo.leftArmPos = data.getController(1).getPosition();
+        playermodelcontroller$rotinfo.rightArmPos = data.getController(0).getPosition();
+        playermodelcontroller$rotinfo.Headpos = data.hmd.getPosition();
+        return playermodelcontroller$rotinfo;
     }
 
     public boolean isTracked(UUID uuid)

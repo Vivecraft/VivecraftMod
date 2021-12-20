@@ -31,7 +31,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
         super(p_170821_, p_170822_);
         this.slim = p_170822_;
         this.vrHMD = p_170821_.getChild("vrHMD");
-        //this.vrHMD.setTextureSize(16, 16); TODO
+        //this.vrHMD.setTextureSize(16, 16);
         //this.vrHMD.setTextureLocation(BLACK_HMD);       
         this.parts = p_170821_.getAllParts().filter((p_170824_) ->
         {
@@ -84,7 +84,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
     	switch (rotinfo.hmd)
     	{
     	case 0:
-    		this.vrHMD.visible = false;
+    		//this.vrHMD.visible = false;
     		break;
 
     	case 1:

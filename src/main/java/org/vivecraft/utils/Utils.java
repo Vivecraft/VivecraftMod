@@ -1,10 +1,5 @@
 package org.vivecraft.utils;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.io.Files;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-//import io.github.classgraph.ClassGraph;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,7 +28,26 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
 import javax.annotation.Nullable;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.vivecraft.render.VRShaders;
+import org.vivecraft.utils.lwjgl.Matrix3f;
+import org.vivecraft.utils.lwjgl.Matrix4f;
+import org.vivecraft.utils.lwjgl.Vector2f;
+import org.vivecraft.utils.lwjgl.Vector3f;
+import org.vivecraft.utils.lwjgl.Vector4f;
+import org.vivecraft.utils.math.Quaternion;
+import org.vivecraft.utils.math.Vector2;
+import org.vivecraft.utils.math.Vector3;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
+import com.google.common.io.Files;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+
 import jopenvr.HmdMatrix44_t;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.ComponentCollector;
@@ -49,17 +63,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.vivecraft.render.VRShaders;
-import org.vivecraft.utils.lwjgl.Matrix3f;
-import org.vivecraft.utils.lwjgl.Matrix4f;
-import org.vivecraft.utils.lwjgl.Vector2f;
-import org.vivecraft.utils.lwjgl.Vector3f;
-import org.vivecraft.utils.lwjgl.Vector4f;
-import org.vivecraft.utils.math.Quaternion;
-import org.vivecraft.utils.math.Vector2;
-import org.vivecraft.utils.math.Vector3;
 
 public class Utils
 {
@@ -476,8 +479,8 @@ public class Utils
         }
     }
 
-    public static URI getVivecraftZipLocation()
-    {
+//    public static URI getVivecraftZipLocation()
+//    {
 //        if (vivecraftZipURI != null)
 //        {
 //            return vivecraftZipURI;
@@ -509,12 +512,12 @@ public class Utils
 //                return vivecraftZipURI;
 //            }
 //        }
-    	return null;
-    }
+//    }
 
     public static ZipFile getVivecraftZip()
     {
-        URI uri = getVivecraftZipLocation();
+        //URI uri = getVivecraftZipLocation();
+    	URI uri = null;
 
         try
         {

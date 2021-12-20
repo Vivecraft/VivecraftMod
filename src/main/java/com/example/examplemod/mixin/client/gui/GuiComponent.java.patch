@@ -1,0 +1,21 @@
+--- a/net/minecraft/client/gui/GuiComponent.java
++++ b/net/minecraft/client/gui/GuiComponent.java
+@@ -199,6 +199,10 @@
+     private static void innerBlit(Matrix4f pMatrixStack, int pX1, int pX2, int pY1, int pY2, int pBlitOffset, float pUWidth, float pVHeight, float pUOffset, float pVOffset)
+     {
+         RenderSystem.setShader(GameRenderer::getPositionTexShader);
++        //Vivecraft
++        RenderSystem.enableBlend();
++        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
++        //
+         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+         bufferbuilder.vertex(pMatrixStack, (float)pX1, (float)pY2, (float)pBlitOffset).uv(pUWidth, pVOffset).endVertex();
+@@ -207,6 +211,7 @@
+         bufferbuilder.vertex(pMatrixStack, (float)pX1, (float)pY1, (float)pBlitOffset).uv(pUWidth, pUOffset).endVertex();
+         bufferbuilder.end();
+         BufferUploader.end(bufferbuilder);
++        RenderSystem.disableBlend();
+     }
+ 
+     public int getBlitOffset()

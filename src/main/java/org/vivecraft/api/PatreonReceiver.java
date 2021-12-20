@@ -1,4 +1,3 @@
-// Optifine only
 //package org.vivecraft.api;
 //
 //import java.nio.charset.StandardCharsets;

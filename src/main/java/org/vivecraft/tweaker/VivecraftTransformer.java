@@ -1,4 +1,3 @@
-//TODO reomve optifine
 //package org.vivecraft.tweaker;
 //
 //import cpw.mods.modlauncher.TransformerHolder;

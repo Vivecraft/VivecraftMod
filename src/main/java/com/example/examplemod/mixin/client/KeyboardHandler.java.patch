@@ -1,0 +1,99 @@
+--- a/net/minecraft/client/KeyboardHandler.java
++++ b/net/minecraft/client/KeyboardHandler.java
+@@ -15,6 +15,7 @@
+ import net.minecraft.client.gui.components.ChatComponent;
+ import net.minecraft.client.gui.components.EditBox;
+ import net.minecraft.client.gui.components.events.GuiEventListener;
++import net.minecraft.client.gui.screens.ChatScreen;
+ import net.minecraft.client.gui.screens.Screen;
+ import net.minecraft.client.gui.screens.SimpleOptionsSubScreen;
+ import net.minecraft.client.gui.screens.controls.ControlsScreen;
+@@ -43,6 +44,9 @@
+ import net.optifine.reflect.Reflector;
+ import net.optifine.shaders.Shaders;
+ import net.optifine.shaders.gui.GuiShaderOptions;
++import org.vivecraft.gameplay.screenhandlers.RadialHandler;
++import org.vivecraft.provider.ControllerType;
++import org.vivecraft.settings.VRHotkeys;
+ 
+ public class KeyboardHandler
+ {
+@@ -411,6 +415,29 @@
+     {
+         if (pWindowPointer == this.minecraft.getWindow().getWindow())
+         {
++            if (p_90895_ == 256 && pScanCode == 1)
++            {
++                if (org.vivecraft.gameplay.screenhandlers.KeyboardHandler.Showing)
++                {
++                    org.vivecraft.gameplay.screenhandlers.KeyboardHandler.setOverlayShowing(false);
++                    if(minecraft.screen instanceof ChatScreen) {
++                    	minecraft.screen.onClose();
++                    }
++                    return;
++                }
++
++                if (RadialHandler.isShowing())
++                {
++                    RadialHandler.setOverlayShowing(false, (ControllerType)null);
++                    return;
++                }
++            }
++
++            if (VRHotkeys.handleKeyboardInputs(p_90895_, pKey, pScanCode, pAction))
++            {
++                return;
++            }
++
+             if (this.debugCrashKeyTime > 0L)
+             {
+                 if (!InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 67) || !InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292))
+@@ -445,13 +472,15 @@
+                         if (Screen.hasControlDown())
+                         {
+                         }
+-
+-                        Screenshot.grab(this.minecraft.gameDirectory, this.minecraft.getMainRenderTarget(), (p_90916_1_) ->
+-                        {
+-                            this.minecraft.execute(() -> {
+-                                this.minecraft.gui.getChat().addMessage(p_90916_1_);
+-                            });
+-                        });
++                        //Vivecraft dont do this here
++//                        Screenshot.grab(this.minecraft.gameDirectory, this.minecraft.getMainRenderTarget(), (p_90916_1_) ->
++//                        {
++//                            this.minecraft.execute(() -> {
++//                                this.minecraft.gui.getChat().addMessage(p_90916_1_);
++//                            });
++//                        });
++                        this.minecraft.grabScreenShot = true;
++                        //
+                         return;
+                     }
+                 }
+@@ -537,7 +566,7 @@
+                 }
+             }
+ 
+-            if (this.minecraft.screen == null || this.minecraft.screen.passEvents)
++            if ((this.minecraft.screen == null || this.minecraft.screen.passEvents) && !InputConstants.isKeyDown(345))
+             {
+                 InputConstants.Key inputconstants$key = InputConstants.getKey(p_90895_, pKey);
+ 
+@@ -595,6 +624,7 @@
+                         if (p_90895_ == 290)
+                         {
+                             this.minecraft.options.hideGui = !this.minecraft.options.hideGui;
++                            this.minecraft.vrSettings.saveOptions();
+                         }
+                     }
+ 
+@@ -619,7 +649,7 @@
+         }
+     }
+ 
+-    private void charTyped(long pWindowPointer, int p_90891_, int pCodePoint)
++    public void charTyped(long pWindowPointer, int p_90891_, int pCodePoint)
+     {
+         if (pWindowPointer == this.minecraft.getWindow().getWindow())
+         {

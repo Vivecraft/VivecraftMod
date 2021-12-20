@@ -1,0 +1,806 @@
+--- a/net/minecraft/client/renderer/LevelRenderer.java
++++ b/net/minecraft/client/renderer/LevelRenderer.java
+@@ -163,7 +163,9 @@
+ import net.optifine.util.RenderChunkUtils;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+-import org.lwjgl.opengl.GL11;
++import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
++import org.vivecraft.render.RenderPass;
++import org.vivecraft.settings.VRSettings;
+ 
+ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseable
+ {
+@@ -287,6 +289,15 @@
+     private static boolean ambientOcclusion = false;
+     private Map<String, List<Entity>> mapEntityLists = new HashMap<>();
+     private Map<RenderType, Map> mapRegionLayers = new LinkedHashMap<>();
++    @Nullable
++    public RenderTarget alphaSortVROccludedFramebuffer;
++    @Nullable
++    public RenderTarget alphaSortVRUnoccludedFramebuffer;
++    @Nullable
++    public RenderTarget alphaSortVRHandsFramebuffer;
++    public float selR;
++    public float selG;
++    public float selB;
+ 
+     public LevelRenderer(Minecraft p_109480_, RenderBuffers p_109481_)
+     {
+@@ -337,9 +348,16 @@
+ 
+             pLightmap.turnOnLightLayer();
+             Level level = this.minecraft.level;
+-            int i = Mth.floor(pX);
+-            int j = Mth.floor(p_109707_);
+-            int k = Mth.floor(pY);
++            //Vivecraft correct which xy pos doesn't get rain.
++            Vec3 vec3 = this.minecraft.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
++            if (this.minecraft.currentPass == RenderPass.THIRD || this.minecraft.currentPass == RenderPass.CAMERA)
++            {
++                vec3 = this.minecraft.vrPlayer.vrdata_world_render.getEye(this.minecraft.currentPass).getPosition();
++            }
++            int i = Mth.floor(vec3.x);
++            int j = Mth.floor(vec3.y);
++            int k = Mth.floor(vec3.z);
++            //
+             Tesselator tesselator = Tesselator.getInstance();
+             BufferBuilder bufferbuilder = tesselator.getBuilder();
+             RenderSystem.disableCull();
+@@ -562,12 +580,15 @@
+ 
+     public void onResourceManagerReload(ResourceManager pResourceManager)
+     {
+-        this.initOutline();
+ 
+-        if (Minecraft.useShaderTransparency())
+-        {
+-            this.initTransparency();
+-        }
++        //Vivecraft
++        this.minecraft.vrRenderer.reinitFrameBuffers("Resource Reload");
++        //this.initOutline();
++        //
++//        if (Minecraft.useShaderTransparency())
++//        {
++//            this.initTransparency();
++//        }
+     }
+ 
+     public void initOutline()
+@@ -599,10 +620,11 @@
+         }
+     }
+ 
+-    private void initTransparency()
++    //unused
++    public void initTransparency()
+     {
+         this.deinitTransparency();
+-        ResourceLocation resourcelocation = new ResourceLocation("shaders/post/transparency.json");
++        ResourceLocation resourcelocation = new ResourceLocation("shaders/post/vrtransparency.json");
+ 
+         try
+         {
+@@ -620,11 +642,11 @@
+             this.weatherTarget = rendertarget4;
+             this.cloudsTarget = rendertarget;
+         }
+-        catch (Exception exception1)
++        catch (Exception exception)
+         {
+-            String s = exception1 instanceof JsonSyntaxException ? "parse" : "load";
++            String s = exception instanceof JsonSyntaxException ? "parse" : "load";
+             String s1 = "Failed to " + s + " shader: " + resourcelocation;
+-            LevelRenderer.TransparencyShaderException levelrenderer$transparencyshaderexception = new LevelRenderer.TransparencyShaderException(s1, exception1);
++            LevelRenderer.TransparencyShaderException levelrenderer$transparencyshaderexception = new LevelRenderer.TransparencyShaderException(s1, exception);
+ 
+             if (this.minecraft.getResourcePackRepository().getSelectedIds().size() > 1)
+             {
+@@ -634,7 +656,7 @@
+                 {
+                     component = new TextComponent(this.minecraft.getResourceManager().getResource(resourcelocation).getSourceName());
+                 }
+-                catch (IOException ioexception1)
++                catch (IOException ioexception)
+                 {
+                     component = null;
+                 }
+@@ -654,7 +676,7 @@
+         }
+     }
+ 
+-    private void deinitTransparency()
++    public void deinitTransparency()
+     {
+         if (this.transparencyChain != null)
+         {
+@@ -857,6 +879,7 @@
+         }
+     }
+ 
++    //unused
+     public void graphicsChanged()
+     {
+         if (Minecraft.useShaderTransparency())
+@@ -873,7 +896,8 @@
+     {
+         if (this.level != null)
+         {
+-            this.graphicsChanged();
++        	//vivecraftn no.
++            //this.graphicsChanged();
+             this.level.clearTintCaches();
+ 
+             if (this.chunkRenderDispatcher == null)
+@@ -1027,7 +1051,8 @@
+             this.viewArea.repositionCamera(d0, d2);
+         }
+ 
+-        if (Config.isDynamicLights())
++        // VIVECRAFT: only update on the first frame, otherwise third person makes it go crazy
++        if (Config.isDynamicLights() && this.minecraft.currentPass == RenderPass.LEFT)
+         {
+             DynamicLights.update(this);
+         }
+@@ -1041,7 +1066,8 @@
+         BlockPos blockpos1 = new BlockPos(Mth.floor(vec3.x / 16.0D) * 16, Mth.floor(vec3.y / 16.0D) * 16, Mth.floor(vec3.z / 16.0D) * 16);
+         float f = pActiveRenderInfo.getXRot();
+         float f1 = pActiveRenderInfo.getYRot();
+-        this.needsUpdate = this.needsUpdate || !this.chunksToCompile.isEmpty() || vec3.x != this.prevCamX || vec3.y != this.prevCamY || vec3.z != this.prevCamZ || (double)f != this.prevCamRotX || (double)f1 != this.prevCamRotY;
++        // VIVECRAFT: Always update culling because different camera positions
++        this.needsUpdate = true;
+         this.prevCamX = vec3.x;
+         this.prevCamY = vec3.y;
+         this.prevCamZ = vec3.z;
+@@ -1366,25 +1392,25 @@
+     }
+ 
+     @Nullable
+-    private ChunkRenderDispatcher.RenderChunk getRenderChunkOffset(BlockPos playerPos, ChunkRenderDispatcher.RenderChunk renderChunkBase, Direction facing, boolean fog, int yMax)
++    private ChunkRenderDispatcher.RenderChunk getRenderChunkOffset(BlockPos p_getRenderChunkOffset_1_, ChunkRenderDispatcher.RenderChunk p_getRenderChunkOffset_2_, Direction p_getRenderChunkOffset_3_, boolean p_getRenderChunkOffset_4_, int p_getRenderChunkOffset_5_)
+     {
+-        ChunkRenderDispatcher.RenderChunk chunkrenderdispatcher$renderchunk = renderChunkBase.getRenderChunkNeighbour(facing);
++        ChunkRenderDispatcher.RenderChunk chunkrenderdispatcher$renderchunk = p_getRenderChunkOffset_2_.getRenderChunkNeighbour(p_getRenderChunkOffset_3_);
+ 
+         if (chunkrenderdispatcher$renderchunk == null)
+         {
+             return null;
+         }
+-        else if (chunkrenderdispatcher$renderchunk.getOrigin().getY() > yMax)
++        else if (chunkrenderdispatcher$renderchunk.getOrigin().getY() > p_getRenderChunkOffset_5_)
+         {
+             return null;
+         }
+         else
+         {
+-            if (fog)
++            if (p_getRenderChunkOffset_4_)
+             {
+                 BlockPos blockpos = chunkrenderdispatcher$renderchunk.getOrigin();
+-                int i = playerPos.getX() - blockpos.getX();
+-                int j = playerPos.getZ() - blockpos.getZ();
++                int i = p_getRenderChunkOffset_1_.getX() - blockpos.getX();
++                int j = p_getRenderChunkOffset_1_.getZ() - blockpos.getZ();
+                 int k = i * i + j * j;
+ 
+                 if (k > this.renderDistanceSq)
+@@ -1438,8 +1464,16 @@
+         this.blockEntityRenderDispatcher.prepare(this.level, pDrawBlockOutline, this.minecraft.hitResult);
+         this.entityRenderDispatcher.prepare(this.level, pDrawBlockOutline, this.minecraft.crosshairPickEntity);
+         ProfilerFiller profilerfiller = this.level.getProfiler();
+-        profilerfiller.popPush("light_updates");
+-        this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, true, true);
++
++    	//Vivecraft once per frame
++        if (this.minecraft.currentPass == RenderPass.LEFT)
++        {
++            profilerfiller.popPush("light_updates");
++            this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, true, true);
++        }
++        //Vivecraft use our postchain
++        this.setShaderGroup();
++        //
+         Vec3 vec3 = pDrawBlockOutline.getPosition();
+         double d0 = vec3.x();
+         double d1 = vec3.y();
+@@ -1489,6 +1523,12 @@
+             Shaders.setCamera(pMatrixStack, pDrawBlockOutline, pPartialTicks);
+             Shaders.renderPrepare();
+         }
++        //
++
++        //Vivecraft - VR Stencil
++        this.minecraft.getProfiler().popPush("stencil");
++        pActiveRenderInfo.drawEyeStencil(flag1);
++        //
+ 
+         frustum.disabled = Config.isShaders() && !Shaders.isFrustumCulling();
+         float f = pActiveRenderInfo.getRenderDistance();
+@@ -1549,13 +1589,8 @@
+         profilerfiller.popPush("terrain");
+         Lagometer.timerTerrain.start();
+ 
+-        if (this.minecraft.options.ofSmoothFps)
+-        {
+-            this.minecraft.getProfiler().popPush("finish");
+-            GL11.glFinish();
+-            this.minecraft.getProfiler().popPush("terrain");
+-        }
+-
++        //Vivecraft this is where ofSmoothFps, would be... if we allowed it.
++        
+         if (Config.isFogOff() && FogRenderer.fogStandard)
+         {
+             RenderSystem.setFogAllowed(false);
+@@ -1573,16 +1608,19 @@
+         }
+ 
+         Lagometer.timerTerrain.end();
+-
++        //TODO: fix lighting?
++        Matrix4f matrix4f1 = new Matrix4f();
++        matrix4f1.setIdentity();
++        //
+         if (this.level.effects().constantAmbientLight())
+         {
+-            Lighting.setupNetherLevel(pMatrixStack.last().pose());
++            Lighting.setupNetherLevel(matrix4f1);
+         }
+         else
+         {
+-            Lighting.setupLevel(pMatrixStack.last().pose());
++            Lighting.setupLevel(matrix4f1);
+         }
+-
++        
+         if (flag1)
+         {
+             Shaders.beginEntities();
+@@ -1629,15 +1667,20 @@
+             GameRenderer.getPositionShader().apply();
+         }
+ 
++        //Vivecraft draw yourself sometimes.
++        boolean renderSelf = this.minecraft.currentPass == RenderPass.THIRD && this.minecraft.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || this.minecraft.currentPass == RenderPass.CAMERA;
++        renderSelf = renderSelf | (this.minecraft.vrSettings.shouldRenderSelf || this.minecraft.vrSettings.tmpRenderSelf);
++        //
++        
+         for (Entity entity : this.level.entitiesForRendering())
+         {
+             BlockPos blockpos = entity.blockPosition();
+ 
+             if (this.renderInfosEntities.contains(SectionPos.asLong(blockpos)) || blockpos.getY() <= i2 || blockpos.getY() >= j2)
+             {
+-                boolean flag4 = entity == this.minecraft.player && !this.minecraft.player.isSpectator();
+-
+-                if ((this.entityRenderDispatcher.shouldRender(entity, frustum, d0, d1, d2) || entity.hasIndirectPassenger(this.minecraft.player)) && (entity != pDrawBlockOutline.getEntity() || pDrawBlockOutline.isDetached() || pDrawBlockOutline.getEntity() instanceof LivingEntity && ((LivingEntity)pDrawBlockOutline.getEntity()).isSleeping()) && (!(entity instanceof LocalPlayer) || pDrawBlockOutline.getEntity() == entity || flag4))
++                boolean flag5 = entity == this.minecraft.player && !this.minecraft.player.isSpectator();
++                //Vivecraft insert selfRender
++                if ((this.entityRenderDispatcher.shouldRender(entity, frustum, d0, d1, d2) || entity.hasIndirectPassenger(this.minecraft.player)) && (renderSelf || entity != pDrawBlockOutline.getEntity() || pDrawBlockOutline.isDetached() || pDrawBlockOutline.getEntity() instanceof LivingEntity && ((LivingEntity)pDrawBlockOutline.getEntity()).isSleeping()) && (!(entity instanceof LocalPlayer) || pDrawBlockOutline.getEntity() == entity || flag5))
+                 {
+                     String s = entity.getClass().getName();
+                     List<Entity> list = this.mapEntityLists.get(s);
+@@ -1659,6 +1702,13 @@
+             {
+                 ++this.renderedEntities;
+ 
++                //Vivecraft put back location.
++                if (entity1 == pDrawBlockOutline.getEntity())
++                {
++                    pActiveRenderInfo.restoreRVEPos((LivingEntity)entity1);
++                }
++                //
++                
+                 if (entity1.tickCount == 0)
+                 {
+                     entity1.xOld = entity1.getX();
+@@ -1694,6 +1744,14 @@
+ 
+                 this.renderEntity(entity1, d0, d1, d2, pPartialTicks, pMatrixStack, multibuffersource);
+                 this.renderedEntity = null;
++
++                //Vivecraft put it back back
++                if (entity1 == pDrawBlockOutline.getEntity())
++                {
++                    pActiveRenderInfo.cacheRVEPos((LivingEntity)entity1);
++                    pActiveRenderInfo.setupRVE();
++                }
++                //
+             }
+ 
+             list1.clear();
+@@ -1886,10 +1944,26 @@
+         --renderEntitiesCounter;
+         this.checkPoseStack(pMatrixStack);
+         HitResult hitresult = this.minecraft.hitResult;
+-
++        
++        profilerfiller.popPush("outline");
++        
++        //Vivecraft interact highlight
++        selR = selG = selB = 1f;
++        for (int c=0;c<2;c++) {
++        	if(minecraft.interactTracker.isInteractActive(c) && (minecraft.interactTracker.inBlockHit[c] != null || minecraft.interactTracker.bukkit[c])) {
++        		BlockPos blockpos = minecraft.interactTracker.inBlockHit[c] != null ? minecraft.interactTracker.inBlockHit[c].getBlockPos() : new BlockPos(minecraft.vrPlayer.vrdata_world_render.getController(c).getPosition());
++        		BlockState blockstate = this.level.getBlockState(blockpos);
++                this.renderHitOutline(pMatrixStack, multibuffersource$buffersource.getBuffer(RenderType.lines()), pDrawBlockOutline.getEntity(), d0, d1, d2, blockpos, blockstate);
++        		if (c==0) p_109603_ = false; //don't draw both
++        	}
++        }
++        //
++        
+         if (p_109603_ && hitresult != null && hitresult.getType() == HitResult.Type.BLOCK)
+         {
+-            profilerfiller.popPush("outline");
++        	//vivecraft put back black outline
++        	selR = selG = selB = 0f;
++        	//
+             BlockPos blockpos1 = ((BlockHitResult)hitresult).getBlockPos();
+             BlockState blockstate = this.level.getBlockState(blockpos1);
+ 
+@@ -1917,17 +1991,19 @@
+ 
+         PoseStack posestack = RenderSystem.getModelViewStack();
+         posestack.pushPose();
+-        posestack.mulPoseMatrix(pMatrixStack.last().pose());
+-        RenderSystem.applyModelViewMatrix();
+-
+-        if (flag1)
+-        {
+-            ShadersRender.beginDebug();
+-        }
+-
+-        this.minecraft.debugRenderer.render(pMatrixStack, multibuffersource$buffersource, d0, d1, d2);
++	        posestack.mulPoseMatrix(pMatrixStack.last().pose());
++	        RenderSystem.applyModelViewMatrix();
++	
++	        if (flag1)
++	        {
++	            ShadersRender.beginDebug();
++	        }
++	
++	        this.minecraft.debugRenderer.render(pMatrixStack, multibuffersource$buffersource, d0, d1, d2);
+         posestack.popPose();
++        
+         RenderSystem.applyModelViewMatrix();
++        profilerfiller.popPush("render bukkake");
+         multibuffersource$buffersource.endBatch(Sheets.translucentCullBlockSheet());
+         multibuffersource$buffersource.endBatch(Sheets.bannerSheet());
+         multibuffersource$buffersource.endBatch(Sheets.shieldSheet());
+@@ -1945,15 +2021,17 @@
+         {
+             multibuffersource$buffersource.endBatch();
+             ShadersRender.endDebug();
+-            Shaders.preRenderHand();
+-            Matrix4f matrix4f1 = RenderSystem.getProjectionMatrix().copy();
+-            ShadersRender.renderHand0(pActiveRenderInfo, pMatrixStack, pDrawBlockOutline, pPartialTicks);
+-            RenderSystem.setProjectionMatrix(matrix4f1);
++//            Shaders.preRenderHand();
++//            Matrix4f matrix4f1 = RenderSystem.getProjectionMatrix().copy();
++//            ShadersRender.renderHand0(pActiveRenderInfo, pMatrixStack, pDrawBlockOutline, pPartialTicks);
++//            RenderSystem.setProjectionMatrix(matrix4f1);
+             Shaders.preWater();
+         }
+-
++        
++        boolean menuHandleft = pActiveRenderInfo.isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
++        boolean menuhandright = menuHandleft || this.minecraft.interactTracker.hotbar >= 0 && this.minecraft.vrSettings.vrTouchHotbar;
+         if (this.transparencyChain != null)
+-        {
++        { //fabulous!
+             multibuffersource$buffersource.endBatch(RenderType.lines());
+             multibuffersource$buffersource.endBatch();
+             this.translucentTarget.clear(Minecraft.ON_OSX);
+@@ -1968,9 +2046,12 @@
+             profilerfiller.popPush("particles");
+             this.minecraft.particleEngine.render(pMatrixStack, multibuffersource$buffersource, pGameRenderer, pDrawBlockOutline, pPartialTicks, frustum);
+             RenderStateShard.PARTICLES_TARGET.clearRenderState();
++            pActiveRenderInfo.renderVRFabulous(pPartialTicks, this, menuhandright, menuHandleft, pMatrixStack);
+         }
+         else
+-        {
++        { //Fast, Fancy
++        	//once
++            pActiveRenderInfo.renderVrFast(pPartialTicks, false, menuhandright, menuHandleft, pMatrixStack);
+             profilerfiller.popPush("translucent");
+ 
+             if (flag1)
+@@ -2002,6 +2083,9 @@
+             }
+ 
+             this.minecraft.particleEngine.render(pMatrixStack, multibuffersource$buffersource, pGameRenderer, pDrawBlockOutline, pPartialTicks, frustum);
++    
++            //twice
++            pActiveRenderInfo.renderVrFast(pPartialTicks, true, menuhandright, menuHandleft, pMatrixStack);
+ 
+             if (flag1)
+             {
+@@ -2011,67 +2095,67 @@
+ 
+         RenderSystem.setFogAllowed(true);
+         posestack.pushPose();
+-        posestack.mulPoseMatrix(pMatrixStack.last().pose());
+-        RenderSystem.applyModelViewMatrix();
+-
+-        if (this.minecraft.options.getCloudsType() != CloudStatus.OFF)
+-        {
+-            if (this.transparencyChain != null)
+-            {
+-                this.cloudsTarget.clear(Minecraft.ON_OSX);
+-                RenderStateShard.CLOUDS_TARGET.setupRenderState();
+-                profilerfiller.popPush("clouds");
+-                this.renderClouds(pMatrixStack, pLightmap, pPartialTicks, d0, d1, d2);
+-                RenderStateShard.CLOUDS_TARGET.clearRenderState();
+-            }
+-            else
+-            {
+-                profilerfiller.popPush("clouds");
+-                RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+-                this.renderClouds(pMatrixStack, pLightmap, pPartialTicks, d0, d1, d2);
+-            }
+-        }
+-
+-        if (this.transparencyChain != null)
+-        {
+-            RenderStateShard.WEATHER_TARGET.setupRenderState();
+-            profilerfiller.popPush("weather");
+-            this.renderSnowAndRain(pGameRenderer, pPartialTicks, d0, d1, d2);
+-            this.renderWorldBorder(pDrawBlockOutline);
+-            RenderStateShard.WEATHER_TARGET.clearRenderState();
+-            this.transparencyChain.process(pPartialTicks);
+-            this.minecraft.getMainRenderTarget().bindWrite(false);
+-        }
+-        else
+-        {
+-            RenderSystem.depthMask(false);
+-
+-            if (Config.isShaders())
+-            {
+-                GlStateManager._depthMask(Shaders.isRainDepth());
+-            }
+-
+-            profilerfiller.popPush("weather");
+-
+-            if (flag1)
+-            {
+-                Shaders.beginWeather();
+-            }
+-
+-            this.renderSnowAndRain(pGameRenderer, pPartialTicks, d0, d1, d2);
+-
+-            if (flag1)
+-            {
+-                Shaders.endWeather();
+-            }
+-
+-            this.renderWorldBorder(pDrawBlockOutline);
+-            RenderSystem.depthMask(true);
+-        }
+-
+-        this.renderDebug(pDrawBlockOutline);
+-        RenderSystem.depthMask(true);
+-        RenderSystem.disableBlend();
++	        posestack.mulPoseMatrix(pMatrixStack.last().pose());
++	        RenderSystem.applyModelViewMatrix();
++	
++	        if (this.minecraft.options.getCloudsType() != CloudStatus.OFF)
++	        {
++	            if (this.transparencyChain != null)
++	            {
++	                this.cloudsTarget.clear(Minecraft.ON_OSX);
++	                RenderStateShard.CLOUDS_TARGET.setupRenderState();
++	                profilerfiller.popPush("clouds");
++	                this.renderClouds(pMatrixStack, pLightmap, pPartialTicks, d0, d1, d2);
++	                RenderStateShard.CLOUDS_TARGET.clearRenderState();
++	            }
++	            else
++	            {
++	                profilerfiller.popPush("clouds");
++	                RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
++	                this.renderClouds(pMatrixStack, pLightmap, pPartialTicks, d0, d1, d2);
++	            }
++	        }
++	
++	        if (this.transparencyChain != null)
++	        {
++	            RenderStateShard.WEATHER_TARGET.setupRenderState();
++	            profilerfiller.popPush("weather");
++	            this.renderSnowAndRain(pGameRenderer, pPartialTicks, d0, d1, d2);
++	            this.renderWorldBorder(pDrawBlockOutline);
++	            RenderStateShard.WEATHER_TARGET.clearRenderState();
++	            this.transparencyChain.process(pPartialTicks);
++	            this.minecraft.getMainRenderTarget().bindWrite(false);
++	        }
++	        else
++	        {
++	            RenderSystem.depthMask(false);
++	
++	            if (Config.isShaders())
++	            {
++	                GlStateManager._depthMask(Shaders.isRainDepth());
++	            }
++	
++	            profilerfiller.popPush("weather");
++	
++	            if (flag1)
++	            {
++	                Shaders.beginWeather();
++	            }
++	
++	            this.renderSnowAndRain(pGameRenderer, pPartialTicks, d0, d1, d2);
++	
++	            if (flag1)
++	            {
++	                Shaders.endWeather();
++	            }
++	
++	            this.renderWorldBorder(pDrawBlockOutline);
++	            RenderSystem.depthMask(true);
++	        }
++	
++	        this.renderDebug(pDrawBlockOutline);
++	        RenderSystem.depthMask(true);
++	        RenderSystem.disableBlend();
+         posestack.popPose();
+         RenderSystem.applyModelViewMatrix();
+         FogRenderer.setupNoFog();
+@@ -2244,7 +2328,7 @@
+                     if (chunkrenderdispatcher$renderchunk.regionX != l || chunkrenderdispatcher$renderchunk.regionZ != i1)
+                     {
+                         PairInt pairint = PairInt.of(chunkrenderdispatcher$renderchunk.regionX, chunkrenderdispatcher$renderchunk.regionZ);
+-                        map1 = map.computeIfAbsent(pairint, (kx) ->
++                        map1 = map.computeIfAbsent(pairint, (p_lambda$renderBlockLayer$4_0_) ->
+                         {
+                             return new LinkedHashMap(8);
+                         });
+@@ -3252,19 +3336,19 @@
+             while (iterator1.hasNext())
+             {
+                 ChunkRenderDispatcher.RenderChunk chunkrenderdispatcher$renderchunk1 = iterator1.next();
+-                boolean flag1 = chunkrenderdispatcher$renderchunk1.isChunkRegionEmpty();
+-                boolean flag;
++                boolean flag = chunkrenderdispatcher$renderchunk1.isChunkRegionEmpty();
++                boolean flag1;
+ 
+-                if (!chunkrenderdispatcher$renderchunk1.isDirtyFromPlayer() && !flag1)
++                if (!chunkrenderdispatcher$renderchunk1.isDirtyFromPlayer() && !flag)
+                 {
+-                    flag = this.chunkRenderDispatcher.updateChunkLater(chunkrenderdispatcher$renderchunk1);
++                    flag1 = this.chunkRenderDispatcher.updateChunkLater(chunkrenderdispatcher$renderchunk1);
+                 }
+                 else
+                 {
+-                    flag = this.chunkRenderDispatcher.updateChunkNow(chunkrenderdispatcher$renderchunk1);
++                    flag1 = this.chunkRenderDispatcher.updateChunkNow(chunkrenderdispatcher$renderchunk1);
+                 }
+ 
+-                if (!flag)
++                if (!flag1)
+                 {
+                     break;
+                 }
+@@ -3272,7 +3356,7 @@
+                 chunkrenderdispatcher$renderchunk1.setNotDirty();
+                 iterator1.remove();
+ 
+-                if (!flag1)
++                if (!flag)
+                 {
+                     double d0 = 2.0D * RenderChunkUtils.getRelativeBufferSize(chunkrenderdispatcher$renderchunk1);
+                     d1 += d0;
+@@ -3418,11 +3502,12 @@
+         }
+     }
+ 
++    //Vivecraft add configurable color.
+     private void renderHitOutline(PoseStack pMatrixStack, VertexConsumer pBuffer, Entity pEntity, double pX, double p_109642_, double pY, BlockPos p_109644_, BlockState pZ)
+     {
+         if (!Config.isCustomEntityModels() || !CustomEntityModels.isCustomModel(pZ))
+         {
+-            renderShape(pMatrixStack, pBuffer, pZ.getShape(this.level, p_109644_, CollisionContext.of(pEntity)), (double)p_109644_.getX() - pX, (double)p_109644_.getY() - p_109642_, (double)p_109644_.getZ() - pY, 0.0F, 0.0F, 0.0F, 0.4F);
++            renderShape(pMatrixStack, pBuffer, pZ.getShape(this.level, p_109644_, CollisionContext.of(pEntity)), (double)p_109644_.getX() - pX, (double)p_109644_.getY() - p_109642_, (double)p_109644_.getZ() - pY, this.selR, this.selG, this.selB, 0.4F);
+         }
+     }
+ 
+@@ -3903,6 +3988,7 @@
+     public void levelEvent(Player pPlayer, int pType, BlockPos pBlockPos, int pData)
+     {
+         Random random = this.level.random;
++        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(pBlockPos) < 25.0D;
+ 
+         switch (pType)
+         {
+@@ -3974,18 +4060,38 @@
+                 break;
+ 
+             case 1011:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 250);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.1F + 0.9F, false);
+                 break;
+ 
+             case 1012:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 250);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.1F + 0.9F, false);
+                 break;
+ 
+             case 1013:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 250);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.WOODEN_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.1F + 0.9F, false);
+                 break;
+ 
+             case 1014:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 250);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.1F + 0.9F, false);
+                 break;
+ 
+@@ -4006,14 +4112,32 @@
+                 break;
+ 
+             case 1019:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 750);
++                    this.minecraft.vr.triggerHapticPulse(1, 750);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                 break;
+ 
+             case 1020:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 750);
++                    this.minecraft.vr.triggerHapticPulse(1, 750);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, SoundSource.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                 break;
+ 
+             case 1021:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 750);
++                    this.minecraft.vr.triggerHapticPulse(1, 750);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+                 break;
+ 
+@@ -4042,10 +4166,21 @@
+                 break;
+ 
+             case 1030:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 500);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.1F + 0.9F, false);
+                 break;
+ 
+             case 1031:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 1250);
++                    this.minecraft.vr.triggerHapticPulse(1, 1250);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.3F, this.level.random.nextFloat() * 0.1F + 0.9F, false);
+                 break;
+ 
+@@ -4066,6 +4201,11 @@
+                 break;
+ 
+             case 1036:
++                if (playerNear)
++                {
++                    this.minecraft.vr.triggerHapticPulse(0, 250);
++                }
++
+                 this.level.playLocalSound(pBlockPos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.1F + 0.9F, false);
+                 break;
+ 
+@@ -4425,9 +4565,9 @@
+         return this.chunksToCompile.size();
+     }
+ 
+-    public ChunkRenderDispatcher.RenderChunk getRenderChunk(BlockPos pos)
++    public ChunkRenderDispatcher.RenderChunk getRenderChunk(BlockPos p_getRenderChunk_1_)
+     {
+-        return this.viewArea.getRenderChunkAt(pos);
++        return this.viewArea.getRenderChunkAt(p_getRenderChunk_1_);
+     }
+ 
+     public ClientLevel getWorld()
+@@ -4512,11 +4652,11 @@
+         return this.renderInfosTileEntities;
+     }
+ 
+-    private void checkLoadVisibleChunks(Camera activeRenderInfo, Frustum icamera, boolean spectator)
++    private void checkLoadVisibleChunks(Camera p_checkLoadVisibleChunks_1_, Frustum p_checkLoadVisibleChunks_2_, boolean p_checkLoadVisibleChunks_3_)
+     {
+         if (this.loadVisibleChunksCounter == 0)
+         {
+-            this.loadAllVisibleChunks(activeRenderInfo, icamera, spectator);
++            this.loadAllVisibleChunks(p_checkLoadVisibleChunks_1_, p_checkLoadVisibleChunks_2_, p_checkLoadVisibleChunks_3_);
+             this.minecraft.gui.getChat().removeById(201435902);
+         }
+ 
+@@ -4526,7 +4666,7 @@
+         }
+     }
+ 
+-    private void loadAllVisibleChunks(Camera activeRenderInfo, Frustum icamera, boolean spectator)
++    private void loadAllVisibleChunks(Camera p_loadAllVisibleChunks_1_, Frustum p_loadAllVisibleChunks_2_, boolean p_loadAllVisibleChunks_3_)
+     {
+         int i = this.minecraft.options.ofChunkUpdates;
+         boolean flag = this.minecraft.options.ofLazyChunkLoading;
+@@ -4550,7 +4690,7 @@
+                 for (int j1 = 0; j1 < 100; ++j1)
+                 {
+                     levelrenderer.needsUpdate();
+-                    levelrenderer.setupRender(activeRenderInfo, icamera, false, this.frameId++, spectator);
++                    levelrenderer.setupRender(p_loadAllVisibleChunks_1_, p_loadAllVisibleChunks_2_, false, this.frameId++, p_loadAllVisibleChunks_3_);
+ 
+                     if (!levelrenderer.hasRenderedAllChunks())
+                     {
+@@ -4772,4 +4912,42 @@
+             super(p_109868_, p_109869_);
+         }
+     }
++    
++    //Vivecraft additions
++    public void setShaderGroup()
++    {
++        this.transparencyChain = null;
++        this.translucentTarget = null;
++        this.itemEntityTarget = null;
++        this.particlesTarget = null;
++        this.weatherTarget = null;
++        this.cloudsTarget = null;
++        this.alphaSortVRHandsFramebuffer = null;
++        this.alphaSortVROccludedFramebuffer = null;
++        this.alphaSortVRUnoccludedFramebuffer = null;
++        PostChain postchain = this.minecraft.vrRenderer.alphaShaders.get(this.minecraft.getMainRenderTarget().name);
++
++        if (postchain != null)
++        {
++            this.transparencyChain = postchain;
++            this.translucentTarget = postchain.getTempTarget("translucent");
++            this.itemEntityTarget = postchain.getTempTarget("itemEntity");
++            this.particlesTarget = postchain.getTempTarget("particles");
++            this.weatherTarget = postchain.getTempTarget("weather");
++            this.cloudsTarget = postchain.getTempTarget("clouds");
++            this.alphaSortVRHandsFramebuffer = postchain.getTempTarget("vrhands");
++            this.alphaSortVROccludedFramebuffer = postchain.getTempTarget("vroccluded");
++            this.alphaSortVRUnoccludedFramebuffer = postchain.getTempTarget("vrunoccluded");
++        }
++
++        this.entityEffect = null;
++        this.entityTarget = null;
++        PostChain postchain2 = this.minecraft.vrRenderer.entityShaders.get(this.minecraft.getMainRenderTarget().name);
++
++        if (postchain2 != null)
++        {
++            this.entityEffect = postchain2;
++            this.entityTarget = postchain2.getTempTarget("final");
++        }
++    }
+ }

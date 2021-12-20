@@ -155,7 +155,7 @@ public class ServerVivePlayer
         return player.position().add(0.0D, 1.62D, 0.0D);
     }
 
-    public Vec3 getControllerPos(int c, Player player)
+    public Vec3 getControllerPos(int c, Player player, boolean realPosition)
     {
         try
         {
@@ -169,7 +169,8 @@ public class ServerVivePlayer
                 float f2 = datainputstream.readFloat();
                 datainputstream.close();
 
-                if (this.isSeated())
+                // TODO: What the fuck is this nonsense?
+                if (this.isSeated() && !realPosition)
                 {
                     Vec3 vec3 = this.getHMDDir();
                     vec3 = vec3.yRot((float)Math.toRadians(c == 0 ? -35.0D : 35.0D));
@@ -190,6 +191,10 @@ public class ServerVivePlayer
         }
 
         return player.position().add(0.0D, 1.62D, 0.0D);
+    }
+
+    public Vec3 getControllerPos(int c, Player player) {
+        return getControllerPos(c, player, false);
     }
 
     public boolean isVR()

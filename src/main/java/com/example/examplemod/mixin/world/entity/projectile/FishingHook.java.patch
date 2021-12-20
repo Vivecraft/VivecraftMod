@@ -84,15 +84,24 @@
      }
  
      protected void defineSynchedData()
-@@ -271,6 +301,7 @@
+@@ -271,6 +301,16 @@
              this.setDeltaMovement(this.getDeltaMovement().scale(0.92D));
              this.reapplyPosition();
          }
 +
++        if (player != null && player.isLocalPlayer())
++        {
++            ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(player.getUUID());
++
++            if (serverviveplayer != null && serverviveplayer.isVR() && this.currentState == FishingHook.FishHookState.BOBBING && this.getDeltaMovement().y <= -0.24D)
++            {
++                MCVR.get().triggerHapticPulse(0, 250);
++            }
++        }
      }
  
      private boolean shouldStopFishing(Player p_37137_)
-@@ -471,9 +502,9 @@
+@@ -471,9 +511,9 @@
  
      private FishingHook.OpenWaterType getOpenWaterTypeForArea(BlockPos p_37148_, BlockPos p_37149_)
      {
@@ -104,7 +113,7 @@
          }).orElse(FishingHook.OpenWaterType.INVALID);
      }
  
-@@ -512,6 +543,7 @@
+@@ -512,6 +552,7 @@
          if (!this.level.isClientSide && player != null && !this.shouldStopFishing(player))
          {
              int i = 0;
@@ -112,7 +121,7 @@
  
              if (this.hookedIn != null)
              {
-@@ -525,6 +557,15 @@
+@@ -525,6 +566,15 @@
                  LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerLevel)this.level)).withParameter(LootContextParams.ORIGIN, this.position()).withParameter(LootContextParams.TOOL, p_37157_).withParameter(LootContextParams.THIS_ENTITY, this).withRandom(this.random).withLuck((float)this.luck + player.getLuck());
                  LootTable loottable = this.level.getServer().getLootTables().get(BuiltInLootTables.FISHING);
                  List<ItemStack> list = loottable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
@@ -128,7 +137,7 @@
                  CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)player, p_37157_, this, list);
  
                  for (ItemStack itemstack : list)
-@@ -553,7 +594,7 @@
+@@ -553,7 +603,7 @@
              }
  
              this.discard();
@@ -137,7 +146,7 @@
          }
          else
          {
-@@ -614,6 +655,16 @@
+@@ -614,6 +664,16 @@
          }
      }
  

@@ -19,6 +19,7 @@
 //import java.util.zip.ZipFile;
 //import org.apache.logging.log4j.LogManager;
 //import org.apache.logging.log4j.Logger;
+//import org.vivecraft.asm.VivecraftASMTransformer;
 //import org.vivecraft.utils.Utils;
 //
 //public class VivecraftTransformationService implements ITransformationService
@@ -119,6 +120,7 @@
 //            list.add(transformer);
 //        }
 //
+//        list.add(new VivecraftASMTransformer());
 //        return list;
 //    }
 //

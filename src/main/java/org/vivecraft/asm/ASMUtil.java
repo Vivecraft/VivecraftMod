@@ -117,7 +117,7 @@ public class ASMUtil {
 			}
 		}
 	
-		//node.methods.add(node); TODO
+		//node.methods.add(node);
 		
 		return true;
 	}
