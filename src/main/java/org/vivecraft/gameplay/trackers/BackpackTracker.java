@@ -17,9 +17,9 @@ public class BackpackTracker extends Tracker
     public int previousSlot = 0;
     private Vec3 down = new Vec3(0.0D, -1.0D, 0.0D);
 
-    public BackpackTracker(Minecraft mc)
+    public BackpackTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)

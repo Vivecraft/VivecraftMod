@@ -45,9 +45,9 @@ public class BowTracker extends Tracker
     int hapcounter = 0;
     int lasthapStep = 0;
 
-    public BowTracker(Minecraft mc)
+    public BowTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public Vec3 getAimVector()

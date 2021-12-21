@@ -1,5 +1,7 @@
 package org.vivecraft.gameplay.trackers;
 
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -12,9 +14,9 @@ public class SwimTracker extends Tracker
     final double riseSpeed = (double)0.005F;
     double swimspeed = (double)1.3F;
 
-    public SwimTracker(Minecraft mc)
+    public SwimTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)

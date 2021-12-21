@@ -2,6 +2,8 @@ package org.vivecraft.gameplay.trackers;
 
 import org.vivecraft.api.NetworkHelper;
 
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
@@ -13,9 +15,9 @@ public class CrawlTracker extends Tracker
     public boolean crawling;
     public boolean crawlsteresis;
 
-    public CrawlTracker(Minecraft mc)
+    public CrawlTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer player)

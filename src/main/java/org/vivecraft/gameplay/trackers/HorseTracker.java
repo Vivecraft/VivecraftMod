@@ -5,6 +5,8 @@ import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Quaternion;
 
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.animal.horse.Horse;
@@ -24,9 +26,9 @@ public class HorseTracker extends Tracker
     Horse horse = null;
     HorseTracker.ModelInfo info = new HorseTracker.ModelInfo();
 
-    public HorseTracker(Minecraft mc)
+    public HorseTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)

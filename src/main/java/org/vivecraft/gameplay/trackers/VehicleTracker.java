@@ -25,9 +25,9 @@ public class VehicleTracker extends Tracker
     private int minecartStupidityCounter;
     public int dismountCooldown = 0;
 
-    public VehicleTracker(Minecraft mc)
+    public VehicleTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)

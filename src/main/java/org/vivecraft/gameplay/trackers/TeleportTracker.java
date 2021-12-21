@@ -41,11 +41,12 @@ public class TeleportTracker extends Tracker
     private Vec3[] movementTeleportArc = new Vec3[50];
     public int movementTeleportArcSteps = 0;
     public double lastTeleportArcDisplayOffset = 0.0D;
-    public VRMovementStyle vrMovementStyle = new VRMovementStyle();
+    public VRMovementStyle vrMovementStyle;
 
-    public TeleportTracker(Minecraft mc)
+    public TeleportTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
+        this.vrMovementStyle = new VRMovementStyle(dh);
     }
 
     public float getTeleportEnergy()

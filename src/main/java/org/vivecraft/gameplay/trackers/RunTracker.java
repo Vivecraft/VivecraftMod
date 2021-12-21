@@ -14,9 +14,9 @@ public class RunTracker extends Tracker
     private double speed = 0.0D;
     private Vec3 movedir;
 
-    public RunTracker(Minecraft mc)
+    public RunTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)

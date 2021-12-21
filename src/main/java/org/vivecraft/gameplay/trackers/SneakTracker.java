@@ -12,9 +12,9 @@ public class SneakTracker extends Tracker
     public boolean sneakOverride = false;
     public int sneakCounter = 0;
 
-    public SneakTracker(Minecraft mc)
+    public SneakTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)

@@ -58,9 +58,9 @@ public class ClimbTracker extends Tracker
     private Random rand = new Random();
     boolean unsetflag;
 
-    public ClimbTracker(Minecraft mc)
+    public ClimbTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isGrabbingLadder()
