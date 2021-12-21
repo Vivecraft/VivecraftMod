@@ -23,9 +23,9 @@ public class JumpTracker extends Tracker
     private boolean c0Latched = false;
     private boolean c1Latched = false;
 
-    public JumpTracker(Minecraft mc)
+    public JumpTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isClimbeyJump()

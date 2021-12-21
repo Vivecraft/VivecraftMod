@@ -50,9 +50,9 @@ public class SwingTracker extends Tracker
     Vec3 forward = new Vec3(0.0D, 0.0D, -1.0D);
     double speedthresh = 3.0D;
 
-    public SwingTracker(Minecraft mc)
+    public SwingTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)

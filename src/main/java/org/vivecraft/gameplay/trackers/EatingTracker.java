@@ -23,9 +23,9 @@ public class EatingTracker extends Tracker
     long eatStart;
     private Random r = new Random();
 
-    public EatingTracker(Minecraft mc)
+    public EatingTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isEating()

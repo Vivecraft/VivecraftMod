@@ -22,9 +22,9 @@ public class TelescopeTracker extends Tracker
     private static final double lensDotMax = 0.9D;
     private static final double lensDotMin = 0.75D;
 
-    public TelescopeTracker(Minecraft mc)
+    public TelescopeTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer player)

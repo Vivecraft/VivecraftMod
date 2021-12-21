@@ -7,6 +7,8 @@ import org.vivecraft.utils.math.Matrix4f;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -25,9 +27,9 @@ public class CameraTracker extends Tracker
     private Quaternion startRotation;
     private boolean quickMode;
 
-    public CameraTracker(Minecraft mc)
+    public CameraTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer player)

@@ -21,9 +21,9 @@ public class RowTracker extends Tracker
     public float ROar;
     public float Foar;
 
-    public RowTracker(Minecraft mc)
+    public RowTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)

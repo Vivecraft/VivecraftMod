@@ -29,11 +29,13 @@ public class VRMovementStyle
     public float endTeleportingSoundVolume;
     public boolean teleportOnRelease;
     public boolean arcAiming;
+	private DataHolder dataHolder;
     private static final ResourceLocation beamPng = new ResourceLocation("textures/entity/endercrystal/endercrystal_beam.png");
 
-    public VRMovementStyle()
+    public VRMovementStyle(DataHolder dataHolder)
     {
         this.setStyle("Arc");
+        this.dataHolder = dataHolder;
     }
 
     public void setStyle(String requestedStyle)
@@ -148,12 +150,12 @@ public class VRMovementStyle
         else
         {
             flag = false;
-            DataHolder.getInstance().printChatMessage("Unknown teleport style requested: " + requestedStyle);
+            dataHolder.printChatMessage("Unknown teleport style requested: " + requestedStyle);
         }
 
-        if (flag && Minecraft.getInstance() != null)
+        if (flag && Minecraft.getInstance() != null && dataHolder != null)
         {
-        	DataHolder.getInstance().printChatMessage("Teleport style (RCTRL-M): " + this.name);
+        	dataHolder.printChatMessage("Teleport style (RCTRL-M): " + this.name);
         }
     }
 }

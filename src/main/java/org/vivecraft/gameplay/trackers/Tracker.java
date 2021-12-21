@@ -9,11 +9,11 @@ public abstract class Tracker
 {
     public Minecraft mc;
     public DataHolder dh;
-
-    public Tracker(Minecraft mc)
+    
+    public Tracker(Minecraft mc, DataHolder dh)
     {
         this.mc = mc;
-        this.dh = DataHolder.getInstance();
+        this.dh = dh;
     }
 
     public abstract boolean isActive(LocalPlayer var1);

@@ -51,9 +51,9 @@ public class InteractTracker extends Tracker
     boolean[] wasactive = new boolean[2];
     private HashSet<Class> rightClickable = null;
 
-    public InteractTracker(Minecraft mc)
+    public InteractTracker(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)
