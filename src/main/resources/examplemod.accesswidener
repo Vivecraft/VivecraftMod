@@ -1,0 +1,23 @@
+accessWidener	v1	named
+
+accessible class net/minecraft/client/model/geom/ModelPart$Polygon
+accessible class net/minecraft/client/model/geom/ModelPart$Vertex
+accessible field net/minecraft/client/model/geom/ModelPart cubes Ljava/util/List;
+accessible field net/minecraft/client/model/geom/ModelPart$Cube polygons [Lnet/minecraft/client/model/geom/ModelPart$Polygon;
+accessible field com/mojang/math/Matrix4f m00 F
+accessible field com/mojang/math/Matrix4f m01 F
+accessible field com/mojang/math/Matrix4f m02 F
+accessible field com/mojang/math/Matrix4f m03 F
+accessible field com/mojang/math/Matrix4f m10 F
+accessible field com/mojang/math/Matrix4f m11 F
+accessible field com/mojang/math/Matrix4f m12 F
+accessible field com/mojang/math/Matrix4f m13 F
+accessible field com/mojang/math/Matrix4f m20 F
+accessible field com/mojang/math/Matrix4f m21 F
+accessible field com/mojang/math/Matrix4f m22 F
+accessible field com/mojang/math/Matrix4f m23 F
+accessible field com/mojang/math/Matrix4f m30 F
+accessible field com/mojang/math/Matrix4f m31 F
+accessible field com/mojang/math/Matrix4f m32 F
+accessible field com/mojang/math/Matrix4f m33 F
+accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;

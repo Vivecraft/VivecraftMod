@@ -15,7 +15,7 @@ import joptsimple.OptionSet;
 import net.minecraft.client.main.Main;
 
 @Mixin(Main.class)
-public class MainMixin {
+public abstract class MainMixin {
 	
 	@Unique
 	private static boolean kiosk;
@@ -34,12 +34,12 @@ public class MainMixin {
 		optionparser.accepts("infinadeck");
 	}
 	
-	@ModifyConstant(method = "main", constant = @Constant(intValue = 854))
+	@ModifyConstant(method = "main", constant = @Constant(intValue = 854), remap = false)
 	private static int width(int i) {
 		return 1280;
 	}
 	
-	@ModifyConstant(method = "main", constant = @Constant(intValue = 480))
+	@ModifyConstant(method = "main", constant = @Constant(intValue = 480), remap = false)
 	private static int height(int i) {
 		return 720;
 	}

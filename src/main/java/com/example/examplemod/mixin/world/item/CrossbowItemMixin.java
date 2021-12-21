@@ -20,12 +20,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 @Mixin(CrossbowItem.class)
-public class CrossbowItemMixin {
+public abstract class CrossbowItemMixin {
 
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/entity/Entity;getViewVector(F)Lnet/minecraft/world/phys/Vec3;"), 
-			method = "shootProjectile(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;FZFFF)V", 
+	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/entity/Entity;getViewVector(F)Lnet/minecraft/world/phys/Vec3;"),
+			method = "shootProjectile(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;FZFFF)V",
 			locals = LocalCapture.CAPTURE_FAILHARD)
-	private static void shoot(Level p_40895_, LivingEntity p_40896_, InteractionHand p_40897_, ItemStack p_40898_,
+	private static void shoot(Level level, LivingEntity p_40896_, InteractionHand p_40897_, ItemStack p_40898_,
 			ItemStack p_40899_, float p_40900_, boolean p_40901_, float p_40902_, float p_40903_, float p_40904_,
 			CallbackInfo info, boolean flag, Projectile projectile, Vec3 vec31,
 			Quaternion quaternion, Vec3 vec3) {
