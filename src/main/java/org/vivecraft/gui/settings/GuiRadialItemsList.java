@@ -1,15 +1,17 @@
 package org.vivecraft.gui.settings;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Arrays;
+
+import org.apache.commons.lang3.ArrayUtils;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 public class GuiRadialItemsList extends ObjectSelectionList
 {
@@ -57,7 +59,7 @@ public class GuiRadialItemsList extends ObjectSelectionList
 
         public CategoryEntry(String name)
         {
-            this.labelText = I18n.m_118938_(name);
+            this.labelText = I18n.get(name);
             this.labelWidth = GuiRadialItemsList.this.mc.font.width(this.labelText);
         }
 
@@ -93,7 +95,7 @@ public class GuiRadialItemsList extends ObjectSelectionList
                 chatformatting = ChatFormatting.GREEN;
             }
 
-            GuiRadialItemsList.this.mc.font.draw(pMatrixStack, chatformatting + I18n.m_118938_(this.myKey.getName()), (float)(GuiRadialItemsList.this.mc.screen.width / 2 - GuiRadialItemsList.this.maxListLabelWidth / 2), (float)(pTop + pHeight / 2 - 9 / 2), 16777215);
+            GuiRadialItemsList.this.mc.font.draw(pMatrixStack, chatformatting + I18n.get(this.myKey.getName()), (float)(GuiRadialItemsList.this.mc.screen.width / 2 - GuiRadialItemsList.this.maxListLabelWidth / 2), (float)(pTop + pHeight / 2 - 9 / 2), 16777215);
         }
 
         public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)

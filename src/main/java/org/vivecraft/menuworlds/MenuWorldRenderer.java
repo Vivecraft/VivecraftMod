@@ -1,37 +1,34 @@
 package org.vivecraft.menuworlds;
 
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+
+import org.lwjgl.opengl.GL11;
+import org.vivecraft.reflection.MCReflection;
+import org.vivecraft.settings.VRSettings;
+
+import com.example.examplemod.DataHolder;
+import com.example.examplemod.GameRendererExtension;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.math.Matrix4f;
 import com.mojang.serialization.MapCodec;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+
 import net.minecraft.Util;
-import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.LiquidBlockRenderer;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -41,22 +38,11 @@ import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
-import net.optifine.Config;
-import net.optifine.shaders.Shaders;
-import net.optifine.util.TextureUtils;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL43;
-import org.vivecraft.reflection.MCReflection;
-import org.vivecraft.render.GLUtils;
-import org.vivecraft.settings.VRSettings;
+//import net.optifine.shaders.Shaders;
 
 public class MenuWorldRenderer
 {
@@ -65,6 +51,7 @@ public class MenuWorldRenderer
     private static final ResourceLocation CLOUDS_TEXTURES = new ResourceLocation("textures/environment/clouds.png");
     private static final ResourceLocation END_SKY_TEXTURES = new ResourceLocation("textures/environment/end_sky.png");
     private Minecraft mc;
+    private DataHolder dh;
     private DimensionSpecialEffects dimensionInfo;
     private FakeBlockAccess blockAccess;
     private final DynamicTexture lightmapTexture;
@@ -92,6 +79,7 @@ public class MenuWorldRenderer
     public MenuWorldRenderer()
     {
         this.mc = Minecraft.getInstance();
+        this.dh = DataHolder.getInstance();
         this.lightmapTexture = new DynamicTexture(16, 16, false);
         this.locationLightMap = this.mc.getTextureManager().register("lightMap", this.lightmapTexture);
         this.lightmapColors = this.lightmapTexture.getPixels();
@@ -106,7 +94,7 @@ public class MenuWorldRenderer
 
     public void init()
     {
-        if (this.mc.vrSettings.menuWorldSelection == VRSettings.MenuWorld.NONE)
+        if (this.dh.vrSettings.menuWorldSelection == VRSettings.MenuWorld.NONE)
         {
             System.out.println("Main menu worlds disabled.");
             return;
@@ -124,7 +112,7 @@ public class MenuWorldRenderer
                 this.setWorld(MenuWorldExporter.loadWorld(inputstream));
                 System.out.println("Building geometry...");
                 this.prepare();
-                this.mc.gameRenderer.menuWorldFastTime = (new Random()).nextInt(10) == 0;
+                ((GameRendererExtension)this.mc.gameRenderer).setMenuWorldFastTime(new Random().nextInt(10) == 0); //TODO check
             }
             else
             {
@@ -1195,7 +1183,7 @@ public class MenuWorldRenderer
 
     public Vec3 getEyePos()
     {
-        Vec3 vec3 = this.mc.vrPlayer.vrdata_room_post.hmd.getPosition();
+        Vec3 vec3 = this.dh.vrPlayer.vrdata_room_post.hmd.getPosition();
         return this.blockAccess == null ? vec3 : new Vec3(vec3.x + (double)(this.blockAccess.getXSize() / 2), vec3.y + (double)this.blockAccess.getGround(), vec3.z + (double)(this.blockAccess.getZSize() / 2));
     }
 
@@ -1250,6 +1238,7 @@ public class MenuWorldRenderer
     public static class MenuCloudRenderer
     {
         private Minecraft mc;
+        private DataHolder dh;
         private boolean updated = false;
         float partialTicks;
         private int glListClouds = -1;
@@ -1263,6 +1252,7 @@ public class MenuWorldRenderer
         public MenuCloudRenderer(Minecraft p_i23_1_)
         {
             this.mc = p_i23_1_;
+            this.dh = DataHolder.getInstance();
             //this.glListClouds = GLUtils.generateDisplayLists(1);
         }
 
@@ -1279,18 +1269,20 @@ public class MenuWorldRenderer
             {
                 return true;
             }
-            else if (this.mc.tickCounter >= this.cloudTickCounterUpdate + 100)
+            else if (this.dh.tickCounter >= this.cloudTickCounterUpdate + 100)
             {
                 return true;
             }
-            else if (!this.color.equals(this.lastColor) && this.mc.tickCounter >= this.cloudTickCounterUpdate + 1)
+            else if (!this.color.equals(this.lastColor) && this.dh.tickCounter >= this.cloudTickCounterUpdate + 1)
             {
                 return true;
             }
             else
             {
-                boolean flag = this.cloudPlayerY < 128.0D + this.mc.options.ofCloudsHeight * 128.0D;
-                boolean flag1 = (double)posY < 128.0D + this.mc.options.ofCloudsHeight * 128.0D;
+//                boolean flag = this.cloudPlayerY < 128.0D + this.mc.options.ofCloudsHeight * 128.0D; TODO check config
+//                boolean flag1 = (double)posY < 128.0D + this.mc.options.ofCloudsHeight * 128.0D;
+            	boolean flag = this.cloudPlayerY < 128.0D + 1 * 128.0D;
+            	boolean flag1 = (double)posY < 128.0D + 1 * 128.0D;
                 return flag1 != flag;
             }
         }
@@ -1345,11 +1337,13 @@ public class MenuWorldRenderer
         private long waterFogUpdateTime = -1L;
         private MenuWorldRenderer menuWorldRenderer;
         private Minecraft mc;
+        private DataHolder dh;
 
         public MenuFogRenderer(MenuWorldRenderer menuWorldRenderer)
         {
             this.menuWorldRenderer = menuWorldRenderer;
             this.mc = Minecraft.getInstance();
+            this.dh = DataHolder.getInstance();
             this.blackBuffer[0] = 0.0F;
             this.blackBuffer[1] = 0.0F;
             this.blackBuffer[2] = 0.0F;
@@ -1433,7 +1427,7 @@ public class MenuWorldRenderer
             {
                 double d0 = Mth.sin(this.menuWorldRenderer.getCelestialAngleRadians()) > 0.0F ? -1.0D : 1.0D;
                 Vec3 vec33 = new Vec3(d0, 0.0D, 0.0D);
-                float f4 = (float)this.mc.vrPlayer.vrdata_room_post.hmd.getDirection().dot(vec33);
+                float f4 = (float)this.dh.vrPlayer.vrdata_room_post.hmd.getDirection().dot(vec33);
 
                 if (f4 < 0.0F)
                 {
@@ -1580,10 +1574,10 @@ public class MenuWorldRenderer
                 this.lastGreen = this.green;
                 this.lastBlue = this.blue;
 
-                if (Config.isShaders())
-                {
-                    Shaders.setFogColor(this.red, this.green, this.blue);
-                }
+//                if (Config.isShaders())
+//                {
+//                    Shaders.setFogColor(this.red, this.green, this.blue);
+//                }
             }
 
             return this.buffer;

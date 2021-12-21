@@ -1,6 +1,5 @@
 package com.example.examplemod;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -28,15 +27,17 @@ import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRSettings;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.MemoryTracker;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.sounds.SoundEngine;
 
 public class DataHolder {
 	
 	private static DataHolder INSTANCE = new DataHolder();
+	public static boolean kiosk;
+	public static boolean ismainhand;
+	public static boolean katvr;
+	public static boolean infinadeck;
+	public static boolean viewonly;
 	
 	public VRPlayer vrPlayer;
 	public MCVR vr;
@@ -60,7 +61,7 @@ public class DataHolder {
 	public CameraTracker cameraTracker = new CameraTracker( Minecraft.getInstance());
 	public ThreadGroup backgroundThreadGroup = new ThreadGroup("background");
 	public final float PIOVER180 = ((float)Math.PI / 180F);
-	private boolean oculus = false;
+//	private boolean oculus = false;
 	public int lastShaderIndex = -1;
 //	public Field fieldHwnd = null;
 //	public Field fieldDisplay = null;
@@ -75,20 +76,20 @@ public class DataHolder {
 	public boolean enableWorldExport = false;
 	public SoundEngine sndManager = null;
 	public MenuWorldRenderer menuWorldRenderer;
-	private FloatBuffer matrixBuffer = MemoryTracker.create(16).asFloatBuffer();
-	private FloatBuffer matrixBuffer2 = MemoryTracker.create(16).asFloatBuffer();
-	private boolean firstInit = true;
+//	private FloatBuffer matrixBuffer = MemoryTracker.create(16).asFloatBuffer();
+//	private FloatBuffer matrixBuffer2 = MemoryTracker.create(16).asFloatBuffer();
+//	private boolean firstInit = true;
 	public boolean showSplashScreen = true;
 	public long splashTimer1 = 0L;
 	public long splashTimer2 = 0L;
-	private RenderTarget splash;
-	private float splashFadeAlpha = 0.0F;
+//	private RenderTarget splash;
+//	private float splashFadeAlpha = 0.0F;
 	public Deque<Long> runTickTimeNanos = new ArrayDeque<>();
 	public long medianRunTickTimeNanos = 0L;
 	public long frameIndex = 0L;
 	public ErrorHelper errorHelper;
 	public RenderPass currentPass;
-	private boolean lastClick;
+//	private boolean lastClick;
 	public boolean resourcePacksChanged;
 	public int tickCounter;
 	public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-NONVR-1-b2";
@@ -98,6 +99,16 @@ public class DataHolder {
 			INSTANCE = new DataHolder();
 		}
 		return INSTANCE;
+	}
+
+	public void printChatMessage(String string) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void print(String string) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

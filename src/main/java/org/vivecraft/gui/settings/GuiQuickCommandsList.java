@@ -1,6 +1,8 @@
 package org.vivecraft.gui.settings;
 
+import com.example.examplemod.DataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -18,7 +20,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         super(mc, parent.width, parent.height, 32, parent.height - 32, 20);
         this.parent = parent;
         this.mc = mc;
-        String[] astring = this.minecraft.vrSettings.vrQuickCommands;
+        String[] astring = DataHolder.getInstance().vrSettings.vrQuickCommands;
         String s = null;
         int i = 0;
 
@@ -38,7 +40,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         {
             this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, new TextComponent(""));
             this.txt.setValue(command);
-            this.btnDelete = new Button(0, 0, 18, 18, "X", (p) ->
+            this.btnDelete = new Button(0, 0, 18, 18, new TextComponent("X"), (p) ->
             {
                 this.txt.setValue("");
                 this.txt.changeFocus(true);

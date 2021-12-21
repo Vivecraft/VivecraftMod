@@ -2,6 +2,8 @@ package org.vivecraft.gameplay.trackers;
 
 import org.vivecraft.settings.VRSettings;
 
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -19,9 +21,9 @@ public class RunTracker extends Tracker
 
     public boolean isActive(LocalPlayer p)
     {
-        if (Minecraft.getInstance().vrPlayer.getFreeMove() && !Minecraft.getInstance().vrSettings.seated)
+        if (DataHolder.getInstance().vrPlayer.getFreeMove() && !DataHolder.getInstance().vrSettings.seated)
         {
-            if (Minecraft.getInstance().vrSettings.vrFreeMoveMode != VRSettings.FreeMove.RUN_IN_PLACE)
+            if (DataHolder.getInstance().vrSettings.vrFreeMoveMode != VRSettings.FreeMove.RUN_IN_PLACE)
             {
                 return false;
             }
@@ -39,7 +41,7 @@ public class RunTracker extends Tracker
                     }
                     else
                     {
-                        return !Minecraft.getInstance().bowTracker.isNotched();
+                        return !DataHolder.getInstance().bowTracker.isNotched();
                     }
                 }
                 else
@@ -75,10 +77,10 @@ public class RunTracker extends Tracker
 
     public void doProcess(LocalPlayer player)
     {
-        Vec3 vec3 = this.mc.vrPlayer.vrdata_world_pre.getController(0).getPosition();
-        Vec3 vec31 = this.mc.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-        double d0 = this.mc.vr.controllerHistory[0].averageSpeed(0.33D);
-        double d1 = this.mc.vr.controllerHistory[1].averageSpeed(0.33D);
+        Vec3 vec3 = this.dh.vrPlayer.vrdata_world_pre.getController(0).getPosition();
+        Vec3 vec31 = this.dh.vrPlayer.vrdata_world_pre.getController(1).getPosition();
+        double d0 = this.dh.vr.controllerHistory[0].averageSpeed(0.33D);
+        double d1 = this.dh.vr.controllerHistory[1].averageSpeed(0.33D);
 
         if (this.speed > 0.0D)
         {
@@ -100,7 +102,7 @@ public class RunTracker extends Tracker
         }
         else
         {
-            Vec3 vec32 = this.mc.vrPlayer.vrdata_world_pre.getController(0).getDirection().add(this.mc.vrPlayer.vrdata_world_pre.getController(1).getDirection()).scale(0.5D);
+            Vec3 vec32 = this.dh.vrPlayer.vrdata_world_pre.getController(0).getDirection().add(this.dh.vrPlayer.vrdata_world_pre.getController(1).getDirection()).scale(0.5D);
             this.direction = (double)((float)Math.toDegrees(Math.atan2(-vec32.x, vec32.z)));
             double d2 = (d0 + d1) / 2.0D;
             this.speed = d2 * 1.0D * 1.3D;

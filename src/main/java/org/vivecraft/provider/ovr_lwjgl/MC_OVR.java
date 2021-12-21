@@ -2,9 +2,7 @@ package org.vivecraft.provider.ovr_lwjgl;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.main.Main;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.ovr.OVR;
@@ -16,14 +14,19 @@ import org.lwjgl.ovr.OVRInputState;
 import org.lwjgl.ovr.OVRLayerEyeFov;
 import org.lwjgl.ovr.OVRPoseStatef;
 import org.lwjgl.ovr.OVRPosef;
+import org.lwjgl.ovr.OVRPosef.Buffer;
 import org.lwjgl.ovr.OVRTrackingState;
 import org.lwjgl.ovr.OVRUtil;
 import org.lwjgl.ovr.OVRVector3f;
-import org.lwjgl.ovr.OVRPosef.Buffer;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.openvr_jna.VRInputAction;
 import org.vivecraft.utils.math.Matrix4f;
+
+import com.example.examplemod.DataHolder;
+
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 
 public class MC_OVR extends MCVR
 {
@@ -74,7 +77,7 @@ public class MC_OVR extends MCVR
 
     public void processInputs()
     {
-        if (!this.mc.vrSettings.seated && !Main.viewonly && this.inputInitialized)
+        if (!this.dh.vrSettings.seated && !DataHolder.viewonly && this.inputInitialized)
         {
             OVR.ovr_GetInputState(this.session.get(0), 3, this.inputs);
             this.processInputAction(this.getInputAction(this.mc.options.keyAttack), this.inputs.IndexTrigger(0) > 0.5F);

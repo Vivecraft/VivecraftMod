@@ -11,6 +11,7 @@ import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.provider.ControllerType;
 
 import com.example.examplemod.DataHolder;
+import com.example.examplemod.PlayerExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -148,7 +149,7 @@ public class ClimbTracker extends Tracker
 
     public boolean isClimbeyClimbEquipped()
     {
-        return NetworkHelper.serverAllowsClimbey && this.mc.player.isClimbeyClimbEquipped();
+        return NetworkHelper.serverAllowsClimbey && ((PlayerExtension)this.mc.player).isClimbeyClimbEquipped();
     }
 
     private boolean canstand(BlockPos bp, LocalPlayer p)
@@ -463,7 +464,7 @@ public class ClimbTracker extends Tracker
                     }
 
                     this.dh.vr.triggerHapticPulse(i, 2000);
-                    this.mc.player.stepSound(blockpos, this.latchStart[i]);
+                    ((PlayerExtension)this.mc.player).stepSound(blockpos, this.latchStart[i]);
 
                     if (!flag3)
                     {

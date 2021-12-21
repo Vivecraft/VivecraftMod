@@ -1,10 +1,17 @@
 package org.vivecraft.gameplay.trackers;
 
 import java.util.List;
+
+import org.vivecraft.api.Vec3History;
+import org.vivecraft.provider.ControllerType;
+import org.vivecraft.reflection.MCReflection;
+import org.vivecraft.settings.VRSettings;
+
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -30,10 +37,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.api.Vec3History;
-import org.vivecraft.provider.ControllerType;
-import org.vivecraft.reflection.MCReflection;
-import org.vivecraft.settings.VRSettings;
 
 public class SwingTracker extends Tracker
 {
@@ -78,28 +81,29 @@ public class SwingTracker extends Tracker
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
+            DataHolder dataholder = DataHolder.getInstance();
 
             if (minecraft.screen != null)
             {
                 return false;
             }
-            else if (minecraft.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF)
+            else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF)
             {
                 return false;
             }
-            else if (minecraft.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO)
+            else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO)
             {
                 return !p.isCreative();
             }
-            else if (minecraft.vrSettings.seated)
+            else if (dataholder.vrSettings.seated)
             {
                 return false;
             }
             else
             {
-                VRSettings vrsettings = minecraft.vrSettings;
+                VRSettings vrsettings = dataholder.vrSettings;
 
-                if (minecraft.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && p.zza > 0.0F)
+                if (dataholder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && p.zza > 0.0F)
                 {
                     return false;
                 }
@@ -109,7 +113,7 @@ public class SwingTracker extends Tracker
                 }
                 else
                 {
-                    return !minecraft.jumpTracker.isjumping();
+                    return !dataholder.jumpTracker.isjumping();
                 }
             }
         }
@@ -133,10 +137,10 @@ public class SwingTracker extends Tracker
 
         for (int i = 0; i < 2; ++i)
         {
-            if (!this.mc.climbTracker.isGrabbingLadder(i))
+            if (!this.dh.climbTracker.isGrabbingLadder(i))
             {
-                Vec3 vec3 = this.mc.vrPlayer.vrdata_world_pre.getController(i).getPosition();
-                Vec3 vec31 = this.mc.vrPlayer.vrdata_world_pre.getHand(i).getCustomVector(this.forward);
+                Vec3 vec3 = this.dh.vrPlayer.vrdata_world_pre.getController(i).getPosition();
+                Vec3 vec31 = this.dh.vrPlayer.vrdata_world_pre.getHand(i).getCustomVector(this.forward);
                 ItemStack itemstack = player.getItemInHand(i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                 Item item = itemstack.getItem();
                 boolean flag = false;
@@ -181,9 +185,9 @@ public class SwingTracker extends Tracker
                     f1 = 0.3F;
                 }
 
-                f = f * this.mc.vrPlayer.vrdata_world_pre.worldScale;
+                f = f * this.dh.vrPlayer.vrdata_world_pre.worldScale;
                 this.miningPoint[i] = vec3.add(vec31.scale((double)f));
-                Vec3 vec32 = this.mc.vrPlayer.vrdata_room_pre.getController(i).getPosition().add(this.mc.vrPlayer.vrdata_room_pre.getHand(i).getCustomVector(this.forward).scale(0.3D));
+                Vec3 vec32 = this.dh.vrPlayer.vrdata_room_pre.getController(i).getPosition().add(this.dh.vrPlayer.vrdata_room_pre.getHand(i).getCustomVector(this.forward).scale(0.3D));
                 this.tipHistory[i].add(vec32);
                 float f2 = (float)this.tipHistory[i].averageSpeed(0.33D);
                 boolean flag2 = false;
@@ -192,7 +196,7 @@ public class SwingTracker extends Tracker
 
                 if (flag3)
                 {
-                    BlockHitResult blockhitresult = this.mc.level.clip(new ClipContext(this.mc.vrPlayer.vrdata_world_pre.hmd.getPosition(), vec3, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.mc.player));
+                    BlockHitResult blockhitresult = this.mc.level.clip(new ClipContext(this.dh.vrPlayer.vrdata_world_pre.hmd.getPosition(), vec3, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.mc.player));
 
                     if (blockhitresult.getType() != HitResult.Type.MISS)
                     {
@@ -225,7 +229,7 @@ public class SwingTracker extends Tracker
                         {
                             //Minecraft.getInstance().physicalGuiManager.preClickAction();
                             this.mc.gameMode.attack(player, entity);
-                            this.mc.vr.triggerHapticPulse(i, 1000);
+                            this.dh.vr.triggerHapticPulse(i, 1000);
                             this.lastWeaponSolid[i] = true;
                         }
 
@@ -235,7 +239,7 @@ public class SwingTracker extends Tracker
 
                 this.canact[i] = this.canact[i] && !flag1 && !flag2;
 
-                if (!this.mc.climbTracker.isClimbeyClimb() || (i != 0 || !this.mc.vr.keyClimbeyGrab.isDown(ControllerType.RIGHT)) && flag && (i != 1 || !this.mc.vr.keyClimbeyGrab.isDown(ControllerType.LEFT)) && flag)
+                if (!this.dh.climbTracker.isClimbeyClimb() || (i != 0 || !this.dh.vr.keyClimbeyGrab.isDown(ControllerType.RIGHT)) && flag && (i != 1 || !this.dh.vr.keyClimbeyGrab.isDown(ControllerType.LEFT)) && flag)
                 {
                     BlockPos blockpos = new BlockPos(this.miningPoint[i]);
                     BlockState blockstate = this.mc.level.getBlockState(blockpos);
@@ -245,7 +249,7 @@ public class SwingTracker extends Tracker
                     {
                         this.lastWeaponSolid[i] = true;
                         boolean flag4 = blockhitresult1.getBlockPos().equals(blockpos);
-                        boolean flag5 = this.mc.vrSettings.realisticClimbEnabled && (blockstate.getBlock() instanceof LadderBlock || blockstate.getBlock() instanceof VineBlock);
+                        boolean flag5 = this.dh.vrSettings.realisticClimbEnabled && (blockstate.getBlock() instanceof LadderBlock || blockstate.getBlock() instanceof VineBlock);
 
                         if (blockhitresult1.getType() == HitResult.Type.BLOCK && flag4 && this.canact[i] && !flag5)
                         {
@@ -286,10 +290,10 @@ public class SwingTracker extends Tracker
                                     MCReflection.PlayerController_blocknoise.set(Minecraft.getInstance().gameMode, 0);
                                 }
 
-                                this.mc.vrPlayer.blockDust(blockhitresult1.getLocation().x, blockhitresult1.getLocation().y, blockhitresult1.getLocation().z, 3 * j, blockpos, blockstate, 0.6F, 1.0F);
+                                this.dh.vrPlayer.blockDust(blockhitresult1.getLocation().x, blockhitresult1.getLocation().y, blockhitresult1.getLocation().z, 3 * j, blockpos, blockstate, 0.6F, 1.0F);
                             }
 
-                            this.mc.vr.triggerHapticPulse(i, 250 * j);
+                            this.dh.vr.triggerHapticPulse(i, 250 * j);
                         }
                     }
                     else
@@ -330,10 +334,10 @@ public class SwingTracker extends Tracker
             f = 0.75F;
         }
 
-        boolean[] aboolean = Minecraft.getInstance().swingTracker.lastWeaponSolid;
+        boolean[] aboolean = DataHolder.getInstance().swingTracker.lastWeaponSolid;
         Minecraft.getInstance().getItemRenderer();
 
-        if (aboolean[ItemRenderer.ismainhand ? 0 : 1])
+        if (aboolean[DataHolder.ismainhand ? 0 : 1])
         {
             f -= 0.25F;
         }

@@ -1,9 +1,13 @@
 package org.vivecraft.gui.framework;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
-import java.util.List;
-import net.minecraft.client.Minecraft;
+
+//import net.optifine.Lang;
+import org.vivecraft.settings.VRSettings;
+
+import com.example.examplemod.DataHolder;
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -12,16 +16,15 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.phys.Vec2;
-import net.optifine.Lang;
-import org.vivecraft.settings.VRSettings;
 
 public abstract class GuiVROptionsBase extends Screen
 {
+	public DataHolder dataholder = DataHolder.getInstance();
     public static final int DONE_BUTTON = 200;
     public static final int DEFAULTS_BUTTON = 201;
     protected final Screen lastScreen;
     protected final VRSettings settings;
-    private VRTooltipManager tooltipManager = new VRTooltipManager(this, new TooltipProviderVROptions());
+    //private VRTooltipManager tooltipManager = new VRTooltipManager(this, new TooltipProviderVROptions());
     protected boolean reinit;
     protected boolean drawDefaultButtons = true;
     protected ObjectSelectionList visibleList = null;
@@ -34,7 +37,7 @@ public abstract class GuiVROptionsBase extends Screen
     {
         super(new TextComponent(""));
         this.lastScreen = lastScreen;
-        this.settings = Minecraft.getInstance().vrSettings;
+        this.settings = DataHolder.getInstance().vrSettings;
     }
 
     protected void addDefaultButtons()
@@ -43,14 +46,14 @@ public abstract class GuiVROptionsBase extends Screen
         {
             if (!this.onDoneClicked())
             {
-                this.minecraft.vrSettings.saveOptions();
+                this.dataholder.vrSettings.saveOptions();
                 this.minecraft.setScreen(this.lastScreen);
             }
         }));
         this.addRenderableWidget(this.btnDefaults = new Button(this.width / 2 - 155, this.height - 30, 150, 20, new TranslatableComponent("vivecraft.gui.loaddefaults"), (p) ->
         {
             this.loadDefaults();
-            this.minecraft.vrSettings.saveOptions();
+            this.dataholder.vrSettings.saveOptions();
             this.reinit = true;
         }));
     }
@@ -220,7 +223,8 @@ public abstract class GuiVROptionsBase extends Screen
             this.visibleList.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
         }
 
-        drawCenteredString(pMatrixStack, this.font, Lang.get(this.vrTitle), this.width / 2, 15, 16777215);
+        //drawCenteredString(pMatrixStack, this.font, Lang.get(this.vrTitle), this.width / 2, 15, 16777215);
+        drawCenteredString(pMatrixStack, this.font, this.vrTitle, this.width / 2, 15, 16777215);
 
         if (this.btnDefaults != null)
         {
@@ -233,7 +237,7 @@ public abstract class GuiVROptionsBase extends Screen
         }
 
         super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
-        this.tooltipManager.drawTooltips(pMatrixStack, pMouseX, pMouseY, this.getButtonList());
+        //this.tooltipManager.drawTooltips(pMatrixStack, pMouseX, pMouseY, this.getButtonList());
     }
 
     protected void actionPerformed(AbstractWidget button)
@@ -247,7 +251,8 @@ public abstract class GuiVROptionsBase extends Screen
     public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)
     {
         boolean flag = super.mouseClicked(pMouseX, p_94738_, pMouseY);
-        AbstractWidget abstractwidget = getSelectedButton((int)pMouseX, (int)p_94738_, this.getButtonList());
+        //AbstractWidget abstractwidget = getSelectedButton((int)pMouseX, (int)p_94738_, this.getButtonList()); TODO
+        AbstractWidget abstractwidget = null;
 
         if (abstractwidget != null)
         {
@@ -299,7 +304,7 @@ public abstract class GuiVROptionsBase extends Screen
         {
             if (!this.onDoneClicked())
             {
-                this.minecraft.vrSettings.saveOptions();
+                this.dataholder.vrSettings.saveOptions();
                 this.minecraft.setScreen(this.lastScreen);
             }
 

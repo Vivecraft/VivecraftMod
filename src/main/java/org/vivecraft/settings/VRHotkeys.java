@@ -1,18 +1,12 @@
 package org.vivecraft.settings;
 
-import com.google.common.util.concurrent.Runnables;
-import com.mojang.blaze3d.platform.InputConstants;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.WinScreen;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.phys.Vec3;
-import net.optifine.Lang;
+
+import org.apache.commons.codec.language.bm.Lang;
 import org.vivecraft.api.VRData;
 import org.vivecraft.utils.LangHelper;
 import org.vivecraft.utils.Utils;
@@ -21,6 +15,16 @@ import org.vivecraft.utils.math.Axis;
 import org.vivecraft.utils.math.Matrix4f;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
+
+import com.example.examplemod.DataHolder;
+import com.google.common.util.concurrent.Runnables;
+import com.mojang.blaze3d.platform.InputConstants;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.WinScreen;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.phys.Vec3;
 
 public class VRHotkeys
 {
@@ -44,40 +48,41 @@ public class VRHotkeys
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
+            DataHolder dataholder = DataHolder.getInstance();
             boolean flag = false;
 
             if (action == 1 && key == 344 && InputConstants.isKeyDown(345))
             {
-                minecraft.vrSettings.storeDebugAim = true;
+            	dataholder.vrSettings.storeDebugAim = true;
                 minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.showaim"));
                 flag = true;
             }
 
             if (action == 1 && key == 66 && InputConstants.isKeyDown(345))
             {
-                minecraft.vrSettings.walkUpBlocks = !minecraft.vrSettings.walkUpBlocks;
-                minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.walkupblocks", minecraft.vrSettings.walkUpBlocks ? LangHelper.getYes() : LangHelper.getNo()));
+            	dataholder.vrSettings.walkUpBlocks = !dataholder.vrSettings.walkUpBlocks;
+                minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.walkupblocks", dataholder.vrSettings.walkUpBlocks ? LangHelper.getYes() : LangHelper.getNo()));
                 flag = true;
             }
 
             if (action == 1 && key == 73 && InputConstants.isKeyDown(345))
             {
-                minecraft.vrSettings.inertiaFactor = minecraft.vrSettings.inertiaFactor.getNext();
-                minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.playerinertia", Lang.get(minecraft.vrSettings.inertiaFactor.getLangKey())));
+            	dataholder.vrSettings.inertiaFactor = dataholder.vrSettings.inertiaFactor.getNext();
+                minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.playerinertia", Lang.get(dataholder.vrSettings.inertiaFactor.getLangKey())));
 
                 flag = true;
             }
 
             if (action == 1 && key == 82 && InputConstants.isKeyDown(345))
             {
-                if (minecraft.vrPlayer.isTeleportOverridden())
+                if (dataholder.vrPlayer.isTeleportOverridden())
                 {
-                    minecraft.vrPlayer.setTeleportOverride(false);
+                	dataholder.vrPlayer.setTeleportOverride(false);
                     minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.teleportdisabled"));
                 }
                 else
                 {
-                    minecraft.vrPlayer.setTeleportOverride(true);
+                	dataholder.vrPlayer.setTeleportOverride(true);
                     minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.teleportenabled"));
                 }
 
@@ -98,13 +103,13 @@ public class VRHotkeys
 
             if ((minecraft.level == null || minecraft.screen != null) && action == 1 && key == 294)
             {
-                minecraft.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
-                minecraft.notifyMirror(minecraft.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
+            	dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
+                minecraft.notifyMirror(dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
             }
 
             if (flag)
             {
-                minecraft.vrSettings.saveOptions();
+            	dataholder.vrSettings.saveOptions();
             }
 
             return flag;
@@ -114,6 +119,7 @@ public class VRHotkeys
     public static void handleMRKeys()
     {
         Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
         boolean flag = false;
 
         if (InputConstants.isKeyDown(263) && InputConstants.isKeyDown(345) && !InputConstants.isKeyDown(344))
@@ -208,24 +214,24 @@ public class VRHotkeys
 
         if (InputConstants.isKeyDown(261) && InputConstants.isKeyDown(345) && InputConstants.isKeyDown(344))
         {
-            --minecraft.vrSettings.mixedRealityFov;
+            --dataholder.vrSettings.mixedRealityFov;
             flag = true;
         }
 
         if (flag)
         {
-            minecraft.vrSettings.saveOptions();
+        	dataholder.vrSettings.saveOptions();
 
-            if (minecraft.vr.mrMovingCamActive)
+            if (dataholder.vr.mrMovingCamActive)
             {
-                Minecraft.getInstance().gui.getChat().addMessage(new TextComponent(LangHelper.get("vivecraft.messages.coords", minecraft.vrSettings.mrMovingCamOffsetX, minecraft.vrSettings.mrMovingCamOffsetY, minecraft.vrSettings.mrMovingCamOffsetZ)));
-                Angle angle = minecraft.vrSettings.mrMovingCamOffsetRotQuat.toEuler();
+                Minecraft.getInstance().gui.getChat().addMessage(new TextComponent(LangHelper.get("vivecraft.messages.coords", dataholder.vrSettings.mrMovingCamOffsetX, dataholder.vrSettings.mrMovingCamOffsetY, dataholder.vrSettings.mrMovingCamOffsetZ)));
+                Angle angle = dataholder.vrSettings.mrMovingCamOffsetRotQuat.toEuler();
                 Minecraft.getInstance().gui.getChat().addMessage(new TextComponent(LangHelper.get("vivecraft.messages.angles", angle.getPitch(), angle.getYaw(), angle.getRoll())));
             }
             else
             {
-                Minecraft.getInstance().gui.getChat().addMessage(new TextComponent(LangHelper.get("vivecraft.messages.coords", minecraft.vrSettings.vrFixedCamposX, minecraft.vrSettings.vrFixedCamposY, minecraft.vrSettings.vrFixedCamposZ)));
-                Angle angle1 = minecraft.vrSettings.vrFixedCamrotQuat.toEuler();
+                Minecraft.getInstance().gui.getChat().addMessage(new TextComponent(LangHelper.get("vivecraft.messages.coords", dataholder.vrSettings.vrFixedCamposX, dataholder.vrSettings.vrFixedCamposY, dataholder.vrSettings.vrFixedCamposZ)));
+                Angle angle1 = dataholder.vrSettings.vrFixedCamrotQuat.toEuler();
                 Minecraft.getInstance().gui.getChat().addMessage(new TextComponent(LangHelper.get("vivecraft.messages.angles", angle1.getPitch(), angle1.getYaw(), angle1.getRoll())));
             }
         }
@@ -234,76 +240,82 @@ public class VRHotkeys
     private static void adjustCamPos(Vector3 offset)
     {
         Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
 
-        if (minecraft.vr.mrMovingCamActive)
+        if (dataholder.vr.mrMovingCamActive)
         {
-            offset = minecraft.vrSettings.mrMovingCamOffsetRotQuat.multiply(offset);
-            minecraft.vrSettings.mrMovingCamOffsetX += offset.getX();
-            minecraft.vrSettings.mrMovingCamOffsetY += offset.getY();
-            minecraft.vrSettings.mrMovingCamOffsetZ += offset.getZ();
+            offset = dataholder.vrSettings.mrMovingCamOffsetRotQuat.multiply(offset);
+            dataholder.vrSettings.mrMovingCamOffsetX += offset.getX();
+            dataholder.vrSettings.mrMovingCamOffsetY += offset.getY();
+            dataholder.vrSettings.mrMovingCamOffsetZ += offset.getZ();
         }
         else
         {
-            offset = minecraft.vrSettings.vrFixedCamrotQuat.inverse().multiply(offset);
-            minecraft.vrSettings.vrFixedCamposX += offset.getX();
-            minecraft.vrSettings.vrFixedCamposY += offset.getY();
-            minecraft.vrSettings.vrFixedCamposZ += offset.getZ();
+            offset = dataholder.vrSettings.vrFixedCamrotQuat.inverse().multiply(offset);
+            dataholder.vrSettings.vrFixedCamposX += offset.getX();
+            dataholder.vrSettings.vrFixedCamposY += offset.getY();
+            dataholder.vrSettings.vrFixedCamposZ += offset.getZ();
         }
     }
 
     private static void adjustCamRot(Axis axis, float degrees)
     {
         Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
 
-        if (minecraft.vr.mrMovingCamActive)
+        if (dataholder.vr.mrMovingCamActive)
         {
-            minecraft.vrSettings.mrMovingCamOffsetRotQuat.set(minecraft.vrSettings.mrMovingCamOffsetRotQuat.rotate(axis, degrees, true));
+        	dataholder.vrSettings.mrMovingCamOffsetRotQuat.set(dataholder.vrSettings.mrMovingCamOffsetRotQuat.rotate(axis, degrees, true));
         }
         else
         {
-            minecraft.vrSettings.vrFixedCamrotQuat.set(minecraft.vrSettings.vrFixedCamrotQuat.rotate(axis, degrees, false));
+        	dataholder.vrSettings.vrFixedCamrotQuat.set(dataholder.vrSettings.vrFixedCamrotQuat.rotate(axis, degrees, false));
         }
     }
 
     public static void snapMRCam(int controller)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        Vec3 vec3 = minecraft.vrPlayer.vrdata_room_pre.getController(controller).getPosition();
-        minecraft.vrSettings.vrFixedCamposX = (float)vec3.x;
-        minecraft.vrSettings.vrFixedCamposY = (float)vec3.y;
-        minecraft.vrSettings.vrFixedCamposZ = (float)vec3.z;
-        Quaternion quaternion = new Quaternion(Utils.convertOVRMatrix(minecraft.vrPlayer.vrdata_room_pre.getController(controller).getMatrix()));
-        minecraft.vrSettings.vrFixedCamrotQuat.set(quaternion);
+        DataHolder dataholder = DataHolder.getInstance();
+        Vec3 vec3 = dataholder.vrPlayer.vrdata_room_pre.getController(controller).getPosition();
+        dataholder.vrSettings.vrFixedCamposX = (float)vec3.x;
+        dataholder.vrSettings.vrFixedCamposY = (float)vec3.y;
+        dataholder.vrSettings.vrFixedCamposZ = (float)vec3.z;
+        Quaternion quaternion = new Quaternion(Utils.convertOVRMatrix(dataholder.vrPlayer.vrdata_room_pre.getController(controller).getMatrix()));
+        dataholder.vrSettings.vrFixedCamrotQuat.set(quaternion);
     }
 
     public static void updateMovingThirdPersonCam()
     {
         Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
 
         if (startControllerPose != null)
         {
-            VRData.VRDevicePose vrdata$vrdevicepose = minecraft.vrPlayer.vrdata_room_pre.getController(startController);
+            VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_room_pre.getController(startController);
             Vec3 vec3 = startControllerPose.getPosition();
             Vec3 vec31 = vrdata$vrdevicepose.getPosition().subtract(vec3);
             Matrix4f matrix4f = Matrix4f.multiply(vrdata$vrdevicepose.getMatrix(), startControllerPose.getMatrix().inverted());
             Vector3 vector3 = new Vector3(startCamposX - (float)vec3.x, startCamposY - (float)vec3.y, startCamposZ - (float)vec3.z);
             Vector3 vector31 = matrix4f.transform(vector3);
-            minecraft.vrSettings.vrFixedCamposX = startCamposX + (float)vec31.x + (vector31.getX() - vector3.getX());
-            minecraft.vrSettings.vrFixedCamposY = startCamposY + (float)vec31.y + (vector31.getY() - vector3.getY());
-            minecraft.vrSettings.vrFixedCamposZ = startCamposZ + (float)vec31.z + (vector31.getZ() - vector3.getZ());
-            minecraft.vrSettings.vrFixedCamrotQuat.set(startCamrotQuat.multiply(new Quaternion(Utils.convertOVRMatrix(matrix4f))));
+            dataholder.vrSettings.vrFixedCamposX = startCamposX + (float)vec31.x + (vector31.getX() - vector3.getX());
+            dataholder.vrSettings.vrFixedCamposY = startCamposY + (float)vec31.y + (vector31.getY() - vector3.getY());
+            dataholder.vrSettings.vrFixedCamposZ = startCamposZ + (float)vec31.z + (vector31.getZ() - vector3.getZ());
+            dataholder.vrSettings.vrFixedCamrotQuat.set(startCamrotQuat.multiply(new Quaternion(Utils.convertOVRMatrix(matrix4f))));
         }
     }
 
     public static void startMovingThirdPersonCam(int controller, VRHotkeys.Triggerer triggerer)
     {
         Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
+
         startController = controller;
-        startControllerPose = minecraft.vrPlayer.vrdata_room_pre.getController(controller);
-        startCamposX = minecraft.vrSettings.vrFixedCamposX;
-        startCamposY = minecraft.vrSettings.vrFixedCamposY;
-        startCamposZ = minecraft.vrSettings.vrFixedCamposZ;
-        startCamrotQuat = minecraft.vrSettings.vrFixedCamrotQuat.copy();
+        startControllerPose = dataholder.vrPlayer.vrdata_room_pre.getController(controller);
+        startCamposX = dataholder.vrSettings.vrFixedCamposX;
+        startCamposY = dataholder.vrSettings.vrFixedCamposY;
+        startCamposZ = dataholder.vrSettings.vrFixedCamposZ;
+        startCamrotQuat = dataholder.vrSettings.vrFixedCamrotQuat.copy();
         camTriggerer = triggerer;
     }
 
@@ -386,17 +398,19 @@ public class VRHotkeys
                 return;
             }
 
-            Minecraft minecraft = Minecraft.getInstance();
-            Quaternion quaternion = new Quaternion(f3, f4, f5, minecraft.vrSettings.externalCameraAngleOrder);
-            minecraft.vrSettings.mrMovingCamOffsetX = f;
-            minecraft.vrSettings.mrMovingCamOffsetY = f1;
-            minecraft.vrSettings.mrMovingCamOffsetZ = f2;
-            minecraft.vrSettings.mrMovingCamOffsetRotQuat.set(quaternion);
-            minecraft.vrSettings.vrFixedCamposX = f;
-            minecraft.vrSettings.vrFixedCamposY = f1;
-            minecraft.vrSettings.vrFixedCamposZ = f2;
-            minecraft.vrSettings.vrFixedCamrotQuat.set(quaternion);
-            minecraft.vrSettings.mixedRealityFov = f6;
+            Minecraft minecraft = Minecraft.getInstance();        
+            DataHolder dataholder = DataHolder.getInstance();
+
+            Quaternion quaternion = new Quaternion(f3, f4, f5, dataholder.vrSettings.externalCameraAngleOrder);
+            dataholder.vrSettings.mrMovingCamOffsetX = f;
+            dataholder.vrSettings.mrMovingCamOffsetY = f1;
+            dataholder.vrSettings.mrMovingCamOffsetZ = f2;
+            dataholder.vrSettings.mrMovingCamOffsetRotQuat.set(quaternion);
+            dataholder.vrSettings.vrFixedCamposX = f;
+            dataholder.vrSettings.vrFixedCamposY = f1;
+            dataholder.vrSettings.vrFixedCamposZ = f2;
+            dataholder.vrSettings.vrFixedCamrotQuat.set(quaternion);
+            dataholder.vrSettings.mixedRealityFov = f6;
         }
     }
 

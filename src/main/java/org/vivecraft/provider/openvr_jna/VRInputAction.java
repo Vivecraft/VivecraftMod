@@ -1,13 +1,13 @@
 package org.vivecraft.provider.openvr_jna;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+
 import javax.annotation.Nullable;
-import net.minecraft.client.KeyMapping;
-import net.optifine.reflect.Reflector;
+
+//import net.optifine.reflect.Reflector;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.provider.HandedKeyBinding;
 import org.vivecraft.provider.InputSimulator;
@@ -16,6 +16,10 @@ import org.vivecraft.provider.openvr_jna.control.VRInputActionSet;
 import org.vivecraft.reflection.MCReflection;
 import org.vivecraft.utils.math.Vector2;
 import org.vivecraft.utils.math.Vector3;
+
+import com.mojang.blaze3d.platform.InputConstants;
+
+import net.minecraft.client.KeyMapping;
 
 public class VRInputAction
 {
@@ -545,7 +549,8 @@ public class VRInputAction
     {
         InputConstants.Key inputconstants$key = (InputConstants.Key)MCReflection.KeyBinding_keyCode.get(this.keyBinding);
 
-        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding) && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+//        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding) && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE))) TODO
+        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding))
         {
             if (inputconstants$key.getType() == InputConstants.Type.KEYSYM)
             {
@@ -567,7 +572,8 @@ public class VRInputAction
     {
         InputConstants.Key inputconstants$key = (InputConstants.Key)MCReflection.KeyBinding_keyCode.get(this.keyBinding);
 
-        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding) && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+//        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding) && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE))) TODO
+        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding))
         {
             if (inputconstants$key.getType() == InputConstants.Type.KEYSYM)
             {

@@ -16,24 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.WinScreen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.main.Main;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.TorchBlock;
-import net.minecraft.world.phys.Vec3;
-import net.optifine.Lang;
-import net.optifine.reflect.Reflector;
+
+import org.apache.commons.codec.language.bm.Lang;
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.api.VRData;
@@ -56,9 +40,29 @@ import org.vivecraft.utils.math.Matrix4f;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
+import com.example.examplemod.DataHolder;
+import com.example.examplemod.GuiExtension;
+
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.WinScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.phys.Vec3;
+
 public abstract class MCVR
 {
     protected Minecraft mc;
+    protected DataHolder dh;
     protected static MCVR me;
     protected Matrix4f hmdPose = new Matrix4f();
     public Matrix4f hmdRotation = new Matrix4f();
@@ -150,6 +154,7 @@ public abstract class MCVR
     public MCVR(Minecraft mc)
     {
         this.mc = mc;
+        this.dh = DataHolder.getInstance();
         me = this;
 
         for (int i = 0; i < 3; ++i)
@@ -238,10 +243,10 @@ public abstract class MCVR
     {
         Vec3 vec3 = new Vec3(this.aimSource[controller].x, this.aimSource[controller].y, this.aimSource[controller].z);
 
-        if (!this.mc.vrSettings.seated && this.mc.vrSettings.allowStandingOriginOffset)
+        if (!this.dh.vrSettings.seated && this.dh.vrSettings.allowStandingOriginOffset)
         {
-        	if(this.mc.vr.isHMDTracking())
-        		vec3 = vec3.add((double)this.mc.vrSettings.originOffset.getX(), (double)this.mc.vrSettings.originOffset.getY(), (double)this.mc.vrSettings.originOffset.getZ());
+        	if(this.dh.vr.isHMDTracking())
+        		vec3 = vec3.add((double)this.dh.vrSettings.originOffset.getX(), (double)this.dh.vrSettings.originOffset.getY(), (double)this.dh.vrSettings.originOffset.getZ());
         }
 
         return vec3;
@@ -260,9 +265,9 @@ public abstract class MCVR
 
     public void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude, float delaySeconds)
     {
-        if (!this.mc.vrSettings.seated)
+        if (!this.dh.vrSettings.seated)
         {
-            if (this.mc.vrSettings.reverseHands)
+            if (this.dh.vrSettings.reverseHands)
             {
                 if (controller == ControllerType.RIGHT)
                 {
@@ -313,10 +318,10 @@ public abstract class MCVR
     {
         Vector3 vector3 = Utils.convertMatrix4ftoTranslationVector(this.hmdPose);
 
-        if (this.mc.vrSettings.seated || this.mc.vrSettings.allowStandingOriginOffset)
+        if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset)
         {
-        	if(this.mc.vr.isHMDTracking())
-        		vector3 = vector3.add(this.mc.vrSettings.originOffset);
+        	if(this.dh.vr.isHMDTracking())
+        		vector3 = vector3.add(this.dh.vrSettings.originOffset);
         }
 
         return vector3.toVector3d();
@@ -344,10 +349,10 @@ public abstract class MCVR
             Matrix4f matrix4f2 = this.hmdPose;
             Vector3 vector31 = Utils.convertMatrix4ftoTranslationVector(matrix4f2);
 
-            if (this.mc.vrSettings.seated || this.mc.vrSettings.allowStandingOriginOffset)
+            if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset)
             {
-            	if(this.mc.vr.isHMDTracking())
-            		vector31 = vector31.add(this.mc.vrSettings.originOffset);
+            	if(this.dh.vr.isHMDTracking())
+            		vector31 = vector31.add(this.dh.vrSettings.originOffset);
             }
 
             return vector31.toVector3d();
@@ -357,10 +362,10 @@ public abstract class MCVR
             Matrix4f matrix4f1 = Matrix4f.multiply(this.hmdPose, matrix4f);
             Vector3 vector3 = Utils.convertMatrix4ftoTranslationVector(matrix4f1);
 
-            if (this.mc.vrSettings.seated || this.mc.vrSettings.allowStandingOriginOffset)
+            if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset)
             {
-            	if(this.mc.vr.isHMDTracking())
-            		vector3 = vector3.add(this.mc.vrSettings.originOffset);
+            	if(this.dh.vr.isHMDTracking())
+            		vector3 = vector3.add(this.dh.vrSettings.originOffset);
             }
 
             return vector3.toVector3d();
@@ -369,7 +374,7 @@ public abstract class MCVR
 
     public HardwareType getHardwareType()
     {
-        return this.mc.vrSettings.forceHardwareDetection > 0 ? HardwareType.values()[this.mc.vrSettings.forceHardwareDetection - 1] : this.detectedHardware;
+        return this.dh.vrSettings.forceHardwareDetection > 0 ? HardwareType.values()[this.dh.vrSettings.forceHardwareDetection - 1] : this.detectedHardware;
     }
 
     public Vec3 getHmdVector()
@@ -487,13 +492,13 @@ public abstract class MCVR
 
     public void resetPosition()
     {
-        Vec3 vec3 = this.getCenterEyePosition().scale(-1.0D).add((double)this.mc.vrSettings.originOffset.getX(), (double)this.mc.vrSettings.originOffset.getY(), (double)this.mc.vrSettings.originOffset.getZ());
-        this.mc.vrSettings.originOffset = new Vector3((float)vec3.x, (float)vec3.y + 1.62F, (float)vec3.z);
+        Vec3 vec3 = this.getCenterEyePosition().scale(-1.0D).add((double)this.dh.vrSettings.originOffset.getX(), (double)this.dh.vrSettings.originOffset.getY(), (double)this.dh.vrSettings.originOffset.getZ());
+        this.dh.vrSettings.originOffset = new Vector3((float)vec3.x, (float)vec3.y + 1.62F, (float)vec3.z);
     }
 
     public void clearOffset()
     {
-        this.mc.vrSettings.originOffset = new Vector3(0.0F, 0.0F, 0.0F);
+        this.dh.vrSettings.originOffset = new Vector3(0.0F, 0.0F, 0.0F);
     }
 
     public void setVanillaBindings(KeyMapping[] bindings)
@@ -508,26 +513,26 @@ public abstract class MCVR
 
     protected void processHotbar()
     {
-        this.mc.interactTracker.hotbar = -1;
+        this.dh.interactTracker.hotbar = -1;
         if(mc.player == null) return;
         if(mc.player.getInventory() == null) return;
 
-        if(mc.climbTracker.isGrabbingLadder() &&
-                mc.climbTracker.isClaws(mc.player.getMainHandItem())) return;
-        if(!mc.interactTracker.isActive(mc.player)) return;
+        if(dh.climbTracker.isGrabbingLadder() &&
+        		dh.climbTracker.isClaws(mc.player.getMainHandItem())) return;
+        if(!dh.interactTracker.isActive(mc.player)) return;
 
         Vec3 main = this.getAimSource(0);
         Vec3 off = this.getAimSource(1);
         Vec3 barStartos = null, barEndos = null;
 
         int i = 1;
-        if (this.mc.vrSettings.reverseHands)
+        if (this.dh.vrSettings.reverseHands)
             i = -1;
 
-        if (this.mc.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST) {
+        if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST) {
             barStartos = this.getAimRotation(1).transform(new Vector3((float)i * 0.02F, 0.05F, 0.26F)).toVector3d();
             barEndos = this.getAimRotation(1).transform(new Vector3((float)i * 0.02F, 0.05F, 0.01F)).toVector3d();
-        } else if (this.mc.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
+        } else if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
             barStartos = this.getAimRotation(1).transform(new Vector3((float)i * -0.18F, 0.08F, -0.01F)).toVector3d();
             barEndos = this.getAimRotation(1).transform(new Vector3((float)i * 0.19F, 0.04F, -0.08F)).toVector3d();
         } else return; //how did u get here
@@ -554,7 +559,7 @@ public abstract class MCVR
         if(fact < 0) ilen *= -1;
         float pos = ilen / linelen * 9;
 
-        if(mc.vrSettings.reverseHands) pos = 9 - pos;
+        if(dh.vrSettings.reverseHands) pos = 9 - pos;
 
         int box = (int) Math.floor(pos);
 
@@ -566,8 +571,8 @@ public abstract class MCVR
                 return;
         }
         //all that maths for this.
-        mc.interactTracker.hotbar = box;
-        if(box != mc.interactTracker.hotbar){
+        dh.interactTracker.hotbar = box;
+        if(box != dh.interactTracker.hotbar){
             triggerHapticPulse(0, 750);
         }
     }
@@ -592,7 +597,7 @@ public abstract class MCVR
             this.hmdYawSamples.removeFirst();
         }
 
-        float f = this.mc.vrPlayer.vrdata_room_pre.hmd.getYaw();
+        float f = this.dh.vrPlayer.vrdata_room_pre.hmd.getYaw();
 
         if (f < 0.0F)
         {
@@ -608,7 +613,7 @@ public abstract class MCVR
             System.out.println("HMD yaw desync/overflow corrected");
         }
 
-        this.hmdPosSamples.add(this.mc.vrPlayer.vrdata_room_pre.hmd.getPosition());
+        this.hmdPosSamples.add(this.dh.vrPlayer.vrdata_room_pre.hmd.getPosition());
         float f1 = 0.0F;
 
         if (this.hmdYawSamples.size() > 0)
@@ -662,7 +667,7 @@ public abstract class MCVR
             Vector3 vector3 = this.hmdRotation.transform(new Vector3(0.0F, -0.1F, 0.1F));
             this.hmdPivotHistory.add(new Vec3((double)vector3.getX() + vec3.x, (double)vector3.getY() + vec3.y, (double)vector3.getZ() + vec3.z));
 
-            if (this.mc.vrSettings.seated)
+            if (this.dh.vrSettings.seated)
             {
                 this.controllerPose[0] = this.hmdPose.inverted().inverted();
                 this.controllerPose[1] = this.hmdPose.inverted().inverted();
@@ -671,7 +676,7 @@ public abstract class MCVR
             Matrix4f[] amatrix4f = new Matrix4f[] {new Matrix4f(), new Matrix4f()};
             Matrix4f[] amatrix4f1 = new Matrix4f[] {new Matrix4f(), new Matrix4f()};
 
-            if (this.mc.vrSettings.seated)
+            if (this.dh.vrSettings.seated)
             {
                 amatrix4f1[0] = this.controllerPose[0];
             }
@@ -697,7 +702,7 @@ public abstract class MCVR
             this.handRotation[0].M[3][2] = 0.0F;
             this.handRotation[0].M[3][3] = 1.0F;
 
-            if (this.mc.vrSettings.seated)
+            if (this.dh.vrSettings.seated)
             {
                 amatrix4f[0] = this.controllerPose[0];
             }
@@ -727,7 +732,7 @@ public abstract class MCVR
             this.controllerRotation[0].M[3][3] = 1.0F;
             Vec3 vec31 = this.getHmdVector();
 
-            if (this.mc.vrSettings.seated && this.mc.screen == null)
+            if (this.dh.vrSettings.seated && this.mc.screen == null)
             {
                 org.vivecraft.utils.lwjgl.Matrix4f matrix4f = new org.vivecraft.utils.lwjgl.Matrix4f();
                 float f = 110.0F;
@@ -745,8 +750,8 @@ public abstract class MCVR
 
                 if (this.mc.isWindowActive())
                 {
-                    float f2 = this.mc.vrSettings.keyholeX;
-                    float f3 = 20.0F * this.mc.vrSettings.xSensitivity;
+                    float f2 = this.dh.vrSettings.keyholeX;
+                    float f3 = 20.0F * this.dh.vrSettings.xSensitivity;
                     int j = (int)((double)(-f2 + f / 2.0F) * (double)this.mc.getWindow().getScreenWidth() / (double)f) + 1;
                     int k = (int)((double)(f2 + f / 2.0F) * (double)this.mc.getWindow().getScreenWidth() / (double)f) - 1;
                     float f4 = ((float)Math.abs(d0) - f2) / (f / 2.0F - f2);
@@ -769,7 +774,7 @@ public abstract class MCVR
                         d0 = (double)f2;
                     }
 
-                    double d4 = 0.5D * (double)this.mc.vrSettings.ySensitivity;
+                    double d4 = 0.5D * (double)this.dh.vrSettings.ySensitivity;
                     d2 = (double)this.aimPitch + d1 * d4;
                     d2 = Mth.clamp(d2, -89.9D, 89.9D);
                     InputSimulator.setMousePos(d3, (double)(i / 2));
@@ -795,7 +800,7 @@ public abstract class MCVR
             Vec3 vec33 = this.controllerRotation[0].transform(this.up).toVector3d();
             this.controllerUpHistory[0].add(vec33);
 
-            if (this.mc.vrSettings.seated)
+            if (this.dh.vrSettings.seated)
             {
                 amatrix4f1[1] = this.controllerPose[1];
             }
@@ -821,7 +826,7 @@ public abstract class MCVR
             this.handRotation[1].M[3][2] = 0.0F;
             this.handRotation[1].M[3][3] = 1.0F;
 
-            if (this.mc.vrSettings.seated)
+            if (this.dh.vrSettings.seated)
             {
                 amatrix4f[1] = this.controllerPose[1];
             }
@@ -854,7 +859,7 @@ public abstract class MCVR
             vec32 = this.controllerRotation[1].transform(this.up).toVector3d();
             this.controllerUpHistory[1].add(vec32);
 
-            if (this.mc.vrSettings.seated)
+            if (this.dh.vrSettings.seated)
             {
                 this.aimSource[1] = this.getCenterEyePosition();
                 this.aimSource[0] = this.getCenterEyePosition();
@@ -884,10 +889,10 @@ public abstract class MCVR
             this.controllerRotation[2].M[3][2] = 0.0F;
             this.controllerRotation[2].M[3][3] = 1.0F;
 
-            if ((!this.hasThirdController() || this.mc.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY && this.mc.vrSettings.displayMirrorMode != VRSettings.MirrorMode.THIRD_PERSON) && !flag)
+            if ((!this.hasThirdController() || this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY && this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.THIRD_PERSON) && !flag)
             {
                 this.mrMovingCamActive = false;
-                this.aimSource[2] = new Vec3((double)this.mc.vrSettings.vrFixedCamposX, (double)this.mc.vrSettings.vrFixedCamposY, (double)this.mc.vrSettings.vrFixedCamposZ);
+                this.aimSource[2] = new Vec3((double)this.dh.vrSettings.vrFixedCamposX, (double)this.dh.vrSettings.vrFixedCamposY, (double)this.dh.vrSettings.vrFixedCamposZ);
             }
             else
             {
@@ -912,24 +917,24 @@ public abstract class MCVR
             }
             else if (++this.moveModeSwitchCount == 80 || flag2)
             {
-                if (this.mc.vrSettings.seated)
+                if (this.dh.vrSettings.seated)
                 {
-                    this.mc.vrSettings.seatedFreeMove = !this.mc.vrSettings.seatedFreeMove;
-                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.mc.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport")));
+                    this.dh.vrSettings.seatedFreeMove = !this.dh.vrSettings.seatedFreeMove;
+                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport")));
                 }
-                else if (this.mc.vrPlayer.isTeleportSupported())
+                else if (this.dh.vrPlayer.isTeleportSupported())
                 {
-                    this.mc.vrSettings.forceStandingFreeMove = !this.mc.vrSettings.forceStandingFreeMove;
-                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.mc.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport")));
+                    this.dh.vrSettings.forceStandingFreeMove = !this.dh.vrSettings.forceStandingFreeMove;
+                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport")));
                 }
-                else if (this.mc.vrPlayer.isTeleportOverridden())
+                else if (this.dh.vrPlayer.isTeleportOverridden())
                 {
-                    this.mc.vrPlayer.setTeleportOverride(false);
+                    this.dh.vrPlayer.setTeleportOverride(false);
                     this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.teleportdisabled"));
                 }
                 else
                 {
-                    this.mc.vrPlayer.setTeleportOverride(true);
+                    this.dh.vrPlayer.setTeleportOverride(true);
                     this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.teleportenabled"));
                 }
             }
@@ -954,12 +959,12 @@ public abstract class MCVR
                     if (!this.isWalkingAbout)
                     {
                         this.isWalkingAbout = true;
-                        this.walkaboutYawStart = this.mc.vrSettings.worldRotation - f2;
+                        this.walkaboutYawStart = this.dh.vrSettings.worldRotation - f2;
                     }
                     else
                     {
-                        this.mc.vrSettings.worldRotation = this.walkaboutYawStart + f2;
-                        this.mc.vrSettings.worldRotation %= 360.0F;
+                        this.dh.vrSettings.worldRotation = this.walkaboutYawStart + f2;
+                        this.dh.vrSettings.worldRotation %= 360.0F;
                     }
                 }
                 else
@@ -980,11 +985,11 @@ public abstract class MCVR
                     if (!this.isFreeRotate)
                     {
                         this.isFreeRotate = true;
-                        this.walkaboutYawStart = this.mc.vrSettings.worldRotation + f3;
+                        this.walkaboutYawStart = this.dh.vrSettings.worldRotation + f3;
                     }
                     else
                     {
-                        this.mc.vrSettings.worldRotation = this.walkaboutYawStart - f3;
+                        this.dh.vrSettings.worldRotation = this.walkaboutYawStart - f3;
                     }
                 }
                 else
@@ -1038,7 +1043,7 @@ public abstract class MCVR
                 this.mc.setScreen((Screen)null);
             }
 
-            if (this.mc.vrSettings.worldRotationIncrement == 0.0F)
+            if (this.dh.vrSettings.worldRotationIncrement == 0.0F)
             {
                 float f4 = this.getInputAction(this.keyRotateAxis).getAxis2DUseTracked().getX();
 
@@ -1050,8 +1055,8 @@ public abstract class MCVR
                 if (f4 != 0.0F)
                 {
                     float f8 = 10.0F * f4;
-                    this.mc.vrSettings.worldRotation -= f8;
-                    this.mc.vrSettings.worldRotation %= 360.0F;
+                    this.dh.vrSettings.worldRotation -= f8;
+                    this.dh.vrSettings.worldRotation %= 360.0F;
                 }
             }
             else if (this.keyRotateAxis.consumeClick() || this.keyFreeMoveRotate.consumeClick())
@@ -1065,12 +1070,12 @@ public abstract class MCVR
 
                 if (Math.abs(f5) > 0.5F)
                 {
-                    this.mc.vrSettings.worldRotation -= this.mc.vrSettings.worldRotationIncrement * Math.signum(f5);
-                    this.mc.vrSettings.worldRotation %= 360.0F;
+                    this.dh.vrSettings.worldRotation -= this.dh.vrSettings.worldRotationIncrement * Math.signum(f5);
+                    this.dh.vrSettings.worldRotation %= 360.0F;
                 }
             }
 
-            if (this.mc.vrSettings.worldRotationIncrement == 0.0F)
+            if (this.dh.vrSettings.worldRotationIncrement == 0.0F)
             {
                 float f6 = VivecraftMovementInput.getMovementAxisValue(this.keyRotateLeft);
 
@@ -1083,17 +1088,17 @@ public abstract class MCVR
                         f9 = 10.0F * f6;
                     }
 
-                    this.mc.vrSettings.worldRotation += f9;
-                    this.mc.vrSettings.worldRotation %= 360.0F;
+                    this.dh.vrSettings.worldRotation += f9;
+                    this.dh.vrSettings.worldRotation %= 360.0F;
                 }
             }
             else if (this.keyRotateLeft.consumeClick())
             {
-                this.mc.vrSettings.worldRotation += this.mc.vrSettings.worldRotationIncrement;
-                this.mc.vrSettings.worldRotation %= 360.0F;
+                this.dh.vrSettings.worldRotation += this.dh.vrSettings.worldRotationIncrement;
+                this.dh.vrSettings.worldRotation %= 360.0F;
             }
 
-            if (this.mc.vrSettings.worldRotationIncrement == 0.0F)
+            if (this.dh.vrSettings.worldRotationIncrement == 0.0F)
             {
                 float f7 = VivecraftMovementInput.getMovementAxisValue(this.keyRotateRight);
 
@@ -1106,17 +1111,17 @@ public abstract class MCVR
                         f10 = 10.0F * f7;
                     }
 
-                    this.mc.vrSettings.worldRotation -= f10;
-                    this.mc.vrSettings.worldRotation %= 360.0F;
+                    this.dh.vrSettings.worldRotation -= f10;
+                    this.dh.vrSettings.worldRotation %= 360.0F;
                 }
             }
             else if (this.keyRotateRight.consumeClick())
             {
-                this.mc.vrSettings.worldRotation -= this.mc.vrSettings.worldRotationIncrement;
-                this.mc.vrSettings.worldRotation %= 360.0F;
+                this.dh.vrSettings.worldRotation -= this.dh.vrSettings.worldRotationIncrement;
+                this.dh.vrSettings.worldRotation %= 360.0F;
             }
 
-            this.seatedRot = this.mc.vrSettings.worldRotation;
+            this.seatedRot = this.dh.vrSettings.worldRotation;
 
             if (this.keyRadialMenu.consumeClick() && !flag1)
             {
@@ -1130,16 +1135,16 @@ public abstract class MCVR
 
             if (this.keySwapMirrorView.consumeClick())
             {
-                if (this.mc.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON)
+                if (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON)
                 {
-                    this.mc.vrSettings.displayMirrorMode = VRSettings.MirrorMode.FIRST_PERSON;
+                    this.dh.vrSettings.displayMirrorMode = VRSettings.MirrorMode.FIRST_PERSON;
                 }
-                else if (this.mc.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON)
+                else if (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON)
                 {
-                    this.mc.vrSettings.displayMirrorMode = VRSettings.MirrorMode.THIRD_PERSON;
+                    this.dh.vrSettings.displayMirrorMode = VRSettings.MirrorMode.THIRD_PERSON;
                 }
 
-                this.mc.vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
+                this.dh.vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
             }
 
             if (this.keyToggleKeyboard.consumeClick())
@@ -1147,7 +1152,7 @@ public abstract class MCVR
                 KeyboardHandler.setOverlayShowing(!KeyboardHandler.Showing);
             }
 
-            if (this.keyMoveThirdPersonCam.consumeClick() && !Main.kiosk && !this.mc.vrSettings.seated && (this.mc.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || this.mc.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON))
+            if (this.keyMoveThirdPersonCam.consumeClick() && !DataHolder.kiosk && !this.dh.vrSettings.seated && (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON))
             {
                 ControllerType controllertype2 = this.findActiveBindingControllerType(this.keyMoveThirdPersonCam);
 
@@ -1160,13 +1165,13 @@ public abstract class MCVR
             if (!this.keyMoveThirdPersonCam.isDown() && VRHotkeys.isMovingThirdPersonCam() && VRHotkeys.getMovingThirdPersonCamTriggerer() == VRHotkeys.Triggerer.BINDING)
             {
                 VRHotkeys.stopMovingThirdPersonCam();
-                this.mc.vrSettings.saveOptions();
+                this.dh.vrSettings.saveOptions();
             }
 
             if (VRHotkeys.isMovingThirdPersonCam() && VRHotkeys.getMovingThirdPersonCamTriggerer() == VRHotkeys.Triggerer.MENUBUTTON && this.keyMenuButton.consumeClick())
             {
                 VRHotkeys.stopMovingThirdPersonCam();
-                this.mc.vrSettings.saveOptions();
+                this.dh.vrSettings.saveOptions();
             }
 
             if (KeyboardHandler.Showing && this.mc.screen == null && this.keyMenuButton.consumeClick())
@@ -1183,7 +1188,7 @@ public abstract class MCVR
             {
                 if (!flag1)
                 {
-                    if (!Main.kiosk)
+                    if (!DataHolder.kiosk)
                     {
                         this.mc.pauseGame(false);
                     }
@@ -1261,14 +1266,14 @@ public abstract class MCVR
 
             if (this.keyTogglePlayerList.consumeClick())
             {
-                this.mc.gui.showPlayerList = !this.mc.gui.showPlayerList;
+                ((GuiExtension)this.mc.gui).showPlayerList = !((GuiExtension)this.mc.gui).showPlayerList;
             }
 
             if (this.keyToggleHandheldCam.consumeClick() && this.mc.player != null)
             {
-                this.mc.cameraTracker.toggleVisibility();
+                this.dh.cameraTracker.toggleVisibility();
 
-                if (this.mc.cameraTracker.isVisible())
+                if (this.dh.cameraTracker.isVisible())
                 {
                     ControllerType controllertype3 = this.findActiveBindingControllerType(this.keyToggleHandheldCam);
 
@@ -1277,17 +1282,17 @@ public abstract class MCVR
                         controllertype3 = ControllerType.RIGHT;
                     }
 
-                    VRData.VRDevicePose vrdata$vrdevicepose = this.mc.vrPlayer.vrdata_world_pre.getController(controllertype3.ordinal());
-                    this.mc.cameraTracker.setPosition(vrdata$vrdevicepose.getPosition());
-                    this.mc.cameraTracker.setRotation(new Quaternion(vrdata$vrdevicepose.getMatrix().transposed()));
+                    VRData.VRDevicePose vrdata$vrdevicepose = this.dh.vrPlayer.vrdata_world_pre.getController(controllertype3.ordinal());
+                    this.dh.cameraTracker.setPosition(vrdata$vrdevicepose.getPosition());
+                    this.dh.cameraTracker.setRotation(new Quaternion(vrdata$vrdevicepose.getMatrix().transposed()));
                 }
             }
 
             if (this.keyQuickHandheldCam.consumeClick() && this.mc.player != null)
             {
-                if (!this.mc.cameraTracker.isVisible())
+                if (!this.dh.cameraTracker.isVisible())
                 {
-                    this.mc.cameraTracker.toggleVisibility();
+                    this.dh.cameraTracker.toggleVisibility();
                 }
 
                 ControllerType controllertype4 = this.findActiveBindingControllerType(this.keyQuickHandheldCam);
@@ -1297,22 +1302,22 @@ public abstract class MCVR
                     controllertype4 = ControllerType.RIGHT;
                 }
 
-                VRData.VRDevicePose vrdata$vrdevicepose1 = this.mc.vrPlayer.vrdata_world_pre.getController(controllertype4.ordinal());
-                this.mc.cameraTracker.setPosition(vrdata$vrdevicepose1.getPosition());
-                this.mc.cameraTracker.setRotation(new Quaternion(vrdata$vrdevicepose1.getMatrix().transposed()));
-                this.mc.cameraTracker.startMoving(controllertype4.ordinal(), true);
+                VRData.VRDevicePose vrdata$vrdevicepose1 = this.dh.vrPlayer.vrdata_world_pre.getController(controllertype4.ordinal());
+                this.dh.cameraTracker.setPosition(vrdata$vrdevicepose1.getPosition());
+                this.dh.cameraTracker.setRotation(new Quaternion(vrdata$vrdevicepose1.getMatrix().transposed()));
+                this.dh.cameraTracker.startMoving(controllertype4.ordinal(), true);
             }
 
-            if (!this.keyQuickHandheldCam.isDown() && this.mc.cameraTracker.isMoving() && this.mc.cameraTracker.isQuickMode() && this.mc.player != null)
+            if (!this.keyQuickHandheldCam.isDown() && this.dh.cameraTracker.isMoving() && this.dh.cameraTracker.isQuickMode() && this.mc.player != null)
             {
-                this.mc.cameraTracker.stopMoving();
-                this.mc.grabScreenShot = true;
+                this.dh.cameraTracker.stopMoving();
+                this.dh.grabScreenShot = true;
             }
 
             GuiHandler.processBindingsGui();
             RadialHandler.processBindings();
             KeyboardHandler.processBindings();
-            this.mc.interactTracker.processBindings();
+            this.dh.interactTracker.processBindings();
         }
     }
 
@@ -1447,13 +1452,14 @@ public abstract class MCVR
 
     protected void changeHotbar(int dir)
     {
-        if (this.mc.player != null && (!this.mc.climbTracker.isGrabbingLadder() || !this.mc.climbTracker.isClaws(this.mc.player.getMainHandItem())))
+        if (this.mc.player != null && (!this.dh.climbTracker.isGrabbingLadder() || !this.dh.climbTracker.isClaws(this.mc.player.getMainHandItem())))
         {
-            if (Reflector.ForgeHooksClient.exists() && this.mc.screen == null)
-            {
-                InputSimulator.scrollMouse(0.0D, (double)(dir * 4));
-            }
-            else
+        	//TODO Forge
+//            if (Reflector.ForgeHooksClient.exists() && this.mc.screen == null)
+//            {
+//                InputSimulator.scrollMouse(0.0D, (double)(dir * 4));
+//            }
+//            else
             {
                 this.mc.player.getInventory().swapPaint((double)dir);
             }

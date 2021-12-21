@@ -1,12 +1,15 @@
 package org.vivecraft.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.resources.language.I18n;
 import org.vivecraft.gui.framework.TwoHandedScreen;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.openvr_jna.VRInputAction;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class GuiRadial extends TwoHandedScreen
 {
@@ -15,8 +18,8 @@ public class GuiRadial extends TwoHandedScreen
 
     public void init()
     {
-        this.arr = this.minecraft.vrSettings.vrRadialItems;
-        String[] astring = this.minecraft.vrSettings.vrRadialItemsAlt;
+        this.arr = this.dataholder.vrSettings.vrRadialItems;
+        String[] astring = this.dataholder.vrSettings.vrRadialItemsAlt;
         this.clearWidgets();
         int i = 8;
         int j = 120;
@@ -46,7 +49,7 @@ public class GuiRadial extends TwoHandedScreen
 
             if (keymapping != null)
             {
-                s = I18n.m_118938_(keymapping.getName());
+                s = I18n.get(keymapping.getName());
             }
 
             int i2 = Math.max(j, this.font.width(s));
@@ -98,7 +101,7 @@ public class GuiRadial extends TwoHandedScreen
 
             if (s != "?")
             {
-                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2 - 10, i2, 20, s, (p) ->
+                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2 - 10, i2, 20, new TranslatableComponent(s), (p) ->
                 {
                     if (l1 < 200)
                     {

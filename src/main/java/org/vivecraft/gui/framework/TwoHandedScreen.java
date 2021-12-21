@@ -1,12 +1,16 @@
 package org.vivecraft.gui.framework;
 
+import org.vivecraft.provider.ControllerType;
+import org.vivecraft.provider.MCVR;
+
+import com.example.examplemod.DataHolder;
+import com.example.examplemod.GuiExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
-import org.vivecraft.provider.ControllerType;
-import org.vivecraft.provider.MCVR;
 
 public abstract class TwoHandedScreen extends Screen
 {
@@ -17,6 +21,7 @@ public abstract class TwoHandedScreen extends Screen
     private AbstractWidget lastHoveredButtonId1 = null;
     private AbstractWidget lastHoveredButtonId2 = null;
     protected boolean reinit;
+    public DataHolder dataholder = DataHolder.getInstance();
 
     protected TwoHandedScreen()
     {
@@ -97,7 +102,7 @@ public abstract class TwoHandedScreen extends Screen
             this.lastHoveredButtonId2 = abstractwidget1;
         }
 
-        this.minecraft.gui.drawMouseMenuQuad((int)d0, (int)d1);
-        this.minecraft.gui.drawMouseMenuQuad((int)d2, (int)d3);
+        ((GuiExtension)this.minecraft.gui).drawMouseMenuQuad((int)d0, (int)d1);
+        ((GuiExtension)this.minecraft.gui).drawMouseMenuQuad((int)d2, (int)d3);
     }
 }

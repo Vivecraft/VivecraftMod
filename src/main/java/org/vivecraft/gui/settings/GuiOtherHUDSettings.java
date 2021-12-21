@@ -1,10 +1,11 @@
 package org.vivecraft.gui.settings;
 
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.gui.framework.GuiVROptionButton;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.settings.VRSettings;
+
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.screens.Screen;
 
 public class GuiOtherHUDSettings extends GuiVROptionsBase
 {
@@ -31,7 +32,7 @@ public class GuiOtherHUDSettings extends GuiVROptionsBase
         this.vrTitle = "vivecraft.options.screen.guiother";
         super.init(hudOptions, true);
 
-        if (this.minecraft.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND || this.minecraft.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
+        if (this.dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND || this.dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
         {
             super.init(chat, false);
         }

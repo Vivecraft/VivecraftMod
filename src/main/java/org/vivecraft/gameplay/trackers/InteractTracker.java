@@ -11,6 +11,7 @@ import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
 
 import com.example.examplemod.DataHolder;
+import com.example.examplemod.PlayerExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -317,7 +318,7 @@ public class InteractTracker extends Tracker
 
                 if (flag)
                 {
-                    this.mc.player.swingArm(interactionhand, VRFirstPersonArmSwing.Interact);
+                	((PlayerExtension)this.mc.player).swingArm(interactionhand, VRFirstPersonArmSwing.Interact);
                     this.dh.vr.triggerHapticPulse(i, 750);
                 }
             }

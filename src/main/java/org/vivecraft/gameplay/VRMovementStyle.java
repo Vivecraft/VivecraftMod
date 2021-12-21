@@ -1,5 +1,7 @@
 package org.vivecraft.gameplay;
 
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 
@@ -146,12 +148,12 @@ public class VRMovementStyle
         else
         {
             flag = false;
-            Minecraft.getInstance().printChatMessage("Unknown teleport style requested: " + requestedStyle);
+            DataHolder.getInstance().printChatMessage("Unknown teleport style requested: " + requestedStyle);
         }
 
         if (flag && Minecraft.getInstance() != null)
         {
-            Minecraft.getInstance().printChatMessage("Teleport style (RCTRL-M): " + this.name);
+        	DataHolder.getInstance().printChatMessage("Teleport style (RCTRL-M): " + this.name);
         }
     }
 }

@@ -1,5 +1,10 @@
 package org.vivecraft.gameplay.trackers;
 
+import org.vivecraft.api.VRData;
+import org.vivecraft.settings.VRSettings;
+
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
@@ -9,8 +14,6 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.FoodOnAStickItem;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.api.VRData;
-import org.vivecraft.settings.VRSettings;
 
 public class VehicleTracker extends Tracker
 {
@@ -61,6 +64,7 @@ public class VehicleTracker extends Tracker
         Vec3 vec3 = null;
         Entity entity = player.getVehicle();
         Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
 
         if (!(entity instanceof AbstractHorse) && !(entity instanceof Boat))
         {
@@ -71,21 +75,21 @@ public class VehicleTracker extends Tracker
                 if (mob.canBeControlledByRider())
                 {
                     int i = player.getMainHandItem().getItem() instanceof FoodOnAStickItem ? 0 : 1;
-                    VRData.VRDevicePose vrdata$vrdevicepose = minecraft.vrPlayer.vrdata_world_pre.getController(i);
+                    VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_world_pre.getController(i);
                     return vrdata$vrdevicepose.getPosition().add(vrdata$vrdevicepose.getDirection().scale(0.3D)).subtract(entity.position()).normalize();
                 }
             }
         }
         else if (player.zza > 0.0F)
         {
-            VRSettings vrsettings = minecraft.vrSettings;
+            VRSettings vrsettings = dataholder.vrSettings;
 
-            if (minecraft.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD)
+            if (dataholder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD)
             {
-                return minecraft.vrPlayer.vrdata_world_pre.hmd.getDirection();
+                return dataholder.vrPlayer.vrdata_world_pre.hmd.getDirection();
             }
 
-            return minecraft.vrPlayer.vrdata_world_pre.getController(0).getDirection();
+            return dataholder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
         }
 
         return vec3;
@@ -105,12 +109,12 @@ public class VehicleTracker extends Tracker
                 --this.rotationCooldown;
             }
 
-            if (this.mc.vrSettings.vehicleRotation && this.mc.player.isPassenger() && this.rotationCooldown == 0)
+            if (this.dh.vrSettings.vehicleRotation && this.mc.player.isPassenger() && this.rotationCooldown == 0)
             {
                 Entity entity = this.mc.player.getVehicle();
                 this.rotationTarget = (double)entity.getYRot();
 
-                if (entity instanceof AbstractHorse && !this.mc.horseTracker.isActive(this.mc.player))
+                if (entity instanceof AbstractHorse && !this.dh.horseTracker.isActive(this.mc.player))
                 {
                     AbstractHorse abstracthorse = (AbstractHorse)entity;
 
@@ -166,7 +170,7 @@ public class VehicleTracker extends Tracker
                     }
                 }
 
-                float f1 = this.mc.vrPlayer.rotDiff_Degrees((float)this.rotationTarget, this.vehicleInitialRotation);
+                float f1 = this.dh.vrPlayer.rotDiff_Degrees((float)this.rotationTarget, this.vehicleInitialRotation);
 
                 if (flag)
                 {
@@ -181,9 +185,9 @@ public class VehicleTracker extends Tracker
                     }
                 }
 
-                this.mc.vrSettings.worldRotation += f1;
-                this.mc.vrSettings.worldRotation %= 360.0F;
-                this.mc.vr.seatedRot = this.mc.vrSettings.worldRotation;
+                this.dh.vrSettings.worldRotation += f1;
+                this.dh.vrSettings.worldRotation %= 360.0F;
+                this.dh.vr.seatedRot = this.dh.vrSettings.worldRotation;
                 this.vehicleInitialRotation -= f1;
                 this.vehicleInitialRotation %= 360.0F;
             }
@@ -202,16 +206,17 @@ public class VehicleTracker extends Tracker
     public void onStartRiding(Entity vehicle, LocalPlayer player)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        this.PreMount_World_Rotation = minecraft.vrPlayer.vrdata_world_pre.rotation_radians;
-        Vec3 vec3 = minecraft.vrPlayer.vrdata_room_pre.getHeadPivot();
+        DataHolder dataholder = DataHolder.getInstance();
+        this.PreMount_World_Rotation = dataholder.vrPlayer.vrdata_world_pre.rotation_radians;
+        Vec3 vec3 = dataholder.vrPlayer.vrdata_room_pre.getHeadPivot();
         this.Premount_Pos_Room = new Vec3(vec3.x, 0.0D, vec3.z);
         this.dismountCooldown = 5;
 
-        if (minecraft.vrSettings.vehicleRotation)
+        if (dataholder.vrSettings.vehicleRotation)
         {
-            float f = minecraft.vrPlayer.vrdata_world_pre.hmd.getYaw();
+            float f = dataholder.vrPlayer.vrdata_world_pre.hmd.getYaw();
             float f1 = vehicle.getYRot() % 360.0F;
-            this.vehicleInitialRotation = minecraft.vrSettings.worldRotation;
+            this.vehicleInitialRotation = dataholder.vrSettings.worldRotation;
             this.rotationCooldown = 2;
 
             if (vehicle instanceof Minecart)
@@ -219,19 +224,19 @@ public class VehicleTracker extends Tracker
                 return;
             }
 
-            float f2 = minecraft.vrPlayer.rotDiff_Degrees(f1, f);
-            minecraft.vrSettings.worldRotation = (float)(Math.toDegrees((double)minecraft.vrPlayer.vrdata_world_pre.rotation_radians) + (double)f2);
-            minecraft.vrSettings.worldRotation %= 360.0F;
-            minecraft.vr.seatedRot = minecraft.vrSettings.worldRotation;
+            float f2 = dataholder.vrPlayer.rotDiff_Degrees(f1, f);
+            dataholder.vrSettings.worldRotation = (float)(Math.toDegrees((double)dataholder.vrPlayer.vrdata_world_pre.rotation_radians) + (double)f2);
+            dataholder.vrSettings.worldRotation %= 360.0F;
+            dataholder.vr.seatedRot = dataholder.vrSettings.worldRotation;
         }
     }
 
     public void onStopRiding(LocalPlayer player)
     {
-        this.mc.swingTracker.disableSwing = 10;
-        this.mc.sneakTracker.sneakCounter = 0;
+        this.dh.swingTracker.disableSwing = 10;
+        this.dh.sneakTracker.sneakCounter = 0;
 
-        if (this.mc.vrSettings.vehicleRotation)
+        if (this.dh.vrSettings.vehicleRotation)
         {
         }
     }

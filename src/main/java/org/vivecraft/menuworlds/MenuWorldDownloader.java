@@ -13,8 +13,9 @@ import java.util.Random;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
-import net.optifine.Config;
 
 public class MenuWorldDownloader {
     private static final String baseUrl = "https://cache.techjargaming.com/vivecraft/115/";
@@ -45,7 +46,7 @@ public class MenuWorldDownloader {
 
     public static InputStream getRandomWorld() throws IOException, NoSuchAlgorithmException {
         init();
-        VRSettings settings = Minecraft.getInstance().vrSettings;
+        VRSettings settings = DataHolder.getInstance().vrSettings;
 
         try {
             List<MenuWorldItem> worldList = new ArrayList<>();
@@ -87,7 +88,8 @@ public class MenuWorldDownloader {
 
     private static List<MenuWorldItem> getOfficialWorlds() throws IOException {
         List<MenuWorldItem> list = new ArrayList<>();
-        List<String> resultList = Utils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + Config.MC_VERSION);
+//        List<String> resultList = Utils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + Config.MC_VERSION); TODO
+        List<String> resultList = Utils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + Minecraft.getInstance().getLaunchedVersion());
         for (String str : resultList)
             list.add(new MenuWorldItem("menuworlds/" + str, null));
         return list;

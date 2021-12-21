@@ -1,13 +1,16 @@
 package org.vivecraft.gameplay.trackers;
 
+import org.vivecraft.gameplay.VRPlayer;
+import org.vivecraft.settings.VRSettings;
+import org.vivecraft.utils.math.Quaternion;
+
+import com.example.examplemod.DataHolder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.gameplay.VRPlayer;
-import org.vivecraft.settings.VRSettings;
-import org.vivecraft.utils.math.Quaternion;
 
 public class RowTracker extends Tracker
 {
@@ -25,11 +28,11 @@ public class RowTracker extends Tracker
 
     public boolean isActive(LocalPlayer p)
     {
-        if (Minecraft.getInstance().vrSettings.seated)
+        if (DataHolder.getInstance().vrSettings.seated)
         {
             return false;
         }
-        else if (!Minecraft.getInstance().vrSettings.realisticRowEnabled)
+        else if (!DataHolder.getInstance().vrSettings.realisticRowEnabled)
         {
             return false;
         }
@@ -49,7 +52,7 @@ public class RowTracker extends Tracker
             }
             else
             {
-                return !Minecraft.getInstance().bowTracker.isNotched();
+                return !DataHolder.getInstance().bowTracker.isNotched();
             }
         }
         else
@@ -72,8 +75,8 @@ public class RowTracker extends Tracker
 
     public void doProcess(LocalPlayer player)
     {
-        double d0 = this.mc.vr.controllerHistory[0].averageSpeed(0.5D);
-        double d1 = this.mc.vr.controllerHistory[1].averageSpeed(0.5D);
+        double d0 = this.dh.vr.controllerHistory[0].averageSpeed(0.5D);
+        double d1 = this.dh.vr.controllerHistory[1].averageSpeed(0.5D);
         float f = 0.5F;
         float f1 = 2.0F;
         this.ROar = (float)Math.max(d0 - (double)f, 0.0D);
@@ -152,7 +155,7 @@ public class RowTracker extends Tracker
 
     Vec3 getAbsArmPos(int side)
     {
-        Vec3 vec3 = this.mc.vr.controllerHistory[side].averagePosition(0.1D);
+        Vec3 vec3 = this.dh.vr.controllerHistory[side].averagePosition(0.1D);
         Quaternion quaternion = new Quaternion(0.0F, VRSettings.inst.worldRotation, 0.0F);
         return VRPlayer.get().roomOrigin.add(quaternion.multiply(vec3));
     }

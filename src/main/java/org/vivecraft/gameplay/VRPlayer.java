@@ -13,6 +13,8 @@ import org.vivecraft.gameplay.trackers.VehicleTracker;
 import org.vivecraft.settings.VRSettings;
 
 import com.example.examplemod.DataHolder;
+import com.example.examplemod.GameRendererExtension;
+import com.example.examplemod.PlayerExtension;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -99,7 +101,7 @@ public class VRPlayer
 
     public void postPoll()
     {
-        this.vrdata_room_pre = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.mc.vrSettings.walkMultiplier, 1.0F, 0.0F);
+        this.vrdata_room_pre = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
         GuiHandler.processGui();
         KeyboardHandler.processGui();
         RadialHandler.processGui();
@@ -111,7 +113,7 @@ public class VRPlayer
         this.vrdata_world_pre = new VRData(this.roomOrigin, this.dh.vrSettings.walkMultiplier, this.worldScale, (float)Math.toRadians((double)this.dh.vrSettings.worldRotation));
         float f = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
 
-        if (this.mc.gameRenderer.isInMenuRoom())
+        if (((GameRendererExtension)this.mc.gameRenderer).isInMenuRoom())
         {
             this.worldScale = 1.0F;
         }
@@ -157,7 +159,7 @@ public class VRPlayer
             this.worldScale = f;
         }
 
-        if (this.dh.vrSettings.seated && !this.mc.gameRenderer.isInMenuRoom())
+        if (this.dh.vrSettings.seated && !((GameRendererExtension)this.mc.gameRenderer).isInMenuRoom())
         {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
         }
@@ -185,6 +187,7 @@ public class VRPlayer
     public void preRender(float par1)
     {
         Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
         float f = this.vrdata_world_post.worldScale * par1 + this.vrdata_world_pre.worldScale * (1.0F - par1);
         float f1 = this.vrdata_world_post.rotation_radians;
         float f2 = this.vrdata_world_pre.rotation_radians;
@@ -204,7 +207,7 @@ public class VRPlayer
 
         float f4 = f1 * par1 + f2 * (1.0F - par1);
         Vec3 vec3 = new Vec3(this.vrdata_world_pre.origin.x + (this.vrdata_world_post.origin.x - this.vrdata_world_pre.origin.x) * (double)par1, this.vrdata_world_pre.origin.y + (this.vrdata_world_post.origin.y - this.vrdata_world_pre.origin.y) * (double)par1, this.vrdata_world_pre.origin.z + (this.vrdata_world_post.origin.z - this.vrdata_world_pre.origin.z) * (double)par1);
-        this.vrdata_world_render = new VRData(vec3, minecraft.vrSettings.walkMultiplier, f, f4);
+        this.vrdata_world_render = new VRData(vec3, dataholder.vrSettings.walkMultiplier, f, f4);
 
         for (Tracker tracker : this.trackers)
         {
@@ -245,20 +248,21 @@ public class VRPlayer
             if (player != null && player.position() != Vec3.ZERO)
             {
                 Minecraft minecraft = Minecraft.getInstance();
+                DataHolder dataholder = DataHolder.getInstance();
 
-                if (minecraft.sneakTracker.sneakCounter <= 0)
+                if (dataholder.sneakTracker.sneakCounter <= 0)
                 {
                     VRData vrdata = this.vrdata_world_pre;
 
                     if (instant)
                     {
-                        vrdata = new VRData(this.roomOrigin, minecraft.vrSettings.walkMultiplier, this.worldScale, (float)Math.toRadians((double)minecraft.vrSettings.worldRotation));
+                        vrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float)Math.toRadians((double)dataholder.vrSettings.worldRotation));
                     }
 
                     Vec3 vec3 = vrdata.getHeadPivot().subtract(vrdata.origin);
                     double d0 = player.getX() - vec3.x;
                     double d2 = player.getZ() - vec3.z;
-                    double d1 = player.getY() + player.getRoomYOffsetFromPose();
+                    double d1 = player.getY() + ((PlayerExtension)player).getRoomYOffsetFromPose();
                     this.setRoomOrigin(d0, d1, d2, reset);
                 }
             }
@@ -285,7 +289,7 @@ public class VRPlayer
 
     public void tick(LocalPlayer player, Minecraft mc, Random rand)
     {
-        if (player.initFromServer)
+        if (((PlayerExtension)player).getInitFromServer())
         {
             if (!this.initdone)
             {
@@ -294,8 +298,8 @@ public class VRPlayer
                 System.out.println("Room origin: " + this.vrdata_world_pre.origin);
                 System.out.println("Hmd position room: " + this.vrdata_room_pre.hmd.getPosition());
                 System.out.println("Hmd position world: " + this.vrdata_world_pre.hmd.getPosition());
-                System.out.println("Hmd Projection Left: " + mc.vrRenderer.eyeproj[0]);
-                System.out.println("Hmd Projection Right: " + mc.vrRenderer.eyeproj[1]);
+                System.out.println("Hmd Projection Left: " + dh.vrRenderer.eyeproj[0]);
+                System.out.println("Hmd Projection Right: " + dh.vrRenderer.eyeproj[1]);
                 System.out.println("<Debug info end>");
                 this.initdone = true;
             }
@@ -327,10 +331,10 @@ public class VRPlayer
                 {
                     AbstractHorse abstracthorse = (AbstractHorse)entity;
 
-                    if (abstracthorse.canBeControlledByRider() && abstracthorse.isSaddled() && !mc.horseTracker.isActive(mc.player))
+                    if (abstracthorse.canBeControlledByRider() && abstracthorse.isSaddled() && !dh.horseTracker.isActive(mc.player))
                     {
                         abstracthorse.yBodyRot = this.vrdata_world_pre.getBodyYaw();
-                        mc.vehicleTracker.rotationCooldown = 10;
+                        dh.vehicleTracker.rotationCooldown = 10;
                     }
                 }
                 else if (entity instanceof Mob)
@@ -340,7 +344,7 @@ public class VRPlayer
                     if (mob.canBeControlledByRider())
                     {
                         mob.yBodyRot = this.vrdata_world_pre.getBodyYaw();
-                        mc.vehicleTracker.rotationCooldown = 10;
+                        dh.vehicleTracker.rotationCooldown = 10;
                     }
                 }
             }
@@ -356,6 +360,7 @@ public class VRPlayer
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
+            DataHolder dataholder = DataHolder.getInstance();
 
             if (player != null)
             {
@@ -363,15 +368,15 @@ public class VRPlayer
                 {
                     if (!player.isSleeping())
                     {
-                        if (!minecraft.jumpTracker.isjumping())
+                        if (!dataholder.jumpTracker.isjumping())
                         {
-                            if (!minecraft.climbTracker.isGrabbingLadder())
+                            if (!dataholder.climbTracker.isGrabbingLadder())
                             {
                                 if (player.isAlive())
                                 {
-                                    VRData vrdata = new VRData(this.roomOrigin, minecraft.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
+                                    VRData vrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
 
-                                    if (minecraft.vehicleTracker.canRoomscaleDismount(minecraft.player))
+                                    if (dataholder.vehicleTracker.canRoomscaleDismount(minecraft.player))
                                     {
                                         Vec3 vec35 = minecraft.player.getVehicle().position();
                                         Vec3 vec36 = vrdata.getHeadPivot();
@@ -379,7 +384,7 @@ public class VRPlayer
 
                                         if (d6 > 1.0D)
                                         {
-                                            minecraft.sneakTracker.sneakCounter = 5;
+                                        	dataholder.sneakTracker.sneakCounter = 5;
                                         }
                                     }
                                     else
@@ -397,12 +402,12 @@ public class VRPlayer
 
                                         if (flag)
                                         {
-                                            player.setPosRaw(d0, !minecraft.vrSettings.simulateFalling ? d1 : player.getY(), d2);
+                                            player.setPosRaw(d0, !dataholder.vrSettings.simulateFalling ? d1 : player.getY(), d2);
                                             player.setBoundingBox(new AABB(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.minY + (double)f1, aabb.maxZ));
                                             player.fallDistance = 0.0F;
                                             this.getEstimatedTorsoPosition(d0, d1, d2);
                                         }
-                                        else if ((minecraft.vrSettings.walkUpBlocks && player.getMuhJumpFactor() == 1.0F || minecraft.climbTracker.isGrabbingLadder() && minecraft.vrSettings.realisticClimbEnabled) && player.fallDistance == 0.0F)
+                                        else if ((dataholder.vrSettings.walkUpBlocks && ((PlayerExtension)player).getMuhJumpFactor() == 1.0F || dataholder.climbTracker.isGrabbingLadder() && dataholder.vrSettings.realisticClimbEnabled) && player.fallDistance == 0.0F)
                                         {
                                             if (vec31 == null)
                                             {
@@ -421,7 +426,7 @@ public class VRPlayer
                                                 aabb = aabb.move(d4, 0.0D, d5);
                                                 int i = 0;
 
-                                                if (player.onClimbable() && minecraft.vrSettings.realisticClimbEnabled)
+                                                if (player.onClimbable() && dataholder.vrSettings.realisticClimbEnabled)
                                                 {
                                                     i = 6;
                                                 }
@@ -443,7 +448,7 @@ public class VRPlayer
                                                         Vec3 vec33 = player.getLookAngle();
                                                         Vec3 vec34 = (new Vec3(vec33.x, 0.0D, vec33.z)).normalize();
                                                         player.fallDistance = 0.0F;
-                                                        minecraft.player.stepSound(new BlockPos(player.position()), player.position());
+                                                        ((PlayerExtension)minecraft.player).stepSound(new BlockPos(player.position()), player.position());
                                                         break;
                                                     }
                                                 }
@@ -485,7 +490,7 @@ public class VRPlayer
 
     public void updateFreeMove()
     {
-        if (this.mc.teleportTracker.isAiming())
+        if (this.dh.teleportTracker.isAiming())
         {
             this.isFreeMoveCurrent = false;
         }
@@ -500,28 +505,28 @@ public class VRPlayer
 
     public boolean getFreeMove()
     {
-        if (this.mc.vrSettings.seated)
+        if (this.dh.vrSettings.seated)
         {
-            return this.mc.vrSettings.seatedFreeMove || !this.isTeleportEnabled();
+            return this.dh.vrSettings.seatedFreeMove || !this.isTeleportEnabled();
         }
         else
         {
-            return this.isFreeMoveCurrent || this.mc.vrSettings.forceStandingFreeMove;
+            return this.isFreeMoveCurrent || this.dh.vrSettings.forceStandingFreeMove;
         }
     }
 
     public String toString()
     {
-        return "VRPlayer: \r\n \t origin: " + this.roomOrigin + "\r\n \t rotation: " + String.format("%.3f", Minecraft.getInstance().vrSettings.worldRotation) + "\r\n \t scale: " + String.format("%.3f", this.worldScale) + "\r\n \t room_pre " + this.vrdata_room_pre + "\r\n \t world_pre " + this.vrdata_world_pre + "\r\n \t world_post " + this.vrdata_world_post + "\r\n \t world_render " + this.vrdata_world_render;
+        return "VRPlayer: \r\n \t origin: " + this.roomOrigin + "\r\n \t rotation: " + String.format("%.3f", DataHolder.getInstance().vrSettings.worldRotation) + "\r\n \t scale: " + String.format("%.3f", this.worldScale) + "\r\n \t room_pre " + this.vrdata_room_pre + "\r\n \t world_pre " + this.vrdata_world_pre + "\r\n \t world_post " + this.vrdata_world_post + "\r\n \t world_render " + this.vrdata_world_render;
     }
 
     public Vec3 getRightClickLookOverride(Player entity, int c)
     {
         Vec3 vec3 = entity.getLookAngle();
 
-        if (this.mc.gameRenderer.crossVec != null)
+        if (((GameRendererExtension)this.mc.gameRenderer).getCrossVec() != null)
         {
-            vec3 = entity.getEyePosition(1.0F).subtract(this.mc.gameRenderer.crossVec).normalize().reverse();
+            vec3 = entity.getEyePosition(1.0F).subtract(((GameRendererExtension)this.mc.gameRenderer).getCrossVec()).normalize().reverse();
         }
 
         ItemStack itemstack;
@@ -544,11 +549,11 @@ public class VRPlayer
                 }
             }
 
-            VRData vrdata = this.mc.vrPlayer.vrdata_world_pre;
+            VRData vrdata = this.dh.vrPlayer.vrdata_world_pre;
             vec3 = vrdata.getController(c).getDirection();
-            Vec3 vec31 = this.mc.bowTracker.getAimVector();
+            Vec3 vec31 = this.dh.bowTracker.getAimVector();
 
-            if (this.mc.bowTracker.isNotched() && vec31 != null && vec31.lengthSqr() > 0.0D)
+            if (this.dh.bowTracker.isNotched() && vec31 != null && vec31.lengthSqr() > 0.0D)
             {
                 vec3 = vec31.reverse();
             }
@@ -556,9 +561,9 @@ public class VRPlayer
             return vec3;
         }
 
-        if (itemstack.getItem() == Items.BUCKET && this.mc.interactTracker.bukkit[c])
+        if (itemstack.getItem() == Items.BUCKET && this.dh.interactTracker.bukkit[c])
         {
-            vec3 = entity.getEyePosition(1.0F).subtract(this.mc.vrPlayer.vrdata_world_pre.getController(c).getPosition()).normalize().reverse();
+            vec3 = entity.getEyePosition(1.0F).subtract(this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition()).normalize().reverse();
         }
 
         return vec3;
@@ -573,8 +578,8 @@ public class VRPlayer
                 entity.setYHeadRot(entity.getYRot());
                 entity.setXRot(-data.hmd.getPitch());		
         	} else {
-        		if(mc.gameRenderer.crossVec != null){
-        			Vec3 playerToCrosshair = entity.getEyePosition(1).subtract(mc.gameRenderer.crossVec); //backwards
+        		if(((GameRendererExtension)this.mc.gameRenderer).getCrossVec() != null){
+        			Vec3 playerToCrosshair = entity.getEyePosition(1).subtract(((GameRendererExtension)this.mc.gameRenderer).getCrossVec()); //backwards
         			double what = playerToCrosshair.y/playerToCrosshair.length();
         			if(what > 1) what = 1;
         			if(what < -1) what = -1;
@@ -588,9 +593,9 @@ public class VRPlayer
 
             if (entity.isSprinting() && entity.input.jumping || entity.isFallFlying() || entity.isSwimming() && entity.zza > 0.0F)
             {
-                VRSettings vrsettings = this.mc.vrSettings;
+                VRSettings vrsettings = this.dh.vrSettings;
 
-                if (this.mc.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.CONTROLLER)
+                if (this.dh.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.CONTROLLER)
                 {
                     entity.setYRot(data.getController(1).getYaw());
                     entity.setYHeadRot(entity.getYRot());
@@ -646,13 +651,13 @@ public class VRPlayer
     {
         boolean flag = !this.noTeleportClient || this.teleportOverride;
 
-        if (this.mc.vrSettings.seated)
+        if (this.dh.vrSettings.seated)
         {
             return flag;
         }
         else
         {
-            return flag && !this.mc.vrSettings.forceStandingFreeMove;
+            return flag && !this.dh.vrSettings.forceStandingFreeMove;
         }
     }
 
@@ -670,7 +675,7 @@ public class VRPlayer
 
     private void updateTeleportKeys()
     {
-        this.mc.vr.getInputAction(this.mc.vr.keyTeleport).setEnabled(this.isTeleportEnabled());
-        this.mc.vr.getInputAction(this.mc.vr.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
+        this.dh.vr.getInputAction(this.dh.vr.keyTeleport).setEnabled(this.isTeleportEnabled());
+        this.dh.vr.getInputAction(this.dh.vr.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
     }
 }

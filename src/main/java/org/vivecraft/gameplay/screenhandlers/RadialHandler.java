@@ -11,7 +11,6 @@ import com.example.examplemod.DataHolder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.main.Main;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
@@ -36,7 +35,7 @@ public class RadialHandler
 
     public static boolean setOverlayShowing(boolean showingState, ControllerType controller)
     {
-        if (Main.kiosk)
+        if (DataHolder.kiosk)
         {
             return false;
         }

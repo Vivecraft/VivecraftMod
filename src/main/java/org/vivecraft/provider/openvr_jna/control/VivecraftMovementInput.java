@@ -1,14 +1,17 @@
 package org.vivecraft.provider.openvr_jna.control;
 
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
-import net.minecraft.client.player.Input;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.openvr_jna.VRInputAction;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Vector2;
+
+import com.example.examplemod.DataHolder;
+
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
+import net.minecraft.client.player.Input;
 
 public class VivecraftMovementInput extends Input
 {
@@ -44,14 +47,15 @@ public class VivecraftMovementInput extends Input
         this.leftImpulse = 0.0F;
         this.forwardImpulse = 0.0F;
         Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
         boolean flag = false;
 
-        if (minecraft.climbTracker.isClimbeyClimb() && !minecraft.player.isInWater() && minecraft.climbTracker.isGrabbingLadder())
+        if (dataholder.climbTracker.isClimbeyClimb() && !minecraft.player.isInWater() && dataholder.climbTracker.isGrabbingLadder())
         {
             flag = true;
         }
 
-        if (flag || !this.gameSettings.keyUp.isDown() && !minecraft.vr.keyTeleportFallback.isDown())
+        if (flag || !this.gameSettings.keyUp.isDown() && !dataholder.vr.keyTeleportFallback.isDown())
         {
             this.up = false;
         }
@@ -94,10 +98,10 @@ public class VivecraftMovementInput extends Input
         boolean flag1 = false;
         float f = 0.0F;
 
-        if (!flag && !minecraft.vrSettings.seated && minecraft.screen == null && !KeyboardHandler.Showing)
+        if (!flag && !dataholder.vrSettings.seated && minecraft.screen == null && !KeyboardHandler.Showing)
         {
-            VRInputAction vrinputaction = minecraft.vr.getInputAction(minecraft.vr.keyFreeMoveStrafe);
-            VRInputAction vrinputaction1 = minecraft.vr.getInputAction(minecraft.vr.keyFreeMoveRotate);
+            VRInputAction vrinputaction = dataholder.vr.getInputAction(dataholder.vr.keyFreeMoveStrafe);
+            VRInputAction vrinputaction1 = dataholder.vr.getInputAction(dataholder.vr.keyFreeMoveRotate);
             Vector2 vector2 = vrinputaction.getAxis2DUseTracked();
             Vector2 vector21 = vrinputaction1.getAxis2DUseTracked();
 
@@ -108,7 +112,7 @@ public class VivecraftMovementInput extends Input
                     flag1 = true;
                     f = vector21.getY();
 
-                    if (minecraft.vrSettings.analogMovement)
+                    if (dataholder.vrSettings.analogMovement)
                     {
                         this.forwardImpulse = vector21.getY();
                         this.leftImpulse = 0.0F;
@@ -120,7 +124,7 @@ public class VivecraftMovementInput extends Input
                         this.forwardImpulse = this.axisToDigitalMovement(vector21.getY());
                     }
                 }
-                else if (minecraft.vrSettings.analogMovement)
+                else if (dataholder.vrSettings.analogMovement)
                 {
                     flag1 = true;
                     this.forwardImpulse = 0.0F;
@@ -129,7 +133,7 @@ public class VivecraftMovementInput extends Input
 
                     if (f1 == 0.0F)
                     {
-                        f1 = getMovementAxisValue(minecraft.vr.keyTeleportFallback);
+                        f1 = getMovementAxisValue(dataholder.vr.keyTeleportFallback);
                     }
 
                     f = f1;
@@ -147,7 +151,7 @@ public class VivecraftMovementInput extends Input
                 flag1 = true;
                 f = vector2.getY();
 
-                if (minecraft.vrSettings.analogMovement)
+                if (dataholder.vrSettings.analogMovement)
                 {
                     this.forwardImpulse = vector2.getY();
                     this.leftImpulse = -vector2.getX();
@@ -171,17 +175,17 @@ public class VivecraftMovementInput extends Input
                 VRInputAction.setKeyBindState(this.gameSettings.keyLeft, this.left);
                 VRInputAction.setKeyBindState(this.gameSettings.keyRight, this.right);
 
-                if (minecraft.vrSettings.autoSprint)
+                if (dataholder.vrSettings.autoSprint)
                 {
-                    if (f >= minecraft.vrSettings.autoSprintThreshold)
+                    if (f >= dataholder.vrSettings.autoSprintThreshold)
                     {
                         minecraft.player.setSprinting(true);
                         this.autoSprintActive = true;
                         this.forwardImpulse = 1.0F;
                     }
-                    else if (this.forwardImpulse > 0.0F && minecraft.vrSettings.analogMovement)
+                    else if (this.forwardImpulse > 0.0F && dataholder.vrSettings.analogMovement)
                     {
-                        this.forwardImpulse = this.forwardImpulse / minecraft.vrSettings.autoSprintThreshold * 1.0F;
+                        this.forwardImpulse = this.forwardImpulse / dataholder.vrSettings.autoSprintThreshold * 1.0F;
                     }
                 }
             }
@@ -197,15 +201,15 @@ public class VivecraftMovementInput extends Input
 
         this.movementSetByAnalog = flag1;
 
-        if (this.autoSprintActive && f < minecraft.vrSettings.autoSprintThreshold)
+        if (this.autoSprintActive && f < dataholder.vrSettings.autoSprintThreshold)
         {
             minecraft.player.setSprinting(false);
             this.autoSprintActive = false;
         }
 
-        boolean flag2 = minecraft.screen == null && (minecraft.vrPlayer.getFreeMove() || minecraft.vrSettings.simulateFalling) && !flag;
+        boolean flag2 = minecraft.screen == null && (dataholder.vrPlayer.getFreeMove() || dataholder.vrSettings.simulateFalling) && !flag;
         this.jumping = this.gameSettings.keyJump.isDown() && flag2;
-        this.shiftKeyDown = (minecraft.sneakTracker.sneakCounter > 0 || minecraft.sneakTracker.sneakOverride || this.gameSettings.keyShift.isDown()) && minecraft.screen == null;
+        this.shiftKeyDown = (dataholder.sneakTracker.sneakCounter > 0 || dataholder.sneakTracker.sneakOverride || this.gameSettings.keyShift.isDown()) && minecraft.screen == null;
 
         if (p_108576_)
         {

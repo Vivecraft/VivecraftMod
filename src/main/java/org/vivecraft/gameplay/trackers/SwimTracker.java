@@ -19,11 +19,11 @@ public class SwimTracker extends Tracker
 
     public boolean isActive(LocalPlayer p)
     {
-        if (this.mc.vrSettings.seated)
+        if (this.dh.vrSettings.seated)
         {
             return false;
         }
-        else if (!this.mc.vrSettings.realisticSwimEnabled)
+        else if (!this.dh.vrSettings.realisticSwimEnabled)
         {
             return false;
         }
@@ -58,12 +58,12 @@ public class SwimTracker extends Tracker
 
     public void doProcess(LocalPlayer player)
     {
-        Vec3 vec3 = this.mc.vrPlayer.vrdata_world_pre.getController(0).getPosition();
-        Vec3 vec31 = this.mc.vrPlayer.vrdata_world_pre.getController(1).getPosition();
+        Vec3 vec3 = this.dh.vrPlayer.vrdata_world_pre.getController(0).getPosition();
+        Vec3 vec31 = this.dh.vrPlayer.vrdata_world_pre.getController(1).getPosition();
         Vec3 vec32 = vec31.subtract(vec3).scale(0.5D).add(vec3);
-        Vec3 vec33 = this.mc.vrPlayer.vrdata_world_pre.getHeadPivot().subtract(0.0D, 0.3D, 0.0D);
-        Vec3 vec34 = vec32.subtract(vec33).normalize().add(this.mc.vrPlayer.vrdata_world_pre.hmd.getDirection()).scale(0.5D);
-        Vec3 vec35 = this.mc.vrPlayer.vrdata_world_pre.getController(0).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).add(this.mc.vrPlayer.vrdata_world_pre.getController(1).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D))).scale(0.5D);
+        Vec3 vec33 = this.dh.vrPlayer.vrdata_world_pre.getHeadPivot().subtract(0.0D, 0.3D, 0.0D);
+        Vec3 vec34 = vec32.subtract(vec33).normalize().add(this.dh.vrPlayer.vrdata_world_pre.hmd.getDirection()).scale(0.5D);
+        Vec3 vec35 = this.dh.vrPlayer.vrdata_world_pre.getController(0).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).add(this.dh.vrPlayer.vrdata_world_pre.getController(1).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D))).scale(0.5D);
         double d0 = vec35.add(vec34).length() / 2.0D;
         double d1 = vec33.distanceTo(vec32);
         double d2 = this.lastDist - d1;

@@ -1,10 +1,11 @@
 package org.vivecraft.gui.settings;
 
-import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.gui.framework.VROptionLayout;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.settings.VRSettings;
+
+import net.minecraft.client.gui.screens.Screen;
 
 public class GuiMainVRSettings extends GuiVROptionsBase
 {
@@ -18,7 +19,7 @@ public class GuiMainVRSettings extends GuiVROptionsBase
             new VROptionLayout(VRSettings.VrOptions.PLAY_MODE_SEATED, (button, mousePos) -> {
                 this.reinit = true;
 
-                if (!this.minecraft.vrSettings.seated)
+                if (!this.dataholder.vrSettings.seated)
                 {
                     this.isConfirm = true;
                     return true;
@@ -48,7 +49,7 @@ public class GuiMainVRSettings extends GuiVROptionsBase
                 return false;
             }, VROptionLayout.Position.POS_RIGHT, 2.0F, true, "gui.cancel"),
             new VROptionLayout((button, mousePos) -> {
-                this.minecraft.vrSettings.seated = true;
+                this.dataholder.vrSettings.seated = true;
                 this.settings.saveOptions();
                 this.reinit = true;
                 this.isConfirm = false;
@@ -68,7 +69,7 @@ public class GuiMainVRSettings extends GuiVROptionsBase
         {
             this.vrTitle = "vivecraft.options.screen.main";
 
-            if (this.minecraft.vrSettings.seated)
+            if (this.dataholder.vrSettings.seated)
             {
                 super.init(this.vrSeatedOptions, true);
             }
@@ -76,7 +77,7 @@ public class GuiMainVRSettings extends GuiVROptionsBase
             {
                 super.init(this.vrStandingOptions, true);
 
-                if (this.minecraft.vrSettings.allowStandingOriginOffset)
+                if (this.dataholder.vrSettings.allowStandingOriginOffset)
                 {
                     super.init(new VROptionLayout[] {new VROptionLayout(VRSettings.VrOptions.RESET_ORIGIN, (button, mousePos) -> {
                             this.resetOrigin();

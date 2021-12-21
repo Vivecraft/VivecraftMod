@@ -1,15 +1,5 @@
 package org.vivecraft.provider.openvr_jna;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.sun.jna.Memory;
-import com.sun.jna.NativeLibrary;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.FloatByReference;
-import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.ptr.LongByReference;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -26,6 +16,36 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+
+import org.vivecraft.gameplay.screenhandlers.GuiHandler;
+import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.gameplay.screenhandlers.RadialHandler;
+import org.vivecraft.provider.ControllerType;
+import org.vivecraft.provider.HardwareType;
+import org.vivecraft.provider.InputSimulator;
+import org.vivecraft.provider.MCVR;
+import org.vivecraft.provider.openvr_jna.control.TrackpadSwipeSampler;
+import org.vivecraft.provider.openvr_jna.control.VRInputActionSet;
+import org.vivecraft.settings.VRHotkeys;
+import org.vivecraft.settings.VRSettings;
+import org.vivecraft.utils.Utils;
+import org.vivecraft.utils.external.jinfinadeck;
+import org.vivecraft.utils.external.jkatvr;
+import org.vivecraft.utils.math.Matrix4f;
+import org.vivecraft.utils.math.Vector3;
+
+import com.example.examplemod.DataHolder;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.sun.jna.Memory;
+import com.sun.jna.NativeLibrary;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.FloatByReference;
+import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ptr.LongByReference;
+
 import jopenvr.HmdMatrix34_t;
 import jopenvr.InputAnalogActionData_t;
 import jopenvr.InputDigitalActionData_t;
@@ -50,26 +70,8 @@ import jopenvr.VR_IVRSettings_FnTable;
 import jopenvr.VR_IVRSystem_FnTable;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.main.Main;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.phys.Vec3;
-import net.optifine.reflect.Reflector;
-import org.vivecraft.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.provider.ControllerType;
-import org.vivecraft.provider.HardwareType;
-import org.vivecraft.provider.InputSimulator;
-import org.vivecraft.provider.MCVR;
-import org.vivecraft.provider.openvr_jna.control.TrackpadSwipeSampler;
-import org.vivecraft.provider.openvr_jna.control.VRInputActionSet;
-import org.vivecraft.settings.VRHotkeys;
-import org.vivecraft.settings.VRSettings;
-import org.vivecraft.utils.Utils;
-import org.vivecraft.utils.external.jinfinadeck;
-import org.vivecraft.utils.external.jkatvr;
-import org.vivecraft.utils.math.Matrix4f;
-import org.vivecraft.utils.math.Vector3;
 
 public class MCOpenVR extends MCVR
 {
@@ -227,12 +229,12 @@ public class MCOpenVR extends MCVR
                 JOpenVRLibrary.VR_ShutdownInternal();
                 this.initialized = false;
 
-                if (Main.katvr)
+                if (DataHolder.katvr)
                 {
                     jkatvr.Halt();
                 }
 
-                if (Main.infinadeck)
+                if (DataHolder.infinadeck)
                 {
                     jinfinadeck.Destroy();
                 }
@@ -261,7 +263,7 @@ public class MCOpenVR extends MCVR
             FloatByReference floatbyreference = new FloatByReference();
             FloatByReference floatbyreference1 = new FloatByReference();
             byte b0 = this.vrChaperone.GetPlayAreaSize.apply(floatbyreference1, floatbyreference);
-            return b0 == 1 ? new float[] {floatbyreference1.getValue() * this.mc.vrSettings.walkMultiplier, floatbyreference.getValue() * this.mc.vrSettings.walkMultiplier} : null;
+            return b0 == 1 ? new float[] {floatbyreference1.getValue() * this.dh.vrSettings.walkMultiplier, floatbyreference.getValue() * this.dh.vrSettings.walkMultiplier} : null;
         }
         else
         {
@@ -314,7 +316,7 @@ public class MCOpenVR extends MCVR
                 if (this.vrInput == null)
                 {
                     System.out.println("Controller input not available. Forcing seated mode.");
-                    this.mc.vrSettings.seated = true;
+                    this.dh.vrSettings.seated = true;
                 }
 
                 System.out.println("OpenVR initialized & VR connected.");
@@ -328,7 +330,7 @@ public class MCOpenVR extends MCVR
 
                 this.initialized = true;
 
-                if (Main.katvr)
+                if (DataHolder.katvr)
                 {
                     try
                     {
@@ -353,7 +355,7 @@ public class MCOpenVR extends MCVR
                     }
                 }
 
-                if (Main.infinadeck)
+                if (DataHolder.infinadeck)
                 {
                     try
                     {
@@ -390,16 +392,16 @@ public class MCOpenVR extends MCVR
             this.mc.getProfiler().push("events");
             this.pollVREvents();
 
-            if (!this.mc.vrSettings.seated)
+            if (!this.dh.vrSettings.seated)
             {
                 this.mc.getProfiler().popPush("controllers");
                 this.mc.getProfiler().push("gui");
 
-                if (this.mc.screen == null && this.mc.vrSettings.vrTouchHotbar)
+                if (this.mc.screen == null && this.dh.vrSettings.vrTouchHotbar)
                 {
-                    VRSettings vrsettings = this.mc.vrSettings;
+                    VRSettings vrsettings = this.dh.vrSettings;
 
-                    if (this.mc.vrSettings.vrHudLockMode != VRSettings.HUDLock.HEAD && this.hudPopup)
+                    if (this.dh.vrSettings.vrHudLockMode != VRSettings.HUDLock.HEAD && this.hudPopup)
                     {
                         this.processHotbar();
                     }
@@ -422,7 +424,7 @@ public class MCOpenVR extends MCVR
 
     public void processInputs()
     {
-        if (!this.mc.vrSettings.seated && !Main.viewonly && this.inputInitialized)
+        if (!this.dh.vrSettings.seated && !DataHolder.viewonly && this.inputInitialized)
         {
             for (VRInputAction vrinputaction : this.inputActions.values())
             {
@@ -591,11 +593,12 @@ public class MCOpenVR extends MCVR
 
         for (VRInputActionSet vrinputactionset : VRInputActionSet.values())
         {
-            if (vrinputactionset != VRInputActionSet.MOD || Reflector.ClientModLoader.exists())
+//            if (vrinputactionset != VRInputActionSet.MOD || Reflector.ClientModLoader.exists()) TODO
+        	if (vrinputactionset != VRInputActionSet.MOD || false)
             {
                 String s = vrinputactionset.usage;
 
-                if (vrinputactionset.advanced && !this.mc.vrSettings.allowAdvancedBindings)
+                if (vrinputactionset.advanced && !this.dh.vrSettings.allowAdvancedBindings)
                 {
                     s = "hidden";
                 }
@@ -627,12 +630,12 @@ public class MCOpenVR extends MCVR
 
         for (VRInputAction vrinputaction1 : list1)
         {
-            map1.put(vrinputaction1.name, I18n.m_118938_(vrinputaction1.keyBinding.getCategory()) + " - " + I18n.m_118938_(vrinputaction1.keyBinding.getName()));
+            map1.put(vrinputaction1.name, I18n.get(vrinputaction1.keyBinding.getCategory()) + " - " + I18n.get(vrinputaction1.keyBinding.getName()));
         }
 
         for (VRInputActionSet vrinputactionset1 : VRInputActionSet.values())
         {
-            map1.put(vrinputactionset1.name, I18n.m_118938_(vrinputactionset1.localizedName));
+            map1.put(vrinputactionset1.name, I18n.get(vrinputactionset1.localizedName));
         }
 
         map1.put("/actions/global/in/lefthand", "Left Hand Pose");
@@ -665,7 +668,7 @@ public class MCOpenVR extends MCVR
             throw new RuntimeException("Failed to write action manifest", exception);
         }
 
-        String s1 = this.mc.vrSettings.reverseHands ? "_reversed" : "";
+        String s1 = this.dh.vrSettings.reverseHands ? "_reversed" : "";
         Utils.loadAssetToFile("input/vive_defaults" + s1 + ".json", new File("openvr/input/vive_defaults.json"), false);
         Utils.loadAssetToFile("input/oculus_defaults" + s1 + ".json", new File("openvr/input/oculus_defaults.json"), false);
         Utils.loadAssetToFile("input/wmr_defaults" + s1 + ".json", new File("openvr/input/wmr_defaults.json"), false);
@@ -694,10 +697,10 @@ public class MCOpenVR extends MCVR
         ArrayList<VRInputActionSet> arraylist = new ArrayList<>();
         arraylist.add(VRInputActionSet.GLOBAL);
 
-        if (Reflector.ClientModLoader.exists())
-        {
-            arraylist.add(VRInputActionSet.MOD);
-        }
+//        if (Reflector.ClientModLoader.exists()) TODO
+//        {
+//            arraylist.add(VRInputActionSet.MOD);
+//        }
 
         arraylist.add(VRInputActionSet.MIXED_REALITY);
         arraylist.add(VRInputActionSet.TECHNICAL);
@@ -1043,7 +1046,7 @@ public class MCOpenVR extends MCVR
             String s = pointer.getString(0L);
             System.out.println("Device manufacturer is: " + s);
             this.detectedHardware = HardwareType.fromManufacturer(s);
-            this.mc.vrSettings.loadOptions();
+            this.dh.vrSettings.loadOptions();
             VRHotkeys.loadExternalCameraConfig();
         }
 
@@ -1608,7 +1611,7 @@ public class MCOpenVR extends MCVR
                 this.inputActions.values().forEach(this::readNewData);
                 this.mc.getProfiler().pop();
 
-                if (this.mc.vrSettings.reverseHands)
+                if (this.dh.vrSettings.reverseHands)
                 {
                     this.updateControllerPose(0, this.leftPoseHandle);
                     this.updateControllerPose(1, this.rightPoseHandle);
@@ -1633,7 +1636,7 @@ public class MCOpenVR extends MCVR
 
     long getControllerHandle(ControllerType hand)
     {
-        if (this.mc.vrSettings.reverseHands)
+        if (this.dh.vrSettings.reverseHands)
         {
             return hand == ControllerType.RIGHT ? this.leftControllerHandle : this.rightControllerHandle;
         }

@@ -1,13 +1,5 @@
 package org.vivecraft.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,18 +14,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
-
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
@@ -47,9 +27,31 @@ import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.lwjgl.Matrix4f;
 import org.vivecraft.utils.lwjgl.Vector3f;
 
+import com.example.examplemod.DataHolder;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
 public class PhysicalKeyboard
 {
     private final Minecraft mc = Minecraft.getInstance();
+    private final DataHolder dh = DataHolder.getInstance();
     private boolean reinit;
     private boolean shift;
     private boolean shiftSticky;
@@ -100,10 +102,10 @@ public class PhysicalKeyboard
         this.keyHeight = KEY_HEIGHT * this.scale;
         this.keyWidthSpecial = KEY_WIDTH_SPECIAL * this.scale;
 
-        String chars = this.mc.vrSettings.keyboardKeys;
+        String chars = this.dh.vrSettings.keyboardKeys;
         if (this.shift)
         {
-            chars = this.mc.vrSettings.keyboardKeysShift;
+            chars = this.dh.vrSettings.keyboardKeysShift;
         }
 
         float calcRows = (float)chars.length() / (float)this.columns;
@@ -312,18 +314,18 @@ public class PhysicalKeyboard
             }
         }
 
-        if (mc.vrSettings.physicalKeyboardTheme == KeyboardTheme.CUSTOM) {
+        if (dh.vrSettings.physicalKeyboardTheme == KeyboardTheme.CUSTOM) {
             customTheme.clear();
             File themeFile = new File(mc.gameDirectory, "keyboardtheme.txt");
             if (!themeFile.exists()) {
                 // Write template theme file
                 try (PrintWriter pw = new PrintWriter(new FileWriter(themeFile, StandardCharsets.UTF_8))) {
-                    char[] normalChars = this.mc.vrSettings.keyboardKeys.toCharArray();
+                    char[] normalChars = this.dh.vrSettings.keyboardKeys.toCharArray();
                     for (int i = 0; i < normalChars.length; i++) {
                         pw.println("# " + normalChars[i] + " (Normal)");
                         pw.println(i + "=255,255,255");
                     }
-                    char[] shiftChars = this.mc.vrSettings.keyboardKeysShift.toCharArray();
+                    char[] shiftChars = this.dh.vrSettings.keyboardKeysShift.toCharArray();
                     for (int i = 0; i < shiftChars.length; i++) {
                         pw.println("# " + shiftChars[i] + " (Shifted)");
                         pw.println((i + 500) + "=255,255,255");
@@ -430,7 +432,7 @@ public class PhysicalKeyboard
         matrix4f.translate(this.getCenterPos());
         Matrix4f.mul(matrix4f, (Matrix4f)Utils.convertOVRMatrix(KeyboardHandler.Rotation_room).invert(), matrix4f);
         matrix4f.translate((Vector3f)Utils.convertToVector3f(KeyboardHandler.Pos_room).negate());
-        Vec3 vec3 = Utils.convertToVector3d(Utils.transformVector(matrix4f, Utils.convertToVector3f(this.mc.vrPlayer.vrdata_room_pre.getController(controller.ordinal()).getPosition()), true));
+        Vec3 vec3 = Utils.convertToVector3d(Utils.transformVector(matrix4f, Utils.convertToVector3f(this.dh.vrPlayer.vrdata_room_pre.getController(controller.ordinal()).getPosition()), true));
 
         for (PhysicalKeyboard.KeyButton physicalkeyboard$keybutton : this.keys)
         {
@@ -505,21 +507,21 @@ public class PhysicalKeyboard
         poseStack.translate(-center.x, -center.y, -center.z);
         RenderSystem.disableTexture();
         RenderSystem.disableCull();
-        GlStateManager.enableAlphaTest();
-        GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
+        //GlStateManager.enableAlphaTest(); TODO
+        //GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
         RenderSystem.enableBlend();
 
         if (this.easterEggActive) {
             // https://qimg.techjargaming.com/i/UkG1cWAh.png
             for (PhysicalKeyboard.KeyButton button : this.keys) {
-                RGBAColor color = RGBAColor.fromHSB(((float)this.mc.tickCounter + this.mc.getFrameTime()) / 100.0F + (float)(button.boundingBox.minX + (button.boundingBox.maxX - button.boundingBox.minX) / 2.0D) / 2.0F, 1.0F, 1.0F);
+                RGBAColor color = RGBAColor.fromHSB(((float)this.dh.tickCounter + this.mc.getFrameTime()) / 100.0F + (float)(button.boundingBox.minX + (button.boundingBox.maxX - button.boundingBox.minX) / 2.0D) / 2.0F, 1.0F, 1.0F);
                 button.color.r = color.r;
                 button.color.g = color.g;
                 button.color.b = color.b;
             }
         } else {
             this.keys.forEach(button -> {
-                if (mc.vrSettings.physicalKeyboardTheme == KeyboardTheme.CUSTOM) {
+                if (dh.vrSettings.physicalKeyboardTheme == KeyboardTheme.CUSTOM) {
                     RGBAColor color = customTheme.get(this.shift && button.id < 1000 ? button.id + 500 : button.id);
                     if (color != null) {
                         button.color.r = color.r;
@@ -527,7 +529,7 @@ public class PhysicalKeyboard
                         button.color.b = color.b;
                     }
                 } else {
-                    mc.vrSettings.physicalKeyboardTheme.assignColor(button);
+                	dh.vrSettings.physicalKeyboardTheme.assignColor(button);
                 }
             });
         }
@@ -609,7 +611,7 @@ public class PhysicalKeyboard
             this.shift = false;
         }
 
-        this.scale = this.mc.vrSettings.physicalKeyboardScale;
+        this.scale = this.dh.vrSettings.physicalKeyboardScale;
         this.reinit = true;
     }
 

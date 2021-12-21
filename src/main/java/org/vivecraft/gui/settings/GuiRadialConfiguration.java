@@ -1,16 +1,18 @@
 package org.vivecraft.gui.settings;
 
+//import net.optifine.Lang;
+import org.apache.commons.lang3.ArrayUtils;
+import org.vivecraft.gui.framework.GuiVROptionsBase;
+import org.vivecraft.gui.framework.VROptionLayout;
+import org.vivecraft.settings.VRSettings;
+
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.optifine.Lang;
-import org.apache.commons.lang3.ArrayUtils;
-import org.vivecraft.gui.framework.GuiVROptionsBase;
-import org.vivecraft.gui.framework.VROptionLayout;
-import org.vivecraft.settings.VRSettings;
 
 public class GuiRadialConfiguration extends GuiVROptionsBase
 {
@@ -46,14 +48,14 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
 
         if (!this.isShift)
         {
-            this.minecraft.vrSettings.vrRadialItems = ArrayUtils.clone(this.arr);
+            this.dataholder.vrSettings.vrRadialItems = ArrayUtils.clone(this.arr);
         }
         else
         {
-            this.minecraft.vrSettings.vrRadialItemsAlt = ArrayUtils.clone(this.arr);
+            this.dataholder.vrSettings.vrRadialItemsAlt = ArrayUtils.clone(this.arr);
         }
 
-        this.minecraft.vrSettings.saveOptions();
+        this.dataholder.vrSettings.saveOptions();
     }
 
     public void init()
@@ -101,8 +103,8 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
             int l = 48;
             int i1 = this.width / 2;
             int j1 = this.height / 2;
-            this.arr = ArrayUtils.clone(this.minecraft.vrSettings.vrRadialItems);
-            String[] astring = ArrayUtils.clone(this.minecraft.vrSettings.vrRadialItemsAlt);
+            this.arr = ArrayUtils.clone(this.dataholder.vrSettings.vrRadialItems);
+            String[] astring = ArrayUtils.clone(this.dataholder.vrSettings.vrRadialItemsAlt);
 
             if (this.isShift)
             {
@@ -125,7 +127,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
 
                 if (keymapping != null)
                 {
-                    s = I18n.m_118938_(keymapping.getName());
+                    s = I18n.get(keymapping.getName());
                 }
 
                 int i2 = Math.max(j, this.font.width(s));
@@ -174,7 +176,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
                 }
 
                 int l1 = k1;
-                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2, i2, 20, s, (p) ->
+                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2, i2, 20, new TranslatableComponent(s), (p) ->
                 {
                     this.selectedIndex = l1;
                     this.isselectmode = true;
@@ -214,12 +216,14 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
 
         if (this.visibleList == null)
         {
-            drawCenteredString(pMatrixStack, this.minecraft.font, Lang.get("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925);
+            //drawCenteredString(pMatrixStack, this.minecraft.font, Lang.get("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925); TODO
+        	drawCenteredString(pMatrixStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925);
         }
 
         if (this.isShift)
         {
-            drawCenteredString(pMatrixStack, this.minecraft.font, Lang.get("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015);
+            //drawCenteredString(pMatrixStack, this.minecraft.font, Lang.get("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015); TODO
+        	drawCenteredString(pMatrixStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015);
         }
     }
 }

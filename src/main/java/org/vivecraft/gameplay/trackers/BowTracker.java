@@ -9,6 +9,7 @@ import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.math.Vector3;
 
 import com.example.examplemod.DataHolder;
+import com.example.examplemod.PlayerExtension;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -206,15 +207,15 @@ public class BowTracker extends Tracker
 
                 if (!this.isDrawing)
                 {
-                    player.setItemInUseClient(itemstack1, interactionhand);
-                    player.setItemInUseCountClient(i);
+                    ((PlayerExtension)player).setItemInUseClient(itemstack1, interactionhand);
+                    ((PlayerExtension)player).setItemInUseCountClient(i);
                     //Minecraft.getInstance().physicalGuiManager.preClickAction();
                 }
             }
             else if ((float)Util.getMillis() - this.tsNotch > 500.0F)
             {
                 this.canDraw = false;
-                player.setItemInUseClient(ItemStack.EMPTY, interactionhand);
+                ((PlayerExtension)player).setItemInUseClient(ItemStack.EMPTY, interactionhand);
             }
 
             if (!this.isDrawing && this.canDraw && this.pressed && !this.lastpressed)
@@ -264,20 +265,20 @@ public class BowTracker extends Tracker
                 }
 
                 int l = (int)((float)itemstack1.getUseDuration() - this.getDrawPercent() * (float)this.maxDrawMillis);
-                player.setItemInUseClient(itemstack1, interactionhand);
+                ((PlayerExtension)player).setItemInUseClient(itemstack1, interactionhand);
                 double d1 = (double)this.getDrawPercent();
 
                 if (d1 >= 1.0D)
                 {
-                    player.setItemInUseCountClient(k);
+                	((PlayerExtension)player).setItemInUseCountClient(k);
                 }
                 else if (d1 > 0.4D)
                 {
-                    player.setItemInUseCountClient(j);
+                	((PlayerExtension)player).setItemInUseCountClient(j);
                 }
                 else
                 {
-                    player.setItemInUseCountClient(i);
+                	((PlayerExtension)player).setItemInUseCountClient(i);
                 }
 
                 int i1 = (int)(d1 * 4.0D * 4.0D * 3.0D);
