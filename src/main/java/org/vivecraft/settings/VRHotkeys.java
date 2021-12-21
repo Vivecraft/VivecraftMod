@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.codec.language.bm.Lang;
 import org.vivecraft.api.VRData;
 import org.vivecraft.utils.LangHelper;
 import org.vivecraft.utils.Utils;
@@ -17,8 +16,8 @@ import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
 import com.example.examplemod.DataHolder;
+import com.example.examplemod.MethodHolder;
 import com.google.common.util.concurrent.Runnables;
-import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.WinScreen;
@@ -51,29 +50,29 @@ public class VRHotkeys
             DataHolder dataholder = DataHolder.getInstance();
             boolean flag = false;
 
-            if (action == 1 && key == 344 && InputConstants.isKeyDown(345))
+            if (action == 1 && key == 344 && MethodHolder.isKeyDown(345))
             {
             	dataholder.vrSettings.storeDebugAim = true;
                 minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.showaim"));
                 flag = true;
             }
 
-            if (action == 1 && key == 66 && InputConstants.isKeyDown(345))
+            if (action == 1 && key == 66 && MethodHolder.isKeyDown(345))
             {
             	dataholder.vrSettings.walkUpBlocks = !dataholder.vrSettings.walkUpBlocks;
                 minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.walkupblocks", dataholder.vrSettings.walkUpBlocks ? LangHelper.getYes() : LangHelper.getNo()));
                 flag = true;
             }
 
-            if (action == 1 && key == 73 && InputConstants.isKeyDown(345))
+            if (action == 1 && key == 73 && MethodHolder.isKeyDown(345))
             {
             	dataholder.vrSettings.inertiaFactor = dataholder.vrSettings.inertiaFactor.getNext();
-                minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.playerinertia", Lang.get(dataholder.vrSettings.inertiaFactor.getLangKey())));
-
+                //minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.playerinertia", Lang.get(dataholder.vrSettings.inertiaFactor.getLangKey()))); TODO
+            	minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.playerinertia", new TranslatableComponent(dataholder.vrSettings.inertiaFactor.getLangKey())));
                 flag = true;
             }
 
-            if (action == 1 && key == 82 && InputConstants.isKeyDown(345))
+            if (action == 1 && key == 82 && MethodHolder.isKeyDown(345))
             {
                 if (dataholder.vrPlayer.isTeleportOverridden())
                 {
@@ -89,7 +88,7 @@ public class VRHotkeys
                 flag = true;
             }
 
-            if (action == 1 && key == 268 && InputConstants.isKeyDown(345))
+            if (action == 1 && key == 268 && MethodHolder.isKeyDown(345))
             {
                 snapMRCam(0);
                 flag = true;
@@ -104,7 +103,7 @@ public class VRHotkeys
             if ((minecraft.level == null || minecraft.screen != null) && action == 1 && key == 294)
             {
             	dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
-                minecraft.notifyMirror(dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
+                MethodHolder.notifyMirror(dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
             }
 
             if (flag)
@@ -122,97 +121,97 @@ public class VRHotkeys
         DataHolder dataholder = DataHolder.getInstance();
         boolean flag = false;
 
-        if (InputConstants.isKeyDown(263) && InputConstants.isKeyDown(345) && !InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(263) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344))
         {
             adjustCamPos(new Vector3(-0.01F, 0.0F, 0.0F));
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(262) && InputConstants.isKeyDown(345) && !InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(262) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344))
         {
             adjustCamPos(new Vector3(0.01F, 0.0F, 0.0F));
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(265) && InputConstants.isKeyDown(345) && !InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(265) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344))
         {
             adjustCamPos(new Vector3(0.0F, 0.0F, -0.01F));
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(264) && InputConstants.isKeyDown(345) && !InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(264) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344))
         {
             adjustCamPos(new Vector3(0.0F, 0.0F, 0.01F));
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(266) && InputConstants.isKeyDown(345) && !InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(266) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344))
         {
             adjustCamPos(new Vector3(0.0F, 0.01F, 0.0F));
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(267) && InputConstants.isKeyDown(345) && !InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(267) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344))
         {
             adjustCamPos(new Vector3(0.0F, -0.01F, 0.0F));
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(265) && InputConstants.isKeyDown(345) && InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(265) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344))
         {
             adjustCamRot(Axis.PITCH, 0.5F);
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(264) && InputConstants.isKeyDown(345) && InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(264) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344))
         {
             adjustCamRot(Axis.PITCH, -0.5F);
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(263) && InputConstants.isKeyDown(345) && InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(263) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344))
         {
             adjustCamRot(Axis.YAW, 0.5F);
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(262) && InputConstants.isKeyDown(345) && InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(262) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344))
         {
             adjustCamRot(Axis.YAW, -0.5F);
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(266) && InputConstants.isKeyDown(345) && InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(266) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344))
         {
             adjustCamRot(Axis.ROLL, 0.5F);
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(267) && InputConstants.isKeyDown(345) && InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(267) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344))
         {
             adjustCamRot(Axis.ROLL, -0.5F);
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(260) && InputConstants.isKeyDown(345) && !InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(260) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344))
         {
             ++minecraft.options.fov;
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(261) && InputConstants.isKeyDown(345) && !InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(261) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344))
         {
             --minecraft.options.fov;
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(260) && InputConstants.isKeyDown(345) && InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(260) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344))
         {
-            ++minecraft.vrSettings.mixedRealityFov;
+            ++dataholder.vrSettings.mixedRealityFov;
             flag = true;
         }
 
-        if (InputConstants.isKeyDown(261) && InputConstants.isKeyDown(345) && InputConstants.isKeyDown(344))
+        if (MethodHolder.isKeyDown(261) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344))
         {
             --dataholder.vrSettings.mixedRealityFov;
             flag = true;

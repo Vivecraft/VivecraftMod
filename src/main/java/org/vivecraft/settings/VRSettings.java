@@ -21,10 +21,6 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.mojang.blaze3d.audio.Library;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import net.optifine.Config;
-import net.optifine.Lang;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
@@ -42,6 +38,9 @@ import org.vivecraft.utils.math.Angle;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
+import com.example.examplemod.DataHolder;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.sounds.SoundEngine;
@@ -50,6 +49,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 
+//TODO Lang
 public class VRSettings
 {
     public static final int VERSION = 2;
@@ -819,7 +819,8 @@ public class VRSettings
 
     public String getButtonDisplayString( VRSettings.VrOptions par1EnumOptions )
     {
-        String var2 = Lang.get("vivecraft.options." + par1EnumOptions.name());
+//        String var2 = Lang.get("vivecraft.options." + par1EnumOptions.name());
+        String var2 = "vivecraft.options." + par1EnumOptions.name();
 
         String var3 = var2 + ": ";
         String var4 = var3;
@@ -840,7 +841,9 @@ public class VRSettings
                 return str;
             } else if (type == Boolean.TYPE) {
                 var langKeys = par1EnumOptions.getBooleanLangKeys();
-                return (boolean)obj ? var4 + Lang.get(langKeys.getLeft()) : var4 + Lang.get(langKeys.getRight());
+//                return (boolean)obj ? var4 + Lang.get(langKeys.getLeft()) : var4 + Lang.get(langKeys.getRight());
+                return (boolean)obj ? var4 + langKeys.getLeft() : var4 + langKeys.getRight();
+
             } else if (type == Float.TYPE || type == Double.TYPE) {
                 if (par1EnumOptions.getDecimalPlaces() < 0) {
                     return var4 + Math.round(((Number)obj).floatValue() * 100) + "%";
@@ -848,7 +851,9 @@ public class VRSettings
                     return var4 + String.format("%." + par1EnumOptions.getDecimalPlaces() + "f", ((Number)obj).floatValue());
                 }
             } else if (OptionEnum.class.isAssignableFrom(type)) {
-                return var4 + Lang.get(((OptionEnum<?>)obj).getLangKey());
+//                return var4 + Lang.get(((OptionEnum<?>)obj).getLangKey());
+                return var4 + ((OptionEnum<?>)obj).getLangKey();
+
             } else {
                 return var4 + obj.toString();
             }
@@ -981,7 +986,9 @@ public class VRSettings
             @Override
             String getDisplayString(String prefix, Object value) {
                 if ((float)value > 0.99)
-                    return prefix + Lang.get("vivecraft.options.opaque");
+//                    return prefix + Lang.get("vivecraft.options.opaque");
+                    return prefix + "vivecraft.options.opaque";
+
                 return null;
             }
         },
@@ -1043,7 +1050,9 @@ public class VRSettings
             String getDisplayString(String prefix, Object value) {
                 try {
                     SoundEvent se = Registry.SOUND_EVENT.get(new ResourceLocation((String)value));
-                    return Lang.get(se.getLocation().getPath());
+//                    return Lang.get(se.getLocation().getPath());
+                    return se.getLocation().getPath();
+
                 } catch (Exception e) {
                     return "error";
                 }
@@ -1077,7 +1086,7 @@ public class VRSettings
         PHYSICAL_KEYBOARD_SCALE(true, false, 0.75f, 1.5f, 0.01f, -1) { // Keyboard Size
             @Override
             void onOptionChange() {
-                KeyboardHandler.physicalKeyboard.setScale(Minecraft.getInstance().vrSettings.physicalKeyboardScale);
+                KeyboardHandler.physicalKeyboard.setScale(DataHolder.getInstance().vrSettings.physicalKeyboardScale);
             }
         },
         PHYSICAL_KEYBOARD_THEME(false, false), // Keyboard Theme
@@ -1104,7 +1113,7 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-                Minecraft.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
+                DataHolder.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
             }
 
             @Override
@@ -1134,7 +1143,9 @@ public class VRSettings
             String getDisplayString(String prefix, Object value) {
                 Color color = (Color)value;
                 var p = colors.stream().filter(c -> c.getLeft().equals(color)).findFirst().orElse(null);
-                return p != null ? prefix + Lang.get(p.getRight()) : prefix + color.getRed() + " " + color.getGreen() + " " + color.getBlue();
+//                return p != null ? prefix + Lang.get(p.getRight()) : prefix + color.getRed() + " " + color.getGreen() + " " + color.getBlue();
+                return p != null ? prefix + p.getRight() : prefix + color.getRed() + " " + color.getGreen() + " " + color.getBlue();
+
             }
 
             @Override
@@ -1159,19 +1170,19 @@ public class VRSettings
         MIXED_REALITY_UNITY_LIKE(false, true, "vivecraft.options.unity", "vivecraft.options.sidebyside") { // Layout
             @Override
             void onOptionChange() {
-                Minecraft.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+                DataHolder.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_UNDISTORTED(false, true) { // Undistorted Pass
             @Override
             void onOptionChange() {
-                Minecraft.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+            	DataHolder.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_ALPHA_MASK(false, true) { // Alpha Mask
             @Override
             void onOptionChange() {
-                Minecraft.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+            	DataHolder.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_FOV(true, false, 0, 179, 1, 0) { // Third Person FOV
@@ -1264,8 +1275,8 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-                Minecraft.getInstance().vrPlayer.roomScaleMovementDelay = 2;
-                Minecraft.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(Minecraft.getInstance().player, false, true);
+                DataHolder.getInstance().vrPlayer.roomScaleMovementDelay = 2;
+                DataHolder.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(Minecraft.getInstance().player, false, true);
                 VRPlayer.get().preTick();
             }
         },
@@ -1277,7 +1288,7 @@ public class VRSettings
 
             @Override
             Float setOptionFloatValue(float value) {
-                Minecraft.getInstance().vr.seatedRot = value;
+                DataHolder.getInstance().vr.seatedRot = value;
                 return null;
             }
         },
@@ -1285,7 +1296,9 @@ public class VRSettings
             @Override
             String getDisplayString(String prefix, Object value) {
                 if ((float)value == 0)
-                    return prefix + Lang.get("vivecraft.options.smooth");
+//                    return prefix + Lang.get("vivecraft.options.smooth");
+                    return prefix + "vivecraft.options.smooth";
+
                 return prefix + String.format("%.0f" + DEGREE, (float)value);
             }
 
@@ -1313,7 +1326,7 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-                Minecraft.getInstance().vrSettings.worldRotation = 0;
+            	DataHolder.getInstance().vrSettings.worldRotation = 0;
             }
         },
         TOUCH_HOTBAR(false, true), // Touch Hotbar Enabled
@@ -1321,7 +1334,7 @@ public class VRSettings
         RENDER_SCALEFACTOR(true, false, 0.1f, 9f, 0.1f, 0) { // Resolution
             @Override
             String getDisplayString(String prefix, Object value) {
-                RenderTarget eye0 = Minecraft.getInstance().vrRenderer.framebufferEye0;
+                RenderTarget eye0 = DataHolder.getInstance().vrRenderer.framebufferEye0;
                 return prefix + Math.round((float)value * 100) + "% (" + (int)Math.ceil(eye0.viewWidth * Math.sqrt((float)value)) + "x" + (int)Math.ceil(eye0.viewHeight * Math.sqrt((float)value)) + ")";
             }
         },
@@ -1351,12 +1364,12 @@ public class VRSettings
         HANDHELD_CAMERA_RENDER_SCALE(true, false, 0.5f, 3.0f, 0.25f, 0) { // Camera Resolution
             @Override
             String getDisplayString(String prefix, Object value) {
-                if (Config.isShaders()) {
-                    RenderTarget camfb = Minecraft.getInstance().vrRenderer.cameraFramebuffer;
-                    return prefix + camfb.viewWidth + "x" + camfb.viewHeight;
-                } else {
+//                if (Config.isShaders()) {
+//                    RenderTarget camfb = DataHolder.getInstance().vrRenderer.cameraFramebuffer;
+//                    return prefix + camfb.viewWidth + "x" + camfb.viewHeight;
+//                } else {
                     return prefix + Math.round(1920 * (float)value) + "x" + Math.round(1080 * (float)value);
-                }
+//                }
             }
         },
         MIXED_REALITY_RENDER_CAMERA_MODEL(false, true, LangHelper.YES_KEY, LangHelper.NO_KEY), // Show Camera Model
@@ -1426,19 +1439,25 @@ public class VRSettings
         TELEPORT_DOWN_LIMIT(true, false, 0, 16, 1, 0) { // Down Limit
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + Lang.getOff();
+//                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + Lang.getOff();
+                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + "OFF";
+
             }
         },
         TELEPORT_UP_LIMIT(true, false, 0, 4, 1, 0) { // Up Limit
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + Lang.getOff();
+//                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + Lang.getOff();
+                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + "OFF";
+
             }
         },
         TELEPORT_HORIZ_LIMIT(true, false, 0, 32, 1, 0) { // Distance Limit
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + Lang.getOff();
+//                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + Lang.getOff();
+                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + "OFF";
+
             }
         },
         ALLOW_STANDING_ORIGIN_OFFSET(false, true, LangHelper.YES_KEY, LangHelper.NO_KEY), // Allow Origin Offset
@@ -1462,18 +1481,22 @@ public class VRSettings
             String getDisplayString(String prefix, Object value) {
                 int i = (int)value;
                 if (i == -1)
-                    return prefix + Lang.getOff();
+//                    return prefix + Lang.getOff();
+                    return prefix + "OFF";
+
                 else if (i == 0)
-                    return prefix + Lang.get("vivecraft.options.default");
-                else if (i <= Library.hrtfList.size())
-                    return prefix + Library.hrtfList.get(i - 1);
+//                    return prefix + Lang.get("vivecraft.options.default");
+                    return prefix + "vivecraft.options.default";
+
+                else if (i <= DataHolder.hrtfList.size())
+                    return prefix + DataHolder.hrtfList.get(i - 1);
                 return prefix;
             }
 
             @Override
             Object setOptionValue(Object value) {
                 int i = (int)value;
-                if (++i > Library.hrtfList.size())
+                if (++i > DataHolder.hrtfList.size())
                     i = -1;
                 return i;
             }
@@ -1488,7 +1511,9 @@ public class VRSettings
         RELOAD_EXTERNAL_CAMERA(false, false) { // Reload External Camera
             @Override
             String getDisplayString(String prefix, Object value) {
-                return Lang.get("vivecraft.options." + name());
+//                return Lang.get("vivecraft.options." + name());
+              return "vivecraft.options." + name();
+
             }
         },
         RIGHT_CLICK_DELAY(false, false); // Right Click Repeat
@@ -1647,29 +1672,33 @@ public class VRSettings
 
     public static synchronized void initSettings( Minecraft mc, File dataDir )
     {
+    	DataHolder dh = DataHolder.getInstance();
         ProfileManager.init(dataDir);
         mc.options = new Options( mc, dataDir );
         // mc.gameSettings.saveOptions();
-        mc.vrSettings = new VRSettings( mc, dataDir );
-        mc.vrSettings.saveOptions();
+        dh.vrSettings = new VRSettings( mc, dataDir );
+        dh.vrSettings.saveOptions();
     }
 
     public static synchronized void loadAll( Minecraft mc )
     {
-        mc.options.load();
-        mc.vrSettings.loadOptions();
+    	DataHolder dh = DataHolder.getInstance();
+    	mc.options.load();
+    	dh.vrSettings.loadOptions();
     }
 
     public static synchronized void saveAll( Minecraft mc )
     {
-        mc.options.save();
-        mc.vrSettings.saveOptions();
+    	DataHolder dh = DataHolder.getInstance();
+    	mc.options.save();
+    	dh.vrSettings.saveOptions();
     }
 
     public static synchronized void resetAll( Minecraft mc )
     {
-        mc.options.resetSettings();
-        mc.vrSettings.resetSettings();
+    	DataHolder dh = DataHolder.getInstance();
+    	//mc.options.resetSettings(); optifine
+    	dh.vrSettings.resetSettings();
     }
 
     public static synchronized String getCurrentProfile()

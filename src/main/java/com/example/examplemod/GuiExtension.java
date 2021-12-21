@@ -2,7 +2,8 @@ package com.example.examplemod;
 
 public interface GuiExtension {
 
-	boolean showPlayerList = false; //TODO
+	boolean getShowPlayerList();
+	void setShowPlayerList(boolean value);
 
 	void drawMouseMenuQuad(int d0, int d1);
 

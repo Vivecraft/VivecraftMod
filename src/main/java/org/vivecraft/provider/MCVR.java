@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import org.apache.commons.codec.language.bm.Lang;
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.api.VRData;
@@ -920,12 +919,15 @@ public abstract class MCVR
                 if (this.dh.vrSettings.seated)
                 {
                     this.dh.vrSettings.seatedFreeMove = !this.dh.vrSettings.seatedFreeMove;
-                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport")));
+                    //this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport"))); TODO
+                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? new TranslatableComponent("vivecraft.options.freemove") : new TranslatableComponent("vivecraft.options.teleport")));
                 }
                 else if (this.dh.vrPlayer.isTeleportSupported())
                 {
                     this.dh.vrSettings.forceStandingFreeMove = !this.dh.vrSettings.forceStandingFreeMove;
-                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport")));
+//                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport"))); TODO
+                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? new TranslatableComponent("vivecraft.options.freemove") : new TranslatableComponent("vivecraft.options.teleport")));
+
                 }
                 else if (this.dh.vrPlayer.isTeleportOverridden())
                 {
@@ -1266,7 +1268,7 @@ public abstract class MCVR
 
             if (this.keyTogglePlayerList.consumeClick())
             {
-                ((GuiExtension)this.mc.gui).showPlayerList = !((GuiExtension)this.mc.gui).showPlayerList;
+                ((GuiExtension)this.mc.gui).setShowPlayerList(!((GuiExtension)this.mc.gui).getShowPlayerList());
             }
 
             if (this.keyToggleHandheldCam.consumeClick() && this.mc.player != null)

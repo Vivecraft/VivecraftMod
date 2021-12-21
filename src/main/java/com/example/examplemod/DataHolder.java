@@ -1,7 +1,9 @@
 package com.example.examplemod;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 import org.vivecraft.api.ErrorHelper;
 import org.vivecraft.gameplay.VRPlayer;
@@ -28,16 +30,20 @@ import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRSettings;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.sounds.SoundEngine;
 
 public class DataHolder {
 	
-	private static DataHolder INSTANCE = new DataHolder();
+	private static DataHolder INSTANCE;
 	public static boolean kiosk;
 	public static boolean ismainhand;
 	public static boolean katvr;
 	public static boolean infinadeck;
 	public static boolean viewonly;
+	public static ModelResourceLocation thirdPersonCameraModel = new ModelResourceLocation("vivecraft:camcorder");
+	public static ModelResourceLocation thirdPersonCameraDisplayModel = new ModelResourceLocation("vivecraft:camcorder_display");
+	public static List<String> hrtfList = new ArrayList<>();
 	
 	public VRPlayer vrPlayer;
 	public MCVR vr;
@@ -94,18 +100,27 @@ public class DataHolder {
 	public int tickCounter;
 	public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-NONVR-1-b2";
 	
+	//private float fov = 1.0F;
+	public float watereffect;
+	public float portaleffect;
+	public float pumpkineffect;
+	long mirroNotifyStart;
+	String mirrorNotifyText;
+	boolean mirrorNotifyClear;
+	long mirroNotifyLen;
+	
 	public static DataHolder getInstance() {
 		if(INSTANCE == null) {
 			INSTANCE = new DataHolder();
 		}
 		return INSTANCE;
 	}
-
+	
 	public void printChatMessage(String string) {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	public void print(String string) {
 		// TODO Auto-generated method stub
 		

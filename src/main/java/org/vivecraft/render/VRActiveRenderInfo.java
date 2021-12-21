@@ -1,13 +1,15 @@
 package org.vivecraft.render;
 
+import org.vivecraft.api.VRData;
+
+import com.example.examplemod.DataHolder;
 import com.mojang.math.Vector3f;
+
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
-import net.optifine.shaders.Shaders;
-import org.vivecraft.api.VRData;
 
 public class VRActiveRenderInfo extends Camera
 {
@@ -17,14 +19,15 @@ public class VRActiveRenderInfo extends Camera
         this.level = p_90576_;
         this.entity = pLevel;
         Minecraft minecraft = Minecraft.getInstance();
-        RenderPass renderpass = minecraft.currentPass;
+        DataHolder dataholder = DataHolder.getInstance();
+        RenderPass renderpass = dataholder.currentPass;
 
-        if (Shaders.isShadowPass && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
-        {
-            renderpass = RenderPass.CENTER;
-        }
+//        if (Shaders.isShadowPass && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
+//        {
+//            renderpass = RenderPass.CENTER;
+//        }
 
-        VRData.VRDevicePose eye = minecraft.vrPlayer.vrdata_world_render.getEye(renderpass);
+        VRData.VRDevicePose eye = dataholder.vrPlayer.vrdata_world_render.getEye(renderpass);
         this.setPosition(eye.getPosition());
         this.xRot = -eye.getPitch();
         this.yRot = eye.getYaw();

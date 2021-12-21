@@ -9,6 +9,9 @@ import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
 import com.example.examplemod.DataHolder;
+import com.example.examplemod.GameRendererExtension;
+import com.example.examplemod.ItemInHandRendererExtension;
+import com.example.examplemod.MethodHolder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -49,10 +52,10 @@ public class VRWidgetHelper
                     f *= 1.03F;
                 }
 
-                renderVRCameraWidget(-0.748F, -0.438F, -0.06F, f, RenderPass.THIRD, GameRenderer.thirdPersonCameraModel, GameRenderer.thirdPersonCameraDisplayModel, () ->
+                renderVRCameraWidget(-0.748F, -0.438F, -0.06F, f, RenderPass.THIRD, DataHolder.thirdPersonCameraModel, DataHolder.thirdPersonCameraDisplayModel, () ->
                 {
-                    minecraft.vrRenderer.framebufferMR.bindRead();
-                    RenderSystem.setShaderTexture(0, minecraft.vrRenderer.framebufferMR.getColorTextureId());
+                	dataHolder.vrRenderer.framebufferMR.bindRead();
+                    RenderSystem.setShaderTexture(0, dataHolder.vrRenderer.framebufferMR.getColorTextureId());
                 }, (face) ->
                 {
                     if (face == Direction.NORTH)
@@ -83,7 +86,7 @@ public class VRWidgetHelper
 
             renderVRCameraWidget(-0.5F, -0.25F, -0.22F, f, RenderPass.CAMERA, CameraTracker.cameraModel, CameraTracker.cameraDisplayModel, () ->
             {
-                if (minecraft.getItemInHandRenderer().getNearOpaqueBlock(dataHolder.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), (double)minecraft.gameRenderer.minClipDistance) == null)
+                if (((ItemInHandRendererExtension)minecraft.getItemInHandRenderer()).getNearOpaqueBlock(dataHolder.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), (double)((GameRendererExtension)minecraft.gameRenderer).getMinClipDistance()) == null)
                 {
                 	dataHolder.vrRenderer.cameraFramebuffer.bindRead();
                     RenderSystem.setShaderTexture(0, dataHolder.vrRenderer.cameraFramebuffer.getColorTextureId());
@@ -106,7 +109,7 @@ public class VRWidgetHelper
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
         poseStack.setIdentity();
-        minecraft.gameRenderer.applyVRModelView(dataHolder.currentPass, poseStack);
+        ((GameRendererExtension)minecraft.gameRenderer).applyVRModelView(dataHolder.currentPass, poseStack);
 
         Vec3 vec3 = dataHolder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
         Vec3 vec31 = dataHolder.vrPlayer.vrdata_world_render.getEye(dataHolder.currentPass).getPosition();
@@ -119,15 +122,15 @@ public class VRWidgetHelper
 
         if (debug)
         {
-        	poseStack.rotateDeg(180.0F, 0.0F, 1.0F, 0.0F);
-            minecraft.gameRenderer.renderDebugAxes(0, 0, 0, 0.08F);
-            poseStack.rotateDeg(180.0F, 0.0F, 1.0F, 0.0F);
+        	MethodHolder.rotateDeg(poseStack ,180.0F, 0.0F, 1.0F, 0.0F);
+        	((GameRendererExtension)minecraft.gameRenderer).renderDebugAxes(0, 0, 0, 0.08F);
+        	MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
         }
 
         poseStack.translate(offsetX, offsetY, offsetZ);
         RenderSystem.applyModelViewMatrix();
 
-        BlockPos blockpos = new BlockPos(minecraft.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
+        BlockPos blockpos = new BlockPos(dataHolder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
         int i = Utils.getCombinedLightWithMin(minecraft.level, blockpos, 0);
 
         RenderSystem.enableDepthTest();

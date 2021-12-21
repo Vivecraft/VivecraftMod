@@ -1,0 +1,12 @@
+--- a/com/mojang/blaze3d/systems/RenderSystem.java
++++ b/com/mojang/blaze3d/systems/RenderSystem.java
+@@ -864,7 +864,8 @@
+ 
+     public static void defaultBlendFunc()
+     {
+-        blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
++        // VIVECRAFT: DestFactor of ONE_MINUS_SRC_ALPHA is really what we want here, because math
++        blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+     }
+ 
+     @Deprecated

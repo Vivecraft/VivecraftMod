@@ -23,9 +23,11 @@ import org.vivecraft.utils.LangHelper;
 
 import com.example.examplemod.DataHolder;
 import com.example.examplemod.GameRendererExtension;
+import com.example.examplemod.GlStateHelper;
+import com.example.examplemod.RenderTargetExtension;
+import com.example.examplemod.MethodHolder;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
@@ -154,9 +156,8 @@ public abstract class VRRenderer
     		RenderSystem.colorMask(true, true, true, true); 
 		}
 		
-    	//GlStateManager.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);  TODO
-		RenderSystem.clearDepth(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
-    	
+		GlStateHelper.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT); 
+		
 		GL11.glClearStencil(0);
     	GL43.glClearDepthf(1);
    	
@@ -241,16 +242,14 @@ public abstract class VRRenderer
             GlStateManager._activeTexture(33984);
             GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager._clearDepth(1.0D);
-            //GlStateManager.clear(16640); TODO
-            RenderSystem.clearDepth(16640);
+            GlStateHelper.clear(16640);
             GlStateManager._viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
             GlStateManager._glUseProgram(VRShaders._Lanczos_shaderProgramId);
             ARBShaderObjects.glUniform1fARB(VRShaders._Lanczos_texelWidthOffsetUniform, 1.0F / (3.0F * (float)this.fsaaFirstPassResultFBO.viewWidth));
             ARBShaderObjects.glUniform1fARB(VRShaders._Lanczos_texelHeightOffsetUniform, 0.0F);
             ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputImageTextureUniform, 1);
             ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputDepthTextureUniform, 2);
-            //GlStateManager.clear(16384); TODO
-            RenderSystem.clearDepth(16384);
+            GlStateHelper.clear(16384); 
             this.drawQuad();
             this.fsaaLastPassResultFBO.bindWrite(true);
             GlStateManager._activeTexture(33985);
@@ -262,8 +261,7 @@ public abstract class VRRenderer
             GlStateManager._viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
             GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager._clearDepth(1.0D);
-            //GlStateManager.clear(16640); TODO
-            RenderSystem.clearDepth(16640);
+            GlStateHelper.clear(16640); 
             this.checkGLError("postclear");
             GlStateManager._activeTexture(33984);
             this.checkGLError("postact");
@@ -274,7 +272,7 @@ public abstract class VRRenderer
             this.drawQuad();
             this.checkGLError("postdraw");
             GlStateManager._glUseProgram(0);
-            //GlStateManager.enableAlphaTest(); TODO
+            GlStateHelper.enableAlphaTest(); 
             GlStateManager._enableBlend();
             GL43.glMatrixMode(5889);
             GL43.glPopMatrix();
@@ -567,14 +565,14 @@ public abstract class VRRenderer
 
             if (this.framebufferEye0 == null)
             {
-                this.framebufferEye0 = new TextureTarget("L Eye", eyew, eyeh, false, false, this.LeftEyeTextureId, false, true);
+                this.framebufferEye0 = MethodHolder.TextureTarget("L Eye", eyew, eyeh, false, false, this.LeftEyeTextureId, false, true);
                 dataholder.print(this.framebufferEye0.toString());
                 this.checkGLError("Left Eye framebuffer setup");
             }
 
             if (this.framebufferEye1 == null)
             {
-                this.framebufferEye1 = new TextureTarget("R Eye", eyew, eyeh, false, false, this.RightEyeTextureId, false, true);
+                this.framebufferEye1 = MethodHolder.TextureTarget("R Eye", eyew, eyeh, false, false, this.RightEyeTextureId, false, true);
                 dataholder.print(this.framebufferEye1.toString());
                 this.checkGLError("Right Eye framebuffer setup");
             }
@@ -582,7 +580,7 @@ public abstract class VRRenderer
             this.renderScale = (float)Math.sqrt((double)dataholder.vrSettings.renderScaleFactor);
             i = (int)Math.ceil((double)((float)eyew * this.renderScale));
             j = (int)Math.ceil((double)((float)eyeh * this.renderScale));
-            this.framebufferVrRender = new TextureTarget("3D Render", i, j, true, false, -1, true, true);
+            this.framebufferVrRender = MethodHolder.TextureTarget("3D Render", i, j, true, false, -1, true, true);
             dataholder.print(this.framebufferVrRender.toString());
             this.checkGLError("3D framebuffer setup");
             this.mirrorFBWidth = minecraft.getWindow().getScreenWidth();
@@ -613,25 +611,25 @@ public abstract class VRRenderer
 
             if (list.contains(RenderPass.THIRD))
             {
-                this.framebufferMR = new TextureTarget("Mixed Reality Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, true, false);
+                this.framebufferMR = MethodHolder.TextureTarget("Mixed Reality Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, true, false);
                 dataholder.print(this.framebufferMR.toString());
                 this.checkGLError("Mixed reality framebuffer setup");
             }
 
             if (list.contains(RenderPass.CENTER))
             {
-                this.framebufferUndistorted = new TextureTarget("Undistorted View Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, false, false);
+                this.framebufferUndistorted = MethodHolder.TextureTarget("Undistorted View Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, false, false);
                 dataholder.print(this.framebufferUndistorted.toString());
                 this.checkGLError("Undistorted view framebuffer setup");
             }
 
-            GuiHandler.guiFramebuffer = new TextureTarget("GUI", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true);
+            GuiHandler.guiFramebuffer = MethodHolder.TextureTarget("GUI", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true);
             dataholder.print(GuiHandler.guiFramebuffer.toString());
             this.checkGLError("GUI framebuffer setup");
-            KeyboardHandler.Framebuffer = new TextureTarget("Keyboard", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true);
+            KeyboardHandler.Framebuffer = MethodHolder.TextureTarget("Keyboard", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true);
             dataholder.print(KeyboardHandler.Framebuffer.toString());
             this.checkGLError("Keyboard framebuffer setup");
-            RadialHandler.Framebuffer = new TextureTarget("Radial Menu", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true);
+            RadialHandler.Framebuffer = MethodHolder.TextureTarget("Radial Menu", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true);
             dataholder.print(RadialHandler.Framebuffer.toString());
             this.checkGLError("Radial framebuffer setup");
             int j2 = 720;
@@ -644,12 +642,12 @@ public abstract class VRRenderer
 //            }
 
             this.checkGLError("Mirror framebuffer setup");
-            this.telescopeFramebufferR = new TextureTarget("TelescopeR", j2, k2, true, false, -1, true, false);
+            this.telescopeFramebufferR = MethodHolder.TextureTarget("TelescopeR", j2, k2, true, false, -1, true, false);
             dataholder.print(this.telescopeFramebufferR.toString());
             this.checkGLError("TelescopeR framebuffer setup");
             this.telescopeFramebufferR.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             this.telescopeFramebufferR.clear(Minecraft.ON_OSX);
-            this.telescopeFramebufferL = new TextureTarget("TelescopeL", j2, k2, true, false, -1, true, false);
+            this.telescopeFramebufferL = MethodHolder.TextureTarget("TelescopeL", j2, k2, true, false, -1, true, false);
             dataholder.print(this.telescopeFramebufferL.toString());
             this.telescopeFramebufferL.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             this.telescopeFramebufferL.clear(Minecraft.ON_OSX);
@@ -659,29 +657,29 @@ public abstract class VRRenderer
             int l1 = j1;
             int i2 = k1;
 
-            if (Config.isShaders())
-            {
-                float f = (float)j1 / (float)k1;
+//            if (Config.isShaders())
+//            {
+//                float f = (float)j1 / (float)k1;
+//
+//                if (f > (float)(i / j))
+//                {
+//                    j1 = i;
+//                    k1 = Math.round((float)i / f);
+//                }
+//                else
+//                {
+//                    j1 = Math.round((float)j * f);
+//                    k1 = j;
+//                }
+//
+//                l1 = i;
+//                i2 = j;
+//            }
 
-                if (f > (float)(i / j))
-                {
-                    j1 = i;
-                    k1 = Math.round((float)i / f);
-                }
-                else
-                {
-                    j1 = Math.round((float)j * f);
-                    k1 = j;
-                }
-
-                l1 = i;
-                i2 = j;
-            }
-
-            this.cameraFramebuffer = new TextureTarget("Handheld Camera", j1, k1, true, false, -1, true, false);
+            this.cameraFramebuffer = MethodHolder.TextureTarget("Handheld Camera", j1, k1, true, false, -1, true, false);
             dataholder.print(this.cameraFramebuffer.toString());
             this.checkGLError("Camera framebuffer setup");
-            this.cameraRenderFramebuffer = new TextureTarget("Handheld Camera Render", l1, i2, true, false, -1, true, true);
+            this.cameraRenderFramebuffer = MethodHolder.TextureTarget("Handheld Camera Render", l1, i2, true, false, -1, true, true);
             dataholder.print(this.cameraRenderFramebuffer.toString());
             this.checkGLError("Camera render framebuffer setup");
             ((GameRendererExtension)minecraft.gameRenderer).setupClipPlanes();
@@ -693,8 +691,8 @@ public abstract class VRRenderer
                 try
                 {
                     this.checkGLError("pre FSAA FBO creation");
-                    this.fsaaFirstPassResultFBO = new TextureTarget("FSAA Pass1 FBO", eyew, j, false, false, -1, false, false);
-                    this.fsaaLastPassResultFBO = new TextureTarget("FSAA Pass2 FBO", eyew, eyeh, false, false, -1, false, false);
+                    this.fsaaFirstPassResultFBO = MethodHolder.TextureTarget("FSAA Pass1 FBO", eyew, j, false, false, -1, false, false);
+                    this.fsaaLastPassResultFBO = MethodHolder.TextureTarget("FSAA Pass2 FBO", eyew, eyeh, false, false, -1, false, false);
                     dataholder.print(this.fsaaFirstPassResultFBO.toString());
                     dataholder.print(this.fsaaLastPassResultFBO.toString());
                     this.checkGLError("FSAA FBO creation");
@@ -722,21 +720,21 @@ public abstract class VRRenderer
                 list1.addAll(this.entityShaders.values());
                 this.entityShaders.clear();
                 ResourceLocation resourcelocation = new ResourceLocation("shaders/post/entity_outline.json");
-                this.entityShaders.put(this.framebufferVrRender.name, this.createShaderGroup(resourcelocation, this.framebufferVrRender));
+                this.entityShaders.put(((RenderTargetExtension)this.framebufferVrRender).getName(), this.createShaderGroup(resourcelocation, this.framebufferVrRender));
 
                 if (list.contains(RenderPass.THIRD))
                 {
-                    this.entityShaders.put(this.framebufferMR.name, this.createShaderGroup(resourcelocation, this.framebufferMR));
+                    this.entityShaders.put(((RenderTargetExtension)this.framebufferMR).getName(), this.createShaderGroup(resourcelocation, this.framebufferMR));
                 }
 
                 if (list.contains(RenderPass.CENTER))
                 {
-                    this.entityShaders.put(this.framebufferUndistorted.name, this.createShaderGroup(resourcelocation, this.framebufferUndistorted));
+                    this.entityShaders.put(((RenderTargetExtension)this.framebufferMR).getName(), this.createShaderGroup(resourcelocation, this.framebufferUndistorted));
                 }
 
-                this.entityShaders.put(this.telescopeFramebufferL.name, this.createShaderGroup(resourcelocation, this.telescopeFramebufferL));
-                this.entityShaders.put(this.telescopeFramebufferR.name, this.createShaderGroup(resourcelocation, this.telescopeFramebufferR));
-                this.entityShaders.put(this.cameraRenderFramebuffer.name, this.createShaderGroup(resourcelocation, this.cameraRenderFramebuffer));
+                this.entityShaders.put(((RenderTargetExtension)this.telescopeFramebufferL).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferL));
+                this.entityShaders.put(((RenderTargetExtension)this.telescopeFramebufferR).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferR));
+                this.entityShaders.put(((RenderTargetExtension)this.cameraRenderFramebuffer).getName(), this.createShaderGroup(resourcelocation, this.cameraRenderFramebuffer));
 
                 for (PostChain postchain : list1)
                 {
@@ -750,21 +748,21 @@ public abstract class VRRenderer
                 if (Minecraft.useShaderTransparency())
                 {
                     ResourceLocation resourcelocation1 = new ResourceLocation("shaders/post/vrtransparency.json");
-                    this.alphaShaders.put(this.framebufferVrRender.name, this.createShaderGroup(resourcelocation1, this.framebufferVrRender));
+                    this.alphaShaders.put(((RenderTargetExtension)this.framebufferVrRender).getName(), this.createShaderGroup(resourcelocation1, this.framebufferVrRender));
 
                     if (list.contains(RenderPass.THIRD))
                     {
-                        this.alphaShaders.put(this.framebufferMR.name, this.createShaderGroup(resourcelocation1, this.framebufferMR));
+                        this.alphaShaders.put(((RenderTargetExtension)this.framebufferMR).getName(), this.createShaderGroup(resourcelocation1, this.framebufferMR));
                     }
 
                     if (list.contains(RenderPass.CENTER))
                     {
-                        this.alphaShaders.put(this.framebufferUndistorted.name, this.createShaderGroup(resourcelocation1, this.framebufferUndistorted));
+                        this.alphaShaders.put(((RenderTargetExtension)this.framebufferMR).getName(), this.createShaderGroup(resourcelocation, this.framebufferMR));
                     }
 
-                    this.alphaShaders.put(this.telescopeFramebufferL.name, this.createShaderGroup(resourcelocation1, this.telescopeFramebufferL));
-                    this.alphaShaders.put(this.telescopeFramebufferR.name, this.createShaderGroup(resourcelocation1, this.telescopeFramebufferR));
-                    this.alphaShaders.put(this.cameraRenderFramebuffer.name, this.createShaderGroup(resourcelocation1, this.cameraRenderFramebuffer));
+                    this.alphaShaders.put(((RenderTargetExtension)this.telescopeFramebufferL).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferL));
+                    this.alphaShaders.put(((RenderTargetExtension)this.telescopeFramebufferR).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferR));
+                    this.alphaShaders.put(((RenderTargetExtension)this.cameraRenderFramebuffer).getName(), this.createShaderGroup(resourcelocation, this.cameraRenderFramebuffer));
                 }
 
                 for (PostChain postchain1 : list1)
