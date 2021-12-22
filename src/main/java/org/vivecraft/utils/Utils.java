@@ -48,6 +48,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
+import io.github.classgraph.ClassGraph;
 import jopenvr.HmdMatrix44_t;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.ComponentCollector;
@@ -430,7 +431,7 @@ public class Utils
             try
             {
                 Path path = Paths.get(System.getProperty("user.dir"));
-                Path path1 = path.getParent().resolve("src/resources/natives/" + directory);
+                Path path1 = path.getParent().resolve("src/main/resources/natives/" + directory);
 
                 if (!path1.toFile().exists())
                 {
@@ -479,45 +480,46 @@ public class Utils
         }
     }
 
-//    public static URI getVivecraftZipLocation()
-//    {
-//        if (vivecraftZipURI != null)
-//        {
-//            return vivecraftZipURI;
-//        }
-//        else
-//        {
-//            for (URI uri : (new ClassGraph()).getClasspathURIs())
-//            {
-//                try (ZipFile zipfile = new ZipFile(new File(uri)))
-//                {
-//                    if (zipfile.getEntry("org/vivecraft/provider/MCVR.class") != null)
-//                    {
-//                        System.out.println("Found Vivecraft zip: " + uri.toString());
-//                        vivecraftZipURI = uri;
-//                        break;
-//                    }
-//                }
-//                catch (IOException ioexception)
-//                {
-//                }
-//            }
-//
-//            if (vivecraftZipURI == null)
-//            {
-//                throw new RuntimeException("Could not find Vivecraft zip");
-//            }
-//            else
-//            {
-//                return vivecraftZipURI;
-//            }
-//        }
-//    }
+    //TODO Crashes?
+    public static URI getVivecraftZipLocation()
+    {
+        if (vivecraftZipURI != null)
+        {
+            return vivecraftZipURI;
+        }
+        else
+        {
+        	System.out.println(new ClassGraph().scan());
+            for (URI uri : (new ClassGraph()).getClasspathURIs())
+            {
+                try (ZipFile zipfile = new ZipFile(new File(uri)))
+                {
+                    if (zipfile.getEntry("org/vivecraft/provider/MCVR.class") != null)
+                    {
+                        System.out.println("Found Vivecraft zip: " + uri.toString());
+                        vivecraftZipURI = uri;
+                        break;
+                    }
+                }
+                catch (IOException ioexception)
+                {
+                }
+            }
+
+            if (vivecraftZipURI == null)
+            {
+                throw new RuntimeException("Could not find Vivecraft zip");
+            }
+            else
+            {
+                return vivecraftZipURI;
+            }
+        }
+    }
 
     public static ZipFile getVivecraftZip()
     {
-        //URI uri = getVivecraftZipLocation();
-    	URI uri = null;
+        URI uri = getVivecraftZipLocation();
 
         try
         {

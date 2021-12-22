@@ -16,7 +16,6 @@ import net.minecraft.client.Minecraft;
 @Mixin(Minecraft.class)
 public class MinecraftMixin{
 
-	//TODO why in minecraft and not a constant?
 	@ModifyConstant(method = "createTitle", constant = @Constant(stringValue = "Minecraft"))
 	private String title(String s) {
 		return DataHolder.getInstance().minecriftVerString;

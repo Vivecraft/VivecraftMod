@@ -1,0 +1,360 @@
+{
+  "action_manifest_version" : 0,
+  "alias_info" : {},
+  "app_key" : "org.jrbudda.vivecraft.steamvrinput",
+  "bindings" : {
+    "/actions/contextual" : {
+      "chords" : [
+        {
+          "inputs" : [
+            [ "/user/hand/left/input/grip", "click" ],
+            [ "/user/hand/right/input/grip", "click" ]
+          ],
+          "output" : "/actions/contextual/in/vivecraft.key.climbeyjump"
+        }
+      ],
+      "sources" : [
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/contextual/in/vivecraft.key.climbeygrab"
+            }
+          },
+          "parameters": {
+            "haptic_amplitude": "0"
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs" : {},
+          "mode" : "button",
+          "path" : "/user/hand/left/input/grip"
+        },
+        {
+          "inputs" : {},
+          "mode" : "button",
+          "path" : "/user/hand/right/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/contextual/in/vivecraft.key.climbeygrab"
+            }
+          },
+          "parameters": {
+            "haptic_amplitude": "0"
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "/actions/contextual/in/vivecraft.key.climbeygrab"
+            }
+          },
+          "mode": "button",
+          "path": "/user/hand/left/input/grip"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "/actions/contextual/in/vivecraft.key.climbeygrab"
+            }
+          },
+          "mode": "button",
+          "path": "/user/hand/right/input/grip"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "/actions/contextual/in/vivecraft.key.vrinteract"
+            }
+          },
+          "mode": "button",
+          "path": "/user/hand/left/input/grip"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "/actions/contextual/in/vivecraft.key.vrinteract"
+            }
+          },
+          "mode": "button",
+          "path": "/user/hand/right/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/contextual/in/vivecraft.key.vrinteract"
+            }
+          },
+          "parameters": {
+            "haptic_amplitude": "0"
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/contextual/in/vivecraft.key.vrinteract"
+            }
+          },
+          "parameters": {
+            "haptic_amplitude": "0"
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/trigger"
+        }
+      ]
+    },
+    "/actions/global" : {
+      "haptics" : [
+        {
+          "output" : "/actions/global/out/lefthaptic",
+          "path" : "/user/hand/left/output/haptic"
+        },
+        {
+          "output" : "/actions/global/out/righthaptic",
+          "path" : "/user/hand/right/output/haptic"
+        }
+      ],
+      "poses" : [
+        {
+          "output" : "/actions/global/in/lefthand",
+          "path" : "/user/hand/left/pose/raw"
+        },
+        {
+          "output" : "/actions/global/in/righthand",
+          "path" : "/user/hand/right/pose/raw"
+        }
+      ],
+      "sources" : [
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/global/in/vivecraft.key.ingamemenubutton"
+            },
+            "long" : {
+              "output" : "/actions/global/in/vivecraft.key.togglekeyboard"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/b"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/global/in/key.inventory"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/a"
+        }
+      ]
+    },
+    "/actions/gui" : {
+      "sources" : [
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/gui/in/vivecraft.key.guishift"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/gui/in/vivecraft.key.guimiddleclick"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/gui/in/vivecraft.key.guileftclick"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/gui/in/vivecraft.key.guirightclick"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/a"
+        },
+        {
+          "inputs" : {
+            "scroll" : {
+              "output" : "/actions/gui/in/vivecraft.key.guiscrollaxis"
+            }
+          },
+          "mode" : "scroll",
+          "parameters" : {
+            "scroll_mode" : "discrete"
+          },
+          "path" : "/user/hand/left/input/joystick"
+        }
+      ]
+    },
+    "/actions/ingame" : {
+      "sources" : [
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/ingame/in/vivecraft.key.hotbarprev"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/ingame/in/vivecraft.key.hotbarnext"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/ingame/in/key.attack"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/ingame/in/vivecraft.key.teleport"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/ingame/in/vivecraft.key.radialmenu"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/y"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/ingame/in/key.use"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/x"
+        },
+        {
+          "inputs" : {
+            "position" : {
+              "output" : "/actions/ingame/in/vivecraft.key.freemovestrafe"
+            }
+          },
+          "mode" : "joystick",
+          "path" : "/user/hand/right/input/joystick"
+        },
+        {
+          "inputs" : {
+            "position" : {
+              "output" : "/actions/ingame/in/vivecraft.key.rotateaxis"
+            }
+          },
+          "mode" : "joystick",
+          "path" : "/user/hand/left/input/joystick"
+        },
+        {
+          "inputs" : {
+            "pull" : {
+              "output" : "/actions/ingame/in/vivecraft.key.teleportfallback"
+            }
+          },
+          "mode" : "trigger",
+          "path" : "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/ingame/in/key.jump"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/bumper"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/ingame/in/key.sneak"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/bumper"
+        }
+      ]
+    },
+    "/actions/keyboard" : {
+      "sources" : [
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/keyboard/in/vivecraft.key.keyboardshift"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/keyboard/in/vivecraft.key.keyboardshift"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/grip"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/keyboard/in/vivecraft.key.keyboardclick"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs" : {
+            "click" : {
+              "output" : "/actions/keyboard/in/vivecraft.key.keyboardclick"
+            }
+          },
+          "mode" : "button",
+          "path" : "/user/hand/right/input/trigger"
+        }
+      ]
+    }
+  },
+  "category" : "steamvr_input",
+  "controller_type" : "vive_cosmos_controller",
+  "description" : "",
+  "name" : "Vive Cosmos Defaults (Reversed Hands)",
+  "options" : {},
+  "simulated_actions" : []
+}

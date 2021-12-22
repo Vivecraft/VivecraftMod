@@ -10,20 +10,6 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-import org.gradle.internal.os.OperatingSystem
-
-switch (OperatingSystem.current()) {
-    case OperatingSystem.LINUX:
-        project.ext.lwjglNatives = "natives-linux"
-        break
-    case OperatingSystem.MAC_OS:
-        project.ext.lwjglNatives = natives-macos
-        break
-    case OperatingSystem.WINDOWS:
-        project.ext.lwjglNatives = "natives-windows"
-        break
-}
-
 repositories {
     mavenCentral()
     maven {
@@ -32,6 +18,17 @@ repositories {
         mavenContent { snapshotsOnly() }
     }
     maven { url = 'https://files.minecraftforge.net/maven' }
+    maven {url = 'https://mvnrepository.com/'}
+}
+
+configurations {
+    library
+    implementation.extendsFrom library
+}
+minecraft.runs.all {
+    lazyToken('minecraft_classpath') {
+        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+    }
 }
 
 dependencies {
@@ -53,11 +50,9 @@ dependencies {
         transitive = false
     }
 
-    // https://mvnrepository.com/artifact/org.json/json
-    implementation group: 'org.json', name: 'json', version: '20211205'
-
-    implementation "org.lwjgl:lwjgl-ovr:3.2.2"
-    runtimeOnly "org.lwjgl:lwjgl-ovr:3.2.2:$lwjglNatives"
+    library "org.json:json:20141113"
+    library "org.lwjgl:lwjgl-ovr:3.2.2"
+    library "io.github.classgraph:classgraph:4.8.138"
 }
 loom {
     accessWidenerPath = file("src/main/resources/examplemod.accesswidener")

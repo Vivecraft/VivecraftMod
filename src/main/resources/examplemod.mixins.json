@@ -21,7 +21,8 @@
     "client.renderer.block.LiquidBlockRendererMixin",
     "client.renderer.entity.EntityRenderDispatcherMixin",
     "client.resources.language.ClientLanguageMixin",
-    "world.entity.vehicle.BoatMixin"
+    "world.entity.vehicle.BoatMixin",
+    "client.MinecraftVRMixin"
   ],
   "server": [
   ],

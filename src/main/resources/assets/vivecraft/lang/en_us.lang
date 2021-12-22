@@ -171,6 +171,7 @@ vivecraft.options.ANIMAL_TOUCHING=Animal Touching
 vivecraft.options.HANDHELD_CAMERA_FOV=Camera FOV
 vivecraft.options.HANDHELD_CAMERA_RENDER_SCALE=Camera Resolution
 vivecraft.options.MIXED_REALITY_RENDER_CAMERA_MODEL=Show Camera Model
+vivecraft.options.PHYSICAL_KEYBOARD_THEME=Keyboard Theme
 
 # Option tooltips
 vivecraft.options.HUD_SCALE.tooltip=Relative size HUD takes up in field-of-view.\n\
@@ -210,7 +211,7 @@ vivecraft.options.RENDER_CROSSHAIR_MODE.tooltip=Set the in-game crosshair displa
   With HUD: The crosshair is only shown when the HUD is enabled.\n\
   Never: The crosshair is never shown.
 
-vivecraft.options.CHAT_NOTIFICATIONS.tooltip=Sets what happens when you recieve a chat message.\n\
+vivecraft.options.CHAT_NOTIFICATIONS.tooltip=Sets what happens when you receive a chat message.\n\
   None: Nothing!\n\
   Haptic: Pulse on left controller.\n\
   Sound: Plays the Chat Notification Sound.\n\
@@ -479,6 +480,10 @@ vivecraft.options.MIXED_REALITY_RENDER_CAMERA_MODEL.tooltip=Show model of a vide
 where the mixed reality or third person camera is currently located. \
 It can also be grabbed to move it around using the interact binding.
 
+vivecraft.options.PHYSICAL_KEYBOARD_THEME.tooltip=Color scheme preset for the physical keyboard. \
+Custom theme can be edited via keyboardtheme.txt in the game directory. \
+It will be reloaded every time the keyboard is opened, to allow real-time tweaking.
+
 # Option values
 vivecraft.options.gamma.cantseeshitcaptain=I Can't See
 vivecraft.options.yes=YES
@@ -544,6 +549,16 @@ vivecraft.options.rightclickdelay.vanilla=Vanilla
 vivecraft.options.rightclickdelay.slow=Slow
 vivecraft.options.rightclickdelay.slower=Slower
 vivecraft.options.rightclickdelay.slowest=Slowest
+vivecraft.options.keyboardtheme.default=White
+vivecraft.options.keyboardtheme.red=Red
+vivecraft.options.keyboardtheme.green=Green
+vivecraft.options.keyboardtheme.blue=Blue
+vivecraft.options.keyboardtheme.black=Void
+vivecraft.options.keyboardtheme.grass=Grass Block
+vivecraft.options.keyboardtheme.bees=Bumblebee
+vivecraft.options.keyboardtheme.aesthetic=§bA§de§bs§dt§bh§de§bt§di§bc
+vivecraft.options.keyboardtheme.dose=Medicine
+vivecraft.options.keyboardtheme.custom=Custom
 
 # Button text
 vivecraft.gui.ok=OK

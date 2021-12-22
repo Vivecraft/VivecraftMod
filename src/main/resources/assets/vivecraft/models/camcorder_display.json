@@ -1,0 +1,26 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+		"1": "vivecraft:transparent",
+		"particle": "vivecraft:transparent"
+	},
+	"elements": [
+		{
+			"from": [0.2, 4.5, 6],
+			"to": [9.2, 9.5, 7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8.25, 12.5, 14]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#1"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#1"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "group",
+			"origin": [21, 13, 12],
+			"children": [0]
+		}
+	]
+}

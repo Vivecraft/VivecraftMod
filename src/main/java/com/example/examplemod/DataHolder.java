@@ -82,7 +82,7 @@ public class DataHolder {
 //	private boolean lastClick;
 	public boolean resourcePacksChanged;
 	public int tickCounter;
-	public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-VR-1-b2";
+	public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-VR-2-a1";
 	
 	//private float fov = 1.0F;
 	public float watereffect;
