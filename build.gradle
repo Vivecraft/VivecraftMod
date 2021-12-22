@@ -21,16 +21,6 @@ repositories {
     maven {url = 'https://mvnrepository.com/'}
 }
 
-configurations {
-    library
-    implementation.extendsFrom library
-}
-minecraft.runs.all {
-    lazyToken('minecraft_classpath') {
-        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-    }
-}
-
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -50,9 +40,9 @@ dependencies {
         transitive = false
     }
 
-    library "org.json:json:20141113"
-    library "org.lwjgl:lwjgl-ovr:3.2.2"
-    library "io.github.classgraph:classgraph:4.8.138"
+    implementation "org.json:json:20141113"
+    implementation "org.lwjgl:lwjgl-ovr:3.2.2"
+    implementation "io.github.classgraph:classgraph:4.8.138"
 }
 loom {
     accessWidenerPath = file("src/main/resources/examplemod.accesswidener")
