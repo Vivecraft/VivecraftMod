@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.lwjgl.opengl.GL11;
-import org.vivecraft.reflection.MCReflection;
 import org.vivecraft.settings.VRSettings;
 
 import com.example.examplemod.DataHolder;
@@ -22,7 +21,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.math.Matrix4f;
-import com.mojang.serialization.MapCodec;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -81,7 +79,7 @@ public class MenuWorldRenderer
         this.mc = Minecraft.getInstance();
         this.dh = DataHolder.getInstance();
         this.lightmapTexture = new DynamicTexture(16, 16, false);
-        this.locationLightMap = this.mc.getTextureManager().register("lightMap", this.lightmapTexture);
+        this.locationLightMap = this.mc.getTextureManager().register("lightmap", this.lightmapTexture);
         this.lightmapColors = this.lightmapTexture.getPixels();
         Builder<VertexFormatElement> builder = ImmutableList.builder();
         builder.add(new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.POSITION, 3));
@@ -1208,32 +1206,32 @@ public class MenuWorldRenderer
         return this.isFluidTagged(fluidState.getType(), tag);
     }
 
-    private static class FluidStateWrapper extends FluidState
-    {
-        private final FluidState fluidState;
-
-        public FluidStateWrapper(FluidState fluidState)
-        {
-            super(fluidState.getType(), fluidState.getValues(), (MapCodec)MCReflection.StateHolder_mapCodec.get(fluidState));
-            this.fluidState = fluidState;
-        }
-
-        public boolean is(Tag<Fluid> pTag)
-        {
-            if (pTag == FluidTags.WATER)
-            {
-                return this.getType() == Fluids.WATER || this.getType() == Fluids.FLOWING_WATER;
-            }
-            else if (pTag != FluidTags.LAVA)
-            {
-                return this.fluidState.is(pTag);
-            }
-            else
-            {
-                return this.getType() == Fluids.LAVA || this.getType() == Fluids.FLOWING_LAVA;
-            }
-        }
-    }
+//    private static class FluidStateWrapper extends FluidState
+//    {
+//        private final FluidState fluidState;
+//
+//        public FluidStateWrapper(FluidState fluidState)
+//        {
+//            super(fluidState.getType(), fluidState.getValues(), (MapCodec)MCReflection.StateHolder_mapCodec.get(fluidState));
+//            this.fluidState = fluidState;
+//        }
+//
+//        public boolean is(Tag<Fluid> pTag)
+//        {
+//            if (pTag == FluidTags.WATER)
+//            {
+//                return this.getType() == Fluids.WATER || this.getType() == Fluids.FLOWING_WATER;
+//            }
+//            else if (pTag != FluidTags.LAVA)
+//            {
+//                return this.fluidState.is(pTag);
+//            }
+//            else
+//            {
+//                return this.getType() == Fluids.LAVA || this.getType() == Fluids.FLOWING_LAVA;
+//            }
+//        }
+//    }
 
     public static class MenuCloudRenderer
     {

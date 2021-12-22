@@ -1,5 +1,6 @@
 package com.example.examplemod.mixin.client.renderer.entity;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,8 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.render.PlayerModelController;
 import org.vivecraft.render.VRPlayerRenderer;
 
-import com.google.common.collect.Maps;
-
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -27,9 +26,9 @@ import net.minecraft.world.entity.Entity;
 public abstract class EntityRenderDispatcherMixin implements ResourceManagerReloadListener{
 	
 	@Unique
-	private final Map<String, VRPlayerRenderer> skinMapVR = Maps.newHashMap();
+	private final Map<String, VRPlayerRenderer> skinMapVR = new HashMap<>();
 	@Unique
-	private final Map<String, VRPlayerRenderer> skinMapVRSeated = Maps.newHashMap();
+	private final Map<String, VRPlayerRenderer> skinMapVRSeated = new HashMap<>();
 	@Unique
 	private VRPlayerRenderer playerRendererVR;
 	@Unique
