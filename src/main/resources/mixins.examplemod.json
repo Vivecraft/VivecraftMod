@@ -24,7 +24,8 @@
     "client.MinecraftMixin",
     "world.entity.vehicle.BoatMixin",
     
-    "client.MinecraftVRMixin"
+    "client.MinecraftVRMixin",
+    "client.renderer.GamerRendererVRMixin"
     
   ],
   "server": [

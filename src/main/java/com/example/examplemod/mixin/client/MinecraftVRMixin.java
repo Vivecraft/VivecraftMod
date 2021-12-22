@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.gameplay.VRPlayer;
+import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.menuworlds.MenuWorldRenderer;
 import org.vivecraft.provider.openvr_jna.MCOpenVR;
 import org.vivecraft.provider.openvr_jna.OpenVRStereoRenderer;
@@ -147,7 +148,7 @@ public abstract class MinecraftVRMixin {
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = Shift.BEFORE), 
 			method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
 	public void gui(Screen pGuiScreen, CallbackInfo info) {
-		//GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
+		GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
 	}
 
 }
