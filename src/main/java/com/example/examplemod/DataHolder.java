@@ -1,37 +1,21 @@
 package com.example.examplemod;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.sounds.SoundEngine;
 import org.vivecraft.api.ErrorHelper;
 import org.vivecraft.gameplay.VRPlayer;
-import org.vivecraft.gameplay.trackers.BackpackTracker;
-import org.vivecraft.gameplay.trackers.BowTracker;
-import org.vivecraft.gameplay.trackers.CameraTracker;
-import org.vivecraft.gameplay.trackers.ClimbTracker;
-import org.vivecraft.gameplay.trackers.CrawlTracker;
-import org.vivecraft.gameplay.trackers.EatingTracker;
-import org.vivecraft.gameplay.trackers.HorseTracker;
-import org.vivecraft.gameplay.trackers.InteractTracker;
-import org.vivecraft.gameplay.trackers.JumpTracker;
-import org.vivecraft.gameplay.trackers.RowTracker;
-import org.vivecraft.gameplay.trackers.RunTracker;
-import org.vivecraft.gameplay.trackers.SneakTracker;
-import org.vivecraft.gameplay.trackers.SwimTracker;
-import org.vivecraft.gameplay.trackers.SwingTracker;
-import org.vivecraft.gameplay.trackers.TeleportTracker;
-import org.vivecraft.gameplay.trackers.VehicleTracker;
+import org.vivecraft.gameplay.trackers.*;
 import org.vivecraft.menuworlds.MenuWorldRenderer;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRSettings;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.client.sounds.SoundEngine;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 
 public class DataHolder {
 	
@@ -98,7 +82,7 @@ public class DataHolder {
 //	private boolean lastClick;
 	public boolean resourcePacksChanged;
 	public int tickCounter;
-	public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-NONVR-1-b2";
+	public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-VR-1-b2";
 	
 	//private float fov = 1.0F;
 	public float watereffect;

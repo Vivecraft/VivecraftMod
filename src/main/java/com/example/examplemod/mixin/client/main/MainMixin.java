@@ -44,7 +44,7 @@ public class MainMixin {
 		return 720;
 	}
 		
-	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParserparse;([Ljava/lang/String;)Ljoptsimple/OptionSet;") , method = "main([Ljava/lang/String;)V", remap = false)
+	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParseroptionparse;([Ljava/lang/String;)Ljoptsimple/OptionSet;") , method = "main([Ljava/lang/String;)V", remap = false)
 	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
 		OptionSet optionset = optionparser.parse(p_129642_);
 		kiosk = optionset.has("kiosk");

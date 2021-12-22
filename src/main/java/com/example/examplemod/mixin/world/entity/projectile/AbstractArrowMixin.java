@@ -1,5 +1,6 @@
 package com.example.examplemod.mixin.world.entity.projectile;
 
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 @Mixin(AbstractArrow.class)
-public abstract class AbstractArrowMixin extends Projectile {
+public abstract class AbstractArrowMixin extends Entity {
 
 	protected AbstractArrowMixin(EntityType<? extends Projectile> p_37248_, Level p_37249_) {
 		super(p_37248_, p_37249_);

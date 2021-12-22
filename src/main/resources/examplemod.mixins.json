@@ -12,20 +12,18 @@
     "world.entity.projectile.ProjectileMixin",
     "world.entity.projectile.ThrowableProjectileMixin",
     "world.entity.projectile.ThrownTridentMixin",
-    
     "world.item.CrossbowItemMixin"
   ],
   "client": [
+    "client.MinecraftMixin",
     "client.main.MainMixin",
     "client.multiplayer.ClientPacketListenerMixin",
     "client.renderer.block.LiquidBlockRendererMixin",
     "client.renderer.entity.EntityRenderDispatcherMixin",
     "client.resources.language.ClientLanguageMixin",
-    "client.MinecraftMixin",
     "world.entity.vehicle.BoatMixin"
   ],
   "server": [
-    
   ],
   "minVersion": "0.8.4"
 }
