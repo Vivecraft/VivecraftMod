@@ -472,7 +472,7 @@ public abstract class MCVR
         }
 
         this.setVanillaBindings(keyBindings);
-        Map<String, Integer> map = (Map)MCReflection.KeyBinding_CATEGORY_ORDER.get((Object)null);
+        Map<String, Integer> map = KeyMapping.CATEGORY_SORT_ORDER;
         map.put("vivecraft.key.category.gui", 8);
         map.put("vivecraft.key.category.climbey", 9);
         map.put("vivecraft.key.category.keyboard", 10);

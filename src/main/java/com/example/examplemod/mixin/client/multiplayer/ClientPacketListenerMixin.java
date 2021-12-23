@@ -31,14 +31,14 @@ public class ClientPacketListenerMixin {
 	@Shadow
 	private Minecraft minecraft;
 
-	@Inject(at = @At("TAIL"), method = "Lnet/minecraft/client/multiplayer/ClientPacketListener;<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/network/Connection;Lcom/mojang/authlib/GameProfile;)V")
+	@Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/network/Connection;Lcom/mojang/authlib/GameProfile;)V")
 	public void init(Minecraft p_104906_, Screen p_104907_, Connection p_104908_, GameProfile p_104909_,
 			CallbackInfo callback) {
 		NetworkHelper.resetServerSettings();
 		NetworkHelper.displayedChatMessage = false;
 	}
 
-	@Inject(at = @At("TAIL"), method = "(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
+	@Inject(at = @At("TAIL"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
 	public void login(ClientboundLoginPacket p_105030_, CallbackInfo callback) {
 		NetworkHelper.vivePlayers.clear();
 		NetworkHelper.sendVersionInfo();
