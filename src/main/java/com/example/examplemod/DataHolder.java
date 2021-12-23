@@ -51,7 +51,6 @@ public class DataHolder {
 	public CameraTracker cameraTracker = new CameraTracker( Minecraft.getInstance(), this);
 	public ThreadGroup backgroundThreadGroup = new ThreadGroup("background");
 	public final float PIOVER180 = ((float)Math.PI / 180F);
-//	private boolean oculus = false;
 	public int lastShaderIndex = -1;
 //	public Field fieldHwnd = null;
 //	public Field fieldDisplay = null;
@@ -66,8 +65,6 @@ public class DataHolder {
 	public boolean enableWorldExport = false;
 	public SoundEngine sndManager = null;
 	public MenuWorldRenderer menuWorldRenderer;
-//	private FloatBuffer matrixBuffer = MemoryTracker.create(16).asFloatBuffer();
-//	private FloatBuffer matrixBuffer2 = MemoryTracker.create(16).asFloatBuffer();
 //	private boolean firstInit = true;
 	public boolean showSplashScreen = true;
 	public long splashTimer1 = 0L;
@@ -84,7 +81,6 @@ public class DataHolder {
 	public int tickCounter;
 	public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-VR-2-a1";
 	
-	//private float fov = 1.0F;
 	public float watereffect;
 	public float portaleffect;
 	public float pumpkineffect;
