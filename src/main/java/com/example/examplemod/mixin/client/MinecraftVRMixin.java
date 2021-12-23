@@ -583,8 +583,8 @@ public abstract class MinecraftVRMixin {
 
 			if (!this.noRender) {
 				// TODO needed?
-				net.minecraftforge.fmllegacy.hooks.BasicEventHooks
-						.onRenderTickEnd(this.pause ? this.pausePartialTick : this.timer.partialTick);
+				/*net.minecraftforge.fmllegacy.hooks.BasicEventHooks
+						.onRenderTickEnd(this.pause ? this.pausePartialTick : this.timer.partialTick); */
 			}
 
 			this.profiler.push("mirror");

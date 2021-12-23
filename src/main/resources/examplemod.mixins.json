@@ -15,15 +15,16 @@
     "world.item.CrossbowItemMixin"
   ],
   "client": [
+    "blaze3d.pipeline.RenderTargetMixin",
     "client.MinecraftMixin",
+    "client.MinecraftVRMixin",
     "client.main.MainMixin",
     "client.multiplayer.ClientPacketListenerMixin",
+    "client.renderer.GamerRendererVRMixin",
     "client.renderer.block.LiquidBlockRendererMixin",
     "client.renderer.entity.EntityRenderDispatcherMixin",
     "client.resources.language.ClientLanguageMixin",
-    "world.entity.vehicle.BoatMixin",
-    "client.MinecraftVRMixin",
-    "client.renderer.GamerRendererVRMixin"
+    "world.entity.vehicle.BoatMixin"
   ],
   "server": [
   ],

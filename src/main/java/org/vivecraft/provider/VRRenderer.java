@@ -216,7 +216,7 @@ public abstract class VRRenderer
         }
         else
         {
-            //GlStateManager.disableAlphaTest(); 
+            //GlStateManager.disableAlphaTest();
             GlStateManager._disableBlend();
             GL11.glMatrixMode(GL11.GL_PROJECTION);
             GL43.glPushMatrix();
