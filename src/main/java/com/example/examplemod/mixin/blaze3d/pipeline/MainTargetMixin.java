@@ -16,5 +16,6 @@ public abstract class MainTargetMixin {
     @Shadow
     static int DEFAULT_HEIGHT = 720;
 
+    @Shadow
     static final MainTarget.Dimension DEFAULT_DIMENSIONS = new MainTarget.Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }

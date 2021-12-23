@@ -15,9 +15,12 @@
     "world.item.CrossbowItemMixin"
   ],
   "client": [
+    "blaze3d.pipeline.MainTargetMixin",
     "blaze3d.pipeline.RenderTargetMixin",
     "client.MinecraftMixin",
     "client.MinecraftVRMixin",
+    "client.OptionMixin",
+    "client.OptionsMixin",
     "client.main.MainMixin",
     "client.multiplayer.ClientPacketListenerMixin",
     "client.renderer.GamerRendererVRMixin",
