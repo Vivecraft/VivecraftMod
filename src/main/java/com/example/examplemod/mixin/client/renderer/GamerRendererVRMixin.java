@@ -1,6 +1,7 @@
 package com.example.examplemod.mixin.client.renderer;
 
 import java.nio.FloatBuffer;
+import java.util.Locale;
 
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +14,9 @@ import org.vivecraft.render.VRCamera;
 import com.example.examplemod.DataHolder;
 import com.example.examplemod.GameRendererExtension;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.MemoryTracker;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -21,9 +24,15 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
 
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.LoadingOverlay;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -83,9 +92,14 @@ public class GamerRendererVRMixin implements GameRendererExtension {
 	@Shadow
 	private float renderDistance;
 
+	@Shadow
+	private LightTexture lightTexture;
+
+	private boolean guiLoadingVisible;
+
 	@Override
 	public boolean isInWater() {
-		return wasinwater;
+		return inwater;
 	}
 
 	@Override
@@ -224,7 +238,7 @@ public class GamerRendererVRMixin implements GameRendererExtension {
 		boolean flag = false;
 
 		if (enable) {
-//			this.polyblendsrca = GlStateManager.BLEND.srcAlpha;
+//			this.polyblendsrca = GlStateManager.BLEND.srcAlpha; TODO
 //			this.polyblenddsta = GlStateManager.BLEND.dstAlpha;
 //			this.polyblendsrcrgb = GlStateManager.BLEND.srcRgb;
 //			this.polyblenddstrgb = GlStateManager.BLEND.dstRgb;
@@ -266,6 +280,232 @@ public class GamerRendererVRMixin implements GameRendererExtension {
 //				Shaders.useProgram(this.prog); TODO
 //			}
 		}
+	}
+
+	@Override
+	public void drawScreen(float f, Screen screen, PoseStack poseStack) {
+		PoseStack posestack = RenderSystem.getModelViewStack();
+		posestack.pushPose();
+		posestack.setIdentity();
+		posestack.translate(0.0D, 0.0D, -2000.0D);
+		RenderSystem.applyModelViewMatrix();
+		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+				GlStateManager.DestFactor.ONE);
+		screen.render(poseStack, 0, 0, f);
+		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+				GlStateManager.DestFactor.ONE);
+		posestack.popPose();
+		RenderSystem.applyModelViewMatrix();
+
+		this.minecraft.getMainRenderTarget().bindRead();
+		// this.minecraft.getMainRenderTarget().genMipMaps();
+		this.minecraft.getMainRenderTarget().unbindRead();
+	}
+
+	@Override
+	public boolean wasInWater() {
+		return wasinwater;
+	}
+
+	@Override
+	public void setWasInWater(boolean b) {
+		this.wasinwater = b;
+	}
+
+	@Override
+	public boolean isInPortal() {
+		return this.inportal;
+	}
+
+	@Override
+	public Matrix4f getThirdPassProjectionMatrix() {
+		return thirdPassProjectionMatrix;
+	}
+
+	@Override
+	public void drawFramebufferNEW(float partialTicks, boolean renderWorldIn, PoseStack matrixstack) {
+		if (!this.minecraft.noRender) {
+			Window window = this.minecraft.getWindow();
+			Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float) ((double) window.getWidth() / window.getGuiScale()),
+					0.0F, (float) ((double) window.getHeight() / window.getGuiScale()), 1000.0F, 3000.0F);
+			RenderSystem.setProjectionMatrix(matrix4f);
+			PoseStack posestack = RenderSystem.getModelViewStack();
+			posestack.pushPose();
+			posestack.setIdentity();
+			posestack.translate(0.0D, 0.0D, -2000.0D);
+			RenderSystem.applyModelViewMatrix();
+			Lighting.setupFor3DItems();
+			PoseStack posestack1 = new PoseStack();
+
+			int i = (int) (this.minecraft.mouseHandler.xpos() * (double) this.minecraft.getWindow().getGuiScaledWidth()
+					/ (double) this.minecraft.getWindow().getScreenWidth());
+			int j = (int) (this.minecraft.mouseHandler.ypos() * (double) this.minecraft.getWindow().getGuiScaledHeight()
+					/ (double) this.minecraft.getWindow().getScreenHeight());
+
+			// Window window = this.minecraft.getWindow();
+			// RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 0.0F);
+			// RenderSystem.clear(16640, Minecraft.ON_OSX);
+			// GL43.glMatrixMode(5889);
+			// GL43.glPushMatrix();
+			// GL43.glLoadIdentity();
+			// GL43.glOrtho(0.0D, (double)window.getScreenWidth() / window.getGuiScale(),
+			// (double)window.getScreenHeight() / window.getGuiScale(), 0.0D, 1000.0D,
+			// 3000.0D);
+			// GL43.glMatrixMode(5888);
+			// GL43.glPushMatrix();
+			// GL43.glLoadIdentity();
+			// GL43.glTranslatef(0.0F, 0.0F, -2000.0F);
+			// Lighting.setupFor3DItems();
+			// RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+			// GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+			// GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+			
+//			GlStateManager.alphaFunc(516, 0.01F);
+
+//			if (this.lightTexture.isCustom()) { TODO
+//				this.lightTexture.setAllowed(false);
+//			}
+
+			// this.lightTexture.turnOffLightLayer();
+			DataHolder.getInstance().pumpkineffect = 0.0F;
+
+			if (renderWorldIn && this.minecraft.level != null
+					&& (!this.minecraft.options.hideGui || this.minecraft.screen != null)) {
+				this.minecraft.getProfiler().popPush("gui");
+
+//				if (Reflector.ForgeIngameGui.exists()) {
+//					// RenderSystem.defaultAlphaFunc();
+//					Reflector.ForgeIngameGui_renderVignette.setValue(false);
+//					Reflector.ForgeIngameGui_renderPortal.setValue(false);
+//					Reflector.ForgeIngameGui_renderCrosshairs.setValue(false);
+//				}
+
+				// no thanks.
+				// if (this.minecraft.player != null)
+				// {
+				// float f = Mth.lerp(pPartialTicks, this.minecraft.player.oPortalTime,
+				// this.minecraft.player.portalTime);
+				//
+				// if (f > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONFUSION) &&
+				// this.minecraft.options.screenEffectScale < 1.0F)
+				// {
+				// this.renderConfusionOverlay(f * (1.0F -
+				// this.minecraft.options.screenEffectScale));
+				// }
+				// }
+
+				if (!DataHolder.viewonly) {
+					this.minecraft.gui.render(posestack1, partialTicks);
+				}
+
+//				if (this.minecraft.options.ofShowFps && !this.minecraft.options.renderDebug) { TODO
+//					Config.drawFps(matrixstack);
+//				} 
+
+//				if (this.minecraft.options.renderDebug) { TODO
+//					Lagometer.showLagometer(matrixstack, (int) this.minecraft.getWindow().getGuiScale());
+//				}
+
+				this.minecraft.getProfiler().pop();
+				RenderSystem.clear(256, Minecraft.ON_OSX);
+			}
+
+			if (this.guiLoadingVisible != (this.minecraft.getOverlay() != null)) {
+				if (this.minecraft.getOverlay() != null) {
+					LoadingOverlay.registerTextures(this.minecraft);
+
+					if (this.minecraft.getOverlay() instanceof LoadingOverlay) {
+						LoadingOverlay loadingoverlay = (LoadingOverlay) this.minecraft.getOverlay();
+						//loadingoverlay.update();
+					}
+				}
+
+				this.guiLoadingVisible = this.minecraft.getOverlay() != null;
+			}
+
+			if (this.minecraft.getOverlay() != null) {
+				try {
+					this.minecraft.getOverlay().render(posestack1, i, j, this.minecraft.getDeltaFrameTime());
+				} catch (Throwable throwable1) {
+					CrashReport crashreport2 = CrashReport.forThrowable(throwable1, "Rendering overlay");
+					CrashReportCategory crashreportcategory2 = crashreport2.addCategory("Overlay render details");
+					crashreportcategory2.setDetail("Overlay name", () -> {
+						return this.minecraft.getOverlay().getClass().getCanonicalName();
+					});
+					throw new ReportedException(crashreport2);
+				}
+			} else if (this.minecraft.screen != null) {
+				try {
+//					if (Config.isCustomEntityModels()) { TODO
+//						CustomEntityModels.onRenderScreen(this.minecraft.screen);
+//					}
+
+//					if (Reflector.ForgeHooksClient_drawScreen.exists()) { TODO
+//						Reflector.callVoid(Reflector.ForgeHooksClient_drawScreen, this.minecraft.screen, posestack1, i,
+//								j, this.minecraft.getDeltaFrameTime());
+//					} else {
+						this.minecraft.screen.render(posestack1, i, j, this.minecraft.getDeltaFrameTime());
+//					}
+					// Vivecraft
+//					this.minecraft.gui.drawMouseMenuQuad(i, j);
+				} catch (Throwable throwable2) {
+					CrashReport crashreport = CrashReport.forThrowable(throwable2, "Rendering screen");
+					CrashReportCategory crashreportcategory = crashreport.addCategory("Screen render details");
+					crashreportcategory.setDetail("Screen name", () -> {
+						return this.minecraft.screen.getClass().getCanonicalName();
+					});
+					crashreportcategory.setDetail("Mouse location", () -> {
+						return String.format(Locale.ROOT, "Scaled: (%d, %d). Absolute: (%f, %f)", i, j,
+								this.minecraft.mouseHandler.xpos(), this.minecraft.mouseHandler.ypos());
+					});
+					crashreportcategory.setDetail("Screen size", () -> {
+						return String.format(Locale.ROOT, "Scaled: (%d, %d). Absolute: (%d, %d). Scale factor of %f",
+								this.minecraft.getWindow().getGuiScaledWidth(),
+								this.minecraft.getWindow().getGuiScaledHeight(), this.minecraft.getWindow().getWidth(),
+								this.minecraft.getWindow().getHeight(), this.minecraft.getWindow().getGuiScale());
+					});
+					throw new ReportedException(crashreport);
+				}
+
+				try {
+					if (this.minecraft.screen != null) {
+						this.minecraft.screen.handleDelayedNarration();
+					}
+				} catch (Throwable throwable1) {
+					CrashReport crashreport1 = CrashReport.forThrowable(throwable1, "Narrating screen");
+					CrashReportCategory crashreportcategory1 = crashreport1.addCategory("Screen details");
+					crashreportcategory1.setDetail("Screen name", () -> {
+						return this.minecraft.screen.getClass().getCanonicalName();
+					});
+					throw new ReportedException(crashreport1);
+				}
+			}
+
+			//this.lightTexture.setAllowed(true);
+			posestack.popPose();
+			RenderSystem.applyModelViewMatrix();
+		}
+
+		if (this.minecraft.options.renderDebugCharts && !this.minecraft.options.hideGui) {
+			//this.minecraft.drawProfiler();
+		}
+
+//		this.frameFinish();
+//		this.waitForServerThread();
+//		MemoryMonitor.update(); TODO
+//		Lagometer.updateLagometer();
+
+//		if (this.minecraft.options.ofProfiler) { TODO
+//			this.minecraft.options.renderDebugCharts = true;
+//		}
+
+		// TODO: does this do anything?
+		this.minecraft.getMainRenderTarget().bindRead();
+		//this.minecraft.getMainRenderTarget().genMipMaps();
+		this.minecraft.getMainRenderTarget().unbindRead();
+
 	}
 
 }
