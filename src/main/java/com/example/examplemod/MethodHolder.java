@@ -1,20 +1,25 @@
 package com.example.examplemod;
 
-import com.example.examplemod.mixin.blaze3d.pipeline.RenderTargetMixin;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43;
 import org.vivecraft.provider.InputSimulator;
+
 import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ShaderInstance;
 
 public abstract class MethodHolder implements RenderTargetExtension {
 
@@ -30,6 +35,7 @@ public abstract class MethodHolder implements RenderTargetExtension {
 		private int texid = -1;
 		public String name = "Default";
 		private boolean linearFilter;
+		public boolean blitLegacy = false;
 
 		public TextureTargetExt(String name, int width, int height, boolean usedepth, boolean onMac, int texid, boolean depthtex, boolean linearFilter) {
 			super(width, height, usedepth, onMac);
@@ -53,8 +59,22 @@ public abstract class MethodHolder implements RenderTargetExtension {
 		public void setBlitLegacy(boolean b) {
 			blitLegacy = b;
 		}
+		
+		@Override
+		public String toString() {
+			StringBuilder stringbuilder = new StringBuilder();
+			stringbuilder.append("\n");
 
-		public boolean blitLegacy = false;
+			if (this.name != null) {
+
+				stringbuilder.append("Name:   " + this.name).append("\n");
+			}
+
+			stringbuilder.append("Size:   " + this.viewWidth + " x " + this.viewHeight).append("\n");
+			stringbuilder.append("FB ID:  " + this.frameBufferId).append("\n");
+			stringbuilder.append("Tex ID: " + this.colorTextureId).append("\n");
+			return stringbuilder.toString();
+		}
 
 
 		public void blitToScreen(int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect) {

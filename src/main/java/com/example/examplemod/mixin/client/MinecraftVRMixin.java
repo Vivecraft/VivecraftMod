@@ -16,9 +16,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
@@ -27,6 +27,7 @@ import org.vivecraft.provider.openvr_jna.MCOpenVR;
 import org.vivecraft.provider.openvr_jna.OpenVRStereoRenderer;
 import org.vivecraft.provider.ovr_lwjgl.MC_OVR;
 import org.vivecraft.provider.ovr_lwjgl.OVR_StereoRenderer;
+import org.vivecraft.render.PlayerModelController;
 import org.vivecraft.render.RenderConfigException;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.render.VRFirstPersonArmSwing;
@@ -56,6 +57,7 @@ import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.Timer;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -176,8 +178,7 @@ public abstract class MinecraftVRMixin {
 	@Shadow
 	protected abstract void renderFpsMeter(PoseStack poseStack, ProfileResults fpsPieResults2);
 
-	// TODO @Redirect really?
-	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
+	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;", remap = false), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public Thread settings() {
 		if (!this.oculus) {
 			DataHolder.getInstance().vr = new MCOpenVR((Minecraft) (Object) this);
@@ -245,19 +246,28 @@ public abstract class MinecraftVRMixin {
 		DataHolder.getInstance().vrSettings.firstRun = false;
 		DataHolder.getInstance().vrSettings.saveOptions();
 	}
-
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;ifElse(Ljava/util/Optional;Ljava/util/function/Consumer;Ljava/lang/Runnable;)Ljava/util/Optional;"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
-	public Optional<Throwable> menuInit(Optional<Throwable> p_137522_, Consumer<Throwable> p_137523_,
-			Runnable p_137524_) {
+	
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/LoadingOverlay;<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/server/packs/resources/ReloadInstance;Ljava/util/function/Consumer;Z)V"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
+	public Consumer<Optional<Throwable>> menuInitvar(Consumer<Optional<Throwable>> c) {
 		if (DataHolder.getInstance().vrRenderer.isInitialized()) {
 			DataHolder.getInstance().menuWorldRenderer.init();
 		}
 		DataHolder.getInstance().vr.postinit();
-		return Util.ifElse(p_137522_, p_137523_, p_137524_);
+		return c;
 	}
-
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;ifElse(Ljava/util/Optional;Ljava/util/function/Consumer;Ljava/lang/Runnable;)Ljava/util/Optional;"), method = "reloadResourcePacks(Z)Ljava/util/concurrent/CompletableFuture;")
-	public void reload(boolean b, CallbackInfoReturnable<Boolean> info) {
+	
+//	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;ifElse(Ljava/util/Optional;Ljava/util/function/Consumer;Ljava/lang/Runnable;)Ljava/util/Optional;"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
+//	public Optional<Throwable> menuInit(Optional<Throwable> p_137522_, Consumer<Throwable> p_137523_,
+//			Runnable p_137524_) {
+//		if (DataHolder.getInstance().vrRenderer.isInitialized()) {
+//			DataHolder.getInstance().menuWorldRenderer.init();
+//		}
+//		DataHolder.getInstance().vr.postinit();
+//		return Util.ifElse(p_137522_, p_137523_, p_137524_);
+//	}
+	
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/LoadingOverlay;<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/server/packs/resources/ReloadInstance;Ljava/util/function/Consumer;Z)V"), method = "reloadResourcePacks(Z)Ljava/util/concurrent/CompletableFuture;")
+	public Consumer<Optional<Throwable>> reloadVar(Consumer<Optional<Throwable>> c) {
 		if (DataHolder.getInstance().menuWorldRenderer.isReady() && DataHolder.getInstance().resourcePacksChanged) {
 			try {
 				DataHolder.getInstance().menuWorldRenderer.destroy();
@@ -267,7 +277,21 @@ public abstract class MinecraftVRMixin {
 			}
 		}
 		DataHolder.getInstance().resourcePacksChanged = false;
+		return c;
 	}
+
+//	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;ifElse(Ljava/util/Optional;Ljava/util/function/Consumer;Ljava/lang/Runnable;)Ljava/util/Optional;",shift = Shift.BEFORE), method = "reloadResourcePacks(Z)Ljava/util/concurrent/CompletableFuture;")
+//	public void reload(boolean b, CallbackInfoReturnable<Boolean> info) {
+//		if (DataHolder.getInstance().menuWorldRenderer.isReady() && DataHolder.getInstance().resourcePacksChanged) {
+//			try {
+//				DataHolder.getInstance().menuWorldRenderer.destroy();
+//				DataHolder.getInstance().menuWorldRenderer.prepare();
+//			} catch (Exception exception) {
+//				exception.printStackTrace();
+//			}
+//		}
+//		DataHolder.getInstance().resourcePacksChanged = false;
+//	}
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = Shift.BEFORE), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
 	public void gui(Screen pGuiScreen, CallbackInfo info) {
@@ -401,6 +425,31 @@ public abstract class MinecraftVRMixin {
 		DataHolder.getInstance().currentPass = RenderPass.GUI;
 		float f = this.pause ? this.pausePartialTick : this.timer.partialTick;
 		//this.gameRenderer.getMainCamera().setup(this.level, this.getCameraEntity(), false, false, f);
+	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 0), method = "runTick(Z)V")
+	public void removePopPushGamerender(ProfilerFiller f, String s) {
+		return;
+	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V"), method = "runTick(Z)V")
+	public void removeGameRender(GameRenderer r, float f, long j, boolean z) {
+		return;
+	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 1), method = "runTick(Z)V")
+	public void removePopPushToast(ProfilerFiller f, String s) {
+		return;
+	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/ToastComponent;render(Lcom/mojang/blaze3d/vertex/PoseStack;)V"), method = "runTick(Z)V")
+	public void removeToast(ToastComponent t,PoseStack p) {
+		return;
+	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 4), method = "runTick(Z)V")
+	public void removeToastPop(ProfilerFiller p) {
+		return;
 	}
 	
 	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;fpsPieResults:Lnet/minecraft/util/profiling/ProfileResults;"), method = "runTick(Z)V")
@@ -574,7 +623,7 @@ public abstract class MinecraftVRMixin {
 				try {
 					DataHolder.getInstance().vrRenderer.endFrame();
 				} catch (Exception exception) {
-					// LOGGER.error(exception.toString());
+					System.err.println(exception.toString());
 				}
 
 				this.profiler.pop();
@@ -595,18 +644,41 @@ public abstract class MinecraftVRMixin {
 			this.profiler.pop();
 		}
 	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 3), method = "runTick(Z)V")
+	public void removePopPushYield(ProfilerFiller p, String s) {
+		return;
+	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;yield()V", remap = false), method = "runTick(Z)V")
+	public void removeYield() {
+		return;
+	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 6), method = "runTick(Z)V")
+	public void removePopYield(ProfilerFiller f) {
+		
+	}
 
-	public void reinitFrame() {
+	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setGuiScale(D)V", shift = Shift.AFTER), method = "resizeDisplay()V")
+	public void reinitFrame(CallbackInfo info) {
 		if (DataHolder.getInstance().vrRenderer != null) {
 			DataHolder.getInstance().vrRenderer.reinitFrameBuffers("Main Window Changed");
 		}
 	}
-
-	public void cancelResizeTarget() {
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;"), method = "resizeDisplay()V")
+	public RenderTarget removeRenderTarget(Minecraft mc) {
+		return null;
+	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;resize(IIZ)V"), method = "resizeDisplay()V" )
+	public void cancelResizeTarget(RenderTarget r, int w, int h, boolean b) {
 		return;
 	}
-
-	public void cancelResizeGame() {
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resize(II)V"), method = "resizeDisplay()V" )
+	public void cancelResizeGame(GameRenderer r, int w, int h) {
 		return;
 	}
 
@@ -641,6 +713,21 @@ public abstract class MinecraftVRMixin {
 			this.rightClickDelay = 8;
 		else if (DataHolder.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.SLOWEST)
 			this.rightClickDelay = 10;
+
+	}
+	
+	@Inject(at = @At("HEAD"), method = "tick()V")
+	public void tick(CallbackInfo info) {
+		++DataHolder.getInstance().tickCounter;
+	}
+	
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;tick(Z)V"), method = "tick()V")
+	public void tickmenu(CallbackInfo info) {
+		if (DataHolder.getInstance().menuWorldRenderer != null) {
+			DataHolder.getInstance().menuWorldRenderer.tick();
+		}
+
+		PlayerModelController.getInstance().tick();
 
 	}
 
@@ -688,7 +775,10 @@ public abstract class MinecraftVRMixin {
 
 	private void checkGLError(String string) {
 		// TODO optifine
-		System.err.println(string);
+		if (GlStateManager._getError() != 0) {
+			System.err.println(string);
+		}
+		
 	}
 
 	private void renderSingleView(int eye, float nano, boolean renderworld) {

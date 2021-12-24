@@ -26,7 +26,7 @@ public class MainMixin {
 	@Unique
 	private static boolean infinadeck;
 	
-	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V"), method = "main([Ljava/lang/String;)V", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
+	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V", remap = false), method = "main([Ljava/lang/String;)V", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
 	private static void options(String[] p_129642_, CallbackInfo callback, OptionParser optionparser) {
 		optionparser.accepts("kiosk");
 		optionparser.accepts("viewonly");
@@ -44,7 +44,7 @@ public class MainMixin {
 		return 720;
 	}
 		
-	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParseroptionparse;([Ljava/lang/String;)Ljoptsimple/OptionSet;") , method = "main([Ljava/lang/String;)V", remap = false)
+	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParseroptionparse;([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "main([Ljava/lang/String;)V", remap = false)
 	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
 		OptionSet optionset = optionparser.parse(p_129642_);
 		kiosk = optionset.has("kiosk");

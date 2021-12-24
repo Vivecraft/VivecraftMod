@@ -238,7 +238,7 @@ public class GamerRendererVRMixin implements GameRendererExtension {
 		boolean flag = false;
 
 		if (enable) {
-//			this.polyblendsrca = GlStateManager.BLEND.srcAlpha; TODO
+//			this.polyblendsrca = GlStateManager.BLEND.srcAlpha; TODO fix acces
 //			this.polyblenddsta = GlStateManager.BLEND.dstAlpha;
 //			this.polyblendsrcrgb = GlStateManager.BLEND.srcRgb;
 //			this.polyblenddstrgb = GlStateManager.BLEND.dstRgb;

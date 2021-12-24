@@ -1,17 +1,23 @@
 package com.example.examplemod.mixin.blaze3d.pipeline;
 
-import com.example.examplemod.RenderTargetExtension;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import com.example.examplemod.RenderTargetExtension;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ShaderInstance;
 
 @Mixin(RenderTarget.class)
 public abstract class RenderTargetMixin implements RenderTargetExtension {
@@ -27,6 +33,9 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     public int viewWidth;
     @Shadow
     protected int colorTextureId;
+    
+	private String name;
+	private String frameBufferId;
 
     @Shadow
     protected abstract void _blitToScreen(int i, int j, boolean bl);
@@ -144,5 +153,21 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         GlStateManager._depthMask(true);
         GlStateManager._colorMask(true, true, true, true);
     }
+    
+    @Override
+	public String toString() {
+		StringBuilder stringbuilder = new StringBuilder();
+		stringbuilder.append("\n");
+
+		if (this.name != null) {
+
+			stringbuilder.append("Name:   " + this.name).append("\n");
+		}
+
+		stringbuilder.append("Size:   " + this.viewWidth + " x " + this.viewHeight).append("\n");
+		stringbuilder.append("FB ID:  " + this.frameBufferId).append("\n");
+		stringbuilder.append("Tex ID: " + this.colorTextureId).append("\n");
+		return stringbuilder.toString();
+	}
 
 }

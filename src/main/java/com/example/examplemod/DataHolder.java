@@ -1,24 +1,37 @@
 package com.example.examplemod;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.client.sounds.SoundEngine;
-import org.lwjgl.opengl.GL11;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+
 import org.vivecraft.api.ErrorHelper;
 import org.vivecraft.gameplay.VRPlayer;
-import org.vivecraft.gameplay.trackers.*;
+import org.vivecraft.gameplay.trackers.BackpackTracker;
+import org.vivecraft.gameplay.trackers.BowTracker;
+import org.vivecraft.gameplay.trackers.CameraTracker;
+import org.vivecraft.gameplay.trackers.ClimbTracker;
+import org.vivecraft.gameplay.trackers.CrawlTracker;
+import org.vivecraft.gameplay.trackers.EatingTracker;
+import org.vivecraft.gameplay.trackers.HorseTracker;
+import org.vivecraft.gameplay.trackers.InteractTracker;
+import org.vivecraft.gameplay.trackers.JumpTracker;
+import org.vivecraft.gameplay.trackers.RowTracker;
+import org.vivecraft.gameplay.trackers.RunTracker;
+import org.vivecraft.gameplay.trackers.SneakTracker;
+import org.vivecraft.gameplay.trackers.SwimTracker;
+import org.vivecraft.gameplay.trackers.SwingTracker;
+import org.vivecraft.gameplay.trackers.TeleportTracker;
+import org.vivecraft.gameplay.trackers.VehicleTracker;
 import org.vivecraft.menuworlds.MenuWorldRenderer;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRSettings;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.sounds.SoundEngine;
 
 public class DataHolder {
 
