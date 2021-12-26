@@ -209,4 +209,8 @@ public abstract class MethodHolder implements RenderTargetExtension {
 		Quaternion quat = vec.rotationDegrees(angle);
 		pose.mulPose(quat);
 	}
+
+	public static void rotateDegXp(PoseStack matrix, int i) {
+		matrix.mulPose(Vector3f.XP.rotationDegrees(i));
+	}
 }

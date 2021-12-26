@@ -26,7 +26,7 @@ public class MainMixin {
 	@Unique
 	private static boolean infinadeck;
 	
-	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V", remap = false), method = "main([Ljava/lang/String;)V", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
+	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V", remap = false), method = "main([Ljava/lang/String;)V", locals = LocalCapture.CAPTURE_FAILHARD)
 	private static void options(String[] p_129642_, CallbackInfo callback, OptionParser optionparser) {
 		optionparser.accepts("kiosk");
 		optionparser.accepts("viewonly");
@@ -34,17 +34,17 @@ public class MainMixin {
 		optionparser.accepts("infinadeck");
 	}
 	
-	@ModifyConstant(method = "main", constant = @Constant(intValue = 854), remap = false)
+	@ModifyConstant(method = "main", constant = @Constant(intValue = 854))
 	private static int width(int i) {
 		return 1280;
 	}
 	
-	@ModifyConstant(method = "main", constant = @Constant(intValue = 480), remap = false)
+	@ModifyConstant(method = "main", constant = @Constant(intValue = 480))
 	private static int height(int i) {
 		return 720;
 	}
 		
-	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParseroptionparse;([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "main([Ljava/lang/String;)V", remap = false)
+	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParseroptionparse;([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "main([Ljava/lang/String;)V")
 	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
 		OptionSet optionset = optionparser.parse(p_129642_);
 		kiosk = optionset.has("kiosk");

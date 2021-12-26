@@ -8,8 +8,6 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -17,17 +15,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.layers.ArrowLayer;
-import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
-import net.minecraft.client.renderer.entity.layers.CapeLayer;
-import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
-import net.minecraft.client.renderer.entity.layers.Deadmau5EarsLayer;
-import net.minecraft.client.renderer.entity.layers.ElytraLayer;
-import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
-import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
-import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
-import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -45,7 +33,7 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 
-public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>
+public class VRPlayerRenderer extends PlayerRenderer
 {
 	static LayerDefinition VRLayerDef = LayerDefinition.create(VRPlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64);
 	static LayerDefinition VRLayerDef_arms = LayerDefinition.create(VRPlayerModel_WithArms.createMesh(CubeDeformation.NONE, false), 64, 64);
@@ -55,23 +43,27 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
 
 	public VRPlayerRenderer(EntityRendererProvider.Context p_174557_, boolean p_174558_, boolean seated)
 	{
-		super(p_174557_, !p_174558_ ? (seated ? 
-				new VRPlayerModel<>(VRLayerDef.bakeRoot(), p_174558_) : 
-					new VRPlayerModel_WithArms<>(VRLayerDef_arms.bakeRoot(), p_174558_)) :
-						(seated ? 
-								new VRPlayerModel<>(VRLayerDef_slim.bakeRoot(), p_174558_) : 
-									new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), p_174558_))
-					, 0.5F);        
-		this.addLayer(new HumanoidArmorLayer<>(this, new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)), new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))));
-		this.addLayer(new PlayerItemInHandLayer<>(this));
-		this.addLayer(new ArrowLayer<>(p_174557_, this));
-		this.addLayer(new Deadmau5EarsLayer(this));
-		this.addLayer(new CapeLayer(this));
-		this.addLayer(new CustomHeadLayer<>(this, p_174557_.getModelSet()));
-		this.addLayer(new ElytraLayer<>(this, p_174557_.getModelSet()));
-		this.addLayer(new ParrotOnShoulderLayer<>(this, p_174557_.getModelSet()));
-		this.addLayer(new SpinAttackEffectLayer<>(this, p_174557_.getModelSet()));
-		this.addLayer(new BeeStingerLayer<>(this));
+		super(p_174557_, seated);
+		this.model = !p_174558_ ? (seated ? new VRPlayerModel<>(VRLayerDef.bakeRoot(), p_174558_) : new VRPlayerModel_WithArms<>(VRLayerDef_arms.bakeRoot(), p_174558_)) :
+			(seated ? new VRPlayerModel<>(VRLayerDef_slim.bakeRoot(), p_174558_) : new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), p_174558_));
+//		super(p_174557_, !p_174558_ ? (seated ? 
+//				new VRPlayerModel<>(VRLayerDef.bakeRoot(), p_174558_) : 
+//					new VRPlayerModel_WithArms<>(VRLayerDef_arms.bakeRoot(), p_174558_)) :
+//						(seated ? 
+//								new VRPlayerModel<>(VRLayerDef_slim.bakeRoot(), p_174558_) : 
+//									new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), p_174558_))
+//					, 0.5F); 
+		
+//		this.addLayer(new HumanoidArmorLayer<>(this, new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)), new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))));
+//		this.addLayer(new PlayerItemInHandLayer<>(this));
+//		this.addLayer(new ArrowLayer<>(p_174557_, this));
+//		this.addLayer(new Deadmau5EarsLayer(this));
+//		this.addLayer(new CapeLayer(this));
+//		this.addLayer(new CustomHeadLayer<>(this, p_174557_.getModelSet()));
+//		this.addLayer(new ElytraLayer<>(this, p_174557_.getModelSet()));
+//		this.addLayer(new ParrotOnShoulderLayer<>(this, p_174557_.getModelSet()));
+//		this.addLayer(new SpinAttackEffectLayer<>(this, p_174557_.getModelSet()));
+//		this.addLayer(new BeeStingerLayer<>(this));
 	}
 
     public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight)

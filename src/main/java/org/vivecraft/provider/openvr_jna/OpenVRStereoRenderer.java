@@ -1,20 +1,23 @@
 package org.vivecraft.provider.openvr_jna;
 
-import com.mojang.math.Matrix4f;
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.IntByReference;
 import java.nio.ByteBuffer;
-import jopenvr.HiddenAreaMesh_t;
-import jopenvr.HmdMatrix44_t;
-import jopenvr.VRTextureBounds_t;
-import net.minecraft.util.Tuple;
+
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.render.RenderConfigException;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.utils.Utils;
+
+import com.mojang.math.Matrix4f;
+import com.sun.jna.Memory;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
+
+import jopenvr.HiddenAreaMesh_t;
+import jopenvr.HmdMatrix44_t;
+import jopenvr.VRTextureBounds_t;
+import net.minecraft.util.Tuple;
 
 public class OpenVRStereoRenderer extends VRRenderer
 {

@@ -42,4 +42,8 @@ public interface GameRendererExtension {
 
 	void drawFramebufferNEW(float f, boolean pRenderLevel, PoseStack poseStack);
 
+	void drawEyeStencil(boolean flag1);
+
+	float inBlock();
+
 }

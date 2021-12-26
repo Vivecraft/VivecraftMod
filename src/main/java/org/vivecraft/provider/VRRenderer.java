@@ -90,6 +90,10 @@ public abstract class VRRenderer
 
     protected void checkGLError(String message)
     {
+    	int error = GlStateManager._getError();
+		if (error != 0) {
+    		System.err.println("ERROR " + message + " : " +error);
+    	}
         //Config.checkGlError(message); TODO
     }
 

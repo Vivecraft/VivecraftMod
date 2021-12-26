@@ -6,6 +6,9 @@
   "mixins": [
     "server.level.ServerPlayerMixin",
     "server.network.ServerGamePacketListenerImplMixin",
+    
+    "server.packs.repository.PackRepositoryVRMixin",
+    
     "world.entity.projectile.AbstractArrowMixin",
     "world.entity.projectile.AbstractHurtingProjectileMixin",
     "world.entity.projectile.FishingHookMixin",
@@ -17,6 +20,7 @@
   "client": [
     "blaze3d.pipeline.MainTargetMixin",
     "blaze3d.pipeline.RenderTargetMixin",
+    "blaze3d.platform.WindowVRMixin",
     "client.MinecraftMixin",
     "client.MinecraftVRMixin",
     "client.OptionMixin",
@@ -24,10 +28,12 @@
     "client.main.MainMixin",
     "client.multiplayer.ClientPacketListenerMixin",
     "client.renderer.GamerRendererVRMixin",
+    "client.renderer.LevelRendererVRMixin",
     "client.renderer.block.LiquidBlockRendererMixin",
     "client.renderer.entity.EntityRenderDispatcherMixin",
     "client.resources.language.ClientLanguageMixin",
-    "world.entity.vehicle.BoatMixin"
+    "world.entity.vehicle.BoatMixin",
+    "client.resources.DefaultClientPackResourcesVRMixin"
   ],
   "server": [
   ],
