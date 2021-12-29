@@ -5,7 +5,7 @@
   "refmap": "examplemod.refmap.json",
   "mixins": [
     "server.level.ServerPlayerMixin",
-    "server.network.ServerGamePacketListenerImplMixin",
+    "server.network.ServerGamePacketListenerImplMixin",    
     
     "server.packs.repository.PackRepositoryVRMixin",
     
@@ -29,11 +29,14 @@
     "client.multiplayer.ClientPacketListenerMixin",
     "client.renderer.GamerRendererVRMixin",
     "client.renderer.LevelRendererVRMixin",
+    "client.renderer.ItemInHandRendererVRMixin",
     "client.renderer.block.LiquidBlockRendererMixin",
     "client.renderer.entity.EntityRenderDispatcherMixin",
     "client.resources.language.ClientLanguageMixin",
     "world.entity.vehicle.BoatMixin",
-    "client.resources.DefaultClientPackResourcesVRMixin"
+    "client.resources.DefaultClientPackResourcesVRMixin",
+    
+    "EntityAccessor"
   ],
   "server": [
   ],

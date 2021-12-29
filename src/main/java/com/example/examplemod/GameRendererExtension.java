@@ -46,4 +46,8 @@ public interface GameRendererExtension {
 
 	float inBlock();
 
+	double getRveY();
+
+	void renderVrFast(float f, boolean b, boolean menuhandright, boolean menuHandleft, PoseStack poseStack);
+
 }

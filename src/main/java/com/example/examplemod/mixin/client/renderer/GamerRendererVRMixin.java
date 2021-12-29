@@ -3,25 +3,30 @@ package com.example.examplemod.mixin.client.renderer;
 import java.nio.FloatBuffer;
 import java.util.Locale;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.VRData;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.gameplay.trackers.BowTracker;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.provider.ControllerType;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.render.VRCamera;
+import org.vivecraft.render.VRWidgetHelper;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
@@ -29,6 +34,9 @@ import com.example.examplemod.DataHolder;
 import com.example.examplemod.GameRendererExtension;
 import com.example.examplemod.ItemInHandRendererExtension;
 import com.example.examplemod.MethodHolder;
+import com.example.examplemod.PlayerExtension;
+import com.example.examplemod.RenderTargetExtension;
+import com.example.examplemod.mixin.EntityAccessor;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
@@ -42,6 +50,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -50,21 +60,31 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 @Mixin(GameRenderer.class)
@@ -175,6 +195,10 @@ public abstract class GamerRendererVRMixin
 	private RenderBuffers renderBuffers;
 	@Shadow
 	private ItemInHandRenderer itemInHandRenderer;
+	@Shadow
+	private int tick;
+	@Shadow
+	private boolean renderHand;
 
 	@Shadow
 	protected abstract Matrix4f getProjectionMatrix(double fov);
@@ -184,6 +208,14 @@ public abstract class GamerRendererVRMixin
 
 	@Shadow
 	protected abstract void resetProjectionMatrix(Matrix4f projectionMatrix);
+
+	@Shadow
+	protected abstract void renderItemActivationAnimation(int i, int j, float par1);
+
+	@Override
+	public double getRveY() {
+		return rveY;
+	}
 
 	// TODO check
 	public void init() {
@@ -215,6 +247,7 @@ public abstract class GamerRendererVRMixin
 	@Inject(at = @At("HEAD"), method = "getProjectionMatrix(D)Lcom/mojang/math/Matrix4f", cancellable = true)
 	public void projection(double d, CallbackInfoReturnable<Matrix4f> info) {
 		PoseStack posestack = new PoseStack();
+		setupClipPlanes();
 		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
 			posestack.mulPoseMatrix(DataHolder.getInstance().vrRenderer.eyeproj[0]);
 		} else if (DataHolder.getInstance().currentPass == RenderPass.RIGHT) {
@@ -268,25 +301,33 @@ public abstract class GamerRendererVRMixin
 //			}
 //		}
 //	}
-	
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V"), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V" , cancellable = true)
-	public void renderoverlay(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
-		PoseStack posestack = new PoseStack();
-		this.renderLevel(partialTicks, nanoTime, posestack);
-		
-		if (DataHolder.getInstance().currentPass != RenderPass.THIRD && DataHolder.getInstance().currentPass != RenderPass.CAMERA)
-		{
-			this.renderFaceOverlay(partialTicks, posestack);
-		}
-		this.tryTakeScreenshotIfNeeded();
+
+	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
+	public void matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
+		this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov));
+		RenderSystem.getModelViewStack().setIdentity();
+		RenderSystem.applyModelViewMatrix();
 	}
 
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
+	public void renderoverlay(GameRenderer l, float f, long j, PoseStack p) {
+		PoseStack posestack = new PoseStack();
+		this.renderLevel(f, j, posestack);
+
+		if (DataHolder.getInstance().currentPass != RenderPass.THIRD
+				&& DataHolder.getInstance().currentPass != RenderPass.CAMERA) {
+			this.renderFaceOverlay(f, posestack);
+		}
+	}
+	
 	@Shadow
-	protected abstract void tryTakeScreenshotIfNeeded();
+	protected abstract void renderLevel(float f, long j, PoseStack posestack);
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
 	public void mainMenu(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
-		if (!renderWorldIn || this.isInMenuRoom() || this.minecraft.level == null) {		
+		if (renderWorldIn && !this.isInMenuRoom() && this.minecraft.level != null) {
+
+		} else {
 			this.minecraft.getProfiler().push("MainMenu");
 			GL11.glDisable(GL11.GL_STENCIL_TEST);
 			PoseStack pMatrixStack = new PoseStack();
@@ -309,17 +350,193 @@ public abstract class GamerRendererVRMixin
 			}
 		}
 		this.minecraft.getProfiler().pop();
-		//info.cancel();
+		// info.cancel();
 	}
-	
-	
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 0), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
+	public void removeMulposeX(PoseStack s, Quaternion quaternion) {
+
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 1), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
+	public void removeMulposeY(PoseStack s, Quaternion quaternion) {
+		applyVRModelView(DataHolder.getInstance().currentPass, s);
+	}
+
+	@Inject(at = @At(value = "TAIL", shift = Shift.BEFORE), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
+	public void restoreVE(float f, long j, PoseStack p, CallbackInfo i) {
+		this.restoreRVEPos((LivingEntity) this.minecraft.getCameraEntity());
+	}
+
+//	@Overwrite
+//	public void renderLevel(float f, long l, PoseStack poseStack) {
+//		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+//			this.lightTexture.updateLightTexture(f);
+//		}
+//		if (this.minecraft.getCameraEntity() == null) {
+//			this.minecraft.setCameraEntity(this.minecraft.player);
+//		}
+//
+//		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+//			this.pick(f);
+//
+//			if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != HitResult.Type.MISS) {
+//				this.crossVec = this.minecraft.hitResult.getLocation();
+//			}
+//
+//			if (this.minecraft.screen == null) {
+//				DataHolder.getInstance().teleportTracker.updateTeleportDestinations((GameRenderer) (Object) this,
+//						this.minecraft, this.minecraft.player);
+//			}
+//		}
+//
+//		this.cacheRVEPos((LivingEntity) this.minecraft.getCameraEntity());
+//		this.setupRVE();
+//		this.setupOverlayStatus(f);
+//
+//		this.minecraft.getProfiler().push("center");
+//		boolean bl = this.shouldRenderBlockOutline();
+//		this.minecraft.getProfiler().popPush("camera");
+//		Camera camera = this.mainCamera;
+////		this.renderDistance = (float) (this.minecraft.options.renderDistance * 16);
+//		setupClipPlanes();
+//		PoseStack poseStack2 = new PoseStack();
+//		double d = this.getFov(camera, f, true);
+//		poseStack2.last().pose().multiply(this.getProjectionMatrix(d));
+//		// this.bobHurt(poseStack2, f);
+//		if (this.minecraft.options.bobView) {
+//			// this.bobView(poseStack2, f);
+//		}
+//
+//		float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)
+//				* this.minecraft.options.screenEffectScale * this.minecraft.options.screenEffectScale;
+//		if (g > 0.0F) {
+//			int i = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
+//			float h = 5.0F / (g * g + 5.0F) - g * 0.04F;
+//			h *= h;
+//			i = i / 5;
+//			h = 1.1F;
+//			Vector3f vector3f = new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F);
+//			poseStack2.mulPose(vector3f.rotationDegrees(((float) this.tick + f) * (float) i));
+//			poseStack2.scale(1.0F / h, 1.0F, 1.0F);
+//			float j = -((float) this.tick + f) * (float) i;
+//			poseStack2.mulPose(vector3f.rotationDegrees(j));
+//		}
+//
+//		Matrix4f i = poseStack2.last().pose();
+//		this.resetProjectionMatrix(i);
+//		camera.setup(this.minecraft.level,
+//				(Entity) (this.minecraft.getCameraEntity() == null ? this.minecraft.player
+//						: this.minecraft.getCameraEntity()),
+//				!this.minecraft.options.getCameraType().isFirstPerson(),
+//				this.minecraft.options.getCameraType().isMirrored(), f);
+//		// poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
+//		// poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0F));
+//		if (DataHolder.getInstance().currentPass != RenderPass.LEFT
+//				&& DataHolder.getInstance().currentPass != RenderPass.RIGHT) {
+//			// poseStack.mulPose(Vector3f.ZP.rotationDegrees(camera));
+//		}
+//
+//		applyVRModelView(DataHolder.getInstance().currentPass, poseStack); // this is just rotation.
+//
+//		this.minecraft.levelRenderer.prepareCullFrustum(poseStack, camera.getPosition(),
+//				this.getProjectionMatrix(Math.max(d, this.minecraft.options.fov)));
+//		this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, (GameRenderer) (Object) this,
+//				this.lightTexture, i);
+//		// this.minecraft.getProfiler().popPush("hand");
+//
+//		boolean flag2 = false;
+//		GL11.glDisable(GL11.GL_STENCIL_TEST);
+//		this.minecraft.getProfiler().popPush("ShadersEnd");
+//
+////		if (this.renderHand) {
+////			RenderSystem.clear(256, Minecraft.ON_OSX);
+////			this.renderItemInHand(poseStack, camera, f);
+////		}
+//
+//		this.restoreRVEPos((LivingEntity) this.minecraft.getCameraEntity());
+//		this.minecraft.getProfiler().pop();
+//	}
+
+	private void setupOverlayStatus(float partialTicks) {
+		this.inBlock = 0.0F;
+		this.inwater = false;
+		this.onfire = false;
+
+		if (!this.minecraft.player.isSpectator() && !this.isInMenuRoom() && this.minecraft.player.isAlive()) {
+			Vec3 vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(DataHolder.getInstance().currentPass).getPosition();
+			Triple<Float, BlockState, BlockPos> triple = ((ItemInHandRendererExtension) this.itemInHandRenderer).getNearOpaqueBlock(vec3, (double) this.minClipDistance);
+
+			if (triple != null) {
+				this.inBlock = triple.getLeft();
+			} else {
+				this.inBlock = 0.0F;
+			}
+
+			this.inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER);
+			this.onfire = DataHolder.getInstance().currentPass != RenderPass.THIRD
+					&& DataHolder.getInstance().currentPass != RenderPass.CAMERA && this.minecraft.player.isOnFire();
+		}
+	}
+
+	public void setupRVE() {
+		if (this.cached) {
+			VRData.VRDevicePose vrdata$vrdevicepose = DataHolder.getInstance().vrPlayer.vrdata_world_render
+					.getEye(DataHolder.getInstance().currentPass);
+			Vec3 vec3 = vrdata$vrdevicepose.getPosition();
+			LivingEntity livingentity = (LivingEntity) this.minecraft.getCameraEntity();
+			livingentity.setPosRaw(vec3.x, vec3.y, vec3.z);
+			livingentity.xOld = vec3.x;
+			livingentity.yOld = vec3.y;
+			livingentity.zOld = vec3.z;
+			livingentity.xo = vec3.x;
+			livingentity.yo = vec3.y;
+			livingentity.zo = vec3.z;
+			livingentity.setXRot(-vrdata$vrdevicepose.getPitch());
+			livingentity.xRotO = livingentity.getXRot();
+			livingentity.setYRot(vrdata$vrdevicepose.getYaw());
+			livingentity.yHeadRot = livingentity.getYRot();
+			livingentity.yHeadRotO = livingentity.getYRot();
+			((EntityAccessor)livingentity).setEyeHeight(0);
+		}
+	}
+
+	public void cacheRVEPos(LivingEntity e) {
+		if (this.minecraft.getCameraEntity() != null) {
+			if (!this.cached) {
+				this.rveX = e.getX();
+				this.rveY = e.getY();
+				this.rveZ = e.getZ();
+				this.rvelastX = e.xOld;
+				this.rvelastY = e.yOld;
+				this.rvelastZ = e.zOld;
+				this.rveprevX = e.xo;
+				this.rveprevY = e.yo;
+				this.rveprevZ = e.zo;
+				this.rveyaw = e.yHeadRot;
+				this.rvepitch = e.getXRot();
+				this.rvelastyaw = e.yHeadRotO;
+				this.rvelastpitch = e.xRotO;
+				this.rveHeight = e.getEyeHeight();
+				this.cached = true;
+			}
+		}
+	}
 
 	@Shadow
-	protected abstract void renderLevel(float partialTicks, long nanoTime, PoseStack posestack);
+	protected abstract void renderItemInHand(PoseStack poseStack, Camera camera, float f);
 
-//	public void renderLevel() {
-//
-//	}
+	@Shadow
+	protected abstract void bobView(PoseStack poseStack2, float f);
+
+	@Shadow
+	protected abstract void bobHurt(PoseStack poseStack2, float f);
+
+	@Shadow
+	protected abstract boolean shouldRenderBlockOutline();
+
+	@Shadow
+	protected abstract void pick(float f);
 
 	void renderMainMenuHand(int c, float partialTicks, boolean depthAlways, PoseStack poseStack) {
 		this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(mainCamera, partialTicks, false)));
@@ -555,10 +772,10 @@ public abstract class GamerRendererVRMixin
 		boolean flag = false;
 
 		if (enable) {
-//			this.polyblendsrca = GlStateManager.BLEND.srcAlpha; TODO fix acces
-//			this.polyblenddsta = GlStateManager.BLEND.dstAlpha;
-//			this.polyblendsrcrgb = GlStateManager.BLEND.srcRgb;
-//			this.polyblenddstrgb = GlStateManager.BLEND.dstRgb;
+			this.polyblendsrca = GlStateManager.BLEND.srcAlpha;
+			this.polyblenddsta = GlStateManager.BLEND.dstAlpha;
+			this.polyblendsrcrgb = GlStateManager.BLEND.srcRgb;
+			this.polyblenddstrgb = GlStateManager.BLEND.dstRgb;
 			this.polyblend = GL11.glIsEnabled(GL11.GL_BLEND);
 			this.polytex = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
 			this.polylight = GL11.glIsEnabled(GL11.GL_LIGHTING);
@@ -617,7 +834,7 @@ public abstract class GamerRendererVRMixin
 		RenderSystem.applyModelViewMatrix();
 
 		this.minecraft.getMainRenderTarget().bindRead();
-		// this.minecraft.getMainRenderTarget().genMipMaps();
+		((RenderTargetExtension) this.minecraft.getMainRenderTarget()).genMipMaps();
 		this.minecraft.getMainRenderTarget().unbindRead();
 	}
 
@@ -766,7 +983,7 @@ public abstract class GamerRendererVRMixin
 					this.minecraft.screen.render(posestack1, i, j, this.minecraft.getDeltaFrameTime());
 //					}
 					// Vivecraft
-//					this.minecraft.gui.drawMouseMenuQuad(i, j);
+//					((GuiExtension) this.minecraft.gui).drawMouseMenuQuad(i, j);
 				} catch (Throwable throwable2) {
 					CrashReport crashreport = CrashReport.forThrowable(throwable2, "Rendering screen");
 					CrashReportCategory crashreportcategory = crashreport.addCategory("Screen render details");
@@ -806,7 +1023,7 @@ public abstract class GamerRendererVRMixin
 		}
 
 		if (this.minecraft.options.renderDebugCharts && !this.minecraft.options.hideGui) {
-			// this.minecraft.drawProfiler();
+//			 this.minecraft.drawProfiler();
 		}
 
 //		this.frameFinish();
@@ -820,7 +1037,7 @@ public abstract class GamerRendererVRMixin
 
 		// TODO: does this do anything?
 		this.minecraft.getMainRenderTarget().bindRead();
-		// this.minecraft.getMainRenderTarget().genMipMaps();
+		((RenderTargetExtension) this.minecraft.getMainRenderTarget()).genMipMaps();
 		this.minecraft.getMainRenderTarget().unbindRead();
 
 	}
@@ -1537,50 +1754,52 @@ public abstract class GamerRendererVRMixin
 //		this.minecraft.getMainRenderTarget().bindWrite(true);
 	}
 
+	@Override
 	public void renderVrFast(float partialTicks, boolean secondpass, boolean menuright, boolean menuleft,
 			PoseStack pMatrix) {
-//		if (DataHolder.getInstance().currentPass == RenderPass.SCOPEL || DataHolder.getInstance().currentPass == RenderPass.SCOPER)
-//			return;
-//		this.minecraft.getProfiler().popPush("VR");
-//		this.lightTexture.turnOffLightLayer();
-//
-//		if (secondpass) {
-//			this.renderVrShadow(partialTicks, !this.shouldOccludeGui(), pMatrix);
-//		}
-//
-//		if (!secondpass) {
-//			this.renderCrosshairAtDepth(!DataHolder.getInstance().vrSettings.useCrosshairOcclusion, pMatrix);
-//		}
-//
-//		if (!secondpass) {
-//			VRWidgetHelper.renderVRThirdPersonCamWidget();
-//		}
-//
-//		if (!secondpass) {
-//			VRWidgetHelper.renderVRHandheldCameraWidget();
-//		}
-//
-//		if (secondpass) {
-//			this.renderGuiLayer(partialTicks, !this.shouldOccludeGui(), pMatrix);
-//		}
-//
-//		if (secondpass && KeyboardHandler.Showing) {
-//			if (DataHolder.getInstance().vrSettings.physicalKeyboard) {
-//				this.renderPhysicalKeyboard(partialTicks, pMatrix);
-//			} else {
-//				this.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
-//						KeyboardHandler.Rotation_room, !this.shouldOccludeGui(), pMatrix);
-//			}
-//		}
-//
-//		if (secondpass && RadialHandler.isShowing()) {
-//			this.render2D(partialTicks, RadialHandler.Framebuffer, RadialHandler.Pos_room, RadialHandler.Rotation_room,
-//					!this.shouldOccludeGui(), pMatrix);
-//		}
-//
-//		this.renderVRHands(partialTicks, this.shouldRenderHands(), this.shouldRenderHands(), menuright, menuleft,
-//				pMatrix);
-//		this.renderVRSelfEffects(partialTicks);
+		if (DataHolder.getInstance().currentPass == RenderPass.SCOPEL
+				|| DataHolder.getInstance().currentPass == RenderPass.SCOPER)
+			return;
+		this.minecraft.getProfiler().popPush("VR");
+		this.lightTexture.turnOffLightLayer();
+
+		if (secondpass) {
+			this.renderVrShadow(partialTicks, !this.shouldOccludeGui(), pMatrix);
+		}
+
+		if (!secondpass) {
+			this.renderCrosshairAtDepth(!DataHolder.getInstance().vrSettings.useCrosshairOcclusion, pMatrix);
+		}
+
+		if (!secondpass) {
+			VRWidgetHelper.renderVRThirdPersonCamWidget();
+		}
+
+		if (!secondpass) {
+			VRWidgetHelper.renderVRHandheldCameraWidget();
+		}
+
+		if (secondpass) {
+			this.renderGuiLayer(partialTicks, !this.shouldOccludeGui(), pMatrix);
+		}
+
+		if (secondpass && KeyboardHandler.Showing) {
+			if (DataHolder.getInstance().vrSettings.physicalKeyboard) {
+				this.renderPhysicalKeyboard(partialTicks, pMatrix);
+			} else {
+				this.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
+						KeyboardHandler.Rotation_room, !this.shouldOccludeGui(), pMatrix);
+			}
+		}
+
+		if (secondpass && RadialHandler.isShowing()) {
+			this.render2D(partialTicks, RadialHandler.Framebuffer, RadialHandler.Pos_room, RadialHandler.Rotation_room,
+					!this.shouldOccludeGui(), pMatrix);
+		}
+
+		this.renderVRHands(partialTicks, this.shouldRenderHands(), this.shouldRenderHands(), menuright, menuleft,
+				pMatrix);
+		this.renderVRSelfEffects(partialTicks);
 	}
 
 	public void drawSizedQuad(float displayWidth, float displayHeight, float size, float[] color) {
@@ -1866,9 +2085,8 @@ public abstract class GamerRendererVRMixin
 //			Shaders.endFPOverlay();
 //		}
 	}
-	
-	private void renderFaceInBlock()
-	{
+
+	private void renderFaceInBlock() {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tesselator.getBuilder();
 		RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, ((GameRendererExtension) this.minecraft.gameRenderer).inBlock());
@@ -1886,5 +2104,333 @@ public abstract class GamerRendererVRMixin
 		tesselator.end();
 		GlStateManager._enableTexture();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+	}
+
+	public boolean shouldRenderCrosshair() {
+		if (DataHolder.getInstance().viewonly) {
+			return false;
+		} else if (this.minecraft.level == null) {
+			return false;
+		} else if (this.minecraft.screen != null) {
+			return false;
+		} else {
+			boolean flag = DataHolder
+					.getInstance().vrSettings.renderInGameCrosshairMode == VRSettings.RenderPointerElement.ALWAYS
+					|| (DataHolder
+							.getInstance().vrSettings.renderInGameCrosshairMode == VRSettings.RenderPointerElement.WITH_HUD
+							&& !this.minecraft.options.hideGui);
+
+			if (!flag) {
+				return false;
+			} else if (DataHolder.getInstance().currentPass == RenderPass.THIRD) {
+				return false;
+			} else if (DataHolder.getInstance().currentPass != RenderPass.SCOPEL
+					&& DataHolder.getInstance().currentPass != RenderPass.SCOPER) {
+				if (DataHolder.getInstance().currentPass == RenderPass.CAMERA) {
+					return false;
+				} else if (KeyboardHandler.Showing) {
+					return false;
+				} else if (RadialHandler.isUsingController(ControllerType.RIGHT)) {
+					return false;
+				} else if (DataHolder.getInstance().bowTracker.isNotched()) {
+					return false;
+				} else if (!DataHolder.getInstance().vr.getInputAction(DataHolder.getInstance().vr.keyVRInteract)
+						.isEnabledRaw(ControllerType.RIGHT)
+						&& !DataHolder.getInstance().vr.keyVRInteract.isDown(ControllerType.RIGHT)) {
+					if (!DataHolder.getInstance().vr.getInputAction(DataHolder.getInstance().vr.keyClimbeyGrab)
+							.isEnabledRaw(ControllerType.RIGHT)
+							&& !DataHolder.getInstance().vr.keyClimbeyGrab.isDown(ControllerType.RIGHT)) {
+						if (DataHolder.getInstance().teleportTracker.isAiming()) {
+							return false;
+						} else if (DataHolder.getInstance().climbTracker.isGrabbingLadder(0)) {
+							return false;
+						} else {
+							return !(DataHolder.getInstance().vrPlayer.worldScale > 15.0F);
+						}
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+	}
+
+	private void renderCrosshairAtDepth(boolean depthAlways, PoseStack poseStack) {
+		if (this.shouldRenderCrosshair()) {
+			this.minecraft.getProfiler().popPush("crosshair");
+			// GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			Vec3 vec3 = this.crossVec;
+			Vec3 vec31 = vec3
+					.subtract(DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getPosition());
+			float f = (float) vec31.length();
+			float f1 = (float) ((double) (0.125F * DataHolder.getInstance().vrSettings.crosshairScale)
+					* Math.sqrt((double) DataHolder.getInstance().vrPlayer.vrdata_world_render.worldScale));
+			vec3 = vec3.add(vec31.normalize().scale(-0.01D));
+			poseStack.pushPose();
+			poseStack.setIdentity();
+			applyVRModelView(DataHolder.getInstance().currentPass, poseStack);
+
+			Vec3 vec32 = vec3.subtract(this.minecraft.getCameraEntity().position());
+			poseStack.translate(vec32.x, vec32.y, vec32.z);
+
+			if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() == HitResult.Type.BLOCK) {
+				BlockHitResult blockhitresult = (BlockHitResult) this.minecraft.hitResult;
+
+				if (blockhitresult.getDirection() == Direction.DOWN) {
+					MethodHolder.rotateDeg(poseStack,
+							DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F,
+							0.0F);
+					MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
+				} else if (blockhitresult.getDirection() == Direction.EAST) {
+					MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
+				} else if (blockhitresult.getDirection() != Direction.NORTH
+						&& blockhitresult.getDirection() != Direction.SOUTH) {
+					if (blockhitresult.getDirection() == Direction.UP) {
+						MethodHolder.rotateDeg(poseStack,
+								-DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F,
+								1.0F, 0.0F);
+						MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
+					} else if (blockhitresult.getDirection() == Direction.WEST) {
+						MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
+					}
+				}
+			} else {
+				MethodHolder.rotateDeg(poseStack,
+						-DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F,
+						0.0F);
+				MethodHolder.rotateDeg(poseStack,
+						-DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getPitch(), 1.0F, 0.0F,
+						0.0F);
+			}
+
+			if (DataHolder.getInstance().vrSettings.crosshairScalesWithDistance) {
+				float f5 = 0.3F + 0.2F * f;
+				f1 *= f5;
+			}
+
+			this.lightTexture.turnOnLightLayer();
+			poseStack.scale(f1, f1, f1);
+			RenderSystem.depthMask(true);
+			RenderSystem.enableDepthTest();
+			// RenderSystem.disableLighting();
+			RenderSystem.disableCull();
+			// GlStateManager.enableAlphaTest();
+
+			if (depthAlways) {
+				RenderSystem.depthFunc(519);
+			} else {
+				RenderSystem.depthFunc(515);
+			}
+
+			// boolean flag = Config.isShaders();
+			boolean flag = false;
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR,
+					GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE,
+					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+			int i = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(vec3));
+			float f2 = 1.0F;
+
+			if (this.minecraft.hitResult == null || this.minecraft.hitResult.getType() == HitResult.Type.MISS) {
+				f2 = 0.5F;
+			}
+
+			RenderSystem.setShaderTexture(0, Screen.GUI_ICONS_LOCATION);
+			float f3 = 0.00390625F;
+			float f4 = 0.00390625F;
+
+			BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+
+			RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
+			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR); // POSITION_TEX_LMAP_COLOR_NORMAL
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4).uv2(i)
+					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4).uv2(i)
+					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F).uv2(i)
+					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
+					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+			Tesselator.getInstance().end();
+			RenderSystem.defaultBlendFunc();
+			RenderSystem.disableBlend();
+			RenderSystem.enableCull();
+			RenderSystem.depthFunc(515);
+			poseStack.popPose();
+		}
+	}
+
+	public boolean shouldOccludeGui() {
+		Vec3 vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(DataHolder.getInstance().currentPass)
+				.getPosition();
+
+		if (DataHolder.getInstance().currentPass != RenderPass.THIRD
+				&& DataHolder.getInstance().currentPass != RenderPass.CAMERA) {
+			return !this.isInMenuRoom() && this.minecraft.screen == null && !KeyboardHandler.Showing
+					&& !RadialHandler.isShowing() && DataHolder.getInstance().vrSettings.hudOcclusion
+					&& !((ItemInHandRendererExtension) this.itemInHandRenderer).isInsideOpaqueBlock(vec3);
+		} else {
+			return true;
+		}
+	}
+
+	private void renderVrShadow(float par1, boolean depthAlways, PoseStack poseStack) {
+		if (DataHolder.getInstance().currentPass != RenderPass.THIRD
+				&& DataHolder.getInstance().currentPass != RenderPass.CAMERA) {
+			if (this.minecraft.player.isAlive()) {
+				if (!(((PlayerExtension) this.minecraft.player).getRoomYOffsetFromPose() < 0.0D)) {
+					if (this.minecraft.player.getVehicle() == null) {
+						AABB aabb = this.minecraft.player.getBoundingBox();
+
+						if (DataHolder.getInstance().vrSettings.vrShowBlueCircleBuddy && aabb != null) {
+
+							poseStack.pushPose();
+							poseStack.setIdentity();
+							GlStateManager._disableCull();
+							this.applyVRModelView(DataHolder.getInstance().currentPass, poseStack);
+							Vec3 vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render
+									.getEye(DataHolder.getInstance().currentPass).getPosition();
+							LocalPlayer localplayer = this.minecraft.player;
+							Vec3 vec31 = new Vec3(this.rvelastX + (this.rveX - this.rvelastX) * (double) par1,
+									this.rvelastY + (this.rveY - this.rvelastY) * (double) par1,
+									this.rvelastZ + (this.rveZ - this.rvelastZ) * (double) par1);
+							Vec3 vec32 = vec31.subtract(vec3).add(0.0D, 0.005D, 0.0D);
+							this.setupPolyRendering(true);
+							RenderSystem.enableDepthTest();
+
+							if (depthAlways) {
+								RenderSystem.depthFunc(519);
+							} else {
+								GlStateManager._depthFunc(515);
+							}
+
+							RenderSystem.setShader(GameRenderer::getPositionColorShader);
+							RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+							this.renderFlatQuad(vec32, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
+									0.0F, 0, 0, 0, 64, poseStack);
+							RenderSystem.depthFunc(515);
+							this.setupPolyRendering(false);
+							poseStack.popPose();
+							GlStateManager._enableCull();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public boolean shouldRenderHands() {
+		if (DataHolder.getInstance().viewonly) {
+			return false;
+		} else if (DataHolder.getInstance().currentPass == RenderPass.THIRD) {
+			return DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY;
+		} else {
+			return DataHolder.getInstance().currentPass != RenderPass.CAMERA;
+		}
+	}
+
+	private void renderVRSelfEffects(float par1) {
+		if (this.onfire && DataHolder.getInstance().currentPass != RenderPass.THIRD
+				&& DataHolder.getInstance().currentPass != RenderPass.CAMERA) {
+
+			if (this.onfire) {
+				this.renderFireInFirstPerson();
+			}
+
+			this.renderItemActivationAnimation(0, 0, par1);
+		}
+	}
+
+	private void renderFireInFirstPerson() {
+		PoseStack posestack = new PoseStack();
+		this.applyVRModelView(DataHolder.getInstance().currentPass, posestack);
+		this.applystereo(DataHolder.getInstance().currentPass, posestack);
+		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+		RenderSystem.depthFunc(519);
+
+		if (DataHolder.getInstance().currentPass == RenderPass.THIRD
+				|| DataHolder.getInstance().currentPass == RenderPass.CAMERA) {
+			GlStateManager._depthFunc(515);
+		}
+
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		TextureAtlasSprite textureatlassprite = ModelBakery.FIRE_1.sprite();
+		RenderSystem.enableDepthTest();
+
+//		if (SmartAnimations.isActive()) { TODO
+//			SmartAnimations.spriteRendered(textureatlassprite);
+//		}
+
+		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+		RenderSystem.setShaderTexture(0, textureatlassprite.atlas().location());
+		float f = textureatlassprite.getU0();
+		float f1 = textureatlassprite.getU1();
+		float f2 = (f + f1) / 2.0F;
+		float f3 = textureatlassprite.getV0();
+		float f4 = textureatlassprite.getV1();
+		float f5 = (f3 + f4) / 2.0F;
+		float f6 = textureatlassprite.uvShrinkRatio();
+		float f7 = Mth.lerp(f6, f, f2);
+		float f8 = Mth.lerp(f6, f1, f2);
+		float f9 = Mth.lerp(f6, f3, f5);
+		float f10 = Mth.lerp(f6, f4, f5);
+		float f11 = 1.0F;
+		float f12 = 0.3F;
+		float f13 = (float) (DataHolder.getInstance().vrPlayer.vrdata_world_render.getHeadPivot().y
+				- ((GameRendererExtension) this.minecraft.gameRenderer).getRveY());
+
+		for (int i = 0; i < 4; ++i) {
+			posestack.pushPose();
+			posestack.mulPose(Vector3f.YP.rotationDegrees(
+					(float) i * 90.0F - DataHolder.getInstance().vrPlayer.vrdata_world_render.getBodyYaw()));
+			posestack.translate(0.0D, (double) (-f13), 0.0D);
+			Matrix4f matrix4f = posestack.last().pose();
+			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+			bufferbuilder.vertex(matrix4f, -f12, 0.0F, -f12).color(1.0F, 1.0F, 1.0F, 0.9F).uv(f8, f10).endVertex();
+			bufferbuilder.vertex(matrix4f, f12, 0.0F, -f12).color(1.0F, 1.0F, 1.0F, 0.9F).uv(f7, f10).endVertex();
+			bufferbuilder.vertex(matrix4f, f12, f13, -f12).color(1.0F, 1.0F, 1.0F, 0.9F).uv(f7, f9).endVertex();
+			bufferbuilder.vertex(matrix4f, -f12, f13, -f12).color(1.0F, 1.0F, 1.0F, 0.9F).uv(f8, f9).endVertex();
+			bufferbuilder.end();
+			BufferUploader.end(bufferbuilder);
+			posestack.popPose();
+		}
+
+		RenderSystem.depthFunc(515);
+		RenderSystem.disableBlend();
+	}
+
+	public void applystereo(RenderPass currentPass, PoseStack matrix) {
+		if (currentPass == RenderPass.LEFT || currentPass == RenderPass.RIGHT) {
+			Vec3 vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(currentPass).getPosition()
+					.subtract(DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER)
+							.getPosition());
+			matrix.translate((double) ((float) (-vec3.x)), (double) ((float) (-vec3.y)), (double) ((float) (-vec3.z)));
+		}
+	}
+
+	public void restoreRVEPos(LivingEntity e) {
+		if (e != null) {
+			e.setPosRaw(this.rveX, this.rveY, this.rveZ);
+			e.xOld = this.rvelastX;
+			e.yOld = this.rvelastY;
+			e.zOld = this.rvelastZ;
+			e.xo = this.rveprevX;
+			e.yo = this.rveprevY;
+			e.zo = this.rveprevZ;
+			e.setYRot(this.rveyaw);
+			e.setXRot(this.rvepitch);
+			e.yRotO = this.rvelastyaw;
+			e.xRotO = this.rvelastpitch;
+			e.yHeadRot = this.rveyaw;
+			e.yHeadRotO = this.rvelastyaw;
+			((EntityAccessor) e).setEyeHeight(this.rveHeight);
+			this.cached = false;
+		}
 	}
 }

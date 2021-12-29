@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
+
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -65,6 +68,10 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -77,8 +84,6 @@ import net.minecraft.world.phys.Vec3;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftVRMixin {
-
-	private static final String ENTITY = null;
 
 	@Unique
 	private boolean oculus;
@@ -170,6 +175,10 @@ public abstract class MinecraftVRMixin {
 	private MultiPlayerGameMode gameMode;
 
 	@Shadow
+	@Final
+	private PackRepository resourcePackRepository;
+
+	@Shadow
 	abstract void selectMainFont(boolean p_91337_);
 
 	@Shadow
@@ -181,6 +190,9 @@ public abstract class MinecraftVRMixin {
 	@Shadow
 	protected abstract void renderFpsMeter(PoseStack poseStack, ProfileResults fpsPieResults2);
 
+	@Shadow
+	public abstract void clearResourcePacksOnError(Throwable throwable, @Nullable Component component);
+	
 	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;", remap = false), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public Thread settings() {
 		if (!this.oculus) {
@@ -199,14 +211,14 @@ public abstract class MinecraftVRMixin {
 		}
 		return Thread.currentThread();
 	}
-
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/MainTarget;<init>(II)V"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V", index = 0)
-	public int rendertargetWidth(int width) {
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I", ordinal = 0), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
+	public int mainWidth(Window w) {
 		return this.window.getScreenWidth();
 	}
 	
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/MainTarget;<init>(II)V"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V", index = 1)
-	public int rendertargetHeight(int height) {
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getHeight()I", ordinal = 0), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
+	public int mainHeight(Window w) {
 		return this.window.getScreenHeight();
 	}
 
@@ -277,13 +289,30 @@ public abstract class MinecraftVRMixin {
 		DataHolder.getInstance().resourcePacksChanged = false;
 		return c;
 	}
+	
+	@Overwrite
+	private void rollbackResourcePacks(Throwable pThrowable) {
+		if (this.resourcePackRepository.getSelectedPacks().stream().anyMatch(e -> !e.isRequired())) {
+			TextComponent component;
+			if (pThrowable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure) {
+				component = new TextComponent(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)pThrowable).getPack().getName());
+			} else {
+				component = null;
+			}
 
+			this.clearResourcePacksOnError(pThrowable, component);
+		} else {
+			Util.throwAsRuntime(pThrowable);
+		}
+
+	}
+	
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = Shift.BEFORE), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
 	public void gui(Screen pGuiScreen, CallbackInfo info) {
 		GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
 	}
 
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Ljava/lang/System;nanoTime()J"), method = "destroy()V")
+	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Ljava/lang/System;nanoTime()J", remap = false), method = "destroy()V")
 	public void destroy(CallbackInfo info) {
 		try {
 			DataHolder.getInstance().vr.destroy();
@@ -477,10 +506,10 @@ public abstract class MinecraftVRMixin {
 
 	}
 	
-//	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"), method = "runTick(Z)V")
-//	public void removePushPose() {
-//
-//	}
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"), method = "runTick(Z)V")
+	public void removePushPose() {
+
+	}
 
 //	public void removeApply2() {
 //

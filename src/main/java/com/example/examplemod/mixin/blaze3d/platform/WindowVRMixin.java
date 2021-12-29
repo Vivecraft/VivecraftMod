@@ -3,6 +3,7 @@ package com.example.examplemod.mixin.blaze3d.platform;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallbackI;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -91,6 +92,7 @@ public abstract class WindowVRMixin {
 //		return this.height;
 //	}
 	
+	@Overwrite
 	public int calculateScale(int pGuiScale, boolean bl) {
 		int i;
 		for (i = 1; i != pGuiScale && i < this.width && i < this.height && this.width / (i + 1) >= 320 && this.height / (i + 1) >= 240; ++i) {
@@ -104,20 +106,17 @@ public abstract class WindowVRMixin {
 		return i;
 	}
 	
-	@Inject(at = @At("HEAD"), method = "getWidth()I", cancellable = true)
+	@Inject(at = @At("RETURN"), method = "getWidth()I", cancellable = true)
 	public void changeGetWidth(CallbackInfoReturnable<Integer> i) {
-		//It should not be null, something is wrong
-		if (Minecraft.getInstance().getMainRenderTarget() != null)
-			i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewWidth);
+		i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewWidth);
 	}
 
-	@Inject(at = @At("HEAD"), method = "getHeight()I", cancellable = true)
+	@Inject(at = @At("RETURN"), method = "getHeight()I", cancellable = true)
 	public void changeGetHeight(CallbackInfoReturnable<Integer> i) { 
-		//It should not be null, something is wrong
-		if (Minecraft.getInstance().getMainRenderTarget() != null)
-			i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewHeight);
+		i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewHeight);
 	}
 	
+	@Overwrite
 	public void setGuiScale(double pScaleFactor) {
 		this.guiScale = pScaleFactor;
 
