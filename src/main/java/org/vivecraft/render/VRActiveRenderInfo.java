@@ -23,9 +23,10 @@ public class VRActiveRenderInfo extends Camera
         RenderPass renderpass = dataholder.currentPass;
 
 //        if (Shaders.isShadowPass && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
-//        {
-//            renderpass = RenderPass.CENTER;
-//        }
+        if (renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
+        {
+            renderpass = RenderPass.CENTER;
+        }
 
         VRData.VRDevicePose eye = dataholder.vrPlayer.vrdata_world_render.getEye(renderpass);
         this.setPosition(eye.getPosition());

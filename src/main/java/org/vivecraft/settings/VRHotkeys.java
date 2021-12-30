@@ -17,6 +17,7 @@ import org.vivecraft.utils.math.Vector3;
 
 import com.example.examplemod.DataHolder;
 import com.example.examplemod.MethodHolder;
+import com.example.examplemod.MinecraftExtension;
 import com.google.common.util.concurrent.Runnables;
 
 import net.minecraft.client.Minecraft;
@@ -103,7 +104,7 @@ public class VRHotkeys
             if ((minecraft.level == null || minecraft.screen != null) && action == 1 && key == 294)
             {
             	dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
-                MethodHolder.notifyMirror(dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
+                ((MinecraftExtension) minecraft).notifyMirror(dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
             }
 
             if (flag)

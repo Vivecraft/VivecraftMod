@@ -1,4 +1,4 @@
---- a/net/minecraft/client/renderer/LevelRenderer.java
+graphicsChanged--- a/net/minecraft/client/renderer/LevelRenderer.java
 +++ b/net/minecraft/client/renderer/LevelRenderer.java
 @@ -163,7 +163,9 @@
  import net.optifine.util.RenderChunkUtils;

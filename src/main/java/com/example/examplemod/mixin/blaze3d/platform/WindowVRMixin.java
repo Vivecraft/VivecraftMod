@@ -10,12 +10,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
-
-import net.minecraft.client.Minecraft;
 
 @Mixin(Window.class)
 public abstract class WindowVRMixin {
@@ -106,15 +103,15 @@ public abstract class WindowVRMixin {
 		return i;
 	}
 	
-	@Inject(at = @At("RETURN"), method = "getWidth()I", cancellable = true)
-	public void changeGetWidth(CallbackInfoReturnable<Integer> i) {
-		i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewWidth);
-	}
-
-	@Inject(at = @At("RETURN"), method = "getHeight()I", cancellable = true)
-	public void changeGetHeight(CallbackInfoReturnable<Integer> i) { 
-		i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewHeight);
-	}
+//	@Inject(at = @At("RETURN"), method = "getWidth()I", cancellable = true)
+//	public void changeGetWidth(CallbackInfoReturnable<Integer> i) {
+//		i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewWidth);
+//	}
+//
+//	@Inject(at = @At("RETURN"), method = "getHeight()I", cancellable = true)
+//	public void changeGetHeight(CallbackInfoReturnable<Integer> i) { 
+//		i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewHeight);
+//	}
 	
 	@Overwrite
 	public void setGuiScale(double pScaleFactor) {

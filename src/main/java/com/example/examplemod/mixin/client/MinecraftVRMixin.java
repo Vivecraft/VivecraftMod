@@ -44,6 +44,7 @@ import org.vivecraft.utils.math.Vector3;
 import com.example.examplemod.DataHolder;
 import com.example.examplemod.GameRendererExtension;
 import com.example.examplemod.GlStateHelper;
+import com.example.examplemod.MinecraftExtension;
 import com.example.examplemod.PlayerExtension;
 import com.example.examplemod.RenderTargetExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -83,7 +84,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftVRMixin {
+public abstract class MinecraftVRMixin implements MinecraftExtension{
 
 	@Unique
 	private boolean oculus;
@@ -390,6 +391,11 @@ public abstract class MinecraftVRMixin {
 	public void removePush(ProfilerFiller f,String s) {
 		return;
 	}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;getModelViewStack()Lcom/mojang/blaze3d/vertex/PoseStack;"), method = "runTick(Z)V")
+	public PoseStack removeStack() {
+		return null;
+	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"), method = "runTick(Z)V")
 	public void removePushPose(PoseStack s) {
@@ -406,7 +412,7 @@ public abstract class MinecraftVRMixin {
 		return;
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;bindWrite(Z)V"), method = "runTick(Z)V")
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;bindWrite(Z)V", ordinal = 0), method = "runTick(Z)V")
 	public void removeBind(RenderTarget t, boolean b) {
 		return;
 	}
@@ -503,11 +509,6 @@ public abstract class MinecraftVRMixin {
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V"), method = "runTick(Z)V")
 	public void removePopPose(PoseStack p) {
-
-	}
-	
-	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"), method = "runTick(Z)V")
-	public void removePushPose() {
 
 	}
 
@@ -749,6 +750,11 @@ public abstract class MinecraftVRMixin {
 		PlayerModelController.getInstance().tick();
 
 	}
+	
+	@Inject(at = @At("HEAD"), method = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V")
+	public void roomScale(ClientLevel pLevelClient, CallbackInfo info) {
+		DataHolder.getInstance().vrPlayer.setRoomOrigin(0.0D, 0.0D, 0.0D, true);
+	}
 
 	private void drawNotifyMirror() {
 		if (System.currentTimeMillis() < this.mirroNotifyStart + this.mirroNotifyLen) {
@@ -785,7 +791,8 @@ public abstract class MinecraftVRMixin {
 		}
 	}
 
-	private void notifyMirror(String text, boolean clear, int lengthMs) {
+	@Override
+	public void notifyMirror(String text, boolean clear, int lengthMs) {
 		this.mirroNotifyStart = System.currentTimeMillis();
 		this.mirroNotifyLen = (long) lengthMs;
 		this.mirrorNotifyText = text;
