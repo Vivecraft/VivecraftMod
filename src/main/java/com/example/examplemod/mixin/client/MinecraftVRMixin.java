@@ -444,6 +444,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension{
 		this.profiler.push("Gui");
 		DataHolder.getInstance().currentPass = RenderPass.GUI;
 		float f = this.pause ? this.pausePartialTick : this.timer.partialTick;
+		if (this.getCameraEntity() != null) {
+			System.out.println(this.getCameraEntity().xo + " pos");
+			System.out.println(this.gameRenderer.getMainCamera().getBlockPosition());
+		}
 		this.gameRenderer.getMainCamera().setup(this.level, this.getCameraEntity(), false, false, f);
 	}
 	

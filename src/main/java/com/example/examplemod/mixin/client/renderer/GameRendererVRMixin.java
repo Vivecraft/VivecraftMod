@@ -88,7 +88,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 @Mixin(GameRenderer.class)
-public abstract class GamerRendererVRMixin
+public abstract class GameRendererVRMixin
 		implements ResourceManagerReloadListener, AutoCloseable, GameRendererExtension {
 
 	@Unique
@@ -218,6 +218,11 @@ public abstract class GamerRendererVRMixin
 	@Override
 	public double getRveY() {
 		return rveY;
+	}
+	
+	@Override
+	public float inBlock() {
+		return inBlock;
 	}
 
 	// TODO check
@@ -350,10 +355,11 @@ public abstract class GamerRendererVRMixin
 			}
 		}
 		this.minecraft.getProfiler().pop();
-		//info.cancel();
+		//info.cancel(); TODO remove?
 	}
 	
-	public void renderpick(float pPartialTicks) {
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
+	public void renderpick(GameRenderer g, float  pPartialTicks) {
 		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
 			this.pick(pPartialTicks);
 
