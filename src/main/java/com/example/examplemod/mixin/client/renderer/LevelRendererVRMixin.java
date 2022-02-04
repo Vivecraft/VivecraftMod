@@ -73,7 +73,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	@Shadow
 	private RenderTarget entityTarget;
 	@Shadow
-	private boolean needsUpdate;
+	private boolean needsFullRenderChunkUpdate;
 	
 	public int rainX() {
 		return 0;
@@ -101,9 +101,9 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		
 	}
 	
-	@Inject(at = @At(value = "FIELD", target = "needsUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
-	public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, int i, boolean bl2, CallbackInfo info) {
-		this.needsUpdate = true;
+	@Inject(at = @At(value = "FIELD", target = "needsFullRenderChunkUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
+	public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
+		this.needsFullRenderChunkUpdate = true;
 	}
 
 	public void lightupdate() {

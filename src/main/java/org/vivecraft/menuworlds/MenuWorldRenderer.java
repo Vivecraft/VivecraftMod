@@ -80,7 +80,7 @@ public class MenuWorldRenderer
         this.mc = Minecraft.getInstance();
         this.dh = DataHolder.getInstance();
         this.lightmapTexture = new DynamicTexture(16, 16, false);
-        this.locationLightMap = this.mc.getTextureManager().register("lightMap", this.lightmapTexture);
+        this.locationLightMap = this.mc.getTextureManager().register("lightmap", this.lightmapTexture);
         this.lightmapColors = this.lightmapTexture.getPixels();
         Builder<VertexFormatElement> builder = ImmutableList.builder();
         builder.add(new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.POSITION, 3));

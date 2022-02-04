@@ -28,7 +28,6 @@ import org.vivecraft.menuworlds.MenuWorldExporter;
 import org.vivecraft.provider.openvr_jna.VRInputAction;
 import org.vivecraft.provider.openvr_jna.control.VRInputActionSet;
 import org.vivecraft.provider.openvr_jna.control.VivecraftMovementInput;
-import org.vivecraft.reflection.MCReflection;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
@@ -472,7 +471,7 @@ public abstract class MCVR
         }
 
         this.setVanillaBindings(keyBindings);
-        Map<String, Integer> map = (Map)MCReflection.KeyBinding_CATEGORY_ORDER.get((Object)null);
+        Map<String, Integer> map = KeyMapping.CATEGORY_SORT_ORDER;
         map.put("vivecraft.key.category.gui", 8);
         map.put("vivecraft.key.category.climbey", 9);
         map.put("vivecraft.key.category.keyboard", 10);
