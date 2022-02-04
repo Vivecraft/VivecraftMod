@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+//import net.optifine.reflect.Reflector;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
@@ -593,8 +594,7 @@ public class MCOpenVR extends MCVR
 
         for (VRInputActionSet vrinputactionset : VRInputActionSet.values())
         {
-//            if (vrinputactionset != VRInputActionSet.MOD || Reflector.ClientModLoader.exists()) TODO
-        	if (vrinputactionset != VRInputActionSet.MOD || false)
+            if (vrinputactionset != VRInputActionSet.MOD ) //|| Reflector.ClientModLoader.exists()) TODO check
             {
                 String s = vrinputactionset.usage;
 
@@ -701,6 +701,7 @@ public class MCOpenVR extends MCVR
 //        {
 //            arraylist.add(VRInputActionSet.MOD);
 //        }
+        arraylist.add(VRInputActionSet.MOD);
 
         arraylist.add(VRInputActionSet.MIXED_REALITY);
         arraylist.add(VRInputActionSet.TECHNICAL);

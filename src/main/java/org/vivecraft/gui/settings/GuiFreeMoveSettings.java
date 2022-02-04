@@ -37,7 +37,7 @@ public class GuiFreeMoveSettings extends GuiVROptionsBase
     {
         this.vrTitle = "vivecraft.options.screen.freemove";
 
-        if (this.dataholder.vrSettings.seated)
+        if (this.dataHolder.vrSettings.seated)
         {
             super.init(seatedSettings, true);
         }
@@ -46,7 +46,7 @@ public class GuiFreeMoveSettings extends GuiVROptionsBase
             super.init(standingSettings, true);
         }
 
-        if (this.dataholder.vrSettings.useFOVReduction)
+        if (this.dataHolder.vrSettings.useFOVReduction)
         {
             super.init(fovRed, false);
         }

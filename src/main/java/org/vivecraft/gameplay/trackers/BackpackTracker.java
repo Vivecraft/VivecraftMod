@@ -25,13 +25,13 @@ public class BackpackTracker extends Tracker
     public boolean isActive(LocalPlayer p)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataHolderd = DataHolder.getInstance();
+        DataHolder dataHolder = DataHolder.getInstance();
 
-        if (dataHolderd.vrSettings.seated)
+        if (dataHolder.vrSettings.seated)
         {
             return false;
         }
-        else if (!dataHolderd.vrSettings.backpackSwitching)
+        else if (!dataHolder.vrSettings.backpackSwitching)
         {
             return false;
         }
@@ -53,7 +53,7 @@ public class BackpackTracker extends Tracker
         }
         else
         {
-            return !dataHolderd.bowTracker.isDrawing;
+            return !dataHolder.bowTracker.isDrawing;
         }
     }
 
@@ -77,7 +77,7 @@ public class BackpackTracker extends Tracker
             boolean flag4 = d0 < 0.0D;
             boolean flag5 = flag && flag1 && flag2;
             Minecraft minecraft = Minecraft.getInstance();
-            DataHolder dataHolderd = DataHolder.getInstance();
+            DataHolder dataHolder = DataHolder.getInstance();
 
             if (flag5)
             {
@@ -85,7 +85,7 @@ public class BackpackTracker extends Tracker
                 {
                     if (i == 0)
                     {
-                        if (!dataHolderd.climbTracker.isGrabbingLadder() || !dataHolderd.climbTracker.isClaws(minecraft.player.getMainHandItem()))
+                        if (!dataHolder.climbTracker.isGrabbingLadder() || !dataHolder.climbTracker.isClaws(minecraft.player.getMainHandItem()))
                         {
                             if (player.getInventory().selected != 0)
                             {
@@ -99,9 +99,9 @@ public class BackpackTracker extends Tracker
                             }
                         }
                     }
-                    else if (!dataHolderd.climbTracker.isGrabbingLadder() || !dataHolderd.climbTracker.isClaws(minecraft.player.getOffhandItem()))
+                    else if (!dataHolder.climbTracker.isGrabbingLadder() || !dataHolder.climbTracker.isClaws(minecraft.player.getOffhandItem()))
                     {
-                        if (dataHolderd.vrSettings.physicalGuiEnabled)
+                        if (dataHolder.vrSettings.physicalGuiEnabled)
                         {
                             //minecraft.physicalGuiManager.toggleInventoryBag();
                         }
@@ -111,7 +111,7 @@ public class BackpackTracker extends Tracker
                         }
                     }
 
-                    dataHolderd.vr.triggerHapticPulse(i, 1500);
+                    dataHolder.vr.triggerHapticPulse(i, 1500);
                     this.wasIn[i] = true;
                 }
             }

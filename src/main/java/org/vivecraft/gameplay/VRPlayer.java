@@ -113,7 +113,7 @@ public class VRPlayer
         this.vrdata_world_pre = new VRData(this.roomOrigin, this.dh.vrSettings.walkMultiplier, this.worldScale, (float)Math.toRadians((double)this.dh.vrSettings.worldRotation));
         float f = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
 
-        if (((GameRendererExtension)this.mc.gameRenderer).isInMenuRoom())
+        if (((GameRendererExtension) this.mc.gameRenderer).isInMenuRoom())
         {
             this.worldScale = 1.0F;
         }
@@ -159,7 +159,7 @@ public class VRPlayer
             this.worldScale = f;
         }
 
-        if (this.dh.vrSettings.seated && !((GameRendererExtension)this.mc.gameRenderer).isInMenuRoom())
+        if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).isInMenuRoom())
         {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
         }
@@ -167,8 +167,8 @@ public class VRPlayer
 
     public void postTick()
     {
-        DataHolder dataHolder = DataHolder.getInstance();
         Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataHolder = DataHolder.getInstance();
         VRData vrdata = new VRData(this.vrdata_world_pre.origin, dataHolder.vrSettings.walkMultiplier, this.vrdata_world_pre.worldScale, this.vrdata_world_pre.rotation_radians);
         VRData vrdata1 = new VRData(this.vrdata_world_pre.origin, dataHolder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
         Vec3 vec3 = vrdata1.hmd.getPosition().subtract(vrdata.hmd.getPosition());
@@ -187,7 +187,7 @@ public class VRPlayer
     public void preRender(float par1)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        DataHolder dataHolder = DataHolder.getInstance();
         float f = this.vrdata_world_post.worldScale * par1 + this.vrdata_world_pre.worldScale * (1.0F - par1);
         float f1 = this.vrdata_world_post.rotation_radians;
         float f2 = this.vrdata_world_pre.rotation_radians;
@@ -207,7 +207,7 @@ public class VRPlayer
 
         float f4 = f1 * par1 + f2 * (1.0F - par1);
         Vec3 vec3 = new Vec3(this.vrdata_world_pre.origin.x + (this.vrdata_world_post.origin.x - this.vrdata_world_pre.origin.x) * (double)par1, this.vrdata_world_pre.origin.y + (this.vrdata_world_post.origin.y - this.vrdata_world_pre.origin.y) * (double)par1, this.vrdata_world_pre.origin.z + (this.vrdata_world_post.origin.z - this.vrdata_world_pre.origin.z) * (double)par1);
-        this.vrdata_world_render = new VRData(vec3, dataholder.vrSettings.walkMultiplier, f, f4);
+        this.vrdata_world_render = new VRData(vec3, dataHolder.vrSettings.walkMultiplier, f, f4);
 
         for (Tracker tracker : this.trackers)
         {
@@ -248,21 +248,21 @@ public class VRPlayer
             if (player != null && player.position() != Vec3.ZERO)
             {
                 Minecraft minecraft = Minecraft.getInstance();
-                DataHolder dataholder = DataHolder.getInstance();
+                DataHolder dataHolder = DataHolder.getInstance();
 
-                if (dataholder.sneakTracker.sneakCounter <= 0)
+                if (dataHolder.sneakTracker.sneakCounter <= 0)
                 {
                     VRData vrdata = this.vrdata_world_pre;
 
                     if (instant)
                     {
-                        vrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float)Math.toRadians((double)dataholder.vrSettings.worldRotation));
+                        vrdata = new VRData(this.roomOrigin, dataHolder.vrSettings.walkMultiplier, this.worldScale, (float)Math.toRadians((double)dataHolder.vrSettings.worldRotation));
                     }
 
                     Vec3 vec3 = vrdata.getHeadPivot().subtract(vrdata.origin);
                     double d0 = player.getX() - vec3.x;
                     double d2 = player.getZ() - vec3.z;
-                    double d1 = player.getY() + ((PlayerExtension)player).getRoomYOffsetFromPose();
+                    double d1 = player.getY() + ((PlayerExtension) player).getRoomYOffsetFromPose();
                     this.setRoomOrigin(d0, d1, d2, reset);
                 }
             }
@@ -289,7 +289,7 @@ public class VRPlayer
 
     public void tick(LocalPlayer player, Minecraft mc, Random rand)
     {
-        if (((PlayerExtension)player).getInitFromServer())
+        if (((PlayerExtension) player).getInitFromServer())
         {
             if (!this.initdone)
             {
@@ -360,7 +360,7 @@ public class VRPlayer
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
-            DataHolder dataholder = DataHolder.getInstance();
+            DataHolder dataHolder = DataHolder.getInstance();
 
             if (player != null)
             {
@@ -368,15 +368,15 @@ public class VRPlayer
                 {
                     if (!player.isSleeping())
                     {
-                        if (!dataholder.jumpTracker.isjumping())
+                        if (!dataHolder.jumpTracker.isjumping())
                         {
-                            if (!dataholder.climbTracker.isGrabbingLadder())
+                            if (!dataHolder.climbTracker.isGrabbingLadder())
                             {
                                 if (player.isAlive())
                                 {
-                                    VRData vrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
+                                    VRData vrdata = new VRData(this.roomOrigin, dataHolder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
 
-                                    if (dataholder.vehicleTracker.canRoomscaleDismount(minecraft.player))
+                                    if (dataHolder.vehicleTracker.canRoomscaleDismount(minecraft.player))
                                     {
                                         Vec3 vec35 = minecraft.player.getVehicle().position();
                                         Vec3 vec36 = vrdata.getHeadPivot();
@@ -384,7 +384,7 @@ public class VRPlayer
 
                                         if (d6 > 1.0D)
                                         {
-                                        	dataholder.sneakTracker.sneakCounter = 5;
+                                        	dataHolder.sneakTracker.sneakCounter = 5;
                                         }
                                     }
                                     else
@@ -402,12 +402,12 @@ public class VRPlayer
 
                                         if (flag)
                                         {
-                                            player.setPosRaw(d0, !dataholder.vrSettings.simulateFalling ? d1 : player.getY(), d2);
+                                            player.setPosRaw(d0, !dataHolder.vrSettings.simulateFalling ? d1 : player.getY(), d2);
                                             player.setBoundingBox(new AABB(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.minY + (double)f1, aabb.maxZ));
                                             player.fallDistance = 0.0F;
                                             this.getEstimatedTorsoPosition(d0, d1, d2);
                                         }
-                                        else if ((dataholder.vrSettings.walkUpBlocks && ((PlayerExtension)player).getMuhJumpFactor() == 1.0F || dataholder.climbTracker.isGrabbingLadder() && dataholder.vrSettings.realisticClimbEnabled) && player.fallDistance == 0.0F)
+                                        else if ((dataHolder.vrSettings.walkUpBlocks && ((PlayerExtension) player).getMuhJumpFactor() == 1.0F || dataHolder.climbTracker.isGrabbingLadder() && dataHolder.vrSettings.realisticClimbEnabled) && player.fallDistance == 0.0F)
                                         {
                                             if (vec31 == null)
                                             {
@@ -426,7 +426,7 @@ public class VRPlayer
                                                 aabb = aabb.move(d4, 0.0D, d5);
                                                 int i = 0;
 
-                                                if (player.onClimbable() && dataholder.vrSettings.realisticClimbEnabled)
+                                                if (player.onClimbable() && dataHolder.vrSettings.realisticClimbEnabled)
                                                 {
                                                     i = 6;
                                                 }
@@ -448,7 +448,7 @@ public class VRPlayer
                                                         Vec3 vec33 = player.getLookAngle();
                                                         Vec3 vec34 = (new Vec3(vec33.x, 0.0D, vec33.z)).normalize();
                                                         player.fallDistance = 0.0F;
-                                                        ((PlayerExtension)minecraft.player).stepSound(new BlockPos(player.position()), player.position());
+                                                        ((PlayerExtension) minecraft.player).stepSound(new BlockPos(player.position()), player.position());
                                                         break;
                                                     }
                                                 }
@@ -524,9 +524,9 @@ public class VRPlayer
     {
         Vec3 vec3 = entity.getLookAngle();
 
-        if (((GameRendererExtension)this.mc.gameRenderer).getCrossVec() != null)
+        if (((GameRendererExtension) this.mc.gameRenderer).getCrossVec() != null)
         {
-            vec3 = entity.getEyePosition(1.0F).subtract(((GameRendererExtension)this.mc.gameRenderer).getCrossVec()).normalize().reverse();
+            vec3 = entity.getEyePosition(1.0F).subtract(((GameRendererExtension) this.mc.gameRenderer).getCrossVec()).normalize().reverse();
         }
 
         ItemStack itemstack;
@@ -578,8 +578,8 @@ public class VRPlayer
                 entity.setYHeadRot(entity.getYRot());
                 entity.setXRot(-data.hmd.getPitch());		
         	} else {
-        		if(((GameRendererExtension)this.mc.gameRenderer).getCrossVec() != null){
-        			Vec3 playerToCrosshair = entity.getEyePosition(1).subtract(((GameRendererExtension)this.mc.gameRenderer).getCrossVec()); //backwards
+        		if(((GameRendererExtension) mc.gameRenderer).getCrossVec() != null){
+        			Vec3 playerToCrosshair = entity.getEyePosition(1).subtract(((GameRendererExtension) mc.gameRenderer).getCrossVec()); //backwards
         			double what = playerToCrosshair.y/playerToCrosshair.length();
         			if(what > 1) what = 1;
         			if(what < -1) what = -1;

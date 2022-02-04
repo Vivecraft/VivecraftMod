@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/resources/model/ModelBakery.java
 +++ b/net/minecraft/client/resources/model/ModelBakery.java
-@@ -37,6 +37,7 @@
+@@ -36,6 +36,7 @@
  import javax.annotation.Nullable;
  import net.minecraft.Util;
  import net.minecraft.client.color.block.BlockColors;
@@ -8,7 +8,7 @@
  import net.minecraft.client.renderer.RenderType;
  import net.minecraft.client.renderer.Sheets;
  import net.minecraft.client.renderer.block.BlockModelShaper;
-@@ -74,6 +75,8 @@
+@@ -73,6 +74,8 @@
  import org.apache.commons.lang3.tuple.Triple;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -17,7 +17,7 @@
  
  public class ModelBakery
  {
-@@ -213,7 +216,13 @@
+@@ -212,7 +215,13 @@
                  this.loadTopLevel(BlockModelShaper.stateToModelLocation(stateIn));
              });
          }

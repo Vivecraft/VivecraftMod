@@ -9,12 +9,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.NetworkHelper;
 import org.vivecraft.api.VRData;
 import org.vivecraft.gameplay.VRPlayer;
@@ -50,7 +44,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.CrashReport;
@@ -70,21 +63,17 @@ import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 @Mixin(GameRenderer.class)
@@ -225,148 +214,148 @@ public abstract class GamerRendererVRMixin
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V"), method = "pick(F)V")
-	public void vrdata(float f, CallbackInfo info) {
-		if (DataHolder.getInstance().vrPlayer.vrdata_world_render == null) {
-			info.cancel();
-		}
-	}
-
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getViewVector(F)Lnet/minecraft/world/phys/Vec3;"), method = "pick(F)V")
-	public Vec3 vrVec(Entity e, float f) {
-		return DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getDirection();
-	}
-
-	@Inject(at = @At("HEAD"), method = "getFov(Lnet/minecraft/client/Camera;FZ)D", cancellable = true)
-	public void fov(Camera camera, float f, boolean bl, CallbackInfoReturnable<Double> info) {
-		if (this.minecraft.level == null) { // Vivecraft: using this on the main menu
-			info.setReturnValue(this.minecraft.options.fov);
-		}
-	}
-
-	@Inject(at = @At("HEAD"), method = "getProjectionMatrix(D)Lcom/mojang/math/Matrix4f", cancellable = true)
-	public void projection(double d, CallbackInfoReturnable<Matrix4f> info) {
-		PoseStack posestack = new PoseStack();
-		setupClipPlanes();
-		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
-			posestack.mulPoseMatrix(DataHolder.getInstance().vrRenderer.eyeproj[0]);
-		} else if (DataHolder.getInstance().currentPass == RenderPass.RIGHT) {
-			posestack.mulPoseMatrix(DataHolder.getInstance().vrRenderer.eyeproj[1]);
-		} else if (DataHolder.getInstance().currentPass == RenderPass.THIRD) {
-			if (DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
-				posestack.mulPoseMatrix(
-						Matrix4f.perspective((double) DataHolder.getInstance().vrSettings.mixedRealityFov,
-								DataHolder.getInstance().vrSettings.mixedRealityAspectRatio, this.minClipDistance,
-								this.clipDistance));
-			} else {
-				posestack.mulPoseMatrix(
-						Matrix4f.perspective((double) DataHolder.getInstance().vrSettings.mixedRealityFov,
-								(float) this.minecraft.getWindow().getScreenWidth()
-										/ (float) this.minecraft.getWindow().getScreenHeight(),
-								this.minClipDistance, this.clipDistance));
-			}
-			this.thirdPassProjectionMatrix = new Matrix4f(posestack.last().pose());
-		} else if (DataHolder.getInstance().currentPass == RenderPass.CAMERA) {
-			posestack.mulPoseMatrix(Matrix4f.perspective((double) DataHolder.getInstance().vrSettings.handCameraFov,
-					(float) DataHolder.getInstance().vrRenderer.cameraFramebuffer.viewWidth
-							/ (float) DataHolder.getInstance().vrRenderer.cameraFramebuffer.viewHeight,
-					this.minClipDistance, this.clipDistance));
-		} else if (DataHolder.getInstance().currentPass == RenderPass.SCOPEL
-				|| DataHolder.getInstance().currentPass == RenderPass.SCOPER) {
-			posestack.mulPoseMatrix(Matrix4f.perspective(70f / 8f, 1.0F, 0.05F, this.clipDistance));
-
-		} else {
-			if (this.zoom != 1.0F) {
-				posestack.translate((double) this.zoomX, (double) (-this.zoomY), 0.0D);
-				posestack.scale(this.zoom, this.zoom, 1.0F);
-			}
-			posestack.mulPoseMatrix(Matrix4f.perspective(d, (float) this.minecraft.getWindow().getScreenWidth()
-					/ (float) this.minecraft.getWindow().getScreenHeight(), 0.05F, this.clipDistance));
-		}
-		info.setReturnValue(posestack.last().pose());
-	}
-
-	// TODO optifine?
-//	public void initFrame() {
-//		if (this.minecraft.currentPass == RenderPass.LEFT) {
-//			this.frameInit();
-//
-//			if (!this.always_true && !this.minecraft.isWindowActive() && this.minecraft.options.pauseOnLostFocus
-//					&& (!this.minecraft.options.touchscreen || !this.minecraft.mouseHandler.isRightPressed())) {
-//				if (Util.getMillis() - this.lastActiveTime > 500L) {
-//					this.minecraft.pauseGame(false);
-//				}
-//			} else {
-//				this.lastActiveTime = Util.getMillis();
-//			}
+//	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V"), method = "pick(F)V")
+//	public void vrdata(float f, CallbackInfo info) {
+//		if (DataHolder.getInstance().vrPlayer.vrdata_world_render == null) {
+//			info.cancel();
 //		}
 //	}
-
-	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
-	public void matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
-		this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov));
-		RenderSystem.getModelViewStack().setIdentity();
-		RenderSystem.applyModelViewMatrix();
-	}
-
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
-	public void renderoverlay(GameRenderer l, float f, long j, PoseStack p) {
-		PoseStack posestack = new PoseStack();
-		this.renderLevel(f, j, posestack);
-
-		if (DataHolder.getInstance().currentPass != RenderPass.THIRD
-				&& DataHolder.getInstance().currentPass != RenderPass.CAMERA) {
-			this.renderFaceOverlay(f, posestack);
-		}
-	}
-	
-	@Shadow
-	protected abstract void renderLevel(float f, long j, PoseStack posestack);
-
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
-	public void mainMenu(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
-		if (renderWorldIn && !this.isInMenuRoom() && this.minecraft.level != null) {
-
-		} else {
-			this.minecraft.getProfiler().push("MainMenu");
-			GL11.glDisable(GL11.GL_STENCIL_TEST);
-			PoseStack pMatrixStack = new PoseStack();
-			applyVRModelView(DataHolder.getInstance().currentPass, pMatrixStack);
-			this.renderGuiLayer(partialTicks, true, pMatrixStack);
-
-			if (KeyboardHandler.Showing) {
-				if (DataHolder.getInstance().vrSettings.physicalKeyboard) {
-					this.renderPhysicalKeyboard(partialTicks, pMatrixStack);
-				} else {
-					this.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
-							KeyboardHandler.Rotation_room, false, pMatrixStack);
-				}
-			}
-
-			if ((DataHolder.getInstance().currentPass != RenderPass.THIRD
-					|| DataHolder.getInstance().vrSettings.mixedRealityRenderHands)
-					&& DataHolder.getInstance().currentPass != RenderPass.CAMERA) {
-				this.renderVRHands(partialTicks, true, true, true, true, pMatrixStack);
-			}
-		}
-		this.minecraft.getProfiler().pop();
-		// info.cancel();
-	}
-
-	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 0), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
-	public void removeMulposeX(PoseStack s, Quaternion quaternion) {
-
-	}
-
-	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 1), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
-	public void removeMulposeY(PoseStack s, Quaternion quaternion) {
-		applyVRModelView(DataHolder.getInstance().currentPass, s);
-	}
-
-	@Inject(at = @At(value = "TAIL", shift = Shift.BEFORE), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
-	public void restoreVE(float f, long j, PoseStack p, CallbackInfo i) {
-		this.restoreRVEPos((LivingEntity) this.minecraft.getCameraEntity());
-	}
+//
+//	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getViewVector(F)Lnet/minecraft/world/phys/Vec3;"), method = "pick(F)V")
+//	public Vec3 vrVec(Entity e, float f) {
+//		return DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getDirection();
+//	}
+//
+//	@Inject(at = @At("HEAD"), method = "getFov(Lnet/minecraft/client/Camera;FZ)D", cancellable = true)
+//	public void fov(Camera camera, float f, boolean bl, CallbackInfoReturnable<Double> info) {
+//		if (this.minecraft.level == null) { // Vivecraft: using this on the main menu
+//			info.setReturnValue(this.minecraft.options.fov);
+//		}
+//	}
+//
+//	@Inject(at = @At("HEAD"), method = "getProjectionMatrix(D)Lcom/mojang/math/Matrix4f", cancellable = true)
+//	public void projection(double d, CallbackInfoReturnable<Matrix4f> info) {
+//		PoseStack posestack = new PoseStack();
+//		setupClipPlanes();
+//		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+//			posestack.mulPoseMatrix(DataHolder.getInstance().vrRenderer.eyeproj[0]);
+//		} else if (DataHolder.getInstance().currentPass == RenderPass.RIGHT) {
+//			posestack.mulPoseMatrix(DataHolder.getInstance().vrRenderer.eyeproj[1]);
+//		} else if (DataHolder.getInstance().currentPass == RenderPass.THIRD) {
+//			if (DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
+//				posestack.mulPoseMatrix(
+//						Matrix4f.perspective((double) DataHolder.getInstance().vrSettings.mixedRealityFov,
+//								DataHolder.getInstance().vrSettings.mixedRealityAspectRatio, this.minClipDistance,
+//								this.clipDistance));
+//			} else {
+//				posestack.mulPoseMatrix(
+//						Matrix4f.perspective((double) DataHolder.getInstance().vrSettings.mixedRealityFov,
+//								(float) this.minecraft.getWindow().getScreenWidth()
+//										/ (float) this.minecraft.getWindow().getScreenHeight(),
+//								this.minClipDistance, this.clipDistance));
+//			}
+//			this.thirdPassProjectionMatrix = new Matrix4f(posestack.last().pose());
+//		} else if (DataHolder.getInstance().currentPass == RenderPass.CAMERA) {
+//			posestack.mulPoseMatrix(Matrix4f.perspective((double) DataHolder.getInstance().vrSettings.handCameraFov,
+//					(float) DataHolder.getInstance().vrRenderer.cameraFramebuffer.viewWidth
+//							/ (float) DataHolder.getInstance().vrRenderer.cameraFramebuffer.viewHeight,
+//					this.minClipDistance, this.clipDistance));
+//		} else if (DataHolder.getInstance().currentPass == RenderPass.SCOPEL
+//				|| DataHolder.getInstance().currentPass == RenderPass.SCOPER) {
+//			posestack.mulPoseMatrix(Matrix4f.perspective(70f / 8f, 1.0F, 0.05F, this.clipDistance));
+//
+//		} else {
+//			if (this.zoom != 1.0F) {
+//				posestack.translate((double) this.zoomX, (double) (-this.zoomY), 0.0D);
+//				posestack.scale(this.zoom, this.zoom, 1.0F);
+//			}
+//			posestack.mulPoseMatrix(Matrix4f.perspective(d, (float) this.minecraft.getWindow().getScreenWidth()
+//					/ (float) this.minecraft.getWindow().getScreenHeight(), 0.05F, this.clipDistance));
+//		}
+//		info.setReturnValue(posestack.last().pose());
+//	}
+//
+//	// TODO optifine?
+////	public void initFrame() {
+////		if (this.minecraft.currentPass == RenderPass.LEFT) {
+////			this.frameInit();
+////
+////			if (!this.always_true && !this.minecraft.isWindowActive() && this.minecraft.options.pauseOnLostFocus
+////					&& (!this.minecraft.options.touchscreen || !this.minecraft.mouseHandler.isRightPressed())) {
+////				if (Util.getMillis() - this.lastActiveTime > 500L) {
+////					this.minecraft.pauseGame(false);
+////				}
+////			} else {
+////				this.lastActiveTime = Util.getMillis();
+////			}
+////		}
+////	}
+//
+//	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
+//	public void matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
+//		this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov));
+//		RenderSystem.getModelViewStack().setIdentity();
+//		RenderSystem.applyModelViewMatrix();
+//	}
+//
+//	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
+//	public void renderoverlay(GameRenderer l, float f, long j, PoseStack p) {
+//		PoseStack posestack = new PoseStack();
+//		this.renderLevel(f, j, posestack);
+//
+//		if (DataHolder.getInstance().currentPass != RenderPass.THIRD
+//				&& DataHolder.getInstance().currentPass != RenderPass.CAMERA) {
+//			this.renderFaceOverlay(f, posestack);
+//		}
+//	}
+//	
+//	@Shadow
+//	protected abstract void renderLevel(float f, long j, PoseStack posestack);
+//
+//	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
+//	public void mainMenu(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
+//		if (renderWorldIn && !this.isInMenuRoom() && this.minecraft.level != null) {
+//
+//		} else {
+//			this.minecraft.getProfiler().push("MainMenu");
+//			GL11.glDisable(GL11.GL_STENCIL_TEST);
+//			PoseStack pMatrixStack = new PoseStack();
+//			applyVRModelView(DataHolder.getInstance().currentPass, pMatrixStack);
+//			this.renderGuiLayer(partialTicks, true, pMatrixStack);
+//
+//			if (KeyboardHandler.Showing) {
+//				if (DataHolder.getInstance().vrSettings.physicalKeyboard) {
+//					this.renderPhysicalKeyboard(partialTicks, pMatrixStack);
+//				} else {
+//					this.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
+//							KeyboardHandler.Rotation_room, false, pMatrixStack);
+//				}
+//			}
+//
+//			if ((DataHolder.getInstance().currentPass != RenderPass.THIRD
+//					|| DataHolder.getInstance().vrSettings.mixedRealityRenderHands)
+//					&& DataHolder.getInstance().currentPass != RenderPass.CAMERA) {
+//				this.renderVRHands(partialTicks, true, true, true, true, pMatrixStack);
+//			}
+//		}
+//		this.minecraft.getProfiler().pop();
+//		info.cancel();
+//	}
+//
+//	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 0), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
+//	public void removeMulposeX(PoseStack s, Quaternion quaternion) {
+//
+//	}
+//
+//	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 1), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
+//	public void removeMulposeY(PoseStack s, Quaternion quaternion) {
+//		applyVRModelView(DataHolder.getInstance().currentPass, s);
+//	}
+//
+//	@Inject(at = @At(value = "TAIL", shift = Shift.BEFORE), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
+//	public void restoreVE(float f, long j, PoseStack p, CallbackInfo i) {
+//		this.restoreRVEPos((LivingEntity) this.minecraft.getCameraEntity());
+//	}
 
 //	@Overwrite
 //	public void renderLevel(float f, long l, PoseStack poseStack) {
@@ -1091,7 +1080,7 @@ public abstract class GamerRendererVRMixin
 
 		this.lightTexture.turnOnLightLayer();
 		MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
-		((ItemInHandRendererExtension) this.itemInHandRenderer).renderArmWithItem(this.minecraft.player, partialTicks,
+		this.itemInHandRenderer.renderArmWithItem(this.minecraft.player, partialTicks,
 				0.0F, InteractionHand.MAIN_HAND, this.minecraft.player.getAttackAnim(partialTicks), itemstack, 0.0F,
 				matrix, multibuffersource$buffersource,
 				this.minecraft.getEntityRenderDispatcher().getPackedLightCoords(this.minecraft.player, partialTicks));
@@ -1150,7 +1139,7 @@ public abstract class GamerRendererVRMixin
 
 		this.lightTexture.turnOnLightLayer();
 		MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
-		((ItemInHandRendererExtension) this.itemInHandRenderer).renderArmWithItem(this.minecraft.player, partialTicks,
+		this.itemInHandRenderer.renderArmWithItem(this.minecraft.player, partialTicks,
 				0.0F, InteractionHand.OFF_HAND, this.minecraft.player.getAttackAnim(partialTicks), itemstack, 0.0F,
 				matrix, multibuffersource$buffersource,
 				this.minecraft.getEntityRenderDispatcher().getPackedLightCoords(this.minecraft.player, partialTicks));
@@ -2160,109 +2149,109 @@ public abstract class GamerRendererVRMixin
 	}
 
 	private void renderCrosshairAtDepth(boolean depthAlways, PoseStack poseStack) {
-		if (this.shouldRenderCrosshair()) {
-			this.minecraft.getProfiler().popPush("crosshair");
-			// GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			Vec3 vec3 = this.crossVec;
-			Vec3 vec31 = vec3
-					.subtract(DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getPosition());
-			float f = (float) vec31.length();
-			float f1 = (float) ((double) (0.125F * DataHolder.getInstance().vrSettings.crosshairScale)
-					* Math.sqrt((double) DataHolder.getInstance().vrPlayer.vrdata_world_render.worldScale));
-			vec3 = vec3.add(vec31.normalize().scale(-0.01D));
-			poseStack.pushPose();
-			poseStack.setIdentity();
-			applyVRModelView(DataHolder.getInstance().currentPass, poseStack);
-
-			Vec3 vec32 = vec3.subtract(this.minecraft.getCameraEntity().position());
-			poseStack.translate(vec32.x, vec32.y, vec32.z);
-
-			if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() == HitResult.Type.BLOCK) {
-				BlockHitResult blockhitresult = (BlockHitResult) this.minecraft.hitResult;
-
-				if (blockhitresult.getDirection() == Direction.DOWN) {
-					MethodHolder.rotateDeg(poseStack,
-							DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F,
-							0.0F);
-					MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
-				} else if (blockhitresult.getDirection() == Direction.EAST) {
-					MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
-				} else if (blockhitresult.getDirection() != Direction.NORTH
-						&& blockhitresult.getDirection() != Direction.SOUTH) {
-					if (blockhitresult.getDirection() == Direction.UP) {
-						MethodHolder.rotateDeg(poseStack,
-								-DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F,
-								1.0F, 0.0F);
-						MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
-					} else if (blockhitresult.getDirection() == Direction.WEST) {
-						MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
-					}
-				}
-			} else {
-				MethodHolder.rotateDeg(poseStack,
-						-DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F,
-						0.0F);
-				MethodHolder.rotateDeg(poseStack,
-						-DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getPitch(), 1.0F, 0.0F,
-						0.0F);
-			}
-
-			if (DataHolder.getInstance().vrSettings.crosshairScalesWithDistance) {
-				float f5 = 0.3F + 0.2F * f;
-				f1 *= f5;
-			}
-
-			this.lightTexture.turnOnLightLayer();
-			poseStack.scale(f1, f1, f1);
-			RenderSystem.depthMask(true);
-			RenderSystem.enableDepthTest();
-			// RenderSystem.disableLighting();
-			RenderSystem.disableCull();
-			// GlStateManager.enableAlphaTest();
-
-			if (depthAlways) {
-				RenderSystem.depthFunc(519);
-			} else {
-				RenderSystem.depthFunc(515);
-			}
-
-			// boolean flag = Config.isShaders();
-			boolean flag = false;
-			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR,
-					GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE,
-					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-			int i = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(vec3));
-			float f2 = 1.0F;
-
-			if (this.minecraft.hitResult == null || this.minecraft.hitResult.getType() == HitResult.Type.MISS) {
-				f2 = 0.5F;
-			}
-
-			RenderSystem.setShaderTexture(0, Screen.GUI_ICONS_LOCATION);
-			float f3 = 0.00390625F;
-			float f4 = 0.00390625F;
-
-			BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-
-			RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
-			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR); // POSITION_TEX_LMAP_COLOR_NORMAL
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4).uv2(i)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4).uv2(i)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F).uv2(i)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			Tesselator.getInstance().end();
-			RenderSystem.defaultBlendFunc();
-			RenderSystem.disableBlend();
-			RenderSystem.enableCull();
-			RenderSystem.depthFunc(515);
-			poseStack.popPose();
-		}
+//		if (this.shouldRenderCrosshair()) {
+//			this.minecraft.getProfiler().popPush("crosshair");
+//			// GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+//			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+//			Vec3 vec3 = this.crossVec;
+//			Vec3 vec31 = vec3
+//					.subtract(DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getPosition());
+//			float f = (float) vec31.length();
+//			float f1 = (float) ((double) (0.125F * DataHolder.getInstance().vrSettings.crosshairScale)
+//					* Math.sqrt((double) DataHolder.getInstance().vrPlayer.vrdata_world_render.worldScale));
+//			vec3 = vec3.add(vec31.normalize().scale(-0.01D));
+//			poseStack.pushPose();
+//			poseStack.setIdentity();
+//			applyVRModelView(DataHolder.getInstance().currentPass, poseStack);
+//
+//			Vec3 vec32 = vec3.subtract(this.minecraft.getCameraEntity().position());
+//			poseStack.translate(vec32.x, vec32.y, vec32.z);
+//
+//			if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() == HitResult.Type.BLOCK) {
+//				BlockHitResult blockhitresult = (BlockHitResult) this.minecraft.hitResult;
+//
+//				if (blockhitresult.getDirection() == Direction.DOWN) {
+//					MethodHolder.rotateDeg(poseStack,
+//							DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F,
+//							0.0F);
+//					MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
+//				} else if (blockhitresult.getDirection() == Direction.EAST) {
+//					MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
+//				} else if (blockhitresult.getDirection() != Direction.NORTH
+//						&& blockhitresult.getDirection() != Direction.SOUTH) {
+//					if (blockhitresult.getDirection() == Direction.UP) {
+//						MethodHolder.rotateDeg(poseStack,
+//								-DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F,
+//								1.0F, 0.0F);
+//						MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
+//					} else if (blockhitresult.getDirection() == Direction.WEST) {
+//						MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
+//					}
+//				}
+//			} else {
+//				MethodHolder.rotateDeg(poseStack,
+//						-DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F,
+//						0.0F);
+//				MethodHolder.rotateDeg(poseStack,
+//						-DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getPitch(), 1.0F, 0.0F,
+//						0.0F);
+//			}
+//
+//			if (DataHolder.getInstance().vrSettings.crosshairScalesWithDistance) {
+//				float f5 = 0.3F + 0.2F * f;
+//				f1 *= f5;
+//			}
+//
+//			this.lightTexture.turnOnLightLayer();
+//			poseStack.scale(f1, f1, f1);
+//			RenderSystem.depthMask(true);
+//			RenderSystem.enableDepthTest();
+//			// RenderSystem.disableLighting();
+//			RenderSystem.disableCull();
+//			// GlStateManager.enableAlphaTest();
+//
+//			if (depthAlways) {
+//				RenderSystem.depthFunc(519);
+//			} else {
+//				RenderSystem.depthFunc(515);
+//			}
+//
+//			// boolean flag = Config.isShaders();
+//			boolean flag = false;
+//			RenderSystem.enableBlend();
+//			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR,
+//					GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE,
+//					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+//			int i = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(vec3));
+//			float f2 = 1.0F;
+//
+//			if (this.minecraft.hitResult == null || this.minecraft.hitResult.getType() == HitResult.Type.MISS) {
+//				f2 = 0.5F;
+//			}
+//
+//			RenderSystem.setShaderTexture(0, Screen.GUI_ICONS_LOCATION);
+//			float f3 = 0.00390625F;
+//			float f4 = 0.00390625F;
+//
+//			BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+//
+//			RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
+//			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR); // POSITION_TEX_LMAP_COLOR_NORMAL
+//			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4).uv2(i)
+//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+//			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4).uv2(i)
+//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+//			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F).uv2(i)
+//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+//			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
+//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+//			Tesselator.getInstance().end();
+//			RenderSystem.defaultBlendFunc();
+//			RenderSystem.disableBlend();
+//			RenderSystem.enableCull();
+//			RenderSystem.depthFunc(515);
+//			poseStack.popPose();
+//		}
 	}
 
 	public boolean shouldOccludeGui() {

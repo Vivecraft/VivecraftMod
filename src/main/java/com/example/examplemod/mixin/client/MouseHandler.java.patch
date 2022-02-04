@@ -14,15 +14,15 @@
      private boolean mouseGrabbed;
 +    private boolean butts = true;
  
-     public MouseHandler(Minecraft p_91522_)
+     public MouseHandler(Minecraft pMinecraft)
      {
-         this.minecraft = p_91522_;
+         this.minecraft = pMinecraft;
      }
  
--    private void onPress(long pHandle, int p_91532_, int pButton, int pAction)
-+    public void onPress(long pHandle, int p_91532_, int pButton, int pAction)
+-    private void onPress(long pWindowPointer, int p_91532_, int pButton, int pAction)
++    public void onPress(long pWindowPointer, int p_91532_, int pButton, int pAction)
      {
-         if (pHandle == this.minecraft.getWindow().getWindow())
+         if (pWindowPointer == this.minecraft.getWindow().getWindow())
          {
 @@ -82,6 +84,11 @@
                  this.activeButton = -1;
@@ -106,10 +106,10 @@
          }
      }
  
--    private void onScroll(long pHandle, double p_91528_, double pXoffset)
-+    public void onScroll(long pHandle, double p_91528_, double pXoffset)
+-    private void onScroll(long pWindowPointer, double p_91528_, double pXOffset)
++    public void onScroll(long pWindowPointer, double p_91528_, double pXOffset)
      {
-         if (pHandle == Minecraft.getInstance().getWindow().getWindow())
+         if (pWindowPointer == Minecraft.getInstance().getWindow().getWindow())
          {
 @@ -161,6 +202,19 @@
                  {
@@ -143,55 +143,14 @@
                      if (this.minecraft.player.isSpectator())
                      {
                          if (this.minecraft.gui.getSpectatorGui().isMenuActive())
-@@ -212,37 +271,37 @@
- 
-     public void setup(long pHandle)
-     {
--        InputConstants.setupMouseCallbacks(pHandle, (p_91591_, p_91592_, p_91593_) ->
-+        InputConstants.setupMouseCallbacks(pHandle, (handle1, xPos, yPos) ->
-         {
-             this.minecraft.execute(() -> {
--                this.onMove(p_91591_, p_91592_, p_91593_);
-+                this.onMove(handle1, xPos, yPos);
-             });
--        }, (p_91566_, p_91567_, p_91568_, p_91569_) ->
-+        }, (handle1, button, action, modifiers) ->
-         {
-             this.minecraft.execute(() -> {
--                this.onPress(p_91566_, p_91567_, p_91568_, p_91569_);
-+                this.onPress(handle1, button, action, modifiers);
-             });
--        }, (p_91576_, p_91577_, p_91578_) ->
-+        }, (handle1, xOffset, yOffset) ->
-         {
-             this.minecraft.execute(() -> {
--                this.onScroll(p_91576_, p_91577_, p_91578_);
-+                this.onScroll(handle1, xOffset, yOffset);
-             });
--        }, (p_91536_, p_91537_, p_91538_) ->
-+        }, (window, callbackCount, names) ->
-         {
--            Path[] apath = new Path[p_91537_];
-+            Path[] apath = new Path[callbackCount];
- 
--            for (int i = 0; i < p_91537_; ++i)
-+            for (int i = 0; i < callbackCount; ++i)
-             {
--                apath[i] = Paths.get(GLFWDropCallback.getName(p_91538_, i));
-+                apath[i] = Paths.get(GLFWDropCallback.getName(names, i));
-             }
- 
-             this.minecraft.execute(() -> {
--                this.onDrop(p_91536_, Arrays.asList(apath));
-+                this.onDrop(window, Arrays.asList(apath));
-             });
+@@ -242,7 +301,7 @@
          });
      }
  
--    private void onMove(long pHandle, double p_91563_, double pXpos)
-+    public void onMove(long pHandle, double p_91563_, double pXpos)
+-    private void onMove(long pWindowPointer, double p_91563_, double pXpos)
++    public void onMove(long pWindowPointer, double p_91563_, double pXpos)
      {
-         if (pHandle == Minecraft.getInstance().getWindow().getWindow())
+         if (pWindowPointer == Minecraft.getInstance().getWindow().getWindow())
          {
 @@ -270,7 +329,13 @@
                      double d3 = (pXpos - this.ypos) * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight();

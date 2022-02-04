@@ -11,12 +11,12 @@ public class GuiMenuWorldSettings extends GuiVROptionsBase
     private VROptionEntry[] miscSettings = new VROptionEntry[] {
             new VROptionEntry(VRSettings.VrOptions.MENU_WORLD_SELECTION),
             new VROptionEntry("vivecraft.gui.menuworld.refresh", (button, mousePos) -> {
-                if (this.dataholder.menuWorldRenderer.getWorld() != null)
+                if (this.dataHolder.menuWorldRenderer.getWorld() != null)
                 {
                     try
                     {
-                        this.dataholder.menuWorldRenderer.destroy();
-                        this.dataholder.menuWorldRenderer.prepare();
+                        this.dataHolder.menuWorldRenderer.destroy();
+                        this.dataHolder.menuWorldRenderer.prepare();
                     }
                     catch (Exception exception)
                     {
@@ -28,12 +28,12 @@ public class GuiMenuWorldSettings extends GuiVROptionsBase
             }),
             new VROptionEntry(VRSettings.VrOptions.DUMMY), new VROptionEntry("vivecraft.gui.menuworld.loadnew", (button, mousePos) -> {
                 try {
-                    if (this.dataholder.menuWorldRenderer.isReady())
+                    if (this.dataHolder.menuWorldRenderer.isReady())
                     {
-                        this.dataholder.menuWorldRenderer.destroy();
+                        this.dataHolder.menuWorldRenderer.destroy();
                     }
 
-                    this.dataholder.menuWorldRenderer.init();
+                    this.dataHolder.menuWorldRenderer.init();
                 }
                 catch (Exception exception)
                 {

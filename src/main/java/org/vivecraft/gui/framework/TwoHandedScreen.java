@@ -14,6 +14,7 @@ import net.minecraft.network.chat.TextComponent;
 
 public abstract class TwoHandedScreen extends Screen
 {
+	public DataHolder dataHolder = DataHolder.getInstance();
     public float cursorX1;
     public float cursorY1;
     public float cursorX2;
@@ -21,11 +22,11 @@ public abstract class TwoHandedScreen extends Screen
     private AbstractWidget lastHoveredButtonId1 = null;
     private AbstractWidget lastHoveredButtonId2 = null;
     protected boolean reinit;
-    public DataHolder dataholder = DataHolder.getInstance();
 
     protected TwoHandedScreen()
     {
         super(new TextComponent(""));
+        this.dataHolder = DataHolder.getInstance();
     }
 
     public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)
@@ -102,7 +103,7 @@ public abstract class TwoHandedScreen extends Screen
             this.lastHoveredButtonId2 = abstractwidget1;
         }
 
-        ((GuiExtension)this.minecraft.gui).drawMouseMenuQuad((int)d0, (int)d1);
-        ((GuiExtension)this.minecraft.gui).drawMouseMenuQuad((int)d2, (int)d3);
+        ((GuiExtension) this.minecraft.gui).drawMouseMenuQuad((int)d0, (int)d1);
+        ((GuiExtension) this.minecraft.gui).drawMouseMenuQuad((int)d2, (int)d3);
     }
 }

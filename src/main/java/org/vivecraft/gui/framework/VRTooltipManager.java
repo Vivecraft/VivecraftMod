@@ -1,18 +1,19 @@
-//TODO
+// TODO OPTIFINE
 //package org.vivecraft.gui.framework;
 //
-//import com.mojang.blaze3d.vertex.PoseStack;
 //import java.awt.Rectangle;
 //import java.util.Arrays;
 //import java.util.List;
+//
+//import com.mojang.blaze3d.vertex.PoseStack;
+//
 //import net.minecraft.client.Minecraft;
 //import net.minecraft.client.gui.Font;
 //import net.minecraft.client.gui.GuiComponent;
 //import net.minecraft.client.gui.components.AbstractWidget;
-//import net.minecraft.client.gui.components.Widget;
 //import net.minecraft.client.gui.screens.Screen;
-//import net.optifine.gui.GuiScreenOF;
-//import net.optifine.gui.TooltipProvider;
+////import net.optifine.gui.GuiScreenOF;
+////import net.optifine.gui.TooltipProvider;
 //
 //public class VRTooltipManager
 //{

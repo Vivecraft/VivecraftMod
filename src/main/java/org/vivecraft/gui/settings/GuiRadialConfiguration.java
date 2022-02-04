@@ -1,6 +1,5 @@
 package org.vivecraft.gui.settings;
 
-//import net.optifine.Lang;
 import org.apache.commons.lang3.ArrayUtils;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.gui.framework.VROptionLayout;
@@ -48,14 +47,14 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
 
         if (!this.isShift)
         {
-            this.dataholder.vrSettings.vrRadialItems = ArrayUtils.clone(this.arr);
+            this.dataHolder.vrSettings.vrRadialItems = ArrayUtils.clone(this.arr);
         }
         else
         {
-            this.dataholder.vrSettings.vrRadialItemsAlt = ArrayUtils.clone(this.arr);
+            this.dataHolder.vrSettings.vrRadialItemsAlt = ArrayUtils.clone(this.arr);
         }
 
-        this.dataholder.vrSettings.saveOptions();
+        this.dataHolder.vrSettings.saveOptions();
     }
 
     public void init()
@@ -103,8 +102,8 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
             int l = 48;
             int i1 = this.width / 2;
             int j1 = this.height / 2;
-            this.arr = ArrayUtils.clone(this.dataholder.vrSettings.vrRadialItems);
-            String[] astring = ArrayUtils.clone(this.dataholder.vrSettings.vrRadialItemsAlt);
+            this.arr = ArrayUtils.clone(this.dataHolder.vrSettings.vrRadialItems);
+            String[] astring = ArrayUtils.clone(this.dataHolder.vrSettings.vrRadialItemsAlt);
 
             if (this.isShift)
             {
@@ -216,14 +215,12 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
 
         if (this.visibleList == null)
         {
-            //drawCenteredString(pMatrixStack, this.minecraft.font, Lang.get("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925); TODO
-        	drawCenteredString(pMatrixStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925);
+            drawCenteredString(pMatrixStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925); //TODO Optifne
         }
 
         if (this.isShift)
         {
-            //drawCenteredString(pMatrixStack, this.minecraft.font, Lang.get("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015); TODO
-        	drawCenteredString(pMatrixStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015);
+            drawCenteredString(pMatrixStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015); //TODO Optifne
         }
     }
 }

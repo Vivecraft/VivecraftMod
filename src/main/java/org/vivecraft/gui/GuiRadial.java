@@ -18,8 +18,8 @@ public class GuiRadial extends TwoHandedScreen
 
     public void init()
     {
-        this.arr = this.dataholder.vrSettings.vrRadialItems;
-        String[] astring = this.dataholder.vrSettings.vrRadialItemsAlt;
+        this.arr = this.dataHolder.vrSettings.vrRadialItems;
+        String[] astring = this.dataHolder.vrSettings.vrRadialItemsAlt;
         this.clearWidgets();
         int i = 8;
         int j = 120;

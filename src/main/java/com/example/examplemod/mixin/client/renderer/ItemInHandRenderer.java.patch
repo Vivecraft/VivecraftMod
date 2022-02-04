@@ -72,10 +72,10 @@
 +    public VRFirstPersonArmSwing swingType = VRFirstPersonArmSwing.Attack;
 +    public float xdist = 0.0F;
  
-     public ItemInHandRenderer(Minecraft p_109310_)
+     public ItemInHandRenderer(Minecraft pMinecraft)
      {
 @@ -123,6 +158,7 @@
-         this.itemRenderer = p_109310_.getItemRenderer();
+         this.itemRenderer = pMinecraft.getItemRenderer();
      }
  
 +    
@@ -208,7 +208,7 @@
      {
          int i = pHand == HumanoidArm.RIGHT ? 1 : -1;
 @@ -388,188 +483,481 @@
-         return p_172913_.is(Items.CROSSBOW) && CrossbowItem.isCharged(p_172913_);
+         return pStack.is(Items.CROSSBOW) && CrossbowItem.isCharged(pStack);
      }
  
 -    private void renderArmWithItem(AbstractClientPlayer pPlayer, float pPartialTicks, float pPitch, InteractionHand pHand, float pSwingProgress, ItemStack pStack, float pEquippedProgress, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight)
@@ -821,7 +821,7 @@
      }
  
 @@ -679,4 +1067,41 @@
-             return p_172932_ == InteractionHand.MAIN_HAND ? RENDER_MAIN_HAND_ONLY : RENDER_OFF_HAND_ONLY;
+             return pHand == InteractionHand.MAIN_HAND ? RENDER_MAIN_HAND_ONLY : RENDER_OFF_HAND_ONLY;
          }
      }
 +

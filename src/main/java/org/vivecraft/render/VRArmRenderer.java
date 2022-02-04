@@ -57,8 +57,6 @@ public class VRArmRenderer extends PlayerRenderer
         GL43.glTexEnvi(8960, 8704, 8448);
         GL43.glTexEnvi(8960, 34163, 1);
         GlStateManager._disableBlend();
-        //GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        
+        RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 }

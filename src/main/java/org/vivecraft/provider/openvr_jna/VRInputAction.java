@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-//import net.optifine.reflect.Reflector;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.provider.HandedKeyBinding;
 import org.vivecraft.provider.InputSimulator;
@@ -549,8 +548,7 @@ public class VRInputAction
     {
         InputConstants.Key inputconstants$key = (InputConstants.Key)MCReflection.KeyBinding_keyCode.get(this.keyBinding);
 
-//        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding) && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE))) TODO
-        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding))
+        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE))) TODO
         {
             if (inputconstants$key.getType() == InputConstants.Type.KEYSYM)
             {
@@ -572,8 +570,7 @@ public class VRInputAction
     {
         InputConstants.Key inputconstants$key = (InputConstants.Key)MCReflection.KeyBinding_keyCode.get(this.keyBinding);
 
-//        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding) && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE))) TODO
-        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding))
+        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE))) TODO
         {
             if (inputconstants$key.getType() == InputConstants.Type.KEYSYM)
             {

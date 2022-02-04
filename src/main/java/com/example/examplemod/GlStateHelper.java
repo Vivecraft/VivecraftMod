@@ -11,4 +11,14 @@ public class GlStateHelper {
 		GlStateManager._clear(i, false);
 	}
 
+	public static void alphaFunc(int i, float f) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public static void disableAlphaTest() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -270,37 +270,39 @@ public class MenuWorldExporter {
 	}
 
 	private static class BlockStateMapper {
-		CrudeIncrementalIntIdentityHashBiMap<BlockState> paletteMap = new CrudeIncrementalIntIdentityHashBiMap<>(256);
+		//CrudeIncrementalIntIdentityHashBiMap<BlockState> paletteMap = new CrudeIncrementalIntIdentityHashBiMap<BlockState>(256);
 
 		private BlockStateMapper() {
 		}
 
 		int getId(BlockState state) {
-			int id = this.paletteMap.getId(state);
-			return id == -1 ? this.paletteMap.add(state) : id;
+			return 0;
+//			int id = this.paletteMap.getId(state);
+//			return id == -1 ? this.paletteMap.add(state) : id;
 		}
 
 		BlockState getState(int id) {
-			return this.paletteMap.byId(id);
+			return null;
+//			return this.paletteMap.byId(id);
 		}
 
 		void readPalette(DataInputStream dis) throws IOException {
-			this.paletteMap.clear();
-			int size = dis.readInt();
-
-			for (int i = 0; i < size; i++) {
-				CompoundTag compoundtag = CompoundTag.TYPE.load(dis, 0, NbtAccounter.UNLIMITED);
-				this.paletteMap.add(NbtUtils.readBlockState(compoundtag));
-			}
+//			this.paletteMap.clear();
+//			int size = dis.readInt();
+//
+//			for (int i = 0; i < size; i++) {
+//				CompoundTag compoundtag = CompoundTag.TYPE.load(dis, 0, NbtAccounter.UNLIMITED);
+//				this.paletteMap.add(NbtUtils.readBlockState(compoundtag));
+//			}
 		}
 
 		void writePalette(DataOutputStream dos) throws IOException {
-			dos.writeInt(this.paletteMap.size());
-
-			for (int i = 0; i < this.paletteMap.size(); i++) {
-				CompoundTag compoundtag = NbtUtils.writeBlockState(this.paletteMap.byId(i));
-				compoundtag.write(dos);
-			}
+//			dos.writeInt(this.paletteMap.size());
+//
+//			for (int i = 0; i < this.paletteMap.size(); i++) {
+//				CompoundTag compoundtag = NbtUtils.writeBlockState(this.paletteMap.byId(i));
+//				compoundtag.write(dos);
+//			}
 		}
 	}
 }

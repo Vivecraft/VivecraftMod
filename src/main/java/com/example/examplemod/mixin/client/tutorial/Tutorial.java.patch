@@ -8,7 +8,7 @@
 +        this.instance = TutorialSteps.NONE.create(this);
      }
  
-     public void addTimedToast(TutorialToast p_120573_, int p_120574_)
+     public void addTimedToast(TutorialToast pToast, int pDurationTicks)
 @@ -147,7 +147,7 @@
          }
      }

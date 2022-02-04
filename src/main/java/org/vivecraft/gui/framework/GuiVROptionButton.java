@@ -8,7 +8,7 @@ import com.example.examplemod.DataHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class GuiVROptionButton extends Button
 {
@@ -28,13 +28,13 @@ public class GuiVROptionButton extends Button
 
     public GuiVROptionButton(int id, int x, int y, int width, int height, @Nullable VRSettings.VrOptions option, String text, Button.OnPress action)
     {
-        super(x, y, width, height, new TextComponent(text), action);
+        super(x, y, width, height, new TranslatableComponent(text), action);
         this.id = id;
         this.enumOptions = option;
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        DataHolder dataHolder = DataHolder.getInstance();
 
-        if (option != null && dataholder.vrSettings.overrides.hasSetting(option) && dataholder.vrSettings.overrides.getSetting(option).isValueOverridden())
+        if (option != null && dataHolder.vrSettings.overrides.hasSetting(option) && dataHolder.vrSettings.overrides.getSetting(option).isValueOverridden())
         {
             this.active = false;
         }

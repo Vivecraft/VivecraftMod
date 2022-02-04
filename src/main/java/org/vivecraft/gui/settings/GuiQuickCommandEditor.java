@@ -25,7 +25,7 @@ public class GuiQuickCommandEditor extends GuiVROptionsBase
     protected void loadDefaults()
     {
         super.loadDefaults();
-        this.dataholder.vrSettings.vrQuickCommands = this.dataholder.vrSettings.getQuickCommandsDefaults();
+        this.dataHolder.vrSettings.vrQuickCommands = this.dataHolder.vrSettings.getQuickCommandsDefaults();
     }
 
     protected boolean onDoneClicked()
@@ -33,7 +33,7 @@ public class GuiQuickCommandEditor extends GuiVROptionsBase
         for (int i = 0; i < 12; ++i)
         {
             String s = (this.guiList.children().get(i)).txt.getValue();
-            this.dataholder.vrSettings.vrQuickCommands[i] = s;
+            this.dataHolder.vrSettings.vrQuickCommands[i] = s;
         }
 
         return super.onDoneClicked();

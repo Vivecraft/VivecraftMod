@@ -11,12 +11,11 @@
  
  public class SoundOptionsScreen extends OptionsSubScreen
  {
-@@ -30,7 +32,15 @@
-                 ++i;
+@@ -32,7 +34,13 @@
+                 ++k;
              }
          }
 -
-+        
 +        this.addRenderableWidget(new Button(this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150, 20, new TextComponent(this.minecraft.vrSettings.getButtonDisplayString(VRSettings.VrOptions.HRTF_SELECTION)), (p_213104_1_) ->
 +        {
 +        	this.clearWidgets();
@@ -24,7 +23,6 @@
 +        	this.minecraft.vrSettings.saveOptions();
 +        	this.init();
 +        }));
-+        
-         int j = this.width / 2 - 75;
-         int k = this.height / 6 - 12;
-         ++i;
+         if (k % 2 == 1)
+         {
+             ++k;

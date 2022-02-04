@@ -14,8 +14,8 @@ public class GuiKeyboard extends TwoHandedScreen
 
     public void init()
     {
-        String s = this.dataholder.vrSettings.keyboardKeys;
-        String s1 = this.dataholder.vrSettings.keyboardKeysShift;
+        String s = this.dataHolder.vrSettings.keyboardKeys;
+        String s1 = this.dataHolder.vrSettings.keyboardKeysShift;
         this.clearWidgets();
 
         if (this.isShift)

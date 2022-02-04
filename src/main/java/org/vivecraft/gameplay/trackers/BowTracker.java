@@ -207,15 +207,15 @@ public class BowTracker extends Tracker
 
                 if (!this.isDrawing)
                 {
-                    ((PlayerExtension)player).setItemInUseClient(itemstack1, interactionhand);
-                    ((PlayerExtension)player).setItemInUseCountClient(i);
+                    ((PlayerExtension) player).setItemInUseClient(itemstack1, interactionhand);
+                    ((PlayerExtension) player).setItemInUseCountClient(i);
                     //Minecraft.getInstance().physicalGuiManager.preClickAction();
                 }
             }
             else if ((float)Util.getMillis() - this.tsNotch > 500.0F)
             {
                 this.canDraw = false;
-                ((PlayerExtension)player).setItemInUseClient(ItemStack.EMPTY, interactionhand);
+                ((PlayerExtension) player).setItemInUseClient(ItemStack.EMPTY, interactionhand);
             }
 
             if (!this.isDrawing && this.canDraw && this.pressed && !this.lastpressed)
@@ -265,20 +265,20 @@ public class BowTracker extends Tracker
                 }
 
                 int l = (int)((float)itemstack1.getUseDuration() - this.getDrawPercent() * (float)this.maxDrawMillis);
-                ((PlayerExtension)player).setItemInUseClient(itemstack1, interactionhand);
+                ((PlayerExtension) player).setItemInUseClient(itemstack1, interactionhand);
                 double d1 = (double)this.getDrawPercent();
 
                 if (d1 >= 1.0D)
                 {
-                	((PlayerExtension)player).setItemInUseCountClient(k);
+                    ((PlayerExtension) player).setItemInUseCountClient(k);
                 }
                 else if (d1 > 0.4D)
                 {
-                	((PlayerExtension)player).setItemInUseCountClient(j);
+                    ((PlayerExtension) player).setItemInUseCountClient(j);
                 }
                 else
                 {
-                	((PlayerExtension)player).setItemInUseCountClient(i);
+                    ((PlayerExtension) player).setItemInUseCountClient(i);
                 }
 
                 int i1 = (int)(d1 * 4.0D * 4.0D * 3.0D);

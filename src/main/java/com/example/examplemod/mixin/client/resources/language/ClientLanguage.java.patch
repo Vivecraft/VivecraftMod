@@ -8,25 +8,16 @@
  
  public class ClientLanguage extends Language
  {
-@@ -46,13 +47,16 @@
+@@ -46,6 +47,9 @@
                      ResourceLocation resourcelocation = new ResourceLocation(s1, s);
-                     appendFrom(p_118917_.getResources(resourcelocation), map);
-                     Lang.loadResources(p_118917_, languageinfo.getCode(), map);
+                     appendFrom(pResourceManager.getResources(resourcelocation), map);
+                     Lang.loadResources(pResourceManager, languageinfo.getCode(), map);
 +                    //Vivecraft
 +                    LangHelper.loadLocaleData(languageinfo.getCode(), map);
 +                    //
                  }
                  catch (FileNotFoundException filenotfoundexception)
                  {
-                 }
--                catch (Exception exception1)
-+                catch (Exception exception)
-                 {
--                    LOGGER.warn("Skipped language file: {}:{} ({})", s1, s, exception1.toString());
-+                    LOGGER.warn("Skipped language file: {}:{} ({})", s1, s, exception.toString());
-                 }
-             }
-         }
 @@ -94,9 +98,9 @@
                      inputstream.close();
                  }

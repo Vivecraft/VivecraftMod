@@ -16,21 +16,22 @@
  
  public class InputConstants
  {
-@@ -185,7 +187,12 @@
+@@ -185,9 +187,12 @@
  
-     public static boolean isKeyDown(long p_84831_, int p_84832_)
+     public static boolean isKeyDown(long pWindow, int p_84832_)
      {
--        return GLFW.glfwGetKey(p_84831_, p_84832_) == 1;
-+        return GLFW.glfwGetKey(p_84831_, p_84832_) == 1 || InputSimulator.isKeyDown(p_84832_);
+-        return GLFW.glfwGetKey(pWindow, p_84832_) == 1;
++        return GLFW.glfwGetKey(pWindow, p_84832_) == 1 || InputSimulator.isKeyDown(p_84832_);
 +    }
-+
 +    public static boolean isKeyDown(int p_216506_2_)
 +    {
 +        return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), p_216506_2_) == 1 || InputSimulator.isKeyDown(p_216506_2_);
      }
- 
-     public static void setupKeyboardCallbacks(long p_84845_, GLFWKeyCallbackI p_84846_, GLFWCharModsCallbackI p_84847_)
-@@ -239,14 +246,14 @@
+-
+     public static void setupKeyboardCallbacks(long pWindow, GLFWKeyCallbackI p_84846_, GLFWCharModsCallbackI pKeyCallback)
+     {
+         GLFW.glfwSetKeyCallback(pWindow, p_84846_);
+@@ -239,14 +244,14 @@
          {
              methodhandle = lookup.findStatic(GLFW.class, "glfwRawMouseMotionSupported", methodtype);
              MethodHandle methodhandle1 = lookup.findStaticGetter(GLFW.class, "GLFW_RAW_MOUSE_MOTION", Integer.TYPE);
@@ -49,7 +50,7 @@
          }
  
          GLFW_RAW_MOUSE_MOTION_SUPPORTED = methodhandle;
-@@ -336,16 +343,16 @@
+@@ -336,16 +341,16 @@
  
      public static enum Type
      {
@@ -74,7 +75,7 @@
          });
  
          private final Int2ObjectMap<InputConstants.Key> map = new Int2ObjectOpenHashMap<>();
-@@ -366,17 +373,17 @@
+@@ -366,17 +371,17 @@
  
          public InputConstants.Key getOrCreate(int pKeyCode)
          {

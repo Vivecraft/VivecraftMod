@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/culling/Frustum.java
 +++ b/net/minecraft/client/renderer/culling/Frustum.java
-@@ -135,13 +135,13 @@
+@@ -231,13 +231,13 @@
  
  	@Override
  	public void setCameraPosition(double var1, double var3, double var5) {

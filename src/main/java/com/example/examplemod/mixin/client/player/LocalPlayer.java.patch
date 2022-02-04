@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/player/LocalPlayer.java
 +++ b/net/minecraft/client/player/LocalPlayer.java
-@@ -1,10 +1,23 @@
+@@ -1,12 +1,24 @@
  package net.minecraft.client.player;
  
  import com.google.common.collect.Lists;
@@ -9,8 +9,9 @@
 +import java.util.HashMap;
  import java.util.Iterator;
  import java.util.List;
+ import java.util.Objects;
  import java.util.UUID;
-+
+ import java.util.stream.StreamSupport;
  import javax.annotation.Nullable;
 +
 +import org.apache.commons.lang3.tuple.Pair;
@@ -24,7 +25,7 @@
  import net.minecraft.client.ClientRecipeBook;
  import net.minecraft.client.Minecraft;
  import net.minecraft.client.gui.screens.DeathScreen;
-@@ -16,6 +29,7 @@
+@@ -18,6 +30,7 @@
  import net.minecraft.client.gui.screens.inventory.MinecartCommandBlockEditScreen;
  import net.minecraft.client.gui.screens.inventory.SignEditScreen;
  import net.minecraft.client.gui.screens.inventory.StructureBlockEditScreen;
@@ -32,7 +33,7 @@
  import net.minecraft.client.multiplayer.ClientLevel;
  import net.minecraft.client.multiplayer.ClientPacketListener;
  import net.minecraft.client.resources.sounds.AmbientSoundHandler;
-@@ -28,11 +42,13 @@
+@@ -30,11 +43,13 @@
  import net.minecraft.client.resources.sounds.UnderwaterAmbientSoundInstances;
  import net.minecraft.core.BlockPos;
  import net.minecraft.core.Direction;
@@ -46,7 +47,7 @@
  import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
  import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
  import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
-@@ -65,8 +81,13 @@
+@@ -67,8 +82,13 @@
  import net.minecraft.world.item.ElytraItem;
  import net.minecraft.world.item.ItemStack;
  import net.minecraft.world.item.Items;
@@ -60,7 +61,7 @@
  import net.minecraft.world.level.block.entity.CommandBlockEntity;
  import net.minecraft.world.level.block.entity.JigsawBlockEntity;
  import net.minecraft.world.level.block.entity.SignBlockEntity;
-@@ -77,6 +98,7 @@
+@@ -79,6 +99,7 @@
  import net.minecraft.world.phys.Vec3;
  import net.minecraft.world.phys.shapes.CollisionContext;
  import net.minecraft.world.phys.shapes.VoxelShape;
@@ -68,7 +69,7 @@
  
  public class LocalPlayer extends AbstractClientPlayer
  {
-@@ -105,6 +127,13 @@
+@@ -109,6 +130,13 @@
      public Input input;
      protected final Minecraft minecraft;
      protected int sprintTriggerTime;
@@ -82,7 +83,7 @@
      public int sprintTime;
      public float yBob;
      public float xBob;
-@@ -122,6 +151,10 @@
+@@ -127,6 +155,10 @@
      private boolean wasFallFlying;
      private int waterVisionTime;
      private boolean showDeathScreen = true;
@@ -91,10 +92,10 @@
 +    public String lastMsg = null;
 +    private Vec3 moveMulIn;
  
-     public LocalPlayer(Minecraft p_108621_, ClientLevel p_108622_, ClientPacketListener p_108623_, StatsCounter p_108624_, ClientRecipeBook p_108625_, boolean p_108626_, boolean p_108627_)
+     public LocalPlayer(Minecraft pMinecraft, ClientLevel pClientLevel, ClientPacketListener pConnection, StatsCounter pStats, ClientRecipeBook pRecipeBook, boolean pWasShiftKeyDown, boolean pWasSprinting)
      {
-@@ -137,6 +170,102 @@
-         this.ambientSoundHandlers.add(new BiomeAmbientSoundsHandler(this, p_108621_.getSoundManager(), p_108622_.getBiomeManager()));
+@@ -142,6 +174,102 @@
+         this.ambientSoundHandlers.add(new BiomeAmbientSoundsHandler(this, pMinecraft.getSoundManager(), pClientLevel.getBiomeManager()));
      }
  
 +    public void setItemInUseClient(ItemStack item, InteractionHand hand)
@@ -196,7 +197,7 @@
      public boolean hurt(DamageSource pSource, float pAmount)
      {
          return false;
-@@ -167,6 +296,8 @@
+@@ -172,6 +300,8 @@
                  this.setYHeadRot(pEntity.getYRot());
              }
  
@@ -205,15 +206,15 @@
              return true;
          }
      }
-@@ -175,6 +306,7 @@
+@@ -180,6 +310,7 @@
      {
          super.removeVehicle();
          this.handsBusy = false;
 +        this.minecraft.vehicleTracker.onStopRiding(this);
      }
  
-     public float getViewXRot(float pPartialTicks)
-@@ -192,6 +324,8 @@
+     public float getViewXRot(float pPartialTick)
+@@ -197,6 +328,8 @@
          if (this.level.hasChunkAt(this.getBlockX(), this.getBlockZ()))
          {
              super.tick();
@@ -222,7 +223,7 @@
  
              if (this.isPassenger())
              {
-@@ -260,7 +394,20 @@
+@@ -265,7 +398,20 @@
              boolean flag1 = d4 * d4 + d0 * d0 + d1 * d1 > 9.0E-4D || this.positionReminder >= 20;
              boolean flag2 = d2 != 0.0D || d3 != 0.0D;
  
@@ -244,7 +245,7 @@
              {
                  Vec3 vec3 = this.getDeltaMovement();
                  this.connection.send(new ServerboundMovePlayerPacket.PosRot(vec3.x, -999.0D, vec3.z, this.getYRot(), this.getXRot(), this.onGround));
-@@ -298,6 +445,12 @@
+@@ -303,6 +449,12 @@
              }
  
              this.lastOnGround = this.onGround;
@@ -257,7 +258,7 @@
              this.autoJumpEnabled = this.minecraft.options.autoJump;
          }
      }
-@@ -313,10 +466,29 @@
+@@ -318,10 +470,29 @@
      public void chat(String pMessage)
      {
          this.connection.send(new ServerboundChatPacket(pMessage));
@@ -287,7 +288,7 @@
          super.swing(pHand);
          this.connection.send(new ServerboundSwingPacket(pHand));
      }
-@@ -555,7 +727,23 @@
+@@ -558,7 +729,23 @@
  
      public void playSound(SoundEvent pSound, float pVolume, float pPitch)
      {
@@ -312,7 +313,7 @@
      }
  
      public void playNotifySound(SoundEvent p_108655_, SoundSource p_108656_, float p_108657_, float p_108658_)
-@@ -750,6 +938,7 @@
+@@ -753,6 +940,7 @@
          boolean flag2 = this.hasEnoughImpulseToStartSprinting();
          this.crouching = !this.getAbilities().flying && !this.isSwimming() && this.canEnterPose(Pose.CROUCHING) && (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
          this.input.tick(this.isMovingSlowly());
@@ -320,7 +321,7 @@
          this.minecraft.getTutorial().onInput(this.input);
  
          if (this.isUsingItem() && !this.isPassenger())
-@@ -818,7 +1007,7 @@
+@@ -821,7 +1009,7 @@
              }
          }
  
@@ -329,7 +330,7 @@
  
          if (this.getAbilities().mayfly)
          {
-@@ -827,7 +1016,7 @@
+@@ -830,7 +1018,7 @@
                  if (!this.getAbilities().flying)
                  {
                      this.getAbilities().flying = true;
@@ -338,7 +339,7 @@
                      this.onUpdateAbilities();
                  }
              }
-@@ -840,21 +1029,28 @@
+@@ -843,21 +1031,28 @@
                  else if (!this.isSwimming())
                  {
                      this.getAbilities().flying = !this.getAbilities().flying;
@@ -372,7 +373,7 @@
          }
  
          this.wasFallFlying = this.isFallFlying();
-@@ -940,6 +1136,7 @@
+@@ -943,6 +1138,7 @@
          }
  
          super.aiStep();
@@ -380,7 +381,7 @@
  
          if (this.onGround && this.getAbilities().flying && !this.minecraft.gameMode.isAlwaysFlying())
          {
-@@ -1045,10 +1242,67 @@
+@@ -1048,10 +1244,67 @@
  
      public void move(MoverType pType, Vec3 pPos)
      {
@@ -452,7 +453,7 @@
      }
  
      public boolean isAutoJumpEnabled()
-@@ -1065,14 +1319,18 @@
+@@ -1068,14 +1321,18 @@
              Vec3 vec32 = new Vec3((double)pMovementX, 0.0D, (double)pMovementZ);
              float f = this.getSpeed();
              float f1 = (float)vec32.lengthSqr();
@@ -474,7 +475,7 @@
                  vec32 = new Vec3((double)(f2 * f5 - f3 * f4), vec32.y, (double)(f3 * f5 + f2 * f4));
                  f1 = (float)vec32.lengthSqr();
  
-@@ -1082,12 +1340,12 @@
+@@ -1085,12 +1342,12 @@
                  }
              }
  
@@ -491,7 +492,7 @@
              {
                  CollisionContext collisioncontext = CollisionContext.of(this);
                  BlockPos blockpos = new BlockPos(this.getX(), this.getBoundingBox().maxY, this.getZ());
-@@ -1108,7 +1366,7 @@
+@@ -1111,7 +1368,7 @@
                              f7 += (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.75F;
                          }
  
@@ -500,7 +501,7 @@
                          Vec3 vec34 = vec31.add(vec312.scale((double)f8));
                          float f9 = this.getBbWidth();
                          float f10 = this.getBbHeight();
-@@ -1136,11 +1394,11 @@
+@@ -1137,11 +1394,11 @@
  
                              if (aabb1.intersects(vec37, vec38) || aabb1.intersects(vec39, vec310))
                              {
@@ -514,7 +515,7 @@
                                  {
                                      BlockPos blockpos2 = blockpos1.above(i);
                                      BlockState blockstate2 = this.level.getBlockState(blockpos2);
-@@ -1148,9 +1406,9 @@
+@@ -1149,9 +1406,9 @@
  
                                      if (!(voxelshape = blockstate2.getCollisionShape(this.level, blockpos2, collisioncontext)).isEmpty())
                                      {
@@ -526,7 +527,7 @@
                                          {
                                              return;
                                          }
-@@ -1174,9 +1432,9 @@
+@@ -1175,9 +1432,9 @@
  
                          if (f11 != Float.MIN_VALUE)
                          {
@@ -538,7 +539,7 @@
                              {
                                  this.autoJumpTime = 1;
                              }
-@@ -1279,4 +1537,359 @@
+@@ -1302,4 +1559,359 @@
      {
          this.minecraft.getTutorial().onInventoryAction(p_172532_, p_172533_, p_172534_);
      }

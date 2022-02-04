@@ -6,30 +6,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.render.RenderPass;
-import org.vivecraft.settings.VRSettings;
 
 import com.example.examplemod.DataHolder;
-import com.example.examplemod.GameRendererExtension;
 import com.example.examplemod.RenderTargetExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.PostChain;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
@@ -73,7 +58,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	@Shadow
 	private RenderTarget entityTarget;
 	@Shadow
-	private boolean needsUpdate;
+	private boolean needsFullRenderChunkUpdate;
 	
 	public int rainX() {
 		return 0;
@@ -96,48 +81,48 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		
 	}
 	
-	@Inject(at = @At(value = "FIELD", target = "needsUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
-	public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, int i, boolean bl2, CallbackInfo info) {
-		this.needsUpdate = true;
-	}
-
-	public void lightupdate() {
-		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
-			this.level.getProfiler().popPush("light_updates");
-			this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, true, true);
-		}
-		this.setShaderGroup();
-	}
-	
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE), 
-			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V ")
-	public void stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
-		this.minecraft.getProfiler().popPush("stencil");
-		//TODO shader
-		((GameRendererExtension) gameRenderer).drawEyeStencil(false);
-	}
-	
-	//TODO fixed in vivecraft?
-	public void lighting() {
-		Matrix4f matrix4f1 = new Matrix4f();
-		matrix4f1.setIdentity();
-	}
-	
-	
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
-	public boolean drawSelf(Camera camera) {
-		boolean renderSelf = DataHolder.getInstance().currentPass == RenderPass.THIRD && DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || DataHolder.getInstance().currentPass == RenderPass.CAMERA;
-		renderSelf = renderSelf | (DataHolder.getInstance().vrSettings.shouldRenderSelf || DataHolder.getInstance().vrSettings.tmpRenderSelf);
-		return camera.isDetached() || renderSelf;
-	}
-	
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", shift = Shift.BEFORE, ordinal = 13), 
-			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
-	public void renderFast(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
-		boolean menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
-		boolean menuhandright = menuHandleft || DataHolder.getInstance().interactTracker.hotbar >= 0 && DataHolder.getInstance().vrSettings.vrTouchHotbar;
-		((GameRendererExtension) gameRenderer).renderVrFast(f, false, menuhandright, menuHandleft, poseStack);
-	}
+//	@Inject(at = @At(value = "FIELD", target = "needsUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
+//	public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, int i, boolean bl2, CallbackInfo info) {
+//		this.needsFullRenderChunkUpdate = true;
+//	}
+//
+//	public void lightupdate() {
+//		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+//			this.level.getProfiler().popPush("light_updates");
+//			this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, true, true);
+//		}
+//		this.setShaderGroup();
+//	}
+//	
+//	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE), 
+//			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V ")
+//	public void stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
+//		this.minecraft.getProfiler().popPush("stencil");
+//		//TODO shader
+//		((GameRendererExtension) gameRenderer).drawEyeStencil(false);
+//	}
+//	
+//	//TODO fixed in vivecraft?
+//	public void lighting() {
+//		Matrix4f matrix4f1 = new Matrix4f();
+//		matrix4f1.setIdentity();
+//	}
+//	
+//	
+//	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
+//	public boolean drawSelf(Camera camera) {
+//		boolean renderSelf = DataHolder.getInstance().currentPass == RenderPass.THIRD && DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || DataHolder.getInstance().currentPass == RenderPass.CAMERA;
+//		renderSelf = renderSelf | (DataHolder.getInstance().vrSettings.shouldRenderSelf || DataHolder.getInstance().vrSettings.tmpRenderSelf);
+//		return camera.isDetached() || renderSelf;
+//	}
+//	
+//	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", shift = Shift.BEFORE, ordinal = 13), 
+//			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
+//	public void renderFast(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
+//		boolean menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
+//		boolean menuhandright = menuHandleft || DataHolder.getInstance().interactTracker.hotbar >= 0 && DataHolder.getInstance().vrSettings.vrTouchHotbar;
+//		((GameRendererExtension) gameRenderer).renderVrFast(f, false, menuhandright, menuHandleft, poseStack);
+//	}
 	
 	public void setShaderGroup() {
 		this.transparencyChain = null;

@@ -19,15 +19,16 @@ public class VRCamera extends Camera
         this.level = pLevel;
         this.entity = pRenderViewEntity;
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
-        RenderPass renderpass = dataholder.currentPass;
+        DataHolder dataHolder = DataHolder.getInstance();
+        RenderPass renderpass = dataHolder.currentPass;
 
-//        if (Shaders.isShadowPass && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
-//        {
-//            renderpass = RenderPass.CENTER;
-//        }
+        //if (Shaders.isShadowPass && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
+        if (renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
+        {
+            renderpass = RenderPass.CENTER;
+        }
 
-        VRData.VRDevicePose eye = dataholder.vrPlayer.vrdata_world_render.getEye(renderpass);
+        VRData.VRDevicePose eye = dataHolder.vrPlayer.vrdata_world_render.getEye(renderpass);
         this.setPosition(eye.getPosition());
         this.xRot = -eye.getPitch();
         this.yRot = eye.getYaw();

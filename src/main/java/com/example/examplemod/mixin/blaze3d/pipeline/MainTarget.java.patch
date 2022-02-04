@@ -11,5 +11,5 @@
 +    public static final int DEFAULT_HEIGHT = 720;
 +    static final MainTarget.Dimension DEFAULT_DIMENSIONS = new MainTarget.Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
  
-     public MainTarget(int p_166137_, int p_166138_)
+     public MainTarget(int pWidth, int pHeight)
      {

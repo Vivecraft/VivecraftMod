@@ -1,6 +1,5 @@
 package org.vivecraft.gui.settings;
 
-//import net.optifine.Config;
 import org.vivecraft.gui.framework.GuiVROptionButton;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.settings.VRHotkeys;
@@ -63,12 +62,12 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         {
             VRSettings.VrOptions vrsettings$vroptions = avrsettings$vroptions[i];
 
-            if (vrsettings$vroptions == VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA && (!VRHotkeys.hasExternalCameraConfig() || this.dataholder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY && this.dataholder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.THIRD_PERSON))
+            if (vrsettings$vroptions == VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA && (!VRHotkeys.hasExternalCameraConfig() || this.dataHolder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY && this.dataHolder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.THIRD_PERSON))
             {
                 avrsettings$vroptions[i] = VRSettings.VrOptions.DUMMY;
             }
 
-            if (vrsettings$vroptions == VRSettings.VrOptions.MIRROR_EYE && this.dataholder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.CROPPED && this.dataholder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.SINGLE)
+            if (vrsettings$vroptions == VRSettings.VrOptions.MIRROR_EYE && this.dataHolder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.CROPPED && this.dataHolder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.SINGLE)
             {
                 avrsettings$vroptions[i] = VRSettings.VrOptions.DUMMY;
             }
@@ -76,7 +75,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
 
         super.init(avrsettings$vroptions, true);
 
-        if (this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY)
+        if (this.dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY)
         {
             avrsettings$vroptions = new VRSettings.VrOptions[MROptions.length];
             System.arraycopy(MROptions, 0, avrsettings$vroptions, 0, MROptions.length);
@@ -85,22 +84,22 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
             {
                 VRSettings.VrOptions vrsettings$vroptions1 = avrsettings$vroptions[j];
 
-                if (vrsettings$vroptions1 == VRSettings.VrOptions.MONO_FOV && (!this.dataholder.vrSettings.mixedRealityUndistorted || !this.dataholder.vrSettings.mixedRealityUnityLike))
+                if (vrsettings$vroptions1 == VRSettings.VrOptions.MONO_FOV && (!this.dataHolder.vrSettings.mixedRealityUndistorted || !this.dataHolder.vrSettings.mixedRealityUnityLike))
                 {
                     avrsettings$vroptions[j] = VRSettings.VrOptions.DUMMY;
                 }
 
-                if (vrsettings$vroptions1 == VRSettings.VrOptions.MIXED_REALITY_ALPHA_MASK && !this.dataholder.vrSettings.mixedRealityUnityLike)
+                if (vrsettings$vroptions1 == VRSettings.VrOptions.MIXED_REALITY_ALPHA_MASK && !this.dataHolder.vrSettings.mixedRealityUnityLike)
                 {
                     avrsettings$vroptions[j] = VRSettings.VrOptions.DUMMY;
                 }
 
-                if (vrsettings$vroptions1 == VRSettings.VrOptions.MIXED_REALITY_UNDISTORTED && !this.dataholder.vrSettings.mixedRealityUnityLike)
+                if (vrsettings$vroptions1 == VRSettings.VrOptions.MIXED_REALITY_UNDISTORTED && !this.dataHolder.vrSettings.mixedRealityUnityLike)
                 {
                     avrsettings$vroptions[j] = VRSettings.VrOptions.DUMMY;
                 }
 
-                if (vrsettings$vroptions1 == VRSettings.VrOptions.MIXED_REALITY_KEY_COLOR && this.dataholder.vrSettings.mixedRealityAlphaMask && this.dataholder.vrSettings.mixedRealityUnityLike)
+                if (vrsettings$vroptions1 == VRSettings.VrOptions.MIXED_REALITY_KEY_COLOR && this.dataHolder.vrSettings.mixedRealityAlphaMask && this.dataHolder.vrSettings.mixedRealityUnityLike)
                 {
                     avrsettings$vroptions[j] = VRSettings.VrOptions.DUMMY;
                 }
@@ -108,11 +107,11 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
 
             super.init(avrsettings$vroptions, false);
         }
-        else if (this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON)
+        else if (this.dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON)
         {
             super.init(UDOptions, false);
         }
-        else if (this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON)
+        else if (this.dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON)
         {
             super.init(TUDOptions, false);
         }
@@ -125,8 +124,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         {
             GuiVROptionButton guivroptionbutton = (GuiVROptionButton)w;
 
-            //if (guivroptionbutton.getOption() == VRSettings.VrOptions.HANDHELD_CAMERA_RENDER_SCALE && Config.isShaders()) TODO
-            if (guivroptionbutton.getOption() == VRSettings.VrOptions.HANDHELD_CAMERA_RENDER_SCALE && false)
+            if (guivroptionbutton.getOption() == VRSettings.VrOptions.HANDHELD_CAMERA_RENDER_SCALE && false) //&& Config.isShaders()) TODO Optifine
             {
                 guivroptionbutton.active = false;
             }
@@ -142,7 +140,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
     {
         super.loadDefaults();
         this.minecraft.options.fov = 70.0D;
-        this.dataholder.vrRenderer.reinitFrameBuffers("Defaults Loaded");
+        this.dataHolder.vrRenderer.reinitFrameBuffers("Defaults Loaded");
     }
 
     protected void actionPerformed(AbstractWidget widget)
@@ -153,7 +151,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
 
             if (guivroptionbutton.id == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroptionbutton.id == VRSettings.VrOptions.FSAA.ordinal())
             {
-                this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
+                this.dataHolder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
             }
             if (guivroptionbutton.id == VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA.ordinal())
             {
@@ -168,7 +166,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         {
             this.prevRenderScaleFactor = this.settings.renderScaleFactor;
             this.prevHandCameraResScale = this.settings.handCameraResScale;
-            this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
+            this.dataHolder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
         }
 
         return super.mouseReleased(pMouseX, p_94754_, pMouseY);

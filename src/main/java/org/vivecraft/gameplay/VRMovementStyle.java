@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class VRMovementStyle
 {
+	public DataHolder dataHolder;
     public String name;
     public boolean cameraSlide;
     public boolean airSparkles;
@@ -29,7 +30,6 @@ public class VRMovementStyle
     public float endTeleportingSoundVolume;
     public boolean teleportOnRelease;
     public boolean arcAiming;
-	private DataHolder dataHolder;
     private static final ResourceLocation beamPng = new ResourceLocation("textures/entity/endercrystal/endercrystal_beam.png");
 
     public VRMovementStyle(DataHolder dataHolder)
@@ -150,12 +150,12 @@ public class VRMovementStyle
         else
         {
             flag = false;
-            dataHolder.printChatMessage("Unknown teleport style requested: " + requestedStyle);
+            DataHolder.getInstance().printChatMessage("Unknown teleport style requested: " + requestedStyle);
         }
 
         if (flag && Minecraft.getInstance() != null && dataHolder != null)
         {
-        	dataHolder.printChatMessage("Teleport style (RCTRL-M): " + this.name);
+        	DataHolder.getInstance().printChatMessage("Teleport style (RCTRL-M): " + this.name);
         }
     }
 }

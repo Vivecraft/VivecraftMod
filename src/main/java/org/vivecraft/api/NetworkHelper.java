@@ -83,7 +83,7 @@ public class NetworkHelper
 
     public static void sendVersionInfo()
     {
-        byte[] abyte = DataHolder.getInstance().minecriftVerString.getBytes(Charsets.UTF_8);
+        byte[] abyte = DataHolder.minecriftVerString.getBytes(Charsets.UTF_8);
         String s = channel.toString();
         FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
         friendlybytebuf.writeBytes(s.getBytes());

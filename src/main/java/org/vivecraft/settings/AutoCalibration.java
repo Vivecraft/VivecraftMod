@@ -14,28 +14,28 @@ public class AutoCalibration
     public static void calibrateManual()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
-        dataholder.vrSettings.manualCalibration = (float)dataholder.vr.hmdPivotHistory.averagePosition(0.5D).y;
+        DataHolder dataHolder = DataHolder.getInstance();
+        dataHolder.vrSettings.manualCalibration = (float)dataHolder.vr.hmdPivotHistory.averagePosition(0.5D).y;
         int i = (int)((float)((double)Math.round(100.0D * (double)getPlayerHeight() / (double)1.52F)));
         minecraft.gui.getChat().addMessage(new TextComponent(LangHelper.get("vivecraft.messages.heightset", i)));
-        dataholder.vrSettings.saveOptions();
+        dataHolder.vrSettings.saveOptions();
     }
 
     public static float getPlayerHeight()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        DataHolder dataHolder = DataHolder.getInstance();
         float f = 1.52F;
 
-        if (dataholder.vrSettings.seated)
+        if (dataHolder.vrSettings.seated)
         {
             return f;
         }
         else
         {
-            if (dataholder.vrSettings.manualCalibration != -1.0F)
+            if (dataHolder.vrSettings.manualCalibration != -1.0F)
             {
-                f = dataholder.vrSettings.manualCalibration;
+                f = dataHolder.vrSettings.manualCalibration;
             }
 
             return f;

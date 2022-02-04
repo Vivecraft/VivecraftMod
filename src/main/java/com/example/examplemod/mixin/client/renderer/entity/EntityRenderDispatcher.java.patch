@@ -184,7 +184,7 @@
 +        }
      }
  
-     public void onResourceManagerReload(ResourceManager p_174004_)
+     public void onResourceManagerReload(ResourceManager pResourceManager)
 @@ -451,6 +583,11 @@
          this.playerRenderers = EntityRenderers.createPlayerRenderers(entityrendererprovider$context);
          this.context = entityrendererprovider$context;

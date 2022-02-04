@@ -27,7 +27,7 @@
 +        return FormattedCharSequence.forward(p_195610_0_, Style.EMPTY);
      };
  
-     public EditBox(Font p_94114_, int p_94115_, int p_94116_, int p_94117_, int p_94118_, Component p_94119_)
+     public EditBox(Font pFont, int pX, int pY, int pWidth, int pHeight, Component p_94119_)
 @@ -458,11 +460,19 @@
          {
              boolean flag = pMouseX >= (double)this.x && pMouseX < (double)(this.x + this.width) && p_94126_ >= (double)this.y && p_94126_ < (double)(this.y + this.height);
@@ -51,12 +51,12 @@
                  int i = Mth.floor(pMouseX) - this.x;
 @@ -519,6 +529,12 @@
                  String s1 = flag ? s.substring(0, j) : s;
-                 j1 = this.font.drawShadow(pMatrixStack, this.formatter.apply(s1, this.displayPos), (float)l, (float)i1, i2);
+                 j1 = this.font.drawShadow(pPoseStack, this.formatter.apply(s1, this.displayPos), (float)l, (float)i1, i2);
              }
 +            //Vivecraft
 +            else if (!Minecraft.getInstance().vrSettings.seated && !KeyboardHandler.Showing)
 +            {
-+                this.font.drawShadow(pMatrixStack, "Click to open keyboard", (float)l, (float)i1, this.textColorUneditable);
++                this.font.drawShadow(pPoseStack, "Click to open keyboard", (float)l, (float)i1, this.textColorUneditable);
 +            }
 +            //
  

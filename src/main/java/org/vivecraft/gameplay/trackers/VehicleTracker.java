@@ -64,7 +64,7 @@ public class VehicleTracker extends Tracker
         Vec3 vec3 = null;
         Entity entity = player.getVehicle();
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        DataHolder dataHolder = DataHolder.getInstance();
 
         if (!(entity instanceof AbstractHorse) && !(entity instanceof Boat))
         {
@@ -75,21 +75,21 @@ public class VehicleTracker extends Tracker
                 if (mob.canBeControlledByRider())
                 {
                     int i = player.getMainHandItem().getItem() instanceof FoodOnAStickItem ? 0 : 1;
-                    VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_world_pre.getController(i);
+                    VRData.VRDevicePose vrdata$vrdevicepose = dataHolder.vrPlayer.vrdata_world_pre.getController(i);
                     return vrdata$vrdevicepose.getPosition().add(vrdata$vrdevicepose.getDirection().scale(0.3D)).subtract(entity.position()).normalize();
                 }
             }
         }
         else if (player.zza > 0.0F)
         {
-            VRSettings vrsettings = dataholder.vrSettings;
+            VRSettings vrsettings = dataHolder.vrSettings;
 
-            if (dataholder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD)
+            if (dataHolder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD)
             {
-                return dataholder.vrPlayer.vrdata_world_pre.hmd.getDirection();
+                return dataHolder.vrPlayer.vrdata_world_pre.hmd.getDirection();
             }
 
-            return dataholder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
+            return dataHolder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
         }
 
         return vec3;
@@ -206,17 +206,17 @@ public class VehicleTracker extends Tracker
     public void onStartRiding(Entity vehicle, LocalPlayer player)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
-        this.PreMount_World_Rotation = dataholder.vrPlayer.vrdata_world_pre.rotation_radians;
-        Vec3 vec3 = dataholder.vrPlayer.vrdata_room_pre.getHeadPivot();
+        DataHolder dataHolder = DataHolder.getInstance();
+        this.PreMount_World_Rotation = dataHolder.vrPlayer.vrdata_world_pre.rotation_radians;
+        Vec3 vec3 = dataHolder.vrPlayer.vrdata_room_pre.getHeadPivot();
         this.Premount_Pos_Room = new Vec3(vec3.x, 0.0D, vec3.z);
         this.dismountCooldown = 5;
 
-        if (dataholder.vrSettings.vehicleRotation)
+        if (dataHolder.vrSettings.vehicleRotation)
         {
-            float f = dataholder.vrPlayer.vrdata_world_pre.hmd.getYaw();
+            float f = dataHolder.vrPlayer.vrdata_world_pre.hmd.getYaw();
             float f1 = vehicle.getYRot() % 360.0F;
-            this.vehicleInitialRotation = dataholder.vrSettings.worldRotation;
+            this.vehicleInitialRotation = dataHolder.vrSettings.worldRotation;
             this.rotationCooldown = 2;
 
             if (vehicle instanceof Minecart)
@@ -224,10 +224,10 @@ public class VehicleTracker extends Tracker
                 return;
             }
 
-            float f2 = dataholder.vrPlayer.rotDiff_Degrees(f1, f);
-            dataholder.vrSettings.worldRotation = (float)(Math.toDegrees((double)dataholder.vrPlayer.vrdata_world_pre.rotation_radians) + (double)f2);
-            dataholder.vrSettings.worldRotation %= 360.0F;
-            dataholder.vr.seatedRot = dataholder.vrSettings.worldRotation;
+            float f2 = dataHolder.vrPlayer.rotDiff_Degrees(f1, f);
+            dataHolder.vrSettings.worldRotation = (float)(Math.toDegrees((double)dataHolder.vrPlayer.vrdata_world_pre.rotation_radians) + (double)f2);
+            dataHolder.vrSettings.worldRotation %= 360.0F;
+            dataHolder.vr.seatedRot = dataHolder.vrSettings.worldRotation;
         }
     }
 

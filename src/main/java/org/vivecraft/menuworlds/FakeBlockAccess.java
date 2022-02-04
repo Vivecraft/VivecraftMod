@@ -1,5 +1,6 @@
 package org.vivecraft.menuworlds;
 
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -59,7 +60,7 @@ public class FakeBlockAccess implements LevelReader
         this.ground = ground;
         this.dimensionType = dimensionType;
         this.isFlat = isFlat;
-        this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(seed), dimensionType.getBiomeZoomer());
+       // this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(seed), dimensionType.getBiomeZoomer());
         this.dimensionInfo = DimensionSpecialEffects.forType(dimensionType);
     }
 
@@ -357,4 +358,10 @@ public class FakeBlockAccess implements LevelReader
     {
         return null;
     }
+
+	@Override
+	public List<VoxelShape> getEntityCollisions(Entity p_186427_, AABB p_186428_) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

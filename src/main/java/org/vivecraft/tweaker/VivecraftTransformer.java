@@ -1,4 +1,4 @@
-//package org.vivecraft.tweaker;
+package org.vivecraft.tweaker;
 //
 //import cpw.mods.modlauncher.TransformerHolder;
 //import cpw.mods.modlauncher.api.ITransformer;
@@ -26,8 +26,8 @@
 //import org.objectweb.asm.tree.FieldNode;
 //import org.objectweb.asm.tree.MethodNode;
 //
-//public class VivecraftTransformer implements ITransformer<ClassNode>
-//{
+public class VivecraftTransformer //implements ITransformer<ClassNode>
+{
 //    private static final Logger LOGGER = LogManager.getLogger();
 //    private ZipFile ZipFile;
 //    public List<ITransformer> undeadClassTransformers = new ArrayList<>();
@@ -58,7 +58,7 @@
 //            s = Utils.removeSuffix(s, new String[] {".clsrg"});
 //            Target target = Target.targetPreClass(s);
 //
-//            if (!this.exclusions.contains(s))
+//            if (!this.exclusions.contains(s) && !s.contains("minecraftforge"))
 //            {
 //                set.add(target);
 //            }
@@ -220,4 +220,4 @@
 //            return null;
 //        }
 //    }
-//}
+}

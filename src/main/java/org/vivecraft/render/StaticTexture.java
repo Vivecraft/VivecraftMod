@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.Closeable;
 import java.io.IOException;
 
-//import net.optifine.Config;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +33,7 @@ public class StaticTexture extends SimpleTexture
             boolean flag = false;
             boolean flag1 = false;
 
-//            if (Config.isShaders())
+//            if (Config.isShaders()) TODO Optifine
 //            {
 //            }
         }

@@ -35,12 +35,11 @@
 +    protected final List<Widget> renderables = Lists.newArrayList();
      public boolean passEvents;
      protected Font font;
-     private URI clickedLink;
-@@ -183,7 +189,20 @@
+     @Nullable
+@@ -184,6 +190,19 @@
  
-     protected void renderTooltip(PoseStack pMatrixStack, ItemStack pTooltips, int pMouseX, int pMouseY)
+     protected void renderTooltip(PoseStack pPoseStack, ItemStack pTooltips, int pMouseX, int pMouseY)
      {
--        this.renderTooltip(pMatrixStack, this.getTooltipFromItem(pTooltips), pTooltips.getTooltipImage(), pMouseX, pMouseY);
 +    	//TODO: fix
 +    	if (Reflector.GuiUtils.exists())
 +    	{
@@ -54,53 +53,39 @@
 +    	//	this.renderComponentTooltip(pMatrixStack, this.getTooltipFromItem(pTooltips), pMouseX, pMouseY);
 +    	}
 +    	
-+    	this.renderTooltip(pMatrixStack, this.getTooltipFromItem(pTooltips), pTooltips.getTooltipImage(), pMouseX, pMouseY);
+         this.renderTooltip(pPoseStack, this.getTooltipFromItem(pTooltips), pTooltips.getTooltipImage(), pMouseX, pMouseY);
      }
  
-     public void renderTooltip(PoseStack pMatrixStack, List<Component> pTooltips, Optional<TooltipComponent> pMouseX, int pMouseY, int p_169393_)
-@@ -208,7 +227,16 @@
+@@ -209,7 +228,16 @@
  
-     public void renderComponentTooltip(PoseStack p_96598_, List<Component> p_96599_, int p_96600_, int p_96601_)
+     public void renderComponentTooltip(PoseStack pPoseStack, List<Component> pTooltips, int pMouseX, int pMouseY)
      {
--        this.renderTooltip(p_96598_, Lists.transform(p_96599_, Component::getVisualOrderText), p_96600_, p_96601_);
+-        this.renderTooltip(pPoseStack, Lists.transform(pTooltips, Component::getVisualOrderText), pMouseX, pMouseY);
 +    	if (Reflector.GuiUtils.exists())
 +    	{
 +    		//this.renderWrappedToolTip(p_96598_, p_96599_, p_96600_, p_96601_, this.font);
 +    	}
 +    	else
 +    	{
-+    		this.renderTooltip(p_96598_, Lists.transform(p_96599_, Component::getVisualOrderText), p_96600_, p_96601_);
++    		this.renderTooltip(pPoseStack, Lists.transform(pTooltips, Component::getVisualOrderText), pMouseX, pMouseY);
 +    	}
 +    	
-+        //this.renderTooltip(p_96598_, Lists.transform(p_96599_, Component::getVisualOrderText), p_96600_, p_96601_);
++        //this.renderTooltip(pPoseStack, Lists.transform(pTooltips, Component::getVisualOrderText), pMouseX, pMouseY);
      }
  
-     public void renderTooltip(PoseStack pMatrixStack, List <? extends FormattedCharSequence > pTooltips, int pMouseX, int pMouseY)
-@@ -434,12 +462,20 @@
+     public void renderTooltip(PoseStack pPoseStack, List <? extends FormattedCharSequence > pTooltips, int pMouseX, int pMouseY)
+@@ -435,6 +463,10 @@
  
-     public void sendMessage(String pText, boolean p_96614_)
+     public void sendMessage(String pText, boolean pAddToChat)
      {
--        if (p_96614_)
-+        if (Reflector.ForgeEventFactory_onClientSendMessage.exists())
-         {
--            this.minecraft.gui.getChat().addRecentChat(pText);
-+            pText = Reflector.callString(Reflector.ForgeEventFactory_onClientSendMessage, pText);
-         }
- 
--        this.minecraft.player.chat(pText);
-+        if (!pText.isEmpty())
++    	if (Reflector.ForgeEventFactory_onClientSendMessage.exists())
 +        {
-+            if (p_96614_)
-+            {
-+                this.minecraft.gui.getChat().addRecentChat(pText);
-+            }
-+
-+            this.minecraft.player.chat(pText);
++            pText = Reflector.callString(Reflector.ForgeEventFactory_onClientSendMessage, pText);
 +        }
-     }
- 
-     public final void init(Minecraft pMinecraft, int pWidth, int pHeight)
-@@ -449,9 +485,14 @@
+         if (pAddToChat)
+         {
+             this.minecraft.gui.getChat().addRecentChat(pText);
+@@ -450,9 +482,14 @@
          this.font = pMinecraft.font;
          this.width = pWidth;
          this.height = pHeight;
@@ -118,25 +103,24 @@
          this.triggerImmediateNarration(false);
          this.suppressNarration(NARRATE_SUPPRESS_AFTER_INIT_TIME);
      }
-@@ -482,7 +523,16 @@
+@@ -483,7 +520,16 @@
      {
          if (this.minecraft.level != null)
          {
--            this.fillGradient(pMatrixStack, 0, 0, this.width, this.height, -1072689136, -804253680);
 +            if (this.minecraft.vrSettings != null && !this.minecraft.vrSettings.menuBackground)
 +            {
-+                this.fillGradient(pMatrixStack, 0, 0, this.width, this.height, 0, 0);
++                this.fillGradient(pPoseStack, 0, 0, this.width, this.height, 0, 0);
 +            }
 +            else
 +            {
-+                this.fillGradient(pMatrixStack, 0, 0, this.width, this.height, -1072689136, -804253680);
+             this.fillGradient(pPoseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
 +            }
 +
-+            Reflector.postForgeBusEvent(Reflector.BackgroundDrawnEvent_Constructor, this, pMatrixStack);
++            Reflector.postForgeBusEvent(Reflector.BackgroundDrawnEvent_Constructor, this, pPoseStack);
          }
          else
          {
-@@ -504,6 +554,7 @@
+@@ -505,6 +551,7 @@
          bufferbuilder.vertex((double)this.width, 0.0D, 0.0D).uv((float)this.width / 32.0F, (float)pVOffset).color(64, 64, 64, 255).endVertex();
          bufferbuilder.vertex(0.0D, 0.0D, 0.0D).uv(0.0F, (float)pVOffset).color(64, 64, 64, 255).endVertex();
          tesselator.end();
@@ -144,8 +128,8 @@
      }
  
      public boolean isPauseScreen()
-@@ -769,4 +820,60 @@
-             this.priority = p_169426_;
+@@ -770,4 +817,60 @@
+             this.priority = pPriority;
          }
      }
 +
@@ -174,7 +158,7 @@
 +    {
 +        for (AbstractWidget butt : getButtonList())
 +        {
-+            if (butt.visible && butt.isHovered())
++            if (butt.visible && butt.isHoveredOrFocused())
 +            {
 +                return butt;
 +            }

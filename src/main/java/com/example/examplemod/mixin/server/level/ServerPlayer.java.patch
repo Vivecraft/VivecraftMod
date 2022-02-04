@@ -42,7 +42,7 @@
  import net.minecraft.world.item.crafting.Recipe;
  import net.minecraft.world.item.trading.MerchantOffers;
  import net.minecraft.world.level.ChunkPos;
-@@ -132,8 +140,12 @@
+@@ -133,8 +141,12 @@
  import net.minecraft.world.scores.Score;
  import net.minecraft.world.scores.Team;
  import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -55,7 +55,7 @@
  
  public class ServerPlayer extends Player
  {
-@@ -225,6 +237,9 @@
+@@ -233,6 +245,9 @@
      private int containerCounter;
      public int latency;
      public boolean wonGame;
@@ -65,7 +65,7 @@
  
      public ServerPlayer(MinecraftServer p_143384_, ServerLevel p_143385_, GameProfile p_143386_)
      {
-@@ -370,9 +385,9 @@
+@@ -378,9 +393,9 @@
              pCompound.putInt("SpawnZ", this.respawnPosition.getZ());
              pCompound.putBoolean("SpawnForced", this.respawnForced);
              pCompound.putFloat("SpawnAngle", this.respawnAngle);
@@ -77,7 +77,7 @@
              });
          }
      }
-@@ -405,13 +420,38 @@
+@@ -413,13 +428,38 @@
  
      private void initMenu(AbstractContainerMenu p_143400_)
      {
@@ -118,7 +118,7 @@
      }
  
      public void onEnterCombat()
-@@ -491,6 +531,7 @@
+@@ -501,6 +541,7 @@
              if (!this.isSpectator() || !this.touchingUnloadedChunk())
              {
                  super.tick();
@@ -126,7 +126,7 @@
              }
  
              for (int i = 0; i < this.getInventory().getContainerSize(); ++i)
-@@ -563,9 +604,9 @@
+@@ -573,9 +614,9 @@
                  CriteriaTriggers.LOCATION.trigger(this);
              }
          }
@@ -138,7 +138,17 @@
              CrashReportCategory crashreportcategory = crashreport.addCategory("Player being ticked");
              this.fillCrashReportCategory(crashreportcategory);
              throw new ReportedException(crashreport);
-@@ -777,76 +818,110 @@
+@@ -631,6 +672,9 @@
+ 
+     public void die(DamageSource pCause)
+     {
++        //Forge
++        if(Reflector.callBoolean(Reflector.ForgeHooks_onLivingDeath, this, pCause)) return;
++        //
+         boolean flag = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES);
+ 
+         if (flag)
+@@ -826,76 +870,120 @@
          }
      }
  
@@ -229,7 +239,7 @@
 +    		ServerLevel serverlevel = this.getLevel();
 +    		ResourceKey<Level> resourcekey = serverlevel.dimension();
 +
-+    		if (resourcekey == Level.END && server.dimension() == Level.OVERWORLD)
++    		if (resourcekey == Level.END && server.dimension() == Level.OVERWORLD && teleporter.isVanilla())
 +    		{
 +    			this.unRide();
 +
@@ -270,30 +280,36 @@
 +    				this.unsetRemoved();
 +    			}
 +
-+    			PortalInfo portalinfo = this.findDimensionEntryPoint(server);
++    			//PortalInfo portalinfo = this.findDimensionEntryPoint(server);
++    			//Forge
++				PortalInfo portalinfo = teleporter.getPortalInfo(this, server, this::findDimensionEntryPoint);
 +
 +    			if (portalinfo != null)
 +    			{
-+    				serverlevel.getProfiler().push("moving");
++    				Entity e = teleporter.placeEntity(this, serverlevel, server, this.getYRot(), spawnPortal -> {//Forge: Start vanilla logic
 +
-+    				if (resourcekey == Level.OVERWORLD && server.dimension() == Level.NETHER)
-+    				{
-+    					this.enteredNetherPosition = this.position();
-+    				}
-+    				else if (server.dimension() == Level.END)
-+    				{
-+    					this.createEndPlatform(server, new BlockPos(portalinfo.pos));
-+    				}
++    					serverlevel.getProfiler().push("moving");
 +
-+    				serverlevel.getProfiler().pop();
-+    				serverlevel.getProfiler().push("placing");
-+    				this.setLevel(server);
-+    				server.addDuringPortalTeleport(this);
-+    				this.setRot(portalinfo.yRot, portalinfo.xRot);
-+    				this.moveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
-+    				serverlevel.getProfiler().pop();
-+    				this.triggerDimensionChangeTriggers(serverlevel);
-+    				this.gameMode.setLevel(server);
++    					if (resourcekey == Level.OVERWORLD && server.dimension() == Level.NETHER)
++    					{
++    						this.enteredNetherPosition = this.position();
++    					}
++    					else if (spawnPortal && server.dimension() == Level.END)
++    					{
++    						this.createEndPlatform(server, new BlockPos(portalinfo.pos));
++    					}
++
++    					serverlevel.getProfiler().pop();
++    					serverlevel.getProfiler().push("placing");
++    					this.setLevel(server);
++    					server.addDuringPortalTeleport(this);
++    					this.setRot(portalinfo.yRot, portalinfo.xRot);
++    					this.moveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
++    					serverlevel.getProfiler().pop();
++    					this.triggerDimensionChangeTriggers(serverlevel);
++    					return this;//forge: this is part of the ITeleporter patch
++    				});//Forge: End vanilla logic
++    				if (e != this) throw new java.lang.IllegalArgumentException(String.format("Teleporter %s returned not the player entity but instead %s, expected PlayerEntity %s", teleporter, e, this));
 +    				this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));
 +    				playerlist.sendLevelInfo(this, server);
 +    				playerlist.sendAllPlayerInfo(this);
@@ -302,12 +318,16 @@
 +    				{
 +    					this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobeffectinstance));
 +    				}
-+
-+    				this.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
++    				//Forge
++    				if (teleporter.playTeleportSound(this, serverlevel, server))
++    					this.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
++    				//
 +    				this.lastSentExp = -1;
 +    				this.lastSentHealth = -1.0F;
 +    				this.lastSentFood = -1;
++    				//Forge
 +    				Reflector.call(Reflector.BasicEventHooks_firePlayerChangedDimensionEvent, this, resourcekey, server.dimension());
++    				//
 +    			}
 +
 +    			return this;
@@ -316,7 +336,7 @@
      }
  
      private void createEndPlatform(ServerLevel p_9007_, BlockPos p_9008_)
-@@ -938,6 +1013,18 @@
+@@ -974,6 +1062,18 @@
  
      public Either<Player.BedSleepingProblem, Unit> startSleepInBed(BlockPos pAt)
      {
@@ -335,7 +355,7 @@
          Direction direction = this.level.getBlockState(pAt).getValue(HorizontalDirectionalBlock.FACING);
  
          if (!this.isSleeping() && this.isAlive())
-@@ -957,8 +1044,14 @@
+@@ -993,8 +1093,14 @@
              else
              {
                  this.setRespawnPosition(this.level.dimension(), pAt, this.getYRot(), false, true);
@@ -352,7 +372,7 @@
                  {
                      return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_NOW);
                  }
-@@ -969,9 +1062,9 @@
+@@ -1005,9 +1111,9 @@
                          double d0 = 8.0D;
                          double d1 = 5.0D;
                          Vec3 vec3 = Vec3.atBottomCenterOf(pAt);
@@ -364,7 +384,7 @@
                          });
  
                          if (!list.isEmpty())
-@@ -980,7 +1073,7 @@
+@@ -1016,7 +1122,7 @@
                          }
                      }
  
@@ -373,7 +393,7 @@
                      {
                          this.awardStat(Stats.SLEEP_IN_BED);
                          CriteriaTriggers.SLEPT_IN_BED.trigger(this);
-@@ -1010,7 +1103,14 @@
+@@ -1046,7 +1152,14 @@
  
      private boolean bedInRange(BlockPos p_9117_, Direction p_9118_)
      {
@@ -389,7 +409,7 @@
      }
  
      private boolean isReachableBedBlock(BlockPos p_9223_)
-@@ -1151,6 +1251,7 @@
+@@ -1187,6 +1300,7 @@
                  this.connection.send(new ClientboundOpenScreenPacket(abstractcontainermenu.containerId, abstractcontainermenu.getType(), p_9033_.getDisplayName()));
                  this.initMenu(abstractcontainermenu);
                  this.containerMenu = abstractcontainermenu;
@@ -397,7 +417,7 @@
                  return OptionalInt.of(this.containerCounter);
              }
          }
-@@ -1172,6 +1273,7 @@
+@@ -1208,6 +1322,7 @@
          this.connection.send(new ClientboundHorseScreenOpenPacket(this.containerCounter, pInventory.getContainerSize(), pHorse.getId()));
          this.containerMenu = new HorseInventoryMenu(this.containerCounter, this.getInventory(), pInventory, pHorse);
          this.initMenu(this.containerMenu);
@@ -405,7 +425,7 @@
      }
  
      public void openItemGui(ItemStack pStack, InteractionHand pHand)
-@@ -1203,6 +1305,7 @@
+@@ -1238,6 +1353,7 @@
      {
          this.containerMenu.removed(this);
          this.inventoryMenu.transferState(this.containerMenu);
@@ -413,7 +433,7 @@
          this.containerMenu = this.inventoryMenu;
      }
  
-@@ -1228,9 +1331,9 @@
+@@ -1263,9 +1379,9 @@
      public void awardStat(Stat<?> pStat, int pAmount)
      {
          this.stats.increment(this, pStat, pAmount);
@@ -425,10 +445,11 @@
          });
      }
  
-@@ -1352,6 +1455,14 @@
+@@ -1387,6 +1503,16 @@
          this.enteredNetherPosition = pThat.enteredNetherPosition;
          this.setShoulderEntityLeft(pThat.getShoulderEntityLeft());
          this.setShoulderEntityRight(pThat.getShoulderEntityRight());
++        //Forge
 +        CompoundTag compoundtag = (CompoundTag)Reflector.call(pThat, Reflector.Entity_getPersistentData);
 +
 +        if (compoundtag != null && compoundtag.contains("PlayerPersisted"))
@@ -437,14 +458,25 @@
 +        }
 +
 +        Reflector.callVoid(Reflector.ForgeEventFactory_onPlayerClone, this, pThat, !pKeepEverything);
++        //
      }
  
      protected void onEffectAdded(MobEffectInstance p_143393_, @Nullable Entity p_143394_)
-@@ -1495,6 +1606,11 @@
-         this.textFilteringEnabled = pPacket.isTextFilteringEnabled();
-         this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)pPacket.getModelCustomisation());
-         this.getEntityData().set(DATA_PLAYER_MAIN_HAND, (byte)(pPacket.getMainHand() == HumanoidArm.LEFT ? 0 : 1));
-+
+@@ -1460,6 +1586,10 @@
+ 
+     public boolean setGameMode(GameType p_143404_)
+     {
++    	//Forge
++    	if (Reflector.ForgeHooks_onChangeGameMode.exists() && !Reflector.callBoolean(Reflector.ForgeHooks_onChangeGameMode, this, this.gameMode.getGameModeForPlayer(), p_143404_))
++    		return false;
++    	//
+         if (!this.gameMode.changeGameModeForPlayer(p_143404_))
+         {
+             return false;
+@@ -1531,6 +1661,10 @@
+         this.allowsListing = pPacket.allowsListing();
+         this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)pPacket.modelCustomisation());
+         this.getEntityData().set(DATA_PLAYER_MAIN_HAND, (byte)(pPacket.mainHand() == HumanoidArm.LEFT ? 0 : 1));
 +        if (Reflector.ForgeHooks.exists())
 +        {
 +            this.language = Reflector.callString(pPacket, Reflector.CClientSettingsPacket_getLanguage);
@@ -452,11 +484,22 @@
      }
  
      public boolean canChatInColor()
-@@ -1606,7 +1722,13 @@
+@@ -1606,7 +1740,8 @@
+     {
+         Entity entity = this.getCamera();
+         this.camera = (Entity)(pEntityToSpectate == null ? this : pEntityToSpectate);
+-
++        //Forge -- ehhh
++        //while (this.camera instanceof net.minecraftforge.entity.PartEntity<?> partEntity) this.camera = partEntity.getParent(); // FORGE: fix MC-46486
+         if (entity != this.camera)
+         {
+             this.connection.send(new ClientboundSetCameraPacket(this.camera));
+@@ -1642,7 +1777,15 @@
      @Nullable
      public Component getTabListDisplayName()
      {
 -        return null;
++    	//Forge
 +        if (!this.hasTabListName)
 +        {
 +            this.tabListDisplayName = (Component)Reflector.call(Reflector.ForgeEventFactory_getPlayerTabListDisplayName, this);
@@ -464,16 +507,24 @@
 +        }
 +
 +        return this.tabListDisplayName;
++        //
      }
  
      public void swing(InteractionHand pHand)
-@@ -1646,8 +1768,20 @@
-             this.connection.send(new ClientboundRespawnPacket(pX.dimensionType(), pX.dimension(), BiomeManager.obfuscateSeed(pX.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), pX.isDebug(), pX.isFlat(), true));
+@@ -1675,22 +1818,109 @@
+         {
+             this.connection.teleport(pX, p_9002_, pY, p_9004_, pZ);
+         }
+-        else
++        else if (Reflector.callBoolean(Reflector.ForgeHooks_onTravelToDimension,this, pNewLevel.dimension())) 
+         {
+             ServerLevel serverlevel = this.getLevel();
+             LevelData leveldata = pNewLevel.getLevelData();
+             this.connection.send(new ClientboundRespawnPacket(pNewLevel.dimensionType(), pNewLevel.dimension(), BiomeManager.obfuscateSeed(pNewLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), pNewLevel.isDebug(), pNewLevel.isFlat(), true));
              this.connection.send(new ClientboundChangeDifficultyPacket(leveldata.getDifficulty(), leveldata.isDifficultyLocked()));
              this.server.getPlayerList().sendPlayerPermissionLevel(this);
 -            serverlevel.removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
 -            this.unsetRemoved();
-+
 +            //Forge
 +            if (Reflector.ForgeHooks.exists())
 +            {
@@ -486,15 +537,17 @@
 +                this.unsetRemoved();
 +            }
 +            //
-+            
-             this.moveTo(p_9001_, pY, p_9003_, pZ, p_9005_);
-             this.setLevel(pX);
-             pX.addDuringCommandTeleport(this);
-@@ -1655,6 +1789,80 @@
-             this.connection.teleport(p_9001_, pY, p_9003_, pZ, p_9005_);
-             this.server.getPlayerList().sendLevelInfo(this, pX);
+             this.moveTo(pX, p_9002_, pY, p_9004_, pZ);
+             this.setLevel(pNewLevel);
+             pNewLevel.addDuringCommandTeleport(this);
+             this.triggerDimensionChangeTriggers(serverlevel);
+             this.connection.teleport(pX, p_9002_, pY, p_9004_, pZ);
++            //Forge
++            this.gameMode.setLevel(pNewLevel);
++            //
+             this.server.getPlayerList().sendLevelInfo(this, pNewLevel);
              this.server.getPlayerList().sendAllPlayerInfo(this);
-+            Reflector.call(Reflector.BasicEventHooks_firePlayerChangedDimensionEvent, this, serverlevel.dimension(), pX.dimension());
++            Reflector.call(Reflector.BasicEventHooks_firePlayerChangedDimensionEvent, this, serverlevel.dimension(), pNewLevel.dimension());
 +        }
 +    }
 +
@@ -571,7 +624,7 @@
          }
      }
  
-@@ -1681,26 +1889,29 @@
+@@ -1717,26 +1947,29 @@
  
      public void setRespawnPosition(ResourceKey<Level> p_9159_, @Nullable BlockPos p_9160_, float p_9161_, boolean p_9162_, boolean p_9163_)
      {
@@ -582,13 +635,13 @@
 +            if (p_9160_ != null)
 +            {
 +                boolean flag = p_9160_.equals(this.respawnPosition) && p_9159_.equals(this.respawnDimension);
- 
--            if (p_9163_ && !flag)
++
 +                if (p_9163_ && !flag)
 +                {
 +                    this.sendMessage(new TranslatableComponent("block.minecraft.set_spawn"), Util.NIL_UUID);
 +                }
-+
+ 
+-            if (p_9163_ && !flag)
 +                this.respawnPosition = p_9160_;
 +                this.respawnDimension = p_9159_;
 +                this.respawnAngle = p_9161_;
@@ -617,11 +670,12 @@
          }
      }
  
-@@ -1748,7 +1959,28 @@
+@@ -1783,7 +2016,32 @@
          }
          else
          {
 -            this.level.addFreshEntity(itementity);
++        	//Vivecraft
 +            ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.getUUID());
 +
 +            if (serverviveplayer != null && serverviveplayer.isVR() && !pDropAround)
@@ -632,7 +686,9 @@
 +                itementity.setDeltaMovement(vec31.x * (double)f, vec31.y * (double)f, vec31.z * (double)f);
 +                itementity.setPos(vec3.x() + itementity.getDeltaMovement().x(), vec3.y() + itementity.getDeltaMovement().y(), vec3.z() + itementity.getDeltaMovement().z());
 +            }
-+
++            //
++                 
++            //Forge
 +            Collection<ItemEntity> collection = (Collection)Reflector.call(this, Reflector.Entity_captureDrops);
 +
 +            if (collection != null)
@@ -643,15 +699,17 @@
 +            {
 +                this.level.addFreshEntity(itementity);
 +            }
-+
++            //
++            
              ItemStack itemstack = itementity.getItem();
  
              if (pTraceItem)
-@@ -1850,4 +2082,21 @@
-         });
-         return this.drop(itemstack, false, true) != null;
+@@ -1890,4 +2148,23 @@
+     {
+         return this.allowsListing;
      }
 +
++    //Forge
 +    public String getLanguage()
 +    {
 +        return this.language;
@@ -667,5 +725,6 @@
 +            this.getServer().getPlayerList().broadcastAll(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME, this));
 +        }
 +    }
++    //
 +
  }

@@ -76,6 +76,7 @@ public class InteractTracker extends Tracker
         }
         else
         {
+            Minecraft minecraft = Minecraft.getInstance();
             DataHolder dataHolder = DataHolder.getInstance();
 
             if (dataHolder.vrSettings.seated)
@@ -318,7 +319,7 @@ public class InteractTracker extends Tracker
 
                 if (flag)
                 {
-                	((PlayerExtension)this.mc.player).swingArm(interactionhand, VRFirstPersonArmSwing.Interact);
+                    ((PlayerExtension) this.mc.player).swingArm(interactionhand, VRFirstPersonArmSwing.Interact);
                     this.dh.vr.triggerHapticPulse(i, 750);
                 }
             }

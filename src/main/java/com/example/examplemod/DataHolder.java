@@ -45,7 +45,7 @@ public class DataHolder {
     public static List<String> hrtfList = new ArrayList<>();
     private static DataHolder INSTANCE;
     public final float PIOVER180 = ((float) Math.PI / 180F);
-    public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-VR-2-a1";
+    public final static String minecriftVerString = "Vivecraft 1.17.1  jrbudda-VR-2-a1";
     public VRPlayer vrPlayer;
     public MCVR vr;
     public VRRenderer vrRenderer;

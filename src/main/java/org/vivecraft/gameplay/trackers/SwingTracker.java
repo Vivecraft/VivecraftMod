@@ -81,29 +81,29 @@ public class SwingTracker extends Tracker
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
-            DataHolder dataholder = DataHolder.getInstance();
+            DataHolder dataHolder = DataHolder.getInstance();
 
             if (minecraft.screen != null)
             {
                 return false;
             }
-            else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF)
+            else if (dataHolder.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF)
             {
                 return false;
             }
-            else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO)
+            else if (dataHolder.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO)
             {
                 return !p.isCreative();
             }
-            else if (dataholder.vrSettings.seated)
+            else if (dataHolder.vrSettings.seated)
             {
                 return false;
             }
             else
             {
-                VRSettings vrsettings = dataholder.vrSettings;
+                VRSettings vrsettings = dataHolder.vrSettings;
 
-                if (dataholder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && p.zza > 0.0F)
+                if (dataHolder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && p.zza > 0.0F)
                 {
                     return false;
                 }
@@ -113,7 +113,7 @@ public class SwingTracker extends Tracker
                 }
                 else
                 {
-                    return !dataholder.jumpTracker.isjumping();
+                    return !dataHolder.jumpTracker.isjumping();
                 }
             }
         }
