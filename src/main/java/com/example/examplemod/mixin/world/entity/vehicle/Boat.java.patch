@@ -66,10 +66,10 @@
 -            this.setDeltaMovement(this.getDeltaMovement().add((double)(Mth.sin(-this.getYRot() * ((float)Math.PI / 180F)) * f), 0.0D, (double)(Mth.cos(this.getYRot() * ((float)Math.PI / 180F)) * f)));
 +			double mx, mz;
 +
-+    		if(this.inputUp && !minecraft.vrSettings.seated){
++    		if(this.inputUp && !dataholder.vrSettings.seated){
 +    			//controller-based
 +    			float yaw = minecraft.vrPlayer.vrdata_world_pre.getController(1).getYaw();     
-+    			if(minecraft.vrSettings.vehicleRotation){
++    			if(dataholder.vrSettings.vehicleRotation){
 +    				//tank controls
 +    				float end = this.getYRot() % 360;
 +    				float start = yaw;
@@ -111,7 +111,7 @@
 +
 +    		} else {
 +    			//roomscale or vanilla behavior
-+    			if(minecraft.rowTracker.isRowing() && !minecraft.vrSettings.seated){
++    			if(minecraft.rowTracker.isRowing() && !dataholder.vrSettings.seated){
 +    			
 +    				this.deltaRotation += minecraft.rowTracker.LOar / 1.5;
 +    				this.deltaRotation -= minecraft.rowTracker.ROar / 1.5;

@@ -1,6 +1,5 @@
 package org.vivecraft.gui.settings;
 
-//import net.optifine.Config;
 import org.vivecraft.gui.framework.GuiVROptionButton;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.settings.VRHotkeys;
@@ -125,11 +124,10 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         {
             GuiVROptionButton guivroptionbutton = (GuiVROptionButton)w;
 
-            //if (guivroptionbutton.getOption() == VRSettings.VrOptions.HANDHELD_CAMERA_RENDER_SCALE && Config.isShaders()) TODO
-            if (guivroptionbutton.getOption() == VRSettings.VrOptions.HANDHELD_CAMERA_RENDER_SCALE && false)
-            {
-                guivroptionbutton.active = false;
-            }
+//            if (guivroptionbutton.getOption() == VRSettings.VrOptions.HANDHELD_CAMERA_RENDER_SCALE && Config.isShaders())  //Optifine
+//            {
+//                guivroptionbutton.active = false;
+//            }
         });
     }
 

@@ -1,30 +1,28 @@
 --- a/net/minecraft/client/renderer/block/LiquidBlockRenderer.java
 +++ b/net/minecraft/client/renderer/block/LiquidBlockRenderer.java
-@@ -83,7 +83,7 @@
-     {
-         return !isFaceOccludedBySelf(p_110949_, p_110950_, p_110952_, p_110953_) && !isNeighborSameFluid(p_110949_, p_110950_, p_110953_, p_110951_);
-     }
+@@ -36,7 +36,7 @@
+     private final TextureAtlasSprite[] lavaIcons = new TextureAtlasSprite[2];
+     private final TextureAtlasSprite[] waterIcons = new TextureAtlasSprite[2];
+     private TextureAtlasSprite waterOverlay;
 -
 +    public static boolean skipStupidGoddamnChunkBoundaryClipping;
-     public boolean tesselate(BlockAndTintGetter pLightReader, BlockPos pPos, VertexConsumer pVertexBuilder, FluidState pFluidState)
+     protected void setupSprites()
      {
-         BlockState blockstate = pFluidState.createLegacyBlock();
-@@ -152,11 +152,13 @@
-                 float f8 = this.getWaterHeight(pLightReader, pPos.south(), pFluidState.getType());
-                 float f9 = this.getWaterHeight(pLightReader, pPos.east().south(), pFluidState.getType());
-                 float f10 = this.getWaterHeight(pLightReader, pPos.east(), pFluidState.getType());
+         this.lavaIcons[0] = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(Blocks.LAVA.defaultBlockState()).getParticleIcon();
+@@ -152,9 +152,13 @@
+                 float f8 = this.getWaterHeight(pLevel, pPos.south(), pFluidState.getType());
+                 float f9 = this.getWaterHeight(pLevel, pPos.east().south(), pFluidState.getType());
+                 float f10 = this.getWaterHeight(pLevel, pPos.east(), pFluidState.getType());
 -                double d0 = (double)(pPos.getX() & 15);
 -                double d1 = (double)(pPos.getY() & 15);
 -                double d2 = (double)(pPos.getZ() & 15);
--
--                if (Config.isRenderRegions())
 +                //double d0 = (double)(pPos.getX() & 15);
 +                //double d1 = (double)(pPos.getY() & 15);
 +                //double d2 = (double)(pPos.getZ() & 15);
 +                double d0 = skipStupidGoddamnChunkBoundaryClipping ? pPos.getX() : (double)(pPos.getX() & 15);
 +                double d1 = skipStupidGoddamnChunkBoundaryClipping ? pPos.getY() : (double)(pPos.getY() & 15);
 +                double d2 = skipStupidGoddamnChunkBoundaryClipping ? pPos.getZ() : (double)(pPos.getZ() & 15);
-+                if (Config.isRenderRegions() && !skipStupidGoddamnChunkBoundaryClipping)
++
+ 
+                 if (Config.isRenderRegions())
                  {
-                     int j = pPos.getX() >> 4 << 4;
-                     int k = pPos.getY() >> 4 << 4;

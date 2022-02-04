@@ -10,26 +10,16 @@
  import net.minecraft.SharedConstants;
  import net.minecraft.Util;
  import net.minecraft.core.BlockPos;
-@@ -141,14 +144,14 @@
+@@ -143,7 +146,7 @@
          {
-             ItemStack itemstack = pPlayer.getItemInHand(pHand);
+             ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
  
 -            if (pPlayer.canEat(this.getFoodProperties().canAlwaysEat()))
-+            if (!pPlayer.canEat(this.getFoodProperties().canAlwaysEat()) && !itemstack.getHoverName().getString().equals("EAT ME"))
++            if (pPlayer.canEat(this.getFoodProperties().canAlwaysEat()) || itemstack.getHoverName().getString().equals("EAT ME"))
              {
--                pPlayer.startUsingItem(pHand);
--                return InteractionResultHolder.consume(itemstack);
-+                return InteractionResultHolder.fail(itemstack);
-             }
-             else
-             {
--                return InteractionResultHolder.fail(itemstack);
-+                pPlayer.startUsingItem(pHand);
-+                return InteractionResultHolder.consume(itemstack);
-             }
-         }
-         else
-@@ -356,6 +359,15 @@
+                 pPlayer.startUsingItem(pUsedHand);
+                 return InteractionResultHolder.consume(itemstack);
+@@ -358,6 +361,15 @@
          float f = pPlayer.getXRot();
          float f1 = pPlayer.getYRot();
          Vec3 vec3 = pPlayer.getEyePosition();

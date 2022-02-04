@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.lwjgl.opengl.GL11;
+import org.vivecraft.reflection.MCReflection;
 import org.vivecraft.settings.VRSettings;
 
 import com.example.examplemod.DataHolder;
@@ -21,6 +22,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.math.Matrix4f;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -40,7 +42,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
-//import net.optifine.shaders.Shaders;
 
 public class MenuWorldRenderer
 {
@@ -79,7 +80,7 @@ public class MenuWorldRenderer
         this.mc = Minecraft.getInstance();
         this.dh = DataHolder.getInstance();
         this.lightmapTexture = new DynamicTexture(16, 16, false);
-        this.locationLightMap = this.mc.getTextureManager().register("lightmap", this.lightmapTexture);
+        this.locationLightMap = this.mc.getTextureManager().register("lightMap", this.lightmapTexture);
         this.lightmapColors = this.lightmapTexture.getPixels();
         Builder<VertexFormatElement> builder = ImmutableList.builder();
         builder.add(new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.POSITION, 3));
@@ -110,7 +111,7 @@ public class MenuWorldRenderer
                 this.setWorld(MenuWorldExporter.loadWorld(inputstream));
                 System.out.println("Building geometry...");
                 this.prepare();
-                ((GameRendererExtension)this.mc.gameRenderer).setMenuWorldFastTime(new Random().nextInt(10) == 0); //TODO check
+                ((GameRendererExtension) this.mc.gameRenderer).setMenuWorldFastTime((new Random()).nextInt(10) == 0);
             }
             else
             {
@@ -1206,32 +1207,32 @@ public class MenuWorldRenderer
         return this.isFluidTagged(fluidState.getType(), tag);
     }
 
-//    private static class FluidStateWrapper extends FluidState
-//    {
-//        private final FluidState fluidState;
-//
-//        public FluidStateWrapper(FluidState fluidState)
-//        {
-//            super(fluidState.getType(), fluidState.getValues(), (MapCodec)MCReflection.StateHolder_mapCodec.get(fluidState));
-//            this.fluidState = fluidState;
-//        }
-//
-//        public boolean is(Tag<Fluid> pTag)
-//        {
-//            if (pTag == FluidTags.WATER)
-//            {
-//                return this.getType() == Fluids.WATER || this.getType() == Fluids.FLOWING_WATER;
-//            }
-//            else if (pTag != FluidTags.LAVA)
-//            {
-//                return this.fluidState.is(pTag);
-//            }
-//            else
-//            {
-//                return this.getType() == Fluids.LAVA || this.getType() == Fluids.FLOWING_LAVA;
-//            }
-//        }
-//    }
+    private static class FluidStateWrapper extends FluidState
+    {
+        private final FluidState fluidState;
+
+        public FluidStateWrapper(FluidState fluidState)
+        {
+            super(fluidState.getType(), fluidState.getValues(), (MapCodec)MCReflection.StateHolder_mapCodec.get(fluidState));
+            this.fluidState = fluidState;
+        }
+
+        public boolean is(Tag<Fluid> pTag)
+        {
+            if (pTag == FluidTags.WATER)
+            {
+                return this.getType() == Fluids.WATER || this.getType() == Fluids.FLOWING_WATER;
+            }
+            else if (pTag != FluidTags.LAVA)
+            {
+                return this.fluidState.is(pTag);
+            }
+            else
+            {
+                return this.getType() == Fluids.LAVA || this.getType() == Fluids.FLOWING_LAVA;
+            }
+        }
+    }
 
     public static class MenuCloudRenderer
     {
@@ -1277,10 +1278,8 @@ public class MenuWorldRenderer
             }
             else
             {
-//                boolean flag = this.cloudPlayerY < 128.0D + this.mc.options.ofCloudsHeight * 128.0D; TODO check config
-//                boolean flag1 = (double)posY < 128.0D + this.mc.options.ofCloudsHeight * 128.0D;
-            	boolean flag = this.cloudPlayerY < 128.0D + 1 * 128.0D;
-            	boolean flag1 = (double)posY < 128.0D + 1 * 128.0D;
+                boolean flag = this.cloudPlayerY < 128.0D; //+ this.mc.options.ofCloudsHeight * 128.0D; Optifine
+                boolean flag1 = (double)posY < 128.0D; //+ this.mc.options.ofCloudsHeight * 128.0D;
                 return flag1 != flag;
             }
         }
@@ -1572,7 +1571,7 @@ public class MenuWorldRenderer
                 this.lastGreen = this.green;
                 this.lastBlue = this.blue;
 
-//                if (Config.isShaders())
+//                if (Config.isShaders()) //Optifine
 //                {
 //                    Shaders.setFogColor(this.red, this.green, this.blue);
 //                }

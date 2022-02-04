@@ -4,7 +4,6 @@ import java.util.HashSet;
 
 import org.vivecraft.api.VRData;
 import org.vivecraft.provider.ControllerType;
-import org.vivecraft.reflection.MCReflection;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.render.VRFirstPersonArmSwing;
 import org.vivecraft.settings.VRHotkeys;
@@ -23,12 +22,10 @@ import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -76,9 +73,10 @@ public class InteractTracker extends Tracker
         }
         else
         {
-            DataHolder dataHolder = DataHolder.getInstance();
+            Minecraft minecraft = Minecraft.getInstance();
+            DataHolder dataholder = DataHolder.getInstance();
 
-            if (dataHolder.vrSettings.seated)
+            if (dataholder.vrSettings.seated)
             {
                 return false;
             }
@@ -88,7 +86,7 @@ public class InteractTracker extends Tracker
             }
             else
             {
-                return !dataHolder.bowTracker.isNotched();
+                return !dataholder.bowTracker.isNotched();
             }
         }
     }
@@ -135,7 +133,7 @@ public class InteractTracker extends Tracker
 
                 try
                 {
-                    new MCReflection.ReflectionMethod(oclass, MCReflection.BlockBehavior_Use, BlockState.class, Level.class, BlockPos.class, Player.class, InteractionHand.class, BlockHitResult.class);
+                    //new MCReflection.ReflectionMethod(oclass, MCReflection.BlockBehavior_Use, BlockState.class, Level.class, BlockPos.class, Player.class, InteractionHand.class, BlockHitResult.class);
                     this.rightClickable.add(oclass);
                 }
                 catch (Throwable throwable1)
@@ -146,7 +144,7 @@ public class InteractTracker extends Tracker
 
                 try
                 {
-                    new MCReflection.ReflectionMethod(oclass, MCReflection.BlockBehavior_Use, BlockState.class, Level.class, BlockPos.class, Player.class, InteractionHand.class, BlockHitResult.class);
+                    //new MCReflection.ReflectionMethod(oclass, MCReflection.BlockBehavior_Use, BlockState.class, Level.class, BlockPos.class, Player.class, InteractionHand.class, BlockHitResult.class);
                     this.rightClickable.add(oclass);
                 }
                 catch (Throwable throwable)
@@ -318,7 +316,7 @@ public class InteractTracker extends Tracker
 
                 if (flag)
                 {
-                	((PlayerExtension)this.mc.player).swingArm(interactionhand, VRFirstPersonArmSwing.Interact);
+                    ((PlayerExtension) this.mc.player).swingArm(interactionhand, VRFirstPersonArmSwing.Interact);
                     this.dh.vr.triggerHapticPulse(i, 750);
                 }
             }

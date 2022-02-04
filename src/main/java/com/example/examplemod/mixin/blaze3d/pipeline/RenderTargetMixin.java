@@ -137,7 +137,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	
 	@Overwrite
 	public void createBuffers(int i, int j, boolean bl) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnGameThreadOrInit();
 		int k = RenderSystem.maxSupportedTextureSize();
 		if (i > 0 && i <= k && j > 0 && j <= k) {
 			this.viewWidth = i;
@@ -196,7 +196,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
 	@Overwrite
 	private void _bindWrite(boolean bl) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnGameThreadOrInit();
 		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
 		if (true) {
 			GlStateManager._viewport(0, 0, this.viewWidth, this.viewHeight);
@@ -207,7 +207,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
 	public void blitToScreen(int left, int width, int height, int top, boolean disableBlend, float xCropFactor,
 			float yCropFactor, boolean keepAspect) {
-		RenderSystem.assertThread(RenderSystem::isOnGameThreadOrInit);
+		RenderSystem.assertOnGameThreadOrInit();
 		if (!RenderSystem.isInInitPhase()) {
 			RenderSystem.recordRenderCall(() -> {
 				this._blitToScreen(left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
@@ -220,7 +220,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
 	private void _blitToScreen(int left, int width, int height, int top, boolean bl, float xCropFactor,
 			float yCropFactor, boolean keepAspect) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnGameThreadOrInit();
 		GlStateManager._colorMask(true, true, true, false);
 		GlStateManager._disableDepthTest();
 		GlStateManager._depthMask(false);

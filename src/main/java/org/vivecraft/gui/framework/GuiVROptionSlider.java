@@ -50,7 +50,6 @@ public class GuiVROptionSlider extends GuiVROptionButton
     {
         Minecraft minecraft = Minecraft.getInstance();
         DataHolder dataholder = DataHolder.getInstance();
-
         this.sliderValue = (double)((float)(p_setValueFromMouse_1_ - (double)(this.x + 4)) / (float)(this.width - 8));
         this.sliderValue = Mth.clamp(this.sliderValue, 0.0D, 1.0D);
         double d0 = this.enumOptions.denormalizeValue((float)this.sliderValue);
@@ -64,9 +63,8 @@ public class GuiVROptionSlider extends GuiVROptionButton
         if (this.visible)
         {
             pMinecraft.getTextureManager().bindForSetup(WIDGETS_LOCATION);
-            //GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            int i = (this.isHovered() ? 2 : 1) * 20;
+            int i = (this.isHoveredOrFocused() ? 2 : 1) * 20;
             this.blit(pMatrixStack, this.x + (int)(this.sliderValue * (double)(this.width - 8)), this.y, 0, 46 + i, 4, 20);
             this.blit(pMatrixStack, this.x + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.y, 196, 46 + i, 4, 20);
         }
@@ -78,7 +76,6 @@ public class GuiVROptionSlider extends GuiVROptionButton
         this.sliderValue = Mth.clamp(this.sliderValue, 0.0D, 1.0D);
         Minecraft minecraft = Minecraft.getInstance();
         DataHolder dataholder = DataHolder.getInstance();
-
         dataholder.vrSettings.setOptionFloatValue(this.enumOptions, (float)this.enumOptions.denormalizeValue((float)this.sliderValue));
         this.setMessage(new TextComponent(dataholder.vrSettings.getButtonDisplayString(this.enumOptions)));
         this.dragging = true;

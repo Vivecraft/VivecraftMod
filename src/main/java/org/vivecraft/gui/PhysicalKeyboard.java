@@ -28,6 +28,7 @@ import org.vivecraft.utils.lwjgl.Matrix4f;
 import org.vivecraft.utils.lwjgl.Vector3f;
 
 import com.example.examplemod.DataHolder;
+import com.example.examplemod.GlStateHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -51,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
 public class PhysicalKeyboard
 {
     private final Minecraft mc = Minecraft.getInstance();
-    private final DataHolder dh = DataHolder.getInstance();
+    private DataHolder dh = DataHolder.getInstance();
     private boolean reinit;
     private boolean shift;
     private boolean shiftSticky;
@@ -507,8 +508,8 @@ public class PhysicalKeyboard
         poseStack.translate(-center.x, -center.y, -center.z);
         RenderSystem.disableTexture();
         RenderSystem.disableCull();
-        //GlStateManager.enableAlphaTest(); TODO
-        //GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
+        GlStateHelper.enableAlphaTest();
+        GlStateHelper.alphaFunc(GL11.GL_GREATER, 0.0F);
         RenderSystem.enableBlend();
 
         if (this.easterEggActive) {
@@ -529,7 +530,7 @@ public class PhysicalKeyboard
                         button.color.b = color.b;
                     }
                 } else {
-                	dh.vrSettings.physicalKeyboardTheme.assignColor(button);
+                    dh.vrSettings.physicalKeyboardTheme.assignColor(button);
                 }
             });
         }
@@ -537,6 +538,7 @@ public class PhysicalKeyboard
         RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
 
         // TODO: does this still do the right thing for shaders?
+        mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
         RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
 
         // We need to ignore depth so we can see the back faces and text

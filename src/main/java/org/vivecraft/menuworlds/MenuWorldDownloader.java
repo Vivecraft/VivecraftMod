@@ -88,7 +88,6 @@ public class MenuWorldDownloader {
 
     private static List<MenuWorldItem> getOfficialWorlds() throws IOException {
         List<MenuWorldItem> list = new ArrayList<>();
-//        List<String> resultList = Utils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + Config.MC_VERSION); TODO
         List<String> resultList = Utils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + Minecraft.getInstance().getLaunchedVersion());
         for (String str : resultList)
             list.add(new MenuWorldItem("menuworlds/" + str, null));

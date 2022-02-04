@@ -150,10 +150,10 @@ public abstract class MCVR
     public final HandedKeyBinding keyVRInteract = new HandedKeyBinding("vivecraft.key.vrInteract", -1, "key.categories.gameplay");
     public final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout", 269, "key.categories.movement");
 
-    public MCVR(Minecraft mc)
+    public MCVR(Minecraft mc, DataHolder dh)
     {
         this.mc = mc;
-        this.dh = DataHolder.getInstance();
+        this.dh = dh;
         me = this;
 
         for (int i = 0; i < 3; ++i)
@@ -472,7 +472,7 @@ public abstract class MCVR
         }
 
         this.setVanillaBindings(keyBindings);
-        Map<String, Integer> map = KeyMapping.CATEGORY_SORT_ORDER;
+        Map<String, Integer> map = (Map)MCReflection.KeyBinding_CATEGORY_ORDER.get((Object)null);
         map.put("vivecraft.key.category.gui", 8);
         map.put("vivecraft.key.category.climbey", 9);
         map.put("vivecraft.key.category.keyboard", 10);
@@ -919,15 +919,12 @@ public abstract class MCVR
                 if (this.dh.vrSettings.seated)
                 {
                     this.dh.vrSettings.seatedFreeMove = !this.dh.vrSettings.seatedFreeMove;
-                    //this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport"))); TODO
                     this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? new TranslatableComponent("vivecraft.options.freemove") : new TranslatableComponent("vivecraft.options.teleport")));
                 }
                 else if (this.dh.vrPlayer.isTeleportSupported())
                 {
                     this.dh.vrSettings.forceStandingFreeMove = !this.dh.vrSettings.forceStandingFreeMove;
-//                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Lang.get("vivecraft.options.freemove") : Lang.get("vivecraft.options.teleport"))); TODO
                     this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? new TranslatableComponent("vivecraft.options.freemove") : new TranslatableComponent("vivecraft.options.teleport")));
-
                 }
                 else if (this.dh.vrPlayer.isTeleportOverridden())
                 {
@@ -1268,7 +1265,7 @@ public abstract class MCVR
 
             if (this.keyTogglePlayerList.consumeClick())
             {
-                ((GuiExtension)this.mc.gui).setShowPlayerList(!((GuiExtension)this.mc.gui).getShowPlayerList());
+                ((GuiExtension) this.mc.gui).setShowPlayerList(!((GuiExtension) this.mc.gui).getShowPlayerList());
             }
 
             if (this.keyToggleHandheldCam.consumeClick() && this.mc.player != null)
@@ -1456,15 +1453,14 @@ public abstract class MCVR
     {
         if (this.mc.player != null && (!this.dh.climbTracker.isGrabbingLadder() || !this.dh.climbTracker.isClaws(this.mc.player.getMainHandItem())))
         {
-        	//TODO Forge
 //            if (Reflector.ForgeHooksClient.exists() && this.mc.screen == null)
 //            {
 //                InputSimulator.scrollMouse(0.0D, (double)(dir * 4));
 //            }
 //            else
-            {
+//            {
                 this.mc.player.getInventory().swapPaint((double)dir);
-            }
+//            }
         }
     }
 

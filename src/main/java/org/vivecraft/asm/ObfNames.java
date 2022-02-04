@@ -1,7 +1,5 @@
 package org.vivecraft.asm;
 
-import net.fabricmc.loader.impl.FabricLoaderImpl;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,7 +21,7 @@ public class ObfNames {
 	static {
 		String prop = System.getProperty("vivecraft.mcpconfdir");
 		File mcpDir = new File(prop == null ? "../conf" : prop);
-		boolean inDev = FabricLoaderImpl.InitHelper.get().isDevelopmentEnvironment();
+		boolean inDev = new File(mcpDir, "joined.srg").exists();
 
 		if (!inDev) {
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(ObfNames.class.getResourceAsStream("/mappings/vivecraft/joined.srg")))) {
@@ -46,7 +44,7 @@ public class ObfNames {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-		} /*else {
+		} else {
 			System.out.println("MCP conf found! Loading dev mappings...");
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(mcpDir, "fields.csv"))))) {
 				br.lines().forEach(line -> {
@@ -66,7 +64,7 @@ public class ObfNames {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		} */
+		}
 	}
 
 	/**

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/Options.java
 +++ b/net/minecraft/client/Options.java
-@@ -196,6 +196,7 @@
+@@ -202,6 +202,7 @@
      public float fovEffectScale = 1.0F;
      public double gamma;
      public int guiScale;
@@ -8,7 +8,7 @@
      public ParticleStatus particles = ParticleStatus.ALL;
      public NarratorStatus narratorStatus = NarratorStatus.OFF;
      public String languageCode = "en_us";
-@@ -207,7 +208,7 @@
+@@ -214,7 +215,7 @@
      public boolean ofSmoothFps = false;
      public boolean ofSmoothWorld = Config.isSingleProcessor();
      public boolean ofLazyChunkLoading = Config.isSingleProcessor();
@@ -17,8 +17,8 @@
      public boolean ofSmartAnimations = false;
      public double ofAoLevel = 1.0D;
      public int ofAaLevel = 0;
-@@ -246,7 +247,7 @@
-     public int ofTranslucentBlocks = 0;
+@@ -251,7 +252,7 @@
+     public boolean ofFastRender = false;
      public boolean ofDynamicFov = true;
      public boolean ofAlternateBlocks = true;
 -    public int ofDynamicLights = 3;
@@ -26,7 +26,7 @@
      public boolean ofCustomEntityModels = true;
      public boolean ofCustomGuis = true;
      public boolean ofShowGlErrors = true;
-@@ -322,6 +323,7 @@
+@@ -331,6 +332,7 @@
          this.ofKeyBindZoom = new KeyMapping("of.key.zoom", 67, "key.categories.misc");
          this.keyMappings = ArrayUtils.add(this.keyMappings, this.ofKeyBindZoom);
          KeyUtils.fixKeyConflicts(this.keyMappings, new KeyMapping[] {this.ofKeyBindZoom});
@@ -34,9 +34,9 @@
          this.renderDistance = 8;
          this.load();
          Config.initGameSettings(this);
-@@ -388,7 +390,9 @@
-         this.gamma = p_168428_.process("gamma", this.gamma);
-         this.renderDistance = p_168428_.process("renderDistance", this.renderDistance);
+@@ -398,7 +400,9 @@
+         this.renderDistance = (int)Mth.clamp((double)p_168428_.process("renderDistance", this.renderDistance), Option.RENDER_DISTANCE.getMinValue(), Option.RENDER_DISTANCE.getMaxValue());
+         this.simulationDistance = (int)Mth.clamp((double)p_168428_.process("simulationDistance", this.simulationDistance), Option.SIMULATION_DISTANCE.getMinValue(), Option.SIMULATION_DISTANCE.getMaxValue());
          this.entityDistanceScaling = p_168428_.process("entityDistanceScaling", this.entityDistanceScaling);
 -        this.guiScale = p_168428_.process("guiScale", this.guiScale);
 +        //Vivecraft
@@ -45,7 +45,7 @@
          this.particles = p_168428_.process("particles", this.particles, ParticleStatus::byId, ParticleStatus::getId);
          this.framerateLimit = p_168428_.process("maxFps", this.framerateLimit);
  
-@@ -820,9 +824,9 @@
+@@ -834,9 +838,9 @@
  
                  printwriter.close();
              }
@@ -57,7 +57,7 @@
              }
  
              this.saveOptions = false;
-@@ -890,22 +894,22 @@
+@@ -904,22 +908,22 @@
          return this.useNativeTransport;
      }
  
@@ -87,7 +87,7 @@
  
              if (i > 0 && Config.isShaders())
              {
-@@ -921,60 +925,61 @@
+@@ -935,60 +939,61 @@
  
              this.ofAaLevel = i;
              this.ofAaLevel = Config.limit(this.ofAaLevel, 0, 16);
@@ -164,7 +164,7 @@
          {
              switch (this.ofFogType)
              {
-@@ -987,7 +992,7 @@
+@@ -1001,7 +1006,7 @@
              }
          }
  
@@ -173,7 +173,7 @@
          {
              this.ofFogStart += 0.2F;
  
-@@ -997,18 +1002,18 @@
+@@ -1011,18 +1016,18 @@
              }
          }
  
@@ -195,7 +195,7 @@
          {
              ++this.ofClouds;
  
-@@ -1020,13 +1025,13 @@
+@@ -1034,13 +1039,13 @@
              this.updateRenderClouds();
          }
  
@@ -206,21 +206,12 @@
              this.minecraft.levelRenderer.allChanged();
          }
  
--        if (par1EnumOptions == Option.DROPPED_ITEMS)
-+        if (p_setOptionValueOF_1_ == Option.DROPPED_ITEMS)
-         {
-             ++this.ofDroppedItems;
- 
-@@ -1036,7 +1041,7 @@
-             }
-         }
- 
 -        if (par1EnumOptions == Option.RAIN)
 +        if (p_setOptionValueOF_1_ == Option.RAIN)
          {
              ++this.ofRain;
  
-@@ -1046,7 +1051,7 @@
+@@ -1050,7 +1055,7 @@
              }
          }
  
@@ -229,7 +220,7 @@
          {
              ++this.ofAnimatedWater;
  
-@@ -1061,7 +1066,7 @@
+@@ -1065,7 +1070,7 @@
              }
          }
  
@@ -238,7 +229,7 @@
          {
              ++this.ofAnimatedLava;
  
-@@ -1076,92 +1081,92 @@
+@@ -1080,92 +1085,92 @@
              }
          }
  
@@ -349,7 +340,7 @@
          {
              int i = 900;
              this.ofAutoSaveTicks = Math.max(this.ofAutoSaveTicks / i * i, i);
-@@ -1173,7 +1178,7 @@
+@@ -1177,7 +1182,7 @@
              }
          }
  
@@ -358,7 +349,7 @@
          {
              ++this.ofBetterGrass;
  
-@@ -1185,7 +1190,7 @@
+@@ -1189,7 +1194,7 @@
              this.minecraft.levelRenderer.allChanged();
          }
  
@@ -367,7 +358,7 @@
          {
              ++this.ofConnectedTextures;
  
-@@ -1204,27 +1209,27 @@
+@@ -1208,27 +1213,27 @@
              }
          }
  
@@ -400,7 +391,7 @@
          {
              ++this.ofVignette;
  
-@@ -1234,7 +1239,7 @@
+@@ -1238,7 +1243,7 @@
              }
          }
  
@@ -409,7 +400,7 @@
          {
              ++this.ofChunkUpdates;
  
-@@ -1244,12 +1249,12 @@
+@@ -1248,12 +1253,12 @@
              }
          }
  
@@ -424,7 +415,7 @@
          {
              ++this.ofTime;
  
-@@ -1259,85 +1264,85 @@
+@@ -1263,119 +1268,119 @@
              }
          }
  
@@ -516,17 +507,7 @@
 -        if (par1EnumOptions == Option.FAST_RENDER)
 +        if (p_setOptionValueOF_1_ == Option.FAST_RENDER)
          {
--            this.ofFastRender = !this.ofFastRender;
-+            this.ofFastRender = false;
-         }
- 
--        if (par1EnumOptions == Option.TRANSLUCENT_BLOCKS)
-+        if (p_setOptionValueOF_1_ == Option.TRANSLUCENT_BLOCKS)
-         {
-             if (this.ofTranslucentBlocks == 0)
-             {
-@@ -1359,41 +1364,41 @@
-             this.minecraft.levelRenderer.allChanged();
+             this.ofFastRender = !this.ofFastRender;
          }
  
 -        if (par1EnumOptions == Option.LAZY_CHUNK_LOADING)
@@ -574,7 +555,7 @@
          {
              ++this.ofScreenshotSize;
  
-@@ -1403,34 +1408,34 @@
+@@ -1385,34 +1390,34 @@
              }
          }
  
@@ -615,7 +596,7 @@
          {
              if (this.ofChatBackground == 0)
              {
-@@ -1446,29 +1451,29 @@
+@@ -1428,7 +1433,7 @@
              }
          }
  
@@ -624,461 +605,7 @@
          {
              this.ofChatShadow = !this.ofChatShadow;
          }
-     }
- 
--    public Component getKeyComponentOF(Option option)
-+    public Component getKeyComponentOF(Option p_getKeyComponentOF_1_)
-     {
--        String s = this.getKeyBindingOF(option);
-+        String s = this.getKeyBindingOF(p_getKeyComponentOF_1_);
-         Component component = new TextComponent(s);
-         return component;
-     }
- 
--    public String getKeyBindingOF(Option par1EnumOptions)
-+    public String getKeyBindingOF(Option p_getKeyBindingOF_1_)
-     {
--        String s = I18n.m_118938_(par1EnumOptions.getResourceKey()) + ": ";
-+        String s = I18n.m_118938_(p_getKeyBindingOF_1_.getResourceKey()) + ": ";
- 
-         if (s == null)
-         {
--            s = par1EnumOptions.getResourceKey();
-+            s = p_getKeyBindingOF_1_.getResourceKey();
-         }
- 
--        if (par1EnumOptions == Option.RENDER_DISTANCE)
-+        if (p_getKeyBindingOF_1_ == Option.RENDER_DISTANCE)
-         {
-             int i1 = (int)Option.RENDER_DISTANCE.get(this);
-             String s2 = I18n.m_118938_("of.options.renderDistance.tiny");
-@@ -1520,7 +1525,7 @@
- 
-             return s + i1 + " " + s1 + "";
-         }
--        else if (par1EnumOptions == Option.FOG_FANCY)
-+        else if (p_getKeyBindingOF_1_ == Option.FOG_FANCY)
-         {
-             switch (this.ofFogType)
-             {
-@@ -1537,23 +1542,23 @@
-                     return s + Lang.getOff();
-             }
-         }
--        else if (par1EnumOptions == Option.FOG_START)
-+        else if (p_getKeyBindingOF_1_ == Option.FOG_START)
-         {
-             return s + this.ofFogStart;
-         }
--        else if (par1EnumOptions == Option.MIPMAP_TYPE)
-+        else if (p_getKeyBindingOF_1_ == Option.MIPMAP_TYPE)
-         {
--            return FloatOptions.getText(par1EnumOptions, (double)this.ofMipmapType);
-+            return FloatOptions.getText(p_getKeyBindingOF_1_, (double)this.ofMipmapType);
-         }
--        else if (par1EnumOptions == Option.SMOOTH_FPS)
-+        else if (p_getKeyBindingOF_1_ == Option.SMOOTH_FPS)
-         {
-             return this.ofSmoothFps ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.SMOOTH_WORLD)
-+        else if (p_getKeyBindingOF_1_ == Option.SMOOTH_WORLD)
-         {
-             return this.ofSmoothWorld ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.CLOUDS)
-+        else if (p_getKeyBindingOF_1_ == Option.CLOUDS)
-         {
-             switch (this.ofClouds)
-             {
-@@ -1570,7 +1575,7 @@
-                     return s + Lang.getDefault();
-             }
-         }
--        else if (par1EnumOptions == Option.TREES)
-+        else if (p_getKeyBindingOF_1_ == Option.TREES)
-         {
-             switch (this.ofTrees)
-             {
-@@ -1588,7 +1593,7 @@
-                     return s + Lang.get("of.general.smart");
-             }
-         }
--        else if (par1EnumOptions == Option.DROPPED_ITEMS)
-+        else if (p_getKeyBindingOF_1_ == Option.DROPPED_ITEMS)
-         {
-             switch (this.ofDroppedItems)
-             {
-@@ -1602,7 +1607,7 @@
-                     return s + Lang.getDefault();
-             }
-         }
--        else if (par1EnumOptions == Option.RAIN)
-+        else if (p_getKeyBindingOF_1_ == Option.RAIN)
-         {
-             switch (this.ofRain)
-             {
-@@ -1619,7 +1624,7 @@
-                     return s + Lang.getDefault();
-             }
-         }
--        else if (par1EnumOptions == Option.ANIMATED_WATER)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_WATER)
-         {
-             switch (this.ofAnimatedWater)
-             {
-@@ -1633,7 +1638,7 @@
-                     return s + Lang.getOn();
-             }
-         }
--        else if (par1EnumOptions == Option.ANIMATED_LAVA)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_LAVA)
-         {
-             switch (this.ofAnimatedLava)
-             {
-@@ -1647,75 +1652,75 @@
-                     return s + Lang.getOn();
-             }
-         }
--        else if (par1EnumOptions == Option.ANIMATED_FIRE)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_FIRE)
-         {
-             return this.ofAnimatedFire ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.ANIMATED_PORTAL)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_PORTAL)
-         {
-             return this.ofAnimatedPortal ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.ANIMATED_REDSTONE)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_REDSTONE)
-         {
-             return this.ofAnimatedRedstone ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.ANIMATED_EXPLOSION)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_EXPLOSION)
-         {
-             return this.ofAnimatedExplosion ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.ANIMATED_FLAME)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_FLAME)
-         {
-             return this.ofAnimatedFlame ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.ANIMATED_SMOKE)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_SMOKE)
-         {
-             return this.ofAnimatedSmoke ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.VOID_PARTICLES)
-+        else if (p_getKeyBindingOF_1_ == Option.VOID_PARTICLES)
-         {
-             return this.ofVoidParticles ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.WATER_PARTICLES)
-+        else if (p_getKeyBindingOF_1_ == Option.WATER_PARTICLES)
-         {
-             return this.ofWaterParticles ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.PORTAL_PARTICLES)
-+        else if (p_getKeyBindingOF_1_ == Option.PORTAL_PARTICLES)
-         {
-             return this.ofPortalParticles ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.POTION_PARTICLES)
-+        else if (p_getKeyBindingOF_1_ == Option.POTION_PARTICLES)
-         {
-             return this.ofPotionParticles ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.FIREWORK_PARTICLES)
-+        else if (p_getKeyBindingOF_1_ == Option.FIREWORK_PARTICLES)
-         {
-             return this.ofFireworkParticles ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.DRIPPING_WATER_LAVA)
-+        else if (p_getKeyBindingOF_1_ == Option.DRIPPING_WATER_LAVA)
-         {
-             return this.ofDrippingWaterLava ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.ANIMATED_TERRAIN)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_TERRAIN)
-         {
-             return this.ofAnimatedTerrain ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.ANIMATED_TEXTURES)
-+        else if (p_getKeyBindingOF_1_ == Option.ANIMATED_TEXTURES)
-         {
-             return this.ofAnimatedTextures ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.RAIN_SPLASH)
-+        else if (p_getKeyBindingOF_1_ == Option.RAIN_SPLASH)
-         {
-             return this.ofRainSplash ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.LAGOMETER)
-+        else if (p_getKeyBindingOF_1_ == Option.LAGOMETER)
-         {
-             return this.ofLagometer ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.SHOW_FPS)
-+        else if (p_getKeyBindingOF_1_ == Option.SHOW_FPS)
-         {
-             return this.ofShowFps ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.AUTOSAVE_TICKS)
-+        else if (p_getKeyBindingOF_1_ == Option.AUTOSAVE_TICKS)
-         {
-             int l = 900;
- 
-@@ -1740,7 +1745,7 @@
-                 return this.ofAutoSaveTicks <= 16 * l ? s + Lang.get("of.options.save.12min") : s + Lang.get("of.options.save.24min");
-             }
-         }
--        else if (par1EnumOptions == Option.BETTER_GRASS)
-+        else if (p_getKeyBindingOF_1_ == Option.BETTER_GRASS)
-         {
-             switch (this.ofBetterGrass)
-             {
-@@ -1754,7 +1759,7 @@
-                     return s + Lang.getOff();
-             }
-         }
--        else if (par1EnumOptions == Option.CONNECTED_TEXTURES)
-+        else if (p_getKeyBindingOF_1_ == Option.CONNECTED_TEXTURES)
-         {
-             switch (this.ofConnectedTextures)
-             {
-@@ -1768,23 +1773,23 @@
-                     return s + Lang.getOff();
-             }
-         }
--        else if (par1EnumOptions == Option.WEATHER)
-+        else if (p_getKeyBindingOF_1_ == Option.WEATHER)
-         {
-             return this.ofWeather ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.SKY)
-+        else if (p_getKeyBindingOF_1_ == Option.SKY)
-         {
-             return this.ofSky ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.STARS)
-+        else if (p_getKeyBindingOF_1_ == Option.STARS)
-         {
-             return this.ofStars ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.SUN_MOON)
-+        else if (p_getKeyBindingOF_1_ == Option.SUN_MOON)
-         {
-             return this.ofSunMoon ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.VIGNETTE)
-+        else if (p_getKeyBindingOF_1_ == Option.VIGNETTE)
-         {
-             switch (this.ofVignette)
-             {
-@@ -1798,15 +1803,15 @@
-                     return s + Lang.getDefault();
-             }
-         }
--        else if (par1EnumOptions == Option.CHUNK_UPDATES)
-+        else if (p_getKeyBindingOF_1_ == Option.CHUNK_UPDATES)
-         {
-             return s + this.ofChunkUpdates;
-         }
--        else if (par1EnumOptions == Option.CHUNK_UPDATES_DYNAMIC)
-+        else if (p_getKeyBindingOF_1_ == Option.CHUNK_UPDATES_DYNAMIC)
-         {
-             return this.ofChunkUpdatesDynamic ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.TIME)
-+        else if (p_getKeyBindingOF_1_ == Option.TIME)
-         {
-             if (this.ofTime == 1)
-             {
-@@ -1817,67 +1822,67 @@
-                 return this.ofTime == 2 ? s + Lang.get("of.options.time.nightOnly") : s + Lang.getDefault();
-             }
-         }
--        else if (par1EnumOptions == Option.AA_LEVEL)
-+        else if (p_getKeyBindingOF_1_ == Option.AA_LEVEL)
-         {
--            return FloatOptions.getText(par1EnumOptions, (double)this.ofAaLevel);
-+            return FloatOptions.getText(p_getKeyBindingOF_1_, (double)this.ofAaLevel);
-         }
--        else if (par1EnumOptions == Option.AF_LEVEL)
-+        else if (p_getKeyBindingOF_1_ == Option.AF_LEVEL)
-         {
--            return FloatOptions.getText(par1EnumOptions, (double)this.ofAfLevel);
-+            return FloatOptions.getText(p_getKeyBindingOF_1_, (double)this.ofAfLevel);
-         }
--        else if (par1EnumOptions == Option.PROFILER)
-+        else if (p_getKeyBindingOF_1_ == Option.PROFILER)
-         {
-             return this.ofProfiler ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.BETTER_SNOW)
-+        else if (p_getKeyBindingOF_1_ == Option.BETTER_SNOW)
-         {
-             return this.ofBetterSnow ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.SWAMP_COLORS)
-+        else if (p_getKeyBindingOF_1_ == Option.SWAMP_COLORS)
-         {
-             return this.ofSwampColors ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.RANDOM_ENTITIES)
-+        else if (p_getKeyBindingOF_1_ == Option.RANDOM_ENTITIES)
-         {
-             return this.ofRandomEntities ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.CUSTOM_FONTS)
-+        else if (p_getKeyBindingOF_1_ == Option.CUSTOM_FONTS)
-         {
-             return this.ofCustomFonts ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.CUSTOM_COLORS)
-+        else if (p_getKeyBindingOF_1_ == Option.CUSTOM_COLORS)
-         {
-             return this.ofCustomColors ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.CUSTOM_SKY)
-+        else if (p_getKeyBindingOF_1_ == Option.CUSTOM_SKY)
-         {
-             return this.ofCustomSky ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.SHOW_CAPES)
-+        else if (p_getKeyBindingOF_1_ == Option.SHOW_CAPES)
-         {
-             return this.ofShowCapes ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.CUSTOM_ITEMS)
-+        else if (p_getKeyBindingOF_1_ == Option.CUSTOM_ITEMS)
-         {
-             return this.ofCustomItems ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.NATURAL_TEXTURES)
-+        else if (p_getKeyBindingOF_1_ == Option.NATURAL_TEXTURES)
-         {
-             return this.ofNaturalTextures ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.EMISSIVE_TEXTURES)
-+        else if (p_getKeyBindingOF_1_ == Option.EMISSIVE_TEXTURES)
-         {
-             return this.ofEmissiveTextures ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.FAST_MATH)
-+        else if (p_getKeyBindingOF_1_ == Option.FAST_MATH)
-         {
-             return this.ofFastMath ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.FAST_RENDER)
-+        else if (p_getKeyBindingOF_1_ == Option.FAST_RENDER)
-         {
-             return this.ofFastRender ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.TRANSLUCENT_BLOCKS)
-+        else if (p_getKeyBindingOF_1_ == Option.TRANSLUCENT_BLOCKS)
-         {
-             if (this.ofTranslucentBlocks == 1)
-             {
-@@ -1888,56 +1893,56 @@
-                 return this.ofTranslucentBlocks == 2 ? s + Lang.getFancy() : s + Lang.getDefault();
-             }
-         }
--        else if (par1EnumOptions == Option.LAZY_CHUNK_LOADING)
-+        else if (p_getKeyBindingOF_1_ == Option.LAZY_CHUNK_LOADING)
-         {
-             return this.ofLazyChunkLoading ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.RENDER_REGIONS)
-+        else if (p_getKeyBindingOF_1_ == Option.RENDER_REGIONS)
-         {
-             return this.ofRenderRegions ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.SMART_ANIMATIONS)
-+        else if (p_getKeyBindingOF_1_ == Option.SMART_ANIMATIONS)
-         {
-             return this.ofSmartAnimations ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.DYNAMIC_FOV)
-+        else if (p_getKeyBindingOF_1_ == Option.DYNAMIC_FOV)
-         {
-             return this.ofDynamicFov ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.ALTERNATE_BLOCKS)
-+        else if (p_getKeyBindingOF_1_ == Option.ALTERNATE_BLOCKS)
-         {
-             return this.ofAlternateBlocks ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.DYNAMIC_LIGHTS)
-+        else if (p_getKeyBindingOF_1_ == Option.DYNAMIC_LIGHTS)
-         {
-             int k = indexOf(this.ofDynamicLights, OF_DYNAMIC_LIGHTS);
-             return s + getTranslation(KEYS_DYNAMIC_LIGHTS, k);
-         }
--        else if (par1EnumOptions == Option.SCREENSHOT_SIZE)
-+        else if (p_getKeyBindingOF_1_ == Option.SCREENSHOT_SIZE)
-         {
-             return this.ofScreenshotSize <= 1 ? s + Lang.getDefault() : s + this.ofScreenshotSize + "x";
-         }
--        else if (par1EnumOptions == Option.CUSTOM_ENTITY_MODELS)
-+        else if (p_getKeyBindingOF_1_ == Option.CUSTOM_ENTITY_MODELS)
-         {
-             return this.ofCustomEntityModels ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.CUSTOM_GUIS)
-+        else if (p_getKeyBindingOF_1_ == Option.CUSTOM_GUIS)
-         {
-             return this.ofCustomGuis ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.SHOW_GL_ERRORS)
-+        else if (p_getKeyBindingOF_1_ == Option.SHOW_GL_ERRORS)
-         {
-             return this.ofShowGlErrors ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.HELD_ITEM_TOOLTIPS)
-+        else if (p_getKeyBindingOF_1_ == Option.HELD_ITEM_TOOLTIPS)
-         {
-             return this.heldItemTooltips ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.ADVANCED_TOOLTIPS)
-+        else if (p_getKeyBindingOF_1_ == Option.ADVANCED_TOOLTIPS)
-         {
-             return this.advancedItemTooltips ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions == Option.FRAMERATE_LIMIT)
-+        else if (p_getKeyBindingOF_1_ == Option.FRAMERATE_LIMIT)
-         {
-             double d1 = Option.FRAMERATE_LIMIT.get(this);
- 
-@@ -1950,7 +1955,7 @@
-                 return d1 == Option.FRAMERATE_LIMIT.getMaxValue() ? s + I18n.m_118938_("options.framerateLimit.max") : s + (int)d1 + " fps";
-             }
-         }
--        else if (par1EnumOptions == Option.CHAT_BACKGROUND)
-+        else if (p_getKeyBindingOF_1_ == Option.CHAT_BACKGROUND)
-         {
-             if (this.ofChatBackground == 3)
-             {
-@@ -1961,13 +1966,13 @@
-                 return this.ofChatBackground == 5 ? s + Lang.get("of.general.compact") : s + Lang.getDefault();
-             }
-         }
--        else if (par1EnumOptions == Option.CHAT_SHADOW)
-+        else if (p_getKeyBindingOF_1_ == Option.CHAT_SHADOW)
-         {
-             return this.ofChatShadow ? s + Lang.getOn() : s + Lang.getOff();
-         }
--        else if (par1EnumOptions instanceof ProgressOption)
-+        else if (p_getKeyBindingOF_1_ instanceof ProgressOption)
-         {
--            ProgressOption progressoption = (ProgressOption)par1EnumOptions;
-+            ProgressOption progressoption = (ProgressOption)p_getKeyBindingOF_1_;
-             double d0 = progressoption.get(this);
-             return d0 == 0.0D ? s + I18n.m_118938_("options.off") : s + (int)(d0 * 100.0D) + "%";
-         }
-@@ -2396,16 +2401,19 @@
+@@ -2341,16 +2346,19 @@
                          this.ofKeyBindZoom.setKey(InputConstants.getKey(astring[1]));
                      }
                  }
@@ -1100,7 +627,7 @@
          }
          catch (Exception exception11)
          {
-@@ -2492,10 +2500,10 @@
+@@ -2435,10 +2443,10 @@
              printwriter.println("key_" + this.ofKeyBindZoom.getName() + ":" + this.ofKeyBindZoom.saveString());
              printwriter.close();
          }
@@ -1113,7 +640,7 @@
          }
      }
  
-@@ -2556,7 +2564,7 @@
+@@ -2500,7 +2508,7 @@
          this.renderClouds = CloudStatus.FANCY;
          this.fov = 70.0D;
          this.gamma = 0.0D;
@@ -1122,7 +649,7 @@
          this.particles = ParticleStatus.ALL;
          this.heldItemTooltips = true;
          this.forceUnicodeFont = false;
-@@ -2569,7 +2577,7 @@
+@@ -2514,7 +2522,7 @@
          Config.updateAvailableProcessors();
          this.ofSmoothWorld = Config.isSingleProcessor();
          this.ofLazyChunkLoading = false;
@@ -1130,8 +657,8 @@
 +        this.ofRenderRegions = true;
          this.ofFastMath = false;
          this.ofFastRender = false;
-         this.ofTranslucentBlocks = 0;
-@@ -2653,61 +2661,61 @@
+         this.ofDynamicFov = true;
+@@ -2597,61 +2605,61 @@
          this.minecraft.delayTextureReload();
      }
  
@@ -1222,60 +749,3 @@
              {
                  return i;
              }
-@@ -2716,37 +2724,34 @@
-         return -1;
-     }
- 
--    private static String getTranslation(String[] strArray, int index)
-+    private static String getTranslation(String[] p_getTranslation_0_, int p_getTranslation_1_)
-     {
--        if (index < 0 || index >= strArray.length)
-+        if (p_getTranslation_1_ < 0 || p_getTranslation_1_ >= p_getTranslation_0_.length)
-         {
--            index = 0;
-+            p_getTranslation_1_ = 0;
-         }
- 
--        return I18n.m_118938_(strArray[index]);
-+        return I18n.m_118938_(p_getTranslation_0_[p_getTranslation_1_]);
-     }
- 
-     private void setForgeKeybindProperties()
-     {
--        if (Reflector.KeyConflictContext_IN_GAME.exists())
-+        if (Reflector.KeyConflictContext_IN_GAME.exists() && Reflector.ForgeKeyBinding_setKeyConflictContext.exists())
-         {
--            if (Reflector.ForgeKeyBinding_setKeyConflictContext.exists())
--            {
--                Object object = Reflector.getFieldValue(Reflector.KeyConflictContext_IN_GAME);
--                Reflector.call(this.keyUp, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyLeft, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyDown, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyRight, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyJump, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyShift, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keySprint, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyAttack, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyChat, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyPlayerList, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyCommand, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keyTogglePerspective, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--                Reflector.call(this.keySmoothCamera, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
--            }
-+            Object object = Reflector.getFieldValue(Reflector.KeyConflictContext_IN_GAME);
-+            Reflector.call(this.keyUp, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyLeft, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyDown, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyRight, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyJump, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyShift, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keySprint, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyAttack, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyChat, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyPlayerList, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyCommand, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keyTogglePerspective, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-+            Reflector.call(this.keySmoothCamera, Reflector.ForgeKeyBinding_setKeyConflictContext, object);
-         }
-     }
- 

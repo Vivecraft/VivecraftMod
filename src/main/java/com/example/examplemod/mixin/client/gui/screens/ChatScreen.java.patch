@@ -7,7 +7,7 @@
 -
 -            this.minecraft.setScreen((Screen)null);
 +            //Vivecraft
-+            if (this.minecraft.vrSettings.seated)
++            if (this.dataholder.vrSettings.seated)
 +            {
 +                this.minecraft.setScreen((Screen)null);
 +            }

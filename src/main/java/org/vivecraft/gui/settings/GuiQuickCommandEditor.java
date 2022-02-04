@@ -1,8 +1,7 @@
 package org.vivecraft.gui.settings;
 
-import org.vivecraft.gui.framework.GuiVROptionsBase;
-
 import net.minecraft.client.gui.screens.Screen;
+import org.vivecraft.gui.framework.GuiVROptionsBase;
 
 public class GuiQuickCommandEditor extends GuiVROptionsBase
 {

@@ -315,7 +315,7 @@ public class SwingTracker extends Tracker
 
     private void clearBlockHitDelay()
     {
-        MCReflection.PlayerController_blockHitDelay.set(Minecraft.getInstance().gameMode, 0);
+        //MCReflection.PlayerController_blockHitDelay.set(Minecraft.getInstance().gameMode, 0);
         MCReflection.PlayerController_blocknoise.set(Minecraft.getInstance().gameMode, 1);
     }
 

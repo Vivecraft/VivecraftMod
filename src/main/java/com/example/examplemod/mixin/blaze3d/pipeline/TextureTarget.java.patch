@@ -1,8 +1,8 @@
 --- a/com/mojang/blaze3d/pipeline/TextureTarget.java
 +++ b/com/mojang/blaze3d/pipeline/TextureTarget.java
 @@ -10,4 +10,11 @@
-         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-         this.resize(p_166213_, p_166214_, p_166216_);
+         RenderSystem.assertOnRenderThreadOrInit();
+         this.resize(pWidth, pHeight, pClearError);
      }
 +    
 +    //Vivecraft extended constructor. TODO: custom rendertarget impl?

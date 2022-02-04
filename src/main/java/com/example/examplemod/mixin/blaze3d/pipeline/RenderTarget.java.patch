@@ -12,13 +12,7 @@
  import net.minecraft.Util;
  import net.minecraft.client.Minecraft;
  import net.minecraft.client.renderer.ShaderInstance;
-@@ -31,13 +36,24 @@
-     public int frameBufferId;
-     protected int colorTextureId;
-     protected int depthBufferId;
--    private final float[] clearChannels = Util.make(() ->
-+	private final float[] clearChannels = Util.make(() ->
-     {
+@@ -36,8 +41,19 @@
          return new float[]{1.0F, 1.0F, 1.0F, 0.0F};
      });
      public int filterMode;
@@ -37,9 +31,9 @@
 +		this.depthBufferId = depthBufferId;
 +	}
 +    ////
-     public RenderTarget(boolean p_166199_)
+     public RenderTarget(boolean pUseDepth)
      {
-         this.useDepth = p_166199_;
+         this.useDepth = pUseDepth;
 @@ -143,14 +159,26 @@
              else
              {
@@ -120,55 +114,52 @@
 +    	pSetViewport = true;
          if (GLX.isUsingFBOs())
          {
-             RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+             RenderSystem.assertOnRenderThreadOrInit();
 @@ -329,8 +367,8 @@
      {
          this.blitToScreen(pWidth, pHeight, true);
      }
 -
--    public void blitToScreen(int pWidth, int pHeight, boolean p_83960_)
+-    public void blitToScreen(int pWidth, int pHeight, boolean pDisableBlend)
 +	//Vivecraft add x/y offsets
 +    public void blitToScreen(int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect)
      {
-         RenderSystem.assertThread(RenderSystem::isOnGameThreadOrInit);
+         RenderSystem.assertOnGameThreadOrInit();
  
 @@ -338,16 +376,18 @@
          {
              RenderSystem.recordRenderCall(() ->
              {
--                this._blitToScreen(pWidth, pHeight, p_83960_);
+-                this._blitToScreen(pWidth, pHeight, pDisableBlend);
 +                this._blitToScreen(left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
              });
          }
          else
          {
--            this._blitToScreen(pWidth, pHeight, p_83960_);
+-            this._blitToScreen(pWidth, pHeight, pDisableBlend);
 +            this._blitToScreen(left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
          }
      }
  
--    private void _blitToScreen(int pWidth, int pHeight, boolean p_83974_)
+-    private void _blitToScreen(int pWidth, int pHeight, boolean pDisableBlend)
 +    public boolean blitLegacy = false;
 +    
-+    private void _blitToScreen(int left, int width, int height, int top, boolean p_227588_3_, float xCropFactor, float yCropFactor, boolean keepAspect)
++    private void _blitToScreen(int left, int width, int height, int top, boolean pDisableBlend, float xCropFactor, float yCropFactor, boolean keepAspect)
      {
          if (GLX.isUsingFBOs())
          {
-@@ -355,44 +395,101 @@
+@@ -355,7 +395,7 @@
              GlStateManager._colorMask(true, true, true, false);
              GlStateManager._disableDepthTest();
              GlStateManager._depthMask(false);
 -            GlStateManager._viewport(0, 0, pWidth, pHeight);
-+            
 +            GlStateManager._viewport(left, top, width, height);
  
--            if (p_83974_)
-+            if (p_227588_3_)
+             if (pDisableBlend)
              {
-                 GlStateManager._disableBlend();
+@@ -363,36 +403,92 @@
              }
--
-+            
+ 
              Minecraft minecraft = Minecraft.getInstance();
 -            ShaderInstance shaderinstance = minecraft.gameRenderer.blitShader;
 -            shaderinstance.setSampler("DiffuseSampler", this.colorTextureId);
@@ -289,15 +280,14 @@
              GlStateManager._depthMask(true);
              GlStateManager._colorMask(true, true, true, true);
          }
-@@ -425,17 +522,52 @@
+@@ -425,17 +521,52 @@
          return this.depthBufferId;
      }
  
 -    public void enableStencil()
 +    public RenderTarget(String name, int width, int height, boolean usedepth, boolean onMac, int texid, boolean depthtex, boolean linearFilter)
-     {
--        if (!this.stencilEnabled)
-+        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
++    {
++        RenderSystem.assertOnRenderThreadOrInit();
 +        this.name = name;
 +        this.texid = texid;
 +        this.linearFilter = linearFilter;
@@ -309,7 +299,8 @@
 +    }
 +
 +    public void genMipMaps()
-+    {
+     {
+-        if (!this.stencilEnabled)
 +        GL30.glGenerateMipmap(3553);
 +    }
 +

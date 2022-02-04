@@ -1,50 +1,17 @@
 --- a/com/mojang/blaze3d/platform/GlStateManager.java
 +++ b/com/mojang/blaze3d/platform/GlStateManager.java
-@@ -40,7 +40,7 @@
- public class GlStateManager
+@@ -42,7 +42,7 @@
  {
+     private static final boolean ON_LINUX = Util.getPlatform() == Util.OS.LINUX;
      public static final int TEXTURE_COUNT = 12;
 -    private static final GlStateManager.BlendState BLEND = new GlStateManager.BlendState();
 +    public static final GlStateManager.BlendState BLEND = new GlStateManager.BlendState();
      private static final GlStateManager.DepthState DEPTH = new GlStateManager.DepthState();
      private static final GlStateManager.CullState CULL = new GlStateManager.CullState();
      private static final GlStateManager.PolygonOffsetState POLY_OFFSET = new GlStateManager.PolygonOffsetState();
-@@ -225,22 +225,19 @@
-         {
-             blendLockState.setFactors(pSrcFactor, pDstFactor);
-         }
--        else
-+        else if (pSrcFactor != BLEND.srcRgb || pDstFactor != BLEND.dstRgb || pSrcFactor != BLEND.srcAlpha || pDstFactor != BLEND.dstAlpha)
-         {
--            if (pSrcFactor != BLEND.srcRgb || pDstFactor != BLEND.dstRgb || pSrcFactor != BLEND.srcAlpha || pDstFactor != BLEND.dstAlpha)
--            {
--                BLEND.srcRgb = pSrcFactor;
--                BLEND.dstRgb = pDstFactor;
--                BLEND.srcAlpha = pSrcFactor;
--                BLEND.dstAlpha = pDstFactor;
--
--                if (Config.isShaders())
--                {
--                    Shaders.uniform_blendFunc.setValue(pSrcFactor, pDstFactor, pSrcFactor, pDstFactor);
--                }
-+            BLEND.srcRgb = pSrcFactor;
-+            BLEND.dstRgb = pDstFactor;
-+            BLEND.srcAlpha = pSrcFactor;
-+            BLEND.dstAlpha = pDstFactor;
- 
--                GL11.glBlendFunc(pSrcFactor, pDstFactor);
-+            if (Config.isShaders())
-+            {
-+                Shaders.uniform_blendFunc.setValue(pSrcFactor, pDstFactor, pSrcFactor, pDstFactor);
-             }
-+
-+            GL11.glBlendFunc(pSrcFactor, pDstFactor);
-         }
-     }
- 
-@@ -248,26 +245,30 @@
+@@ -250,26 +250,30 @@
      {
-         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+         RenderSystem.assertOnRenderThread();
  
 +        // VIVECRAFT: correct bad blend function that trashes alpha channel
 +        if (pSrcFactor == GlStateManager.SourceFactor.SRC_ALPHA.value && pDstFactor == GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value && pSrcFactorAlpha == GlStateManager.SourceFactor.ONE.value && pDstFactorAlpha == GlStateManager.DestFactor.ZERO.value)
@@ -66,16 +33,16 @@
 -                BLEND.dstRgb = pDstFactor;
 -                BLEND.srcAlpha = pSrcFactorAlpha;
 -                BLEND.dstAlpha = pDstFactorAlpha;
+-
+-                if (Config.isShaders())
+-                {
+-                    Shaders.uniform_blendFunc.setValue(pSrcFactor, pDstFactor, pSrcFactorAlpha, pDstFactorAlpha);
+-                }
 +            BLEND.srcRgb = pSrcFactor;
 +            BLEND.dstRgb = pDstFactor;
 +            BLEND.srcAlpha = pSrcFactorAlpha;
 +            BLEND.dstAlpha = pDstFactorAlpha;
  
--                if (Config.isShaders())
--                {
--                    Shaders.uniform_blendFunc.setValue(pSrcFactor, pDstFactor, pSrcFactorAlpha, pDstFactorAlpha);
--                }
--
 -                glBlendFuncSeparate(pSrcFactor, pDstFactor, pSrcFactorAlpha, pDstFactorAlpha);
 +            if (Config.isShaders())
 +            {
@@ -86,16 +53,7 @@
          }
      }
  
-@@ -642,6 +643,8 @@
-     public static void _glDeleteFramebuffers(int pFrameBuffer)
-     {
-         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-+        if(pFrameBuffer == framebufferDraw) framebufferDraw = 0;
-+        if(pFrameBuffer == framebufferRead) framebufferRead = 0;
-         GL30.glDeleteFramebuffers(pFrameBuffer);
-     }
- 
-@@ -894,11 +897,11 @@
+@@ -904,11 +908,11 @@
  
              GL11.glDeleteTextures(pTexture);
  
@@ -110,66 +68,7 @@
                  }
              }
          }
-@@ -908,13 +911,13 @@
-     {
-         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
- 
--        for (GlStateManager.TextureState glstatemanager$texturestate : TEXTURES)
-+        for (GlStateManager.TextureState GlStateManager$texturestate : TEXTURES)
-         {
-             for (int i : p_84366_)
-             {
--                if (glstatemanager$texturestate.binding == i)
-+                if (GlStateManager$texturestate.binding == i)
-                 {
--                    glstatemanager$texturestate.binding = -1;
-+                    GlStateManager$texturestate.binding = -1;
-                 }
-             }
-         }
-@@ -1200,32 +1203,29 @@
-             int k = getActiveTextureUnit();
-             int l = getBoundTexture();
- 
--            if (l > 0)
-+            if (l > 0 && (i != k || j != l))
-             {
--                if (i != k || j != l)
--                {
--                    Config.dbg("checkTexture: act: " + k + ", glAct: " + i + ", tex: " + l + ", glTex: " + j);
--                }
-+                Config.dbg("checkTexture: act: " + k + ", glAct: " + i + ", tex: " + l + ", glTex: " + j);
-             }
-         }
-     }
- 
--    public static void genTextures(IntBuffer buf)
-+    public static void genTextures(IntBuffer p_genTextures_0_)
-     {
--        GL11.glGenTextures(buf);
-+        GL11.glGenTextures(p_genTextures_0_);
-     }
- 
--    public static void deleteTextures(IntBuffer buf)
-+    public static void deleteTextures(IntBuffer p_deleteTextures_0_)
-     {
--        ((Buffer)buf).rewind();
-+        ((Buffer)p_deleteTextures_0_).rewind();
- 
--        while (buf.position() < buf.limit())
-+        while (p_deleteTextures_0_.position() < p_deleteTextures_0_.limit())
-         {
--            int i = buf.get();
-+            int i = p_deleteTextures_0_.get();
-             _deleteTexture(i);
-         }
- 
--        ((Buffer)buf).rewind();
-+        ((Buffer)p_deleteTextures_0_).rewind();
-     }
- 
-     public static void lockAlpha(GlAlphaState stateNew)
-@@ -1289,45 +1289,45 @@
+@@ -1299,45 +1303,45 @@
          }
      }
  
@@ -226,7 +125,7 @@
              cullLock.lock();
          }
      }
-@@ -1340,34 +1340,34 @@
+@@ -1350,34 +1354,34 @@
          }
      }
  
@@ -270,7 +169,7 @@
  
          if (Config.isShaders())
          {
-@@ -1378,7 +1378,7 @@
+@@ -1388,7 +1392,7 @@
                  for (int j = 1; j < i; ++j)
                  {
                      Shaders.uniform_instanceId.setValue(j);
@@ -279,7 +178,7 @@
                  }
  
                  Shaders.uniform_instanceId.setValue(0);
-@@ -1423,9 +1423,9 @@
+@@ -1433,9 +1437,9 @@
          GL31.glCopyBufferSubData(readTarget, writeTarget, readOffset, writeOffset, size);
      }
  
@@ -291,7 +190,7 @@
      }
  
      public static int getFramebufferRead()
-@@ -1452,13 +1452,13 @@
+@@ -1462,13 +1466,13 @@
          GL14.glBlendFuncSeparate(BLEND.srcRgb, BLEND.dstRgb, BLEND.srcAlpha, BLEND.dstAlpha);
      }
  
@@ -309,7 +208,7 @@
  
                  if (glblendstate != null)
                  {
-@@ -1477,19 +1477,19 @@
+@@ -1487,19 +1491,19 @@
          }
      }
  
@@ -334,7 +233,7 @@
      }
  
      public static int getProgram()
-@@ -1497,7 +1497,7 @@
+@@ -1507,7 +1511,7 @@
          return glProgram;
      }
  
@@ -343,7 +242,7 @@
      {
          public final GlStateManager.BooleanState mode = new GlStateManager.BooleanState(3042);
          public int srcRgb = 1;
-@@ -1717,4 +1717,46 @@
+@@ -1727,4 +1731,46 @@
              return INSTANCE.height;
          }
      }

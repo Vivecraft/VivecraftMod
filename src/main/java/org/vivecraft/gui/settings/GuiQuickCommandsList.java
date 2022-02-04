@@ -9,9 +9,11 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsList.CommandEntry>
 {
+	protected DataHolder dataholder = DataHolder.getInstance();
     private final GuiQuickCommandEditor parent;
     private final Minecraft mc;
 
@@ -20,7 +22,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         super(mc, parent.width, parent.height, 32, parent.height - 32, 20);
         this.parent = parent;
         this.mc = mc;
-        String[] astring = DataHolder.getInstance().vrSettings.vrQuickCommands;
+        String[] astring = this.dataholder.vrSettings.vrQuickCommands;
         String s = null;
         int i = 0;
 
@@ -40,7 +42,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         {
             this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, new TextComponent(""));
             this.txt.setValue(command);
-            this.btnDelete = new Button(0, 0, 18, 18, new TextComponent("X"), (p) ->
+            this.btnDelete = new Button(0, 0, 18, 18,  new TranslatableComponent("X"), (p) ->
             {
                 this.txt.setValue("");
                 this.txt.changeFocus(true);

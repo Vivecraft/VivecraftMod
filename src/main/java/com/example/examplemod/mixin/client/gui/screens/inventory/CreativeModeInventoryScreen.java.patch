@@ -8,7 +8,7 @@
  
  public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu>
  {
-@@ -464,6 +465,7 @@
+@@ -453,6 +454,7 @@
              (this.menu).items.addAll(searchtree.search(s.toLowerCase(Locale.ROOT)));
          }
  
@@ -16,7 +16,7 @@
          this.scrollOffs = 0.0F;
          this.menu.scrollTo(0.0F);
      }
-@@ -602,6 +604,7 @@
+@@ -591,6 +593,7 @@
          else if (pTab != CreativeModeTab.TAB_SEARCH)
          {
              pTab.fillItemList((this.menu).items);

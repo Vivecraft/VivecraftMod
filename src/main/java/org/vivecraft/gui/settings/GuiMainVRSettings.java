@@ -1,11 +1,10 @@
 package org.vivecraft.gui.settings;
 
+import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.gui.framework.VROptionLayout;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.settings.VRSettings;
-
-import net.minecraft.client.gui.screens.Screen;
 
 public class GuiMainVRSettings extends GuiVROptionsBase
 {

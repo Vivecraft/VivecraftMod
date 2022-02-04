@@ -2,7 +2,6 @@ package org.vivecraft.gui.framework;
 
 import java.util.function.BiFunction;
 
-//import net.optifine.Lang;
 import org.vivecraft.settings.VRSettings;
 
 import com.example.examplemod.DataHolder;
@@ -132,9 +131,7 @@ public class VROptionLayout
 
     public String getButtonText()
     {
-        //return this._title.isEmpty() && this._e != null ? DataHolder.getInstance().vrSettings.getButtonDisplayString(this._e) : Lang.get(this._title); TODO
         return this._title.isEmpty() && this._e != null ? DataHolder.getInstance().vrSettings.getButtonDisplayString(this._e) : this._title;
-
     }
 
     public VRSettings.VrOptions getOption()

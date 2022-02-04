@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/main/Main.java
 +++ b/net/minecraft/client/main/Main.java
-@@ -40,7 +40,10 @@
+@@ -44,7 +44,10 @@
  public class Main
  {
      static final Logger LOGGER = LogManager.getLogger();
@@ -10,9 +10,9 @@
 +    public static boolean katvr;
 +    public static boolean infinadeck;
      @DontObfuscate
-     public static void main(String[] p_129642_)
+     public static void main(String[] pArgs)
      {
-@@ -50,6 +53,11 @@
+@@ -54,6 +57,11 @@
          optionparser.accepts("demo");
          optionparser.accepts("disableMultiplayer");
          optionparser.accepts("disableChat");
@@ -23,20 +23,20 @@
 +        optionparser.accepts("infinadeck");
          optionparser.accepts("fullscreen");
          optionparser.accepts("checkGlErrors");
-         OptionSpec<String> optionspec = optionparser.accepts("server").withRequiredArg();
-@@ -65,8 +73,8 @@
-         OptionSpec<String> optionspec10 = optionparser.accepts("uuid").withRequiredArg();
-         OptionSpec<String> optionspec11 = optionparser.accepts("accessToken").withRequiredArg().required();
-         OptionSpec<String> optionspec12 = optionparser.accepts("version").withRequiredArg().required();
--        OptionSpec<Integer> optionspec13 = optionparser.accepts("width").withRequiredArg().ofType(Integer.class).defaultsTo(854);
--        OptionSpec<Integer> optionspec14 = optionparser.accepts("height").withRequiredArg().ofType(Integer.class).defaultsTo(480);
-+        OptionSpec<Integer> optionspec13 = optionparser.accepts("width").withRequiredArg().ofType(Integer.class).defaultsTo(1280);
-+        OptionSpec<Integer> optionspec14 = optionparser.accepts("height").withRequiredArg().ofType(Integer.class).defaultsTo(720);
-         OptionSpec<Integer> optionspec15 = optionparser.accepts("fullscreenWidth").withRequiredArg().ofType(Integer.class);
-         OptionSpec<Integer> optionspec16 = optionparser.accepts("fullscreenHeight").withRequiredArg().ofType(Integer.class);
-         OptionSpec<String> optionspec17 = optionparser.accepts("userProperties").withRequiredArg().defaultsTo("{}");
-@@ -117,6 +125,25 @@
-         OptionalInt optionalint1 = ofNullable(parseArgument(optionset, optionspec16));
+         OptionSpec<Void> optionspec = optionparser.accepts("jfrProfile");
+@@ -72,8 +80,8 @@
+         OptionSpec<String> optionspec13 = optionparser.accepts("clientId").withOptionalArg().defaultsTo("");
+         OptionSpec<String> optionspec14 = optionparser.accepts("accessToken").withRequiredArg().required();
+         OptionSpec<String> optionspec15 = optionparser.accepts("version").withRequiredArg().required();
+-        OptionSpec<Integer> optionspec16 = optionparser.accepts("width").withRequiredArg().ofType(Integer.class).defaultsTo(854);
+-        OptionSpec<Integer> optionspec17 = optionparser.accepts("height").withRequiredArg().ofType(Integer.class).defaultsTo(480);
++        OptionSpec<Integer> optionspec16 = optionparser.accepts("width").withRequiredArg().ofType(Integer.class).defaultsTo(1280);
++        OptionSpec<Integer> optionspec17 = optionparser.accepts("height").withRequiredArg().ofType(Integer.class).defaultsTo(720);
+         OptionSpec<Integer> optionspec18 = optionparser.accepts("fullscreenWidth").withRequiredArg().ofType(Integer.class);
+         OptionSpec<Integer> optionspec19 = optionparser.accepts("fullscreenHeight").withRequiredArg().ofType(Integer.class);
+         OptionSpec<String> optionspec20 = optionparser.accepts("userProperties").withRequiredArg().defaultsTo("{}");
+@@ -124,6 +132,25 @@
+         OptionalInt optionalint1 = ofNullable(parseArgument(optionset, optionspec19));
          boolean flag = optionset.has("fullscreen");
          boolean flag1 = optionset.has("demo");
 +        kiosk = optionset.has("kiosk");
@@ -60,16 +60,16 @@
 +        infinadeck = optionset.has("infinadeck");
          boolean flag2 = optionset.has("disableMultiplayer");
          boolean flag3 = optionset.has("disableChat");
-         String s3 = parseArgument(optionset, optionspec12);
-@@ -174,6 +201,7 @@
+         String s3 = parseArgument(optionset, optionspec15);
+@@ -196,6 +223,7 @@
          }
          catch (Throwable throwable1)
          {
 +            LOGGER.warn("Failed to something: ", throwable1);
              CrashReport crashreport = CrashReport.forThrowable(throwable1, "Initializing game");
-             crashreport.addCategory("Initialization");
-             Minecraft.fillReport((Minecraft)null, (LanguageManager)null, gameconfig.game.launchVersion, (Options)null, crashreport);
-@@ -232,9 +260,9 @@
+             CrashReportCategory crashreportcategory = crashreport.addCategory("Initialization");
+             NativeModuleLister.addCrashSection(crashreportcategory);
+@@ -255,9 +283,9 @@
                  thread1.join();
              }
          }
@@ -81,13 +81,11 @@
          }
          finally
          {
-@@ -275,9 +303,4 @@
+@@ -307,6 +335,6 @@
+     static
      {
-         return pStr != null && !pStr.isEmpty();
-     }
--
--    static
--    {
+         Util.preInitLog4j();
 -        System.setProperty("java.awt.headless", "true");
--    }
++        //Vivecraft we do this for some reason. System.setProperty("java.awt.headless", "true");
+     }
  }

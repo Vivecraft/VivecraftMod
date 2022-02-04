@@ -1659,7 +1659,7 @@ public abstract class GameRendererVRMixin
 //			this.renderVrShadow(partialTicks, false, pMatrix);
 //
 //			if (KeyboardHandler.Showing) {
-//				if (this.minecraft.vrSettings.physicalKeyboard) {
+//				if (this.dataholder.vrSettings.physicalKeyboard) {
 //					this.renderPhysicalKeyboard(partialTicks, pMatrix);
 //				} else {
 //					this.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
@@ -1681,7 +1681,7 @@ public abstract class GameRendererVRMixin
 //			this.renderVrShadow(partialTicks, false, pMatrix);
 //
 //			if (KeyboardHandler.Showing) {
-//				if (this.minecraft.vrSettings.physicalKeyboard) {
+//				if (this.dataholder.vrSettings.physicalKeyboard) {
 //					this.renderPhysicalKeyboard(partialTicks, pMatrix);
 //				} else {
 //					this.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,

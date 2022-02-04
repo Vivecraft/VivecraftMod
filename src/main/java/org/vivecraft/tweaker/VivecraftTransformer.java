@@ -5,6 +5,8 @@
 //import cpw.mods.modlauncher.api.ITransformerActivity;
 //import cpw.mods.modlauncher.api.ITransformerVotingContext;
 //import cpw.mods.modlauncher.api.TransformerVoteResult;
+//import optifine.AccessFixer;
+//import optifine.Utils;
 //import cpw.mods.modlauncher.api.ITransformer.Target;
 //import java.io.ByteArrayInputStream;
 //import java.io.IOException;
@@ -17,8 +19,6 @@
 //import java.util.Set;
 //import java.util.zip.ZipEntry;
 //import java.util.zip.ZipFile;
-//import optifine.AccessFixer;
-//import optifine.Utils;
 //import org.apache.logging.log4j.LogManager;
 //import org.apache.logging.log4j.Logger;
 //import org.objectweb.asm.ClassReader;
@@ -49,16 +49,16 @@
 //    public Set<Target> targets()
 //    {
 //        Set<Target> set = new HashSet<>();
-//        String[] astring = this.getNamesMatching("srg/", ".clsrg");
+//        String[] astring = this.getNamesMatching("vcsrg", ".clsrg");
 //
 //        for (int i = 0; i < astring.length; ++i)
 //        {
 //            String s = astring[i];
-//            s = Utils.removePrefix(s, new String[] {"srg/"});
+//            s = Utils.removePrefix(s, new String[] {"vcsrg/"});
 //            s = Utils.removeSuffix(s, new String[] {".clsrg"});
 //            Target target = Target.targetPreClass(s);
 //
-//            if (!this.exclusions.contains(s))
+//            if (!this.exclusions.contains(s) && !s.contains("minecraftforge"))
 //            {
 //                set.add(target);
 //            }
@@ -73,7 +73,7 @@
 //        ClassNode classnode = input;
 //        String s = context.getClassName();
 //        String s1 = s.replace('.', '/');
-//        byte[] abyte = this.getResourceBytes("srg/" + s1 + ".clsrg");
+//        byte[] abyte = this.getResourceBytes(s1 + ".clsrg");
 //
 //        if (abyte != null)
 //        {

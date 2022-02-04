@@ -31,8 +31,8 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
         super(p_170821_, p_170822_);
         this.slim = p_170822_;
         this.vrHMD = p_170821_.getChild("vrHMD");
-        //this.vrHMD.setTextureSize(16, 16);
-        //this.vrHMD.setTextureLocation(BLACK_HMD);       
+//        this.vrHMD.setTextureSize(16, 16);
+//        this.vrHMD.setTextureLocation(BLACK_HMD);       
         this.parts = p_170821_.getAllParts().filter((p_170824_) ->
         {
             return !p_170824_.isEmpty();
@@ -81,27 +81,27 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
 
     	this.vrHMD.visible = true;
 
-    	switch (rotinfo.hmd)
-    	{
-    	case 0:
-    		//this.vrHMD.visible = false;
-    		break;
-
-    	case 1:
-    		//this.vrHMD.setTextureLocation(this.BLACK_HMD);
-    		break;
-
-    	case 2:
-    		//this.vrHMD.setTextureLocation(this.GOLD_HMD);
-    		break;
-
-    	case 3:
-    		//this.vrHMD.setTextureLocation(this.DIAMOND_HMD);
-    		break;
-
-    	case 4:
-    		//this.vrHMD.setTextureLocation(this.DIAMOND_HMD);
-    	}
+//    	switch (rotinfo.hmd)
+//    	{
+//    	case 0:
+//    		this.vrHMD.visible = false;
+//    		break;
+//
+//    	case 1:
+//    		this.vrHMD.setTextureLocation(this.BLACK_HMD);
+//    		break;
+//
+//    	case 2:
+//    		this.vrHMD.setTextureLocation(this.GOLD_HMD);
+//    		break;
+//
+//    	case 3:
+//    		this.vrHMD.setTextureLocation(this.DIAMOND_HMD);
+//    		break;
+//
+//    	case 4:
+//    		this.vrHMD.setTextureLocation(this.DIAMOND_HMD);
+//    	}
 
     	this.vrHMD.copyFrom(this.head);
         this.hat.copyFrom(this.head);

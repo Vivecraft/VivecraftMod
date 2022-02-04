@@ -301,7 +301,7 @@ public class GuiHandler
     {
         if (unpressKeys)
         {
-        	dh.vr.ignorePressesNextFrame = true;
+            dh.vr.ignorePressesNextFrame = true;
         }
 
         if (newScreen == null)
@@ -324,17 +324,17 @@ public class GuiHandler
         {
             if (dh.vrSettings.worldRotationCached != 0.0F)
             {
-            	dh.vrSettings.worldRotation = dh.vrSettings.worldRotationCached;
-            	dh.vrSettings.worldRotationCached = 0.0F;
+                dh.vrSettings.worldRotation = dh.vrSettings.worldRotationCached;
+                dh.vrSettings.worldRotationCached = 0.0F;
             }
         }
         else
         {
-        	dh.vrSettings.worldRotationCached = dh.vrSettings.worldRotation;
-        	dh.vrSettings.worldRotation = 0.0F;
+            dh.vrSettings.worldRotationCached = dh.vrSettings.worldRotation;
+            dh.vrSettings.worldRotation = 0.0F;
         }
 
-        boolean flag = mc.gameRenderer == null || ((GameRendererExtension)mc.gameRenderer).isInMenuRoom();
+        boolean flag = mc.gameRenderer == null || ((GameRendererExtension) mc.gameRenderer).isInMenuRoom();
         flag = flag & (!dh.vrSettings.seated && !dh.vrSettings.menuAlwaysFollowFace);
 
         if (flag)
@@ -456,7 +456,7 @@ public class GuiHandler
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY(((float)Math.PI / 10F) * (float)i));
                         scale = 0.58823526F;
                         guilocal = new Vec3(guilocal.x, 0.32D * (double)dh.vrPlayer.vrdata_world_render.worldScale, guilocal.z);
-                        guipos = ((GameRendererExtension)mc.gameRenderer).getControllerRenderPos(1);
+                        guipos = ((GameRendererExtension) mc.gameRenderer).getControllerRenderPos(1);
                         dh.vr.hudPopup = true;
                     }
                     else if (dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST)
@@ -466,7 +466,7 @@ public class GuiHandler
                         guirot = Matrix4f.multiply(matrix4f8, matrix4f6);
                         guirot = Matrix4f.multiply(guirot, Utils.rotationZMatrix(((float)Math.PI / 2F) * (float)i));
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY(0.9424779F * (float)i));
-                        guipos = ((GameRendererExtension)mc.gameRenderer).getControllerRenderPos(1);
+                        guipos = ((GameRendererExtension) mc.gameRenderer).getControllerRenderPos(1);
                         dh.vr.hudPopup = true;
                         boolean flag = mc.player.getModelName().equals("slim");
                         scale = 0.4F;
@@ -502,7 +502,7 @@ public class GuiHandler
             guirot = Matrix4f.multiply(matrix4f4, guirot);
         }
 
-        if ((dh.vrSettings.seated || dh.vrSettings.menuAlwaysFollowFace) && ((GameRendererExtension)mc.gameRenderer).isInMenuRoom())
+        if ((dh.vrSettings.seated || dh.vrSettings.menuAlwaysFollowFace) && ((GameRendererExtension) mc.gameRenderer).isInMenuRoom())
         {
             scale = 2.0F;
             Vec3 vec35 = new Vec3(0.0D, 0.0D, 0.0D);
@@ -523,7 +523,7 @@ public class GuiHandler
             f1 = f1 / (float)dh.vr.hmdYawSamples.size();
             f1 = (float)Math.toRadians((double)f1);
             Vec3 vec38 = new Vec3(-Math.sin((double)f1), 0.0D, Math.cos((double)f1));
-            float f4 = ((GameRendererExtension)mc.gameRenderer).isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
+            float f4 = ((GameRendererExtension) mc.gameRenderer).isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
             Vec3 vec39 = vec35.add(new Vec3(vec38.x * (double)f4, vec38.y * (double)f4, vec38.z * (double)f4));
             Vec3 vec310 = new Vec3(vec39.x, vec39.y, vec39.z);
             Matrix4f matrix4f3 = Matrix4f.rotationY(135.0F - f1);
@@ -535,7 +535,7 @@ public class GuiHandler
             guiPos_room = vec310;
         }
 
-        //GL11.glMultMatrixf(mc.vrPlayer.vrdata_world_render.getEye(currentPass).getMatrix().toFloatBuffer());
+        //GL11.glMultMatrixf(dh.vrPlayer.vrdata_world_render.getEye(currentPass).getMatrix().toFloatBuffer());
         
         Vec3 vec36 = guipos.subtract(vec3);
         pMatrixStack.translate(vec36.x, vec36.y, vec36.z);

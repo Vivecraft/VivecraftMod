@@ -8,6 +8,7 @@ import org.vivecraft.utils.math.Vector3;
 
 import com.example.examplemod.DataHolder;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 
 public class VRData
@@ -29,7 +30,8 @@ public class VRData
 
     public VRData(Vec3 origin, float walkMul, float worldScale, float rotation)
     {
-    	DataHolder dataholder = DataHolder.getInstance();
+        Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
         this.origin = origin;
         this.worldScale = worldScale;
         this.rotation_radians = rotation;
@@ -72,7 +74,9 @@ public class VRData
 
     private Matrix4f getSmoothedRotation(int c, float lenSec)
     {
-    	DataHolder dataholder = DataHolder.getInstance();
+        Minecraft minecraft = Minecraft.getInstance();
+        DataHolder dataholder = DataHolder.getInstance();
+
         Vec3 vec3 = dataholder.vr.controllerHistory[c].averagePosition((double)lenSec);
         Vec3 vec31 = dataholder.vr.controllerForwardHistory[c].averagePosition((double)lenSec);
         Vec3 vec32 = dataholder.vr.controllerUpHistory[c].averagePosition((double)lenSec);

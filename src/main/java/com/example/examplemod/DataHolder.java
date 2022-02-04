@@ -29,6 +29,11 @@ import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRSettings;
 
+import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.sounds.SoundEngine;
@@ -102,6 +107,9 @@ public class DataHolder {
     String mirrorNotifyText;
     boolean mirrorNotifyClear;
     long mirroNotifyLen;
+    
+    public static final VertexFormat POSITION_TEX_LMAP_COLOR_NORMAL = new VertexFormat(ImmutableMap.<String,VertexFormatElement>builder().put("Position", DefaultVertexFormat.ELEMENT_POSITION).put("UV0", DefaultVertexFormat.ELEMENT_UV0).put("UV2", DefaultVertexFormat.ELEMENT_UV2).put("Color", DefaultVertexFormat.ELEMENT_COLOR).put("Normal", DefaultVertexFormat.ELEMENT_NORMAL).put("Padding", DefaultVertexFormat.ELEMENT_PADDING).build());
+
 
     public static DataHolder getInstance() {
         if (INSTANCE == null) {

@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -34,6 +33,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.vivecraft.render.VRShaders;
+import org.vivecraft.tweaker.LoaderUtils;
 import org.vivecraft.utils.lwjgl.Matrix3f;
 import org.vivecraft.utils.lwjgl.Matrix4f;
 import org.vivecraft.utils.lwjgl.Vector2f;
@@ -48,7 +48,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
-import io.github.classgraph.ClassGraph;
 import jopenvr.HmdMatrix44_t;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.ComponentCollector;
@@ -70,7 +69,6 @@ public class Utils
     private static final char[] illegalChars = new char[] {'"', '<', '>', '|', '\u0000', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u0007', '\b', '\t', '\n', '\u000b', '\f', '\r', '\u000e', '\u000f', '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', '\u0017', '\u0018', '\u0019', '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f', ':', '*', '?', '\\', '/'};
     private static final int CONNECT_TIMEOUT = 5000;
     private static final int READ_TIMEOUT = 20000;
-    private static URI vivecraftZipURI;
     private static final Random avRandomizer = new Random();
 
     public static String sanitizeFileName(String fileName)
@@ -431,7 +429,7 @@ public class Utils
             try
             {
                 Path path = Paths.get(System.getProperty("user.dir"));
-                Path path1 = path.getParent().resolve("src/main/resources/natives/" + directory);
+                Path path1 = path.getParent().resolve("src/resources/natives/" + directory);
 
                 if (!path1.toFile().exists())
                 {
@@ -456,7 +454,7 @@ public class Utils
             }
 
             System.out.println("Unpacking " + directory + " natives...");
-            ZipFile zipfile = getVivecraftZip();
+            ZipFile zipfile = LoaderUtils.getVivecraftZip();
             Enumeration <? extends ZipEntry > enumeration = zipfile.entries();
 
             while (enumeration.hasMoreElements())
@@ -480,57 +478,6 @@ public class Utils
         }
     }
 
-    //TODO Crashes?
-    public static URI getVivecraftZipLocation()
-    {
-        if (vivecraftZipURI != null)
-        {
-            return vivecraftZipURI;
-        }
-        else
-        {
-        	System.out.println(new ClassGraph().scan());
-            for (URI uri : (new ClassGraph()).getClasspathURIs())
-            {
-                try (ZipFile zipfile = new ZipFile(new File(uri)))
-                {
-                    if (zipfile.getEntry("org/vivecraft/provider/MCVR.class") != null)
-                    {
-                        System.out.println("Found Vivecraft zip: " + uri.toString());
-                        vivecraftZipURI = uri;
-                        break;
-                    }
-                }
-                catch (IOException ioexception)
-                {
-                }
-            }
-
-            if (vivecraftZipURI == null)
-            {
-                throw new RuntimeException("Could not find Vivecraft zip");
-            }
-            else
-            {
-                return vivecraftZipURI;
-            }
-        }
-    }
-
-    public static ZipFile getVivecraftZip()
-    {
-        URI uri = getVivecraftZipLocation();
-
-        try
-        {
-            File file1 = new File(uri);
-            return new ZipFile(file1);
-        }
-        catch (IOException ioexception)
-        {
-            throw new RuntimeException(ioexception);
-        }
-    }
 
     public static void writeStreamToFile(InputStream is, File file) throws IOException
     {

@@ -53,23 +53,23 @@ public class VRHotkeys
 
             if (action == 1 && key == 344 && MethodHolder.isKeyDown(345))
             {
-            	dataholder.vrSettings.storeDebugAim = true;
+                dataholder.vrSettings.storeDebugAim = true;
                 minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.showaim"));
                 flag = true;
             }
 
             if (action == 1 && key == 66 && MethodHolder.isKeyDown(345))
             {
-            	dataholder.vrSettings.walkUpBlocks = !dataholder.vrSettings.walkUpBlocks;
+                dataholder.vrSettings.walkUpBlocks = !dataholder.vrSettings.walkUpBlocks;
                 minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.walkupblocks", dataholder.vrSettings.walkUpBlocks ? LangHelper.getYes() : LangHelper.getNo()));
                 flag = true;
             }
 
             if (action == 1 && key == 73 && MethodHolder.isKeyDown(345))
             {
-            	dataholder.vrSettings.inertiaFactor = dataholder.vrSettings.inertiaFactor.getNext();
-                //minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.playerinertia", Lang.get(dataholder.vrSettings.inertiaFactor.getLangKey()))); TODO
-            	minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.playerinertia", new TranslatableComponent(dataholder.vrSettings.inertiaFactor.getLangKey())));
+                dataholder.vrSettings.inertiaFactor = dataholder.vrSettings.inertiaFactor.getNext();
+                minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.playerinertia", new TranslatableComponent(dataholder.vrSettings.inertiaFactor.getLangKey())));
+
                 flag = true;
             }
 
@@ -77,12 +77,12 @@ public class VRHotkeys
             {
                 if (dataholder.vrPlayer.isTeleportOverridden())
                 {
-                	dataholder.vrPlayer.setTeleportOverride(false);
+                    dataholder.vrPlayer.setTeleportOverride(false);
                     minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.teleportdisabled"));
                 }
                 else
                 {
-                	dataholder.vrPlayer.setTeleportOverride(true);
+                    dataholder.vrPlayer.setTeleportOverride(true);
                     minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.teleportenabled"));
                 }
 
@@ -103,13 +103,13 @@ public class VRHotkeys
 
             if ((minecraft.level == null || minecraft.screen != null) && action == 1 && key == 294)
             {
-            	dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
+                dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
                 ((MinecraftExtension) minecraft).notifyMirror(dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
             }
 
             if (flag)
             {
-            	dataholder.vrSettings.saveOptions();
+                dataholder.vrSettings.saveOptions();
             }
 
             return flag;
@@ -220,7 +220,7 @@ public class VRHotkeys
 
         if (flag)
         {
-        	dataholder.vrSettings.saveOptions();
+            dataholder.vrSettings.saveOptions();
 
             if (dataholder.vr.mrMovingCamActive)
             {
@@ -265,11 +265,11 @@ public class VRHotkeys
 
         if (dataholder.vr.mrMovingCamActive)
         {
-        	dataholder.vrSettings.mrMovingCamOffsetRotQuat.set(dataholder.vrSettings.mrMovingCamOffsetRotQuat.rotate(axis, degrees, true));
+            dataholder.vrSettings.mrMovingCamOffsetRotQuat.set(dataholder.vrSettings.mrMovingCamOffsetRotQuat.rotate(axis, degrees, true));
         }
         else
         {
-        	dataholder.vrSettings.vrFixedCamrotQuat.set(dataholder.vrSettings.vrFixedCamrotQuat.rotate(axis, degrees, false));
+            dataholder.vrSettings.vrFixedCamrotQuat.set(dataholder.vrSettings.vrFixedCamrotQuat.rotate(axis, degrees, false));
         }
     }
 
@@ -309,7 +309,6 @@ public class VRHotkeys
     {
         Minecraft minecraft = Minecraft.getInstance();
         DataHolder dataholder = DataHolder.getInstance();
-
         startController = controller;
         startControllerPose = dataholder.vrPlayer.vrdata_room_pre.getController(controller);
         startCamposX = dataholder.vrSettings.vrFixedCamposX;
@@ -398,9 +397,8 @@ public class VRHotkeys
                 return;
             }
 
-            Minecraft minecraft = Minecraft.getInstance();        
+            Minecraft minecraft = Minecraft.getInstance();
             DataHolder dataholder = DataHolder.getInstance();
-
             Quaternion quaternion = new Quaternion(f3, f4, f5, dataholder.vrSettings.externalCameraAngleOrder);
             dataholder.vrSettings.mrMovingCamOffsetX = f;
             dataholder.vrSettings.mrMovingCamOffsetY = f1;

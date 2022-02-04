@@ -125,9 +125,9 @@ public class MCOpenVR extends MCVR
     InputDigitalActionData_t digital = new InputDigitalActionData_t.ByReference();
     InputAnalogActionData_t analog = new InputAnalogActionData_t.ByReference();
 
-    public MCOpenVR(Minecraft mc)
+    public MCOpenVR(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
         ome = this;
         this.hapticScheduler = new OpenVRHapticScheduler();
 
@@ -593,8 +593,7 @@ public class MCOpenVR extends MCVR
 
         for (VRInputActionSet vrinputactionset : VRInputActionSet.values())
         {
-//            if (vrinputactionset != VRInputActionSet.MOD || Reflector.ClientModLoader.exists()) TODO
-        	if (vrinputactionset != VRInputActionSet.MOD || false)
+            if (vrinputactionset != VRInputActionSet.MOD) // || Reflector.ClientModLoader.exists())
             {
                 String s = vrinputactionset.usage;
 
@@ -697,7 +696,7 @@ public class MCOpenVR extends MCVR
         ArrayList<VRInputActionSet> arraylist = new ArrayList<>();
         arraylist.add(VRInputActionSet.GLOBAL);
 
-//        if (Reflector.ClientModLoader.exists()) TODO
+//        if (Reflector.ClientModLoader.exists())
 //        {
 //            arraylist.add(VRInputActionSet.MOD);
 //        }

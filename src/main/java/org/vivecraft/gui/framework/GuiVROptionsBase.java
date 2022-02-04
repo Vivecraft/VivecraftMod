@@ -2,9 +2,9 @@ package org.vivecraft.gui.framework;
 
 import java.util.ArrayList;
 
-//import net.optifine.Lang;
 import org.vivecraft.settings.VRSettings;
 
+import com.example.examplemod.ButtonExtension;
 import com.example.examplemod.DataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec2;
 
 public abstract class GuiVROptionsBase extends Screen
 {
-	public DataHolder dataholder = DataHolder.getInstance();
+	protected DataHolder dataholder = DataHolder.getInstance();
     public static final int DONE_BUTTON = 200;
     public static final int DEFAULTS_BUTTON = 201;
     protected final Screen lastScreen;
@@ -223,8 +223,7 @@ public abstract class GuiVROptionsBase extends Screen
             this.visibleList.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
         }
 
-        //drawCenteredString(pMatrixStack, this.font, Lang.get(this.vrTitle), this.width / 2, 15, 16777215);
-        drawCenteredString(pMatrixStack, this.font, this.vrTitle, this.width / 2, 15, 16777215);
+        drawCenteredString(pMatrixStack, this.font, new TranslatableComponent(this.vrTitle), this.width / 2, 15, 16777215);
 
         if (this.btnDefaults != null)
         {
@@ -237,7 +236,7 @@ public abstract class GuiVROptionsBase extends Screen
         }
 
         super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
-        //this.tooltipManager.drawTooltips(pMatrixStack, pMouseX, pMouseY, this.getButtonList());
+        //this.tooltipManager.drawTooltips(pMatrixStack, pMouseX, pMouseY, this.getButtonList()); Optifine
     }
 
     protected void actionPerformed(AbstractWidget button)
@@ -251,8 +250,7 @@ public abstract class GuiVROptionsBase extends Screen
     public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)
     {
         boolean flag = super.mouseClicked(pMouseX, p_94738_, pMouseY);
-        //AbstractWidget abstractwidget = getSelectedButton((int)pMouseX, (int)p_94738_, this.getButtonList()); TODO
-        AbstractWidget abstractwidget = null;
+        AbstractWidget abstractwidget = ((ButtonExtension)this).getSelectedButton((int)pMouseX, (int)p_94738_, ((ButtonExtension)this).getButtonList());
 
         if (abstractwidget != null)
         {

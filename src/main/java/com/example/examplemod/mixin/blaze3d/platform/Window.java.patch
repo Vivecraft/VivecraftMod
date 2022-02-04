@@ -33,56 +33,47 @@
          }
      }
  
-@@ -364,7 +365,7 @@
+@@ -364,7 +365,8 @@
      {
-         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-         this.vsync = pVsyncEnabled;
--        GLFW.glfwSwapInterval(pVsyncEnabled ? 1 : 0);
+         RenderSystem.assertOnRenderThreadOrInit();
+         this.vsync = pVsync;
+-        GLFW.glfwSwapInterval(pVsync ? 1 : 0);
++        //Vivecraft no vsync
 +        GLFW.glfwSwapInterval(0);
      }
  
      public void close()
-@@ -387,15 +388,15 @@
+@@ -387,15 +389,16 @@
      {
-         if (pWindowPointer == this.window)
+         if (p_85416_ == this.window)
          {
 -            int i = this.getWidth();
 -            int j = this.getHeight();
++        	//Vivecraft use screen sizes
 +            int i = this.getScreenWidth();
 +            int j = this.getScreenHeight();
  
-             if (p_85417_ != 0 && pFramebufferWidth != 0)
+             if (p_85417_ != 0 && p_85418_ != 0)
              {
                  this.framebufferWidth = p_85417_;
-                 this.framebufferHeight = pFramebufferWidth;
+                 this.framebufferHeight = p_85418_;
  
 -                if (this.getWidth() != i || this.getHeight() != j)
 +                if (this.getScreenWidth() != i || this.getScreenHeight() != j)
                  {
                      this.eventHandler.resizeDisplay();
                  }
-@@ -414,20 +415,24 @@
- 
-         if (this.framebufferHeight == 0 || this.framebufferWidth == 0)
-         {
--            EarlyProgressVisualization.INSTANCE.updateFBSize((w) ->
-+            EarlyProgressVisualization.INSTANCE.updateFBSize((p_lambda$updateFramebufferSize$4_1_) ->
-             {
--                this.framebufferWidth = w;
--            }, (h) ->
-+                this.framebufferWidth = p_lambda$updateFramebufferSize$4_1_;
-+            }, (p_lambda$updateFramebufferSize$5_1_) ->
-             {
--                this.framebufferHeight = h;
-+                this.framebufferHeight = p_lambda$updateFramebufferSize$5_1_;
+@@ -423,11 +426,15 @@
              });
          }
      }
- 
-     private void onResize(long pWindowPointer, int p_85429_, int pWindowWidth)
+-
+-    private void onResize(long p_85428_, int p_85429_, int p_85430_)
++	//vivecraft dont resize on minimize
++    private void onResize(long pWindowPointer, int p_85429_, int pWindowWidth)
      {
 -        this.width = p_85429_;
--        this.height = pWindowWidth;
+-        this.height = p_85430_;
 +        if (pWindowWidth * p_85429_ != 0)
 +        {
 +            this.width = p_85429_;
@@ -91,8 +82,8 @@
 +        }
      }
  
-     private void onFocus(long pWindowPointer, boolean p_85394_)
-@@ -575,13 +580,12 @@
+     private void onFocus(long p_85393_, boolean p_85394_)
+@@ -575,13 +582,12 @@
      {
          int i;
  
@@ -107,7 +98,7 @@
          }
  
          return i;
-@@ -590,10 +594,10 @@
+@@ -590,10 +596,10 @@
      public void setGuiScale(double pScaleFactor)
      {
          this.guiScale = pScaleFactor;
@@ -122,7 +113,7 @@
      }
  
      public void setTitle(String pTitle)
-@@ -613,12 +617,12 @@
+@@ -613,12 +619,12 @@
  
      public int getWidth()
      {
@@ -136,9 +127,9 @@
 +        return Minecraft.getInstance().getMainRenderTarget().viewHeight;
      }
  
-     public void setWidth(int p_166451_)
-@@ -677,9 +681,9 @@
-         InputConstants.updateRawMouseInput(this.window, pValue);
+     public void setWidth(int pFramebufferWidth)
+@@ -677,9 +683,9 @@
+         InputConstants.updateRawMouseInput(this.window, pEnableRawMouseMotion);
      }
  
 -    public void resizeFramebuffer(int width, int height)

@@ -24,4 +24,4 @@
 +
      public interface OnPress
      {
-         void onPress(Button p_93751_);
+         void onPress(Button pButton);

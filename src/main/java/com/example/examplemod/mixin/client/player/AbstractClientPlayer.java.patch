@@ -8,7 +8,7 @@
  
  public abstract class AbstractClientPlayer extends Player
  {
-@@ -68,6 +69,7 @@
+@@ -69,6 +70,7 @@
  
          CapeUtils.downloadCape(this);
          PlayerConfigurations.getPlayerConfiguration(this);
@@ -16,7 +16,7 @@
      }
  
      public boolean isSpectator()
-@@ -227,9 +229,9 @@
+@@ -228,9 +230,9 @@
          return this.locationOfCape;
      }
  
@@ -28,7 +28,7 @@
      }
  
      public boolean hasElytraCape()
-@@ -246,9 +248,9 @@
+@@ -247,9 +249,9 @@
          }
      }
  
@@ -40,7 +40,7 @@
      }
  
      public boolean isElytraOfCape()
-@@ -261,8 +263,8 @@
+@@ -262,8 +264,8 @@
          return this.reloadCapeTimeMs;
      }
  

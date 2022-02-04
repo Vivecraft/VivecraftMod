@@ -7,7 +7,7 @@ public class VRTextureTarget extends RenderTarget{
 
 	public VRTextureTarget(String name, int width, int height, boolean usedepth, boolean onMac, int texid, boolean depthtex, boolean linearFilter) {
 		super(usedepth);
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnGameThreadOrInit();
 		((RenderTargetExtension)this).setName(name);
 		((RenderTargetExtension)this).setTextid(texid);
 		((RenderTargetExtension)this).isLinearFilter(linearFilter);

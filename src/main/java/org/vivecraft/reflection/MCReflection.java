@@ -5,57 +5,57 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
+import org.vivecraft.asm.ObfNames;
+
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.sounds.SoundEngine;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.state.StateHolder;
-import org.vivecraft.asm.ObfNames;
 
 public class MCReflection
 {
 
 	//soundEngine
-    public static final MCReflection.ReflectionField SoundHandler_sndManager = new MCReflection.ReflectionField(SoundManager.class, "field_5590");
-    
-    //blocks for interact
-    public static final String BlockBehavior_Use = "method_9534";
-  
-    //destroyDelay
-    public static final MCReflection.ReflectionField PlayerController_blockHitDelay = new MCReflection.ReflectionField(MultiPlayerGameMode.class, "field_3716");
-    //isDestroying
-    public static final MCReflection.ReflectionField PlayerController_isHittingBlock = new MCReflection.ReflectionField(MultiPlayerGameMode.class, "field_3717");
-    //destroyTicks
-    public static final MCReflection.ReflectionField PlayerController_blocknoise = new MCReflection.ReflectionField(MultiPlayerGameMode.class, "field_3713");
-    //isDown
-    public static final MCReflection.ReflectionField KeyBinding_pressed = new MCReflection.ReflectionField(KeyMapping.class, "field_1653");
-    //clickCount
-    public static final MCReflection.ReflectionField KeyBinding_pressTime = new MCReflection.ReflectionField(KeyMapping.class, "field_1661");
-    //release
-    public static final MCReflection.ReflectionMethod KeyBinding_unpressKey = new MCReflection.ReflectionMethod(KeyMapping.class, "method_1425");
-    //key
-    public static final MCReflection.ReflectionField KeyBinding_keyCode = new MCReflection.ReflectionField(KeyMapping.class, "field_1655");
-    //CATEGORY_SORT_ORDER
-    public static final MCReflection.ReflectionField KeyBinding_CATEGORY_ORDER = new MCReflection.ReflectionField(KeyMapping.class, "field_1656");
-    public static final MCReflection.ReflectionField Entity_eyeHeight = new MCReflection.ReflectionField(Entity.class, "field_18066");
-    //setModelProperties
-    public static final MCReflection.ReflectionMethod RenderPlayer_setModelVisibilities = new MCReflection.ReflectionMethod(PlayerRenderer.class, "method_4218", AbstractClientPlayer.class);
-    //identifier
-    public static final MCReflection.ReflectionField CCustomPayloadPacket_channel = new MCReflection.ReflectionField(ServerboundCustomPayloadPacket.class, "field_12830");
-    public static final MCReflection.ReflectionField CCustomPayloadPacket_data = new MCReflection.ReflectionField(ServerboundCustomPayloadPacket.class, "field_12832");
-    //propertiesCodec
-    public static final MCReflection.ReflectionField StateHolder_mapCodec = new MCReflection.ReflectionField(StateHolder.class, "field_24740");
-    public static final MCReflection.ReflectionField ClientWorldInfo_isFlat = new MCReflection.ReflectionField(ClientLevel.ClientLevelData.class, "field_24607");
-    //biomeZoomSeed
-    public static final MCReflection.ReflectionField BiomeManager_seed = new MCReflection.ReflectionField(BiomeManager.class, "field_20641");
-    public static final MCReflection.ReflectionField NetworkManager_channel = new MCReflection.ReflectionField(Connection.class, "field_11651");
+	// public static final MCReflection.ReflectionField SoundHandler_sndManager = new MCReflection.ReflectionField(SoundManager.class, "field_5590");
+	    
+	    //blocks for interact
+	    public static final String BlockBehavior_Use = "method_9534";
+	  
+	    //destroyDelay
+	    public static final MCReflection.ReflectionField PlayerController_blockHitDelay = new MCReflection.ReflectionField(MultiPlayerGameMode.class, "field_3716");
+	    //isDestroying
+	    public static final MCReflection.ReflectionField PlayerController_isHittingBlock = new MCReflection.ReflectionField(MultiPlayerGameMode.class, "field_3717");
+	    //destroyTicks
+	    public static final MCReflection.ReflectionField PlayerController_blocknoise = new MCReflection.ReflectionField(MultiPlayerGameMode.class, "field_3713");
+	    //isDown
+	    public static final MCReflection.ReflectionField KeyBinding_pressed = new MCReflection.ReflectionField(KeyMapping.class, "field_1653");
+	    //clickCount
+	    public static final MCReflection.ReflectionField KeyBinding_pressTime = new MCReflection.ReflectionField(KeyMapping.class, "field_1661");
+	    //release
+	    public static final MCReflection.ReflectionMethod KeyBinding_unpressKey = new MCReflection.ReflectionMethod(KeyMapping.class, "method_1425");
+	    //key
+	    public static final MCReflection.ReflectionField KeyBinding_keyCode = new MCReflection.ReflectionField(KeyMapping.class, "field_1655");
+	    //CATEGORY_SORT_ORDER
+	    public static final MCReflection.ReflectionField KeyBinding_CATEGORY_ORDER = new MCReflection.ReflectionField(KeyMapping.class, "field_1656");
+	    public static final MCReflection.ReflectionField Entity_eyeHeight = new MCReflection.ReflectionField(Entity.class, "field_18066");
+	    //setModelProperties
+	    public static final MCReflection.ReflectionMethod RenderPlayer_setModelVisibilities = new MCReflection.ReflectionMethod(PlayerRenderer.class, "method_4218", AbstractClientPlayer.class);
+	    //identifier
+	    public static final MCReflection.ReflectionField CCustomPayloadPacket_channel = new MCReflection.ReflectionField(ServerboundCustomPayloadPacket.class, "field_12830");
+	    public static final MCReflection.ReflectionField CCustomPayloadPacket_data = new MCReflection.ReflectionField(ServerboundCustomPayloadPacket.class, "field_12832");
+	    //propertiesCodec
+	    public static final MCReflection.ReflectionField StateHolder_mapCodec = new MCReflection.ReflectionField(StateHolder.class, "field_24740");
+	    public static final MCReflection.ReflectionField ClientWorldInfo_isFlat = new MCReflection.ReflectionField(ClientLevel.ClientLevelData.class, "field_24607");
+	    //biomeZoomSeed
+	    public static final MCReflection.ReflectionField BiomeManager_seed = new MCReflection.ReflectionField(BiomeManager.class, "field_20641");
+	    public static final MCReflection.ReflectionField NetworkManager_channel = new MCReflection.ReflectionField(Connection.class, "field_11651");
 
     public static class ReflectionConstructor
     {

@@ -197,9 +197,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension{
 	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;", remap = false), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public Thread settings() {
 		if (!this.oculus) {
-			DataHolder.getInstance().vr = new MCOpenVR((Minecraft) (Object) this);
+			DataHolder.getInstance().vr = new MCOpenVR((Minecraft) (Object) this, DataHolder.getInstance());
 		} else {
-			DataHolder.getInstance().vr = new MC_OVR((Minecraft) (Object) this);
+			DataHolder.getInstance().vr = new MC_OVR((Minecraft) (Object) this, DataHolder.getInstance());
 		}
 
 		VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);

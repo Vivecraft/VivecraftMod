@@ -45,9 +45,9 @@ public class MC_OVR extends MCVR
     OVRInputState inputs;
     private boolean inputInitialized;
 
-    public MC_OVR(Minecraft mc)
+    public MC_OVR(Minecraft mc, DataHolder dh)
     {
-        super(mc);
+        super(mc, dh);
         ome = this;
         this.hapticScheduler = new OVR_HapticScheduler();
         this.trackingState = OVRTrackingState.malloc();

@@ -1,3 +1,4 @@
+// Optifine
 //package org.vivecraft.render;
 //
 //import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -5,7 +6,6 @@
 //import com.mojang.blaze3d.vertex.VertexConsumer;
 //import com.mojang.math.Matrix3f;
 //import com.mojang.math.Matrix4f;
-//
 //import net.minecraft.client.renderer.block.ModelBlockRenderer;
 //import net.minecraft.client.renderer.block.model.BakedQuad;
 //import net.minecraft.core.Vec3i;
@@ -19,9 +19,7 @@
 //
 //    private static void addQuad(VertexConsumer buffer, PoseStack.Pose matrixEntryIn, BakedQuad quadIn, float[] colorMuls, float redIn, float greenIn, float blueIn, float alphaIn, int[] combinedLightsIn, int combinedOverlayIn, boolean mulColor)
 //    {
-//    	//TODO no optifine patches
-//        //int[] aint = buffer.isMultiTexture() ? quadIn.getVertexDataSingle() : quadIn.getVertices();
-//        int[] aint = quadIn.getVertices();
+//        int[] aint = buffer.isMultiTexture() ? quadIn.getVertexDataSingle() : quadIn.getVertices();
 //        buffer.putSprite(quadIn.getSprite());
 //        boolean flag = ModelBlockRenderer.isSeparateAoLightValue();
 //        Vec3i vec3i = quadIn.getDirection().getNormal();
