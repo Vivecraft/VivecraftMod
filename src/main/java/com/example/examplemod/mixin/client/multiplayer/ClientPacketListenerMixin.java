@@ -2,6 +2,7 @@ package com.example.examplemod.mixin.client.multiplayer;
 
 import java.util.UUID;
 
+import net.minecraft.client.ClientTelemetryManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,9 +32,8 @@ public class ClientPacketListenerMixin {
 	@Shadow
 	private Minecraft minecraft;
 
-	@Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/network/Connection;Lcom/mojang/authlib/GameProfile;)V")
-	public void init(Minecraft p_104906_, Screen p_104907_, Connection p_104908_, GameProfile p_104909_,
-			CallbackInfo callback) {
+	@Inject(at = @At("TAIL"), method = "<init>")
+	public void init(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager, CallbackInfo ci) {
 		NetworkHelper.resetServerSettings();
 		NetworkHelper.displayedChatMessage = false;
 	}

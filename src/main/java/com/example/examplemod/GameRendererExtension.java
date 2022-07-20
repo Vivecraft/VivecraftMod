@@ -1,5 +1,6 @@
 package com.example.examplemod;
 
+import net.minecraft.world.entity.LivingEntity;
 import org.vivecraft.render.RenderPass;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -50,4 +51,7 @@ public interface GameRendererExtension {
 
 	void renderVrFast(float f, boolean b, boolean menuhandright, boolean menuHandleft, PoseStack poseStack);
 
+	void restoreRVEPos(LivingEntity e);
+
+	void setupRVE();
 }

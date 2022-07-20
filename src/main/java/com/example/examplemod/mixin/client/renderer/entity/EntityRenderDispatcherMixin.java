@@ -94,8 +94,5 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 		this.skinMapVRSeated.put("slim", new VRPlayerRenderer(context, true, true));
 		this.skinMapVR.put("default", new VRPlayerRenderer(context, false, false));
 		this.skinMapVR.put("slim", new VRPlayerRenderer(context, true, false));
-		
 	}
-	
-	
 }

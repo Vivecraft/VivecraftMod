@@ -88,8 +88,10 @@ public abstract class VRRenderer
 
     protected void checkGLError(String message)
     {
-        //Config.checkGlError(message);
-    	System.out.println("GLERROR " + message);
+        //Config.checkGlError(message); TODO
+    	if (GlStateManager._getError() != 0) {
+			System.err.println(message);
+		}
     }
 
     public boolean clipPlanesChanged()

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.render.VRFirstPersonArmSwing;
 
 public interface ItemInHandRendererExtension {
 
@@ -12,4 +13,7 @@ public interface ItemInHandRendererExtension {
 
 	boolean isInsideOpaqueBlock(Vec3 vec31);
 
+    void setXdist(float v);
+
+	void setSwingType(VRFirstPersonArmSwing interact);
 }

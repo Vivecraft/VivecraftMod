@@ -15,12 +15,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Unique;
+import org.vivecraft.render.VRFirstPersonArmSwing;
 
 @Mixin(ItemInHandRenderer.class)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {
 
+	@Unique
+	private float xdist;
+
+	@Unique
+	private VRFirstPersonArmSwing swingType;
+
 	@Shadow
 	private Minecraft minecraft;
+
 
 	@Override
 	public Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 in, double dist) {
@@ -55,4 +64,13 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 		}
 	}
 
+	@Override
+	public void setXdist(float v) {
+		this.xdist = v;
+	}
+
+	@Override
+	public void setSwingType(VRFirstPersonArmSwing interact) {
+		this.swingType = interact;
+	}
 }

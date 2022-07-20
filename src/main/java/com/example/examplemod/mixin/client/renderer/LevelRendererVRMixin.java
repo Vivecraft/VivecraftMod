@@ -2,15 +2,22 @@ package com.example.examplemod.mixin.client.renderer;
 
 import javax.annotation.Nullable;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import com.example.examplemod.LevelRendererExtension;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRSettings;
@@ -25,16 +32,12 @@ import com.mojang.math.Matrix4f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 @Mixin(LevelRenderer.class)
-public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable{
+public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable, LevelRendererExtension {
 	
 	@Unique
 	@Nullable
@@ -51,7 +54,11 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	public float selG;
 	@Unique
 	public float selB;
+
+	@Unique
+	private Entity capturedEntity;
 	
+	@Final
 	@Shadow
 	private Minecraft minecraft;
 	@Shadow
@@ -74,7 +81,15 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	private RenderTarget entityTarget;
 	@Shadow
 	private boolean needsFullRenderChunkUpdate;
-	
+	@Final
+	@Shadow
+	private RenderBuffers renderBuffers;
+	@Unique
+	private Entity renderedEntity;
+
+	@Shadow
+	protected abstract void renderHitOutline(PoseStack poseStack, VertexConsumer buffer, Entity entity, double d, double e, double g, BlockPos blockpos, BlockState blockstate);
+
 	public int rainX() {
 		return 0;
 	}
@@ -86,22 +101,27 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	public int rainZ() {
 		return 0;
 	}
+
+	@Override
+	public Entity getRenderedEntity() {
+		return this.capturedEntity;
+	}
 	
 	@Overwrite
 	public void onResourceManagerReload(ResourceManager pResourceManager) {
 		DataHolder.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
 	}
-	
-	@Redirect(at = @At(value = "INVOKE", target = "graphicsChanged()V"), method = "allChanged()V")
-	public void removeGraphich(LevelRenderer l) {
-		
-	}
+
+//	@Redirect(at = @At(value = "INVOKE", target = "graphicsChanged()V"), method = "allChanged()V")
+//	public void removeGraphich(LevelRenderer l) {
+//
+//	}
 	
 	public void clearTint() {
 		
 	}
 	
-	@Inject(at = @At(value = "FIELD", target = "needsFullRenderChunkUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;needsFullRenderChunkUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
 	public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
 		this.needsFullRenderChunkUpdate = true;
 	}
@@ -135,7 +155,56 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		renderSelf = renderSelf | (DataHolder.getInstance().vrSettings.shouldRenderSelf || DataHolder.getInstance().vrSettings.tmpRenderSelf);
 		return camera.isDetached() || renderSelf;
 	}
-	
+
+	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;tickCount:I"), method = "renderLevel")
+	public int captureEntity(Entity instance) {
+		this.capturedEntity = instance;
+		return instance.tickCount;
+	}
+
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;tickCount:I"), method = "renderLevel")
+	public void restoreLoc1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+		if (capturedEntity == camera.getEntity()) {
+			((GameRendererExtension)gameRenderer).restoreRVEPos((LivingEntity)capturedEntity);
+		}
+		this.renderedEntity = capturedEntity;
+	}
+
+	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V"), method = "renderLevel")
+	public void restoreLoc2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+		if (capturedEntity == camera.getEntity()) {
+			((GameRendererExtension)gameRenderer).restoreRVEPos((LivingEntity)capturedEntity);
+			((GameRendererExtension)gameRenderer).setupRVE();
+		}
+		this.renderedEntity = null;
+	}
+
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;"), method = "renderLevel")
+	public void interactOutline(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+		selR = selG = selB = 1f;
+		Vec3 vec3 = camera.getPosition();
+		double d = vec3.x();
+		double e = vec3.y();
+		double g = vec3.z();
+		for (int c=0;c<2;c++) {
+			if(DataHolder.getInstance().interactTracker.isInteractActive(c) && (DataHolder.getInstance().interactTracker.inBlockHit[c] != null || DataHolder.getInstance().interactTracker.bukkit[c])) {
+				BlockPos blockpos = DataHolder.getInstance().interactTracker.inBlockHit[c] != null ? DataHolder.getInstance().interactTracker.inBlockHit[c].getBlockPos() : new BlockPos(DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
+				BlockState blockstate = this.level.getBlockState(blockpos);
+				this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
+				if (c==0) {
+					bl = false; //don't draw both
+				}
+			}
+		}
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 13), method = "renderLevel")
+	public void blackOutline(ProfilerFiller instance, String s) {
+		selR = selG = selB = 0f;
+	}
+
+
+
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", shift = Shift.BEFORE, ordinal = 16), 
 			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
 	public void renderFast1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {

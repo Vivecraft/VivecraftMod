@@ -1,14 +1,18 @@
 package com.example.examplemod.mixin.client.player;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import com.example.examplemod.ItemInHandRendererExtension;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.world.InteractionHand;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.gameplay.VRPlayer;
 
 import com.example.examplemod.DataHolder;
+import com.example.examplemod.PlayerExtension;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -18,13 +22,25 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.render.VRFirstPersonArmSwing;
 
 @Mixin(LocalPlayer.class)
-public abstract class LocalPlayerVRMixin extends AbstractClientPlayer {
+public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements PlayerExtension{
 
 	@Unique
 	private Vec3 moveMulIn;
-	
+	@Shadow
+	private Minecraft minecraft;
+
+	@Shadow
+	@Final
+	public ClientPacketListener connection;
+	@Shadow
+	protected abstract void updateAutoJump(float f, float g);
+
+	@Shadow
+	public abstract void swing(InteractionHand interactionHand);
+
 	public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile) {
 		super(clientLevel, gameProfile);
 		// TODO Auto-generated constructor stub
@@ -114,7 +130,20 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer {
 		return d0;
 	}
 
-	@Shadow
-	protected abstract void updateAutoJump(float f, float g);
+	@Inject(at = @At("HEAD"), method = "swing")
+	public void vrSwing(InteractionHand interactionHand, CallbackInfo ci) {
+		if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+			((ItemInHandRendererExtension)this.minecraft.getItemInHandRenderer()).setXdist((float) this.minecraft.hitResult.getLocation().subtract(DataHolder.getInstance().vrPlayer.vrdata_world_pre.getController(interactionHand.ordinal()).getPosition()).length());
+		} else {
+			((ItemInHandRendererExtension)this.minecraft.getItemInHandRenderer()).setXdist(0F);
+		}
+	}
+
+	@Override
+	public void swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact) {
+		((ItemInHandRendererExtension)this.minecraft.getItemInHandRenderer()).setSwingType(interact);
+		this.swing(interactionhand);
+	}
+
 
 }

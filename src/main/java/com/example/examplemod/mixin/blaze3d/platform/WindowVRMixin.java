@@ -59,12 +59,12 @@ public abstract class WindowVRMixin {
 		
 	}
 	
-	@Redirect(at = @At(value = "INVOKE", target = "getWidth()I"), method = "onFramebufferResize(JII)V")
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I"), method = "onFramebufferResize(JII)V")
 	public int widthCorrection(Window w) {
 		return this.getScreenWidth();
 	}
 	
-	@Redirect(at = @At(value = "INVOKE", target = "getHeight()I"), method = "onFramebufferResize(JII)V")
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getHeight()I"), method = "onFramebufferResize(JII)V")
 	public int heightCorrection(Window w) {
 		return this.getScreenHeight();
 	}
