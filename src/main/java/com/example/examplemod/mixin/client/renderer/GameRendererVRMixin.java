@@ -3,12 +3,13 @@ package com.example.examplemod.mixin.client.renderer;
 import java.nio.FloatBuffer;
 import java.util.Locale;
 
+import com.example.examplemod.*;
+import net.minecraft.client.gui.screens.WinScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.commons.lang3.tuple.Triple;
 import org.lwjgl.opengl.GL11;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,12 +31,6 @@ import org.vivecraft.render.VRWidgetHelper;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
-import com.example.examplemod.DataHolder;
-import com.example.examplemod.GameRendererExtension;
-import com.example.examplemod.ItemInHandRendererExtension;
-import com.example.examplemod.MethodHolder;
-import com.example.examplemod.PlayerExtension;
-import com.example.examplemod.RenderTargetExtension;
 import com.example.examplemod.mixin.EntityAccessor;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -97,7 +92,7 @@ public abstract class GameRendererVRMixin
 	@Unique
 	public Vec3 crossVec;
 	@Unique
-	private FloatBuffer matrixBuffer = MemoryTracker.create(16).asFloatBuffer();
+	private final FloatBuffer matrixBuffer = MemoryTracker.create(16).asFloatBuffer();
 	@Unique
 	public Matrix4f thirdPassProjectionMatrix = new Matrix4f();
 	@Unique
@@ -235,6 +230,8 @@ public abstract class GameRendererVRMixin
 	@Shadow
 	public abstract void pick(float f);
 
+	@Shadow private boolean effectActive;
+
 	@Override
 	public double getRveY() {
 		return rveY;
@@ -253,10 +250,9 @@ public abstract class GameRendererVRMixin
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V"), method = "pick(F)V")	public void vrdata(float f, CallbackInfo info) {
-		if (GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render == null) {
-			info.cancel();
-		}
+	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"), method = "pick")
+	public ClientLevel appendCheck(Minecraft instance) {
+		return DataHolder.getInstance().vrPlayer.vrdata_world_render == null ? null : instance.level;
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getEyePosition(F)Lnet/minecraft/world/phys/Vec3;"), method = "pick(F)V")
@@ -356,11 +352,17 @@ public abstract class GameRendererVRMixin
 		}
 	}
 
+	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;effectActive:Z"), method = "render")
+	public boolean effect(GameRenderer instance) {
+		return this.effectActive && DataHolder.getInstance().currentPass != RenderPass.THIRD;
+	}
+
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
 	public void mainMenu(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
 		if (renderWorldIn && !this.isInMenuRoom() && this.minecraft.level != null) {
 
-		} else {
+		}
+		else {
 			this.minecraft.getProfiler().push("MainMenu");
 			GL11.glDisable(GL11.GL_STENCIL_TEST);
 			PoseStack pMatrixStack = new PoseStack();
@@ -383,7 +385,7 @@ public abstract class GameRendererVRMixin
 			}
 		}
 		this.minecraft.getProfiler().pop();
-		//info.cancel();
+		info.cancel();
 	}
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
@@ -405,13 +407,15 @@ public abstract class GameRendererVRMixin
 		this.setupRVE();
 		this.setupOverlayStatus(pPartialTicks);
 	}
-	
-	public void removeBobHurt() {
-		
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobHurt(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "renderLevel")
+	public void removeBobHurt(GameRenderer instance, PoseStack poseStack, float f) {
+		return;
 	}
-	
-	public void removeBobView() {
-		
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "renderLevel")
+	public void removeBobView(GameRenderer instance, PoseStack poseStack, float f) {
+		return;
 	}
 	
 	public void limiti() {
@@ -419,17 +423,28 @@ public abstract class GameRendererVRMixin
 	}
 	
 	public void changeVariable() {
-		
+
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 2), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
 	public void removeMulposeX(PoseStack s, Quaternion quaternion) {
-
+		return;
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 3), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
 	public void removeMulposeY(PoseStack s, Quaternion quaternion) {
 		applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, s);
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 1), method = "renderLevel")
+	public void noHandProfiler(ProfilerFiller instance, String s) {
+		GL11.glDisable(GL11.GL_STENCIL_TEST);
+		this.minecraft.getProfiler().popPush("ShadersEnd"); //TODO needed?
+		return;
+	}
+	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"), method = "renderLevel")
+	public boolean noHands(GameRenderer instance) {
+		return false;
 	}
 
 	@Inject(at = @At(value = "TAIL", shift = Shift.BEFORE), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
@@ -466,6 +481,7 @@ public abstract class GameRendererVRMixin
 			Vec3 vec3 = vrdata$vrdevicepose.getPosition();
 			LivingEntity livingentity = (LivingEntity) this.minecraft.getCameraEntity();
 			livingentity.setPosRaw(vec3.x, vec3.y, vec3.z);
+			livingentity.setPos(vec3);
 			livingentity.xOld = vec3.x;
 			livingentity.yOld = vec3.y;
 			livingentity.zOld = vec3.z;
@@ -603,7 +619,7 @@ public abstract class GameRendererVRMixin
 
 	@Override
 	public boolean isInMenuRoom() {
-		return false;
+		return this.minecraft.level == null || this.minecraft.screen instanceof WinScreen || DataHolder.getInstance().integratedServerLaunchInProgress || this.minecraft.getOverlay() != null;
 	}
 
 	@Override
@@ -861,7 +877,7 @@ public abstract class GameRendererVRMixin
 			// GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
 			// GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 
-//			GlStateManager.alphaFunc(516, 0.01F);
+			GlStateHelper.alphaFunc(516, 0.01F);
 
 //			if (this.lightTexture.isCustom()) { TODO
 //				this.lightTexture.setAllowed(false);
@@ -873,7 +889,6 @@ public abstract class GameRendererVRMixin
 			if (renderWorldIn && this.minecraft.level != null
 					&& (!this.minecraft.options.hideGui || this.minecraft.screen != null)) {
 				this.minecraft.getProfiler().popPush("gui");
-
 //				if (Reflector.ForgeIngameGui.exists()) {
 //					// RenderSystem.defaultAlphaFunc();
 //					Reflector.ForgeIngameGui_renderVignette.setValue(false);
@@ -917,7 +932,7 @@ public abstract class GameRendererVRMixin
 
 					if (this.minecraft.getOverlay() instanceof LoadingOverlay) {
 						LoadingOverlay loadingoverlay = (LoadingOverlay) this.minecraft.getOverlay();
-						// loadingoverlay.update();
+						//loadingoverlay.update();
 					}
 				}
 
@@ -948,7 +963,7 @@ public abstract class GameRendererVRMixin
 					this.minecraft.screen.render(posestack1, i, j, this.minecraft.getDeltaFrameTime());
 //					}
 					// Vivecraft
-//					((GuiExtension) this.minecraft.gui).drawMouseMenuQuad(i, j);
+					((GuiExtension) this.minecraft.gui).drawMouseMenuQuad(i, j);
 				} catch (Throwable throwable2) {
 					CrashReport crashreport = CrashReport.forThrowable(throwable2, "Rendering screen");
 					CrashReportCategory crashreportcategory = crashreport.addCategory("Screen render details");
@@ -988,7 +1003,7 @@ public abstract class GameRendererVRMixin
 		}
 
 		if (this.minecraft.options.renderDebugCharts && !this.minecraft.options.hideGui) {
-//			 this.minecraft.drawProfiler();
+			 //this.minecraft.drawProfiler();
 		}
 
 //		this.frameFinish();
@@ -1350,7 +1365,7 @@ public abstract class GameRendererVRMixin
 						if (GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer != null
 								&& GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.isReady()) {
 							try {
-								// this.renderTechjarsAwesomeMainMenuRoom();
+								//this.renderTechjarsAwesomeMainMenuRoom();
 							} catch (Exception exception) {
 								System.out.println("Error rendering main menu world, unloading to prevent more errors");
 								exception.printStackTrace();

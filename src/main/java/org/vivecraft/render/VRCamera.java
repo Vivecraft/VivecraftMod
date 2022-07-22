@@ -23,7 +23,7 @@ public class VRCamera extends Camera
         RenderPass renderpass = dataholder.currentPass;
 
 //        if (Shaders.isShadowPass && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
-        if (renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
+        if (false && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
         {
             renderpass = RenderPass.CENTER;
         }

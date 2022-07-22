@@ -5,7 +5,7 @@
   "refmap": "examplemod.refmap.json",
   "mixins": [
     "server.level.ServerPlayerMixin",
-    //"server.network.ServerGamePacketListenerImplMixin",    
+    "server.network.ServerGamePacketListenerImplMixin",
     
     "server.packs.repository.PackRepositoryVRMixin",
     
@@ -21,12 +21,15 @@
     "blaze3d.pipeline.MainTargetMixin",
     "blaze3d.pipeline.RenderTargetMixin",
     "blaze3d.platform.WindowVRMixin",
+    "blaze3d.systems.RenderSystemVRMixin",
     "client.MinecraftMixin",
     "client.MinecraftVRMixin2",
     "client.OptionMixin",
     "client.OptionsMixin",
+    "client.gui.GuiVRMixin",
+    "client.gui.screens.PauseScreenVRMixin",
     "client.main.MainMixin",
-    //"client.multiplayer.ClientPacketListenerMixin",
+    "client.multiplayer.ClientPacketListenerMixin",
     "client.player.LocalPlayerVRMixin",
     "client.renderer.GameRendererVRMixin",
     "client.renderer.LevelRendererVRMixin",

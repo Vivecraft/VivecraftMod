@@ -3,12 +3,15 @@ package com.example.examplemod.mixin.client.player;
 import com.example.examplemod.ItemInHandRendererExtension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.NetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 
 import com.example.examplemod.DataHolder;
@@ -23,18 +26,31 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.render.VRFirstPersonArmSwing;
+import org.vivecraft.utils.external.jinfinadeck;
+import org.vivecraft.utils.external.jkatvr;
+
+import static org.vivecraft.settings.VRSettings.FreeMove.*;
 
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements PlayerExtension{
 
 	@Unique
 	private Vec3 moveMulIn;
+	@Unique
+	private boolean initFromServer;
+	@Unique
+	private int movementTeleportTimer;
+	@Unique
+	private double additionX;
+	@Unique
+	private double additionZ;
+	@Final
 	@Shadow
 	private Minecraft minecraft;
-
 	@Shadow
 	@Final
 	public ClientPacketListener connection;
+	private final DataHolder dataholder = DataHolder.getInstance();
 	@Shadow
 	protected abstract void updateAutoJump(float f, float g);
 
@@ -44,6 +60,17 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile) {
 		super(clientLevel, gameProfile);
 		// TODO Auto-generated constructor stub
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V"), method = "tick")
+	public void overridePose(CallbackInfo ci) {
+		NetworkHelper.overridePose(this);
+		DataHolder.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object)this, DataHolder.getInstance().vrPlayer.vrdata_world_pre);
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;aiStep()V"), method = "aiStep")
+	public void ai(CallbackInfo ci) {
+		this.dataholder.vrPlayer.tick((LocalPlayer) (Object) this, this.minecraft, this.random);
 	}
 
 	@Inject(at = @At("HEAD"), method = "move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V", cancellable = true)
@@ -132,10 +159,12 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
 	@Inject(at = @At("HEAD"), method = "swing")
 	public void vrSwing(InteractionHand interactionHand, CallbackInfo ci) {
-		if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
-			((ItemInHandRendererExtension)this.minecraft.getItemInHandRenderer()).setXdist((float) this.minecraft.hitResult.getLocation().subtract(DataHolder.getInstance().vrPlayer.vrdata_world_pre.getController(interactionHand.ordinal()).getPosition()).length());
-		} else {
-			((ItemInHandRendererExtension)this.minecraft.getItemInHandRenderer()).setXdist(0F);
+		if (!this.swinging) {
+			if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+				((ItemInHandRendererExtension) this.minecraft.getItemInHandRenderer()).setXdist((float) this.minecraft.hitResult.getLocation().subtract(DataHolder.getInstance().vrPlayer.vrdata_world_pre.getController(interactionHand.ordinal()).getPosition()).length());
+			} else {
+				((ItemInHandRendererExtension) this.minecraft.getItemInHandRenderer()).setXdist(0F);
+			}
 		}
 	}
 
@@ -145,5 +174,194 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		this.swing(interactionhand);
 	}
 
+	public void moveTo(double pX, double p_20109_, double pY, float p_20111_, float pZ) {
+		super.moveTo(pX, p_20109_, pY, p_20111_, pZ);
+		if (this.initFromServer) {
+			DataHolder.getInstance().vrPlayer.snapRoomOriginToPlayerEntity((LocalPlayer)(Object)this, false, false);
+		}
+	}
 
+	public void absMoveTo(double pX, double p_19892_, double pY, float p_19894_, float pZ) {
+		super.absMoveTo(pX, p_19892_, pY, p_19894_, pZ);
+		DataHolder.getInstance().vrPlayer.snapRoomOriginToPlayerEntity((LocalPlayer)(Object)this, false, false);
+		if (!this.initFromServer)
+		{
+			this.moveTo(pX, p_19892_, pY, p_19894_, pZ);
+			this.initFromServer = true;
+		}
+	}
+
+	public void doDrag() {
+		float f = 0.91F;
+		if (this.onGround) {
+			f = this.level.getBlockState(new BlockPos(this.getX(), this.getBoundingBox().minY - 1.0D, this.getZ())).getBlock().getFriction() * 0.91F;
+		}
+		double d0 = (double)f;
+		double d1 = (double)f;
+		this.setDeltaMovement(this.getDeltaMovement().x / d0, this.getDeltaMovement().y, this.getDeltaMovement().z / d1);
+		double d2 = dataholder.vrSettings.inertiaFactor.getFactor();
+		double d3 = this.getBoundedAddition(this.additionX);
+		double d4 = (double)f * d3 / (double)(1.0F - f);
+		double d5 = d4 / ((double)f * (d4 + d3 * d2));
+		d0 = d0 * d5;
+		double d6 = this.getBoundedAddition(this.additionZ);
+		double d7 = (double)f * d6 / (double)(1.0F - f);
+		double d8 = d7 / ((double)f * (d7 + d6 * d2));
+		d1 = d1 * d8;
+		this.setDeltaMovement(this.getDeltaMovement().x * d0, this.getDeltaMovement().y, this.getDeltaMovement().z * d1);
+	}
+
+	public double getBoundedAddition(double orig) {
+		return orig >= -1.0E-6D && orig <= 1.0E-6D ? 1.0E-6D : orig;
+	}
+
+	public void moveRelative(float pAmount, Vec3 pRelative) {
+		double d0 = pRelative.y;
+		double d1 = pRelative.x;
+		double d2 = pRelative.z;
+		VRPlayer vrplayer = this.dataholder.vrPlayer;
+
+		if (vrplayer.getFreeMove()) {
+			double d3 = d1 * d1 + d2 * d2;
+			double d4 = 0.0D;
+			double d5 = 0.0D;
+			double d6 = 0.0D;
+			double d7 = 1.0D;
+
+			if (d3 >= (double)1.0E-4F || DataHolder.katvr) {
+				d3 = (double) Mth.sqrt((float) d3);
+
+				if (d3 < 1.0D && !DataHolder.katvr) {
+					d3 = 1.0D;
+				}
+
+				d3 = (double)pAmount / d3;
+				d1 = d1 * d3;
+				d2 = d2 * d3;
+				Vec3 vec3 = new Vec3(d1, 0.0D, d2);
+				VRPlayer vrplayer1 = this.dataholder.vrPlayer;
+				boolean flag = !this.isPassenger() && (this.getAbilities().flying || this.isSwimming());
+
+				if (DataHolder.katvr) {
+					jkatvr.query();
+					d3 = (double)(jkatvr.getSpeed() * jkatvr.walkDirection() * this.dataholder.vrSettings.movementSpeedMultiplier);
+					vec3 = new Vec3(0.0D, 0.0D, d3);
+
+					if (flag) {
+						vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float)Math.PI / 180F));
+					}
+
+					vec3 = vec3.yRot(-jkatvr.getYaw() * ((float)Math.PI / 180F) + this.dataholder.vrPlayer.vrdata_world_pre.rotation_radians);
+				}
+				else if (DataHolder.infinadeck) {
+					jinfinadeck.query();
+					d3 = (double)(jinfinadeck.getSpeed() * jinfinadeck.walkDirection() * this.dataholder.vrSettings.movementSpeedMultiplier);
+					vec3 = new Vec3(0.0D, 0.0D, d3);
+
+					if (flag) {
+						vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float)Math.PI / 180F));
+					}
+
+					vec3 = vec3.yRot(-jinfinadeck.getYaw() * ((float)Math.PI / 180F) + this.dataholder.vrPlayer.vrdata_world_pre.rotation_radians);
+				}
+				else if (this.dataholder.vrSettings.seated) {
+					int j = 0;
+					if (this.dataholder.vrSettings.seatedUseHMD) {
+						j = 1;
+					}
+
+					if (flag) {
+						vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.getController(j).getPitch() * ((float)Math.PI / 180F));
+					}
+
+					vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.getController(j).getYaw() * ((float)Math.PI / 180F));
+				}
+				else {
+					if (flag) {
+						switch (this.dataholder.vrSettings.vrFreeMoveMode) {
+							case CONTROLLER:
+								vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.getController(1).getPitch() * ((float)Math.PI / 180F));
+								break;
+							case HMD:
+							case RUN_IN_PLACE:
+							case ROOM:
+								vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float)Math.PI / 180F));
+						}
+					}
+					if (this.dataholder.jumpTracker.isjumping()) {
+						vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.hmd.getYaw() * ((float)Math.PI / 180F));
+					}
+					else {
+						switch (this.dataholder.vrSettings.vrFreeMoveMode)                         {
+							case CONTROLLER:
+								vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.getController(1).getYaw() * ((float)Math.PI / 180F));
+								break;
+
+							case HMD:
+								vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.hmd.getYaw() * ((float)Math.PI / 180F));
+								break;
+
+				            case RUN_IN_PLACE:
+								vec3 = vec3.yRot((float)(-this.dataholder.runTracker.getYaw() * (double)((float)Math.PI / 180F)));
+								vec3 = vec3.scale(this.dataholder.runTracker.getSpeed());
+
+							case ROOM:
+								vec3 = vec3.yRot((180.0F + this.dataholder.vrSettings.worldRotation) * ((float)Math.PI / 180F));
+						}
+					}
+				}
+
+				d4 = vec3.x;
+				d6 = vec3.y;
+				d5 = vec3.z;
+
+				if (!this.getAbilities().flying && !this.wasTouchingWater) {
+					d7 = this.dataholder.vrSettings.inertiaFactor.getFactor();
+				}
+
+				float f = 1.0F;
+
+				if (this.getAbilities().flying) {
+					f = 5.0F;
+				}
+
+				this.setDeltaMovement(this.getDeltaMovement().x + d4 * d7, this.getDeltaMovement().y + d6 * (double)f, this.getDeltaMovement().z + d5 * d7);
+				this.additionX = d4;
+				this.additionZ = d5;
+			}
+
+			if (!this.getAbilities().flying && !this.wasTouchingWater)
+			{
+				this.doDrag();
+			}
+		}
+	}
+	private boolean isThePlayer() {
+		return (LocalPlayer) (Object)this == Minecraft.getInstance().player;
+	}
+
+	@Override
+	public boolean getInitFromServer() {
+		return this.initFromServer;
+	}
+
+	@Override
+	public void setMovementTeleportTimer(int value) {
+		this.movementTeleportTimer = value;
+	}
+
+	@Override
+	public int getMovementTeleportTimer() {
+		return movementTeleportTimer;
+	}
+
+	@Override
+	public float getMuhSpeedFactor() {
+		return this.moveMulIn.lengthSqr() > 0.0D ? (float)((double)this.getBlockSpeedFactor() * (this.moveMulIn.x + this.moveMulIn.z) / 2.0D) : this.getBlockSpeedFactor();
+	}
+
+	@Override
+	public float getMuhJumpFactor() {
+		return this.moveMulIn.lengthSqr() > 0.0D ? (float)((double)this.getBlockJumpFactor() * this.moveMulIn.y) : this.getBlockJumpFactor();
+	}
 }

@@ -146,9 +146,11 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 	@Shadow
 	private Overlay overlay;
 
+	@Final
 	@Shadow
 	private Font font;
 
+	@Final
 	@Shadow
 	private static boolean ON_OSX;
 
@@ -158,9 +160,11 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 	@Shadow
 	private float pausePartialTick;
 
+	@Final
 	@Shadow
 	private Timer timer;
 
+	@Final
 	@Shadow
 	private GameRenderer gameRenderer;
 
@@ -170,6 +174,7 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 	@Shadow
 	public RenderTarget mainRenderTarget;
 
+	@Final
 	@Shadow
 	private SoundManager soundManager;
 
@@ -229,6 +234,7 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 	@Shadow
 	private String fpsString;
 
+	@Final
 	@Shadow
 	private TextureManager textureManager;
 
@@ -374,15 +380,14 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 		} else {
 			Util.throwAsRuntime(pThrowable);
 		}
-
 	}
 
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = Shift.BEFORE), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = Shift.BEFORE, ordinal = 2), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
 	public void gui(Screen pGuiScreen, CallbackInfo info) {
 		GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
 	}
 
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Ljava/lang/System;nanoTime()J", remap = false), method = "destroy()V")
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
 	public void destroy(CallbackInfo info) {
 		try {
 			DataHolder.getInstance().vr.destroy();
@@ -429,7 +434,8 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 			// v
 			try {
 				DataHolder.getInstance().vrRenderer.setupRenderConfiguration();
-			} catch (RenderConfigException renderconfigexception) {
+			}
+			catch (RenderConfigException renderconfigexception) {
 				this.screen = null;
 				GlStateManager._viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
 
@@ -442,7 +448,8 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 					PoseStack p = new PoseStack();
 					p.translate(0, 0, -2000);
 					this.overlay.render(p, 0, 0, 0.0F);
-				} else {
+				}
+				else {
 					this.notifyMirror(
 							LangHelper.get("vivecraft.messages.rendersetupfailed", renderconfigexception.error), true,
 							10000);
@@ -454,7 +461,8 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 
 					try {
 						Thread.sleep(10L);
-					} catch (InterruptedException interruptedexception) {
+					}
+					catch (InterruptedException interruptedexception) {
 					}
 				}
 
@@ -505,7 +513,8 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 			this.checkGLError("pre render setup ");
 			DataHolder.getInstance().vrRenderer.setupRenderConfiguration();
 			this.checkGLError("post render setup ");
-		} catch (Exception exception1) {
+		}
+		catch (Exception exception1) {
 			exception1.printStackTrace();
 		}
 

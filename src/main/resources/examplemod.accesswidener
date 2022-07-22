@@ -39,6 +39,7 @@ accessible field net/minecraft/client/Camera up Lcom/mojang/math/Vector3f;
 accessible field net/minecraft/client/Camera left Lcom/mojang/math/Vector3f;
 accessible field net/minecraft/client/Camera rotation Lcom/mojang/math/Quaternion;
 mutable field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options;
+accessible method net/minecraft/client/Minecraft isMultiplayerServer ()Z
 mutable field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
 accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
 accessible class net/minecraft/client/gui/screens/Screen

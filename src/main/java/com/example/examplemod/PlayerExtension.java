@@ -27,8 +27,8 @@ public interface PlayerExtension {
 	void swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact);
 
 	boolean isClimbeyJumpEquipped();
-	double getMuhJumpFactor();
-	double getMuhSpeedFactor();
+	float getMuhJumpFactor();
+	float getMuhSpeedFactor();
 	double getRoomYOffsetFromPose();
 	boolean getInitFromServer();
 
