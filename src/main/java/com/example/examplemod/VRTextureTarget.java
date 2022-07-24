@@ -1,6 +1,7 @@
 package com.example.examplemod;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 public class VRTextureTarget extends RenderTarget{

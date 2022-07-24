@@ -21,6 +21,7 @@
     "blaze3d.pipeline.MainTargetMixin",
     "blaze3d.pipeline.RenderTargetMixin",
     "blaze3d.platform.WindowVRMixin",
+    "blaze3d.platform.GlStateManagerVRMixin",
     "blaze3d.systems.RenderSystemVRMixin",
     "client.MinecraftMixin",
     "client.MinecraftVRMixin2",

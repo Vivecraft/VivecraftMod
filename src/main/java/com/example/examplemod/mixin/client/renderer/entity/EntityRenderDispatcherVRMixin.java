@@ -32,7 +32,6 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
 
     @Unique
     private VRArmRenderer armRenderer;
-
     @Unique
     public final Map<String, VRArmRenderer> armSkinMap = new HashMap<>();
     @Shadow

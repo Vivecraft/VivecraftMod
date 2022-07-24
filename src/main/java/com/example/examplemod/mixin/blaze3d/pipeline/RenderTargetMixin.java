@@ -2,6 +2,7 @@ package com.example.examplemod.mixin.blaze3d.pipeline;
 
 import java.nio.IntBuffer;
 
+import com.example.examplemod.GlStateHelper;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,25 +55,13 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Shadow
 	protected int colorTextureId;
 	@Shadow
-	private final float[] clearChannels = Util.make(() -> {
-		return new float[] { 1.0F, 1.0F, 1.0F, 0.0F };
-	});
-
-	@Shadow
-	protected abstract void _blitToScreen(int i, int j, boolean bl);
-
-	@Shadow
 	public abstract void unbindRead();
-
 	@Shadow
 	public abstract void bindRead();
-
 	@Shadow
 	protected abstract void clear(boolean onMacIn);
-
 	@Shadow
 	protected abstract void checkStatus();
-
 	@Shadow
 	protected abstract void setFilterMode(int i);
 
@@ -135,6 +124,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 //		}
 //	}
 	
+	/**
+	 * @author
+	 * @reason
+	 */
 	@Overwrite
 	public void createBuffers(int i, int j, boolean bl) {
 		RenderSystem.assertOnGameThreadOrInit();
@@ -183,6 +176,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	}
 
 
+	/**
+	 * @author
+	 * @reason
+	 */
 	@Overwrite
 	public void bindWrite(boolean bl) {
 		if (!RenderSystem.isOnRenderThread()) {
@@ -194,6 +191,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		}
 	}
 
+	/**
+	 * @author
+	 * @reason
+	 */
 	@Overwrite
 	private void _bindWrite(boolean bl) {
 		RenderSystem.assertOnGameThreadOrInit();
@@ -202,7 +203,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			GlStateManager._viewport(0, 0, this.viewWidth, this.viewHeight);
 		}
 	}
-	
 	
 
 	public void blitToScreen(int left, int width, int height, int top, boolean disableBlend, float xCropFactor,
@@ -291,7 +291,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			shaderinstance.clear();
 		} else {
 			this.bindRead();
-			// GlStateManager.disableAlphaTest();
+			GlStateHelper.disableAlphaTest();
 			GlStateManager._disableBlend();
 			GL11.glMatrixMode(GL11.GL_PROJECTION);
 			GL43.glLoadIdentity();

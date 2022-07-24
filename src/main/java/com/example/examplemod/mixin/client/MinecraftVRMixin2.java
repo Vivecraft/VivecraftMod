@@ -12,6 +12,9 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.client.gui.Gui;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.thread.BlockableEventLoop;
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -31,6 +34,7 @@ import org.vivecraft.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.menuworlds.MenuWorldRenderer;
 import org.vivecraft.provider.openvr_jna.MCOpenVR;
 import org.vivecraft.provider.openvr_jna.OpenVRStereoRenderer;
+import org.vivecraft.provider.openvr_jna.VRInputAction;
 import org.vivecraft.provider.ovr_lwjgl.MC_OVR;
 import org.vivecraft.provider.ovr_lwjgl.OVR_StereoRenderer;
 import org.vivecraft.render.PlayerModelController;
@@ -94,9 +98,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-//TODO Done execpt controls
+//TODO Done except controls
 @Mixin(Minecraft.class)
 public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler, MinecraftExtension {
+
+	@Final
+	@Shadow
+	private Gui gui;
 
 	public MinecraftVRMixin2(String string) {
 		super(string);
@@ -365,6 +373,10 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 		return c;
 	}
 
+	/**
+	 * @author
+	 * @reason
+	 */
 	@Overwrite
 	private void rollbackResourcePacks(Throwable pThrowable) {
 		if (this.resourcePackRepository.getSelectedPacks().stream().anyMatch(e -> !e.isRequired())) {
@@ -391,7 +403,8 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 	public void destroy(CallbackInfo info) {
 		try {
 			DataHolder.getInstance().vr.destroy();
-		} catch (Exception exception) {
+		}
+		catch (Exception exception) {
 		}
 	}
 	
@@ -804,14 +817,47 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 	public void tick(CallbackInfo info) {
 		++DataHolder.getInstance().tickCounter;
 	}
-	
-	public void removePick() {
-		
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "tick")
+	public void removePick(GameRenderer instance, float f) {
+		return;
 	}
 	
 	public void textures() {
 		this.textureManager.tick();
 	}
+
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;overlay:Lnet/minecraft/client/gui/screens/Overlay;", shift = Shift.BEFORE), method = "tick")
+	public void vrInputs(CallbackInfo ci) {
+		this.profiler.push("vrProcessInputs");
+		DataHolder.getInstance().vr.processInputs();
+		DataHolder.getInstance().vr.processBindings();
+	}
+
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;", ordinal = 4, shift = Shift.BEFORE), method = "tick")
+	public void vrActions(CallbackInfo ci) {
+		this.profiler.popPush("vrInputActionsTick");
+
+		for (VRInputAction vrinputaction : DataHolder.getInstance().vr.getInputActions()) {
+			vrinputaction.tick();
+		}
+
+		if (DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
+			VRHotkeys.handleMRKeys();
+		}
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 2, shift = Shift.BEFORE), method = "tick")
+	public void freeMove(CallbackInfo ci) {
+		if (this.player != null) {
+			DataHolder.getInstance().vrPlayer.updateFreeMove();
+
+			if (DataHolder.getInstance().vrPlayer.teleportWarningTimer >= 0 && --DataHolder.getInstance().vrPlayer.teleportWarningTimer == 0) {
+				this.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.noserverplugin"));
+			}
+		}
+	}
+
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;tick(Z)V"), method = "tick()V")
 	public void tickmenu(CallbackInfo info) {

@@ -3,6 +3,7 @@ package org.vivecraft.render;
 import java.util.Random;
 import java.util.function.Function;
 
+import net.minecraft.client.renderer.LightTexture;
 import org.vivecraft.gameplay.trackers.CameraTracker;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
@@ -161,14 +162,13 @@ public class VRWidgetHelper
         {
             if (displayFaceFunc.apply(bakedquad.getDirection()) != VRWidgetHelper.DisplayFace.NONE && bakedquad.getSprite().getName().equals(new ResourceLocation("vivecraft:transparent")))
             {
-//            	  Optifine
-//                QuadBounds quadbounds = bakedquad.getQuadBounds();
-//                boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == VRWidgetHelper.DisplayFace.MIRROR;
-//                int j = LightTexture.pack(15, 15);
-//                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).uv(flag ? 1.0F : 0.0F, 0.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
-//                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).uv(flag ? 0.0F : 1.0F, 0.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
-//                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).uv(flag ? 0.0F : 1.0F, 1.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
-//                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).uv(flag ? 1.0F : 0.0F, 1.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                QuadBounds quadbounds = new QuadBounds(bakedquad.getVertices());
+                boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == VRWidgetHelper.DisplayFace.MIRROR;
+                int j = LightTexture.pack(15, 15);
+                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).uv(flag ? 1.0F : 0.0F, 0.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).uv(flag ? 0.0F : 1.0F, 0.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).uv(flag ? 0.0F : 1.0F, 1.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).uv(flag ? 1.0F : 0.0F, 1.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
             }
         }
 
@@ -184,5 +184,66 @@ public class VRWidgetHelper
         NONE,
         NORMAL,
         MIRROR;
+    }
+
+    //Optifine
+    static class QuadBounds {
+        private float minZ;
+        private float maxX;
+        private float maxY;
+        private float maxZ;
+        private float minX;
+        private float minY;
+
+        public QuadBounds(int[] vertexData) {
+            int step = vertexData.length / 4;
+            for (int i = 0; i < 4; ++i) {
+                int pos = i * step;
+                float x = Float.intBitsToFloat(vertexData[pos + 0]);
+                float y = Float.intBitsToFloat(vertexData[pos + 1]);
+                float z = Float.intBitsToFloat(vertexData[pos + 2]);
+                if (this.minX > x) {
+                    this.minX = x;
+                }
+                if (this.minY > y) {
+                    this.minY = y;
+                }
+                if (this.minZ > z) {
+                    this.minZ = z;
+                }
+                if (this.maxX < x) {
+                    this.maxX = x;
+                }
+                if (this.maxY < y) {
+                    this.maxY = y;
+                }
+                if (!(this.maxZ < z)) continue;
+                this.maxZ = z;
+            }
+        }
+
+        public float getMinX() {
+            return this.minX;
+        }
+
+        public float getMinY() {
+            return this.minY;
+        }
+
+        public float getMinZ() {
+            return this.minZ;
+        }
+
+        public float getMaxX() {
+            return this.maxX;
+        }
+
+        public float getMaxY() {
+            return this.maxY;
+        }
+
+        public float getMaxZ() {
+            return this.maxZ;
+        }
     }
 }

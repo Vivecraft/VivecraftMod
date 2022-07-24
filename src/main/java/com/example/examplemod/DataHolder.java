@@ -38,6 +38,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.sounds.SoundEngine;
 
+import static com.mojang.blaze3d.vertex.DefaultVertexFormat.*;
+
 public class DataHolder {
 
     public static boolean kiosk;
@@ -107,8 +109,8 @@ public class DataHolder {
     String mirrorNotifyText;
     boolean mirrorNotifyClear;
     long mirroNotifyLen;
-    
-    public static final VertexFormat POSITION_TEX_LMAP_COLOR_NORMAL = new VertexFormat(ImmutableMap.<String,VertexFormatElement>builder().put("Position", DefaultVertexFormat.ELEMENT_POSITION).put("UV0", DefaultVertexFormat.ELEMENT_UV0).put("UV2", DefaultVertexFormat.ELEMENT_UV2).put("Color", DefaultVertexFormat.ELEMENT_COLOR).put("Normal", DefaultVertexFormat.ELEMENT_NORMAL).put("Padding", DefaultVertexFormat.ELEMENT_PADDING).build());
+
+    public static final VertexFormat POSITION_TEX_LMAP_COLOR_NORMAL = new VertexFormat(ImmutableMap.<String,VertexFormatElement>builder().put("Position", ELEMENT_POSITION).put("UV0", ELEMENT_UV0).put("UV2", ELEMENT_UV2).put("Color", ELEMENT_COLOR).put("Normal", ELEMENT_NORMAL).put("Padding", ELEMENT_PADDING).build());
 
 
     public static DataHolder getInstance() {
