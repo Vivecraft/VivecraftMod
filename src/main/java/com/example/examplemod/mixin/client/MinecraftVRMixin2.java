@@ -876,7 +876,7 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 	}
 
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;tick(Z)V"), method = "tick()V")
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;pause:Z", ordinal = 5, shift = Shift.BEFORE), method = "tick()V")
 	public void tickmenu(CallbackInfo info) {
 		if (DataHolder.getInstance().menuWorldRenderer != null) {
 			DataHolder.getInstance().menuWorldRenderer.tick();

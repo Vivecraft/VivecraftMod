@@ -32,6 +32,7 @@
     "client.gui.screens.PauseScreenVRMixin",
     "client.main.MainMixin",
     "client.multiplayer.ClientPacketListenerMixin",
+    "client.multiplayer.ClientPacketListenerVRMixin",
     "client.player.LocalPlayerVRMixin",
     "client.renderer.GameRendererVRMixin",
     "client.renderer.LevelRendererVRMixin",
