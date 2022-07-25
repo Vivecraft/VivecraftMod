@@ -2,7 +2,6 @@
   "required": true,
   "package": "com.example.examplemod.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "examplemod.refmap.json",
   "mixins": [
     "server.level.ServerPlayerMixin",
     "server.network.ServerGamePacketListenerImplMixin",
@@ -23,8 +22,10 @@
     "blaze3d.platform.WindowVRMixin",
     "blaze3d.platform.GlStateManagerVRMixin",
     "blaze3d.systems.RenderSystemVRMixin",
+    "client.KeyboardHandlerVRMixin",
     "client.MinecraftMixin",
     "client.MinecraftVRMixin2",
+    "client.MouseHandlerVRMixin",
     "client.OptionMixin",
     "client.OptionsMixin",
     "client.gui.GuiVRMixin",

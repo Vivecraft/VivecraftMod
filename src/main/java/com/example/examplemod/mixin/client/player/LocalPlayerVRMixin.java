@@ -5,8 +5,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,7 +40,7 @@ import static org.vivecraft.settings.VRSettings.FreeMove.*;
 public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements PlayerExtension{
 
 	@Unique
-	private Vec3 moveMulIn;
+	private Vec3 moveMulIn = Vec3.ZERO;
 	@Unique
 	private boolean initFromServer;
 	@Unique
@@ -363,5 +368,25 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	@Override
 	public float getMuhJumpFactor() {
 		return this.moveMulIn.lengthSqr() > 0.0D ? (float)((double)this.getBlockJumpFactor() * this.moveMulIn.y) : this.getBlockJumpFactor();
+	}
+
+	@Override
+	public void stepSound(BlockPos blockforNoise, Vec3 soundPos) {
+		BlockState blockstate = this.level.getBlockState(blockforNoise);
+		Block block = blockstate.getBlock();
+		SoundType soundtype = block.getSoundType(blockstate);
+		BlockState blockstate1 = this.level.getBlockState(blockforNoise.above());
+
+		if (blockstate1.getBlock() == Blocks.SNOW) {
+			soundtype = Blocks.SNOW.getSoundType(blockstate1);
+		}
+
+		float f = soundtype.getVolume();
+		float f1 = soundtype.getPitch();
+		SoundEvent soundevent = soundtype.getStepSound();
+
+		if (!this.isSilent() && !block.defaultBlockState().getMaterial().isLiquid()) {
+			this.level.playSound((LocalPlayer)null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
+		}
 	}
 }

@@ -12,9 +12,10 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.client.*;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.thread.BlockableEventLoop;
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -28,9 +29,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.NetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
+import org.vivecraft.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.menuworlds.MenuWorldRenderer;
 import org.vivecraft.provider.openvr_jna.MCOpenVR;
 import org.vivecraft.provider.openvr_jna.OpenVRStereoRenderer;
@@ -64,12 +67,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.Util;
-import net.minecraft.client.CloudStatus;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.MouseHandler;
-import net.minecraft.client.Option;
-import net.minecraft.client.Options;
-import net.minecraft.client.Timer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.screens.LoadingOverlay;
@@ -102,9 +99,8 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(Minecraft.class)
 public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler, MinecraftExtension {
 
-	@Final
-	@Shadow
-	private Gui gui;
+	@Unique
+	private boolean lastClick;
 
 	public MinecraftVRMixin2(String string) {
 		super(string);
@@ -133,6 +129,13 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 
 	@Unique
 	private FloatBuffer matrixBuffer2 = MemoryTracker.create(16).asFloatBuffer();
+
+	@Shadow
+	protected int missTime;
+
+	@Final
+	@Shadow
+	private Gui gui;
 
 	@Shadow
 	@Final
@@ -275,7 +278,9 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 
 	@Shadow
 	abstract void stop();
-	
+
+	@Shadow @Final public LevelRenderer levelRenderer;
+
 	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;", remap = false), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public Thread settings() {
 		if (!this.oculus) {
@@ -810,8 +815,20 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 		else if (DataHolder.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.SLOWEST)
 			this.rightClickDelay = 10;
 	}
-	
-	
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"), method = "startUseItem")
+	public ItemStack activeHand2(LocalPlayer instance, InteractionHand interactionHand) {
+		ItemStack itemInHand = instance.getItemInHand(interactionHand);
+		if (DataHolder.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemInHand)) {
+			NetworkHelper.sendActiveHand((byte) interactionHand.ordinal());
+		}
+		return itemInHand;
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"), method = "startUseItem")
+	public void swingUse(LocalPlayer instance, InteractionHand interactionHand) {
+		((PlayerExtension)instance).swingArm(interactionHand, VRFirstPersonArmSwing.Use);
+	}
 
 	@Inject(at = @At("HEAD"), method = "tick()V")
 	public void tick(CallbackInfo info) {
@@ -869,14 +886,63 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 
 	}
 
-	//TODO change while to for, hard!!
-	public void handleKeys() {
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;setCameraType(Lnet/minecraft/client/CameraType;)V"), method = "handleKeybinds")
+	public void noCamera(Options instance, CameraType cameraType) {
+		return ;
+	}
 
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;setCameraType(Lnet/minecraft/client/CameraType;)V"), method = "handleKeybinds")
+	public void vrMirrorOption(Options instance, CameraType cameraType) {
+		DataHolder.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
+		this.notifyMirror(DataHolder.getInstance().vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
+		this.levelRenderer.needsUpdate();
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;checkEntityPostEffect(Lnet/minecraft/world/entity/Entity;)V"), method = "handleKeybinds")
+	public void noPosEffect(GameRenderer instance, Entity entity) {
+		return ;
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"), method = "handleKeybinds()V")
 	public void swingArmhandleKeybinds(LocalPlayer instance, InteractionHand interactionHand) {
 		((PlayerExtension) player).swingArm(InteractionHand.MAIN_HAND, VRFirstPersonArmSwing.Attack);
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"), method = "handleKeybinds")
+	public boolean vrKeyuse(KeyMapping instance) {
+		return !(!instance.isDown() && (!DataHolder.getInstance().bowTracker.isActive(this.player) || DataHolder.getInstance().vrSettings.seated) && ! DataHolder.getInstance().autoFood.isEating());
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;releaseUsingItem(Lnet/minecraft/world/entity/player/Player;)V", shift = Shift.BEFORE), method = "handleKeybinds")
+	public void activeHand(CallbackInfo ci) {
+		NetworkHelper.sendActiveHand((byte)this.player.getUsedItemHand().ordinal());
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z", ordinal = 13), method = "handleKeybinds")
+	public boolean notConsumeClick(KeyMapping instance) {
+		return false;
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startAttack()V", shift = Shift.AFTER), method = "handleKeybinds")
+	public void lastClick(CallbackInfo ci) {
+		this.lastClick = true;
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z", ordinal = 14, shift = Shift.BEFORE), method = "handleKeybinds")
+	public void attackDown(CallbackInfo ci) {
+		if (this.options.keyAttack.consumeClick() && this.screen == null){
+
+		}
+		else if (!this.options.keyAttack.isDown())
+		{
+			this.missTime = 0;
+
+			if (this.lastClick) {
+				this.gameMode.stopDestroyBlock();
+			}
+
+			this.lastClick = false;
+		}
 	}
 
 	@Inject(at = @At("HEAD"), method = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V")
