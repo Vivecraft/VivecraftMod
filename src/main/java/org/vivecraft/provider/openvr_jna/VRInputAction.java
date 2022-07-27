@@ -12,7 +12,6 @@ import org.vivecraft.provider.HandedKeyBinding;
 import org.vivecraft.provider.InputSimulator;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.openvr_jna.control.VRInputActionSet;
-import org.vivecraft.reflection.MCReflection;
 import org.vivecraft.utils.math.Vector2;
 import org.vivecraft.utils.math.Vector3;
 
@@ -539,14 +538,14 @@ public class VRInputAction
     {
         if (kb != null)
         {
-            MCReflection.KeyBinding_pressed.set(kb, pressed);
-            MCReflection.KeyBinding_pressTime.set(kb, (int)MCReflection.KeyBinding_pressTime.get(kb) + 1);
+            kb.isDown = pressed;
+            kb.clickCount += 1;
         }
     }
 
     private void pressKey()
     {
-        InputConstants.Key inputconstants$key = (InputConstants.Key)MCReflection.KeyBinding_keyCode.get(this.keyBinding);
+        InputConstants.Key inputconstants$key = this.keyBinding.key;
 
         if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
@@ -568,7 +567,7 @@ public class VRInputAction
 
     public void unpressKey()
     {
-        InputConstants.Key inputconstants$key = (InputConstants.Key)MCReflection.KeyBinding_keyCode.get(this.keyBinding);
+        InputConstants.Key inputconstants$key = this.keyBinding.key;
 
         if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
@@ -585,7 +584,7 @@ public class VRInputAction
             }
         }
 
-        MCReflection.KeyBinding_unpressKey.invoke(this.keyBinding);
+        this.keyBinding.release();
     }
 
     public class AnalogData

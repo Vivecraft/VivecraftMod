@@ -12,7 +12,6 @@ import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.reflection.MCReflection;
 
 public class AimFixHandler extends ChannelInboundHandlerAdapter
 {
@@ -59,7 +58,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
                 serverplayer.setYRot((float)Math.toDegrees(Math.atan2(-dir.x, dir.z)));
                 serverplayer.xRotO = serverplayer.getXRot();
                 serverplayer.yRotO = serverplayer.yHeadRotO = serverplayer.yHeadRot = serverplayer.getYRot();
-                MCReflection.Entity_eyeHeight.set(serverplayer, 0);
+                serverplayer.eyeHeight = 0;
                 serverviveplayer.offset = position.subtract(pos);
                 System.out.println("AimFix " + pos.x + " " + pos.y + " " + pos.z + " " + (float)Math.toDegrees(Math.asin(-dir.y)) + " " + (float)Math.toDegrees(Math.atan2(-dir.x, dir.z)));
             }
@@ -90,7 +89,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
             serverplayer.xRotO = xRotO;
             serverplayer.yRotO = yRotO;
             serverplayer.yHeadRotO = yHeadRotO;
-            MCReflection.Entity_eyeHeight.set(serverplayer, eyeHeight);
+            serverplayer.eyeHeight = eyeHeight;
             if (serverviveplayer != null)
                 serverviveplayer.offset = new Vec3(0.0D, 0.0D, 0.0D);
         });

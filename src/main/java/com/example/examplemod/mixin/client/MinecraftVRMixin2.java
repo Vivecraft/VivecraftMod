@@ -107,7 +107,7 @@ public abstract class MinecraftVRMixin2 extends ReentrantBlockableEventLoop<Runn
 	}
 
 	@Unique
-	private boolean oculus;
+	private boolean oculus = false;
 
 	@Unique
 	private long mirroNotifyStart;

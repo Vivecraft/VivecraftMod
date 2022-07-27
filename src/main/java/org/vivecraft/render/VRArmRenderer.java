@@ -3,7 +3,6 @@ package org.vivecraft.render;
 import org.lwjgl.opengl.GL43;
 import org.vivecraft.gameplay.trackers.SwingTracker;
 import org.vivecraft.provider.ControllerType;
-import org.vivecraft.reflection.MCReflection;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -40,7 +39,7 @@ public class VRArmRenderer extends PlayerRenderer
     private void renderItem(ControllerType side, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, AbstractClientPlayer playerIn, ModelPart rendererArmIn, ModelPart rendererArmwearIn)
     {
         PlayerModel<AbstractClientPlayer> playermodel = this.getModel();
-        MCReflection.RenderPlayer_setModelVisibilities.invoke(this, playerIn);
+        //this.setModelVisibilities(); TODO find method
         GlStateManager._enableBlend();
         GlStateManager._enableCull();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);

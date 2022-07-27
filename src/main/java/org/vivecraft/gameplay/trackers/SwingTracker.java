@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.vivecraft.api.Vec3History;
 import org.vivecraft.provider.ControllerType;
-import org.vivecraft.reflection.MCReflection;
 import org.vivecraft.settings.VRSettings;
 
 import com.example.examplemod.DataHolder;
@@ -287,7 +286,7 @@ public class SwingTracker extends Tracker
                                         }
                                     }
 
-                                    MCReflection.PlayerController_blocknoise.set(Minecraft.getInstance().gameMode, 0);
+     //                               Minecraft.getInstance().gameMode.blockBreakingCooldown = 0;
                                 }
 
                                 this.dh.vrPlayer.blockDust(blockhitresult1.getLocation().x, blockhitresult1.getLocation().y, blockhitresult1.getLocation().z, 3 * j, blockpos, blockstate, 0.6F, 1.0F);
@@ -310,13 +309,13 @@ public class SwingTracker extends Tracker
 
     private boolean getIsHittingBlock()
     {
-        return (boolean) MCReflection.PlayerController_isHittingBlock.get(Minecraft.getInstance().gameMode);
+        return Minecraft.getInstance().gameMode.isDestroying();
     }
 
     private void clearBlockHitDelay()
     {
         //MCReflection.PlayerController_blockHitDelay.set(Minecraft.getInstance().gameMode, 0);
-        MCReflection.PlayerController_blocknoise.set(Minecraft.getInstance().gameMode, 1);
+       // Minecraft.getInstance().gameMode.blockBreakingCooldown = 1;
     }
 
     public Vec3 constrain(Vec3 start, Vec3 end)

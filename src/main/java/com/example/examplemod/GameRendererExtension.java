@@ -54,4 +54,6 @@ public interface GameRendererExtension {
 	void restoreRVEPos(LivingEntity e);
 
 	void setupRVE();
+
+    void DrawScopeFB(PoseStack matrixStackIn, int i);
 }

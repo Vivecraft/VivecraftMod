@@ -33,14 +33,13 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 	private VRPlayerRenderer playerRendererVR;
 	@Unique
 	private VRPlayerRenderer playerRendererVRSeated;
-	
+
 	@Inject(at = @At("HEAD"), method = "getRenderer(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/client/renderer/entity/EntityRenderer;", cancellable = true)
 	public void renderer(Entity pEntity, CallbackInfoReturnable<EntityRenderer<AbstractClientPlayer>> info) {
 		if (pEntity instanceof AbstractClientPlayer) {
 			String s = ((AbstractClientPlayer)pEntity).getModelName();
 			PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(pEntity.getUUID());
 			if (playermodelcontroller$rotinfo != null) {
-				Object object = null;
 				VRPlayerRenderer vrplayerrenderer1;
 				if (playermodelcontroller$rotinfo.seated) {
 					if (this.playerRendererVRSeated == null) {
@@ -59,7 +58,8 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 					} else {
 						vrplayerrenderer1 = this.playerRendererVRSeated;
 					}
-				} else {
+				}
+				else {
 					if (this.playerRendererVR == null) {
 						this.playerRendererVR = (VRPlayerRenderer) this.skinMapVR.get("default");
 //					this.skinMapVR.put("default", this.playerRendererVR);

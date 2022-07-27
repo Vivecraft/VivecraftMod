@@ -61,7 +61,6 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                 cir.setReturnValue(this.cameraOrientation);
             }
         }
-
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;", shift = At.Shift.AFTER),
@@ -92,5 +91,9 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                 return this.cameraOrientation;
             }
         }
+    }
+
+    public Map<String, VRArmRenderer> getArmSkinMap() {
+        return armSkinMap;
     }
 }

@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.lwjgl.opengl.GL11;
-import org.vivecraft.reflection.MCReflection;
 import org.vivecraft.settings.VRSettings;
 
 import com.example.examplemod.DataHolder;
@@ -1213,7 +1212,7 @@ public class MenuWorldRenderer
 
         public FluidStateWrapper(FluidState fluidState)
         {
-            super(fluidState.getType(), fluidState.getValues(), (MapCodec)MCReflection.StateHolder_mapCodec.get(fluidState));
+            super(fluidState.getType(), fluidState.getValues(), fluidState.propertiesCodec);
             this.fluidState = fluidState;
         }
 

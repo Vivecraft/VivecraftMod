@@ -4,6 +4,7 @@ import java.nio.FloatBuffer;
 import java.util.Locale;
 
 import com.example.examplemod.*;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -2403,4 +2404,37 @@ public abstract class GameRendererVRMixin
 			this.cached = false;
 		}
 	}
+
+	@Override
+	public void DrawScopeFB(PoseStack matrixStackIn, int i) {
+		if (DataHolder.getInstance().currentPass != RenderPass.SCOPEL && DataHolder.getInstance().currentPass != RenderPass.SCOPER) {
+			this.lightTexture.turnOffLightLayer();
+			matrixStackIn.pushPose();
+			RenderSystem.enableDepthTest();
+			RenderSystem.enableTexture();
+
+			if (i == 0) {
+				DataHolder.getInstance().vrRenderer.telescopeFramebufferR.bindRead();
+				RenderSystem.setShaderTexture(0, DataHolder.getInstance().vrRenderer.telescopeFramebufferR.getColorTextureId());
+			}
+			else {
+				DataHolder.getInstance().vrRenderer.telescopeFramebufferL.bindRead();
+				RenderSystem.setShaderTexture(0, DataHolder.getInstance().vrRenderer.telescopeFramebufferL.getColorTextureId());
+			}
+
+			float scale = 0.0785F;
+			//actual framebuffer
+			float f = TelescopeTracker.viewPercent(i);
+			this.drawSizedQuad(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
+
+			RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
+			RenderSystem.enableBlend();
+			matrixStackIn.translate(0.0D, 0.0D, 0.00001D);
+			int light = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(i).getPosition()));
+			this.drawSizedQuadWithLightmap(720.0F, 720.0F, scale, light, matrixStackIn.last().pose());
+
+			matrixStackIn.popPose();
+			this.lightTexture.turnOnLightLayer();
+			    }
+			}
 }

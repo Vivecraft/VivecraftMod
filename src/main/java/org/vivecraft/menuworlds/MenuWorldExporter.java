@@ -14,6 +14,7 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -31,8 +32,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
-
-import org.vivecraft.reflection.MCReflection;
 
 public class MenuWorldExporter {
 	public static final int VERSION = 5;
@@ -80,14 +79,14 @@ public class MenuWorldExporter {
 		if (world instanceof ServerLevel)
 			dos.writeBoolean(((ServerLevel)world).isFlat());
 		else
-			dos.writeBoolean((boolean)MCReflection.ClientWorldInfo_isFlat.get(world.getLevelData()));
+			dos.writeBoolean(((ClientLevel)world).getLevelData().isFlat);
 
 		dos.writeBoolean(world.dimensionType().hasSkyLight()); // technically not needed now but keeping it just in case
 
 		if (world instanceof ServerLevel)
 			dos.writeLong(((ServerLevel)world).getSeed());
 		else
-			dos.writeLong((long)MCReflection.BiomeManager_seed.get(world.getBiomeManager())); // not really correct :/
+			dos.writeLong(world.getBiomeManager().biomeZoomSeed); // not really correct :/
 
 		mapper.writePalette(dos);
 
