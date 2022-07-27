@@ -16,7 +16,7 @@ import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
-import com.example.examplemod.DataHolder;
+import com.example.vivecraftfabric.DataHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;

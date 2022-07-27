@@ -46,7 +46,7 @@ dependencies {
     include(implementation("io.github.classgraph:classgraph:4.8.138"))
 }
 loom {
-    accessWidenerPath = file("src/main/resources/examplemod.accesswidener")
+    accessWidenerPath = file("src/main/resources/vivecraftfabric.accesswidener")
 }
 
 processResources {

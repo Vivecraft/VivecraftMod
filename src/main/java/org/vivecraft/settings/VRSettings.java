@@ -37,8 +37,8 @@ import org.vivecraft.utils.math.Angle;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
-import com.example.examplemod.DataHolder;
-import com.example.examplemod.OptionsExtension;
+import com.example.vivecraftfabric.DataHolder;
+import com.example.vivecraftfabric.OptionsExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
 import net.minecraft.client.Minecraft;

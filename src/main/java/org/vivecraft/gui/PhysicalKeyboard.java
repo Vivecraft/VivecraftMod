@@ -27,8 +27,8 @@ import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.lwjgl.Matrix4f;
 import org.vivecraft.utils.lwjgl.Vector3f;
 
-import com.example.examplemod.DataHolder;
-import com.example.examplemod.GlStateHelper;
+import com.example.vivecraftfabric.DataHolder;
+import com.example.vivecraftfabric.GlStateHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;

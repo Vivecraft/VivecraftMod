@@ -15,9 +15,9 @@ import org.vivecraft.utils.math.Matrix4f;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
-import com.example.examplemod.DataHolder;
-import com.example.examplemod.MethodHolder;
-import com.example.examplemod.MinecraftExtension;
+import com.example.vivecraftfabric.DataHolder;
+import com.example.vivecraftfabric.MethodHolder;
+import com.example.vivecraftfabric.MinecraftExtension;
 import com.google.common.util.concurrent.Runnables;
 
 import net.minecraft.client.Minecraft;

@@ -2,7 +2,7 @@ package org.vivecraft.asm;
 
 import org.vivecraft.api.VRData;
 
-import com.example.examplemod.DataHolder;
+import com.example.vivecraftfabric.DataHolder;
 
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.NonNullList;

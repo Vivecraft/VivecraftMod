@@ -1,0 +1,53 @@
+{
+  "required": true,
+  "package": "com.example.vivecraftfabric.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "server.level.ServerPlayerMixin",
+    "server.network.ServerGamePacketListenerImplMixin",
+    
+    "server.packs.repository.PackRepositoryVRMixin",
+    
+    "world.entity.projectile.AbstractArrowMixin",
+    "world.entity.projectile.AbstractHurtingProjectileMixin",
+    "world.entity.projectile.FishingHookMixin",
+    "world.entity.projectile.ProjectileMixin",
+    "world.entity.projectile.ThrowableProjectileMixin",
+    "world.entity.projectile.ThrownTridentMixin",
+    "world.item.CrossbowItemMixin"
+  ],
+  "client": [
+    "blaze3d.pipeline.MainTargetMixin",
+    "blaze3d.pipeline.RenderTargetMixin",
+    "blaze3d.platform.WindowVRMixin",
+    "blaze3d.platform.GlStateManagerVRMixin",
+    "blaze3d.systems.RenderSystemVRMixin",
+    "client.KeyboardHandlerVRMixin",
+    "client.MinecraftMixin",
+    "client.MinecraftVRMixin2",
+    "client.MouseHandlerVRMixin",
+    "client.OptionMixin",
+    "client.OptionsMixin",
+    "client.gui.GuiVRMixin",
+    "client.gui.screens.PauseScreenVRMixin",
+    "client.main.MainMixin",
+    "client.multiplayer.ClientPacketListenerMixin",
+    "client.multiplayer.ClientPacketListenerVRMixin",
+    "client.player.LocalPlayerVRMixin",
+    "client.renderer.GameRendererVRMixin",
+    "client.renderer.LevelRendererVRMixin",
+    "client.renderer.ItemInHandRendererVRMixin",
+    "client.renderer.block.LiquidBlockRendererMixin",
+    "client.renderer.entity.EntityRenderDispatcherMixin",
+    "client.renderer.entity.EntityRenderDispatcherVRMixin",
+    "client.renderer.entity.EntityRendererVRMixin",
+    "client.resources.language.ClientLanguageMixin",
+    "world.entity.vehicle.BoatMixin",
+    "client.resources.DefaultClientPackResourcesVRMixin",
+    
+    "EntityAccessor"
+  ],
+  "server": [
+  ],
+  "minVersion": "0.8.4"
+}

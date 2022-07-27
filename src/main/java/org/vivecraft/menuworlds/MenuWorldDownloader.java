@@ -13,7 +13,7 @@ import java.util.Random;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
-import com.example.examplemod.DataHolder;
+import com.example.vivecraftfabric.DataHolder;
 
 import net.minecraft.client.Minecraft;
 

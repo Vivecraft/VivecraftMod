@@ -2,7 +2,7 @@ package org.vivecraft.gameplay.trackers;
 
 import org.vivecraft.settings.AutoCalibration;
 
-import com.example.examplemod.DataHolder;
+import com.example.vivecraftfabric.DataHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

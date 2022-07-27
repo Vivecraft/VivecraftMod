@@ -2,7 +2,7 @@ package org.vivecraft.render;
 
 import org.vivecraft.api.VRData;
 
-import com.example.examplemod.DataHolder;
+import com.example.vivecraftfabric.DataHolder;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Camera;

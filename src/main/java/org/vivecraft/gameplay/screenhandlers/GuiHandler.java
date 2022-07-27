@@ -14,8 +14,8 @@ import org.vivecraft.utils.math.Matrix4f;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
-import com.example.examplemod.DataHolder;
-import com.example.examplemod.GameRendererExtension;
+import com.example.vivecraftfabric.DataHolder;
+import com.example.vivecraftfabric.GameRendererExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "vivecraftfabric",
   "version": "${version}",
 
-  "name": "Example Mod",
+  "name": "Vivecraft Fabric",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
     "Me!"
@@ -14,13 +14,13 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.example.examplemod.ExampleMod"
+      "com.example.vivecraftfabric.VivecraftFabric"
     ]
   },
   "mixins": [
-    "examplemod.mixins.json"
+    "vivecraftfabric.mixins.json"
   ],
-  "accessWidener": "examplemod.accesswidener",
+  "accessWidener": "vivecraftfabric.accesswidener",
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",

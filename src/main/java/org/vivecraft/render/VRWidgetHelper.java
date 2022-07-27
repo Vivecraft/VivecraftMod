@@ -9,11 +9,11 @@ import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
-import com.example.examplemod.DataHolder;
-import com.example.examplemod.GameRendererExtension;
-import com.example.examplemod.GlStateHelper;
-import com.example.examplemod.ItemInHandRendererExtension;
-import com.example.examplemod.MethodHolder;
+import com.example.vivecraftfabric.DataHolder;
+import com.example.vivecraftfabric.GameRendererExtension;
+import com.example.vivecraftfabric.GlStateHelper;
+import com.example.vivecraftfabric.ItemInHandRendererExtension;
+import com.example.vivecraftfabric.MethodHolder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;

@@ -21,11 +21,11 @@ import org.vivecraft.render.VRShaders;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.LangHelper;
 
-import com.example.examplemod.DataHolder;
-import com.example.examplemod.GameRendererExtension;
-import com.example.examplemod.GlStateHelper;
-import com.example.examplemod.RenderTargetExtension;
-import com.example.examplemod.VRTextureTarget;
+import com.example.vivecraftfabric.DataHolder;
+import com.example.vivecraftfabric.GameRendererExtension;
+import com.example.vivecraftfabric.GlStateHelper;
+import com.example.vivecraftfabric.RenderTargetExtension;
+import com.example.vivecraftfabric.VRTextureTarget;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;

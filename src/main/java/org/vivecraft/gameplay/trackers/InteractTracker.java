@@ -9,8 +9,8 @@ import org.vivecraft.render.VRFirstPersonArmSwing;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
 
-import com.example.examplemod.DataHolder;
-import com.example.examplemod.PlayerExtension;
+import com.example.vivecraftfabric.DataHolder;
+import com.example.vivecraftfabric.PlayerExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;

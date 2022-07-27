@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import org.vivecraft.settings.VRSettings;
 
-import com.example.examplemod.DataHolder;
+import com.example.vivecraftfabric.DataHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;

@@ -8,8 +8,8 @@ import java.util.Set;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.settings.VRSettings;
 
-import com.example.examplemod.DataHolder;
-import com.example.examplemod.GameRendererExtension;
+import com.example.vivecraftfabric.DataHolder;
+import com.example.vivecraftfabric.GameRendererExtension;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -21,7 +21,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.math.Matrix4f;
-import com.mojang.serialization.MapCodec;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
