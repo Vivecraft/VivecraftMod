@@ -4,6 +4,7 @@ import java.nio.FloatBuffer;
 import java.util.Locale;
 
 import com.example.vivecraftfabric.*;
+import net.minecraft.Util;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -220,6 +221,8 @@ public abstract class GameRendererVRMixin
 
 	@Shadow private boolean effectActive;
 
+	@Shadow private long lastActiveTime;
+
 	@Override
 	public double getRveY() {
 		return rveY;
@@ -322,6 +325,21 @@ public abstract class GameRendererVRMixin
 //		}
 //	}
 
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;pauseGame(Z)V"), method = "render")
+	public void pause(Minecraft instance, boolean bl) {
+		if (DataHolder.getInstance().currentPass == RenderPass.LEFT ){
+			instance.pauseGame(bl);
+		}
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;getMillis()J"), method = "render")
+	public long active() {
+		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+			return Util.getMillis();
+		}
+		return this.lastActiveTime;
+	}
+
 	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
 	public void matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
 		this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov));
@@ -345,14 +363,15 @@ public abstract class GameRendererVRMixin
 		return this.effectActive && DataHolder.getInstance().currentPass != RenderPass.THIRD;
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.BEFORE, ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
 	public void mainMenu(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
-		if (renderWorldIn && !this.isInMenuRoom() && this.minecraft.level != null) {
+		if (renderWorldIn && this.minecraft.level != null) {
 
 		}
 		else {
 			this.minecraft.getProfiler().push("MainMenu");
 			GL11.glDisable(GL11.GL_STENCIL_TEST);
+
 			PoseStack pMatrixStack = new PoseStack();
 			applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, pMatrixStack);
 			this.renderGuiLayer(partialTicks, true, pMatrixStack);
@@ -569,7 +588,7 @@ public abstract class GameRendererVRMixin
 
 		if (renderright) {
 			this.minecraft.getItemRenderer();
-			// ItemRenderer.ismainhand = true; TODO
+			DataHolder.ismainhand = true;
 
 			if (menuhandright) {
 				this.renderMainMenuHand(0, partialTicks, false, poseStack);
@@ -582,7 +601,7 @@ public abstract class GameRendererVRMixin
 			}
 
 			this.minecraft.getItemRenderer();
-			// ItemRenderer.ismainhand = false; TODO
+			DataHolder.ismainhand = false;
 		}
 
 		if (renderleft) {
@@ -991,7 +1010,7 @@ public abstract class GameRendererVRMixin
 		}
 
 		if (this.minecraft.options.renderDebugCharts && !this.minecraft.options.hideGui) {
-			 //this.minecraft.drawProfiler();
+			((MinecraftExtension)this.minecraft).drawProfiler();
 		}
 
 //		this.frameFinish();

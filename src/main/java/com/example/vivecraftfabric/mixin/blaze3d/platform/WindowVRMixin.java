@@ -1,7 +1,10 @@
 package com.example.vivecraftfabric.mixin.blaze3d.platform;
 
+import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallbackI;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,6 +25,7 @@ public abstract class WindowVRMixin {
 	private int width;
 	@Shadow
 	private int height;
+	@Final
 	@Shadow
 	private WindowEventHandler eventHandler;
 	@Shadow
@@ -34,7 +38,7 @@ public abstract class WindowVRMixin {
 	@Shadow
 	public abstract int getScreenWidth();
 	@Shadow
-	protected abstract int getScreenHeight();
+	public abstract int getScreenHeight();
 
 	@ModifyArg(at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwWindowHint(II)V", ordinal = 4, remap = false), 
 			method = "<init>(Lcom/mojang/blaze3d/platform/WindowEventHandler;Lcom/mojang/blaze3d/platform/ScreenManager;Lcom/mojang/blaze3d/platform/DisplayData;Ljava/lang/String;Ljava/lang/String;)V",
@@ -79,16 +83,10 @@ public abstract class WindowVRMixin {
 		info.cancel();
 	}
 	
-//	@Redirect(at = @At(value = "FIELD", target = "framebufferWidth:I"), method = "calculateScale(IZ)V")
-//	public int bufferWidthCorrection(Window w) {
-//		return this.width;
-//	}
-//	
-//	@Redirect(at = @At(value = "FIELD", target = "framebufferHeight:I"), method = "calculateScale(IZ)V")
-//	public int bufferHeightCorrection(Window w) {
-//		return this.height;
-//	}
-	
+	/**
+	 * @author
+	 * @reason
+	 */
 	@Overwrite
 	public int calculateScale(int pGuiScale, boolean bl) {
 		int i;
@@ -102,17 +100,12 @@ public abstract class WindowVRMixin {
 
 		return i;
 	}
+
 	
-//	@Inject(at = @At("RETURN"), method = "getWidth()I", cancellable = true)
-//	public void changeGetWidth(CallbackInfoReturnable<Integer> i) {
-//		i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewWidth);
-//	}
-//
-//	@Inject(at = @At("RETURN"), method = "getHeight()I", cancellable = true)
-//	public void changeGetHeight(CallbackInfoReturnable<Integer> i) { 
-//		i.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewHeight);
-//	}
-	
+	/**
+	 * @author
+	 * @reason
+	 */
 	@Overwrite
 	public void setGuiScale(double pScaleFactor) {
 		this.guiScale = pScaleFactor;
@@ -121,6 +114,24 @@ public abstract class WindowVRMixin {
 		this.guiScaledWidth = (double) this.width / pScaleFactor > (double) i ? i + 1 : i;
 		int j = (int) ((double) this.height / pScaleFactor);
 		this.guiScaledHeight = (double) this.height / pScaleFactor > (double) j ? j + 1 : j;
+	}
+
+	/**
+	 * @author
+	 * @reason
+	 */
+	@Overwrite
+	public int getWidth() {
+		return Minecraft.getInstance().getMainRenderTarget().viewWidth;
+	}
+
+	/**
+	 * @author
+	 * @reason
+	 */
+	@Overwrite
+	public int getHeight() {
+		return Minecraft.getInstance().getMainRenderTarget().viewHeight;
 	}
 
 }

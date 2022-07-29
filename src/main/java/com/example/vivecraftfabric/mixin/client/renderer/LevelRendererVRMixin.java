@@ -11,6 +11,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -131,19 +132,28 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		this.needsFullRenderChunkUpdate = true;
 	}
 
-	public void lightupdate() {
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;pollLightUpdates()V"), method = "renderLevel")
+	public void noPoll(ClientLevel instance) {
+
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"), method = "renderLevel")
+	public int lightupdate(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
 		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+			this.level.getProfiler().popPush("light_update_queue");
+			this.level.pollLightUpdates();
 			this.level.getProfiler().popPush("light_updates");
-			this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, true, true);
+			boolean flag = this.level.isLightUpdateQueueEmpty();
+			this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, flag, true);
 		}
 		this.setShaderGroup();
+		return 0; //not used?
 	}
 	
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE), 
 			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V ")
 	public void stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
 		this.minecraft.getProfiler().popPush("stencil");
-		//TODO shader
 		((GameRendererExtension) gameRenderer).drawEyeStencil(false);
 	}
 	

@@ -91,7 +91,7 @@
 -        float f3 = 0.4F * Mth.sin(f1 * ((float)Math.PI * 2F));
 -        float f4 = -0.4F * Mth.sin(pSwingProgress * (float)Math.PI);
 -        pMatrixStack.translate((double)(f * (f2 + 0.64000005F)), (double)(f3 + -0.6F + pEquippedProgress * -0.6F), (double)(f4 + -0.71999997F));
--        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(f * 45.0F));
+-        pMvratrixStack.mulPose(Vector3f.YP.rotationDegrees(f * 45.0F));
 -        float f5 = Mth.sin(pSwingProgress * pSwingProgress * (float)Math.PI);
 -        float f6 = Mth.sin(f1 * (float)Math.PI);
 -        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(f * f6 * 70.0F));

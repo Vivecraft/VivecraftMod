@@ -62,16 +62,16 @@ public class VRPlayerRenderer extends PlayerRenderer
 //								new VRPlayerModel<>(VRLayerDef_slim.bakeRoot(), p_174558_) :
 //									new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), p_174558_))
 //					, 0.5F);
-        this.addLayer(new HumanoidArmorLayer<>(this, new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)), new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))));
-        this.addLayer(new PlayerItemInHandLayer<>(this));
-        this.addLayer(new ArrowLayer<>(p_174557_, this));
-        this.addLayer(new Deadmau5EarsLayer(this));
-        this.addLayer(new CapeLayer(this));
-        this.addLayer(new CustomHeadLayer<>(this, p_174557_.getModelSet()));
-        this.addLayer(new ElytraLayer<>(this, p_174557_.getModelSet()));
-        this.addLayer(new ParrotOnShoulderLayer<>(this, p_174557_.getModelSet()));
-        this.addLayer(new SpinAttackEffectLayer<>(this, p_174557_.getModelSet()));
-        this.addLayer(new BeeStingerLayer<>(this));
+//        this.addLayer(new HumanoidArmorLayer<>(this, new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)), new HumanoidModel(p_174557_.bakeLayer(p_174558_ ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))));
+//        this.addLayer(new PlayerItemInHandLayer<>(this));
+//        this.addLayer(new ArrowLayer<>(p_174557_, this));
+//        this.addLayer(new Deadmau5EarsLayer(this));
+//        this.addLayer(new CapeLayer(this));
+//        this.addLayer(new CustomHeadLayer<>(this, p_174557_.getModelSet()));
+//        this.addLayer(new ElytraLayer<>(this, p_174557_.getModelSet()));
+//        this.addLayer(new ParrotOnShoulderLayer<>(this, p_174557_.getModelSet()));
+//        this.addLayer(new SpinAttackEffectLayer<>(this, p_174557_.getModelSet()));
+//        this.addLayer(new BeeStingerLayer<>(this));
     }
 
     public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight)
