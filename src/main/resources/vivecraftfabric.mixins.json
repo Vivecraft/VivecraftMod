@@ -5,6 +5,7 @@
   "mixins": [
     "server.level.ServerPlayerMixin",
     "server.network.ServerGamePacketListenerImplMixin",
+    "server.network.ServerGamePacketListnerImplVRMixin",
     
     "server.packs.repository.PackRepositoryVRMixin",
     
@@ -45,8 +46,7 @@
     "client.resources.language.ClientLanguageMixin",
     "world.entity.vehicle.BoatMixin",
     "client.resources.DefaultClientPackResourcesVRMixin",
-    
-    "EntityAccessor"
+
   ],
   "server": [
   ],

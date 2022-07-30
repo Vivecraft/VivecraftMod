@@ -133,8 +133,8 @@ public abstract class ServerPlayerMixin extends Player {
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;captureDrops()Ljava/util/Collection;", shift = Shift.BEFORE), method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
-			locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z", shift = Shift.BEFORE), method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
+			locals = LocalCapture.CAPTURE_FAILHARD)
 	public void dropvive(ItemStack p_9085_, boolean p_9086_, boolean p_9087_, CallbackInfoReturnable<ItemEntity> info,
 			ItemEntity itementity) {
 		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.getUUID());

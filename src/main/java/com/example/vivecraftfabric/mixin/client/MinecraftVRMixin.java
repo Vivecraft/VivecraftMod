@@ -101,6 +101,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Unique
 	private boolean lastClick;
+	@Unique
+	private ItemStack itemInHand; //Captured item
 
 	public MinecraftVRMixin(String string) {
 		super(string);
@@ -127,25 +129,22 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	@Unique
 	private FloatBuffer matrixBuffer = MemoryTracker.create(16).asFloatBuffer();
 
-	@Unique
-	private FloatBuffer matrixBuffer2 = MemoryTracker.create(16).asFloatBuffer();
-
 	@Shadow
 	protected int missTime;
 
 	@Final
 	@Shadow
-	private Gui gui;
+	public Gui gui;
 
 	@Shadow
 	@Final
 	public File gameDirectory;
 
 	@Shadow
-	private Options options;
+	public Options options;
 
 	@Shadow
-	private Screen screen;
+	public Screen screen;
 
 	@Shadow
 	private ProfilerFiller profiler;
@@ -159,11 +158,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Final
 	@Shadow
-	private Font font;
+	public Font font;
 
 	@Final
 	@Shadow
-	private static boolean ON_OSX;
+	public static boolean ON_OSX;
 
 	@Shadow
 	private boolean pause;
@@ -177,10 +176,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Final
 	@Shadow
-	private GameRenderer gameRenderer;
+	public GameRenderer gameRenderer;
 
 	@Shadow
-	private ClientLevel level;
+	public ClientLevel level;
 
 	@Shadow
 	public RenderTarget mainRenderTarget;
@@ -190,10 +189,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	private SoundManager soundManager;
 
 	@Shadow
-	private boolean noRender;
+	public boolean noRender;
 
 	@Shadow
-	private LocalPlayer player;
+	public LocalPlayer player;
 
 	@Shadow
 	private ProfileResults fpsPieResults;
@@ -202,10 +201,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	private int rightClickDelay;
 
 	@Shadow
-	private HitResult hitResult;
+	public HitResult hitResult;
 
 	@Shadow
-	private MultiPlayerGameMode gameMode;
+	public MultiPlayerGameMode gameMode;
 
 	@Shadow
 	@Final
@@ -220,7 +219,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Shadow
 	@Final
-	private MouseHandler mouseHandler;
+	public MouseHandler mouseHandler;
 
 	@Shadow
 	@Final
@@ -234,7 +233,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Shadow
 	@Final
-	private FrameTimer frameTimer;
+	public FrameTimer frameTimer;
 	
 	@Shadow
 	private long lastNanoTime;
@@ -243,7 +242,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	private long lastTime;
 
 	@Shadow
-	private String fpsString;
+	public String fpsString;
 
 	@Final
 	@Shadow
@@ -256,30 +255,34 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	abstract void selectMainFont(boolean p_91337_);
 
 	@Shadow
-	abstract Entity getCameraEntity();
+	public abstract Entity getCameraEntity();
 
 	@Shadow
-	abstract void renderFpsMeter(PoseStack poseStack, ProfileResults fpsPieResults2);
+	protected abstract void renderFpsMeter(PoseStack poseStack, ProfileResults fpsPieResults2);
 
 	@Shadow
-	abstract void clearResourcePacksOnError(Throwable throwable, @Nullable Component component);
+	public abstract void clearResourcePacksOnError(Throwable throwable, @Nullable Component component);
 
 	@Shadow
-	abstract boolean hasSingleplayerServer();
+	public abstract boolean hasSingleplayerServer();
 
 	@Shadow
-	abstract int getFramerateLimit();
+	protected abstract int getFramerateLimit();
 
 	@Shadow
-	abstract void tick();
+	public abstract void tick();
 
 	@Shadow
-	abstract CompletableFuture<Void> reloadResourcePacks();
+	public abstract CompletableFuture<Void> reloadResourcePacks();
 
 	@Shadow
-	abstract void stop();
+	public abstract void stop();
 
 	@Shadow @Final public LevelRenderer levelRenderer;
+
+	@Shadow private static Minecraft instance;
+
+	@Shadow protected abstract void startAttack();
 
 	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;", remap = false), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public Thread settings() {
@@ -822,8 +825,18 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		if (DataHolder.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemInHand)) {
 			NetworkHelper.sendActiveHand((byte) interactionHand.ordinal());
 		}
+		this.itemInHand = itemInHand;
 		return itemInHand;
 	}
+
+	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem")
+	public HitResult activeHand2(Minecraft instance) {
+		if (DataHolder.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemInHand)){
+			return instance.hitResult;
+		}
+		return null;
+	}
+
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"), method = "startUseItem")
 	public void swingUse(LocalPlayer instance, InteractionHand interactionHand) {
@@ -908,7 +921,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		((PlayerExtension) player).swingArm(InteractionHand.MAIN_HAND, VRFirstPersonArmSwing.Attack);
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"), method = "handleKeybinds")
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z", ordinal = 2), method = "handleKeybinds")
 	public boolean vrKeyuse(KeyMapping instance) {
 		return !(!instance.isDown() && (!DataHolder.getInstance().bowTracker.isActive(this.player) || DataHolder.getInstance().vrSettings.seated) && ! DataHolder.getInstance().autoFood.isEating());
 	}
@@ -923,15 +936,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		return false;
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startAttack()V", shift = Shift.AFTER), method = "handleKeybinds")
-	public void lastClick(CallbackInfo ci) {
-		this.lastClick = true;
-	}
-
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z", ordinal = 14, shift = Shift.BEFORE), method = "handleKeybinds")
 	public void attackDown(CallbackInfo ci) {
 		if (this.options.keyAttack.consumeClick() && this.screen == null){
-
+			this.startAttack();
+			this.lastClick = true;
 		}
 		else if (!this.options.keyAttack.isDown())
 		{
@@ -943,6 +952,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 			this.lastClick = false;
 		}
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MouseHandler;isMouseGrabbed()Z"), method = "handleKeybinds")
+	public boolean alwaysGrapped(MouseHandler instance) {
+		return true;
 	}
 
 	@Inject(at = @At("HEAD"), method = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V")

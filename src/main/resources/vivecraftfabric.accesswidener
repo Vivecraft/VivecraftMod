@@ -73,5 +73,17 @@ accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData is
 
 accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
 
+accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
+
+accessible field net/minecraft/client/player/LocalPlayer xLast D
+accessible field net/minecraft/client/player/LocalPlayer yLast1 D
+accessible field net/minecraft/client/player/LocalPlayer zLast D
+accessible field net/minecraft/client/player/LocalPlayer yRotLast F
+accessible field net/minecraft/client/player/LocalPlayer xRotLast F
+accessible field net/minecraft/client/player/LocalPlayer lastOnGround Z
+accessible field net/minecraft/client/player/LocalPlayer wasShiftKeyDown Z
+accessible field net/minecraft/client/player/LocalPlayer wasSprinting Z
+accessible field net/minecraft/client/player/LocalPlayer positionReminder I
+
 accessible field net/minecraft/client/sounds/SoundManager soundEngine Lnet/minecraft/client/sounds/SoundEngine;
 

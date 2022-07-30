@@ -1,5 +1,6 @@
 package org.vivecraft.render;
 
+import net.minecraft.client.model.geom.PartPose;
 import org.lwjgl.opengl.GL43;
 import org.vivecraft.gameplay.trackers.SwingTracker;
 import org.vivecraft.provider.ControllerType;

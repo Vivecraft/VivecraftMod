@@ -1,5 +1,6 @@
 package com.example.vivecraftfabric;
 
+import net.minecraft.client.player.LocalPlayer;
 import org.vivecraft.render.VRFirstPersonArmSwing;
 
 import net.minecraft.core.BlockPos;
@@ -31,5 +32,7 @@ public interface PlayerExtension {
 	float getMuhSpeedFactor();
 	double getRoomYOffsetFromPose();
 	boolean getInitFromServer();
-
+    String getLastMsg();
+	void setLastMsg(String string);
+	void updateSyncFields(LocalPlayer old);
 }

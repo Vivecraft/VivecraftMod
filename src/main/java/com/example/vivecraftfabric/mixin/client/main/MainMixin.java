@@ -1,5 +1,6 @@
 package com.example.vivecraftfabric.mixin.client.main;
 
+import com.example.vivecraftfabric.DataHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,15 +17,6 @@ import net.minecraft.client.main.Main;
 //Done
 @Mixin(Main.class)
 public class MainMixin {
-	
-	@Unique
-	private static boolean kiosk;
-	@Unique
-	private static boolean viewonly;
-	@Unique
-	private static boolean katvr;
-	@Unique
-	private static boolean infinadeck;
 	
 	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V", remap = false), method = "main([Ljava/lang/String;)V", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
 	private static void options(String[] p_129642_, CallbackInfo callback, OptionParser optionparser) {
@@ -47,25 +39,25 @@ public class MainMixin {
 	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "main([Ljava/lang/String;)V", remap = false)
 	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
 		OptionSet optionset = optionparser.parse(p_129642_);
-		kiosk = optionset.has("kiosk");
+		DataHolder.kiosk = optionset.has("kiosk");
 		
-		if (kiosk)
+		if (DataHolder.kiosk)
 		{
 			System.out.println("Setting kiosk");
 		}
 		
-		if (kiosk)
+		if (DataHolder.kiosk)
 		{
-			viewonly = optionset.has("viewonly");
+			DataHolder.viewonly = optionset.has("viewonly");
 			
-			if (viewonly)
+			if (DataHolder.viewonly)
 			{
 				System.out.println("Setting viewonly");
 			}
 		}
-		
-		katvr = optionset.has("katvr");
-		infinadeck = optionset.has("infinadeck");
+
+		DataHolder.katvr = optionset.has("katvr");
+		DataHolder.infinadeck = optionset.has("infinadeck");
 		return optionset;
 	}
 //	

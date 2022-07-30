@@ -82,7 +82,6 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 	@Shadow
 	private float offHandHeight;
 
-
 	@Override
 	public Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 in, double dist) {
 		if (this.minecraft.level == null) {
@@ -542,7 +541,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
 		poseStack.scale(0.4f, 0.4F, 0.4F);
 		boolean slim = abstractclientplayer.getSkinTextureLocation().getPath().equals("slim");
-		poseStack.translate(slim ? 0.345F * -f : 0.375F * -f, 0, slim ? 0.785F : 0.75F);
+		poseStack.translate(slim ? 0.345F * -h : 0.375F * -h, 0, slim ? 0.785F : 0.75F);
 		poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(180));
 		if (flag) {
@@ -553,7 +552,6 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 		}
 		poseStack.popPose();
 	}
-
 
 
 	@Override

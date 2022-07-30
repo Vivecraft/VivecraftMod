@@ -32,7 +32,6 @@ import org.vivecraft.render.VRWidgetHelper;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
-import com.example.vivecraftfabric.mixin.EntityAccessor;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
@@ -500,7 +499,7 @@ public abstract class GameRendererVRMixin
 			livingentity.setYRot(vrdata$vrdevicepose.getYaw());
 			livingentity.yHeadRot = livingentity.getYRot();
 			livingentity.yHeadRotO = livingentity.getYRot();
-			((EntityAccessor)livingentity).setEyeHeight(0);
+			livingentity.eyeHeight = 0;
 		}
 	}
 
@@ -2418,7 +2417,7 @@ public abstract class GameRendererVRMixin
 			e.xRotO = this.rvelastpitch;
 			e.yHeadRot = this.rveyaw;
 			e.yHeadRotO = this.rvelastyaw;
-			((EntityAccessor) e).setEyeHeight(this.rveHeight);
+			e.eyeHeight = this.rveHeight;
 			this.cached = false;
 		}
 	}
