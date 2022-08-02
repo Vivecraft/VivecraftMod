@@ -65,7 +65,7 @@ public class KeyboardHandlerVRMixin {
     //TODO really bad
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", ordinal = 2), method = "keyPress")
     public Screen screenKey(Minecraft instance) {
-        return !MethodHolder.isKeyDown(345)? instance.screen : (Screen) new Object();
+        return !MethodHolder.isKeyDown(345)? instance.screen : null;
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z", ordinal = 1, shift = At.Shift.AFTER), method = "keyPress")

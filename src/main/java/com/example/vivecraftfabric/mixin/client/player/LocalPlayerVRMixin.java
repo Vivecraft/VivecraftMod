@@ -5,17 +5,25 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.Input;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.objectweb.asm.Opcodes;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,6 +49,9 @@ import org.vivecraft.render.VRFirstPersonArmSwing;
 import org.vivecraft.utils.external.jinfinadeck;
 import org.vivecraft.utils.external.jkatvr;
 
+import java.util.Iterator;
+import java.util.stream.StreamSupport;
+
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements PlayerExtension {
 
@@ -64,6 +75,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	@Shadow
 	protected Minecraft minecraft;
 	@Shadow
+	private boolean startedUsingItem;
+	@Shadow
 	@Final
 	public ClientPacketListener connection;
 	private final DataHolder dataholder = DataHolder.getInstance();
@@ -85,6 +98,12 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	public boolean wasSprinting;
 	@Shadow
 	public int positionReminder;
+	@Shadow
+	private InteractionHand usingItemHand;
+	@Shadow
+	private int autoJumpTime;
+	@Shadow
+	public Input input;
 
 	@Shadow
 	protected abstract void updateAutoJump(float f, float g);
@@ -230,10 +249,108 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		return d0;
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getYRot()F"), method = "updateAutoJump")
-	public float yRot(LocalPlayer instance) {
-		return DataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw();
+//	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getYRot()F"), method = "updateAutoJump")
+//	public float yRot(LocalPlayer instance) {
+//		return DataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw();
+//	}
+
+	@Inject(at = @At("HEAD"), method = "updateAutoJump", cancellable = true)
+	public void autostep1(float f, float g, CallbackInfo ci) {
+		float l;
+		if (!this.canAutoJump()) {
+			return;
+		}
+		Vec3 vec3 = this.position();
+		Vec3 vec32 = vec3.add(f, 0.0, g);
+		Vec3 vec33 = new Vec3(f, 0.0, g);
+		float h = this.getSpeed();
+		float i = (float)vec33.lengthSqr();
+		if (i <= 0.001f) {
+			Vec2 vec2 = this.input.getMoveVector();
+			float j = h * vec2.x;
+			float k = h * vec2.y;
+			l = Mth.sin(DataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw() * ((float)Math.PI / 180));
+			float m = Mth.cos(DataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw() * ((float)Math.PI / 180));
+			vec33 = new Vec3(j * m - k * l, vec33.y, k * m + j * l);
+			i = (float)vec33.lengthSqr();
+			if (i <= 0.001f) {
+				return;
+			}
+		}
+		float vec2 = Mth.fastInvSqrt(i);
+		Vec3 j = vec33.scale(vec2);
+		Vec3 k = this.getForward();
+		l = (float)(k.x * j.x + k.z * j.z);
+		if (l < -0.15f) {
+			return;
+		}
+		CollisionContext m = CollisionContext.of(this);
+		BlockPos blockPos = new BlockPos(this.getX(), this.getBoundingBox().maxY, this.getZ());
+		BlockState blockState = this.level.getBlockState(blockPos);
+		if (!blockState.getCollisionShape(this.level, blockPos, m).isEmpty()) {
+			return;
+		}
+		BlockState blockState2 = this.level.getBlockState(blockPos = blockPos.above());
+		if (!blockState2.getCollisionShape(this.level, blockPos, m).isEmpty()) {
+			return;
+		}
+		float n = 7.0f;
+		float o = 1.2f;
+		if (this.hasEffect(MobEffects.JUMP)) {
+			o += (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.75f;
+		}
+		float p = Math.max(h * 7.0f, 1.0f / vec2);
+		Vec3 vec34 = vec3;
+		Vec3 vec35 = vec32.add(j.scale(p));
+		float q = this.getBbWidth();
+		float r = this.getBbHeight();
+		AABB aABB = new AABB(vec34, vec35.add(0.0, r, 0.0)).inflate(q, 0.0, q);
+		vec34 = vec34.add(0.0, 0.51f, 0.0);
+		vec35 = vec35.add(0.0, 0.51f, 0.0);
+		Vec3 vec36 = j.cross(new Vec3(0.0, 1.0, 0.0));
+		Vec3 vec37 = vec36.scale(q * 0.5f);
+		Vec3 vec38 = vec34.subtract(vec37);
+		Vec3 vec39 = vec35.subtract(vec37);
+		Vec3 vec310 = vec34.add(vec37);
+		Vec3 vec311 = vec35.add(vec37);
+		Iterable<VoxelShape> iterable = this.level.getCollisions(this, aABB);
+		Iterator iterator = StreamSupport.stream(iterable.spliterator(), false).flatMap(voxelShape -> voxelShape.toAabbs().stream()).iterator();
+		float s = Float.MIN_VALUE;
+		while (iterator.hasNext()) {
+			AABB aABB2 = (AABB)iterator.next();
+			if (!aABB2.intersects(vec38, vec39) && !aABB2.intersects(vec310, vec311)) continue;
+			s = (float)aABB2.maxY;
+			Vec3 vec312 = aABB2.getCenter();
+			BlockPos blockPos2 = new BlockPos(vec312);
+			int t = 1;
+			while ((float)t < p) {
+				BlockState blockState4;
+				BlockPos blockPos3 = blockPos2.above(t);
+				BlockState blockState3 = this.level.getBlockState(blockPos3);
+				VoxelShape voxelShape2 = blockState3.getCollisionShape(this.level, blockPos3, m);
+				if (!voxelShape2.isEmpty() && (double)(s = (float)voxelShape2.max(Direction.Axis.Y) + (float)blockPos3.getY()) - this.getY() > (double)p) {
+					return;
+				}
+				if (t > 1 && !(blockState4 = this.level.getBlockState(blockPos = blockPos.above())).getCollisionShape(this.level, blockPos, m).isEmpty()) {
+					return;
+				}
+				++t;
+			}
+			break;
+		}
+		if (s == Float.MIN_VALUE) {
+			return;
+		}
+		float aABB2 = (float)((double)s - this.getY());
+		if (aABB2 <= 0.5f || aABB2 > p) {
+			return;
+		}
+		this.autoJumpTime = 1;
+		ci.cancel();
 	}
+
+	@Shadow
+	protected abstract boolean canAutoJump();
 
 	@Override
 	public void moveTo(double pX, double p_20109_, double pY, float p_20111_, float pZ) {
@@ -419,8 +536,11 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		}
 	}
 
-	private boolean isThePlayer() {
-		return (LocalPlayer) (Object) this == Minecraft.getInstance().player;
+	@Override
+	public void die(DamageSource pCause) {
+		super.die(pCause);
+		DataHolder.getInstance().vr.triggerHapticPulse(0, 2000);
+		DataHolder.getInstance().vr.triggerHapticPulse(1, 2000);
 	}
 
 	@Override
@@ -484,6 +604,16 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	}
 
 	@Override
+	public boolean isClimbeyClimbEquipped() {
+		if (this.getMainHandItem() != null && DataHolder.getInstance().climbTracker.isClaws(this.getMainHandItem())) {
+			return true;
+		}
+		else {
+			return this.getOffhandItem() != null && DataHolder.getInstance().climbTracker.isClaws(this.getOffhandItem());
+		}
+	}
+
+	@Override
 	public void releaseUsingItem() {
 		NetworkHelper.sendActiveHand((byte) this.getUsedItemHand().ordinal());
 		super.releaseUsingItem();
@@ -500,5 +630,29 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		this.wasShiftKeyDown = old.wasShiftKeyDown;
 		this.wasSprinting = old.wasSprinting;
 		this.positionReminder = old.positionReminder;
+	}
+
+	@Override
+	public void setItemInUseClient(ItemStack item, InteractionHand hand) {
+		this.useItem = item;
+
+		if (item != ItemStack.EMPTY) {
+			this.startedUsingItem = true;
+			this.usingItemHand = hand;
+		}
+		else {
+			this.startedUsingItem = false;
+			this.usingItemHand = hand;
+		}
+	}
+
+	@Override
+	public void setTeleported(boolean teleported) {
+		this.teleported = teleported;
+	}
+
+	@Override
+	public void setItemInUseCountClient(int count) {
+		this.useItemRemaining = count;
 	}
 }

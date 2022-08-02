@@ -487,7 +487,6 @@ public abstract class GameRendererVRMixin
 			Vec3 vec3 = vrdata$vrdevicepose.getPosition();
 			LivingEntity livingentity = (LivingEntity) this.minecraft.getCameraEntity();
 			livingentity.setPosRaw(vec3.x, vec3.y, vec3.z);
-			livingentity.setPos(vec3);
 			livingentity.xOld = vec3.x;
 			livingentity.yOld = vec3.y;
 			livingentity.zOld = vec3.z;
