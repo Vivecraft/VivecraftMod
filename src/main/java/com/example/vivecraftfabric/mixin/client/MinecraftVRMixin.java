@@ -804,7 +804,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;isDestroying()Z"), method = "startUseItem()V")
 	public boolean seatedCheck(MultiPlayerGameMode gameMode) {
-		return gameMode.isDestroying() || !DataHolder.getInstance().vrSettings.seated;
+		return !(!gameMode.isDestroying() || !DataHolder.getInstance().vrSettings.seated);
 	}
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;rightClickDelay:I", shift = Shift.AFTER, opcode = Opcodes.PUTFIELD), method = "startUseItem()V")
