@@ -126,7 +126,12 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	public void stopRidingTracker(CallbackInfo ci) {
 		DataHolder.getInstance().vehicleTracker.onStopRiding((LocalPlayer) (Object) this);
 	}
-
+	
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.BEFORE), method = "tick")
+	public void overrideLookPre(CallbackInfo ci) {
+		DataHolder.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, DataHolder.getInstance().vrPlayer.vrdata_world_pre);
+	}
+	
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.AFTER), method = "tick")
 	public void overridePose(CallbackInfo ci) {
 		NetworkHelper.overridePose(this);

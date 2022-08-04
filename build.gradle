@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -32,18 +32,13 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 
-    implementation "cpw.mods:modlauncher:5.0.0-milestone.4"
-
     // launchwrapper + dependencies
     compileOnly ('net.minecraft:launchwrapper:1.12') {
         transitive = false
     }
-
-    include(implementation("org.json:json:20141113"))
     include(implementation("org.lwjgl:lwjgl-ovr:3.2.2"))
     include(implementation("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows"))
     include(implementation("org.lwjgl:lwjgl-opengl:3.2.1:natives-windows"))
-    include(implementation("io.github.classgraph:classgraph:4.8.138"))
 }
 loom {
     accessWidenerPath = file("src/main/resources/vivecraftfabric.accesswidener")

@@ -2,14 +2,14 @@ package org.vivecraft.settings.profile;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public class ProfileWriter
 {
     private String activeProfileName;
     private String set;
     private Map<String, String> data = new HashMap<>();
-    private JSONObject theProfile = null;
+    private JsonObject theProfile = null;
 
     public ProfileWriter(String set)
     {
@@ -18,7 +18,7 @@ public class ProfileWriter
         this.data = new HashMap<>();
     }
 
-    public ProfileWriter(String set, JSONObject theProfile)
+    public ProfileWriter(String set, JsonObject theProfile)
     {
         this.activeProfileName = ProfileManager.currentProfileName;
         this.set = set;

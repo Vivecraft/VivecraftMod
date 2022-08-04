@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.json.JSONObject;
+
+import com.google.gson.JsonObject;
 
 public class ProfileReader
 {
@@ -12,7 +13,7 @@ public class ProfileReader
     private String profile;
     private Map<String, String> currentProfile = null;
     private Iterator profileSettingsIt = null;
-    private JSONObject theProfiles = null;
+    private JsonObject theProfiles = null;
 
     public ProfileReader(String set)
     {
@@ -20,7 +21,7 @@ public class ProfileReader
         this.set = set;
     }
 
-    public ProfileReader(String set, JSONObject theProfiles)
+    public ProfileReader(String set, JsonObject theProfiles)
     {
         this.profile = ProfileManager.currentProfileName;
         this.set = set;

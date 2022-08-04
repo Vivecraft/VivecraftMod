@@ -1367,19 +1367,18 @@ public abstract class GameRendererVRMixin
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
 
-						if (GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer != null
-								&& GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.isReady()) {
-							try {
-								//this.renderTechjarsAwesomeMainMenuRoom();
-							} catch (Exception exception) {
-								System.out.println("Error rendering main menu world, unloading to prevent more errors");
-								exception.printStackTrace();
-								GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.destroy();
-							}
-						} else {
-							System.out.println("jrbudda");
+//						if (GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer != null
+//								&& GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.isReady()) {
+//							try {
+//								//this.renderTechjarsAwesomeMainMenuRoom();
+//							} catch (Exception exception) {
+//								System.out.println("Error rendering main menu world, unloading to prevent more errors");
+//								exception.printStackTrace();
+//								GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.destroy();
+//							}
+//						} else {
 							this.renderJrbuddasAwesomeMainMenuRoomNew(pMatrix);
-						}
+//						}
 						pMatrix.popPose();
 					}
 
