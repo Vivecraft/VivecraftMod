@@ -21,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -60,7 +61,7 @@ public class VRPlayer
     public int wfCount = 0;
     public int roomScaleMovementDelay = 0;
     boolean initdone = false;
-    private boolean onTick;
+    public boolean onTick;
 
     public void registerTracker(Tracker tracker)
     {
@@ -571,31 +572,39 @@ public class VRPlayer
 
     public void doPermanantLookOverride(LocalPlayer entity, VRData data)
     {
-        if (entity != null)
+    	if (entity == null)
+    		return;
+
+
+    	if (entity.isPassenger())
         {
-        	if(false){//TODO: Option
-                entity.setYRot(data.hmd.getYaw());
+    		//Server-side movement
+    		Vec3 vec3 = VehicleTracker.getSteeringDirection(entity);
+
+    		if (vec3 != null)
+    		{
+    			entity.setXRot((float)Math.toDegrees(Math.asin(-vec3.y / vec3.length())));
+    			entity.setYRot((float)Math.toDegrees(Math.atan2(-vec3.x, vec3.z)));
                 entity.setYHeadRot(entity.getYRot());
-                entity.setXRot(-data.hmd.getPitch());		
+    		}
+    	} else if(entity.isBlocking()) {
+    		//block direction
+    		if (entity.getUsedItemHand() == InteractionHand.MAIN_HAND) {
+    			entity.setYRot(data.getController(0).getYaw());
+    			entity.setYHeadRot(entity.getYRot());
+    			entity.setXRot(-data.getController(0).getPitch());
         	} else {
-        		if(((GameRendererExtension) mc.gameRenderer).getCrossVec() != null){
-        			Vec3 playerToCrosshair = entity.getEyePosition(1).subtract(((GameRendererExtension) mc.gameRenderer).getCrossVec()); //backwards
-        			double what = playerToCrosshair.y/playerToCrosshair.length();
-        			if(what > 1) what = 1;
-        			if(what < -1) what = -1;
-        			float pitch = (float)Math.toDegrees(Math.asin(what));
-        			float yaw = (float)Math.toDegrees(Math.atan2(playerToCrosshair.x, -playerToCrosshair.z));    
-        			entity.setXRot(pitch);
-        			entity.setYRot(yaw);
-        			entity.setYHeadRot(yaw);
+    			entity.setYRot(data.getController(1).getYaw());
+    			entity.setYHeadRot(entity.getYRot());
+    			entity.setXRot(-data.getController(1).getPitch());
         		}	
         	}
-
-            if (entity.isSprinting() && entity.input.jumping || entity.isFallFlying() || entity.isSwimming() && entity.zza > 0.0F)
+    	else  if (entity.isSprinting() && (entity.input.jumping || mc.options.keyJump.isDown()) || entity.isFallFlying() || entity.isSwimming() && entity.zza > 0.0F)
             {
-                VRSettings vrsettings = this.dh.vrSettings;
+    		//Server-side movement
+    		VRSettings vrsettings = this.dh.vrSettings;
 
-                if (this.dh.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.CONTROLLER)
+    		if (this.dh.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.CONTROLLER)
                 {
                     entity.setYRot(data.getController(1).getYaw());
                     entity.setYHeadRot(entity.getYRot());
@@ -608,18 +617,22 @@ public class VRPlayer
                     entity.setXRot(-data.hmd.getPitch());
                 }
             }
-
-            if (entity.isPassenger())
-            {
-                Vec3 vec3 = VehicleTracker.getSteeringDirection(entity);
-
-                if (vec3 != null)
-                {
-                    entity.setXRot((float)Math.toDegrees(Math.asin(-vec3.y / vec3.length())));
-                    entity.setYRot((float)Math.toDegrees(Math.atan2(-vec3.x, vec3.z)));
+    	else if (((GameRendererExtension)mc.gameRenderer).getCrossVec() != null){
+    		//Look AT the crosshair by default, most compatible with mods.
+    		Vec3 playerToCrosshair = entity.getEyePosition(1).subtract(((GameRendererExtension)mc.gameRenderer).getCrossVec()); //backwards
+    		double what = playerToCrosshair.y/playerToCrosshair.length();
+    		if(what > 1) what = 1;
+    		if(what < -1) what = -1;
+    		float pitch = (float)Math.toDegrees(Math.asin(what));
+    		float yaw = (float)Math.toDegrees(Math.atan2(playerToCrosshair.x, -playerToCrosshair.z));    
+    		entity.setXRot(pitch);
+    		entity.setYRot(yaw);
+    		entity.setYHeadRot(yaw);
+    	} else {
+    		//use HMD only if no crosshair hit.
+    		entity.setYRot(data.hmd.getYaw());
                     entity.setYHeadRot(entity.getYRot());
-                }
-            }
+    		entity.setXRot(-data.hmd.getPitch());	
         }
     }
 

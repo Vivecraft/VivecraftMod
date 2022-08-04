@@ -23,7 +23,6 @@ import org.vivecraft.gameplay.trackers.SwimTracker;
 import org.vivecraft.gameplay.trackers.SwingTracker;
 import org.vivecraft.gameplay.trackers.TeleportTracker;
 import org.vivecraft.gameplay.trackers.VehicleTracker;
-import org.vivecraft.menuworlds.MenuWorldRenderer;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.render.RenderPass;
@@ -51,7 +50,7 @@ public class DataHolder {
     public static List<String> hrtfList = new ArrayList<>();
     private static DataHolder INSTANCE;
     public final float PIOVER180 = ((float) Math.PI / 180F);
-    public final String minecriftVerString = "Vivecraft 1.17.1  jrbudda-VR-2-a1";
+    public final String minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-fabric-a1";
     public VRPlayer vrPlayer;
     public MCVR vr;
     public VRRenderer vrRenderer;
@@ -86,7 +85,7 @@ public class DataHolder {
     public boolean lastShowMouseNative = true;
     public boolean enableWorldExport = false;
     public SoundEngine sndManager = null;
-    public MenuWorldRenderer menuWorldRenderer;
+    //public MenuWorldRenderer menuWorldRenderer;
     //	private boolean firstInit = true;
     public boolean showSplashScreen = true;
     public long splashTimer1 = 0L;

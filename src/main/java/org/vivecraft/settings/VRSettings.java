@@ -21,11 +21,13 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.google.gson.JsonObject;
+import com.mojang.blaze3d.audio.Library;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gui.PhysicalKeyboard;
@@ -54,7 +56,7 @@ public class VRSettings
     public static final int VERSION = 2;
     public static final Logger logger = LogManager.getLogger();
     public static VRSettings inst;
-    public JSONObject defaults = new JSONObject();
+    public JsonObject defaults = new JsonObject();
     public static final int UNKNOWN_VERSION = 0;
     public static final String DEGREE  = "\u00b0";
 
@@ -197,6 +199,8 @@ public class VRSettings
     public boolean firstRun = true;
     @SettingField(VrOptions.RIGHT_CLICK_DELAY)
     public RightClickDelay rightclickDelay = RightClickDelay.VANILLA;
+    @SettingField(VrOptions.THIRDPERSON_ITEMTRANSFORMS)
+    public boolean thirdPersonItems = false;
     //
 
     //Locomotion
@@ -692,7 +696,7 @@ public class VRSettings
         loadOptions(this.defaults);
     }
 
-    public void loadOptions(JSONObject theProfiles)
+    public void loadOptions(JsonObject theProfiles)
     {
         // Load Minecrift options
         try
@@ -760,7 +764,7 @@ public class VRSettings
         saveOptions(this.defaults);
     }
 
-    private void saveOptions(JSONObject theProfiles)
+    private void saveOptions(JsonObject theProfiles)
     {
         // Save Minecrift settings
         try
@@ -818,7 +822,7 @@ public class VRSettings
 
     public String getButtonDisplayString( VRSettings.VrOptions par1EnumOptions )
     {
-        String var2 = "vivecraft.options." + par1EnumOptions.name();
+        String var2 = Lang.get("vivecraft.options." + par1EnumOptions.name());
 
         String var3 = var2 + ": ";
         String var4 = var3;
@@ -839,7 +843,7 @@ public class VRSettings
                 return str;
             } else if (type == Boolean.TYPE) {
                 var langKeys = par1EnumOptions.getBooleanLangKeys();
-                return (boolean)obj ? var4 + (langKeys.getLeft()) : var4 + (langKeys.getRight());
+                return (boolean)obj ? var4 + Lang.get(langKeys.getLeft()) : var4 + Lang.get(langKeys.getRight());
             } else if (type == Float.TYPE || type == Double.TYPE) {
                 if (par1EnumOptions.getDecimalPlaces() < 0) {
                     return var4 + Math.round(((Number)obj).floatValue() * 100) + "%";
@@ -847,7 +851,7 @@ public class VRSettings
                     return var4 + String.format("%." + par1EnumOptions.getDecimalPlaces() + "f", ((Number)obj).floatValue());
                 }
             } else if (OptionEnum.class.isAssignableFrom(type)) {
-                return var4 + (((OptionEnum<?>)obj).getLangKey());
+                return var4 + Lang.get(((OptionEnum<?>)obj).getLangKey());
             } else {
                 return var4 + obj.toString();
             }
@@ -980,7 +984,7 @@ public class VRSettings
             @Override
             String getDisplayString(String prefix, Object value) {
                 if ((float)value > 0.99)
-                    return prefix + ("vivecraft.options.opaque");
+                    return prefix + Lang.get("vivecraft.options.opaque");
                 return null;
             }
         },
@@ -1042,7 +1046,7 @@ public class VRSettings
             String getDisplayString(String prefix, Object value) {
                 try {
                     SoundEvent se = Registry.SOUND_EVENT.get(new ResourceLocation((String)value));
-                    return (se.getLocation().getPath());
+                    return Lang.get(se.getLocation().getPath());
                 } catch (Exception e) {
                     return "error";
                 }
@@ -1133,7 +1137,7 @@ public class VRSettings
             String getDisplayString(String prefix, Object value) {
                 Color color = (Color)value;
                 var p = colors.stream().filter(c -> c.getLeft().equals(color)).findFirst().orElse(null);
-                return p != null ? prefix + p.getRight() : prefix + color.getRed() + " " + color.getGreen() + " " + color.getBlue();
+                return p != null ? prefix + Lang.get(p.getRight()) : prefix + color.getRed() + " " + color.getGreen() + " " + color.getBlue();
             }
 
             @Override
@@ -1409,6 +1413,7 @@ public class VRSettings
         ANALOG_MOVEMENT(false, true), // Analog Movement
         AUTO_SPRINT(false, true), // Auto-sprint
         AUTO_SPRINT_THRESHOLD(true, false, 0.5f, 1f, 0.01f, 2), // Auto-sprint Threshold
+        THIRDPERSON_ITEMTRANSFORMS(false, true), // 3rd person items
         BOW_MODE(false, true) { // Roomscale Bow Mode
             @Override
             Object convertOption(String value) {
@@ -1460,9 +1465,9 @@ public class VRSettings
             String getDisplayString(String prefix, Object value) {
                 int i = (int)value;
                 if (i == -1)
-                    return prefix + "OFF";
+                    return prefix + Lang.getOff();
                 else if (i == 0)
-                    return prefix + ("vivecraft.options.default");
+                    return prefix + Lang.get("vivecraft.options.default");
                 else if (i <= DataHolder.hrtfList.size())
                     return prefix + DataHolder.hrtfList.get(i - 1);
                 return prefix;
@@ -1486,7 +1491,7 @@ public class VRSettings
         RELOAD_EXTERNAL_CAMERA(false, false) { // Reload External Camera
             @Override
             String getDisplayString(String prefix, Object value) {
-                return ("vivecraft.options." + name());
+                return Lang.get("vivecraft.options." + name());
             }
         },
         RIGHT_CLICK_DELAY(false, false); // Right Click Repeat

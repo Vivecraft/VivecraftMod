@@ -14,8 +14,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+
 
 public class ProfileManager
 {
@@ -28,8 +32,8 @@ public class ProfileManager
     static final String KEY_SELECTED_PROFILE = "selectedProfile";
     static String currentProfileName = "Default";
     static File vrProfileCfgFile = null;
-    static JSONObject jsonConfigRoot = null;
-    static JSONObject profiles = null;
+    static JsonObject jsonConfigRoot = null;
+    static JsonObject profiles = null;
     static boolean loaded = false;
     public static final String[] DEFAULT_BINDINGS = new String[] {"key.playerlist:b:6:Button 6", "axis.updown:a:2:-:Y Rotation", "walk.forward:a:0:-:Y ", "gui.axis.leftright:a:3:-:X Rotation", "gui.axis.updown:a:2:-:Y Rotation", "key.sneak:b:9:Button 9", "gui.Left:px:-", "key.itemright:b:5:Button 5", "gui.Right:px:+", "key.left:a:1:-:X ", "gui.Select:b:0:Button 0", "key.aimcenter:b:8:Button 8", "key.pickItem:b:2:Button 2", "key.menu:b:7:Button 7", "key.attack:a:4:-:Z ", "gui.Up:py:-", "key.use:a:4:+:Z ", "axis.leftright:a:3:-:X Rotation", "gui.Down:py:+", "key.right:a:1:+:X ", "key.back:a:0:+:Y ", "key.inventory:b:3:Button 3", "key.jump:b:0:Button 0", "key.drop:b:1:Button 1", "gui.Back:b:1:Button 1", "key.itemleft:b:4:Button 4"};
 
@@ -52,39 +56,38 @@ public class ProfileManager
 
             try
             {
-                JSONTokener jsontokener = new JSONTokener(inputstreamreader);
-                jsonConfigRoot = new JSONObject(jsontokener);
+                jsonConfigRoot = JsonParser.parseReader(inputstreamreader).getAsJsonObject();
             }
             catch (Exception exception)
             {
-                jsonConfigRoot = new JSONObject();
+                jsonConfigRoot = new JsonObject();
             }
 
             inputstreamreader.close();
 
             if (jsonConfigRoot.has("selectedProfile"))
             {
-                currentProfileName = jsonConfigRoot.getString("selectedProfile");
+                currentProfileName = jsonConfigRoot.get("selectedProfile").getAsString();
             }
             else
             {
-                jsonConfigRoot.put("selectedProfile", "Default");
+                jsonConfigRoot.add("selectedProfile", new JsonPrimitive("Default"));
             }
 
             if (jsonConfigRoot.has("Profiles"))
             {
-                profiles = jsonConfigRoot.getJSONObject("Profiles");
+                profiles = jsonConfigRoot.get("Profiles").getAsJsonObject();
             }
             else
             {
-                profiles = new JSONObject();
-                jsonConfigRoot.put("Profiles", profiles);
+                profiles = new JsonObject();
+                jsonConfigRoot.add("Profiles", profiles);
             }
 
             if (!profiles.has("Default"))
             {
-                JSONObject jsonobject = new JSONObject();
-                profiles.put("Default", jsonobject);
+            	JsonObject JsonObject = new JsonObject();
+                profiles.add("Default", JsonObject);
             }
 
             validateProfiles();
@@ -105,39 +108,39 @@ public class ProfileManager
             String s = (String)object;
             Object object1 = profiles.get(s);
 
-            if (object1 instanceof JSONObject)
+            if (object1 instanceof JsonObject)
             {
-                JSONObject jsonobject = (JSONObject)object1;
-                JSONObject jsonobject1 = null;
-                JSONObject jsonobject2 = null;
-                JSONObject jsonobject3 = null;
-                JSONObject jsonobject4 = null;
+                JsonObject JsonObject = (JsonObject)object1;
+                JsonObject JsonObject1 = null;
+                JsonObject JsonObject2 = null;
+                JsonObject JsonObject3 = null;
+                JsonObject JsonObject4 = null;
 
-                for (Object object2 : jsonobject.keySet())
+                for (Object object2 : JsonObject.keySet())
                 {
                     String s1 = (String)object2;
-                    Object object3 = jsonobject.get(s1);
+                    Object object3 = JsonObject.get(s1);
 
-                    if (object3 instanceof JSONObject)
+                    if (object3 instanceof JsonObject)
                     {
                         if (s1.equals("Mc"))
                         {
-                            jsonobject1 = (JSONObject)object3;
+                            JsonObject1 = (JsonObject)object3;
                         }
 
                         if (s1.equals("Of"))
                         {
-                            jsonobject2 = (JSONObject)object3;
+                            JsonObject2 = (JsonObject)object3;
                         }
 
                         if (s1.equals("Vr"))
                         {
-                            jsonobject3 = (JSONObject)object3;
+                            JsonObject3 = (JsonObject)object3;
                         }
 
                         if (s1.equals("Controller"))
                         {
-                            jsonobject4 = (JSONObject)object3;
+                            JsonObject4 = (JsonObject)object3;
                         }
                     }
                 }
@@ -145,7 +148,7 @@ public class ProfileManager
         }
     }
 
-    private static synchronized boolean loadLegacySettings(File settingsFile, JSONObject theProfile, String set) throws Exception
+    private static synchronized boolean loadLegacySettings(File settingsFile, JsonObject theProfile, String set) throws Exception
     {
         if (!settingsFile.exists())
         {
@@ -178,7 +181,7 @@ public class ProfileManager
         }
     }
 
-    private static synchronized boolean loadLegacySettings(String settingStr, JSONObject theProfile, String set) throws Exception
+    private static synchronized boolean loadLegacySettings(String settingStr, JsonObject theProfile, String set) throws Exception
     {
         StringReader stringreader = new StringReader(settingStr);
         BufferedReader bufferedreader = new BufferedReader(stringreader);
@@ -204,7 +207,7 @@ public class ProfileManager
         return i != 0;
     }
 
-    private static synchronized boolean loadLegacySettings(String[] settingStr, JSONObject theProfile, String set) throws Exception
+    private static synchronized boolean loadLegacySettings(String[] settingStr, JsonObject theProfile, String set) throws Exception
     {
         Map<String, String> map = new HashMap<>();
         int i = 0;
@@ -237,15 +240,15 @@ public class ProfileManager
 
         if (profiles.has(profile))
         {
-            JSONObject jsonobject = profiles.getJSONObject(profile);
+            JsonObject JsonObject = profiles.get(profile).getAsJsonObject();
 
-            if (jsonobject.has(set))
+            if (JsonObject.has(set))
             {
-                JSONObject jsonobject1 = jsonobject.getJSONObject(set);
+                JsonObject JsonObject1 = JsonObject.get(set).getAsJsonObject();
 
-                for (String s : (Set<String>)jsonobject1.keySet())
+                for (String s : (Set<String>)JsonObject1.keySet())
                 {
-                    String s1 = jsonobject1.getString(s);
+                    String s1 = JsonObject1.get(s).getAsString();
                     map.put(s, s1);
                 }
             }
@@ -254,17 +257,17 @@ public class ProfileManager
         return map;
     }
 
-    public static synchronized Map<String, String> getProfileSet(JSONObject theProfile, String set)
+    public static synchronized Map<String, String> getProfileSet(JsonObject theProfile, String set)
     {
         Map<String, String> map = new HashMap<>();
 
         if (theProfile.has(set))
         {
-            JSONObject jsonobject = theProfile.getJSONObject(set);
+            JsonObject JsonObject = theProfile.get(set).getAsJsonObject();
 
-            for (String s : (Set<String>)jsonobject.keySet())
+            for (String s : (Set<String>)JsonObject.keySet())
             {
-                String s1 = jsonobject.getString(s);
+                String s1 = JsonObject.get(s).getAsString();
                 map.put(s, s1);
             }
         }
@@ -274,41 +277,41 @@ public class ProfileManager
 
     public static synchronized void setProfileSet(String profile, String set, Map<String, String> settings)
     {
-        JSONObject jsonobject = null;
-        JSONObject jsonobject1 = new JSONObject();
+        JsonObject JsonObject = null;
+        JsonObject JsonObject1 = new JsonObject();
 
         if (profiles.has(profile))
         {
-            jsonobject = profiles.getJSONObject(profile);
+            JsonObject = profiles.get(profile).getAsJsonObject();
         }
         else
         {
-            jsonobject = new JSONObject();
-            profiles.put(profile, jsonobject);
+            JsonObject = new JsonObject();
+            profiles.add(profile, JsonObject);
         }
 
         for (String s : settings.keySet())
         {
             String s1 = settings.get(s);
-            jsonobject1.put(s, s1);
+            JsonObject1.add(s, new JsonPrimitive(s1));
         }
 
-        jsonobject.remove(set);
-        jsonobject.put(set, jsonobject1);
+        JsonObject.remove(set);
+        JsonObject.add(set, JsonObject1);
     }
 
-    public static synchronized void setProfileSet(JSONObject theProfile, String set, Map<String, String> settings)
+    public static synchronized void setProfileSet(JsonObject theProfile, String set, Map<String, String> settings)
     {
-        JSONObject jsonobject = new JSONObject();
+        JsonObject JsonObject = new JsonObject();
 
         for (String s : settings.keySet())
         {
             String s1 = settings.get(s);
-            jsonobject.put(s, s1);
+            JsonObject.add(s, new JsonPrimitive(s1));
         }
 
         theProfile.remove(set);
-        theProfile.put(set, jsonobject);
+        theProfile.add(set, JsonObject);
     }
 
     public static synchronized void save()
@@ -316,7 +319,7 @@ public class ProfileManager
         try
         {
             OutputStreamWriter outputstreamwriter = new OutputStreamWriter(new FileOutputStream(vrProfileCfgFile), "UTF-8");
-            String s = jsonConfigRoot.toString(3);
+            String s = jsonConfigRoot.toString();
             outputstreamwriter.write(s);
             outputstreamwriter.flush();
             outputstreamwriter.close();
@@ -338,7 +341,7 @@ public class ProfileManager
         return new TreeSet<>(set);
     }
 
-    private static JSONObject getCurrentProfile()
+    private static JsonObject getCurrentProfile()
     {
         if (!profiles.has(currentProfileName))
         {
@@ -347,7 +350,7 @@ public class ProfileManager
         else
         {
             Object object = profiles.get(currentProfileName);
-            return object != null && object instanceof JSONObject ? (JSONObject)object : null;
+            return object != null && object instanceof JsonObject ? (JsonObject)object : null;
         }
     }
 
@@ -366,7 +369,7 @@ public class ProfileManager
         else
         {
             currentProfileName = profileName;
-            jsonConfigRoot.put("selectedProfile", currentProfileName);
+            jsonConfigRoot.add("selectedProfile",new JsonPrimitive(currentProfileName));
             return true;
         }
     }
@@ -380,8 +383,8 @@ public class ProfileManager
         }
         else
         {
-            JSONObject jsonobject = new JSONObject();
-            profiles.put(profileName, jsonobject);
+            JsonObject JsonObject = new JsonObject();
+            profiles.add(profileName, JsonObject);
             return true;
         }
     }
@@ -405,9 +408,9 @@ public class ProfileManager
         }
         else
         {
-            JSONObject jsonobject = new JSONObject(profiles.getJSONObject(existingProfileName));
+            JsonObject JsonObject = profiles.get(existingProfileName).getAsJsonObject().deepCopy();
             profiles.remove(existingProfileName);
-            profiles.put(newProfileName, jsonobject);
+            profiles.add(newProfileName, JsonObject);
 
             if (existingProfileName.equals(currentProfileName))
             {
@@ -432,8 +435,8 @@ public class ProfileManager
         }
         else
         {
-            JSONObject jsonobject = new JSONObject(profiles.getJSONObject(profileName));
-            profiles.put(duplicateProfileName, jsonobject);
+            JsonObject JsonObject = profiles.get(profileName).getAsJsonObject().deepCopy();
+            profiles.add(duplicateProfileName, JsonObject);
             return true;
         }
     }
@@ -467,13 +470,13 @@ public class ProfileManager
     {
         if (loaded)
         {
-            JSONObject jsonobject = getCurrentProfile();
+            JsonObject JsonObject = getCurrentProfile();
 
-            if (jsonobject != null)
+            if (JsonObject != null)
             {
                 try
                 {
-                    loadLegacySettings(DEFAULT_BINDINGS, jsonobject, "Controller");
+                    loadLegacySettings(DEFAULT_BINDINGS, JsonObject, "Controller");
                 }
                 catch (Exception exception)
                 {

@@ -34,7 +34,6 @@ import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
-import org.vivecraft.menuworlds.MenuWorldRenderer;
 import org.vivecraft.provider.openvr_jna.MCOpenVR;
 import org.vivecraft.provider.openvr_jna.OpenVRStereoRenderer;
 import org.vivecraft.provider.openvr_jna.VRInputAction;
@@ -83,7 +82,6 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfileResults;
@@ -282,7 +280,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Shadow private static Minecraft instance;
 
-	@Shadow protected abstract void startAttack();
+	@Shadow protected abstract boolean startAttack();
 
 	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;", remap = false), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public Thread settings() {
@@ -353,7 +351,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;resizeDisplay()V"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public void resize(Minecraft mc) {
 		this.resizeDisplay();
-		DataHolder.getInstance().menuWorldRenderer = new MenuWorldRenderer();
+		//DataHolder.getInstance().menuWorldRenderer = new MenuWorldRenderer();
 		DataHolder.getInstance().vrSettings.firstRun = false;
 		DataHolder.getInstance().vrSettings.saveOptions();
 	}
@@ -361,7 +359,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/LoadingOverlay;<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/server/packs/resources/ReloadInstance;Ljava/util/function/Consumer;Z)V"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public Consumer<Optional<Throwable>> menuInitvar(Consumer<Optional<Throwable>> c) {
 		if (DataHolder.getInstance().vrRenderer.isInitialized()) {
-			DataHolder.getInstance().menuWorldRenderer.init();
+			//DataHolder.getInstance().menuWorldRenderer.init();
 		}
 		DataHolder.getInstance().vr.postinit();
 		return c;
@@ -369,38 +367,38 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/LoadingOverlay;<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/server/packs/resources/ReloadInstance;Ljava/util/function/Consumer;Z)V"), method = "reloadResourcePacks(Z)Ljava/util/concurrent/CompletableFuture;")
 	public Consumer<Optional<Throwable>> reloadVar(Consumer<Optional<Throwable>> c) {
-		if (DataHolder.getInstance().menuWorldRenderer.isReady() && DataHolder.getInstance().resourcePacksChanged) {
-			try {
-				DataHolder.getInstance().menuWorldRenderer.destroy();
-				DataHolder.getInstance().menuWorldRenderer.prepare();
-			} catch (Exception exception) {
-				exception.printStackTrace();
-			}
-		}
+//		if (DataHolder.getInstance().menuWorldRenderer.isReady() && DataHolder.getInstance().resourcePacksChanged) {
+//			try {
+//				DataHolder.getInstance().menuWorldRenderer.destroy();
+//				DataHolder.getInstance().menuWorldRenderer.prepare();
+//			} catch (Exception exception) {
+//				exception.printStackTrace();
+//			}
+//		}
 		DataHolder.getInstance().resourcePacksChanged = false;
 		return c;
 	}
 
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	private void rollbackResourcePacks(Throwable pThrowable) {
-		if (this.resourcePackRepository.getSelectedPacks().stream().anyMatch(e -> !e.isRequired())) {
-			TextComponent component;
-			if (pThrowable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure) {
-				component = new TextComponent(
-						((SimpleReloadableResourceManager.ResourcePackLoadingFailure) pThrowable).getPack().getName());
-			} else {
-				component = null;
-			}
-
-			this.clearResourcePacksOnError(pThrowable, component);
-		} else {
-			Util.throwAsRuntime(pThrowable);
-		}
-	}
+//	/**
+//	 * @author
+//	 * @reason
+//	 */
+//	@Overwrite
+//	private void rollbackResourcePacks(Throwable pThrowable) {
+//		if (this.resourcePackRepository.getSelectedPacks().stream().anyMatch(e -> !e.isRequired())) {
+//			TextComponent component;
+//			if (pThrowable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure) {
+//				component = new TextComponent(
+//						((SimpleReloadableResourceManager.ResourcePackLoadingFailure) pThrowable).getPack().getName());
+//			} else {
+//				component = null;
+//			}
+//
+//			this.clearResourcePacksOnError(pThrowable, component);
+//		} else {
+//			Util.throwAsRuntime(pThrowable);
+//		}
+//	}
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = Shift.BEFORE, ordinal = 2), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
 	public void gui(Screen pGuiScreen, CallbackInfo info) {
@@ -891,9 +889,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;pause:Z", ordinal = 5, shift = Shift.BEFORE), method = "tick()V")
 	public void tickmenu(CallbackInfo info) {
-		if (DataHolder.getInstance().menuWorldRenderer != null) {
-			DataHolder.getInstance().menuWorldRenderer.tick();
-		}
+//		if (DataHolder.getInstance().menuWorldRenderer != null) {
+//			DataHolder.getInstance().menuWorldRenderer.tick();
+//		}
 
 		PlayerModelController.getInstance().tick();
 
