@@ -39,6 +39,11 @@ dependencies {
     include(implementation("org.lwjgl:lwjgl-ovr:3.2.2"))
     include(implementation("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows"))
     include(implementation("org.lwjgl:lwjgl-opengl:3.2.1:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-jemalloc:3.2.1:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl:3.2.1:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-glfw:3.2.1:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-stb:3.2.1:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-openal:3.2.1:natives-windows"))
 }
 loom {
     accessWidenerPath = file("src/main/resources/vivecraftfabric.accesswidener")

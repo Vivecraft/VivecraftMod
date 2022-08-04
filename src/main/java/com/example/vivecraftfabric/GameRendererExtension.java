@@ -1,5 +1,6 @@
 package com.example.vivecraftfabric;
 
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import org.vivecraft.render.RenderPass;
 
@@ -50,6 +51,8 @@ public interface GameRendererExtension {
 	double getRveY();
 
 	void renderVrFast(float f, boolean b, boolean menuhandright, boolean menuHandleft, PoseStack poseStack);
+
+	void renderVRFabulous(float f, LevelRenderer levelRenderer, boolean menuhandright, boolean menuHandleft, PoseStack poseStack);
 
 	void restoreRVEPos(LivingEntity e);
 
