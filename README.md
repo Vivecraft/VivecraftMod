@@ -9,4 +9,4 @@ A port of https://github.com/jrbudda/Vivecraft_118 to fabric (and back to forge)
 - [ ] Sodium support
 - [ ] Iris support
 
-![Discord Shield](https://discordapp.com/api/guilds/923042654537805874/widget.png?style=shield)
+[Discord server](https://discord.gg/jYyyv7zhSW)
