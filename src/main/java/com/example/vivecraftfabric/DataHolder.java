@@ -103,7 +103,7 @@ public class DataHolder {
     public float watereffect;
     public float portaleffect;
     public float pumpkineffect;
-    public boolean isfphand;
+    public static boolean isfphand;
     long mirroNotifyStart;
     String mirrorNotifyText;
     boolean mirrorNotifyClear;

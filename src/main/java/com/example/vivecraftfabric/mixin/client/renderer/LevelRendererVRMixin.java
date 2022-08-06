@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 
 import com.example.vivecraftfabric.LevelRendererExtension;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import me.fallenbreath.conditionalmixin.api.annotation.Condition;
+import me.fallenbreath.conditionalmixin.api.annotation.Restriction;
 import net.minecraft.client.renderer.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -94,7 +96,9 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	@Shadow
 	protected abstract void renderHitOutline(PoseStack poseStack, VertexConsumer buffer, Entity entity, double d, double e, double g, BlockPos blockpos, BlockState blockstate);
 
-	@Shadow protected abstract void renderShape(PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j);
+	@Shadow
+	private static void renderShape(PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j) {
+	}
 
 	public int rainX() {
 		return 0;
@@ -158,11 +162,13 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	public void removeGraphich(LevelRenderer l) {
 		return;
 	}
-	
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;needsFullRenderChunkUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
-	public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
-		this.needsFullRenderChunkUpdate = true;
-	}
+
+	//Moved for sodium
+//	@Restriction(conflict = @Condition("sodium"))
+//	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;needsFullRenderChunkUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
+//	public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
+//		this.needsFullRenderChunkUpdate = true;
+//	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;pollLightUpdates()V"), method = "renderLevel")
 	public void noPoll(ClientLevel instance) {

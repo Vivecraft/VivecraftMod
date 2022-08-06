@@ -12,6 +12,8 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import com.example.vivecraftfabric.*;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -50,12 +52,6 @@ import org.vivecraft.utils.LangHelper;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Vector3;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.GameRendererExtension;
-import com.example.vivecraftfabric.GlStateHelper;
-import com.example.vivecraftfabric.MinecraftExtension;
-import com.example.vivecraftfabric.PlayerExtension;
-import com.example.vivecraftfabric.RenderTargetExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.MemoryTracker;
@@ -416,7 +412,13 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	
 	@Inject(at = @At("HEAD"), method = "runTick(Z)V", cancellable = true)
 	public void replaceTick(boolean bl, CallbackInfo callback)  {
+		if (FabricLoader.getInstance().isModLoaded("sodium")) {
+			SodiumHelper.preRenderMinecraft();
+		}
 		newRunTick(bl);
+		if (FabricLoader.getInstance().isModLoaded("sodium")) {
+			SodiumHelper.postRenderMinecraft();
+		}
 		callback.cancel();
 	}
 

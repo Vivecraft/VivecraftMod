@@ -19,6 +19,14 @@ repositories {
     }
     maven { url = 'https://files.minecraftforge.net/maven' }
     maven {url = 'https://mvnrepository.com/'}
+    maven { url 'https://jitpack.io' }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -30,20 +38,32 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
-    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+    modImplementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 
     // launchwrapper + dependencies
     compileOnly ('net.minecraft:launchwrapper:1.12') {
         transitive = false
     }
+
+    modImplementation "com.github.Fallen-Breath:conditional-mixin:v0.3.1"
+    modCompileOnly "maven.modrinth:sodium:mc1.18.2-0.4.1"
+
+    implementation 'org.joml:joml:1.10.4'//temp sodium
+    modImplementation(fabricApi.module("fabric-api-base", project.fabric_version))//temp sodium
+    modImplementation(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_version))//temp sodium
+    modImplementation(fabricApi.module("fabric-rendering-data-attachment-v1", project.fabric_version))//temp sodium
+    modImplementation(fabricApi.module("fabric-resource-loader-v0", project.fabric_version))//temp sodium
+
+    include "com.github.Fallen-Breath:conditional-mixin:v0.3.1"
+
     include(implementation("org.lwjgl:lwjgl-ovr:3.2.2"))
     include(implementation("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows"))
-    include(implementation("org.lwjgl:lwjgl-opengl:3.2.1:natives-windows"))
-    include(implementation("org.lwjgl:lwjgl-jemalloc:3.2.1:natives-windows"))
-    include(implementation("org.lwjgl:lwjgl:3.2.1:natives-windows"))
-    include(implementation("org.lwjgl:lwjgl-glfw:3.2.1:natives-windows"))
-    include(implementation("org.lwjgl:lwjgl-stb:3.2.1:natives-windows"))
-    include(implementation("org.lwjgl:lwjgl-openal:3.2.1:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-opengl:3.2.2:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-jemalloc:3.2.2:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl:3.2.2:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-glfw:3.2.2:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-stb:3.2.2:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-openal:3.2.2:natives-windows"))
 }
 loom {
     accessWidenerPath = file("src/main/resources/vivecraftfabric.accesswidener")

@@ -19,7 +19,7 @@ public abstract class FrustumVRMixin implements FrustumExtension {
     private double camZ;
 
     @Shadow
-    abstract boolean cubeInFrustum(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
+    protected abstract boolean cubeInFrustum(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
 
     public void setCameraPosition(double var1, double var3, double var5) {
         this.camX = var1;

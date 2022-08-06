@@ -1,6 +1,7 @@
 {
   "required": true,
   "package": "com.example.vivecraftfabric.mixin",
+  "plugin": "com.example.vivecraftfabric.DefaultMixinConfig",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "server.level.ServerPlayerMixin",
@@ -46,9 +47,14 @@
     "client.renderer.entity.EntityRenderDispatcherMixin",
     "client.renderer.entity.EntityRenderDispatcherVRMixin",
     "client.renderer.entity.EntityRendererVRMixin",
+    //"client.renderer.entity.FishingHookRendererVRMixin",
+    "client.renderer.entity.GuardianRendererVRMixin",
+    "client.renderer.entity.MobRendererVRMixin",
     "client.resources.language.ClientLanguageMixin",
     "world.entity.vehicle.BoatMixin",
     "client.resources.DefaultClientPackResourcesVRMixin",
+
+    "client.renderer.NoSodiumLevelRendererVRMixin"
 
   ],
   "server": [

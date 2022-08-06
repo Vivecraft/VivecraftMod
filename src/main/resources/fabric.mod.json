@@ -18,7 +18,8 @@
     ]
   },
   "mixins": [
-    "vivecraftfabric.mixins.json"
+    "vivecraftfabric.mixins.json",
+    "vivecraftfabric.sodium.mixins.json"
   ],
   "accessWidener": "vivecraftfabric.accesswidener",
   "depends": {
