@@ -3,9 +3,11 @@ package com.example.vivecraftfabric.mixin.client.gui;
 import com.example.vivecraftfabric.DataHolder;
 import com.example.vivecraftfabric.GlStateHelper;
 import com.example.vivecraftfabric.GuiExtension;
+import com.example.vivecraftfabric.SodiumHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -52,8 +54,13 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     //Moved to render for sodium
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderVignette(Lnet/minecraft/world/entity/Entity;)V"), method = "render")
     public void noVignette(Gui instance, Entity entity) {
-        return;
+
     }
+
+//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z"), method = "render")
+//    public boolean noVignette() {
+//        return false;
+//    }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/CameraType;isFirstPerson()Z"), method = "render")
     public boolean noFirstPerson(CameraType instance) {
@@ -150,7 +157,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V"), method = "renderHotbar")
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V", remap = false), method = "renderHotbar")
     public void renderVive(float f, PoseStack poseStack, CallbackInfo ci){
         this.renderViveHudIcons(poseStack);
     }

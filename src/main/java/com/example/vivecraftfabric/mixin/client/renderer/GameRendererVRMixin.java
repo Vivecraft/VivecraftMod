@@ -4,6 +4,7 @@ import java.nio.FloatBuffer;
 import java.util.Locale;
 
 import com.example.vivecraftfabric.*;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -38,11 +39,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
@@ -339,7 +335,7 @@ public abstract class GameRendererVRMixin
 		return this.lastActiveTime;
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
+	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER, remap = false), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
 	public void matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
 		this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov));
 		RenderSystem.getModelViewStack().setIdentity();
@@ -414,7 +410,8 @@ public abstract class GameRendererVRMixin
 		this.setupOverlayStatus(pPartialTicks);
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobHurt(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "renderLevel")
+	//TODO Iris
+	//@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobHurt(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "renderLevel")
 	public void removeBobHurt(GameRenderer instance, PoseStack poseStack, float f) {
 		return;
 	}
@@ -1439,11 +1436,8 @@ public abstract class GameRendererVRMixin
 //						int i = Config.isShaders() ? 8 : 4; TODO
 						int i = 4;
 						int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec31), i);
-//						this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
-//								(float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
-//								pMatrix.last().pose());
-						this.drawSizedQuad((float) this.minecraft.getWindow().getGuiScaledWidth(),
-								(float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, color,
+						this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
+								(float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
 								pMatrix.last().pose());
 					} else {
 						RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -1829,22 +1823,25 @@ public abstract class GameRendererVRMixin
 
 	public void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
 			float[] color, Matrix4f pMatrix) {
-		RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
-		float f = displayHeight / displayWidth;
-		this.lightTexture.turnOnLightLayer();
-		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-		bufferbuilder.begin(Mode.QUADS, DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL); // POSITION_TEX_LMAP_COLOR_NORMAL
-		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).uv(0.0F, 0.0F).uv2(lighti)
-				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F).uv2(lighti)
-				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F).uv2(lighti)
-				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F).uv2(lighti)
-				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-		bufferbuilder.end();
-		BufferUploader.end(bufferbuilder);
-		this.lightTexture.turnOffLightLayer();
+		drawSizedQuad(displayWidth, displayHeight, size, color, pMatrix); //TODO fix lightmap
+		VertexFormat positionTexLmapColorNormal = DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL; //link to here.
+
+//		RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
+//		float f = displayHeight / displayWidth;
+//		this.lightTexture.turnOnLightLayer();
+//		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+//		bufferbuilder.begin(Mode.QUADS, DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL); // POSITION_TEX_LMAP_COLOR_NORMAL
+//		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).uv(0.0F, 0.0F).uv2(lighti)
+//				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
+//		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F).uv2(lighti)
+//				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
+//		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F).uv2(lighti)
+//				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
+//		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F).uv2(lighti)
+//				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
+//		bufferbuilder.end();
+//		BufferUploader.end(bufferbuilder);
+//		this.lightTexture.turnOffLightLayer();
 	}
 
 	public void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
@@ -2231,16 +2228,31 @@ public abstract class GameRendererVRMixin
 
 			BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 
+			//ToDo fix vertex
 			RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
-			bufferbuilder.begin(Mode.QUADS, DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL); // POSITION_TEX_LMAP_COLOR_NORMAL
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4).uv2(i)
+			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL); // POSITION_TEX_LMAP_COLOR_NORMAL
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4)
 					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4).uv2(i)
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4)
 					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F).uv2(i)
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F)
 					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F)
 					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+
+			VertexFormat positionTexLmapColorNormal = DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL; //link
+
+
+//			RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
+//			bufferbuilder.begin(Mode.QUADS, DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL); // POSITION_TEX_LMAP_COLOR_NORMAL
+//			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4).uv2(i)
+//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+//			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4).uv2(i)
+//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+//			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F).uv2(i)
+//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+//			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
+//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
 			Tesselator.getInstance().end();
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.disableBlend();

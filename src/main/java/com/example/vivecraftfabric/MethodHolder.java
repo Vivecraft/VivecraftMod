@@ -9,12 +9,7 @@ import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
 
-public abstract class MethodHolder implements RenderTargetExtension {
-
-	public static VRTextureTarget createTextureTarget(String name, int width, int height, boolean usedepth, boolean onMac, int texid, boolean depthtex, boolean linearFilter) {
-		VRTextureTarget t = new VRTextureTarget(name, width, height, usedepth, onMac, texid, depthtex, linearFilter);
-		return t;
-	}
+public abstract class MethodHolder {
 	
 	public static boolean isKeyDown(int i) {
 		return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), i) == 1 || InputSimulator.isKeyDown(i);

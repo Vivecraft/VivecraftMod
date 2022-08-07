@@ -46,13 +46,16 @@ dependencies {
     }
 
     modImplementation "com.github.Fallen-Breath:conditional-mixin:v0.3.1"
-    modCompileOnly "maven.modrinth:sodium:mc1.18.2-0.4.1"
+    modImplementation "maven.modrinth:sodium:mc1.18.2-0.4.1"
+    modImplementation "maven.modrinth:iris:1.18.x-v1.2.6"
 
     implementation 'org.joml:joml:1.10.4'//temp sodium
     modImplementation(fabricApi.module("fabric-api-base", project.fabric_version))//temp sodium
     modImplementation(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_version))//temp sodium
     modImplementation(fabricApi.module("fabric-rendering-data-attachment-v1", project.fabric_version))//temp sodium
     modImplementation(fabricApi.module("fabric-resource-loader-v0", project.fabric_version))//temp sodium
+
+    implementation 'org.anarres:jcpp:1.4.14'//temp iris
 
     include "com.github.Fallen-Breath:conditional-mixin:v0.3.1"
 

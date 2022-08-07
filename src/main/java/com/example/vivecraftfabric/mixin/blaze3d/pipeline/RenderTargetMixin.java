@@ -64,6 +64,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Shadow
 	protected abstract void setFilterMode(int i);
 
+	/**
+	 * @author
+	 * @reason
+	 */
 	@Overwrite
 	public void blitToScreen(int pWidth, int pHeight, boolean p_83960_) {
 		this.blitToScreen(0, pWidth, pHeight, 0, p_83960_, 0.0F, 0.0F, false);

@@ -153,7 +153,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		DataHolder.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
 	}
 
-	@Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/resources/ResourceLocation;<init>(Ljava/lang/String;)V"), method = "initTransparency")
+	@Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/resources/ResourceLocation;"), method = "initTransparency")
 	public ResourceLocation vrShader(String string) {
 		return new ResourceLocation("shaders/post/vrtransparency.json");
 	}
@@ -252,7 +252,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;applyModelViewMatrix()V", ordinal = 1), method = "renderLevel")
+	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;applyModelViewMatrix()V", ordinal = 1, remap = false), method = "renderLevel")
 	public void renderBukkake(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
 		this.level.getProfiler().popPush("render bukkake");
 	}

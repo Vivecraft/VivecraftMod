@@ -1,0 +1,15 @@
+{
+  "required": false,
+  "package": "com.example.vivecraftfabric.irisMixin",
+  "plugin": "com.example.vivecraftfabric.DefaultMixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "IrisHandRendererVRMixin"
+  ],
+  "client": [
+
+  ],
+  "server": [
+  ],
+  "minVersion": "0.8.4"
+}

@@ -1,13 +1,11 @@
 package com.example.vivecraftfabric;
 
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
-import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinWorldRenderer;
 import org.lwjgl.opengl.GL32C;
 
 public class SodiumHelper {
-    public static final LongArrayFIFOQueue fences = new LongArrayFIFOQueue();
+    static final LongArrayFIFOQueue fences = new LongArrayFIFOQueue();
 
     public static void preRenderMinecraft() {
         while (fences.size() > SodiumClientMod.options().advanced.cpuRenderAheadLimit) {
