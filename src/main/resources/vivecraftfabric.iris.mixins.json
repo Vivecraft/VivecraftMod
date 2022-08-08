@@ -4,7 +4,9 @@
   "plugin": "com.example.vivecraftfabric.DefaultMixinConfig",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "IrisHandRendererVRMixin"
+    "IrisHandRendererVRMixin",
+    "IrisDeferredWorldRenderingPipelineVRMixin",
+    "IrisNewWorldRenderingPipelineVRMixin"
   ],
   "client": [
 
