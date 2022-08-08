@@ -54,7 +54,9 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     //Moved to render for sodium
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderVignette(Lnet/minecraft/world/entity/Entity;)V"), method = "render")
     public void noVignette(Gui instance, Entity entity) {
-
+        if(FabricLoader.getInstance().isModLoaded("sodium")) {
+            SodiumHelper.vignette(false);
+        }
     }
 
 //    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z"), method = "render")

@@ -153,10 +153,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		DataHolder.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
 	}
 
-	@Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/resources/ResourceLocation;"), method = "initTransparency")
-	public ResourceLocation vrShader(String string) {
-		return new ResourceLocation("shaders/post/vrtransparency.json");
-	}
+//	@Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/resources/ResourceLocation;"), method = "initTransparency")
+//	public ResourceLocation vrShader(String string) {
+//		return new ResourceLocation("shaders/post/vrtransparency.json");
+//	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;graphicsChanged()V"), method = "allChanged()V")
 	public void removeGraphich(LevelRenderer l) {

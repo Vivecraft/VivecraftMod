@@ -2092,7 +2092,7 @@ public abstract class GameRendererVRMixin
 	}
 
 	public boolean shouldRenderCrosshair() {
-		if (GameRendererVRMixin.DATA_HOLDER.viewonly) {
+		if (DataHolder.viewonly) {
 			return false;
 		} else if (this.minecraft.level == null) {
 			return false;
@@ -2230,15 +2230,15 @@ public abstract class GameRendererVRMixin
 
 			//ToDo fix vertex
 			RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
-			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL); // POSITION_TEX_LMAP_COLOR_NORMAL
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR); // POSITION_TEX_LMAP_COLOR_NORMAL
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4).uv2(i)
+					.color(f2, f2, f2, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4).uv2(i)
+					.color(f2, f2, f2, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F).uv2(i)
+					.color(f2, f2, f2, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
+					.color(f2, f2, f2, 1.0F).endVertex();
 
 			VertexFormat positionTexLmapColorNormal = DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL; //link
 
