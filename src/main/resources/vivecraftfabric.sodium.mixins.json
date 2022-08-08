@@ -4,7 +4,8 @@
   "plugin": "com.example.vivecraftfabric.DefaultMixinConfig",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "SodiumWorldRendererVRMixin"
+    "SodiumWorldRendererVRMixin",
+    "SodiumGameOptionPagesVRMixin"
   ],
   "client": [
 

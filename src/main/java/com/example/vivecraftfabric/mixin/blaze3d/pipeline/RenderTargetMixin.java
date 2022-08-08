@@ -30,8 +30,6 @@ import net.minecraft.client.renderer.ShaderInstance;
 public abstract class RenderTargetMixin implements RenderTargetExtension {
 
 	@Unique
-	private int frameBufferId;
-	@Unique
 	private int texid = -1;
 	@Unique
 	public String name = "Default";
@@ -40,9 +38,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Unique
 	public boolean blitLegacy = false;
 	@Shadow
-	private int depthBufferId;
+	public int frameBufferId;
 	@Shadow
-	private boolean useDepth;
+	protected int depthBufferId;
+	@Shadow
+	public boolean useDepth;
 	@Shadow
 	public int width;
 	@Shadow
@@ -58,11 +58,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Shadow
 	public abstract void bindRead();
 	@Shadow
-	protected abstract void clear(boolean onMacIn);
+	public abstract void clear(boolean onMacIn);
 	@Shadow
-	protected abstract void checkStatus();
+	public abstract void checkStatus();
 	@Shadow
-	protected abstract void setFilterMode(int i);
+	public abstract void setFilterMode(int i);
 
 	/**
 	 * @author

@@ -3,10 +3,7 @@ package com.example.vivecraftfabric.mixin.client;
 import com.example.vivecraftfabric.DataHolder;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.CycleOption;
-import net.minecraft.client.GraphicsStatus;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.Option;
+import net.minecraft.client.*;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -15,6 +12,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,43 +38,10 @@ public abstract class OptionMixin {
     @Shadow
     private static Component GRAPHICS_TOOLTIP_FABULOUS;
 
-
-    @Final
-    @Mutable
-    @Shadow
-    public static CycleOption<GraphicsStatus> GRAPHICS = CycleOption.create("options.graphics", Arrays.asList(GraphicsStatus.values()), Stream.of(GraphicsStatus.values()).filter(graphicsStatus -> graphicsStatus != GraphicsStatus.FABULOUS).collect(Collectors.toList()), () -> Minecraft.getInstance().getGpuWarnlistManager().isSkippingFabulous(), graphicsStatus -> {
-        TranslatableComponent mutableComponent = new TranslatableComponent(graphicsStatus.getKey());
-        if (graphicsStatus == GraphicsStatus.FABULOUS) {
-            return mutableComponent.withStyle(ChatFormatting.ITALIC);
-        }
-        return mutableComponent;
-    }, options -> options.graphicsMode, (options, option, graphicsStatus) -> {
-        Minecraft minecraft = Minecraft.getInstance();
-        GpuWarnlistManager gpuWarnlistManager = minecraft.getGpuWarnlistManager();
-        if (graphicsStatus == GraphicsStatus.FABULOUS && gpuWarnlistManager.willShowWarning()) {
-            gpuWarnlistManager.showWarning();
-            return;
-        }
-        options.graphicsMode = graphicsStatus;
-        minecraft.levelRenderer.allChanged();
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;allChanged()V"), method = "method_32552")
+    private static void reinit(Options options, Option option, GraphicsStatus graphicsStatus, CallbackInfo ci) {
+        System.out.println("changed");
         DataHolder.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
-    }).setTooltip(minecraft -> {
-        List<FormattedCharSequence> list = minecraft.font.split(GRAPHICS_TOOLTIP_FAST, 200);
-        List<FormattedCharSequence> list2 = minecraft.font.split(GRAPHICS_TOOLTIP_FANCY, 200);
-        List<FormattedCharSequence> list3 = minecraft.font.split(GRAPHICS_TOOLTIP_FABULOUS, 200);
-        return graphicsStatus -> {
-            switch (graphicsStatus) {
-                case FANCY: {
-                    return list2;
-                }
-                case FAST: {
-                    return list;
-                }
-                case FABULOUS: {
-                    return list3;
-                }
-            }
-            return ImmutableList.of();
-        };
-    });
+    }
+
 }
