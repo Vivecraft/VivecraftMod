@@ -24,4 +24,8 @@ public class SodiumHelper {
 
         fences.enqueue(fence);
     }
+
+    public static void vignette(boolean b) {
+        SodiumClientMod.options().quality.enableVignette = b;
+    }
 }

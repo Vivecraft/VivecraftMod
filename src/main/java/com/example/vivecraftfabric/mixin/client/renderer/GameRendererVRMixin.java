@@ -2089,7 +2089,7 @@ public abstract class GameRendererVRMixin
 	}
 
 	public boolean shouldRenderCrosshair() {
-		if (GameRendererVRMixin.DATA_HOLDER.viewonly) {
+		if (DataHolder.viewonly) {
 			return false;
 		} else if (this.minecraft.level == null) {
 			return false;
@@ -2236,10 +2236,10 @@ public abstract class GameRendererVRMixin
 					.color(f2, f2, f2, 1.0F).endVertex();
 			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
 					.color(f2, f2, f2, 1.0F).endVertex();
-			
+
 			bufferbuilder.end();
 			BufferUploader.end(bufferbuilder);
-			RenderSystem.defaultBlendFunc();
+  		RenderSystem.defaultBlendFunc();
 			RenderSystem.disableBlend();
 			RenderSystem.enableCull();
 			RenderSystem.depthFunc(515);
