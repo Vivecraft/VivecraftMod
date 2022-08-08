@@ -1823,25 +1823,22 @@ public abstract class GameRendererVRMixin
 
 	public void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
 			float[] color, Matrix4f pMatrix) {
-		drawSizedQuad(displayWidth, displayHeight, size, color, pMatrix); //TODO fix lightmap
-		VertexFormat positionTexLmapColorNormal = DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL; //link to here.
-
-//		RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
-//		float f = displayHeight / displayWidth;
-//		this.lightTexture.turnOnLightLayer();
-//		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-//		bufferbuilder.begin(Mode.QUADS, DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL); // POSITION_TEX_LMAP_COLOR_NORMAL
-//		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).uv(0.0F, 0.0F).uv2(lighti)
-//				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-//		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F).uv2(lighti)
-//				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-//		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F).uv2(lighti)
-//				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-//		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F).uv2(lighti)
-//				.color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-//		bufferbuilder.end();
-//		BufferUploader.end(bufferbuilder);
-//		this.lightTexture.turnOffLightLayer();
+		RenderSystem.setShader(GameRenderer::getPositionTexLightmapColorShader);
+		float f = displayHeight / displayWidth;
+		this.lightTexture.turnOnLightLayer();
+		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR);
+		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).uv(0.0F, 0.0F).uv2(lighti)
+				.color(color[0], color[1], color[2], color[3]).endVertex();
+		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F).uv2(lighti)
+				.color(color[0], color[1], color[2], color[3]).endVertex();
+		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F).uv2(lighti)
+				.color(color[0], color[1], color[2], color[3]).endVertex();
+		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F).uv2(lighti)
+				.color(color[0], color[1], color[2], color[3]).endVertex();
+		bufferbuilder.end();
+		BufferUploader.end(bufferbuilder);
+		this.lightTexture.turnOffLightLayer();
 	}
 
 	public void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
@@ -2214,7 +2211,7 @@ public abstract class GameRendererVRMixin
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR,
 					GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE,
-					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+					GlStateManager.DestFactor.ONE);
 			int i = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(vec3));
 			float f2 = 1.0F;
 
@@ -2228,32 +2225,20 @@ public abstract class GameRendererVRMixin
 
 			BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 
-			//ToDo fix vertex
-			RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
-			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL); // POSITION_TEX_LMAP_COLOR_NORMAL
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F)
-					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+			RenderSystem.setShader(GameRenderer::getPositionTexLightmapColorShader);
+			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR); // POSITION_TEX_LMAP_COLOR_NORMAL
 
-			VertexFormat positionTexLmapColorNormal = DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL; //link
-
-
-//			RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
-//			bufferbuilder.begin(Mode.QUADS, DataHolder.POSITION_TEX_LMAP_COLOR_NORMAL); // POSITION_TEX_LMAP_COLOR_NORMAL
-//			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4).uv2(i)
-//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-//			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4).uv2(i)
-//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-//			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F).uv2(i)
-//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-//			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
-//					.color(f2, f2, f2, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
-			Tesselator.getInstance().end();
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4).uv2(i)
+					.color(f2, f2, f2, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4).uv2(i)
+					.color(f2, f2, f2, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F).uv2(i)
+					.color(f2, f2, f2, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
+					.color(f2, f2, f2, 1.0F).endVertex();
+			
+			bufferbuilder.end();
+			BufferUploader.end(bufferbuilder);
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.disableBlend();
 			RenderSystem.enableCull();
