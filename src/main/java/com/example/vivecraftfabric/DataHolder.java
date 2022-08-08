@@ -109,9 +109,6 @@ public class DataHolder {
     boolean mirrorNotifyClear;
     long mirroNotifyLen;
 
-    public static final VertexFormat POSITION_TEX_LMAP_COLOR_NORMAL = new VertexFormat(ImmutableMap.<String,VertexFormatElement>builder().put("Position", ELEMENT_POSITION).put("UV0", ELEMENT_UV0).put("UV2", ELEMENT_UV2).put("Color", ELEMENT_COLOR).put("Normal", ELEMENT_NORMAL).put("Padding", ELEMENT_PADDING).build());
-
-
     public static DataHolder getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new DataHolder();
