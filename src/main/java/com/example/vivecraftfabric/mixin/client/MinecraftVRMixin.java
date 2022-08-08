@@ -20,11 +20,7 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -89,7 +85,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-//TODO Done except controls
+
+@Debug(export = true)
 @Mixin(Minecraft.class)
 public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler, MinecraftExtension {
 
@@ -900,15 +897,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;setCameraType(Lnet/minecraft/client/CameraType;)V"), method = "handleKeybinds")
-	public void noCamera(Options instance, CameraType cameraType) {
-		return ;
-	}
-
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;setCameraType(Lnet/minecraft/client/CameraType;)V"), method = "handleKeybinds")
 	public void vrMirrorOption(Options instance, CameraType cameraType) {
 		DataHolder.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
 		this.notifyMirror(DataHolder.getInstance().vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
-		this.levelRenderer.needsUpdate();
+		//this.levelRenderer.needsUpdate();
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;checkEntityPostEffect(Lnet/minecraft/world/entity/Entity;)V"), method = "handleKeybinds")
