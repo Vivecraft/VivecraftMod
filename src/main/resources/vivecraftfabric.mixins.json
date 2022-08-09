@@ -32,6 +32,7 @@
     "client.OptionMixin",
     "client.OptionsMixin",
     "client.gui.GuiVRMixin",
+    "client.gui.NoSodiumGuiVRMixin",
     "client.gui.screens.PauseScreenVRMixin",
     "client.gui.screens.inventory.AbstractContainerScreenVRMixin",
     "client.gui.screens.inventory.BookEditScreenVRMixin",

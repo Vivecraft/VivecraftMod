@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SodiumGameOptionPages.class)
 public class SodiumGameOptionPagesVRMixin {
 
-    @Inject(at = @At("HEAD"), method = "lambda$quality$23")
+    @Inject(at = @At("HEAD"), method = "lambda$quality$23", remap = false)
     private static void initframe(Options opts, GraphicsStatus value, CallbackInfo ci) {
         DataHolder.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
     }

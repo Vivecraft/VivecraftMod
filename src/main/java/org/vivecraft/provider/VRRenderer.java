@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.example.vivecraftfabric.*;
+import net.fabricmc.loader.api.FabricLoader;
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -21,11 +23,6 @@ import org.vivecraft.render.VRShaders;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.LangHelper;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.GameRendererExtension;
-import com.example.vivecraftfabric.GlStateHelper;
-import com.example.vivecraftfabric.RenderTargetExtension;
-import com.example.vivecraftfabric.VRTextureTarget;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -803,6 +800,11 @@ public abstract class VRRenderer
             this.lastDisplayFBWidth = i;
             this.lastDisplayFBHeight = j;
             this.reinitFramebuffers = false;
+
+            if (FabricLoader.getInstance().isModLoaded("iris")) {
+                IrisHelper.reload();
+            }
+
         }
     }
 

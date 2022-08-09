@@ -38,9 +38,8 @@ public abstract class OptionMixin {
     @Shadow
     private static Component GRAPHICS_TOOLTIP_FABULOUS;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;allChanged()V"), method = "method_32552")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;allChanged()V"), method = "method_32552", remap = false)
     private static void reinit(Options options, Option option, GraphicsStatus graphicsStatus, CallbackInfo ci) {
-        System.out.println("changed");
         DataHolder.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
     }
 

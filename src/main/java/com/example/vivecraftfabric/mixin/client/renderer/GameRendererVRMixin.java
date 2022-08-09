@@ -1,15 +1,25 @@
 package com.example.vivecraftfabric.mixin.client.renderer;
 
+import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 import com.example.vivecraftfabric.*;
+import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.datafixers.util.Pair;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.*;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.api.NetworkHelper;
 import org.vivecraft.api.VRData;
 import org.vivecraft.gameplay.VRPlayer;
@@ -52,12 +63,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
@@ -558,6 +563,9 @@ public abstract class GameRendererVRMixin
 					new BlockPos(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition()));
 			// int i = Config.isShaders() ? 8 : 4; TODO
 			int i = 4;
+			if (FabricLoader.getInstance().isModLoaded("iris")) {
+				i = IrisHelper.ShaderLight();
+			}
 
 			if (f < (float) i) {
 				f = (float) i;
@@ -1292,6 +1300,9 @@ public abstract class GameRendererVRMixin
 
 //				int i = Config.isShaders() ? 8 : 4; TODO
 				int i = 4;
+				if (FabricLoader.getInstance().isModLoaded("iris")) {
+					i = IrisHelper.ShaderLight();
+				}
 				int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec3), i);
 				this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
 						(float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
@@ -1435,6 +1446,9 @@ public abstract class GameRendererVRMixin
 
 //						int i = Config.isShaders() ? 8 : 4; TODO
 						int i = 4;
+						if (FabricLoader.getInstance().isModLoaded("iris")) {
+							i = IrisHelper.ShaderLight();
+						}
 						int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec31), i);
 						this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
 								(float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
@@ -1823,19 +1837,19 @@ public abstract class GameRendererVRMixin
 
 	public void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
 			float[] color, Matrix4f pMatrix) {
-		RenderSystem.setShader(GameRenderer::getPositionTexLightmapColorShader);
+		RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
 		float f = displayHeight / displayWidth;
 		this.lightTexture.turnOnLightLayer();
 		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR);
-		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).uv(0.0F, 0.0F).uv2(lighti)
-				.color(color[0], color[1], color[2], color[3]).endVertex();
-		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F).uv2(lighti)
-				.color(color[0], color[1], color[2], color[3]).endVertex();
-		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F).uv2(lighti)
-				.color(color[0], color[1], color[2], color[3]).endVertex();
-		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F).uv2(lighti)
-				.color(color[0], color[1], color[2], color[3]).endVertex();
+		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
+		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
+				.uv(0.0F, 0.0F).uv2(lighti).normal(0,0,1).endVertex();
+		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
+				.uv(1.0F, 0.0F).uv2(lighti).normal(0,0,1).endVertex();
+		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
+				.uv(1.0F, 1.0F).uv2(lighti).normal(0,0,1).endVertex();
+		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
+				.uv(0.0F, 1.0F).uv2(lighti).normal(0,0,1).endVertex();
 		bufferbuilder.end();
 		BufferUploader.end(bufferbuilder);
 		this.lightTexture.turnOffLightLayer();
@@ -2211,7 +2225,7 @@ public abstract class GameRendererVRMixin
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR,
 					GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE,
-					GlStateManager.DestFactor.ONE);
+					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 			int i = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(vec3));
 			float f2 = 1.0F;
 
@@ -2225,21 +2239,21 @@ public abstract class GameRendererVRMixin
 
 			BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 
-			RenderSystem.setShader(GameRenderer::getPositionTexLightmapColorShader);
-			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR); // POSITION_TEX_LMAP_COLOR_NORMAL
+			RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
+			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
 
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).uv(0.0F, 15.0F * f4).uv2(i)
-					.color(f2, f2, f2, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).uv(15.0F * f3, 15.0F * f4).uv2(i)
-					.color(f2, f2, f2, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).uv(15.0F * f3, 0.0F).uv2(i)
-					.color(f2, f2, f2, 1.0F).endVertex();
-			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).uv2(i)
-					.color(f2, f2, f2, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).color(f2, f2, f2, 1.0F)
+					.uv(0.0F, 15.0F * f4).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).color(f2, f2, f2, 1.0F)
+					.uv(15.0F * f3, 15.0F * f4).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).color(f2, f2, f2, 1.0F)
+					.uv(15.0F * f3, 0.0F).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+			bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).color(f2, f2, f2, 1.0F)
+					.uv(0.0F, 0.0F).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
 
 			bufferbuilder.end();
 			BufferUploader.end(bufferbuilder);
-  		RenderSystem.defaultBlendFunc();
+  			RenderSystem.defaultBlendFunc();
 			RenderSystem.disableBlend();
 			RenderSystem.enableCull();
 			RenderSystem.depthFunc(515);
@@ -2447,6 +2461,6 @@ public abstract class GameRendererVRMixin
 
 			matrixStackIn.popPose();
 			this.lightTexture.turnOnLightLayer();
-			    }
-			}
+		}
+	}
 }

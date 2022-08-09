@@ -59,11 +59,6 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         }
     }
 
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z"), method = "render")
-//    public boolean noVignette() {
-//        return false;
-//    }
-
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/CameraType;isFirstPerson()Z"), method = "render")
     public boolean noFirstPerson(CameraType instance) {
         return false;
