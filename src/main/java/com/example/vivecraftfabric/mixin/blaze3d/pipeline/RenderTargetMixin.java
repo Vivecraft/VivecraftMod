@@ -262,7 +262,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		float f8 = (float) this.viewWidth / (float) this.width;
 		float f9 = (float) this.viewHeight / (float) this.height;
 
-		if (!blitLegacy) {
 			ShaderInstance shaderinstance = minecraft.gameRenderer.blitShader;
 			shaderinstance.setSampler("DiffuseSampler", this.colorTextureId);
 			Matrix4f matrix4f = Matrix4f.orthographic((float) width, (float) (-height), 1000.0F, 3000.0F);
@@ -292,30 +291,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			bufferbuilder.end();
 			BufferUploader._endInternal(bufferbuilder);
 			shaderinstance.clear();
-		} else {
-			this.bindRead();
-			GlStateHelper.disableAlphaTest();
-			GlStateManager._disableBlend();
-			GL11.glMatrixMode(GL11.GL_PROJECTION);
-			GL43.glLoadIdentity();
-			GL11.glOrtho(0.0D, (double) width, (double) height, 0.0D, 1000.0D, 3000.0D);
-			GL43.glMatrixMode(5888);
-			GL43.glLoadIdentity();
-			GL11.glTranslatef(0.0F, 0.0F, -2000);
-			GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-			GlStateManager._clearDepth(1.0D);
-			GL11.glBegin(GL11.GL_QUADS);
-			GL11.glTexCoord2f(xCropFactor, yCropFactor);
-			GL11.glVertex3f(f4, f3, 0.0F);
-			GL11.glTexCoord2f(f8 - xCropFactor, yCropFactor);
-			GL11.glVertex3f(f2, f3, 0.0F);
-			GL11.glTexCoord2f(f8 - xCropFactor, f9 - yCropFactor);
-			GL11.glVertex3f(f2, f5, 0.0F);
-			GL11.glTexCoord2f(xCropFactor, f9 - yCropFactor);
-			GL11.glVertex3f(f4, f5, 0.0F);
-			GL11.glEnd();
-			unbindRead();
-		}
 
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);

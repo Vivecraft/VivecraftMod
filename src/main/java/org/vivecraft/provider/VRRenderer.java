@@ -1,17 +1,18 @@
 package org.vivecraft.provider;
 
 import java.io.IOException;
+import java.nio.Buffer;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.example.vivecraftfabric.*;
+import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.loader.api.FabricLoader;
-import org.lwjgl.opengl.ARBShaderObjects;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL43;
+import net.minecraft.client.renderer.GameRenderer;
+import org.lwjgl.opengl.*;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
@@ -165,32 +166,28 @@ public abstract class VRRenderer
         RenderSystem.disableTexture();
         RenderSystem.disableCull();
         
-        GL43.glColor4f(0F, 0F, 0F, 1.0F);
+        RenderSystem.setShaderColor(0F, 0F, 0F, 1.0F);
         
-        GL43.glMatrixMode(GL11.GL_PROJECTION);
-        GL43.glPushMatrix();
-        GL43.glLoadIdentity();
+
         RenderTarget fb = minecraft.getMainRenderTarget();
         RenderSystem.viewport(0, 0, fb.viewWidth, fb.viewHeight);
-        GL43.glOrtho(0.0D, (double)fb.viewWidth, 0.0D, (double)fb.viewHeight, 0.0, 20.0D);
-        GL43.glMatrixMode(GL11.GL_MODELVIEW);
-        GL43.glPushMatrix();
-        GL43.glLoadIdentity();
+        RenderSystem.backupProjectionMatrix();
+        RenderSystem.setProjectionMatrix(Matrix4f.orthographic(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F));
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().setIdentity();
         if(inverse) //draw on far clip
-        	GL43.glTranslatef(0, 0, -20);
+        	RenderSystem.getModelViewStack().translate(0, 0, -20);
+        RenderSystem.applyModelViewMatrix();
         int s= GL43.glGetInteger(GL43.GL_CURRENT_PROGRAM);
-        GL30.glUseProgram(0);
-        
+
         if(dataholder.currentPass == RenderPass.SCOPEL || dataholder.currentPass == RenderPass.SCOPER){
             drawCircle(fb.viewWidth, fb.viewHeight);
         } else if(dataholder.currentPass == RenderPass.LEFT||dataholder.currentPass == RenderPass.RIGHT) {
         	drawMask();
         }
 
-        GL11.glMatrixMode(GL11.GL_PROJECTION);
-        GL43.glPopMatrix();
-        GL11.glMatrixMode(GL11.GL_MODELVIEW);
-        GL43.glPopMatrix();
+        RenderSystem.restoreProjectionMatrix();
+        RenderSystem.getModelViewStack().popPose();
 
         RenderSystem.depthMask(true); // Do write to depth buffer
         RenderSystem.colorMask(true, true, true, true);
@@ -205,9 +202,13 @@ public abstract class VRRenderer
         GL11.glStencilMask(0); // Dont Write to stencil buffer
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
     }
+    FloatBuffer buffer = FloatBuffer.allocate(16);
 
     public void doFSAA(boolean hasShaders)
     {
+        if (true) {
+            return;
+        }
         if (this.fsaaFirstPassResultFBO == null)
         {
             this.reinitFrameBuffers("FSAA Setting Changed");
@@ -216,13 +217,13 @@ public abstract class VRRenderer
         {
             GlStateHelper.disableAlphaTest();
             GlStateManager._disableBlend();
-            GL11.glMatrixMode(GL11.GL_PROJECTION);
-            GL43.glPushMatrix();
-            GL43.glLoadIdentity();
-            GL43.glMatrixMode(5888);
-            GL43.glPushMatrix();
-            GL43.glLoadIdentity();
-            GL11.glTranslatef(0.0F, 0.0F, -0.7F);
+            RenderSystem.backupProjectionMatrix();
+            Matrix4f matrix4f = new Matrix4f();
+            matrix4f.setIdentity();
+            RenderSystem.setProjectionMatrix(matrix4f);
+            RenderSystem.getModelViewStack().pushPose();
+            RenderSystem.getModelViewStack().translate(0, 0, -0.7F);
+            RenderSystem.applyModelViewMatrix();
             this.fsaaFirstPassResultFBO.bindWrite(true);
             GlStateManager._activeTexture(33985);
             this.framebufferVrRender.bindRead();
@@ -247,6 +248,12 @@ public abstract class VRRenderer
             ARBShaderObjects.glUniform1fARB(VRShaders._Lanczos_texelHeightOffsetUniform, 0.0F);
             ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputImageTextureUniform, 1);
             ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputDepthTextureUniform, 2);
+            matrix4f.store(this.buffer);
+            ((Buffer) this.buffer).rewind();
+            ARBShaderObjects.glUniformMatrix4fvARB(VRShaders._Lanczos_projectionUniform, false, this.buffer);
+            RenderSystem.getModelViewMatrix().store(this.buffer);
+            ((Buffer) this.buffer).rewind();
+            ARBShaderObjects.glUniformMatrix4fvARB(VRShaders._Lanczos_modelViewUniform, false, this.buffer);
             GlStateHelper.clear(16384);
             this.drawQuad();
             this.fsaaLastPassResultFBO.bindWrite(true);
@@ -272,26 +279,26 @@ public abstract class VRRenderer
             GlStateManager._glUseProgram(0);
             GlStateHelper.enableAlphaTest();
             GlStateManager._enableBlend();
-            GL43.glMatrixMode(5889);
-            GL43.glPopMatrix();
-            GL43.glMatrixMode(5888);
-            GL43.glPopMatrix();
+            RenderSystem.restoreProjectionMatrix();
+            RenderSystem.getModelViewStack().popPose();
         }
     }
     
     private void drawCircle(float width, float height) {
-        GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        builder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
         int i = 32;
         float f = (float)(width / 2);
-        GL11.glVertex2f((float)(width / 2), (float)(width / 2));
+        builder.vertex((float)(width / 2), (float)(width / 2), 0.0F).endVertex();
         for (int j = 0; j < i + 1; ++j)
         {
             float f1 = (float)j / (float)i * (float)Math.PI * 2.0F;
             float f2 = (float)((double)(width / 2) + Math.cos((double)f1) * (double)f);
             float f3 = (float)((double)(width / 2) + Math.sin((double)f1) * (double)f);
-            GL11.glVertex2f(f2, f3);
+            builder.vertex(f2, f3, 0.0F).endVertex();
         }
-        GL11.glEnd();
+        builder.end();
+        BufferUploader.end(builder);
     }
     
     private void drawMask() {
@@ -300,28 +307,30 @@ public abstract class VRRenderer
 		float[] verts = getStencilMask(dh.currentPass);
 		if (verts == null) return;
 		
-        GL11.glBegin(GL11.GL_TRIANGLES);
+        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
 
         for (int i = 0; i < verts.length; i += 2)
         {
-            GL11.glVertex2f(verts[i] * dh.vrRenderer.renderScale, verts[i + 1] * dh.vrRenderer.renderScale);
+            builder.vertex(verts[i] * dh.vrRenderer.renderScale, verts[i + 1] * dh.vrRenderer.renderScale, 0.0F).endVertex();
         }
 
-        GL11.glEnd();
+        builder.end();
+        RenderSystem.setShader(GameRenderer::getPositionShader);
+        BufferUploader.end(builder);
     }
 
     private void drawQuad()
     {
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glTexCoord2f(0.0F, 0.0F);
-        GL11.glVertex3f(-1.0F, -1.0F, 0.0F);
-        GL11.glTexCoord2f(1.0F, 0.0F);
-        GL11.glVertex3f(1.0F, -1.0F, 0.0F);
-        GL11.glTexCoord2f(1.0F, 1.0F);
-        GL11.glVertex3f(1.0F, 1.0F, 0.0F);
-        GL11.glTexCoord2f(0.0F, 1.0F);
-        GL11.glVertex3f(-1.0F, 1.0F, 0.0F);
-        GL11.glEnd();
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        builder.vertex(-1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).endVertex();
+        builder.vertex(1.0F, -1.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
+        builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
+        builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
+        builder.end();
+        BufferUploader.end(builder);
     }
 
     public double getCurrentTimeSecs()

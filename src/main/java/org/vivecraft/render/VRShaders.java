@@ -10,6 +10,8 @@ public class VRShaders
     public static int _Lanczos_texelHeightOffsetUniform = -1;
     public static int _Lanczos_inputImageTextureUniform = -1;
     public static int _Lanczos_inputDepthTextureUniform = -1;
+    public static int _Lanczos_projectionUniform = -1;
+    public static int _Lanczos_modelViewUniform = -1;
     public static int _DepthMask_shaderProgramId = -1;
     public static int _DepthMask_resolutionUniform = -1;
     public static int _DepthMask_positionUniform = -1;
@@ -85,6 +87,8 @@ public class VRShaders
             _Lanczos_texelHeightOffsetUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "texelHeightOffset");
             _Lanczos_inputImageTextureUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "inputImageTexture");
             _Lanczos_inputDepthTextureUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "inputDepthTexture");
+            _Lanczos_projectionUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "projection");
+            _Lanczos_modelViewUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "modelView");
         }
     }
 
