@@ -3,16 +3,15 @@ package org.vivecraft.provider;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.example.vivecraftfabric.*;
 import com.mojang.blaze3d.vertex.*;
+import net.coderbot.iris.Iris;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.renderer.GameRenderer;
 import org.lwjgl.opengl.*;
+import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
@@ -193,7 +192,7 @@ public abstract class VRRenderer
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();
 
-        GL43.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);      
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableTexture();
         RenderSystem.enableCull();
         GL30.glUseProgram(s);
@@ -202,13 +201,11 @@ public abstract class VRRenderer
         GL11.glStencilMask(0); // Dont Write to stencil buffer
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
     }
-    FloatBuffer buffer = FloatBuffer.allocate(16);
+    FloatBuffer buffer = MemoryUtil.memAllocFloat(16);
+    FloatBuffer buffer2 = MemoryUtil.memAllocFloat(16);
 
-    public void doFSAA(boolean hasShaders)
+    public void doFSAA(float nano, boolean hasShaders)
     {
-        if (true) {
-            return;
-        }
         if (this.fsaaFirstPassResultFBO == null)
         {
             this.reinitFrameBuffers("FSAA Setting Changed");
@@ -250,16 +247,23 @@ public abstract class VRRenderer
             ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputDepthTextureUniform, 2);
             matrix4f.store(this.buffer);
             ((Buffer) this.buffer).rewind();
-            ARBShaderObjects.glUniformMatrix4fvARB(VRShaders._Lanczos_projectionUniform, false, this.buffer);
-            RenderSystem.getModelViewMatrix().store(this.buffer);
-            ((Buffer) this.buffer).rewind();
-            ARBShaderObjects.glUniformMatrix4fvARB(VRShaders._Lanczos_modelViewUniform, false, this.buffer);
+            GL43C.glUniformMatrix4fv(VRShaders._Lanczos_projectionUniform, false, this.buffer);
+            RenderSystem.getModelViewMatrix().store(this.buffer2);
+            ((Buffer) this.buffer2).rewind();
+            GL43C.glUniformMatrix4fv(VRShaders._Lanczos_modelViewUniform, false, this.buffer2);
             GlStateHelper.clear(16384);
             this.drawQuad();
             this.fsaaLastPassResultFBO.bindWrite(true);
             GlStateManager._activeTexture(33985);
             this.fsaaFirstPassResultFBO.bindRead();
             GlStateManager._activeTexture(33986);
+            if (this.fsaaFirstPassResultFBO.getDepthTextureId() < 0) {
+                this.fsaaFirstPassResultFBO.createBuffers(this.framebufferVrRender.viewWidth, this.framebufferVrRender.viewHeight, Minecraft.ON_OSX);
+            }
+            if (this.fsaaLastPassResultFBO.getDepthTextureId() < 0) {
+                this.fsaaLastPassResultFBO.createBuffers(this.framebufferVrRender.viewWidth, this.framebufferVrRender.viewHeight, Minecraft.ON_OSX);
+            }
+            Iris.logger.warn(String.valueOf(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId()));
             GlStateManager._bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
             GlStateManager._activeTexture(33984);
             this.checkGLError("posttex");
@@ -270,6 +274,12 @@ public abstract class VRRenderer
             this.checkGLError("postclear");
             GlStateManager._activeTexture(33984);
             this.checkGLError("postact");
+            matrix4f.store(this.buffer);
+            ((Buffer) this.buffer).rewind();
+            GL43C.glUniformMatrix4fv(VRShaders._Lanczos_projectionUniform, false, this.buffer);
+            RenderSystem.getModelViewMatrix().store(this.buffer2);
+            ((Buffer) this.buffer2).rewind();
+            GL43C.glUniformMatrix4fv(VRShaders._Lanczos_modelViewUniform, false, this.buffer2);
             ARBShaderObjects.glUniform1fARB(VRShaders._Lanczos_texelWidthOffsetUniform, 0.0F);
             ARBShaderObjects.glUniform1fARB(VRShaders._Lanczos_texelHeightOffsetUniform, 1.0F / (3.0F * (float)this.framebufferEye0.viewHeight));
             ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputImageTextureUniform, 1);
@@ -330,7 +340,7 @@ public abstract class VRRenderer
         builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
         builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
         builder.end();
-        BufferUploader.end(builder);
+        BufferUploader._endInternal(builder);
     }
 
     public double getCurrentTimeSecs()

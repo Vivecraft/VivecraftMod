@@ -54,8 +54,6 @@ public class VRArmRenderer extends PlayerRenderer
         rendererArmIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.entityTranslucent(playerIn.getSkinTextureLocation())), combinedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, f);
         rendererArmwearIn.xRot = 0.0F;
         rendererArmwearIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.entityTranslucent(playerIn.getSkinTextureLocation())), combinedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, f);
-        GL43.glTexEnvi(8960, 8704, 8448);
-        GL43.glTexEnvi(8960, 34163, 1);
         GlStateManager._disableBlend();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }

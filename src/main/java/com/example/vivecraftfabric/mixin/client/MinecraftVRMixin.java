@@ -1025,7 +1025,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			if (DataHolder.getInstance().vrSettings.useFsaa) {
 				this.profiler.push("fsaa");
 				// DataHolder.getInstance().vrRenderer.doFSAA(Config.isShaders()); TODO
-				DataHolder.getInstance().vrRenderer.doFSAA(false);
+				DataHolder.getInstance().vrRenderer.doFSAA(nano, false);
 				rendertarget = DataHolder.getInstance().vrRenderer.fsaaLastPassResultFBO;
 				this.checkGLError("fsaa " + eye);
 				this.profiler.pop();
