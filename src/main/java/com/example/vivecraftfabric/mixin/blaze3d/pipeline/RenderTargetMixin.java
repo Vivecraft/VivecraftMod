@@ -2,6 +2,7 @@ package com.example.vivecraftfabric.mixin.blaze3d.pipeline;
 
 import java.nio.IntBuffer;
 
+import com.example.vivecraftfabric.mixin.blaze3d.systems.RenderSystemAccessor;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -233,7 +234,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			instance = minecraft.gameRenderer.blitShader;
 			instance.setSampler("DiffuseSampler", this.colorTextureId);
 		} else {
-			for (int k = 0; k < 12; ++k) {
+			for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
 				int l = RenderSystem.getShaderTexture(k);
 				instance.setSampler("Sampler" + k, l);
 			}
@@ -310,7 +311,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 				instance = minecraft.gameRenderer.blitShader;
 				instance.setSampler("DiffuseSampler", this.colorTextureId);
 			} else {
-				for (int k = 0; k < 12; ++k) {
+				for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
 					int l = RenderSystem.getShaderTexture(k);
 					instance.setSampler("Sampler" + k, l);
 				}

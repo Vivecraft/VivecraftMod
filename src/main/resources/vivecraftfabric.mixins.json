@@ -25,6 +25,7 @@
     "blaze3d.platform.WindowVRMixin",
     "blaze3d.platform.GlStateManagerVRMixin",
     "blaze3d.systems.RenderSystemVRMixin",
+    "blaze3d.systems.RenderSystemAccessor",
     "client.KeyboardHandlerVRMixin",
     "client.MinecraftMixin",
     "client.MinecraftVRMixin",
