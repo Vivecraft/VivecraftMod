@@ -2,6 +2,7 @@ package com.example.vivecraftfabric.irisMixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.coderbot.iris.pipeline.HandRenderer;
+import net.coderbot.iris.pipeline.ShadowRenderer;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//TODO Move rendering to here
 @Pseudo
 @Mixin(HandRenderer.class)
 public class IrisHandRendererVRMixin {

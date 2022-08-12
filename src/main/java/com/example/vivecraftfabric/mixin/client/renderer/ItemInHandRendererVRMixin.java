@@ -55,7 +55,7 @@ import org.vivecraft.render.VRFirstPersonArmSwing;
 import org.vivecraft.render.VivecraftItemRendering;
 import org.vivecraft.render.VivecraftItemRendering.VivecraftItemTransformType;
 
-@Mixin(ItemInHandRenderer.class)
+@Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {
 
 	@Unique

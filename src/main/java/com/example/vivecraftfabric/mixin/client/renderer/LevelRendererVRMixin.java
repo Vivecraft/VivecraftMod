@@ -101,8 +101,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	private static void renderShape(PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j) {
 	}
 
-	@Shadow protected abstract void renderChunkLayer(RenderType renderType, PoseStack poseStack, double d, double e, double f, Matrix4f matrix4f);
-
 	public int rainX() {
 		return 0;
 	}
