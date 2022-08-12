@@ -7,7 +7,6 @@ import java.util.*;
 
 import com.example.vivecraftfabric.*;
 import com.mojang.blaze3d.vertex.*;
-import net.coderbot.iris.Iris;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.renderer.GameRenderer;
 import org.lwjgl.opengl.*;
@@ -204,15 +203,13 @@ public abstract class VRRenderer
     FloatBuffer buffer = MemoryUtil.memAllocFloat(16);
     FloatBuffer buffer2 = MemoryUtil.memAllocFloat(16);
 
-    public void doFSAA(float nano, boolean hasShaders)
+    public void doFSAA(RenderPass eye, boolean hasShaders)
     {
         if (this.fsaaFirstPassResultFBO == null)
         {
             this.reinitFrameBuffers("FSAA Setting Changed");
         }
-        else
-        {
-            GlStateHelper.disableAlphaTest();
+        else {
             GlStateManager._disableBlend();
             RenderSystem.backupProjectionMatrix();
             Matrix4f matrix4f = new Matrix4f();
@@ -221,50 +218,43 @@ public abstract class VRRenderer
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().translate(0, 0, -0.7F);
             RenderSystem.applyModelViewMatrix();
-            this.fsaaFirstPassResultFBO.bindWrite(true);
+            DefaultVertexFormat.POSITION_TEX.setupBufferState();
+            this.fsaaFirstPassResultFBO.clear(Minecraft.ON_OSX);
+            this.fsaaFirstPassResultFBO.bindWrite(false);
+            RenderSystem.setShaderTexture(0, framebufferVrRender.getColorTextureId());
+            RenderSystem.setShaderTexture(1, framebufferVrRender.getDepthTextureId());
+
             GlStateManager._activeTexture(33985);
             this.framebufferVrRender.bindRead();
             GlStateManager._activeTexture(33986);
-
-//            if (hasShaders && Shaders.dfb != null) // Optifine
-//            {
-//                GlStateManager._bindTexture(Shaders.dfb.depthTextures.get(0));
-//            }
-//            else
-//            {
-                GlStateManager._bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
-//            }
+            GlStateManager._bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
 
             GlStateManager._activeTexture(33984);
             GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager._clearDepth(1.0D);
+            this.fsaaFirstPassResultFBO.bindRead();
             GlStateHelper.clear(16640);
             GlStateManager._viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
-            GlStateManager._glUseProgram(VRShaders._Lanczos_shaderProgramId);
-            ARBShaderObjects.glUniform1fARB(VRShaders._Lanczos_texelWidthOffsetUniform, 1.0F / (3.0F * (float)this.fsaaFirstPassResultFBO.viewWidth));
-            ARBShaderObjects.glUniform1fARB(VRShaders._Lanczos_texelHeightOffsetUniform, 0.0F);
-            ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputImageTextureUniform, 1);
-            ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputDepthTextureUniform, 2);
-            matrix4f.store(this.buffer);
-            ((Buffer) this.buffer).rewind();
-            GL43C.glUniformMatrix4fv(VRShaders._Lanczos_projectionUniform, false, this.buffer);
-            RenderSystem.getModelViewMatrix().store(this.buffer2);
-            ((Buffer) this.buffer2).rewind();
-            GL43C.glUniformMatrix4fv(VRShaders._Lanczos_modelViewUniform, false, this.buffer2);
+            VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
+            VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
+            VRShaders._Lanczos_modelViewUniform.set(RenderSystem.getModelViewMatrix());
+            VRShaders._Lanczos_projectionUniform.set(RenderSystem.getProjectionMatrix());
+            for (int k = 0; k < 3; ++k) {
+                int l = RenderSystem.getShaderTexture(k);
+                VRShaders.lanczosShader.setSampler("Sampler" + k, l);
+            }
+            VRShaders.lanczosShader.apply();
             GlStateHelper.clear(16384);
             this.drawQuad();
-            this.fsaaLastPassResultFBO.bindWrite(true);
+            this.fsaaLastPassResultFBO.clear(Minecraft.ON_OSX);
+            this.fsaaLastPassResultFBO.bindWrite(false);
             GlStateManager._activeTexture(33985);
             this.fsaaFirstPassResultFBO.bindRead();
+            RenderSystem.setShaderTexture(0, this.fsaaFirstPassResultFBO.getColorTextureId());
             GlStateManager._activeTexture(33986);
-            if (this.fsaaFirstPassResultFBO.getDepthTextureId() < 0) {
-                this.fsaaFirstPassResultFBO.createBuffers(this.framebufferVrRender.viewWidth, this.framebufferVrRender.viewHeight, Minecraft.ON_OSX);
-            }
-            if (this.fsaaLastPassResultFBO.getDepthTextureId() < 0) {
-                this.fsaaLastPassResultFBO.createBuffers(this.framebufferVrRender.viewWidth, this.framebufferVrRender.viewHeight, Minecraft.ON_OSX);
-            }
-            Iris.logger.warn(String.valueOf(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId()));
+            RenderSystem.setShaderTexture(1, this.fsaaFirstPassResultFBO.getDepthTextureId());
             GlStateManager._bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
+
             GlStateManager._activeTexture(33984);
             this.checkGLError("posttex");
             GlStateManager._viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
@@ -274,23 +264,20 @@ public abstract class VRRenderer
             this.checkGLError("postclear");
             GlStateManager._activeTexture(33984);
             this.checkGLError("postact");
-            matrix4f.store(this.buffer);
-            ((Buffer) this.buffer).rewind();
-            GL43C.glUniformMatrix4fv(VRShaders._Lanczos_projectionUniform, false, this.buffer);
-            RenderSystem.getModelViewMatrix().store(this.buffer2);
-            ((Buffer) this.buffer2).rewind();
-            GL43C.glUniformMatrix4fv(VRShaders._Lanczos_modelViewUniform, false, this.buffer2);
-            ARBShaderObjects.glUniform1fARB(VRShaders._Lanczos_texelWidthOffsetUniform, 0.0F);
-            ARBShaderObjects.glUniform1fARB(VRShaders._Lanczos_texelHeightOffsetUniform, 1.0F / (3.0F * (float)this.framebufferEye0.viewHeight));
-            ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputImageTextureUniform, 1);
-            ARBShaderObjects.glUniform1iARB(VRShaders._Lanczos_inputDepthTextureUniform, 2);
+            for (int k = 0; k < 3; ++k) {
+                int l = RenderSystem.getShaderTexture(k);
+                VRShaders.lanczosShader.setSampler("Sampler" + k, l);
+            }
+            VRShaders._Lanczos_texelWidthOffsetUniform.set(0.0F);
+            VRShaders._Lanczos_texelHeightOffsetUniform.set(1.0F / (3.0F * (float) this.framebufferEye0.viewHeight));
+            VRShaders.lanczosShader.apply();
             this.drawQuad();
             this.checkGLError("postdraw");
-            GlStateManager._glUseProgram(0);
-            GlStateHelper.enableAlphaTest();
-            GlStateManager._enableBlend();
             RenderSystem.restoreProjectionMatrix();
             RenderSystem.getModelViewStack().popPose();
+            // Clean up time
+            VRShaders.lanczosShader.clear();
+            Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
         }
     }
     
@@ -708,8 +695,8 @@ public abstract class VRRenderer
                 try
                 {
                     this.checkGLError("pre FSAA FBO creation");
-                    this.fsaaFirstPassResultFBO = new VRTextureTarget("FSAA Pass1 FBO", eyew, j, false, false, -1, false, false);
-                    this.fsaaLastPassResultFBO = new VRTextureTarget("FSAA Pass2 FBO", eyew, eyeh, false, false, -1, false, false);
+                    this.fsaaFirstPassResultFBO = new VRTextureTarget("FSAA Pass1 FBO", eyew, j, true, false, -1, false, false);
+                    this.fsaaLastPassResultFBO = new VRTextureTarget("FSAA Pass2 FBO", eyew, eyeh, true, false, -1, false, false);
                     dataholder.print(this.fsaaFirstPassResultFBO.toString());
                     dataholder.print(this.fsaaLastPassResultFBO.toString());
                     this.checkGLError("FSAA FBO creation");

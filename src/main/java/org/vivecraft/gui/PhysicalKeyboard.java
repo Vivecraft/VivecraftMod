@@ -508,8 +508,6 @@ public class PhysicalKeyboard
         poseStack.translate(-center.x, -center.y, -center.z);
         RenderSystem.disableTexture();
         RenderSystem.disableCull();
-        GlStateHelper.enableAlphaTest();
-        GlStateHelper.alphaFunc(GL11.GL_GREATER, 0.0F);
         RenderSystem.enableBlend();
 
         if (this.easterEggActive) {

@@ -35,8 +35,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public String name = "Default";
 	@Unique
 	private boolean linearFilter;
-	@Unique
-	public boolean blitLegacy = false;
 	@Shadow
 	public int frameBufferId;
 	@Shadow
@@ -64,6 +62,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Shadow
 	public abstract void setFilterMode(int i);
 
+	@Shadow public abstract void unbindWrite();
+
 	/**
 	 * @author
 	 * @reason
@@ -77,12 +77,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public int getDepthBufferId() {
 		return depthBufferId;
 	}
-	
-	@Override
-	public void setBlitLegacy(boolean b) {
-		blitLegacy = b;
-	}
-	
+
 	@Override
 	public void setName(String name) {
 		this.name=name;
@@ -91,6 +86,20 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public void clearWithColor(float r, float g, float b, float a, boolean isMac) {
+		RenderSystem.assertOnRenderThreadOrInit();
+		this._bindWrite(true);
+		GlStateManager._clearColor(r, g, b, a);
+		int i = 16384;
+		if (this.useDepth) {
+			GlStateManager._clearDepth(1.0);
+			i |= 0x100;
+		}
+		GlStateManager._clear(i, isMac);
+		this.unbindWrite();
 	}
 
 	@Override

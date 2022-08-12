@@ -532,7 +532,6 @@ public abstract class GameRendererVRMixin
 		poseStack.pushPose();
 		poseStack.setIdentity();
 		RenderSystem.disableTexture();
-		GlStateHelper.disableAlphaTest();
 		RenderSystem.enableDepthTest();
 		applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, poseStack);
 		SetupRenderingAtController(c, poseStack);
@@ -888,7 +887,6 @@ public abstract class GameRendererVRMixin
 			// GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
 			// GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 
-			GlStateHelper.alphaFunc(516, 0.01F);
 
 //			if (this.lightTexture.isCustom()) { TODO
 //				this.lightTexture.setAllowed(false);
@@ -1166,7 +1164,6 @@ public abstract class GameRendererVRMixin
 //				Shaders.useProgram(Shaders.ProgramTexturedLit);
 //			}
 
-			GlStateHelper.enableAlphaTest();
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
 					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
@@ -1282,15 +1279,8 @@ public abstract class GameRendererVRMixin
 				GlStateManager._depthFunc(515);
 			}
 
-			GlStateHelper.alphaFunc(516, 0.003921569F);
 			GlStateManager._depthMask(true);
 			GlStateManager._enableDepthTest();
-
-			if (flag) {
-				GlStateHelper.disableAlphaTest();
-			} else {
-				GlStateHelper.enableAlphaTest();
-			}
 
 			// GlStateManager._disableLighting();
 
@@ -1428,15 +1418,8 @@ public abstract class GameRendererVRMixin
 						RenderSystem.depthFunc(515);
 					}
 
-					GlStateHelper.alphaFunc(516, 0.003921569F);
 					RenderSystem.depthMask(true);
 					RenderSystem.enableDepthTest();
-
-					if (flag) {
-						GlStateHelper.disableAlphaTest();
-					} else {
-						GlStateHelper.enableAlphaTest();
-					}
 
 					// RenderSystem.disableLighting();
 
@@ -2213,7 +2196,6 @@ public abstract class GameRendererVRMixin
 			RenderSystem.enableDepthTest();
 			// RenderSystem.disableLighting();
 			RenderSystem.disableCull();
-			GlStateHelper.enableAlphaTest();
 
 			if (depthAlways) {
 				RenderSystem.depthFunc(519);

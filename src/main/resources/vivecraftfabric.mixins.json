@@ -37,6 +37,7 @@
     "client.gui.screens.inventory.AbstractContainerScreenVRMixin",
     "client.gui.screens.inventory.BookEditScreenVRMixin",
     "client.gui.screens.inventory.SignEditScreenVRMixin",
+    "client.gui.screens.OptionsScreenMixin",
     "client.main.MainMixin",
     "client.multiplayer.ClientPacketListenerMixin",
     "client.multiplayer.ClientPacketListenerVRMixin",

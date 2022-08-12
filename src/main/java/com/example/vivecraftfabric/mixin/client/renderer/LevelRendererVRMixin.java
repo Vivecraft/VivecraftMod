@@ -3,6 +3,8 @@ package com.example.vivecraftfabric.mixin.client.renderer;
 import javax.annotation.Nullable;
 
 import com.example.vivecraftfabric.LevelRendererExtension;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.fallenbreath.conditionalmixin.api.annotation.Condition;
 import me.fallenbreath.conditionalmixin.api.annotation.Restriction;
@@ -23,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRSettings;
 

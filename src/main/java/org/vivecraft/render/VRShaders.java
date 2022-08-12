@@ -1,18 +1,22 @@
 package org.vivecraft.render;
 
-import org.lwjgl.opengl.ARBShaderObjects;
+import com.mojang.blaze3d.shaders.AbstractUniform;
+import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.opengl.GL43C;
 import org.vivecraft.utils.Utils;
 
 public class VRShaders
 {
-    public static int _Lanczos_shaderProgramId = -1;
-    public static int _Lanczos_texelWidthOffsetUniform = -1;
-    public static int _Lanczos_texelHeightOffsetUniform = -1;
-    public static int _Lanczos_inputImageTextureUniform = -1;
-    public static int _Lanczos_inputDepthTextureUniform = -1;
-    public static int _Lanczos_projectionUniform = -1;
-    public static int _Lanczos_modelViewUniform = -1;
+    public static ShaderInstance lanczosShader;
+    public static AbstractUniform _Lanczos_texelWidthOffsetUniform;
+    public static AbstractUniform _Lanczos_texelHeightOffsetUniform;
+    public static AbstractUniform _Lanczos_inputImageTextureUniform;
+    public static AbstractUniform _Lanczos_inputDepthTextureUniform;
+    public static AbstractUniform _Lanczos_projectionUniform;
+    public static AbstractUniform _Lanczos_modelViewUniform;
     public static int _DepthMask_shaderProgramId = -1;
     public static int _DepthMask_resolutionUniform = -1;
     public static int _DepthMask_positionUniform = -1;
@@ -76,21 +80,15 @@ public class VRShaders
 
     public static void setupFSAA() throws Exception
     {
-        _Lanczos_shaderProgramId = ShaderHelper.initShaders(LANCZOS_SAMPLER_VERTEX_SHADER, LANCZOS_SAMPLER_FRAGMENT_SHADER, true);
+        lanczosShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "lanczos", DefaultVertexFormat.POSITION_TEX);
 
-        if (_Lanczos_shaderProgramId == 0)
-        {
-            throw new Exception("Failed to validate FSAA shader!");
-        }
-        else
-        {
-            _Lanczos_texelWidthOffsetUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "texelWidthOffset");
-            _Lanczos_texelHeightOffsetUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "texelHeightOffset");
-            _Lanczos_inputImageTextureUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "inputImageTexture");
-            _Lanczos_inputDepthTextureUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "inputDepthTexture");
-            _Lanczos_projectionUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "projection");
-            _Lanczos_modelViewUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "modelView");
-        }
+
+            _Lanczos_texelWidthOffsetUniform = lanczosShader.safeGetUniform( "texelWidthOffset");
+            _Lanczos_texelHeightOffsetUniform = lanczosShader.safeGetUniform( "texelHeightOffset");
+            _Lanczos_inputImageTextureUniform = lanczosShader.safeGetUniform( "inputImageTexture");
+            _Lanczos_inputDepthTextureUniform = lanczosShader.safeGetUniform( "inputDepthTexture");
+            _Lanczos_projectionUniform = lanczosShader.safeGetUniform("projection");
+            _Lanczos_modelViewUniform = lanczosShader.safeGetUniform( "modelView");
     }
 
     public static void setupFOVReduction() throws Exception
