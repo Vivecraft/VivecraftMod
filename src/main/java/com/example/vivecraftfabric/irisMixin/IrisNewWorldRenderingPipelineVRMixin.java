@@ -20,12 +20,7 @@ import org.vivecraft.render.RenderPass;
 @Pseudo
 @Mixin(NewWorldRenderingPipeline.class)
 public class IrisNewWorldRenderingPipelineVRMixin {
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;"), method = "<init>")
-    public RenderTarget rendertarget(Minecraft instance) {
-        return DataHolder.getInstance().vrRenderer.framebufferVrRender;
-    }
-
-    @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true, remap = false)
+ @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true, remap = false)
     private void cancelShadows(LevelRendererAccessor par1, Camera par2, CallbackInfo ci) {
         if (!(DataHolder.getInstance().currentPass == RenderPass.LEFT || DataHolder.getInstance().currentPass == RenderPass.THIRD || DataHolder.getInstance().currentPass == RenderPass.CAMERA)) {
             ci.cancel();
