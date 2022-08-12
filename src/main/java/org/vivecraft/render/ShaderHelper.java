@@ -1,8 +1,9 @@
 package org.vivecraft.render;
 
-import org.lwjgl.opengl.ARBShaderObjects;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
+import com.mojang.blaze3d.platform.GlStateManager;
+import org.lwjgl.opengl.*;
+
+import java.util.List;
 
 public class ShaderHelper
 {
@@ -12,7 +13,7 @@ public class ShaderHelper
 
         try
         {
-            i = ARBShaderObjects.glCreateShaderObjectARB(shaderType);
+            i = GL43C.glCreateShader(shaderType);
 
             if (i == 0)
             {
@@ -20,12 +21,12 @@ public class ShaderHelper
             }
             else
             {
-                ARBShaderObjects.glShaderSourceARB(i, (CharSequence)shaderGLSL);
-                ARBShaderObjects.glCompileShaderARB(i);
+                GlStateManager.glShaderSource(i, List.of(shaderGLSL));
+                GlStateManager.glCompileShader(i);
 
-                if (ARBShaderObjects.glGetObjectParameteriARB(i, ARBShaderObjects.GL_OBJECT_COMPILE_STATUS_ARB) == 0)
-                {
-                    throw new RuntimeException("Error creating shader: " + getLogInfo(i));
+                String log = GL20C.glGetShaderInfoLog(i);
+                if (!log.isEmpty()) {
+                    throw new RuntimeException("Error creating shader: " + log);
                 }
                 else
                 {
@@ -35,7 +36,7 @@ public class ShaderHelper
         }
         catch (Exception exception)
         {
-            ARBShaderObjects.glDeleteObjectARB(i);
+            GlStateManager.glDeleteShader(i);
             throw exception;
         }
     }
@@ -53,11 +54,6 @@ public class ShaderHelper
         }
 
         return i;
-    }
-
-    private static String getLogInfo(int obj)
-    {
-        return ARBShaderObjects.glGetInfoLogARB(obj, ARBShaderObjects.glGetObjectParameteriARB(obj, 35716));
     }
 
     public static int initShaders(String vertexShaderGLSL, String fragmentShaderGLSL, boolean doAttribs)
@@ -90,7 +86,7 @@ public class ShaderHelper
 
             return b0;
         }
-        k = ARBShaderObjects.glCreateProgramObjectARB();
+        k = GlStateManager.glCreateProgram();
 
         if (k == 0)
         {
@@ -98,8 +94,8 @@ public class ShaderHelper
         }
         else
         {
-            ARBShaderObjects.glAttachObjectARB(k, i);
-            ARBShaderObjects.glAttachObjectARB(k, j);
+            GL43C.glAttachShader(k, i);
+            GL43C.glAttachShader(k, j);
 
             if (doAttribs)
             {
@@ -111,28 +107,23 @@ public class ShaderHelper
                 checkGLError("@3");
             }
 
-            ARBShaderObjects.glLinkProgramARB(k);
+            GL43C.glLinkProgram(k);
             checkGLError("Link");
 
-            if (ARBShaderObjects.glGetObjectParameteriARB(k, ARBShaderObjects.GL_OBJECT_LINK_STATUS_ARB) == 0)
-            {
-                System.out.println(getLogInfo(k));
+            String log = GL20C.glGetShaderInfoLog(i);
+            if (!log.isEmpty()) {
+                System.out.println("Shader compilation log: " + log);
+                return 0;
+            }
+            String log2 = GL20C.glGetShaderInfoLog(j);
+            if (!log2.isEmpty()) {
+                System.out.println("Shader compilation log: " + log2);
                 return 0;
             }
             else
-            {
-                ARBShaderObjects.glValidateProgramARB(k);
-
-                if (ARBShaderObjects.glGetObjectParameteriARB(k, ARBShaderObjects.GL_OBJECT_VALIDATE_STATUS_ARB) == 0)
-                {
-                    System.out.println(getLogInfo(k));
-                    return 0;
-                }
-                else
                 {
                     return k;
                 }
             }
         }
-    }
 }

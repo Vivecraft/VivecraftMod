@@ -538,7 +538,7 @@ public abstract class GameRendererVRMixin
 		SetupRenderingAtController(c, poseStack);
 
 		if (this.minecraft.getOverlay() == null) {
-			RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+			RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraftfabric:textures/white.png"));
 		}
 
 		Tesselator tesselator = Tesselator.getInstance();
@@ -717,7 +717,7 @@ public abstract class GameRendererVRMixin
 	@Override
 	public void renderDebugAxes(int r, int g, int b, float radius) {
 		this.setupPolyRendering(true);
-		RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+		RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraftfabric:textures/white.png"));
 		this.renderCircle(new Vec3(0.0D, 0.0D, 0.0D), radius, 32, r, g, b, 255, 0);
 		this.renderCircle(new Vec3(0.0D, 0.01D, 0.0D), radius * 0.75F, 32, r, g, b, 255, 0);
 		this.renderCircle(new Vec3(0.0D, 0.02D, 0.0D), radius * 0.25F, 32, r, g, b, 255, 0);
@@ -1194,7 +1194,7 @@ public abstract class GameRendererVRMixin
 					f = 0.0F;
 				}
 				RenderSystem.setShader(GameRenderer::getPositionColorShader);
-				RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+				RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraftfabric:textures/white.png"));
 				this.renderFlatQuad(vec3.add(0.0D, 0.05001D, 0.0D), f, f, 0.0F, this.tpLimitedColor.getX(),
 						this.tpLimitedColor.getY(), this.tpLimitedColor.getZ(), 128, matrix);
 				this.renderFlatQuad(vec3.add(0.0D, 0.05D, 0.0D), f1, f1, 0.0F, this.tpLimitedColor.getX(),
@@ -1870,7 +1870,7 @@ public abstract class GameRendererVRMixin
 			boolean flag = false;
 			RenderSystem.enableCull();
 			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-			RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+			RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraftfabric:textures/white.png"));
 			Tesselator tesselator = Tesselator.getInstance();
 			tesselator.getBuilder().begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 			double d0 = GameRendererVRMixin.DATA_HOLDER.teleportTracker.lastTeleportArcDisplayOffset;
@@ -2307,7 +2307,7 @@ public abstract class GameRendererVRMixin
 							}
 
 							RenderSystem.setShader(GameRenderer::getPositionColorShader);
-							RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+							RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraftfabric:textures/white.png"));
 							this.renderFlatQuad(vec32, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
 									0.0F, 0, 0, 0, 64, poseStack);
 							RenderSystem.depthFunc(515);

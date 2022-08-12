@@ -25,16 +25,6 @@ public class GLUtils
         return createByteBuffer(size << 2).asFloatBuffer();
     }
 
-    public static Matrix4f getViewModelMatrix()
-    {
-        ((Buffer)matrixBuffer).rewind();
-        GL11.glGetFloatv(2982, matrixBuffer);
-        ((Buffer)matrixBuffer).rewind();
-        Matrix4f matrix4f = new Matrix4f();
-        matrix4f.load(matrixBuffer);
-        return matrix4f;
-    }
-
     public static synchronized int generateDisplayLists(int range)
     {
         int i = GL12.glGenLists(range);

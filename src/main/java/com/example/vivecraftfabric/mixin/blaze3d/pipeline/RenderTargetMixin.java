@@ -183,16 +183,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	 * @author
 	 * @reason
 	 */
-	@Overwrite
-	public void bindWrite(boolean bl) {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> {
-				this._bindWrite(true);
-			});
-		} else {
-			this._bindWrite(true);
-		}
-	}
+
 
 	/**
 	 * @author
@@ -202,7 +193,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	private void _bindWrite(boolean bl) {
 		RenderSystem.assertOnGameThreadOrInit();
 		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
-		if (true) {
+		if (bl) {
 			GlStateManager._viewport(0, 0, this.viewWidth, this.viewHeight);
 		}
 	}

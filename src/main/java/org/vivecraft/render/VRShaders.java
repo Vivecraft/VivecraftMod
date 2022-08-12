@@ -1,6 +1,7 @@
 package org.vivecraft.render;
 
 import org.lwjgl.opengl.ARBShaderObjects;
+import org.lwjgl.opengl.GL43C;
 import org.vivecraft.utils.Utils;
 
 public class VRShaders
@@ -59,17 +60,17 @@ public class VRShaders
         }
         else
         {
-            _DepthMask_resolutionUniform = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "resolution");
-            _DepthMask_positionUniform = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "position");
-            _DepthMask_colorTexUniform = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "colorTex");
-            _DepthMask_depthTexUniform = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "depthTex");
-            _DepthMask_hmdViewPosition = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "hmdViewPosition");
-            _DepthMask_hmdPlaneNormal = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "hmdPlaneNormal");
-            _DepthMask_projectionMatrix = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "projectionMatrix");
-            _DepthMask_viewMatrix = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "viewMatrix");
-            _DepthMask_passUniform = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "pass");
-            _DepthMask_keyColorUniform = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "keyColor");
-            _DepthMask_alphaModeUniform = ARBShaderObjects.glGetUniformLocationARB(_DepthMask_shaderProgramId, "alphaMode");
+            _DepthMask_resolutionUniform = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "resolution");
+            _DepthMask_positionUniform = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "position");
+            _DepthMask_colorTexUniform = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "colorTex");
+            _DepthMask_depthTexUniform = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "depthTex");
+            _DepthMask_hmdViewPosition = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "hmdViewPosition");
+            _DepthMask_hmdPlaneNormal = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "hmdPlaneNormal");
+            _DepthMask_projectionMatrix = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "projectionMatrix");
+            _DepthMask_viewMatrix = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "viewMatrix");
+            _DepthMask_passUniform = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "pass");
+            _DepthMask_keyColorUniform = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "keyColor");
+            _DepthMask_alphaModeUniform = GL43C.glGetUniformLocation(_DepthMask_shaderProgramId, "alphaMode");
         }
     }
 
@@ -83,12 +84,12 @@ public class VRShaders
         }
         else
         {
-            _Lanczos_texelWidthOffsetUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "texelWidthOffset");
-            _Lanczos_texelHeightOffsetUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "texelHeightOffset");
-            _Lanczos_inputImageTextureUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "inputImageTexture");
-            _Lanczos_inputDepthTextureUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "inputDepthTexture");
-            _Lanczos_projectionUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "projection");
-            _Lanczos_modelViewUniform = ARBShaderObjects.glGetUniformLocationARB(_Lanczos_shaderProgramId, "modelView");
+            _Lanczos_texelWidthOffsetUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "texelWidthOffset");
+            _Lanczos_texelHeightOffsetUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "texelHeightOffset");
+            _Lanczos_inputImageTextureUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "inputImageTexture");
+            _Lanczos_inputDepthTextureUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "inputDepthTexture");
+            _Lanczos_projectionUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "projection");
+            _Lanczos_modelViewUniform = GL43C.glGetUniformLocation(_Lanczos_shaderProgramId, "modelView");
         }
     }
 
@@ -102,18 +103,18 @@ public class VRShaders
         }
         else
         {
-            _FOVReduction_RadiusUniform = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "circle_radius");
-            _FOVReduction_OffsetUniform = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "circle_offset");
-            _FOVReduction_BorderUniform = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "border");
-            _FOVReduction_TextureUniform = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "tex0");
-            _Overlay_HealthAlpha = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "redalpha");
-            _Overlay_FreezeAlpha = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "bluealpha");
-            _Overlay_waterAmplitude = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "water");
-            _Overlay_portalAmplitutde = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "portal");
-            _Overlay_pumpkinAmplitutde = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "pumpkin");
-            _Overlay_eye = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "eye");
-            _Overlay_time = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "portaltime");
-            _Overlay_BlackAlpha = ARBShaderObjects.glGetUniformLocationARB(_FOVReduction_shaderProgramId, "blackalpha");
+            _FOVReduction_RadiusUniform = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "circle_radius");
+            _FOVReduction_OffsetUniform = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "circle_offset");
+            _FOVReduction_BorderUniform = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "border");
+            _FOVReduction_TextureUniform = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "tex0");
+            _Overlay_HealthAlpha = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "redalpha");
+            _Overlay_FreezeAlpha = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "bluealpha");
+            _Overlay_waterAmplitude = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "water");
+            _Overlay_portalAmplitutde = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "portal");
+            _Overlay_pumpkinAmplitutde = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "pumpkin");
+            _Overlay_eye = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "eye");
+            _Overlay_time = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "portaltime");
+            _Overlay_BlackAlpha = GL43C.glGetUniformLocation(_FOVReduction_shaderProgramId, "blackalpha");
         }
     }
 }
