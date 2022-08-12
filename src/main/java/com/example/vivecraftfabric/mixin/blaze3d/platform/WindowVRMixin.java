@@ -45,9 +45,10 @@ public abstract class WindowVRMixin {
 	public GLFWFramebufferSizeCallback removebuffer(long l, GLFWFramebufferSizeCallbackI cl) {
 		return null;
 	}
-	
-	public void glfwSwapInterval() {
-		
+
+	@Inject(method = "updateVsync", at = @At("HEAD"), cancellable = true)
+	public void disableSwap(boolean bl, CallbackInfo ci) {
+		ci.cancel();
 	}
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I"), method = "onFramebufferResize(JII)V")
