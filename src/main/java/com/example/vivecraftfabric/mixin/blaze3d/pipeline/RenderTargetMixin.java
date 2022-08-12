@@ -2,9 +2,8 @@ package com.example.vivecraftfabric.mixin.blaze3d.pipeline;
 
 import java.nio.IntBuffer;
 
-import com.example.vivecraftfabric.GlStateHelper;
+import com.example.vivecraftfabric.mixin.blaze3d.systems.RenderSystemAccessor;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL43;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -208,20 +207,66 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	}
 	
 
-	public void blitToScreen(int left, int width, int height, int top, boolean disableBlend, float xCropFactor,
+	public void blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor,
 			float yCropFactor, boolean keepAspect) {
 		RenderSystem.assertOnGameThreadOrInit();
 		if (!RenderSystem.isInInitPhase()) {
 			RenderSystem.recordRenderCall(() -> {
-				this._blitToScreen(left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
+				this._blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
 			});
 		} else {
-			this._blitToScreen(left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
+			this._blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
 		}
 
 	}
 
-	private void _blitToScreen(int left, int width, int height, int top, boolean bl, float xCropFactor,
+	@Override
+	public void blitFovReduction(ShaderInstance instance, int width, int height) {
+		RenderSystem.assertOnRenderThread();
+		GlStateManager._colorMask(true, true, true, false);
+		GlStateManager._disableDepthTest();
+		GlStateManager._depthMask(false);
+		GlStateManager._viewport(0, 0, width, height);
+		GlStateManager._disableBlend();
+		Minecraft minecraft = Minecraft.getInstance();
+		RenderSystem.setShaderTexture(0, this.colorTextureId);
+		if (instance == null) {
+			instance = minecraft.gameRenderer.blitShader;
+			instance.setSampler("DiffuseSampler", this.colorTextureId);
+		} else {
+			for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
+				int l = RenderSystem.getShaderTexture(k);
+				instance.setSampler("Sampler" + k, l);
+			}
+		}
+		Matrix4f matrix4f = Matrix4f.orthographic(width, -height, 1000.0f, 3000.0f);
+		RenderSystem.setProjectionMatrix(matrix4f);
+		if (instance.MODEL_VIEW_MATRIX != null) {
+			instance.MODEL_VIEW_MATRIX.set(Matrix4f.createTranslateMatrix(0.0f, 0.0f, -2000.0f));
+		}
+		if (instance.PROJECTION_MATRIX != null) {
+			instance.PROJECTION_MATRIX.set(matrix4f);
+		}
+		instance.apply();
+		float f = width;
+		float g = height;
+		float h = (float)this.viewWidth / (float)this.width;
+		float k = (float)this.viewHeight / (float)this.height;
+		Tesselator tesselator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
+		bufferBuilder.vertex(0.0, g, 0.0).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
+		bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0f).color(255, 255, 255, 255).endVertex();
+		bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).color(255, 255, 255, 255).endVertex();
+		bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, k).color(255, 255, 255, 255).endVertex();
+		bufferBuilder.end();
+		BufferUploader._endInternal(bufferBuilder);
+		instance.clear();
+		GlStateManager._depthMask(true);
+		GlStateManager._colorMask(true, true, true, true);
+	}
+
+	private void _blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean bl, float xCropFactor,
 			float yCropFactor, boolean keepAspect) {
 		RenderSystem.assertOnGameThreadOrInit();
 		GlStateManager._colorMask(true, true, true, false);
@@ -262,24 +307,31 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		float f8 = (float) this.viewWidth / (float) this.width;
 		float f9 = (float) this.viewHeight / (float) this.height;
 
-			ShaderInstance shaderinstance = minecraft.gameRenderer.blitShader;
-			shaderinstance.setSampler("DiffuseSampler", this.colorTextureId);
+			if (instance == null) {
+				instance = minecraft.gameRenderer.blitShader;
+				instance.setSampler("DiffuseSampler", this.colorTextureId);
+			} else {
+				for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
+					int l = RenderSystem.getShaderTexture(k);
+					instance.setSampler("Sampler" + k, l);
+				}
+			}
 			Matrix4f matrix4f = Matrix4f.orthographic((float) width, (float) (-height), 1000.0F, 3000.0F);
 			RenderSystem.setProjectionMatrix(matrix4f);
 
-			if (shaderinstance.MODEL_VIEW_MATRIX != null) {
-				shaderinstance.MODEL_VIEW_MATRIX.set(Matrix4f.createTranslateMatrix(0.0F, 0.0F, -2000.0F));
+			if (instance.MODEL_VIEW_MATRIX != null) {
+				instance.MODEL_VIEW_MATRIX.set(Matrix4f.createTranslateMatrix(0.0F, 0.0F, -2000.0F));
 			}
 
-			if (shaderinstance.PROJECTION_MATRIX != null) {
-				shaderinstance.PROJECTION_MATRIX.set(matrix4f);
+			if (instance.PROJECTION_MATRIX != null) {
+				instance.PROJECTION_MATRIX.set(matrix4f);
 			}
 
-			shaderinstance.apply();
+			instance.apply();
 
 			Tesselator tesselator = RenderSystem.renderThreadTesselator();
 			BufferBuilder bufferbuilder = tesselator.getBuilder();
-			bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferbuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
 			bufferbuilder.vertex((double) f4, (double) f3, 0.0D).uv(xCropFactor, yCropFactor).color(255, 255, 255, 255)
 					.endVertex();
 			bufferbuilder.vertex((double) f2, (double) f3, 0.0D).uv(f8 - xCropFactor, yCropFactor)
@@ -290,7 +342,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 					.color(255, 255, 255, 255).endVertex();
 			bufferbuilder.end();
 			BufferUploader._endInternal(bufferbuilder);
-			shaderinstance.clear();
+			instance.clear();
 
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);

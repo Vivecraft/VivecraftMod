@@ -6,6 +6,7 @@ import java.nio.FloatBuffer;
 import java.util.*;
 
 import com.example.vivecraftfabric.*;
+import com.example.vivecraftfabric.mixin.blaze3d.systems.RenderSystemAccessor;
 import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.renderer.GameRenderer;
@@ -239,7 +240,7 @@ public abstract class VRRenderer
             VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
             VRShaders._Lanczos_modelViewUniform.set(RenderSystem.getModelViewMatrix());
             VRShaders._Lanczos_projectionUniform.set(RenderSystem.getProjectionMatrix());
-            for (int k = 0; k < 3; ++k) {
+            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
                 int l = RenderSystem.getShaderTexture(k);
                 VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }
@@ -264,7 +265,7 @@ public abstract class VRRenderer
             this.checkGLError("postclear");
             GlStateManager._activeTexture(33984);
             this.checkGLError("postact");
-            for (int k = 0; k < 3; ++k) {
+            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
                 int l = RenderSystem.getShaderTexture(k);
                 VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }

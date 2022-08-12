@@ -1,25 +1,17 @@
 package com.example.vivecraftfabric.mixin.client.renderer;
 
-import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.function.Consumer;
 
 import com.example.vivecraftfabric.*;
-import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.datafixers.util.Pair;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.commons.lang3.tuple.Triple;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43C;
 import org.spongepowered.asm.mixin.*;
@@ -29,7 +21,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.api.NetworkHelper;
 import org.vivecraft.api.VRData;
 import org.vivecraft.gameplay.VRPlayer;
@@ -505,6 +496,7 @@ public abstract class GameRendererVRMixin
 		}
 	}
 
+	@Override
 	public void cacheRVEPos(LivingEntity e) {
 		if (this.minecraft.getCameraEntity() != null) {
 			if (!this.cached) {
