@@ -18,7 +18,7 @@ import net.minecraft.client.*;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.lwjgl.opengl.ARBShaderObjects;
+import org.lwjgl.opengl.GL43C;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -655,7 +655,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				this.profiler.push("setup");
 				this.mainRenderTarget.bindWrite(true);
 				this.profiler.pop();
-				this.renderSingleView(renderpass.ordinal(), f, bl);
+				this.renderSingleView(renderpass, f, bl);
 				this.profiler.pop();
 
 				if (DataHolder.getInstance().grabScreenShot) {
@@ -1007,15 +1007,15 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	}
 
-	private void renderSingleView(int eye, float nano, boolean renderworld) {
+	private void renderSingleView(RenderPass eye, float nano, boolean renderworld) {
 		GlStateManager._clearColor(0.0F, 0.0F, 0.0F, 1.0F);
-		GlStateHelper.clear(16640);
+		GlStateHelper.clear(16384);
 		GlStateManager._enableTexture();
 		GlStateManager._enableDepthTest();
 		this.profiler.push("updateCameraAndRender");
 		this.gameRenderer.render(nano, System.nanoTime(), renderworld);
 		this.profiler.pop();
-		this.checkGLError("post game render " + eye);
+		this.checkGLError("post game render " + eye.name());
 
 		if (DataHolder.getInstance().currentPass == RenderPass.LEFT
 				|| DataHolder.getInstance().currentPass == RenderPass.RIGHT) {
@@ -1023,15 +1023,22 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			RenderTarget rendertarget = this.mainRenderTarget;
 
 			if (DataHolder.getInstance().vrSettings.useFsaa) {
+				GlStateManager._clearColor(RenderSystem.getShaderFogColor()[0], RenderSystem.getShaderFogColor()[1], RenderSystem.getShaderFogColor()[2], RenderSystem.getShaderFogColor()[3]);
+				if (eye == RenderPass.LEFT) {
+					DataHolder.getInstance().vrRenderer.framebufferEye0.bindWrite(true);
+				} else {
+					DataHolder.getInstance().vrRenderer.framebufferEye1.bindWrite(true);
+				}
+				GlStateHelper.clear(16384);
 				this.profiler.push("fsaa");
 				// DataHolder.getInstance().vrRenderer.doFSAA(Config.isShaders()); TODO
-				DataHolder.getInstance().vrRenderer.doFSAA(false);
+				DataHolder.getInstance().vrRenderer.doFSAA(eye, false);
 				rendertarget = DataHolder.getInstance().vrRenderer.fsaaLastPassResultFBO;
-				this.checkGLError("fsaa " + eye);
+				this.checkGLError("fsaa " + eye.name());
 				this.profiler.pop();
 			}
 
-			if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+			if (eye == RenderPass.LEFT) {
 				DataHolder.getInstance().vrRenderer.framebufferEye0.bindWrite(true);
 			} else {
 				DataHolder.getInstance().vrRenderer.framebufferEye1.bindWrite(true);
@@ -1057,8 +1064,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			}
 
 			GlStateManager._glUseProgram(VRShaders._FOVReduction_shaderProgramId);
-			ARBShaderObjects.glUniform1iARB(VRShaders._FOVReduction_TextureUniform, 0);
-			ARBShaderObjects.glUniform1fARB(VRShaders._FOVReduction_OffsetUniform,
+			GL43C.glUniform1i(VRShaders._FOVReduction_TextureUniform, 0);
+			GL43C.glUniform1f(VRShaders._FOVReduction_OffsetUniform,
 					DataHolder.getInstance().vrSettings.fovRedutioncOffset);
 			float red = 0.0F;
 			float black = 0.0F;
@@ -1084,9 +1091,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				((GameRendererExtension) this.gameRenderer)
 						.setWasInWater(((GameRendererExtension) this.gameRenderer).isInWater());
 
-//				if (Config.isShaders()) { TODO
-//					DataHolder.getInstance().watereffect = 0.0F;
-//				}
+				if (FabricLoader.getInstance().isModLoaded("iris")) {
+					if (!IrisHelper.hasWaterEffect()) {
+						DataHolder.getInstance().watereffect = 0.0F;
+					}
+				}
 
 				if (((GameRendererExtension) this.gameRenderer).isInPortal()) {
 					DataHolder.getInstance().portaleffect = 1.0F;
@@ -1144,28 +1153,26 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			}
 
 			if (DataHolder.getInstance().pumpkineffect > 0.0F) {
-				ARBShaderObjects.glUniform1fARB(VRShaders._FOVReduction_RadiusUniform, 0.3F);
-				ARBShaderObjects.glUniform1fARB(VRShaders._FOVReduction_BorderUniform, 0.0F);
+				GL43C.glUniform1f(VRShaders._FOVReduction_RadiusUniform, 0.3F);
+				GL43C.glUniform1f(VRShaders._FOVReduction_BorderUniform, 0.0F);
 			} else {
-				ARBShaderObjects.glUniform1fARB(VRShaders._FOVReduction_RadiusUniform, this.fov);
-				ARBShaderObjects.glUniform1fARB(VRShaders._FOVReduction_BorderUniform, 0.06F);
+				GL43C.glUniform1f(VRShaders._FOVReduction_RadiusUniform, this.fov);
+				GL43C.glUniform1f(VRShaders._FOVReduction_BorderUniform, 0.06F);
 			}
 
-			ARBShaderObjects.glUniform1fARB(VRShaders._Overlay_HealthAlpha, red);
-			ARBShaderObjects.glUniform1fARB(VRShaders._Overlay_FreezeAlpha, blue);
-			ARBShaderObjects.glUniform1fARB(VRShaders._Overlay_BlackAlpha, black);
-			ARBShaderObjects.glUniform1fARB(VRShaders._Overlay_time, time);
-			ARBShaderObjects.glUniform1fARB(VRShaders._Overlay_waterAmplitude, DataHolder.getInstance().watereffect);
-			ARBShaderObjects.glUniform1fARB(VRShaders._Overlay_portalAmplitutde, DataHolder.getInstance().portaleffect);
-			ARBShaderObjects.glUniform1fARB(VRShaders._Overlay_pumpkinAmplitutde,
+			GL43C.glUniform1f(VRShaders._Overlay_HealthAlpha, red);
+			GL43C.glUniform1f(VRShaders._Overlay_FreezeAlpha, blue);
+			GL43C.glUniform1f(VRShaders._Overlay_BlackAlpha, black);
+			GL43C.glUniform1f(VRShaders._Overlay_time, time);
+			GL43C.glUniform1f(VRShaders._Overlay_waterAmplitude, DataHolder.getInstance().watereffect);
+			GL43C.glUniform1f(VRShaders._Overlay_portalAmplitutde, DataHolder.getInstance().portaleffect);
+			GL43C.glUniform1f(VRShaders._Overlay_pumpkinAmplitutde,
 					DataHolder.getInstance().pumpkineffect);
 			RenderPass renderpass = DataHolder.getInstance().currentPass;
-			ARBShaderObjects.glUniform1iARB(VRShaders._Overlay_eye,
+			GL43C.glUniform1i(VRShaders._Overlay_eye,
 					DataHolder.getInstance().currentPass == RenderPass.LEFT ? 1 : -1);
-			((RenderTargetExtension) rendertarget).setBlitLegacy(true);
 			rendertarget.blitToScreen(DataHolder.getInstance().vrRenderer.framebufferEye0.viewWidth,
 					DataHolder.getInstance().vrRenderer.framebufferEye0.viewHeight);
-			((RenderTargetExtension) rendertarget).setBlitLegacy(false);
 			GlStateManager._glUseProgram(0);
 			this.checkGLError("post overlay" + eye);
 			this.profiler.pop();
@@ -1268,20 +1275,20 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		GlStateManager._glUseProgram(VRShaders._DepthMask_shaderProgramId);
 		((GameRendererExtension) this.gameRenderer).getThirdPassProjectionMatrix().store(this.matrixBuffer);
 		((Buffer) this.matrixBuffer).rewind();
-		ARBShaderObjects.glUniformMatrix4fvARB(VRShaders._DepthMask_projectionMatrix, false, this.matrixBuffer);
+		GL43C.glUniformMatrix4fv(VRShaders._DepthMask_projectionMatrix, false, this.matrixBuffer);
 		matrix4f.store(this.matrixBuffer);
 		((Buffer) this.matrixBuffer).rewind();
-		ARBShaderObjects.glUniformMatrix4fvARB(VRShaders._DepthMask_viewMatrix, false, this.matrixBuffer);
-		ARBShaderObjects.glUniform1iARB(VRShaders._DepthMask_colorTexUniform, 1);
-		ARBShaderObjects.glUniform1iARB(VRShaders._DepthMask_depthTexUniform, 2);
-		ARBShaderObjects.glUniform3fARB(VRShaders._DepthMask_hmdViewPosition, (float) vec3.x, (float) vec3.y,
+		GL43C.glUniformMatrix4fv(VRShaders._DepthMask_viewMatrix, false, this.matrixBuffer);
+		GL43C.glUniform1i(VRShaders._DepthMask_colorTexUniform, 1);
+		GL43C.glUniform1i(VRShaders._DepthMask_depthTexUniform, 2);
+		GL43C.glUniform3f(VRShaders._DepthMask_hmdViewPosition, (float) vec3.x, (float) vec3.y,
 				(float) vec3.z);
-		ARBShaderObjects.glUniform3fARB(VRShaders._DepthMask_hmdPlaneNormal, -vector3.getX(), 0.0F, -vector3.getZ());
-		ARBShaderObjects.glUniform3fARB(VRShaders._DepthMask_keyColorUniform,
+		GL43C.glUniform3f(VRShaders._DepthMask_hmdPlaneNormal, -vector3.getX(), 0.0F, -vector3.getZ());
+		GL43C.glUniform3f(VRShaders._DepthMask_keyColorUniform,
 				(float) DataHolder.getInstance().vrSettings.mixedRealityKeyColor.getRed() / 255.0F,
 				(float) DataHolder.getInstance().vrSettings.mixedRealityKeyColor.getGreen() / 255.0F,
 				(float) DataHolder.getInstance().vrSettings.mixedRealityKeyColor.getBlue() / 255.0F);
-		ARBShaderObjects.glUniform1iARB(VRShaders._DepthMask_alphaModeUniform, flag1 ? 1 : 0);
+		GL43C.glUniform1i(VRShaders._DepthMask_alphaModeUniform, flag1 ? 1 : 0);
 		GlStateManager._activeTexture(33985);
 		DataHolder.getInstance().vrRenderer.framebufferMR.bindRead();
 		GlStateManager._activeTexture(33986);
@@ -1314,9 +1321,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				}
 			}
 
-			ARBShaderObjects.glUniform2fARB(VRShaders._DepthMask_resolutionUniform, (float) j, (float) k);
-			ARBShaderObjects.glUniform2fARB(VRShaders._DepthMask_positionUniform, (float) l, (float) i1);
-			ARBShaderObjects.glUniform1iARB(VRShaders._DepthMask_passUniform, i);
+			GL43C.glUniform2f(VRShaders._DepthMask_resolutionUniform, (float) j, (float) k);
+			GL43C.glUniform2f(VRShaders._DepthMask_positionUniform, (float) l, (float) i1);
+			GL43C.glUniform1i(VRShaders._DepthMask_passUniform, i);
 			((RenderTargetExtension) DataHolder.getInstance().vrRenderer.framebufferMR).blitToScreen(l, j, k, i1, true,
 					0.0F, 0.0F, false);
 		}

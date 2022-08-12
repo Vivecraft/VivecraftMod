@@ -276,7 +276,7 @@ public class VRSettings
 
     //Rendering
     @SettingField(VrOptions.FSAA)
-    public boolean useFsaa = true;   // default to off
+    public boolean useFsaa = false;   // default to off
     @SettingField(value = VrOptions.FOV_REDUCTION, config = "fovReduction")
     public boolean useFOVReduction = false;   // default to off
     @SettingField(VrOptions.FOV_REDUCTION_OFFSET)

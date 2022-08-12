@@ -1,6 +1,7 @@
 package com.example.vivecraftfabric;
 
 import net.coderbot.iris.Iris;
+import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.irisshaders.iris.api.v0.IrisApi;
 
 import java.io.IOException;
@@ -26,5 +27,9 @@ public class IrisHelper {
             e.printStackTrace();
         }
 
+    }
+
+    public static boolean hasWaterEffect() {
+        return Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderUnderwaterOverlay).orElse(true);
     }
 }

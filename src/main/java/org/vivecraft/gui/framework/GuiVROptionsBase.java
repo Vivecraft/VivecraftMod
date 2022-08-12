@@ -2,9 +2,9 @@ package org.vivecraft.gui.framework;
 
 import java.util.ArrayList;
 
+import com.example.vivecraftfabric.ScreenUtils;
 import org.vivecraft.settings.VRSettings;
 
-import com.example.vivecraftfabric.ButtonExtension;
 import com.example.vivecraftfabric.DataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -250,7 +250,7 @@ public abstract class GuiVROptionsBase extends Screen
     public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)
     {
         boolean flag = super.mouseClicked(pMouseX, p_94738_, pMouseY);
-        AbstractWidget abstractwidget = ((ButtonExtension)this).getSelectedButton((int)pMouseX, (int)p_94738_, ((ButtonExtension)this).getButtonList());
+        AbstractWidget abstractwidget = ScreenUtils.getSelectedButton(this, (int)pMouseX, (int)p_94738_);
 
         if (abstractwidget != null)
         {

@@ -151,7 +151,6 @@ public class VRWidgetHelper
 
         minecraft.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.disableBlend();
-        GlStateHelper.alphaFunc(519, 0.0F);
         displayBindFunc.run();
         RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
 
@@ -174,7 +173,6 @@ public class VRWidgetHelper
 
         tesselator.end();
         RenderSystem.enableBlend();
-        GlStateHelper.alphaFunc(519, 0.1F);
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
     }

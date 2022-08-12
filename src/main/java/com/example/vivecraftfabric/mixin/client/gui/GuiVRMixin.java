@@ -225,7 +225,6 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     @Override
     public void drawMouseMenuQuad(int mouseX, int mouseY) {
         RenderSystem.enableBlend();
-        GlStateHelper.enableAlphaTest();
         RenderSystem.disableDepthTest();
         //uhhhh //RenderSystem.disableLighting();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);

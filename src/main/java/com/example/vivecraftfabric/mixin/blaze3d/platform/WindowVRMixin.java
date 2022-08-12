@@ -39,28 +39,16 @@ public abstract class WindowVRMixin {
 	public abstract int getScreenWidth();
 	@Shadow
 	public abstract int getScreenHeight();
-
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwWindowHint(II)V", ordinal = 4, remap = false), 
-			method = "<init>(Lcom/mojang/blaze3d/platform/WindowEventHandler;Lcom/mojang/blaze3d/platform/ScreenManager;Lcom/mojang/blaze3d/platform/DisplayData;Ljava/lang/String;Ljava/lang/String;)V",
-			index = 1)
-	public int windowhint(int i) {
-		return 204802;
-	}
-	
-	@Redirect(at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwWindowHint(II)V", ordinal = 5, remap = false), 
-			method = "<init>(Lcom/mojang/blaze3d/platform/WindowEventHandler;Lcom/mojang/blaze3d/platform/ScreenManager;Lcom/mojang/blaze3d/platform/DisplayData;Ljava/lang/String;Ljava/lang/String;)V")
-	public void removewindowhint(int i, int i2) {
-		return;
-	}
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSetFramebufferSizeCallback(JLorg/lwjgl/glfw/GLFWFramebufferSizeCallbackI;)Lorg/lwjgl/glfw/GLFWFramebufferSizeCallback;", remap = false), 
 			method = "<init>(Lcom/mojang/blaze3d/platform/WindowEventHandler;Lcom/mojang/blaze3d/platform/ScreenManager;Lcom/mojang/blaze3d/platform/DisplayData;Ljava/lang/String;Ljava/lang/String;)V", remap = false)
 	public GLFWFramebufferSizeCallback removebuffer(long l, GLFWFramebufferSizeCallbackI cl) {
 		return null;
 	}
-	
-	public void glfwSwapInterval() {
-		
+
+	@Inject(method = "updateVsync", at = @At("HEAD"), cancellable = true)
+	public void disableSwap(boolean bl, CallbackInfo ci) {
+		ci.cancel();
 	}
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I"), method = "onFramebufferResize(JII)V")

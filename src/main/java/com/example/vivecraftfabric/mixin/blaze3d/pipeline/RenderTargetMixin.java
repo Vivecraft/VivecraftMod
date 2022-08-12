@@ -35,8 +35,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public String name = "Default";
 	@Unique
 	private boolean linearFilter;
-	@Unique
-	public boolean blitLegacy = false;
 	@Shadow
 	public int frameBufferId;
 	@Shadow
@@ -64,6 +62,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Shadow
 	public abstract void setFilterMode(int i);
 
+	@Shadow public abstract void unbindWrite();
+
 	/**
 	 * @author
 	 * @reason
@@ -77,12 +77,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public int getDepthBufferId() {
 		return depthBufferId;
 	}
-	
-	@Override
-	public void setBlitLegacy(boolean b) {
-		blitLegacy = b;
-	}
-	
+
 	@Override
 	public void setName(String name) {
 		this.name=name;
@@ -91,6 +86,20 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public void clearWithColor(float r, float g, float b, float a, boolean isMac) {
+		RenderSystem.assertOnRenderThreadOrInit();
+		this._bindWrite(true);
+		GlStateManager._clearColor(r, g, b, a);
+		int i = 16384;
+		if (this.useDepth) {
+			GlStateManager._clearDepth(1.0);
+			i |= 0x100;
+		}
+		GlStateManager._clear(i, isMac);
+		this.unbindWrite();
 	}
 
 	@Override
@@ -183,16 +192,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	 * @author
 	 * @reason
 	 */
-	@Overwrite
-	public void bindWrite(boolean bl) {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> {
-				this._bindWrite(true);
-			});
-		} else {
-			this._bindWrite(true);
-		}
-	}
+
 
 	/**
 	 * @author
@@ -202,7 +202,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	private void _bindWrite(boolean bl) {
 		RenderSystem.assertOnGameThreadOrInit();
 		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
-		if (true) {
+		if (bl) {
 			GlStateManager._viewport(0, 0, this.viewWidth, this.viewHeight);
 		}
 	}
@@ -262,7 +262,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		float f8 = (float) this.viewWidth / (float) this.width;
 		float f9 = (float) this.viewHeight / (float) this.height;
 
-		if (!blitLegacy) {
 			ShaderInstance shaderinstance = minecraft.gameRenderer.blitShader;
 			shaderinstance.setSampler("DiffuseSampler", this.colorTextureId);
 			Matrix4f matrix4f = Matrix4f.orthographic((float) width, (float) (-height), 1000.0F, 3000.0F);
@@ -292,30 +291,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			bufferbuilder.end();
 			BufferUploader._endInternal(bufferbuilder);
 			shaderinstance.clear();
-		} else {
-			this.bindRead();
-			GlStateHelper.disableAlphaTest();
-			GlStateManager._disableBlend();
-			GL11.glMatrixMode(GL11.GL_PROJECTION);
-			GL43.glLoadIdentity();
-			GL11.glOrtho(0.0D, (double) width, (double) height, 0.0D, 1000.0D, 3000.0D);
-			GL43.glMatrixMode(5888);
-			GL43.glLoadIdentity();
-			GL11.glTranslatef(0.0F, 0.0F, -2000);
-			GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-			GlStateManager._clearDepth(1.0D);
-			GL11.glBegin(GL11.GL_QUADS);
-			GL11.glTexCoord2f(xCropFactor, yCropFactor);
-			GL11.glVertex3f(f4, f3, 0.0F);
-			GL11.glTexCoord2f(f8 - xCropFactor, yCropFactor);
-			GL11.glVertex3f(f2, f3, 0.0F);
-			GL11.glTexCoord2f(f8 - xCropFactor, f9 - yCropFactor);
-			GL11.glVertex3f(f2, f5, 0.0F);
-			GL11.glTexCoord2f(xCropFactor, f9 - yCropFactor);
-			GL11.glVertex3f(f4, f5, 0.0F);
-			GL11.glEnd();
-			unbindRead();
-		}
 
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);

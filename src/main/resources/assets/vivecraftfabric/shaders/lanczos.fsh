@@ -1,17 +1,17 @@
-#version 120 
+#version 150 core
  uniform sampler2D inputImageTexture; 
  uniform sampler2D inputDepthTexture; 
 
- varying vec2 centerTextureCoordinate;
- varying vec2 oneStepLeftTextureCoordinate;
- varying vec2 twoStepsLeftTextureCoordinate;
- varying vec2 threeStepsLeftTextureCoordinate;
- varying vec2 fourStepsLeftTextureCoordinate;
- varying vec2 oneStepRightTextureCoordinate;
- varying vec2 twoStepsRightTextureCoordinate;
- varying vec2 threeStepsRightTextureCoordinate;
- varying vec2 fourStepsRightTextureCoordinate;
- 
+ in vec2 centerTextureCoordinate;
+in vec2 oneStepLeftTextureCoordinate;
+in vec2 twoStepsLeftTextureCoordinate;
+in vec2 threeStepsLeftTextureCoordinate;
+in vec2 fourStepsLeftTextureCoordinate;
+in vec2 oneStepRightTextureCoordinate;
+in vec2 twoStepsRightTextureCoordinate;
+in vec2 threeStepsRightTextureCoordinate;
+in vec2 fourStepsRightTextureCoordinate;
+out vec4 fragColor;
  // sinc(x) * sinc(x/a) = (a * sin(pi * x) * sin(pi * x / a)) / (pi^2 * x^2) 
  // Assuming a Lanczos constant of 2.0, and scaling values to max out at x = +/- 1.5 
  
@@ -29,9 +29,9 @@
 	 fragmentColor += texture2D(inputImageTexture, threeStepsRightTextureCoordinate) * -0.02612; 
  
 	 fragmentColor += texture2D(inputImageTexture, fourStepsLeftTextureCoordinate) * -0.02143; 
-	 fragmentColor += texture2D(inputImageTexture, fourStepsRightTextureCoordinate) * -0.02143; 
- 
-	 gl_FragColor = fragmentColor; 
+	 fragmentColor += texture2D(inputImageTexture, fourStepsRightTextureCoordinate) * -0.02143;
+
+	 fragColor = fragmentColor;
 	 
 	 float depth = texture2D(inputDepthTexture, centerTextureCoordinate).r * 0.38026;
 	 

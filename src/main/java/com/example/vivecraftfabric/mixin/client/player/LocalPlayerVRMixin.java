@@ -178,6 +178,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		this.swing(interactionhand);
 	}
 
+
 	@Inject(at = @At("HEAD"), method = "swing")
 	public void vrSwing(InteractionHand interactionHand, CallbackInfo ci) {
 		if (!this.swinging) {

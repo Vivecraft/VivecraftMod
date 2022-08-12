@@ -508,8 +508,6 @@ public class PhysicalKeyboard
         poseStack.translate(-center.x, -center.y, -center.z);
         RenderSystem.disableTexture();
         RenderSystem.disableCull();
-        GlStateHelper.enableAlphaTest();
-        GlStateHelper.alphaFunc(GL11.GL_GREATER, 0.0F);
         RenderSystem.enableBlend();
 
         if (this.easterEggActive) {
@@ -538,8 +536,8 @@ public class PhysicalKeyboard
         RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
 
         // TODO: does this still do the right thing for shaders?
-        mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
-        RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+        mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraftfabric:textures/white.png"));
+        RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraftfabric:textures/white.png"));
 
         // We need to ignore depth so we can see the back faces and text
         RenderSystem.depthFunc(GL11.GL_ALWAYS);
