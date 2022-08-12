@@ -15,7 +15,9 @@ public interface GameRendererExtension {
 	boolean wasInWater();
 	
 	void setWasInWater(boolean b);
-	
+
+	void cacheRVEPos(LivingEntity e);
+
 	boolean isInWater();
 
 	boolean isInMenuRoom();

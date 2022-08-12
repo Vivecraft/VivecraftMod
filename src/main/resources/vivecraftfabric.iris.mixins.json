@@ -6,7 +6,9 @@
   "mixins": [
     "IrisHandRendererVRMixin",
     "IrisDeferredWorldRenderingPipelineVRMixin",
-    "IrisNewWorldRenderingPipelineVRMixin"
+    "IrisNewWorldRenderingPipelineVRMixin",
+    "IrisBeginFrameHack",
+    "IrisShadowRendererMixin"
   ],
   "client": [
 
