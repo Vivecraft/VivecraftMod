@@ -1,5 +1,6 @@
 package com.example.vivecraftfabric.mixin.blaze3d.platform;
 
+import com.example.vivecraftfabric.mixin.blaze3d.systems.RenderSystemAccessor;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,7 +22,7 @@ public class GlStateManagerVRMixin {
     //Change the limit of textures to 32
     @ModifyConstant(constant = @Constant(intValue = 12),method = "_getTextureId", remap = false)
     private static int properId(int i) {
-        return 32;
+        return RenderSystemAccessor.getShaderTextures().length;
     }
 
     /**

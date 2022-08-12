@@ -1,5 +1,6 @@
 package com.example.vivecraftfabric.mixin.client.renderer;
 
+import com.example.vivecraftfabric.mixin.blaze3d.systems.RenderSystemAccessor;
 import me.fallenbreath.conditionalmixin.api.annotation.Condition;
 import me.fallenbreath.conditionalmixin.api.annotation.Restriction;
 import net.fabricmc.fabric.mixin.client.rendering.MixinWorldRenderer;
@@ -28,6 +29,6 @@ public class NoSodiumLevelRendererVRMixin {
 
     @ModifyConstant(method = "renderChunkLayer", constant = @Constant(intValue = 12))
     public int moreTextures(int constant) {
-        return 32;
+        return RenderSystemAccessor.getShaderTextures().length;
     }
 }
