@@ -1,22 +1,22 @@
 package org.vivecraft.provider.openvr_jna;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.OutputStreamWriter;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
-import java.nio.IntBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-
+import com.example.vivecraftfabric.DataHolder;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.sun.jna.Memory;
+import com.sun.jna.NativeLibrary;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.FloatByReference;
+import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ptr.LongByReference;
+import jopenvr.*;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.phys.Vec3;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
@@ -34,44 +34,15 @@ import org.vivecraft.utils.external.jkatvr;
 import org.vivecraft.utils.math.Matrix4f;
 import org.vivecraft.utils.math.Vector3;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.sun.jna.Memory;
-import com.sun.jna.NativeLibrary;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.FloatByReference;
-import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.ptr.LongByReference;
-
-import jopenvr.HmdMatrix34_t;
-import jopenvr.InputAnalogActionData_t;
-import jopenvr.InputDigitalActionData_t;
-import jopenvr.InputOriginInfo_t;
-import jopenvr.InputPoseActionData_t;
-import jopenvr.JOpenVRLibrary;
-import jopenvr.RenderModel_ComponentState_t;
-import jopenvr.RenderModel_ControllerMode_State_t;
-import jopenvr.Texture_t;
-import jopenvr.TrackedDevicePose_t;
-import jopenvr.VRActiveActionSet_t;
-import jopenvr.VREvent_t;
-import jopenvr.VRTextureBounds_t;
-import jopenvr.VR_IVRApplications_FnTable;
-import jopenvr.VR_IVRChaperone_FnTable;
-import jopenvr.VR_IVRCompositor_FnTable;
-import jopenvr.VR_IVRInput_FnTable;
-import jopenvr.VR_IVROCSystem_FnTable;
-import jopenvr.VR_IVROverlay_FnTable;
-import jopenvr.VR_IVRRenderModels_FnTable;
-import jopenvr.VR_IVRSettings_FnTable;
-import jopenvr.VR_IVRSystem_FnTable;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.world.phys.Vec3;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.OutputStreamWriter;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
+import java.nio.IntBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class MCOpenVR extends MCVR
 {
@@ -629,12 +600,14 @@ public class MCOpenVR extends MCVR
 
         for (VRInputAction vrinputaction1 : list1)
         {
-            map1.put(vrinputaction1.name, I18n.get(vrinputaction1.keyBinding.getCategory()) + " - " + I18n.get(vrinputaction1.keyBinding.getName()));
+            MutableComponent component = new TranslatableComponent(vrinputaction1.keyBinding.getCategory()).append(" - ").append(new TranslatableComponent(vrinputaction1.keyBinding.getName()));
+            map1.put(vrinputaction1.name, component.getString());
         }
 
         for (VRInputActionSet vrinputactionset1 : VRInputActionSet.values())
         {
-            map1.put(vrinputactionset1.name, I18n.get(vrinputactionset1.localizedName));
+            TranslatableComponent component = new TranslatableComponent(vrinputactionset1.localizedName);
+            map1.put(vrinputactionset1.name, component.getString());
         }
 
         map1.put("/actions/global/in/lefthand", "Left Hand Pose");
