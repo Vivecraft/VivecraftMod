@@ -38,7 +38,6 @@ import org.vivecraft.settings.VRSettings;
 
 import javax.annotation.Nullable;
 
-@Debug(export = true)
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable, LevelRendererExtension {
 	
@@ -220,7 +219,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		this.renderedEntity = capturedEntity;
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V"), method = "renderLevel")
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", shift = Shift.AFTER), method = "renderLevel")
 	public void restoreLoc2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
 		if (capturedEntity == camera.getEntity()) {
 			((GameRendererExtension)gameRenderer).cacheRVEPos((LivingEntity)capturedEntity);
