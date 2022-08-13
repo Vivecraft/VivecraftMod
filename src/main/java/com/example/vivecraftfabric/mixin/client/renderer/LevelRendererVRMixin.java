@@ -1,16 +1,20 @@
 package com.example.vivecraftfabric.mixin.client.renderer;
 
-import javax.annotation.Nullable;
-
+import com.example.vivecraftfabric.DataHolder;
+import com.example.vivecraftfabric.GameRendererExtension;
 import com.example.vivecraftfabric.LevelRendererExtension;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.example.vivecraftfabric.RenderTargetExtension;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import me.fallenbreath.conditionalmixin.api.annotation.Condition;
-import me.fallenbreath.conditionalmixin.api.annotation.Restriction;
+import com.mojang.math.Matrix4f;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
@@ -21,27 +25,16 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRSettings;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.GameRendererExtension;
-import com.example.vivecraftfabric.RenderTargetExtension;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import javax.annotation.Nullable;
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable, LevelRendererExtension {
@@ -207,7 +200,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	public boolean drawSelf(Camera camera) {
 		boolean renderSelf = DataHolder.getInstance().currentPass == RenderPass.THIRD && DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || DataHolder.getInstance().currentPass == RenderPass.CAMERA;
 		renderSelf = renderSelf | (DataHolder.getInstance().vrSettings.shouldRenderSelf || DataHolder.getInstance().vrSettings.tmpRenderSelf);
-		return camera.isDetached() || renderSelf;
+		return !(!camera.isDetached() && !renderSelf);
 	}
 
 	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;tickCount:I"), method = "renderLevel")
@@ -224,7 +217,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		this.renderedEntity = capturedEntity;
 	}
 
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V"), method = "renderLevel")
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V"), method = "renderLevel")
 	public void restoreLoc2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
 		if (capturedEntity == camera.getEntity()) {
 			((GameRendererExtension)gameRenderer).restoreRVEPos((LivingEntity)capturedEntity);

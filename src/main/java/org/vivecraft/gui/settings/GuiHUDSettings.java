@@ -8,7 +8,6 @@ import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gui.framework.GuiVROptionButton;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.gui.framework.VROptionEntry;
-import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
 
 public class GuiHUDSettings extends GuiVROptionsBase

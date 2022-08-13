@@ -286,7 +286,7 @@ public class SwingTracker extends Tracker
                                         }
                                     }
 
-     //                               Minecraft.getInstance().gameMode.blockBreakingCooldown = 0;
+                                    Minecraft.getInstance().gameMode.destroyDelay = 0;
                                 }
 
                                 this.dh.vrPlayer.blockDust(blockhitresult1.getLocation().x, blockhitresult1.getLocation().y, blockhitresult1.getLocation().z, 3 * j, blockpos, blockstate, 0.6F, 1.0F);

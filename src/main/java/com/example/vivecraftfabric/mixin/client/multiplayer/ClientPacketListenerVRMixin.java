@@ -47,6 +47,11 @@ public class ClientPacketListenerVRMixin {
         return null;
     }
 
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;adjustPlayer(Lnet/minecraft/world/entity/player/Player;)V"), method = "handleLogin")
+    public void readdInput(ClientboundLoginPacket clientboundLoginPacket, CallbackInfo ci) {
+        this.minecraft.player.input = new VivecraftMovementInput(this.minecraft.options);
+    }
+
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/ClientTelemetryManager;onPlayerInfoReceived(Lnet/minecraft/world/level/GameType;Z)V"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
     public void noTelemetry(ClientTelemetryManager instance, GameType gameType, boolean bl) {
         return;
@@ -57,11 +62,6 @@ public class ClientPacketListenerVRMixin {
         DataHolder.getInstance().vrPlayer.setTeleportSupported(false);
         DataHolder.getInstance().vrPlayer.setTeleportOverride(false);
         DataHolder.getInstance().vrSettings.overrides.resetAll();
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;adjustPlayer(Lnet/minecraft/world/entity/player/Player;)V"), method = "handleLogin")
-    public void readdInput(ClientboundLoginPacket clientboundLoginPacket, CallbackInfo ci) {
-        this.minecraft.player.input = new VivecraftMovementInput(this.minecraft.options);
     }
 
     @Inject(at = @At("TAIL"), method = "handleChat")
@@ -95,7 +95,7 @@ public class ClientPacketListenerVRMixin {
         return null;
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;setYRot(F)V", shift = At.Shift.AFTER), method = "handleRespawn")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;adjustPlayer(Lnet/minecraft/world/entity/player/Player;)V", shift = At.Shift.BEFORE), method = "handleRespawn")
     public void readdInput2(ClientboundRespawnPacket clientboundRespawnPacket, CallbackInfo ci) {
         this.minecraft.player.input = new VivecraftMovementInput(this.minecraft.options);
     }

@@ -12,7 +12,7 @@ import static com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate;
 
 @Mixin(RenderSystem.class)
 public interface RenderSystemAccessor {
-    @Accessor
+    @Accessor(remap = false)
     static int[] getShaderTextures() {
         return null;
     }

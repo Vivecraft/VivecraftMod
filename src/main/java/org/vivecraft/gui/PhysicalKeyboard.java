@@ -28,7 +28,6 @@ import org.vivecraft.utils.lwjgl.Matrix4f;
 import org.vivecraft.utils.lwjgl.Vector3f;
 
 import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.GlStateHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -551,7 +550,7 @@ public class PhysicalKeyboard
         // Start building vertices for key boxes
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
 
         for (PhysicalKeyboard.KeyButton physicalkeyboard$keybutton1 : this.keys)
         {

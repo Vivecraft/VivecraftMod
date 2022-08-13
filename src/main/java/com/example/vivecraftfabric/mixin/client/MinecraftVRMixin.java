@@ -1,23 +1,46 @@
 package com.example.vivecraftfabric.mixin.client;
 
-import java.io.File;
-import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
-
 import com.example.vivecraftfabric.*;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.MemoryTracker;
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.platform.WindowEventHandler;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.Util;
 import net.minecraft.client.*;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.gui.screens.LoadingOverlay;
+import net.minecraft.client.gui.screens.Overlay;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.lwjgl.opengl.GL43C;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.util.FrameTimer;
+import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.ProfileResults;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,55 +59,23 @@ import org.vivecraft.provider.openvr_jna.OpenVRStereoRenderer;
 import org.vivecraft.provider.openvr_jna.VRInputAction;
 import org.vivecraft.provider.ovr_lwjgl.MC_OVR;
 import org.vivecraft.provider.ovr_lwjgl.OVR_StereoRenderer;
-import org.vivecraft.render.PlayerModelController;
-import org.vivecraft.render.RenderConfigException;
-import org.vivecraft.render.RenderPass;
-import org.vivecraft.render.VRFirstPersonArmSwing;
-import org.vivecraft.render.VRShaders;
+import org.vivecraft.render.*;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.LangHelper;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Vector3;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.MemoryTracker;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.platform.WindowEventHandler;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
-import net.minecraft.Util;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.client.gui.screens.LoadingOverlay;
-import net.minecraft.client.gui.screens.Overlay;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.MultiPlayerGameMode;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.util.FrameTimer;
-import net.minecraft.util.Mth;
-import net.minecraft.util.profiling.ProfileResults;
-import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.util.thread.ReentrantBlockableEventLoop;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-
-@Debug(export = true)
 @Mixin(Minecraft.class)
 public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler, MinecraftExtension {
 
@@ -854,7 +845,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;overlay:Lnet/minecraft/client/gui/screens/Overlay;", shift = Shift.BEFORE), method = "tick")
 	public void vrInputs(CallbackInfo ci) {
-		this.profiler.push("vrProcessInputs");
+		this.profiler.popPush("vrProcessInputs");
 		DataHolder.getInstance().vr.processInputs();
 		DataHolder.getInstance().vr.processBindings();
 	}
