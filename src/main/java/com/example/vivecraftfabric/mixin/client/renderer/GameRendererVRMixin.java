@@ -2133,7 +2133,6 @@ public abstract class GameRendererVRMixin
 	private void renderCrosshairAtDepth(boolean depthAlways, PoseStack poseStack) {
 		if (this.shouldRenderCrosshair()) {
 			this.minecraft.getProfiler().popPush("crosshair");
-			// GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			Vec3 vec3 = this.crossVec;
 			Vec3 vec31 = vec3.subtract(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getController(0).getPosition());

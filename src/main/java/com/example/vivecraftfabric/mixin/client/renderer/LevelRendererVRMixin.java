@@ -12,6 +12,8 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -36,6 +38,7 @@ import org.vivecraft.settings.VRSettings;
 
 import javax.annotation.Nullable;
 
+@Debug(export = true)
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable, LevelRendererExtension {
 	
@@ -203,10 +206,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		return !(!camera.isDetached() && !renderSelf);
 	}
 
-	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;tickCount:I"), method = "renderLevel")
-	public int captureEntity(Entity instance) {
-		this.capturedEntity = instance;
-		return instance.tickCount;
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z"), method = "renderLevel")
+	public boolean captureEntity(EntityRenderDispatcher instance, Entity entity, Frustum frustum, double d, double e, double f) {
+		this.capturedEntity = entity;
+		return instance.shouldRender(entity, frustum, d, e, f);
 	}
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;tickCount:I", shift = Shift.BEFORE), method = "renderLevel")
@@ -220,7 +223,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V"), method = "renderLevel")
 	public void restoreLoc2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
 		if (capturedEntity == camera.getEntity()) {
-			((GameRendererExtension)gameRenderer).restoreRVEPos((LivingEntity)capturedEntity);
+			((GameRendererExtension)gameRenderer).cacheRVEPos((LivingEntity)capturedEntity);
 			((GameRendererExtension)gameRenderer).setupRVE();
 		}
 		this.renderedEntity = null;
