@@ -16,12 +16,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.render.RenderPass;
 
 @Pseudo
-@Mixin(SystemTimeUniforms.FrameCounter.class)
+@Mixin(targets = {
+        "net.coderbot.iris.uniforms.SystemTimeUniforms$FrameCounter",
+        "net.coderbot.iris.uniforms.SystemTimeUniforms$Timer"
+})
 public class IrisBeginFrameHack {
 
     @Inject(method = "beginFrame", at = @At("HEAD"), cancellable = true, remap = false)
     private void cancelShadows(CallbackInfo ci) {
-        if (DataHolder.getInstance().currentPass != RenderPass.LEFT) {
+        if (!DataHolder.getInstance().isFirstPass) {
             ci.cancel();
         }
     }

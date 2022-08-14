@@ -606,6 +606,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		if (!this.noRender) {
 			List<RenderPass> list = DataHolder.getInstance().vrRenderer.getRenderPasses();
 
+			DataHolder.getInstance().isFirstPass = true;
 			for (RenderPass renderpass : list) {
 				DataHolder.getInstance().currentPass = renderpass;
 
@@ -667,6 +668,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 						DataHolder.getInstance().grabScreenShot = false;
 					}
 				}
+
+				DataHolder.getInstance().isFirstPass = false;
 			}
 
 			if (bl) {
