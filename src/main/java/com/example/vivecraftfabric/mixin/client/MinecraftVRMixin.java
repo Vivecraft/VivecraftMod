@@ -46,7 +46,6 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.api.NetworkHelper;
@@ -71,10 +70,8 @@ import java.io.File;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler, MinecraftExtension {
@@ -338,17 +335,16 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		DataHolder.getInstance().vrSettings.saveOptions();
 	}
 
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/LoadingOverlay;<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/server/packs/resources/ReloadInstance;Ljava/util/function/Consumer;Z)V"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
-	public Consumer<Optional<Throwable>> menuInitvar(Consumer<Optional<Throwable>> c) {
+	@Inject(at = @At("HEAD"), method = "method_29338")
+	public void menuInitvar(CallbackInfo ci) {
 		if (DataHolder.getInstance().vrRenderer.isInitialized()) {
 			//DataHolder.getInstance().menuWorldRenderer.init();
 		}
 		DataHolder.getInstance().vr.postinit();
-		return c;
 	}
 
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/LoadingOverlay;<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/server/packs/resources/ReloadInstance;Ljava/util/function/Consumer;Z)V"), method = "reloadResourcePacks(Z)Ljava/util/concurrent/CompletableFuture;")
-	public Consumer<Optional<Throwable>> reloadVar(Consumer<Optional<Throwable>> c) {
+	@Inject(at = @At("HEAD"), method = "method_29339")
+	public void reloadVar(CallbackInfo ci) {
 //		if (DataHolder.getInstance().menuWorldRenderer.isReady() && DataHolder.getInstance().resourcePacksChanged) {
 //			try {
 //				DataHolder.getInstance().menuWorldRenderer.destroy();
@@ -358,7 +354,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //			}
 //		}
 		DataHolder.getInstance().resourcePacksChanged = false;
-		return c;
 	}
 
 //	/**
