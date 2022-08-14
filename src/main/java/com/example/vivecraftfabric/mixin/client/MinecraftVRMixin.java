@@ -946,6 +946,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float) this.window.getScreenWidth(), 0.0F,
 					(float) this.window.getScreenHeight(), 1000.0F, 3000.0F);
 			RenderSystem.setProjectionMatrix(matrix4f);
+			RenderSystem.getModelViewStack().pushPose();
 			RenderSystem.getModelViewStack().setIdentity();
 			RenderSystem.getModelViewStack().translate(0, 0, -2000);
 			RenderSystem.applyModelViewMatrix();
@@ -972,6 +973,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				this.font.draw(p, s, 1.0F, (float) j, 16777215);
 				j += 12;
 			}
+			RenderSystem.getModelViewStack().popPose();
 		}
 	}
 

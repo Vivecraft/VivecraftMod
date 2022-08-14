@@ -191,13 +191,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		((GameRendererExtension) gameRenderer).drawEyeStencil(false);
 	}
 	
-	//TODO fixed in vivecraft?
-	public void lighting() {
-		Matrix4f matrix4f1 = new Matrix4f();
-		matrix4f1.setIdentity();
-	}
-	
-	
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
 	public boolean drawSelf(Camera camera) {
 		boolean renderSelf = DataHolder.getInstance().currentPass == RenderPass.THIRD && DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || DataHolder.getInstance().currentPass == RenderPass.CAMERA;
