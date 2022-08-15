@@ -3,6 +3,7 @@ package org.vivecraft.gameplay.trackers;
 import java.util.HashSet;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.MappingResolver;
 import org.vivecraft.api.VRData;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.render.RenderPass;
@@ -135,7 +136,12 @@ public class InteractTracker extends Tracker
 
                 try
                 {
-                    if (oclass.getMethod(name).getDeclaringClass() == oclass) {
+                    if (oclass.getMethod(name, net.minecraft.world.level.block.state.BlockState.class,
+                            net.minecraft.world.level.Level.class,
+                            net.minecraft.core.BlockPos.class,
+                            net.minecraft.world.entity.player.Player.class,
+                            net.minecraft.world.InteractionHand.class,
+                            net.minecraft.world.phys.BlockHitResult.class).getDeclaringClass() == oclass) {
                         this.rightClickable.add(oclass);
                     }
                 }
@@ -147,7 +153,12 @@ public class InteractTracker extends Tracker
 
                 try
                 {
-                    if (oclass.getMethod(name).getDeclaringClass() == oclass) {
+                    if (oclass.getMethod(name, net.minecraft.world.level.block.state.BlockState.class,
+                            net.minecraft.world.level.Level.class,
+                            net.minecraft.core.BlockPos.class,
+                            net.minecraft.world.entity.player.Player.class,
+                            net.minecraft.world.InteractionHand.class,
+                            net.minecraft.world.phys.BlockHitResult.class).getDeclaringClass() == oclass) {
                         this.rightClickable.add(oclass);
                     }
                 }
