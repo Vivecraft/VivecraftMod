@@ -2,6 +2,7 @@ package org.vivecraft.gameplay.trackers;
 
 import java.util.HashSet;
 
+import net.fabricmc.loader.api.FabricLoader;
 import org.vivecraft.api.VRData;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.render.RenderPass;
@@ -127,14 +128,16 @@ public class InteractTracker extends Tracker
         {
             this.rightClickable = new HashSet<>();
 
+            String name = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_4970", "method_9534", "(Lnet/minecraft/class_2680;Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;Lnet/minecraft/class_1657;Lnet/minecraft/class_1268;Lnet/minecraft/class_3965;)Lnet/minecraft/class_1269;");
             for (Object object : Registry.BLOCK)
             {
-                Class oclass = object.getClass();
+                Class<?> oclass = object.getClass();
 
                 try
                 {
-                    //new MCReflection.ReflectionMethod(oclass, MCReflection.BlockBehavior_Use, BlockState.class, Level.class, BlockPos.class, Player.class, InteractionHand.class, BlockHitResult.class);
-                    this.rightClickable.add(oclass);
+                    if (oclass.getMethod(name).getDeclaringClass() == oclass) {
+                        this.rightClickable.add(oclass);
+                    }
                 }
                 catch (Throwable throwable1)
                 {
@@ -144,8 +147,9 @@ public class InteractTracker extends Tracker
 
                 try
                 {
-                    //new MCReflection.ReflectionMethod(oclass, MCReflection.BlockBehavior_Use, BlockState.class, Level.class, BlockPos.class, Player.class, InteractionHand.class, BlockHitResult.class);
-                    this.rightClickable.add(oclass);
+                    if (oclass.getMethod(name).getDeclaringClass() == oclass) {
+                        this.rightClickable.add(oclass);
+                    }
                 }
                 catch (Throwable throwable)
                 {
