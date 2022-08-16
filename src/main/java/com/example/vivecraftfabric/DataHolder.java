@@ -104,6 +104,7 @@ public class DataHolder {
     public float portaleffect;
     public float pumpkineffect;
     public static boolean isfphand;
+    public boolean isFirstPass;
     long mirroNotifyStart;
     String mirrorNotifyText;
     boolean mirrorNotifyClear;

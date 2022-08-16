@@ -22,20 +22,20 @@ import org.vivecraft.render.RenderPass;
 public class IrisNewWorldRenderingPipelineVRMixin {
  @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true, remap = false)
     private void cancelShadows(LevelRendererAccessor par1, Camera par2, CallbackInfo ci) {
-        if (!(DataHolder.getInstance().currentPass == RenderPass.LEFT || DataHolder.getInstance().currentPass == RenderPass.THIRD || DataHolder.getInstance().currentPass == RenderPass.CAMERA)) {
+     if (!DataHolder.getInstance().isFirstPass) {
             ci.cancel();
         }
     }
 
     @Redirect(method = "beginLevelRendering", remap = false, at = @At(value = "INVOKE", target = "Lnet/coderbot/iris/uniforms/FrameUpdateNotifier;onNewFrame()V"))
     private void no(FrameUpdateNotifier instance) {
-        if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+        if (DataHolder.getInstance().isFirstPass) {
             instance.onNewFrame();
         }
     }
     @Redirect(method = "beginLevelRendering", remap = false, at = @At(value = "INVOKE", target = "Lnet/coderbot/iris/pipeline/ClearPass;execute(Lnet/coderbot/iris/vendored/joml/Vector4f;)V", ordinal = 0))
     private void noX2(ClearPass instance, Vector4f vector4f) {
-        if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+        if (DataHolder.getInstance().isFirstPass) {
             instance.execute(vector4f);
         }
     }
