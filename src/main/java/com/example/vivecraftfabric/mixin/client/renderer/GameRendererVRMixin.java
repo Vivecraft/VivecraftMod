@@ -9,6 +9,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -702,8 +703,10 @@ public abstract class GameRendererVRMixin
 
 	@Override
 	public void applyVRModelView(RenderPass currentPass, PoseStack poseStack) {
-		poseStack.last().pose().multiply(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(currentPass)
-				.getMatrix().transposed().toMCMatrix());
+		Matrix4f modelView = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(currentPass)
+				.getMatrix().transposed().toMCMatrix();
+		poseStack.last().pose().multiply(modelView);
+		poseStack.last().normal().mul(new Matrix3f(modelView));
 	}
 
 	@Override

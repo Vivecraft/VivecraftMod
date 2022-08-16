@@ -89,8 +89,8 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         ci.cancel();
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 1), method = "renderHotbar")
-    public void hotbarContect(float f, PoseStack poseStack, CallbackInfo ci) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 1, shift = At.Shift.AFTER), method = "renderHotbar")
+    public void hotbarContext(float f, PoseStack poseStack, CallbackInfo ci) {
         int i = this.screenWidth / 2;
         if (DataHolder.getInstance().interactTracker.hotbar >= 0 && DataHolder.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != DataHolder.getInstance().interactTracker.hotbar) {
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
@@ -99,58 +99,31 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z"), method = "renderHotbar")
-    public boolean redictEmpty(ItemStack instance) {
-        return instance.isEmpty() || DataHolder.getInstance().vrSettings.vrTouchHotbar;
-    }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2), method = "renderHotbar")
-    public void offHandSwap(Gui instance, PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
-        if (DataHolder.getInstance().interactTracker.hotbar == 9) {
-            RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
-            this.blit(poseStack, i, this.screenHeight - 23, 24, 22, 29, 24);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        } else {
-            this.blit(poseStack, i, this.screenHeight - 23, 24, 22, 29, 24);
-        }
-    }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 1), method = "renderHotbar")
-    public void hotbarContext(Gui instance, PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
-        this.blit(poseStack, i, j, k, l, m, n);
-        Player player = this.getCameraPlayer();
-        if (DataHolder.getInstance().interactTracker.hotbar >= 0 && DataHolder.getInstance().interactTracker.hotbar < 9 && player.getInventory().selected != DataHolder.getInstance().interactTracker.hotbar) {
-            RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
-            this.blit(poseStack, i + DataHolder.getInstance().interactTracker.hotbar * 20 - player.getInventory().selected *20, this.screenHeight - 22 - 1, 0, 22, 24, 22);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        }
-    }
-
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0), method = "renderHotbar")
     public boolean slotSwap(ItemStack instance) {
-        return instance.isEmpty() || DataHolder.getInstance().vrSettings.vrTouchHotbar;
+        return !(!instance.isEmpty() || DataHolder.getInstance().vrSettings.vrTouchHotbar);
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2), method = "renderHotbar")
-    public void renderVRHotbar(Gui instance, PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+    public void renderVRHotbarLeft(Gui instance, PoseStack poseStack, int x, int y, int uOffset, int vOffset, int uWidth, int vWidth) {
         if (DataHolder.getInstance().interactTracker.hotbar == 9) {
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
-            this.blit(poseStack, i, this.screenHeight - 23, 24, 22, 29, 24);
+            this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
         else {
-            this.blit(poseStack, i, this.screenHeight - 23, 24, 22, 29, 24);
+            this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
         }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 3), method = "renderHotbar")
-    public void hotbar(Gui instance, PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+    public void renderVRHotbarRight(Gui instance, PoseStack poseStack, int x, int y, int uOffset, int vOffset, int uWidth, int vWidth) {
         if (DataHolder.getInstance().interactTracker.hotbar == 9){
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
-            this.blit(poseStack, i + 91 + 91 +29, this.screenHeight - 23, 53, 22, 29, 24);
+            this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         } else {
-            this.blit(poseStack,i,j,k,l,m,n);
+            this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
         }
     }
 
