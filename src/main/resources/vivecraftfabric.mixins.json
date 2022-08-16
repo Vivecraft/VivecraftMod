@@ -54,9 +54,7 @@
     //"client.renderer.entity.FishingHookRendererVRMixin",
     "client.renderer.entity.GuardianRendererVRMixin",
     "client.renderer.entity.MobRendererVRMixin",
-    "client.resources.language.ClientLanguageMixin",
     "world.entity.vehicle.BoatMixin",
-    "client.resources.DefaultClientPackResourcesVRMixin",
 
     "client.renderer.NoSodiumLevelRendererVRMixin"
 

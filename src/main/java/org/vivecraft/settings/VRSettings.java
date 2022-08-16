@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -812,7 +813,7 @@ public class VRSettings
 
     public String getButtonDisplayString( VRSettings.VrOptions par1EnumOptions )
     {
-        String var2 = Lang.get("vivecraft.options." + par1EnumOptions.name());
+        String var2 = I18n.get("vivecraft.options." + par1EnumOptions.name());
 
         String var3 = var2 + ": ";
         String var4 = var3;
@@ -833,7 +834,7 @@ public class VRSettings
                 return str;
             } else if (type == Boolean.TYPE) {
                 var langKeys = par1EnumOptions.getBooleanLangKeys();
-                return (boolean)obj ? var4 + Lang.get(langKeys.getLeft()) : var4 + Lang.get(langKeys.getRight());
+                return (boolean)obj ? var4 + I18n.get(langKeys.getLeft()) : var4 + I18n.get(langKeys.getRight());
             } else if (type == Float.TYPE || type == Double.TYPE) {
                 if (par1EnumOptions.getDecimalPlaces() < 0) {
                     return var4 + Math.round(((Number)obj).floatValue() * 100) + "%";
@@ -841,7 +842,7 @@ public class VRSettings
                     return var4 + String.format("%." + par1EnumOptions.getDecimalPlaces() + "f", ((Number)obj).floatValue());
                 }
             } else if (OptionEnum.class.isAssignableFrom(type)) {
-                return var4 + Lang.get(((OptionEnum<?>)obj).getLangKey());
+                return var4 + I18n.get(((OptionEnum<?>)obj).getLangKey());
             } else {
                 return var4 + obj.toString();
             }
@@ -974,7 +975,7 @@ public class VRSettings
             @Override
             String getDisplayString(String prefix, Object value) {
                 if ((float)value > 0.99)
-                    return prefix + Lang.get("vivecraft.options.opaque");
+                    return prefix + I18n.get("vivecraft.options.opaque");
                 return null;
             }
         },
@@ -1036,7 +1037,7 @@ public class VRSettings
             String getDisplayString(String prefix, Object value) {
                 try {
                     SoundEvent se = Registry.SOUND_EVENT.get(new ResourceLocation((String)value));
-                    return Lang.get(se.getLocation().getPath());
+                    return I18n.get(se.getLocation().getPath());
                 } catch (Exception e) {
                     return "error";
                 }
@@ -1127,7 +1128,7 @@ public class VRSettings
             String getDisplayString(String prefix, Object value) {
                 Color color = (Color)value;
                 var p = colors.stream().filter(c -> c.getLeft().equals(color)).findFirst().orElse(null);
-                return p != null ? prefix + Lang.get(p.getRight()) : prefix + color.getRed() + " " + color.getGreen() + " " + color.getBlue();
+                return p != null ? prefix + I18n.get(p.getRight()) : prefix + color.getRed() + " " + color.getGreen() + " " + color.getBlue();
             }
 
             @Override
@@ -1455,9 +1456,9 @@ public class VRSettings
             String getDisplayString(String prefix, Object value) {
                 int i = (int)value;
                 if (i == -1)
-                    return prefix + Lang.getOff();
+                    return prefix + I18n.get("options.off");
                 else if (i == 0)
-                    return prefix + Lang.get("vivecraft.options.default");
+                    return prefix + I18n.get("vivecraft.options.default");
                 else if (i <= DataHolder.hrtfList.size())
                     return prefix + DataHolder.hrtfList.get(i - 1);
                 return prefix;
@@ -1481,7 +1482,7 @@ public class VRSettings
         RELOAD_EXTERNAL_CAMERA(false, false) { // Reload External Camera
             @Override
             String getDisplayString(String prefix, Object value) {
-                return Lang.get("vivecraft.options." + name());
+                return I18n.get("vivecraft.options." + name());
             }
         },
         RIGHT_CLICK_DELAY(false, false); // Right Click Repeat
