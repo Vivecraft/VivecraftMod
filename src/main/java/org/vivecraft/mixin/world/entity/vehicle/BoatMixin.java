@@ -1,13 +1,11 @@
 package org.vivecraft.mixin.world.entity.vehicle;
 
-import com.example.vivecraftfabric.DataHolder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.vehicle.Boat;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
@@ -15,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.DataHolder;
 
 //TODO needed?
 @Mixin(Boat.class)
@@ -44,7 +43,7 @@ public abstract class BoatMixin extends Entity {
 		 float f1 = minecraft.player.input.leftImpulse;
 		 return f1;
 	}
-	
+
 	@ModifyConstant(constant = @Constant(floatValue = 1F, ordinal = 1), method = "controlBoat()V")
 	public float inputRight(float f) {
 		 Minecraft minecraft = Minecraft.getInstance();
