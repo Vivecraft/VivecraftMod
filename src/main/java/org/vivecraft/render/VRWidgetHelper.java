@@ -1,27 +1,14 @@
 package org.vivecraft.render;
 
-import java.util.Random;
-import java.util.function.Function;
-
-import net.minecraft.client.renderer.LightTexture;
-import org.vivecraft.gameplay.trackers.CameraTracker;
-import org.vivecraft.settings.VRHotkeys;
-import org.vivecraft.settings.VRSettings;
-import org.vivecraft.utils.Utils;
-
-import org.vivecraft.DataHolder;
-import org.vivecraft.GameRendererExtension;
-import org.vivecraft.ItemInHandRendererExtension;
-import org.vivecraft.MethodHolder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -31,6 +18,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.DataHolder;
+import org.vivecraft.GameRendererExtension;
+import org.vivecraft.ItemInHandRendererExtension;
+import org.vivecraft.MethodHolder;
+import org.vivecraft.gameplay.trackers.CameraTracker;
+import org.vivecraft.settings.VRHotkeys;
+import org.vivecraft.settings.VRSettings;
+import org.vivecraft.utils.Utils;
+
+import java.util.Random;
+import java.util.function.Function;
 
 public class VRWidgetHelper
 {
@@ -185,12 +183,12 @@ public class VRWidgetHelper
 
     //Optifine
     static class QuadBounds {
-        private float minZ;
-        private float maxX;
-        private float maxY;
-        private float maxZ;
-        private float minX;
-        private float minY;
+        private float maxX = -3.4028235E38f;
+        private float maxY = -3.4028235E38f;
+        private float maxZ = -3.4028235E38f;
+        private float minX = Float.MAX_VALUE;
+        private float minY = Float.MAX_VALUE;
+        private float minZ = Float.MAX_VALUE;
 
         public QuadBounds(int[] vertexData) {
             int step = vertexData.length / 4;
