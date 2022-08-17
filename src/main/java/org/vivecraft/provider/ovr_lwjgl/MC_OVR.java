@@ -23,7 +23,7 @@ import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.openvr_jna.VRInputAction;
 import org.vivecraft.utils.math.Matrix4f;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;

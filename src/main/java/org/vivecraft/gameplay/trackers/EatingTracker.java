@@ -4,7 +4,7 @@ import java.util.Random;
 
 import org.vivecraft.gameplay.VRPlayer;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;

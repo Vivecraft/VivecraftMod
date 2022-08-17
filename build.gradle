@@ -73,7 +73,7 @@ dependencies {
     include(implementation("org.lwjgl:lwjgl-openal:3.2.2:natives-windows"))
 }
 loom {
-    accessWidenerPath = file("src/main/resources/vivecraftfabric.accesswidener")
+    accessWidenerPath = file("src/main/resources/vivecraft.accesswidener")
 }
 
 processResources {

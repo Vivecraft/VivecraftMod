@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -30,15 +29,14 @@ import org.vivecraft.provider.openvr_jna.control.VivecraftMovementInput;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
-import org.vivecraft.utils.LangHelper;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.lwjgl.Vector3f;
 import org.vivecraft.utils.math.Matrix4f;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.GuiExtension;
+import org.vivecraft.DataHolder;
+import org.vivecraft.GuiExtension;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -46,13 +44,11 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.phys.Vec3;
 

@@ -2,10 +2,10 @@ package org.vivecraft.gui.framework;
 
 import java.util.ArrayList;
 
-import com.example.vivecraftfabric.ScreenUtils;
+import org.vivecraft.ScreenUtils;
 import org.vivecraft.settings.VRSettings;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.AbstractWidget;

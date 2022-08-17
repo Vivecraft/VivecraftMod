@@ -1,12 +1,12 @@
 package org.vivecraft.provider;
 
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.*;
 
-import com.example.vivecraftfabric.*;
-import com.example.vivecraftfabric.mixin.blaze3d.systems.RenderSystemAccessor;
+
+import org.vivecraft.*;
+import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
 import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.renderer.GameRenderer;

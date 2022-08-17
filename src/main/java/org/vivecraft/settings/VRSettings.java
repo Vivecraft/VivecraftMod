@@ -4,8 +4,8 @@
  */
 package org.vivecraft.settings;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.OptionsExtension;
+import org.vivecraft.DataHolder;
+import org.vivecraft.OptionsExtension;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;

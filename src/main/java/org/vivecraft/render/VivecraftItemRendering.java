@@ -4,7 +4,7 @@ import org.vivecraft.gameplay.trackers.SwingTracker;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.provider.ControllerType;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;

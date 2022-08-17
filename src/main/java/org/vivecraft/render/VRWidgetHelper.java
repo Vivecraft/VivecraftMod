@@ -9,11 +9,10 @@ import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.GameRendererExtension;
-import com.example.vivecraftfabric.GlStateHelper;
-import com.example.vivecraftfabric.ItemInHandRendererExtension;
-import com.example.vivecraftfabric.MethodHolder;
+import org.vivecraft.DataHolder;
+import org.vivecraft.GameRendererExtension;
+import org.vivecraft.ItemInHandRendererExtension;
+import org.vivecraft.MethodHolder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -164,10 +163,10 @@ public class VRWidgetHelper
                 QuadBounds quadbounds = new QuadBounds(bakedquad.getVertices());
                 boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == VRWidgetHelper.DisplayFace.MIRROR;
                 int j = LightTexture.pack(15, 15);
-                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).uv(flag ? 1.0F : 0.0F, 0.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
-                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).uv(flag ? 0.0F : 1.0F, 0.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
-                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).uv(flag ? 0.0F : 1.0F, 1.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
-                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).uv(flag ? 1.0F : 0.0F, 1.0F).uv2(j).color(1.0F, 1.0F, 1.0F, 1.0F).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).color(1.0F, 1.0F, 1.0F, 1.0F).uv(flag ? 1.0F : 0.0F, 0.0F).uv2(j).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).color(1.0F, 1.0F, 1.0F, 1.0F).uv(flag ? 0.0F : 1.0F, 0.0F).uv2(j).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).color(1.0F, 1.0F, 1.0F, 1.0F).uv(flag ? 0.0F : 1.0F, 1.0F).uv2(j).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).color(1.0F, 1.0F, 1.0F, 1.0F).uv(flag ? 1.0F : 0.0F, 1.0F).uv2(j).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
             }
         }
 

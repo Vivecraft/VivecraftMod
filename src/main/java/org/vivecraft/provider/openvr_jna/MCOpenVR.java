@@ -1,6 +1,6 @@
 package org.vivecraft.provider.openvr_jna;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;

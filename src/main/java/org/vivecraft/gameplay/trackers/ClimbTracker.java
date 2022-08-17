@@ -10,8 +10,8 @@ import org.vivecraft.api.NetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.provider.ControllerType;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.PlayerExtension;
+import org.vivecraft.DataHolder;
+import org.vivecraft.PlayerExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

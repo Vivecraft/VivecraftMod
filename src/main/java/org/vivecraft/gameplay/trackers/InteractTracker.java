@@ -3,7 +3,6 @@ package org.vivecraft.gameplay.trackers;
 import java.util.HashSet;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.MappingResolver;
 import org.vivecraft.api.VRData;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.render.RenderPass;
@@ -11,8 +10,8 @@ import org.vivecraft.render.VRFirstPersonArmSwing;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.PlayerExtension;
+import org.vivecraft.DataHolder;
+import org.vivecraft.PlayerExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;

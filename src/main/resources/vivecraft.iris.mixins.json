@@ -1,0 +1,19 @@
+{
+  "required": false,
+  "package": "org.vivecraft.irisMixin",
+  "plugin": "org.vivecraft.DefaultMixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "IrisHandRendererVRMixin",
+    "IrisDeferredWorldRenderingPipelineVRMixin",
+    "IrisNewWorldRenderingPipelineVRMixin",
+    "IrisBeginFrameHack",
+    "IrisShadowRendererMixin"
+  ],
+  "client": [
+
+  ],
+  "server": [
+  ],
+  "minVersion": "0.8.4"
+}

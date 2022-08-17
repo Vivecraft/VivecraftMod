@@ -1,6 +1,6 @@
 package org.vivecraft.gui.settings;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.KeyMapping;

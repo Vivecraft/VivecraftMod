@@ -6,7 +6,7 @@ import org.vivecraft.api.Vec3History;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.settings.VRSettings;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;

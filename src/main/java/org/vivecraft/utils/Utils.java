@@ -317,12 +317,12 @@ public class Utils
         {
             try
             {
-                Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation("vivecraftfabric", name));
+                Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation("vivecraft", name));
                 inputstream = resource.getInputStream();
             }
             catch (NullPointerException | FileNotFoundException filenotfoundexception)
             {
-                inputstream = VRShaders.class.getResourceAsStream("/assets/vivecraftfabric/" + name);
+                inputstream = VRShaders.class.getResourceAsStream("/assets/vivecraft/" + name);
             }
 
             if (inputstream == null)
@@ -331,11 +331,11 @@ public class Utils
 
                 if (path1.getParent() != null)
                 {
-                    Path path = path1.getParent().resolve("src/resources/assets/vivecraftfabric/" + name);
+                    Path path = path1.getParent().resolve("src/resources/assets/vivecraft/" + name);
 
                     if (!path.toFile().exists() && path1.getParent().getParent() != null)
                     {
-                        path = path1.getParent().getParent().resolve("resources/assets/vivecraftfabric/" + name);
+                        path = path1.getParent().getParent().resolve("resources/assets/vivecraft/" + name);
                     }
 
                     if (path.toFile().exists())
