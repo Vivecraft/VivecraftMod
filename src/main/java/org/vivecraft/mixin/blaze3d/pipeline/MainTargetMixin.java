@@ -14,5 +14,5 @@ public abstract class MainTargetMixin {
     @Shadow
     @Final
     @Mutable
-    public static MainTarget.Dimension DEFAULT_DIMENSIONS = new MainTarget.Dimension(1280, 720);
+    static MainTarget.Dimension DEFAULT_DIMENSIONS = new MainTarget.Dimension(1280, 720);
 }

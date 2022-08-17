@@ -41,6 +41,7 @@
     "client.multiplayer.ClientPacketListenerMixin",
     "client.multiplayer.ClientPacketListenerVRMixin",
     "client.multiplayer.MultiPlayerGameModeVRMixin",
+    "client.player.AbstractClientPlayerMixin",
     "client.player.LocalPlayerVRMixin",
     "client.renderer.GameRendererVRMixin",
     "client.renderer.LevelRendererVRMixin",
