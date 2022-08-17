@@ -14,7 +14,7 @@ import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.lwjgl.Matrix4f;
 import org.vivecraft.utils.math.Quaternion;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 import com.google.common.base.Charsets;
 
 import io.netty.buffer.ByteBuf;

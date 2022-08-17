@@ -12,9 +12,9 @@ import org.vivecraft.gameplay.trackers.Tracker;
 import org.vivecraft.gameplay.trackers.VehicleTracker;
 import org.vivecraft.settings.VRSettings;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.GameRendererExtension;
-import com.example.vivecraftfabric.PlayerExtension;
+import org.vivecraft.DataHolder;
+import org.vivecraft.GameRendererExtension;
+import org.vivecraft.PlayerExtension;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;

@@ -11,9 +11,9 @@ import org.vivecraft.utils.math.Matrix4f;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.GameRendererExtension;
-import com.example.vivecraftfabric.PlayerExtension;
+import org.vivecraft.DataHolder;
+import org.vivecraft.GameRendererExtension;
+import org.vivecraft.PlayerExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

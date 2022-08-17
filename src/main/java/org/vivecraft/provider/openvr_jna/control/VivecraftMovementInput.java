@@ -6,7 +6,7 @@ import org.vivecraft.provider.openvr_jna.VRInputAction;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Vector2;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;

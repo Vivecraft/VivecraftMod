@@ -2,7 +2,7 @@ package org.vivecraft.gui.framework;
 
 import org.vivecraft.settings.VRSettings;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 

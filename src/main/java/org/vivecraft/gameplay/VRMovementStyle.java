@@ -1,6 +1,6 @@
 package org.vivecraft.gameplay;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;

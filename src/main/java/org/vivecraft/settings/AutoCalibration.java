@@ -2,7 +2,7 @@ package org.vivecraft.settings;
 
 import org.vivecraft.utils.LangHelper;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;

@@ -8,8 +8,8 @@ import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.math.Vector3;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.PlayerExtension;
+import org.vivecraft.DataHolder;
+import org.vivecraft.PlayerExtension;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;

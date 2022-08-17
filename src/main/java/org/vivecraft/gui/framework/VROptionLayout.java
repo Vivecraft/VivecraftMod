@@ -4,7 +4,7 @@ import java.util.function.BiFunction;
 
 import org.vivecraft.settings.VRSettings;
 
-import com.example.vivecraftfabric.DataHolder;
+import org.vivecraft.DataHolder;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.phys.Vec2;

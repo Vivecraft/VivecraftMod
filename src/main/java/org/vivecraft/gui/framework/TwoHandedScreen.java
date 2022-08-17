@@ -3,8 +3,8 @@ package org.vivecraft.gui.framework;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.provider.MCVR;
 
-import com.example.vivecraftfabric.DataHolder;
-import com.example.vivecraftfabric.GuiExtension;
+import org.vivecraft.DataHolder;
+import org.vivecraft.GuiExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.AbstractWidget;
