@@ -146,10 +146,9 @@ public class VRWidgetHelper
         minecraft.getBlockRenderer().getModelRenderer().renderModel((new PoseStack()).last(), bufferbuilder, (BlockState)null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
         tesselator.end();
 
-        minecraft.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.disableBlend();
         displayBindFunc.run();
-        RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
+        RenderSystem.setShader(GameRenderer::getRendertypeSolidShader);
 
         BufferBuilder bufferbuilder1 = tesselator.getBuilder();
         bufferbuilder1.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
@@ -158,17 +157,48 @@ public class VRWidgetHelper
         {
             if (displayFaceFunc.apply(bakedquad.getDirection()) != VRWidgetHelper.DisplayFace.NONE && bakedquad.getSprite().getName().equals(new ResourceLocation("vivecraft:transparent")))
             {
-                QuadBounds quadbounds = new QuadBounds(bakedquad.getVertices());
+                int[] vertexList = bakedquad.getVertices();
                 boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == VRWidgetHelper.DisplayFace.MIRROR;
                 int j = LightTexture.pack(15, 15);
-                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).color(1.0F, 1.0F, 1.0F, 1.0F).uv(flag ? 1.0F : 0.0F, 0.0F).uv2(j).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
-                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMinY(), (double)quadbounds.getMinZ()).color(1.0F, 1.0F, 1.0F, 1.0F).uv(flag ? 0.0F : 1.0F, 0.0F).uv2(j).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
-                bufferbuilder1.vertex(flag ? (double)quadbounds.getMinX() : (double)quadbounds.getMaxX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).color(1.0F, 1.0F, 1.0F, 1.0F).uv(flag ? 0.0F : 1.0F, 1.0F).uv2(j).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
-                bufferbuilder1.vertex(flag ? (double)quadbounds.getMaxX() : (double)quadbounds.getMinX(), (double)quadbounds.getMaxY(), (double)quadbounds.getMinZ()).color(1.0F, 1.0F, 1.0F, 1.0F).uv(flag ? 1.0F : 0.0F, 1.0F).uv2(j).normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                int step = vertexList.length / 4;
+                bufferbuilder1.vertex(
+                                Float.intBitsToFloat(vertexList[0]),
+                                Float.intBitsToFloat(vertexList[1]),
+                                Float.intBitsToFloat(vertexList[2]))
+                        .color(1.0F, 1.0F, 1.0F, 1.0F)
+                        .uv(flag ? 1.0F : 0.0F, 1.0F)
+                        .uv2(j)
+                        .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F)
+                        .endVertex();
+                bufferbuilder1.vertex(
+                                Float.intBitsToFloat(vertexList[step]),
+                                Float.intBitsToFloat(vertexList[step+1]),
+                                Float.intBitsToFloat(vertexList[step+2]))
+                        .color(1.0F, 1.0F, 1.0F, 1.0F)
+                        .uv(flag ? 1.0F : 0.0F, 0.0F)
+                        .uv2(j)
+                        .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                bufferbuilder1.vertex(
+                                Float.intBitsToFloat(vertexList[step*2]),
+                                Float.intBitsToFloat(vertexList[step*2+1]),
+                                Float.intBitsToFloat(vertexList[step*2+2]))
+                        .color(1.0F, 1.0F, 1.0F, 1.0F)
+                        .uv(flag ? 0.0F : 1.0F, 0.0F)
+                        .uv2(j)
+                        .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                bufferbuilder1.vertex(
+                                Float.intBitsToFloat(vertexList[step*3]),
+                                Float.intBitsToFloat(vertexList[step*3+1]),
+                                Float.intBitsToFloat(vertexList[step*3+2]))
+                        .color(1.0F, 1.0F, 1.0F, 1.0F)
+                        .uv(flag ? 0.0F : 1.0F, 1.0F)
+                        .uv2(j)
+                        .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
             }
         }
 
         tesselator.end();
+        minecraft.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.enableBlend();
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
@@ -179,66 +209,5 @@ public class VRWidgetHelper
         NONE,
         NORMAL,
         MIRROR;
-    }
-
-    //Optifine
-    static class QuadBounds {
-        private float maxX = -3.4028235E38f;
-        private float maxY = -3.4028235E38f;
-        private float maxZ = -3.4028235E38f;
-        private float minX = Float.MAX_VALUE;
-        private float minY = Float.MAX_VALUE;
-        private float minZ = Float.MAX_VALUE;
-
-        public QuadBounds(int[] vertexData) {
-            int step = vertexData.length / 4;
-            for (int i = 0; i < 4; ++i) {
-                int pos = i * step;
-                float x = Float.intBitsToFloat(vertexData[pos + 0]);
-                float y = Float.intBitsToFloat(vertexData[pos + 1]);
-                float z = Float.intBitsToFloat(vertexData[pos + 2]);
-                if (this.minX > x) {
-                    this.minX = x;
-                }
-                if (this.minY > y) {
-                    this.minY = y;
-                }
-                if (this.minZ > z) {
-                    this.minZ = z;
-                }
-                if (this.maxX < x) {
-                    this.maxX = x;
-                }
-                if (this.maxY < y) {
-                    this.maxY = y;
-                }
-                if (!(this.maxZ < z)) continue;
-                this.maxZ = z;
-            }
-        }
-
-        public float getMinX() {
-            return this.minX;
-        }
-
-        public float getMinY() {
-            return this.minY;
-        }
-
-        public float getMinZ() {
-            return this.minZ;
-        }
-
-        public float getMaxX() {
-            return this.maxX;
-        }
-
-        public float getMaxY() {
-            return this.maxY;
-        }
-
-        public float getMaxZ() {
-            return this.maxZ;
-        }
     }
 }
