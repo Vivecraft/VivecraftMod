@@ -1,8 +1,8 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
 import org.vivecraft.DataHolder;
-import org.vivecraft.EntityRenderDispatcherExtension;
-import org.vivecraft.LevelRendererExtension;
+import org.vivecraft.extensions.EntityRenderDispatcherExtension;
+import org.vivecraft.extensions.LevelRendererExtension;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.Camera;

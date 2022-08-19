@@ -1,6 +1,6 @@
 package org.vivecraft.irisMixin;
 
-import org.vivecraft.GameRendererExtension;
+import org.vivecraft.extensions.GameRendererExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.coderbot.iris.mixin.LevelRendererAccessor;
 import net.coderbot.iris.pipeline.ShadowRenderer;

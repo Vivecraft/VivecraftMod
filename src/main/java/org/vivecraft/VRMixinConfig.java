@@ -5,7 +5,7 @@ import me.fallenbreath.conditionalmixin.api.mixin.RestrictiveMixinConfigPlugin;
 import java.util.List;
 import java.util.Set;
 
-public class DefaultMixinConfig extends RestrictiveMixinConfigPlugin {
+public class VRMixinConfig extends RestrictiveMixinConfigPlugin {
     @Override
     public String getRefMapperConfig() {
         return null;

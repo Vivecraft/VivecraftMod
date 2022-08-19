@@ -1,9 +1,9 @@
 package org.vivecraft.mixin.client.renderer;
 
 import org.vivecraft.DataHolder;
-import org.vivecraft.GameRendererExtension;
-import org.vivecraft.LevelRendererExtension;
-import org.vivecraft.RenderTargetExtension;
+import org.vivecraft.extensions.GameRendererExtension;
+import org.vivecraft.extensions.LevelRendererExtension;
+import org.vivecraft.extensions.RenderTargetExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

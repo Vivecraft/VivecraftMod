@@ -1,4 +1,4 @@
-package org.vivecraft;
+package org.vivecraft.extensions;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.world.entity.Entity;

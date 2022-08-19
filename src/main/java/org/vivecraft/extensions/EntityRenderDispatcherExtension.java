@@ -1,4 +1,4 @@
-package org.vivecraft;
+package org.vivecraft.extensions;
 
 import com.mojang.math.Quaternion;
 import org.vivecraft.render.VRArmRenderer;

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.io.File;
 
 @Mixin(Options.class)
-public abstract class OptionsMixin {
+public abstract class OptionsVRMixin {
     @Shadow
     public KeyMapping[] keyMappings;
 

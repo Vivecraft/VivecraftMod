@@ -1,0 +1,33 @@
+{
+  "required": true,
+  "package": "org.vivecraft.mixin",
+  "plugin": "org.vivecraft.NonVRMixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "server.level.ServerPlayerMixin",
+    "server.network.ServerGamePacketListenerImplMixin",
+    "world.entity.projectile.AbstractArrowMixin",
+    "world.entity.projectile.AbstractHurtingProjectileMixin",
+    "world.entity.projectile.FishingHookMixin",
+    "world.entity.projectile.ProjectileMixin",
+    "world.entity.projectile.ThrowableProjectileMixin",
+    "world.entity.projectile.ThrownTridentMixin",
+    "world.item.CrossbowItemMixin"
+  ],
+  "client": [
+    "blaze3d.pipeline.MainTargetMixin",
+    "blaze3d.pipeline.RenderTargetMixin",
+    "blaze3d.systems.RenderSystemAccessor",
+    "client.MinecraftMixin",
+    "client.OptionMixin",
+    "client.main.MainMixin",
+    "client.multiplayer.ClientPacketListenerMixin",
+    "client.player.AbstractClientPlayerMixin",
+    "client.renderer.block.LiquidBlockRendererMixin",
+    "client.renderer.entity.EntityRenderDispatcherMixin",
+    "world.entity.vehicle.BoatMixin"
+  ],
+  "server": [
+  ],
+  "minVersion": "0.8.4"
+}

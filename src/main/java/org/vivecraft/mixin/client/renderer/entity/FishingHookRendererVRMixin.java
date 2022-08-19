@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
 import org.vivecraft.DataHolder;
-import org.vivecraft.GameRendererExtension;
+import org.vivecraft.extensions.GameRendererExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;

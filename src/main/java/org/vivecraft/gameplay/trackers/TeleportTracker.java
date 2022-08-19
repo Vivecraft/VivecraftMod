@@ -1,20 +1,5 @@
 package org.vivecraft.gameplay.trackers;
 
-import java.util.Random;
-
-import org.vivecraft.api.NetworkHelper;
-import org.vivecraft.gameplay.VRMovementStyle;
-import org.vivecraft.provider.openvr_jna.OpenVRUtil;
-import org.vivecraft.utils.Utils;
-import org.vivecraft.utils.math.Angle;
-import org.vivecraft.utils.math.Matrix4f;
-import org.vivecraft.utils.math.Quaternion;
-import org.vivecraft.utils.math.Vector3;
-
-import org.vivecraft.DataHolder;
-import org.vivecraft.GameRendererExtension;
-import org.vivecraft.PlayerExtension;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -30,6 +15,19 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.DataHolder;
+import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.extensions.GameRendererExtension;
+import org.vivecraft.extensions.PlayerExtension;
+import org.vivecraft.gameplay.VRMovementStyle;
+import org.vivecraft.provider.openvr_jna.OpenVRUtil;
+import org.vivecraft.utils.Utils;
+import org.vivecraft.utils.math.Angle;
+import org.vivecraft.utils.math.Matrix4f;
+import org.vivecraft.utils.math.Quaternion;
+import org.vivecraft.utils.math.Vector3;
+
+import java.util.Random;
 
 public class TeleportTracker extends Tracker
 {

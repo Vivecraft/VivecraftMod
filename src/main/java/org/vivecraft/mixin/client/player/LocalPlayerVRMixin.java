@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.player;
 
-import org.vivecraft.ItemInHandRendererExtension;
+import org.vivecraft.extensions.ItemInHandRendererExtension;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -34,7 +34,7 @@ import org.vivecraft.api.NetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 
 import org.vivecraft.DataHolder;
-import org.vivecraft.PlayerExtension;
+import org.vivecraft.extensions.PlayerExtension;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.client.multiplayer.ClientLevel;

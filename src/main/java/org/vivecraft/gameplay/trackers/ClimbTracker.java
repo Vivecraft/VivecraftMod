@@ -11,7 +11,7 @@ import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.provider.ControllerType;
 
 import org.vivecraft.DataHolder;
-import org.vivecraft.PlayerExtension;
+import org.vivecraft.extensions.PlayerExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

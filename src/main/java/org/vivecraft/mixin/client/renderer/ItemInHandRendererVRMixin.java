@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.vivecraft.DataHolder;
-import org.vivecraft.EntityRenderDispatcherExtension;
-import org.vivecraft.GameRendererExtension;
+import org.vivecraft.extensions.EntityRenderDispatcherExtension;
+import org.vivecraft.extensions.GameRendererExtension;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import org.vivecraft.ItemInHandRendererExtension;
+import org.vivecraft.extensions.ItemInHandRendererExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemInHandRenderer;

@@ -1,7 +1,10 @@
 package org.vivecraft.mixin.client.multiplayer;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.Connection;
 import org.vivecraft.DataHolder;
-import org.vivecraft.PlayerExtension;
+import org.vivecraft.extensions.PlayerExtension;
 import net.minecraft.client.ClientTelemetryManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -41,6 +44,11 @@ import java.util.UUID;
 public class ClientPacketListenerVRMixin {
     @Final
     @Shadow private Minecraft minecraft;
+
+    @Inject(at = @At("TAIL"), method = "<init>")
+    public void init(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager, CallbackInfo ci) {
+        DataHolder.getInstance().vrSettings.overrides.resetAll();
+    }
 
     @Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/client/player/KeyboardInput;<init>(Lnet/minecraft/client/Options;)V"), method = "handleLogin")
     public KeyboardInput login(Options options) {
@@ -98,6 +106,11 @@ public class ClientPacketListenerVRMixin {
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;adjustPlayer(Lnet/minecraft/world/entity/player/Player;)V", shift = At.Shift.BEFORE), method = "handleRespawn")
     public void readdInput2(ClientboundRespawnPacket clientboundRespawnPacket, CallbackInfo ci) {
         this.minecraft.player.input = new VivecraftMovementInput(this.minecraft.options);
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 0, shift = At.Shift.AFTER), method = "handleRespawn(Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;)V")
+    public void respawn(ClientboundRespawnPacket packet, CallbackInfo callback) {
+        DataHolder.getInstance().vrSettings.overrides.resetAll();
     }
 
     @Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getData()Lnet/minecraft/network/FriendlyByteBuf;"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;)V", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)

@@ -17,7 +17,7 @@ import org.vivecraft.utils.math.Vector3;
 
 import org.vivecraft.DataHolder;
 import org.vivecraft.MethodHolder;
-import org.vivecraft.MinecraftExtension;
+import org.vivecraft.extensions.MinecraftExtension;
 import com.google.common.util.concurrent.Runnables;
 
 import net.minecraft.client.Minecraft;

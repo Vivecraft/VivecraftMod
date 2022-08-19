@@ -6,6 +6,8 @@ import java.util.*;
 
 
 import org.vivecraft.*;
+import org.vivecraft.extensions.GameRendererExtension;
+import org.vivecraft.extensions.RenderTargetExtension;
 import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
 import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.loader.api.FabricLoader;

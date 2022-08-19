@@ -11,7 +11,7 @@ import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
 
 import org.vivecraft.DataHolder;
-import org.vivecraft.PlayerExtension;
+import org.vivecraft.extensions.PlayerExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;

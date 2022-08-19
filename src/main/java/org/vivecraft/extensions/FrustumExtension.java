@@ -1,4 +1,4 @@
-package org.vivecraft;
+package org.vivecraft.extensions;
 
 import net.minecraft.world.phys.AABB;
 

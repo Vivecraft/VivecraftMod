@@ -1,22 +1,6 @@
 package org.vivecraft.api;
 
-import java.nio.Buffer;
-import java.nio.FloatBuffer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import org.vivecraft.gameplay.VRPlayer;
-import org.vivecraft.render.PlayerModelController;
-import org.vivecraft.render.RenderPass;
-import org.vivecraft.settings.AutoCalibration;
-import org.vivecraft.settings.VRSettings;
-import org.vivecraft.utils.lwjgl.Matrix4f;
-import org.vivecraft.utils.math.Quaternion;
-
-import org.vivecraft.DataHolder;
 import com.google.common.base.Charsets;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -30,6 +14,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.DataHolder;
+import org.vivecraft.gameplay.VRPlayer;
+import org.vivecraft.render.PlayerModelController;
+import org.vivecraft.render.RenderPass;
+import org.vivecraft.settings.AutoCalibration;
+import org.vivecraft.settings.VRSettings;
+import org.vivecraft.utils.lwjgl.Matrix4f;
+import org.vivecraft.utils.math.Quaternion;
+
+import java.nio.Buffer;
+import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class NetworkHelper
 {
@@ -78,7 +76,7 @@ public class NetworkHelper
         serverWantsData = false;
         serverSupportsDirectTeleport = false;
         serverAllowsCrawling = false;
-        DataHolder.getInstance().vrSettings.overrides.resetAll();
+        //DataHolder.getInstance().vrSettings.overrides.resetAll(); move to mixin
     }
 
     public static void sendVersionInfo()

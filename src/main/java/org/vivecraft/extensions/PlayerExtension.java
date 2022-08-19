@@ -1,4 +1,4 @@
-package org.vivecraft;
+package org.vivecraft.extensions;
 
 import net.minecraft.client.player.LocalPlayer;
 import org.vivecraft.render.VRFirstPersonArmSwing;

@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.gui.settings.GuiMainVRSettings;
 
 @Mixin(OptionsScreen.class)
-public class OptionsScreenMixin extends Screen {
-    protected OptionsScreenMixin(Component component) {
+public class OptionsScreenVRMixin extends Screen {
+    protected OptionsScreenVRMixin(Component component) {
         super(component);
     }
 

@@ -1,6 +1,6 @@
 //package com.example.vivecraft.mixin.client.particle;
 //
-//import org.vivecraft.GameRendererExtension;
+//import org.vivecraft.extensions.GameRendererExtension;
 //import net.minecraft.client.Minecraft;
 //import net.minecraft.client.particle.ItemPickupParticle;
 //import net.minecraft.util.Mth;

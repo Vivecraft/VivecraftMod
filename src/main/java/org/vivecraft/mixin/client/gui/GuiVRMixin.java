@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client.gui;
 
 import org.vivecraft.DataHolder;
-import org.vivecraft.GuiExtension;
+import org.vivecraft.extensions.GuiExtension;
 import org.vivecraft.SodiumHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;

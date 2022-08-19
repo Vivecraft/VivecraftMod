@@ -5,7 +5,7 @@
 package org.vivecraft.settings;
 
 import org.vivecraft.DataHolder;
-import org.vivecraft.OptionsExtension;
+import org.vivecraft.extensions.OptionsExtension;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;

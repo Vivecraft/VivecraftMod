@@ -1,21 +1,5 @@
 package org.vivecraft.gameplay;
 
-import java.util.ArrayList;
-import java.util.Random;
-
-import org.vivecraft.api.NetworkHelper;
-import org.vivecraft.api.VRData;
-import org.vivecraft.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.gameplay.trackers.Tracker;
-import org.vivecraft.gameplay.trackers.VehicleTracker;
-import org.vivecraft.settings.VRSettings;
-
-import org.vivecraft.DataHolder;
-import org.vivecraft.GameRendererExtension;
-import org.vivecraft.PlayerExtension;
-
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.TerrainParticle;
@@ -39,6 +23,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.DataHolder;
+import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.VRData;
+import org.vivecraft.extensions.GameRendererExtension;
+import org.vivecraft.extensions.PlayerExtension;
+import org.vivecraft.gameplay.screenhandlers.GuiHandler;
+import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.gameplay.screenhandlers.RadialHandler;
+import org.vivecraft.gameplay.trackers.Tracker;
+import org.vivecraft.gameplay.trackers.VehicleTracker;
+import org.vivecraft.settings.VRSettings;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class VRPlayer
 {

@@ -18,7 +18,8 @@
     ]
   },
   "mixins": [
-    "vivecraft.mixins.json",
+
+    "vivecraft.nonvr.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.iris.mixins.json"
   ],
