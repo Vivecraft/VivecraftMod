@@ -256,15 +256,6 @@ public class MCOpenVR extends MCVR
         {
             this.tried = true;
             this.mc = Minecraft.getInstance();
-            this.unpackPlatformNatives();
-
-            if (JOpenVRLibrary.VR_IsHmdPresent() == 0)
-            {
-                this.initStatus = "vivecraft.messages.nosteamvr";
-                return false;
-            }
-            else
-            {
                 try
                 {
                     this.initializeJOpenVR();
@@ -352,7 +343,6 @@ public class MCOpenVR extends MCVR
 
                 return true;
             }
-        }
     }
 
     public void poll(long frameIndex)
