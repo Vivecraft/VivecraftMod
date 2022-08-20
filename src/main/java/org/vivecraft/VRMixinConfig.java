@@ -3,6 +3,7 @@ package org.vivecraft;
 import com.sun.jna.NativeLibrary;
 import jopenvr.JOpenVRLibrary;
 import me.fallenbreath.conditionalmixin.api.mixin.RestrictiveMixinConfigPlugin;
+import net.fabricmc.loader.api.FabricLoader;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 public class VRMixinConfig implements IMixinConfigPlugin {
-    private boolean asked = false;
+    private static boolean asked = false;
 
     @Override
     public String getRefMapperConfig() {
@@ -44,19 +45,22 @@ public class VRMixinConfig implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
+    }
+
+    static {
         if (!asked && !JOpenVRLibrary.isErrored()) {
             unpackPlatformNatives();
             if (JOpenVRLibrary.VR_IsHmdPresent() == 0) {
                 asked = true;
                 VRState.isVR = false;
-                return;
+            } else {
+                VRState.isVR = TinyFileDialogs.tinyfd_messageBox("VR", "Would you like to use VR?", "yesno", "info", false);
+                asked = true;
             }
-            VRState.isVR = TinyFileDialogs.tinyfd_messageBox("VR", "Would you like to use VR?", "yesno", "info", false);
-            asked = true;
         }
     }
 
-    private boolean unpackPlatformNatives()
+    private static boolean unpackPlatformNatives()
     {
         String s = System.getProperty("os.name").toLowerCase();
         String s1 = System.getProperty("os.arch").toLowerCase();
@@ -102,6 +106,9 @@ public class VRMixinConfig implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (mixinClassName.contains("NoSodium") && FabricLoader.getInstance().isModLoaded("sodium")) {
+            return false;
+        }
         return VRState.isVR;
     }
 }
