@@ -79,6 +79,7 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
             Matrix4f matrix4f = matrixStackIn.last().pose();
             double d0 = (new Vec3((double)matrix4f.m00, (double)matrix4f.m01, (double)matrix4f.m02)).length();
             matrixStackIn.last().pose().setIdentity();
+            matrixStackIn.last().normal().setIdentity();
             matrixStackIn.translate(0.0D, 0.0D, 1000.0D);
             matrixStackIn.scale((float)d0, (float)d0, (float)d0);
             matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
