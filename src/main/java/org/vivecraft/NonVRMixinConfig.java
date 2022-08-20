@@ -17,6 +17,15 @@ public class NonVRMixinConfig extends RestrictiveMixinConfigPlugin {
     }
 
     @Override
+    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (targetClassName.contains("ClientPacketListener")) {
+            return !VRState.isVR;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
     public List<String> getMixins() {
         return null;
     }
