@@ -105,7 +105,7 @@ public class DataHolder {
     long mirroNotifyLen;
 
     public DataHolder() {
-        if (VRState.isVR) {
+        if (VRState.checkVR()) {
             minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-fabric-a1";
         } else {
             minecriftVerString = "Vivecraft 1.18.2 jrbudda-NONVR-fabric-a1";

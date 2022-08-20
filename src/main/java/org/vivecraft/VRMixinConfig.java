@@ -12,7 +12,11 @@ import org.vivecraft.utils.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 public class VRMixinConfig implements IMixinConfigPlugin {
@@ -48,15 +52,26 @@ public class VRMixinConfig implements IMixinConfigPlugin {
     }
 
     static {
-        if (!asked && !JOpenVRLibrary.isErrored()) {
-            unpackPlatformNatives();
-            if (JOpenVRLibrary.VR_IsHmdPresent() == 0) {
-                asked = true;
-                VRState.isVR = false;
-            } else {
+        Properties properties = new Properties();
+        try {
+            Path file = FabricLoader.getInstance().getConfigDir().resolve("vivecraft-config.properties");
+            if (!Files.exists(file)) {
+                Files.createFile(file);
+            }
+            properties.load(Files.newInputStream(file));
+            if (properties.containsKey("vrStatus")) {
+                VRState.isVR = Boolean.parseBoolean(properties.getProperty("vrStatus"));
+            } else if (!asked && !JOpenVRLibrary.isErrored()) {
+                unpackPlatformNatives();
                 VRState.isVR = TinyFileDialogs.tinyfd_messageBox("VR", "Would you like to use VR?", "yesno", "info", false);
                 asked = true;
+
+                properties.setProperty("vrStatus", String.valueOf(VRState.isVR));
+                properties.store(Files.newOutputStream(file), "This file stores if VR should be enabled.");
+                TinyFileDialogs.tinyfd_messageBox("VR", "Your choice has been saved. To edit it, please go to config/vivecraft-config.properties.", "ok", "info", false);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

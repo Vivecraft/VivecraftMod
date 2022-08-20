@@ -48,6 +48,14 @@ public class ClientPacketListenerVRMixin {
     @Inject(at = @At("TAIL"), method = "<init>")
     public void init(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager, CallbackInfo ci) {
         DataHolder.getInstance().vrSettings.overrides.resetAll();
+        NetworkHelper.resetServerSettings();
+        NetworkHelper.displayedChatMessage = false;
+    }
+
+    @Inject(at = @At("TAIL"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
+    public void login(ClientboundLoginPacket p_105030_, CallbackInfo callback) {
+        NetworkHelper.vivePlayers.clear();
+        NetworkHelper.sendVersionInfo();
     }
 
     @Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/client/player/KeyboardInput;<init>(Lnet/minecraft/client/Options;)V"), method = "handleLogin")
@@ -100,6 +108,8 @@ public class ClientPacketListenerVRMixin {
 
     @Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/client/player/KeyboardInput;<init>(Lnet/minecraft/client/Options;)V"), method = "handleRespawn")
     public KeyboardInput respawn(Options options) {
+        NetworkHelper.resetServerSettings();
+        NetworkHelper.sendVersionInfo();
         return null;
     }
 

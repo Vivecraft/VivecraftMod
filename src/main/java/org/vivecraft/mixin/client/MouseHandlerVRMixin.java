@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client;
 
+import net.minecraft.client.player.LocalPlayer;
 import org.vivecraft.DataHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
@@ -29,6 +30,11 @@ public class MouseHandlerVRMixin {
         if (this.minecraft.screen.mouseScrolled(g, h, f)) {
             ci.cancel();
         }
+    }
+
+    @Redirect(method = "onPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
+    private boolean checkNull(LocalPlayer instance) {
+        return instance != null && instance.isSpectator();
     }
 
     @Inject(at = @At("HEAD"), method = "turnPlayer", cancellable = true)
