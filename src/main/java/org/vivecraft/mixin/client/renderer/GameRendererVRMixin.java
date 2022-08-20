@@ -1819,9 +1819,28 @@ public abstract class GameRendererVRMixin
 		BufferUploader.end(bufferbuilder);
 	}
 
-	public void drawSizedQuad(float displayWidth, float displayHeight, float size) {
-		this.drawSizedQuad(displayWidth, displayHeight, size, new float[] { 1, 1, 1, 1 });
+	public void drawSizedQuadSolid(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
+		RenderSystem.setShader(GameRenderer::getRendertypeSolidShader);
+		float f = displayHeight / displayWidth;
+		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
+		int light = LightTexture.pack(15, 15);
+		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
+				.uv(0.0F, 0.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
+				.uv(1.0F, 0.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
+				.uv(1.0F, 1.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
+				.uv(0.0F, 1.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+		bufferbuilder.end();
+		BufferUploader.end(bufferbuilder);
 	}
+
+
+    public void drawSizedQuad(float displayWidth, float displayHeight, float size) {
+        this.drawSizedQuad(displayWidth, displayHeight, size, new float[] { 1, 1, 1, 1 });
+    }
 
 	public void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
 			float[] color, Matrix4f pMatrix) {
@@ -2030,7 +2049,8 @@ public abstract class GameRendererVRMixin
 				GL11.glDisable(GL11.GL_STENCIL_TEST);
 			}
 		} else {
-			GameRendererVRMixin.DATA_HOLDER.vrRenderer.doStencil(true);
+			// No stencil for telescope
+			// GameRendererVRMixin.DATA_HOLDER.vrRenderer.doStencil(true);
 		}
 	}
 
@@ -2420,7 +2440,7 @@ public abstract class GameRendererVRMixin
 	@Override
 	public void DrawScopeFB(PoseStack matrixStackIn, int i) {
 		if (DataHolder.getInstance().currentPass != RenderPass.SCOPEL && DataHolder.getInstance().currentPass != RenderPass.SCOPER) {
-			this.lightTexture.turnOffLightLayer();
+			//this.lightTexture.turnOffLightLayer();
 			matrixStackIn.pushPose();
 			RenderSystem.enableDepthTest();
 			RenderSystem.enableTexture();
@@ -2437,7 +2457,8 @@ public abstract class GameRendererVRMixin
 			float scale = 0.0785F;
 			//actual framebuffer
 			float f = TelescopeTracker.viewPercent(i);
-			this.drawSizedQuad(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
+			//this.drawSizedQuad(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
+			this.drawSizedQuadSolid(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
 
 			RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
 			RenderSystem.enableBlend();
