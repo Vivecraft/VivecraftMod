@@ -34,27 +34,17 @@ dependencies {
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
-    modImplementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
-
-    // launchwrapper + dependencies
-    compileOnly ('net.minecraft:launchwrapper:1.12') {
-        transitive = false
-    }
-
     modImplementation "com.github.Fallen-Breath:conditional-mixin:v0.3.1"
     modImplementation "maven.modrinth:sodium:mc1.18.2-0.4.1"
     modImplementation "maven.modrinth:iris:1.18.x-v1.2.6"
     modCompileOnly "maven.modrinth:lithium:mc1.18.2-0.7.10"
 
     implementation 'org.joml:joml:1.10.4'//temp sodium
-    modImplementation(fabricApi.module("fabric-api-base", project.fabric_version))//temp sodium
-    modImplementation(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_version))//temp sodium
-    modImplementation(fabricApi.module("fabric-rendering-data-attachment-v1", project.fabric_version))//temp sodium
-    modImplementation(fabricApi.module("fabric-resource-loader-v0", project.fabric_version))//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-api-base", project.fabric_version))//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-key-binding-api-v1", project.fabric_version))//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_version))//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-rendering-data-attachment-v1", project.fabric_version))//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-resource-loader-v0", project.fabric_version))//temp sodium
 
     implementation 'org.anarres:jcpp:1.4.14'//temp iris
 

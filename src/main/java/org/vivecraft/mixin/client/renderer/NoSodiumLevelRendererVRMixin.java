@@ -3,7 +3,6 @@ package org.vivecraft.mixin.client.renderer;
 import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
 import me.fallenbreath.conditionalmixin.api.annotation.Condition;
 import me.fallenbreath.conditionalmixin.api.annotation.Restriction;
-import net.fabricmc.fabric.mixin.client.rendering.MixinWorldRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
