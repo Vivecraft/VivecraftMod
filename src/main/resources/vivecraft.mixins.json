@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "server.level.ServerPlayerMixin",
-    "server.network.ServerGamePacketListenerImplMixin",
     "server.network.ServerGamePacketListnerImplVRMixin",
     "server.packs.repository.PackRepositoryVRMixin",
     "world.entity.projectile.AbstractArrowMixin",
@@ -39,7 +38,6 @@
     "client.gui.screens.inventory.SignEditScreenVRMixin",
     "client.gui.screens.OptionsScreenVRMixin",
     "client.main.MainMixin",
-    "client.multiplayer.ClientPacketListenerMixin",
     "client.multiplayer.ClientPacketListenerVRMixin",
     "client.multiplayer.MultiPlayerGameModeVRMixin",
     "client.player.AbstractClientPlayerMixin",

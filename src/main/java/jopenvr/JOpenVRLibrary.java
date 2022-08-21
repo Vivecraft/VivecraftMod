@@ -11,7 +11,6 @@ import java.nio.IntBuffer;
 public class JOpenVRLibrary implements Library
 {
     public static final String JNA_LIBRARY_NAME = "openvr_api";
-    public static final NativeLibrary JNA_NATIVE_LIB = NativeLibrary.getInstance("openvr_api");
     public static final int k_nDriverNone = -1;
     public static final int k_unMaxDriverDebugResponseSize = 32768;
     public static final int k_unTrackedDeviceIndex_Hmd = 0;
@@ -103,9 +102,20 @@ public class JOpenVRLibrary implements Library
 
     public static native Pointer VR_GetVRInitErrorAsEnglishDescription(int var0);
 
+    private static boolean errored;
+
+    public static boolean isErrored() {
+        return errored;
+    }
+
     static
     {
-        Native.register(JOpenVRLibrary.class, JNA_NATIVE_LIB);
+        try {
+            Native.register(JOpenVRLibrary.class, NativeLibrary.getInstance(JNA_LIBRARY_NAME));
+        } catch (UnsatisfiedLinkError error) {
+            errored = true;
+            System.out.println("Couldn't register VR!");
+        }
     }
 
     public interface ChaperoneCalibrationState

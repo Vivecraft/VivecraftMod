@@ -41,6 +41,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -72,9 +73,13 @@ import org.vivecraft.utils.math.Vector3;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 
@@ -457,6 +462,19 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 					this.overlay.render(p, 0, 0, 0.0F);
 				}
 				else {
+					if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_Q)) {
+						System.out.println("Resetting VR status!");
+						Path file = FabricLoader.getInstance().getConfigDir().resolve("vivecraft-config.properties");
+
+						Properties properties = new Properties();
+						properties.setProperty("vrStatus", "false");
+						try {
+							properties.store(Files.newOutputStream(file), "This file stores if VR should be enabled.");
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						Minecraft.getInstance().stop();
+					}
 					this.notifyMirror(
 							LangHelper.get("vivecraft.messages.rendersetupfailed", renderconfigexception.error), true,
 							10000);

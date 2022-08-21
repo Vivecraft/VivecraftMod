@@ -44,7 +44,7 @@ public class DataHolder {
     public static List<String> hrtfList = new ArrayList<>();
     private static DataHolder INSTANCE;
     public final float PIOVER180 = ((float) Math.PI / 180F);
-    public final String minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-fabric-a1";
+    public String minecriftVerString;
     public VRPlayer vrPlayer;
     public MCVR vr;
     public VRRenderer vrRenderer;
@@ -103,6 +103,14 @@ public class DataHolder {
     String mirrorNotifyText;
     boolean mirrorNotifyClear;
     long mirroNotifyLen;
+
+    public DataHolder() {
+        if (VRState.checkVR()) {
+            minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-fabric-a1";
+        } else {
+            minecriftVerString = "Vivecraft 1.18.2 jrbudda-NONVR-fabric-a1";
+        }
+    }
 
     public static DataHolder getInstance() {
         if (INSTANCE == null) {

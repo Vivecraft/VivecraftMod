@@ -86,7 +86,7 @@ public class PatreonReceiver
                     if (!downloadStarted)
                     {
                         downloadStarted = true;
-                        String s = "http:www.vivecraft.org/patreon/current.txt";
+                        String s = "http://www.vivecraft.org/patreon/current.txt";
                         new Thread(() -> {
                             try {
                                 String value = IOUtils.toString(new URL(s), StandardCharsets.UTF_8);

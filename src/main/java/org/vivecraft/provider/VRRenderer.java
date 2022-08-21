@@ -5,6 +5,7 @@ import java.nio.FloatBuffer;
 import java.util.*;
 
 
+import com.mojang.blaze3d.platform.GlUtil;
 import org.vivecraft.*;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.RenderTargetExtension;
@@ -466,10 +467,10 @@ public abstract class VRRenderer
             int i = minecraft.getWindow().getScreenWidth() < 1 ? 1 : minecraft.getWindow().getScreenWidth();
             int j = minecraft.getWindow().getScreenHeight() < 1 ? 1 : minecraft.getWindow().getScreenHeight();
 
-//            if (Config.openGlRenderer.toLowerCase().contains("intel")) //Optifine
-//            {
-//                throw new RenderConfigException("Incompatible", LangHelper.get("vivecraft.messages.intelgraphics", Config.openGlRenderer));
-//            }
+           if(GlUtil.getRenderer().toLowerCase().contains("intel")) //Optifine
+           {
+               throw new RenderConfigException("Incompatible", LangHelper.get("vivecraft.messages.intelgraphics", GlUtil.getRenderer()));
+           }
 
             if (!this.isInitialized())
             {
