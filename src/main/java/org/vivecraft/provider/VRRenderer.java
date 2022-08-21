@@ -38,6 +38,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.vivecraft.xplat.XplatImpl;
 
 public abstract class VRRenderer
 {
@@ -811,7 +812,7 @@ public abstract class VRRenderer
             this.lastDisplayFBHeight = j;
             this.reinitFramebuffers = false;
 
-            if (FabricLoader.getInstance().isModLoaded("iris")) {
+            if (XplatImpl.getInstance().isModLoaded("iris")) {
                 IrisHelper.reload();
             }
 

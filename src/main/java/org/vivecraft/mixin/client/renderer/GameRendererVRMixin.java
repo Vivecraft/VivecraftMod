@@ -81,6 +81,7 @@ import org.vivecraft.render.VRCamera;
 import org.vivecraft.render.VRWidgetHelper;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
+import org.vivecraft.xplat.XplatImpl;
 
 import java.nio.FloatBuffer;
 import java.util.Locale;
@@ -565,7 +566,7 @@ public abstract class GameRendererVRMixin
 					new BlockPos(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition()));
 			// int i = Config.isShaders() ? 8 : 4; TODO
 			int i = 4;
-			if (FabricLoader.getInstance().isModLoaded("iris")) {
+			if (XplatImpl.getInstance().isModLoaded("iris")) {
 				i = IrisHelper.ShaderLight();
 			}
 
@@ -1295,7 +1296,7 @@ public abstract class GameRendererVRMixin
 
 //				int i = Config.isShaders() ? 8 : 4; TODO
 				int i = 4;
-				if (FabricLoader.getInstance().isModLoaded("iris")) {
+				if (XplatImpl.getInstance().isModLoaded("iris")) {
 					i = IrisHelper.ShaderLight();
 				}
 				int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec3), i);
@@ -1434,7 +1435,7 @@ public abstract class GameRendererVRMixin
 
 //						int i = Config.isShaders() ? 8 : 4; TODO
 						int i = 4;
-						if (FabricLoader.getInstance().isModLoaded("iris")) {
+						if (XplatImpl.getInstance().isModLoaded("iris")) {
 							i = IrisHelper.ShaderLight();
 						}
 						int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec31), i);

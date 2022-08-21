@@ -70,6 +70,7 @@ import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.LangHelper;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Vector3;
+import org.vivecraft.xplat.XplatImpl;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -403,11 +404,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	
 	@Inject(at = @At("HEAD"), method = "runTick(Z)V", cancellable = true)
 	public void replaceTick(boolean bl, CallbackInfo callback)  {
-		if (FabricLoader.getInstance().isModLoaded("sodium")) {
+		if (XplatImpl.getInstance().isModLoaded("sodium")) {
 			SodiumHelper.preRenderMinecraft();
 		}
 		newRunTick(bl);
-		if (FabricLoader.getInstance().isModLoaded("sodium")) {
+		if (XplatImpl.getInstance().isModLoaded("sodium")) {
 			SodiumHelper.postRenderMinecraft();
 		}
 		callback.cancel();
@@ -464,7 +465,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				else {
 					if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_Q)) {
 						System.out.println("Resetting VR status!");
-						Path file = FabricLoader.getInstance().getConfigDir().resolve("vivecraft-config.properties");
+						Path file = XplatImpl.getInstance().getConfigPath("vivecraft-config.properties");
 
 						Properties properties = new Properties();
 						properties.setProperty("vrStatus", "false");
@@ -1101,7 +1102,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				((GameRendererExtension) this.gameRenderer)
 						.setWasInWater(((GameRendererExtension) this.gameRenderer).isInWater());
 
-				if (FabricLoader.getInstance().isModLoaded("iris")) {
+				if (XplatImpl.getInstance().isModLoaded("iris")) {
 					if (!IrisHelper.hasWaterEffect()) {
 						DataHolder.getInstance().watereffect = 0.0F;
 					}
