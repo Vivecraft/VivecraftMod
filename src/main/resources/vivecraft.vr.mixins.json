@@ -8,6 +8,7 @@
     "server.packs.repository.PackRepositoryVRMixin"
   ],
   "client": [
+    "blaze3d.audio.LibraryVRMixin",
     "blaze3d.platform.InputConstantsVRMixin",
     "blaze3d.platform.WindowVRMixin",
     "blaze3d.platform.GlStateManagerVRMixin",
@@ -25,6 +26,7 @@
     "client.gui.screens.inventory.BookEditScreenVRMixin",
     "client.gui.screens.inventory.SignEditScreenVRMixin",
     "client.gui.screens.OptionsScreenVRMixin",
+    "client.gui.screens.SoundOptionsScreenVRMixin",
     "client.multiplayer.ClientPacketListenerVRMixin",
     "client.multiplayer.MultiPlayerGameModeVRMixin",
     "client.player.LocalPlayerVRMixin",
