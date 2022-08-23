@@ -33,7 +33,7 @@ public abstract class ProjectileMixin extends Entity{
 		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(pProjectile.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR()){
 			Vec3 vec3 = serverviveplayer.getControllerDir(serverviveplayer.activeHand);
-			if (pProjectile instanceof AbstractArrow && !(pProjectile instanceof ThrownTrident) && !serverviveplayer.isSeated() && serverviveplayer.getDraw() > 0.0F){
+			if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !serverviveplayer.isSeated() && serverviveplayer.getDraw() > 0.0F){
 				vec3 = serverviveplayer.getControllerPos(1, (Player)pProjectile).subtract(serverviveplayer.getControllerPos(0, (Player)pProjectile)).normalize();
 				pVelocity *= serverviveplayer.getDraw();
 				((AbstractArrow)(Object)this).setBaseDamage(((AbstractArrow)(Object)this).getBaseDamage() * 2.0D);
