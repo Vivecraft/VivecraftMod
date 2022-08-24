@@ -12,7 +12,8 @@
     "world.entity.projectile.ProjectileMixin",
     "world.entity.projectile.ThrowableProjectileMixin",
     "world.entity.projectile.ThrownTridentMixin",
-    "world.item.CrossbowItemMixin"
+    "world.item.CrossbowItemMixin",
+    "world.item.ItemsMixin"
   ],
   "client": [
     "blaze3d.pipeline.MainTargetMixin",

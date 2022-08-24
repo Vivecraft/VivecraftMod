@@ -1,0 +1,22 @@
+{
+  "type": "vivecraft:vivecraft_crafting",
+  "group": "vivecraft",
+  "pattern": [
+    "B",
+    "S"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:leather_boots"
+    },
+    "S": {
+      "item": "minecraft:slime_block"
+    }
+  },
+  "result": {
+    "item": "minecraft:leather_boots"
+  },
+  "name": "vivecraft.item.jumpboots",
+  "hideflags": 4,
+  "unbreakable": true
+}

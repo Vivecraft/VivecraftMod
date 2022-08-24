@@ -56,6 +56,7 @@ public class ClientPacketListenerVRMixin {
     public void login(ClientboundLoginPacket p_105030_, CallbackInfo callback) {
         NetworkHelper.vivePlayers.clear();
         NetworkHelper.sendVersionInfo();
+        DataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
     }
 
     @Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/client/player/KeyboardInput;<init>(Lnet/minecraft/client/Options;)V"), method = "handleLogin")
@@ -110,6 +111,7 @@ public class ClientPacketListenerVRMixin {
     public KeyboardInput respawn(Options options) {
         NetworkHelper.resetServerSettings();
         NetworkHelper.sendVersionInfo();
+        DataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
         return null;
     }
 

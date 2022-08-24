@@ -87,7 +87,7 @@ public class NetworkHelper
         friendlybytebuf.writeBytes(s.getBytes());
         Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new ResourceLocation("minecraft:register"), friendlybytebuf));
         Minecraft.getInstance().getConnection().send(getVivecraftClientPacket(NetworkHelper.PacketDiscriminators.VERSION, abyte));
-        DataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
+        //DataHolder.getInstance().vrPlayer.teleportWarningTimer = 200; move to mixin
     }
 
     public static void sendVRPlayerPositions(VRPlayer player)

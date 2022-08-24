@@ -3,8 +3,9 @@ package org.vivecraft.mixin.blaze3d.audio;
 import com.mojang.blaze3d.audio.Library;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.ALC;
 import org.lwjgl.openal.ALC10;
+import org.lwjgl.openal.ALCCapabilities;
+import org.lwjgl.openal.ALCapabilities;
 import org.lwjgl.openal.SOFTHRTF;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
@@ -13,6 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.DataHolder;
 
 import java.nio.Buffer;
@@ -49,12 +51,11 @@ public class LibraryVRMixin {
         };
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/OpenAlUtil;checkALError(Ljava/lang/String;)Z", ordinal = 0, shift = At.Shift.AFTER))
-    private void setHRTF(String string, CallbackInfo ci) {
-
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/OpenAlUtil;checkALError(Ljava/lang/String;)Z", ordinal = 0, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void setHRTF(String string, CallbackInfo ci, ALCCapabilities aLCCapabilities, int i, int j, int k, ALCapabilities aLCapabilities) {
         DataHolder.hrtfList.clear();
 
-        if (ALC.getCapabilities().ALC_SOFT_HRTF) {
+        if (aLCCapabilities.ALC_SOFT_HRTF) {
             int l = ALC10.alcGetInteger(this.currentDevice, 6548);
 
             if (l > 0) {

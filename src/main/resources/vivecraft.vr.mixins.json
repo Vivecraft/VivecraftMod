@@ -22,6 +22,7 @@
     "client.gui.NoSodiumGuiVRMixin",
     "client.gui.screens.ScreenVRMixin",
     "client.gui.screens.PauseScreenVRMixin",
+    "client.gui.screens.inventory.CreativeModeInventoryScreenVRMixin",
     "client.gui.screens.inventory.AbstractContainerScreenVRMixin",
     "client.gui.screens.inventory.BookEditScreenVRMixin",
     "client.gui.screens.inventory.SignEditScreenVRMixin",
