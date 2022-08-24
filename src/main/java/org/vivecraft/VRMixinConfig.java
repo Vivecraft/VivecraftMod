@@ -9,6 +9,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.vivecraft.utils.Utils;
+import org.vivecraft.xplat.XplatImpl;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,7 +55,7 @@ public class VRMixinConfig implements IMixinConfigPlugin {
     static {
         Properties properties = new Properties();
         try {
-            Path file = FabricLoader.getInstance().getConfigDir().resolve("vivecraft-config.properties");
+            Path file = XplatImpl.getInstance().getConfigPath("vivecraft-config.properties");
             if (!Files.exists(file)) {
                 Files.createFile(file);
             }
@@ -121,7 +122,7 @@ public class VRMixinConfig implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.contains("NoSodium") && FabricLoader.getInstance().isModLoaded("sodium")) {
+        if (mixinClassName.contains("NoSodium") && XplatImpl.getInstance().isModLoaded("sodium")) {
             return false;
         }
         return VRState.isVR;

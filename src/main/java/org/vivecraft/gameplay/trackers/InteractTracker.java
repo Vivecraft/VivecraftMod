@@ -128,7 +128,8 @@ public class InteractTracker extends Tracker
         {
             this.rightClickable = new HashSet<>();
 
-            String name = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_4970", "method_9534", "(Lnet/minecraft/class_2680;Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;Lnet/minecraft/class_1657;Lnet/minecraft/class_1268;Lnet/minecraft/class_3965;)Lnet/minecraft/class_1269;");
+            String name = "use";
+            String unmappedName = "method_9534";
             for (Object object : Registry.BLOCK)
             {
                 Class<?> oclass = object.getClass();
@@ -136,6 +137,11 @@ public class InteractTracker extends Tracker
                 try
                 {
                     if (oclass.getMethod(name, net.minecraft.world.level.block.state.BlockState.class,
+                            net.minecraft.world.level.Level.class,
+                            net.minecraft.core.BlockPos.class,
+                            net.minecraft.world.entity.player.Player.class,
+                            net.minecraft.world.InteractionHand.class,
+                            net.minecraft.world.phys.BlockHitResult.class).getDeclaringClass() == oclass || oclass.getMethod(unmappedName, net.minecraft.world.level.block.state.BlockState.class,
                             net.minecraft.world.level.Level.class,
                             net.minecraft.core.BlockPos.class,
                             net.minecraft.world.entity.player.Player.class,
@@ -153,6 +159,11 @@ public class InteractTracker extends Tracker
                 try
                 {
                     if (oclass.getMethod(name, net.minecraft.world.level.block.state.BlockState.class,
+                            net.minecraft.world.level.Level.class,
+                            net.minecraft.core.BlockPos.class,
+                            net.minecraft.world.entity.player.Player.class,
+                            net.minecraft.world.InteractionHand.class,
+                            net.minecraft.world.phys.BlockHitResult.class).getDeclaringClass() == oclass || oclass.getMethod(unmappedName, net.minecraft.world.level.block.state.BlockState.class,
                             net.minecraft.world.level.Level.class,
                             net.minecraft.core.BlockPos.class,
                             net.minecraft.world.entity.player.Player.class,

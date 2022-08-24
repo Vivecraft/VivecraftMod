@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.xplat.XplatImpl;
 
 @Mixin(Gui.class)
 public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
@@ -53,7 +54,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     //Moved to render for sodium
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderVignette(Lnet/minecraft/world/entity/Entity;)V"), method = "render")
     public void noVignette(Gui instance, Entity entity) {
-        if(FabricLoader.getInstance().isModLoaded("sodium")) {
+        if(XplatImpl.getInstance().isModLoaded("sodium")) {
             SodiumHelper.vignette(false);
         }
     }

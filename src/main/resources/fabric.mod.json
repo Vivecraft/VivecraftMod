@@ -12,11 +12,6 @@
   "license": "CC0-1.0",
 
   "environment": "*",
-  "entrypoints": {
-    "main": [
-      "org.vivecraft.Vivecraft"
-    ]
-  },
   "mixins": [
     "vivecraft.vr.mixins.json",
     "vivecraft.nonvr.mixins.json",
