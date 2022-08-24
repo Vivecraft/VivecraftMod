@@ -22,6 +22,7 @@ import java.util.Set;
 
 public class VRMixinConfig implements IMixinConfigPlugin {
     private static boolean asked = false;
+    private static boolean unpackedNatives = false;
 
     @Override
     public String getRefMapperConfig() {
@@ -62,14 +63,19 @@ public class VRMixinConfig implements IMixinConfigPlugin {
             properties.load(Files.newInputStream(file));
             if (properties.containsKey("vrStatus")) {
                 VRState.isVR = Boolean.parseBoolean(properties.getProperty("vrStatus"));
-            } else if (!asked && !JOpenVRLibrary.isErrored()) {
-                unpackPlatformNatives();
+            } else if (!asked) {
                 VRState.isVR = TinyFileDialogs.tinyfd_messageBox("VR", "Would you like to use VR?", "yesno", "info", false);
                 asked = true;
 
                 properties.setProperty("vrStatus", String.valueOf(VRState.isVR));
                 properties.store(Files.newOutputStream(file), "This file stores if VR should be enabled.");
                 TinyFileDialogs.tinyfd_messageBox("VR", "Your choice has been saved. To edit it, please go to config/vivecraft-config.properties.", "ok", "info", false);
+            }
+            if (!unpackedNatives && VRState.isVR) {
+                unpackPlatformNatives();
+                // disable VR if natives failed
+                VRState.isVR = !JOpenVRLibrary.isErrored();
+                unpackedNatives = true;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

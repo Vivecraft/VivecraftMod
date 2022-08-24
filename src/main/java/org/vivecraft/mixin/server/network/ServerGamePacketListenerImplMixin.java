@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import net.minecraft.network.protocol.PacketUtils;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -58,6 +59,9 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 	
 	@Inject(at = @At("TAIL"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ServerboundCustomPayloadPacket;)V" )
 	public void custompacket(ServerboundCustomPayloadPacket pPacket, CallbackInfo info) {
+
+		PacketUtils.ensureRunningOnSameThread(pPacket, this, this.player.getLevel());
+
 		FriendlyByteBuf friendlybytebuf = pPacket.getData();
 		ResourceLocation resourcelocation = pPacket.getIdentifier();
 		String s = resourcelocation.getNamespace();
