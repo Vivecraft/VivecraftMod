@@ -25,12 +25,12 @@ import java.util.Objects;
 public class LibraryVRMixin {
     @Shadow
     @Final
-    private static Logger LOGGER;
+    static Logger LOGGER;
 
     @Shadow
     private long currentDevice;
 
-    static boolean checkALError(String string) {
+    private static boolean checkALError(String string) {
         int i = AL10.alGetError();
         if (i != 0) {
             LOGGER.error("{}: {}", string, alErrorToString(i));
