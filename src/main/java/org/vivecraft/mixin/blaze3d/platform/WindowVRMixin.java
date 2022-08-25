@@ -1,21 +1,19 @@
 package org.vivecraft.mixin.blaze3d.platform;
 
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.platform.WindowEventHandler;
 import net.minecraft.client.Minecraft;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallbackI;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.platform.WindowEventHandler;
 
 @Mixin(Window.class)
 public abstract class WindowVRMixin {
@@ -46,9 +44,9 @@ public abstract class WindowVRMixin {
 		return null;
 	}
 
-	@Inject(method = "updateVsync", at = @At("HEAD"), cancellable = true)
-	public void disableSwap(boolean bl, CallbackInfo ci) {
-		ci.cancel();
+	@Redirect(method = "updateVsync", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapInterval(I)V"))
+	public void disableSwap(int interval) {
+		GLFW.glfwSwapInterval(0);
 	}
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I"), method = "onFramebufferResize(JII)V")
