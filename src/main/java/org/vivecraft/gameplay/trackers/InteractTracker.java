@@ -205,10 +205,10 @@ public class InteractTracker extends Tracker
                 {
                     VRData.VRDevicePose vrdata$vrdevicepose = this.dh.vrPlayer.vrdata_world_pre.getEye(RenderPass.THIRD);
                     Vec3 vec32 = vrdata$vrdevicepose.getPosition();
-                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double)0.15F));
-                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, -1.0D, 0.0D)).scale((double)0.05F));
+                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double)0.15F * this.dh.vrPlayer.vrdata_world_pre.worldScale));
+                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, -1.0D, 0.0D)).scale((double)0.05F * this.dh.vrPlayer.vrdata_world_pre.worldScale));
 
-                    if (vec3.distanceTo(vec32) < (double)0.15F)
+                    if (vec3.distanceTo(vec32) < (double)0.15F * this.dh.vrPlayer.vrdata_world_pre.worldScale)
                     {
                         this.inCamera[j] = true;
                         this.active[j] = true;
@@ -219,9 +219,9 @@ public class InteractTracker extends Tracker
                 {
                     VRData.VRDevicePose vrdata$vrdevicepose1 = this.dh.vrPlayer.vrdata_world_pre.getEye(RenderPass.CAMERA);
                     Vec3 vec36 = vrdata$vrdevicepose1.getPosition();
-                    vec36 = vec36.subtract(vrdata$vrdevicepose1.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double)0.08F));
+                    vec36 = vec36.subtract(vrdata$vrdevicepose1.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double)0.08F * this.dh.vrPlayer.vrdata_world_pre.worldScale));
 
-                    if (vec3.distanceTo(vec36) < (double)0.11F)
+                    if (vec3.distanceTo(vec36) < (double)0.11F * this.dh.vrPlayer.vrdata_world_pre.worldScale)
                     {
                         this.inHandheldCamera[j] = true;
                         this.active[j] = true;
