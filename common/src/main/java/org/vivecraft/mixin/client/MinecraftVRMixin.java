@@ -386,11 +386,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //		}
 //	}
 
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = Shift.BEFORE, ordinal = 2), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
-	public void gui(Screen pGuiScreen, CallbackInfo info) {
-		GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
-	}
-
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
 	public void destroy(CallbackInfo info) {
 		try {
