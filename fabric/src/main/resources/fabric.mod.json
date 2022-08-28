@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "vivecraft",
+  "version": "${version}",
+
+  "name": "Vivecraft",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "Me!"
+  ],
+
+  "license": "CC0-1.0",
+
+  "environment": "*",
+  "mixins": [
+    "vivecraft.vr.mixins.json",
+    "vivecraft.nonvr.mixins.json",
+    "vivecraft.sodium.mixins.json",
+    "vivecraft.iris.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "minecraft": "1.18.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

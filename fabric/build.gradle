@@ -1,0 +1,106 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+}
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+
+    modRuntimeOnly "maven.modrinth:sodium:mc1.18.2-0.4.1"
+    modRuntimeOnly "maven.modrinth:iris:1.18.x-v1.2.6"
+
+    modRuntimeOnly 'org.joml:joml:1.10.4'//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-api-base", rootProject.fabric_api_version))//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))//temp sodium
+    modRuntimeOnly(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version))//temp sodium
+
+    modRuntimeOnly 'org.anarres:jcpp:1.4.14'//temp iris
+
+    modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
+    modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium
+
+    include "com.github.Fallen-Breath:conditional-mixin:v0.3.1"
+
+    include("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows")
+    include("org.lwjgl:lwjgl-opengl:3.2.2:natives-windows")
+    include("org.lwjgl:lwjgl-jemalloc:3.2.2:natives-windows")
+    include("org.lwjgl:lwjgl:3.2.2:natives-windows")
+    include("org.lwjgl:lwjgl-glfw:3.2.2:natives-windows")
+    include("org.lwjgl:lwjgl-stb:3.2.2:natives-windows")
+    include("org.lwjgl:lwjgl-openal:3.2.2:natives-windows")
+
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+shadowJar {
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    classifier "dev-shadow"
+}
+
+remapJar {
+    injectAccessWidener = true
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier null
+}
+
+jar {
+    classifier "dev"
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+publishing {
+    publications {
+        mavenFabric(MavenPublication) {
+            artifactId = rootProject.archives_base_name + "-" + project.name
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+    }
+}

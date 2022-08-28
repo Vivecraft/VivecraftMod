@@ -1,0 +1,17 @@
+{
+  "source": "builtin",
+  "applications": [
+    {
+      "app_key": "org.jrbudda.vivecraft.steamvrinput",
+      "image_path": "https://i1.wp.com/www.vivecraft.org/wp-content/uploads/2016/07/wesYwME.png",
+      "launch_type": "url",
+      "url": "steam://launch/",
+      "strings": {
+        "en_us": {
+          "name": "Vivecraft",
+          "description": "VR mod for Minecraft: Java Edition"
+        }
+      }
+    }
+  ]
+}

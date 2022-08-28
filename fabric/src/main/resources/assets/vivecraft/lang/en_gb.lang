@@ -1,0 +1,435 @@
+# Contributors: bloodninja
+
+# Key bindings
+# vivecraft.key.hotbarNext=Hotbar Next
+# vivecraft.key.hotbarPrev=Hotbar Previous
+# vivecraft.key.hotbarScroll=Hotbar Scroll
+# vivecraft.key.hotbarSwipeX=Hotbar Swipe (Left/Right)
+# vivecraft.key.hotbarSwipeY=Hotbar Swipe (Up/Down)
+# vivecraft.key.rotateLeft=Rotate Left
+# vivecraft.key.rotateRight=Rotate Right
+# vivecraft.key.rotateAxis=Rotate Only
+# vivecraft.key.rotateFree=Rotate Free
+# vivecraft.key.walkabout=Walkabout
+# vivecraft.key.teleport=Teleport
+# vivecraft.key.teleportFallback=Walk Forwards When Teleport Disabled
+# vivecraft.key.freeMoveRotate=Move/Rotate
+# vivecraft.key.freeMoveStrafe=Move/Strafe
+# vivecraft.key.toggleMovement=Toggle Movement Mode
+# vivecraft.key.quickTorch=Quick Torch
+# vivecraft.key.ingameMenuButton=Game Menu
+# vivecraft.key.exportWorld=Export Menu World
+# vivecraft.key.radialMenu=Open Radial Menu
+# vivecraft.key.swapMirrorView=Swap Mirror View
+# vivecraft.key.toggleKeyboard=Show/Hide Keyboard
+# vivecraft.key.moveThirdPersonCam=Move Third Person Camera
+# vivecraft.key.togglePlayerList=Toggle Player List
+# vivecraft.key.trackpadTouch=Trackpad Touch
+# vivecraft.key.vrInteract=Contextual Interact
+# vivecraft.key.guiLeftClick=Left Click
+# vivecraft.key.guiRightClick=Right Click
+# vivecraft.key.guiMiddleClick=Middle Click
+# vivecraft.key.guiShift=Shift
+# vivecraft.key.guiCtrl=Ctrl
+# vivecraft.key.guiAlt=Alt
+# vivecraft.key.guiScrollUp=Scroll Up
+# vivecraft.key.guiScrollDown=Scroll Down
+# vivecraft.key.guiScrollAxis=Scroll
+# vivecraft.key.keyboardClick=Click
+# vivecraft.key.keyboardShift=Shift
+# vivecraft.key.climbeyGrab=Climb Claws
+# vivecraft.key.climbeyJump=Jump Boots
+
+# Key binding categories
+# vivecraft.key.category.gui=GUI
+# vivecraft.key.category.climbey=Climbey Motion
+# vivecraft.key.category.keyboard=Keyboard
+
+# Action set names
+# vivecraft.actionset.ingame=In-Game
+# vivecraft.actionset.gui=GUI
+# vivecraft.actionset.global=Global
+# vivecraft.actionset.mod=Modded
+# vivecraft.actionset.contextual=Contextual
+# vivecraft.actionset.keyboard=Keyboard
+# vivecraft.actionset.mixedReality=Mixed Reality
+# vivecraft.actionset.technical=Technical
+
+# Option screens
+# vivecraft.options.screen.main=VR Settings
+# vivecraft.options.screen.freemove=Free Move Settings
+# vivecraft.options.screen.gui=HUD and GUI Settings
+# vivecraft.options.screen.menuworld=Menu World Settings
+# vivecraft.options.screen.guiother=Chat/Crosshair Settings
+# vivecraft.options.screen.quickcommands=Quick Commands
+# vivecraft.options.screen.radialmenu=Radial Menu Configuration
+# vivecraft.options.screen.stereorendering=Stereo Renderer Settings
+# vivecraft.options.screen.roomscale=Roomscale Interactions Settings
+# vivecraft.options.screen.seated=Seated Settings
+# vivecraft.options.screen.standing=Standing Locomotion Settings
+# vivecraft.options.screen.teleport=Teleport Settings
+# vivecraft.options.screen.controls=Controller Settings
+
+# Buttons that lead to the screen
+# vivecraft.options.screen.main.button=VR Settings...
+# vivecraft.options.screen.gui.button=HUD and GUI Settings...
+# vivecraft.options.screen.stereorendering.button=Stereo Rendering...
+# vivecraft.options.screen.quickcommands.button=Quick Commands...
+# vivecraft.options.screen.guiother.button=Chat & Crosshair Settings...
+# vivecraft.options.screen.standing.button=Locomotion Settings...
+# vivecraft.options.screen.roomscale.button=Interaction Settings...
+# vivecraft.options.screen.controls.button=Controller Settings...
+# vivecraft.options.screen.radialmenu.button=Radial Menu...
+# vivecraft.options.screen.seated.button=Seated Settings...
+# vivecraft.options.screen.menuworld.button=Menu World Settings...
+# vivecraft.options.screen.teleport.button=Teleport Settings...
+# vivecraft.options.screen.freemove.button=Free Move Settings...
+
+# Option names
+# vivecraft.options.HUD_SCALE=Head HUD Size
+# vivecraft.options.HUD_DISTANCE=Head HUD Distance
+# vivecraft.options.HUD_LOCK_TO=HUD Orientation Lock
+# vivecraft.options.HUD_OPACITY=HUD Opacity
+# vivecraft.options.HUD_HIDE=Hide HUD (F1)
+# vivecraft.options.RENDER_MENU_BACKGROUND=HUD/GUI Background
+# vivecraft.options.HUD_OCCLUSION=HUD Occlusion
+# vivecraft.options.MENU_ALWAYS_FOLLOW_FACE=Main Menu Follow
+# vivecraft.options.CROSSHAIR_OCCLUSION=Crosshair Occlusion
+# vivecraft.options.CROSSHAIR_SCALE=Crosshair Size
+# vivecraft.options.MENU_CROSSHAIR_SCALE=Menu Crosshair Size
+# vivecraft.options.RENDER_CROSSHAIR_MODE=Show Crosshair
+# vivecraft.options.CHAT_NOTIFICATIONS=Chat Notifications
+# vivecraft.options.CHAT_NOTIFICATION_SOUND=Notification Sound
+# vivecraft.options.CROSSHAIR_SCALES_WITH_DISTANCE=Crosshair Scaling
+# vivecraft.options.RENDER_BLOCK_OUTLINE_MODE=Show Block Outline
+# vivecraft.options.AUTO_OPEN_KEYBOARD=Always Open Keyboard
+# vivecraft.options.RADIAL_MODE_HOLD=Radial Menu Mode
+# vivecraft.options.PHYSICAL_KEYBOARD=Keyboard Type
+# vivecraft.options.GUI_APPEAR_OVER_BLOCK=Appear Over Block
+# vivecraft.options.FSAA=Lanczos Scaler
+# vivecraft.options.MIRROR_DISPLAY=Desktop Mirror
+# vivecraft.options.MIRROR_EYE=Mirror Eye
+vivecraft.options.MIXED_REALITY_KEY_COLOR=Key Colour
+# vivecraft.options.MIXED_REALITY_RENDER_HANDS=Show Hands
+# vivecraft.options.MIXED_REALITY_UNITY_LIKE=Layout
+# vivecraft.options.MIXED_REALITY_UNDISTORTED=Undistorted Pass
+# vivecraft.options.MIXED_REALITY_ALPHA_MASK=Alpha Mask
+# vivecraft.options.MIXED_REALITY_FOV=Camera FOV
+# vivecraft.options.WALK_UP_BLOCKS=Walk Up Blocks
+# vivecraft.options.MOVEMENT_MULTIPLIER=Move. Speed Multiplier
+# vivecraft.options.INERTIA_FACTOR=Player Inertia
+# vivecraft.options.SIMULATE_FALLING=Simulate Falling
+# vivecraft.options.WEAPON_COLLISION=Weapon Collision
+# vivecraft.options.ALLOW_CRAWLING=Roomscale Crawling
+# vivecraft.options.LIMIT_TELEPORT=Limit in Survival
+# vivecraft.options.REVERSE_HANDS=Reverse Hands
+# vivecraft.options.STENCIL_ON=Use Eye Stencil
+# vivecraft.options.BCB_ON=Show Body Position
+# vivecraft.options.WORLD_SCALE=World Scale
+# vivecraft.options.WORLD_ROTATION=World Rotation
+# vivecraft.options.WORLD_ROTATION_INCREMENT=Rotation Increment
+# vivecraft.options.TOUCH_HOTBAR=Touch Hotbar Enabled
+# vivecraft.options.PLAY_MODE_SEATED=Play Mode
+# vivecraft.options.RENDER_SCALEFACTOR=Resolution
+# vivecraft.options.MONO_FOV=Undistorted FOV
+# vivecraft.options.REALISTIC_JUMP=Roomscale Jumping
+# vivecraft.options.REALISTIC_SNEAK=Roomscale Sneaking
+# vivecraft.options.PHYSICAL_GUI=Physical GUIs
+# vivecraft.options.REALISTIC_CLIMB=Roomscale Climbing
+# vivecraft.options.REALISTIC_SWIM=Roomscale Swimming
+# vivecraft.options.REALISTIC_ROW=Roomscale Rowing
+# vivecraft.options.WALK_MULTIPLIER=Walking Multiplier
+# vivecraft.options.FREEMOVE_MODE=Free Move Type
+# vivecraft.options.VEHICLE_ROTATION=Vehicle Rotation
+# vivecraft.options.RESET_ORIGIN=Reset Origin
+# vivecraft.options.X_SENSITIVITY=Rotation Speed
+# vivecraft.options.Y_SENSITIVITY=Y Sensitivity
+# vivecraft.options.KEYHOLE=Keyhole
+# vivecraft.options.FOV_REDUCTION=FOV Comfort Reduction
+# vivecraft.options.FOV_REDUCTION_MIN=FOV Reduction Size
+# vivecraft.options.FOV_REDUCTION_OFFSET=FOV Reduction Offset
+# vivecraft.options.SEATED_HMD=Forward Direction
+# vivecraft.options.SEATED_HUD_XHAIR=HUD Follows
+# vivecraft.options.BACKPACK_SWITCH=Backpack Switching
+vivecraft.options.ANALOG_MOVEMENT=Analogue Movement
+# vivecraft.options.AUTO_SPRINT=Auto-Sprint
+# vivecraft.options.AUTO_SPRINT_THRESHOLD=Auto-Sprint Threshold
+# vivecraft.options.BOW_MODE=Roomscale Bow Mode
+# vivecraft.options.TELEPORT_DOWN_LIMIT=Down Limit
+# vivecraft.options.TELEPORT_UP_LIMIT=Up Limit
+# vivecraft.options.TELEPORT_HORIZ_LIMIT=Distance Limit
+# vivecraft.options.ALLOW_STANDING_ORIGIN_OFFSET=Allow Origin Offset
+# vivecraft.options.SEATED_FREE_MOVE=Movement Type
+# vivecraft.options.FORCE_STANDING_FREE_MOVE=Force Free Move
+# vivecraft.options.ALLOW_ADVANCED_BINDINGS=Show Advanced Bindings
+# vivecraft.options.MENU_WORLD_SELECTION=Worlds
+# vivecraft.options.HRTF_SELECTION=HRTF
+# vivecraft.options.RELOAD_EXTERNAL_CAMERA=Reload External Camera
+# vivecraft.options.RIGHT_CLICK_DELAY=Right Click Repeat
+
+# Option tooltips
+# vivecraft.options.HUD_SCALE.tooltip=Relative size HUD takes up in field-of-view.\nThe units are just relative, not in degrees or a fraction of FOV or anything.
+
+vivecraft.options.HUD_DISTANCE.tooltip=Distance the floating HUD is drawn in front of your body.\nThe relative size of the HUD is unchanged by this.\nDistance is in metres (though isn't obstructed by blocks).
+
+# vivecraft.options.HUD_LOCK_TO.tooltip=Specifies which orientation the HUD is locked to.\n  Hand: The HUD will appear just above your off-hand.\n  Head: The HUD will always appear in your field of view straight ahead.\n  Wrist: The HUD will appear on the inside of your off-hand arm. It will "pop out" when looked at.
+
+# vivecraft.options.HUD_OPACITY.tooltip=How transparent to draw the in-game HUD and UI.
+
+# vivecraft.options.RENDER_MENU_BACKGROUND.tooltip=Specifies whether the in game GUI menus have a semi-transparent background or not.\n  ON: Semi-transparent background on in-game menus.\n  OFF: No background on in-game menus.
+
+# vivecraft.options.HUD_OCCLUSION.tooltip=Specifies whether the HUD is occluded by closer objects.\n  ON: The HUD will be hidden by closer objects. May be hidden completely in confined environments!\n  OFF: The HUD is always visible. Stereo depth issues may be noticeable.
+
+# vivecraft.options.MENU_ALWAYS_FOLLOW_FACE.tooltip=Specifies when the main menu follows your look direction.\n  Seated: The main menu will only follow in seated mode.\n  Always: The main menu will always follow.
+
+# vivecraft.options.CROSSHAIR_SCALE.tooltip=Sets the size of the in-game crosshair.
+
+# vivecraft.options.MENU_CROSSHAIR_SCALE.tooltip=Sets the size of the menu crosshair.
+
+# vivecraft.options.RENDER_CROSSHAIR_MODE.tooltip=Set the in-game crosshair display mode.\n  Always: The crosshair is always shown even if the HUD is disabled.\n  With HUD: The crosshair is only shown when the HUD is enabled.\n  Never: The crosshair is never shown.
+
+# vivecraft.options.CHAT_NOTIFICATIONS.tooltip=Sets what happens when you recieve a chat message.\n  None: Nothing!\n  Haptic: Pulse on left controller.\n  Sound: Plays the Chat Notification Sound.\n  Both: Both haptic and sound.
+
+# vivecraft.options.CHAT_NOTIFICATION_SOUND.tooltip=Sets the chat notification sound.
+
+# vivecraft.options.CROSSHAIR_SCALES_WITH_DISTANCE.tooltip=Determines how the crosshair changes with distance.\n  ON: The crosshair will grow larger in the distance to remain the same apparent size from your viewpoint.\n  OFF: The crosshair will always be the same size in the world and appear to shrink with distance.
+
+# vivecraft.options.RENDER_BLOCK_OUTLINE_MODE.tooltip=Sets the in-game block outline display mode.\n  Always: The block outline is always shown even if the HUD is disabled.\n  With HUD: The block outline is only shown when the HUD is enabled.\n  Never: The block outline is never shown.
+
+# vivecraft.options.AUTO_OPEN_KEYBOARD.tooltip=If disabled, the keyboard will only open when you click a text field, or if a text field can't lose focus.\n\nIf enabled, the keyboard will open automatically any time a text field comes into focus. Enabling this will cause it to open in unwanted situations with mods.
+
+vivecraft.options.RADIAL_MODE_HOLD.tooltip=Behaviour of the radial menu when pressing the button.\nHold: Hold radial menu button, hover over selection and release.\nPress: Press radial menu button, click buttons, press radial menu button again to dismiss.
+
+# vivecraft.options.PHYSICAL_KEYBOARD.tooltip=Which type of VR keyboard to use for typing.\n  Physical: A keyboard which you can type on like a real keyboard.\n  Pointer: A keyboard which you can use by pointing either controller's crosshair at and pressing buttons.
+
+# vivecraft.options.GUI_APPEAR_OVER_BLOCK.tooltip=If enabled, the GUI for blocks (such as chests and furnaces) will be placed above the block. Otherwise, it will be at the usual position.
+
+# vivecraft.options.FSAA.tooltip=Uses a fancier method of resampling the game before sending it to the HMD. Works best at high render scales.
+
+# vivecraft.options.MIRROR_DISPLAY.tooltip=Mirrors image on HMD to separate desktop window.\nCan be set to OFF, single or dual hmd-view, first-person undistorted, third person undistorted and mixed reality. The undistorted and mixed reality views have a performance cost.
+
+# vivecraft.options.MIRROR_EYE.tooltip=Which eye to use in cropped and single modes.
+
+vivecraft.options.MIXED_REALITY_KEY_COLOR.tooltip=The colour drawn to the "transparent" areas of the mixed reality view. Other colours in-game will be prevented from matching this so it doesn't cause weirdness.
+
+# vivecraft.options.MIXED_REALITY_RENDER_HANDS.tooltip=Render hands on the mixed reality view. Only toggles rendering of the actual hand models, items will still be rendered.
+
+# vivecraft.options.MIXED_REALITY_UNITY_LIKE.tooltip=Choose between Unity-style 4-pane layout, or 2-pane side-by-side.
+
+# vivecraft.options.MIXED_REALITY_UNDISTORTED.tooltip=Include an undistorted view in 4-pane layout Requires an extra render pass. Otherwise the HMD view will be used.
+
+vivecraft.options.MIXED_REALITY_ALPHA_MASK.tooltip=In Unity layout, if yes, will draw a grayscale alpha mask to the upper-right quadrant (like Unity) for use in masking the foreground layer. Otherwise, foreground will be drawn with key colour for use with colour key effect.
+
+# vivecraft.options.MIXED_REALITY_FOV.tooltip=The FOV used for the mixed reality mirror mode.
+
+# vivecraft.options.WALK_UP_BLOCKS.tooltip=Allows you to set the ability to walk up blocks without having to jump. Hotkey: RCtrl+B\n§cWARNING: May trigger anti-cheat warnings if on a multiplayer server!!\n  OFF: (Default) You will have to jump up blocks.\n  ON: You can walk up single blocks. May reduce locomotion induced simulator sickness for some.
+
+# vivecraft.options.MOVEMENT_MULTIPLIER.tooltip=Sets a movement multiplier, allowing slower movement than default. This may help reduce locomotion induced simulator sickness.\n§cWARNING: May trigger anti-cheat warnings if on a multiplayer server!!\nDefaults to standard Minecraft movement (1.0) speed.
+
+# vivecraft.options.INERTIA_FACTOR.tooltip=Sets the player's movement inertia in single player mode. Lower inertia means faster acceleration, higher inertia slower acceleration. High inertia may reduce motion sickness for some, but beware of cliff edges!\n  Normal: (Default) Standard Minecraft player movement.\n  Automan < Normal < A lot < Even More. Does not affect lava, water or jumping movement currently.
+
+# vivecraft.options.SIMULATE_FALLING.tooltip=If enabled the player will fall to the ground in teleport mode when standing above empty space. Also allows jumping.
+
+# vivecraft.options.WEAPON_COLLISION.tooltip=Enables hitting blocks and entities in roomscale.\nAuto is on in survival and off in creative.
+
+# vivecraft.options.ALLOW_CRAWLING.tooltip=If enabled the player will be able to duck under block.
+
+# vivecraft.options.LIMIT_TELEPORT.tooltip=If enabled the arc teleporter will be have restrictions in survival mode. It will not be able to jump up the side of blocks, it will consume food, and it will have an energy bar that refills over time.
+
+# vivecraft.options.REVERSE_HANDS.tooltip=Swap left/right hands as dominant.\n  ON: Left dominant\n  OFF: Right dominant\n\nTo swap the buttons, restart the game and make sure default bindings are selected in SteamVR.
+
+# vivecraft.options.STENCIL_ON.tooltip=Mask out areas of the screen outside the FOV.\nImproves performance.
+
+# vivecraft.options.BCB_ON.tooltip=Shows your body position as a square shadow on the ground.\nThis is your Square Shadow Buddy™.\nDo not lose your Square Shadow Buddy.
+
+# vivecraft.options.WORLD_SCALE.tooltip=Scales the player in the world.\nAbove one makes you larger\nAnd below one makes you small\nAnd the ones that mother gives you\ndon't do anything at all.
+
+# vivecraft.options.WORLD_ROTATION.tooltip=Adds extra rotation to your HMD.\nMore useful bound to a button or changed with the arrow keys.
+
+# vivecraft.options.WORLD_ROTATION_INCREMENT.tooltip=How many degrees to rotate when rotating the world.
+
+# vivecraft.options.TOUCH_HOTBAR.tooltip=If enabled allow you to touch the hotbar with your main hand to select an item.
+
+# vivecraft.options.PLAY_MODE_SEATED.tooltip=Standing or seated play mode.\nStanding is vastly superior.
+
+# vivecraft.options.RENDER_SCALEFACTOR.tooltip=The internal rendering scale of the game, relative to the native HMD display. Higher values improve visual quality at the cost of performance.
+
+# vivecraft.options.MONO_FOV.tooltip=The FOV used for the undistorted mirror mode.
+
+# vivecraft.options.REALISTIC_JUMP.tooltip=If turned on, once you jump in real life your player will also jump. Also enables Jump Boots.
+
+# vivecraft.options.REALISTIC_SNEAK.tooltip=If turned on, once you duck in real life your player will also sneak.
+
+# vivecraft.options.PHYSICAL_GUI.tooltip=If turned on, GUIs will be replaced with 3d interactable models.\nIf Backpack tracking is enabled, reaching on your back will bring out your inventory bag.
+
+# vivecraft.options.REALISTIC_CLIMB.tooltip=If turned on, allow climbing ladders and vines by touching them. Also enables Climb Claws.
+
+# vivecraft.options.REALISTIC_SWIM.tooltip=If turned on, allow swimming by doing the breaststroke with the controllers.
+
+# vivecraft.options.REALISTIC_ROW.tooltip=Row, row, row your boat... by flapping your arms like mad.
+
+# vivecraft.options.WALK_MULTIPLIER.tooltip=Multiplies your position in the room by a factor.\nAllows you to walk around more, but may cause motion sickness.
+
+# vivecraft.options.FREEMOVE_MODE.tooltip=The source for freemove direction.\n\n  Controller: Offhand controller pointing direction.\n  HMD: Headset look direction.\n  Run-In-Place: Direction is based on how controllers are swinging.
+
+# vivecraft.options.VEHICLE_ROTATION.tooltip=Riding in a vehicle will rotate the world as the vehicle rotates. May be disorienting.
+
+vivecraft.options.RESET_ORIGIN.tooltip=Re-centre the player's feet in the world to 1.62m below the current HMD position. For non-absolute tracking systems or seated play.
+
+# vivecraft.options.X_SENSITIVITY.tooltip=Speed the view will rotate when pushed on the edge of the keyhole.
+
+# vivecraft.options.Y_SENSITIVITY.tooltip=Vertical speed of the crosshair related to the mouse.
+
+# vivecraft.options.KEYHOLE.tooltip=The number of degrees to the left and right of center where the view will begin to rotate.
+
+# vivecraft.options.FOV_REDUCTION.tooltip=Shrinks the field of view while moving. Can help with motion sickness.
+
+# vivecraft.options.FOV_REDUCTION_MIN.tooltip=The final size of FOV reduction.
+
+# vivecraft.options.FOV_REDUCTION_OFFSET.tooltip=Horizontally offsets the center of the FOV reduction for non-standard HMDs.
+
+# vivecraft.options.SEATED_HMD.tooltip=The direction the forward (W) key will go.\nHMD view direction or crosshair pointing direction.
+
+# vivecraft.options.SEATED_HUD_XHAIR.tooltip=The direction the HUD will be placed.\nHMD view direction or crosshair pointing direction.
+
+# vivecraft.options.BACKPACK_SWITCH.tooltip=If turned on, reaching behind your head with the right controller will swap to the 1st hotbar slot, or back to the previous slot. Doing the same with the left controller will swap the left and right hand items.
+
+vivecraft.options.ANALOG_MOVEMENT.tooltip=Walking speed will be determined by the controller button axis, if the bound button has a variable axis.\n\nFor full analogue control it is better to use "Move/Strafe" or "Move/Rotate".
+
+# vivecraft.options.AUTO_SPRINT.tooltip=While using freemove, sprint will automatically activate\nwhen the axis reaches the configured threshold.
+
+# vivecraft.options.AUTO_SPRINT_THRESHOLD.tooltip=The axis threshold at which auto-sprint activates.
+
+# vivecraft.options.BOW_MODE.tooltip=Sets when to use Roomscale Archery\n  OFF: Never.\n  Vanilla: Only for the vanilla bow, no mod items.\n  ON: Always for any item that uses the "bow" action.
+
+# vivecraft.options.TELEPORT_DOWN_LIMIT.tooltip=Limit the number of blocks you can teleport below you.
+
+# vivecraft.options.TELEPORT_UP_LIMIT.tooltip=Limit the number of blocks you can teleport above you.
+
+# vivecraft.options.TELEPORT_HORIZ_LIMIT.tooltip=Limit the number of blocks you can teleport sideways you.
+
+# vivecraft.options.ALLOW_STANDING_ORIGIN_OFFSET.tooltip=Allows the "Reset Origin" button to be used in standing mode, for those that wish to play physically seated while using tracked controllers.
+
+# vivecraft.options.SEATED_FREE_MOVE.tooltip=Which locomotion mode to use in seated mode.\n\n  Teleport: Press any direction to activate.\n  Free Move: WASD movement like vanilla Minecraft.
+
+# vivecraft.options.FORCE_STANDING_FREE_MOVE.tooltip=Forces the use of the fallback walk forwards binding (left trigger by default). For more movement options, edit the SteamVR controller bindings.\n\nNote that this disables the teleport binding.
+
+# vivecraft.options.ALLOW_ADVANCED_BINDINGS.tooltip=Unhides additional SteamVR bindings for climbey, keyboard and mixed reality.\n\nRequires a restart to take effect.
+
+# vivecraft.options.MENU_WORLD_SELECTION.tooltip=Which menu worlds to load on startup.\n\nIf no custom worlds are found, official worlds will be used regardless.
+
+# vivecraft.options.HRTF_SELECTION.tooltip=HRTF profile to use for positional 3D audio. Quality may vary by device and driver.\n\n  OFF: Explicitly disable HRTF.\n  Default: Use the default HRTF profile.\n  Others: Use a specific HRTF profile.
+
+# vivecraft.options.RELOAD_EXTERNAL_CAMERA.tooltip=Reloads the camera config from ExternalCamera.cfg
+
+# vivecraft.options.RIGHT_CLICK_DELAY.tooltip=The number of game ticks between "right clicks" while holding the button down.
+
+# Option values
+# vivecraft.options.gamma.cantseeshitcaptain=I Can't See
+# vivecraft.options.yes=YES
+# vivecraft.options.no=NO
+# vivecraft.options.auto=Auto
+# vivecraft.options.default=Default
+# vivecraft.options.opaque=Opaque
+# vivecraft.options.mirror.off=OFF (fast)
+# vivecraft.options.mirror.dual=Dual (fast)
+# vivecraft.options.mirror.single=Single (fast)
+# vivecraft.options.mirror.firstperson=1st Person (slow)
+# vivecraft.options.mirror.thirdperson=3rd Person (slow)
+# vivecraft.options.mirror.mixedreality=Mixed Reality (slow)
+# vivecraft.options.mirror.cropped=Cropped (fast)
+# vivecraft.options.left=Left
+# vivecraft.options.right=Right
+# vivecraft.options.color.black=Black
+# vivecraft.options.color.red=Red
+# vivecraft.options.color.yellow=Yellow
+# vivecraft.options.color.green=Green
+# vivecraft.options.color.cyan=Cyan
+# vivecraft.options.color.blue=Blue
+# vivecraft.options.color.magenta=Magenta
+# vivecraft.options.unity=Unity
+# vivecraft.options.sidebyside=Side-by-Side
+# vivecraft.options.hand=Hand
+# vivecraft.options.head=Head
+# vivecraft.options.wrist=Wrist
+# vivecraft.options.body=Body
+# vivecraft.options.withhud=With HUD
+# vivecraft.options.always=Always
+# vivecraft.options.never=Never
+# vivecraft.options.chatnotification.none=None
+# vivecraft.options.chatnotification.haptic=Haptic
+# vivecraft.options.chatnotification.sound=Sound
+# vivecraft.options.chatnotification.both=Both
+# vivecraft.options.seated=Seated
+# vivecraft.options.standing=Standing
+# vivecraft.options.inertia.none=Automan
+# vivecraft.options.inertia.normal=Normal
+# vivecraft.options.inertia.large=A Lot
+# vivecraft.options.inertia.massive=Even More
+# vivecraft.options.smooth=Smooth
+# vivecraft.options.hmd=HMD
+# vivecraft.options.crosshair=Crosshair
+# vivecraft.options.controller=Controller
+# vivecraft.options.runinplace=Run-In-Place
+# vivecraft.options.hold=Hold
+# vivecraft.options.press=Press
+# vivecraft.options.keyboard.physical=Physical
+# vivecraft.options.keyboard.pointer=Pointer
+# vivecraft.options.vanilla=Vanilla
+# vivecraft.options.teleportlimit=%d Blocks
+# vivecraft.options.teleport=Teleport
+# vivecraft.options.freemove=Free Move
+# vivecraft.options.menuworld.both=Official & Custom
+# vivecraft.options.menuworld.custom=Custom Only
+# vivecraft.options.menuworld.official=Official Only
+# vivecraft.options.menuworld.none=None
+# vivecraft.options.rightclickdelay.slow=Slow
+# vivecraft.options.rightclickdelay.slower=Slower
+# vivecraft.options.rightclickdelay.slowest=Slowest
+
+# Button text
+# vivecraft.gui.ok=OK
+# vivecraft.gui.clear=Clear
+# vivecraft.gui.loaddefaults=Load Defaults
+# vivecraft.gui.menuworld.refresh=Refresh Menu World
+# vivecraft.gui.menuworld.loadnew=Load New Menu World
+# vivecraft.gui.radialmenu.mainset=Main Set
+# vivecraft.gui.radialmenu.alternateset=Alternate Set
+# vivecraft.gui.chat=Chat
+# vivecraft.gui.commands=Commands
+# vivecraft.gui.overlay=Overlay
+# vivecraft.gui.profiler=Profiler
+# vivecraft.gui.screenshot=Screenshot
+# vivecraft.gui.calibrateheight=Calibrate Height
+# vivecraft.gui.alignkatwalk=Align KAT WALK
+# vivecraft.gui.movethirdpersoncam=Move Third Cam
+
+# Items
+# vivecraft.item.jumpboots=Jump Boots
+# vivecraft.item.climbclaws=Climb Claws
+# vivecraft.item.telescope=Eye of the Farseer
+
+# Messages
+# vivecraft.messages.seatedmode=Switching to Seated Mode will disable controller input. Continue?
+# vivecraft.messages.radialmenubind.1=Make sure Open Radial Menu is bound.
+# vivecraft.messages.radialmenubind.2=Hold (Keyboard Shift) with the radial menu open to switch to this set.
+# vivecraft.messages.controls.1=Bindings are handled by SteamVR Input.
+# vivecraft.messages.controls.2=Go to Settings > Controllers > Manage Controller Bindings in the dashboard.
+# vivecraft.messages.controls.3=§6Steam must be running §obefore§r§6 SteamVR is started, or bindings will not save.
+# vivecraft.messages.serverplugin=Vivecraft server mod detected: %s
+# vivecraft.messages.noserverplugin=Vivecraft server mod not detected. This server may not support teleporting. Restricted movement mode (fallback to free move) has been enabled.
+# vivecraft.messages.calibrateheight=Please calibrate your height in the pause menu.
+# vivecraft.messages.rendersetupfailed=Render setup failed: %s
+# vivecraft.messages.intelgraphics=Intel Integrated Graphics are not supported. If this is a laptop, please force the high-performance GPU. Detected GPU: %s
+# vivecraft.messages.menuworldexportcomplete.1=World export complete... area size: %d
+# vivecraft.messages.menuworldexportcomplete.2=Saved to %s
+# vivecraft.messages.menuworldexportclientwarning=WARNING: Saving menu world using a client world. Data may be incomplete. It is recommended to save menu worlds in singleplayer.
+# vivecraft.messages.teleportdisabled=Restricted movement enabled (no teleporting)
+# vivecraft.messages.teleportenabled=Restricted movement disabled (teleporting allowed)
+# vivecraft.messages.walkupblocks=Walk up blocks (RCTRL+B): %s
+# vivecraft.messages.showaim=Show aim (RCTRL+RSHIFT): enabled
+# vivecraft.messages.playerinertia=Player movement inertia (LCTRL+I): %s
+# vivecraft.messages.movementmodeswitch=Movement mode switched to: %s
+# vivecraft.messages.coords=X: %.2f Y: %.2f Z: %.2f
+# vivecraft.messages.angles=Pitch: %.1f Yaw: %.1f Roll: %.1f
+# vivecraft.messages.heightset=User height set to %d%%

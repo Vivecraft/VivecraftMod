@@ -1,0 +1,26 @@
+{
+	"credit": "Made with Blockbench",
+	"ambientocclusion": false,
+	"texture_size": [64, 64],
+	"textures": {
+		"1": "vivecraft:transparent",
+		"particle": "vivecraft:transparent"
+	},
+	"elements": [
+		{
+			"from": [3.733, 1.6, 10],
+			"to": [12.266, 6.4, 10.3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [14.2, 9.2, 20]},
+			"faces": {
+				"south": {"uv": [0, 0, 16, 16], "texture": "#1"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "camera",
+			"origin": [14, 9, 20],
+			"children": [0]
+		}
+	]
+}
