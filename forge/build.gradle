@@ -18,6 +18,7 @@ loom {
         mixinConfig "vivecraft.nonvr.mixins.json"
 
         mixinConfig "vivecraft.vr.forge.mixins.json"
+        mixinConfig "vivecraft.nonvr.forge.mixins.json"
     }
 }
 

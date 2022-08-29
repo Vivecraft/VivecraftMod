@@ -26,8 +26,7 @@
     "client.multiplayer.ClientPacketListenerMixin",
     "client.player.AbstractClientPlayerMixin",
     "client.renderer.block.LiquidBlockRendererMixin",
-    "client.renderer.entity.EntityRenderDispatcherMixin",
-    "client.resources.model.ModelBakeryMixin"
+    "client.renderer.entity.EntityRenderDispatcherMixin"
   ],
   "server": [
   ],

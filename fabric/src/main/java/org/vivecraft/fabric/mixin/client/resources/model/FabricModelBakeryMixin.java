@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.client.resources.model;
+package org.vivecraft.fabric.mixin.client.resources.model;
 
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -15,7 +15,7 @@ import org.vivecraft.gameplay.trackers.CameraTracker;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
 
 @Mixin(ModelBakery.class)
-public abstract class ModelBakeryMixin {
+public abstract class FabricModelBakeryMixin {
     @Shadow protected abstract void loadTopLevel(ModelResourceLocation modelResourceLocation);
 
     @Inject(method = "<init>", at = @At(value = "CONSTANT", args = "stringValue=textures"))
