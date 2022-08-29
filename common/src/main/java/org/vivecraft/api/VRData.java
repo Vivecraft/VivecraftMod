@@ -55,7 +55,8 @@ public class VRData
         }
         
         Matrix4f matrix4f2 = Matrix4f.multiply(Matrix4f.rotationY(-rotation), (new Matrix4f(DataHolder.getInstance().cameraTracker.getRotation())).transposed());
-        this.cam = new VRDevicePose(this, matrix4f2, DataHolder.getInstance().cameraTracker.getPosition().subtract(origin).yRot(-rotation).subtract(vec3).add(vec31), matrix4f2.transform(Vector3.forward()).toVector3d());
+        float inverseWorldScale = 1.0F / worldScale;
+        this.cam = new VRData.VRDevicePose(this, matrix4f2, DataHolder.getInstance().cameraTracker.getPosition().subtract(origin).yRot(-rotation).multiply(inverseWorldScale,inverseWorldScale,inverseWorldScale).subtract(vec3).add(vec31), matrix4f2.transform(Vector3.forward()).toVector3d());
 
         if (dataholder.vr.mrMovingCamActive)
         {
