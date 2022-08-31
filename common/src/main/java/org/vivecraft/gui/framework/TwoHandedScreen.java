@@ -1,6 +1,6 @@
 package org.vivecraft.gui.framework;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.GuiExtension;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.provider.MCVR;
@@ -14,7 +14,7 @@ import net.minecraft.network.chat.TextComponent;
 
 public abstract class TwoHandedScreen extends Screen
 {
-	protected DataHolder dataholder = DataHolder.getInstance();
+	protected ClientDataHolder dataholder = ClientDataHolder.getInstance();
     public float cursorX1;
     public float cursorY1;
     public float cursorX2;

@@ -1,6 +1,6 @@
 package org.vivecraft.gameplay.trackers;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.math.Quaternion;
@@ -20,18 +20,18 @@ public class RowTracker extends Tracker
     public float ROar;
     public float Foar;
 
-    public RowTracker(Minecraft mc, DataHolder dh)
+    public RowTracker(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)
     {
-        if (DataHolder.getInstance().vrSettings.seated)
+        if (ClientDataHolder.getInstance().vrSettings.seated)
         {
             return false;
         }
-        else if (!DataHolder.getInstance().vrSettings.realisticRowEnabled)
+        else if (!ClientDataHolder.getInstance().vrSettings.realisticRowEnabled)
         {
             return false;
         }
@@ -51,7 +51,7 @@ public class RowTracker extends Tracker
             }
             else
             {
-                return !DataHolder.getInstance().bowTracker.isNotched();
+                return !ClientDataHolder.getInstance().bowTracker.isNotched();
             }
         }
         else

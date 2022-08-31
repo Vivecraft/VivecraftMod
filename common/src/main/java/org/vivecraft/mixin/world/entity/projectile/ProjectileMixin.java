@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.ClientNetworkHelper;
+import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.api.ServerVivePlayer;
 
 @Mixin(Projectile.class)
@@ -30,7 +31,7 @@ public abstract class ProjectileMixin extends Entity{
 
 	@Inject(at = @At("HEAD"), method = "shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V", cancellable = true)
 	public void shoot(Entity pProjectile, float pX, float pY, float pZ, float pVelocity, float pInaccuracy, CallbackInfo info) {
-		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(pProjectile.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(pProjectile.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR()){
 			Vec3 vec3 = serverviveplayer.getControllerDir(serverviveplayer.activeHand);
 			if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !serverviveplayer.isSeated() && serverviveplayer.getDraw() > 0.0F){

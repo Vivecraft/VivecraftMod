@@ -1,6 +1,6 @@
 package org.vivecraft.irisMixin;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import net.coderbot.iris.mixin.LevelRendererAccessor;
 import net.coderbot.iris.pipeline.ClearPass;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
@@ -19,20 +19,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class IrisNewWorldRenderingPipelineVRMixin {
  @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true, remap = false)
     private void cancelShadows(LevelRendererAccessor par1, Camera par2, CallbackInfo ci) {
-     if (!DataHolder.getInstance().isFirstPass) {
+     if (!ClientDataHolder.getInstance().isFirstPass) {
             ci.cancel();
         }
     }
 
     @Redirect(method = "beginLevelRendering", remap = false, at = @At(value = "INVOKE", target = "Lnet/coderbot/iris/uniforms/FrameUpdateNotifier;onNewFrame()V"))
     private void no(FrameUpdateNotifier instance) {
-        if (DataHolder.getInstance().isFirstPass) {
+        if (ClientDataHolder.getInstance().isFirstPass) {
             instance.onNewFrame();
         }
     }
     @Redirect(method = "beginLevelRendering", remap = false, at = @At(value = "INVOKE", target = "Lnet/coderbot/iris/pipeline/ClearPass;execute(Lnet/coderbot/iris/vendored/joml/Vector4f;)V", ordinal = 0))
     private void noX2(ClearPass instance, Vector4f vector4f) {
-        if (DataHolder.getInstance().isFirstPass) {
+        if (ClientDataHolder.getInstance().isFirstPass) {
             instance.execute(vector4f);
         }
     }

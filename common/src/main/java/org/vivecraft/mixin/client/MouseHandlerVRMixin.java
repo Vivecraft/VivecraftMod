@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client;
 
 import net.minecraft.client.player.LocalPlayer;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Final;
@@ -56,7 +56,7 @@ public class MouseHandlerVRMixin {
 
     @Inject(at = @At("HEAD"), method = "grabMouse", cancellable = true)
     public void seated(CallbackInfo ci) {
-        if (!DataHolder.getInstance().vrSettings.seated) {
+        if (!ClientDataHolder.getInstance().vrSettings.seated) {
             this.mouseGrabbed = true;
             ci.cancel();
         }
@@ -64,7 +64,7 @@ public class MouseHandlerVRMixin {
 
     @Inject(at = @At(value = "HEAD"), method = "releaseMouse", cancellable = true)
     public void grabMouse(CallbackInfo ci) {
-        if (!DataHolder.getInstance().vrSettings.seated) {
+        if (!ClientDataHolder.getInstance().vrSettings.seated) {
             this.mouseGrabbed = false;
             ci.cancel();
         }

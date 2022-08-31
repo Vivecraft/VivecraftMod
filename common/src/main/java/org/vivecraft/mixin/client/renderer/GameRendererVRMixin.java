@@ -58,7 +58,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.MethodHolder;
 import org.vivecraft.Xplat;
@@ -69,7 +69,7 @@ import org.vivecraft.extensions.LevelRendererExtension;
 import org.vivecraft.extensions.MinecraftExtension;
 import org.vivecraft.extensions.PlayerExtension;
 import org.vivecraft.extensions.RenderTargetExtension;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.ClientNetworkHelper;
 import org.vivecraft.api.VRData;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
@@ -91,7 +91,7 @@ import java.util.Locale;
 public abstract class GameRendererVRMixin
 		implements ResourceManagerReloadListener, AutoCloseable, GameRendererExtension {
 
-	private static final DataHolder DATA_HOLDER = DataHolder.getInstance();
+	private static final ClientDataHolder DATA_HOLDER = ClientDataHolder.getInstance();
 	@Unique
 	public float minClipDistance = 0.02F;
 	@Unique
@@ -247,7 +247,7 @@ public abstract class GameRendererVRMixin
 
 	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"), method = "pick")
 	public ClientLevel appendCheck(Minecraft instance) {
-		return DataHolder.getInstance().vrPlayer.vrdata_world_render == null ? null : instance.level;
+		return ClientDataHolder.getInstance().vrPlayer.vrdata_world_render == null ? null : instance.level;
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getEyePosition(F)Lnet/minecraft/world/phys/Vec3;"), method = "pick(F)V")
@@ -331,14 +331,14 @@ public abstract class GameRendererVRMixin
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;pauseGame(Z)V"), method = "render")
 	public void pause(Minecraft instance, boolean bl) {
-		if (DataHolder.getInstance().currentPass == RenderPass.LEFT ){
+		if (ClientDataHolder.getInstance().currentPass == RenderPass.LEFT ){
 			instance.pauseGame(bl);
 		}
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;getMillis()J"), method = "render")
 	public long active() {
-		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+		if (ClientDataHolder.getInstance().currentPass == RenderPass.LEFT) {
 			return Util.getMillis();
 		}
 		return this.lastActiveTime;
@@ -364,7 +364,7 @@ public abstract class GameRendererVRMixin
 
 	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;effectActive:Z"), method = "render")
 	public boolean effect(GameRenderer instance) {
-		return this.effectActive && DataHolder.getInstance().currentPass != RenderPass.THIRD;
+		return this.effectActive && ClientDataHolder.getInstance().currentPass != RenderPass.THIRD;
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.BEFORE, ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
@@ -595,7 +595,7 @@ public abstract class GameRendererVRMixin
 
 		if (renderright) {
 			this.minecraft.getItemRenderer();
-			DataHolder.ismainhand = true;
+			ClientDataHolder.ismainhand = true;
 
 			if (menuhandright) {
 				this.renderMainMenuHand(0, partialTicks, false, poseStack);
@@ -608,7 +608,7 @@ public abstract class GameRendererVRMixin
 			}
 
 			this.minecraft.getItemRenderer();
-			DataHolder.ismainhand = false;
+			ClientDataHolder.ismainhand = false;
 		}
 
 		if (renderleft) {
@@ -633,12 +633,12 @@ public abstract class GameRendererVRMixin
 
 	@Override
 	public boolean isInMenuRoom() {
-		return this.minecraft.level == null || this.minecraft.screen instanceof WinScreen || DataHolder.getInstance().integratedServerLaunchInProgress || this.minecraft.getOverlay() != null;
+		return this.minecraft.level == null || this.minecraft.screen instanceof WinScreen || ClientDataHolder.getInstance().integratedServerLaunchInProgress || this.minecraft.getOverlay() != null;
 	}
 
 	@Override
 	public Vec3 getControllerRenderPos(int c) {
-		DataHolder dataholder = GameRendererVRMixin.DATA_HOLDER;
+		ClientDataHolder dataholder = GameRendererVRMixin.DATA_HOLDER;
 		if (!dataholder.vrSettings.seated) {
 			return dataholder.vrPlayer.vrdata_world_render.getController(c).getPosition();
 		} else {
@@ -902,7 +902,7 @@ public abstract class GameRendererVRMixin
 				// }
 				// }
 
-				if (!DataHolder.viewonly) {
+				if (!ClientDataHolder.viewonly) {
 					this.minecraft.gui.render(posestack1, partialTicks);
 				}
 
@@ -1153,7 +1153,7 @@ public abstract class GameRendererVRMixin
 					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 			RenderSystem.disableTexture();
 
-			if (NetworkHelper.isLimitedSurvivalTeleport() && !GameRendererVRMixin.DATA_HOLDER.vrPlayer.getFreeMove()
+			if (ClientNetworkHelper.isLimitedSurvivalTeleport() && !GameRendererVRMixin.DATA_HOLDER.vrPlayer.getFreeMove()
 					&& this.minecraft.gameMode.hasMissTime()
 					&& GameRendererVRMixin.DATA_HOLDER.teleportTracker.vrMovementStyle.arcAiming
 					&& !GameRendererVRMixin.DATA_HOLDER.bowTracker.isActive(this.minecraft.player)) {
@@ -1637,10 +1637,10 @@ public abstract class GameRendererVRMixin
 
 	public void renderVRFabulous(float partialTicks, LevelRenderer worldrendererin, boolean menuhandright,
 			boolean menuhandleft, PoseStack pMatrix) {
-		if (DataHolder.getInstance().currentPass == RenderPass.SCOPEL || DataHolder.getInstance().currentPass == RenderPass.SCOPER)
+		if (ClientDataHolder.getInstance().currentPass == RenderPass.SCOPEL || ClientDataHolder.getInstance().currentPass == RenderPass.SCOPER)
 			return;
 		this.minecraft.getProfiler().popPush("VR");
-		this.renderCrosshairAtDepth(!DataHolder.getInstance().vrSettings.useCrosshairOcclusion, pMatrix);
+		this.renderCrosshairAtDepth(!ClientDataHolder.getInstance().vrSettings.useCrosshairOcclusion, pMatrix);
 		this.minecraft.getMainRenderTarget().unbindWrite();
 		((LevelRendererExtension)worldrendererin).getAlphaSortVROccludedFramebuffer().clear(Minecraft.ON_OSX);
 		((LevelRendererExtension)worldrendererin).getAlphaSortVROccludedFramebuffer().copyDepthFrom(this.minecraft.getMainRenderTarget());
@@ -1856,7 +1856,7 @@ public abstract class GameRendererVRMixin
 				vec3i = new Vec3i(83, 75, 83);
 				b0 = -128;
 			} else {
-				if (NetworkHelper.isLimitedSurvivalTeleport() && !this.minecraft.player.getAbilities().mayfly) {
+				if (ClientNetworkHelper.isLimitedSurvivalTeleport() && !this.minecraft.player.getAbilities().mayfly) {
 					vec3i = this.tpLimitedColor;
 				} else {
 					vec3i = this.tpUnlimitedColor;
@@ -2078,7 +2078,7 @@ public abstract class GameRendererVRMixin
 	}
 
 	public boolean shouldRenderCrosshair() {
-		if (DataHolder.viewonly) {
+		if (ClientDataHolder.viewonly) {
 			return false;
 		} else if (this.minecraft.level == null) {
 			return false;
@@ -2406,19 +2406,19 @@ public abstract class GameRendererVRMixin
 
 	@Override
 	public void DrawScopeFB(PoseStack matrixStackIn, int i) {
-		if (DataHolder.getInstance().currentPass != RenderPass.SCOPEL && DataHolder.getInstance().currentPass != RenderPass.SCOPER) {
+		if (ClientDataHolder.getInstance().currentPass != RenderPass.SCOPEL && ClientDataHolder.getInstance().currentPass != RenderPass.SCOPER) {
 			//this.lightTexture.turnOffLightLayer();
 			matrixStackIn.pushPose();
 			RenderSystem.enableDepthTest();
 			RenderSystem.enableTexture();
 
 			if (i == 0) {
-				DataHolder.getInstance().vrRenderer.telescopeFramebufferR.bindRead();
-				RenderSystem.setShaderTexture(0, DataHolder.getInstance().vrRenderer.telescopeFramebufferR.getColorTextureId());
+				ClientDataHolder.getInstance().vrRenderer.telescopeFramebufferR.bindRead();
+				RenderSystem.setShaderTexture(0, ClientDataHolder.getInstance().vrRenderer.telescopeFramebufferR.getColorTextureId());
 			}
 			else {
-				DataHolder.getInstance().vrRenderer.telescopeFramebufferL.bindRead();
-				RenderSystem.setShaderTexture(0, DataHolder.getInstance().vrRenderer.telescopeFramebufferL.getColorTextureId());
+				ClientDataHolder.getInstance().vrRenderer.telescopeFramebufferL.bindRead();
+				RenderSystem.setShaderTexture(0, ClientDataHolder.getInstance().vrRenderer.telescopeFramebufferL.getColorTextureId());
 			}
 
 			float scale = 0.0785F;
@@ -2430,7 +2430,7 @@ public abstract class GameRendererVRMixin
 			RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
 			RenderSystem.enableBlend();
 			matrixStackIn.translate(0.0D, 0.0D, 0.00001D);
-			int light = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(i).getPosition()));
+			int light = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getController(i).getPosition()));
 			this.drawSizedQuadWithLightmap(720.0F, 720.0F, scale, light, matrixStackIn.last().pose());
 
 			matrixStackIn.popPose();

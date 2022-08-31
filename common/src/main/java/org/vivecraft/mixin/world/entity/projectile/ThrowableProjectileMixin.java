@@ -5,7 +5,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.ClientNetworkHelper;
+import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.api.ServerVivePlayer;
 
 import net.minecraft.world.entity.EntityType;
@@ -26,7 +27,7 @@ public abstract class ThrowableProjectileMixin extends Entity {
 
 	@Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V")
 	public void init(EntityType<? extends ThrowableProjectile> p_37462_, LivingEntity p_37463_, Level p_37464_, CallbackInfo info) {
-		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(p_37463_.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(p_37463_.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			Vec3 vec3 = serverviveplayer.getControllerPos(serverviveplayer.activeHand, (Player)p_37463_);
 			Vec3 vec31 = serverviveplayer.getControllerDir(serverviveplayer.activeHand).scale((double)0.6F);

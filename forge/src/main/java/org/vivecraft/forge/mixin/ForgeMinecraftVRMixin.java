@@ -7,7 +7,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.CommonDataHolder;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 
 @Mixin(Minecraft.class)
@@ -18,10 +19,10 @@ public class ForgeMinecraftVRMixin {
 
     @Inject(at = @At("HEAD"), method = "lambda$new$2", remap = false)
     public void menuInitvarforge(CallbackInfo ci) {
-        if (DataHolder.getInstance().vrRenderer.isInitialized()) {
+        if (ClientDataHolder.getInstance().vrRenderer.isInitialized()) {
             //DataHolder.getInstance().menuWorldRenderer.init();
         }
-        DataHolder.getInstance().vr.postinit();
+        ClientDataHolder.getInstance().vr.postinit();
     }
 
     @Inject(at = @At("HEAD"), method = "lambda$reloadResourcePacks$18", remap = false)
@@ -34,7 +35,7 @@ public class ForgeMinecraftVRMixin {
 //				exception.printStackTrace();
 //			}
 //		}
-        DataHolder.getInstance().resourcePacksChanged = false;
+        CommonDataHolder.getInstance().resourcePacksChanged = false;
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = At.Shift.BEFORE, ordinal = 1), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")

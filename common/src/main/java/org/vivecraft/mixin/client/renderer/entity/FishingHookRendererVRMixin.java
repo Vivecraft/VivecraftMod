@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.GameRendererExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -32,7 +32,7 @@ public class FishingHookRendererVRMixin {
             index = 0;
         }
         Vec3 vec31 = ((GameRendererExtension)Minecraft.getInstance().gameRenderer).getControllerRenderPos(index);
-        Vec3 vec32 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getHand(index).getDirection();
+        Vec3 vec32 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getHand(index).getDirection();
 
         o = vec31.x + vec32.x * (double)0.47F;
         p = vec31.y + vec32.y * (double)0.47F;

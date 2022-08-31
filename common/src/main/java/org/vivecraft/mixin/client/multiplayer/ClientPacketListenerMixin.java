@@ -20,7 +20,8 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.ClientNetworkHelper;
+import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.render.PlayerModelController;
 
 import java.util.UUID;
@@ -34,20 +35,20 @@ public class ClientPacketListenerMixin {
 
     @Inject(at = @At("TAIL"), method = "<init>")
     public void init(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager, CallbackInfo ci) {
-        NetworkHelper.resetServerSettings();
-        NetworkHelper.displayedChatMessage = false;
+        ClientNetworkHelper.resetServerSettings();
+        ClientNetworkHelper.displayedChatMessage = false;
     }
 
     @Inject(at = @At("TAIL"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
     public void login(ClientboundLoginPacket p_105030_, CallbackInfo callback) {
-        NetworkHelper.vivePlayers.clear();
-        NetworkHelper.sendVersionInfo();
+        CommonNetworkHelper.vivePlayers.clear();
+        ClientNetworkHelper.sendVersionInfo();
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 0, shift = Shift.AFTER), method = "handleRespawn(Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;)V")
     public void respawn(ClientboundRespawnPacket packet, CallbackInfo callback) {
-        NetworkHelper.resetServerSettings();
-        NetworkHelper.sendVersionInfo();
+        ClientNetworkHelper.resetServerSettings();
+        ClientNetworkHelper.sendVersionInfo();
     }
 
     @Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getData()Lnet/minecraft/network/FriendlyByteBuf;"),
@@ -57,21 +58,21 @@ public class ClientPacketListenerMixin {
         if (resourcelocation.getNamespace().equalsIgnoreCase("vivecraft")) {
             if (resourcelocation.getPath().equalsIgnoreCase("data")) {
                 byte b0 = friendlybytebuf.readByte();
-                NetworkHelper.PacketDiscriminators networkhelper$packetdiscriminators = NetworkHelper.PacketDiscriminators.values()[b0];
+                CommonNetworkHelper.PacketDiscriminators networkhelper$packetdiscriminators = CommonNetworkHelper.PacketDiscriminators.values()[b0];
 
                 switch (networkhelper$packetdiscriminators) {
                     case VERSION:
                         String s11 = friendlybytebuf.readUtf(1024);
 
-                        if (!NetworkHelper.displayedChatMessage) {
-                            NetworkHelper.displayedChatMessage = true;
+                        if (!ClientNetworkHelper.displayedChatMessage) {
+                            ClientNetworkHelper.displayedChatMessage = true;
                             this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.serverplugin", s11));
                         }
 
                         break;
 
                     case REQUESTDATA:
-                        NetworkHelper.serverWantsData = true;
+                        ClientNetworkHelper.serverWantsData = true;
                         break;
 
                     case CLIMBING:
@@ -79,7 +80,7 @@ public class ClientPacketListenerMixin {
                         break;
 
                     case TELEPORT:
-                        NetworkHelper.serverSupportsDirectTeleport = true;
+                        ClientNetworkHelper.serverSupportsDirectTeleport = true;
                         break;
 
                     case UBERPACKET:
@@ -110,7 +111,7 @@ public class ClientPacketListenerMixin {
                         break;
 
                     case CRAWL:
-                        NetworkHelper.serverAllowsCrawling = true;
+                        ClientNetworkHelper.serverAllowsCrawling = true;
                 }
 
 				info.cancel();

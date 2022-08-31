@@ -3,7 +3,8 @@ package org.vivecraft.mixin.client.multiplayer;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.Connection;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
 import net.minecraft.client.ClientTelemetryManager;
 import net.minecraft.client.Minecraft;
@@ -32,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.ClientNetworkHelper;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.provider.openvr_jna.control.VivecraftMovementInput;
 import org.vivecraft.render.PlayerModelController;
@@ -47,16 +48,16 @@ public class ClientPacketListenerVRMixin {
 
     @Inject(at = @At("TAIL"), method = "<init>")
     public void init(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager, CallbackInfo ci) {
-        DataHolder.getInstance().vrSettings.overrides.resetAll();
-        NetworkHelper.resetServerSettings();
-        NetworkHelper.displayedChatMessage = false;
+        ClientDataHolder.getInstance().vrSettings.overrides.resetAll();
+        ClientNetworkHelper.resetServerSettings();
+        ClientNetworkHelper.displayedChatMessage = false;
     }
 
     @Inject(at = @At("TAIL"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
     public void login(ClientboundLoginPacket p_105030_, CallbackInfo callback) {
-        NetworkHelper.vivePlayers.clear();
-        NetworkHelper.sendVersionInfo();
-        DataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
+        CommonNetworkHelper.vivePlayers.clear();
+        ClientNetworkHelper.sendVersionInfo();
+        ClientDataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
     }
 
     @Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/client/player/KeyboardInput;<init>(Lnet/minecraft/client/Options;)V"), method = "handleLogin")
@@ -76,9 +77,9 @@ public class ClientPacketListenerVRMixin {
 
     @Inject(at = @At("TAIL"), method = "onDisconnect")
     public void disconnect(Component component, CallbackInfo ci) {
-        DataHolder.getInstance().vrPlayer.setTeleportSupported(false);
-        DataHolder.getInstance().vrPlayer.setTeleportOverride(false);
-        DataHolder.getInstance().vrSettings.overrides.resetAll();
+        ClientDataHolder.getInstance().vrPlayer.setTeleportSupported(false);
+        ClientDataHolder.getInstance().vrPlayer.setTeleportOverride(false);
+        ClientDataHolder.getInstance().vrSettings.overrides.resetAll();
     }
 
     @Inject(at = @At("TAIL"), method = "handleChat")
@@ -88,7 +89,7 @@ public class ClientPacketListenerVRMixin {
         ((PlayerExtension)minecraft.player).setLastMsg(null);
 
         if (minecraft.player == null || s == null || !clientboundChatPacket.getMessage().getString().contains(s)) {
-            DataHolder dataholder = DataHolder.getInstance();
+            ClientDataHolder dataholder = ClientDataHolder.getInstance();
             if (dataholder.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
                 if ((dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) && !dataholder.vrSettings.seated) {
                     dataholder.vr.triggerHapticPulse(ControllerType.LEFT, 0.2F, 1000.0F, 1.0F);}
@@ -109,9 +110,9 @@ public class ClientPacketListenerVRMixin {
 
     @Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/client/player/KeyboardInput;<init>(Lnet/minecraft/client/Options;)V"), method = "handleRespawn")
     public KeyboardInput respawn(Options options) {
-        NetworkHelper.resetServerSettings();
-        NetworkHelper.sendVersionInfo();
-        DataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
+        ClientNetworkHelper.resetServerSettings();
+        ClientNetworkHelper.sendVersionInfo();
+        ClientDataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
         return null;
     }
 
@@ -122,17 +123,16 @@ public class ClientPacketListenerVRMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 0, shift = At.Shift.AFTER), method = "handleRespawn(Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;)V")
     public void respawn(ClientboundRespawnPacket packet, CallbackInfo callback) {
-        DataHolder.getInstance().vrSettings.overrides.resetAll();
+        ClientDataHolder.getInstance().vrSettings.overrides.resetAll();
     }
 
     @Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getData()Lnet/minecraft/network/FriendlyByteBuf;"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;)V", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
 	public void handlepacket(ClientboundCustomPayloadPacket p_105004_, CallbackInfo info, ResourceLocation resourcelocation, FriendlyByteBuf friendlybytebuf) {
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         if (resourcelocation.getNamespace().equalsIgnoreCase("vivecraft")) {
 			if (resourcelocation.getPath().equalsIgnoreCase("data")) {
 				byte b0 = friendlybytebuf.readByte();
-				NetworkHelper.PacketDiscriminators networkhelper$packetdiscriminators = NetworkHelper.PacketDiscriminators
-						.values()[b0];
+                CommonNetworkHelper.PacketDiscriminators networkhelper$packetdiscriminators = CommonNetworkHelper.PacketDiscriminators.values()[b0];
 
 				switch (networkhelper$packetdiscriminators) {
 				case VERSION:
@@ -140,8 +140,8 @@ public class ClientPacketListenerVRMixin {
                     dataholder.vrPlayer.setTeleportSupported(true);
                     dataholder.vrPlayer.teleportWarningTimer = -1;
 
-					if (!NetworkHelper.displayedChatMessage) {
-						NetworkHelper.displayedChatMessage = true;
+					if (!ClientNetworkHelper.displayedChatMessage) {
+						ClientNetworkHelper.displayedChatMessage = true;
 						this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.serverplugin", s11));
 					}
                     if (dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
@@ -151,11 +151,11 @@ public class ClientPacketListenerVRMixin {
 					break;
 
 				case REQUESTDATA:
-					NetworkHelper.serverWantsData = true;
+					ClientNetworkHelper.serverWantsData = true;
 					break;
 
 				case CLIMBING:
-                    NetworkHelper.serverAllowsClimbey = friendlybytebuf.readBoolean();
+                    ClientNetworkHelper.serverAllowsClimbey = friendlybytebuf.readBoolean();
 
                     if (friendlybytebuf.readableBytes() > 0) {
                         dataholder.climbTracker.serverblockmode = friendlybytebuf.readByte();
@@ -174,7 +174,7 @@ public class ClientPacketListenerVRMixin {
 					break;
 
 				case TELEPORT:
-					NetworkHelper.serverSupportsDirectTeleport = true;
+					ClientNetworkHelper.serverSupportsDirectTeleport = true;
 					break;
 
 				case UBERPACKET:
@@ -252,7 +252,7 @@ public class ClientPacketListenerVRMixin {
 					break;
 
 				case CRAWL:
-					NetworkHelper.serverAllowsCrawling = true;
+					ClientNetworkHelper.serverAllowsCrawling = true;
 				}
 			}
 			if (friendlybytebuf != null) {

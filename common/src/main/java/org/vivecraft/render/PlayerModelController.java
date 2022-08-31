@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.VRData;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Quaternion;
@@ -317,7 +317,7 @@ public class PlayerModelController
         playermodelcontroller$rotinfo.headQuat = quaternion2;
         playermodelcontroller$rotinfo.leftArmQuat = quaternion;
         playermodelcontroller$rotinfo.rightArmQuat = quaternion1;
-        playermodelcontroller$rotinfo.seated = DataHolder.getInstance().vrSettings.seated;
+        playermodelcontroller$rotinfo.seated = ClientDataHolder.getInstance().vrSettings.seated;
         playermodelcontroller$rotinfo.leftArmPos = data.getController(1).getPosition();
         playermodelcontroller$rotinfo.rightArmPos = data.getController(0).getPosition();
         playermodelcontroller$rotinfo.Headpos = data.hmd.getPosition();

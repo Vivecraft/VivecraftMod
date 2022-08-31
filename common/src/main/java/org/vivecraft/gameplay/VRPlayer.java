@@ -23,10 +23,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.ClientNetworkHelper;
 import org.vivecraft.api.VRData;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
@@ -41,7 +41,7 @@ import java.util.Random;
 public class VRPlayer
 {
     Minecraft mc = Minecraft.getInstance();
-    DataHolder dh = DataHolder.getInstance();
+    ClientDataHolder dh = ClientDataHolder.getInstance();
     public VRData vrdata_room_pre;
     public VRData vrdata_world_pre;
     public VRData vrdata_room_post;
@@ -49,7 +49,7 @@ public class VRPlayer
     public VRData vrdata_world_render;
     private long errorPrintTime = Util.getMillis();
     ArrayList<Tracker> trackers = new ArrayList<>();
-    public float worldScale = DataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
+    public float worldScale = ClientDataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean noTeleportClient = true;
     private boolean teleportOverride = false;
     public int teleportWarningTimer = -1;
@@ -81,7 +81,7 @@ public class VRPlayer
 
     public static VRPlayer get()
     {
-        return DataHolder.getInstance().vrPlayer;
+        return ClientDataHolder.getInstance().vrPlayer;
     }
 
     public static Vec3 room_to_world_pos(Vec3 pos, VRData data)
@@ -167,7 +167,7 @@ public class VRPlayer
     public void postTick()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         VRData vrdata = new VRData(this.vrdata_world_pre.origin, dataholder.vrSettings.walkMultiplier, this.vrdata_world_pre.worldScale, this.vrdata_world_pre.rotation_radians);
         VRData vrdata1 = new VRData(this.vrdata_world_pre.origin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
         Vec3 vec3 = vrdata1.hmd.getPosition().subtract(vrdata.hmd.getPosition());
@@ -179,14 +179,14 @@ public class VRPlayer
         this.vrdata_room_post = new VRData(new Vec3(0.0D, 0.0D, 0.0D), dataholder.vrSettings.walkMultiplier, 1.0F, 0.0F);
         this.vrdata_world_post = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float)Math.toRadians((double)dataholder.vrSettings.worldRotation));
         this.doPermanantLookOverride(minecraft.player, this.vrdata_world_post);
-        NetworkHelper.sendVRPlayerPositions(this);
+        ClientNetworkHelper.sendVRPlayerPositions(this);
         this.onTick = false;
     }
 
     public void preRender(float par1)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         float f = this.vrdata_world_post.worldScale * par1 + this.vrdata_world_pre.worldScale * (1.0F - par1);
         float f1 = this.vrdata_world_post.rotation_radians;
         float f2 = this.vrdata_world_pre.rotation_radians;
@@ -247,7 +247,7 @@ public class VRPlayer
             if (player != null && player.position() != Vec3.ZERO)
             {
                 Minecraft minecraft = Minecraft.getInstance();
-                DataHolder dataholder = DataHolder.getInstance();
+                ClientDataHolder dataholder = ClientDataHolder.getInstance();
 
                 if (dataholder.sneakTracker.sneakCounter <= 0)
                 {
@@ -359,7 +359,7 @@ public class VRPlayer
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
-            DataHolder dataholder = DataHolder.getInstance();
+            ClientDataHolder dataholder = ClientDataHolder.getInstance();
 
             if (player != null)
             {
@@ -516,7 +516,7 @@ public class VRPlayer
 
     public String toString()
     {
-        return "VRPlayer: \r\n \t origin: " + this.roomOrigin + "\r\n \t rotation: " + String.format("%.3f", DataHolder.getInstance().vrSettings.worldRotation) + "\r\n \t scale: " + String.format("%.3f", this.worldScale) + "\r\n \t room_pre " + this.vrdata_room_pre + "\r\n \t world_pre " + this.vrdata_world_pre + "\r\n \t world_post " + this.vrdata_world_post + "\r\n \t world_render " + this.vrdata_world_render;
+        return "VRPlayer: \r\n \t origin: " + this.roomOrigin + "\r\n \t rotation: " + String.format("%.3f", ClientDataHolder.getInstance().vrSettings.worldRotation) + "\r\n \t scale: " + String.format("%.3f", this.worldScale) + "\r\n \t room_pre " + this.vrdata_room_pre + "\r\n \t world_pre " + this.vrdata_world_pre + "\r\n \t world_post " + this.vrdata_world_post + "\r\n \t world_render " + this.vrdata_world_render;
     }
 
     public Vec3 getRightClickLookOverride(Player entity, int c)

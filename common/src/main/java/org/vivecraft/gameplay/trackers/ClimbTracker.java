@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.ClientNetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.provider.ControllerType;
 
@@ -57,7 +58,7 @@ public class ClimbTracker extends Tracker
     private Random rand = new Random();
     boolean unsetflag;
 
-    public ClimbTracker(Minecraft mc, DataHolder dh)
+    public ClimbTracker(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
     }
@@ -112,7 +113,7 @@ public class ClimbTracker extends Tracker
         {
             return false;
         }
-        else if (!this.dh.vrPlayer.getFreeMove() && !DataHolder.getInstance().vrSettings.simulateFalling)
+        else if (!this.dh.vrPlayer.getFreeMove() && !ClientDataHolder.getInstance().vrSettings.simulateFalling)
         {
             return false;
         }
@@ -148,7 +149,7 @@ public class ClimbTracker extends Tracker
 
     public boolean isClimbeyClimbEquipped()
     {
-        return NetworkHelper.serverAllowsClimbey && ((PlayerExtension) this.mc.player).isClimbeyClimbEquipped();
+        return ClientNetworkHelper.serverAllowsClimbey && ((PlayerExtension) this.mc.player).isClimbeyClimbEquipped();
     }
 
     private boolean canstand(BlockPos bp, LocalPlayer p)
@@ -703,7 +704,7 @@ public class ClimbTracker extends Tracker
                 }
                 else
                 {
-                    ServerboundCustomPayloadPacket serverboundcustompayloadpacket = NetworkHelper.getVivecraftClientPacket(NetworkHelper.PacketDiscriminators.CLIMBING, new byte[0]);
+                    ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworkHelper.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CLIMBING, new byte[0]);
 
                     if (this.mc.getConnection() != null)
                     {

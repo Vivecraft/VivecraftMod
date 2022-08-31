@@ -12,7 +12,7 @@
     "world.entity.projectile.ProjectileMixin",
     "world.entity.projectile.ThrowableProjectileMixin",
     "world.entity.projectile.ThrownTridentMixin",
-    "world.entity.vehicle.BoatMixin",
+
     "world.item.CrossbowItemMixin",
     "world.item.ItemsMixin"
   ],
@@ -27,7 +27,9 @@
     "client.player.AbstractClientPlayerMixin",
     "client.renderer.block.LiquidBlockRendererMixin",
     "client.renderer.entity.EntityRenderDispatcherMixin",
-    "client.resources.model.ModelBakeryMixin"
+    "client.resources.model.ModelBakeryMixin",
+
+    "world.entity.vehicle.BoatMixin"
   ],
   "server": [
   ],

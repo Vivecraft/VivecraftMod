@@ -1,6 +1,6 @@
 package org.vivecraft.render;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.VRData;
 
 import com.mojang.math.Vector3f;
@@ -19,7 +19,7 @@ public class VRActiveRenderInfo extends Camera
         this.level = p_90576_;
         this.entity = pLevel;
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         RenderPass renderpass = dataholder.currentPass;
 
 //        if (Shaders.isShadowPass && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)

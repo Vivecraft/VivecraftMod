@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.GuiExtension;
 import org.vivecraft.api.VRData;
 import org.vivecraft.api.Vec3History;
@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
 public abstract class MCVR
 {
     protected Minecraft mc;
-    protected DataHolder dh;
+    protected ClientDataHolder dh;
     protected static MCVR me;
     protected org.vivecraft.utils.math.Matrix4f hmdPose = new org.vivecraft.utils.math.Matrix4f();
     public org.vivecraft.utils.math.Matrix4f hmdRotation = new org.vivecraft.utils.math.Matrix4f();
@@ -142,7 +142,7 @@ public abstract class MCVR
     public final HandedKeyBinding keyVRInteract = new HandedKeyBinding("vivecraft.key.vrInteract", -1, "key.categories.gameplay");
     public final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout", 269, "key.categories.movement");
 
-    public MCVR(Minecraft mc, DataHolder dh)
+    public MCVR(Minecraft mc, ClientDataHolder dh)
     {
         this.mc = mc;
         this.dh = dh;
@@ -1143,7 +1143,7 @@ public abstract class MCVR
                 KeyboardHandler.setOverlayShowing(!KeyboardHandler.Showing);
             }
 
-            if (this.keyMoveThirdPersonCam.consumeClick() && !DataHolder.kiosk && !this.dh.vrSettings.seated && (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON))
+            if (this.keyMoveThirdPersonCam.consumeClick() && !ClientDataHolder.kiosk && !this.dh.vrSettings.seated && (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON))
             {
                 ControllerType controllertype2 = this.findActiveBindingControllerType(this.keyMoveThirdPersonCam);
 
@@ -1179,7 +1179,7 @@ public abstract class MCVR
             {
                 if (!flag1)
                 {
-                    if (!DataHolder.kiosk)
+                    if (!ClientDataHolder.kiosk)
                     {
                         this.mc.pauseGame(false);
                     }

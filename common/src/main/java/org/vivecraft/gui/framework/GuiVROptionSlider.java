@@ -1,6 +1,6 @@
 package org.vivecraft.gui.framework;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.settings.VRSettings;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -25,7 +25,7 @@ public class GuiVROptionSlider extends GuiVROptionButton
         this.minValue = min;
         this.maxValue = max;
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         this.sliderValue = this.enumOptions.normalizeValue(dataholder.vrSettings.getOptionFloatValue(this.enumOptions));
         this.setMessage(new TextComponent(dataholder.vrSettings.getButtonDisplayString(this.enumOptions)));
     }
@@ -49,7 +49,7 @@ public class GuiVROptionSlider extends GuiVROptionButton
     private void setValueFromMouse(double p_setValueFromMouse_1_)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         this.sliderValue = (double)((float)(p_setValueFromMouse_1_ - (double)(this.x + 4)) / (float)(this.width - 8));
         this.sliderValue = Mth.clamp(this.sliderValue, 0.0D, 1.0D);
         double d0 = this.enumOptions.denormalizeValue((float)this.sliderValue);
@@ -75,7 +75,7 @@ public class GuiVROptionSlider extends GuiVROptionButton
         this.sliderValue = (pMouseX - (double)(this.x + 4)) / (double)(this.width - 8);
         this.sliderValue = Mth.clamp(this.sliderValue, 0.0D, 1.0D);
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         dataholder.vrSettings.setOptionFloatValue(this.enumOptions, (float)this.enumOptions.denormalizeValue((float)this.sliderValue));
         this.setMessage(new TextComponent(dataholder.vrSettings.getButtonDisplayString(this.enumOptions)));
         this.dragging = true;

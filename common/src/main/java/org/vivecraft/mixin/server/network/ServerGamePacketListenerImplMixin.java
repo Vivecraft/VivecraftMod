@@ -13,9 +13,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.DataHolder;
+import org.vivecraft.CommonDataHolder;
 import org.vivecraft.api.AimFixHandler;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.api.ServerVivePlayer;
 
 import net.minecraft.network.Connection;
@@ -53,7 +53,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 	
 	@Inject(at = @At("TAIL"), method = "tick()V")
 	public void posdata(CallbackInfo info) {
-		NetworkHelper.sendPosData(this.player);
+		CommonNetworkHelper.sendPosData(this.player);
 	}
 	
 	@Inject(at = @At("TAIL"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ServerboundCustomPayloadPacket;)V" )
@@ -69,12 +69,12 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 		if (s.equalsIgnoreCase("vivecraft") && s1.equalsIgnoreCase("data"))
 		{
 			int i = friendlybytebuf.readableBytes();
-			NetworkHelper.PacketDiscriminators networkhelper$packetdiscriminators = NetworkHelper.PacketDiscriminators.values()[friendlybytebuf.readByte()];
+			CommonNetworkHelper.PacketDiscriminators networkhelper$packetdiscriminators = CommonNetworkHelper.PacketDiscriminators.values()[friendlybytebuf.readByte()];
 			byte[] abyte = new byte[i - 1];
 			friendlybytebuf.readBytes(abyte);
-			ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.player.getUUID());
+			ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.player.getUUID());
 			
-			if (serverviveplayer == null && networkhelper$packetdiscriminators != NetworkHelper.PacketDiscriminators.VERSION)
+			if (serverviveplayer == null && networkhelper$packetdiscriminators != CommonNetworkHelper.PacketDiscriminators.VERSION)
 			{
 				return;
 			}
@@ -82,14 +82,14 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 			switch (networkhelper$packetdiscriminators)
 			{
 			case VERSION:
-				String s2 = DataHolder.getInstance().minecriftVerString;
-				this.send(NetworkHelper.getVivecraftServerPacket(NetworkHelper.PacketDiscriminators.VERSION, s2));
-				this.send(NetworkHelper.getVivecraftServerPacket(NetworkHelper.PacketDiscriminators.REQUESTDATA, new byte[0]));
-				this.send(NetworkHelper.getVivecraftServerPacket(NetworkHelper.PacketDiscriminators.CLIMBING, new byte[] {1, 0}));
-				this.send(NetworkHelper.getVivecraftServerPacket(NetworkHelper.PacketDiscriminators.TELEPORT, new byte[0]));
-				this.send(NetworkHelper.getVivecraftServerPacket(NetworkHelper.PacketDiscriminators.CRAWL, new byte[0]));
+				String s2 = CommonDataHolder.getInstance().minecriftVerString;
+				this.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VERSION, s2));
+				this.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.REQUESTDATA, new byte[0]));
+				this.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.CLIMBING, new byte[] {1, 0}));
+				this.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.TELEPORT, new byte[0]));
+				this.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[0]));
 				serverviveplayer = new ServerVivePlayer(this.player);
-				NetworkHelper.vivePlayers.put(this.player.getUUID(), serverviveplayer);
+				CommonNetworkHelper.vivePlayers.put(this.player.getUUID(), serverviveplayer);
 				BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(new DataInputStream(new ByteArrayInputStream(abyte))));
 				
 				try

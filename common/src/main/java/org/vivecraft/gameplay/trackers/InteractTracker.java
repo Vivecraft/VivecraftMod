@@ -2,7 +2,7 @@ package org.vivecraft.gameplay.trackers;
 
 import java.util.HashSet;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.PlayerExtension;
 import org.vivecraft.api.VRData;
 import org.vivecraft.provider.ControllerType;
@@ -47,7 +47,7 @@ public class InteractTracker extends Tracker
     boolean[] wasactive = new boolean[2];
     private HashSet<Class> rightClickable = null;
 
-    public InteractTracker(Minecraft mc, DataHolder dh)
+    public InteractTracker(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
     }
@@ -73,7 +73,7 @@ public class InteractTracker extends Tracker
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
-            DataHolder dataholder = DataHolder.getInstance();
+            ClientDataHolder dataholder = ClientDataHolder.getInstance();
 
             if (dataholder.vrSettings.seated)
             {

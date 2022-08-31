@@ -22,7 +22,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.system.MemoryUtil;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.GlStateHelper;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.VRTextureTarget;
@@ -142,7 +142,7 @@ public abstract class VRRenderer
     public void doStencil(boolean inverse)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         
         //setup stencil for writing
         GL11.glEnable(GL11.GL_STENCIL_TEST);
@@ -313,7 +313,7 @@ public abstract class VRRenderer
     
     private void drawMask() {
 		Minecraft mc = Minecraft.getInstance();
-		DataHolder dh = DataHolder.getInstance();
+		ClientDataHolder dh = ClientDataHolder.getInstance();
 		float[] verts = getStencilMask(dh.currentPass);
 		if (verts == null) return;
 		
@@ -371,7 +371,7 @@ public abstract class VRRenderer
     public List<RenderPass> getRenderPasses()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         List<RenderPass> list = new ArrayList<>();
         list.add(RenderPass.LEFT);
         list.add(RenderPass.RIGHT);
@@ -443,7 +443,7 @@ public abstract class VRRenderer
     public void setupRenderConfiguration() throws Exception
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         boolean flag = false;
 
         if (this.clipPlanesChanged())

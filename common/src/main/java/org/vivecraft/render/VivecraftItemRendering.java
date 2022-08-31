@@ -1,6 +1,6 @@
 package org.vivecraft.render;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.gameplay.trackers.SwingTracker;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.provider.ControllerType;
@@ -37,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class VivecraftItemRendering
 {
-	private static DataHolder dh = DataHolder.getInstance();
+	private static ClientDataHolder dh = ClientDataHolder.getInstance();
 	public static VivecraftItemTransformType getTransformType(ItemStack pStack, AbstractClientPlayer pPlayer, ItemRenderer itemRenderer) {
 		VivecraftItemTransformType rendertype = VivecraftItemTransformType.Item;
 		Item item = pStack.getItem();

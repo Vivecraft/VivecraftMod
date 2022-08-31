@@ -1,6 +1,6 @@
 package org.vivecraft.gameplay.trackers;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -8,9 +8,9 @@ import net.minecraft.client.player.LocalPlayer;
 public abstract class Tracker
 {
     public Minecraft mc;
-    public DataHolder dh;
+    public ClientDataHolder dh;
 
-    public Tracker(Minecraft mc, DataHolder dh)
+    public Tracker(Minecraft mc, ClientDataHolder dh)
     {
         this.mc = mc;
         this.dh = dh;

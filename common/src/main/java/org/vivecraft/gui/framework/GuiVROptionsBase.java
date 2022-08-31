@@ -2,7 +2,7 @@ package org.vivecraft.gui.framework;
 
 import java.util.ArrayList;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.ScreenUtils;
 import org.vivecraft.settings.VRSettings;
 
@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec2;
 
 public abstract class GuiVROptionsBase extends Screen
 {
-	protected DataHolder dataholder = DataHolder.getInstance();
+	protected ClientDataHolder dataholder = ClientDataHolder.getInstance();
     public static final int DONE_BUTTON = 200;
     public static final int DEFAULTS_BUTTON = 201;
     protected final Screen lastScreen;
@@ -37,7 +37,7 @@ public abstract class GuiVROptionsBase extends Screen
     {
         super(new TextComponent(""));
         this.lastScreen = lastScreen;
-        this.settings = DataHolder.getInstance().vrSettings;
+        this.settings = ClientDataHolder.getInstance().vrSettings;
     }
 
     protected void addDefaultButtons()

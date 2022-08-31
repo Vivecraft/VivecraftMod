@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -40,7 +40,7 @@ public class ItemRendererVRMixin {
     public void fade(ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel, CallbackInfo ci) {
         LocalPlayer localplayer = Minecraft.getInstance().player;
 
-        if (localplayer != null && DataHolder.isfphand) {
+        if (localplayer != null && ClientDataHolder.isfphand) {
             this.fade = SwingTracker.getItemFade(localplayer, itemStack);
         }
         else {
@@ -50,7 +50,7 @@ public class ItemRendererVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemBlockRenderTypes;getRenderType(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/client/renderer/RenderType;"), method = "render")
     public RenderType rendertypeFade(ItemStack itemStack, boolean bl) {
-        if (DataHolder.isfphand && this.fade < 1.0F) {
+        if (ClientDataHolder.isfphand && this.fade < 1.0F) {
             return Sheets.translucentCullBlockSheet();
         }
         return ItemBlockRenderTypes.getRenderType(itemStack, bl);
@@ -58,10 +58,10 @@ public class ItemRendererVRMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/VertexConsumer;putBulkData(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lnet/minecraft/client/renderer/block/model/BakedQuad;FFFII)V", shift = At.Shift.BY, by = -3), method = "renderQuadList", locals = LocalCapture.CAPTURE_FAILHARD)
     public void specialItems(PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack, int i, int j, CallbackInfo ci, boolean bl, PoseStack.Pose pose, Iterator var9, BakedQuad bakedQuad, int k, float f, float g, float h) {
-        if (DataHolder.getInstance().jumpTracker.isBoots(itemStack)) {
+        if (ClientDataHolder.getInstance().jumpTracker.isBoots(itemStack)) {
             k = this.makeColor(1, 0, 255, 0);
         }
-        else if (DataHolder.getInstance().climbTracker.isClaws(itemStack)) {
+        else if (ClientDataHolder.getInstance().climbTracker.isClaws(itemStack)) {
             k = this.makeColor(1, 130, 0, 75);
         }
         else if (TelescopeTracker.isLegacyTelescope(itemStack)) {

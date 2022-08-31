@@ -1,12 +1,13 @@
 package org.vivecraft.gameplay.trackers;
 
-import org.vivecraft.DataHolder;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ClientNetworkHelper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.world.entity.Pose;
+import org.vivecraft.api.CommonNetworkHelper;
 
 public class CrawlTracker extends Tracker
 {
@@ -14,7 +15,7 @@ public class CrawlTracker extends Tracker
     public boolean crawling;
     public boolean crawlsteresis;
 
-    public CrawlTracker(Minecraft mc, DataHolder dh)
+    public CrawlTracker(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
     }
@@ -29,7 +30,7 @@ public class CrawlTracker extends Tracker
         {
             return false;
         }
-        else if (!NetworkHelper.serverAllowsCrawling)
+        else if (!ClientNetworkHelper.serverAllowsCrawling)
         {
             return false;
         }
@@ -74,9 +75,9 @@ public class CrawlTracker extends Tracker
                 this.crawlsteresis = true;
             }
 
-            if (NetworkHelper.serverAllowsCrawling)
+            if (ClientNetworkHelper.serverAllowsCrawling)
             {
-                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = NetworkHelper.getVivecraftClientPacket(NetworkHelper.PacketDiscriminators.CRAWL, new byte[] {(byte)(this.crawling ? 1 : 0)});
+                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworkHelper.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[] {(byte)(this.crawling ? 1 : 0)});
 
                 if (this.mc.getConnection() != null)
                 {

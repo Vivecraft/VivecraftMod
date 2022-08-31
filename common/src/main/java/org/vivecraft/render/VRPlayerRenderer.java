@@ -2,7 +2,7 @@ package org.vivecraft.render;
 
 import java.util.UUID;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -74,7 +74,7 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
 
     public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight)
     {
-        if (DataHolder.getInstance().currentPass == RenderPass.GUI && entityIn.isLocalPlayer())
+        if (ClientDataHolder.getInstance().currentPass == RenderPass.GUI && entityIn.isLocalPlayer())
         {
             Matrix4f matrix4f = matrixStackIn.last().pose();
             double d0 = (new Vec3((double)matrix4f.m00, (double)matrix4f.m01, (double)matrix4f.m02)).length();
@@ -83,7 +83,7 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
             matrixStackIn.translate(0.0D, 0.0D, 1000.0D);
             matrixStackIn.scale((float)d0, (float)d0, (float)d0);
             matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-            matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F + DataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw()));
+            matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F + ClientDataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw()));
         }
 
         PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(entityIn.getUUID());

@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.provider.ControllerType;
@@ -51,7 +51,7 @@ import net.minecraft.world.phys.Vec3;
 public class PhysicalKeyboard
 {
     private final Minecraft mc = Minecraft.getInstance();
-    private DataHolder dh = DataHolder.getInstance();
+    private ClientDataHolder dh = ClientDataHolder.getInstance();
     private boolean reinit;
     private boolean shift;
     private boolean shiftSticky;

@@ -2,7 +2,7 @@ package org.vivecraft.gameplay.trackers;
 
 import java.util.List;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.Vec3History;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.settings.VRSettings;
@@ -48,7 +48,7 @@ public class SwingTracker extends Tracker
     Vec3 forward = new Vec3(0.0D, 0.0D, -1.0D);
     double speedthresh = 3.0D;
 
-    public SwingTracker(Minecraft mc, DataHolder dh)
+    public SwingTracker(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
     }
@@ -79,7 +79,7 @@ public class SwingTracker extends Tracker
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
-            DataHolder dataholder = DataHolder.getInstance();
+            ClientDataHolder dataholder = ClientDataHolder.getInstance();
 
             if (minecraft.screen != null)
             {
@@ -332,10 +332,10 @@ public class SwingTracker extends Tracker
             f = 0.75F;
         }
 
-        boolean[] aboolean = DataHolder.getInstance().swingTracker.lastWeaponSolid;
+        boolean[] aboolean = ClientDataHolder.getInstance().swingTracker.lastWeaponSolid;
         Minecraft.getInstance().getItemRenderer();
 
-        if (aboolean[DataHolder.ismainhand ? 0 : 1])
+        if (aboolean[ClientDataHolder.ismainhand ? 0 : 1])
         {
             f -= 0.25F;
         }

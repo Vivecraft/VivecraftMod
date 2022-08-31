@@ -1,6 +1,6 @@
 package org.vivecraft.provider.openvr_jna;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -96,7 +96,7 @@ public class MCOpenVR extends MCVR
     InputDigitalActionData_t digital = new InputDigitalActionData_t.ByReference();
     InputAnalogActionData_t analog = new InputAnalogActionData_t.ByReference();
 
-    public MCOpenVR(Minecraft mc, DataHolder dh)
+    public MCOpenVR(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
         ome = this;
@@ -200,12 +200,12 @@ public class MCOpenVR extends MCVR
                 JOpenVRLibrary.VR_ShutdownInternal();
                 this.initialized = false;
 
-                if (DataHolder.katvr)
+                if (ClientDataHolder.katvr)
                 {
                     jkatvr.Halt();
                 }
 
-                if (DataHolder.infinadeck)
+                if (ClientDataHolder.infinadeck)
                 {
                     jinfinadeck.Destroy();
                 }
@@ -292,7 +292,7 @@ public class MCOpenVR extends MCVR
 
                 this.initialized = true;
 
-                if (DataHolder.katvr)
+                if (ClientDataHolder.katvr)
                 {
                     try
                     {
@@ -317,7 +317,7 @@ public class MCOpenVR extends MCVR
                     }
                 }
 
-                if (DataHolder.infinadeck)
+                if (ClientDataHolder.infinadeck)
                 {
                     try
                     {
@@ -385,7 +385,7 @@ public class MCOpenVR extends MCVR
 
     public void processInputs()
     {
-        if (!this.dh.vrSettings.seated && !DataHolder.viewonly && this.inputInitialized)
+        if (!this.dh.vrSettings.seated && !ClientDataHolder.viewonly && this.inputInitialized)
         {
             for (VRInputAction vrinputaction : this.inputActions.values())
             {

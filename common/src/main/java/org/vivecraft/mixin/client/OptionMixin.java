@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import net.minecraft.client.*;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
@@ -28,7 +28,7 @@ public abstract class OptionMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;allChanged()V"), method = "method_32552", remap = false)
     private static void reinit(Options options, Option option, GraphicsStatus graphicsStatus, CallbackInfo ci) {
-        DataHolder.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
+        ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
     }
 
 }

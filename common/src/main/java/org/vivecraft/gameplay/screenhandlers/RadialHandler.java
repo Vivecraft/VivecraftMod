@@ -1,6 +1,6 @@
 package org.vivecraft.gameplay.screenhandlers;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.VRData;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.gui.GuiRadial;
@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public class RadialHandler
 {
     public static Minecraft mc = Minecraft.getInstance();
-    public static DataHolder dh = DataHolder.getInstance();
+    public static ClientDataHolder dh = ClientDataHolder.getInstance();
     private static boolean Showing = false;
     public static GuiRadial UI = new GuiRadial();
     public static Vec3 Pos_room = new Vec3(0.0D, 0.0D, 0.0D);
@@ -35,7 +35,7 @@ public class RadialHandler
 
     public static boolean setOverlayShowing(boolean showingState, ControllerType controller)
     {
-        if (DataHolder.kiosk)
+        if (ClientDataHolder.kiosk)
         {
             return false;
         }

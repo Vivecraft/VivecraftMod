@@ -1,8 +1,8 @@
 package org.vivecraft.gameplay.trackers;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.ClientNetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.settings.AutoCalibration;
 
@@ -22,7 +22,7 @@ public class JumpTracker extends Tracker
     private boolean c0Latched = false;
     private boolean c1Latched = false;
 
-    public JumpTracker(Minecraft mc, DataHolder dh)
+    public JumpTracker(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
     }
@@ -34,20 +34,20 @@ public class JumpTracker extends Tracker
 
     public boolean isClimbeyJumpEquipped()
     {
-        return NetworkHelper.serverAllowsClimbey && ((PlayerExtension) Minecraft.getInstance().player).isClimbeyJumpEquipped();
+        return ClientNetworkHelper.serverAllowsClimbey && ((PlayerExtension) Minecraft.getInstance().player).isClimbeyJumpEquipped();
     }
 
     public boolean isActive(LocalPlayer p)
     {
-        if (DataHolder.getInstance().vrSettings.seated)
+        if (ClientDataHolder.getInstance().vrSettings.seated)
         {
             return false;
         }
-        else if (!DataHolder.getInstance().vrPlayer.getFreeMove() && !DataHolder.getInstance().vrSettings.simulateFalling)
+        else if (!ClientDataHolder.getInstance().vrPlayer.getFreeMove() && !ClientDataHolder.getInstance().vrSettings.simulateFalling)
         {
             return false;
         }
-        else if (!DataHolder.getInstance().vrSettings.realisticJumpEnabled)
+        else if (!ClientDataHolder.getInstance().vrSettings.realisticJumpEnabled)
         {
             return false;
         }

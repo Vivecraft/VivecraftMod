@@ -1,6 +1,6 @@
 package org.vivecraft.provider.openvr_jna.control;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.provider.openvr_jna.VRInputAction;
@@ -46,7 +46,7 @@ public class VivecraftMovementInput extends Input
         this.leftImpulse = 0.0F;
         this.forwardImpulse = 0.0F;
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         boolean flag = false;
 
         if (dataholder.climbTracker.isClimbeyClimb() && !minecraft.player.isInWater() && dataholder.climbTracker.isGrabbingLadder())

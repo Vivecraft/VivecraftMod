@@ -1,6 +1,6 @@
 package org.vivecraft.sodiumMixin;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptionPages;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Options;
@@ -16,6 +16,6 @@ public class SodiumGameOptionPagesVRMixin {
 
     @Inject(at = @At("HEAD"), method = "lambda$quality$23", remap = false)
     private static void initframe(Options opts, GraphicsStatus value, CallbackInfo ci) {
-        DataHolder.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
+        ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
     }
 }

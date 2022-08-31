@@ -17,11 +17,11 @@ public abstract class MethodHolder {
 	
 	public static void notifyMirror(String text, boolean clear, int lengthMs)
 	{
-		DataHolder dataHolder = DataHolder.getInstance();
-		dataHolder.mirroNotifyStart = System.currentTimeMillis();
-		dataHolder.mirroNotifyLen = (long)lengthMs;
-		dataHolder.mirrorNotifyText = text;
-		dataHolder.mirrorNotifyClear = clear;
+		ClientDataHolder clientDataHolder = ClientDataHolder.getInstance();
+		clientDataHolder.mirroNotifyStart = System.currentTimeMillis();
+		clientDataHolder.mirroNotifyLen = (long)lengthMs;
+		clientDataHolder.mirrorNotifyText = text;
+		clientDataHolder.mirrorNotifyClear = clear;
 	}
 	
 	public static void rotateDeg(PoseStack pose, float angle, float x, float y, float z) {

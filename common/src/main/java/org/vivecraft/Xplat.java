@@ -27,4 +27,9 @@ public interface Xplat {
     static Path getConfigPath(String fileName) {
         return null;
     }
+
+    @ExpectPlatform
+    static boolean isDedicatedServer() {
+        return false;
+    }
 }

@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.main;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
@@ -39,25 +39,25 @@ public class MainMixin {
 	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "main([Ljava/lang/String;)V", remap = false)
 	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
 		OptionSet optionset = optionparser.parse(p_129642_);
-		DataHolder.kiosk = optionset.has("kiosk");
+		ClientDataHolder.kiosk = optionset.has("kiosk");
 		
-		if (DataHolder.kiosk)
+		if (ClientDataHolder.kiosk)
 		{
 			System.out.println("Setting kiosk");
 		}
 		
-		if (DataHolder.kiosk)
+		if (ClientDataHolder.kiosk)
 		{
-			DataHolder.viewonly = optionset.has("viewonly");
+			ClientDataHolder.viewonly = optionset.has("viewonly");
 			
-			if (DataHolder.viewonly)
+			if (ClientDataHolder.viewonly)
 			{
 				System.out.println("Setting viewonly");
 			}
 		}
 
-		DataHolder.katvr = optionset.has("katvr");
-		DataHolder.infinadeck = optionset.has("infinadeck");
+		ClientDataHolder.katvr = optionset.has("katvr");
+		ClientDataHolder.infinadeck = optionset.has("infinadeck");
 		return optionset;
 	}
 //	

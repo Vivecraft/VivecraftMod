@@ -1,6 +1,6 @@
 package org.vivecraft.irisMixin;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +16,7 @@ public class IrisBeginFrameHack {
 
     @Inject(method = "beginFrame", at = @At("HEAD"), cancellable = true, remap = false)
     private void cancelShadows(CallbackInfo ci) {
-        if (!DataHolder.getInstance().isFirstPass) {
+        if (!ClientDataHolder.getInstance().isFirstPass) {
             ci.cancel();
         }
     }

@@ -2,7 +2,7 @@ package org.vivecraft.gameplay.trackers;
 
 import java.util.Random;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.gameplay.VRPlayer;
 
 import net.minecraft.Util;
@@ -22,7 +22,7 @@ public class EatingTracker extends Tracker
     long eatStart;
     private Random r = new Random();
 
-    public EatingTracker(Minecraft mc, DataHolder dh)
+    public EatingTracker(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
     }
@@ -34,7 +34,7 @@ public class EatingTracker extends Tracker
 
     public boolean isActive(LocalPlayer p)
     {
-        if (DataHolder.getInstance().vrSettings.seated)
+        if (ClientDataHolder.getInstance().vrSettings.seated)
         {
             return false;
         }

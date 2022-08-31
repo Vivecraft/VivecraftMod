@@ -1,6 +1,6 @@
 package org.vivecraft.gui.settings;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
@@ -13,7 +13,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsList.CommandEntry>
 {
-	protected DataHolder dataholder = DataHolder.getInstance();
+	protected ClientDataHolder dataholder = ClientDataHolder.getInstance();
     private final GuiQuickCommandEditor parent;
     private final Minecraft mc;
 

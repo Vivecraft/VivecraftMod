@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.api.ServerVivePlayer;
 
 import com.mojang.authlib.GameProfile;
@@ -50,7 +50,7 @@ public abstract class ServerPlayerMixin extends Player {
 
 	@Inject(at = @At("TAIL"), method = "initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V")
 	public void menu(AbstractContainerMenu p_143400_, CallbackInfo info) {
-		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
 
 		// TODO easter egg?
 		if (serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(20) == 3) {
@@ -72,11 +72,11 @@ public abstract class ServerPlayerMixin extends Player {
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;tick()V", shift = Shift.AFTER), method = "doTick()V")
 	public void tick(CallbackInfo info) {
-		NetworkHelper.overridePose(this);
+		CommonNetworkHelper.overridePose((ServerPlayer) (Object)this);
 	}
 
 	public void sweepAttack() {
-		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
 
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			Vec3 vec3 = serverviveplayer.getControllerDir(0);
@@ -109,7 +109,7 @@ public abstract class ServerPlayerMixin extends Player {
 	}
 
 	private void addItemParticles(ItemStack stack, int count) {
-		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
 		for (int i = 0; i < count; ++i) {
 			Vec3 vec3 = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
 			vec3 = vec3.xRot(-this.getXRot() * ((float) Math.PI / 180F));
@@ -137,7 +137,7 @@ public abstract class ServerPlayerMixin extends Player {
 			locals = LocalCapture.CAPTURE_FAILHARD)
 	public void dropvive(ItemStack p_9085_, boolean p_9086_, boolean p_9087_, CallbackInfoReturnable<ItemEntity> info,
 			ItemEntity itementity) {
-		ServerVivePlayer serverviveplayer = NetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR() && !p_9087_) {
 			Vec3 vec3 = serverviveplayer.getControllerPos(0, this);
 			Vec3 vec31 = serverviveplayer.getControllerDir(0);

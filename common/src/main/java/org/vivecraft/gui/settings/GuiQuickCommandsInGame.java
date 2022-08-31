@@ -1,6 +1,6 @@
 package org.vivecraft.gui.settings;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.KeyMapping;
@@ -11,7 +11,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 public class GuiQuickCommandsInGame extends Screen
 {
-	protected DataHolder dataholder = DataHolder.getInstance();
+	protected ClientDataHolder dataholder = ClientDataHolder.getInstance();
     private int field_146445_a;
     private int field_146444_f;
     private static final String __OBFID = "CL_00000703";

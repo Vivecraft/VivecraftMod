@@ -1,6 +1,6 @@
 package org.vivecraft.gameplay.screenhandlers;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.api.VRData;
 import org.vivecraft.provider.ControllerType;
@@ -44,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
 public class GuiHandler
 {
     public static Minecraft mc = Minecraft.getInstance();
-    public static DataHolder dh = DataHolder.getInstance();
+    public static ClientDataHolder dh = ClientDataHolder.getInstance();
     static boolean lastPressedLeftClick;
     static boolean lastPressedRightClick;
     static boolean lastPressedMiddleClick;

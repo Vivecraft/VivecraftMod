@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.MethodHolder;
 import org.vivecraft.extensions.MinecraftExtension;
 import org.vivecraft.api.VRData;
@@ -48,7 +48,7 @@ public class VRHotkeys
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
-            DataHolder dataholder = DataHolder.getInstance();
+            ClientDataHolder dataholder = ClientDataHolder.getInstance();
             boolean flag = false;
 
             if (action == 1 && key == 344 && MethodHolder.isKeyDown(345))
@@ -119,7 +119,7 @@ public class VRHotkeys
     public static void handleMRKeys()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         boolean flag = false;
 
         if (MethodHolder.isKeyDown(263) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344))
@@ -240,7 +240,7 @@ public class VRHotkeys
     private static void adjustCamPos(Vector3 offset)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
 
         if (dataholder.vr.mrMovingCamActive)
         {
@@ -261,7 +261,7 @@ public class VRHotkeys
     private static void adjustCamRot(Axis axis, float degrees)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
 
         if (dataholder.vr.mrMovingCamActive)
         {
@@ -276,7 +276,7 @@ public class VRHotkeys
     public static void snapMRCam(int controller)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         Vec3 vec3 = dataholder.vrPlayer.vrdata_room_pre.getController(controller).getPosition();
         dataholder.vrSettings.vrFixedCamposX = (float)vec3.x;
         dataholder.vrSettings.vrFixedCamposY = (float)vec3.y;
@@ -288,7 +288,7 @@ public class VRHotkeys
     public static void updateMovingThirdPersonCam()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
 
         if (startControllerPose != null)
         {
@@ -308,7 +308,7 @@ public class VRHotkeys
     public static void startMovingThirdPersonCam(int controller, Triggerer triggerer)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         startController = controller;
         startControllerPose = dataholder.vrPlayer.vrdata_room_pre.getController(controller);
         startCamposX = dataholder.vrSettings.vrFixedCamposX;
@@ -398,7 +398,7 @@ public class VRHotkeys
             }
 
             Minecraft minecraft = Minecraft.getInstance();
-            DataHolder dataholder = DataHolder.getInstance();
+            ClientDataHolder dataholder = ClientDataHolder.getInstance();
             Quaternion quaternion = new Quaternion(f3, f4, f5, dataholder.vrSettings.externalCameraAngleOrder);
             dataholder.vrSettings.mrMovingCamOffsetX = f;
             dataholder.vrSettings.mrMovingCamOffsetY = f1;

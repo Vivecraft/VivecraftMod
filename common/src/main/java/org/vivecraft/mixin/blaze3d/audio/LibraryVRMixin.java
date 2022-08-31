@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 
 import java.nio.Buffer;
 import java.nio.IntBuffer;
@@ -53,7 +53,7 @@ public class LibraryVRMixin {
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/OpenAlUtil;checkALError(Ljava/lang/String;)Z", ordinal = 0, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
     private void setHRTF(String string, CallbackInfo ci, ALCCapabilities aLCCapabilities, int i, int j, int k, ALCapabilities aLCapabilities) {
-        DataHolder.hrtfList.clear();
+        ClientDataHolder.hrtfList.clear();
 
         if (aLCCapabilities.ALC_SOFT_HRTF) {
             int l = ALC10.alcGetInteger(this.currentDevice, 6548);
@@ -63,11 +63,11 @@ public class LibraryVRMixin {
 
                 for (int i1 = 0; i1 < l; i1++) {
                     String s = Objects.requireNonNull(SOFTHRTF.alcGetStringiSOFT(this.currentDevice, 6549, i1));
-                    DataHolder.hrtfList.add(s);
+                    ClientDataHolder.hrtfList.add(s);
                     LOGGER.info("{}: {}", i1, s);
                 }
 
-                int k1 = DataHolder.getInstance().vrSettings.hrtfSelection;
+                int k1 = ClientDataHolder.getInstance().vrSettings.hrtfSelection;
                 int l1;
 
                 if (k1 == -1) {
@@ -79,11 +79,11 @@ public class LibraryVRMixin {
                 IntBuffer intbuffer = BufferUtils.createIntBuffer(10).put(6546).put(l1);
 
                 if (k1 != -1) {
-                    if (k1 > 0 && k1 <= DataHolder.hrtfList.size()) {
-                        LOGGER.info("Using HRTF: {}", DataHolder.hrtfList.get(k1 - 1));
+                    if (k1 > 0 && k1 <= ClientDataHolder.hrtfList.size()) {
+                        LOGGER.info("Using HRTF: {}", ClientDataHolder.hrtfList.get(k1 - 1));
                         intbuffer.put(6550).put(k1 - 1);
                     } else {
-                        if (k1 > DataHolder.hrtfList.size()) {
+                        if (k1 > ClientDataHolder.hrtfList.size()) {
                             LOGGER.warn("Invalid HRTF index: {}", k1);
                         }
 

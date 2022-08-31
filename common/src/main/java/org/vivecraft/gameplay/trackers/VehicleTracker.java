@@ -1,6 +1,6 @@
 package org.vivecraft.gameplay.trackers;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.VRData;
 import org.vivecraft.settings.VRSettings;
 
@@ -24,7 +24,7 @@ public class VehicleTracker extends Tracker
     private int minecartStupidityCounter;
     public int dismountCooldown = 0;
 
-    public VehicleTracker(Minecraft mc, DataHolder dh)
+    public VehicleTracker(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
     }
@@ -63,7 +63,7 @@ public class VehicleTracker extends Tracker
         Vec3 vec3 = null;
         Entity entity = player.getVehicle();
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
 
         if (!(entity instanceof AbstractHorse) && !(entity instanceof Boat))
         {
@@ -205,7 +205,7 @@ public class VehicleTracker extends Tracker
     public void onStartRiding(Entity vehicle, LocalPlayer player)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        DataHolder dataholder = DataHolder.getInstance();
+        ClientDataHolder dataholder = ClientDataHolder.getInstance();
         this.PreMount_World_Rotation = dataholder.vrPlayer.vrdata_world_pre.rotation_radians;
         Vec3 vec3 = dataholder.vrPlayer.vrdata_room_pre.getHeadPivot();
         this.Premount_Pos_Room = new Vec3(vec3.x, 0.0D, vec3.z);

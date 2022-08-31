@@ -32,7 +32,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.sounds.SoundEngine;
 
-public class DataHolder {
+public class ClientDataHolder {
 
     public static boolean kiosk;
     public static boolean ismainhand;
@@ -42,9 +42,9 @@ public class DataHolder {
     public static ModelResourceLocation thirdPersonCameraModel = new ModelResourceLocation("vivecraft:camcorder");
     public static ModelResourceLocation thirdPersonCameraDisplayModel = new ModelResourceLocation("vivecraft:camcorder_display");
     public static List<String> hrtfList = new ArrayList<>();
-    private static DataHolder INSTANCE;
+    private static ClientDataHolder INSTANCE;
     public final float PIOVER180 = ((float) Math.PI / 180F);
-    public String minecriftVerString;
+    //public String minecriftVerString; Common
     public VRPlayer vrPlayer;
     public MCVR vr;
     public VRRenderer vrRenderer;
@@ -92,7 +92,7 @@ public class DataHolder {
     public ErrorHelper errorHelper;
     public RenderPass currentPass;
     //	private boolean lastClick;
-    public boolean resourcePacksChanged;
+    //public boolean resourcePacksChanged; SERVER
     public int tickCounter;
     public float watereffect;
     public float portaleffect;
@@ -104,17 +104,9 @@ public class DataHolder {
     boolean mirrorNotifyClear;
     long mirroNotifyLen;
 
-    public DataHolder() {
-        if (VRState.checkVR()) {
-            minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-fabric-a1";
-        } else {
-            minecriftVerString = "Vivecraft 1.18.2 jrbudda-NONVR-fabric-a1";
-        }
-    }
-
-    public static DataHolder getInstance() {
+    public static ClientDataHolder getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new DataHolder();
+            INSTANCE = new ClientDataHolder();
         }
         return INSTANCE;
     }

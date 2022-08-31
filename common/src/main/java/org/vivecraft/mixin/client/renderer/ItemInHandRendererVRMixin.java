@@ -3,7 +3,7 @@ package org.vivecraft.mixin.client.renderer;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.ItemInHandRendererExtension;
@@ -57,7 +57,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 	@Final
 	@Shadow
 	private Minecraft minecraft;
-	DataHolder dh = DataHolder.getInstance();
+	ClientDataHolder dh = ClientDataHolder.getInstance();
 	@Final
 	@Shadow
 	private EntityRenderDispatcher entityRenderDispatcher;

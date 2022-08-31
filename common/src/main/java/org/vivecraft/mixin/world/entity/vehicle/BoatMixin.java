@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 
 //TODO needed?
 @Mixin(Boat.class)
@@ -55,12 +55,12 @@ public abstract class BoatMixin extends Entity {
 	public void roomscaleRowing(CallbackInfo ci, float f) {
 
 		double mx, mz;
-		DataHolder dataHolder = DataHolder.getInstance();
+		ClientDataHolder clientDataHolder = ClientDataHolder.getInstance();
 
-		if(this.inputUp && !dataHolder.vrSettings.seated){
+		if(this.inputUp && !clientDataHolder.vrSettings.seated){
 			//controller-based
-			float yaw = dataHolder.vrPlayer.vrdata_world_pre.getController(1).getYaw();
-			if(dataHolder.vrSettings.vehicleRotation){
+			float yaw = clientDataHolder.vrPlayer.vrdata_world_pre.getController(1).getYaw();
+			if(clientDataHolder.vrSettings.vehicleRotation){
 				//tank controls
 				float end = this.getYRot() % 360;
 				float start = yaw;
@@ -102,10 +102,10 @@ public abstract class BoatMixin extends Entity {
 
 		} else {
 			//roomscale or vanilla behavior
-			if(dataHolder.rowTracker.isRowing() && !dataHolder.vrSettings.seated){
+			if(clientDataHolder.rowTracker.isRowing() && !clientDataHolder.vrSettings.seated){
 
-				this.deltaRotation += dataHolder.rowTracker.LOar / 1.5;
-				this.deltaRotation -= dataHolder.rowTracker.ROar / 1.5;
+				this.deltaRotation += clientDataHolder.rowTracker.LOar / 1.5;
+				this.deltaRotation -= clientDataHolder.rowTracker.ROar / 1.5;
     				/*
     				this.deltaRotation += mc.rowTracker.forces[0] *50;
     				this.deltaRotation -= mc.rowTracker.forces[1] *50;
@@ -114,7 +114,7 @@ public abstract class BoatMixin extends Entity {
 				if (deltaRotation < 0) this.inputLeft = true;
 				if (deltaRotation > 0) this.inputRight = true;
 
-				f = 0.06f * dataHolder.rowTracker.Foar;
+				f = 0.06f * clientDataHolder.rowTracker.Foar;
 				if(f > 0) this.inputUp = true;
 
     				/*

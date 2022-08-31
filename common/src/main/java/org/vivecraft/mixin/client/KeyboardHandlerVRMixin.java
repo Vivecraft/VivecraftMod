@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.MethodHolder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.KeyboardHandler;
@@ -54,7 +54,7 @@ public class KeyboardHandlerVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Screenshot;grab(Ljava/io/File;Lcom/mojang/blaze3d/pipeline/RenderTarget;Ljava/util/function/Consumer;)V"), method = "keyPress")
     public void noScreenshot(File file, RenderTarget renderTarget, Consumer<Component> consumer) {
-        DataHolder.getInstance().grabScreenShot = true;
+        ClientDataHolder.getInstance().grabScreenShot = true;
     }
 
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/Screen;passEvents:Z"), method = "keyPress")
@@ -70,6 +70,6 @@ public class KeyboardHandlerVRMixin {
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z", ordinal = 1, shift = At.Shift.AFTER), method = "keyPress")
     public void saveOptions(long l, int i, int j, int k, int m, CallbackInfo ci) {
-        DataHolder.getInstance().vrSettings.saveOptions();
+        ClientDataHolder.getInstance().vrSettings.saveOptions();
     }
 }

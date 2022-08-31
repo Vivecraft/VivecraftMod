@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.gui;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.SodiumHelper;
 import org.vivecraft.Xplat;
 import org.vivecraft.extensions.GuiExtension;
@@ -91,21 +91,21 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 1, shift = At.Shift.AFTER), method = "renderHotbar")
     public void hotbarContext(float f, PoseStack poseStack, CallbackInfo ci) {
         int i = this.screenWidth / 2;
-        if (DataHolder.getInstance().interactTracker.hotbar >= 0 && DataHolder.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != DataHolder.getInstance().interactTracker.hotbar) {
+        if (ClientDataHolder.getInstance().interactTracker.hotbar >= 0 && ClientDataHolder.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != ClientDataHolder.getInstance().interactTracker.hotbar) {
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
-            this.blit(poseStack, i - 91 - 1 + DataHolder.getInstance().interactTracker.hotbar * 20, this.screenHeight - 22 - 1, 0, 22, 24, 22);
+            this.blit(poseStack, i - 91 - 1 + ClientDataHolder.getInstance().interactTracker.hotbar * 20, this.screenHeight - 22 - 1, 0, 22, 24, 22);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0), method = "renderHotbar")
     public boolean slotSwap(ItemStack instance) {
-        return !(!instance.isEmpty() || DataHolder.getInstance().vrSettings.vrTouchHotbar);
+        return !(!instance.isEmpty() || ClientDataHolder.getInstance().vrSettings.vrTouchHotbar);
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2), method = "renderHotbar")
     public void renderVRHotbarLeft(Gui instance, PoseStack poseStack, int x, int y, int uOffset, int vOffset, int uWidth, int vWidth) {
-        if (DataHolder.getInstance().interactTracker.hotbar == 9) {
+        if (ClientDataHolder.getInstance().interactTracker.hotbar == 9) {
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
             this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -117,7 +117,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 3), method = "renderHotbar")
     public void renderVRHotbarRight(Gui instance, PoseStack poseStack, int x, int y, int uOffset, int vOffset, int uWidth, int vWidth) {
-        if (DataHolder.getInstance().interactTracker.hotbar == 9){
+        if (ClientDataHolder.getInstance().interactTracker.hotbar == 9){
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
             this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -155,7 +155,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
             if (player.isFallFlying()) {
                 k = -1;
             }
-            if (DataHolder.getInstance().crawlTracker.crawling) {
+            if (ClientDataHolder.getInstance().crawlTracker.crawling) {
                 k = -2;
             }
 
@@ -202,7 +202,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, Screen.GUI_ICONS_LOCATION);
-        float f = 16.0F * DataHolder.getInstance().vrSettings.menuCrosshairScale;
+        float f = 16.0F * ClientDataHolder.getInstance().vrSettings.menuCrosshairScale;
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
         this.drawCentredTexturedModalRect(mouseX, mouseY, f, f, 0, 0, 15, 15);
         RenderSystem.disableBlend();

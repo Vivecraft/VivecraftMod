@@ -2,9 +2,10 @@ package org.vivecraft.gameplay.trackers;
 
 import java.nio.ByteBuffer;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.api.NetworkHelper;
+import org.vivecraft.api.ClientNetworkHelper;
 import org.vivecraft.api.VRData;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.settings.VRSettings;
@@ -44,7 +45,7 @@ public class BowTracker extends Tracker
     int hapcounter = 0;
     int lasthapStep = 0;
 
-    public BowTracker(Minecraft mc, DataHolder dh)
+    public BowTracker(Minecraft mc, ClientDataHolder dh)
     {
         super(mc, dh);
     }
@@ -70,11 +71,11 @@ public class BowTracker extends Tracker
         {
             return false;
         }
-        else if (DataHolder.getInstance().vrSettings.bowMode == VRSettings.BowMode.OFF)
+        else if (ClientDataHolder.getInstance().vrSettings.bowMode == VRSettings.BowMode.OFF)
         {
             return false;
         }
-        else if (DataHolder.getInstance().vrSettings.bowMode == VRSettings.BowMode.VANILLA)
+        else if (ClientDataHolder.getInstance().vrSettings.bowMode == VRSettings.BowMode.VANILLA)
         {
             return itemStack.getItem() == Items.BOW;
         }
@@ -86,7 +87,7 @@ public class BowTracker extends Tracker
 
     public static boolean isHoldingBow(LivingEntity e, InteractionHand hand)
     {
-        return DataHolder.getInstance().vrSettings.seated ? false : isBow(e.getItemInHand(hand));
+        return ClientDataHolder.getInstance().vrSettings.seated ? false : isBow(e.getItemInHand(hand));
     }
 
     public static boolean isHoldingBowEither(LivingEntity e)
@@ -228,10 +229,10 @@ public class BowTracker extends Tracker
             {
                 this.dh.vr.triggerHapticPulse(0, 500);
                 this.dh.vr.triggerHapticPulse(1, 3000);
-                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = NetworkHelper.getVivecraftClientPacket(NetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(this.getDrawPercent()).array());
+                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworkHelper.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(this.getDrawPercent()).array());
                 Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
                 this.mc.gameMode.releaseUsingItem(player);
-                serverboundcustompayloadpacket = NetworkHelper.getVivecraftClientPacket(NetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(0.0F).array());
+                serverboundcustompayloadpacket = ClientNetworkHelper.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(0.0F).array());
                 Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
                 this.isDrawing = false;
             }

@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.renderer;
 
-import org.vivecraft.DataHolder;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.LevelRendererExtension;
 import org.vivecraft.extensions.RenderTargetExtension;
@@ -115,27 +115,27 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 0), method = "renderSnowAndRain")
 	public int rain1(double d) {
-		Vec3 vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
-		if (DataHolder.getInstance().currentPass == RenderPass.THIRD || DataHolder.getInstance().currentPass == RenderPass.CAMERA) {
-			vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(DataHolder.getInstance().currentPass).getPosition();
+		Vec3 vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
+		if (ClientDataHolder.getInstance().currentPass == RenderPass.THIRD || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA) {
+			vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolder.getInstance().currentPass).getPosition();
 		}
 		return Mth.floor(vec3.x);
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 1), method = "renderSnowAndRain")
 	public int rain2(double d) {
-		Vec3 vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
-		if (DataHolder.getInstance().currentPass == RenderPass.THIRD || DataHolder.getInstance().currentPass == RenderPass.CAMERA) {
-			vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(DataHolder.getInstance().currentPass).getPosition();
+		Vec3 vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
+		if (ClientDataHolder.getInstance().currentPass == RenderPass.THIRD || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA) {
+			vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolder.getInstance().currentPass).getPosition();
 		}
 		return Mth.floor(vec3.y);
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 2), method = "renderSnowAndRain")
 	public int rain3(double d) {
-		Vec3 vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
-		if (DataHolder.getInstance().currentPass == RenderPass.THIRD || DataHolder.getInstance().currentPass == RenderPass.CAMERA) {
-			vec3 = DataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(DataHolder.getInstance().currentPass).getPosition();
+		Vec3 vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
+		if (ClientDataHolder.getInstance().currentPass == RenderPass.THIRD || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA) {
+			vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolder.getInstance().currentPass).getPosition();
 		}
 		return Mth.floor(vec3.z);
 	}
@@ -146,7 +146,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	 */
 	@Overwrite
 	public void onResourceManagerReload(ResourceManager pResourceManager) {
-		DataHolder.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
+		ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
 	}
 
 //	@Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/resources/ResourceLocation;"), method = "initTransparency")
@@ -173,7 +173,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"), method = "renderLevel")
 	public int lightupdate(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
-		if (DataHolder.getInstance().currentPass == RenderPass.LEFT) {
+		if (ClientDataHolder.getInstance().currentPass == RenderPass.LEFT) {
 			this.level.getProfiler().popPush("light_update_queue");
 			this.level.pollLightUpdates();
 			this.level.getProfiler().popPush("light_updates");
@@ -193,8 +193,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
 	public boolean drawSelf(Camera camera) {
-		boolean renderSelf = DataHolder.getInstance().currentPass == RenderPass.THIRD && DataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || DataHolder.getInstance().currentPass == RenderPass.CAMERA;
-		renderSelf = renderSelf | (DataHolder.getInstance().vrSettings.shouldRenderSelf || DataHolder.getInstance().vrSettings.tmpRenderSelf);
+		boolean renderSelf = ClientDataHolder.getInstance().currentPass == RenderPass.THIRD && ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA;
+		renderSelf = renderSelf | (ClientDataHolder.getInstance().vrSettings.shouldRenderSelf || ClientDataHolder.getInstance().vrSettings.tmpRenderSelf);
 		return !(!camera.isDetached() && !renderSelf);
 	}
 
@@ -230,8 +230,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		double e = vec3.y();
 		double g = vec3.z();
 		for (int c=0;c<2;c++) {
-			if(DataHolder.getInstance().interactTracker.isInteractActive(c) && (DataHolder.getInstance().interactTracker.inBlockHit[c] != null || DataHolder.getInstance().interactTracker.bukkit[c])) {
-				BlockPos blockpos = DataHolder.getInstance().interactTracker.inBlockHit[c] != null ? DataHolder.getInstance().interactTracker.inBlockHit[c].getBlockPos() : new BlockPos(DataHolder.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
+			if(ClientDataHolder.getInstance().interactTracker.isInteractActive(c) && (ClientDataHolder.getInstance().interactTracker.inBlockHit[c] != null || ClientDataHolder.getInstance().interactTracker.bukkit[c])) {
+				BlockPos blockpos = ClientDataHolder.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolder.getInstance().interactTracker.inBlockHit[c].getBlockPos() : new BlockPos(ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
 				BlockState blockstate = this.level.getBlockState(blockpos);
 				this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
 				if (c==0) {
@@ -254,7 +254,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V", ordinal = 0), method = "renderLevel")
 	public void renderFabulous(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
 		boolean menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
-		boolean menuhandright = menuHandleft || DataHolder.getInstance().interactTracker.hotbar >= 0 && DataHolder.getInstance().vrSettings.vrTouchHotbar;
+		boolean menuhandright = menuHandleft || ClientDataHolder.getInstance().interactTracker.hotbar >= 0 && ClientDataHolder.getInstance().vrSettings.vrTouchHotbar;
 		((GameRendererExtension) gameRenderer).renderVRFabulous(f, (LevelRenderer)(Object)this, menuhandright, menuHandleft, poseStack);
 	}
 
@@ -262,7 +262,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
 	public void renderFast1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
 		boolean menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
-		boolean menuhandright = menuHandleft || DataHolder.getInstance().interactTracker.hotbar >= 0 && DataHolder.getInstance().vrSettings.vrTouchHotbar;
+		boolean menuhandright = menuHandleft || ClientDataHolder.getInstance().interactTracker.hotbar >= 0 && ClientDataHolder.getInstance().vrSettings.vrTouchHotbar;
 		((GameRendererExtension) gameRenderer).renderVrFast(f, false, menuhandright, menuHandleft, poseStack);
 	}
 
@@ -276,7 +276,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,250);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
 		}
 	}
 
@@ -285,7 +285,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,250);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
 		}
 	}
 
@@ -294,7 +294,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,250);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
 		}
 	}
 
@@ -303,7 +303,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,250);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
 		}
 	}
 
@@ -312,8 +312,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,750);
-			DataHolder.getInstance().vr.triggerHapticPulse(1,750);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,750);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(1,750);
 
 		}
 	}
@@ -323,8 +323,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,750);
-			DataHolder.getInstance().vr.triggerHapticPulse(1,750);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,750);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(1,750);
 
 		}
 	}
@@ -334,8 +334,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,750);
-			DataHolder.getInstance().vr.triggerHapticPulse(1,750);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,750);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(1,750);
 		}
 	}
 
@@ -344,7 +344,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,500);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,500);
 		}
 	}
 
@@ -353,8 +353,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,1250);
-			DataHolder.getInstance().vr.triggerHapticPulse(1,1250);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,1250);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(1,1250);
 		}
 	}
 
@@ -363,7 +363,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
-			DataHolder.getInstance().vr.triggerHapticPulse(0,250);
+			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
 		}
 	}
 	
@@ -377,7 +377,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		this.alphaSortVRHandsFramebuffer = null;
 		this.alphaSortVROccludedFramebuffer = null;
 		this.alphaSortVRUnoccludedFramebuffer = null;
-		PostChain postchain = DataHolder.getInstance().vrRenderer.alphaShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
+		PostChain postchain = ClientDataHolder.getInstance().vrRenderer.alphaShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
 
 		if (postchain != null) {
 			this.transparencyChain = postchain;
@@ -393,7 +393,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
 		this.entityEffect = null;
 		this.entityTarget = null;
-		PostChain postchain2 = DataHolder.getInstance().vrRenderer.entityShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
+		PostChain postchain2 = ClientDataHolder.getInstance().vrRenderer.entityShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
 
 		if (postchain2 != null) {
 			this.entityEffect = postchain2;
