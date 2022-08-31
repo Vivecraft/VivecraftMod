@@ -50,6 +50,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43C;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -170,6 +171,7 @@ public abstract class GameRendererVRMixin
 
 	@Shadow
 	@Final
+	@Mutable
 	private final Camera mainCamera = new VRCamera();
 
 	@Unique // TODO added by optifine...
@@ -223,9 +225,11 @@ public abstract class GameRendererVRMixin
 	@Shadow
 	public abstract void pick(float f);
 
-	@Shadow private boolean effectActive;
+	@Shadow
+	private boolean effectActive;
 
-	@Shadow private long lastActiveTime;
+	@Shadow
+	private long lastActiveTime;
 
 	@Override
 	public double getRveY() {

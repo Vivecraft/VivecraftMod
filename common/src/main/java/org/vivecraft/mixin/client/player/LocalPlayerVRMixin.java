@@ -264,7 +264,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	public void autostep1(float f, float g, CallbackInfo ci) {
 		float l;
 		if (!this.canAutoJump()) {
-			return;
+			ci.cancel();
 		}
 		Vec3 vec3 = this.position();
 		Vec3 vec32 = vec3.add(f, 0.0, g);
@@ -280,7 +280,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 			vec33 = new Vec3(j * m - k * l, vec33.y, k * m + j * l);
 			i = (float)vec33.lengthSqr();
 			if (i <= 0.001f) {
-				return;
+				ci.cancel();
 			}
 		}
 		float vec2 = Mth.fastInvSqrt(i);
@@ -288,17 +288,17 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		Vec3 k = this.getForward();
 		l = (float)(k.x * j.x + k.z * j.z);
 		if (l < -0.15f) {
-			return;
+			ci.cancel();
 		}
 		CollisionContext m = CollisionContext.of(this);
 		BlockPos blockPos = new BlockPos(this.getX(), this.getBoundingBox().maxY, this.getZ());
 		BlockState blockState = this.level.getBlockState(blockPos);
 		if (!blockState.getCollisionShape(this.level, blockPos, m).isEmpty()) {
-			return;
+			ci.cancel();
 		}
 		BlockState blockState2 = this.level.getBlockState(blockPos = blockPos.above());
 		if (!blockState2.getCollisionShape(this.level, blockPos, m).isEmpty()) {
-			return;
+			ci.cancel();
 		}
 		float n = 7.0f;
 		float o = 1.2f;
@@ -335,21 +335,21 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 				BlockState blockState3 = this.level.getBlockState(blockPos3);
 				VoxelShape voxelShape2 = blockState3.getCollisionShape(this.level, blockPos3, m);
 				if (!voxelShape2.isEmpty() && (double)(s = (float)voxelShape2.max(Direction.Axis.Y) + (float)blockPos3.getY()) - this.getY() > (double)p) {
-					return;
+					ci.cancel();
 				}
 				if (t > 1 && !(blockState4 = this.level.getBlockState(blockPos = blockPos.above())).getCollisionShape(this.level, blockPos, m).isEmpty()) {
-					return;
+					ci.cancel();
 				}
 				++t;
 			}
 			break;
 		}
 		if (s == Float.MIN_VALUE) {
-			return;
+			ci.cancel();
 		}
 		float aABB2 = (float)((double)s - this.getY());
 		if (aABB2 <= 0.5f || aABB2 > p) {
-			return;
+			ci.cancel();
 		}
 		this.autoJumpTime = 1;
 		ci.cancel();
@@ -366,6 +366,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		}
 	}
 
+	@Override
 	public void absMoveTo(double pX, double p_19892_, double pY, float p_19894_, float pZ) {
 		super.absMoveTo(pX, p_19892_, pY, p_19894_, pZ);
 		ClientDataHolder.getInstance().vrPlayer.snapRoomOriginToPlayerEntity((LocalPlayer) (Object) this, false, false);
@@ -625,18 +626,18 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		super.releaseUsingItem();
 	}
 
-	@Override
-	public void updateSyncFields(LocalPlayer old) {
-		this.xLast = old.xLast;
-		this.yLast1 = old.yLast1;
-		this.zLast = old.zLast;
-		this.yRotLast = old.yRotLast;
-		this.xRotLast = old.xRotLast;
-		this.lastOnGround = old.lastOnGround;
-		this.wasShiftKeyDown = old.wasShiftKeyDown;
-		this.wasSprinting = old.wasSprinting;
-		this.positionReminder = old.positionReminder;
-	}
+//	@Override
+//	public void updateSyncFields(LocalPlayer old) {
+//		this.xLast = old.xLast;
+//		this.yLast1 = old.yLast1;
+//		this.zLast = old.zLast;
+//		this.yRotLast = old.yRotLast;
+//		this.xRotLast = old.xRotLast;
+//		this.lastOnGround = old.lastOnGround;
+//		this.wasShiftKeyDown = old.wasShiftKeyDown;
+//		this.wasSprinting = old.wasSprinting;
+//		this.positionReminder = old.positionReminder;
+//	}
 
 	@Override
 	public void setItemInUseClient(ItemStack item, InteractionHand hand) {
