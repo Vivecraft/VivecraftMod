@@ -15,7 +15,6 @@ import org.vivecraft.utils.math.Vector3;
 @Mixin(CrossbowItem.class)
 public class CrossbowItemMixin {
 
-
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getViewVector(F)Lnet/minecraft/world/phys/Vec3;"),
 			method = "shootProjectile(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;FZFFF)V")
 	private static Vec3 shoot(LivingEntity LivingEntity, float v) {
