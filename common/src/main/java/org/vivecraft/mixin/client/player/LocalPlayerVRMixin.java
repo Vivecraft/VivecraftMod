@@ -265,6 +265,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		float l;
 		if (!this.canAutoJump()) {
 			ci.cancel();
+			return;
 		}
 		Vec3 vec3 = this.position();
 		Vec3 vec32 = vec3.add(f, 0.0, g);
@@ -281,6 +282,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 			i = (float)vec33.lengthSqr();
 			if (i <= 0.001f) {
 				ci.cancel();
+				return;
 			}
 		}
 		float vec2 = Mth.fastInvSqrt(i);
@@ -289,16 +291,19 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		l = (float)(k.x * j.x + k.z * j.z);
 		if (l < -0.15f) {
 			ci.cancel();
+			return;
 		}
 		CollisionContext m = CollisionContext.of(this);
 		BlockPos blockPos = new BlockPos(this.getX(), this.getBoundingBox().maxY, this.getZ());
 		BlockState blockState = this.level.getBlockState(blockPos);
 		if (!blockState.getCollisionShape(this.level, blockPos, m).isEmpty()) {
 			ci.cancel();
+			return;
 		}
 		BlockState blockState2 = this.level.getBlockState(blockPos = blockPos.above());
 		if (!blockState2.getCollisionShape(this.level, blockPos, m).isEmpty()) {
 			ci.cancel();
+			return;
 		}
 		float n = 7.0f;
 		float o = 1.2f;
@@ -336,9 +341,11 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 				VoxelShape voxelShape2 = blockState3.getCollisionShape(this.level, blockPos3, m);
 				if (!voxelShape2.isEmpty() && (double)(s = (float)voxelShape2.max(Direction.Axis.Y) + (float)blockPos3.getY()) - this.getY() > (double)p) {
 					ci.cancel();
+					return;
 				}
 				if (t > 1 && !(blockState4 = this.level.getBlockState(blockPos = blockPos.above())).getCollisionShape(this.level, blockPos, m).isEmpty()) {
 					ci.cancel();
+					return;
 				}
 				++t;
 			}
@@ -346,10 +353,12 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		}
 		if (s == Float.MIN_VALUE) {
 			ci.cancel();
+			return;
 		}
 		float aABB2 = (float)((double)s - this.getY());
 		if (aABB2 <= 0.5f || aABB2 > p) {
 			ci.cancel();
+			return;
 		}
 		this.autoJumpTime = 1;
 		ci.cancel();
