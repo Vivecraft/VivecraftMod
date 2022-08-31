@@ -17,6 +17,7 @@
     "vivecraft.nonvr.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.iris.mixins.json",
+    "vivecraft.nonvr.fabric.mixins.json",
     "vivecraft.vr.fabric.mixins.json"
   ],
   "depends": {
