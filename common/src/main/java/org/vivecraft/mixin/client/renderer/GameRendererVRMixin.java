@@ -442,16 +442,6 @@ public abstract class GameRendererVRMixin
 
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 2), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
-	public void removeMulposeX(PoseStack s, Quaternion quaternion) {
-		return;
-	}
-
-	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lcom/mojang/math/Quaternion;)V ", ordinal = 3), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
-	public void removeMulposeY(PoseStack s, Quaternion quaternion) {
-		applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, s);
-	}
-
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 1), method = "renderLevel")
 	public void noHandProfiler(ProfilerFiller instance, String s) {
 		GL11.glDisable(GL11.GL_STENCIL_TEST);

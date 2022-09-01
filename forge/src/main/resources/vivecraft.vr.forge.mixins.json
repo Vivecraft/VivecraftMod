@@ -9,7 +9,8 @@
   "client": [
     "ForgeMinecraftVRMixin",
     "ForgeLevelRendererVRMixin",
-    "ForgeIngameGuiVRMixin"
+    "ForgeIngameGuiVRMixin",
+    "ForgeGameRendererVRMixin"
   ],
   "server": [
   ],
