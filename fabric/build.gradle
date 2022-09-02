@@ -34,12 +34,14 @@ dependencies {
     modRuntimeOnly(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))//temp sodium
     modRuntimeOnly(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))//temp sodium
     modRuntimeOnly(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))//temp sodium
-    modRuntimeOnly(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version))//temp sodium
 
     modRuntimeOnly 'org.anarres:jcpp:1.4.14'//temp iris
 
     modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
     modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium
+
+    // needed for resource loading
+    include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
 
     include "com.github.Fallen-Breath:conditional-mixin:v0.3.1"
 

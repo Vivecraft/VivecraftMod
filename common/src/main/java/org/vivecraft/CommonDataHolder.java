@@ -6,12 +6,11 @@ public class CommonDataHolder {
     public boolean resourcePacksChanged;
     public final String minecriftVerString;
 
-    //TODO add loader name
     public CommonDataHolder() {
         if (VRState.checkVR()) {
-            minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-fabric-a1";
+            minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-" + Xplat.getModloader() + "-a1";
         } else {
-            minecriftVerString = "Vivecraft 1.18.2 jrbudda-NONVR-fabric-a1";
+            minecriftVerString = "Vivecraft 1.18.2 jrbudda-NONVR-" + Xplat.getModloader() + "-a1";
         }
     }
 

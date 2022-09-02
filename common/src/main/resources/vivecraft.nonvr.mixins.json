@@ -21,7 +21,6 @@
     "blaze3d.pipeline.RenderTargetMixin",
     "blaze3d.systems.RenderSystemAccessor",
     "client.MinecraftMixin",
-    "client.OptionMixin",
     "client.main.MainMixin",
     "client.multiplayer.ClientPacketListenerMixin",
     "client.player.AbstractClientPlayerMixin",

@@ -348,7 +348,7 @@ public abstract class GameRendererVRMixin
 		return this.lastActiveTime;
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER, remap = false), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
+	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
 	public void matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
 		this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov));
 		RenderSystem.getModelViewStack().setIdentity();
