@@ -41,8 +41,6 @@ dependencies {
     modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
     modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium
 
-    include "com.github.Fallen-Breath:conditional-mixin:v0.3.1"
-
     include("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows")
     include("org.lwjgl:lwjgl-opengl:3.2.2:natives-windows")
     include("org.lwjgl:lwjgl-jemalloc:3.2.2:natives-windows")

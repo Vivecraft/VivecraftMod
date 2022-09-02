@@ -87,3 +87,6 @@ accessible field net/minecraft/client/player/LocalPlayer positionReminder I
 
 accessible field net/minecraft/client/sounds/SoundManager soundEngine Lnet/minecraft/client/sounds/SoundEngine;
 
+accessible class net/minecraft/world/entity/monster/EnderMan$EndermanFreezeWhenLookedAt
+accessible class net/minecraft/world/entity/monster/EnderMan$EndermanLookForPlayerGoal
+accessible method net/minecraft/world/entity/monster/EnderMan isLookingAtMe (Lnet/minecraft/world/entity/player/Player;)Z
