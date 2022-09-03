@@ -20,7 +20,7 @@ public abstract class EndermanLookForPlayerGoalMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z"), method = "method_18449")
     private static boolean predicate(EnderMan instance, Player player) {
-        if (CommonNetworkHelper.isVive((ServerPlayer) player)) {
+        if (CommonNetworkHelper.isVive((ServerPlayer) player) && CommonNetworkHelper.vivePlayers.get(player) != null) {
             return shouldEndermanAttackVRPlayer(instance, (ServerPlayer) player);
         }else {
             return instance.isLookingAtMe(player);
@@ -29,7 +29,7 @@ public abstract class EndermanLookForPlayerGoalMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z"), method = "tick")
     public boolean shouldAttack(EnderMan instance, Player player) {
-        if (CommonNetworkHelper.isVive((ServerPlayer) player)) {
+        if (CommonNetworkHelper.isVive((ServerPlayer) player) && CommonNetworkHelper.vivePlayers.get(player) != null) {
             return shouldEndermanAttackVRPlayer(instance, (ServerPlayer) player);
         }else {
             return instance.isLookingAtMe(player);
