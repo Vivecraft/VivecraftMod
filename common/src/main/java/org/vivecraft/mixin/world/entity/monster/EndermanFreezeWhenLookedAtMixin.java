@@ -32,7 +32,7 @@ public class EndermanFreezeWhenLookedAtMixin {
 
     @Inject(at = @At("HEAD"), method = "canUse", cancellable = true)
     public void vrTarget(CallbackInfoReturnable<Boolean> cir) {
-        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player)) {
+        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player) && CommonNetworkHelper.vivePlayers.get(player) != null) {
             double dist = target.distanceToSqr(this.enderman);
             cir.setReturnValue(dist <= 256.0D && shouldEndermanAttackVRPlayer(this.enderman, player));
         }
@@ -40,7 +40,7 @@ public class EndermanFreezeWhenLookedAtMixin {
 
     @Inject(at = @At("HEAD"), method = "tick")
     public void vrTick(CallbackInfo ci) {
-        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player)) {
+        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player) && CommonNetworkHelper.vivePlayers.get(player) != null) {
             ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player);
             this.enderman.getLookControl().setLookAt(data.getHMDPos(player));
         }
