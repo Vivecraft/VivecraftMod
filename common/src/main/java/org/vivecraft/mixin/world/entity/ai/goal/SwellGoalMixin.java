@@ -24,7 +24,7 @@ public class SwellGoalMixin {
     public void vrSwellDistance(CallbackInfoReturnable<Boolean> cir) {
         LivingEntity target = this.creeper.getTarget();
         if (target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player)) {
-            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player);
+            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player.getUUID());
             if (data != null && !data.isSeated())
                 cir.setReturnValue(this.creeper.getSwellDir() > 0 || this.creeper.distanceToSqr(target) < 1.75 * 1.75); //ServerConfig.creeperSwellDistance.get()
         }

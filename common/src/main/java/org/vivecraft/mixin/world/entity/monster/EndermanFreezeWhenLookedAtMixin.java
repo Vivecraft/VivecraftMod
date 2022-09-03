@@ -32,7 +32,7 @@ public class EndermanFreezeWhenLookedAtMixin {
 
     @Inject(at = @At("HEAD"), method = "canUse", cancellable = true)
     public void vrTarget(CallbackInfoReturnable<Boolean> cir) {
-        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player) && CommonNetworkHelper.vivePlayers.get(player) != null) {
+        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player)) {
             double dist = target.distanceToSqr(this.enderman);
             cir.setReturnValue(dist <= 256.0D && shouldEndermanAttackVRPlayer(this.enderman, player));
         }
@@ -40,8 +40,8 @@ public class EndermanFreezeWhenLookedAtMixin {
 
     @Inject(at = @At("HEAD"), method = "tick")
     public void vrTick(CallbackInfo ci) {
-        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player) && CommonNetworkHelper.vivePlayers.get(player) != null) {
-            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player);
+        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player)) {
+            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player.getUUID());
             this.enderman.getLookControl().setLookAt(data.getHMDPos(player));
         }
     }
@@ -49,7 +49,7 @@ public class EndermanFreezeWhenLookedAtMixin {
     private static boolean shouldEndermanAttackVRPlayer(EnderMan enderman, ServerPlayer player) {
         ItemStack itemstack = player.getInventory().armor.get(3);
         if (!itemstack.is(Items.CARVED_PUMPKIN)) { //no enderitem
-            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player);
+            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player.getUUID());
             Vec3 vector3d = data.getHMDDir();
             Vec3 vector3d1 = new Vec3(enderman.getX() - data.getHMDPos(player).x, enderman.getEyeY() - data.getHMDPos(player).y, enderman.getZ() - data.getHMDPos(player).z);
             double d0 = vector3d1.length();

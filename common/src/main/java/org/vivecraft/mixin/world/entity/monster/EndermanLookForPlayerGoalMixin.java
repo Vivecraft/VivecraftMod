@@ -20,7 +20,7 @@ public abstract class EndermanLookForPlayerGoalMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z"), method = "method_18449")
     private static boolean predicate(EnderMan instance, Player player) {
-        if (CommonNetworkHelper.isVive((ServerPlayer) player) && CommonNetworkHelper.vivePlayers.get(player) != null) {
+        if (CommonNetworkHelper.isVive((ServerPlayer) player)) {
             return shouldEndermanAttackVRPlayer(instance, (ServerPlayer) player);
         }else {
             return instance.isLookingAtMe(player);
@@ -29,7 +29,7 @@ public abstract class EndermanLookForPlayerGoalMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z"), method = "tick")
     public boolean shouldAttack(EnderMan instance, Player player) {
-        if (CommonNetworkHelper.isVive((ServerPlayer) player) && CommonNetworkHelper.vivePlayers.get(player) != null) {
+        if (CommonNetworkHelper.isVive((ServerPlayer) player)) {
             return shouldEndermanAttackVRPlayer(instance, (ServerPlayer) player);
         }else {
             return instance.isLookingAtMe(player);
@@ -39,7 +39,7 @@ public abstract class EndermanLookForPlayerGoalMixin {
     private static boolean shouldEndermanAttackVRPlayer(EnderMan enderman, ServerPlayer player) {
         ItemStack itemstack = player.getInventory().armor.get(3);
         if (!itemstack.is(Items.CARVED_PUMPKIN)) { //no enderitem
-            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player);
+            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player.getUUID());
             Vec3 vector3d = data.getHMDDir();
             Vec3 vector3d1 = new Vec3(enderman.getX() - data.getHMDPos(player).x, enderman.getEyeY() - data.getHMDPos(player).y, enderman.getZ() - data.getHMDPos(player).z);
             double d0 = vector3d1.length();
