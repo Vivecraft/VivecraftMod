@@ -20,4 +20,8 @@ public class XplatImpl {
     public static boolean isDedicatedServer() {
         return FMLEnvironment.dist == Dist.DEDICATED_SERVER;
     }
+
+    public static String getModloader() {
+        return "forge";
+    }
 }

@@ -138,11 +138,13 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		ClientDataHolder.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolder.getInstance().vrPlayer.vrdata_world_pre);
 	}
 
+	/* TODO: not working, is this needed?
 	//TODO verify
 	@ModifyVariable(at = @At("STORE"), ordinal = 3, method = "sendPosition")
 	public boolean changeFlag(boolean b) {
 		return this.teleported || b;
 	}
+	*/
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z", shift = At.Shift.BEFORE), method = "sendPosition")
 	public void passenger(CallbackInfo ci) {
