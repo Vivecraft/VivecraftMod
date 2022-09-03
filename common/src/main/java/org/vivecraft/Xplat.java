@@ -34,4 +34,9 @@ public interface Xplat {
     static boolean isDedicatedServer() {
         return false;
     }
+
+    @ExpectPlatform
+    static String getModloader() {
+        return "";
+    }
 }

@@ -21,7 +21,7 @@ configurations {
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    //modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
@@ -34,20 +34,22 @@ dependencies {
     modRuntimeOnly(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))//temp sodium
     modRuntimeOnly(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))//temp sodium
     modRuntimeOnly(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))//temp sodium
-    modRuntimeOnly(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version))//temp sodium
 
     modRuntimeOnly 'org.anarres:jcpp:1.4.14'//temp iris
 
     modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
     modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium
 
-    include("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows")
-    include("org.lwjgl:lwjgl-opengl:3.2.2:natives-windows")
-    include("org.lwjgl:lwjgl-jemalloc:3.2.2:natives-windows")
-    include("org.lwjgl:lwjgl:3.2.2:natives-windows")
-    include("org.lwjgl:lwjgl-glfw:3.2.2:natives-windows")
-    include("org.lwjgl:lwjgl-stb:3.2.2:natives-windows")
-    include("org.lwjgl:lwjgl-openal:3.2.2:natives-windows")
+    // needed for resource loading
+    include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
+
+//    include("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows")
+//    include("org.lwjgl:lwjgl-opengl:3.2.2:natives-windows")
+//    include("org.lwjgl:lwjgl-jemalloc:3.2.2:natives-windows")
+//    include("org.lwjgl:lwjgl:3.2.2:natives-windows")
+//    include("org.lwjgl:lwjgl-glfw:3.2.2:natives-windows")
+//    include("org.lwjgl:lwjgl-stb:3.2.2:natives-windows")
+//    include("org.lwjgl:lwjgl-openal:3.2.2:natives-windows")
 
 }
 

@@ -19,4 +19,8 @@ public class XplatImpl {
     public static boolean isDedicatedServer() {
        return FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER);
     }
+
+    public static String getModloader() {
+        return "fabric";
+    }
 }

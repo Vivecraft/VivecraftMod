@@ -85,17 +85,21 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 					}
 				}
 				info.setReturnValue(vrplayerrenderer1);
+				return;
 			} else {
 				EntityRenderer<? extends Player> entityrenderer = this.playerRenderers.get(s);
 				if (entityrenderer != null) {
 					info.setReturnValue((EntityRenderer<AbstractClientPlayer>) entityrenderer);
+					return;
 				} else {
 					info.setReturnValue((EntityRenderer<AbstractClientPlayer>) this.playerRenderers.get("default"));
+					return;
 				}
 			}
 		}
 		else {
 			info.setReturnValue((EntityRenderer)this.renderers.get(pEntity.getType()));
+			return;
 		}
 	}
 	
@@ -103,7 +107,7 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 			method = "onResourceManagerReload", locals = LocalCapture.CAPTURE_FAILEXCEPTION)
 	public void reload(ResourceManager p_174004_, CallbackInfo info, EntityRendererProvider.Context context) {
 		this.context = context;
-		//this.playerRenderers = new HashMap<>(this.playerRenderers);
+		this.playerRenderers = new HashMap<>(this.playerRenderers);
 		this.skinMapVRSeated.put("default", new VRPlayerRenderer(context, false, true));
 		this.skinMapVRSeated.put("slim", new VRPlayerRenderer(context, true, true));
 		this.skinMapVR.put("default", new VRPlayerRenderer(context, false, false));

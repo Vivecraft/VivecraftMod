@@ -28,4 +28,7 @@ public class XplatImpl {
         return FMLEnvironment.dist == Dist.DEDICATED_SERVER;
     }
 
+    public static String getModloader() {
+        return "forge";
+    }
 }

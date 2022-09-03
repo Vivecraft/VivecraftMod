@@ -12,8 +12,10 @@ import static com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate;
 
 @Mixin(RenderSystem.class)
 public interface RenderSystemAccessor {
-    @Accessor(remap = false)
-    static int[] getShaderTextures() {
+
+    // needs remap because of forge
+    @Accessor
+    public static int[] getShaderTextures(){
         return null;
     }
 }

@@ -126,7 +126,8 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V", remap = false), method = "renderHotbar")
+    // do remap because of forge
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V"), method = "renderHotbar")
     public void renderVive(float f, PoseStack poseStack, CallbackInfo ci){
         this.renderViveHudIcons(poseStack);
     }

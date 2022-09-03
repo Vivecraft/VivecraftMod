@@ -60,11 +60,6 @@ public class ClientPacketListenerVRMixin {
         ClientDataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
     }
 
-    @Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/client/player/KeyboardInput;<init>(Lnet/minecraft/client/Options;)V"), method = "handleLogin")
-    public KeyboardInput login(Options options) {
-        return null;
-    }
-
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;adjustPlayer(Lnet/minecraft/world/entity/player/Player;)V"), method = "handleLogin")
     public void readdInput(ClientboundLoginPacket clientboundLoginPacket, CallbackInfo ci) {
         this.minecraft.player.input = new VivecraftMovementInput(this.minecraft.options);
@@ -105,19 +100,14 @@ public class ClientPacketListenerVRMixin {
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;resetPos()V"), method = "handleRespawn")
     public void sync(LocalPlayer instance) {
         instance.resetPos();
-        ((PlayerExtension)instance).updateSyncFields(this.minecraft.player);
-    }
-
-    @Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/client/player/KeyboardInput;<init>(Lnet/minecraft/client/Options;)V"), method = "handleRespawn")
-    public KeyboardInput respawn(Options options) {
-        ClientNetworkHelper.resetServerSettings();
-        ClientNetworkHelper.sendVersionInfo();
-        ClientDataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
-        return null;
+        // ((PlayerExtension)instance).updateSyncFields(this.minecraft.player);
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;adjustPlayer(Lnet/minecraft/world/entity/player/Player;)V", shift = At.Shift.BEFORE), method = "handleRespawn")
     public void readdInput2(ClientboundRespawnPacket clientboundRespawnPacket, CallbackInfo ci) {
+        ClientNetworkHelper.resetServerSettings();
+        ClientNetworkHelper.sendVersionInfo();
+        ClientDataHolder.getInstance().vrPlayer.teleportWarningTimer = 200;
         this.minecraft.player.input = new VivecraftMovementInput(this.minecraft.options);
     }
 
