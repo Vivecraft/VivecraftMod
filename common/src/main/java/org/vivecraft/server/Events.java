@@ -73,7 +73,7 @@
 //    public void onArrowLoose(ServerPlayer player, Function<Integer, Void> charge) {
 //        ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player);
 //        if (data != null && !data.isSeated() && data.getDraw() > 0) {
-//            charge.apply(Math.round(data.getDraw() * 2));
+//            charge.apply(Math.round(data.getDraw() * 20));
 //        }
 //    }
 //

@@ -1,4 +1,4 @@
-package org.vivecraft.config;
+package org.vivecraft.server.config;
 
 public class IntValue extends ConfigValue<Integer>{
 

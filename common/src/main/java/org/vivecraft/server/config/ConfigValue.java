@@ -1,6 +1,4 @@
-package org.vivecraft.config;
-
-import java.util.function.Supplier;
+package org.vivecraft.server.config;
 
 public abstract class ConfigValue<T> {
 

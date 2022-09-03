@@ -1,4 +1,4 @@
-package org.vivecraft.config;
+package org.vivecraft.server.config;
 
 public class BooleanValue extends ConfigValue<Boolean>{
 

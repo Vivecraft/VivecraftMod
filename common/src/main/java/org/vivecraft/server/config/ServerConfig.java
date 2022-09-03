@@ -1,4 +1,4 @@
-package org.vivecraft.config;
+package org.vivecraft.server.config;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+//Not used. Possible VFE integration, but not planned for now
 public class ServerConfig {
 
     public static BooleanValue vrOnly = new BooleanValue("vrOnly", false);
