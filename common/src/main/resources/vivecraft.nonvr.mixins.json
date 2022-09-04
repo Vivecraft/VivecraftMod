@@ -15,6 +15,7 @@
 
     "world.entity.ai.goal.SwellGoalMixin",
     "world.entity.monster.EndermanMixin",
+    "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
 
     "world.item.CrossbowItemMixin",
     "world.item.ItemsMixin"
