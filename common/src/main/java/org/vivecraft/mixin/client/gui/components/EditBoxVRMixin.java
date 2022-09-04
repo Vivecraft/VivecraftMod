@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(EditBox.class)
 public abstract class EditBoxVRMixin extends AbstractWidget{
@@ -21,11 +22,11 @@ public abstract class EditBoxVRMixin extends AbstractWidget{
 	public abstract void setFocus(boolean p_94179_);
 
 	//TODO test
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/EditBox;canLoseFocus:Z"), method = "Lnet/minecraft/client/gui/components/EditBox;mouseClicked(DDI)Z")
-	public void focus(double p_94125_, double p_94126_, int p_94127_, CallbackInfoReturnable<Boolean> info, boolean flag) {
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/EditBox;canLoseFocus:Z"), method = "Lnet/minecraft/client/gui/components/EditBox;mouseClicked(DDI)Z", locals = LocalCapture.CAPTURE_FAILHARD)
+	public void focus(double d, double e, int i, CallbackInfoReturnable<Boolean> cir, int f, boolean bl) {
 		if (!this.isFocused())
         {
-            this.setFocus(flag);
+            this.setFocus(bl);
         }
 	}
 

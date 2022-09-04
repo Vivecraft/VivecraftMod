@@ -12,4 +12,24 @@ public abstract class ForgeIngameGuiVRMixin {
     private static boolean noVignette() {
         return false;
     }
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z", remap = true), method = "lambda$static$1", remap = false)
+    private static boolean noSpyglass() {
+        return false;
+    }
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z", remap = true), method = "lambda$static$2", remap = false)
+    private static boolean noHelmet() {
+        return false;
+    }
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z", remap = true), method = "lambda$static$3", remap = false)
+    private static boolean noFreeze() {
+        return false;
+    }
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z", remap = true), method = "lambda$static$4", remap = false)
+    private static boolean noPortal() {
+        return false;
+    }
 }

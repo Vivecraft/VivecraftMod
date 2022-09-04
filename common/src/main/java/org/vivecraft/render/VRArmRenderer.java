@@ -38,7 +38,7 @@ public class VRArmRenderer extends PlayerRenderer
     private void renderItem(ControllerType side, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, AbstractClientPlayer playerIn, ModelPart rendererArmIn, ModelPart rendererArmwearIn)
     {
         PlayerModel<AbstractClientPlayer> playermodel = this.getModel();
-        //this.setModelVisibilities(); TODO find method
+        this.setModelProperties(playerIn);
         GlStateManager._enableBlend();
         GlStateManager._enableCull();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
