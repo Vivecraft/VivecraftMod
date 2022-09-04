@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -19,9 +21,6 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
 {
     private final boolean slim;
     public ModelPart vrHMD;
-    ResourceLocation DIAMOND_HMD = new ResourceLocation("vivecraft:textures/diamond_hmd.png");
-    ResourceLocation GOLD_HMD = new ResourceLocation("vivecraft:textures/gold_hmd.png");
-    ResourceLocation BLACK_HMD = new ResourceLocation("vivecraft:textures/black_hmd.png");
     PlayerModelController.RotInfo rotInfo;
     private boolean laying;
     private final List<ModelPart> parts;
@@ -31,8 +30,6 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
         super(p_170821_, p_170822_);
         this.slim = p_170822_;
         this.vrHMD = p_170821_.getChild("vrHMD");
-//        this.vrHMD.setTextureSize(16, 16);
-//        this.vrHMD.setTextureLocation(BLACK_HMD);       
         this.parts = p_170821_.getAllParts().filter((p_170824_) ->
         {
             return !p_170824_.isEmpty();
@@ -81,29 +78,11 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
 
     	this.vrHMD.visible = true;
 
-//    	switch (rotinfo.hmd)
-//    	{
-//    	case 0:
-//    		this.vrHMD.visible = false;
-//    		break;
-//
-//    	case 1:
-//    		this.vrHMD.setTextureLocation(this.BLACK_HMD);
-//    		break;
-//
-//    	case 2:
-//    		this.vrHMD.setTextureLocation(this.GOLD_HMD);
-//    		break;
-//
-//    	case 3:
-//    		this.vrHMD.setTextureLocation(this.DIAMOND_HMD);
-//    		break;
-//
-//    	case 4:
-//    		this.vrHMD.setTextureLocation(this.DIAMOND_HMD);
-//    	}
-
     	this.vrHMD.copyFrom(this.head);
         this.hat.copyFrom(this.head);
     }
+
+	public void renderHMDR(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int noOverlay) {
+		this.vrHMD.render(poseStack, vertexConsumer, i, noOverlay);
+	}
 }

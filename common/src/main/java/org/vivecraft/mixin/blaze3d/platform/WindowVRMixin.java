@@ -44,7 +44,7 @@ public abstract class WindowVRMixin {
 		return null;
 	}
 
-	@Redirect(method = "updateVsync", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapInterval(I)V"))
+	@Redirect(method = "updateVsync", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapInterval(I)V", remap = false))
 	public void disableSwap(int interval) {
 		GLFW.glfwSwapInterval(0);
 	}

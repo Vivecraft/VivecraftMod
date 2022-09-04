@@ -70,6 +70,8 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
         this.addLayer(new ParrotOnShoulderLayer<>(this, p_174557_.getModelSet()));
         this.addLayer(new SpinAttackEffectLayer<>(this, p_174557_.getModelSet()));
         this.addLayer(new BeeStingerLayer<>(this));
+
+        this.addLayer(new HMDLayer(this));
     }
 
     public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight)

@@ -49,7 +49,6 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 	public void renderer(Entity pEntity, CallbackInfoReturnable<EntityRenderer<AbstractClientPlayer>> info) {
 		if (pEntity instanceof AbstractClientPlayer) {
 			String s = ((AbstractClientPlayer) pEntity).getModelName();
-			PlayerRenderer playerrenderer = (PlayerRenderer) this.playerRenderers.get(s);
 			PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(pEntity.getUUID());
 			if (playermodelcontroller$rotinfo != null) {
 				VRPlayerRenderer vrplayerrenderer1;
