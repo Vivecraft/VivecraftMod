@@ -14,8 +14,7 @@
     "world.entity.projectile.ThrownTridentMixin",
 
     "world.entity.ai.goal.SwellGoalMixin",
-    "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
-    "world.entity.monster.EndermanLookForPlayerGoalMixin",
+    "world.entity.monster.EndermanMixin",
 
     "world.item.CrossbowItemMixin",
     "world.item.ItemsMixin"

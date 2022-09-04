@@ -2,37 +2,34 @@ package org.vivecraft.mixin.world.entity.monster;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.api.ServerVivePlayer;
 
-@Mixin(EnderMan.EndermanLookForPlayerGoal.class)
-public abstract class EndermanLookForPlayerGoalMixin {
+@Mixin(EnderMan.class)
+public abstract class EndermanMixin extends Monster {
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z"), method = "method_18449")
-    private static boolean predicate(EnderMan instance, Player player) {
-        if (CommonNetworkHelper.isVive((ServerPlayer) player)) {
-            return shouldEndermanAttackVRPlayer(instance, (ServerPlayer) player);
-        }else {
-            return instance.isLookingAtMe(player);
-        }
+    protected EndermanMixin(EntityType<? extends Monster> entityType, Level level) {
+        super(entityType, level);
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z"), method = "tick")
-    public boolean shouldAttack(EnderMan instance, Player player) {
+    @Inject(at = @At("HEAD"), method = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z", cancellable = true)
+    public void lookAtVR(Player player, CallbackInfoReturnable<Boolean> cir){
         if (CommonNetworkHelper.isVive((ServerPlayer) player)) {
-            return shouldEndermanAttackVRPlayer(instance, (ServerPlayer) player);
-        }else {
-            return instance.isLookingAtMe(player);
+            cir.setReturnValue(shouldEndermanAttackVRPlayer((EnderMan) (Object) this, (ServerPlayer) player));
         }
     }
 
@@ -45,7 +42,7 @@ public abstract class EndermanLookForPlayerGoalMixin {
             double d0 = vector3d1.length();
             vector3d1 = vector3d1.normalize();
             double d1 = vector3d.dot(vector3d1);
-            return d1 > 1.0D - 0.025D / d0 && canEntityBeSeen(enderman, data.getHMDPos(player));
+            return d1 > 1.0D - 0.025D / d0 && d0 < 128.0 && canEntityBeSeen(enderman, data.getHMDPos(player));
         }
 
         return false;
