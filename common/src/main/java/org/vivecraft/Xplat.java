@@ -1,6 +1,8 @@
 package org.vivecraft;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Path;
 
