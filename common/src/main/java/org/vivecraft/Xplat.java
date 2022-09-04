@@ -39,4 +39,9 @@ public interface Xplat {
     static String getModloader() {
         return "";
     }
+
+    @ExpectPlatform
+    static String getModVersion() {
+        return "";
+    }
 }

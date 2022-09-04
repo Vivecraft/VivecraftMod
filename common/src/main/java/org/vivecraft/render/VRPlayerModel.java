@@ -38,7 +38,7 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
     
     public static MeshDefinition createMesh(CubeDeformation p_170826_, boolean p_170827_)
     {
-    	MeshDefinition meshdefinition = PlayerModel.createMesh(p_170826_, false);
+    	MeshDefinition meshdefinition = PlayerModel.createMesh(p_170826_, p_170827_);
     	PartDefinition partdefinition = meshdefinition.getRoot();
     	partdefinition.addOrReplaceChild("vrHMD", CubeListBuilder.create().texOffs(0, 0).addBox(-3.5F, -6.0F, -7.5F, 7.0F, 4.0F, 5.0F, p_170826_), PartPose.ZERO);
     	return meshdefinition;

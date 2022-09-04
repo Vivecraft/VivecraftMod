@@ -58,7 +58,7 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 	
 	public static MeshDefinition createMesh(CubeDeformation p_170826_, boolean p_170827_)
 	{
-		MeshDefinition meshdefinition = VRPlayerModel.createMesh(p_170826_, false);
+		MeshDefinition meshdefinition = VRPlayerModel.createMesh(p_170826_, p_170827_);
 		PartDefinition partdefinition = meshdefinition.getRoot();
 
 		//its just a flesh wound

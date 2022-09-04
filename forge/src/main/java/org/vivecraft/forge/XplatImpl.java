@@ -31,4 +31,7 @@ public class XplatImpl {
     public static String getModloader() {
         return "forge";
     }
+    public static String getModVersion() {
+        return FMLLoader.getLoadingModList().getModFileById("vivecraft").versionString();
+    }
 }
