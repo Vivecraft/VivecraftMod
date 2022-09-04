@@ -20,6 +20,7 @@
     "client.OptionsVRMixin",
     "client.gui.GuiVRMixin",
     "client.gui.NoSodiumGuiVRMixin",
+    "client.gui.components.EditBoxVRMixin",
     "client.gui.screens.ScreenVRMixin",
     "client.gui.screens.PauseScreenVRMixin",
     "client.gui.screens.inventory.CreativeModeInventoryScreenVRMixin",
