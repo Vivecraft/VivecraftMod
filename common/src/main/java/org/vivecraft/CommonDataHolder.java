@@ -8,9 +8,9 @@ public class CommonDataHolder {
 
     public CommonDataHolder() {
         if (VRState.checkVR()) {
-            minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-" + Xplat.getModloader() + "-a1";
+            minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-" + Xplat.getModloader() + "-" + Xplat.getModVersion();
         } else {
-            minecriftVerString = "Vivecraft 1.18.2 jrbudda-NONVR-" + Xplat.getModloader() + "-a1";
+            minecriftVerString = "Vivecraft 1.18.2 jrbudda-NONVR-" + Xplat.getModloader() + "-" + Xplat.getModVersion();
         }
     }
 

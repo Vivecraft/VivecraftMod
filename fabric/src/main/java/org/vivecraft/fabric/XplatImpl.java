@@ -6,6 +6,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 public class XplatImpl {
 
@@ -22,5 +25,9 @@ public class XplatImpl {
 
     public static String getModloader() {
         return "fabric";
+    }
+
+    public static String getModVersion() {
+        return FabricLoader.getInstance().getModContainer("vivecraft").get().getMetadata().getVersion().getFriendlyString();
     }
 }
