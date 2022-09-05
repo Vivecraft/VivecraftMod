@@ -30,7 +30,6 @@ dependencies {
     modRuntimeOnly "maven.modrinth:iris:1.18.x-v1.2.6"
     modRuntimeOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
     //modRuntimeOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-728"
-    //modRuntimeOnly "maven.modrinth:immersiveportals:1.4.9-1.18.2"
 
     modRuntimeOnly("io.github.fabricators_of_create:Porting-Lib:1.2.460-beta+1.18.2-dev.cca931b") //temp create
     modRuntimeOnly("me.alphamode:ForgeTags:2.1") //temp create
@@ -47,17 +46,17 @@ dependencies {
     modRuntimeOnly("com.github.AlphaMode:fakeconfig:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
     modRuntimeOnly("com.github.AlphaMode:fakeconfigtoml:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
 
-    modRuntimeOnly("com.github.qouteall:GravityChanger:v0.3.1") { transitive = false } //temp immersiveportals
-    modRuntimeOnly("me.shedaniel.cloth:cloth-config-fabric:6.2.57") { exclude(group: "net.fabricmc.fabric-api")} //temp immersiveportals
-    modApi("com.github.Virtuoel:Pehkui:3.3.3", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
-    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.9-1.18'){ //temp immersiveportals
-        exclude(group: "net.fabricmc.fabric-api")
-        transitive(false)
-    }
-    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v1.4.9-1.18'){ //temp immersiveportals
-        exclude(group: "net.fabricmc.fabric-api")
-        transitive(false)
-    }
+//    modRuntimeOnly("com.github.qouteall:GravityChanger:v0.3.1") { transitive = false } //temp immersiveportals
+//    modRuntimeOnly("me.shedaniel.cloth:cloth-config-fabric:6.2.57") { exclude(group: "net.fabricmc.fabric-api")} //temp immersiveportals
+//    modApi("com.github.Virtuoel:Pehkui:3.3.3", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
+//    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.9-1.18'){ //temp immersiveportals
+//        exclude(group: "net.fabricmc.fabric-api")
+//        transitive(false)
+//    }
+//    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v1.4.9-1.18'){ //temp immersiveportals
+//        exclude(group: "net.fabricmc.fabric-api")
+//        transitive(false)
+//    }
 
     modRuntimeOnly 'org.joml:joml:1.10.4'//temp sodium
     modRuntimeOnly(fabricApi.module("fabric-api-base", rootProject.fabric_api_version))//temp sodium
