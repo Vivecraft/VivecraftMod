@@ -3,33 +3,34 @@ package org.vivecraft.forge.mixin;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ForgeIngameGui.class)
 public abstract class ForgeIngameGuiVRMixin {
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z", remap = true), method = "lambda$static$0", remap = false)
-    private static boolean noVignette() {
-        return false;
+    @Inject(at = @At("HEAD"), method = "lambda$static$0", remap = false, cancellable = true)
+    private static void noVignette(CallbackInfo ci) {
+        ci.cancel();
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z", remap = true), method = "lambda$static$1", remap = false)
-    private static boolean noSpyglass() {
-        return false;
+    @Inject(at = @At("HEAD"), method = "lambda$static$1", remap = false, cancellable = true)
+    private static void noSpyglass(CallbackInfo ci) {
+        ci.cancel();
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z", remap = true), method = "lambda$static$2", remap = false)
-    private static boolean noHelmet() {
-        return false;
+    @Inject(at = @At("HEAD"), method = "lambda$static$2", remap = false, cancellable = true)
+    private static void noHelmet(CallbackInfo ci) {
+        ci.cancel();
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z", remap = true), method = "lambda$static$3", remap = false)
-    private static boolean noFreeze() {
-        return false;
+    @Inject(at = @At("HEAD"), method = "lambda$static$3", remap = false, cancellable = true)
+    private static void noFreeze(CallbackInfo ci) {
+        ci.cancel();
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z", remap = true), method = "lambda$static$4", remap = false)
-    private static boolean noPortal() {
-        return false;
+    @Inject(at = @At("HEAD"), method = "lambda$static$4", remap = false, cancellable = true)
+    private static void noPortal(CallbackInfo ci) {
+        ci.cancel();
     }
 }
