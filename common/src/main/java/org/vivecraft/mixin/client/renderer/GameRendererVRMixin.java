@@ -11,7 +11,6 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -56,6 +55,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -180,6 +180,9 @@ public abstract class GameRendererVRMixin
 	@Unique // TODO added by optifine...
 	private boolean guiLoadingVisible;
 
+	@Unique
+	private PoseStack stack;
+
 	@Shadow
 	@Final
 	private Minecraft minecraft;
@@ -218,9 +221,6 @@ public abstract class GameRendererVRMixin
 
 	@Shadow
 	protected abstract void renderItemActivationAnimation(int i, int j, float par1);
-	
-	@Shadow
-	public abstract void renderLevel(float f, long j, PoseStack posestack);
 
 	@Shadow
 	public abstract void pick(float f);
@@ -355,14 +355,17 @@ public abstract class GameRendererVRMixin
 		RenderSystem.applyModelViewMatrix();
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
-	public void renderoverlay(GameRenderer l, float f, long j, PoseStack p) {
-		PoseStack posestack = new PoseStack();
-		this.renderLevel(f, j, posestack);
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"), method = "render")
+	public PoseStack newStack(PoseStack poseStack) {
+		this.stack = poseStack;
+		return poseStack;
+	}
 
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
+	public void renderoverlay(float f, long l, boolean bl, CallbackInfo ci) {
 		if (GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.THIRD
 				&& GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.CAMERA) {
-			this.renderFaceOverlay(f, posestack);
+			this.renderFaceOverlay(f, this.stack);
 		}
 	}
 
