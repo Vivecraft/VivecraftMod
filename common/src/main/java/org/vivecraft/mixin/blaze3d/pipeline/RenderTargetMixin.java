@@ -13,15 +13,24 @@ import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
+import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.extensions.RenderTargetExtension;
 import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
 
 import java.nio.IntBuffer;
 
+@Debug(export = true)
 @Mixin(RenderTarget.class)
 public abstract class RenderTargetMixin implements RenderTargetExtension {
 
@@ -132,55 +141,80 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 //		}
 //	}
 	
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	public void createBuffers(int i, int j, boolean bl) {
-		RenderSystem.assertOnGameThreadOrInit();
-		int k = RenderSystem.maxSupportedTextureSize();
-		if (i > 0 && i <= k && j > 0 && j <= k) {
-			this.viewWidth = i;
-			this.viewHeight = j;
-			this.width = i;
-			this.height = j;
-			this.frameBufferId = GlStateManager.glGenFramebuffers();
-			if (this.texid == -1) {
-				this.colorTextureId = TextureUtil.generateTextureId();
-			} else {
-				this.colorTextureId = this.texid;
-			}
-			if (this.useDepth) {
-				this.depthBufferId = TextureUtil.generateTextureId();
-				GlStateManager._bindTexture(this.depthBufferId);
-				GlStateManager._texParameter(3553, 10241, linearFilter ? GL11.GL_LINEAR : 9728);
-				GlStateManager._texParameter(3553, 10240, linearFilter ? GL11.GL_LINEAR : 9728);
-				GlStateManager._texParameter(3553, 34892, 0);
-				GlStateManager._texParameter(3553, 10242, 33071);
-				GlStateManager._texParameter(3553, 10243, 33071);
-                GlStateManager._texImage2D(3553, 0, 36013, this.width, this.height, 0, 34041, 36269, null);			}
-			if (linearFilter)
-				this.setFilterMode(GL11.GL_LINEAR);
-			else
-				this.setFilterMode(9728);
-			GlStateManager._bindTexture(this.colorTextureId);
-			GlStateManager._texParameter(3553, 10242, 33071);
-			GlStateManager._texParameter(3553, 10243, 33071);
-			GlStateManager._texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, (IntBuffer)null);
-			GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
-			GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
-			if (this.useDepth) {
-				GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, 36096, 3553, this.depthBufferId, 0);
-                GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, 36128, 3553, this.depthBufferId, 0);
-			}
+//	/**
+//	 * @author
+//	 * @reason
+//	 */
+//	@Overwrite
+//	public void createBuffers(int i, int j, boolean bl) {
+//		RenderSystem.assertOnGameThreadOrInit();
+//		int k = RenderSystem.maxSupportedTextureSize();
+//		if (i > 0 && i <= k && j > 0 && j <= k) {
+//			this.viewWidth = i;
+//			this.viewHeight = j;
+//			this.width = i;
+//			this.height = j;
+//			this.frameBufferId = GlStateManager.glGenFramebuffers();
+//			if (this.texid == -1) {
+//				this.colorTextureId = TextureUtil.generateTextureId();
+//			} else {
+//				this.colorTextureId = this.texid;
+//			}
+//			if (this.useDepth) {
+//				this.depthBufferId = TextureUtil.generateTextureId();
+//				GlStateManager._bindTexture(this.depthBufferId);
+//				GlStateManager._texParameter(3553, 10241, linearFilter ? GL11.GL_LINEAR : 9728);
+//				GlStateManager._texParameter(3553, 10240, linearFilter ? GL11.GL_LINEAR : 9728);
+//				GlStateManager._texParameter(3553, 34892, 0);
+//				GlStateManager._texParameter(3553, 10242, 33071);
+//				GlStateManager._texParameter(3553, 10243, 33071);
+//              GlStateManager._texImage2D(3553, 0, 36013, this.width, this.height, 0, 34041, 36269, null);
+// 			}
+//			if (linearFilter)
+//				this.setFilterMode(GL11.GL_LINEAR);
+//			else
+//				this.setFilterMode(9728);
+//			GlStateManager._bindTexture(this.colorTextureId);
+//			GlStateManager._texParameter(3553, 10242, 33071);
+//			GlStateManager._texParameter(3553, 10243, 33071);
+//			GlStateManager._texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, (IntBuffer)null);
+//			GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
+//			GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
+//			if (this.useDepth) {
+//				GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, 36096, 3553, this.depthBufferId, 0);
+//              GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, 36128, 3553, this.depthBufferId, 0);
+//			}
+//
+//			this.checkStatus();
+//			this.clear(bl);
+//			this.unbindRead();
+//		} else {
+//			throw new IllegalArgumentException("Window " + i + "x" + j + " size out of bounds (max. size: " + k + ")");
+//		}
+//	}
 
-			this.checkStatus();
-			this.clear(bl);
-			this.unbindRead();
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I", ordinal = 0), method = "createBuffers")
+	public int genTextureId() {
+		if (this.texid == -1) {
+			return TextureUtil.generateTextureId();
 		} else {
-			throw new IllegalArgumentException("Window " + i + "x" + j + " size out of bounds (max. size: " + k + ")");
+			return this.texid;
 		}
+	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers")
+	public void newTexImage2D(int i, int j, int k, int l, int m, int n, int o, int p, IntBuffer intBuffer) {
+		GlStateManager._texImage2D(3553, 0, 36013, this.width, this.height, 0, 34041, 36269, null);
+	}
+
+	@ModifyConstant(method = "createBuffers", constant = @Constant(intValue = 9728))
+	public int changeTextPar(int i) {
+		return linearFilter ? GL11.GL_LINEAR : i;
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", shift = At.Shift.AFTER, ordinal = 1, remap = false), method = "createBuffers")
+	public void addBufferTexture(int i, int j, boolean bl, CallbackInfo ci) {
+		GlStateManager._glFramebufferTexture2D(36160, 36128, 3553, this.depthBufferId, 0);
 	}
 
 
