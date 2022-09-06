@@ -20,6 +20,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -1330,28 +1331,14 @@ public abstract class GameRendererVRMixin
 					poseStack.setIdentity();
 					RenderSystem.applyModelViewMatrix();
 
-					if (flag) {
+					if (Minecraft.getInstance().screen instanceof TitleScreen && Minecraft.getInstance().level == null) {
 						pMatrix.pushPose();
 						Vec3 eye = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render
 								.getEye(GameRendererVRMixin.DATA_HOLDER.currentPass).getPosition();
 						pMatrix.translate((GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
-						//System.out.println(eye + " eye");
-						//System.out.println(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin + " world");
-
-//						if (GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer != null
-//								&& GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.isReady()) {
-//							try {
-//								//this.renderTechjarsAwesomeMainMenuRoom();
-//							} catch (Exception exception) {
-//								System.out.println("Error rendering main menu world, unloading to prevent more errors");
-//								exception.printStackTrace();
-//								GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.destroy();
-//							}
-//						} else {
-							this.renderJrbuddasAwesomeMainMenuRoomNew(pMatrix);
-//						}
+						this.renderJrbuddasAwesomeMainMenuRoomNew(pMatrix);
 						pMatrix.popPose();
 					}
 

@@ -7,6 +7,7 @@ import net.minecraft.client.Options;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 
 @Mixin(Options.class)
 public abstract class OptionsVRMixin {
@@ -15,6 +16,7 @@ public abstract class OptionsVRMixin {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;load()V"))
     void processOptionsMixin(Options instance) {
+        TitleWorldsMod.onInitializeClient();
         this.keyMappings = ClientDataHolder.getInstance().vr.initializeBindings(this.keyMappings);
         instance.load();
     }

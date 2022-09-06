@@ -15,6 +15,7 @@
   "mixins": [
     "vivecraft.vr.mixins.json",
     "vivecraft.nonvr.mixins.json",
+    "titleworlds.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.iris.mixins.json",
     "vivecraft.nonvr.fabric.mixins.json",
