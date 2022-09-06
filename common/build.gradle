@@ -35,7 +35,7 @@ dependencies {
 
     modCompileOnly("com.github.qouteall:GravityChanger:v0.3.1") { transitive = false } //temp immersiveportals
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:6.2.57") { exclude(group: "net.fabricmc.fabric-api")} //temp immersiveportals
-    modApi("com.github.Virtuoel:Pehkui:3.3.3", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
+    modCompileOnly("com.github.Virtuoel:Pehkui:3.3.3", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
     modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.9-1.18'){ //temp immersiveportals
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)

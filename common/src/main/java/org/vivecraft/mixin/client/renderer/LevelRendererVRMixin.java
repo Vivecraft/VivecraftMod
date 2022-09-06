@@ -272,7 +272,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 11, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1011(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1011(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
@@ -281,7 +281,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 12, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1012(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1012(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
@@ -290,7 +290,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 13, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1013(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1013(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
@@ -299,7 +299,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 14, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1014(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1014(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
@@ -308,7 +308,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 19, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1019(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1019(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
@@ -319,7 +319,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 20, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1020(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1020(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
@@ -330,7 +330,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 21, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1021(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1021(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
@@ -340,7 +340,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 28, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1030(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1030(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
@@ -349,7 +349,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 29, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1031(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1031(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {
@@ -359,7 +359,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 33, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1036(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
+	public void levelEvent1036(int i, BlockPos blockPos, int j, CallbackInfo ci) {
 		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
 		if (playerNear) {

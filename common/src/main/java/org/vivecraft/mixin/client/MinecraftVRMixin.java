@@ -15,7 +15,6 @@ import net.minecraft.client.CloudStatus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
-import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.Timer;
 import net.minecraft.client.gui.Font;
@@ -34,7 +33,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
@@ -335,7 +334,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			}
 
 			dh.vrPlayer = new VRPlayer();
-			dh.vrRenderer.lastGuiScale = this.options.guiScale;
+			dh.vrRenderer.lastGuiScale = this.options.guiScale().get();
 			dh.vrPlayer.registerTracker(dh.backpackTracker);
 			dh.vrPlayer.registerTracker(dh.bowTracker);
 			dh.vrPlayer.registerTracker(dh.climbTracker);
@@ -375,7 +374,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //		if (this.resourcePackRepository.getSelectedPacks().stream().anyMatch(e -> !e.isRequired())) {
 //			TextComponent component;
 //			if (pThrowable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure) {
-//				component = new TextComponent(
+//				component = Component.literal(
 //						((SimpleReloadableResourceManager.ResourcePackLoadingFailure) pThrowable).getPack().getName());
 //			} else {
 //				component = null;
@@ -750,12 +749,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		while (Util.getMillis() >= this.lastTime + 1000L) {
 			fps = this.frames;
 			this.fpsString = String.format("%d fps T: %s%s%s%s B: %d", fps,
-					(double) this.options.framerateLimit == Option.FRAMERATE_LIMIT.getMaxValue() ? "inf"
-							: this.options.framerateLimit,
-					this.options.enableVsync ? " vsync" : "", this.options.graphicsMode.toString(),
-					this.options.renderClouds == CloudStatus.OFF ? ""
-							: (this.options.renderClouds == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
-					this.options.biomeBlendRadius);
+					(double) this.options.framerateLimit().get() == 260 ? "inf"
+							: this.options.framerateLimit().get(),
+					this.options.enableVsync().get() ? " vsync" : "", this.options.graphicsMode().get().toString(),
+					this.options.cloudStatus().get() == CloudStatus.OFF ? ""
+							: (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
+					this.options.biomeBlendRadius().get());
 			this.lastTime += 1000L;
 			this.frames = 0;
 		}
@@ -885,7 +884,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			ClientDataHolder.getInstance().vrPlayer.updateFreeMove();
 
 			if (ClientDataHolder.getInstance().vrPlayer.teleportWarningTimer >= 0 && --ClientDataHolder.getInstance().vrPlayer.teleportWarningTimer == 0) {
-				this.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.noserverplugin"));
+				this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.noserverplugin"));
 			}
 		}
 	}

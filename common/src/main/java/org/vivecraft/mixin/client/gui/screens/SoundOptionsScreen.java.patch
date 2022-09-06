@@ -4,8 +4,8 @@
  import net.minecraft.client.gui.components.Button;
  import net.minecraft.client.gui.components.VolumeSlider;
  import net.minecraft.network.chat.CommonComponents;
-+import net.minecraft.network.chat.TextComponent;
- import net.minecraft.network.chat.TranslatableComponent;
++import net.minecraft.network.chat.Component;
+ import net.minecraft.network.chat.Component;
  import net.minecraft.sounds.SoundSource;
 +import org.vivecraft.settings.VRSettings;
  
@@ -16,7 +16,7 @@
              }
          }
 -
-+        this.addRenderableWidget(new Button(this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150, 20, new TextComponent(this.dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.HRTF_SELECTION)), (p_213104_1_) ->
++        this.addRenderableWidget(new Button(this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150, 20, Component.literal(this.dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.HRTF_SELECTION)), (p_213104_1_) ->
 +        {
 +        	this.clearWidgets();
 +        	this.dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.HRTF_SELECTION);

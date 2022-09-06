@@ -290,8 +290,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0f).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, k).color(255, 255, 255, 255).endVertex();
-		bufferBuilder.end();
-		BufferUploader._endInternal(bufferBuilder);
+		BufferUploader.draw(bufferBuilder.end());
 		instance.clear();
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);
@@ -371,8 +370,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 					.color(255, 255, 255, 255).endVertex();
 			bufferbuilder.vertex((double) f4, (double) f5, 0.0D).uv(xCropFactor, f9 - yCropFactor)
 					.color(255, 255, 255, 255).endVertex();
-			bufferbuilder.end();
-			BufferUploader._endInternal(bufferbuilder);
+			BufferUploader.draw(bufferbuilder.end());
 			instance.clear();
 
 		GlStateManager._depthMask(true);

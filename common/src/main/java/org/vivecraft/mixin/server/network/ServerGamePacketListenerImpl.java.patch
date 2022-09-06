@@ -15,7 +15,7 @@
 +import net.minecraft.network.FriendlyByteBuf;
  import net.minecraft.network.chat.ChatType;
  import net.minecraft.network.chat.Component;
- import net.minecraft.network.chat.TextComponent;
+ import net.minecraft.network.chat.Component;
 @@ -110,6 +112,8 @@
  import net.minecraft.world.entity.ExperienceOrb;
  import net.minecraft.world.entity.MoverType;
@@ -69,7 +69,7 @@
  
 @@ -293,6 +322,8 @@
          {
-             this.disconnect(new TranslatableComponent("multiplayer.disconnect.idling"));
+             this.disconnect(Component.translatable("multiplayer.disconnect.idling"));
          }
 +
 +        NetworkHelper.sendPosData(this.player);
@@ -163,8 +163,8 @@
              if (!SharedConstants.isAllowedChatCharacter(s.charAt(i)))
 @@ -1399,9 +1453,14 @@
                  String s1 = pPacket.getFiltered();
-                 Component component = s1.isEmpty() ? null : new TranslatableComponent("chat.type.text", this.player.getDisplayName(), s1);
-                 Component component1 = new TranslatableComponent("chat.type.text", this.player.getDisplayName(), s);
+                 Component component = s1.isEmpty() ? null : Component.translatable("chat.type.text", this.player.getDisplayName(), s1);
+                 Component component1 = Component.translatable("chat.type.text", this.player.getDisplayName(), s);
 +    			//Forge
 +                if(Reflector.ForgeHooks_onServerChatEvent.exists())
 +                	component1 = (Component) Reflector.call(Reflector.ForgeHooks_onServerChatEvent, this, s, component1);
@@ -233,12 +233,12 @@
 +
 +                        if (s3.contains("NONVR"))
 +                        {
-+                            this.player.sendMessage(new TextComponent("NONVR: " + this.player.getDisplayName().getString()), this.player.getUUID());
++                            this.player.sendMessage(Component.literal("NONVR: " + this.player.getDisplayName().getString()), this.player.getUUID());
 +                            serverviveplayer.setVR(false);
 +                        }
 +                        else
 +                        {
-+                            this.player.sendMessage(new TextComponent("VR: " + this.player.getDisplayName().getString()), this.player.getUUID());
++                            this.player.sendMessage(Component.literal("VR: " + this.player.getDisplayName().getString()), this.player.getUUID());
 +                            serverviveplayer.setVR(true);
 +                        }
 +                    }

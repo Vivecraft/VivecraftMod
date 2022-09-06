@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -66,7 +67,7 @@ public abstract class VRRenderer
     public RenderTarget fsaaFirstPassResultFBO;
     public RenderTarget fsaaLastPassResultFBO;
     protected float[][] hiddenMesheVertecies = new float[2][];
-    public ResourceKey<DimensionType> lastDimensionId = DimensionType.OVERWORLD_LOCATION;
+    public ResourceKey<DimensionType> lastDimensionId = BuiltinDimensionTypes.OVERWORLD;
     public int lastDisplayFBHeight = 0;
     public int lastDisplayFBWidth = 0;
     public boolean lastEnableVsync = true;
@@ -307,8 +308,7 @@ public abstract class VRRenderer
             float f3 = (float)((double)(width / 2) + Math.sin((double)f1) * (double)f);
             builder.vertex(f2, f3, 0.0F).endVertex();
         }
-        builder.end();
-        BufferUploader.end(builder);
+        BufferUploader.drawWithShader(builder.end());
     }
     
     private void drawMask() {
@@ -325,9 +325,8 @@ public abstract class VRRenderer
             builder.vertex(verts[i] * dh.vrRenderer.renderScale, verts[i + 1] * dh.vrRenderer.renderScale, 0.0F).endVertex();
         }
 
-        builder.end();
         RenderSystem.setShader(GameRenderer::getPositionShader);
-        BufferUploader.end(builder);
+        BufferUploader.drawWithShader(builder.end());
     }
 
     private void drawQuad()
@@ -339,8 +338,7 @@ public abstract class VRRenderer
         builder.vertex(1.0F, -1.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
         builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
         builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
-        builder.end();
-        BufferUploader._endInternal(builder);
+        BufferUploader.draw(builder.end());
     }
 
     public double getCurrentTimeSecs()
@@ -457,10 +455,10 @@ public abstract class VRRenderer
             this.reinitFrameBuffers("Window Handle Changed");
         }
 
-        if (this.lastEnableVsync != minecraft.options.enableVsync)
+        if (this.lastEnableVsync != minecraft.options.enableVsync().get())
         {
             this.reinitFrameBuffers("VSync Changed");
-            this.lastEnableVsync = minecraft.options.enableVsync;
+            this.lastEnableVsync = minecraft.options.enableVsync().get();
         }
 
         if (this.lastMirror != dataholder.vrSettings.displayMirrorMode)

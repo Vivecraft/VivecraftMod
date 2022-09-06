@@ -20,7 +20,7 @@ import org.vivecraft.api.ServerVivePlayer;
 
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -98,12 +98,12 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 					
 					if (s3.contains("NONVR"))
 					{
-						this.player.sendMessage(new TextComponent("NONVR: " + this.player.getDisplayName().getString()), this.player.getUUID());
+						this.player.sendSystemMessage(Component.literal("NONVR: " + this.player.getDisplayName().getString()));
 						serverviveplayer.setVR(false);
 					}
 					else
 					{
-						this.player.sendMessage(new TextComponent("VR: " + this.player.getDisplayName().getString()), this.player.getUUID());
+						this.player.sendSystemMessage(Component.literal("VR: " + this.player.getDisplayName().getString()));
 						serverviveplayer.setVR(true);
 					}
 				}

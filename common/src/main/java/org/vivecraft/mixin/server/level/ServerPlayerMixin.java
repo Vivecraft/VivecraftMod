@@ -1,5 +1,7 @@
 package org.vivecraft.mixin.server.level;
 
+import net.minecraft.world.entity.player.ProfilePublicKey;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -36,17 +38,16 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player {
 
-	public ServerPlayerMixin(Level p_36114_, BlockPos p_36115_, float p_36116_, GameProfile p_36117_) {
-		super(p_36114_, p_36115_, p_36116_, p_36117_);
-		// TODO Auto-generated constructor stub
-	}
-
 	@Unique
 	private String language = "en_us";
 	@Unique
 	private boolean hasTabListName = false;
 	@Unique
 	private Component tabListDisplayName = null;
+
+	public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
+		super(level, blockPos, f, gameProfile, profilePublicKey);
+	}
 
 	@Inject(at = @At("TAIL"), method = "initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V")
 	public void menu(AbstractContainerMenu p_143400_, CallbackInfo info) {
@@ -56,10 +57,10 @@ public abstract class ServerPlayerMixin extends Player {
 		if (serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(20) == 3) {
 			ItemStack itemstack;
 			if (this.random.nextInt(2) == 1) {
-				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(new TextComponent("EAT ME"));
+				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
 			} else {
 				itemstack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)
-						.setHoverName(new TextComponent("DRINK ME"));
+						.setHoverName(Component.literal("DRINK ME"));
 			}
 
 			itemstack.getTag().putInt("HideFlags", 32);

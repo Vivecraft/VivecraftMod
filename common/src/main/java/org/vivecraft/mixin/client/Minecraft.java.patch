@@ -405,7 +405,7 @@
 -
 -            if (p_91240_ instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure)
 -            {
--                component = new TextComponent(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)p_91240_).getPack().getName());
+-                component = Component.literal(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)p_91240_).getPack().getName());
 -            }
 -            else
 -            {
@@ -429,7 +429,7 @@
 +
 +    		if (p_91240_ instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure)
 +    		{
-+    			component = new TextComponent(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)p_91240_).getPack().getName());
++    			component = Component.literal(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)p_91240_).getPack().getName());
 +    		}
 +    		else
 +    		{
@@ -1347,7 +1347,7 @@
 +
 +                if (this.vrPlayer.teleportWarningTimer >= 0 && --this.vrPlayer.teleportWarningTimer == 0)
 +                {
-+                    this.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.noserverplugin"));
++                    this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.noserverplugin"));
 +                }
 +            }
 +
@@ -1567,7 +1567,7 @@
 +                        LOGGER.error("Failed to delete world {}", pLevelName, ioexception1);
                      }
                  }
-             }, new TranslatableComponent("selectWorld.backupQuestion.experimental"), new TranslatableComponent("selectWorld.backupWarning.experimental"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
+             }, Component.translatable("selectWorld.backupQuestion.experimental"), Component.translatable("selectWorld.backupWarning.experimental"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
 @@ -2511,6 +3122,15 @@
  
      public void setLevel(ClientLevel pLevelClient)
@@ -1582,7 +1582,7 @@
 +        //
 +
          ProgressScreen progressscreen = new ProgressScreen(true);
-         progressscreen.progressStartNoAbort(new TranslatableComponent("connect.joining"));
+         progressscreen.progressStartNoAbort(Component.translatable("connect.joining"));
          this.updateScreenAndTick(progressscreen);
 @@ -2548,12 +3168,18 @@
          IntegratedServer integratedserver = this.singleplayerServer;
@@ -1688,7 +1688,7 @@
 +    {
 +        if (this.level != null)
 +        {
-+            Component component = new TextComponent(msg);
++            Component component = Component.literal(msg);
 +            this.gui.getChat().addMessage(component);
 +        }
 +    }

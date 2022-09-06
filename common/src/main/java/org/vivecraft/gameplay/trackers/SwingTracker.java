@@ -256,7 +256,7 @@ public class SwingTracker extends Tracker
                             if (item instanceof HoeItem)
                             {
                                 //this.mc.physicalGuiManager.preClickAction();
-                                this.mc.gameMode.useItemOn(player, (ClientLevel)player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1);
+                                this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1);
                             }
                             else if (blockstate.getBlock() instanceof NoteBlock)
                             {

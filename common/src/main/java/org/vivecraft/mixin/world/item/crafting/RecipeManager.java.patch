@@ -4,7 +4,7 @@
  import net.minecraft.Util;
  import net.minecraft.core.NonNullList;
  import net.minecraft.core.Registry;
-+import net.minecraft.network.chat.TranslatableComponent;
++import net.minecraft.network.chat.Component;
  import net.minecraft.resources.ResourceLocation;
  import net.minecraft.server.packs.resources.ResourceManager;
  import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -25,12 +25,12 @@
  
 +        //VIVECRAFT - This prolly cant stay here. Move to .json files someday.
 +        ItemStack is = new ItemStack(Items.LEATHER_BOOTS);
-+        is.setHoverName(new TranslatableComponent("vivecraft.item.jumpboots"));
++        is.setHoverName(Component.translatable("vivecraft.item.jumpboots"));
 +        is.getOrCreateTag().putBoolean("Unbreakable", true);
 +        is.getOrCreateTag().putInt("HideFlags",4);
 +
 +        ItemStack is2 = new ItemStack(Items.SHEARS);
-+        is2.setHoverName(new TranslatableComponent("vivecraft.item.climbclaws"));
++        is2.setHoverName(Component.translatable("vivecraft.item.climbclaws"));
 +        is2.getOrCreateTag().putBoolean("Unbreakable", true);
 +        is2.getOrCreateTag().putInt("HideFlags",4);
 +

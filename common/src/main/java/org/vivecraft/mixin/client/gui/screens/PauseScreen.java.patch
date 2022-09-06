@@ -22,7 +22,7 @@
 +import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 +import net.minecraft.client.main.Main;
  import net.minecraft.network.chat.Component;
- import net.minecraft.network.chat.TranslatableComponent;
+ import net.minecraft.network.chat.Component;
  
 @@ -30,6 +40,86 @@
          {
@@ -31,7 +31,7 @@
 +
 +        if (!Minecraft.getInstance().isMultiplayerServer())
 +        {
-+            this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("vivecraft.gui.chat"), (p) ->
++            this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, Component.translatable("vivecraft.gui.chat"), (p) ->
 +            {
 +                this.minecraft.setScreen(new ChatScreen(""));
 +                if (dataholder.vrSettings.autoOpenKeyboard)
@@ -40,27 +40,27 @@
 +        }
 +        else
 +        {
-+            this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 46, 20, new TranslatableComponent("vivecraft.gui.chat"), (p) ->
++            this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 46, 20, Component.translatable("vivecraft.gui.chat"), (p) ->
 +            {
 +                this.minecraft.setScreen(new ChatScreen(""));
 +            }));
-+            this.addRenderableWidget(new Button(this.width / 2 - 102 + 48, this.height / 4 + 72 + -16, 46, 20, new TranslatableComponent("vivecraft.gui.social"), (p) ->
++            this.addRenderableWidget(new Button(this.width / 2 - 102 + 48, this.height / 4 + 72 + -16, 46, 20, Component.translatable("vivecraft.gui.social"), (p) ->
 +            {
 +                this.minecraft.setScreen(new SocialInteractionsScreen());
 +            }));
 +        }
 +
-+        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("vivecraft.gui.commands"), (p) ->
++        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 72 + -16, 98, 20, Component.translatable("vivecraft.gui.commands"), (p) ->
 +        {
 +            this.minecraft.setScreen(new GuiQuickCommandsInGame(this));
 +            this.init();
 +        }));
-+        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 49, 20, new TranslatableComponent("vivecraft.gui.overlay"), (p) ->
++        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 49, 20, Component.translatable("vivecraft.gui.overlay"), (p) ->
 +        {
 +            this.minecraft.options.renderDebug = !this.minecraft.options.renderDebug;
 +            this.minecraft.setScreen((Screen)null);
 +        }));
-+        this.addRenderableWidget(new Button(this.width / 2 - 52, this.height / 4 + 120 + -16, 49, 20, new TranslatableComponent("vivecraft.gui.profiler"), (p) ->
++        this.addRenderableWidget(new Button(this.width / 2 - 52, this.height / 4 + 120 + -16, 49, 20, Component.translatable("vivecraft.gui.profiler"), (p) ->
 +        {
 +        	if (!this.minecraft.options.renderDebug) this.minecraft.options.renderDebugCharts = false;
 +            this.minecraft.options.renderDebugCharts = !this.minecraft.options.renderDebugCharts;
@@ -68,7 +68,7 @@
 +            this.minecraft.options.renderDebug = this.minecraft.options.renderDebugCharts;
 +            this.minecraft.setScreen((Screen)null);
 +        }));
-+        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 120 + -16, 98, 20, new TranslatableComponent("vivecraft.gui.screenshot"), (p) ->
++        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 120 + -16, 98, 20, Component.translatable("vivecraft.gui.screenshot"), (p) ->
 +        {
 +            this.minecraft.setScreen((Screen)null);
 +            this.minecraft.grabScreenShot = true;
@@ -76,7 +76,7 @@
 +
 +        if (!this.dataholder.vrSettings.seated)
 +        {
-+            this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 144 + -16, 98, 20, new TranslatableComponent("vivecraft.gui.calibrateheight"), (p) ->
++            this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 144 + -16, 98, 20, Component.translatable("vivecraft.gui.calibrateheight"), (p) ->
 +            {
 +                AutoCalibration.calibrateManual();
 +                this.dataholder.vrSettings.saveOptions();
@@ -86,7 +86,7 @@
 +
 +        if (Main.katvr)
 +        {
-+            this.addRenderableWidget(new Button(this.width / 2 + 106, this.height / 4 + 144 + -16, 98, 20, new TranslatableComponent("vivecraft.gui.alignkatwalk"), (p) ->
++            this.addRenderableWidget(new Button(this.width / 2 + 106, this.height / 4 + 144 + -16, 98, 20, Component.translatable("vivecraft.gui.alignkatwalk"), (p) ->
 +            {
 +                jkatvr.resetYaw(this.minecraft.vrPlayer.vrdata_room_pre.hmd.getYaw());
 +                this.minecraft.setScreen((Screen)null);
@@ -95,7 +95,7 @@
 +
 +        if (!this.dataholder.vrSettings.seated || this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY)
 +        {
-+            this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 144 + -16, 98, 20, new TranslatableComponent("vivecraft.gui.movethirdpersoncam"), (p) ->
++            this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 144 + -16, 98, 20, Component.translatable("vivecraft.gui.movethirdpersoncam"), (p) ->
 +            {
 +                if (!VRHotkeys.isMovingThirdPersonCam())
 +                {
@@ -116,7 +116,7 @@
              this.minecraft.setScreen(new StatsScreen(this, this.minecraft.player.getStats()));
          }));
 -        String s = SharedConstants.getCurrentVersion().isStable() ? "https://aka.ms/javafeedback?ref=game" : "https://aka.ms/snapshotfeedback?ref=game";
--        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.sendFeedback"), (p_96318_) ->
+-        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, Component.translatable("menu.sendFeedback"), (p_96318_) ->
 -        {
 -            this.minecraft.setScreen(new ConfirmLinkScreen((p_169337_) -> {
 -                if (p_169337_)
@@ -127,7 +127,7 @@
 -                this.minecraft.setScreen(this);
 -            }, s, true));
 -        }));
--        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.reportBugs"), (p_96331_) ->
+-        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 72 + -16, 98, 20, Component.translatable("menu.reportBugs"), (p_96331_) ->
 -        {
 -            this.minecraft.setScreen(new ConfirmLinkScreen((p_169339_) -> {
 -                if (p_169339_)
@@ -139,7 +139,7 @@
 -            }, "https://aka.ms/snapshotbugs?ref=game", true));
 -        }));
 +//        String s = SharedConstants.getCurrentVersion().isStable() ? "https://aka.ms/javafeedback?ref=game" : "https://aka.ms/snapshotfeedback?ref=game";
-+//        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.sendFeedback"), (p_96318_) ->
++//        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, Component.translatable("menu.sendFeedback"), (p_96318_) ->
 +//        {
 +//            this.minecraft.setScreen(new ConfirmLinkScreen((p_169337_) -> {
 +//                if (p_169337_)
@@ -150,7 +150,7 @@
 +//                this.minecraft.setScreen(this);
 +//            }, s, true));
 +//        }));
-+//        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.reportBugs"), (p_96331_) ->
++//        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 72 + -16, 98, 20, Component.translatable("menu.reportBugs"), (p_96331_) ->
 +//        {
 +//            this.minecraft.setScreen(new ConfirmLinkScreen((p_169339_) -> {
 +//                if (p_169339_)
@@ -161,13 +161,13 @@
 +//                this.minecraft.setScreen(this);
 +//            }, "https://aka.ms/snapshotbugs?ref=game", true));
 +//        }));
-         this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 96 + -16, 98, 20, new TranslatableComponent("menu.options"), (p_96323_) ->
+         this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 96 + -16, 98, 20, Component.translatable("menu.options"), (p_96323_) ->
          {
              this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
 @@ -82,7 +172,9 @@
          }));
          button.active = this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished();
-         Component component = this.minecraft.isLocalServer() ? new TranslatableComponent("menu.returnToMenu") : new TranslatableComponent("menu.disconnect");
+         Component component = this.minecraft.isLocalServer() ? Component.translatable("menu.returnToMenu") : Component.translatable("menu.disconnect");
 -        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, component, (p_96315_) ->
 +
 +        //vivecraft move down

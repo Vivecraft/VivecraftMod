@@ -3,6 +3,7 @@ package org.vivecraft.mixin.client.multiplayer;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.*;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
@@ -15,11 +16,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.network.protocol.game.ClientboundChatPacket;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.game.ClientboundLoginPacket;
-import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.GameType;
@@ -77,13 +74,33 @@ public class ClientPacketListenerVRMixin {
         ClientDataHolder.getInstance().vrSettings.overrides.resetAll();
     }
 
-    @Inject(at = @At("TAIL"), method = "handleChat")
-    public void chat(ClientboundChatPacket clientboundChatPacket, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "handlePlayerChat")
+    public void chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
         String s = ((PlayerExtension)minecraft.player).getLastMsg();
         ((PlayerExtension)minecraft.player).setLastMsg(null);
 
-        if (minecraft.player == null || s == null || !clientboundChatPacket.getMessage().getString().contains(s)) {
+        if (minecraft.player == null || s == null || clientboundPlayerChatPacket.message().signedHeader().sender() == Minecraft.getInstance().player.getUUID()) {
+            ClientDataHolder dataholder = ClientDataHolder.getInstance();
+            if (dataholder.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
+                if ((dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) && !dataholder.vrSettings.seated) {
+                    dataholder.vr.triggerHapticPulse(ControllerType.LEFT, 0.2F, 1000.0F, 1.0F);}
+
+                if (dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) {
+                    Vec3 vec3 = dataholder.vrPlayer.vrdata_world_pre.getController(1).getPosition();
+                    minecraft.level.playLocalSound(vec3.x(), vec3.y(), vec3.z(), Registry.SOUND_EVENT.get(new ResourceLocation(dataholder.vrSettings.chatNotificationSound)), SoundSource.NEUTRAL, 0.3F, 0.1F, false);
+                }
+            }
+        }
+    }
+
+    @Inject(at = @At("TAIL"), method = "handleSystemChat")
+    public void chatSystem(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
+        Minecraft minecraft = Minecraft.getInstance();
+        String s = ((PlayerExtension)minecraft.player).getLastMsg();
+        ((PlayerExtension)minecraft.player).setLastMsg(null);
+
+        if (minecraft.player == null || s == null || clientboundSystemChatPacket.content().getString().contains(s)) {
             ClientDataHolder dataholder = ClientDataHolder.getInstance();
             if (dataholder.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
                 if ((dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) && !dataholder.vrSettings.seated) {
@@ -132,10 +149,10 @@ public class ClientPacketListenerVRMixin {
 
 					if (!ClientNetworkHelper.displayedChatMessage) {
 						ClientNetworkHelper.displayedChatMessage = true;
-						this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.serverplugin", s11));
+						this.minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
 					}
                     if (dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
-                        this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.calibrateheight"));
+                        this.minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibrateheight"));
                     }
 
 					break;
