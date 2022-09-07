@@ -233,6 +233,8 @@ public abstract class GameRendererVRMixin
 	@Shadow
 	private long lastActiveTime;
 
+	@Shadow public abstract void renderLevel(float f, long l, PoseStack poseStack);
+
 	@Override
 	public double getRveY() {
 		return rveY;
@@ -334,6 +336,11 @@ public abstract class GameRendererVRMixin
 //			}
 //		}
 //	}
+
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isWindowActive()Z"), method = "render")
+	public boolean focus(Minecraft instance) {
+		return true;
+	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;pauseGame(Z)V"), method = "render")
 	public void pause(Minecraft instance, boolean bl) {
