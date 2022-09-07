@@ -18,6 +18,8 @@ dependencies {
     modCompileOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-731"
     //modCompileOnly "maven.modrinth:immersiveportals:1.4.9-1.18.2"
 
+    modCompileOnly("maven.modrinth:rubidium:0.5.3a")
+
     modCompileOnly("io.github.fabricators_of_create:Porting-Lib:1.2.460-beta+1.18.2-dev.cca931b") //temp create
     modCompileOnly("me.alphamode:ForgeTags:2.1") //temp create
     modCompileOnly("com.electronwill.night-config:core:3.6.3") //temp create

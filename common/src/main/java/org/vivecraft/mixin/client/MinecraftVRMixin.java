@@ -399,11 +399,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	
 	@Inject(at = @At("HEAD"), method = "runTick(Z)V", cancellable = true)
 	public void replaceTick(boolean bl, CallbackInfo callback)  {
-		if (Xplat.isModLoaded("sodium")) {
+		if (Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium")) {
 			SodiumHelper.preRenderMinecraft();
 		}
 		newRunTick(bl);
-		if (Xplat.isModLoaded("sodium")) {
+		if (Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium")) {
 			SodiumHelper.postRenderMinecraft();
 		}
 		callback.cancel();
@@ -1099,7 +1099,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 						.setWasInWater(((GameRendererExtension) this.gameRenderer).isInWater());
 
 				if (Xplat
-						.isModLoaded("iris")) {
+						.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 					if (!IrisHelper.hasWaterEffect()) {
 						ClientDataHolder.getInstance().watereffect = 0.0F;
 					}

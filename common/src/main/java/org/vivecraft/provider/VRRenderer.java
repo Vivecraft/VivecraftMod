@@ -820,7 +820,7 @@ public abstract class VRRenderer
             this.lastDisplayFBHeight = j;
             this.reinitFramebuffers = false;
 
-            if (Xplat.isModLoaded("iris")) {
+            if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
                 IrisHelper.reload();
             }
 

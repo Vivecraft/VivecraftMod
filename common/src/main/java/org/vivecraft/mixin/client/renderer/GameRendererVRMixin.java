@@ -571,7 +571,7 @@ public abstract class GameRendererVRMixin
 					new BlockPos(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition()));
 			// int i = Config.isShaders() ? 8 : 4; TODO
 			int i = 4;
-			if (Xplat.isModLoaded("iris")) {
+			if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 				i = IrisHelper.ShaderLight();
 			}
 
@@ -1273,7 +1273,7 @@ public abstract class GameRendererVRMixin
 
 //				int i = Config.isShaders() ? 8 : 4; TODO
 				int i = 4;
-				if (Xplat.isModLoaded("iris")) {
+				if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 					i = IrisHelper.ShaderLight();
 				}
 				int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec3), i);
@@ -1407,7 +1407,7 @@ public abstract class GameRendererVRMixin
 
 //						int i = Config.isShaders() ? 8 : 4; TODO
 						int i = 4;
-						if (Xplat.isModLoaded("iris")) {
+						if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 							i = IrisHelper.ShaderLight();
 						}
 						int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec31), i);
