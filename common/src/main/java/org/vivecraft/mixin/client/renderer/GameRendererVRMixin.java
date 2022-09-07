@@ -1789,6 +1789,7 @@ public abstract class GameRendererVRMixin
 
 	public void drawSizedQuadSolid(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
 		RenderSystem.setShader(GameRenderer::getRendertypeSolidShader);
+		this.lightTexture.turnOnLightLayer();
 		float f = displayHeight / displayWidth;
 		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
@@ -1803,6 +1804,7 @@ public abstract class GameRendererVRMixin
 				.uv(0.0F, 1.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		bufferbuilder.end();
 		BufferUploader.end(bufferbuilder);
+		this.lightTexture.turnOffLightLayer();
 	}
 
 
@@ -2425,8 +2427,8 @@ public abstract class GameRendererVRMixin
 			float scale = 0.0785F;
 			//actual framebuffer
 			float f = TelescopeTracker.viewPercent(i);
-			this.drawSizedQuad(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
-			//this.drawSizedQuadSolid(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose()); Why no work on Forge?
+			// this.drawSizedQuad(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
+			this.drawSizedQuadSolid(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
 
 			RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
 			RenderSystem.enableBlend();
