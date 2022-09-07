@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import me.jellysquid.mods.lithium.common.util.Pos;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -62,6 +63,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.MethodHolder;
+import org.vivecraft.Xevents;
 import org.vivecraft.Xplat;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.GuiExtension;
@@ -470,15 +472,15 @@ public abstract class GameRendererVRMixin
 			Vec3 vec3 = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(GameRendererVRMixin.DATA_HOLDER.currentPass).getPosition();
 			Triple<Float, BlockState, BlockPos> triple = ((ItemInHandRendererExtension) this.itemInHandRenderer).getNearOpaqueBlock(vec3, (double) this.minClipDistance);
 
-			if (triple != null) {
+			if (triple != null && !Xevents.renderBlockOverlay(this.minecraft.player, new PoseStack(), triple.getMiddle(), triple.getRight())) {
 				this.inBlock = triple.getLeft();
 			} else {
 				this.inBlock = 0.0F;
 			}
 
-			this.inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER);
+			this.inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER) && !Xevents.renderWaterOverlay(this.minecraft.player, new PoseStack());
 			this.onfire = GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.THIRD
-					&& GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.CAMERA && this.minecraft.player.isOnFire();
+					&& GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.CAMERA && this.minecraft.player.isOnFire() && !Xevents.renderFireOverlay(this.minecraft.player, new PoseStack());
 		}
 	}
 
@@ -949,8 +951,10 @@ public abstract class GameRendererVRMixin
 //						Reflector.callVoid(Reflector.ForgeHooksClient_drawScreen, this.minecraft.screen, posestack1, i,
 //								j, this.minecraft.getDeltaFrameTime());
 //					} else {
-					this.minecraft.screen.render(posestack1, i, j, this.minecraft.getDeltaFrameTime());
+					//this.minecraft.screen.render(posestack1, i, j, this.minecraft.getDeltaFrameTime());
 //					}
+					Xevents.drawScreen(this.minecraft.screen, posestack1, i, j, this.minecraft.getDeltaFrameTime());
+
 					// Vivecraft
 					((GuiExtension) this.minecraft.gui).drawMouseMenuQuad(i, j);
 				} catch (Throwable throwable2) {
@@ -2421,8 +2425,8 @@ public abstract class GameRendererVRMixin
 			float scale = 0.0785F;
 			//actual framebuffer
 			float f = TelescopeTracker.viewPercent(i);
-			//this.drawSizedQuad(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
-			this.drawSizedQuadSolid(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
+			this.drawSizedQuad(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
+			//this.drawSizedQuadSolid(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose()); Why no work on Forge?
 
 			RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
 			RenderSystem.enableBlend();
