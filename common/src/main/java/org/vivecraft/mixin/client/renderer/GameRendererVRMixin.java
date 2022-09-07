@@ -233,8 +233,6 @@ public abstract class GameRendererVRMixin
 	@Shadow
 	private long lastActiveTime;
 
-	@Shadow public abstract void renderLevel(float f, long l, PoseStack poseStack);
-
 	@Override
 	public double getRveY() {
 		return rveY;
