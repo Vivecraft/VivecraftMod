@@ -2068,17 +2068,24 @@ public abstract class GameRendererVRMixin
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tesselator.getBuilder();
 		RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, ((GameRendererExtension) this.minecraft.gameRenderer).inBlock());
+
+		// orthographic matrix, (-1, -1) to (1, 1), near = 0.0, far 2.0
 		Matrix4f mat = new Matrix4f();
-		mat = mat.orthographic(1, 1, 0, 1);
+		mat.m00 = 1.0F;
+		mat.m11 = 1.0F;
+		mat.m22 = -1.0F;
+		mat.m33 = 1.0F;
+		mat.m23 = -1.0F;
+
 		GlStateManager._disableDepthTest();
 		GlStateManager._disableTexture();
 		GlStateManager._enableBlend();
 		GlStateManager._disableCull();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION);
-		bufferbuilder.vertex(mat, -1.0F, -1.0F, 0.0F).endVertex();
-		bufferbuilder.vertex(mat, 2.0F, -1.0F, 0.0F).endVertex();
-		bufferbuilder.vertex(mat, 2.0F, 2.0F, 0.0F).endVertex();
-		bufferbuilder.vertex(mat, -1.0F, 2.0F, 0.0F).endVertex();
+		bufferbuilder.vertex(mat, -1.5F, -1.5F, 0.0F).endVertex();
+		bufferbuilder.vertex(mat, 1.5F, -1.5F, 0.0F).endVertex();
+		bufferbuilder.vertex(mat, 1.5F, 1.5F, 0.0F).endVertex();
+		bufferbuilder.vertex(mat, -1.5F, 1.5F, 0.0F).endVertex();
 		tesselator.end();
 		GlStateManager._enableTexture();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
