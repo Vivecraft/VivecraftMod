@@ -6,7 +6,6 @@ architectury {
     platformSetupLoomIde()
     forge()
 }
-
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
@@ -64,6 +63,10 @@ remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     classifier null
+}
+
+remapJar {
+    archiveClassifier.set('forge')
 }
 
 jar {
