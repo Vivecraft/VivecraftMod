@@ -1,5 +1,9 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
+import net.minecraft.util.Mth;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.GameRendererExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -23,20 +27,38 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(FishingHookRenderer.class)
 public class FishingHookRendererVRMixin {
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEyeHeight()F"), method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void updateX(FishingHook fishingHook, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci, Player player, PoseStack.Pose pose, Matrix4f matrix4f, Matrix3f matrix3f, VertexConsumer vertexConsumer, int j, ItemStack itemStack, float h, float k, float l, double d, double e, double m, double n, double o, double p, double q, float r) {
+    FishingHook myHook;
+    float myG;
+    @Inject(at = @At("HEAD"), method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V")
+    public void getFisher(FishingHook fishingHook, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci){
+        myHook = fishingHook;
+        myG = g;
+    }
 
-        int index = 1;
+    @ModifyArgs(method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/FishingHookRenderer;stringVertex(FFFLcom/mojang/blaze3d/vertex/VertexConsumer;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;FF)V"))
+    private void injected(Args args) {
+        if(myHook.getPlayerOwner() == Minecraft.getInstance().player) {
+            int index = 1;
 
-        if (player.getMainHandItem().getItem() instanceof FishingRodItem) {
-            index = 0;
+            if (myHook.getPlayerOwner().getMainHandItem().getItem() instanceof FishingRodItem) {
+                index = 0;
+            }
+            Vec3 vec31 = ((GameRendererExtension)Minecraft.getInstance().gameRenderer).getControllerRenderPos(index);
+            Vec3 vec32 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getHand(index).getDirection();
+
+            double o = vec31.x + vec32.x * (double)0.47F;
+            double p = vec31.y + vec32.y * (double)0.47F;
+            double q = vec31.z + vec32.z * (double)0.47F;
+
+            double s = Mth.lerp((double)myG, myHook.xo, myHook.getX());
+            double t = Mth.lerp((double)myG, myHook.yo, myHook.getY()) + 0.25;
+            double u = Mth.lerp((double)myG, myHook.zo, myHook.getZ());
+            float v = (float)(o - s);
+            float w = (float)(p - t);
+            float x = (float)(q - u);
+            args.set(0, v);
+            args.set(1, w);
+            args.set(2, x);
         }
-        Vec3 vec31 = ((GameRendererExtension)Minecraft.getInstance().gameRenderer).getControllerRenderPos(index);
-        Vec3 vec32 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getHand(index).getDirection();
-
-        o = vec31.x + vec32.x * (double)0.47F;
-        p = vec31.y + vec32.y * (double)0.47F;
-        q = vec31.z + vec32.z * (double)0.47F;
-        r = 0.0F;
     }
 }

@@ -37,6 +37,7 @@
     "client.renderer.ItemInHandRendererVRMixin",
     "client.renderer.entity.EntityRenderDispatcherVRMixin",
     "client.renderer.entity.EntityRendererVRMixin",
+    "client.renderer.entity.FishingHookRendererVRMixin",
     "client.renderer.entity.GuardianRendererVRMixin",
     "client.renderer.entity.MobRendererVRMixin",
     "client.renderer.NoSodiumLevelRendererVRMixin",
