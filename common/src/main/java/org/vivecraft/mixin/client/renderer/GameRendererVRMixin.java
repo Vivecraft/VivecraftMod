@@ -86,6 +86,7 @@ import org.vivecraft.render.RenderPass;
 import org.vivecraft.render.VRCamera;
 import org.vivecraft.render.VRWidgetHelper;
 import org.vivecraft.settings.VRSettings;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 import org.vivecraft.utils.Utils;
 
 import java.nio.FloatBuffer;
@@ -637,7 +638,7 @@ public abstract class GameRendererVRMixin
 
 	@Override
 	public boolean isInMenuRoom() {
-		return this.minecraft.level == null || this.minecraft.screen instanceof WinScreen || ClientDataHolder.getInstance().integratedServerLaunchInProgress || this.minecraft.getOverlay() != null;
+		return this.minecraft.level == null || TitleWorldsMod.state.isTitleWorld || this.minecraft.screen instanceof WinScreen || ClientDataHolder.getInstance().integratedServerLaunchInProgress || this.minecraft.getOverlay() != null;
 	}
 
 	@Override
