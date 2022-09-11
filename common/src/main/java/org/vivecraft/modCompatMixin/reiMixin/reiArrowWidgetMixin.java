@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = {"me.shedaniel.rei.impl.client.gui.widget.basewidgets.ArrowWidget"})
 public class reiArrowWidgetMixin {
 
-    @Inject(method = "renderBackground(Lcom/mojang/blaze3d/vertex/PoseStack;ZF)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;blendFunc(II)V", shift = At.Shift.AFTER, remap = true), remap = false)
+    @Inject(method = "renderBackground(Lcom/mojang/blaze3d/vertex/PoseStack;ZF)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;blendFunc(II)V", shift = At.Shift.AFTER))
     private void changeBlendFunction(CallbackInfo ci) {
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
