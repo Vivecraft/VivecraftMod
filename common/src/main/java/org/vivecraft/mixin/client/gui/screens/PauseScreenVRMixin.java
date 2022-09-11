@@ -1,6 +1,5 @@
 package org.vivecraft.mixin.client.gui.screens;
 
-import org.vivecraft.ClientDataHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -9,16 +8,16 @@ import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.gui.settings.GuiQuickCommandsInGame;
 import org.vivecraft.settings.AutoCalibration;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.external.jkatvr;
-import org.vivecraft.gui.settings.GuiQuickCommandsInGame;
 
 @Mixin(PauseScreen.class)
 public abstract class PauseScreenVRMixin extends Screen {
@@ -111,6 +110,8 @@ public abstract class PauseScreenVRMixin extends Screen {
     private GuiEventListener remove2(PauseScreen instance, GuiEventListener guiEventListener) {
         return null;
     }
+    @Redirect(method = "createPauseMenu", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/Button;active:Z"))
+    private void remove3(Button instance, boolean value) {}
     @ModifyConstant(method = "createPauseMenu", constant = @Constant(intValue = 120), remap = false)
     private int moveDown(int constant) {
         return 168;
