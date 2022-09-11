@@ -7,7 +7,8 @@ license = "LGPLv3"
 modId = "vivecraft"
 version = "${version}"
 displayName = "Vivecraft"
-authors = "Me!"
+logoFile="vivecraft_icon.png"
+authors = "fayer3, Ferri_Arnus, IMS, jrbudda, minecraft player"
 displayTest="IGNORE_ALL_VERSION"
 description = '''
 The VR mod for any loader!

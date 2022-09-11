@@ -4,12 +4,17 @@
   "version": "${version}",
 
   "name": "Vivecraft",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "The VR mod for any loader!",
+  "icon": "vivecraft_icon.png",
   "authors": [
-    "Me!"
+    "fayer3",
+    "Ferri_Arnus",
+    "IMS",
+    "jrbudda",
+    "minecraft player"
   ],
 
-  "license": "CC0-1.0",
+  "license": "LGPLv3",
 
   "environment": "*",
   "mixins": [
