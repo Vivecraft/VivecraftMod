@@ -1,6 +1,6 @@
 {
   "required": false,
-  "package": "org.vivecraft.irisMixin",
+  "package": "org.vivecraft.modCompatMixin.irisMixin",
   "plugin": "org.vivecraft.VRMixinConfig",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
