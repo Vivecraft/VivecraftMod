@@ -24,18 +24,8 @@ import org.vivecraft.CommonDataHolder;
 @Mixin(PackRepository.class)
 public class PackRepositoryVRMixin {
 	
-	@Mutable
-	@Shadow
-	@Final
-	private Set<RepositorySource> sources;
-	
 	@Shadow
 	private List<Pack> selected;
-
-	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/server/packs/repository/Pack$PackConstructor;[Lnet/minecraft/server/packs/repository/RepositorySource;)V")
-	public void sources(Pack.PackConstructor packConstructor, RepositorySource[] repositorySources, CallbackInfo info) {
-		 this.sources = new HashSet<>(Arrays.asList(repositorySources));
-	}
 	
 	@Inject(at = @At("TAIL"), method = "reload()V")
 	public void reload(CallbackInfo info) {

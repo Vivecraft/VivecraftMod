@@ -29,9 +29,8 @@
     "client.multiplayer.ClientPacketListenerMixin",
     "client.player.AbstractClientPlayerMixin",
     "client.renderer.block.LiquidBlockRendererMixin",
-    "client.renderer.entity.EntityRenderDispatcherMixin",
+    "client.renderer.entity.EntityRenderDispatcherMixin"
 
-    "world.entity.vehicle.BoatMixin"
   ],
   "server": [
   ],

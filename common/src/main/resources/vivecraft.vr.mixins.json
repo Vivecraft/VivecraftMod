@@ -39,7 +39,9 @@
     "client.renderer.entity.EntityRendererVRMixin",
     "client.renderer.entity.GuardianRendererVRMixin",
     "client.renderer.entity.MobRendererVRMixin",
-    "client.renderer.NoSodiumLevelRendererVRMixin"
+    "client.renderer.NoSodiumLevelRendererVRMixin",
+
+    "world.entity.vehicle.BoatMixin"
   ],
   "server": [
   ],

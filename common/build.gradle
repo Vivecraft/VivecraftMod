@@ -16,7 +16,9 @@ dependencies {
     modCompileOnly "maven.modrinth:lithium:mc1.18.2-0.7.10"
     modCompileOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
     modCompileOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-731"
-    //modCompileOnly "maven.modrinth:immersiveportals:1.4.9-1.18.2"
+    modCompileOnly "maven.modrinth:roughly-enough-items:8.3.529+fabric"
+
+    modCompileOnly("maven.modrinth:rubidium:0.5.3a")
 
     modCompileOnly("io.github.fabricators_of_create:Porting-Lib:1.2.460-beta+1.18.2-dev.cca931b") //temp create
     modCompileOnly("me.alphamode:ForgeTags:2.1") //temp create
@@ -44,6 +46,9 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
+
+    modApi("dev.architectury:architectury-fabric:4.5.75") //temp rei
+    modApi("me.shedaniel:error-notifier-fabric:1.0.9") //temp rei
 
 
     modCompileOnly 'org.joml:joml:1.10.4'//temp sodium

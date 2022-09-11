@@ -1,15 +1,16 @@
 modLoader = "javafml"
 loaderVersion = "[40,)"
 #issueTrackerURL = ""
-license = "Insert License Here"
+license = "LGPLv3"
 
 [[mods]]
 modId = "vivecraft"
 version = "${version}"
 displayName = "Vivecraft"
 authors = "Me!"
+displayTest="IGNORE_ALL_VERSION"
 description = '''
-This is an example description! Tell everyone what your mod is about!
+The VR mod for any loader!
 '''
 #logoFile = ""
 

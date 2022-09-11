@@ -64,6 +64,7 @@ import org.vivecraft.GlStateHelper;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.MethodHolder;
 import org.vivecraft.SodiumHelper;
+import org.vivecraft.Xevents;
 import org.vivecraft.Xplat;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.MinecraftExtension;
@@ -398,11 +399,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	
 	@Inject(at = @At("HEAD"), method = "runTick(Z)V", cancellable = true)
 	public void replaceTick(boolean bl, CallbackInfo callback)  {
-		if (Xplat.isModLoaded("sodium")) {
+		if (Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium")) {
 			SodiumHelper.preRenderMinecraft();
 		}
 		newRunTick(bl);
-		if (Xplat.isModLoaded("sodium")) {
+		if (Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium")) {
 			SodiumHelper.postRenderMinecraft();
 		}
 		callback.cancel();
@@ -563,6 +564,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //			this.profiler.popPush("toasts");
 //			this.toast.render(new PoseStack());
 //			this.profiler.pop();
+			Xevents.onRenderTickStart(this.pause ? this.pausePartialTick : this.timer.partialTick);
 		}
 
 //		if (this.fpsPieResults != null) {
@@ -705,7 +707,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			}
 
 			if (!this.noRender) {
-				//Reflector.call(Reflector.BasicEventHooks_onRenderTickEnd, f);
+				Xevents.onRenderTickEnd(this.pause ? this.pausePartialTick : this.timer.partialTick);
 			}
 
 			this.profiler.push("mirror");
@@ -1097,7 +1099,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 						.setWasInWater(((GameRendererExtension) this.gameRenderer).isInWater());
 
 				if (Xplat
-						.isModLoaded("iris")) {
+						.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 					if (!IrisHelper.hasWaterEffect()) {
 						ClientDataHolder.getInstance().watereffect = 0.0F;
 					}
