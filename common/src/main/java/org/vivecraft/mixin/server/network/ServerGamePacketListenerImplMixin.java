@@ -47,7 +47,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 	@Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;)V")
 	public void init(MinecraftServer p_9770_, Connection p_9771_, ServerPlayer p_9772_, CallbackInfo info) {
 		// Vivecraft
-		if (this.connection.channel != null) { //fake player fix
+		if (this.connection.channel != null && this.connection.channel.pipeline().get("packet_handler") != null) { //fake player fix
 			this.connection.channel.pipeline().addBefore("packet_handler", "vr_aim_fix",
 					new AimFixHandler(this.connection));
 		}
