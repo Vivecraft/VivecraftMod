@@ -2,6 +2,7 @@ package org.vivecraft.gameplay.trackers;
 
 import java.util.List;
 
+import net.minecraft.world.level.block.*;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.Vec3History;
 import org.vivecraft.provider.ControllerType;
@@ -27,9 +28,6 @@ import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.LadderBlock;
-import net.minecraft.world.level.block.NoteBlock;
-import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -253,10 +251,14 @@ public class SwingTracker extends Tracker
                         {
                             int j = 3;
 
-                            if (item instanceof HoeItem)
+                            if (item instanceof HoeItem && (
+                                    blockstate.getBlock() instanceof CropBlock
+                                    || blockstate.getBlock() instanceof StemBlock
+                                    || blockstate.getBlock() instanceof AttachedStemBlock
+                                    || this.mc.gameMode.useItemOn(player, (ClientLevel)player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing()))
                             {
+                                // don't try to break crops with hoes
                                 //this.mc.physicalGuiManager.preClickAction();
-                                this.mc.gameMode.useItemOn(player, (ClientLevel)player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1);
                             }
                             else if (blockstate.getBlock() instanceof NoteBlock)
                             {

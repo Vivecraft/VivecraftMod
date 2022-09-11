@@ -1,4 +1,4 @@
-package org.vivecraft.irisMixin;
+package org.vivecraft.modCompatMixin.irisMixin;
 
 import org.vivecraft.ClientDataHolder;
 import net.coderbot.iris.mixin.LevelRendererAccessor;
