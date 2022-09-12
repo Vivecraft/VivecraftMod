@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
         "net.coderbot.iris.uniforms.SystemTimeUniforms$Timer"
 })
 public class IrisBeginFrameHack {
-
+    // not needed, every pass now has its own pipeline
     @Inject(method = "beginFrame", at = @At("HEAD"), cancellable = true, remap = false)
     private void cancelShadows(CallbackInfo ci) {
         if (!ClientDataHolder.getInstance().isFirstPass) {

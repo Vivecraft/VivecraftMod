@@ -1,0 +1,107 @@
+package org.vivecraft.modCompatMixin.irisMixin;
+
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.coderbot.iris.Iris;
+import net.coderbot.iris.pipeline.WorldRenderingPipeline;
+import net.coderbot.iris.shaderpack.DimensionId;
+import net.minecraft.client.Minecraft;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.provider.VRRenderer;
+import org.vivecraft.render.RenderPass;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+@Pseudo
+@Mixin(targets = {"net.coderbot.iris.pipeline.PipelineManager"})
+public class IrisPipelineManagerVRMixin {
+
+    /*@Inject(method = "beginFrame", at = @At("HEAD"), cancellable = true, remap = false)
+    private void cancelShadows(CallbackInfo ci) {
+        if (!ClientDataHolder.getInstance().isFirstPass) {
+            ci.cancel();
+        }
+    }*/
+
+    @Shadow
+    private void resetTextureState(){};
+    @Shadow
+    private WorldRenderingPipeline pipeline;
+    @Shadow
+    private Function<DimensionId, WorldRenderingPipeline> pipelineFactory;
+
+    private final Map<RenderPass, WorldRenderingPipeline> vrPipelines = new HashMap<>();
+
+    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private void generateVRPipelines(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+        RenderTarget current = Minecraft.getInstance().mainRenderTarget;
+        for (RenderPass renderPass : RenderPass.values()) {
+            Iris.logger.info("Creating VR pipeline for dimension {}, RenderPass {}", newDimension, renderPass);
+            VRRenderer rnder = ClientDataHolder.getInstance().vrRenderer;
+            switch (renderPass) {
+                case LEFT:
+                case RIGHT:
+                    Minecraft.getInstance().mainRenderTarget = ClientDataHolder.getInstance().vrRenderer.framebufferVrRender;
+                    break;
+
+                case CENTER:
+                    Minecraft.getInstance().mainRenderTarget = ClientDataHolder.getInstance().vrRenderer.framebufferUndistorted;
+                    break;
+
+                case THIRD:
+                    Minecraft.getInstance().mainRenderTarget = ClientDataHolder.getInstance().vrRenderer.framebufferMR;
+                    break;
+
+                case SCOPEL:
+                    Minecraft.getInstance().mainRenderTarget = ClientDataHolder.getInstance().vrRenderer.telescopeFramebufferL;
+                    break;
+
+                case SCOPER:
+                    Minecraft.getInstance().mainRenderTarget = ClientDataHolder.getInstance().vrRenderer.telescopeFramebufferR;
+                    break;
+
+                case CAMERA:
+                    Minecraft.getInstance().mainRenderTarget = ClientDataHolder.getInstance().vrRenderer.cameraRenderFramebuffer;
+                    break;
+                default:
+                    Minecraft.getInstance().mainRenderTarget = null;
+            }
+            if (Minecraft.getInstance().mainRenderTarget == null) {
+                continue;
+            }
+            pipeline = pipelineFactory.apply(newDimension);
+            vrPipelines.put(renderPass, pipeline);
+        }
+
+        Minecraft.getInstance().mainRenderTarget = current;
+
+        if (ClientDataHolder.getInstance().currentPass != null) {
+            pipeline = vrPipelines.get(ClientDataHolder.getInstance().currentPass);
+        } else {
+            pipeline = vrPipelines.get(RenderPass.LEFT);
+        }
+    }
+    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, cancellable = true)
+    private void getVRPipeline(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+        // Iris.logger.info("switching pipeline to {}", ClientDataHolder.getInstance().currentPass);
+        pipeline = vrPipelines.get(ClientDataHolder.getInstance().currentPass);
+        cir.setReturnValue(pipeline);
+    }
+
+    @Inject(method = "destroyPipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V"), remap = false)
+    private void destroyVRPipelines(CallbackInfo ci) {
+        vrPipelines.forEach((renderPass, pipeline) -> {
+            Iris.logger.info("Destroying VR pipeline {}", renderPass);
+            pipeline.destroy();
+        });
+        vrPipelines.clear();
+    }
+}
