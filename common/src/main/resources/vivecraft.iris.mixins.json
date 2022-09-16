@@ -5,11 +5,12 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "IrisHandRendererVRMixin",
-    "IrisDeferredWorldRenderingPipelineVRMixin",
-    //"IrisNewWorldRenderingPipelineVRMixin",
-    //"IrisBeginFrameHack",
+    "IrisNewWorldRenderingPipelineVRMixin",
+    "IrisBeginFrameHack",
+    "IrisShadowMatricesMixin",
     "IrisShadowRendererMixin",
-    "IrisPipelineManagerVRMixin"
+    "IrisPipelineManagerVRMixin",
+    "IrisProgramUniformsMixin"
   ],
   "client": [
 
