@@ -1,12 +1,13 @@
 package org.vivecraft.gui;
 
+import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 import org.vivecraft.gui.framework.TwoHandedScreen;
 import org.vivecraft.provider.InputSimulator;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
 
 public class GuiKeyboard extends TwoHandedScreen
 {
@@ -52,7 +53,7 @@ public class GuiKeyboard extends TwoHandedScreen
                 }
 
                 String s2 = String.valueOf(c0);
-                Button button = new Button(k + k1 * (i1 + l), k + j1 * (20 + l), i1, 20, Component.translatable(s2), (p) ->
+                Button button = new Button(k + k1 * (i1 + l), k + j1 * (20 + l), i1, 20, Component.literal(s2), (p) ->
                 {
                     InputSimulator.typeChars(s2);
                 });
@@ -60,74 +61,74 @@ public class GuiKeyboard extends TwoHandedScreen
             }
         }
 
-        this.addRenderableWidget(new Button(0, k + 3 * (20 + l), 30, 20, Component.translatable("Shift"), (p) ->
+        this.addRenderableWidget(new Button(0, k + 3 * (20 + l), 30, 20, Component.literal("Shift"), (p) ->
         {
             this.setShift(!this.isShift);
         }));
-        this.addRenderableWidget(new Button(k + 4 * (i1 + l), k + j * (20 + l), 5 * (i1 + l), 20, Component.translatable(" "), (p) ->
+        this.addRenderableWidget(new Button(k + 4 * (i1 + l), k + j * (20 + l), 5 * (i1 + l), 20, Component.literal(" "), (p) ->
         {
             InputSimulator.typeChars(" ");
         }));
-        this.addRenderableWidget(new Button(i * (i1 + l) + k, k, 35, 20, Component.translatable("BKSP"), (p) ->
+        this.addRenderableWidget(new Button(i * (i1 + l) + k, k, 35, 20, Component.literal("BKSP"), (p) ->
         {
-            InputSimulator.pressKey(259);
-            InputSimulator.releaseKey(259);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_BACKSPACE);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_BACKSPACE);
         }));
-        this.addRenderableWidget(new Button(i * (i1 + l) + k, k + 2 * (20 + l), 35, 20, Component.translatable("ENTER"), (p) ->
+        this.addRenderableWidget(new Button(i * (i1 + l) + k, k + 2 * (20 + l), 35, 20, Component.literal("ENTER"), (p) ->
         {
-            InputSimulator.pressKey(257);
-            InputSimulator.releaseKey(257);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_ENTER);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_ENTER);
         }));
-        this.addRenderableWidget(new Button(0, k + 20 + l, 30, 20, Component.translatable("TAB"), (p) ->
+        this.addRenderableWidget(new Button(0, k + 20 + l, 30, 20, Component.literal("TAB"), (p) ->
         {
-            InputSimulator.pressKey(258);
-            InputSimulator.releaseKey(258);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_TAB);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_TAB);
         }));
-        this.addRenderableWidget(new Button(0, k, 30, 20, Component.translatable("ESC"), (p) ->
+        this.addRenderableWidget(new Button(0, k, 30, 20, Component.literal("ESC"), (p) ->
         {
-            InputSimulator.pressKey(256);
-            InputSimulator.releaseKey(256);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_ESCAPE);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_ESCAPE);
         }));
-        this.addRenderableWidget(new Button((i - 1) * (i1 + l) + k, k + j * (20 + l), i1, 20, Component.translatable("\u2191"), (p) ->
+        this.addRenderableWidget(new Button((i - 1) * (i1 + l) + k, k + j * (20 + l), i1, 20, Component.literal("\u2191"), (p) ->
         {
-            InputSimulator.pressKey(265);
-            InputSimulator.releaseKey(265);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_UP);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_UP);
         }));
-        this.addRenderableWidget(new Button((i - 1) * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, Component.translatable("\u2193"), (p) ->
+        this.addRenderableWidget(new Button((i - 1) * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, Component.literal("\u2193"), (p) ->
         {
-            InputSimulator.pressKey(264);
-            InputSimulator.releaseKey(264);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_DOWN);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_DOWN);
         }));
-        this.addRenderableWidget(new Button((i - 2) * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, Component.translatable("\u2190"), (p) ->
+        this.addRenderableWidget(new Button((i - 2) * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, Component.literal("\u2190"), (p) ->
         {
-            InputSimulator.pressKey(263);
-            InputSimulator.releaseKey(263);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT);
         }));
-        this.addRenderableWidget(new Button(i * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, Component.translatable("\u2192"), (p) ->
+        this.addRenderableWidget(new Button(i * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, Component.literal("\u2192"), (p) ->
         {
-            InputSimulator.pressKey(262);
-            InputSimulator.releaseKey(262);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_RIGHT);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_RIGHT);
         }));
-        this.addRenderableWidget(new Button(k, k + -1 * (20 + l), 35, 20, Component.translatable("CUT"), (p) ->
+        this.addRenderableWidget(new Button(k, k + -1 * (20 + l), 35, 20, Component.literal("CUT"), (p) ->
         {
-            InputSimulator.pressKey(341);
-            InputSimulator.pressKey(88);
-            InputSimulator.releaseKey(88);
-            InputSimulator.releaseKey(341);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_X);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_X);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
         }));
-        this.addRenderableWidget(new Button(35 + l + k, k + -1 * (20 + l), 35, 20, Component.translatable("COPY"), (p) ->
+        this.addRenderableWidget(new Button(35 + l + k, k + -1 * (20 + l), 35, 20, Component.literal("COPY"), (p) ->
         {
-            InputSimulator.pressKey(341);
-            InputSimulator.pressKey(67);
-            InputSimulator.releaseKey(67);
-            InputSimulator.releaseKey(341);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_C);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_C);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
         }));
-        this.addRenderableWidget(new Button(2 * (35 + l) + k, k + -1 * (20 + l), 35, 20, Component.translatable("PASTE"), (p) ->
+        this.addRenderableWidget(new Button(2 * (35 + l) + k, k + -1 * (20 + l), 35, 20, Component.literal("PASTE"), (p) ->
         {
-            InputSimulator.pressKey(341);
-            InputSimulator.pressKey(86);
-            InputSimulator.releaseKey(86);
-            InputSimulator.releaseKey(341);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
+            InputSimulator.pressKey(GLFW.GLFW_KEY_V);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_V);
+            InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
         }));
     }
 

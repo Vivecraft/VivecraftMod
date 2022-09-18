@@ -232,7 +232,6 @@ public abstract class VRRenderer
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().translate(0, 0, -0.7F);
             RenderSystem.applyModelViewMatrix();
-            DefaultVertexFormat.POSITION_TEX.setupBufferState();
             this.fsaaFirstPassResultFBO.clear(Minecraft.ON_OSX);
             this.fsaaFirstPassResultFBO.bindWrite(false);
             RenderSystem.setShaderTexture(0, framebufferVrRender.getColorTextureId());
@@ -818,7 +817,7 @@ public abstract class VRRenderer
             this.lastDisplayFBHeight = j;
             this.reinitFramebuffers = false;
 
-            if (Xplat.isModLoaded("iris")) {
+            if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
                 IrisHelper.reload();
             }
 

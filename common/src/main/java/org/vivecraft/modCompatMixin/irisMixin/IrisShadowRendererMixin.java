@@ -1,4 +1,4 @@
-package org.vivecraft.irisMixin;
+package org.vivecraft.modCompatMixin.irisMixin;
 
 import jdk.jfr.Percentage;
 import org.spongepowered.asm.mixin.Pseudo;

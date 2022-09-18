@@ -121,7 +121,7 @@ public class VRMixinConfig implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.contains("NoSodium") && Xplat.isModLoaded("sodium")) {
+        if (mixinClassName.contains("NoSodium") && (Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium"))) {
             return false;
         }
         return VRState.isVR;

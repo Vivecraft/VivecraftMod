@@ -1,4 +1,4 @@
-package org.vivecraft.irisMixin;
+package org.vivecraft.modCompatMixin.irisMixin;
 
 import net.coderbot.iris.pipeline.DeferredWorldRenderingPipeline;
 import org.spongepowered.asm.mixin.Mixin;

@@ -1,4 +1,4 @@
-package org.vivecraft.sodiumMixin;
+package org.vivecraft.modCompatMixin.sodiumMixin;
 
 import org.vivecraft.ClientDataHolder;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptionPages;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Pseudo
 @Mixin(SodiumGameOptionPages.class)
-public class SodiumGameOptionPagesVRMixin {
+public class FabricSodiumGameOptionPagesVRMixin {
 
     @Inject(at = @At("HEAD"), method = "lambda$quality$23", remap = false)
     private static void initframe(Options opts, GraphicsStatus value, CallbackInfo ci) {

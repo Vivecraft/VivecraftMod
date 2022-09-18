@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import me.jellysquid.mods.lithium.common.util.Pos;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -62,6 +63,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.MethodHolder;
+import org.vivecraft.Xevents;
 import org.vivecraft.Xplat;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.GuiExtension;
@@ -333,6 +335,11 @@ public abstract class GameRendererVRMixin
 //		}
 //	}
 
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isWindowActive()Z"), method = "render")
+	public boolean focus(Minecraft instance) {
+		return true;
+	}
+
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;pauseGame(Z)V"), method = "render")
 	public void pause(Minecraft instance, boolean bl) {
 		if (ClientDataHolder.getInstance().currentPass == RenderPass.LEFT ){
@@ -426,10 +433,9 @@ public abstract class GameRendererVRMixin
 		this.setupOverlayStatus(pPartialTicks);
 	}
 
-	//TODO Iris
-	//@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobHurt(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "renderLevel")
-	public void removeBobHurt(GameRenderer instance, PoseStack poseStack, float f) {
-		return;
+	@Inject(at = @At("HEAD"), method = "bobHurt", cancellable = true)
+	public void removeBobHurt(PoseStack poseStack, float f, CallbackInfo ci) {
+		ci.cancel();
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "renderLevel")
@@ -470,15 +476,15 @@ public abstract class GameRendererVRMixin
 			Vec3 vec3 = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(GameRendererVRMixin.DATA_HOLDER.currentPass).getPosition();
 			Triple<Float, BlockState, BlockPos> triple = ((ItemInHandRendererExtension) this.itemInHandRenderer).getNearOpaqueBlock(vec3, (double) this.minClipDistance);
 
-			if (triple != null) {
+			if (triple != null && !Xevents.renderBlockOverlay(this.minecraft.player, new PoseStack(), triple.getMiddle(), triple.getRight())) {
 				this.inBlock = triple.getLeft();
 			} else {
 				this.inBlock = 0.0F;
 			}
 
-			this.inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER);
+			this.inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER) && !Xevents.renderWaterOverlay(this.minecraft.player, new PoseStack());
 			this.onfire = GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.THIRD
-					&& GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.CAMERA && this.minecraft.player.isOnFire();
+					&& GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.CAMERA && this.minecraft.player.isOnFire() && !Xevents.renderFireOverlay(this.minecraft.player, new PoseStack());
 		}
 	}
 
@@ -564,7 +570,7 @@ public abstract class GameRendererVRMixin
 					new BlockPos(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition()));
 			// int i = Config.isShaders() ? 8 : 4; TODO
 			int i = 4;
-			if (Xplat.isModLoaded("iris")) {
+			if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 				i = IrisHelper.ShaderLight();
 			}
 
@@ -948,8 +954,10 @@ public abstract class GameRendererVRMixin
 //						Reflector.callVoid(Reflector.ForgeHooksClient_drawScreen, this.minecraft.screen, posestack1, i,
 //								j, this.minecraft.getDeltaFrameTime());
 //					} else {
-					this.minecraft.screen.render(posestack1, i, j, this.minecraft.getDeltaFrameTime());
+					//this.minecraft.screen.render(posestack1, i, j, this.minecraft.getDeltaFrameTime());
 //					}
+					Xevents.drawScreen(this.minecraft.screen, posestack1, i, j, this.minecraft.getDeltaFrameTime());
+
 					// Vivecraft
 					((GuiExtension) this.minecraft.gui).drawMouseMenuQuad(i, j);
 				} catch (Throwable throwable2) {
@@ -1263,7 +1271,7 @@ public abstract class GameRendererVRMixin
 
 //				int i = Config.isShaders() ? 8 : 4; TODO
 				int i = 4;
-				if (Xplat.isModLoaded("iris")) {
+				if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 					i = IrisHelper.ShaderLight();
 				}
 				int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec3), i);
@@ -1397,7 +1405,7 @@ public abstract class GameRendererVRMixin
 
 //						int i = Config.isShaders() ? 8 : 4; TODO
 						int i = 4;
-						if (Xplat.isModLoaded("iris")) {
+						if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 							i = IrisHelper.ShaderLight();
 						}
 						int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec31), i);
@@ -1781,6 +1789,7 @@ public abstract class GameRendererVRMixin
 
 	public void drawSizedQuadSolid(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
 		RenderSystem.setShader(GameRenderer::getRendertypeSolidShader);
+		this.lightTexture.turnOnLightLayer();
 		float f = displayHeight / displayWidth;
 		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
@@ -1794,6 +1803,7 @@ public abstract class GameRendererVRMixin
 		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
 				.uv(0.0F, 1.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		BufferUploader.drawWithShader(bufferbuilder.end());
+		this.lightTexture.turnOffLightLayer();
 
 	}
 
@@ -2054,17 +2064,24 @@ public abstract class GameRendererVRMixin
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tesselator.getBuilder();
 		RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, ((GameRendererExtension) this.minecraft.gameRenderer).inBlock());
+
+		// orthographic matrix, (-1, -1) to (1, 1), near = 0.0, far 2.0
 		Matrix4f mat = new Matrix4f();
-		mat = mat.orthographic(1, 1, 0, 1);
+		mat.m00 = 1.0F;
+		mat.m11 = 1.0F;
+		mat.m22 = -1.0F;
+		mat.m33 = 1.0F;
+		mat.m23 = -1.0F;
+
 		GlStateManager._disableDepthTest();
 		GlStateManager._disableTexture();
 		GlStateManager._enableBlend();
 		GlStateManager._disableCull();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION);
-		bufferbuilder.vertex(mat, -1.0F, -1.0F, 0.0F).endVertex();
-		bufferbuilder.vertex(mat, 2.0F, -1.0F, 0.0F).endVertex();
-		bufferbuilder.vertex(mat, 2.0F, 2.0F, 0.0F).endVertex();
-		bufferbuilder.vertex(mat, -1.0F, 2.0F, 0.0F).endVertex();
+		bufferbuilder.vertex(mat, -1.5F, -1.5F, 0.0F).endVertex();
+		bufferbuilder.vertex(mat, 1.5F, -1.5F, 0.0F).endVertex();
+		bufferbuilder.vertex(mat, 1.5F, 1.5F, 0.0F).endVertex();
+		bufferbuilder.vertex(mat, -1.5F, 1.5F, 0.0F).endVertex();
 		tesselator.end();
 		GlStateManager._enableTexture();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -2417,7 +2434,7 @@ public abstract class GameRendererVRMixin
 			float scale = 0.0785F;
 			//actual framebuffer
 			float f = TelescopeTracker.viewPercent(i);
-			//this.drawSizedQuad(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
+			// this.drawSizedQuad(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
 			this.drawSizedQuadSolid(720.0F, 720.0F, scale, new float[]{f, f, f, 1}, matrixStackIn.last().pose());
 
 			RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));

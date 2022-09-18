@@ -1278,7 +1278,7 @@ public class VRSettings
             @Override
             String getDisplayString(String prefix, Object value) {
                 if ((float)value == 0)
-                    return prefix + ("vivecraft.options.smooth");
+                    return prefix + I18n.get("vivecraft.options.smooth");
                 return prefix + String.format("%.0f" + DEGREE, (float)value);
             }
 

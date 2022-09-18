@@ -1,4 +1,4 @@
-package org.vivecraft.irisMixin;
+package org.vivecraft.modCompatMixin.irisMixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.coderbot.iris.pipeline.HandRenderer;
