@@ -13,14 +13,14 @@ import org.vivecraft.render.RenderPass;
 @Mixin(ProgramUniforms.class)
 public class IrisProgramUniformsMixin {
 
-    @Shadow
+    @Shadow(remap = false)
     int lastFrame;
     private RenderPass lastPass;
     private int actualFrame;
 
 
     // modify the frame counter on RenderPasChange, so perFrame Uniforms are recalculated
-    @ModifyVariable(method = "update", at = @At(value = "STORE"), remap = false, print = true)
+    @ModifyVariable(method = "update", at = @At(value = "STORE"), remap = false)
     private int checkNewFrame(int currentFrame) {
         actualFrame = currentFrame;
         if (lastFrame == currentFrame && lastPass != ClientDataHolder.getInstance().currentPass) {
@@ -30,8 +30,8 @@ public class IrisProgramUniformsMixin {
         return currentFrame;
     }
 
-    // restore actual frame counter,, so stuff doesn't get messed up
-    @ModifyVariable(method = "update", at = @At(value = "LOAD", ordinal = 1), remap = false,print = true)
+    // restore actual frame counter, so stuff doesn't get messed up
+    @ModifyVariable(method = "update", at = @At(value = "LOAD", ordinal = 1), remap = false)
     private int restoreFrame(int currentFrame) {
         return actualFrame;
     }

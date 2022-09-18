@@ -1,7 +1,6 @@
 package org.vivecraft.modCompatMixin.irisMixin;
 
 import net.coderbot.iris.Iris;
-import net.coderbot.iris.shaderpack.PackShadowDirectives;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,7 +17,7 @@ import org.vivecraft.extensions.iris.PipelineManagerExtension;
 @Pseudo
 @Mixin(NewWorldRenderingPipeline.class)
 public class IrisNewWorldRenderingPipelineVRMixin {
-    @Shadow
+    @Shadow(remap = false)
     private ShadowRenderTargets shadowRenderTargets;
 
     // store shadowTargets of the first pipeline
@@ -29,21 +28,41 @@ public class IrisNewWorldRenderingPipelineVRMixin {
         }
     }
 
-    // needed because shadowRenderTargets never gets set for sub pipelines
-    @Redirect(method = "addGbufferOrShadowSamplers(Lnet/coderbot/iris/pipeline/newshader/ExtendedShader;Ljava/util/function/Supplier;ZLnet/coderbot/iris/pipeline/newshader/ShaderAttributeInputs;)V", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
-    private Object rerouteShadowSamplers(Object obj) {
-        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
-        // this should give the own shadow targets, for the main pipeline and renderpass.LEFT,
-        // and for all other piplines the one from renderpass.LEFT
-        return targets != null ? targets : obj;
-    }
-
     // return main shadowRenderTargets, instead of own
     @Inject(method = "lambda$new$1", at = @At("HEAD"), cancellable = true, remap = false)
-    private void onlyOneShadowTargetSupplier(PackShadowDirectives par1, CallbackInfoReturnable<ShadowRenderTargets> cir) {
+    private void onlyOneShadowTargetSupplier(CallbackInfoReturnable<ShadowRenderTargets> cir) {
         if (((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
             cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets());
         }
+    }
+
+    // needed because shadowRenderTargets never gets set for sub pipelines
+    // this should give the own shadow targets, for the main pipeline and renderpass.LEFT,
+    // and for all other piplines the one from renderpass.LEFT
+    @Redirect(method = "addGbufferOrShadowSamplers", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTarget(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
+    }
+    @Redirect(method = "lambda$new$3", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTargetTerrainSamplers(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
+    }
+    @Redirect(method = "lambda$new$4", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTargetTerrainImages(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
+    }
+    @Redirect(method = "lambda$new$6", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTargetShadowTerrainSamplers(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
+    }
+    @Redirect(method = "lambda$new$8", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTargetShadowTerrainImages(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
     }
 
 }

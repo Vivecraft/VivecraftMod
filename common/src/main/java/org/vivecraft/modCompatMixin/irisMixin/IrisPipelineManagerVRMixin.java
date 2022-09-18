@@ -26,11 +26,11 @@ import java.util.function.Function;
 @Mixin(net.coderbot.iris.pipeline.PipelineManager.class)
 public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
-    @Shadow
-    private void resetTextureState(){};
-    @Shadow
+    @Shadow(remap = false)
+    private void resetTextureState(){}
+    @Shadow(remap = false)
     private WorldRenderingPipeline pipeline;
-    @Shadow
+    @Shadow(remap = false)
     @Final
     private Function<DimensionId, WorldRenderingPipeline> pipelineFactory;
 
@@ -97,7 +97,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
         }
     }
     @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, cancellable = true)
-    private void getVRPipeline(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+    private void returnCurrentVRPipeline(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         pipeline = vrPipelines.get(ClientDataHolder.getInstance().currentPass);
         cir.setReturnValue(pipeline);
     }
@@ -111,5 +111,9 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
         });
         shadowRenderTargets = null;
         vrPipelines.clear();
+    }
+
+    public WorldRenderingPipeline getVRPipeline(RenderPass pass){
+        return vrPipelines.get(pass);
     }
 }
