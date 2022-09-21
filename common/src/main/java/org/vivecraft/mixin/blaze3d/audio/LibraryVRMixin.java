@@ -51,7 +51,7 @@ public class LibraryVRMixin {
         };
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/OpenAlUtil;checkALError(Ljava/lang/String;)Z", ordinal = 0, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+    //@Inject(method = "init", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/OpenAlUtil;checkALError(Ljava/lang/String;)Z", ordinal = 0, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
     private void setHRTF(String string, CallbackInfo ci, ALCCapabilities aLCCapabilities, int i, int j, int k, ALCapabilities aLCapabilities) {
         ClientDataHolder.hrtfList.clear();
 

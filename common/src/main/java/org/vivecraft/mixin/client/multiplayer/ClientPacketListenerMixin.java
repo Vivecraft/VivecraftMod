@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
@@ -66,7 +66,7 @@ public class ClientPacketListenerMixin {
 
                         if (!ClientNetworkHelper.displayedChatMessage) {
                             ClientNetworkHelper.displayedChatMessage = true;
-                            this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.serverplugin", s11));
+                            this.minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
                         }
 
                         break;

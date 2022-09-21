@@ -100,7 +100,7 @@
              {
 @@ -654,7 +677,7 @@
                  {
-                     component = new TextComponent(this.minecraft.getResourceManager().getResource(resourcelocation).getSourceName());
+                     component = Component.literal(this.minecraft.getResourceManager().getResource(resourcelocation).getSourceName());
                  }
 -                catch (IOException ioexception1)
 +                catch (IOException ioexception)

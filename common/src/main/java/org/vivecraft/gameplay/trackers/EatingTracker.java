@@ -113,7 +113,7 @@ public class EatingTracker extends Tracker
                         {
                             //Minecraft.getInstance().physicalGuiManager.preClickAction();
 
-                            if (this.mc.gameMode.useItem(player, player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).consumesAction())
+                            if (this.mc.gameMode.useItem(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).consumesAction())
                             {
                                 this.mc.gameRenderer.itemInHandRenderer.itemUsed(i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                                 this.eating[i] = true;

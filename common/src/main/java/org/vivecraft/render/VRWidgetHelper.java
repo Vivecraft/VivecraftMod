@@ -15,6 +15,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -32,7 +33,7 @@ import java.util.function.Function;
 
 public class VRWidgetHelper
 {
-    private static final Random random = new Random();
+    private static final RandomSource random = RandomSource.create();
     public static boolean debug = false;
 
     public static void renderVRThirdPersonCamWidget()
@@ -85,7 +86,7 @@ public class VRWidgetHelper
 
             renderVRCameraWidget(-0.5F, -0.25F, -0.22F, f, RenderPass.CAMERA, CameraTracker.cameraModel, CameraTracker.cameraDisplayModel, () ->
             {
-                if (((ItemInHandRendererExtension) minecraft.getItemInHandRenderer()).getNearOpaqueBlock(dataholder.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), (double)((GameRendererExtension) minecraft.gameRenderer).getMinClipDistance()) == null)
+                if (((ItemInHandRendererExtension) minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).getNearOpaqueBlock(dataholder.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), (double)((GameRendererExtension) minecraft.gameRenderer).getMinClipDistance()) == null)
                 {
                 	dataholder.vrRenderer.cameraFramebuffer.bindRead();
                     RenderSystem.setShaderTexture(0, dataholder.vrRenderer.cameraFramebuffer.getColorTextureId());

@@ -43,7 +43,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -911,22 +911,22 @@ public abstract class MCVR
                 if (this.dh.vrSettings.seated)
                 {
                     this.dh.vrSettings.seatedFreeMove = !this.dh.vrSettings.seatedFreeMove;
-                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? new TranslatableComponent("vivecraft.options.freemove") : new TranslatableComponent("vivecraft.options.teleport")));
+                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
                 }
                 else if (this.dh.vrPlayer.isTeleportSupported())
                 {
                     this.dh.vrSettings.forceStandingFreeMove = !this.dh.vrSettings.forceStandingFreeMove;
-                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? new TranslatableComponent("vivecraft.options.freemove") : new TranslatableComponent("vivecraft.options.teleport")));
+                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
                 }
                 else if (this.dh.vrPlayer.isTeleportOverridden())
                 {
                     this.dh.vrPlayer.setTeleportOverride(false);
-                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.teleportdisabled"));
+                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
                 }
                 else
                 {
                     this.dh.vrPlayer.setTeleportOverride(true);
-                    this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.teleportenabled"));
+                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
                 }
             }
 
@@ -1238,11 +1238,11 @@ public abstract class MCVR
 //                            else
 //                            {
 //                                MenuWorldExporter.saveAreaToFile(this.mc.level, blockpos.getX() - 160, blockpos.getZ() - 160, 320, 320, blockpos.getY(), file2);
-//                                this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.menuworldexportclientwarning"));
+//                                this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
 //                            }
 //
-//                            this.mc.gui.getChat().addMessage(new TextComponent(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", 320)));
-//                            this.mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
+//                            this.mc.gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", 320)));
+//                            this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
 //                            break;
 //                        }
 //

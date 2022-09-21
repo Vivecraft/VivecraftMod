@@ -1321,17 +1321,17 @@ public class VRSettings
         MONO_FOV(true, false, 0, 179, 1, 0) { // Undistorted FOV
             @Override
             String getDisplayString(String prefix, Object value) {
-                return prefix + String.format("%.0f" + DEGREE, Minecraft.getInstance().options.fov);
+                return prefix + String.format("%.0f" + DEGREE, Minecraft.getInstance().options.fov().get());
             }
 
             @Override
             Float getOptionFloatValue(float value) {
-                return (float)Minecraft.getInstance().options.fov;
+                return (float)Minecraft.getInstance().options.fov().get();
             }
 
             @Override
             Float setOptionFloatValue(float value) {
-                Minecraft.getInstance().options.fov = value;
+                Minecraft.getInstance().options.fov().set((int) value);
                 return 0f;
             }
         },

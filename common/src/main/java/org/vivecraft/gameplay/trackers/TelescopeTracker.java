@@ -1,5 +1,6 @@
 package org.vivecraft.gameplay.trackers;
 
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.VRData;
 import org.vivecraft.render.RenderPass;
@@ -7,7 +8,7 @@ import org.vivecraft.render.RenderPass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
@@ -60,7 +61,7 @@ public class TelescopeTracker extends Tracker
         }
         else
         {
-            return i.getHoverName() instanceof TranslatableComponent && ((TranslatableComponent)i.getHoverName()).getKey().equals("vivecraft.item.telescope") || i.getHoverName().getString().equals("Eye of the Farseer");
+            return i.getHoverName().getContents() instanceof TranslatableContents && ((TranslatableContents)i.getHoverName().getContents()).getKey().equals("vivecraft.item.telescope") || i.getHoverName().getString().equals("Eye of the Farseer");
         }
     }
 

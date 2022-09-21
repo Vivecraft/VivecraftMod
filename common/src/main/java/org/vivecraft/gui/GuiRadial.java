@@ -9,7 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class GuiRadial extends TwoHandedScreen
 {
@@ -101,7 +101,7 @@ public class GuiRadial extends TwoHandedScreen
 
             if (s != "?")
             {
-                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2 - 10, i2, 20, new TranslatableComponent(s), (p) ->
+                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2 - 10, i2, 20, Component.translatable(s), (p) ->
                 {
                     if (l1 < 200)
                     {

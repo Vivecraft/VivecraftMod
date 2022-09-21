@@ -100,11 +100,11 @@
 +
 +            if (this.random.nextInt(2) == 1)
 +            {
-+                itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(new TextComponent("EAT ME"));
++                itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
 +            }
 +            else
 +            {
-+                itemstack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER).setHoverName(new TextComponent("DRINK ME"));
++                itemstack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER).setHoverName(Component.literal("DRINK ME"));
 +            }
 +
 +            itemstack.getTag().putInt("HideFlags", 32);
@@ -638,7 +638,7 @@
 +
 +                if (p_9163_ && !flag)
 +                {
-+                    this.sendMessage(new TranslatableComponent("block.minecraft.set_spawn"), Util.NIL_UUID);
++                    this.sendMessage(Component.translatable("block.minecraft.set_spawn"), Util.NIL_UUID);
 +                }
  
 -            if (p_9163_ && !flag)
@@ -649,7 +649,7 @@
 +            }
 +            else
              {
--                this.sendMessage(new TranslatableComponent("block.minecraft.set_spawn"), Util.NIL_UUID);
+-                this.sendMessage(Component.translatable("block.minecraft.set_spawn"), Util.NIL_UUID);
 +                this.respawnPosition = null;
 +                this.respawnDimension = Level.OVERWORLD;
 +                this.respawnAngle = 0.0F;

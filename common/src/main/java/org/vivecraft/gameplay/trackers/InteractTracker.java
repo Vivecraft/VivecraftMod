@@ -330,11 +330,11 @@ public class InteractTracker extends Tracker
                 }
                 else if (this.inBlockHit[i] != null)
                 {
-                    flag = this.mc.gameMode.useItemOn(this.mc.player, (ClientLevel)this.mc.player.level, interactionhand, this.inBlockHit[i]).consumesAction();
+                    flag = this.mc.gameMode.useItemOn(this.mc.player, interactionhand, this.inBlockHit[i]).consumesAction();
                 }
                 else if (this.bukkit[i])
                 {
-                    flag = this.mc.gameMode.useItem(this.mc.player, (ClientLevel)this.mc.player.level, interactionhand).consumesAction();
+                    flag = this.mc.gameMode.useItem(this.mc.player, interactionhand).consumesAction();
                 }
 
                 if (flag)

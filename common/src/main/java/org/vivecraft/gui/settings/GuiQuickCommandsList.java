@@ -8,8 +8,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Component;
 
 public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsList.CommandEntry>
 {
@@ -40,9 +40,9 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
 
         private CommandEntry(String command, GuiQuickCommandsList parent)
         {
-            this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, new TextComponent(""));
+            this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, Component.literal(""));
             this.txt.setValue(command);
-            this.btnDelete = new Button(0, 0, 18, 18,  new TranslatableComponent("X"), (p) ->
+            this.btnDelete = new Button(0, 0, 18, 18,  Component.translatable("X"), (p) ->
             {
                 this.txt.setValue("");
                 this.txt.changeFocus(true);

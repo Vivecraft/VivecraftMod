@@ -16,7 +16,7 @@
 +             
 +            if (option == Option.FOV)
 +            {
-+            	this.addRenderableWidget(new Button(j, k, 150, 20, new TranslatableComponent("vivecraft.options.screen.main.button"), (p) ->
++            	this.addRenderableWidget(new Button(j, k, 150, 20, Component.translatable("vivecraft.options.screen.main.button"), (p) ->
 +            	{
 +            		this.minecraft.options.save();
 +            		this.minecraft.setScreen(new GuiMainVRSettings(this));

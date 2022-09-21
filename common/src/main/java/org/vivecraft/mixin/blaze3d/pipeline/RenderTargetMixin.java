@@ -5,10 +5,7 @@ import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -286,12 +283,20 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		Tesselator tesselator = RenderSystem.renderThreadTesselator();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
-		bufferBuilder.vertex(0.0, g, 0.0).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
-		bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0f).color(255, 255, 255, 255).endVertex();
-		bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).color(255, 255, 255, 255).endVertex();
-		bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, k).color(255, 255, 255, 255).endVertex();
-		bufferBuilder.end();
-		BufferUploader._endInternal(bufferBuilder);
+		if (instance.getVertexFormat() == DefaultVertexFormat.POSITION_TEX) {
+			bufferBuilder.vertex(0.0, g, 0.0).uv(0.0f, 0.0f).endVertex();
+			bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0f).endVertex();
+			bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).endVertex();
+			bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, k).endVertex();
+		} else if (instance.getVertexFormat() == DefaultVertexFormat.POSITION_TEX_COLOR) {
+			bufferBuilder.vertex(0.0, g, 0.0).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
+			bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0f).color(255, 255, 255, 255).endVertex();
+			bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).color(255, 255, 255, 255).endVertex();
+			bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, k).color(255, 255, 255, 255).endVertex();
+		} else {
+			throw new IllegalStateException("Unexpected vertex format " + instance.getVertexFormat());
+		}
+		BufferUploader.draw(bufferBuilder.end());
 		instance.clear();
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);
@@ -371,8 +376,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 					.color(255, 255, 255, 255).endVertex();
 			bufferbuilder.vertex((double) f4, (double) f5, 0.0D).uv(xCropFactor, f9 - yCropFactor)
 					.color(255, 255, 255, 255).endVertex();
-			bufferbuilder.end();
-			BufferUploader._endInternal(bufferbuilder);
+			BufferUploader.draw(bufferbuilder.end());
 			instance.clear();
 
 		GlStateManager._depthMask(true);

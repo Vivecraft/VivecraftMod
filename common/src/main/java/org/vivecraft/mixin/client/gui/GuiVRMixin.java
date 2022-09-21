@@ -217,7 +217,6 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY + height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + 0) * f, (float)(v + texHeight) * f1).endVertex();
         bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY + height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + texWidth) * f, (float)(v + texHeight) * f1).endVertex();
         bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY - height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + texWidth) * f, (float)(v + 0) * f1).endVertex();bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY - height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + 0) * f, (float)(v + 0) * f1).endVertex();
-        bufferbuilder.end();
-        BufferUploader.end(bufferbuilder);
+        BufferUploader.drawWithShader(bufferbuilder.end());
     }
 }

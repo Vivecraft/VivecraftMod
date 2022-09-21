@@ -20,7 +20,7 @@ import org.vivecraft.api.ClientNetworkHelper;
 public class MultiPlayerGameModeVRMixin {
 
     @Inject(at = @At("HEAD"), method = "useItem")
-    public void overrideUse(Player player, Level level, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
+    public void overrideUse(Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
         ClientNetworkHelper.overrideLook(player, ClientDataHolder.getInstance().vrPlayer.getRightClickLookOverride(player, interactionHand.ordinal()));
     }
 
@@ -30,7 +30,7 @@ public class MultiPlayerGameModeVRMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "useItemOn")
-    public void overrideUseOn(LocalPlayer localPlayer, ClientLevel clientLevel, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
+    public void overrideUseOn(LocalPlayer localPlayer, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
         ClientNetworkHelper.overrideLook(localPlayer, blockHitResult.getLocation().subtract(localPlayer.getEyePosition(1.0F)).normalize());
     }
 }

@@ -28,8 +28,8 @@
 -    private static final ResourceLocation SPYGLASS_SCOPE_LOCATION = new ResourceLocation("textures/misc/spyglass_scope.png");
 +    public static final ResourceLocation SPYGLASS_SCOPE_LOCATION = new ResourceLocation("textures/misc/spyglass_scope.png");
      private static final ResourceLocation POWDER_SNOW_OUTLINE_LOCATION = new ResourceLocation("textures/misc/powder_snow_outline.png");
-     private static final Component DEMO_EXPIRED_TEXT = new TranslatableComponent("demo.demoExpired");
-     private static final Component SAVING_TEXT = new TranslatableComponent("menu.savingLevel");
+     private static final Component DEMO_EXPIRED_TEXT = Component.translatable("demo.demoExpired");
+     private static final Component SAVING_TEXT = Component.translatable("menu.savingLevel");
 @@ -142,7 +145,9 @@
      private float lastAutosaveIndicatorValue;
      private final Map<ChatType, List<ChatListener>> chatListeners = Maps.newHashMap();

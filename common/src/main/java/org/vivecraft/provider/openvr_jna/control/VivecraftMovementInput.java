@@ -41,7 +41,7 @@ public class VivecraftMovementInput extends Input
         }
     }
 
-    public void tick(boolean p_108576_)
+    public void tick(boolean p_108576_, float sneakSpeed)
     {
         this.leftImpulse = 0.0F;
         this.forwardImpulse = 0.0F;

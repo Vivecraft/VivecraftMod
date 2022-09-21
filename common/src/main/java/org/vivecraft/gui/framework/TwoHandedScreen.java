@@ -10,7 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 public abstract class TwoHandedScreen extends Screen
 {
@@ -25,7 +25,7 @@ public abstract class TwoHandedScreen extends Screen
 
     protected TwoHandedScreen()
     {
-        super(new TextComponent(""));
+        super(Component.literal(""));
     }
 
     public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)

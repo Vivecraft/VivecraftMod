@@ -7,7 +7,7 @@ import org.vivecraft.settings.VRSettings;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class GuiVROptionButton extends Button
 {
@@ -27,7 +27,7 @@ public class GuiVROptionButton extends Button
 
     public GuiVROptionButton(int id, int x, int y, int width, int height, @Nullable VRSettings.VrOptions option, String text, OnPress action)
     {
-        super(x, y, width, height, new TranslatableComponent(text), action);
+        super(x, y, width, height, Component.translatable(text), action);
         this.id = id;
         this.enumOptions = option;
         Minecraft minecraft = Minecraft.getInstance();

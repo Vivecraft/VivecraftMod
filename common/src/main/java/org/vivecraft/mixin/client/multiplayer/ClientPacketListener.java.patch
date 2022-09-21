@@ -146,8 +146,8 @@
  
                      if (entity1 == this.minecraft.player && !flag)
                      {
--                        this.minecraft.gui.setOverlayMessage(new TranslatableComponent("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage()), false);
-+                        this.minecraft.gui.setOverlayMessage(new TranslatableComponent("mount.onboard", this.minecraft.options.keyShift.getName()), false);
+-                        this.minecraft.gui.setOverlayMessage(Component.translatable("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage()), false);
++                        this.minecraft.gui.setOverlayMessage(Component.translatable("mount.onboard", this.minecraft.options.keyShift.getName()), false);
 +                        this.minecraft.options.keyShift.getTranslatedKeyMessage();
                      }
                  }
@@ -304,12 +304,12 @@
 +                            if (!NetworkHelper.displayedChatMessage)
 +                            {
 +                                NetworkHelper.displayedChatMessage = true;
-+                                this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.serverplugin", s11));
++                                this.minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
 +                            }
 +
 +                            if (Minecraft.getInstance().vrSettings.manualCalibration == -1.0F && !Minecraft.getInstance().vrSettings.seated)
 +                            {
-+                                this.minecraft.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.calibrateheight"));
++                                this.minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibrateheight"));
 +                            }
 +
 +                            break;

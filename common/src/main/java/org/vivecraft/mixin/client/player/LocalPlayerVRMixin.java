@@ -1,5 +1,8 @@
 package org.vivecraft.mixin.client.player;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.ProfilePublicKey;
+import org.jetbrains.annotations.Nullable;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.ItemInHandRendererExtension;
@@ -105,16 +108,15 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	@Shadow
 	public Input input;
 
+	public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
+		super(clientLevel, gameProfile, profilePublicKey);
+	}
+
 	@Shadow
 	protected abstract void updateAutoJump(float f, float g);
 
 	@Shadow
 	public abstract void swing(InteractionHand interactionHand);
-
-	public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile) {
-		super(clientLevel, gameProfile);
-		// TODO Auto-generated constructor stub
-	}
 
 	@Inject(at = @At("TAIL"), method = "startRiding")
 	public void startRidingTracker(Entity entity, boolean bl, CallbackInfoReturnable<Boolean> cir) {
@@ -165,18 +167,18 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/LocalPlayer;lastOnGround:Z", shift = At.Shift.AFTER, ordinal = 1), method = "sendPosition")
 	public void walkUp(CallbackInfo ci) {
 		if (ClientDataHolder.getInstance().vrSettings.walkUpBlocks) {
-			this.minecraft.options.autoJump = false;
+			this.minecraft.options.autoJump().set(false);
 		}
 	}
 
-	@Inject(at = @At("TAIL"), method = "chat")
-	public void chatMsg(String string, CallbackInfo ci) {
+	@Inject(at = @At("TAIL"), method = "chatSigned")
+	public void chatMsg(String string, Component component, CallbackInfo ci) {
 		this.lastMsg = string;
 	}
 
 	@Override
 	public void swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact) {
-		((ItemInHandRendererExtension) this.minecraft.getItemInHandRenderer()).setSwingType(interact);
+		((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).setSwingType(interact);
 		this.swing(interactionhand);
 	}
 
@@ -185,9 +187,9 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	public void vrSwing(InteractionHand interactionHand, CallbackInfo ci) {
 		if (!this.swinging) {
 			if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
-				((ItemInHandRendererExtension) this.minecraft.getItemInHandRenderer()).setXdist((float) this.minecraft.hitResult.getLocation().subtract(ClientDataHolder.getInstance().vrPlayer.vrdata_world_pre.getController(interactionHand.ordinal()).getPosition()).length());
+				((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).setXdist((float) this.minecraft.hitResult.getLocation().subtract(ClientDataHolder.getInstance().vrPlayer.vrdata_world_pre.getController(interactionHand.ordinal()).getPosition()).length());
 			} else {
-				((ItemInHandRendererExtension) this.minecraft.getItemInHandRenderer()).setXdist(0F);
+				((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).setXdist(0F);
 			}
 		}
 	}

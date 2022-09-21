@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -146,7 +146,7 @@ public class VivecraftCrafting extends ShapedRecipe {
             NonNullList<Ingredient> nonNullList = VivecraftCrafting.dissolvePattern(strings, map, i, j);
             ItemStack itemStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(jsonObject, "result"));
             String name = jsonObject.get("name").getAsString();
-            itemStack.setHoverName(new TranslatableComponent(name));
+            itemStack.setHoverName(Component.translatable(name));
             int flags = jsonObject.get("hideflags").getAsInt();
             boolean unbreakable = jsonObject.get("unbreakable").getAsBoolean();
             itemStack.getOrCreateTag().putBoolean("Unbreakable", unbreakable);

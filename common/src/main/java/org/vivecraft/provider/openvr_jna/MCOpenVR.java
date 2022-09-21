@@ -15,7 +15,7 @@ import jopenvr.*;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
@@ -590,13 +590,13 @@ public class MCOpenVR extends MCVR
 
         for (VRInputAction vrinputaction1 : list1)
         {
-            MutableComponent component = new TranslatableComponent(vrinputaction1.keyBinding.getCategory()).append(" - ").append(new TranslatableComponent(vrinputaction1.keyBinding.getName()));
+            MutableComponent component = Component.translatable(vrinputaction1.keyBinding.getCategory()).append(" - ").append(Component.translatable(vrinputaction1.keyBinding.getName()));
             map1.put(vrinputaction1.name, component.getString());
         }
 
         for (VRInputActionSet vrinputactionset1 : VRInputActionSet.values())
         {
-            TranslatableComponent component = new TranslatableComponent(vrinputactionset1.localizedName);
+            MutableComponent component = Component.translatable(vrinputactionset1.localizedName);
             map1.put(vrinputactionset1.name, component.getString());
         }
 

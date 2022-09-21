@@ -255,7 +255,7 @@ public class SwingTracker extends Tracker
                                     blockstate.getBlock() instanceof CropBlock
                                     || blockstate.getBlock() instanceof StemBlock
                                     || blockstate.getBlock() instanceof AttachedStemBlock
-                                    || this.mc.gameMode.useItemOn(player, (ClientLevel)player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing()))
+                                    || this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing()))
                             {
                                 // don't try to break crops with hoes
                                 //this.mc.physicalGuiManager.preClickAction();

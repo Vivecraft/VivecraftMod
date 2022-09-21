@@ -1,7 +1,7 @@
 //package org.vivecraft.server;
 //
 //import net.minecraft.network.chat.Component;
-//import net.minecraft.network.chat.TextComponent;
+//import net.minecraft.network.chat.Component;
 //import net.minecraft.server.MinecraftServer;
 //import net.minecraft.server.level.ServerPlayer;
 //import net.minecraft.world.damagesource.DamageSource;
@@ -122,12 +122,12 @@
 //                scheduler.schedule(() -> {
 //                    server.submit(() -> {
 //                        if (player.connection.getConnection().isConnected() && !CommonNetworkHelper.isVive(player)) {
-//                            server.sendMessage(new TextComponent(ServerConfig.vrOnlyKickMessage.get()), player.getUUID());
-//                            server.sendMessage(new TextComponent("If this is not a VR client, you will be kicked in " + ServerConfig.vrOnlyKickDelay.get() + " seconds."), player.getUUID());
+//                            server.sendMessage(Component.literal(ServerConfig.vrOnlyKickMessage.get()), player.getUUID());
+//                            server.sendMessage(Component.literal("If this is not a VR client, you will be kicked in " + ServerConfig.vrOnlyKickDelay.get() + " seconds."), player.getUUID());
 //                            scheduler.schedule(() -> {
 //                                server.submit(() -> {
 //                                    if (player.connection.getConnection().isConnected() && CommonNetworkHelper.isVive(player)) {
-//                                        player.connection.disconnect(new TextComponent(ServerConfig.vrOnlyKickMessage.get()));
+//                                        player.connection.disconnect(Component.literal(ServerConfig.vrOnlyKickMessage.get()));
 //                                    }
 //                                });
 //                            }, Math.round(ServerConfig.vrOnlyKickDelay.get() * 1000), TimeUnit.MILLISECONDS);

@@ -317,8 +317,10 @@ public class Utils
         {
             try
             {
-                Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation("vivecraft", name));
-                inputstream = resource.getInputStream();
+                Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation("vivecraft", name));
+                if (resource.isPresent()) {
+                    inputstream = resource.get().open();
+                }
             }
             catch (NullPointerException | FileNotFoundException filenotfoundexception)
             {

@@ -1,5 +1,6 @@
 package org.vivecraft.gui;
 
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.gui.framework.TwoHandedScreen;
 import org.vivecraft.provider.InputSimulator;
@@ -7,7 +8,6 @@ import org.vivecraft.provider.InputSimulator;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.TextComponent;
 
 public class GuiKeyboard extends TwoHandedScreen
 {
@@ -53,7 +53,7 @@ public class GuiKeyboard extends TwoHandedScreen
                 }
 
                 String s2 = String.valueOf(c0);
-                Button button = new Button(k + k1 * (i1 + l), k + j1 * (20 + l), i1, 20, new TextComponent(s2), (p) ->
+                Button button = new Button(k + k1 * (i1 + l), k + j1 * (20 + l), i1, 20, Component.literal(s2), (p) ->
                 {
                     InputSimulator.typeChars(s2);
                 });
@@ -61,69 +61,69 @@ public class GuiKeyboard extends TwoHandedScreen
             }
         }
 
-        this.addRenderableWidget(new Button(0, k + 3 * (20 + l), 30, 20, new TextComponent("Shift"), (p) ->
+        this.addRenderableWidget(new Button(0, k + 3 * (20 + l), 30, 20, Component.literal("Shift"), (p) ->
         {
             this.setShift(!this.isShift);
         }));
-        this.addRenderableWidget(new Button(k + 4 * (i1 + l), k + j * (20 + l), 5 * (i1 + l), 20, new TextComponent(" "), (p) ->
+        this.addRenderableWidget(new Button(k + 4 * (i1 + l), k + j * (20 + l), 5 * (i1 + l), 20, Component.literal(" "), (p) ->
         {
             InputSimulator.typeChars(" ");
         }));
-        this.addRenderableWidget(new Button(i * (i1 + l) + k, k, 35, 20, new TextComponent("BKSP"), (p) ->
+        this.addRenderableWidget(new Button(i * (i1 + l) + k, k, 35, 20, Component.literal("BKSP"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_BACKSPACE);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_BACKSPACE);
         }));
-        this.addRenderableWidget(new Button(i * (i1 + l) + k, k + 2 * (20 + l), 35, 20, new TextComponent("ENTER"), (p) ->
+        this.addRenderableWidget(new Button(i * (i1 + l) + k, k + 2 * (20 + l), 35, 20, Component.literal("ENTER"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_ENTER);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_ENTER);
         }));
-        this.addRenderableWidget(new Button(0, k + 20 + l, 30, 20, new TextComponent("TAB"), (p) ->
+        this.addRenderableWidget(new Button(0, k + 20 + l, 30, 20, Component.literal("TAB"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_TAB);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_TAB);
         }));
-        this.addRenderableWidget(new Button(0, k, 30, 20, new TextComponent("ESC"), (p) ->
+        this.addRenderableWidget(new Button(0, k, 30, 20, Component.literal("ESC"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_ESCAPE);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_ESCAPE);
         }));
-        this.addRenderableWidget(new Button((i - 1) * (i1 + l) + k, k + j * (20 + l), i1, 20, new TextComponent("\u2191"), (p) ->
+        this.addRenderableWidget(new Button((i - 1) * (i1 + l) + k, k + j * (20 + l), i1, 20, Component.literal("\u2191"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_UP);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_UP);
         }));
-        this.addRenderableWidget(new Button((i - 1) * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, new TextComponent("\u2193"), (p) ->
+        this.addRenderableWidget(new Button((i - 1) * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, Component.literal("\u2193"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_DOWN);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_DOWN);
         }));
-        this.addRenderableWidget(new Button((i - 2) * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, new TextComponent("\u2190"), (p) ->
+        this.addRenderableWidget(new Button((i - 2) * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, Component.literal("\u2190"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT);
         }));
-        this.addRenderableWidget(new Button(i * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, new TextComponent("\u2192"), (p) ->
+        this.addRenderableWidget(new Button(i * (i1 + l) + k, k + (j + 1) * (20 + l), i1, 20, Component.literal("\u2192"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_RIGHT);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_RIGHT);
         }));
-        this.addRenderableWidget(new Button(k, k + -1 * (20 + l), 35, 20, new TextComponent("CUT"), (p) ->
+        this.addRenderableWidget(new Button(k, k + -1 * (20 + l), 35, 20, Component.literal("CUT"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
             InputSimulator.pressKey(GLFW.GLFW_KEY_X);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_X);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
         }));
-        this.addRenderableWidget(new Button(35 + l + k, k + -1 * (20 + l), 35, 20, new TextComponent("COPY"), (p) ->
+        this.addRenderableWidget(new Button(35 + l + k, k + -1 * (20 + l), 35, 20, Component.literal("COPY"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
             InputSimulator.pressKey(GLFW.GLFW_KEY_C);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_C);
             InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT_CONTROL);
         }));
-        this.addRenderableWidget(new Button(2 * (35 + l) + k, k + -1 * (20 + l), 35, 20, new TextComponent("PASTE"), (p) ->
+        this.addRenderableWidget(new Button(2 * (35 + l) + k, k + -1 * (20 + l), 35, 20, Component.literal("PASTE"), (p) ->
         {
             InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
             InputSimulator.pressKey(GLFW.GLFW_KEY_V);
