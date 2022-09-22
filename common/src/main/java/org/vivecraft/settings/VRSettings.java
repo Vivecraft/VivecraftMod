@@ -129,6 +129,12 @@ public class VRSettings
     	SLOWER,
     	SLOWEST
     }
+
+    public enum ShaderGUIRender implements OptionEnum<ShaderGUIRender> {
+        BEFORE_TRANSLUCENT_SOLID,
+        AFTER_TRANSLUCENT,
+        AFTER_SHADER
+    }
     
     @SettingField
     public int version = UNKNOWN_VERSION;
@@ -386,6 +392,8 @@ public class VRSettings
     public String chatNotificationSound = "block.note_block.bell";
     @SettingField(VrOptions.GUI_APPEAR_OVER_BLOCK)
     public boolean guiAppearOverBlock = true;
+    @SettingField(VrOptions.SHADER_GUI_RENDER)
+    public ShaderGUIRender shaderGUIRender = ShaderGUIRender.AFTER_SHADER;
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
@@ -1076,6 +1084,7 @@ public class VRSettings
         },
         PHYSICAL_KEYBOARD_THEME(false, false), // Keyboard Theme
         GUI_APPEAR_OVER_BLOCK(false, true), // Appear Over Block
+        SHADER_GUI_RENDER(false, true),
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
         MIRROR_DISPLAY(false, true) { // Desktop Mirror

@@ -1,7 +1,9 @@
 package org.vivecraft.modCompatMixin.irisMixin;
 
-import jdk.jfr.Percentage;
+import net.minecraft.client.Camera;
 import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.GameRendererExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.coderbot.iris.mixin.LevelRendererAccessor;
@@ -43,6 +45,15 @@ public class IrisShadowRendererMixin {
         if (entity == Minecraft.getInstance().getCameraEntity()) {
             ((GameRendererExtension) Minecraft.getInstance().gameRenderer).cacheRVEPos((LivingEntity) entity);
             ((GameRendererExtension) Minecraft.getInstance().gameRenderer).setupRVE();
+        }
+    }
+
+    // only render shadows on the first RenderPass
+    // cancel them here, or we would also cancel prepare shaders
+    @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true)
+    private void onlyOneShadow(LevelRendererAccessor par1, Camera par2, CallbackInfo ci) {
+        if (!ClientDataHolder.getInstance().isFirstPass) {
+            ci.cancel();
         }
     }
 }

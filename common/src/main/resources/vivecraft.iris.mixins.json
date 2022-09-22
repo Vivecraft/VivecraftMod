@@ -4,11 +4,14 @@
   "plugin": "org.vivecraft.VRMixinConfig",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "IrisChunkProgramOverridesMixin",
     "IrisHandRendererVRMixin",
-    "IrisDeferredWorldRenderingPipelineVRMixin",
     "IrisNewWorldRenderingPipelineVRMixin",
     "IrisBeginFrameHack",
-    "IrisShadowRendererMixin"
+    "IrisShadowMatricesMixin",
+    "IrisShadowRendererMixin",
+    "IrisPipelineManagerVRMixin",
+    "IrisProgramUniformsMixin"
   ],
   "client": [
 

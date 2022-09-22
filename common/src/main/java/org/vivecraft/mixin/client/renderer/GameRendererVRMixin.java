@@ -80,6 +80,7 @@ import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.gameplay.trackers.BowTracker;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.render.VRCamera;
@@ -540,6 +541,7 @@ public abstract class GameRendererVRMixin
 		poseStack.setIdentity();
 		RenderSystem.disableTexture();
 		RenderSystem.enableDepthTest();
+		RenderSystem.defaultBlendFunc();
 		applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, poseStack);
 		SetupRenderingAtController(c, poseStack);
 
@@ -1383,6 +1385,9 @@ public abstract class GameRendererVRMixin
 						RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
 								GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
 								GlStateManager.SourceFactor.ONE_MINUS_DST_ALPHA, GlStateManager.DestFactor.ONE);
+						if (GameRendererVRMixin.DATA_HOLDER.vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID && (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus") && IrisHelper.isShaderActive())) {
+							RenderSystem.disableBlend();
+						}
 					} else {
 						RenderSystem.disableBlend();
 					}
@@ -1733,10 +1738,6 @@ public abstract class GameRendererVRMixin
 			VRWidgetHelper.renderVRHandheldCameraWidget();
 		}
 
-		if (secondpass) {
-			this.renderGuiLayer(partialTicks, !this.shouldOccludeGui(), pMatrix);
-		}
-
 		if (secondpass && KeyboardHandler.Showing) {
 			if (GameRendererVRMixin.DATA_HOLDER.vrSettings.physicalKeyboard) {
 				this.renderPhysicalKeyboard(partialTicks, pMatrix);
@@ -1751,8 +1752,17 @@ public abstract class GameRendererVRMixin
 					!this.shouldOccludeGui(), pMatrix);
 		}
 
+		if (secondpass) {
+			this.renderGuiLayer(partialTicks, !this.shouldOccludeGui(), pMatrix);
+		}
+		// render hands in second pass when gui is open
+		boolean renderHandsSecond = RadialHandler.isShowing() || KeyboardHandler.Showing || Minecraft.getInstance().screen != null;
+		if (secondpass == renderHandsSecond) {
+			// should render hands in second pass if menus are open, else in the first pass
+			// only render the hands only once
 		this.renderVRHands(partialTicks, this.shouldRenderHands(), this.shouldRenderHands(), menuright, menuleft,
 				pMatrix);
+		}
 		this.renderVRSelfEffects(partialTicks);
 	}
 
@@ -1788,23 +1798,37 @@ public abstract class GameRendererVRMixin
 	}
 
 	public void drawSizedQuadSolid(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
-		RenderSystem.setShader(GameRenderer::getRendertypeSolidShader);
+		RenderSystem.setShader(GameRenderer::getRendertypeEntitySolidShader);
 		this.lightTexture.turnOnLightLayer();
 		float f = displayHeight / displayWidth;
 		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
+		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 		int light = LightTexture.pack(15, 15);
+
+		// store old lights
+		Vector3f light0Old = RenderSystemAccessor.getShaderLightDirections()[0];
+		Vector3f light1Old = RenderSystemAccessor.getShaderLightDirections()[1];
+
+		// set lights to front
+		RenderSystem.setShaderLights(new Vector3f(0,0,1), new Vector3f(0,0,1));
+		RenderSystem.setupShaderLights(RenderSystem.getShader());
+
 		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(0.0F, 0.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+				.uv(0.0F, 0.0F).overlayCoords(0).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(1.0F, 0.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+				.uv(1.0F, 0.0F).overlayCoords(0).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(1.0F, 1.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+				.uv(1.0F, 1.0F).overlayCoords(0).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(0.0F, 1.0F).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+				.uv(0.0F, 1.0F).overlayCoords(0).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		BufferUploader.drawWithShader(bufferbuilder.end());
 		this.lightTexture.turnOffLightLayer();
 
+		// reset lights
+		if (light0Old != null && light1Old != null) {
+			RenderSystem.setShaderLights(light0Old, light1Old);
+			RenderSystem.setupShaderLights(RenderSystem.getShader());
+		}
 	}
 
 
@@ -1814,22 +1838,37 @@ public abstract class GameRendererVRMixin
 
 	public void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
 			float[] color, Matrix4f pMatrix) {
-		RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
+		RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
 		float f = displayHeight / displayWidth;
 		this.lightTexture.turnOnLightLayer();
 		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
+		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+
+		// store old lights
+		Vector3f light0Old = RenderSystemAccessor.getShaderLightDirections()[0];
+		Vector3f light1Old = RenderSystemAccessor.getShaderLightDirections()[1];
+
+		// set lights to front
+		RenderSystem.setShaderLights(new Vector3f(0,0,1), new Vector3f(0,0,1));
+		RenderSystem.setupShaderLights(RenderSystem.getShader());
+
 		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(0.0F, 0.0F).uv2(lighti).normal(0,0,1).endVertex();
+				.uv(0.0F, 0.0F).overlayCoords(0).uv2(lighti).normal(0,0,1).endVertex();
 		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(1.0F, 0.0F).uv2(lighti).normal(0,0,1).endVertex();
+				.uv(1.0F, 0.0F).overlayCoords(0).uv2(lighti).normal(0,0,1).endVertex();
 		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(1.0F, 1.0F).uv2(lighti).normal(0,0,1).endVertex();
+				.uv(1.0F, 1.0F).overlayCoords(0).uv2(lighti).normal(0,0,1).endVertex();
 		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(0.0F, 1.0F).uv2(lighti).normal(0,0,1).endVertex();
+				.uv(0.0F, 1.0F).overlayCoords(0).uv2(lighti).normal(0,0,1).endVertex();
 		BufferUploader.drawWithShader(bufferbuilder.end());
 
 		this.lightTexture.turnOffLightLayer();
+
+		// reset lights
+		if (light0Old != null && light1Old != null) {
+			RenderSystem.setShaderLights(light0Old, light1Old);
+			RenderSystem.setupShaderLights(RenderSystem.getShader());
+	}
 	}
 
 	public void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
@@ -2346,7 +2385,7 @@ public abstract class GameRendererVRMixin
 //			SmartAnimations.spriteRendered(textureatlassprite);
 //		}
 
-		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.setShaderTexture(0, textureatlassprite.atlas().location());
 		float f = textureatlassprite.getU0();
 		float f1 = textureatlassprite.getU1();
@@ -2370,11 +2409,11 @@ public abstract class GameRendererVRMixin
 					(float) i * 90.0F - GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getBodyYaw()));
 			posestack.translate(0.0D, (double) (-f13), 0.0D);
 			Matrix4f matrix4f = posestack.last().pose();
-			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-			bufferbuilder.vertex(matrix4f, -f12, 0.0F, -f12).color(1.0F, 1.0F, 1.0F, 0.9F).uv(f8, f10).endVertex();
-			bufferbuilder.vertex(matrix4f, f12, 0.0F, -f12).color(1.0F, 1.0F, 1.0F, 0.9F).uv(f7, f10).endVertex();
-			bufferbuilder.vertex(matrix4f, f12, f13, -f12).color(1.0F, 1.0F, 1.0F, 0.9F).uv(f7, f9).endVertex();
-			bufferbuilder.vertex(matrix4f, -f12, f13, -f12).color(1.0F, 1.0F, 1.0F, 0.9F).uv(f8, f9).endVertex();
+			bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferbuilder.vertex(matrix4f, -f12, 0.0F, -f12).uv(f8, f10).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
+			bufferbuilder.vertex(matrix4f, f12, 0.0F, -f12).uv(f7, f10).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
+			bufferbuilder.vertex(matrix4f, f12, f13, -f12).uv(f7, f9).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
+			bufferbuilder.vertex(matrix4f, -f12, f13, -f12).uv(f8, f9).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
 			BufferUploader.drawWithShader(bufferbuilder.end());
 
 			posestack.popPose();
