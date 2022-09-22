@@ -173,6 +173,7 @@
     "vivecraft.options.HANDHELD_CAMERA_RENDER_SCALE": "Camera Resolution",
     "vivecraft.options.MIXED_REALITY_RENDER_CAMERA_MODEL": "Show Camera Model",
     "vivecraft.options.PHYSICAL_KEYBOARD_THEME": "Keyboard Theme",
+    "vivecraft.options.SHADER_GUI_RENDER": "Shaders GUI",
 
     "_comment": "Option tooltips",
     "vivecraft.options.HUD_SCALE.tooltip": "Relative size HUD takes up in field-of-view.\\nThe units are just relative, not in degrees or a fraction of FOV or anything.",
@@ -418,6 +419,9 @@
     "vivecraft.options.keyboardtheme.aesthetic": "§bA§de§bs§dt§bh§de§bt§di§bc",
     "vivecraft.options.keyboardtheme.dose": "Medicine",
     "vivecraft.options.keyboardtheme.custom": "Custom",
+    "vivecraft.options.shaderguirender.aftershader": "After Shader",
+    "vivecraft.options.shaderguirender.aftertranslucent": "After Water",
+    "vivecraft.options.shaderguirender.beforetranslucentsolid": "Before Water",
 
     "_comment": "Button text",
     "vivecraft.gui.ok": "OK",

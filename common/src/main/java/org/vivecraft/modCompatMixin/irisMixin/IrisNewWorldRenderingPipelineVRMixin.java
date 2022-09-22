@@ -1,8 +1,10 @@
 package org.vivecraft.modCompatMixin.irisMixin;
 
 import net.coderbot.iris.Iris;
+import net.coderbot.iris.pipeline.ShadowRenderer;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
@@ -20,6 +22,10 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     @Shadow(remap = false)
     private ShadowRenderTargets shadowRenderTargets;
 
+    @Final
+    @Shadow(remap = false)
+    private ShadowRenderer shadowRenderer;
+
     // store shadowTargets of the first pipeline
     @Inject(method = "<init>", at = @At("TAIL"), remap = false)
     private void storeShadowTargets(ProgramSet par1, CallbackInfo ci) {
@@ -33,6 +39,12 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     private void onlyOneShadowTargetSupplier(CallbackInfoReturnable<ShadowRenderTargets> cir) {
         if (((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
             cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets());
+        }
+    }
+    @Inject(method = "shouldDisableVanillaEntityShadows", at = @At("HEAD"), cancellable = true, remap = false)
+    private void shouldDisableEntityShadows(CallbackInfoReturnable<Boolean> cir) {
+        if (shadowRenderer != null || ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
+            cir.setReturnValue(true);
         }
     }
 

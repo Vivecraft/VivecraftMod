@@ -1,6 +1,8 @@
 package org.vivecraft.mixin.client.renderer;
 
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.IrisHelper;
+import org.vivecraft.Xplat;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.LevelRendererExtension;
 import org.vivecraft.extensions.RenderTargetExtension;
@@ -258,12 +260,45 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		((GameRendererExtension) gameRenderer).renderVRFabulous(f, (LevelRenderer)(Object)this, menuhandright, menuHandleft, poseStack);
 	}
 
+	private boolean menuHandleft;
+	private boolean menuhandright;
+
+	private boolean guiRendered = false;
+	@Inject(at = @At("HEAD"), method = "renderLevel")
+	public void resetGuiRendered(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+		guiRendered = false;
+	}
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", shift = Shift.BEFORE, ordinal = 17),
 			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
 	public void renderFast1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
-		boolean menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
-		boolean menuhandright = menuHandleft || ClientDataHolder.getInstance().interactTracker.hotbar >= 0 && ClientDataHolder.getInstance().vrSettings.vrTouchHotbar;
+		menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
+		menuhandright = menuHandleft || ClientDataHolder.getInstance().interactTracker.hotbar >= 0 && ClientDataHolder.getInstance().vrSettings.vrTouchHotbar;
 		((GameRendererExtension) gameRenderer).renderVrFast(f, false, menuhandright, menuHandleft, poseStack);
+
+		if ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive() && ClientDataHolder.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID) {
+			// shaders active, and render gui before translucents
+			((GameRendererExtension) gameRenderer).renderVrFast(f, true, menuhandright, menuHandleft, poseStack);
+			guiRendered = true;
+		}
+	}
+	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = Shift.BEFORE, ordinal = 4),
+			method = "renderLevel")
+	public void renderFast2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+		if (transparencyChain == null && (!((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()) || ClientDataHolder.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.AFTER_TRANSLUCENT)) {
+			// no shaders, or shaders, and gui after translucents
+			((GameRendererExtension) gameRenderer).renderVrFast(f, true, menuhandright, menuHandleft, poseStack);
+			guiRendered = true;
+		}
+	}
+
+	// if the gui didn't render yet, and something canceled the level renderer, render it now.
+	// or if shaders are on, and option AFTER_SHADER is selected
+	@Inject(at = @At("RETURN"), method = "renderLevel")
+	public void renderFast2Final(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
+		if (!guiRendered && transparencyChain == null) {
+			((GameRendererExtension) gameRenderer).renderVrFast(f, true, menuhandright, menuHandleft, poseStack);
+			guiRendered = true;
+		}
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderShape(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/phys/shapes/VoxelShape;DDDFFFF)V"), method = "renderHitOutline")
