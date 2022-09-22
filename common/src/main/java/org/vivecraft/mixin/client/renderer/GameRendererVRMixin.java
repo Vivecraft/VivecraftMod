@@ -1759,12 +1759,9 @@ public abstract class GameRendererVRMixin
 		}
 		// render hands in second pass when gui is open
 		boolean renderHandsSecond = RadialHandler.isShowing() || KeyboardHandler.Showing || Minecraft.getInstance().screen != null;
-		if (!secondpass && !renderHandsSecond) {
-			// only render the hands on the first pass
-			this.renderVRHands(partialTicks, this.shouldRenderHands(), this.shouldRenderHands(), menuright, menuleft,
-					pMatrix);
-		} else if (secondpass && renderHandsSecond){
-			// render hands here, if a gui is open
+		if (secondpass == renderHandsSecond) {
+			// should render hands in second pass if menus are open, else in the first pass
+			// only render the hands only once
 			this.renderVRHands(partialTicks, this.shouldRenderHands(), this.shouldRenderHands(), menuright, menuleft,
 					pMatrix);
 		}
