@@ -40,7 +40,8 @@ import org.vivecraft.settings.VRSettings;
 
 import javax.annotation.Nullable;
 
-@Mixin(LevelRenderer.class)
+// priority 999 to inject before iris, for the vrFast rendering
+@Mixin(value = LevelRenderer.class, priority = 999)
 public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable, LevelRendererExtension {
 	
 	@Unique
