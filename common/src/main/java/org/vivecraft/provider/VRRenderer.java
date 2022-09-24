@@ -463,10 +463,16 @@ public abstract class VRRenderer
             this.lastEnableVsync = minecraft.options.enableVsync;
         }
 
-        if (this.lastMirror != dataholder.vrSettings.displayMirrorMode)
-        {
-            this.reinitFrameBuffers("Mirror Changed");
+        if (this.lastMirror != dataholder.vrSettings.displayMirrorMode) {
+            if (!((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                // don't reinit with shaders, not needed
+                this.reinitFrameBuffers("Mirror Changed");
+            }
             this.lastMirror = dataholder.vrSettings.displayMirrorMode;
+        }
+
+        if ((framebufferMR == null || framebufferUndistorted == null) && ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+            this.reinitFrameBuffers("Shaders on, but some buffers not initialized");
         }
 
         if (this.reinitFramebuffers)
@@ -626,14 +632,14 @@ public abstract class VRRenderer
                 System.out.println("Passes: " + renderpass.toString());
             }
 
-            if (list.contains(RenderPass.THIRD))
+            if (list.contains(RenderPass.THIRD) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()))
             {
                 this.framebufferMR = new VRTextureTarget("Mixed Reality Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, true, false);
                 dataholder.print(this.framebufferMR.toString());
                 this.checkGLError("Mixed reality framebuffer setup");
             }
 
-            if (list.contains(RenderPass.CENTER))
+            if (list.contains(RenderPass.CENTER) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()))
             {
                 this.framebufferUndistorted = new VRTextureTarget("Undistorted View Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, false, false);
                 dataholder.print(this.framebufferUndistorted.toString());
