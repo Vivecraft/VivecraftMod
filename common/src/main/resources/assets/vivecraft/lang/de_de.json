@@ -401,6 +401,9 @@
     "vivecraft.options.rightclickdelay.slow": "Langsam",
     "vivecraft.options.rightclickdelay.slower": "Langsamer",
     "vivecraft.options.rightclickdelay.slowest": "Am langsamsten",
+    "vivecraft.options.shaderguirender.aftershader": "Nach Shader",
+    "vivecraft.options.shaderguirender.aftertranslucent": "Nach Wasser",
+    "vivecraft.options.shaderguirender.beforetranslucentsolid": "Vor Wasser",
 
     "_comment": "Button text",
     "vivecraft.gui.ok": "OK",

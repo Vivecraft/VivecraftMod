@@ -33,7 +33,8 @@ public class GuiHUDSettings extends GuiVROptionsBase
                 Minecraft.getInstance().setScreen(new GuiMenuWorldSettings(this));
                 return true;
             }),
-            new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME)
+            new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME),
+            new VROptionEntry(VRSettings.VrOptions.SHADER_GUI_RENDER)
     };
 
     public GuiHUDSettings(Screen guiScreen)

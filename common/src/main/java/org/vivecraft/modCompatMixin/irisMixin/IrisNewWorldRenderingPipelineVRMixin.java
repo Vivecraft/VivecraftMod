@@ -1,40 +1,80 @@
 package org.vivecraft.modCompatMixin.irisMixin;
 
-import org.vivecraft.ClientDataHolder;
-import net.coderbot.iris.mixin.LevelRendererAccessor;
-import net.coderbot.iris.pipeline.ClearPass;
+import net.coderbot.iris.Iris;
+import net.coderbot.iris.pipeline.ShadowRenderer;
+import net.coderbot.iris.shaderpack.ProgramSet;
+import net.coderbot.iris.shadows.ShadowRenderTargets;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
-import net.coderbot.iris.uniforms.FrameUpdateNotifier;
-import net.coderbot.iris.vendored.joml.Vector4f;
-import net.minecraft.client.Camera;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.extensions.iris.PipelineManagerExtension;
 
 @Pseudo
 @Mixin(NewWorldRenderingPipeline.class)
 public class IrisNewWorldRenderingPipelineVRMixin {
- @Inject(method = "renderShadows", at = @At("HEAD"), cancellable = true, remap = false)
-    private void cancelShadows(LevelRendererAccessor par1, Camera par2, CallbackInfo ci) {
-     if (!ClientDataHolder.getInstance().isFirstPass) {
-            ci.cancel();
+    @Shadow(remap = false)
+    private ShadowRenderTargets shadowRenderTargets;
+
+    @Final
+    @Shadow(remap = false)
+    private ShadowRenderer shadowRenderer;
+
+    // store shadowTargets of the first pipeline
+    @Inject(method = "<init>", at = @At("TAIL"), remap = false)
+    private void storeShadowTargets(ProgramSet par1, CallbackInfo ci) {
+        if (((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() == null) {
+            ((PipelineManagerExtension) Iris.getPipelineManager()).setShadowRenderTargets(shadowRenderTargets);
         }
     }
 
-    @Redirect(method = "beginLevelRendering", remap = false, at = @At(value = "INVOKE", target = "Lnet/coderbot/iris/uniforms/FrameUpdateNotifier;onNewFrame()V"))
-    private void no(FrameUpdateNotifier instance) {
-        if (ClientDataHolder.getInstance().isFirstPass) {
-            instance.onNewFrame();
+    // return main shadowRenderTargets, instead of own
+    @Inject(method = "lambda$new$1", at = @At("HEAD"), cancellable = true, remap = false)
+    private void onlyOneShadowTargetSupplier(CallbackInfoReturnable<ShadowRenderTargets> cir) {
+        if (((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
+            cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets());
         }
     }
-    @Redirect(method = "beginLevelRendering", remap = false, at = @At(value = "INVOKE", target = "Lnet/coderbot/iris/pipeline/ClearPass;execute(Lnet/coderbot/iris/vendored/joml/Vector4f;)V", ordinal = 0))
-    private void noX2(ClearPass instance, Vector4f vector4f) {
-        if (ClientDataHolder.getInstance().isFirstPass) {
-            instance.execute(vector4f);
+    @Inject(method = "shouldDisableVanillaEntityShadows", at = @At("HEAD"), cancellable = true, remap = false)
+    private void shouldDisableEntityShadows(CallbackInfoReturnable<Boolean> cir) {
+        if (shadowRenderer != null || ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
+            cir.setReturnValue(true);
         }
+    }
+
+    // needed because shadowRenderTargets never gets set for sub pipelines
+    // this should give the own shadow targets, for the main pipeline and renderpass.LEFT,
+    // and for all other piplines the one from renderpass.LEFT
+    @Redirect(method = "addGbufferOrShadowSamplers", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTarget(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
+    }
+    @Redirect(method = "lambda$new$3", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTargetTerrainSamplers(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
+    }
+    @Redirect(method = "lambda$new$4", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTargetTerrainImages(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
+    }
+    @Redirect(method = "lambda$new$6", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTargetShadowTerrainSamplers(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
+    }
+    @Redirect(method = "lambda$new$8", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTargetShadowTerrainImages(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return targets != null ? targets : obj;
     }
 
 }
