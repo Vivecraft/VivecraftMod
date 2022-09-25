@@ -2,7 +2,6 @@ package org.vivecraft.modCompatMixin.irisMixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.coderbot.iris.pipeline.HandRenderer;
-import net.coderbot.iris.pipeline.ShadowRenderer;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
