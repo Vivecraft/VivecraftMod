@@ -2,6 +2,9 @@ package org.vivecraft.gameplay.trackers;
 
 import java.util.List;
 
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.*;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.Vec3History;
@@ -115,9 +118,11 @@ public class SwingTracker extends Tracker
         }
     }
 
+    private final static TagKey<Item> TINKERS_TOOL = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("tconstruct","modifiable"));
+    
     public static boolean isTool(Item item)
     {
-        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof HoeItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem;
+        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof HoeItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem || item.getDefaultInstance().is(TINKERS_TOOL);
     }
 
     public void doProcess(LocalPlayer player)
