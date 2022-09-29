@@ -7,8 +7,6 @@
 
   ],
   "client": [
-    "client.FabricOptionVRMixin",
-    "FabricMinecraftVRMixin",
     "FabricGameRendererVRMixin"
   ],
   "server": [

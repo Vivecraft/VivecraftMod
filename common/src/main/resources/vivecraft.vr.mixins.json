@@ -18,6 +18,7 @@
     "client.MinecraftVRMixin",
     "client.MouseHandlerVRMixin",
     "client.OptionsVRMixin",
+    "client.OptionVRMixin",
     "client.gui.GuiVRMixin",
     "client.gui.NoSodiumGuiVRMixin",
     "client.gui.components.EditBoxVRMixin",
