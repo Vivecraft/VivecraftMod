@@ -7,8 +7,6 @@
 
   ],
   "client": [
-    "client.ForgeOptionVRMixin",
-    "ForgeMinecraftVRMixin",
     "ForgeIngameGuiVRMixin",
     "ForgeGameRendererVRMixin"
   ],

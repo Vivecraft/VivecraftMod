@@ -1,5 +1,7 @@
 package org.vivecraft;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -31,6 +33,10 @@ public class NonVRMixinConfig implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (!Xplat.isModLoadedSuccess()) {
+            LogManager.getLogger().log(Level.WARN, "not loading '" + mixinClassName + "' because mod failed to load completely");
+            return false;
+        }
         if (mixinClassName.contains("ClientPacketListenerMixin")) {
             return !VRState.checkVR();
         } else {
