@@ -1,6 +1,7 @@
 package org.vivecraft.render;
 
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ItemTags;
 import org.vivecraft.gameplay.trackers.SwingTracker;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.provider.ControllerType;
@@ -67,7 +68,7 @@ public class VivecraftItemRendering
                     }
                 }
             }
-            else if (item instanceof MapItem)
+            else if (item instanceof MapItem || pStack.is(ItemTags.VIVECRAFT_MAPS))
             {
                 rendertype = VivecraftItemTransformType.Map;
             }
@@ -87,29 +88,32 @@ public class VivecraftItemRendering
                     }
                 }
             }
-            else if (item instanceof SwordItem)
+            else if (item instanceof SwordItem || pStack.is(ItemTags.VIVECRAFT_SWORDS))
             {
                 rendertype = VivecraftItemTransformType.Sword;
             }
-            else if (item instanceof ShieldItem)
+            else if (item instanceof ShieldItem || pStack.is(ItemTags.VIVECRAFT_SHIELDS))
             {
                 rendertype = VivecraftItemTransformType.Shield;
             }
-            else if (item instanceof TridentItem)
+            else if (item instanceof TridentItem || pStack.is(ItemTags.VIVECRAFT_SPEARS))
             {
                 rendertype = VivecraftItemTransformType.Spear;
             }
-            else if (item instanceof CrossbowItem)
+            else if (item instanceof CrossbowItem || pStack.is(ItemTags.VIVECRAFT_CROSSBOWS))
             {
                 rendertype = VivecraftItemTransformType.Crossbow;
             }
-            else if (!(item instanceof CompassItem) && item != Items.CLOCK)
+            else if (item instanceof CompassItem || item == Items.CLOCK || pStack.is(ItemTags.VIVECRAFT_COMPASSES)) {
+                rendertype = VivecraftItemTransformType.Compass;
+            }
+            else
             {
                 if (SwingTracker.isTool(item))
                 {
                     rendertype = VivecraftItemTransformType.Tool;
 
-                    if (item instanceof FoodOnAStickItem || item instanceof FishingRodItem)
+                    if (item instanceof FoodOnAStickItem || item instanceof FishingRodItem || pStack.is(ItemTags.VIVECRAFT_FISHING_RODS))
                     {
                         rendertype = VivecraftItemTransformType.Tool_Rod;
                     }
@@ -118,10 +122,6 @@ public class VivecraftItemRendering
                 {
                     rendertype = VivecraftItemTransformType.Telescope;
                 }
-            }
-            else
-            {
-                rendertype = VivecraftItemTransformType.Compass;
             }
         }
         else
@@ -431,7 +431,7 @@ public class VivecraftItemRendering
                         }
                     }
 
-                    if (pStack.getItem() instanceof ArrowItem)
+                    if (pStack.getItem() instanceof ArrowItem || pStack.is(ItemTags.VIVECRAFT_ARROWS))
                     {
                         preRotation = Vector3f.ZP.rotationDegrees(-180.0F);
                         rotation.mul(Vector3f.XP.rotationDegrees((float)(-gunAngle)));

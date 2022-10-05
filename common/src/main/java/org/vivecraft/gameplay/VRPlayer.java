@@ -24,6 +24,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ItemTags;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.PlayerExtension;
 import org.vivecraft.api.ClientNetworkHelper;
@@ -533,7 +534,7 @@ public class VRPlayer
         {
             itemstack = c == 0 ? entity.getMainHandItem() : entity.getOffhandItem();
 
-            if (!(itemstack.getItem() instanceof SnowballItem) && !(itemstack.getItem() instanceof EggItem) && !(itemstack.getItem() instanceof SpawnEggItem) && !(itemstack.getItem() instanceof PotionItem) && !(itemstack.getItem() instanceof BowItem))
+            if (!(itemstack.getItem() instanceof SnowballItem) && !(itemstack.getItem() instanceof EggItem) && !(itemstack.getItem() instanceof SpawnEggItem) && !(itemstack.getItem() instanceof PotionItem) && !(itemstack.getItem() instanceof BowItem) && !itemstack.is(ItemTags.VIVECRAFT_THROW_ITEMS))
             {
                 if (!(itemstack.getItem() instanceof CrossbowItem))
                 {

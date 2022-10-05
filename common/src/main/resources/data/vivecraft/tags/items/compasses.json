@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#minecraft:compasses",
+      "required": false
+    },
+    "minecraft:clock",
+    "minecraft:compass"
+  ]
+}

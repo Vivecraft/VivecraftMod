@@ -694,7 +694,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				try {
 					ClientDataHolder.getInstance().vrRenderer.endFrame();
 				} catch (Exception exception) {
-					//LOGGER.error(exception.toString());
+					VRSettings.logger.error(exception.toString());
 				}
 
 				this.profiler.pop();
