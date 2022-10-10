@@ -17,35 +17,35 @@ out vec4 fragColor;
  
  void main() 
  { 
-	 vec4 fragmentColor = texture2D(Sampler0, centerTextureCoordinate) * 0.38026;
+	 vec4 fragmentColor = texture(Sampler0, centerTextureCoordinate) * 0.38026;
 	 
-	 fragmentColor += texture2D(Sampler0, oneStepLeftTextureCoordinate) * 0.27667;
-	 fragmentColor += texture2D(Sampler0, oneStepRightTextureCoordinate) * 0.27667;
+	 fragmentColor += texture(Sampler0, oneStepLeftTextureCoordinate) * 0.27667;
+	 fragmentColor += texture(Sampler0, oneStepRightTextureCoordinate) * 0.27667;
  
-	 fragmentColor += texture2D(Sampler0, twoStepsLeftTextureCoordinate) * 0.08074;
-	 fragmentColor += texture2D(Sampler0, twoStepsRightTextureCoordinate) * 0.08074;
+	 fragmentColor += texture(Sampler0, twoStepsLeftTextureCoordinate) * 0.08074;
+	 fragmentColor += texture(Sampler0, twoStepsRightTextureCoordinate) * 0.08074;
  
-	 fragmentColor += texture2D(Sampler0, threeStepsLeftTextureCoordinate) * -0.02612;
-	 fragmentColor += texture2D(Sampler0, threeStepsRightTextureCoordinate) * -0.02612;
+	 fragmentColor += texture(Sampler0, threeStepsLeftTextureCoordinate) * -0.02612;
+	 fragmentColor += texture(Sampler0, threeStepsRightTextureCoordinate) * -0.02612;
  
-	 fragmentColor += texture2D(Sampler0, fourStepsLeftTextureCoordinate) * -0.02143;
-	 fragmentColor += texture2D(Sampler0, fourStepsRightTextureCoordinate) * -0.02143;
+	 fragmentColor += texture(Sampler0, fourStepsLeftTextureCoordinate) * -0.02143;
+	 fragmentColor += texture(Sampler0, fourStepsRightTextureCoordinate) * -0.02143;
 
 	 fragColor = fragmentColor;
 	 
-	 float depth = texture2D(Sampler1, centerTextureCoordinate).r * 0.38026;
+	 float depth = texture(Sampler1, centerTextureCoordinate).r * 0.38026;
 	 
-	 depth += texture2D(Sampler1, oneStepLeftTextureCoordinate).r * 0.27667;
-	 depth += texture2D(Sampler1, oneStepRightTextureCoordinate).r * 0.27667;
+	 depth += texture(Sampler1, oneStepLeftTextureCoordinate).r * 0.27667;
+	 depth += texture(Sampler1, oneStepRightTextureCoordinate).r * 0.27667;
  
-	 depth += texture2D(Sampler1, twoStepsLeftTextureCoordinate).r * 0.08074;
-	 depth += texture2D(Sampler1, twoStepsRightTextureCoordinate).r * 0.08074;
+	 depth += texture(Sampler1, twoStepsLeftTextureCoordinate).r * 0.08074;
+	 depth += texture(Sampler1, twoStepsRightTextureCoordinate).r * 0.08074;
  
-	 depth += texture2D(Sampler1, threeStepsLeftTextureCoordinate).r * -0.02612;
-	 depth += texture2D(Sampler1, threeStepsRightTextureCoordinate).r * -0.02612;
+	 depth += texture(Sampler1, threeStepsLeftTextureCoordinate).r * -0.02612;
+	 depth += texture(Sampler1, threeStepsRightTextureCoordinate).r * -0.02612;
  
-	 depth += texture2D(Sampler1, fourStepsLeftTextureCoordinate).r * -0.02143;
-	 depth += texture2D(Sampler1, fourStepsRightTextureCoordinate).r * -0.02143;
+	 depth += texture(Sampler1, fourStepsLeftTextureCoordinate).r * -0.02143;
+	 depth += texture(Sampler1, fourStepsRightTextureCoordinate).r * -0.02143;
  
 	 gl_FragDepth = depth; 
 	 

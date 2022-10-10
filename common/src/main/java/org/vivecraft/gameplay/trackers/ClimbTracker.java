@@ -8,6 +8,7 @@ import java.util.Set;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.BlockTags;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
 import org.vivecraft.api.ClientNetworkHelper;
@@ -56,6 +57,7 @@ public class ClimbTracker extends Tracker
     private AABB westBB = new AABB(0.9D, 0.0D, 0.1D, 1.1D, 1.0D, 0.9D);
     private AABB eastBB = new AABB(-0.1D, 0.0D, 0.1D, 0.1D, 1.0D, 0.9D);
     private AABB upBB = new AABB(0.0D, 0.9D, 0.0D, 1.0D, 1.1D, 1.0D);
+    private AABB fullBB = new AABB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
     private Random rand = new Random();
     boolean unsetflag;
 
@@ -242,7 +244,7 @@ public class ClimbTracker extends Tracker
                 Vec3 vec31 = this.dh.vrPlayer.vrdata_world_pre.getController(i).getPosition().subtract(vec3.scale(0.2D));
                 AABB aabb = new AABB(avec3[i], vec31);
                 flag3 = true;
-                boolean flag4 = block instanceof LadderBlock || block instanceof VineBlock;
+                boolean flag4 = block instanceof LadderBlock || block instanceof VineBlock || blockstate.is(BlockTags.VIVECRAFT_CLIMBABLE);
 
                 if (!flag4)
                 {
@@ -250,7 +252,7 @@ public class ClimbTracker extends Tracker
                     BlockState blockstate1 = this.mc.level.getBlockState(blockpos1);
                     Block block1 = blockstate1.getBlock();
 
-                    if (block1 instanceof LadderBlock || block1 instanceof VineBlock)
+                    if (block1 instanceof LadderBlock || block1 instanceof VineBlock || blockstate1.is(BlockTags.VIVECRAFT_CLIMBABLE))
                     {
                         blockpos = blockpos1;
                         blockstate = blockstate1;
@@ -379,7 +381,7 @@ public class ClimbTracker extends Tracker
                     {
                         BlockPos blockpos5 = new BlockPos(this.latchStart[i]);
                         BlockState blockstate2 = this.mc.level.getBlockState(blockpos5);
-                        this.inblock[i] = this.wasinblock[i] && blockstate2.getBlock() instanceof LadderBlock || blockstate2.getBlock() instanceof VineBlock;
+                        this.inblock[i] = this.wasinblock[i] && blockstate2.getBlock() instanceof LadderBlock || blockstate2.getBlock() instanceof VineBlock || blockstate2.is(BlockTags.VIVECRAFT_CLIMBABLE);
                     }
                 }
 

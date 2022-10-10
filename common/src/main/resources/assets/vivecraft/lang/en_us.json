@@ -125,6 +125,7 @@
     "vivecraft.options.ALLOW_CRAWLING": "Roomscale Crawling",
     "vivecraft.options.LIMIT_TELEPORT": "Limit in Survival",
     "vivecraft.options.REVERSE_HANDS": "Reverse Hands",
+    "vivecraft.options.THIRDPERSON_ITEMTRANSFORMS": "Raw Item Positions",
     "vivecraft.options.STENCIL_ON": "Use Eye Stencil",
     "vivecraft.options.BCB_ON": "Show Body Position",
     "vivecraft.options.WORLD_SCALE": "World Scale",

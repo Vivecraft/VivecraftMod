@@ -554,17 +554,14 @@ public class MCOpenVR extends MCVR
 
         for (VRInputActionSet vrinputactionset : VRInputActionSet.values())
         {
-            if (vrinputactionset != VRInputActionSet.MOD) // || Reflector.ClientModLoader.exists())
+            String s = vrinputactionset.usage;
+
+            if (vrinputactionset.advanced && !this.dh.vrSettings.allowAdvancedBindings)
             {
-                String s = vrinputactionset.usage;
-
-                if (vrinputactionset.advanced && !this.dh.vrSettings.allowAdvancedBindings)
-                {
-                    s = "hidden";
-                }
-
-                list.add(ImmutableMap.<String, Object>builder().put("name", vrinputactionset.name).put("usage", s).build());
+                s = "hidden";
             }
+
+            list.add(ImmutableMap.<String, Object>builder().put("name", vrinputactionset.name).put("usage", s).build());
         }
 
         map.put("action_sets", list);
@@ -659,10 +656,8 @@ public class MCOpenVR extends MCVR
         ArrayList<VRInputActionSet> arraylist = new ArrayList<>();
         arraylist.add(VRInputActionSet.GLOBAL);
 
-//        if (Reflector.ClientModLoader.exists())
-//        {
-//            arraylist.add(VRInputActionSet.MOD);
-//        }
+        // we are always modded
+        arraylist.add(VRInputActionSet.MOD);
 
         arraylist.add(VRInputActionSet.MIXED_REALITY);
         arraylist.add(VRInputActionSet.TECHNICAL);

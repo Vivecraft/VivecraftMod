@@ -7,10 +7,18 @@ public class CommonDataHolder {
     public final String minecriftVerString;
 
     public CommonDataHolder() {
+        String mcVersion = "";
+        String modVersion = "";
+        if (Xplat.isModLoadedSuccess()) {
+            String[] version = Xplat.getModVersion().split("-");
+            mcVersion = version[0];
+            modVersion = version[1];
+        }
+
         if (VRState.checkVR()) {
-            minecriftVerString = "Vivecraft 1.18.2 jrbudda-VR-" + Xplat.getModloader() + "-" + Xplat.getModVersion();
+            minecriftVerString = "Vivecraft " + mcVersion + " jrbudda-VR-" + Xplat.getModloader() + "-" + modVersion;
         } else {
-            minecriftVerString = "Vivecraft 1.18.2 jrbudda-NONVR-" + Xplat.getModloader() + "-" + Xplat.getModVersion();
+            minecriftVerString = "Vivecraft " + mcVersion + " jrbudda-NONVR-" + Xplat.getModloader() + "-" + modVersion;
         }
     }
 

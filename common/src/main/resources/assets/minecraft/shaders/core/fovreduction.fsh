@@ -26,18 +26,18 @@ uniform int eye = 0;
 
 void main(){
 
-	vec4 bkg_color = texture2D(Sampler0,texCoordinates.st); 
+	vec4 bkg_color = texture(Sampler0,texCoordinates.st); 
     
 	if(portal > 0){ //swirly whirly
 		float ts = texCoordinates.s;
 		vec2 mod_texcoord = texCoordinates.st + vec2(portal*.005*cos(portaltime + 20*ts*pi), portal*.005*sin(portaltime + 30*ts*pi));
-		bkg_color = texture2D(Sampler0, mod_texcoord);
+		bkg_color = texture(Sampler0, mod_texcoord);
 	}
 
 	if(water > 0){ //goobly woobly
 		float ts = texCoordinates.s;
 		vec2 mod_texcoord = texCoordinates.st + vec2(0, water*.0010*sin(portaltime + 10*ts*pi));
-		bkg_color = texture2D(Sampler0, mod_texcoord);
+		bkg_color = texture(Sampler0, mod_texcoord);
 		vec4 blue = vec4(0, 0, bkg_color.b, 1.0);
 		bkg_color  = mix(bkg_color, blue, 0.1);
 

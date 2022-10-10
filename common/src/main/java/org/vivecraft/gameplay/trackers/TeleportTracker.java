@@ -17,6 +17,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.BlockTags;
+import org.vivecraft.api.ItemTags;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.PlayerExtension;
 import org.vivecraft.api.ClientNetworkHelper;
@@ -417,7 +419,7 @@ public class TeleportTracker extends Tracker
         }
         else if (collision.getDirection() != Direction.UP)
         {
-            if (blockstate.getBlock() instanceof LadderBlock || blockstate.getBlock() instanceof VineBlock)
+            if (blockstate.getBlock() instanceof LadderBlock || blockstate.getBlock() instanceof VineBlock || blockstate.is(BlockTags.VIVECRAFT_CLIMBABLE))
             {
                 Vec3 vec36 = new Vec3((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.5D, (double)blockpos.getZ() + 0.5D);
                 Block block = mc.level.getBlockState(blockpos.below()).getBlock();

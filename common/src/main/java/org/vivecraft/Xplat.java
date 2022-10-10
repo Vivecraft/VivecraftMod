@@ -44,4 +44,9 @@ public interface Xplat {
     static String getModVersion() {
         return "";
     }
+
+    @ExpectPlatform
+    static boolean isModLoadedSuccess() {
+        return false;
+    }
 }

@@ -4,6 +4,8 @@ import java.util.List;
 
 import net.minecraft.world.level.block.*;
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.BlockTags;
+import org.vivecraft.api.ItemTags;
 import org.vivecraft.api.Vec3History;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.settings.VRSettings;
@@ -117,7 +119,7 @@ public class SwingTracker extends Tracker
 
     public static boolean isTool(Item item)
     {
-        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof HoeItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem;
+        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem || item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
     }
 
     public void doProcess(LocalPlayer player)
@@ -142,7 +144,7 @@ public class SwingTracker extends Tracker
                 boolean flag = false;
                 boolean flag1 = false;
 
-                if (!(item instanceof SwordItem) && !(item instanceof TridentItem))
+                if (!(item instanceof SwordItem || itemstack.is(ItemTags.VIVECRAFT_SWORDS)) && !(item instanceof TridentItem || itemstack.is(ItemTags.VIVECRAFT_SPEARS)))
                 {
                     if (isTool(item))
                     {
@@ -245,22 +247,29 @@ public class SwingTracker extends Tracker
                     {
                         this.lastWeaponSolid[i] = true;
                         boolean flag4 = blockhitresult1.getBlockPos().equals(blockpos);
-                        boolean flag5 = this.dh.vrSettings.realisticClimbEnabled && (blockstate.getBlock() instanceof LadderBlock || blockstate.getBlock() instanceof VineBlock);
+                        boolean flag5 = this.dh.vrSettings.realisticClimbEnabled && (blockstate.getBlock() instanceof LadderBlock || blockstate.getBlock() instanceof VineBlock || blockstate.is(BlockTags.VIVECRAFT_CLIMBABLE));
 
                         if (blockhitresult1.getType() == HitResult.Type.BLOCK && flag4 && this.canact[i] && !flag5)
                         {
                             int j = 3;
 
-                            if (item instanceof HoeItem && (
+                             if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES) || itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) && (
                                     blockstate.getBlock() instanceof CropBlock
                                     || blockstate.getBlock() instanceof StemBlock
                                     || blockstate.getBlock() instanceof AttachedStemBlock
+                                    || blockstate.is(BlockTags.VIVECRAFT_CROPS)
                                     || this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing()))
                             {
                                 // don't try to break crops with hoes
-                                //this.mc.physicalGuiManager.preClickAction();
+                                if (itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) {
+                                    // some scythes need to be used on crops
+                                    if (!this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing()) {
+                                        // some scythes just need to be used
+                                        this.mc.gameMode.useItem(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                             }
-                            else if (blockstate.getBlock() instanceof NoteBlock)
+                                }
+                            }
+                            else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS))
                             {
                                 this.mc.gameMode.continueDestroyBlock(blockhitresult1.getBlockPos(), blockhitresult1.getDirection());
                             }

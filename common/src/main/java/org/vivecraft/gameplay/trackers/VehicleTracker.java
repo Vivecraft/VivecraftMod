@@ -1,6 +1,7 @@
 package org.vivecraft.gameplay.trackers;
 
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ItemTags;
 import org.vivecraft.api.VRData;
 import org.vivecraft.settings.VRSettings;
 
@@ -73,7 +74,7 @@ public class VehicleTracker extends Tracker
 
                 if (mob.isControlledByLocalInstance())
                 {
-                    int i = player.getMainHandItem().getItem() instanceof FoodOnAStickItem ? 0 : 1;
+                    int i = (player.getMainHandItem().getItem() instanceof FoodOnAStickItem || player.getMainHandItem().is(ItemTags.VIVECRAFT_FOOD_STICKS)) ? 0 : 1;
                     VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_world_pre.getController(i);
                     return vrdata$vrdevicepose.getPosition().add(vrdata$vrdevicepose.getDirection().scale(0.3D)).subtract(entity.position()).normalize();
                 }

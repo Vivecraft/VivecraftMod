@@ -20,7 +20,8 @@ public class GuiVRControls extends GuiVROptionsBase
             new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
             new VROptionEntry(VRSettings.VrOptions.REVERSE_HANDS),
             new VROptionEntry(VRSettings.VrOptions.RIGHT_CLICK_DELAY),
-            new VROptionEntry(VRSettings.VrOptions.ALLOW_ADVANCED_BINDINGS)
+            new VROptionEntry(VRSettings.VrOptions.ALLOW_ADVANCED_BINDINGS),
+            new VROptionEntry(VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS)
     };
 
     public GuiVRControls(Screen par1GuiScreen)
