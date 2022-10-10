@@ -1,0 +1,84 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#forge:tools/axes",
+      "required": false
+    },
+    {
+      "id": "#c:axes",
+      "required": false
+    },
+    {
+      "id": "#forge:tools/shovels",
+      "required": false
+    },
+    {
+      "id": "#c:shovels",
+      "required": false
+    },
+
+    "#vivecraft:hoes",
+    "#vivecraft:scythes",
+    "#vivecraft:fishing_rods",
+
+    {
+      "id": "#forge:tools/pickaxes",
+      "required": false
+    },
+    {
+      "id": "#c:pickaxes",
+      "required": false
+    },
+    {
+      "id": "#forge:shears",
+      "required": false
+    },
+    {
+      "id": "#c:shears",
+      "required": false
+    },
+    {
+      "id": "#forge:rods",
+      "required": false
+    },
+    "#minecraft:arrows",
+
+    "minecraft:bone",
+    "minecraft:stick",
+    "minecraft:blaze_rod",
+    "minecraft:bamboo",
+    "minecraft:torch",
+    "minecraft:redstone_torch",
+    "minecraft:soul_torch",
+    "minecraft:flint_and_steel",
+    "minecraft:debug_stick",
+
+    "minecraft:wooden_shovel",
+    "minecraft:stone_shovel",
+    "minecraft:iron_shovel",
+    "minecraft:diamond_shovel",
+    "minecraft:golden_shovel",
+    "minecraft:netherite_shovel",
+
+    "minecraft:wooden_axe",
+    "minecraft:stone_axe",
+    "minecraft:iron_axe",
+    "minecraft:diamond_axe",
+    "minecraft:golden_axe",
+    "minecraft:netherite_axe",
+
+    "minecraft:wooden_pickaxe",
+    "minecraft:stone_pickaxe",
+    "minecraft:iron_pickaxe",
+    "minecraft:diamond_pickaxe",
+    "minecraft:golden_pickaxe",
+    "minecraft:netherite_pickaxe",
+
+
+    {
+      "id": "#tconstruct:modifiable",
+      "required": false
+    }
+  ]
+}

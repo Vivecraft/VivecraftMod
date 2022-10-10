@@ -1,0 +1,53 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#forge:tools/hoes",
+      "required": false
+    },
+    {
+      "id": "#c:hoes",
+      "required": false
+    },
+
+    "minecraft:wooden_hoe",
+    "minecraft:stone_hoe",
+    "minecraft:iron_hoe",
+    "minecraft:diamond_hoe",
+    "minecraft:golden_hoe",
+    "minecraft:netherite_hoe",
+    {
+      "id": "tconstruct:scythe",
+      "required": false
+    },
+
+    {
+      "id": "harvest_scythes:wooden_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:stone_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:iron_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:golden_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:diamond_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:netherite_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:creative_scythe",
+      "required": false
+    }
+  ]
+}

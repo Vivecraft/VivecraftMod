@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:spears",
+      "required": false
+    },
+    {
+      "id": "#forge:tools/tridents",
+      "required": false
+    },
+    "minecraft:trident"
+  ]
+}
