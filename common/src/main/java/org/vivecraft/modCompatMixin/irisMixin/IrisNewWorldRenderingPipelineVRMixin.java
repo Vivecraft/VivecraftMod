@@ -6,6 +6,7 @@ import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,13 +36,21 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     }
 
     // return main shadowRenderTargets, instead of own
-    @Inject(method = "lambda$new$1", at = @At("HEAD"), cancellable = true, remap = false)
-    private void onlyOneShadowTargetSupplier(CallbackInfoReturnable<ShadowRenderTargets> cir) {
+    @Group(name = "one shadowRenderTargets", min = 1, max = 1)
+    @Inject(method = "lambda$new$1(Lnet/coderbot/iris/shaderpack/PackShadowDirectives;)Lnet/coderbot/iris/shadows/ShadowRenderTargets;", at = @At("HEAD"), cancellable = true, remap = false)
+    private void onlyOneShadowTargetSupplier131(CallbackInfoReturnable<ShadowRenderTargets> cir) {
         if (((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
             cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets());
         }
     }
-    @Inject(method = "shouldDisableVanillaEntityShadows", at = @At("HEAD"), cancellable = true, remap = false)
+    @Group(name = "one shadowRenderTargets", min = 1, max = 1)
+    @Inject(method = "lambda$new$0(Lnet/coderbot/iris/shaderpack/PackShadowDirectives;)Lnet/coderbot/iris/shadows/ShadowRenderTargets;", at = @At("HEAD"), cancellable = true, remap = false)
+    private void onlyOneShadowTargetSupplier140(CallbackInfoReturnable<ShadowRenderTargets> cir) {
+        if (((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
+            cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets());
+        }
+    }
+    @Inject(method = "shouldDisableVanillaEntityShadows()Z", at = @At("HEAD"), cancellable = true, remap = false)
     private void shouldDisableEntityShadows(CallbackInfoReturnable<Boolean> cir) {
         if (shadowRenderer != null || ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
             cir.setReturnValue(true);
@@ -51,28 +60,36 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     // needed because shadowRenderTargets never gets set for sub pipelines
     // this should give the own shadow targets, for the main pipeline and renderpass.LEFT,
     // and for all other piplines the one from renderpass.LEFT
+
+    @Group(name = "reroute shadowRenderTargets", min = 6, max = 6)
     @Redirect(method = "addGbufferOrShadowSamplers", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
     private Object rerouteShadowTarget(Object obj) {
         ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
         return targets != null ? targets : obj;
     }
-    @Redirect(method = "lambda$new$3", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
-    private Object rerouteShadowTargetTerrainSamplers(Object obj) {
+
+    // iris 1.3.1 and before
+    @Group(name = "reroute shadowRenderTargets",  min = 6, max = 6)
+    @Redirect(method = {
+            "lambda$new$3(Ljava/util/function/Supplier;I)Lnet/coderbot/iris/gl/program/ProgramSamplers;",
+            "lambda$new$4(Ljava/util/function/Supplier;I)Lnet/coderbot/iris/gl/program/ProgramImages;",
+            "lambda$new$6(I)Lnet/coderbot/iris/gl/program/ProgramSamplers;",
+            "lambda$new$8(I)Lnet/coderbot/iris/gl/program/ProgramImages;"
+    }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTarget131(Object obj) {
         ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
         return targets != null ? targets : obj;
     }
-    @Redirect(method = "lambda$new$4", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
-    private Object rerouteShadowTargetTerrainImages(Object obj) {
-        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
-        return targets != null ? targets : obj;
-    }
-    @Redirect(method = "lambda$new$6", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
-    private Object rerouteShadowTargetShadowTerrainSamplers(Object obj) {
-        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
-        return targets != null ? targets : obj;
-    }
-    @Redirect(method = "lambda$new$8", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
-    private Object rerouteShadowTargetShadowTerrainImages(Object obj) {
+
+    // iris 1.4.0+
+    @Group(name = "reroute shadowRenderTargets",  min = 6, max = 6)
+    @Redirect(method = {
+            "lambda$new$2(Ljava/util/function/Supplier;I)Lnet/coderbot/iris/gl/program/ProgramSamplers;",
+            "lambda$new$3(Ljava/util/function/Supplier;I)Lnet/coderbot/iris/gl/program/ProgramImages;",
+            "lambda$new$5(I)Lnet/coderbot/iris/gl/program/ProgramSamplers;",
+            "lambda$new$7(I)Lnet/coderbot/iris/gl/program/ProgramImages;"
+    }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    private Object rerouteShadowTarget140(Object obj) {
         ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
         return targets != null ? targets : obj;
     }
