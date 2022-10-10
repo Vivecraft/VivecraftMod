@@ -14,6 +14,18 @@
     "minecraft:iron_sword",
     "minecraft:diamond_sword",
     "minecraft:golden_sword",
-    "minecraft:netherite_sword"
+    "minecraft:netherite_sword",
+    {
+      "id": "tconstruct:dagger",
+      "required": false
+    },
+    {
+      "id": "tconstruct:sword",
+      "required": false
+    },
+    {
+      "id": "tconstruct:cleaver",
+      "required": false
+    }
   ]
 }

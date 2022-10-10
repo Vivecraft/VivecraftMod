@@ -7,6 +7,6 @@
     },
 
     "minecraft:fishing_rod",
-    "vivecraft:food_sticks"
+    "#vivecraft:food_sticks"
   ]
 }

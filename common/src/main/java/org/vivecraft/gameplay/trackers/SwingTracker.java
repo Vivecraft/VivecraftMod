@@ -253,7 +253,7 @@ public class SwingTracker extends Tracker
                         {
                             int j = 3;
 
-                            if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES)) && (
+                             if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES) || itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) && (
                                     blockstate.getBlock() instanceof CropBlock
                                     || blockstate.getBlock() instanceof StemBlock
                                     || blockstate.getBlock() instanceof AttachedStemBlock
@@ -261,7 +261,13 @@ public class SwingTracker extends Tracker
                                     || this.mc.gameMode.useItemOn(player, (ClientLevel)player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing()))
                             {
                                 // don't try to break crops with hoes
-                                //this.mc.physicalGuiManager.preClickAction();
+                                if (itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) {
+                                    // some scythes need to be used on crops
+                                    if (!this.mc.gameMode.useItemOn(player, (ClientLevel) player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing()) {
+                                        // some scythes just need to be used
+                                        this.mc.gameMode.useItem(player, player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+                                    }
+                                }
                             }
                             else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS))
                             {
