@@ -17,6 +17,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.extensions.iris.PipelineManagerExtension;
 
+import java.util.Objects;
+
 @Pseudo
 @Mixin(NewWorldRenderingPipeline.class)
 public class IrisNewWorldRenderingPipelineVRMixin {
@@ -50,6 +52,15 @@ public class IrisNewWorldRenderingPipelineVRMixin {
             cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets());
         }
     }
+    // why do you need to be special?
+    @Group(name = "one shadowRenderTargets", min = 1, max = 1)
+    @Inject(method = "lambda$new$1()Lnet/coderbot/iris/shadows/ShadowRenderTargets;", at = @At("HEAD"), cancellable = true, remap = false)
+    private void onlyOneShadowTargetSupplierOculus(CallbackInfoReturnable<ShadowRenderTargets> cir) {
+        if (((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
+            cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets());
+        }
+    }
+
     @Inject(method = "shouldDisableVanillaEntityShadows()Z", at = @At("HEAD"), cancellable = true, remap = false)
     private void shouldDisableEntityShadows(CallbackInfoReturnable<Boolean> cir) {
         if (shadowRenderer != null || ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
@@ -62,10 +73,10 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     // and for all other piplines the one from renderpass.LEFT
 
     @Group(name = "reroute shadowRenderTargets", min = 6, max = 6)
-    @Redirect(method = "addGbufferOrShadowSamplers", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
+    @Redirect(method = "addGbufferOrShadowSamplers", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/coderbot/iris/samplers/IrisSamplers;hasShadowSamplers(Lnet/coderbot/iris/gl/sampler/SamplerHolder;)Z")))
     private Object rerouteShadowTarget(Object obj) {
         ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
-        return targets != null ? targets : obj;
+        return Objects.requireNonNull(targets != null ? targets : obj);
     }
 
     // iris 1.3.1 and before
@@ -78,7 +89,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
     private Object rerouteShadowTarget131(Object obj) {
         ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
-        return targets != null ? targets : obj;
+        return Objects.requireNonNull(targets != null ? targets : obj);
     }
 
     // iris 1.4.0+
@@ -91,7 +102,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
     private Object rerouteShadowTarget140(Object obj) {
         ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
-        return targets != null ? targets : obj;
+        return Objects.requireNonNull(targets != null ? targets : obj);
     }
 
 }
