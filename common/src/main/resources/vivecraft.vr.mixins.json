@@ -40,6 +40,7 @@
     "client.renderer.entity.FishingHookRendererVRMixin",
     "client.renderer.entity.GuardianRendererVRMixin",
     "client.renderer.entity.MobRendererVRMixin",
+    "client.renderer.item.ItemPropertiesVRMixin",
     "client.renderer.NoSodiumLevelRendererVRMixin",
 
     "world.entity.vehicle.BoatMixin"

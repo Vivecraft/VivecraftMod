@@ -186,6 +186,11 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
                 {
                     return HumanoidModel.ArmPose.SPYGLASS;
                 }
+
+                if (useanim == UseAnim.TOOT_HORN)
+                {
+                    return HumanoidModel.ArmPose.TOOT_HORN;
+                }
             }
             else if (!p_117795_.swinging && itemstack.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemstack))
             {
