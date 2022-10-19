@@ -44,7 +44,8 @@
     "client.renderer.entity.MobRendererVRMixin",
     "client.renderer.NoSodiumLevelRendererVRMixin",
 
-    "world.entity.vehicle.BoatMixin"
+    "world.entity.vehicle.BoatMixin",
+    "world.item.PotionItemVRMixin"
   ],
   "server": [
   ],
