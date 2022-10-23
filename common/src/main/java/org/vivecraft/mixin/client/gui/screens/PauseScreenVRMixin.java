@@ -1,5 +1,7 @@
 package org.vivecraft.mixin.client.gui.screens;
 
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Widget;
 import org.vivecraft.ClientDataHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -30,7 +32,7 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
 
-    @Inject(at =  @At("TAIL"), method = "init")
+    @Inject(at =  @At("TAIL"), method = "createPauseMenu")
     public void addInit(CallbackInfo ci) {
         if (!Minecraft.getInstance().isMultiplayerServer()) {
             this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("vivecraft.gui.chat"), (p) ->
@@ -101,15 +103,31 @@ public abstract class PauseScreenVRMixin extends Screen {
                 }
             }));
         }
+
+        // move every button up a bit
+        for (Widget widget: this.renderables) {
+            ((AbstractWidget)widget).y -= 24;
+        }
+    }
+
+    @ModifyConstant(method = "render", constant = @Constant(intValue = 40), remap = false)
+    private int moveTitleUp(int constant) {
+        return 16;
     }
 
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 3))
     private GuiEventListener remove(PauseScreen instance, GuiEventListener guiEventListener) {
-        return null;
+        // Feedback button
+        // don't remove, just hide, so mods that rely on it being there, still work
+        ((AbstractWidget)guiEventListener).visible = false;
+        return this.addRenderableWidget((Button)guiEventListener);
     }
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 4))
     private GuiEventListener remove2(PauseScreen instance, GuiEventListener guiEventListener) {
-        return null;
+        // report bugs button
+        // don't remove, just hide, so mods that rely on it being there, still work
+        ((AbstractWidget)guiEventListener).visible = false;
+        return this.addRenderableWidget((Button)guiEventListener);
     }
     @ModifyConstant(method = "createPauseMenu", constant = @Constant(intValue = 120), remap = false)
     private int moveDown(int constant) {
