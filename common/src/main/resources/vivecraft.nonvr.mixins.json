@@ -18,7 +18,8 @@
     "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
 
     "world.item.CrossbowItemMixin",
-    "world.item.ItemsMixin"
+    "world.item.ItemsMixin",
+    "world.item.crafting.ShapedRecipeMixin"
   ],
   "client": [
     "blaze3d.pipeline.MainTargetMixin",
