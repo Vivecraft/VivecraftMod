@@ -1,6 +1,9 @@
 package org.vivecraft.mixin.server.level;
 
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
@@ -37,6 +40,8 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player {
 
+	@Shadow @Final public MinecraftServer server;
+
 	public ServerPlayerMixin(Level p_36114_, BlockPos p_36115_, float p_36116_, GameProfile p_36117_) {
 		super(p_36114_, p_36115_, p_36116_, p_36117_);
 		// TODO Auto-generated constructor stub
@@ -53,7 +58,7 @@ public abstract class ServerPlayerMixin extends Player {
 	public void menu(CallbackInfo info) {
 		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
 		// TODO change setting to commonDataHolder?
-		if ((ClientDataHolder.getInstance().vrSettings != null && !ClientDataHolder.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
+		if ((!this.server.isDedicatedServer() && ClientDataHolder.getInstance().vrSettings != null && !ClientDataHolder.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
 			if (this.random.nextInt(2) == 1) {
 				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(new TextComponent("EAT ME"));
