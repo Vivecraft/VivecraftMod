@@ -37,13 +37,13 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Inject(at =  @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", shift = At.Shift.AFTER, ordinal = 1), method = "createNormalMenuOptions")
     public void initFullGame(CallbackInfo ci) {
-        addVRMOdeButton();
+        addVRModeButton();
     }
     @Inject(at =  @At("TAIL"), method = "createDemoMenuOptions")
     public void initDemo(CallbackInfo ci) {
-        addVRMOdeButton();
+        addVRModeButton();
     }
-    private void addVRMOdeButton() {
+    private void addVRModeButton() {
 
         // get first button, to position warnings
         firstButton = (AbstractWidget)renderables.get(0);
