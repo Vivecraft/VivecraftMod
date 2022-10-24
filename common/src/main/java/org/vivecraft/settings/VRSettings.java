@@ -96,7 +96,8 @@ public class VRSettings
         DUAL,
         FIRST_PERSON,
         THIRD_PERSON,
-        MIXED_REALITY
+        MIXED_REALITY,
+        GUI
     }
 
     public enum HUDLock implements OptionEnum<HUDLock> {

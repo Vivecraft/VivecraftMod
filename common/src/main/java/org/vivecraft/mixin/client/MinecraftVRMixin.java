@@ -1274,6 +1274,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				source = ClientDataHolder.getInstance().vrRenderer.framebufferUndistorted;
 			} else if (ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
 				source = ClientDataHolder.getInstance().vrRenderer.framebufferMR;
+			} else if (ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.GUI) {
+				source = GuiHandler.guiFramebuffer;
 			} else if (ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.SINGLE
 					|| ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF) {
 				if (!ClientDataHolder.getInstance().vrSettings.displayMirrorLeftEye)
