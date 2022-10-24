@@ -99,13 +99,15 @@ public abstract class TitleScreenMixin extends Screen {
         return (showError ? "§c\u26A0§r " : (showRestart ? "§6\u24D8§r ": ""));
     }
 
-    @Inject(at =  @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;render(Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = At.Shift.BEFORE), method = "render")
-    public void renderAdditional(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
+    @Inject(at =  @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;render(Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = At.Shift.BEFORE, ordinal = 0), method = "render")
+    public void renderText(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
         int l = this.height / 4 + 49;
-        int warningHeight = firstButton.y - 10;
         drawString(poseStack, this.font, "Vivecraft", this.width / 2 + 106, l, 16777215);
         drawString(poseStack, this.font, new TranslatableComponent("vivecraft.messages.mode"), this.width / 2 + 106, l + 10, 16777215);
-
+    }
+    @Inject(at =  @At("TAIL"), method = "render")
+    public void renderWarning(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
+        int warningHeight = firstButton.y - 10;
         Component warning = null;
         if (showError) {
             warning = new TranslatableComponent("vivecraft.messages.configWriteError");
