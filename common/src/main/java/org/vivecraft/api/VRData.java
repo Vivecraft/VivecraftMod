@@ -131,7 +131,8 @@ public class VRData
     public Vec3 getHeadPivot()
     {
         Vec3 vec3 = this.hmd.getPosition();
-        Vector3 vector3 = this.hmd.getMatrix().transform(new Vector3(0.0F, -0.1F, 0.1F));
+        // scale pivot point with world scale, to prevent unwanted player movement
+        Vector3 vector3 = this.hmd.getMatrix().transform(new Vector3(0.0F, -0.1F * worldScale, 0.1F * worldScale));
         return new Vec3((double)vector3.getX() + vec3.x, (double)vector3.getY() + vec3.y, (double)vector3.getZ() + vec3.z);
     }
 
