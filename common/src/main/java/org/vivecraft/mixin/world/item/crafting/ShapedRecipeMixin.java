@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -19,30 +20,45 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(ShapedRecipe.class)
 public class ShapedRecipeMixin {
     @Inject(method = "itemFromJson", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/DefaultedRegistry;getOptional(Lnet/minecraft/resources/ResourceLocation;)Ljava/util/Optional;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    private static void vivecraftItems(JsonObject jsonObject, CallbackInfoReturnable<Item> cir, String resourceLocation){
+    private static void getVivecraftVanillaItemInject(JsonObject jsonObject, CallbackInfoReturnable<Item> cir, String resourceLocation){
         if (resourceLocation.startsWith("vivecraft")) {
-            String vanillaItem = GsonHelper.getAsString(jsonObject, "vanillaitem");
-            cir.setReturnValue(Registry.ITEM.getOptional(new ResourceLocation(vanillaItem)).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + vanillaItem + "'")));
-
+            cir.setReturnValue(getVivecraftVanillaItem(jsonObject, resourceLocation));
         }
     }
 
-    @Inject(method = "itemStackFromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", shift = At.Shift.BEFORE, remap = false), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    private static void vivecraftItems(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir, Item vanillaItem){
+    private static Item getVivecraftVanillaItem(JsonObject jsonObject, String resourceLocation){
+        String vanillaItem = GsonHelper.getAsString(jsonObject, "vanillaitem");
+        return Registry.ITEM.getOptional(new ResourceLocation(vanillaItem)).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + vanillaItem + "'"));
+    }
+
+    @Group(name = "item to custom itemStack", min = 1, max = 1)
+    @Inject(method = "itemStackFromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", shift = At.Shift.BEFORE, remap = false), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, expect = 0)
+    private static void customizeVanillaItemStackFabric(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir, Item vanillaItem){
         if (GsonHelper.getAsString(jsonObject, "item").startsWith("vivecraft")) {
-            if (jsonObject.has("data")) {
-                throw new JsonParseException("Disallowed data tag found");
+            cir.setReturnValue(customizeVanillaItemStack(jsonObject, vanillaItem));
+        }
+    }
+    @Group(name = "item to custom itemStack", min = 1, max = 1)
+    @Inject(method = "m_151274_", at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
+    private static void customizeVanillaItemStackForge(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir){
+        if (GsonHelper.getAsString(jsonObject, "item").startsWith("vivecraft")) {
+            Item vanillaItem = getVivecraftVanillaItem(jsonObject, GsonHelper.getAsString(jsonObject, "item"));
+            cir.setReturnValue(customizeVanillaItemStack(jsonObject, vanillaItem));
+        }
+    }
+    private static ItemStack customizeVanillaItemStack(JsonObject jsonObject, Item vanillaItem){
+        if (jsonObject.has("data")) {
+            throw new JsonParseException("Disallowed data tag found");
+        } else {
+            int i = GsonHelper.getAsInt(jsonObject, "count", 1);
+            if (i < 1) {
+                throw new JsonSyntaxException("Invalid output count: " + i);
             } else {
-                int i = GsonHelper.getAsInt(jsonObject, "count", 1);
-                if (i < 1) {
-                    throw new JsonSyntaxException("Invalid output count: " + i);
-                } else {
-                    ItemStack itemStack = new ItemStack(vanillaItem, i);
-                    itemStack.setHoverName(new TranslatableComponent(jsonObject.get("name").getAsString()));
-                    itemStack.getOrCreateTag().putBoolean("Unbreakable", GsonHelper.getAsBoolean(jsonObject, "unbreakable", false));
-                    itemStack.getOrCreateTag().putInt("HideFlags", GsonHelper.getAsInt(jsonObject, "hideflags", 0));
-                    cir.setReturnValue(itemStack);
-                }
+                ItemStack itemStack = new ItemStack(vanillaItem, i);
+                itemStack.setHoverName(new TranslatableComponent(jsonObject.get("name").getAsString()));
+                itemStack.getOrCreateTag().putBoolean("Unbreakable", GsonHelper.getAsBoolean(jsonObject, "unbreakable", false));
+                itemStack.getOrCreateTag().putInt("HideFlags", GsonHelper.getAsInt(jsonObject, "hideflags", 0));
+                return itemStack;
             }
         }
     }
