@@ -1,57 +1,58 @@
-package org.vivecraft.mixin.client.particle;//package com.example.vivecraft.mixin.client.particle;
-//
-//import org.vivecraft.extensions.GameRendererExtension;
-//import net.minecraft.client.Minecraft;
-//import net.minecraft.client.particle.ItemPickupParticle;
-//import net.minecraft.util.Mth;
-//import net.minecraft.world.entity.player.Player;
-//import net.minecraft.world.phys.Vec3;
-//import org.spongepowered.asm.mixin.Final;
-//import org.spongepowered.asm.mixin.Mixin;
-//import org.spongepowered.asm.mixin.Shadow;
-//import org.spongepowered.asm.mixin.injection.At;
-//import org.spongepowered.asm.mixin.injection.Redirect;
-//
-//@Mixin(ItemPickupParticle.class)
-//public class ItemPickupParticlevRMixin {
-//
-//    @Final
-//    @Shadow
-//    private Player target;
-//
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 0), method = "render")
-//    public double updateX(double d, double e, double f) {
-//        Vec3 pos = this.target.position().add(0, 0.5f, 0);
-//
-//        Minecraft mc = Minecraft.getInstance();
-//        if (target == mc.player) {
-//            pos = ((GameRendererExtension)mc.gameRenderer).getControllerRenderPos(0);
-//        }
-//
-//        return Mth.lerp(d, pos.x, pos.x);
-//    }
-//
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 1), method = "render")
-//    public double updateY(double d, double e, double f) {
-//        Vec3 pos = this.target.position().add(0, 0.5f, 0);
-//
-//        Minecraft mc = Minecraft.getInstance();
-//        if (target == mc.player) {
-//            pos = ((GameRendererExtension)mc.gameRenderer).getControllerRenderPos(0);
-//        }
-//
-//        return Mth.lerp(d, pos.y, pos.y);
-//    }
-//
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 2), method = "render")
-//    public double updateZ(double d, double e, double f) {
-//        Vec3 pos = this.target.position().add(0, 0.5f, 0);
-//
-//        Minecraft mc = Minecraft.getInstance();
-//        if (target == mc.player) {
-//            pos = ((GameRendererExtension)mc.gameRenderer).getControllerRenderPos(0);
-//        }
-//
-//        return Mth.lerp(d, pos.z, pos.z);
-//    }
-//}
+package org.vivecraft.mixin.client.particle;
+
+import net.minecraft.world.entity.Entity;
+import org.spongepowered.asm.mixin.injection.*;
+import org.vivecraft.extensions.GameRendererExtension;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ItemPickupParticle;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+
+@Mixin(ItemPickupParticle.class)
+public class ItemPickupParticleVRMixin {
+
+    @Final
+    @Shadow
+    private Entity target;
+    @Final
+    @Shadow
+    private Entity itemEntity;
+
+    private Vec3 playerPos;
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 0), method = "render")
+    public double updateX(double d, double e, double f) {
+        Minecraft mc = Minecraft.getInstance();
+        if (target == mc.player) {
+            playerPos = ((GameRendererExtension)mc.gameRenderer).getControllerRenderPos(0);
+            e = f = playerPos.x;
+        }
+
+        return Mth.lerp(d, e, f);
+    }
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 1), method = "render")
+    public double updateY(double d, double e, double f) {
+        if (target == Minecraft.getInstance().player) {
+            float offset = 0.5F;
+            // offset, so the particle is centered around the arm
+            offset += itemEntity.getBbHeight();
+            e = f = playerPos.y - offset;
+        }
+
+        return Mth.lerp(d, e, f);
+    }
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 2), method = "render")
+    public double updateZ(double d, double e, double f) {
+        if (target == Minecraft.getInstance().player) {
+            e = f = playerPos.z;
+            playerPos = null;
+        }
+
+        return Mth.lerp(d, e, f);
+    }
+}

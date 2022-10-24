@@ -33,6 +33,7 @@
     "client.gui.screens.SoundOptionsScreenVRMixin",
     "client.multiplayer.ClientPacketListenerVRMixin",
     "client.multiplayer.MultiPlayerGameModeVRMixin",
+    "client.particle.ItemPickupParticleVRMixin",
     "client.player.LocalPlayerVRMixin",
     "client.renderer.GameRendererVRMixin",
     "client.renderer.LevelRendererVRMixin",
