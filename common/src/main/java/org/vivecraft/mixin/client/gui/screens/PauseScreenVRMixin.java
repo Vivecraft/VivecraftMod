@@ -105,14 +105,16 @@ public abstract class PauseScreenVRMixin extends Screen {
         }
 
         // move every button up a bit
-        for (Widget widget: this.renderables) {
-            ((AbstractWidget)widget).y -= 24;
+        if (!ClientDataHolder.getInstance().vrSettings.seated || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
+            for (Widget widget: this.renderables) {
+                ((AbstractWidget)widget).y -= 24;
+            }
         }
     }
 
-    @ModifyConstant(method = "render", constant = @Constant(intValue = 40), remap = false)
+    @ModifyConstant(method = "render", constant = @Constant(intValue = 40))
     private int moveTitleUp(int constant) {
-        return 16;
+        return (!ClientDataHolder.getInstance().vrSettings.seated || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) ? 16 : 40;
     }
 
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 3))
@@ -131,6 +133,6 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
     @ModifyConstant(method = "createPauseMenu", constant = @Constant(intValue = 120), remap = false)
     private int moveDown(int constant) {
-        return 168;
+        return (!ClientDataHolder.getInstance().vrSettings.seated || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) ? 168 : 144;
     }
 }
