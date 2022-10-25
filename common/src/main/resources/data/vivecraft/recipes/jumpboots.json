@@ -1,6 +1,5 @@
 {
-  "type": "vivecraft:vivecraft_crafting",
-  "group": "vivecraft",
+  "type": "minecraft:crafting_shaped",
   "pattern": [
     "B",
     "S"
@@ -14,9 +13,10 @@
     }
   },
   "result": {
-    "item": "minecraft:leather_boots"
-  },
-  "name": "vivecraft.item.jumpboots",
-  "hideflags": 4,
-  "unbreakable": true
+    "item": "vivecraft:jumpboots",
+    "vanillaitem": "minecraft:leather_boots",
+    "name": "vivecraft.item.jumpboots",
+    "hideflags": 4,
+    "unbreakable": true
+  }
 }

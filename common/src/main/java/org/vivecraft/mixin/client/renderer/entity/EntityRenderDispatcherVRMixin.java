@@ -57,10 +57,10 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                     vec3 = ClientDataHolder.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolder.getInstance().currentPass).getPosition();
                 }
                 Vec3 vec31 = entity.position().add(0.0D, (double)(entity.getBbHeight() / 2.0F), 0.0D).subtract(vec3).normalize();
-                this.cameraOrientation.set(0.0F, 0.0F, 0.0F, 1.0F);
-                this.cameraOrientation.mul(Vector3f.YP.rotationDegrees((float)(-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
-                this.cameraOrientation.mul(Vector3f.XP.rotationDegrees((float)(-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
-                cir.setReturnValue(this.cameraOrientation);
+                Quaternion q = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+                q.mul(Vector3f.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
+                q.mul(Vector3f.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
+                cir.setReturnValue(q);
                 return;
             }
         }
@@ -88,10 +88,10 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                     vec3 = ClientDataHolder.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolder.getInstance().currentPass).getPosition();
                 }
                 Vec3 vec31 = entity.position().add(0.0D, (double) (entity.getBbHeight() + offset), 0.0D).subtract(vec3).normalize();
-                this.cameraOrientation.set(0.0F, 0.0F, 0.0F, 1.0F);
-                this.cameraOrientation.mul(Vector3f.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
-                this.cameraOrientation.mul(Vector3f.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
-                return this.cameraOrientation;
+                Quaternion q = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+                q.mul(Vector3f.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
+                q.mul(Vector3f.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
+                return q;
             }
         }
     }

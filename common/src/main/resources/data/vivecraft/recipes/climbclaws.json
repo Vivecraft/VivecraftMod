@@ -1,6 +1,5 @@
 {
-  "type": "vivecraft:vivecraft_crafting",
-  "group": "vivecraft",
+  "type": "minecraft:crafting_shaped",
   "pattern": [
     "E E",
     "S S"
@@ -14,9 +13,10 @@
     }
   },
   "result": {
-    "item": "minecraft:shears"
-  },
-  "name": "vivecraft.item.climbclaws",
-  "hideflags": 4,
-  "unbreakable": true
+    "item": "vivecraft:climbclaws",
+    "vanillaitem": "minecraft:shears",
+    "name": "vivecraft.item.climbclaws",
+    "hideflags": 4,
+    "unbreakable": true
+  }
 }

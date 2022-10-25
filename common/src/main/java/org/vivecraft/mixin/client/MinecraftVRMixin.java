@@ -1172,7 +1172,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 					hurtTimer = healthpercent
 							+ Mth.sin(hurtTimer * hurtTimer * hurtTimer * hurtTimer * (float) Math.PI) * 0.5F;
 					red = hurtTimer;
-				} else { // red due to low health
+				} else if (ClientDataHolder.getInstance().vrSettings.low_health_indicator){ // red due to low health
 					red = (float) ((double) healthpercent
 							* Math.abs(Math.sin((double) (2.5F * time) / ((double) (1.0F - healthpercent) + 0.1D))));
 
@@ -1274,6 +1274,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				source = ClientDataHolder.getInstance().vrRenderer.framebufferUndistorted;
 			} else if (ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
 				source = ClientDataHolder.getInstance().vrRenderer.framebufferMR;
+			} else if (ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.GUI) {
+				source = GuiHandler.guiFramebuffer;
 			} else if (ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.SINGLE
 					|| ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF) {
 				if (!ClientDataHolder.getInstance().vrSettings.displayMirrorLeftEye)
