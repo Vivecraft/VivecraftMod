@@ -340,14 +340,14 @@ public abstract class GuiVROptionsBase extends Screen
                         tooltip = tooltip.replace("\n", "§r\n");
 
                         // make last line the roughly 308 wide
-                        List<FormattedText> form = font.getSplitter().splitLines(tooltip, 308, Style.EMPTY);
-                        tooltip += " ".repeat((308 - (form.size() == 0 ? 0 : font.width(form.get(form.size() - 1)))) / font.width(" "));
+                        List<FormattedText> formattedText = font.getSplitter().splitLines(tooltip, 308, Style.EMPTY);
+                        tooltip += " ".repeat((308 - (formattedText.size() == 0 ? 0 : font.width(formattedText.get(formattedText.size() - 1)))) / font.width(" "));
 
                         // if tooltip is not too low, draw below button, else above
-                        if (guiHover.y + guiHover.getHeight() + form.size() * (font.lineHeight + 1) + 14 < this.height) {
-                            renderTooltip(pMatrixStack, font.split(new TextComponent(tooltip), 308), this.width / 2 - 154, guiHover.y + guiHover.getHeight() + 14);
+                        if (guiHover.y + guiHover.getHeight() + formattedText.size() * (font.lineHeight + 1) + 14 < this.height) {
+                            renderTooltip(pMatrixStack, font.split(new TextComponent(tooltip), 308), this.width / 2 - 166, guiHover.y + guiHover.getHeight() + 14);
                         } else {
-                            renderTooltip(pMatrixStack, font.split(new TextComponent(tooltip), 308), this.width / 2 - 154, guiHover.y - form.size() * (font.lineHeight + 1) + 9);
+                            renderTooltip(pMatrixStack, font.split(new TextComponent(tooltip), 308), this.width / 2 - 166, guiHover.y - formattedText.size() * (font.lineHeight + 1) + 9);
                         }
                     }
                 }
