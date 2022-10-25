@@ -1,21 +1,23 @@
 package org.vivecraft.gui.framework;
 
-import java.util.ArrayList;
-
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.ScreenUtils;
-import org.vivecraft.settings.VRSettings;
-
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.phys.Vec2;
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.ScreenUtils;
+import org.vivecraft.settings.VRSettings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class GuiVROptionsBase extends Screen
 {
@@ -236,7 +238,7 @@ public abstract class GuiVROptionsBase extends Screen
         }
 
         super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
-        //this.tooltipManager.drawTooltips(pMatrixStack, pMouseX, pMouseY, this.getButtonList()); Optifine
+        renderTooltip(pMatrixStack, pMouseX, pMouseY);
     }
 
     protected void actionPerformed(AbstractWidget button)
@@ -317,5 +319,39 @@ public abstract class GuiVROptionsBase extends Screen
     public boolean charTyped(char pCodePoint, int pModifiers)
     {
         return this.visibleList != null && this.visibleList.charTyped(pCodePoint, pModifiers) ? true : super.charTyped(pCodePoint, pModifiers);
+    }
+
+    private void renderTooltip(PoseStack pMatrixStack, int pMouseX, int pMouseY) {
+        AbstractWidget hover = null;
+        // find active button
+        for (Widget widget: renderables) {
+            if (widget instanceof AbstractWidget && ((AbstractWidget) widget).isMouseOver(pMouseX, pMouseY)) {
+                hover = (AbstractWidget) widget;
+            }
+        }
+        if (hover != null ) {
+            if (hover instanceof GuiVROptionButton guiHover) {
+                if (guiHover.getOption() != null) {
+                    String tooltipString = "vivecraft.options." + guiHover.getOption().name() + ".tooltip";
+                    // check if it has a tooltip
+                    if (I18n.exists(tooltipString)) {
+                        String tooltip = I18n.get(tooltipString, (Object) null);
+                        // add format reset at line ends
+                        tooltip = tooltip.replace("\n", "§r\n");
+
+                        // make last line the roughly 308 wide
+                        List<FormattedText> form = font.getSplitter().splitLines(tooltip, 308, Style.EMPTY);
+                        tooltip += " ".repeat((308 - (form.size() == 0 ? 0 : font.width(form.get(form.size() - 1)))) / font.width(" "));
+
+                        // if tooltip is not too low, draw below button, else above
+                        if (guiHover.y + guiHover.getHeight() + form.size() * (font.lineHeight + 1) + 14 < this.height) {
+                            renderTooltip(pMatrixStack, font.split(new TextComponent(tooltip), 308), this.width / 2 - 154, guiHover.y + guiHover.getHeight() + 14);
+                        } else {
+                            renderTooltip(pMatrixStack, font.split(new TextComponent(tooltip), 308), this.width / 2 - 154, guiHover.y - form.size() * (font.lineHeight + 1) + 9);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
