@@ -2,7 +2,10 @@ package org.vivecraft.mixin.server.level;
 
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
@@ -10,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.api.ServerVivePlayer;
 
@@ -38,6 +42,7 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player {
 
+	@Shadow @Final public MinecraftServer server;
 	@Unique
 	private String language = "en_us";
 	@Unique
@@ -52,9 +57,8 @@ public abstract class ServerPlayerMixin extends Player {
 	@Inject(at = @At("TAIL"), method = "initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V")
 	public void menu(AbstractContainerMenu p_143400_, CallbackInfo info) {
 		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
-
-		// TODO easter egg?
-		if (serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(20) == 3) {
+		// TODO change setting to commonDataHolder?
+		if ((!this.server.isDedicatedServer() && ClientDataHolder.getInstance().vrSettings != null && !ClientDataHolder.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
 			if (this.random.nextInt(2) == 1) {
 				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));

@@ -1445,14 +1445,14 @@ public abstract class MCVR
     {
         if (this.mc.player != null && (!this.dh.climbTracker.isGrabbingLadder() || !this.dh.climbTracker.isClaws(this.mc.player.getMainHandItem())))
         {
-//            if (Reflector.ForgeHooksClient.exists() && this.mc.screen == null)
-//            {
-//                InputSimulator.scrollMouse(0.0D, (double)(dir * 4));
-//            }
-//            else
-//            {
+            if (this.mc.screen == null)
+            {
+                InputSimulator.scrollMouse(0.0D, (double)(dir * 4));
+            }
+            else
+            {
                 this.mc.player.getInventory().swapPaint((double)dir);
-//            }
+            }
         }
     }
 

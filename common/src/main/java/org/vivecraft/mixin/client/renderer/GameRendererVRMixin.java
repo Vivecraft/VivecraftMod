@@ -1382,7 +1382,7 @@ public abstract class GameRendererVRMixin
 						RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
 								GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
 								GlStateManager.SourceFactor.ONE_MINUS_DST_ALPHA, GlStateManager.DestFactor.ONE);
-						if (GameRendererVRMixin.DATA_HOLDER.vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID && (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus") && IrisHelper.isShaderActive())) {
+						if (GameRendererVRMixin.DATA_HOLDER.vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID && (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()) {
 							RenderSystem.disableBlend();
 						}
 					} else {
@@ -1735,6 +1735,10 @@ public abstract class GameRendererVRMixin
 			VRWidgetHelper.renderVRHandheldCameraWidget();
 		}
 
+		if (secondpass && (Minecraft.getInstance().screen !=  null || !KeyboardHandler.Showing)) {
+			this.renderGuiLayer(partialTicks, !this.shouldOccludeGui(), pMatrix);
+		}
+
 		if (secondpass && KeyboardHandler.Showing) {
 			if (GameRendererVRMixin.DATA_HOLDER.vrSettings.physicalKeyboard) {
 				this.renderPhysicalKeyboard(partialTicks, pMatrix);
@@ -1747,10 +1751,6 @@ public abstract class GameRendererVRMixin
 		if (secondpass && RadialHandler.isShowing()) {
 			this.render2D(partialTicks, RadialHandler.Framebuffer, RadialHandler.Pos_room, RadialHandler.Rotation_room,
 					!this.shouldOccludeGui(), pMatrix);
-		}
-
-		if (secondpass) {
-			this.renderGuiLayer(partialTicks, !this.shouldOccludeGui(), pMatrix);
 		}
 		// render hands in second pass when gui is open
 		boolean renderHandsSecond = RadialHandler.isShowing() || KeyboardHandler.Showing || Minecraft.getInstance().screen != null;

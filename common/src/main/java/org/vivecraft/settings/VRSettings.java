@@ -96,7 +96,8 @@ public class VRSettings
         DUAL,
         FIRST_PERSON,
         THIRD_PERSON,
-        MIXED_REALITY
+        MIXED_REALITY,
+        GUI
     }
 
     public enum HUDLock implements OptionEnum<HUDLock> {
@@ -276,6 +277,8 @@ public class VRSettings
     //Rendering
     @SettingField(VrOptions.FSAA)
     public boolean useFsaa = false;   // default to off
+    @SettingField(VrOptions.LOW_HEALTH_INDICATOR)
+    public boolean low_health_indicator = true;   // default to on
     @SettingField(value = VrOptions.FOV_REDUCTION, config = "fovReduction")
     public boolean useFOVReduction = false;   // default to off
     @SettingField(VrOptions.FOV_REDUCTION_OFFSET)
@@ -1089,6 +1092,7 @@ public class VRSettings
         SHADER_GUI_RENDER(false, true),
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
+        LOW_HEALTH_INDICATOR(false, true), // red low health pulse
         MIRROR_DISPLAY(false, true) { // Desktop Mirror
             @Override
             Object convertOption(String value) {
