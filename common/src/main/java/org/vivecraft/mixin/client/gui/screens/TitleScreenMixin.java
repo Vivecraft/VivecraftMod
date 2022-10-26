@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Consumer;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
@@ -32,32 +31,20 @@ public abstract class TitleScreenMixin extends Screen {
     private boolean showRestart = false;
     private boolean showError = false;
     private AbstractWidget firstButton;
+    private Button vrModeButton;
 
     @Inject(at =  @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", shift = At.Shift.AFTER, ordinal = 1), method = "createNormalMenuOptions")
     public void initFullGame(CallbackInfo ci) {
-        addVRMOdeButton();
+        addVRModeButton();
     }
     @Inject(at =  @At("TAIL"), method = "createDemoMenuOptions")
     public void initDemo(CallbackInfo ci) {
-        addVRMOdeButton();
+        addVRModeButton();
     }
-    private void addVRMOdeButton() {
+    private void addVRModeButton() {
 
         // get first button, to position warnings
         firstButton = (AbstractWidget)renderables.get(0);
-
-        int l = this.height / 4 + 48;
-        Button.OnTooltip onTooltip = new Button.OnTooltip() {
-            private final Component text = Component.translatable("vivecraft.options.VR_MODE.tooltip");
-
-            public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
-                renderTooltip(poseStack, font.split(this.text, Math.max(width / 2 - 43, 170)), i, j);
-            }
-
-            public void narrateTooltip(Consumer<Component> consumer) {
-                consumer.accept(this.text);
-            }
-        };
 
         try {
             if (!Files.exists(vrConfigPath)) {
@@ -71,7 +58,7 @@ public abstract class TitleScreenMixin extends Screen {
             throw new RuntimeException(e);
         }
         String vrMode = Boolean.parseBoolean(vrConfig.getProperty("vrStatus")) ? "VR" : "NONVR";
-        this.addRenderableWidget(new Button(this.width / 2 + 104, l + 24, 56, 20, Component.literal(getIcon() + vrMode), (button) -> {
+        vrModeButton = new Button(this.width / 2 + 104, this.height / 4 + 72, 56, 20, Component.literal(getIcon() + vrMode), (button) -> {
             showError = false;
             String newMode;
             if (button.getMessage().getString().endsWith("NONVR")) {
@@ -88,7 +75,8 @@ public abstract class TitleScreenMixin extends Screen {
             }
 
             button.setMessage(Component.translatable(getIcon() + newMode));
-        }, onTooltip));
+        });
+        this.addRenderableWidget(vrModeButton);
     }
 
     private String getIcon() {
@@ -105,6 +93,11 @@ public abstract class TitleScreenMixin extends Screen {
     }
     @Inject(at =  @At("TAIL"), method = "render")
     public void renderWarning(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
+
+        if (vrModeButton.isMouseOver(i, j)) {
+            renderTooltip(poseStack, font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
+        }
+
         int warningHeight = firstButton.y - 10;
         Component warning = null;
         if (showError) {
