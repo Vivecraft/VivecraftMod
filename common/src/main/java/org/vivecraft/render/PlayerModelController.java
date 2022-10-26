@@ -12,8 +12,6 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.PehkuiHelper;
-import org.vivecraft.Xplat;
 import org.vivecraft.api.VRData;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Quaternion;
