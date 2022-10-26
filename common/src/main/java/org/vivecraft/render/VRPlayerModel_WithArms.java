@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.ModelPart.Polygon;
 import net.minecraft.client.model.geom.ModelPart.Vertex;
@@ -19,6 +20,8 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.PehkuiHelper;
+import org.vivecraft.Xplat;
 
 public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerModel<T>
 {
@@ -134,7 +137,14 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 			this.leftShoulder.y += 3.2F;
 		}
 
-		Vec3 vec3 = rotinfo.leftArmPos.add(0.0D, d0, 0.0D);
+		Vec3 vec3 = rotinfo.leftArmPos;
+		Vec3 vec32 = rotinfo.rightArmPos;
+		if (Xplat.isModLoaded("pehkui")){
+			// remove pehkui scale from that, since the whole entity is scaled
+			vec3 = vec3.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getFrameTime()));
+			vec32 = vec32.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getFrameTime()));
+		}
+		vec3 = vec3.add(0.0D, d0, 0.0D);
 		vec3 = vec3.yRot((float)(-Math.PI + d1));
 		vec3 = vec3.scale((double)(16.0F / rotinfo.heightScale));
 		this.leftHand.setPos((float)(-vec3.x), (float)(-vec3.y), (float)vec3.z);
@@ -162,7 +172,7 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 		default:
 		}
 
-		Vec3 vec32 = rotinfo.rightArmPos.add(0.0D, d0, 0.0D);
+		vec32 = vec32.add(0.0D, d0, 0.0D);
 		vec32 = vec32.yRot((float)(-Math.PI + d1));
 		vec32 = vec32.scale((double)(16.0F / rotinfo.heightScale));
 		this.rightHand.setPos((float)(-vec32.x), -((float)vec32.y), (float)vec32.z);

@@ -2,6 +2,8 @@ package org.vivecraft.mixin.client.particle;
 
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.injection.*;
+import org.vivecraft.PehkuiHelper;
+import org.vivecraft.Xplat;
 import org.vivecraft.extensions.GameRendererExtension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ItemPickupParticle;
@@ -38,6 +40,10 @@ public class ItemPickupParticleVRMixin {
     public double updateY(double d, double e, double f) {
         if (target == Minecraft.getInstance().player) {
             float offset = 0.5F;
+            if (Xplat.isModLoaded("pehkui")){
+                // pehkui changes the offset, need to account for that
+                offset *= PehkuiHelper.getPlayerScale(target, (float)d);
+            }
             // offset, so the particle is centered around the arm
             offset += itemEntity.getBbHeight();
             e = f = playerPos.y - offset;

@@ -3,6 +3,8 @@ package org.vivecraft.gameplay.trackers;
 import java.nio.ByteBuffer;
 
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.PehkuiHelper;
+import org.vivecraft.Xplat;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
 import org.vivecraft.api.ClientNetworkHelper;
@@ -157,6 +159,12 @@ public class BowTracker extends Tracker
             this.lastDraw = this.currentDraw;
             this.lastcanDraw = this.canDraw;
             this.maxDraw = (double)this.mc.player.getBbHeight() * 0.22D;
+
+            if (Xplat.isModLoaded("pehkui")) {
+                // this is meant to be relative to the base Bb height, not the scaled one
+                this.maxDraw /= PehkuiHelper.getPlayerBbScale(player, mc.getFrameTime());
+            }
+
             Vec3 vec3 = vrdata.getController(0).getPosition();
             Vec3 vec31 = vrdata.getController(1).getPosition();
             this.controllersDist = vec31.distanceTo(vec3);
