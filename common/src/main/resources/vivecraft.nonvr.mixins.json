@@ -18,7 +18,6 @@
     "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
 
     "world.item.CrossbowItemMixin",
-    "world.item.ItemsMixin",
     "world.item.crafting.ShapedRecipeMixin"
   ],
   "client": [
