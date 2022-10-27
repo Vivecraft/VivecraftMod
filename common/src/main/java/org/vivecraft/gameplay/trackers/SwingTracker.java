@@ -2,6 +2,7 @@ package org.vivecraft.gameplay.trackers;
 
 import java.util.List;
 
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.*;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.BlockTags;
@@ -253,20 +254,20 @@ public class SwingTracker extends Tracker
                         {
                             int j = 3;
 
-                             if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES) || itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) && (
-                                    blockstate.getBlock() instanceof CropBlock
-                                    || blockstate.getBlock() instanceof StemBlock
-                                    || blockstate.getBlock() instanceof AttachedStemBlock
-                                    || blockstate.is(BlockTags.VIVECRAFT_CROPS)
-                                    || this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing()))
+                            if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES) || itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) && (
+                                blockstate.getBlock() instanceof CropBlock
+                                || blockstate.getBlock() instanceof StemBlock
+                                || blockstate.getBlock() instanceof AttachedStemBlock
+                                || blockstate.is(BlockTags.VIVECRAFT_CROPS)
+                                // check if the item can use the block
+                                || item.useOn(new UseOnContext(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1)).shouldSwing()))
                             {
                                 // don't try to break crops with hoes
-                                if (itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) {
-                                    // some scythes need to be used on crops
-                                    if (!this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing()) {
+                                // actually use the item on the block
+                                boolean useSuccessful = this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing();
+                                if (itemstack.is(ItemTags.VIVECRAFT_SCYTHES) && !useSuccessful) {
                                         // some scythes just need to be used
                                         this.mc.gameMode.useItem(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
-                            }
                                 }
                             }
                             else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS))

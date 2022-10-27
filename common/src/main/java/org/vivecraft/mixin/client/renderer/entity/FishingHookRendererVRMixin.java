@@ -34,7 +34,7 @@ public class FishingHookRendererVRMixin {
         }
         Vec3 vec31 = ((GameRendererExtension) Minecraft.getInstance().gameRenderer).getControllerRenderPos(j);
         Vec3 vec32 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getHand(j).getDirection();
-        CachedHandPos = vec31.add(vec32.multiply(0.47, 0.47, 0.47));
+        CachedHandPos = vec31.add(vec32.scale(0.47 * ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.worldScale));
         return CachedHandPos.x;
     }
     @ModifyVariable(at = @At(value = "STORE", ordinal = 1),
