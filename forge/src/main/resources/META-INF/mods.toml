@@ -9,7 +9,7 @@ version = "${version}"
 displayName = "Vivecraft"
 logoFile="vivecraft_icon.png"
 authors = "fayer3, Ferri_Arnus, IMS, jrbudda, minecraft player"
-displayTest="IGNORE_ALL_VERSION"
+displayTest="IGNORE_SERVER_VERSION"
 description = '''
 The VR mod for any loader!
 '''
