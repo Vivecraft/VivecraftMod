@@ -384,7 +384,7 @@
     "vivecraft.options.shaderguirender.aftertranslucent": "Translucent",
     "vivecraft.options.shaderguirender.beforetranslucentsolid": "Opaque",
     "_comment_m5": "Option names",
-    "vivecraft.options.LOW_HEALTH_INDICATOR": "health indicator",
+    "vivecraft.options.LOW_HEALTH_INDICATOR": "Health Indicator",
     "vivecraft.options.SHADER_GUI_RENDER": "Shaders GUI",
     "_comment_m6": "Option tooltips",
     "vivecraft.options.LOW_HEALTH_INDICATOR.tooltip": "Pulses the screen red, when at low health, to indicate your current health status",
