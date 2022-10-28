@@ -7,6 +7,5 @@ public class Vivecraft {
     public static final String MODID = "vivecraft";
 
     public Vivecraft() {
-
     }
 }
