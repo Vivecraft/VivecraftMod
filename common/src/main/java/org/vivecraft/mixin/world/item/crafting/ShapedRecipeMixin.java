@@ -32,9 +32,10 @@ public class ShapedRecipeMixin {
     }
 
     @Group(name = "item to custom itemStack", min = 1, max = 1)
-    @Inject(method = "itemStackFromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", shift = At.Shift.BEFORE, remap = false), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, expect = 0)
-    private static void customizeVanillaItemStackFabric(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir, Item vanillaItem){
+    @Inject(method = "itemStackFromJson", at = @At("HEAD"), cancellable = true, expect = 0)
+    private static void customizeVanillaItemStackFabric(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir){
         if (GsonHelper.getAsString(jsonObject, "item").startsWith("vivecraft")) {
+            Item vanillaItem = getVivecraftVanillaItem(jsonObject, GsonHelper.getAsString(jsonObject, "item"));
             cir.setReturnValue(customizeVanillaItemStack(jsonObject, vanillaItem));
         }
     }
