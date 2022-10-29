@@ -113,7 +113,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
 	@Override
 	public Entity getRenderedEntity() {
-		return this.capturedEntity;
+		return this.renderedEntity;
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 0), method = "renderSnowAndRain")
