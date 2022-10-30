@@ -31,22 +31,14 @@ public class ShapedRecipeMixin {
         return Registry.ITEM.getOptional(new ResourceLocation(vanillaItem)).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + vanillaItem + "'"));
     }
 
-    @Group(name = "item to custom itemStack", min = 1, max = 1)
-    @Inject(method = "itemStackFromJson", at = @At("HEAD"), cancellable = true, expect = 0)
+    @Inject(method = "itemStackFromJson", at = @At("HEAD"), cancellable = true)
     private static void customizeVanillaItemStackFabric(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir){
         if (GsonHelper.getAsString(jsonObject, "item").startsWith("vivecraft")) {
             Item vanillaItem = getVivecraftVanillaItem(jsonObject, GsonHelper.getAsString(jsonObject, "item"));
             cir.setReturnValue(customizeVanillaItemStack(jsonObject, vanillaItem));
         }
     }
-    @Group(name = "item to custom itemStack", min = 1, max = 1)
-    @Inject(method = "m_151274_", at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
-    private static void customizeVanillaItemStackForge(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir){
-        if (GsonHelper.getAsString(jsonObject, "item").startsWith("vivecraft")) {
-            Item vanillaItem = getVivecraftVanillaItem(jsonObject, GsonHelper.getAsString(jsonObject, "item"));
-            cir.setReturnValue(customizeVanillaItemStack(jsonObject, vanillaItem));
-        }
-    }
+
     private static ItemStack customizeVanillaItemStack(JsonObject jsonObject, Item vanillaItem){
         if (jsonObject.has("data")) {
             throw new JsonParseException("Disallowed data tag found");
