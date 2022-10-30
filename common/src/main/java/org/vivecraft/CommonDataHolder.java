@@ -10,7 +10,7 @@ public class CommonDataHolder {
         String mcVersion = "";
         String modVersion = "";
         if (Xplat.isModLoadedSuccess()) {
-            String[] version = Xplat.getModVersion().split("-");
+            String[] version = Xplat.getModVersion().split("-", 2);
             mcVersion = version[0];
             modVersion = version[1];
         }
