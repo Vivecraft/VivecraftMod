@@ -12,6 +12,11 @@
   "license": "CC0-1.0",
 
   "environment": "*",
+  "entrypoints": {
+    "client": [
+      "org.vivecraft.fabric.TitleWorlds"
+    ]
+  },
   "mixins": [
     "vivecraft.vr.mixins.json",
     "vivecraft.nonvr.mixins.json",
