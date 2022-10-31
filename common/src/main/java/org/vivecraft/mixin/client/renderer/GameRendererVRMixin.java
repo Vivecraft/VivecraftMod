@@ -1339,7 +1339,7 @@ public abstract class GameRendererVRMixin
 					poseStack.setIdentity();
 					RenderSystem.applyModelViewMatrix();
 
-					if (Minecraft.getInstance().screen instanceof TitleScreen && Minecraft.getInstance().level == null) {
+					if (flag && !TitleWorldsMod.state.isTitleWorld) {
 						pMatrix.pushPose();
 						Vec3 eye = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render
 								.getEye(GameRendererVRMixin.DATA_HOLDER.currentPass).getPosition();

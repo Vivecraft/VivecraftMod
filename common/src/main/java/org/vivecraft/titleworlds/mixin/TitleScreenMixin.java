@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelStorageException;
+import org.vivecraft.ClientDataHolder;
 import org.vivecraft.titleworlds.TitleWorldsMod;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -29,6 +30,9 @@ public class TitleScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("HEAD"))
     void checkLevelStorage(CallbackInfo ci) {
+        if (!ClientDataHolder.getInstance().vrSettings.menuWorldSelection) {
+            return;
+        }
         if (TitleWorldsMod.state.isTitleWorld) {
             this.noLevels = false;
         } else {

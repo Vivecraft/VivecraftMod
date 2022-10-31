@@ -29,6 +29,8 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.storage.*;
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.settings.VRSettings;
 import org.vivecraft.titleworlds.TitleWorldsMod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -228,7 +230,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
                                 Function<LevelStorageSource.LevelStorageAccess, WorldStem.WorldDataSupplier> worldDataSupplier
     ) throws ExecutionException, InterruptedException {
         LOGGER.info("Loading title world");
-        TitleWorldsMod.state.isTitleWorld = true;
+        TitleWorldsMod.state.isTitleWorld = ClientDataHolder.getInstance().vrSettings.menuWorldSelection;
         TitleWorldsMod.state.pause = false;
 
         var worldResourcesFuture
