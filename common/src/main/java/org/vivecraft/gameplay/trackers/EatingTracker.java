@@ -60,7 +60,7 @@ public class EatingTracker extends Tracker
             {
                 UseAnim useanim = p.getMainHandItem().getUseAnimation();
 
-                if (useanim == UseAnim.EAT || useanim == UseAnim.DRINK)
+                if (useanim == UseAnim.EAT || useanim == UseAnim.DRINK || useanim == UseAnim.TOOT_HORN)
                 {
                     return true;
                 }
@@ -70,7 +70,7 @@ public class EatingTracker extends Tracker
             {
                 UseAnim useanim1 = p.getOffhandItem().getUseAnimation();
 
-                if (useanim1 == UseAnim.EAT || useanim1 == UseAnim.DRINK)
+                if (useanim1 == UseAnim.EAT || useanim1 == UseAnim.DRINK || useanim1 == UseAnim.TOOT_HORN)
                 {
                     return true;
                 }
@@ -107,6 +107,9 @@ public class EatingTracker extends Tracker
                 }
                 else if (itemstack.getUseAnimation() == UseAnim.EAT) {
                     crunchiness = 2;
+                }
+                else if (itemstack.getUseAnimation() == UseAnim.TOOT_HORN) {
+                    crunchiness = 1;
                 }
                 else {
                     continue;

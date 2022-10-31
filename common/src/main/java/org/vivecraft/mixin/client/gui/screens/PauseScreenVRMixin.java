@@ -1,5 +1,7 @@
 package org.vivecraft.mixin.client.gui.screens;
 
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -29,7 +31,7 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
 
-    @Inject(at =  @At("TAIL"), method = "init")
+    @Inject(at =  @At("TAIL"), method = "createPauseMenu")
     public void addInit(CallbackInfo ci) {
         if (!Minecraft.getInstance().isMultiplayerServer()) {
             this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, Component.translatable("vivecraft.gui.chat"), (p) ->
@@ -100,20 +102,38 @@ public abstract class PauseScreenVRMixin extends Screen {
                 }
             }));
         }
+
+        // move every button up a bit
+        if (!ClientDataHolder.getInstance().vrSettings.seated || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
+            for (Widget widget: this.renderables) {
+                ((AbstractWidget)widget).y -= 24;
+    }
+        }
+    }
+
+    @ModifyConstant(method = "render", constant = @Constant(intValue = 40))
+    private int moveTitleUp(int constant) {
+        return (!ClientDataHolder.getInstance().vrSettings.seated || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) ? 16 : 40;
     }
 
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 3))
     private GuiEventListener remove(PauseScreen instance, GuiEventListener guiEventListener) {
-        return null;
+        // Feedback button
+        // don't remove, just hide, so mods that rely on it being there, still work
+        ((AbstractWidget)guiEventListener).visible = false;
+        return this.addRenderableWidget((Button)guiEventListener);
     }
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 4))
     private GuiEventListener remove2(PauseScreen instance, GuiEventListener guiEventListener) {
-        return null;
+        // report bugs button
+        // don't remove, just hide, so mods that rely on it being there, still work
+        ((AbstractWidget)guiEventListener).visible = false;
+        return this.addRenderableWidget((Button)guiEventListener);
     }
     @Redirect(method = "createPauseMenu", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/Button;active:Z"))
     private void remove3(Button instance, boolean value) {}
     @ModifyConstant(method = "createPauseMenu", constant = @Constant(intValue = 120), remap = false)
     private int moveDown(int constant) {
-        return 168;
+        return (!ClientDataHolder.getInstance().vrSettings.seated || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) ? 168 : 144;
     }
 }

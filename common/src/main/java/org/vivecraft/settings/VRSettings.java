@@ -96,7 +96,8 @@ public class VRSettings
         DUAL,
         FIRST_PERSON,
         THIRD_PERSON,
-        MIXED_REALITY
+        MIXED_REALITY,
+        GUI
     }
 
     public enum HUDLock implements OptionEnum<HUDLock> {
@@ -276,6 +277,8 @@ public class VRSettings
     //Rendering
     @SettingField(VrOptions.FSAA)
     public boolean useFsaa = false;   // default to off
+    @SettingField(VrOptions.LOW_HEALTH_INDICATOR)
+    public boolean low_health_indicator = true;   // default to on
     @SettingField(value = VrOptions.FOV_REDUCTION, config = "fovReduction")
     public boolean useFOVReduction = false;   // default to off
     @SettingField(VrOptions.FOV_REDUCTION_OFFSET)
@@ -1089,6 +1092,7 @@ public class VRSettings
         SHADER_GUI_RENDER(false, true),
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
+        LOW_HEALTH_INDICATOR(false, true), // red low health pulse
         MIRROR_DISPLAY(false, true) { // Desktop Mirror
             @Override
             Object convertOption(String value) {
@@ -1465,31 +1469,10 @@ public class VRSettings
             }
         },
         HRTF_SELECTION(false, false) { // HRTF
-            @Override
-            String getDisplayString(String prefix, Object value) {
-                int i = (int)value;
-                if (i == -1)
-                    return prefix + I18n.get("options.off");
-                else if (i == 0)
-                    return prefix + I18n.get("vivecraft.options.default");
-                else if (i <= ClientDataHolder.hrtfList.size())
-                    return prefix + ClientDataHolder.hrtfList.get(i - 1);
-                return prefix;
-            }
-
+            // this is now handled by vanilla
             @Override
             Object setOptionValue(Object value) {
-                int i = (int)value;
-                if (++i > ClientDataHolder.hrtfList.size())
-                    i = -1;
-                return i;
-            }
-
-            @Override
-            void onOptionChange() {
-                // Reload the sound engine to get the new HRTF
-                SoundEngine eng = Minecraft.getInstance().getSoundManager().soundEngine;
-                eng.reload();
+                return value;
             }
         },
         RELOAD_EXTERNAL_CAMERA(false, false) { // Reload External Camera

@@ -88,6 +88,10 @@ public class VivecraftItemRendering
                     }
                 }
             }
+            else if (pStack.getUseAnimation() == UseAnim.TOOT_HORN)
+            {
+                rendertype = VivecraftItemTransformType.Horn;
+            }
             else if (item instanceof SwordItem || pStack.is(ItemTags.VIVECRAFT_SWORDS))
             {
                 rendertype = VivecraftItemTransformType.Sword;
@@ -293,6 +297,15 @@ public class VivecraftItemRendering
                 rotation.mul(Vector3f.XP.rotationDegrees(-45.0F));
                 rotation.mul(Vector3f.XP.rotationDegrees((float)gunAngle));
             }
+            else if (rendertype == VivecraftItemTransformType.Horn)
+            {
+                scale = (double)0.3F;
+                rotation = Vector3f.XP.rotationDegrees(0.0F);
+                translateY += -0.105D + 0.06D * gunAngle / 40.0D;
+                translateZ += (double) - 0.1F;
+                rotation.mul(Vector3f.XP.rotationDegrees(-45.0F));
+                rotation.mul(Vector3f.XP.rotationDegrees((float)gunAngle));
+            }
             else if (rendertype == VivecraftItemTransformType.Shield)
             {
 				boolean reverse = dh.vrSettings.reverseHands && !dh.vrSettings.seated;
@@ -480,7 +493,8 @@ public class VivecraftItemRendering
     Noms,
     Crossbow,
     Telescope,
-    Compass;
+    Compass,
+    Horn
 }
 	
 }

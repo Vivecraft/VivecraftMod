@@ -3,6 +3,8 @@ package org.vivecraft.gameplay.trackers;
 import java.nio.ByteBuffer;
 
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.PehkuiHelper;
+import org.vivecraft.Xplat;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
 import org.vivecraft.api.ClientNetworkHelper;
@@ -157,10 +159,16 @@ public class BowTracker extends Tracker
             this.lastDraw = this.currentDraw;
             this.lastcanDraw = this.canDraw;
             this.maxDraw = (double)this.mc.player.getBbHeight() * 0.22D;
+
+            if (Xplat.isModLoaded("pehkui")) {
+                // this is meant to be relative to the base Bb height, not the scaled one
+                this.maxDraw /= PehkuiHelper.getPlayerBbScale(player, mc.getFrameTime());
+            }
+
             Vec3 vec3 = vrdata.getController(0).getPosition();
             Vec3 vec31 = vrdata.getController(1).getPosition();
             this.controllersDist = vec31.distanceTo(vec3);
-            Vec3 vec32 = new Vec3(0.0D, 1.0D, 0.0D);
+            Vec3 vec32 = new Vec3(0.0D, 1.0D * vrdata.worldScale, 0.0D);
             Vec3 vec33 = vrdata.getHand(1).getCustomVector(vec32).scale(this.maxDraw * 0.5D).add(vec31);
             double d0 = vec3.distanceTo(vec33);
             this.aim = vec3.subtract(vec31).normalize();
@@ -170,7 +178,7 @@ public class BowTracker extends Tracker
             Vector3 vector31 = new Vector3((float)vec35.x, (float)vec35.y, (float)vec35.z);
             this.controllersDot = (180D / Math.PI) * Math.acos((double)vector31.dot(vector3));
             this.pressed = this.mc.options.keyAttack.isDown();
-            float f = (float)(0.15D * (double)vrdata.worldScale);
+            float f = 0.15F * vrdata.worldScale;
             boolean flag = isHoldingBow(player, InteractionHand.MAIN_HAND);
             InteractionHand interactionhand = flag ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
             ItemStack itemstack = ItemStack.EMPTY;
@@ -250,7 +258,7 @@ public class BowTracker extends Tracker
 
             if (this.isDrawing)
             {
-                this.currentDraw = this.controllersDist - (double)f;
+                this.currentDraw = (this.controllersDist - (double)f) / vrdata.worldScale;
 
                 if (this.currentDraw > this.maxDraw)
                 {

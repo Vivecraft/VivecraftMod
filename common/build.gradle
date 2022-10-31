@@ -12,32 +12,32 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     modCompileOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
-    modCompileOnly "maven.modrinth:iris:1.19.x-v1.3.1"
-    modCompileOnly "maven.modrinth:lithium:mc1.18.2-0.7.10"
-    modCompileOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
-    modCompileOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-731"
-    modCompileOnly "maven.modrinth:roughly-enough-items:9.1.537+fabric"
+    modCompileOnly "maven.modrinth:iris:1.19.x-v1.4.0"
+    modCompileOnly "maven.modrinth:lithium:mc1.19.2-0.10.0"
+    modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
+    modCompileOnly "maven.modrinth:roughly-enough-items:9.1.555+fabric"
 
-    modCompileOnly("maven.modrinth:rubidium:0.5.3a")
+    modCompileOnly("maven.modrinth:rubidium:0.6.1")
 
-    modCompileOnly("io.github.fabricators_of_create:Porting-Lib:1.2.460-beta+1.18.2-dev.cca931b") //temp create
-    modCompileOnly("me.alphamode:ForgeTags:2.1") //temp create
-    modCompileOnly("com.electronwill.night-config:core:3.6.3") //temp create
-    modCompileOnly("com.electronwill.night-config:toml:3.6.3") //temp create
-    modCompileOnly("curse.maven:forge-config-api-port-fabric-547434:3671141") //temp create
-    modCompileOnly("com.tterrag.registrate_fabric:Registrate:MC1.18.2-1.1.4") //temp create
-    modCompileOnly("com.jozufozu.flywheel:flywheel-fabric-1.18.2:0.6.4-30") //temp create
-    modCompileOnly("com.jamieswhiteshirt:reach-entity-attributes:2.1.1") //temp create
-    modCompileOnly("dev.cafeteria:fake-player-api:0.3.0") //temp create
-    modCompileOnly("io.github.tropheusj:milk-lib:0.3.2") //temp create
-    modCompileOnly("me.luligabi:NoIndium:1.0.1+1.18.2") //temp create
-    compileOnly("com.google.code.findbugs:jsr305:3.0.2") //temp create
-    modCompileOnly("com.github.AlphaMode:fakeconfig:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") } //temp create
-    modCompileOnly("com.github.AlphaMode:fakeconfigtoml:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") } //temp create
+//    modCompileOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-731"
+//    modCompileOnly("io.github.fabricators_of_create:Porting-Lib:1.2.460-beta+1.18.2-dev.cca931b") //temp create
+//    modCompileOnly("me.alphamode:ForgeTags:2.1") //temp create
+//    modCompileOnly("com.electronwill.night-config:core:3.6.3") //temp create
+//    modCompileOnly("com.electronwill.night-config:toml:3.6.3") //temp create
+//    modCompileOnly("curse.maven:forge-config-api-port-fabric-547434:3671141") //temp create
+//    modCompileOnly("com.tterrag.registrate_fabric:Registrate:MC1.18.2-1.1.4") //temp create
+//    modCompileOnly("com.jozufozu.flywheel:flywheel-fabric-1.18.2:0.6.4-30") //temp create
+//    modCompileOnly("com.jamieswhiteshirt:reach-entity-attributes:2.1.1") //temp create
+//    modCompileOnly("dev.cafeteria:fake-player-api:0.3.0") //temp create
+//    modCompileOnly("io.github.tropheusj:milk-lib:0.3.2") //temp create
+//    modCompileOnly("me.luligabi:NoIndium:1.0.1+1.18.2") //temp create
+//    compileOnly("com.google.code.findbugs:jsr305:3.0.2") //temp create
+//    modCompileOnly("com.github.AlphaMode:fakeconfig:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") } //temp create
+//    modCompileOnly("com.github.AlphaMode:fakeconfigtoml:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") } //temp create
 
     modCompileOnly("com.github.qouteall:GravityChanger:v0.3.1") { transitive = false } //temp immersiveportals
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:6.2.57") { exclude(group: "net.fabricmc.fabric-api")} //temp immersiveportals
-    modCompileOnly("com.github.Virtuoel:Pehkui:3.3.3", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
+    modCompileOnly("com.github.Virtuoel:Pehkui:3.5.0", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
     modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.9-1.18'){ //temp immersiveportals
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
@@ -54,6 +54,7 @@ dependencies {
     modCompileOnly 'org.joml:joml:1.10.4'//temp sodium
 
     modCompileOnly 'org.anarres:jcpp:1.4.14'//temp iris
+    modCompileOnly 'io.github.douira:glsl-transformer:1.0.1'//temp iris
 
     modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
     modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium

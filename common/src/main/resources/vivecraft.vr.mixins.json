@@ -19,6 +19,7 @@
     "client.MouseHandlerVRMixin",
     "client.OptionsVRMixin",
     "client.gui.GuiVRMixin",
+    "client.gui.GuiComponentVRMixin",
     "client.gui.NoSodiumGuiVRMixin",
     "client.gui.components.EditBoxVRMixin",
     "client.gui.screens.ScreenVRMixin",
@@ -31,6 +32,7 @@
     "client.gui.screens.SoundOptionsScreenVRMixin",
     "client.multiplayer.ClientPacketListenerVRMixin",
     "client.multiplayer.MultiPlayerGameModeVRMixin",
+    "client.particle.ItemPickupParticleVRMixin",
     "client.player.LocalPlayerVRMixin",
     "client.renderer.GameRendererVRMixin",
     "client.renderer.LevelRendererVRMixin",
@@ -40,9 +42,12 @@
     "client.renderer.entity.FishingHookRendererVRMixin",
     "client.renderer.entity.GuardianRendererVRMixin",
     "client.renderer.entity.MobRendererVRMixin",
+    "client.renderer.item.ItemPropertiesVRMixin",
     "client.renderer.NoSodiumLevelRendererVRMixin",
 
-    "world.entity.vehicle.BoatMixin"
+    "world.entity.vehicle.BoatMixin",
+    "world.item.ItemVRMixin",
+    "world.item.PotionItemVRMixin"
   ],
   "server": [
   ],
