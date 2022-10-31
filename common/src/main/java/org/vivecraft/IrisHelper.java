@@ -32,4 +32,8 @@ public class IrisHelper {
     public static boolean hasWaterEffect() {
         return Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderUnderwaterOverlay).orElse(true);
     }
+
+    public static boolean isShaderActive(){
+        return IrisApi.getInstance().isShaderPackInUse();
+    }
 }

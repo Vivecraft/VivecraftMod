@@ -13,6 +13,6 @@ public class ItemsMixin {
 
     @Inject(at = @At("HEAD"), method = "<clinit>")
     private static void addCrafting(CallbackInfo ci) {
-        //RecipeSerializer.register("vivecraft:vivecraft_crafting", VivecraftCrafting.SERIALIZER);
+        RecipeSerializer.register("vivecraft:vivecraft_crafting", VivecraftCrafting.SERIALIZER);
     }
 }

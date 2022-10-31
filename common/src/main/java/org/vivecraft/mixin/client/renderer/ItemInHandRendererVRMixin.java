@@ -236,8 +236,20 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 		}
 
 		poseStack.scale(0.4f, 0.4F, 0.4F);
-		boolean slim = abstractclientplayer.getSkinTextureLocation().getPath().equals("slim");
-		poseStack.translate(slim ? 0.345F * -h : 0.375F * -h, 0, slim ? 0.785F : 0.75F);
+		boolean slim = abstractclientplayer.getModelName().equals("slim");
+
+            /*
+             x offset: (arm x origin + arm x offset + arm x dimension * 0.5) / 16
+             z offset: (arm y origin + arm y offset + arm y dimension) / 16
+             slim
+             x offset: (5 + -1 + 3*0.5) / 16 = 0.34375
+             z offset: (-2 + 2.5 + 12) / 16 = 0.78125
+             regular
+             x offset: (5 - 1 + 4*0.5) / 16 = 0.375
+             z offset: (-2 + 2 + 12) / 16 = 0.75
+            */
+
+		poseStack.translate((slim ? -0.34375F : -0.375F) * h, 0.0F, slim ? 0.78125F : 0.75F);
 		poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(180));
 		if (flag) {

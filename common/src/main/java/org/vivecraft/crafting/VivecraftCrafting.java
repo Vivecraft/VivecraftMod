@@ -177,5 +177,20 @@ public class VivecraftCrafting extends ShapedRecipe {
             }
             friendlyByteBuf.writeItem(recipe.getResultItem());
         }
+
+        //Forge
+        private ResourceLocation name = null;
+        public Object setRegistryName(ResourceLocation arg){
+            name = arg;
+            return this;
+        }
+
+        public ResourceLocation getRegistryName(){
+            return name;
+        }
+
+        public Class<Serializer> getRegistryType(){
+            return Serializer.class;
+        }
     }
 }

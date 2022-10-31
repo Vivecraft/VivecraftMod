@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client.player;
 
+import net.minecraft.world.level.Level;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.ItemInHandRendererExtension;
@@ -364,6 +365,17 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		}
 		this.autoJumpTime = 1;
 		ci.cancel();
+	}
+
+	@Override
+	public ItemStack eat(Level level, ItemStack itemStack)
+	{
+		if (itemStack.isEdible() && ((LocalPlayer)(Object)this) == Minecraft.getInstance().player && itemStack.getHoverName().getString().equals("EAT ME"))
+		{
+			ClientDataHolder.getInstance().vrPlayer.wfMode = 0.5D;
+			ClientDataHolder.getInstance().vrPlayer.wfCount = 400;
+		}
+		return super.eat(level, itemStack);
 	}
 
 	@Shadow

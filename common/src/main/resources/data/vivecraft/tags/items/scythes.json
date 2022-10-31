@@ -1,0 +1,68 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#forge:tools/scythe",
+      "required": false
+    },
+
+    {
+      "id": "tconstruct:scythe",
+      "required": false
+    },
+    {
+      "id": "tconstruct:kama",
+      "required": false
+    },
+
+    {
+      "id": "harvest_scythes:wooden_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:stone_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:iron_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:golden_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:diamond_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:netherite_scythe",
+      "required": false
+    },
+    {
+      "id": "harvest_scythes:creative_scythe",
+      "required": false
+    },
+
+    {
+      "id": "scythes:diamond_scythe",
+      "required": false
+    },
+    {
+      "id": "scythes:gold_scythe",
+      "required": false
+    },
+    {
+      "id": "scythes:iron_scythe",
+      "required": false
+    },
+    {
+      "id": "scythes:netherite_scythe",
+      "required": false
+    },
+    {
+      "id": "scythes:wood_scythe",
+      "required": false
+    }
+  ]
+}

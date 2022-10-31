@@ -2,7 +2,11 @@ package org.vivecraft.gameplay.trackers;
 
 import java.util.List;
 
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.*;
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.BlockTags;
+import org.vivecraft.api.ItemTags;
 import org.vivecraft.api.Vec3History;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.settings.VRSettings;
@@ -27,9 +31,6 @@ import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.LadderBlock;
-import net.minecraft.world.level.block.NoteBlock;
-import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -119,7 +120,7 @@ public class SwingTracker extends Tracker
 
     public static boolean isTool(Item item)
     {
-        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof HoeItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem;
+        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem || item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
     }
 
     public void doProcess(LocalPlayer player)
@@ -144,7 +145,7 @@ public class SwingTracker extends Tracker
                 boolean flag = false;
                 boolean flag1 = false;
 
-                if (!(item instanceof SwordItem) && !(item instanceof TridentItem))
+                if (!(item instanceof SwordItem || itemstack.is(ItemTags.VIVECRAFT_SWORDS)) && !(item instanceof TridentItem || itemstack.is(ItemTags.VIVECRAFT_SPEARS)))
                 {
                     if (isTool(item))
                     {
@@ -247,18 +248,29 @@ public class SwingTracker extends Tracker
                     {
                         this.lastWeaponSolid[i] = true;
                         boolean flag4 = blockhitresult1.getBlockPos().equals(blockpos);
-                        boolean flag5 = this.dh.vrSettings.realisticClimbEnabled && (blockstate.getBlock() instanceof LadderBlock || blockstate.getBlock() instanceof VineBlock);
+                        boolean flag5 = this.dh.vrSettings.realisticClimbEnabled && (blockstate.getBlock() instanceof LadderBlock || blockstate.getBlock() instanceof VineBlock || blockstate.is(BlockTags.VIVECRAFT_CLIMBABLE));
 
                         if (blockhitresult1.getType() == HitResult.Type.BLOCK && flag4 && this.canact[i] && !flag5)
                         {
                             int j = 3;
 
-                            if (item instanceof HoeItem)
+                            if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES) || itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) && (
+                                blockstate.getBlock() instanceof CropBlock
+                                || blockstate.getBlock() instanceof StemBlock
+                                || blockstate.getBlock() instanceof AttachedStemBlock
+                                || blockstate.is(BlockTags.VIVECRAFT_CROPS)
+                                // check if the item can use the block
+                                || item.useOn(new UseOnContext(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1)).shouldSwing()))
                             {
-                                //this.mc.physicalGuiManager.preClickAction();
-                                this.mc.gameMode.useItemOn(player, (ClientLevel)player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1);
+                                // don't try to break crops with hoes
+                                // actually use the item on the block
+                                boolean useSuccessful = this.mc.gameMode.useItemOn(player, (ClientLevel)player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing();
+                                if (itemstack.is(ItemTags.VIVECRAFT_SCYTHES) && !useSuccessful) {
+                                    // some scythes just need to be used
+                                    this.mc.gameMode.useItem(player, player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+                                }
                             }
-                            else if (blockstate.getBlock() instanceof NoteBlock)
+                            else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS))
                             {
                                 this.mc.gameMode.continueDestroyBlock(blockhitresult1.getBlockPos(), blockhitresult1.getDirection());
                             }

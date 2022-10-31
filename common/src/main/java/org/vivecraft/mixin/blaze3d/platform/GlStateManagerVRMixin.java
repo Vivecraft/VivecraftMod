@@ -33,7 +33,7 @@ public class GlStateManagerVRMixin {
     @Overwrite
     public static void _blendFuncSeparate(int i, int j, int k, int l) {
         RenderSystem.assertOnRenderThread();
-        if (j == GlStateManager.SourceFactor.SRC_ALPHA.value && j == GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value && k == GlStateManager.SourceFactor.ONE.value && l == GlStateManager.DestFactor.ZERO.value) {
+        if (i == GlStateManager.SourceFactor.SRC_ALPHA.value && j == GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value && k == GlStateManager.SourceFactor.ONE.value && l == GlStateManager.DestFactor.ZERO.value) {
             l = GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value;
         }
         if (i != BLEND.srcRgb || j != BLEND.dstRgb || k != BLEND.srcAlpha || l != BLEND.dstAlpha) {

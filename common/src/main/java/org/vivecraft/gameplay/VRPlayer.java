@@ -24,6 +24,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.PehkuiHelper;
+import org.vivecraft.Xplat;
+import org.vivecraft.api.ItemTags;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.PlayerExtension;
 import org.vivecraft.api.ClientNetworkHelper;
@@ -50,6 +53,7 @@ public class VRPlayer
     private long errorPrintTime = Util.getMillis();
     ArrayList<Tracker> trackers = new ArrayList<>();
     public float worldScale = ClientDataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
+    private float rawWorldScale = ClientDataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean noTeleportClient = true;
     private boolean teleportOverride = false;
     public int teleportWarningTimer = -1;
@@ -116,46 +120,46 @@ public class VRPlayer
         {
             this.worldScale = 1.0F;
         }
-        else if (this.wfCount > 0 && !this.mc.isPaused())
-        {
-            if (this.wfCount < 40)
-            {
-                this.worldScale = (float)((double)this.worldScale - this.wfMode);
+        else {
+            if (this.wfCount > 0 && !this.mc.isPaused()) {
+                if (this.wfCount < 40) {
+                    this.rawWorldScale = (float) ((double) this.rawWorldScale - this.wfMode);
 
-                if (this.wfMode > 0.0D)
-                {
-                    if (this.worldScale < f)
-                    {
-                        this.worldScale = f;
+                    if (this.wfMode > 0.0D) {
+                        if (this.rawWorldScale < f) {
+                            this.rawWorldScale = f;
+                        }
+                    } else if (this.wfMode < 0.0D && this.rawWorldScale > f) {
+                        this.rawWorldScale = f;
+                    }
+                } else {
+                    this.rawWorldScale = (float) ((double) this.rawWorldScale + this.wfMode);
+
+                    if (this.wfMode > 0.0D) {
+                        if (this.rawWorldScale > 20.0F) {
+                            this.rawWorldScale = 20.0F;
+                        }
+                    } else if (this.wfMode < 0.0D && this.rawWorldScale < 0.1F) {
+                        this.rawWorldScale = 0.1F;
                     }
                 }
-                else if (this.wfMode < 0.0D && this.worldScale > f)
-                {
-                    this.worldScale = f;
-                }
-            }
-            else
-            {
-                this.worldScale = (float)((double)this.worldScale + this.wfMode);
 
-                if (this.wfMode > 0.0D)
-                {
-                    if (this.worldScale > 20.0F)
-                    {
-                        this.worldScale = 20.0F;
-                    }
-                }
-                else if (this.wfMode < 0.0D && this.worldScale < 0.1F)
-                {
-                    this.worldScale = 0.1F;
-                }
+                --this.wfCount;
+            } else {
+                this.rawWorldScale = f;
             }
 
-            --this.wfCount;
-        }
-        else
-        {
-            this.worldScale = f;
+            this.worldScale = rawWorldScale;
+
+            if (Xplat.isModLoaded("pehkui")) {
+                // scale world with player size
+                this.worldScale *= PehkuiHelper.getPlayerScale(mc.player, mc.getFrameTime());
+                // limit scale
+                if (this.worldScale > 100F)
+                    this.worldScale = 100F;
+                else if (this.worldScale < 0.025F) //minClip + player position indicator offset
+                    this.worldScale = 0.025F;
+            }
         }
 
         if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).isInMenuRoom())
@@ -533,7 +537,7 @@ public class VRPlayer
         {
             itemstack = c == 0 ? entity.getMainHandItem() : entity.getOffhandItem();
 
-            if (!(itemstack.getItem() instanceof SnowballItem) && !(itemstack.getItem() instanceof EggItem) && !(itemstack.getItem() instanceof SpawnEggItem) && !(itemstack.getItem() instanceof PotionItem) && !(itemstack.getItem() instanceof BowItem))
+            if (!(itemstack.getItem() instanceof SnowballItem) && !(itemstack.getItem() instanceof EggItem) && !(itemstack.getItem() instanceof SpawnEggItem) && !(itemstack.getItem() instanceof PotionItem) && !(itemstack.getItem() instanceof BowItem) && !itemstack.is(ItemTags.VIVECRAFT_THROW_ITEMS))
             {
                 if (!(itemstack.getItem() instanceof CrossbowItem))
                 {

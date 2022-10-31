@@ -1,6 +1,7 @@
 package org.vivecraft.gameplay.trackers;
 
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ItemTags;
 import org.vivecraft.api.VRData;
 import org.vivecraft.render.RenderPass;
 
@@ -37,7 +38,7 @@ public class TelescopeTracker extends Tracker
 
     public static boolean isTelescope(ItemStack i)
     {
-        return i.getItem() == Items.SPYGLASS || isLegacyTelescope(i);
+        return i.getItem() == Items.SPYGLASS || isLegacyTelescope(i) || i.is(ItemTags.VIVECRAFT_TELESCOPE);
     }
 
     // TODO: old eye of the farseer, remove this eventually

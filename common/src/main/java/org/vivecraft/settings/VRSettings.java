@@ -5,6 +5,8 @@
 package org.vivecraft.settings;
 
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.IrisHelper;
+import org.vivecraft.Xplat;
 import org.vivecraft.extensions.OptionsExtension;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -94,7 +96,8 @@ public class VRSettings
         DUAL,
         FIRST_PERSON,
         THIRD_PERSON,
-        MIXED_REALITY
+        MIXED_REALITY,
+        GUI
     }
 
     public enum HUDLock implements OptionEnum<HUDLock> {
@@ -128,6 +131,12 @@ public class VRSettings
     	SLOW,
     	SLOWER,
     	SLOWEST
+    }
+
+    public enum ShaderGUIRender implements OptionEnum<ShaderGUIRender> {
+        BEFORE_TRANSLUCENT_SOLID,
+        AFTER_TRANSLUCENT,
+        AFTER_SHADER
     }
     
     @SettingField
@@ -268,6 +277,8 @@ public class VRSettings
     //Rendering
     @SettingField(VrOptions.FSAA)
     public boolean useFsaa = false;   // default to off
+    @SettingField(VrOptions.LOW_HEALTH_INDICATOR)
+    public boolean low_health_indicator = true;   // default to on
     @SettingField(value = VrOptions.FOV_REDUCTION, config = "fovReduction")
     public boolean useFOVReduction = false;   // default to off
     @SettingField(VrOptions.FOV_REDUCTION_OFFSET)
@@ -386,6 +397,8 @@ public class VRSettings
     public String chatNotificationSound = "block.note_block.bell";
     @SettingField(VrOptions.GUI_APPEAR_OVER_BLOCK)
     public boolean guiAppearOverBlock = true;
+    @SettingField(VrOptions.SHADER_GUI_RENDER)
+    public ShaderGUIRender shaderGUIRender = ShaderGUIRender.AFTER_SHADER;
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
@@ -1076,8 +1089,10 @@ public class VRSettings
         },
         PHYSICAL_KEYBOARD_THEME(false, false), // Keyboard Theme
         GUI_APPEAR_OVER_BLOCK(false, true), // Appear Over Block
+        SHADER_GUI_RENDER(false, true),
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
+        LOW_HEALTH_INDICATOR(false, true), // red low health pulse
         MIRROR_DISPLAY(false, true) { // Desktop Mirror
             @Override
             Object convertOption(String value) {
@@ -1098,7 +1113,9 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-            	ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
+                if (!((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                    ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
+                }
             }
 
             @Override

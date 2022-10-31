@@ -12,7 +12,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     modCompileOnly "maven.modrinth:sodium:mc1.18.2-0.4.1"
-    modCompileOnly "maven.modrinth:iris:1.18.x-v1.2.6"
+    modCompileOnly "maven.modrinth:iris:1.18.x-v1.3.1"
     modCompileOnly "maven.modrinth:lithium:mc1.18.2-0.7.10"
     modCompileOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
     modCompileOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-731"
