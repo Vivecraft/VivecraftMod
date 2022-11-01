@@ -37,6 +37,7 @@ import org.vivecraft.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.settings.VRSettings;
 import org.vivecraft.gameplay.trackers.Tracker;
 import org.vivecraft.gameplay.trackers.VehicleTracker;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -690,6 +691,9 @@ public class VRPlayer
 
     private void updateTeleportKeys()
     {
+        if (TitleWorldsMod.state.isTitleWorld) {
+            return;
+        }
         this.dh.vr.getInputAction(this.dh.vr.keyTeleport).setEnabled(this.isTeleportEnabled());
         this.dh.vr.getInputAction(this.dh.vr.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
     }

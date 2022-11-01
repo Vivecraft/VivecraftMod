@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.event.ForgeEventFactory;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 
 public class XeventsImpl {
 
@@ -24,10 +25,16 @@ public class XeventsImpl {
     }
 
     public static void onRenderTickStart(float f) {
+        if (TitleWorldsMod.state.isTitleWorld)  {
+            return;
+        }
         ForgeEventFactory.onRenderTickStart(f);
     }
 
     public static void onRenderTickEnd(float f) {
+        if (TitleWorldsMod.state.isTitleWorld)  {
+            return;
+        }
         ForgeEventFactory.onRenderTickEnd(f);
     }
 

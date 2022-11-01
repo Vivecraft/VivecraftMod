@@ -55,7 +55,7 @@ public class TitleScreenMixin extends Screen {
         }
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/gui/screens/TitleScreen;drawString(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/gui/Font;Ljava/lang/String;III)V"))
+    //@Inject(method = "render", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/client/gui/screens/TitleScreen;drawString(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/gui/Font;Ljava/lang/String;III)V"))
     void render(PoseStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (this.noLevels) {
             GuiComponent.drawCenteredString(matrices, font, "Put one or more worlds in the titleworlds folder and restart the game", this.width / 2, 2, 16777215);
