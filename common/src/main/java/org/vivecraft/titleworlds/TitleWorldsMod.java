@@ -26,6 +26,8 @@ public class TitleWorldsMod {
     public static class State {
         public boolean isTitleWorld = false;
 
+        public boolean finishedLoading = false;
+
         public boolean pause = false;
         public boolean noSave = true;
     }

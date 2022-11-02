@@ -1339,7 +1339,7 @@ public abstract class GameRendererVRMixin
 					poseStack.setIdentity();
 					RenderSystem.applyModelViewMatrix();
 
-					if (flag && !TitleWorldsMod.state.isTitleWorld) {
+					if (flag && (!TitleWorldsMod.state.isTitleWorld || !TitleWorldsMod.state.finishedLoading)) {
 						pMatrix.pushPose();
 						Vec3 eye = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render
 								.getEye(GameRendererVRMixin.DATA_HOLDER.currentPass).getPosition();

@@ -16,7 +16,6 @@ public abstract class OptionsVRMixin {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;load()V"))
     void processOptionsMixin(Options instance) {
-        TitleWorldsMod.onInitializeClient();
         this.keyMappings = ClientDataHolder.getInstance().vr.initializeBindings(this.keyMappings);
         instance.load();
     }

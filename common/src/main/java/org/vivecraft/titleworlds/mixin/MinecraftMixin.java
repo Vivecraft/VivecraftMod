@@ -30,7 +30,6 @@ import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.storage.*;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.settings.VRSettings;
 import org.vivecraft.titleworlds.TitleWorldsMod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +41,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import oshi.util.tuples.Pair;
+import org.vivecraft.titleworlds.extensions.MinecraftTitleworldExtension;
 import oshi.util.tuples.Triplet;
 
 import java.io.File;
@@ -59,7 +58,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnable> {
+public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnable> implements MinecraftTitleworldExtension {
 
     @Shadow
     @Nullable
@@ -191,11 +190,6 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         }
     }
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    void init(GameConfig gameConfig, CallbackInfo ci) {
-        tryLoadTitleWorld();
-    }
-
     @Unique
     private static final Random random = new Random();
 
@@ -234,7 +228,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         TitleWorldsMod.state.pause = false;
 
         var worldResourcesFuture
-                = CompletableFuture.supplyAsync(() -> openWorldResources(levelName, dataPackConfigSupplier, worldDataSupplier, false));
+                = CompletableFuture.supplyAsync(() -> openWorldResources(levelName, dataPackConfigSupplier, worldDataSupplier, false), Util.backgroundExecutor());
 
         activeLoadingFuture = worldResourcesFuture;
         cleanup = () -> {
@@ -286,7 +280,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         this.progressListener.set(null);
 
         LOGGER.info("Starting server");
-        activeLoadingFuture = CompletableFuture.runAsync(() -> startSingleplayerServer(levelName, levelStorageAccess, worldStem, packRepository));
+        activeLoadingFuture = CompletableFuture.runAsync(() -> startSingleplayerServer(levelName, levelStorageAccess, worldStem, packRepository), Util.backgroundExecutor());
         cleanup = null;
 
         while (singleplayerServer == null || !this.singleplayerServer.isReady()) {
@@ -298,7 +292,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         }
 
         LOGGER.info("Joining singleplayer server");
-        var joinServerFuture = CompletableFuture.runAsync(this::joinSingleplayerServer);
+        var joinServerFuture = CompletableFuture.runAsync(this::joinSingleplayerServer, Util.backgroundExecutor());
 
         activeLoadingFuture = joinServerFuture;
 
@@ -312,6 +306,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         activeLoadingFuture = null;
 
         LOGGER.info("Logging into title world");
+        TitleWorldsMod.state.finishedLoading = true;
     }
 
     @Unique

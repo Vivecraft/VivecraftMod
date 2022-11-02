@@ -31,7 +31,8 @@
     "vivecraft.iris.mixins.json",
     "vivecraft.rei.mixins.json",
     "vivecraft.nonvr.fabric.mixins.json",
-    "vivecraft.vr.fabric.mixins.json"
+    "vivecraft.vr.fabric.mixins.json",
+    "titleworlds.fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.11.3",

@@ -691,9 +691,6 @@ public class VRPlayer
 
     private void updateTeleportKeys()
     {
-        if (TitleWorldsMod.state.isTitleWorld) {
-            return;
-        }
         this.dh.vr.getInputAction(this.dh.vr.keyTeleport).setEnabled(this.isTeleportEnabled());
         this.dh.vr.getInputAction(this.dh.vr.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
     }

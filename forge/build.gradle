@@ -23,6 +23,7 @@ loom {
 
         mixinConfig "vivecraft.vr.forge.mixins.json"
         mixinConfig "vivecraft.nonvr.forge.mixins.json"
+        mixinConfig "titleworlds.forge.mixins.json"
     }
 }
 

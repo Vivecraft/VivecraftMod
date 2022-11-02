@@ -17,7 +17,7 @@ public class TitleWorlds {
 
     @Mod.EventBusSubscriber(modid = TitleWorldsMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
-        //@SubscribeEvent
+        @SubscribeEvent
         static void clientSetup(FMLConstructModEvent event) {
             TitleWorldsMod.onInitializeClient();
         }

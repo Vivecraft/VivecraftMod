@@ -30,6 +30,7 @@ import org.vivecraft.provider.openvr_jna.control.VRInputActionSet;
 import org.vivecraft.provider.openvr_jna.control.VivecraftMovementInput;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 import org.vivecraft.utils.lwjgl.Matrix4f;
 import org.vivecraft.render.RenderPass;
 import org.vivecraft.utils.Utils;
@@ -723,7 +724,7 @@ public abstract class MCVR
             this.controllerRotation[0].M[3][3] = 1.0F;
             Vec3 vec31 = this.getHmdVector();
 
-            if (this.dh.vrSettings.seated && this.mc.screen == null)
+            if (this.dh.vrSettings.seated && this.mc.screen == null && !TitleWorldsMod.state.isTitleWorld)
             {
                 Matrix4f matrix4f = new Matrix4f();
                 float f = 110.0F;
