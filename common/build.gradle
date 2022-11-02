@@ -12,7 +12,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     modCompileOnly "maven.modrinth:sodium:mc1.18.2-0.4.1"
-    modCompileOnly "maven.modrinth:iris:1.18.x-v1.3.1"
+    modCompileOnly "maven.modrinth:iris:1.18.x-v1.4.0"
     modCompileOnly "maven.modrinth:lithium:mc1.18.2-0.7.10"
     modCompileOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
     modCompileOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-731"
@@ -38,22 +38,27 @@ dependencies {
     modCompileOnly("com.github.qouteall:GravityChanger:v0.3.1") { transitive = false } //temp immersiveportals
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:6.2.57") { exclude(group: "net.fabricmc.fabric-api")} //temp immersiveportals
     modApi("com.github.Virtuoel:Pehkui:3.3.3", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
-    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.9-1.18'){ //temp immersiveportals
+    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.10-1.18'){ //temp immersiveportals
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v1.4.9-1.18'){ //temp immersiveportals
+    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v1.4.10-1.18'){ //temp immersiveportals
+        exclude(group: "net.fabricmc.fabric-api")
+        transitive(false)
+    }
+    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:build:v1.4.10-1.18'){
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
 
-    modApi("dev.architectury:architectury-fabric:4.5.75") //temp rei
+    modApi("dev.architectury:architectury-fabric:4.10.86") //temp rei
     modApi("me.shedaniel:error-notifier-fabric:1.0.9") //temp rei
 
 
     modCompileOnly 'org.joml:joml:1.10.4'//temp sodium
 
     modCompileOnly 'org.anarres:jcpp:1.4.14'//temp iris
+    modCompileOnly 'io.github.douira:glsl-transformer:1.0.1'//temp iris
 
     modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
     modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium

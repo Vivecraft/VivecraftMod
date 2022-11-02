@@ -2057,7 +2057,8 @@ public abstract class GameRendererVRMixin
 				GameRendererVRMixin.DATA_HOLDER.vrRenderer.doStencil(false);
 //				}
 			} else {
-				GL11.glDisable(GL11.GL_STENCIL_TEST);
+				// TODO don't disabled stencil for immersive portals
+				//GL11.glDisable(GL11.GL_STENCIL_TEST);
 			}
 		} else {
 			// No stencil for telescope

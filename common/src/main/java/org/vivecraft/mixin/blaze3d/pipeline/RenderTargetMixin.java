@@ -202,6 +202,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		}
 	}
 
+	// TODO this conflicts with immersive portals
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers")
 	public void newTexImage2D(int i, int j, int k, int l, int m, int n, int o, int p, IntBuffer intBuffer) {
 		GlStateManager._texImage2D(3553, 0, 36013, this.width, this.height, 0, 34041, 36269, null);
@@ -214,7 +215,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
 	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", shift = At.Shift.AFTER, ordinal = 1), method = "createBuffers")
 	public void addBufferTexture(int i, int j, boolean bl, CallbackInfo ci) {
-		GlStateManager._glFramebufferTexture2D(36160, 36128, 3553, this.depthBufferId, 0);
+		// TODO disable if immersive portals, since it already adds a stencil
+		//GlStateManager._glFramebufferTexture2D(36160, 36128, 3553, this.depthBufferId, 0);
 	}
 
 
