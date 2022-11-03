@@ -7,7 +7,7 @@
 
 name: VivecraftMod Build
 
-on: pull-request
+on: pull_request
 
 
 permissions:
