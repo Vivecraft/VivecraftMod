@@ -1,4 +1,4 @@
-package org.vivecraft.modCompatMixin.irisMixin;
+package org.vivecraft.modCompat.iris.mixin;
 
 import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;

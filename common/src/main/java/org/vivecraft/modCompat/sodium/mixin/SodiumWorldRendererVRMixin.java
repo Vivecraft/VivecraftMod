@@ -1,4 +1,4 @@
-package org.vivecraft.modCompatMixin.sodiumMixin;
+package org.vivecraft.modCompat.sodium.mixin;
 
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import org.spongepowered.asm.mixin.Mixin;

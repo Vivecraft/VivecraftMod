@@ -1,4 +1,4 @@
-package org.vivecraft.modCompatMixin.irisMixin;
+package org.vivecraft.modCompat.iris.mixin;
 
 import net.coderbot.iris.gl.program.ProgramUniforms;
 import org.spongepowered.asm.mixin.Mixin;

@@ -2,7 +2,7 @@ package org.vivecraft.mixin.client.particle;
 
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.injection.*;
-import org.vivecraft.PehkuiHelper;
+import org.vivecraft.modCompat.pehkui.PehkuiHelper;
 import org.vivecraft.Xplat;
 import org.vivecraft.extensions.GameRendererExtension;
 import net.minecraft.client.Minecraft;

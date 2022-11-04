@@ -1,4 +1,4 @@
-package org.vivecraft.modCompatMixin.irisMixin;
+package org.vivecraft.modCompat.iris.mixin;
 
 import net.minecraft.client.Camera;
 import org.spongepowered.asm.mixin.Pseudo;

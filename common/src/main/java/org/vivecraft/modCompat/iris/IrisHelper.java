@@ -1,4 +1,4 @@
-package org.vivecraft;
+package org.vivecraft.modCompat.iris;
 
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;

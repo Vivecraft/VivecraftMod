@@ -3,7 +3,7 @@ package org.vivecraft.gameplay.trackers;
 import java.nio.ByteBuffer;
 
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.PehkuiHelper;
+import org.vivecraft.modCompat.pehkui.PehkuiHelper;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;

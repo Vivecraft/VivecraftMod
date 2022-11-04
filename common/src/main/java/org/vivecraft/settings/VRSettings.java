@@ -5,7 +5,7 @@
 package org.vivecraft.settings;
 
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.IrisHelper;
+import org.vivecraft.modCompat.iris.IrisHelper;
 import org.vivecraft.Xplat;
 import org.vivecraft.extensions.OptionsExtension;
 import com.google.gson.JsonObject;

@@ -71,6 +71,8 @@ import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.modCompat.iris.IrisHelper;
+import org.vivecraft.modCompat.sodium.SodiumHelper;
 import org.vivecraft.provider.openvr_jna.MCOpenVR;
 import org.vivecraft.provider.openvr_jna.OpenVRStereoRenderer;
 import org.vivecraft.provider.openvr_jna.VRInputAction;

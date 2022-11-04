@@ -1,4 +1,4 @@
-package org.vivecraft.modCompatMixin.irisMixin;
+package org.vivecraft.modCompat.iris.mixin;
 
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.ShadowRenderer;

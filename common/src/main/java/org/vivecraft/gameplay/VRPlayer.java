@@ -24,7 +24,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.PehkuiHelper;
+import org.vivecraft.modCompat.pehkui.PehkuiHelper;
 import org.vivecraft.Xplat;
 import org.vivecraft.api.ItemTags;
 import org.vivecraft.extensions.GameRendererExtension;

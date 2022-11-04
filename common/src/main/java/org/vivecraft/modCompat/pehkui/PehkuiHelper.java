@@ -1,4 +1,4 @@
-package org.vivecraft;
+package org.vivecraft.modCompat.pehkui;
 
 import net.minecraft.world.entity.Entity;
 import virtuoel.pehkui.util.ScaleUtils;

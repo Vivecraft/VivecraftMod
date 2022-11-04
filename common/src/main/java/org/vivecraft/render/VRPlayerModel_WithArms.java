@@ -20,7 +20,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.PehkuiHelper;
+import org.vivecraft.modCompat.pehkui.PehkuiHelper;
 import org.vivecraft.Xplat;
 
 public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerModel<T>

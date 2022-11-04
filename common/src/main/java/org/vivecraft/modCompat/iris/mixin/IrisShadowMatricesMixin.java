@@ -1,4 +1,4 @@
-package org.vivecraft.modCompatMixin.irisMixin;
+package org.vivecraft.modCompat.iris.mixin;
 
 import com.mojang.math.Matrix4f;
 import net.coderbot.iris.shadow.ShadowMatrices;
