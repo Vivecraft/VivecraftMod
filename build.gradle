@@ -28,17 +28,6 @@ allprojects {
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    sourceSets {
-        api {
-            java {
-                srcDir('src/api/java')
-            }
-            resources {
-                srcDir('src/api/resources')
-            }
-        }
-    }
-
     archivesBaseName = rootProject.archives_base_name
     version = rootProject.minecraft_version + "-" + rootProject.mod_version
             group = rootProject.maven_group

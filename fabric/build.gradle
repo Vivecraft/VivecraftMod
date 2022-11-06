@@ -18,11 +18,18 @@ configurations {
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
 
-    commonApi
-    shadowCommonApi
-    compileClasspathApi.extendsFrom commonApi
-    runtimeClasspathApi.extendsFrom commonApi
-    developmentFabricApi.extendsFrom commonApi
+    api
+}
+
+sourceSets {
+    api {
+        java {
+            srcDir(project(":common").sourceSets.api.java.srcDirs)
+        }
+        resources {
+            srcDir(project(":common").sourceSets.api.resources.srcDirs)
+        }
+    }
 }
 
 dependencies {
@@ -32,8 +39,7 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    //commonApi(project(":common").sourceSets.api.output)
-    shadowCommonApi(project(":common").sourceSets.api.output)
+    api sourceSets.api.output
 
     modRuntimeOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
     modRuntimeOnly "maven.modrinth:iris:1.19.x-v1.4.0"
@@ -130,7 +136,6 @@ jar {
 task apiJar(type: Jar) {
     classifier "api-dev"
 
-    from project(":common").sourceSets.api.output
     from sourceSets.api.output
 }
 
