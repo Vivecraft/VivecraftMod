@@ -13,10 +13,10 @@ configurations {
 sourceSets {
     api {
         java {
-            srcDir('src/api/java')
+            //srcDir('src/api/java')
         }
         resources {
-            srcDir('src/api/resources')
+            //srcDir('src/api/resources')
         }
     }
 }

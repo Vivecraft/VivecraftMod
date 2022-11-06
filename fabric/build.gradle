@@ -19,15 +19,17 @@ configurations {
     developmentFabric.extendsFrom common
 
     api
+    commonApi
 }
 
 sourceSets {
     api {
         java {
-            srcDir(project(":common").sourceSets.api.java.srcDirs)
+            //srcDir(project(":common").sourceSets.api.java.srcDirs)
+            //srcDir("src/api/java")
         }
         resources {
-            srcDir(project(":common").sourceSets.api.resources.srcDirs)
+            //srcDir(project(":common").sourceSets.api.resources.srcDirs)
         }
     }
 }
@@ -40,6 +42,7 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     api sourceSets.api.output
+    commonApi project(":common").sourceSets.api.output
 
     modRuntimeOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
     modRuntimeOnly "maven.modrinth:iris:1.19.x-v1.4.0"
@@ -137,6 +140,7 @@ task apiJar(type: Jar) {
     classifier "api-dev"
 
     from sourceSets.api.output
+    from project(":common").sourceSets.api.output
 }
 
 sourcesJar {
