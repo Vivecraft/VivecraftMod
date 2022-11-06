@@ -17,6 +17,12 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
+
+    commonApi
+    shadowCommonApi
+    compileClasspathApi.extendsFrom commonApi
+    runtimeClasspathApi.extendsFrom commonApi
+    developmentFabricApi.extendsFrom commonApi
 }
 
 dependencies {
@@ -25,6 +31,9 @@ dependencies {
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+
+    //commonApi(project(":common").sourceSets.api.output)
+    shadowCommonApi(project(":common").sourceSets.api.output)
 
     modRuntimeOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
     modRuntimeOnly "maven.modrinth:iris:1.19.x-v1.4.0"
@@ -118,6 +127,13 @@ jar {
     classifier "dev"
 }
 
+task apiJar(type: Jar) {
+    classifier "api-dev"
+
+    from project(":common").sourceSets.api.output
+    from sourceSets.api.output
+}
+
 sourcesJar {
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
@@ -143,3 +159,4 @@ publishing {
         // Add repositories to publish to here.
     }
 }
+build.dependsOn apiJar

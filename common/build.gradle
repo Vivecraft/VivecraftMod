@@ -6,9 +6,14 @@ loom {
     accessWidenerPath = file("src/main/resources/vivecraft.accesswidener")
 }
 
+configurations {
+    api
+}
+
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
+    api sourceSets.api.output
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     modCompileOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
