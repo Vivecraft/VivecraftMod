@@ -1,0 +1,94 @@
+accessWidener	v1	named
+
+accessible class net/minecraft/client/model/geom/ModelPart$Polygon
+accessible class net/minecraft/client/model/geom/ModelPart$Vertex
+accessible field net/minecraft/client/model/geom/ModelPart cubes Ljava/util/List;
+accessible field net/minecraft/client/model/geom/ModelPart$Cube polygons [Lnet/minecraft/client/model/geom/ModelPart$Polygon;
+accessible field com/mojang/math/Matrix4f m00 F
+accessible field com/mojang/math/Matrix4f m01 F
+accessible field com/mojang/math/Matrix4f m02 F
+accessible field com/mojang/math/Matrix4f m03 F
+accessible field com/mojang/math/Matrix4f m10 F
+accessible field com/mojang/math/Matrix4f m11 F
+accessible field com/mojang/math/Matrix4f m12 F
+accessible field com/mojang/math/Matrix4f m13 F
+accessible field com/mojang/math/Matrix4f m20 F
+accessible field com/mojang/math/Matrix4f m21 F
+accessible field com/mojang/math/Matrix4f m22 F
+accessible field com/mojang/math/Matrix4f m23 F
+accessible field com/mojang/math/Matrix4f m30 F
+accessible field com/mojang/math/Matrix4f m31 F
+accessible field com/mojang/math/Matrix4f m32 F
+accessible field com/mojang/math/Matrix4f m33 F
+accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
+extendable class net/minecraft/world/level/material/FluidState
+accessible method net/minecraft/client/MouseHandler onPress (JIII)V
+accessible method net/minecraft/client/MouseHandler onMove (JDD)V
+accessible method net/minecraft/client/MouseHandler onScroll (JDD)V
+accessible method net/minecraft/client/KeyboardHandler charTyped (JII)V
+accessible method net/minecraft/client/Minecraft startUseItem ()V
+mutable field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+accessible field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+accessible field net/minecraft/client/Camera initialized Z
+accessible field net/minecraft/client/Camera level Lnet/minecraft/world/level/BlockGetter;
+accessible field net/minecraft/client/Camera entity Lnet/minecraft/world/entity/Entity;
+accessible field net/minecraft/client/Camera xRot F
+accessible field net/minecraft/client/Camera yRot F
+accessible field net/minecraft/client/Camera forwards Lcom/mojang/math/Vector3f;
+accessible field net/minecraft/client/Camera up Lcom/mojang/math/Vector3f;
+accessible field net/minecraft/client/Camera left Lcom/mojang/math/Vector3f;
+accessible field net/minecraft/client/Camera rotation Lcom/mojang/math/Quaternion;
+mutable field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options;
+accessible method net/minecraft/client/Minecraft isMultiplayerServer ()Z
+mutable field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
+accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
+accessible class net/minecraft/client/gui/screens/Screen
+mutable field com/mojang/blaze3d/pipeline/RenderTarget useDepth Z
+accessible class com/mojang/blaze3d/pipeline/MainTarget$Dimension
+accessible method com/mojang/blaze3d/pipeline/MainTarget$Dimension <init> (II)V
+accessible class net/minecraft/client/Options$FieldAccess
+mutable field net/minecraft/client/Options keyMappings [Lnet/minecraft/client/KeyMapping;
+accessible field net/minecraft/client/KeyMapping CATEGORY_SORT_ORDER Ljava/util/Map;
+mutable field net/minecraft/client/KeyMapping CATEGORY_SORT_ORDER Ljava/util/Map;
+
+accessible field com/mojang/blaze3d/platform/GlStateManager BLEND Lcom/mojang/blaze3d/platform/GlStateManager$BlendState;
+accessible class com/mojang/blaze3d/platform/GlStateManager$BlendState
+mutable field com/mojang/blaze3d/pipeline/MainTarget DEFAULT_WIDTH I
+mutable field com/mojang/blaze3d/pipeline/MainTarget DEFAULT_HEIGHT I
+accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWithItem (Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V
+
+accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
+accessible field net/minecraft/world/level/block/state/StateHolder propertiesCodec Lcom/mojang/serialization/MapCodec;
+
+accessible field net/minecraft/client/KeyMapping isDown Z
+accessible field net/minecraft/client/KeyMapping clickCount I
+accessible method net/minecraft/client/KeyMapping release ()V
+accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
+
+accessible field net/minecraft/world/entity/Entity eyeHeight F
+
+accessible field net/minecraft/world/level/block/state/StateHolder propertiesCodec Lcom/mojang/serialization/MapCodec;
+
+accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData isFlat Z
+
+accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
+
+accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
+
+accessible field net/minecraft/client/player/LocalPlayer xLast D
+accessible field net/minecraft/client/player/LocalPlayer yLast1 D
+accessible field net/minecraft/client/player/LocalPlayer zLast D
+accessible field net/minecraft/client/player/LocalPlayer yRotLast F
+accessible field net/minecraft/client/player/LocalPlayer xRotLast F
+accessible field net/minecraft/client/player/LocalPlayer lastOnGround Z
+accessible field net/minecraft/client/player/LocalPlayer wasShiftKeyDown Z
+accessible field net/minecraft/client/player/LocalPlayer wasSprinting Z
+accessible field net/minecraft/client/player/LocalPlayer positionReminder I
+
+accessible field net/minecraft/client/sounds/SoundManager soundEngine Lnet/minecraft/client/sounds/SoundEngine;
+
+accessible class net/minecraft/world/entity/monster/EnderMan$EndermanFreezeWhenLookedAt
+accessible class net/minecraft/world/entity/monster/EnderMan$EndermanLookForPlayerGoal
+accessible method net/minecraft/world/entity/monster/EnderMan isLookingAtMe (Lnet/minecraft/world/entity/player/Player;)Z
+
+accessible method net/minecraft/client/renderer/entity/player/PlayerRenderer setModelProperties (Lnet/minecraft/client/player/AbstractClientPlayer;)V

@@ -1,5 +1,3 @@
-import net.fabricmc.loom.task.RemapJarTask
-
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
@@ -10,7 +8,7 @@ architectury {
 }
 
 loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
+    accessWidenerPath = project(":common:vivecraft").loom.accessWidenerPath
 }
 
 configurations {
@@ -20,12 +18,12 @@ configurations {
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
 
-    vrapi
-    commonApi
+    vr
+    commonVR
 }
 
 sourceSets {
-    vrapi {
+    vr {
         java {}
         resources {}
     }
@@ -35,11 +33,11 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+    common(project(path: ":common:vivecraft", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common:vivecraft", configuration: "transformProductionFabric")) { transitive false }
 
-    vrapi sourceSets.vrapi.output
-    commonApi(project(path: ":common", configuration: "vrapi"))
+    vr sourceSets.main.output
+    commonVR(project(path: ":common:vivecraft", configuration: "vr"))
 
     modRuntimeOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
     modRuntimeOnly "maven.modrinth:iris:1.19.x-v1.4.0"
@@ -129,21 +127,9 @@ jar {
     classifier "dev"
 }
 
-task vrapiJar(type: Jar) {
-    from sourceSets.vrapi.output
-    from project(":common").sourceSets.vrapi.output
-    classifier "api-fabric-dev"
-}
-
-task remapVrApiJar(type: RemapJarTask) {
-    input.set vrapiJar.archiveFile
-    dependsOn vrapiJar
-    classifier "api-fabric"
-}
-
 
 sourcesJar {
-    def commonSources = project(":common").sourcesJar
+    def commonSources = project(":common:vivecraft").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 }
@@ -167,4 +153,3 @@ publishing {
         // Add repositories to publish to here.
     }
 }
-build.dependsOn remapVrApiJar

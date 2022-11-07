@@ -1,6 +1,6 @@
 package org.vivecraft.api.forge;
 
-@Mod(VivecraftApi.MODID)
+//@Mod(VivecraftApi.MODID)
 public class VivecraftApi {
     public static final String MODID = "vivecraftapi";
 

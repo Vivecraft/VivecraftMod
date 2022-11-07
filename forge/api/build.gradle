@@ -1,5 +1,3 @@
-import net.fabricmc.loom.task.RemapJarTask
-
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
@@ -9,21 +7,13 @@ architectury {
     forge()
 }
 loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
+    accessWidenerPath = project(":common:api").loom.accessWidenerPath
 
     forge {
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
         mixinConfig "vivecraft.vr.mixins.json"
-        mixinConfig "vivecraft.nonvr.mixins.json"
-        mixinConfig "vivecraft.sodium.mixins.json"
-        mixinConfig "vivecraft.forge.sodium.mixins.json"
-        mixinConfig "vivecraft.iris.mixins.json"
-        mixinConfig "vivecraft.rei.mixins.json"
-
-        mixinConfig "vivecraft.vr.forge.mixins.json"
-        mixinConfig "vivecraft.nonvr.forge.mixins.json"
     }
 }
 
@@ -33,32 +23,13 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
-
-    vrapi
-    commonApi
-    apicompileClasspath
-    apiruntimeClasspath
-}
-
-sourceSets {
-    vrapi {
-        java {}
-        resources {}
-    }
 }
 
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
-
-    vrapi sourceSets.vrapi.output
-    vrapi "net.minecraftforge:forge:${rootProject.forge_version}"
-    commonApi(project(path: ":common", configuration: "api"))
-
-    modRuntimeOnly("maven.modrinth:rubidium:0.6.1")
-    modRuntimeOnly("maven.modrinth:oculus:1.19-1.2.5a")
+    common(project(path: ":common:api", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common:api", configuration: "transformProductionForge")) { transitive = false }
 }
 
 processResources {
@@ -87,21 +58,9 @@ jar {
     classifier "dev"
 }
 
-task vrapiJar(type: Jar) {
-    from sourceSets.vrapi.output
-    from project(":common").sourceSets.vrapi.output
-    classifier "api-forge-dev"
-}
-
-task remapVrApiJar(type: RemapJarTask) {
-    input.set vrapiJar.archiveFile
-    dependsOn vrapiJar
-    classifier "api-forge"
-}
-
 
 sourcesJar {
-    def commonSources = project(":common").sourcesJar
+    def commonSources = project(":common:api").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 }
@@ -125,4 +84,3 @@ publishing {
         // Add repositories to publish to here.
     }
 }
-build.dependsOn remapVrApiJar
