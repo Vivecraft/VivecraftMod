@@ -1,3 +1,5 @@
+import net.fabricmc.loom.task.RemapJarTask
+
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
@@ -32,23 +34,16 @@ configurations {
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
 
-    api
+    vrapi
     commonApi
     apicompileClasspath
     apiruntimeClasspath
 }
 
 sourceSets {
-    api {
-        java {
-            //srcDir(project(":common").sourceSets.api.java.srcDirs)
-            //srcDir("src/api/java")
-        }
-        resources {
-            //srcDir(project(":common").sourceSets.api.resources.srcDirs)
-        }
-        compileClasspath = configurations.apicompileClasspath
-        runtimeClasspath = configurations.apiruntimeClasspath
+    vrapi {
+        java {}
+        resources {}
     }
 }
 
@@ -58,7 +53,8 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    api sourceSets.api.output
+    vrapi sourceSets.vrapi.output
+    vrapi "net.minecraftforge:forge:${rootProject.forge_version}"
     commonApi(project(path: ":common", configuration: "api"))
 
     modRuntimeOnly("maven.modrinth:rubidium:0.6.1")
@@ -84,23 +80,25 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
-}
-
-remapJar {
-    archiveClassifier.set('forge')
+    classifier 'forge'
 }
 
 jar {
     classifier "dev"
 }
 
-task apiJar(type: Jar) {
-    classifier "api-forge"
-
-    from sourceSets.api.output
-    from project(":common").sourceSets.api.output
+task vrapiJar(type: Jar) {
+    from sourceSets.vrapi.output
+    from project(":common").sourceSets.vrapi.output
+    classifier "api-forge-dev"
 }
+
+task remapVrApiJar(type: RemapJarTask) {
+    input.set vrapiJar.archiveFile
+    dependsOn vrapiJar
+    classifier "api-forge"
+}
+
 
 sourcesJar {
     def commonSources = project(":common").sourcesJar
@@ -127,3 +125,4 @@ publishing {
         // Add repositories to publish to here.
     }
 }
+build.dependsOn remapVrApiJar

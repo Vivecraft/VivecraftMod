@@ -1,3 +1,5 @@
+import net.fabricmc.loom.task.RemapJarTask
+
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
@@ -18,19 +20,14 @@ configurations {
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
 
-    api
+    vrapi
     commonApi
 }
 
 sourceSets {
-    api {
-        java {
-            //srcDir(project(":common").sourceSets.api.java.srcDirs)
-            //srcDir("src/api/java")
-        }
-        resources {
-            //srcDir(project(":common").sourceSets.api.resources.srcDirs)
-        }
+    vrapi {
+        java {}
+        resources {}
     }
 }
 
@@ -41,8 +38,8 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    api sourceSets.api.output
-    commonApi(project(path: ":common", configuration: "api"))
+    vrapi sourceSets.vrapi.output
+    commonApi(project(path: ":common", configuration: "vrapi"))
 
     modRuntimeOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
     modRuntimeOnly "maven.modrinth:iris:1.19.x-v1.4.0"
@@ -125,23 +122,25 @@ remapJar {
     injectAccessWidener = true
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
-}
-
-remapJar {
-    archiveClassifier.set('fabric')
+    classifier 'fabric'
 }
 
 jar {
     classifier "dev"
 }
 
-task apiJar(type: Jar) {
-    classifier "api-fabric"
-
-    from sourceSets.api.output
-    from project(":common").sourceSets.api.output
+task vrapiJar(type: Jar) {
+    from sourceSets.vrapi.output
+    from project(":common").sourceSets.vrapi.output
+    classifier "api-fabric-dev"
 }
+
+task remapVrApiJar(type: RemapJarTask) {
+    input.set vrapiJar.archiveFile
+    dependsOn vrapiJar
+    classifier "api-fabric"
+}
+
 
 sourcesJar {
     def commonSources = project(":common").sourcesJar
@@ -168,4 +167,4 @@ publishing {
         // Add repositories to publish to here.
     }
 }
-build.dependsOn apiJar
+build.dependsOn remapVrApiJar

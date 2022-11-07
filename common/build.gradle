@@ -7,24 +7,20 @@ loom {
 }
 
 configurations {
-    api
+    vrapi
 }
 
 sourceSets {
-    api {
-        java {
-            //srcDir('src/api/java')
-        }
-        resources {
-            //srcDir('src/api/resources')
-        }
+    vrapi {
+        java {}
+        resources {}
     }
 }
 
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
-    api sourceSets.api.output
+    vrapi sourceSets.vrapi.output
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     modCompileOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
@@ -87,12 +83,12 @@ dependencies {
 
 }
 
-task apiJar(type:Jar) {
-    from sourceSets.api.output
+task vrapiJar(type:Jar) {
+    from sourceSets.vrapi.output
 }
 
 artifacts {
-    api apiJar
+    vrapi vrapiJar
 }
 
 publishing {
