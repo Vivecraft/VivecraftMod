@@ -412,22 +412,24 @@ public abstract class GameRendererVRMixin
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
 	public void renderpick(GameRenderer g, float  pPartialTicks) {
-		if (GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.LEFT && !(Xplat.isModLoaded("immersive_portals") && ImmersivePortalsHelper.isRenderingPortal())) {
-			this.pick(pPartialTicks);
+		if (!Xplat.isModLoaded("immersive_portals") || !ImmersivePortalsHelper.isRenderingPortal()) {
+			if (GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.LEFT) {
+				this.pick(pPartialTicks);
 
-			if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != HitResult.Type.MISS) {
-				this.crossVec = this.minecraft.hitResult.getLocation();
+				if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != HitResult.Type.MISS) {
+					this.crossVec = this.minecraft.hitResult.getLocation();
+				}
+
+				if (this.minecraft.screen == null) {
+					GameRendererVRMixin.DATA_HOLDER.teleportTracker.updateTeleportDestinations((GameRenderer) (Object) this, this.minecraft,
+							this.minecraft.player);
+				}
 			}
 
-			if (this.minecraft.screen == null) {
-				GameRendererVRMixin.DATA_HOLDER.teleportTracker.updateTeleportDestinations((GameRenderer)(Object)this, this.minecraft,
-						this.minecraft.player);
-			}
+			this.cacheRVEPos((LivingEntity) this.minecraft.getCameraEntity());
+			this.setupRVE();
+			this.setupOverlayStatus(pPartialTicks);
 		}
-
-		this.cacheRVEPos((LivingEntity) this.minecraft.getCameraEntity());
-		this.setupRVE();
-		this.setupOverlayStatus(pPartialTicks);
 	}
 
 	@Inject(at = @At("HEAD"), method = "bobHurt", cancellable = true)
