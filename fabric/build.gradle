@@ -42,7 +42,7 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     api sourceSets.api.output
-    commonApi project(":common").sourceSets.api.output
+    commonApi(project(path: ":common", configuration: "api"))
 
     modRuntimeOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
     modRuntimeOnly "maven.modrinth:iris:1.19.x-v1.4.0"
@@ -137,7 +137,7 @@ jar {
 }
 
 task apiJar(type: Jar) {
-    classifier "api-dev"
+    classifier "api-fabric"
 
     from sourceSets.api.output
     from project(":common").sourceSets.api.output

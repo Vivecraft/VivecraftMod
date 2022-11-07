@@ -31,14 +31,35 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
+
+    api
+    commonApi
+    apicompileClasspath
+    apiruntimeClasspath
 }
 
+sourceSets {
+    api {
+        java {
+            //srcDir(project(":common").sourceSets.api.java.srcDirs)
+            //srcDir("src/api/java")
+        }
+        resources {
+            //srcDir(project(":common").sourceSets.api.resources.srcDirs)
+        }
+        compileClasspath = configurations.apicompileClasspath
+        runtimeClasspath = configurations.apiruntimeClasspath
+    }
+}
 
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+
+    api sourceSets.api.output
+    commonApi(project(path: ":common", configuration: "api"))
 
     modRuntimeOnly("maven.modrinth:rubidium:0.6.1")
     modRuntimeOnly("maven.modrinth:oculus:1.19-1.2.5a")
@@ -72,6 +93,13 @@ remapJar {
 
 jar {
     classifier "dev"
+}
+
+task apiJar(type: Jar) {
+    classifier "api-forge"
+
+    from sourceSets.api.output
+    from project(":common").sourceSets.api.output
 }
 
 sourcesJar {

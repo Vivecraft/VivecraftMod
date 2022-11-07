@@ -87,6 +87,14 @@ dependencies {
 
 }
 
+task apiJar(type:Jar) {
+    from sourceSets.api.output
+}
+
+artifacts {
+    api apiJar
+}
+
 publishing {
     publications {
         mavenCommon(MavenPublication) {
