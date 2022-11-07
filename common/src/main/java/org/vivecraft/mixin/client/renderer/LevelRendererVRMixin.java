@@ -198,7 +198,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
 	public boolean drawSelf(Camera camera) {
-		boolean renderSelf = ClientDataHolder.getInstance().currentPass == RenderPass.THIRD && ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA || (Xplat.isModLoaded("immersive_portals") && ImmersivePortalsHelper.isRenderingPortal());
+		boolean renderSelf = ClientDataHolder.getInstance().currentPass == RenderPass.THIRD && ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA || (Xplat.isModLoaded("immersive_portals") && ImmersivePortalsHelper.shouldRenderSelf());
 		renderSelf = renderSelf | (ClientDataHolder.getInstance().vrSettings.shouldRenderSelf || ClientDataHolder.getInstance().vrSettings.tmpRenderSelf);
 		return !(!camera.isDetached() && !renderSelf);
 	}
