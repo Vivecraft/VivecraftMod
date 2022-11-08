@@ -13,7 +13,7 @@ loom {
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
-        mixinConfig "vivecraft.vr.mixins.json"
+        //mixinConfig "vivecraft.vr.mixins.json"
     }
 }
 
@@ -23,6 +23,8 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
+
+    compiledJar
 }
 
 dependencies {
@@ -58,6 +60,9 @@ jar {
     classifier "dev"
 }
 
+artifacts {
+    compiledJar jar
+}
 
 sourcesJar {
     def commonSources = project(":common-api").sourcesJar

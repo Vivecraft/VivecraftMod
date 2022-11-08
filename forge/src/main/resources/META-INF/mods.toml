@@ -28,3 +28,10 @@ mandatory = true
 versionRange = "[1.18.2,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.vivecraft]]
+modId = "vivecraftapi"
+mandatory = true
+versionRange = "[1.18.2,)"
+ordering = "AFTER"
+side = "BOTH"

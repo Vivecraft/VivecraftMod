@@ -1,7 +1,7 @@
 package org.vivecraft.provider.openvr_jna;
 
-import jopenvr.HmdMatrix34_t;
-import jopenvr.HmdMatrix44_t;
+import org.vivecraft.api.jopenvr.HmdMatrix34_t;
+import org.vivecraft.api.jopenvr.HmdMatrix44_t;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Matrix4f;
 import org.vivecraft.utils.math.Quaternion;
