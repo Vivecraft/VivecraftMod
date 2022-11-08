@@ -8,7 +8,7 @@ architectury {
 }
 
 loom {
-    accessWidenerPath = project(":common:vivecraft").loom.accessWidenerPath
+    accessWidenerPath = project(":common").loom.accessWidenerPath
 }
 
 configurations {
@@ -33,11 +33,13 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-    common(project(path: ":common:vivecraft", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common:vivecraft", configuration: "transformProductionFabric")) { transitive false }
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     vr sourceSets.main.output
-    commonVR(project(path: ":common:vivecraft", configuration: "vr"))
+    commonVR(project(path: ":common", configuration: "vr"))
+
+    implementation(project(":fabric-api").sourceSets.main.output)
 
     modRuntimeOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
     modRuntimeOnly "maven.modrinth:iris:1.19.x-v1.4.0"
@@ -129,7 +131,7 @@ jar {
 
 
 sourcesJar {
-    def commonSources = project(":common:vivecraft").sourcesJar
+    def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 }

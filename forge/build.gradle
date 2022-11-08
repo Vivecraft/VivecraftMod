@@ -7,7 +7,7 @@ architectury {
     forge()
 }
 loom {
-    accessWidenerPath = project(":common:vivecraft").loom.accessWidenerPath
+    accessWidenerPath = project(":common").loom.accessWidenerPath
 
     forge {
         convertAccessWideners = true
@@ -53,8 +53,10 @@ dependencies {
 
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
 
-    common(project(path: ":common:vivecraft", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common:vivecraft", configuration: "transformProductionForge")) { transitive = false }
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+
+    implementation(project(":forge-api").sourceSets.main.output)
 
     modRuntimeOnly("maven.modrinth:rubidium:0.6.1")
     modRuntimeOnly("maven.modrinth:oculus:1.19-1.2.5a")
@@ -87,7 +89,7 @@ jar {
 }
 
 sourcesJar {
-    def commonSources = project(":common:vivecraft").sourcesJar
+    def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 }

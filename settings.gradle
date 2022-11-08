@@ -7,11 +7,11 @@ pluginManagement {
     }
 }
 
-include("common:vivecraft")
-include("fabric:vivecraft")
-include("forge:vivecraft")
-include("common:api")
-include("fabric:api")
-include("forge:api")
+include("common")
+include("fabric")
+include("forge")
+include("common-api")
+include("fabric-api")
+include("forge-api")
 
 rootProject.name = "vivecraft"
