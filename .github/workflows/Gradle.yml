@@ -34,5 +34,5 @@ jobs:
         
     - uses: actions/upload-artifact@v3
       with:
-       name: vivemod-build-multi-19
+       name: Vivecraftmod-multi-19
        path: build
