@@ -168,6 +168,9 @@ public abstract class GameRendererVRMixin
 	@Unique
 	private Vec3i tpInvalidColor = new Vec3i(83, 83, 83);
 
+	@Unique
+	private boolean wasStencilOn = false;
+
 	@Shadow
 	@Final
 	@Mutable
@@ -452,7 +455,8 @@ public abstract class GameRendererVRMixin
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 1), method = "renderLevel")
 	public void noHandProfiler(ProfilerFiller instance, String s) {
-		if (!Xplat.isModLoaded("immersive_portals")) {
+		if (!wasStencilOn) {
+			// disable the stencil test, if we enabled it
 			GL11.glDisable(GL11.GL_STENCIL_TEST);
 		}
 		this.minecraft.getProfiler().popPush("ShadersEnd"); //TODO needed?
@@ -2037,12 +2041,13 @@ public abstract class GameRendererVRMixin
 
 	@Override
 	public void drawEyeStencil(boolean flag1) {
+		wasStencilOn = GL11.glIsEnabled(GL11.GL_STENCIL_TEST);
 
-		if (GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.SCOPEL
-				&& GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.SCOPER) {
-			if ((GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.LEFT
-					|| GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.RIGHT)
-					&& GameRendererVRMixin.DATA_HOLDER.vrSettings.vrUseStencil) {
+		// stencil only for left/right VR view
+		if ((GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.LEFT
+			|| GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.RIGHT)
+			&& GameRendererVRMixin.DATA_HOLDER.vrSettings.vrUseStencil
+			&& (!Xplat.isModLoaded("immersive_portals") || !ImmersivePortalsHelper.isRenderingPortal())) {
 //				net.optifine.shaders.Program program = Shaders.activeProgram;
 //
 //				if (shaders && Shaders.dfb != null) {
@@ -2058,14 +2063,6 @@ public abstract class GameRendererVRMixin
 //				} else {
 				GameRendererVRMixin.DATA_HOLDER.vrRenderer.doStencil(false);
 //				}
-			} else {
-				if (!Xplat.isModLoaded("immersive_portals")) {
-					GL11.glDisable(GL11.GL_STENCIL_TEST);
-				}
-			}
-		} else {
-			// No stencil for telescope
-			// GameRendererVRMixin.DATA_HOLDER.vrRenderer.doStencil(true);
 		}
 	}
 
