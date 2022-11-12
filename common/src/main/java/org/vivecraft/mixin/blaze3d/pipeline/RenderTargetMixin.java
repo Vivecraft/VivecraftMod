@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.blaze3d.pipeline;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -19,16 +18,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.extensions.RenderTargetExtension;
 import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
-
-import java.nio.IntBuffer;
 
 @Debug(export = true)
 @Mixin(RenderTarget.class)
@@ -40,6 +32,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public String name = "Default";
 	@Unique
 	private boolean linearFilter;
+	@Unique
+	private boolean useStencil = false;
 	@Shadow
 	public int frameBufferId;
 	@Shadow
@@ -91,6 +85,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public void setUseStencil(boolean useStencil){
+		this.useStencil = useStencil;
 	}
 
 	@Override
@@ -202,9 +201,17 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		}
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers")
-	public void newTexImage2D(int i, int j, int k, int l, int m, int n, int o, int p, IntBuffer intBuffer) {
-		GlStateManager._texImage2D(3553, 0, 36013, this.width, this.height, 0, 34041, 36269, null);
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 2)
+	public int modifyTexImage2DInternalformat(int internalformat) {
+		return useStencil ? GL30.GL_DEPTH32F_STENCIL8 : internalformat;
+	}
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 6)
+	public int modifyTexImage2DFormat(int format) {
+		return useStencil ? GL30.GL_DEPTH_STENCIL : format;
+	}
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 7)
+	public int modifyTexImage2DType(int type) {
+		return useStencil ? GL30.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
 	}
 
 	@ModifyConstant(method = "createBuffers", constant = @Constant(intValue = 9728))
@@ -212,17 +219,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		return linearFilter ? GL11.GL_LINEAR : i;
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", shift = At.Shift.AFTER, ordinal = 1), method = "createBuffers")
-	public void addBufferTexture(int i, int j, boolean bl, CallbackInfo ci) {
-		GlStateManager._glFramebufferTexture2D(36160, 36128, 3553, this.depthBufferId, 0);
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", ordinal = 1), method = "createBuffers", index = 1)
+	public int modifyGlFramebufferTexture2DAttachment(int attachment) {
+		return useStencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
 	}
-
-
-	/**
-	 * @author
-	 * @reason
-	 */
-
 
 	/**
 	 * @author
