@@ -7,6 +7,7 @@
   ],
   "client": [
     "ClientTeleportationManagerMixin",
+    "SecondaryFrameBufferMixin",
     "TransformationManagerMixin"
   ],
   "server": [

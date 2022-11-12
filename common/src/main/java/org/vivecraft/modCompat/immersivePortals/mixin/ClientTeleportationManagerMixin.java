@@ -26,6 +26,5 @@ public class ClientTeleportationManagerMixin {
     private void moveRoomOrigin(Portal portal, CallbackInfo ci){
         Vec3 newPos = portal.transformPoint(VRPlayer.get().roomOrigin);
         VRPlayer.get().setRoomOrigin(newPos.x, newPos.y, newPos.z, true);
-        //disableTeleportFor(1);
     }
 }
