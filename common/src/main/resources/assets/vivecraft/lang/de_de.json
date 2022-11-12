@@ -385,14 +385,19 @@
     "vivecraft.options.shaderguirender.aftertranslucent": "Transparent",
     "vivecraft.options.shaderguirender.beforetranslucentsolid": "Undurchsichtig",
     "_comment_m5": "Option names",
+    "vivecraft.options.CHAT_MESSAGE_STENCIL": "Schablonen Nachricht",
     "vivecraft.options.LOW_HEALTH_INDICATOR": "Gesundheit Indikator",
     "vivecraft.options.SHADER_GUI_RENDER": "Shader GUI",
     "_comment_m6": "Option tooltips",
+    "vivecraft.options.CHAT_MESSAGE_STENCIL.tooltip": "Schreibt eine Nachricht in den Chat, wenn ein anderer Mod erkannt wird, der ebenfalls die Schablone verwendet.",
     "vivecraft.options.LOW_HEALTH_INDICATOR.tooltip": "Pulsiert den Bildschirm Rot bei niedriger Gesundheit, um den derzeitigen Gesundheitszustand anzuzeigen.",
     "vivecraft.options.SHADER_GUI_RENDER.tooltip": "Bestimmt wie die Benutzeroberfläche mit Shadern dargestellt wird.\n  Nach Shader: zeigt die Benutzeroberfläche ohne Shader, beste Kompatibilität. (Probleme mit PTGI HRR)\n  Transparent: zeigt die Benutzeroberfläche mit Shadern und transparent. (Probleme mit Sildurs Vibrant)\n  Undurchsichtig: zeigt die Benutzeroberfläche mit Shadern, aber Undurchsichtig",
     "vivecraft.options.VR_MODE.tooltip": "wechsle zwischen VR/NONVR\nbenötigt einen Spiel Neustart, um übernommen zu werden",
     "_comment_m10": "Messages",
     "vivecraft.messages.mode": "Modus:",
     "vivecraft.messages.configWriteError":"§cSchreiben der Einstellungen fehlgeschlagen, Änderungen wurden nicht gespeichert",
-    "vivecraft.messages.configChangeRestart":"§6VR Modus geändert, bitte starte das Spiel neu damit die Änderungen übernommen werden."
+    "vivecraft.messages.configChangeRestart":"§6VR Modus geändert, bitte starte das Spiel neu damit die Änderungen übernommen werden.",
+    "vivecraft.messages.stencil": "[Vivecraft] Ein anderer Mod verwendet den Schablonen Puffer, wenn Sie Grafikfehler bemerken, versuchen Sie die Augenschablone in folgendem Menü zu deaktivieren: %s\nSie können diese Nachricht in folgendem Menü deaktivieren: %s",
+    "vivecraft.messages.3options": "%s > %s > %s",
+    "vivecraft.messages.openSettings": "Klicken um die Einstellungen zu öffnen."
 }

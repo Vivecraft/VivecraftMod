@@ -4,6 +4,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.gui.framework.GuiVROptionButton;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
+import org.vivecraft.gui.framework.VROptionEntry;
 import org.vivecraft.settings.VRSettings;
 
 public class GuiOtherHUDSettings extends GuiVROptionsBase
@@ -18,7 +19,17 @@ public class GuiOtherHUDSettings extends GuiVROptionsBase
             VRSettings.VrOptions.CHAT_NOTIFICATIONS
     };
     static VRSettings.VrOptions[] chat = new VRSettings.VrOptions[] {
-            VRSettings.VrOptions.CHAT_NOTIFICATION_SOUND
+            VRSettings.VrOptions.CHAT_NOTIFICATION_SOUND,
+            VRSettings.VrOptions.DUMMY,
+            VRSettings.VrOptions.DUMMY
+    };
+    static VRSettings.VrOptions[] dummy = new VRSettings.VrOptions[] {
+            VRSettings.VrOptions.DUMMY,
+            VRSettings.VrOptions.DUMMY,
+            VRSettings.VrOptions.DUMMY
+    };
+    static VRSettings.VrOptions[] chatMessages = new VRSettings.VrOptions[] {
+            VRSettings.VrOptions.CHAT_MESSAGE_STENCIL
     };
 
     public GuiOtherHUDSettings(Screen guiScreen)
@@ -34,7 +45,11 @@ public class GuiOtherHUDSettings extends GuiVROptionsBase
         if (this.dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND || this.dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
         {
             super.init(chat, false);
+        } else {
+            super.init(dummy, false);
         }
+
+        super.init(chatMessages, false);
 
         super.addDefaultButtons();
     }

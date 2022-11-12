@@ -395,6 +395,8 @@ public class VRSettings
     public ChatNotifications chatNotifications = ChatNotifications.NONE; // 0 = off, 1 = haptic, 2 = sound, 3 = both
     @SettingField(VrOptions.CHAT_NOTIFICATION_SOUND)
     public String chatNotificationSound = "block.note_block.bell";
+    @SettingField(VrOptions.CHAT_MESSAGE_STENCIL)
+    public boolean chatMessageStencil = true;
     @SettingField(VrOptions.GUI_APPEAR_OVER_BLOCK)
     public boolean guiAppearOverBlock = true;
     @SettingField(VrOptions.SHADER_GUI_RENDER)
@@ -1065,6 +1067,7 @@ public class VRSettings
                 return Registry.SOUND_EVENT.byId(i).getLocation().getPath();
             }
         },
+        CHAT_MESSAGE_STENCIL(false, true), // warning for other mod using stencil
         CROSSHAIR_SCALES_WITH_DISTANCE(false, true), // Crosshair Scaling
         RENDER_BLOCK_OUTLINE_MODE(false, true) { // Show Block Outline
             @Override
