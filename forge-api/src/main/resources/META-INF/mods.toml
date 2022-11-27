@@ -1,0 +1,30 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+#issueTrackerURL = ""
+license = "LGPLv3"
+
+[[mods]]
+modId = "vivecraftapi"
+version = "${version}"
+displayName = "Vivecraft Api"
+logoFile="vivecraft_icon.png"
+authors = "fayer3, Ferri_Arnus, IMS, jrbudda, minecraft player"
+displayTest="IGNORE_SERVER_VERSION"
+description = '''
+The VR mod for any loader!
+'''
+#logoFile = ""
+
+[[dependencies.vivecraftapi]]
+modId = "forge"
+mandatory = true
+versionRange = "[40,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.vivecraftapi]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.18.2,)"
+ordering = "NONE"
+side = "BOTH"

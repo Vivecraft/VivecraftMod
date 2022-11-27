@@ -20,8 +20,8 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.api.ClientNetworkHelper;
-import org.vivecraft.api.CommonNetworkHelper;
+import org.vivecraft.apiold.ClientNetworkHelper;
+import org.vivecraft.apiold.CommonNetworkHelper;
 import org.vivecraft.render.PlayerModelController;
 
 import java.util.UUID;

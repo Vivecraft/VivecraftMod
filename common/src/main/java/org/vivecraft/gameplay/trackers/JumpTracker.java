@@ -3,13 +3,12 @@ package org.vivecraft.gameplay.trackers;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.api.ClientNetworkHelper;
+import org.vivecraft.apiold.ClientNetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.settings.AutoCalibration;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;

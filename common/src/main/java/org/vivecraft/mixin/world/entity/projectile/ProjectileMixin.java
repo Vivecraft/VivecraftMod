@@ -14,9 +14,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.api.ClientNetworkHelper;
-import org.vivecraft.api.CommonNetworkHelper;
-import org.vivecraft.api.ServerVivePlayer;
+import org.vivecraft.apiold.CommonNetworkHelper;
+import org.vivecraft.apiold.ServerVivePlayer;
 
 @Mixin(Projectile.class)
 public abstract class ProjectileMixin extends Entity{

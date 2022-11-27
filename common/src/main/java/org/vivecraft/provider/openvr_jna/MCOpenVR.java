@@ -1,5 +1,6 @@
 package org.vivecraft.provider.openvr_jna;
 
+import jopenvr.*;
 import org.vivecraft.ClientDataHolder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -11,7 +12,6 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
-import org.vivecraft.api.jopenvr.*;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;

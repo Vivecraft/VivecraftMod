@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.api.CommonNetworkHelper;
-import org.vivecraft.api.ServerVivePlayer;
+import org.vivecraft.apiold.CommonNetworkHelper;
+import org.vivecraft.apiold.ServerVivePlayer;
 
 @Mixin(SwellGoal.class)
 public class SwellGoalMixin {

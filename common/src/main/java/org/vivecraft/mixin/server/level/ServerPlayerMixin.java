@@ -14,15 +14,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.api.CommonNetworkHelper;
-import org.vivecraft.api.ServerVivePlayer;
+import org.vivecraft.apiold.CommonNetworkHelper;
+import org.vivecraft.apiold.ServerVivePlayer;
 
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

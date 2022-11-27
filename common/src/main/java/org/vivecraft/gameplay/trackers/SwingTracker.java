@@ -5,14 +5,13 @@ import java.util.List;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.*;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.api.BlockTags;
-import org.vivecraft.api.ItemTags;
-import org.vivecraft.api.Vec3History;
+import org.vivecraft.apiold.BlockTags;
+import org.vivecraft.apiold.ItemTags;
+import org.vivecraft.apiold.Vec3History;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.settings.VRSettings;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;

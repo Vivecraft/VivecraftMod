@@ -48,7 +48,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
-import org.vivecraft.api.jopenvr.HmdMatrix44_t;
+import jopenvr.HmdMatrix44_t;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.ComponentCollector;
 import net.minecraft.client.Minecraft;

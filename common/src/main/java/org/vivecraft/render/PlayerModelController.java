@@ -12,7 +12,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.api.VRData;
+import org.vivecraft.apiold.VRData;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;

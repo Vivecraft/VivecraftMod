@@ -8,10 +8,10 @@ import java.util.Set;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.api.BlockTags;
-import org.vivecraft.api.CommonNetworkHelper;
+import org.vivecraft.apiold.BlockTags;
+import org.vivecraft.apiold.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.api.ClientNetworkHelper;
+import org.vivecraft.apiold.ClientNetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.provider.ControllerType;
 
@@ -19,7 +19,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;

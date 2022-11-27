@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.MethodHolder;
 import org.vivecraft.extensions.MinecraftExtension;
-import org.vivecraft.api.VRData;
+import org.vivecraft.apiold.VRData;
 import org.vivecraft.utils.LangHelper;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Angle;
@@ -22,7 +22,6 @@ import com.google.common.util.concurrent.Runnables;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.WinScreen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 

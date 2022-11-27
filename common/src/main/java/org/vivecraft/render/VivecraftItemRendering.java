@@ -1,7 +1,7 @@
 package org.vivecraft.render;
 
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.api.ItemTags;
+import org.vivecraft.apiold.ItemTags;
 import org.vivecraft.gameplay.trackers.SwingTracker;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.provider.ControllerType;

@@ -4,7 +4,7 @@ import java.util.HashSet;
 
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.api.VRData;
+import org.vivecraft.apiold.VRData;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
@@ -12,7 +12,6 @@ import org.vivecraft.render.RenderPass;
 import org.vivecraft.render.VRFirstPersonArmSwing;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
