@@ -14,6 +14,10 @@ loom {
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
         //mixinConfig "vivecraft.vr.mixins.json"
+
+        runConfigs.configureEach {
+            ideConfigGenerated = false
+        }
     }
 }
 

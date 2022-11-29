@@ -8,6 +8,10 @@ architectury {
 
 loom {
     accessWidenerPath = project(":vivecraft-api:common").loom.accessWidenerPath
+
+    runConfigs.configureEach {
+        ideConfigGenerated = false
+    }
 }
 
 configurations {

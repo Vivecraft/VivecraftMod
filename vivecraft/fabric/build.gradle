@@ -35,6 +35,8 @@ dependencies {
     common(project(path: ":vivecraft:common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":vivecraft:common", configuration: "transformProductionFabric")) { transitive false }
 
+    common(project(path: ":vivecraft-api:fabric", configuration: 'namedElements')) { transitive false }
+
     vr sourceSets.main.output
     commonVR(project(path: ":vivecraft:common", configuration: "vr"))
 

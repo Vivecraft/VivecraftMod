@@ -6,7 +6,6 @@ plugins {
 //evaluationDependsOn(":vivecraft-api:common")
 
 architectury {
-    minecraft "1.19.2"
     platformSetupLoomIde()
     forge()
 }
