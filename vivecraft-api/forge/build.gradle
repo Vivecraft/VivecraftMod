@@ -1,0 +1,77 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+architectury {
+    forge()
+}
+
+loom {
+    accessWidenerPath = project(":vivecraft-api:common").loom.accessWidenerPath
+
+    forge {
+        convertAccessWideners = true
+        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+
+        //mixinConfig "vivecraft.vr.mixins.json"
+    }
+}
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+
+    compiledJar
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+
+    common(project(path: ":vivecraft-api:common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":vivecraft-api:common", configuration: "transformProductionForge")) { transitive = false }
+}
+
+processResources {
+    inputs.property "version", project.api_version
+
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.api_version
+    }
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    classifier "dev-shadow"
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier 'forge'
+}
+
+jar {
+    classifier "dev"
+}
+
+artifacts {
+    compiledJar jar
+}
+
+sourcesJar {
+    def commonSources = project(":vivecraft-api:common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
