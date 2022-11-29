@@ -24,6 +24,12 @@ loom {
         mixinConfig "vivecraft.nonvr.forge.mixins.json"
     }
 
+    mods {
+        forge {
+            sourceSet project(":vivecraft-api:forge").sourceSets.main
+        }
+    }
+
 }
 
 sourceSets {
@@ -58,7 +64,6 @@ dependencies {
     shadowCommon(project(path: ":vivecraft:common", configuration: "transformProductionForge")) { transitive = false }
 
     common(project(path: ":vivecraft-api:common", configuration: 'namedElements')) { transitive false }
-    common(project(path: ":vivecraft-api:forge", configuration: 'namedElements')) { transitive false }
 
     modCompileOnly("maven.modrinth:rubidium:0.6.1")
     modCompileOnly("maven.modrinth:oculus:1.19-1.2.5a")

@@ -31,7 +31,7 @@ side = "BOTH"
 
 [[dependencies.vivecraft]]
 modId = "vivecraftapi"
-mandatory = false
-versionRange = "[1.19.2,)"
+mandatory = true
+versionRange = "[0.0.1,)"
 ordering = "AFTER"
 side = "BOTH"
