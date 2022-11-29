@@ -1,4 +1,4 @@
-package org.vivecraft.apiold;
+package org.vivecraft.oldapi;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;

@@ -2,9 +2,6 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
-//evaluationDependsOn(":vivecraft-api:forge")
-//evaluationDependsOn(":vivecraft-api:common")
-
 architectury {
     platformSetupLoomIde()
     forge()
@@ -60,7 +57,7 @@ dependencies {
     common(project(path: ":vivecraft:common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":vivecraft:common", configuration: "transformProductionForge")) { transitive = false }
 
-    //implementation(project(path: ':forge-api', configuration: 'namedElements'))
+    common(project(path: ":vivecraft-api:common", configuration: 'namedElements')) { transitive false }
     common(project(path: ":vivecraft-api:forge", configuration: 'namedElements')) { transitive false }
 
     modCompileOnly("maven.modrinth:rubidium:0.6.1")
@@ -68,10 +65,10 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", project.version
+    inputs.property "version", project.mod_version
 
     filesMatching("META-INF/mods.toml") {
-        expand "version": project.version
+        expand "version": project.mod_version
     }
 }
 

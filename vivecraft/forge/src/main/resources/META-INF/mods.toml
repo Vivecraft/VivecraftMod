@@ -25,13 +25,13 @@ side = "BOTH"
 [[dependencies.vivecraft]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18.2,)"
+versionRange = "[1.19.2,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.vivecraft]]
 modId = "vivecraftapi"
-mandatory = true
-versionRange = "[1.18.2,)"
+mandatory = false
+versionRange = "[1.19.2,)"
 ordering = "AFTER"
 side = "BOTH"

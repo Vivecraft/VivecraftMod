@@ -14,9 +14,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.CommonDataHolder;
-import org.vivecraft.apiold.AimFixHandler;
-import org.vivecraft.apiold.CommonNetworkHelper;
-import org.vivecraft.apiold.ServerVivePlayer;
+import org.vivecraft.oldapi.AimFixHandler;
+import org.vivecraft.oldapi.CommonNetworkHelper;
+import org.vivecraft.oldapi.ServerVivePlayer;
 
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;

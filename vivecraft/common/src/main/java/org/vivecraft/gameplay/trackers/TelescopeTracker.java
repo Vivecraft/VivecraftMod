@@ -2,8 +2,8 @@ package org.vivecraft.gameplay.trackers;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.apiold.ItemTags;
-import org.vivecraft.apiold.VRData;
+import org.vivecraft.oldapi.ItemTags;
+import org.vivecraft.oldapi.VRData;
 import org.vivecraft.render.RenderPass;
 
 import net.minecraft.client.Minecraft;

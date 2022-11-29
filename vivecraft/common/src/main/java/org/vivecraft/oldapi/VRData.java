@@ -1,4 +1,4 @@
-package org.vivecraft.apiold;
+package org.vivecraft.oldapi;
 
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.render.RenderPass;

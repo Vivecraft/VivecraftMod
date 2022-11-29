@@ -3,6 +3,7 @@ plugins {
 }
 
 architectury {
+    platformSetupLoomIde()
     fabric()
 }
 
@@ -35,6 +36,7 @@ dependencies {
     common(project(path: ":vivecraft:common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":vivecraft:common", configuration: "transformProductionFabric")) { transitive false }
 
+    common(project(path: ":vivecraft-api:common", configuration: 'namedElements')) { transitive false }
     common(project(path: ":vivecraft-api:fabric", configuration: 'namedElements')) { transitive false }
 
     vr sourceSets.main.output
@@ -103,10 +105,10 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", project.version
+    inputs.property "version", rootProject.version
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        expand "version": rootProject.version
     }
 }
 

@@ -1,4 +1,4 @@
-package org.vivecraft.apiold;
+package org.vivecraft.oldapi;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;

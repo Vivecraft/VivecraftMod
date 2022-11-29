@@ -5,9 +5,9 @@ import java.util.List;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.*;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.apiold.BlockTags;
-import org.vivecraft.apiold.ItemTags;
-import org.vivecraft.apiold.Vec3History;
+import org.vivecraft.oldapi.BlockTags;
+import org.vivecraft.oldapi.ItemTags;
+import org.vivecraft.oldapi.Vec3History;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.settings.VRSettings;
 

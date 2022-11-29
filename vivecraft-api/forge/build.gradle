@@ -3,6 +3,7 @@ plugins {
 }
 
 architectury {
+    platformSetupLoomIde()
     forge()
 }
 
@@ -14,10 +15,6 @@ loom {
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
         //mixinConfig "vivecraft.vr.mixins.json"
-
-        runConfigs.configureEach {
-            ideConfigGenerated = false
-        }
     }
 }
 
@@ -39,10 +36,10 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", project.api_version
+    inputs.property "version", project.mod_version
 
     filesMatching("META-INF/mods.toml") {
-        expand "version": project.api_version
+        expand "version": project.mod_version
     }
 }
 

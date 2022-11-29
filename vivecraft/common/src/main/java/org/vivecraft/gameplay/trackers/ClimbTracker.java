@@ -8,10 +8,10 @@ import java.util.Set;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.apiold.BlockTags;
-import org.vivecraft.apiold.CommonNetworkHelper;
+import org.vivecraft.oldapi.BlockTags;
+import org.vivecraft.oldapi.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.apiold.ClientNetworkHelper;
+import org.vivecraft.oldapi.ClientNetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.provider.ControllerType;
 

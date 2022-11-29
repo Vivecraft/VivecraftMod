@@ -6,8 +6,8 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.apiold.CommonNetworkHelper;
-import org.vivecraft.apiold.ServerVivePlayer;
+import org.vivecraft.oldapi.CommonNetworkHelper;
+import org.vivecraft.oldapi.ServerVivePlayer;
 
 @Mixin(AbstractHurtingProjectile.class)
 public abstract class AbstractHurtingProjectileMixin {

@@ -1,4 +1,4 @@
-package org.vivecraft.apiold;
+package org.vivecraft.oldapi;
 
 import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;

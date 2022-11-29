@@ -30,7 +30,9 @@
   "depends": {
     "fabricloader": ">=0.11.3",
     "minecraft": "1.19.x",
-    "java": ">=17"
+    "java": ">=17",
+
+    "vivecraftapi": ">=0.0.1"
   },
   "suggests": {
     "another-mod": "*"

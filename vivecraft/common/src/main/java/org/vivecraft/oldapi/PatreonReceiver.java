@@ -1,4 +1,4 @@
-package org.vivecraft.apiold;
+package org.vivecraft.oldapi;
 
 import java.io.IOException;
 import java.net.URL;

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import org.vivecraft.apiold.ErrorHelper;
+import org.vivecraft.oldapi.ErrorHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.trackers.BackpackTracker;
 import org.vivecraft.gameplay.trackers.BowTracker;

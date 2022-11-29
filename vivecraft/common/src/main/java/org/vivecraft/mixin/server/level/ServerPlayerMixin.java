@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.apiold.CommonNetworkHelper;
-import org.vivecraft.apiold.ServerVivePlayer;
+import org.vivecraft.oldapi.CommonNetworkHelper;
+import org.vivecraft.oldapi.ServerVivePlayer;
 
 import com.mojang.authlib.GameProfile;
 

@@ -1,7 +1,7 @@
 package org.vivecraft.render;
 
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.apiold.VRData;
+import org.vivecraft.oldapi.VRData;
 
 import com.mojang.math.Vector3f;
 

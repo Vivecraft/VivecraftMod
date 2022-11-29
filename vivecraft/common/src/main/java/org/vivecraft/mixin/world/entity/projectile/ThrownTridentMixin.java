@@ -3,8 +3,8 @@ package org.vivecraft.mixin.world.entity.projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.apiold.CommonNetworkHelper;
-import org.vivecraft.apiold.ServerVivePlayer;
+import org.vivecraft.oldapi.CommonNetworkHelper;
+import org.vivecraft.oldapi.ServerVivePlayer;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;

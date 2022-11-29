@@ -62,7 +62,7 @@ import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.MinecraftExtension;
 import org.vivecraft.extensions.PlayerExtension;
 import org.vivecraft.extensions.RenderTargetExtension;
-import org.vivecraft.apiold.ClientNetworkHelper;
+import org.vivecraft.oldapi.ClientNetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
