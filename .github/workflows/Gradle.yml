@@ -30,9 +30,9 @@ jobs:
     - name: Build with Gradle
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
-        arguments: build
+        arguments: build > Logs.txt 2> Errors.txt
         
     - uses: actions/upload-artifact@v3
       with:
        name: Multibuild-19
-       path: /
+       path: build
