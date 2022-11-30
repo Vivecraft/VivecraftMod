@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.CommonDataHolder;
-import org.vivecraft.render.PlayerModelController;
+import org.vivecraft.api.CommonDataHolder;
+import org.vivecraft.api.render.PlayerModelController;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {

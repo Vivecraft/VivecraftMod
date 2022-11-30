@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
-import org.vivecraft.Xplat;
+import org.vivecraft.api.Xplat;
 
 public class XeventsImpl {
 

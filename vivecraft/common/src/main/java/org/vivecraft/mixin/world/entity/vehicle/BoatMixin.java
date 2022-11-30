@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ClientDataHolder;
 
 //TODO needed?
 @Mixin(Boat.class)

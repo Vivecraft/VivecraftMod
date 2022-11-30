@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
-import org.vivecraft.CommonDataHolder;
+import org.vivecraft.api.CommonDataHolder;
 
 @Mixin(PackRepository.class)
 public class PackRepositoryVRMixin {

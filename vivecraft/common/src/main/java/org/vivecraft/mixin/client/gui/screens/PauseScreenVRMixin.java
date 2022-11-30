@@ -13,13 +13,13 @@ import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.gui.settings.GuiQuickCommandsInGame;
-import org.vivecraft.settings.AutoCalibration;
-import org.vivecraft.settings.VRHotkeys;
-import org.vivecraft.settings.VRSettings;
-import org.vivecraft.utils.external.jkatvr;
+import org.vivecraft.api.ClientDataHolder;
+import org.vivecraft.api.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.api.gui.settings.GuiQuickCommandsInGame;
+import org.vivecraft.api.settings.AutoCalibration;
+import org.vivecraft.api.settings.VRHotkeys;
+import org.vivecraft.api.settings.VRSettings;
+import org.vivecraft.api.utils.external.jkatvr;
 
 @Mixin(PauseScreen.class)
 public abstract class PauseScreenVRMixin extends Screen {

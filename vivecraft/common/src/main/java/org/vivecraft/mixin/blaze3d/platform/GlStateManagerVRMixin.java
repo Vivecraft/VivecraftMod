@@ -1,17 +1,22 @@
 package org.vivecraft.mixin.blaze3d.platform;
 
-import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
+import org.vivecraft.api.mixin.blaze3d.systems.RenderSystemAccessor;
 
-import static com.mojang.blaze3d.platform.GlStateManager.BLEND;
 import static com.mojang.blaze3d.platform.GlStateManager.glBlendFuncSeparate;
 
 @Mixin(GlStateManager.class)
 public class GlStateManagerVRMixin {
+
+    @Final
+    @Shadow
+    public static GlStateManager.BlendState BLEND;
 
     //Change the limit of textures to 32
     @ModifyArg(at = @At(value = "INVOKE", target = "Ljava/util/stream/IntStream;range(II)Ljava/util/stream/IntStream;"), index = 1, method = "<clinit>")

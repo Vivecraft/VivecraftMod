@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ClientDataHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.GuardianRenderer;
 import net.minecraft.world.entity.LivingEntity;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.render.RenderPass;
+import org.vivecraft.api.render.RenderPass;
 
 @Mixin(GuardianRenderer.class)
 public abstract class GuardianRendererVRMixin {

@@ -6,8 +6,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.render.RenderPass;
+import org.vivecraft.api.ClientDataHolder;
+import org.vivecraft.api.render.RenderPass;
 
 @Pseudo
 @Mixin(targets = {"net.coderbot.iris.shadow.ShadowMatrices", "net.coderbot.iris.shadows.ShadowMatrices"})

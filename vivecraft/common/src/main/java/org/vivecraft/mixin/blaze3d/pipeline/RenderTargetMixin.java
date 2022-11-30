@@ -20,8 +20,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.extensions.RenderTargetExtension;
-import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
+import org.vivecraft.api.extensions.RenderTargetExtension;
+import org.vivecraft.api.mixin.blaze3d.systems.RenderSystemAccessor;
 
 import java.nio.IntBuffer;
 

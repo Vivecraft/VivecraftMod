@@ -16,8 +16,8 @@ import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.settings.VRSettings;
+import org.vivecraft.api.ClientDataHolder;
+import org.vivecraft.api.settings.VRSettings;
 
 import java.util.List;
 

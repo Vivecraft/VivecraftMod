@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.multiplayer;
 
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ClientDataHolder;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.oldapi.ClientNetworkHelper;
+import org.vivecraft.api.oldapi.ClientNetworkHelper;
 
 @Mixin(MultiPlayerGameMode.class)
 public class MultiPlayerGameModeVRMixin {

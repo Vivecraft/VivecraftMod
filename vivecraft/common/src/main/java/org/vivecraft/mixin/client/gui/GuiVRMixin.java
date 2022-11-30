@@ -1,9 +1,9 @@
 package org.vivecraft.mixin.client.gui;
 
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.SodiumHelper;
-import org.vivecraft.Xplat;
-import org.vivecraft.extensions.GuiExtension;
+import org.vivecraft.api.ClientDataHolder;
+import org.vivecraft.api.SodiumHelper;
+import org.vivecraft.api.Xplat;
+import org.vivecraft.api.extensions.GuiExtension;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;

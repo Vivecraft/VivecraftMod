@@ -10,8 +10,8 @@ import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.extensions.GameRendererExtension;
+import org.vivecraft.api.ClientDataHolder;
+import org.vivecraft.api.extensions.GameRendererExtension;
 
 @Mixin(FishingHookRenderer.class)
 public class FishingHookRendererVRMixin {

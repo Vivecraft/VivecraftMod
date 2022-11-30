@@ -1,6 +1,5 @@
 package org.vivecraft.mixin.client.renderer;
 
-import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -11,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.api.mixin.blaze3d.systems.RenderSystemAccessor;
 
 @Mixin(LevelRenderer.class)
 public class NoSodiumLevelRendererVRMixin {

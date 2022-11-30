@@ -1,6 +1,6 @@
 package org.vivecraft.modCompatMixin.irisMixin;
 
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ClientDataHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;

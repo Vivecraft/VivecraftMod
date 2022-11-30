@@ -10,6 +10,24 @@ dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+
+    modCompileOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
+    modCompileOnly "maven.modrinth:iris:1.19.x-v1.4.0"
+    modCompileOnly "maven.modrinth:lithium:mc1.19.2-0.10.0"
+    modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
+    modCompileOnly "maven.modrinth:roughly-enough-items:9.1.555+fabric"
+
+    modCompileOnly("maven.modrinth:rubidium:0.6.1")
+
+    modCompileOnly("com.github.Virtuoel:Pehkui:3.5.0", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
+
+    modCompileOnly 'org.joml:joml:1.10.4'//temp sodium
+
+    modCompileOnly 'org.anarres:jcpp:1.4.14'//temp iris
+    modCompileOnly 'io.github.douira:glsl-transformer:1.0.1'//temp iris
+
+    modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
+    modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium
 }
 
 processResources {

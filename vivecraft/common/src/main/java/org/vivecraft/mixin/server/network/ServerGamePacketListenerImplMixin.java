@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.CommonDataHolder;
-import org.vivecraft.oldapi.AimFixHandler;
-import org.vivecraft.oldapi.CommonNetworkHelper;
-import org.vivecraft.oldapi.ServerVivePlayer;
+import org.vivecraft.api.CommonDataHolder;
+import org.vivecraft.api.oldapi.AimFixHandler;
+import org.vivecraft.api.oldapi.CommonNetworkHelper;
+import org.vivecraft.api.oldapi.ServerVivePlayer;
 
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;

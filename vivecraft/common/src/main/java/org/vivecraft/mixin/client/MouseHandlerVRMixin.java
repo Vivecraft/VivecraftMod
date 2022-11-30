@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client;
 
 import net.minecraft.client.player.LocalPlayer;
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ClientDataHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Final;

@@ -3,10 +3,10 @@ package org.vivecraft.mixin.client.renderer;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.extensions.EntityRenderDispatcherExtension;
-import org.vivecraft.extensions.GameRendererExtension;
-import org.vivecraft.extensions.ItemInHandRendererExtension;
+import org.vivecraft.api.ClientDataHolder;
+import org.vivecraft.api.extensions.EntityRenderDispatcherExtension;
+import org.vivecraft.api.extensions.GameRendererExtension;
+import org.vivecraft.api.extensions.ItemInHandRendererExtension;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
@@ -38,12 +38,12 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.gameplay.trackers.BowTracker;
-import org.vivecraft.gameplay.trackers.TelescopeTracker;
-import org.vivecraft.render.RenderPass;
-import org.vivecraft.render.VRArmRenderer;
-import org.vivecraft.render.VRFirstPersonArmSwing;
-import org.vivecraft.render.VivecraftItemRendering;
+import org.vivecraft.api.gameplay.trackers.BowTracker;
+import org.vivecraft.api.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.api.render.RenderPass;
+import org.vivecraft.api.render.VRArmRenderer;
+import org.vivecraft.api.render.VRFirstPersonArmSwing;
+import org.vivecraft.api.render.VivecraftItemRendering;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {

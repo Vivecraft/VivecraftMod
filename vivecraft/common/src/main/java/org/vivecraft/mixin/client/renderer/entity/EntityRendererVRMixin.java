@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import org.vivecraft.extensions.EntityRenderDispatcherExtension;
+import org.vivecraft.api.extensions.EntityRenderDispatcherExtension;
 import com.mojang.math.Quaternion;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;

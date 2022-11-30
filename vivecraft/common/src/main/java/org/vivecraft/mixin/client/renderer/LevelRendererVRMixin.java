@@ -1,11 +1,11 @@
 package org.vivecraft.mixin.client.renderer;
 
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.IrisHelper;
-import org.vivecraft.Xplat;
-import org.vivecraft.extensions.GameRendererExtension;
-import org.vivecraft.extensions.LevelRendererExtension;
-import org.vivecraft.extensions.RenderTargetExtension;
+import org.vivecraft.api.ClientDataHolder;
+import org.vivecraft.api.IrisHelper;
+import org.vivecraft.api.Xplat;
+import org.vivecraft.api.extensions.GameRendererExtension;
+import org.vivecraft.api.extensions.LevelRendererExtension;
+import org.vivecraft.api.extensions.RenderTargetExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -33,9 +33,9 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.render.RenderPass;
-import org.vivecraft.settings.VRSettings;
+import org.vivecraft.api.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.api.render.RenderPass;
+import org.vivecraft.api.settings.VRSettings;
 
 import javax.annotation.Nullable;
 

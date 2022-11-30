@@ -13,7 +13,7 @@ import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.extensions.iris.PipelineManagerExtension;
+import org.vivecraft.api.extensions.iris.PipelineManagerExtension;
 
 import java.util.Objects;
 

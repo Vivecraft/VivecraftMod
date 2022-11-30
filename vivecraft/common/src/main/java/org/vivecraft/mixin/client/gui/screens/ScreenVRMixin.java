@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.gui.screens;
 
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.api.ClientDataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;

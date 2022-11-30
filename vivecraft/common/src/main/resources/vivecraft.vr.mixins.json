@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "org.vivecraft.mixin",
-  "plugin": "org.vivecraft.VRMixinConfig",
+  "plugin": "org.vivecraft.api.VRMixinConfig",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "server.network.ServerGamePacketListnerImplVRMixin",
@@ -13,7 +13,6 @@
     "blaze3d.platform.WindowVRMixin",
     "blaze3d.platform.GlStateManagerVRMixin",
     "blaze3d.systems.RenderSystemVRMixin",
-    "blaze3d.systems.RenderSystemAccessor",
     "client.KeyboardHandlerVRMixin",
     "client.MinecraftVRMixin",
     "client.MouseHandlerVRMixin",

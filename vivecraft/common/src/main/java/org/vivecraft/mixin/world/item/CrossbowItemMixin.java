@@ -4,13 +4,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.vivecraft.oldapi.CommonNetworkHelper;
+import org.vivecraft.api.oldapi.CommonNetworkHelper;
 
 
 import net.minecraft.world.item.CrossbowItem;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.oldapi.ServerVivePlayer;
-import org.vivecraft.utils.math.Vector3;
+import org.vivecraft.api.oldapi.ServerVivePlayer;
+import org.vivecraft.api.utils.math.Vector3;
 
 @Mixin(CrossbowItem.class)
 public class CrossbowItemMixin {

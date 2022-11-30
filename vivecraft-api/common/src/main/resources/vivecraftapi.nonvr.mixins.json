@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "org.vivecraft.api.mixin",
+  "plugin": "org.vivecraft.api.NonVRMixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+
+  ],
+  "client": [
+    "blaze3d.systems.RenderSystemAccessor"
+  ],
+  "server": [
+  ],
+  "minVersion": "0.8.4"
+}
