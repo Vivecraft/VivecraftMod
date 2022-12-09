@@ -50,6 +50,14 @@ public class IrisNewWorldRenderingPipelineVRMixin {
             cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets());
         }
     }
+    @Group(name = "one shadowRenderTargets", min = 1, max = 1)
+    @Inject(target = @Desc(value = "lambda$new$3", owner = NewWorldRenderingPipeline.class, ret = ShadowRenderTargets.class, args = PackShadowDirectives.class), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
+    private void onlyOneShadowTargetSupplier150(CallbackInfoReturnable<ShadowRenderTargets> cir) {
+        if (((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
+            cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets());
+        }
+    }
+
     // why do you need to be special?
     @Group(name = "one shadowRenderTargets", min = 1, max = 1)
     @Inject(target = @Desc(value = "lambda$new$1", owner = NewWorldRenderingPipeline.class, ret = ShadowRenderTargets.class, args = {}), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
@@ -99,6 +107,19 @@ public class IrisNewWorldRenderingPipelineVRMixin {
             @Desc(value = "lambda$new$7", owner = NewWorldRenderingPipeline.class, ret = net.coderbot.iris.gl.program.ProgramImages.class, args = int.class)
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0)
     private Object rerouteShadowTarget140(Object obj) {
+        ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
+        return Objects.requireNonNull(targets != null ? targets : obj);
+    }
+
+    // iris 1.5.0+
+    @Group(name = "reroute shadowRenderTargets",  min = 6, max = 6)
+    @Redirect(target = {
+            @Desc(value = "lambda$new$5", owner = NewWorldRenderingPipeline.class, ret = net.coderbot.iris.gl.program.ProgramSamplers.class, args = {java.util.function.Supplier.class, int.class}),
+            @Desc(value = "lambda$new$6", owner = NewWorldRenderingPipeline.class, ret = net.coderbot.iris.gl.program.ProgramImages.class, args = {java.util.function.Supplier.class, int.class}),
+            @Desc(value = "lambda$new$8", owner = NewWorldRenderingPipeline.class, ret = net.coderbot.iris.gl.program.ProgramSamplers.class, args = int.class),
+            @Desc(value = "lambda$new$10", owner = NewWorldRenderingPipeline.class, ret = net.coderbot.iris.gl.program.ProgramImages.class, args = int.class)
+    }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0)
+    private Object rerouteShadowTarget150(Object obj) {
         ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
         return Objects.requireNonNull(targets != null ? targets : obj);
     }
