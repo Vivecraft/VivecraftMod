@@ -41,7 +41,7 @@ public class VivecraftMovementInput extends Input
         }
     }
 
-    public void tick(boolean p_108576_, float sneakSpeed)
+    public void tick(boolean isSneaking, float sneakSpeed)
     {
         this.leftImpulse = 0.0F;
         this.forwardImpulse = 0.0F;
@@ -210,10 +210,10 @@ public class VivecraftMovementInput extends Input
         this.jumping = this.gameSettings.keyJump.isDown() && flag2;
         this.shiftKeyDown = (dataholder.sneakTracker.sneakCounter > 0 || dataholder.sneakTracker.sneakOverride || this.gameSettings.keyShift.isDown()) && minecraft.screen == null;
 
-        if (p_108576_)
+        if (isSneaking)
         {
-            this.leftImpulse = (float)((double)this.leftImpulse * 0.3D);
-            this.forwardImpulse = (float)((double)this.forwardImpulse * 0.3D);
+            this.leftImpulse = (float)((double)this.leftImpulse * sneakSpeed);
+            this.forwardImpulse = (float)((double)this.forwardImpulse * sneakSpeed);
         }
     }
 }
