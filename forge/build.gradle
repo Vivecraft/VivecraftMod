@@ -72,6 +72,11 @@ remapJar {
 
 jar {
     classifier "dev"
+    manifest {
+        attributes(
+                'Main-Class': "org.vivecraft.LaunchPopup"
+        )
+    }
 }
 
 sourcesJar {
