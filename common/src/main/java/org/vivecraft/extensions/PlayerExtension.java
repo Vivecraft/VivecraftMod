@@ -32,7 +32,5 @@ public interface PlayerExtension {
 	float getMuhSpeedFactor();
 	double getRoomYOffsetFromPose();
 	boolean getInitFromServer();
-    String getLastMsg();
-	void setLastMsg(String string);
 	void updateSyncFields(LocalPlayer old);
 }

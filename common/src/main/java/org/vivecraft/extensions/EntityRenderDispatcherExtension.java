@@ -1,13 +1,13 @@
 package org.vivecraft.extensions;
 
-import com.mojang.math.Quaternion;
+import org.joml.Quaternionf;
 import org.vivecraft.render.VRArmRenderer;
 
 import java.util.Map;
 
 public interface EntityRenderDispatcherExtension {
 
-    Quaternion getCameraOrientationOffset(float offset);
+    Quaternionf getCameraOrientationOffset(float offset);
 
     Map<String, VRArmRenderer>  getArmSkinMap();
 }

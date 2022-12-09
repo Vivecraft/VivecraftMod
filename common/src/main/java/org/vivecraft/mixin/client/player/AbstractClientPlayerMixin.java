@@ -13,7 +13,7 @@ import org.vivecraft.api.PatreonReceiver;
 @Mixin(AbstractClientPlayer.class)
 public class AbstractClientPlayerMixin {
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void addPatreonInfo(ClientLevel clientLevel, GameProfile gameProfile, ProfilePublicKey profilePublicKey, CallbackInfo ci) {
+    private void addPatreonInfo(ClientLevel clientLevel, GameProfile gameProfile, CallbackInfo ci) {
         PatreonReceiver.addPlayerInfo(((AbstractClientPlayer) (Object) this));
     }
 }

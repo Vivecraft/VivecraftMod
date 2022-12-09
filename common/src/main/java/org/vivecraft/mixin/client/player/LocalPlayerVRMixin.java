@@ -1,8 +1,5 @@
 package org.vivecraft.mixin.client.player;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.ProfilePublicKey;
-import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.level.Level;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.CommonNetworkHelper;
@@ -34,7 +31,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.ClientNetworkHelper;
@@ -109,8 +105,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	@Shadow
 	public Input input;
 
-	public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
-		super(clientLevel, gameProfile, profilePublicKey);
+	public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile) {
+		super(clientLevel, gameProfile);
 	}
 
 	@Shadow
@@ -170,11 +166,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		if (ClientDataHolder.getInstance().vrSettings.walkUpBlocks) {
 			this.minecraft.options.autoJump().set(false);
 		}
-	}
-
-	@Inject(at = @At("TAIL"), method = "chatSigned")
-	public void chatMsg(String string, Component component, CallbackInfo ci) {
-		this.lastMsg = string;
 	}
 
 	@Override
@@ -395,14 +386,13 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	public void absMoveTo(double pX, double p_19892_, double pY, float p_19894_, float pZ) {
 		super.absMoveTo(pX, p_19892_, pY, p_19894_, pZ);
 		ClientDataHolder.getInstance().vrPlayer.snapRoomOriginToPlayerEntity((LocalPlayer) (Object) this, false, false);
-		if (!this.initFromServer) {
-			this.moveTo(pX, p_19892_, pY, p_19894_, pZ);
-			this.initFromServer = true;
-		}
 	}
 
 	@Override
 	public void setPos(double pX, double p_20211_, double pY) {
+		if (!this.initFromServer) {
+			this.initFromServer = true;
+		}
 		double d0 = this.getX();
 		double d1 = this.getY();
 		double d2 = this.getZ();
@@ -618,16 +608,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		if (!this.isSilent() && !block.defaultBlockState().getMaterial().isLiquid()) {
 			this.level.playSound((LocalPlayer) null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
 		}
-	}
-
-	@Override
-	public String getLastMsg() {
-		return lastMsg;
-	}
-
-	@Override
-	public void setLastMsg(String string) {
-		this.lastMsg = string;
 	}
 
 	@Override

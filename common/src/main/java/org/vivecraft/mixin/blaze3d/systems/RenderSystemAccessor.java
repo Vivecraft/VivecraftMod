@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.blaze3d.systems;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Vector3f;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 

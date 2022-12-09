@@ -1,11 +1,12 @@
 package org.vivecraft;
 
+import com.mojang.math.Axis;
+import org.joml.AxisAngle4f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.provider.InputSimulator;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
+import org.joml.Quaternionf;
 
 import net.minecraft.client.Minecraft;
 
@@ -25,12 +26,10 @@ public abstract class MethodHolder {
 	}
 	
 	public static void rotateDeg(PoseStack pose, float angle, float x, float y, float z) {
-		Vector3f vec = new Vector3f(x, y, z);
-		Quaternion quat = vec.rotationDegrees(angle);
-		pose.mulPose(quat);
+		pose.mulPose(new Quaternionf(new AxisAngle4f(angle * 0.017453292F, x, y, z)));
 	}
 
 	public static void rotateDegXp(PoseStack matrix, int i) {
-		matrix.mulPose(Vector3f.XP.rotationDegrees(i));
+		matrix.mulPose(Axis.XP.rotationDegrees(i));
 	}
 }

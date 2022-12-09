@@ -882,26 +882,12 @@ public class Utils
         }
     }
 
-    public static com.mojang.math.Matrix4f Matrix4fFromOpenVR(HmdMatrix44_t in)
+    public static org.joml.Matrix4f Matrix4fFromOpenVR(HmdMatrix44_t in)
     {
-        com.mojang.math.Matrix4f matrix4f = new com.mojang.math.Matrix4f();
-        matrix4f.m00 = in.m[0];
-        matrix4f.m01 = in.m[1];
-        matrix4f.m02 = in.m[2];
-        matrix4f.m03 = in.m[3];
-        matrix4f.m10 = in.m[4];
-        matrix4f.m11 = in.m[5];
-        matrix4f.m12 = in.m[6];
-        matrix4f.m13 = in.m[7];
-        matrix4f.m20 = in.m[8];
-        matrix4f.m21 = in.m[9];
-        matrix4f.m22 = in.m[10];
-        matrix4f.m23 = in.m[11];
-        matrix4f.m30 = in.m[12];
-        matrix4f.m31 = in.m[13];
-        matrix4f.m32 = in.m[14];
-        matrix4f.m33 = in.m[15];
-        return matrix4f;
+        return new org.joml.Matrix4f(in.m[0], in.m[4], in.m[8], in.m[12],
+                in.m[1], in.m[5],  in.m[9], in.m[13],
+                in.m[2], in.m[6], in.m[10], in.m[14],
+                in.m[3], in.m[7], in.m[11], in.m[15]);
     }
 
     public static Quaternion convertMatrix4ftoRotationQuat(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)

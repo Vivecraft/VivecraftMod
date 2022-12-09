@@ -179,7 +179,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
             if (mobeffect != null) {
                 TextureAtlasSprite textureatlassprite = this.minecraft.getMobEffectTextures().get(mobeffect);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                RenderSystem.setShaderTexture(0, textureatlassprite.atlas().location());
+                RenderSystem.setShaderTexture(0, textureatlassprite.atlasLocation());
                 GuiComponent.blit(matrixstack, l, i1, 0, 18, 18, textureatlassprite);
             }
         }

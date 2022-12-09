@@ -1,10 +1,11 @@
 package org.vivecraft.mixin.client.multiplayer;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.client.ClientTelemetryManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -34,7 +35,7 @@ public class ClientPacketListenerMixin {
     private Minecraft minecraft;
 
     @Inject(at = @At("TAIL"), method = "<init>")
-    public void init(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager, CallbackInfo ci) {
+    public void init(Minecraft minecraft, Screen screen, Connection connection, ServerData serverData, GameProfile gameProfile, WorldSessionTelemetryManager worldSessionTelemetryManager, CallbackInfo ci) {
         ClientNetworkHelper.resetServerSettings();
         ClientNetworkHelper.displayedChatMessage = false;
     }

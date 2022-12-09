@@ -39,8 +39,8 @@ public class ClientDataHolder {
     public static boolean katvr;
     public static boolean infinadeck;
     public static boolean viewonly;
-    public static ModelResourceLocation thirdPersonCameraModel = new ModelResourceLocation("vivecraft:camcorder");
-    public static ModelResourceLocation thirdPersonCameraDisplayModel = new ModelResourceLocation("vivecraft:camcorder_display");
+    public static ModelResourceLocation thirdPersonCameraModel = new ModelResourceLocation("vivecraft", "camcorder", "");
+    public static ModelResourceLocation thirdPersonCameraDisplayModel = new ModelResourceLocation("vivecraft", "camcorder_display", "");
     public static List<String> hrtfList = new ArrayList<>();
     private static ClientDataHolder INSTANCE;
     public final float PIOVER180 = ((float) Math.PI / 180F);

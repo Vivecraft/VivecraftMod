@@ -11,13 +11,15 @@ dependencies {
     // Do NOT use other classes from fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-    modCompileOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
-    modCompileOnly "maven.modrinth:iris:1.19.x-v1.4.0"
+    modCompileOnly "maven.modrinth:sodium:mc1.19.3-0.4.5"
+    modCompileOnly "maven.modrinth:iris:1.19.3-v1.4.4"
+
+    modCompileOnly("maven.modrinth:rubidium:0.6.1")
+
+/*
     modCompileOnly "maven.modrinth:lithium:mc1.19.2-0.10.0"
     modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
     modCompileOnly "maven.modrinth:roughly-enough-items:9.1.555+fabric"
-
-    modCompileOnly("maven.modrinth:rubidium:0.6.1")
 
 //    modCompileOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-731"
 //    modCompileOnly("io.github.fabricators_of_create:Porting-Lib:1.2.460-beta+1.18.2-dev.cca931b") //temp create
@@ -37,7 +39,6 @@ dependencies {
 
     modCompileOnly("com.github.qouteall:GravityChanger:v0.3.1") { transitive = false } //temp immersiveportals
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:6.2.57") { exclude(group: "net.fabricmc.fabric-api")} //temp immersiveportals
-    modCompileOnly("com.github.Virtuoel:Pehkui:3.5.0", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
     modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.9-1.18'){ //temp immersiveportals
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
@@ -46,12 +47,10 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-
-    modApi("dev.architectury:architectury-fabric:6.2.43") //temp rei
+*/
+    modApi("dev.architectury:architectury-fabric:7.0.59") //temp rei
     modApi("me.shedaniel:error-notifier-fabric:1.0.9") //temp rei
-
-
-    modCompileOnly 'org.joml:joml:1.10.4'//temp sodium
+    modApi("com.github.Virtuoel:Pehkui:3.5.0", { exclude group: "net.fabricmc.fabric-api" })
 
     modCompileOnly 'org.anarres:jcpp:1.4.14'//temp iris
     modCompileOnly 'io.github.douira:glsl-transformer:1.0.1'//temp iris

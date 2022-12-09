@@ -216,26 +216,12 @@ public class Matrix4f
         return new Matrix4f(vector31.x, vector31.y, vector31.z, -vector31.dot(eye), vector32.x, vector32.y, vector32.z, -vector32.dot(eye), vector3.x, vector3.y, vector3.z, -vector3.dot(eye), 0.0F, 0.0F, 0.0F, 1.0F);
     }
 
-    public com.mojang.math.Matrix4f toMCMatrix()
+    public org.joml.Matrix4f toMCMatrix()
     {
-        com.mojang.math.Matrix4f matrix4f = new com.mojang.math.Matrix4f();
-        matrix4f.m00 = this.M[0][0];
-        matrix4f.m01 = this.M[0][1];
-        matrix4f.m02 = this.M[0][2];
-        matrix4f.m03 = this.M[0][3];
-        matrix4f.m10 = this.M[1][0];
-        matrix4f.m11 = this.M[1][1];
-        matrix4f.m12 = this.M[1][2];
-        matrix4f.m13 = this.M[1][3];
-        matrix4f.m20 = this.M[2][0];
-        matrix4f.m21 = this.M[2][1];
-        matrix4f.m22 = this.M[2][2];
-        matrix4f.m23 = this.M[2][3];
-        matrix4f.m30 = this.M[3][0];
-        matrix4f.m31 = this.M[3][1];
-        matrix4f.m32 = this.M[3][2];
-        matrix4f.m33 = this.M[3][3];
-        return matrix4f;
+        return new org.joml.Matrix4f(this.M[0][0], this.M[1][0], this.M[2][0], this.M[3][0],
+            this.M[0][1], this.M[1][1], this.M[2][1], this.M[3][1],
+            this.M[0][2], this.M[1][2], this.M[2][2], this.M[3][2],
+            this.M[0][3], this.M[1][3], this.M[2][3], this.M[3][3]);
     }
 
     public String toString()

@@ -27,7 +27,7 @@ public class GuiVROptionButton extends Button
 
     public GuiVROptionButton(int id, int x, int y, int width, int height, @Nullable VRSettings.VrOptions option, String text, OnPress action)
     {
-        super(x, y, width, height, Component.translatable(text), action);
+        super(x, y, width, height, Component.translatable(text), action, Button.DEFAULT_NARRATION);
         this.id = id;
         this.enumOptions = option;
         Minecraft minecraft = Minecraft.getInstance();

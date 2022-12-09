@@ -13,8 +13,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.sounds.SoundEngine;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -1049,7 +1048,7 @@ public class VRSettings
             @Override
             String getDisplayString(String prefix, Object value) {
                 try {
-                    SoundEvent se = Registry.SOUND_EVENT.get(new ResourceLocation((String)value));
+                    SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation((String)value));
                     return I18n.get(se.getLocation().getPath());
                 } catch (Exception e) {
                     return "error";
@@ -1058,11 +1057,11 @@ public class VRSettings
 
             @Override
             Object setOptionValue(Object value) {
-                SoundEvent se = Registry.SOUND_EVENT.get(new ResourceLocation((String)value));
-                int i = Registry.SOUND_EVENT.getId(se);
-                if (++i >= Registry.SOUND_EVENT.keySet().size())
+                SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation((String)value));
+                int i = BuiltInRegistries.SOUND_EVENT.getId(se);
+                if (++i >= BuiltInRegistries.SOUND_EVENT.keySet().size())
                     i = 0;
-                return Registry.SOUND_EVENT.byId(i).getLocation().getPath();
+                return BuiltInRegistries.SOUND_EVENT.byId(i).getLocation().getPath();
             }
         },
         CROSSHAIR_SCALES_WITH_DISTANCE(false, true), // Crosshair Scaling

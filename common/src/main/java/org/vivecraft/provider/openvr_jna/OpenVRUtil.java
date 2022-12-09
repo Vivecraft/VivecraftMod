@@ -25,21 +25,21 @@ public class OpenVRUtil
         return Utils.convertMatrix4ftoRotationQuat(mat.M[0][0], mat.M[0][1], mat.M[0][2], mat.M[1][0], mat.M[1][1], mat.M[1][2], mat.M[2][0], mat.M[2][1], mat.M[2][2]);
     }
 
-    public static HmdMatrix34_t convertToMatrix34(com.mojang.math.Matrix4f matrix)
+    public static HmdMatrix34_t convertToMatrix34(org.joml.Matrix4f matrix)
     {
         HmdMatrix34_t hmdmatrix34_t = new HmdMatrix34_t();
-        hmdmatrix34_t.m[0] = matrix.m00;
-        hmdmatrix34_t.m[1] = matrix.m10;
-        hmdmatrix34_t.m[2] = matrix.m20;
-        hmdmatrix34_t.m[3] = matrix.m30;
-        hmdmatrix34_t.m[4] = matrix.m01;
-        hmdmatrix34_t.m[5] = matrix.m11;
-        hmdmatrix34_t.m[6] = matrix.m21;
-        hmdmatrix34_t.m[7] = matrix.m31;
-        hmdmatrix34_t.m[8] = matrix.m02;
-        hmdmatrix34_t.m[9] = matrix.m12;
-        hmdmatrix34_t.m[10] = matrix.m22;
-        hmdmatrix34_t.m[11] = matrix.m32;
+        hmdmatrix34_t.m[0] = matrix.m00();
+        hmdmatrix34_t.m[1] = matrix.m10();
+        hmdmatrix34_t.m[2] = matrix.m20();
+        hmdmatrix34_t.m[3] = matrix.m30();
+        hmdmatrix34_t.m[4] = matrix.m01();
+        hmdmatrix34_t.m[5] = matrix.m11();
+        hmdmatrix34_t.m[6] = matrix.m21();
+        hmdmatrix34_t.m[7] = matrix.m31();
+        hmdmatrix34_t.m[8] = matrix.m02();
+        hmdmatrix34_t.m[9] = matrix.m12();
+        hmdmatrix34_t.m[10] = matrix.m22();
+        hmdmatrix34_t.m[11] = matrix.m32();
         return hmdmatrix34_t;
     }
 }

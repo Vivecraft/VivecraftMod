@@ -6,9 +6,9 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.spongepowered.asm.mixin.Debug;
@@ -267,10 +267,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 				instance.setSampler("Sampler" + k, l);
 			}
 		}
-		Matrix4f matrix4f = Matrix4f.orthographic(width, -height, 1000.0f, 3000.0f);
+		Matrix4f matrix4f = new Matrix4f().setOrtho(0, width, height, 0,1000.0f, 3000.0f);
 		RenderSystem.setProjectionMatrix(matrix4f);
 		if (instance.MODEL_VIEW_MATRIX != null) {
-			instance.MODEL_VIEW_MATRIX.set(Matrix4f.createTranslateMatrix(0.0f, 0.0f, -2000.0f));
+			instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0f, 0.0f, -2000.0f));
 		}
 		if (instance.PROJECTION_MATRIX != null) {
 			instance.PROJECTION_MATRIX.set(matrix4f);
@@ -352,11 +352,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 					instance.setSampler("Sampler" + k, l);
 				}
 			}
-			Matrix4f matrix4f = Matrix4f.orthographic((float) width, (float) (-height), 1000.0F, 3000.0F);
+			Matrix4f matrix4f = new Matrix4f().setOrtho(0, (float) width, (float) (height), 0, 1000.0F, 3000.0F);
 			RenderSystem.setProjectionMatrix(matrix4f);
 
 			if (instance.MODEL_VIEW_MATRIX != null) {
-				instance.MODEL_VIEW_MATRIX.set(Matrix4f.createTranslateMatrix(0.0F, 0.0F, -2000.0F));
+				instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0F, 0.0F, -2000.0F));
 			}
 
 			if (instance.PROJECTION_MATRIX != null) {

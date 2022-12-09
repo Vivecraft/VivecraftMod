@@ -2,12 +2,15 @@ package org.vivecraft.mixin.client.multiplayer;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.*;
+import org.spongepowered.asm.mixin.Unique;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.extensions.PlayerExtension;
-import net.minecraft.client.ClientTelemetryManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -44,7 +47,7 @@ public class ClientPacketListenerVRMixin {
     @Shadow private Minecraft minecraft;
 
     @Inject(at = @At("TAIL"), method = "<init>")
-    public void init(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager, CallbackInfo ci) {
+    public void init(Minecraft minecraft, Screen screen, Connection connection, ServerData serverData, GameProfile gameProfile, WorldSessionTelemetryManager worldSessionTelemetryManager, CallbackInfo ci) {
         ClientDataHolder.getInstance().vrSettings.overrides.resetAll();
         ClientNetworkHelper.resetServerSettings();
         ClientNetworkHelper.displayedChatMessage = false;
@@ -62,8 +65,8 @@ public class ClientPacketListenerVRMixin {
         this.minecraft.player.input = new VivecraftMovementInput(this.minecraft.options);
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/ClientTelemetryManager;onPlayerInfoReceived(Lnet/minecraft/world/level/GameType;Z)V"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
-    public void noTelemetry(ClientTelemetryManager instance, GameType gameType, boolean bl) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/telemetry/WorldSessionTelemetryManager;onPlayerInfoReceived(Lnet/minecraft/world/level/GameType;Z)V"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
+    public void noTelemetry(WorldSessionTelemetryManager instance, GameType gameType, boolean bl) {
         return;
     }
 
@@ -74,13 +77,22 @@ public class ClientPacketListenerVRMixin {
         ClientDataHolder.getInstance().vrSettings.overrides.resetAll();
     }
 
+    @Unique String lastMsg = null;
+    @Inject(at = @At("TAIL"), method = "sendChat")
+    public void chatMsg(String string, CallbackInfo ci) {
+        this.lastMsg = string;
+    }
+
+    @Inject(at = @At("TAIL"), method = "sendCommand")
+    public void commandMsg(String string, CallbackInfo ci) {
+        this.lastMsg = string;
+    }
+
     @Inject(at = @At("TAIL"), method = "handlePlayerChat")
     public void chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
-        String s = ((PlayerExtension)minecraft.player).getLastMsg();
-        ((PlayerExtension)minecraft.player).setLastMsg(null);
 
-        if (minecraft.player == null || s == null || clientboundPlayerChatPacket.message().signedHeader().sender() == Minecraft.getInstance().player.getUUID()) {
+        if (minecraft.player == null || lastMsg == null || clientboundPlayerChatPacket.sender() == minecraft.player.getUUID()) {
             ClientDataHolder dataholder = ClientDataHolder.getInstance();
             if (dataholder.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
                 if ((dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) && !dataholder.vrSettings.seated) {
@@ -88,19 +100,18 @@ public class ClientPacketListenerVRMixin {
 
                 if (dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) {
                     Vec3 vec3 = dataholder.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-                    minecraft.level.playLocalSound(vec3.x(), vec3.y(), vec3.z(), Registry.SOUND_EVENT.get(new ResourceLocation(dataholder.vrSettings.chatNotificationSound)), SoundSource.NEUTRAL, 0.3F, 0.1F, false);
+                    minecraft.level.playLocalSound(vec3.x(), vec3.y(), vec3.z(), BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation(dataholder.vrSettings.chatNotificationSound)), SoundSource.NEUTRAL, 0.3F, 0.1F, false);
                 }
             }
         }
+        lastMsg = null;
     }
 
     @Inject(at = @At("TAIL"), method = "handleSystemChat")
     public void chatSystem(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
-        String s = ((PlayerExtension)minecraft.player).getLastMsg();
-        ((PlayerExtension)minecraft.player).setLastMsg(null);
 
-        if (minecraft.player == null || s == null || clientboundSystemChatPacket.content().getString().contains(s)) {
+        if (minecraft.player == null || lastMsg == null || clientboundSystemChatPacket.content().getString().contains(lastMsg)) {
             ClientDataHolder dataholder = ClientDataHolder.getInstance();
             if (dataholder.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
                 if ((dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) && !dataholder.vrSettings.seated) {
@@ -108,10 +119,11 @@ public class ClientPacketListenerVRMixin {
 
                 if (dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) {
                     Vec3 vec3 = dataholder.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-                    minecraft.level.playLocalSound(vec3.x(), vec3.y(), vec3.z(), Registry.SOUND_EVENT.get(new ResourceLocation(dataholder.vrSettings.chatNotificationSound)), SoundSource.NEUTRAL, 0.3F, 0.1F, false);
+                    minecraft.level.playLocalSound(vec3.x(), vec3.y(), vec3.z(), BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation(dataholder.vrSettings.chatNotificationSound)), SoundSource.NEUTRAL, 0.3F, 0.1F, false);
                 }
             }
         }
+        lastMsg = null;
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;resetPos()V"), method = "handleRespawn")
@@ -170,7 +182,7 @@ public class ClientPacketListenerVRMixin {
 
                         while (friendlybytebuf.readableBytes() > 0) {
                             String s12 = friendlybytebuf.readUtf(16384);
-                            Block block = Registry.BLOCK.get(new ResourceLocation(s12));
+                            Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s12));
 
                             if (block != null) {
                                 dataholder.climbTracker.blocklist.add(block);

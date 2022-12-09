@@ -1,14 +1,10 @@
 package org.vivecraft.render;
 
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.MemoryTracker;
-import com.mojang.math.Matrix4f;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 public class GLUtils

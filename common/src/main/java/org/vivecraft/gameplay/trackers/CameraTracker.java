@@ -15,8 +15,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class CameraTracker extends Tracker
 {
-    public static final ModelResourceLocation cameraModel = new ModelResourceLocation("vivecraft:camera");
-    public static final ModelResourceLocation cameraDisplayModel = new ModelResourceLocation("vivecraft:camera_display");
+    public static final ModelResourceLocation cameraModel = new ModelResourceLocation("vivecraft", "camera", "");
+    public static final ModelResourceLocation cameraDisplayModel = new ModelResourceLocation("vivecraft", "camera_display", "");
     private boolean visible = false;
     private Vec3 position = new Vec3(0.0D, 0.0D, 0.0D);
     private Quaternion rotation = new Quaternion();

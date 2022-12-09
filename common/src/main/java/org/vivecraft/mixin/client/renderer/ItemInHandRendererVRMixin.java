@@ -3,13 +3,14 @@ package org.vivecraft.mixin.client.renderer;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.mojang.math.Axis;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.ItemInHandRendererExtension;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import org.joml.Vector3f;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -179,16 +180,16 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 					pMatrixStack.pushPose();
 					pMatrixStack.scale(0.625F, 0.625F, 0.625F);
 					pMatrixStack.translate(mainHand ? -0.53D : -0.47D, -0.5D, -0.6D);
-					//pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
+					//pMatrixStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 					this.minecraft.getBlockRenderer().getModelRenderer().renderModel(pMatrixStack.last(), pBuffer.getBuffer(Sheets.solidBlockSheet()), (BlockState)null, this.minecraft.getModelManager().getModel(TelescopeTracker.scopeModel), 0.5F, 0.5F, 1.0F, pCombinedLight, OverlayTexture.NO_OVERLAY);
 					pMatrixStack.popPose();
 				}
 
 				pMatrixStack.pushPose();
 				pMatrixStack.translate(mainHand ? -0.01875D : 0.01875D, 0.215D, -0.0626D);
-				pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-				pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-				pMatrixStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+				pMatrixStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+				pMatrixStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+				pMatrixStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
 				((GameRendererExtension)this.minecraft.gameRenderer).DrawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
 				pMatrixStack.popPose();
 			}
@@ -250,8 +251,8 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
             */
 
 		poseStack.translate((slim ? -0.34375F : -0.375F) * h, 0.0F, slim ? 0.78125F : 0.75F);
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180));
+		poseStack.mulPose(Axis.XP.rotationDegrees(-90));
+		poseStack.mulPose(Axis.YP.rotationDegrees(180));
 		if (flag) {
 			vrarmrenderer.renderRightHand(poseStack, multiBufferSource, i, abstractclientplayer);
 		}
@@ -283,7 +284,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 					}
 
 					matrixStackIn.translate(0.0D, 0.0D, (double)0.2F);
-					matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(f2 * 30.0F));
+					matrixStackIn.mulPose(Axis.XP.rotationDegrees(f2 * 30.0F));
 					matrixStackIn.translate(0.0D, 0.0D, (double) - 0.2F);
 					break;
 
@@ -294,7 +295,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 						f1 = Mth.sin((float)((double)swingProgress * Math.PI + Math.PI));
 					}
 
-					matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees((float)(hand == HumanoidArm.RIGHT ? -1 : 1) * f1 * 45.0F));
+					matrixStackIn.mulPose(Axis.ZP.rotationDegrees((float)(hand == HumanoidArm.RIGHT ? -1 : 1) * f1 * 45.0F));
 					break;
 
 				case Use:

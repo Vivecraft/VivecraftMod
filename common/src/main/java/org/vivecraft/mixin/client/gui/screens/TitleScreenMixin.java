@@ -58,24 +58,27 @@ public abstract class TitleScreenMixin extends Screen {
             throw new RuntimeException(e);
         }
         String vrMode = Boolean.parseBoolean(vrConfig.getProperty("vrStatus")) ? "VR" : "NONVR";
-        vrModeButton = new Button(this.width / 2 + 104, this.height / 4 + 72, 56, 20, Component.literal(getIcon() + vrMode), (button) -> {
-            showError = false;
-            String newMode;
-            if (button.getMessage().getString().endsWith("NONVR")) {
-                vrConfig.setProperty("vrStatus", String.valueOf(true));
-                newMode = "VR";
-            } else {
-                vrConfig.setProperty("vrStatus", String.valueOf(false));
-                newMode = "NONVR";
-            }
-            try {
-                vrConfig.store(Files.newOutputStream(vrConfigPath), "This file stores if VR should be enabled.");
-            } catch (IOException e) {
-                showError = true;
-            }
+        vrModeButton = new Button.Builder( Component.literal(getIcon() + vrMode),  (button) -> {
+                showError = false;
+                String newMode;
+                if (button.getMessage().getString().endsWith("NONVR")) {
+                    vrConfig.setProperty("vrStatus", String.valueOf(true));
+                    newMode = "VR";
+                } else {
+                    vrConfig.setProperty("vrStatus", String.valueOf(false));
+                    newMode = "NONVR";
+                }
+                try {
+                    vrConfig.store(Files.newOutputStream(vrConfigPath), "This file stores if VR should be enabled.");
+                } catch (IOException e) {
+                    showError = true;
+                }
 
-            button.setMessage(Component.translatable(getIcon() + newMode));
-        });
+                button.setMessage(Component.translatable(getIcon() + newMode));
+            })
+            .size( 56,  20)
+            .pos(this.width / 2 + 104,  this.height / 4 + 72)
+            .build();
         this.addRenderableWidget(vrModeButton);
     }
 
@@ -98,7 +101,7 @@ public abstract class TitleScreenMixin extends Screen {
             renderTooltip(poseStack, font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
         }
 
-        int warningHeight = firstButton.y - 10;
+        int warningHeight = firstButton.getY() - 10;
         Component warning = null;
         if (showError) {
             warning = Component.translatable("vivecraft.messages.configWriteError");

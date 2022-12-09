@@ -1,10 +1,10 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
+import com.mojang.math.Axis;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.extensions.LevelRendererExtension;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
+import org.joml.Quaternionf;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -36,11 +36,9 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
     public final Map<String, VRArmRenderer> armSkinMap = new HashMap<>();
     @Shadow
     public Camera camera;
-    @Shadow
-    private Quaternion cameraOrientation;
 
     @Inject(at = @At("HEAD"), method = "cameraOrientation", cancellable = true)
-    public void cameraOrientation(CallbackInfoReturnable<Quaternion> cir) {
+    public void cameraOrientation(CallbackInfoReturnable<Quaternionf> cir) {
         if (ClientDataHolder.getInstance().currentPass == RenderPass.GUI) {
             cir.setReturnValue(this.camera.rotation());
             return;
@@ -57,11 +55,10 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                     vec3 = ClientDataHolder.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolder.getInstance().currentPass).getPosition();
                 }
                 Vec3 vec31 = entity.position().add(0.0D, (double)(entity.getBbHeight() / 2.0F), 0.0D).subtract(vec3).normalize();
-                Quaternion q = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-                q.mul(Vector3f.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
-                q.mul(Vector3f.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
+                Quaternionf q = new Quaternionf();
+                q.mul(Axis.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
+                q.mul(Axis.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
                 cir.setReturnValue(q);
-                return;
             }
         }
     }
@@ -75,7 +72,7 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
     }
 
     @Override
-    public Quaternion getCameraOrientationOffset(float offset) {
+    public Quaternionf getCameraOrientationOffset(float offset) {
         if (ClientDataHolder.getInstance().currentPass == RenderPass.GUI) {
             return this.camera.rotation();
         } else {
@@ -88,9 +85,9 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                     vec3 = ClientDataHolder.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolder.getInstance().currentPass).getPosition();
                 }
                 Vec3 vec31 = entity.position().add(0.0D, (double) (entity.getBbHeight() + offset), 0.0D).subtract(vec3).normalize();
-                Quaternion q = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-                q.mul(Vector3f.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
-                q.mul(Vector3f.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
+                Quaternionf q = new Quaternionf();
+                q.mul(Axis.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
+                q.mul(Axis.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
                 return q;
             }
         }

@@ -231,7 +231,7 @@ public class TeleportTracker extends Tracker
             if (!this.dh.vrPlayer.isTeleportSupported())
             {
                 String s1 = "tp " + vec3.x + " " + vec3.y + " " + vec3.z;
-                this.mc.player.commandSigned(s1, Component.empty());
+                this.mc.player.connection.sendCommand(s1);
             }
             else
             {

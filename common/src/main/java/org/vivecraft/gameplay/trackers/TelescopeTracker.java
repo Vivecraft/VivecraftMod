@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public class TelescopeTracker extends Tracker
 {
     //public static final ResourceLocation scopeResource = new ResourceLocation("vivecraft:trashbin");
-    public static final ModelResourceLocation scopeModel = new ModelResourceLocation("vivecraft:spyglass_in_hand#inventory");
+    public static final ModelResourceLocation scopeModel = new ModelResourceLocation("vivecraft", "spyglass_in_hand", "inventory");
     private static final double lensDistMax = 0.05D;
     private static final double lensDistMin = 0.185D;
     private static final double lensDotMax = 0.9D;

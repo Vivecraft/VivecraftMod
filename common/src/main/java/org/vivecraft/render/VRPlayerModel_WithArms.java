@@ -4,7 +4,8 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
+import org.joml.Vector3f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
@@ -251,11 +252,11 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 
 		if (this.laying)
 		{
-			pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
+			pMatrixStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
 		}
 
 		modelpart.translateAndRotate(pMatrixStack);
-		pMatrixStack.mulPose(Vector3f.XP.rotation((float)Math.sin((double)this.attackTime * Math.PI)));
+		pMatrixStack.mulPose(Axis.XP.rotation((float)Math.sin((double)this.attackTime * Math.PI)));
 		pMatrixStack.translate(0.0D, -0.5D, 0.0D);
 	}
 
@@ -284,7 +285,7 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 //
 //			if (this.laying)
 //			{
-//				pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
+//				pMatrixStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
 //			}
 //
 //			this.rightHand.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);

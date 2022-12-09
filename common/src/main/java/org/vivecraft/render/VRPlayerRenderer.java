@@ -2,11 +2,12 @@ package org.vivecraft.render;
 
 import java.util.UUID;
 
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import org.joml.Matrix4f;
 import org.vivecraft.ClientDataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import org.joml.Vector3f;
 
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
@@ -80,13 +81,13 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
         if (ClientDataHolder.getInstance().currentPass == RenderPass.GUI && entityIn.isLocalPlayer())
         {
             Matrix4f matrix4f = matrixStackIn.last().pose();
-            double d0 = (new Vec3((double)matrix4f.m00, (double)matrix4f.m01, (double)matrix4f.m02)).length();
-            matrixStackIn.last().pose().setIdentity();
-            matrixStackIn.last().normal().setIdentity();
+            double d0 = (new Vec3((double)matrix4f.m00(), (double)matrix4f.m01(), (double)matrix4f.m02())).length();
+            matrixStackIn.last().pose().identity();
+            matrixStackIn.last().normal().identity();
             matrixStackIn.translate(0.0D, 0.0D, 1000.0D);
             matrixStackIn.scale((float)d0, (float)d0, (float)d0);
-            matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-            matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F + ClientDataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw()));
+            matrixStackIn.mulPose(Axis.ZP.rotationDegrees(180.0F));
+            matrixStackIn.mulPose(Axis.YP.rotationDegrees(180.0F + ClientDataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw()));
         }
 
         PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(entityIn.getUUID());
@@ -284,7 +285,7 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
 
             if (!pEntityLiving.isAutoSpinAttack())
             {
-                pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(f2 * (-90.0F - pEntityLiving.getXRot())));
+                pMatrixStack.mulPose(Axis.XP.rotationDegrees(f2 * (-90.0F - pEntityLiving.getXRot())));
             }
 
             Vec3 vec3 = pEntityLiving.getViewVector(pPartialTicks);
@@ -296,7 +297,7 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
             {
                 double d2 = (vec31.x * vec3.x + vec31.z * vec3.z) / Math.sqrt(d0 * d1);
                 double d3 = vec31.x * vec3.z - vec31.z * vec3.x;
-                pMatrixStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(d3) * Math.acos(d2))));
+                pMatrixStack.mulPose(Axis.YP.rotation((float)(Math.signum(d3) * Math.acos(d2))));
             }
         }
         else if (f > 0.0F)
@@ -304,7 +305,7 @@ public class VRPlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer,
             super.setupRotations(pEntityLiving, pMatrixStack, pAgeInTicks, pRotationYaw, pPartialTicks);
             float f3 = pEntityLiving.isInWater() ? -90.0F - pEntityLiving.getXRot() : -90.0F;
             float f4 = Mth.lerp(f, 0.0F, f3);
-            pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(f4));
+            pMatrixStack.mulPose(Axis.XP.rotationDegrees(f4));
 
             if (pEntityLiving.isVisuallySwimming())
             {

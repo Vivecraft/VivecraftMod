@@ -33,24 +33,24 @@ public class Matrix4f extends Matrix implements Serializable
         this.load(src);
     }
 
-    public Matrix4f(com.mojang.math.Matrix4f src)
+    public Matrix4f(org.joml.Matrix4f src)
     {
-        this.m00 = src.m00;
-        this.m01 = src.m01;
-        this.m02 = src.m02;
-        this.m03 = src.m03;
-        this.m10 = src.m10;
-        this.m11 = src.m11;
-        this.m12 = src.m12;
-        this.m13 = src.m13;
-        this.m20 = src.m20;
-        this.m21 = src.m21;
-        this.m22 = src.m22;
-        this.m23 = src.m23;
-        this.m30 = src.m30;
-        this.m31 = src.m31;
-        this.m32 = src.m32;
-        this.m33 = src.m33;
+        this.m00 = src.m00();
+        this.m01 = src.m01();
+        this.m02 = src.m02();
+        this.m03 = src.m03();
+        this.m10 = src.m10();
+        this.m11 = src.m11();
+        this.m12 = src.m12();
+        this.m13 = src.m13();
+        this.m20 = src.m20();
+        this.m21 = src.m21();
+        this.m22 = src.m22();
+        this.m23 = src.m23();
+        this.m30 = src.m30();
+        this.m31 = src.m31();
+        this.m32 = src.m32();
+        this.m33 = src.m33();
     }
 
     public String toString()

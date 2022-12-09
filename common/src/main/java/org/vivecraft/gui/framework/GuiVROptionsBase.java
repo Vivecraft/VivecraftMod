@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -43,20 +43,28 @@ public abstract class GuiVROptionsBase extends Screen
 
     protected void addDefaultButtons()
     {
-        this.addRenderableWidget(this.btnDone = new Button(this.width / 2 + 5, this.height - 30, 150, 20, Component.translatable("gui.back"), (p) ->
-        {
-            if (!this.onDoneClicked())
-            {
-                this.dataholder.vrSettings.saveOptions();
-                this.minecraft.setScreen(this.lastScreen);
-            }
-        }));
-        this.addRenderableWidget(this.btnDefaults = new Button(this.width / 2 - 155, this.height - 30, 150, 20, Component.translatable("vivecraft.gui.loaddefaults"), (p) ->
-        {
-            this.loadDefaults();
-            this.dataholder.vrSettings.saveOptions();
-            this.reinit = true;
-        }));
+        this.addRenderableWidget(this.btnDone = new Button.Builder(Component.translatable("gui.back"), (p) ->
+                    {
+                        if (!this.onDoneClicked())
+                        {
+                            this.dataholder.vrSettings.saveOptions();
+                            this.minecraft.setScreen(this.lastScreen);
+                        }
+                    })
+                .pos(this.width / 2 + 5, this.height - 30)
+                .size(150, 20)
+                .build());
+        this.addRenderableWidget(this.btnDefaults = new Button.Builder(Component.translatable("vivecraft.gui.loaddefaults"), (p) ->
+                {
+                    if (!this.onDoneClicked())
+                    {
+                        this.dataholder.vrSettings.saveOptions();
+                        this.minecraft.setScreen(this.lastScreen);
+                    }
+                })
+                .pos(this.width / 2 - 155, this.height - 30)
+                .size(150, 20)
+                .build());
     }
 
     protected boolean onDoneClicked()
@@ -138,11 +146,11 @@ public abstract class GuiVROptionsBase extends Screen
 
     protected void loadDefaults()
     {
-        for (Widget widget : this.renderables) {
-            if (!(widget instanceof GuiVROptionButton))
+        for (Renderable renderable : this.renderables) {
+            if (!(renderable instanceof GuiVROptionButton))
                 continue;
 
-            GuiVROptionButton optionButton = (GuiVROptionButton)widget;
+            GuiVROptionButton optionButton = (GuiVROptionButton)renderable;
             this.settings.loadDefault(optionButton.enumOptions);
         }
     }
@@ -323,9 +331,9 @@ public abstract class GuiVROptionsBase extends Screen
     private void renderTooltip(PoseStack pMatrixStack, int pMouseX, int pMouseY) {
         AbstractWidget hover = null;
         // find active button
-        for (Widget widget: renderables) {
-            if (widget instanceof AbstractWidget && ((AbstractWidget) widget).isMouseOver(pMouseX, pMouseY)) {
-                hover = (AbstractWidget) widget;
+        for (Renderable renderable: renderables) {
+            if (renderable instanceof AbstractWidget && ((AbstractWidget) renderable).isMouseOver(pMouseX, pMouseY)) {
+                hover = (AbstractWidget) renderable;
             }
         }
         if (hover != null ) {
@@ -343,10 +351,10 @@ public abstract class GuiVROptionsBase extends Screen
                         tooltip += " ".repeat((308 - (formattedText.size() == 0 ? 0 : font.width(formattedText.get(formattedText.size() - 1)))) / font.width(" "));
 
                         // if tooltip is not too low, draw below button, else above
-                        if (guiHover.y + guiHover.getHeight() + formattedText.size() * (font.lineHeight + 1) + 14 < this.height) {
-                            renderTooltip(pMatrixStack, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.y + guiHover.getHeight() + 14);
+                        if (guiHover.getY() + guiHover.getHeight() + formattedText.size() * (font.lineHeight + 1) + 14 < this.height) {
+                            renderTooltip(pMatrixStack, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.getY() + guiHover.getHeight() + 14);
                         } else {
-                            renderTooltip(pMatrixStack, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.y - formattedText.size() * (font.lineHeight + 1) + 9);
+                            renderTooltip(pMatrixStack, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.getY() - formattedText.size() * (font.lineHeight + 1) + 9);
                         }
                     }
                 }

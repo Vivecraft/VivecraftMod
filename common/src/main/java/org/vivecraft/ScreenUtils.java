@@ -61,7 +61,7 @@ public class ScreenUtils {
                 int j = abstractwidget.getWidth();
                 int k = abstractwidget.getHeight();
 
-                if (x >= abstractwidget.x && y >= abstractwidget.y && x < abstractwidget.x + j && y < abstractwidget.y + k)
+                if (x >= abstractwidget.getX() && y >= abstractwidget.getY() && x < abstractwidget.getX() + j && y < abstractwidget.getY() + k)
                 {
                     return abstractwidget;
                 }

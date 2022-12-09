@@ -38,7 +38,7 @@ public class XeventsImpl {
         if (Xplat.isModLoaded("architectury")){
             ClientGuiEvent.RENDER_PRE.invoker().render(screen, poseStack, mouseX, mouseY, partialTick);
         }
-        screen.render(poseStack, mouseX, mouseY, partialTick);
+        screen.renderWithTooltip(poseStack, mouseX, mouseY, partialTick);
         if (Xplat.isModLoaded("fabric")){
             ScreenEvents.afterRender(screen).invoker().afterRender(screen, poseStack, mouseX, mouseY, partialTick);
         }

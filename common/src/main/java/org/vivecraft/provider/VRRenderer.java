@@ -10,7 +10,6 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
@@ -19,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL43;
@@ -184,7 +184,7 @@ public abstract class VRRenderer
         RenderTarget fb = minecraft.getMainRenderTarget();
         RenderSystem.viewport(0, 0, fb.viewWidth, fb.viewHeight);
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(Matrix4f.orthographic(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F));
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F));
         RenderSystem.getModelViewStack().pushPose();
         RenderSystem.getModelViewStack().setIdentity();
         if(inverse) //draw on far clip
@@ -227,7 +227,7 @@ public abstract class VRRenderer
             GlStateManager._disableBlend();
             RenderSystem.backupProjectionMatrix();
             Matrix4f matrix4f = new Matrix4f();
-            matrix4f.setIdentity();
+            matrix4f.identity();
             RenderSystem.setProjectionMatrix(matrix4f);
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().translate(0, 0, -0.7F);

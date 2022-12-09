@@ -50,7 +50,7 @@ public class GuiVROptionSlider extends GuiVROptionButton
     {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolder dataholder = ClientDataHolder.getInstance();
-        this.sliderValue = (double)((float)(p_setValueFromMouse_1_ - (double)(this.x + 4)) / (float)(this.width - 8));
+        this.sliderValue = (double)((float)(p_setValueFromMouse_1_ - (double)(this.getX() + 4)) / (float)(this.width - 8));
         this.sliderValue = Mth.clamp(this.sliderValue, 0.0D, 1.0D);
         double d0 = this.enumOptions.denormalizeValue((float)this.sliderValue);
         dataholder.vrSettings.setOptionFloatValue(this.enumOptions, (float)d0);
@@ -65,14 +65,14 @@ public class GuiVROptionSlider extends GuiVROptionButton
             pMinecraft.getTextureManager().bindForSetup(WIDGETS_LOCATION);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             int i = (this.isHoveredOrFocused() ? 2 : 1) * 20;
-            this.blit(pMatrixStack, this.x + (int)(this.sliderValue * (double)(this.width - 8)), this.y, 0, 46 + i, 4, 20);
-            this.blit(pMatrixStack, this.x + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.y, 196, 46 + i, 4, 20);
+            this.blit(pMatrixStack, this.getX() + (int)(this.sliderValue * (double)(this.width - 8)), this.getY(), 0, 46 + i, 4, 20);
+            this.blit(pMatrixStack, this.getX() + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.getY(), 196, 46 + i, 4, 20);
         }
     }
 
     public void onClick(double pMouseX, double p_93635_)
     {
-        this.sliderValue = (pMouseX - (double)(this.x + 4)) / (double)(this.width - 8);
+        this.sliderValue = (pMouseX - (double)(this.getX() + 4)) / (double)(this.width - 8);
         this.sliderValue = Mth.clamp(this.sliderValue, 0.0D, 1.0D);
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolder dataholder = ClientDataHolder.getInstance();

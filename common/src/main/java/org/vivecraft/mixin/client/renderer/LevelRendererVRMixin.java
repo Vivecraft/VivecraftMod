@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client.renderer;
 
+import org.joml.Matrix4f;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.Xplat;
@@ -9,7 +10,6 @@ import org.vivecraft.extensions.RenderTargetExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -187,13 +187,13 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 	}
 	
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE), 
-			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V ")
+			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V ")
 	public void stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
 		this.minecraft.getProfiler().popPush("stencil");
 		((GameRendererExtension) gameRenderer).drawEyeStencil(false);
 	}
 	
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V")
 	public boolean drawSelf(Camera camera) {
 		boolean renderSelf = ClientDataHolder.getInstance().currentPass == RenderPass.THIRD && ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA;
 		renderSelf = renderSelf | (ClientDataHolder.getInstance().vrSettings.shouldRenderSelf || ClientDataHolder.getInstance().vrSettings.tmpRenderSelf);
@@ -269,7 +269,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		guiRendered = false;
 	}
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", shift = Shift.BEFORE, ordinal = 17),
-			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lcom/mojang/math/Matrix4f;)V")
+			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V")
 	public void renderFast1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
 		menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
 		menuhandright = menuHandleft || ClientDataHolder.getInstance().interactTracker.hotbar >= 0 && ClientDataHolder.getInstance().vrSettings.vrTouchHotbar;

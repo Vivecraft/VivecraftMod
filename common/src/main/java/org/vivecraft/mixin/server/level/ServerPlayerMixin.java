@@ -50,8 +50,8 @@ public abstract class ServerPlayerMixin extends Player {
 	@Unique
 	private Component tabListDisplayName = null;
 
-	public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
-		super(level, blockPos, f, gameProfile, profilePublicKey);
+	public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
+		super(level, blockPos, f, gameProfile);
 	}
 
 	@Inject(at = @At("TAIL"), method = "initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V")

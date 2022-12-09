@@ -59,8 +59,8 @@ public abstract class TwoHandedScreen extends Screen
         for (int i = 0; i < this.renderables.size(); ++i)
         {
             AbstractWidget abstractwidget2 = (AbstractWidget) this.renderables.get(i);
-            boolean flag = d0 >= (double)abstractwidget2.x && d1 >= (double)abstractwidget2.y && d0 < (double)(abstractwidget2.x + abstractwidget2.getWidth()) && d1 < (double)(abstractwidget2.y + 20);
-            boolean flag1 = d2 >= (double)abstractwidget2.x && d3 >= (double)abstractwidget2.y && d2 < (double)(abstractwidget2.x + abstractwidget2.getWidth()) && d3 < (double)(abstractwidget2.y + 20);
+            boolean flag = d0 >= (double)abstractwidget2.getX() && d1 >= (double)abstractwidget2.getY() && d0 < (double)(abstractwidget2.getX() + abstractwidget2.getWidth()) && d1 < (double)(abstractwidget2.getY() + 20);
+            boolean flag1 = d2 >= (double)abstractwidget2.getX() && d3 >= (double)abstractwidget2.getY() && d2 < (double)(abstractwidget2.getX() + abstractwidget2.getWidth()) && d3 < (double)(abstractwidget2.getY() + 20);
 
             if (flag)
             {
