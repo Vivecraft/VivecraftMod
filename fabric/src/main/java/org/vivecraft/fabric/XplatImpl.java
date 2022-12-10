@@ -1,5 +1,6 @@
 package org.vivecraft.fabric;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -31,5 +32,9 @@ public class XplatImpl {
 
     public static boolean isModLoadedSuccess() {
         return FabricLoader.getInstance().isModLoaded("vivecraft");
+    }
+
+    public static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
+        return false;
     }
 }
