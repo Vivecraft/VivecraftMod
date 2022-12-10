@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.extensions.RenderTargetExtension;
 
 @Mixin(PostChain.class)
-public class PostChainMixin {
+public class PostChainVRMixin {
 
     @Shadow
     @Final
