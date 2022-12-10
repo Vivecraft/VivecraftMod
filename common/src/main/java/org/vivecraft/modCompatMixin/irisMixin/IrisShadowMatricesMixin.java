@@ -1,7 +1,7 @@
 package org.vivecraft.modCompatMixin.irisMixin;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
-import net.coderbot.iris.shadow.ShadowMatrices;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -18,8 +18,18 @@ public class IrisShadowMatricesMixin {
     private static Vec3 leftPass;
     private static Vec3 currentPass;
 
-    @Inject(method = "snapModelViewToGrid", at = @At("HEAD"), remap = false)
+
+    // iris 1.4.2-
+    @Group(name = "shadow interval", min = 1, max = 1)
+    @Inject(target = @Desc(value = "snapModelViewToGrid", args = {Matrix4f.class, float.class, double.class, double.class, double.class}), at = @At("HEAD"), remap = false, expect = 0, require = 0)
     private static void cacheInterval(Matrix4f target, float shadowIntervalSize, double cameraX, double cameraY, double cameraZ, CallbackInfo ci){
+        cachedShadowIntervalSize = shadowIntervalSize;
+    }
+
+    // iris 1.4.3+
+    @Group(name = "shadow interval", min = 1, max = 1)
+    @Inject(target = @Desc(value = "snapModelViewToGrid", args = {PoseStack.class, float.class, double.class, double.class, double.class}), at = @At("HEAD"), remap = false, expect = 0, require = 0)
+    private static void cacheInterval143(PoseStack target, float shadowIntervalSize, double cameraX, double cameraY, double cameraZ, CallbackInfo ci){
         cachedShadowIntervalSize = shadowIntervalSize;
     }
 
