@@ -22,7 +22,7 @@ public class IrisShadowMatricesMixin {
     // iris 1.4.2-
     @Group(name = "shadow interval", min = 1, max = 1)
     @Inject(target = @Desc(value = "snapModelViewToGrid", args = {Matrix4f.class, float.class, double.class, double.class, double.class}), at = @At("HEAD"), remap = false, expect = 0, require = 0)
-    private static void cacheInterval(PoseStack target, float shadowIntervalSize, double cameraX, double cameraY, double cameraZ, CallbackInfo ci){
+    private static void cacheInterval(Matrix4f target, float shadowIntervalSize, double cameraX, double cameraY, double cameraZ, CallbackInfo ci){
         cachedShadowIntervalSize = shadowIntervalSize;
     }
 
