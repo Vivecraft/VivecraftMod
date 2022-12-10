@@ -90,6 +90,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	}
 
 	@Override
+	public boolean getUseStencil(){
+		return useStencil;
+	}
+
+	@Override
 	public void clearWithColor(float r, float g, float b, float a, boolean isMac) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		this._bindWrite(true);
