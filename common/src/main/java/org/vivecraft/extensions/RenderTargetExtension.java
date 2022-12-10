@@ -28,6 +28,8 @@ public interface RenderTargetExtension {
 
 	void setUseStencil(boolean useStencil);
 
+	boolean getUseStencil();
+
 	void isLinearFilter(boolean linearFilter);
 
 	void blitFovReduction(ShaderInstance instance, int width, int height);

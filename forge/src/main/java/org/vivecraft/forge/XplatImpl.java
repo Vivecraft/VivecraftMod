@@ -1,5 +1,6 @@
 package org.vivecraft.forge;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -33,5 +34,10 @@ public class XplatImpl {
 
     public static boolean isModLoadedSuccess() {
         return FMLLoader.getLoadingModList().getModFileById("vivecraft") != null;
+    }
+
+    public static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
+        renderTarget.enableStencil();
+        return true;
     }
 }

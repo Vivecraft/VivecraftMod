@@ -152,9 +152,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         {
             GuiVROptionButton guivroptionbutton = (GuiVROptionButton)widget;
 
-            if (guivroptionbutton.id == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroptionbutton.id == VRSettings.VrOptions.FSAA.ordinal())
+            if (guivroptionbutton.id == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroptionbutton.id == VRSettings.VrOptions.FSAA.ordinal() || guivroptionbutton.id == VRSettings.VrOptions.STENCIL_ON.ordinal())
             {
-                if (guivroptionbutton.id != VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() && !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                if (guivroptionbutton.id != VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
                     this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
                 }
             }
