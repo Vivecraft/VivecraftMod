@@ -14,6 +14,9 @@ public class VRTextureTarget extends RenderTarget{
 		((RenderTargetExtension)this).isLinearFilter(linearFilter);
 		((RenderTargetExtension)this).setUseStencil(useStencil);
 		this.resize(width, height, onMac);
+		if (useStencil) {
+			Xplat.enableRenderTargetStencil(this);
+		}
 		this.setClearColor(0, 0, 0, 0);
 	}	
 }

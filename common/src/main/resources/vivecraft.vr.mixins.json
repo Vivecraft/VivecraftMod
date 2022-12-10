@@ -44,6 +44,7 @@
     "client.renderer.entity.GuardianRendererVRMixin",
     "client.renderer.entity.MobRendererVRMixin",
     "client.renderer.NoSodiumLevelRendererVRMixin",
+    "client.renderer.PostChainMixin",
 
     "world.entity.vehicle.BoatMixin",
     "world.item.ItemVRMixin",
