@@ -1,5 +1,8 @@
 package org.vivecraft.gui.settings;
 
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.IrisHelper;
+import org.vivecraft.Xplat;
 import org.vivecraft.gui.framework.GuiVROptionButton;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.settings.VRHotkeys;
@@ -151,7 +154,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
 
             if (guivroptionbutton.id == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroptionbutton.id == VRSettings.VrOptions.FSAA.ordinal())
             {
-                this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
+                if (guivroptionbutton.id != VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() && !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                    this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
+                }
             }
             if (guivroptionbutton.id == VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA.ordinal())
             {

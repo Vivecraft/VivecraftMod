@@ -26,6 +26,7 @@ public interface RenderTargetExtension {
 
 	void setTextid(int texid);
 
+	void setUseStencil(boolean useStencil);
 
 	void isLinearFilter(boolean linearFilter);
 
