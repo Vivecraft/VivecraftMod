@@ -55,4 +55,9 @@ public interface Xplat {
     static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
         return false;
     }
+
+    @ExpectPlatform
+    static String getUseMethodName() {
+        return "";
+    }
 }
