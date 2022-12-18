@@ -37,4 +37,8 @@ public class XplatImpl {
     public static boolean enableRenderTargetStencil(RenderTarget renderTarget) {
         return false;
     }
+
+    public static Path getJarPath(){
+        return FabricLoader.getInstance().getModContainer("vivecraft").get().getRootPaths().get(0);
+    }
 }
