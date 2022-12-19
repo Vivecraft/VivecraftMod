@@ -569,13 +569,32 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //		}
 
 		// v
+		this.profiler.push("gui setup");
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);
 		this.mainRenderTarget = GuiHandler.guiFramebuffer;
 		this.mainRenderTarget.clear(Minecraft.ON_OSX);
 		this.mainRenderTarget.bindWrite(true);
-		((GameRendererExtension) this.gameRenderer).drawFramebufferNEW(f, bl, new PoseStack());
 
+		// draw screen/gui to buffer
+		RenderSystem.getModelViewStack().pushPose();
+		((GameRendererExtension) this.gameRenderer).setShouldDrawScreen(true);
+		((GameRendererExtension) this.gameRenderer).setShouldDrawGui(bl);
+
+		this.gameRenderer.render(f, Util.getNanos(), false);
+		// draw debug pie
+		drawProfiler();
+
+		RenderSystem.getModelViewStack().popPose();
+		RenderSystem.applyModelViewMatrix();
+
+		// generate mipmaps
+		// TODO: does this do anything?
+		mainRenderTarget.bindRead();
+		((RenderTargetExtension) mainRenderTarget).genMipMaps();
+		mainRenderTarget.unbindRead();
+
+		this.profiler.popPush("2D Keyboard");
 		if (KeyboardHandler.Showing
 				&& !ClientDataHolder.getInstance().vrSettings.physicalKeyboard) {
 			this.mainRenderTarget = KeyboardHandler.Framebuffer;
@@ -598,6 +617,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //		this.window.updateDisplay();
 
 		// v
+		this.profiler.popPush("Radial Menu");
 		if (RadialHandler.isShowing()) {
 			this.mainRenderTarget = RadialHandler.Framebuffer;
 			this.mainRenderTarget.clear(Minecraft.ON_OSX);
@@ -605,6 +625,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			((GameRendererExtension) this.gameRenderer).drawScreen(f, RadialHandler.UI, new PoseStack());
 		}
 
+		this.profiler.pop();
 		this.checkGLError("post 2d ");
 		VRHotkeys.updateMovingThirdPersonCam();
 		this.profiler.popPush("sound");
