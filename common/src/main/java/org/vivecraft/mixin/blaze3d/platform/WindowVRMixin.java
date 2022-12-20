@@ -44,9 +44,10 @@ public abstract class WindowVRMixin {
 		return null;
 	}
 
-	@Redirect(method = "updateVsync", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapInterval(I)V", remap = false))
-	public void disableSwap(int interval) {
+	@Inject(method = "updateVsync", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapInterval(I)V", remap = false, shift = At.Shift.BEFORE), cancellable = true)
+	public void disableSwap(boolean bl, CallbackInfo ci) {
 		GLFW.glfwSwapInterval(0);
+		ci.cancel();
 	}
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I"), method = "onFramebufferResize(JII)V")
