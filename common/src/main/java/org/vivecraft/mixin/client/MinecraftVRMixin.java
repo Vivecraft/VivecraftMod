@@ -30,6 +30,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
@@ -283,6 +284,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	public abstract void stop();
 
 	@Shadow @Final public LevelRenderer levelRenderer;
+
+	@Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
 
 	@Shadow private static Minecraft instance;
 
@@ -579,7 +582,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		// draw screen/gui to buffer
 		RenderSystem.getModelViewStack().pushPose();
 		((GameRendererExtension) this.gameRenderer).setShouldDrawScreen(true);
-		((GameRendererExtension) this.gameRenderer).setShouldDrawGui(bl);
+		// only draw the gui when the level was rendered once, since some mods expect that
+		((GameRendererExtension) this.gameRenderer).setShouldDrawGui(bl && this.entityRenderDispatcher.camera != null);
 
 		this.gameRenderer.render(f, Util.getNanos(), false);
 		// draw debug pie
