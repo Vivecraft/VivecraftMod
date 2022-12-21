@@ -423,13 +423,13 @@ public abstract class GameRendererVRMixin
 	private void noItemActivationAnimationOnGUI(GameRenderer instance, int i, int j, float f) {}
 
 	@Group(name = "mouse cursor", min = 1, max = 1)
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;render(Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = Shift.AFTER), method = "render(FJZ)V", locals = LocalCapture.CAPTURE_FAILHARD)
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;render(Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = Shift.AFTER), method = "render(FJZ)V", locals = LocalCapture.CAPTURE_FAILHARD, expect = 0)
 	private void renderCursor(float f, long l, boolean bl, CallbackInfo ci, int x, int y) {
 		((GuiExtension) this.minecraft.gui).drawMouseMenuQuad(x, y);
 	}
 
 	@Group(name = "mouse cursor", min = 1, max = 1)
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/ForgeHooksClient;drawScreen(Lnet/minecraft/client/gui/screens/Screen;Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = Shift.AFTER), method = "render(FJZ)V", locals = LocalCapture.CAPTURE_FAILHARD)
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/ForgeHooksClient;drawScreen(Lnet/minecraft/client/gui/screens/Screen;Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = Shift.AFTER), method = "render(FJZ)V", locals = LocalCapture.CAPTURE_FAILHARD, expect = 0)
 	private void renderCursorForge(float f, long l, boolean bl, CallbackInfo ci, int x, int y) {
 		((GuiExtension) this.minecraft.gui).drawMouseMenuQuad(x, y);
 	}
