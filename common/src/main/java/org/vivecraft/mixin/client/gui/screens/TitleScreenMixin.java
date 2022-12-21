@@ -89,7 +89,7 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Inject(at =  @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;render(Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = At.Shift.BEFORE, ordinal = 0), method = "render")
     public void renderText(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
-        int l = this.height / 4 + 49;
+        int l = vrModeButton.y - 23;
         drawString(poseStack, this.font, "Vivecraft", this.width / 2 + 106, l, 16777215);
         drawString(poseStack, this.font, new TranslatableComponent("vivecraft.messages.mode"), this.width / 2 + 106, l + 10, 16777215);
     }
