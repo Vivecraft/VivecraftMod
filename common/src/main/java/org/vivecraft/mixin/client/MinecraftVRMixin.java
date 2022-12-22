@@ -62,10 +62,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.*;
-import org.vivecraft.extensions.GameRendererExtension;
-import org.vivecraft.extensions.MinecraftExtension;
-import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.extensions.RenderTargetExtension;
+import org.vivecraft.extensions.*;
 import org.vivecraft.api.ClientNetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
@@ -586,6 +583,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		((GameRendererExtension) this.gameRenderer).setShouldDrawGui(bl && this.entityRenderDispatcher.camera != null);
 
 		this.gameRenderer.render(f, Util.getNanos(), false);
+		// draw cursor
+		if (Minecraft.getInstance().screen != null) {
+			int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
+			int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
+			((GuiExtension) Minecraft.getInstance().gui).drawMouseMenuQuad(x, y);
+		}
 		// draw debug pie
 		drawProfiler();
 

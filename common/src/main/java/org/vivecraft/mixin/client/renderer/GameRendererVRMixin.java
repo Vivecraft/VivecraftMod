@@ -56,7 +56,6 @@ import org.vivecraft.MethodHolder;
 import org.vivecraft.Xevents;
 import org.vivecraft.Xplat;
 import org.vivecraft.extensions.GameRendererExtension;
-import org.vivecraft.extensions.GuiExtension;
 import org.vivecraft.extensions.ItemInHandRendererExtension;
 import org.vivecraft.extensions.LevelRendererExtension;
 import org.vivecraft.extensions.PlayerExtension;
@@ -421,18 +420,6 @@ public abstract class GameRendererVRMixin
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemActivationAnimation(IIF)V"), method = "render(FJZ)V")
 	private void noItemActivationAnimationOnGUI(GameRenderer instance, int i, int j, float f) {}
-
-	@Group(name = "mouse cursor", min = 1, max = 1)
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;render(Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = Shift.AFTER), method = "render(FJZ)V", locals = LocalCapture.CAPTURE_FAILHARD, expect = 0)
-	private void renderCursor(float f, long l, boolean bl, CallbackInfo ci, int x, int y) {
-		((GuiExtension) this.minecraft.gui).drawMouseMenuQuad(x, y);
-	}
-
-	@Group(name = "mouse cursor", min = 1, max = 1)
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/ForgeHooksClient;drawScreen(Lnet/minecraft/client/gui/screens/Screen;Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = Shift.AFTER), method = "render(FJZ)V", locals = LocalCapture.CAPTURE_FAILHARD, expect = 0)
-	private void renderCursorForge(float f, long l, boolean bl, CallbackInfo ci, int x, int y) {
-		((GuiExtension) this.minecraft.gui).drawMouseMenuQuad(x, y);
-	}
 
 	@Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(DDD)V"))
 	private void noTranslateItem(PoseStack poseStack, double x, double y, double z){}
