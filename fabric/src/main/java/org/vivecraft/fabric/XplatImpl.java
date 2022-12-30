@@ -38,6 +38,10 @@ public class XplatImpl {
         return false;
     }
 
+    public static Path getJarPath() {
+        return FabricLoader.getInstance().getModContainer("vivecraft").get().getRootPaths().get(0);
+    }
+
     public static String getUseMethodName() {
         return FabricLoader.getInstance().getMappingResolver().mapMethodName(
                 "intermediary",
@@ -49,6 +53,5 @@ public class XplatImpl {
                         "Lnet/minecraft/class_1268;"+
                         "Lnet/minecraft/class_3965;)"+
                         "Lnet/minecraft/class_1269;");
-
     }
 }

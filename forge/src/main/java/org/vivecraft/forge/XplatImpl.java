@@ -41,6 +41,10 @@ public class XplatImpl {
         renderTarget.enableStencil();
         return true;
     }
+    
+    public static Path getJarPath() {
+        return FMLLoader.getLoadingModList().getModFileById("vivecraft").getFile().getSecureJar().getPath("/");
+    }
 
     public static String getUseMethodName() {
         return ObfuscationReflectionHelper.findMethod(
