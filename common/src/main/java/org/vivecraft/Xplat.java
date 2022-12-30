@@ -57,7 +57,12 @@ public interface Xplat {
     }
 
     @ExpectPlatform
-    static Path getJarPath(){
+    static Path getJarPath() {
         return null;
+    }
+
+    @ExpectPlatform
+    static String getUseMethodName() {
+        return "";
     }
 }
