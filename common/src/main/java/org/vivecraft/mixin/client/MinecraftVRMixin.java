@@ -439,6 +439,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				ClientDataHolder.getInstance().vrRenderer.setupRenderConfiguration();
 			}
 			catch (RenderConfigException renderconfigexception) {
+				// unbind the rendertarget, to draw directly to the screen
+				this.mainRenderTarget.unbindWrite();
 				this.screen = null;
 				GlStateManager._viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
 
