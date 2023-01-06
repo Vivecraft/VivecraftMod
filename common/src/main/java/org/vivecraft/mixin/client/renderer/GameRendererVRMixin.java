@@ -2107,7 +2107,7 @@ public abstract class GameRendererVRMixin
 		mat.m11(1.0F);
 		mat.m22(-1.0F);
 		mat.m33(1.0F);
-		mat.m23(-1.0F);
+		mat.m32(-1.0F);
 
 		GlStateManager._disableDepthTest();
 		GlStateManager._disableTexture();
