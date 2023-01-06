@@ -1330,6 +1330,9 @@ public abstract class GameRendererVRMixin
 		if (!GameRendererVRMixin.DATA_HOLDER.bowTracker.isDrawing) {
 			if (this.minecraft.screen != null || !this.minecraft.options.hideGui) {
 				if (!RadialHandler.isShowing()) {
+					// cache fog distance
+					float fogStart = RenderSystem.getShaderFogStart();
+
 					boolean flag = this.isInMenuRoom();
 
 					PoseStack poseStack = RenderSystem.getModelViewStack();
@@ -1373,6 +1376,9 @@ public abstract class GameRendererVRMixin
 					if (!flag) {
 						if (this.minecraft.screen == null) {
 							color[3] = GameRendererVRMixin.DATA_HOLDER.vrSettings.hudOpacity;
+						} else {
+							// disable fog for menus
+							RenderSystem.setShaderFogStart(Float.MAX_VALUE);
 						}
 
 						if (this.minecraft.player != null && this.minecraft.player.isShiftKeyDown()) {
@@ -1423,6 +1429,8 @@ public abstract class GameRendererVRMixin
 					}
 
 					// RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
+					// reset fog
+					RenderSystem.setShaderFogStart(fogStart);
 					RenderSystem.depthFunc(515);
 					RenderSystem.enableDepthTest();
 					// RenderSystem.defaultAlphaFunc();
