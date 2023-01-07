@@ -15,6 +15,7 @@ loom {
 
         mixinConfig "vivecraft.vr.mixins.json"
         mixinConfig "vivecraft.nonvr.mixins.json"
+        mixinConfig "titleworlds.mixins.json"
         mixinConfig "vivecraft.sodium.mixins.json"
         mixinConfig "vivecraft.forge.sodium.mixins.json"
         mixinConfig "vivecraft.iris.mixins.json"
@@ -22,6 +23,7 @@ loom {
 
         mixinConfig "vivecraft.vr.forge.mixins.json"
         mixinConfig "vivecraft.nonvr.forge.mixins.json"
+        mixinConfig "titleworlds.forge.mixins.json"
     }
 }
 
@@ -40,8 +42,8 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    modRuntimeOnly("maven.modrinth:rubidium:0.5.3a")
-    modRuntimeOnly("maven.modrinth:oculus:1.18.2-1.2.5a")
+    modCompileOnly("maven.modrinth:rubidium:0.5.3a")
+    modCompileOnly("maven.modrinth:oculus:1.18.2-1.2.5a")
 }
 
 processResources {

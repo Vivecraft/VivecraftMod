@@ -1,0 +1,31 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.vivecraft.titleworlds.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ConnectScreenMixin",
+    "ConnectScreenThreadMixin",
+    "GameRendererMixin",
+    "MinecraftMixin",
+    "MinecraftServerMixin",
+    "RealmsConnectThreadMixin",
+    "TitleScreenMixin",
+    "accessor.ClientChunkCacheAcc",
+    "accessor.ClientChunkCacheStorageAcc",
+    "accessor.ClientLevelAcc",
+    "accessor.PersistentEntitySectionManagerAcc",
+    "accessor.ServerLevelAcc",
+    "accessor.TransientEntitySectionManagerAcc",
+    "cancel_save.ChunkMapMixin",
+    "cancel_save.PersistentEntitySectionManagerMixin",
+    "cancel_save.ServerChunkCacheMixin",
+    "cancel_save.needed.ChunkMapMixin",
+    "cancel_save.needed.EntityStorageMixin",
+    "cancel_save.needed.MinecraftServerMixin",
+    "cancel_save.needed.PlayerListMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

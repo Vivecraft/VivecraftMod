@@ -21,6 +21,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -83,6 +84,7 @@ import org.vivecraft.render.RenderPass;
 import org.vivecraft.render.VRCamera;
 import org.vivecraft.render.VRWidgetHelper;
 import org.vivecraft.settings.VRSettings;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 import org.vivecraft.utils.Utils;
 
 import java.nio.FloatBuffer;
@@ -635,7 +637,7 @@ public abstract class GameRendererVRMixin
 
 	@Override
 	public boolean isInMenuRoom() {
-		return this.minecraft.level == null || this.minecraft.screen instanceof WinScreen || ClientDataHolder.getInstance().integratedServerLaunchInProgress || this.minecraft.getOverlay() != null;
+		return this.minecraft.level == null || TitleWorldsMod.state.isTitleWorld || this.minecraft.screen instanceof WinScreen || ClientDataHolder.getInstance().integratedServerLaunchInProgress || this.minecraft.getOverlay() != null;
 	}
 
 	@Override
@@ -1337,28 +1339,14 @@ public abstract class GameRendererVRMixin
 					poseStack.setIdentity();
 					RenderSystem.applyModelViewMatrix();
 
-					if (flag) {
+					if (flag && (!TitleWorldsMod.state.isTitleWorld || !TitleWorldsMod.state.finishedLoading)) {
 						pMatrix.pushPose();
 						Vec3 eye = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render
 								.getEye(GameRendererVRMixin.DATA_HOLDER.currentPass).getPosition();
 						pMatrix.translate((GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
-						//System.out.println(eye + " eye");
-						//System.out.println(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin + " world");
-
-//						if (GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer != null
-//								&& GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.isReady()) {
-//							try {
-//								//this.renderTechjarsAwesomeMainMenuRoom();
-//							} catch (Exception exception) {
-//								System.out.println("Error rendering main menu world, unloading to prevent more errors");
-//								exception.printStackTrace();
-//								GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.destroy();
-//							}
-//						} else {
-							this.renderJrbuddasAwesomeMainMenuRoomNew(pMatrix);
-//						}
+						this.renderJrbuddasAwesomeMainMenuRoomNew(pMatrix);
 						pMatrix.popPose();
 					}
 

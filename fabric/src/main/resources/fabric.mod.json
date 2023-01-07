@@ -17,15 +17,22 @@
   "license": "LGPLv3",
 
   "environment": "*",
+  "entrypoints": {
+    "client": [
+      "org.vivecraft.fabric.TitleWorlds"
+    ]
+  },
   "mixins": [
     "vivecraft.vr.mixins.json",
     "vivecraft.nonvr.mixins.json",
+    "titleworlds.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.fabric.sodium.mixins.json",
     "vivecraft.iris.mixins.json",
     "vivecraft.rei.mixins.json",
     "vivecraft.nonvr.fabric.mixins.json",
-    "vivecraft.vr.fabric.mixins.json"
+    "vivecraft.vr.fabric.mixins.json",
+    "titleworlds.fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.11.3",

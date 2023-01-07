@@ -15,6 +15,9 @@ The VR mod for any loader!
 '''
 #logoFile = ""
 
+[[mods]]
+modId = "titleworlds"
+
 [[dependencies.vivecraft]]
 modId = "forge"
 mandatory = true
