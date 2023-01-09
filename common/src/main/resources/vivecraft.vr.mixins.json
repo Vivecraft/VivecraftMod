@@ -23,6 +23,7 @@
     "client.gui.GuiComponentVRMixin",
     "client.gui.NoSodiumGuiVRMixin",
     "client.gui.components.EditBoxVRMixin",
+    "client.gui.components.toasts.TutorialToastVRMixin",
     "client.gui.screens.ScreenVRMixin",
     "client.gui.screens.PauseScreenVRMixin",
     "client.gui.screens.inventory.CreativeModeInventoryScreenVRMixin",
@@ -45,6 +46,9 @@
     "client.renderer.entity.MobRendererVRMixin",
     "client.renderer.NoSodiumLevelRendererVRMixin",
     "client.renderer.PostChainVRMixin",
+    "client.tutorial.MovementTutorialStepInstanceVRMixin",
+    "client.tutorial.OpenInventoryTutorialStepVRMixin",
+    "client.tutorial.PunchTreeTutorialStepInstanceVRMixin",
 
     "world.entity.vehicle.BoatMixin",
     "world.item.ItemVRMixin",
