@@ -2112,6 +2112,7 @@ public abstract class GameRendererVRMixin
 	private void renderFaceInBlock() {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tesselator.getBuilder();
+		RenderSystem.setShader(GameRenderer::getPositionShader);
 		RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, ((GameRendererExtension) this.minecraft.gameRenderer).inBlock());
 
 		// orthographic matrix, (-1, -1) to (1, 1), near = 0.0, far 2.0
@@ -2122,7 +2123,7 @@ public abstract class GameRendererVRMixin
 		mat.m33 = 1.0F;
 		mat.m23 = -1.0F;
 
-		GlStateManager._disableDepthTest();
+		GlStateManager._depthFunc(GL11.GL_ALWAYS);
 		GlStateManager._disableTexture();
 		GlStateManager._enableBlend();
 		GlStateManager._disableCull();
@@ -2132,6 +2133,7 @@ public abstract class GameRendererVRMixin
 		bufferbuilder.vertex(mat, 1.5F, 1.5F, 0.0F).endVertex();
 		bufferbuilder.vertex(mat, -1.5F, 1.5F, 0.0F).endVertex();
 		tesselator.end();
+		GlStateManager._depthFunc(GL11.GL_LEQUAL);
 		GlStateManager._enableTexture();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
