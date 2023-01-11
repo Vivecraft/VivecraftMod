@@ -5,7 +5,7 @@ import org.vivecraft.render.VRArmRenderer;
 
 import java.util.Map;
 
-public interface EntityRenderDispatcherExtension {
+public interface EntityRenderDispatcherVRExtension {
 
     Quaternion getCameraOrientationOffset(float offset);
 
