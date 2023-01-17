@@ -68,7 +68,12 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
     		this.head.x = 0.0F;
     		this.head.y = -4.0F;
     		this.head.xRot = (float)((double)this.head.xRot - (Math.PI / 2D));
-    	}
+    	} else if (this.crouching) {
+			// move head down when crouching
+			this.head.z = 0.0F;
+			this.head.x = 0.0F;
+			this.head.y = 4.2f;
+		}
     	else
     	{
     		this.head.z = 0.0F;
