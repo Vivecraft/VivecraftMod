@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.extensions.EntityRenderDispatcherExtension;
+import org.vivecraft.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.extensions.ItemInHandRendererExtension;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -224,7 +224,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 		float h = flag ? 1.0F : -1.0F;
 		AbstractClientPlayer abstractclientplayer = this.minecraft.player;
 		RenderSystem.setShaderTexture(0, abstractclientplayer.getSkinTextureLocation());
-		VRArmRenderer vrarmrenderer = ((EntityRenderDispatcherExtension)entityRenderDispatcher).getArmSkinMap().get(abstractclientplayer.getModelName());
+		VRArmRenderer vrarmrenderer = ((EntityRenderDispatcherVRExtension)entityRenderDispatcher).getArmSkinMap().get(abstractclientplayer.getModelName());
 		poseStack.pushPose();
 
 		if (abstractclientplayer.swingingArm == InteractionHand.MAIN_HAND && flag) {

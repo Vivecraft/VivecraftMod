@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import org.vivecraft.extensions.EntityRenderDispatcherExtension;
+import org.vivecraft.extensions.EntityRenderDispatcherVRExtension;
 import com.mojang.math.Quaternion;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -19,6 +19,6 @@ public class EntityRendererVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;cameraOrientation()Lcom/mojang/math/Quaternion;"), method = "renderNameTag")
     public Quaternion cameraOffset(EntityRenderDispatcher instance) {
-        return ((EntityRenderDispatcherExtension)this.entityRenderDispatcher).getCameraOrientationOffset(0.5f);
+        return ((EntityRenderDispatcherVRExtension)this.entityRenderDispatcher).getCameraOrientationOffset(0.5f);
     }
 }
