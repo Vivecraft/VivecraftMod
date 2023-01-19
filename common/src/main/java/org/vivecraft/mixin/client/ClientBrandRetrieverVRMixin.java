@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientBrandRetriever.class)
 public class ClientBrandRetrieverVRMixin {
-    @Inject(at = @At("RETURN"), method = "getClientModName", remap = false, cancellable = true)
+    @Inject(at = @At("RETURN"), method = "getClientModName", cancellable = true)
     private static void vivecraftClientBrand(CallbackInfoReturnable<String> cir) {
         cir.setReturnValue("vivecraft");
     }
