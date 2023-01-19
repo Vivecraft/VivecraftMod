@@ -8,7 +8,12 @@ architectury {
 }
 
 subprojects {
+    apply plugin: "java"
     apply plugin: "dev.architectury.loom"
+
+    archivesBaseName = rootProject.archives_base_name
+    version = rootProject.minecraft_version + "-" + rootProject.mod_version
+    group = rootProject.maven_group
 
     loom {
         silentMojangMappingsLicense()
@@ -21,16 +26,33 @@ subprojects {
         // The following line declares the yarn mappings you may select this one as well.
         // mappings "net.fabricmc:yarn:1.18.2+build.4:v2"
     }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+        options.release = 17
+    }
+
+    java {
+        withSourcesJar()
+    }
+
+    task copyJarToMain(type: Copy) {
+        duplicatesStrategy = "include"
+        if (project.name != "common") {
+            from remapJar
+            into "../build/libs"
+        }
+    }
+
+    remapJar {
+        // after remap, copy the final jsr to the main /build/libs folder
+        finalizedBy copyJarToMain
+    }
 }
 
 allprojects {
-    apply plugin: "java"
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
-
-    archivesBaseName = rootProject.archives_base_name
-    version = rootProject.minecraft_version + "-" + rootProject.mod_version
-            group = rootProject.maven_group
 
     repositories {
         // Add repositories to retrieve artifacts from in here.
@@ -74,14 +96,5 @@ allprojects {
                 includeGroup("com.jamieswhiteshirt")
             }
         }
-    }
-
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-        options.release = 17
-    }
-
-    java {
-        withSourcesJar()
     }
 }
