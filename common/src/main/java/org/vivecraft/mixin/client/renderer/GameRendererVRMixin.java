@@ -2124,6 +2124,7 @@ public abstract class GameRendererVRMixin
 		mat.m23 = -1.0F;
 
 		GlStateManager._depthFunc(GL11.GL_ALWAYS);
+		GlStateManager._depthMask(true);
 		GlStateManager._disableTexture();
 		GlStateManager._enableBlend();
 		GlStateManager._disableCull();
