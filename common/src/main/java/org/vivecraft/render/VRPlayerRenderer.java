@@ -88,6 +88,6 @@ public class VRPlayerRenderer extends PlayerRenderer
     	}
 
         //vanilla below here
-            super.setupRotations(pEntityLiving, pMatrixStack, pAgeInTicks, pRotationYaw, pPartialTicks);
-            }
+        super.setupRotations(pEntityLiving, pMatrixStack, pAgeInTicks, pRotationYaw, pPartialTicks);
+    }
 }
