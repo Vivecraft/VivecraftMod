@@ -70,17 +70,20 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 			}
 		}
 	}
-	
+
+	@Inject(at = @At(value = "HEAD"),method = "onResourceManagerReload")
+	public void reloadClear(ResourceManager resourceManager, CallbackInfo ci) {
+		skinMapVRSeated.clear();
+		skinMapVR.clear();
+	}
+
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;", shift = Shift.AFTER),
 			method = "onResourceManagerReload", locals = LocalCapture.CAPTURE_FAILEXCEPTION)
 	public void reload(ResourceManager p_174004_, CallbackInfo info, EntityRendererProvider.Context context) {
-
 		this.playerRendererVRSeated = new VRPlayerRenderer(context, false, true);
-		skinMapVRSeated.clear();
 		this.skinMapVRSeated.put("default", playerRendererVRSeated);
 		this.skinMapVRSeated.put("slim", new VRPlayerRenderer(context, true, true));
 
-		skinMapVR.clear();
 		this.playerRendererVR = new VRPlayerRenderer(context, false, false);
 		this.skinMapVR.put("default", playerRendererVR);
 		this.skinMapVR.put("slim", new VRPlayerRenderer(context, true, false));
