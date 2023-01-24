@@ -34,14 +34,24 @@ public abstract class ProjectileMixin extends Entity {
 	}
 
 	@ModifyVariable(method = "shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V",
-			at = @At("HEAD"), ordinal = 0, argsOnly = true)
-	public float pX(float pXIn, Entity pProjectile) {
+			at = @At("HEAD"), ordinal = 3, argsOnly = true)
+	public float pVelocity(float pVelocity, Entity pProjectile) {
 		this.serverVivePlayer = CommonNetworkHelper.vivePlayers.get(pProjectile.getUUID());
 		if (this.serverVivePlayer != null && this.serverVivePlayer.isVR()) {
 			this.controllerDir = this.serverVivePlayer.getControllerDir(this.serverVivePlayer.activeHand);
-			if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !this.serverVivePlayer.isSeated() && this.serverVivePlayer.getDraw() > 0.0F) {
+			if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !this.serverVivePlayer.isSeated() && this.serverVivePlayer.getDraw() > 0.0F){
 				this.controllerDir = this.serverVivePlayer.getControllerPos(1, (Player) pProjectile).subtract(this.serverVivePlayer.getControllerPos(0, (Player) pProjectile)).normalize();
+				((AbstractArrow)(Object)this).setBaseDamage(((AbstractArrow)(Object)this).getBaseDamage() * 2.0D);
+				return pVelocity * this.serverVivePlayer.getDraw();
 			}
+		}
+		return pVelocity;
+	}
+
+	@ModifyVariable(method = "shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V",
+			at = @At("HEAD"), ordinal = 0, argsOnly = true)
+	public float pX(float pXIn, Entity pProjectile) {
+		if (this.controllerDir != null) {
 			return -((float) Math.toDegrees(Math.asin(this.controllerDir.y / this.controllerDir.length())));
 		}
 		return pXIn;
@@ -51,20 +61,11 @@ public abstract class ProjectileMixin extends Entity {
 			at = @At("HEAD"), ordinal = 1, argsOnly = true)
 	public float pY(float pYIn, Entity pProjectile) {
 		if (this.controllerDir != null) {
-			return (float) Math.toDegrees(Math.atan2(-this.controllerDir.x, this.controllerDir.z));
+			float toRet = (float) Math.toDegrees(Math.atan2(-this.controllerDir.x, this.controllerDir.z));
+			this.controllerDir = null;
+			this.serverVivePlayer = null;
+			return toRet;
 		}
 		return pYIn;
-	}
-
-	@ModifyVariable(method = "shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V",
-			at = @At("HEAD"), ordinal = 3, argsOnly = true)
-	public float pVelocity(float pVelocity, Entity pProjectile) {
-		if (this.serverVivePlayer != null && this.serverVivePlayer.isVR()) {
-			if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !this.serverVivePlayer.isSeated() && this.serverVivePlayer.getDraw() > 0.0F){
-				((AbstractArrow)(Object)this).setBaseDamage(((AbstractArrow)(Object)this).getBaseDamage() * 2.0D);
-				return pVelocity * this.serverVivePlayer.getDraw();
-			}
-		}
-		return pVelocity;
 	}
 }
