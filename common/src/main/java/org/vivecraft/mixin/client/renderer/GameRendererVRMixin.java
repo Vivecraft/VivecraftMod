@@ -25,6 +25,7 @@ import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
@@ -1823,13 +1824,13 @@ public abstract class GameRendererVRMixin
 		RenderSystem.setupShaderLights(RenderSystem.getShader());
 
 		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(0.0F, 0.0F).overlayCoords(0).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+				.uv(0.0F, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(1.0F, 0.0F).overlayCoords(0).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+				.uv(1.0F, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(1.0F, 1.0F).overlayCoords(0).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+				.uv(1.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(0.0F, 1.0F).overlayCoords(0).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+				.uv(0.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 		bufferbuilder.end();
 		BufferUploader.end(bufferbuilder);
 		this.lightTexture.turnOffLightLayer();
@@ -1863,13 +1864,13 @@ public abstract class GameRendererVRMixin
 		RenderSystem.setupShaderLights(RenderSystem.getShader());
 
 		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(0.0F, 0.0F).overlayCoords(0).uv2(lighti).normal(0,0,1).endVertex();
+				.uv(0.0F, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti).normal(0,0,1).endVertex();
 		bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(1.0F, 0.0F).overlayCoords(0).uv2(lighti).normal(0,0,1).endVertex();
+				.uv(1.0F, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti).normal(0,0,1).endVertex();
 		bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(1.0F, 1.0F).overlayCoords(0).uv2(lighti).normal(0,0,1).endVertex();
+				.uv(1.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti).normal(0,0,1).endVertex();
 		bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
-				.uv(0.0F, 1.0F).overlayCoords(0).uv2(lighti).normal(0,0,1).endVertex();
+				.uv(0.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti).normal(0,0,1).endVertex();
 		bufferbuilder.end();
 		BufferUploader.end(bufferbuilder);
 		this.lightTexture.turnOffLightLayer();
