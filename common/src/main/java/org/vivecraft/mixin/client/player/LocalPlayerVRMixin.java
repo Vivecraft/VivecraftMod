@@ -172,7 +172,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 		}
 	}
 
-	@Inject(at = @At("TAIL"), method = "chatSigned")
+	@Inject(at = @At("TAIL"), method = "chat(Ljava/lang/String;Lnet/minecraft/network/chat/Component;)V")
 	public void chatMsg(String string, Component component, CallbackInfo ci) {
 		this.lastMsg = string;
 	}

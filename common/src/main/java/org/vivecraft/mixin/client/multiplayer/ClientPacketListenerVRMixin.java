@@ -81,13 +81,13 @@ public class ClientPacketListenerVRMixin {
     public void cleanup(CallbackInfo ci) {
         ClientNetworkHelper.needsReset = true;
     }
-    @Inject(at = @At("TAIL"), method = "handlePlayerChat")
+    @Inject(at = @At("TAIL"), method = "handlePlayerChat(Lnet/minecraft/network/protocol/game/ClientboundPlayerChatPacket;)V")
     public void chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
         String s = ((PlayerExtension)minecraft.player).getLastMsg();
         ((PlayerExtension)minecraft.player).setLastMsg(null);
 
-        if (minecraft.player == null || s == null || clientboundPlayerChatPacket.message().signedHeader().sender() == Minecraft.getInstance().player.getUUID()) {
+        if (minecraft.player == null || s == null || clientboundPlayerChatPacket.getMessage().signature().sender() == minecraft.player.getUUID()) {
             ClientDataHolder dataholder = ClientDataHolder.getInstance();
             if (dataholder.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
                 if ((dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) && !dataholder.vrSettings.seated) {

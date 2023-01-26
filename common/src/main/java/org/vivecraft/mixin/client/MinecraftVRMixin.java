@@ -1013,7 +1013,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		ClientDataHolder.getInstance().vr.postinit();
 	}
 	@Group(name = "initMenuworld", min = 1, max = 1)
-	@Inject(at = @At("HEAD"), method = "lambda$new$3", remap = false, expect = 0)
+	@Inject(at = @At("HEAD"), method = "lambda$new$2", remap = false, expect = 0)
 	public void menuInitvarForge(CallbackInfo ci) {
 		if (ClientDataHolder.getInstance().vrRenderer.isInitialized()) {
 			//DataHolder.getInstance().menuWorldRenderer.init();
@@ -1027,7 +1027,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		reloadMenuworld();
 	}
 	@Group(name = "reloadMenuworld", min = 1, max = 1)
-	@Inject(at = @At("HEAD"), method = "m_231392_", remap = false, expect = 0)
+	@Inject(at = @At("HEAD"), method = "lambda$reloadResourcePacks$22", remap = false, expect = 0)
 	public void reloadMenuworldForge(CallbackInfo ci) {
 		reloadMenuworld();
 	}

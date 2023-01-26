@@ -26,11 +26,11 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    modRuntimeOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
-    modRuntimeOnly "maven.modrinth:iris:1.19.x-v1.4.0"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.19-0.4.2"
+    modRuntimeOnly "maven.modrinth:iris:1.19.x-v1.2.6"
     //modRuntimeOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
     //modRuntimeOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-728"
-    modRuntimeOnly "maven.modrinth:roughly-enough-items:9.1.555+fabric"
+    modCompileOnly "maven.modrinth:roughly-enough-items:9.1.555+fabric"
 
 
 //    modRuntimeOnly("io.github.fabricators_of_create:Porting-Lib:1.2.460-beta+1.18.2-dev.cca931b") //temp create
@@ -60,31 +60,23 @@ dependencies {
 //        transitive(false)
 //    }
 
-    modApi("dev.architectury:architectury-fabric:6.2.43") //temp rei
-    modApi("me.shedaniel:error-notifier-fabric:1.0.9") //temp rei
-
+    modApi("dev.architectury:architectury-fabric:5.13.60") //temp rei
+//    modApi("me.shedaniel:error-notifier-fabric:1.0.9") //temp rei
+//
     modRuntimeOnly 'org.joml:joml:1.10.4'//temp sodium
-    modRuntimeOnly(fabricApi.module("fabric-api-base", rootProject.fabric_api_version))//temp sodium
-    modRuntimeOnly(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))//temp sodium
-    modRuntimeOnly(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))//temp sodium
-    modRuntimeOnly(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))//temp sodium
-
+//    modRuntimeOnly(fabricApi.module("fabric-api-base", rootProject.fabric_api_version))//temp sodium
+//    modRuntimeOnly(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))//temp sodium
+//    modRuntimeOnly(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))//temp sodium
+//    modRuntimeOnly(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))//temp sodium
+//
     modRuntimeOnly 'org.anarres:jcpp:1.4.14'//temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:1.0.1'//temp iris
-
-    modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
-    modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium
+//
+//    modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
+//    modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium
 
     // needed for resource loading
     include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
-
-//    include("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-opengl:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-jemalloc:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-glfw:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-stb:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-openal:3.2.2:natives-windows")
 
 }
 
