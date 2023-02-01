@@ -19,9 +19,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.LoadingOverlay;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.WinScreen;
+import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.*;
@@ -635,7 +633,23 @@ public abstract class GameRendererVRMixin
 
 	@Override
 	public boolean isInMenuRoom() {
-		return this.minecraft.level == null || this.minecraft.screen instanceof WinScreen || ClientDataHolder.getInstance().integratedServerLaunchInProgress || this.minecraft.getOverlay() != null;
+		return this.minecraft.level == null ||
+				this.minecraft.screen instanceof WinScreen ||
+				this.minecraft.screen instanceof ReceivingLevelScreen ||
+				this.minecraft.screen instanceof ProgressScreen ||
+				this.minecraft.screen instanceof GenericDirtMessageScreen ||
+				ClientDataHolder.getInstance().integratedServerLaunchInProgress ||
+				this.minecraft.getOverlay() != null;
+	}
+	@Override
+	public boolean willBeInMenuRoom(Screen newScreen) {
+		return this.minecraft.level == null ||
+				newScreen instanceof WinScreen ||
+				newScreen instanceof ReceivingLevelScreen ||
+				newScreen instanceof ProgressScreen ||
+				newScreen instanceof GenericDirtMessageScreen ||
+				ClientDataHolder.getInstance().integratedServerLaunchInProgress ||
+				this.minecraft.getOverlay() != null;
 	}
 
 	@Override

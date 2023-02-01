@@ -21,6 +21,8 @@ public interface GameRendererExtension {
 	boolean isInWater();
 
 	boolean isInMenuRoom();
+
+	boolean willBeInMenuRoom(Screen newScreen);
 	
 	boolean isInPortal();
 
