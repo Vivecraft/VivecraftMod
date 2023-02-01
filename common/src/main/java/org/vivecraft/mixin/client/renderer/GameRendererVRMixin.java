@@ -1603,38 +1603,39 @@ public abstract class GameRendererVRMixin
 		Matrix4f matrix4f = pMatrixStack.last().pose();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
 
-		float a, b, c, d;
-		a = b = c = d = 0.8f;
+		float r, g, b, a;
+		r = g = b = 0.8f;
+		a = 1.0f;
 
-		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(a, b, c, d).normal(0, 1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(0, i * f3).color(a, b, c, d).normal(0, 1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f2, i * f3).color(a, b, c, d).normal(0, 1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(i * f2, 0).color(a, b, c, d).normal(0, 1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(r, g, b, a).normal(0, 1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(0, i * f3).color(r, g, b, a).normal(0, 1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f2, i * f3).color(r, g, b, a).normal(0, 1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(i * f2, 0).color(r, g, b, a).normal(0, 1, 0).endVertex();
 
-		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(0, 0).color(a, b, c, d).normal(0, -1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f3).color(a, b, c, d).normal(0, -1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(i * f2, i * f3).color(a, b, c, d).normal(0, -1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f2, 0).color(a, b, c, d).normal(0, -1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(0, 0).color(r, g, b, a).normal(0, -1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f3).color(r, g, b, a).normal(0, -1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(i * f2, i * f3).color(r, g, b, a).normal(0, -1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f2, 0).color(r, g, b, a).normal(0, -1, 0).endVertex();
 
-		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(a, b, c, d).normal(1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f).color(a, b, c, d).normal(1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(i * f3, i * f).color(a, b, c, d).normal(1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(i * f3, 0).color(a, b, c, d).normal(1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(r, g, b, a).normal(1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f).color(r, g, b, a).normal(1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(i * f3, i * f).color(r, g, b, a).normal(1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(i * f3, 0).color(r, g, b, a).normal(1, 0, 0).endVertex();
 
-		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(0, 0).color(a, b, c, d).normal(-1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f3, 0).color(a, b, c, d).normal(-1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f3, i * f).color(a, b, c, d).normal(-1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(0, i * f).color(a, b, c, d).normal(-1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(0, 0).color(r, g, b, a).normal(-1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f3, 0).color(r, g, b, a).normal(-1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f3, i * f).color(r, g, b, a).normal(-1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(0, i * f).color(r, g, b, a).normal(-1, 0, 0).endVertex();
 
-		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(a, b, c, d).normal(0, 0, 1).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(i * f2, 0).color(a, b, c, d).normal(0, 0, 1).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(i * f2, i * f).color(a, b, c, d).normal(0, 0, 1).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f).color(a, b, c, d).normal(0, 0, 1).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(r, g, b, a).normal(0, 0, 1).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(i * f2, 0).color(r, g, b, a).normal(0, 0, 1).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(i * f2, i * f).color(r, g, b, a).normal(0, 0, 1).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f).color(r, g, b, a).normal(0, 0, 1).endVertex();
 
-		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(0, 0).color(a, b, c, d).normal(0, 0, -1).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(0, i * f).color(a, b, c, d).normal(0, 0, -1).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f2, i * f).color(a, b, c, d).normal(0, 0, -1).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f2, 0).color(a, b, c, d).normal(0, 0, -1).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(0, 0).color(r, g, b, a).normal(0, 0, -1).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(0, i * f).color(r, g, b, a).normal(0, 0, -1).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f2, i * f).color(r, g, b, a).normal(0, 0, -1).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f2, 0).color(r, g, b, a).normal(0, 0, -1).endVertex();
 
 		bufferbuilder.end();
 		BufferUploader.end(bufferbuilder);
