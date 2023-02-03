@@ -582,7 +582,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		// only draw the gui when the level was rendered once, since some mods expect that
 		((GameRendererExtension) this.gameRenderer).setShouldDrawGui(bl && this.entityRenderDispatcher.camera != null);
 
-		this.gameRenderer.render(f, Util.getNanos(), false);
+		this.gameRenderer.render(f, System.nanoTime(), false);
 		// draw cursor
 		if (Minecraft.getInstance().screen != null) {
 			int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
