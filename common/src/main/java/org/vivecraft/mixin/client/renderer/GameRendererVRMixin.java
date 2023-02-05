@@ -403,7 +403,7 @@ public abstract class GameRendererVRMixin
 					this.renderPhysicalKeyboard(partialTicks, pMatrixStack);
 				} else {
 					this.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
-							KeyboardHandler.Rotation_room, false, pMatrixStack);
+							KeyboardHandler.Rotation_room, DATA_HOLDER.vrSettings.menuAlwaysFollowFace && isInMenuRoom(), pMatrixStack);
 				}
 			}
 
