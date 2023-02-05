@@ -1189,6 +1189,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				if (itemstack.getItem() == Blocks.CARVED_PUMPKIN.asItem()
 						&& (!itemstack.hasTag() || itemstack.getTag().getInt("CustomModelData") == 0)) {
 					ClientDataHolder.getInstance().pumpkineffect = 1.0F;
+				} else {
+					ClientDataHolder.getInstance().pumpkineffect = 0.0F;
 				}
 
 				float hurtTimer = (float) this.player.hurtTime - nano;
