@@ -84,6 +84,7 @@ import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
 import java.nio.FloatBuffer;
+import java.nio.file.Path;
 import java.util.Locale;
 
 @Mixin(GameRenderer.class)
@@ -375,6 +376,13 @@ public abstract class GameRendererVRMixin
 	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;effectActive:Z"), method = "render")
 	public boolean effect(GameRenderer instance) {
 		return this.effectActive && ClientDataHolder.getInstance().currentPass != RenderPass.THIRD;
+	}
+
+	@Inject(at = @At("HEAD"), method = "takeAutoScreenshot", cancellable = true)
+	public void noScreenshotInMenu(Path path, CallbackInfo ci) {
+		if(isInMenuRoom()) {
+			ci.cancel();
+		}
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.BEFORE, ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
