@@ -13,6 +13,7 @@ import com.mojang.math.Vector3f;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -420,6 +421,20 @@ public abstract class GameRendererVRMixin
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemActivationAnimation(IIF)V"), method = "render(FJZ)V")
 	private void noItemActivationAnimationOnGUI(GameRenderer instance, int i, int j, float f) {}
+	
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "render(FJZ)V")
+	private void noGUIwithViewOnly(Gui instance, PoseStack poseStack, float f) {
+		if (!ClientDataHolder.viewonly) {
+			instance.render(poseStack, f);
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "renderConfusionOverlay", cancellable = true)
+	private void noConfusionOverlayOnGUI(float f, CallbackInfo ci) {
+		if (DATA_HOLDER.currentPass == RenderPass.GUI) {
+			ci.cancel();
+		}
+	}
 
 	@Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(DDD)V"))
 	private void noTranslateItem(PoseStack poseStack, double x, double y, double z){}
