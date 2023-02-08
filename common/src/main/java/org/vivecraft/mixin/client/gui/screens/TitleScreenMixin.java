@@ -46,7 +46,12 @@ public abstract class TitleScreenMixin extends Screen {
     private void addVRModeButton() {
 
         // get first button, to position warnings
-        firstButton = (AbstractWidget)renderables.get(0);
+        for (Widget widget : renderables) {
+            if (widget instanceof AbstractWidget) {
+                firstButton = (AbstractWidget) widget;
+                break;
+            }
+        }
 
         try {
             if (!Files.exists(vrConfigPath)) {
