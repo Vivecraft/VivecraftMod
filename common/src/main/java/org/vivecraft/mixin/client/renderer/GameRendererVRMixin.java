@@ -441,13 +441,16 @@ public abstract class GameRendererVRMixin
 	public void removeBobView(GameRenderer instance, PoseStack poseStack, float f) {
 		return;
 	}
-	
-	public void limiti() {
-		
-	}
-	
-	public void changeVariable() {
 
+	@ModifyVariable(at = @At(value = "STORE"), method = "renderLevel")
+	public int reduceNauseaSpeed(int oldVal) {
+		return oldVal / 5;
+	}
+
+	@ModifyVariable(at = @At(value = "STORE", ordinal = 1), ordinal = 2, method = "renderLevel", print = true)
+	public float reduceNauseaAffect(float oldVal) {
+		// scales down the effect from (1,0.65) to (1,0.9)
+		return 1f - (1f - oldVal) * 0.25f;
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 1), method = "renderLevel")
