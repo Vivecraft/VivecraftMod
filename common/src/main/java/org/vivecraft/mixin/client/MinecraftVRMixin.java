@@ -401,9 +401,15 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		callback.cancel();
 	}
 
-	@ModifyConstant(constant = @Constant(longValue = 16), method = "doLoadLevel")
-	private long noWaitOnLevelLoad(long constant) {
-		// the VR runtime handles the frame limit, no need to manually limit it
+	// the VR runtime handles the frame limit, no need to manually limit it 60fps
+	@Group(name = "noFramelimit.", min = 1, max = 1)
+	@ModifyConstant(constant = @Constant(longValue = 16), method = "doLoadLevel", expect = 0)
+	private long noWaitOnLevelLoadFabric(long constant) {
+		return 0L;
+	}
+	@Group(name = "noFramelimit.", min = 1, max = 1)
+	@ModifyConstant(constant = @Constant(longValue = 16), method = "doLoadLevel(Ljava/lang/String;Ljava/util/function/Function;Ljava/util/function/Function;ZLnet/minecraft/client/Minecraft$ExperimentalDialogType;Z)V", expect = 0)
+	private long noWaitOnLevelLoadForge(long constant) {
 		return 0L;
 	}
 
