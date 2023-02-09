@@ -447,7 +447,7 @@ public abstract class GameRendererVRMixin
 		return oldVal / 5;
 	}
 
-	@ModifyVariable(at = @At(value = "STORE", ordinal = 1), ordinal = 2, method = "renderLevel", print = true)
+	@ModifyVariable(at = @At(value = "STORE", ordinal = 1), ordinal = 2, method = "renderLevel")
 	public float reduceNauseaAffect(float oldVal) {
 		// scales down the effect from (1,0.65) to (1,0.9)
 		return 1f - (1f - oldVal) * 0.25f;
