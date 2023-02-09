@@ -1366,6 +1366,10 @@ public abstract class GameRendererVRMixin
 						pMatrix.translate((GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
+
+						// remove world rotation or the room doesn't align with the screen
+						pMatrix.mulPose(Vector3f.YN.rotation(-GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+						
 						//System.out.println(eye + " eye");
 						//System.out.println(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin + " world");
 
