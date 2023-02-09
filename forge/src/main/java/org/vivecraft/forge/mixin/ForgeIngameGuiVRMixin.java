@@ -21,7 +21,7 @@ public abstract class ForgeIngameGuiVRMixin{
         }
     }
 
-    @Redirect(method = "Lnet/minecraftforge/client/gui/ForgeIngameGui;renderPlayerList(IILcom/mojang/blaze3d/vertex/PoseStack;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"))
+    @Redirect(method = "renderPlayerList(IILcom/mojang/blaze3d/vertex/PoseStack;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"))
     public boolean toggleableTabListForge(KeyMapping instance) {
         return instance.isDown() || ((GuiExtension)this).getShowPlayerList();
     }
