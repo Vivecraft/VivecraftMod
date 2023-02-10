@@ -598,6 +598,8 @@ public abstract class GameRendererVRMixin
 	private void renderVRHands(float partialTicks, boolean renderright, boolean renderleft, boolean menuhandright,
 			boolean menuhandleft, PoseStack poseStack) {
 		this.minecraft.getProfiler().push("hands");
+		// backup projection matrix, not doing that breaks sodium water on 1.19.3
+		RenderSystem.backupProjectionMatrix();
 
 		if (renderright) {
 			this.minecraft.getItemRenderer();
@@ -629,6 +631,7 @@ public abstract class GameRendererVRMixin
 			}
 		}
 
+		RenderSystem.restoreProjectionMatrix();
 		this.minecraft.getProfiler().pop();
 	}
 
@@ -1337,6 +1340,12 @@ public abstract class GameRendererVRMixin
 					// cache fog distance
 					float fogStart = RenderSystem.getShaderFogStart();
 
+					// remove nausea effect from projection matrix, for vanilla, nd posestack for iris
+					this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(this.mainCamera, par1, true)));
+					pMatrix.pushPose();
+					pMatrix.setIdentity();
+					this.applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, pMatrix);
+
 					boolean flag = this.isInMenuRoom();
 
 					PoseStack poseStack = RenderSystem.getModelViewStack();
@@ -1369,7 +1378,6 @@ public abstract class GameRendererVRMixin
 						pMatrix.popPose();
 					}
 
-					pMatrix.pushPose();
 					Vec3 vec31 = GuiHandler.applyGUIModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, pMatrix);
 					GuiHandler.guiFramebuffer.bindRead();
 					RenderSystem.disableCull();
