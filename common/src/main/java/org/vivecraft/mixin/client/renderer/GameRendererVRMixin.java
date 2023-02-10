@@ -1354,6 +1354,9 @@ public abstract class GameRendererVRMixin
 				if (!RadialHandler.isShowing()) {
 					boolean flag = this.isInMenuRoom();
 
+					// render the screen always on top in the menu room to prevent z fighting
+					depthAlways |= flag;
+
 					PoseStack poseStack = RenderSystem.getModelViewStack();
 					poseStack.pushPose();
 					poseStack.setIdentity();
