@@ -6,8 +6,6 @@ import net.minecraft.client.player.Input;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.tutorial.MovementTutorialStepInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,10 +34,10 @@ public class MovementTutorialStepInstanceVRMixin {
             // find the currently used movement binding
             if (MCVR.get().getInputAction(MCVR.get().keyFreeMoveStrafe).isActive()) {
                 // moveStrafe active
-                return new TextComponent(moveString.formatted("§l" + MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyFreeMoveStrafe).getLastOrigin()) + "§r"));
+                return Component.literal(moveString.formatted("§l" + MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyFreeMoveStrafe).getLastOrigin()) + "§r"));
             } else if (MCVR.get().getInputAction(MCVR.get().keyFreeMoveRotate).isActive()) {
                 // moveRotate active
-                return new TextComponent(moveString.formatted("§l" + MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyFreeMoveRotate).getLastOrigin()) + "§r"));
+                return Component.literal(moveString.formatted("§l" + MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyFreeMoveRotate).getLastOrigin()) + "§r"));
             } else if (MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).isActive() ||
                     MCVR.get().getInputAction(Minecraft.getInstance().options.keyDown).isActive() ||
                     MCVR.get().getInputAction(Minecraft.getInstance().options.keyLeft).isActive() ||
@@ -59,13 +57,13 @@ public class MovementTutorialStepInstanceVRMixin {
                     }
                     buttonsString.append(buttonsString.isEmpty() ? "§l" + s + "§r" : ", " + "§l" + s + "§r");
                 }
-                return new TextComponent(moveString.formatted(buttonsString.toString()));
+                return Component.literal(moveString.formatted(buttonsString.toString()));
             } else if (MCVR.get().getInputAction(MCVR.get().keyTeleportFallback).isActive()) {
                 // teleport fallback
-                return new TextComponent(moveString.formatted("§l" + MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyTeleportFallback).getLastOrigin()) + "§r"));
+                return Component.literal(moveString.formatted("§l" + MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyTeleportFallback).getLastOrigin()) + "§r"));
             } else if (MCVR.get().getInputAction(MCVR.get().keyTeleport).isActive()) {
                 // teleport
-                return new TranslatableComponent("vivecraft.toasts.teleport", new TextComponent(MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyTeleport).getLastOrigin())).withStyle(ChatFormatting.BOLD));
+                return Component.translatable("vivecraft.toasts.teleport", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyTeleport).getLastOrigin())).withStyle(ChatFormatting.BOLD));
             }
         }
         return title;
@@ -73,7 +71,7 @@ public class MovementTutorialStepInstanceVRMixin {
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 0), index = 2, method = "tick")
     private Component alterMovementDescription(Component description) {
         if (!ClientDataHolder.getInstance().vrSettings.seated && MCVR.get().getInputAction(Minecraft.getInstance().options.keyJump).isActive()) {
-            return new TranslatableComponent("tutorial.move.description", new TextComponent(MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyJump).getLastOrigin())).withStyle(ChatFormatting.BOLD));
+            return Component.translatable("tutorial.move.description", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyJump).getLastOrigin())).withStyle(ChatFormatting.BOLD));
         }
         return description;
     }
@@ -81,7 +79,7 @@ public class MovementTutorialStepInstanceVRMixin {
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 1), index = 2, method = "tick")
     private Component alterLookDescription(Component title) {
         if (!ClientDataHolder.getInstance().vrSettings.seated) {
-            return new TranslatableComponent("vivecraft.toasts.point_controller", new TranslatableComponent(ClientDataHolder.getInstance().vrSettings.reverseHands ? "vivecraft.toasts.point_controller.left" : "vivecraft.toasts.point_controller.right").withStyle(ChatFormatting.BOLD));
+            return Component.translatable("vivecraft.toasts.point_controller", Component.translatable(ClientDataHolder.getInstance().vrSettings.reverseHands ? "vivecraft.toasts.point_controller.left" : "vivecraft.toasts.point_controller.right").withStyle(ChatFormatting.BOLD));
         }
         return title;
     }
