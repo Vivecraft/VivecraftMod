@@ -2241,13 +2241,9 @@ public abstract class GameRendererVRMixin
 	private void renderVRSelfEffects(float par1) {
 		if (this.onfire && GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.THIRD
 				&& GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.CAMERA) {
-
-			if (this.onfire) {
-				this.renderFireInFirstPerson();
-			}
-
-			this.renderItemActivationAnimation(0, 0, par1);
+			this.renderFireInFirstPerson();
 		}
+		this.renderItemActivationAnimation(0, 0, par1);
 	}
 
 	private void renderFireInFirstPerson() {
