@@ -80,7 +80,7 @@ public class ClientPacketListenerVRMixin {
         ClientDataHolder.getInstance().vrSettings.overrides.resetAll();
     }
 
-    @Inject(at = @At("TAIL"), method = "cleanup")
+    @Inject(at = @At("TAIL"), method = "close")
     public void cleanup(CallbackInfo ci) {
         ClientNetworkHelper.needsReset = true;
     }

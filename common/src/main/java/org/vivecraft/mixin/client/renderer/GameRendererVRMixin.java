@@ -445,8 +445,8 @@ public abstract class GameRendererVRMixin
 		}
 	}
 
-	@Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(DDD)V"))
-	private void noTranslateItem(PoseStack poseStack, double x, double y, double z){}
+	@Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"))
+	private void noTranslateItem(PoseStack poseStack, float x, float y, float z){}
 
 	@Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
 	private void noScaleItem(PoseStack poseStack, float x, float y, float z){}
@@ -461,8 +461,8 @@ public abstract class GameRendererVRMixin
 		applyVRModelView(ClientDataHolder.getInstance().currentPass, posestack);
 		applystereo(ClientDataHolder.getInstance().currentPass, posestack);
 		posestack.scale(sinN, sinN, sinN);
-		posestack.mulPose(Vector3f.YP.rotationDegrees(-ClientDataHolder.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolder.getInstance().currentPass).getYaw()));
-		posestack.mulPose(Vector3f.XP.rotationDegrees(-ClientDataHolder.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolder.getInstance().currentPass).getPitch()));
+		posestack.mulPose(Axis.YP.rotationDegrees(-ClientDataHolder.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolder.getInstance().currentPass).getYaw()));
+		posestack.mulPose(Axis.XP.rotationDegrees(-ClientDataHolder.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolder.getInstance().currentPass).getPitch()));
 	}
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
@@ -1273,7 +1273,7 @@ public abstract class GameRendererVRMixin
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
 
 						// remove world rotation or the room doesn't align with the screen
-						pMatrix.mulPose(Vector3f.YN.rotation(-GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+						pMatrix.mulPose(Axis.YN.rotation(-GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
 						
 						//System.out.println(eye + " eye");
 						//System.out.println(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin + " world");

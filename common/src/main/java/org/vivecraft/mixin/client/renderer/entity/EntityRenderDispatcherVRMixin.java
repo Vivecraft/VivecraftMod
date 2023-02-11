@@ -36,6 +36,8 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
     public final Map<String, VRArmRenderer> armSkinMap = new HashMap<>();
     @Shadow
     public Camera camera;
+    @Shadow
+    private Quaternionf cameraOrientation;
 
     @Inject(at = @At("HEAD"), method = "cameraOrientation", cancellable = true)
     public void cameraOrientation(CallbackInfoReturnable<Quaternionf> cir) {
