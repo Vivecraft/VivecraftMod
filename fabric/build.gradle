@@ -26,8 +26,8 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    modRuntimeOnly "maven.modrinth:sodium:mc1.19.3-0.4.5"
-    modCompileOnly "maven.modrinth:iris:1.19.3-v1.4.4"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
+    modRuntimeOnly "maven.modrinth:iris:1.5.2+1.19.3"
     //modRuntimeOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
     //modRuntimeOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-728"
 /*
@@ -70,7 +70,7 @@ dependencies {
 //    modRuntimeOnly(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))//temp sodium
 
     modRuntimeOnly 'org.anarres:jcpp:1.4.14'//temp iris
-    modRuntimeOnly 'io.github.douira:glsl-transformer:1.0.1'//temp iris
+    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre9'//temp iris
 
     modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
     modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium
