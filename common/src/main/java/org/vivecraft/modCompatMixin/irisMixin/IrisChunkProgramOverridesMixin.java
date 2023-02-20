@@ -1,3 +1,4 @@
+/*
 package org.vivecraft.modCompatMixin.irisMixin;
 
 import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
@@ -74,3 +75,4 @@ public class IrisChunkProgramOverridesMixin {
         pipelinePrograms.clear();
     }
 }
+*/

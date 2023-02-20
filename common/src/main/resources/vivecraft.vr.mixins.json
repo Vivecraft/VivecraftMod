@@ -21,7 +21,6 @@
     "client.OptionInstanceVRMixin",
     "client.gui.GuiVRMixin",
     "client.gui.GuiComponentVRMixin",
-    "client.gui.NoSodiumGuiVRMixin",
     "client.gui.components.EditBoxVRMixin",
     "client.gui.screens.ScreenVRMixin",
     "client.gui.screens.PauseScreenVRMixin",
@@ -43,7 +42,6 @@
     "client.renderer.entity.GuardianRendererVRMixin",
     "client.renderer.entity.MobRendererVRMixin",
     "client.renderer.item.ItemPropertiesVRMixin",
-    "client.renderer.NoSodiumLevelRendererVRMixin",
     "client.renderer.PostChainVRMixin",
 
     "world.entity.vehicle.BoatMixin",

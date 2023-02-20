@@ -1,3 +1,4 @@
+/*
 package org.vivecraft.mixin.client.renderer;
 
 import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(LevelRenderer.class)
+@Mixin(value = LevelRenderer.class, priority = 900)
 public class NoSodiumLevelRendererVRMixin {
 
     @Shadow
@@ -28,3 +29,4 @@ public class NoSodiumLevelRendererVRMixin {
         return RenderSystemAccessor.getShaderTextures().length;
     }
 }
+*/

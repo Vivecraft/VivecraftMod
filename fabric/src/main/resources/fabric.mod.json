@@ -20,9 +20,6 @@
   "mixins": [
     "vivecraft.vr.mixins.json",
     "vivecraft.nonvr.mixins.json",
-    "vivecraft.sodium.mixins.json",
-    "vivecraft.fabric.sodium.mixins.json",
-    "vivecraft.iris.mixins.json",
     "vivecraft.rei.mixins.json",
     "vivecraft.nonvr.fabric.mixins.json",
     "vivecraft.vr.fabric.mixins.json"
