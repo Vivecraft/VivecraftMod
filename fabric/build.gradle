@@ -26,8 +26,8 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    modRuntimeOnly "maven.modrinth:sodium:mc1.19.3-0.4.5"
-    modCompileOnly "maven.modrinth:iris:1.19.3-v1.4.4"
+    //modRuntimeOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
+    modCompileOnly "maven.modrinth:iris:1.5.2+1.19.3"
     //modRuntimeOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
     //modRuntimeOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-728"
 /*
