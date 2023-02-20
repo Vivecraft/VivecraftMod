@@ -587,7 +587,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			((GuiExtension) Minecraft.getInstance().gui).drawMouseMenuQuad(x, y);
 		}
 		if (!this.noRender) {
-			this.profiler.popPush("toasts");
+			this.profiler.push("toasts");
 			this.toast.render(new PoseStack());
 			this.profiler.pop();
 		}
