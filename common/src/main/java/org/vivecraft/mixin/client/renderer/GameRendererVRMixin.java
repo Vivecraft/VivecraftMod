@@ -1337,6 +1337,7 @@ public abstract class GameRendererVRMixin
 		if (!GameRendererVRMixin.DATA_HOLDER.bowTracker.isDrawing) {
 			if (this.minecraft.screen != null || !this.minecraft.options.hideGui) {
 				if (!RadialHandler.isShowing()) {
+					minecraft.getProfiler().push("GuiLayer");
 					// cache fog distance
 					float fogStart = RenderSystem.getShaderFogStart();
 
@@ -1452,6 +1453,7 @@ public abstract class GameRendererVRMixin
 
 					poseStack.popPose();
 					RenderSystem.applyModelViewMatrix();
+					minecraft.getProfiler().pop();
 				}
 			}
 		}
@@ -2204,7 +2206,7 @@ public abstract class GameRendererVRMixin
 
 	private void renderCrosshairAtDepth(boolean depthAlways, PoseStack poseStack) {
 		if (this.shouldRenderCrosshair()) {
-			this.minecraft.getProfiler().popPush("crosshair");
+			this.minecraft.getProfiler().push("crosshair");
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			Vec3 vec3 = this.crossVec;
 			Vec3 vec31 = vec3.subtract(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getController(0).getPosition());
@@ -2305,6 +2307,7 @@ public abstract class GameRendererVRMixin
 			RenderSystem.enableCull();
 			RenderSystem.depthFunc(515);
 			poseStack.popPose();
+			this.minecraft.getProfiler().pop();
 		}
 	}
 
@@ -2328,6 +2331,7 @@ public abstract class GameRendererVRMixin
 			if (this.minecraft.player.isAlive()) {
 				if (!(((PlayerExtension) this.minecraft.player).getRoomYOffsetFromPose() < 0.0D)) {
 					if (this.minecraft.player.getVehicle() == null) {
+						this.minecraft.getProfiler().push("vr shadow");
 						AABB aabb = this.minecraft.player.getBoundingBox();
 
 						if (GameRendererVRMixin.DATA_HOLDER.vrSettings.vrShowBlueCircleBuddy && aabb != null) {
@@ -2361,6 +2365,7 @@ public abstract class GameRendererVRMixin
 							poseStack.popPose();
 							GlStateManager._enableCull();
 						}
+						this.minecraft.getProfiler().pop();
 					}
 				}
 			}
