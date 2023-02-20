@@ -48,6 +48,7 @@
     "client.renderer.PostChainVRMixin",
 
     "world.entity.vehicle.BoatMixin",
+    "world.entity.projectile.FishingHookVRMixin",
     "world.item.ItemVRMixin",
     "world.item.PotionItemVRMixin"
   ],
