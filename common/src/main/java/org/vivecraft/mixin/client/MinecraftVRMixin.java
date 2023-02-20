@@ -653,7 +653,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 					this.mainRenderTarget = ClientDataHolder.getInstance().vrRenderer.cameraRenderFramebuffer;
 				}
 
-				this.profiler.push("Eye:" + ClientDataHolder.getInstance().currentPass.ordinal());
+				this.profiler.push("Eye:" + ClientDataHolder.getInstance().currentPass);
 				this.profiler.push("setup");
 				this.mainRenderTarget.bindWrite(true);
 				this.profiler.pop();
