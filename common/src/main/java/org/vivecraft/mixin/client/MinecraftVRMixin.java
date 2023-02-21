@@ -554,9 +554,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		if (!this.noRender) {
 //			this.profiler.popPush("gameRenderer");
 //			this.gameRenderer.render(this.pause ? this.pausePartialTick : this.timer.partialTick, l, bl);
-//			this.profiler.popPush("toasts");
-//			this.toast.render(new PoseStack());
-//			this.profiler.pop();
 			Xevents.onRenderTickStart(this.pause ? this.pausePartialTick : this.timer.partialTick);
 		}
 
@@ -586,6 +583,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
 			int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
 			((GuiExtension) Minecraft.getInstance().gui).drawMouseMenuQuad(x, y);
+		}
+		if (!this.noRender) {
+			this.profiler.push("toasts");
+			this.toast.render(new PoseStack());
+			this.profiler.pop();
 		}
 		// draw debug pie
 		drawProfiler();
