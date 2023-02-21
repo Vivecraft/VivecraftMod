@@ -13,9 +13,8 @@ import com.mojang.math.Vector3f;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.WinScreen;
+import net.minecraft.client.gui.Gui
+import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.*;
@@ -79,6 +78,7 @@ import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.Utils;
 
 import java.nio.FloatBuffer;
+import java.nio.file.Path;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererVRMixin
@@ -368,6 +368,12 @@ public abstract class GameRendererVRMixin
 		return this.effectActive && ClientDataHolder.getInstance().currentPass != RenderPass.THIRD;
 	}
 
+	@Inject(at = @At("HEAD"), method = "takeAutoScreenshot", cancellable = true)
+	public void noScreenshotInMenu(Path path, CallbackInfo ci) {
+		if(isInMenuRoom()) {
+			ci.cancel();
+		}
+
 	@Unique
 	private boolean shouldDrawScreen = false;
 	@Unique
@@ -401,7 +407,7 @@ public abstract class GameRendererVRMixin
 					this.renderPhysicalKeyboard(partialTicks, pMatrixStack);
 				} else {
 					this.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
-							KeyboardHandler.Rotation_room, false, pMatrixStack);
+							KeyboardHandler.Rotation_room, DATA_HOLDER.vrSettings.menuAlwaysFollowFace && isInMenuRoom(), pMatrixStack);
 				}
 			}
 
@@ -687,7 +693,23 @@ public abstract class GameRendererVRMixin
 
 	@Override
 	public boolean isInMenuRoom() {
-		return this.minecraft.level == null || this.minecraft.screen instanceof WinScreen || ClientDataHolder.getInstance().integratedServerLaunchInProgress || this.minecraft.getOverlay() != null;
+		return this.minecraft.level == null ||
+				this.minecraft.screen instanceof WinScreen ||
+				this.minecraft.screen instanceof ReceivingLevelScreen ||
+				this.minecraft.screen instanceof ProgressScreen ||
+				this.minecraft.screen instanceof GenericDirtMessageScreen ||
+				ClientDataHolder.getInstance().integratedServerLaunchInProgress ||
+				this.minecraft.getOverlay() != null;
+	}
+	@Override
+	public boolean willBeInMenuRoom(Screen newScreen) {
+		return this.minecraft.level == null ||
+				newScreen instanceof WinScreen ||
+				newScreen instanceof ReceivingLevelScreen ||
+				newScreen instanceof ProgressScreen ||
+				newScreen instanceof GenericDirtMessageScreen ||
+				ClientDataHolder.getInstance().integratedServerLaunchInProgress ||
+				this.minecraft.getOverlay() != null;
 	}
 
 	@Override
@@ -1233,6 +1255,9 @@ public abstract class GameRendererVRMixin
 
 					boolean flag = this.isInMenuRoom();
 
+					// render the screen always on top in the menu room to prevent z fighting
+					depthAlways |= flag;
+
 					PoseStack poseStack = RenderSystem.getModelViewStack();
 					poseStack.pushPose();
 					poseStack.setIdentity();
@@ -1245,6 +1270,10 @@ public abstract class GameRendererVRMixin
 						pMatrix.translate((GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.x - eye.x),
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.y - eye.y),
 								(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
+
+						// remove world rotation or the room doesn't align with the screen
+						pMatrix.mulPose(Vector3f.YN.rotation(-GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+						
 						//System.out.println(eye + " eye");
 						//System.out.println(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin + " world");
 
@@ -1509,38 +1538,39 @@ public abstract class GameRendererVRMixin
 		Matrix4f matrix4f = pMatrixStack.last().pose();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
 
-		float a, b, c, d;
-		a = b = c = d = 0.8f;
+		float r, g, b, a;
+		r = g = b = 0.8f;
+		a = 1.0f;
 
-		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(a, b, c, d).normal(0, 1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(0, i * f3).color(a, b, c, d).normal(0, 1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f2, i * f3).color(a, b, c, d).normal(0, 1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(i * f2, 0).color(a, b, c, d).normal(0, 1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(r, g, b, a).normal(0, 1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(0, i * f3).color(r, g, b, a).normal(0, 1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f2, i * f3).color(r, g, b, a).normal(0, 1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(i * f2, 0).color(r, g, b, a).normal(0, 1, 0).endVertex();
 
-		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(0, 0).color(a, b, c, d).normal(0, -1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f3).color(a, b, c, d).normal(0, -1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(i * f2, i * f3).color(a, b, c, d).normal(0, -1, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f2, 0).color(a, b, c, d).normal(0, -1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(0, 0).color(r, g, b, a).normal(0, -1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f3).color(r, g, b, a).normal(0, -1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(i * f2, i * f3).color(r, g, b, a).normal(0, -1, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f2, 0).color(r, g, b, a).normal(0, -1, 0).endVertex();
 
-		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(a, b, c, d).normal(1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f).color(a, b, c, d).normal(1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(i * f3, i * f).color(a, b, c, d).normal(1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(i * f3, 0).color(a, b, c, d).normal(1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(r, g, b, a).normal(1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f).color(r, g, b, a).normal(1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(i * f3, i * f).color(r, g, b, a).normal(1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(i * f3, 0).color(r, g, b, a).normal(1, 0, 0).endVertex();
 
-		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(0, 0).color(a, b, c, d).normal(-1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f3, 0).color(a, b, c, d).normal(-1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f3, i * f).color(a, b, c, d).normal(-1, 0, 0).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(0, i * f).color(a, b, c, d).normal(-1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(0, 0).color(r, g, b, a).normal(-1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f3, 0).color(r, g, b, a).normal(-1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f3, i * f).color(r, g, b, a).normal(-1, 0, 0).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(0, i * f).color(r, g, b, a).normal(-1, 0, 0).endVertex();
 
-		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(a, b, c, d).normal(0, 0, 1).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(i * f2, 0).color(a, b, c, d).normal(0, 0, 1).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(i * f2, i * f).color(a, b, c, d).normal(0, 0, 1).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f).color(a, b, c, d).normal(0, 0, 1).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(r, g, b, a).normal(0, 0, 1).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, 0).uv(i * f2, 0).color(r, g, b, a).normal(0, 0, 1).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, 0).uv(i * f2, i * f).color(r, g, b, a).normal(0, 0, 1).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, 0).uv(0, i * f).color(r, g, b, a).normal(0, 0, 1).endVertex();
 
-		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(0, 0).color(a, b, c, d).normal(0, 0, -1).endVertex();
-		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(0, i * f).color(a, b, c, d).normal(0, 0, -1).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f2, i * f).color(a, b, c, d).normal(0, 0, -1).endVertex();
-		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f2, 0).color(a, b, c, d).normal(0, 0, -1).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, 0, f3).uv(0, 0).color(r, g, b, a).normal(0, 0, -1).endVertex();
+		bufferbuilder.vertex(matrix4f, 0, f, f3).uv(0, i * f).color(r, g, b, a).normal(0, 0, -1).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f2, i * f).color(r, g, b, a).normal(0, 0, -1).endVertex();
+		bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f2, 0).color(r, g, b, a).normal(0, 0, -1).endVertex();
 
 		bufferbuilder.end();
 		BufferUploader.end(bufferbuilder);

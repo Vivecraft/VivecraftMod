@@ -1,6 +1,7 @@
 package org.vivecraft.gameplay.screenhandlers;
 
 import org.vivecraft.ClientDataHolder;
+import org.vivecraft.extensions.GameRendererExtension;
 import org.vivecraft.provider.ControllerType;
 import org.vivecraft.utils.lwjgl.Matrix4f;
 import org.vivecraft.gui.GuiKeyboard;
@@ -182,7 +183,7 @@ public class KeyboardHandler
             {
                 Matrix4f matrix4f1 = Utils.convertOVRMatrix(GuiHandler.guiRotation_room);
                 Vec3 vec35 = new Vec3((double)matrix4f1.m10, (double)matrix4f1.m11, (double)matrix4f1.m12);
-                Vec3 vec37 = (new Vec3((double)matrix4f1.m20, (double)matrix4f1.m21, (double)matrix4f1.m22)).scale(0.25D);
+                Vec3 vec37 = (new Vec3((double)matrix4f1.m20, (double)matrix4f1.m21, (double)matrix4f1.m22)).scale(0.25D * GuiHandler.guiScale);
                 vec35 = vec35.scale((double)0.8F);
                 matrix4f.translate(new Vector3f((float)(GuiHandler.guiPos_room.x - vec35.x), (float)(GuiHandler.guiPos_room.y - vec35.y), (float)(GuiHandler.guiPos_room.z - vec35.z)));
                 matrix4f.translate(new Vector3f((float)vec37.x, (float)vec37.y, (float)vec37.z));

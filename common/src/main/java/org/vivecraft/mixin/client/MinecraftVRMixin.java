@@ -402,6 +402,18 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		callback.cancel();
 	}
 
+	// the VR runtime handles the frame limit, no need to manually limit it 60fps
+	@Group(name = "noFramelimit.", min = 1, max = 1)
+	@ModifyConstant(constant = @Constant(longValue = 16), method = "doLoadLevel", expect = 0)
+	private long noWaitOnLevelLoadFabric(long constant) {
+		return 0L;
+	}
+	@Group(name = "noFramelimit.", min = 1, max = 1)
+	@ModifyConstant(constant = @Constant(longValue = 16), method = "doLoadLevel(Ljava/lang/String;Ljava/util/function/Function;Ljava/util/function/Function;ZLnet/minecraft/client/Minecraft$ExperimentalDialogType;Z)V", expect = 0)
+	private long noWaitOnLevelLoadForge(long constant) {
+		return 0L;
+	}
+
 	//Replaces normal runTick
 	public void newRunTick(boolean bl) {
 		this.window.setErrorSection("Pre render");
@@ -424,11 +436,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		}
 
 		int j;
+		int i = 0;
+		// v
+		++ClientDataHolder.getInstance().frameIndex;
+		//
 		if (bl) {
-			// v
-			++ClientDataHolder.getInstance().frameIndex;
-			//
-			int i = this.timer.advanceTime(Util.getMillis());
+			i = this.timer.advanceTime(Util.getMillis());
 			this.profiler.push("scheduledExecutables");
 			this.runAllTasks();
 			this.profiler.pop();
@@ -487,11 +500,14 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			} catch (Exception exception2) {
 				exception2.printStackTrace();
 			}
+		}
 
-			this.profiler.push("VR Poll/VSync");
-			ClientDataHolder.getInstance().vr.poll(ClientDataHolder.getInstance().frameIndex);
-			this.profiler.pop();
-			ClientDataHolder.getInstance().vrPlayer.postPoll();
+		this.profiler.push("VR Poll/VSync");
+		ClientDataHolder.getInstance().vr.poll(ClientDataHolder.getInstance().frameIndex);
+		this.profiler.pop();
+		ClientDataHolder.getInstance().vrPlayer.postPoll();
+
+		if (bl) {
 			//
 			this.profiler.push("tick");
 
@@ -717,19 +733,17 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				ClientDataHolder.getInstance().isFirstPass = false;
 			}
 
-			if (bl) {
-				ClientDataHolder.getInstance().vrPlayer.postRender(f);
-				this.profiler.push("Display/Reproject");
+			ClientDataHolder.getInstance().vrPlayer.postRender(f);
+			this.profiler.push("Display/Reproject");
 
-				try {
-					ClientDataHolder.getInstance().vrRenderer.endFrame();
-				} catch (Exception exception) {
-					VRSettings.logger.error(exception.toString());
-				}
-
-				this.profiler.pop();
-				this.checkGLError("post submit ");
+			try {
+				ClientDataHolder.getInstance().vrRenderer.endFrame();
+			} catch (Exception exception) {
+				VRSettings.logger.error(exception.toString());
 			}
+
+			this.profiler.pop();
+			this.checkGLError("post submit ");
 
 			if (!this.noRender) {
 				Xevents.onRenderTickEnd(this.pause ? this.pausePartialTick : this.timer.partialTick);

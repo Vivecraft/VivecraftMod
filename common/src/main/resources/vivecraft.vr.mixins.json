@@ -33,6 +33,7 @@
     "client.gui.screens.inventory.SignEditScreenVRMixin",
     "client.gui.screens.OptionsScreenVRMixin",
     "client.gui.screens.SoundOptionsScreenVRMixin",
+    "client.gui.screens.WinScreenVRMixin",
     "client.multiplayer.ClientPacketListenerVRMixin",
     "client.multiplayer.MultiPlayerGameModeVRMixin",
     "client.particle.ItemPickupParticleVRMixin",
