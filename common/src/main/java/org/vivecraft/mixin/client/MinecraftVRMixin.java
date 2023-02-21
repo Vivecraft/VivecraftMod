@@ -30,6 +30,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
@@ -57,11 +58,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.*;
-import org.vivecraft.extensions.GameRendererExtension;
-import org.vivecraft.extensions.MinecraftExtension;
-import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.extensions.RenderTargetExtension;
+import org.vivecraft.extensions.*;
 import org.vivecraft.api.ClientNetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
@@ -281,6 +280,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Shadow @Final public LevelRenderer levelRenderer;
 
+	@Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
+
 	@Shadow private static Minecraft instance;
 
 	@Shadow protected abstract boolean startAttack();
@@ -449,6 +450,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				ClientDataHolder.getInstance().vrRenderer.setupRenderConfiguration();
 			}
 			catch (RenderConfigException renderconfigexception) {
+				// unbind the rendertarget, to draw directly to the screen
+				this.mainRenderTarget.unbindWrite();
 				this.screen = null;
 				GlStateManager._viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
 
@@ -569,9 +572,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		if (!this.noRender) {
 //			this.profiler.popPush("gameRenderer");
 //			this.gameRenderer.render(this.pause ? this.pausePartialTick : this.timer.partialTick, l, bl);
-//			this.profiler.popPush("toasts");
-//			this.toast.render(new PoseStack());
-//			this.profiler.pop();
 			Xevents.onRenderTickStart(this.pause ? this.pausePartialTick : this.timer.partialTick);
 		}
 
@@ -582,13 +582,44 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //		}
 
 		// v
+		this.profiler.push("gui setup");
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);
 		this.mainRenderTarget = GuiHandler.guiFramebuffer;
 		this.mainRenderTarget.clear(Minecraft.ON_OSX);
 		this.mainRenderTarget.bindWrite(true);
-		((GameRendererExtension) this.gameRenderer).drawFramebufferNEW(f, bl, new PoseStack());
 
+		// draw screen/gui to buffer
+		RenderSystem.getModelViewStack().pushPose();
+		((GameRendererExtension) this.gameRenderer).setShouldDrawScreen(true);
+		// only draw the gui when the level was rendered once, since some mods expect that
+		((GameRendererExtension) this.gameRenderer).setShouldDrawGui(bl && this.entityRenderDispatcher.camera != null);
+
+		this.gameRenderer.render(f, System.nanoTime(), false);
+		// draw cursor
+		if (Minecraft.getInstance().screen != null) {
+			int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
+			int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
+			((GuiExtension) Minecraft.getInstance().gui).drawMouseMenuQuad(x, y);
+		}
+		if (!this.noRender) {
+			this.profiler.push("toasts");
+			this.toast.render(new PoseStack());
+			this.profiler.pop();
+		}
+		// draw debug pie
+		drawProfiler();
+
+		RenderSystem.getModelViewStack().popPose();
+		RenderSystem.applyModelViewMatrix();
+
+		// generate mipmaps
+		// TODO: does this do anything?
+		mainRenderTarget.bindRead();
+		((RenderTargetExtension) mainRenderTarget).genMipMaps();
+		mainRenderTarget.unbindRead();
+
+		this.profiler.popPush("2D Keyboard");
 		if (KeyboardHandler.Showing
 				&& !ClientDataHolder.getInstance().vrSettings.physicalKeyboard) {
 			this.mainRenderTarget = KeyboardHandler.Framebuffer;
@@ -611,6 +642,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //		this.window.updateDisplay();
 
 		// v
+		this.profiler.popPush("Radial Menu");
 		if (RadialHandler.isShowing()) {
 			this.mainRenderTarget = RadialHandler.Framebuffer;
 			this.mainRenderTarget.clear(Minecraft.ON_OSX);
@@ -618,6 +650,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			((GameRendererExtension) this.gameRenderer).drawScreen(f, RadialHandler.UI, new PoseStack());
 		}
 
+		this.profiler.pop();
 		this.checkGLError("post 2d ");
 		VRHotkeys.updateMovingThirdPersonCam();
 		this.profiler.popPush("sound");
@@ -664,7 +697,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 					this.mainRenderTarget = ClientDataHolder.getInstance().vrRenderer.cameraRenderFramebuffer;
 				}
 
-				this.profiler.push("Eye:" + ClientDataHolder.getInstance().currentPass.ordinal());
+				this.profiler.push("Eye:" + ClientDataHolder.getInstance().currentPass);
 				this.profiler.push("setup");
 				this.mainRenderTarget.bindWrite(true);
 				this.profiler.pop();
@@ -829,14 +862,17 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			this.rightClickDelay = 10;
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"), method = "startUseItem")
-	public ItemStack activeHand2(LocalPlayer instance, InteractionHand interactionHand) {
-		ItemStack itemInHand = instance.getItemInHand(interactionHand);
+	@ModifyVariable(at = @At(value = "STORE", ordinal = 0), method = "startUseItem")
+	public ItemStack handItemStore(ItemStack itemInHand) {
+		this.itemInHand = itemInHand;
+		return itemInHand;
+	}
+
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem", locals = LocalCapture.CAPTURE_FAILHARD)
+	public void activeHandSend(CallbackInfo ci, InteractionHand[] var1, int var2, int var3, InteractionHand interactionHand) {
 		if (ClientDataHolder.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemInHand)) {
 			ClientNetworkHelper.sendActiveHand((byte) interactionHand.ordinal());
 		}
-		this.itemInHand = itemInHand;
-		return itemInHand;
 	}
 
 	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem")
@@ -1172,6 +1208,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				if (itemstack.getItem() == Blocks.CARVED_PUMPKIN.asItem()
 						&& (!itemstack.hasTag() || itemstack.getTag().getInt("CustomModelData") == 0)) {
 					ClientDataHolder.getInstance().pumpkineffect = 1.0F;
+				} else {
+					ClientDataHolder.getInstance().pumpkineffect = 0.0F;
 				}
 
 				float hurtTimer = (float) this.player.hurtTime - nano;

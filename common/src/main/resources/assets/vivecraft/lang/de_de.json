@@ -394,5 +394,10 @@
     "_comment_m10": "Messages",
     "vivecraft.messages.mode": "Modus:",
     "vivecraft.messages.configWriteError":"§cSchreiben der Einstellungen fehlgeschlagen, Änderungen wurden nicht gespeichert",
-    "vivecraft.messages.configChangeRestart":"§6VR Modus geändert, bitte starte das Spiel neu damit die Änderungen übernommen werden."
+    "vivecraft.messages.configChangeRestart":"§6VR Modus geändert, bitte starte das Spiel neu damit die Änderungen übernommen werden.",
+
+    "vivecraft.toasts.point_controller":"Zeige mit deinem %s",
+    "vivecraft.toasts.point_controller.left":"linken Controller",
+    "vivecraft.toasts.point_controller.right":"rechten Controller",
+    "vivecraft.toasts.teleport":"Teleportiere mit %s"
 }
