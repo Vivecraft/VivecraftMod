@@ -38,17 +38,6 @@ public class VRPlayerRenderer extends PlayerRenderer
     @Override
     public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight)
     {
-        if (ClientDataHolder.getInstance().currentPass == RenderPass.GUI && entityIn.isLocalPlayer())
-        {
-            Matrix4f matrix4f = matrixStackIn.last().pose();
-            double d0 = (new Vec3((double)matrix4f.m00, (double)matrix4f.m01, (double)matrix4f.m02)).length();
-            matrixStackIn.last().pose().setIdentity();
-            matrixStackIn.last().normal().setIdentity();
-            matrixStackIn.translate(0.0D, 0.0D, 1000.0D);
-            matrixStackIn.scale((float)d0, (float)d0, (float)d0);
-            matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-            matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F + ClientDataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw()));
-        }
 
         PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(entityIn.getUUID());
 
@@ -81,7 +70,7 @@ public class VRPlayerRenderer extends PlayerRenderer
     protected void setupRotations(AbstractClientPlayer pEntityLiving, PoseStack pMatrixStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks)
     {
     	UUID uuid = pEntityLiving.getUUID();
-    	if (PlayerModelController.getInstance().isTracked(uuid))
+    	if (ClientDataHolder.getInstance().currentPass != RenderPass.GUI && PlayerModelController.getInstance().isTracked(uuid))
     	{
     		PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(uuid);
     		pRotationYaw = (float)Math.toDegrees(playermodelcontroller$rotinfo.getBodyYawRadians());

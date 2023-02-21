@@ -42,7 +42,7 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
     @Inject(at = @At("HEAD"), method = "cameraOrientation", cancellable = true)
     public void cameraOrientation(CallbackInfoReturnable<Quaternion> cir) {
         if (ClientDataHolder.getInstance().currentPass == RenderPass.GUI) {
-            cir.setReturnValue(this.camera.rotation());
+            cir.setReturnValue(cameraOrientation);
             return;
         }
         else {
