@@ -44,8 +44,6 @@ public interface GameRendererExtension {
 
 	Matrix4f getThirdPassProjectionMatrix();
 
-	void drawFramebufferNEW(float f, boolean pRenderLevel, PoseStack poseStack);
-
 	void drawEyeStencil(boolean flag1);
 
 	float inBlock();
@@ -61,4 +59,7 @@ public interface GameRendererExtension {
 	void setupRVE();
 
     void DrawScopeFB(PoseStack matrixStackIn, int i);
+
+	void setShouldDrawScreen(boolean shouldDrawScreen);
+	void setShouldDrawGui(boolean shouldDrawGui);
 }

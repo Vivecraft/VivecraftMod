@@ -31,7 +31,4 @@ public class XeventsImpl {
         ForgeEventFactory.onRenderTickEnd(f);
     }
 
-    public static void drawScreen(Screen screen, PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        ForgeHooksClient.drawScreen(screen, poseStack, mouseX, mouseY, partialTick);
-    }
 }
