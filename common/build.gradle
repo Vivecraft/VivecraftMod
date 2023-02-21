@@ -13,6 +13,8 @@ dependencies {
 
     modCompileOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
     modCompileOnly "maven.modrinth:iris:1.5.2+1.19.3"
+    modCompileOnly("maven.modrinth:vulkanmod:T4ooVL38")
+    compileOnly("org.lwjgl:lwjgl-vulkan:3.2.3")
 
     modCompileOnly("maven.modrinth:rubidium:0.6.1")
 

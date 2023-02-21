@@ -77,6 +77,7 @@ dependencies {
 
     // needed for resource loading
     include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
+    modRuntimeOnly("maven.modrinth:vulkanmod:T4ooVL38")
 
 //    include("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows")
 //    include("org.lwjgl:lwjgl-opengl:3.2.2:natives-windows")
@@ -86,6 +87,20 @@ dependencies {
 //    include("org.lwjgl:lwjgl-stb:3.2.2:natives-windows")
 //    include("org.lwjgl:lwjgl-openal:3.2.2:natives-windows")
 
+    implementation("org.lwjgl:lwjgl:3.3.1")
+    implementation("org.lwjgl:lwjgl-vulkan:3.3.1")
+    implementation("org.joml:joml:1.10.4")
+    implementation("org.lwjgl:lwjgl-vma:3.3.1")
+    runtimeOnly("org.lwjgl:lwjgl-vma:3.3.1:natives-windows")
+    implementation("org.lwjgl:lwjgl-glfw:3.3.1")
+    runtimeOnly("org.lwjgl:lwjgl-glfw:3.3.1:natives-windows")
+    implementation("org.lwjgl:lwjgl-stb:3.3.1")
+    runtimeOnly("org.lwjgl:lwjgl-stb:3.3.1:natives-windows")
+    implementation("org.lwjgl:lwjgl-openal:3.3.1")
+    runtimeOnly("org.lwjgl:lwjgl-openal:3.3.1:natives-windows")
+    runtimeOnly("org.lwjgl:lwjgl:3.3.1:natives-windows")
+    implementation("org.lwjgl:lwjgl-shaderc:3.3.1")
+    runtimeOnly("org.lwjgl:lwjgl-shaderc:3.3.1:natives-windows")
 }
 
 processResources {

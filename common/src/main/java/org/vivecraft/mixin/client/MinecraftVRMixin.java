@@ -46,6 +46,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.vulkanmod.vulkan.Drawer;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
@@ -425,6 +426,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		}
 
 		int j;
+		Drawer drawer = Drawer.getInstance();
+		drawer.initiateRenderPass();
 		if (bl) {
 			// v
 			++ClientDataHolder.getInstance().frameIndex;
@@ -439,7 +442,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			}
 			catch (RenderConfigException renderconfigexception) {
 				this.screen = null;
-				GlStateManager._viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
+				RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
 
 				if (this.overlay != null) {
 					RenderSystem.clear(256, ON_OSX);
@@ -699,6 +702,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				this.profiler.pop();
 				this.checkGLError("post submit ");
 			}
+
+			drawer.endRenderPass();
+			drawer.submitDraw();
 
 			if (!this.noRender) {
 				Xevents.onRenderTickEnd(this.pause ? this.pausePartialTick : this.timer.partialTick);

@@ -3,13 +3,20 @@ package org.vivecraft.provider.openvr_jna;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import jopenvr.HiddenAreaMesh_t;
-import jopenvr.HmdMatrix44_t;
-import jopenvr.VRTextureBounds_t;
+
+import jopenvr.*;
 import net.minecraft.util.Tuple;
+import net.vulkanmod.vulkan.Vulkan;
+import net.vulkanmod.vulkan.texture.VulkanImage;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.vulkan.VkPhysicalDevice;
+import org.vivecraft.mixin.VulkanMixin;
 import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.provider.MCVR;
 import org.vivecraft.render.RenderConfigException;
@@ -94,27 +101,53 @@ public class OpenVRStereoRenderer extends VRRenderer
 
     public void createRenderTexture(int lwidth, int lheight)
     {
-        this.LeftEyeTextureId = GL11.glGenTextures();
-        int i = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.LeftEyeTextureId);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729.0F);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729.0F);
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, (ByteBuffer)null);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, i);
-        this.openvr.texType0.handle = Pointer.createConstant(this.LeftEyeTextureId);
+        Class<?> vulkan;
+        int queueFamily;
+        try {
+            vulkan = Vulkan.class;
+            Method findQueueFamilies = vulkan.getMethod("findQueueFamilies", VkPhysicalDevice.class);
+            Object indices = findQueueFamilies.invoke(null, VulkanMixin.getPhysicalDevice());
+            Field indicesField = indices.getClass().getDeclaredField("graphicsFamily");
+            indicesField.setAccessible(true);
+            queueFamily = (int) indicesField.get(indices);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException |
+                 NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+        this.LeftEyeTextureId = new VulkanImage(lwidth, lheight);
+        VRVulkanTextureData_t leftData = new VRVulkanTextureData_t();
+        leftData.m_nImage = LeftEyeTextureId.getId();
+        leftData.m_nSampleCount = 1;
+        leftData.m_nWidth = lwidth;
+        leftData.m_nHeight = lheight;
+        leftData.m_nFormat = 37;
+        leftData.m_pInstance = new JOpenVRLibrary.VkInstance_T(Pointer.createConstant(VulkanMixin.getInstance().address()));
+        leftData.m_pPhysicalDevice = new JOpenVRLibrary.VkPhysicalDevice_T(Pointer.createConstant(VulkanMixin.getPhysicalDevice().address()));
+        leftData.m_pDevice = new JOpenVRLibrary.VkDevice_T(Pointer.createConstant(VulkanMixin.getDevice().address()));
+        leftData.m_pQueue = new JOpenVRLibrary.VkQueue_T(Pointer.createConstant(Vulkan.getGraphicsQueue().address()));
+        leftData.m_nQueueFamilyIndex = queueFamily;
+        leftData.write();
+        this.openvr.texType0.handle = leftData.getPointer();
         this.openvr.texType0.eColorSpace = 1;
-        this.openvr.texType0.eType = 1;
+        this.openvr.texType0.eType = 2;
         this.openvr.texType0.write();
-        this.RightEyeTextureId = GL11.glGenTextures();
-        i = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.RightEyeTextureId);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729.0F);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729.0F);
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, (ByteBuffer)null);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, i);
-        this.openvr.texType1.handle = Pointer.createConstant(this.RightEyeTextureId);
+
+        this.RightEyeTextureId = new VulkanImage(lwidth, lheight);
+        VRVulkanTextureData_t rightData = new VRVulkanTextureData_t();
+        rightData.m_nImage = RightEyeTextureId.getId();
+        rightData.m_nSampleCount = 1;
+        rightData.m_nWidth = lwidth;
+        rightData.m_nHeight = lheight;
+        rightData.m_nFormat = 37;
+        rightData.m_pInstance = new JOpenVRLibrary.VkInstance_T(Pointer.createConstant(VulkanMixin.getInstance().address()));
+        rightData.m_pPhysicalDevice = new JOpenVRLibrary.VkPhysicalDevice_T(Pointer.createConstant(VulkanMixin.getPhysicalDevice().address()));
+        rightData.m_pDevice = new JOpenVRLibrary.VkDevice_T(Pointer.createConstant(VulkanMixin.getDevice().address()));
+        rightData.m_pQueue = new JOpenVRLibrary.VkQueue_T(Pointer.createConstant(Vulkan.getGraphicsQueue().address()));
+        rightData.m_nQueueFamilyIndex = queueFamily;
+        rightData.write();
+        this.openvr.texType1.handle = rightData.getPointer();
         this.openvr.texType1.eColorSpace = 1;
-        this.openvr.texType1.eType = 1;
+        this.openvr.texType1.eType = 2;
         this.openvr.texType1.write();
     }
 

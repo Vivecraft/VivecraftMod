@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.vulkanmod.vulkan.texture.VulkanImage;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -78,8 +79,8 @@ public abstract class VRRenderer
     public int lastRenderDistanceChunks = -1;
     public long lastWindow = 0L;
     public float lastWorldScale = 0.0F;
-    protected int LeftEyeTextureId = -1;
-    protected int RightEyeTextureId = -1;
+    protected VulkanImage LeftEyeTextureId = null;
+    protected VulkanImage RightEyeTextureId = null;
     public int mirrorFBHeight;
     public int mirrorFBWidth;
     protected boolean reinitFramebuffers = true;
@@ -123,21 +124,6 @@ public abstract class VRRenderer
         PostChain postchain = new PostChain(minecraft.getTextureManager(), minecraft.getResourceManager(), fb, resource);
         postchain.resize(fb.viewWidth, fb.viewHeight);
         return postchain;
-    }
-
-    public void deleteRenderTextures()
-    {
-        if (this.LeftEyeTextureId > 0)
-        {
-            GL11.glDeleteTextures(this.LeftEyeTextureId);
-        }
-
-        if (this.RightEyeTextureId > 0)
-        {
-            GL11.glDeleteTextures(this.RightEyeTextureId);
-        }
-
-        this.LeftEyeTextureId = this.RightEyeTextureId = -1;
     }
 
     public void doStencil(boolean inverse)
@@ -568,11 +554,11 @@ public abstract class VRRenderer
             int i1 = 0;
             boolean flag1 = i1 > 0;
 
-            if (this.LeftEyeTextureId == -1)
+            if (this.LeftEyeTextureId == null)
             {
                 this.createRenderTexture(eyew, eyeh);
 
-                if (this.LeftEyeTextureId == -1)
+                if (this.LeftEyeTextureId == null)
                 {
                     throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), this.getLastError());
                 }
@@ -585,14 +571,14 @@ public abstract class VRRenderer
 
             if (this.framebufferEye0 == null)
             {
-                this.framebufferEye0 = new VRTextureTarget("L Eye", eyew, eyeh, false, false, this.LeftEyeTextureId, false, true, false);
+                this.framebufferEye0 = new VRTextureTarget("L Eye", eyew, eyeh, false, false, (int) this.LeftEyeTextureId.getId(), false, true, false);
                 dataholder.print(this.framebufferEye0.toString());
                 this.checkGLError("Left Eye framebuffer setup");
             }
 
             if (this.framebufferEye1 == null)
             {
-                this.framebufferEye1 = new VRTextureTarget("R Eye", eyew, eyeh, false, false, this.RightEyeTextureId, false, true, false);
+                this.framebufferEye1 = new VRTextureTarget("R Eye", eyew, eyeh, false, false, (int) this.RightEyeTextureId.getId(), false, true, false);
                 dataholder.print(this.framebufferEye1.toString());
                 this.checkGLError("Right Eye framebuffer setup");
             }
@@ -729,74 +715,66 @@ public abstract class VRRenderer
                 }
             }
 
-            try
+            minecraft.mainRenderTarget = this.framebufferVrRender;
+            VRShaders.setupDepthMask();
+            ShaderHelper.checkGLError("init depth shader");
+            VRShaders.setupFOVReduction();
+            ShaderHelper.checkGLError("init FOV shader");
+            List<PostChain> list1 = new ArrayList<>();
+            list1.addAll(this.entityShaders.values());
+            this.entityShaders.clear();
+            ResourceLocation resourcelocation = new ResourceLocation("shaders/post/entity_outline.json");
+            this.entityShaders.put(((RenderTargetExtension) this.framebufferVrRender).getName(), this.createShaderGroup(resourcelocation, this.framebufferVrRender));
+
+            if (list.contains(RenderPass.THIRD))
             {
-                minecraft.mainRenderTarget = this.framebufferVrRender;
-                VRShaders.setupDepthMask();
-                ShaderHelper.checkGLError("init depth shader");
-                VRShaders.setupFOVReduction();
-                ShaderHelper.checkGLError("init FOV shader");
-                List<PostChain> list1 = new ArrayList<>();
-                list1.addAll(this.entityShaders.values());
-                this.entityShaders.clear();
-                ResourceLocation resourcelocation = new ResourceLocation("shaders/post/entity_outline.json");
-                this.entityShaders.put(((RenderTargetExtension) this.framebufferVrRender).getName(), this.createShaderGroup(resourcelocation, this.framebufferVrRender));
+                this.entityShaders.put(((RenderTargetExtension) this.framebufferMR).getName(), this.createShaderGroup(resourcelocation, this.framebufferMR));
+            }
+
+            if (list.contains(RenderPass.CENTER))
+            {
+                this.entityShaders.put(((RenderTargetExtension) this.framebufferUndistorted).getName(), this.createShaderGroup(resourcelocation, this.framebufferUndistorted));
+            }
+
+            this.entityShaders.put(((RenderTargetExtension) this.telescopeFramebufferL).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferL));
+            this.entityShaders.put(((RenderTargetExtension) this.telescopeFramebufferR).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferR));
+            this.entityShaders.put(((RenderTargetExtension) this.cameraRenderFramebuffer).getName(), this.createShaderGroup(resourcelocation, this.cameraRenderFramebuffer));
+
+            for (PostChain postchain : list1)
+            {
+                postchain.close();
+            }
+
+            list1.clear();
+            list1.addAll(this.alphaShaders.values());
+            this.alphaShaders.clear();
+
+            if (Minecraft.useShaderTransparency())
+            {
+                ResourceLocation resourcelocation1 = new ResourceLocation("shaders/post/vrtransparency.json");
+                this.alphaShaders.put(((RenderTargetExtension) this.framebufferVrRender).getName(), this.createShaderGroup(resourcelocation1, this.framebufferVrRender));
 
                 if (list.contains(RenderPass.THIRD))
                 {
-                    this.entityShaders.put(((RenderTargetExtension) this.framebufferMR).getName(), this.createShaderGroup(resourcelocation, this.framebufferMR));
+                    this.alphaShaders.put(((RenderTargetExtension) this.framebufferMR).getName(), this.createShaderGroup(resourcelocation1, this.framebufferMR));
                 }
 
                 if (list.contains(RenderPass.CENTER))
                 {
-                    this.entityShaders.put(((RenderTargetExtension) this.framebufferUndistorted).getName(), this.createShaderGroup(resourcelocation, this.framebufferUndistorted));
+                    this.alphaShaders.put(((RenderTargetExtension) this.framebufferUndistorted).getName(), this.createShaderGroup(resourcelocation1, this.framebufferUndistorted));
                 }
 
-                this.entityShaders.put(((RenderTargetExtension) this.telescopeFramebufferL).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferL));
-                this.entityShaders.put(((RenderTargetExtension) this.telescopeFramebufferR).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferR));
-                this.entityShaders.put(((RenderTargetExtension) this.cameraRenderFramebuffer).getName(), this.createShaderGroup(resourcelocation, this.cameraRenderFramebuffer));
-
-                for (PostChain postchain : list1)
-                {
-                    postchain.close();
-                }
-
-                list1.clear();
-                list1.addAll(this.alphaShaders.values());
-                this.alphaShaders.clear();
-
-                if (Minecraft.useShaderTransparency())
-                {
-                    ResourceLocation resourcelocation1 = new ResourceLocation("shaders/post/vrtransparency.json");
-                    this.alphaShaders.put(((RenderTargetExtension) this.framebufferVrRender).getName(), this.createShaderGroup(resourcelocation1, this.framebufferVrRender));
-
-                    if (list.contains(RenderPass.THIRD))
-                    {
-                        this.alphaShaders.put(((RenderTargetExtension) this.framebufferMR).getName(), this.createShaderGroup(resourcelocation1, this.framebufferMR));
-                    }
-
-                    if (list.contains(RenderPass.CENTER))
-                    {
-                        this.alphaShaders.put(((RenderTargetExtension) this.framebufferUndistorted).getName(), this.createShaderGroup(resourcelocation1, this.framebufferUndistorted));
-                    }
-
-                    this.alphaShaders.put(((RenderTargetExtension) this.telescopeFramebufferL).getName(), this.createShaderGroup(resourcelocation1, this.telescopeFramebufferL));
-                    this.alphaShaders.put(((RenderTargetExtension) this.telescopeFramebufferR).getName(), this.createShaderGroup(resourcelocation1, this.telescopeFramebufferR));
-                    this.alphaShaders.put(((RenderTargetExtension) this.cameraRenderFramebuffer).getName(), this.createShaderGroup(resourcelocation1, this.cameraRenderFramebuffer));
-                }
-
-                for (PostChain postchain1 : list1)
-                {
-                    postchain1.close();
-                }
-
-                minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
+                this.alphaShaders.put(((RenderTargetExtension) this.telescopeFramebufferL).getName(), this.createShaderGroup(resourcelocation1, this.telescopeFramebufferL));
+                this.alphaShaders.put(((RenderTargetExtension) this.telescopeFramebufferR).getName(), this.createShaderGroup(resourcelocation1, this.telescopeFramebufferR));
+                this.alphaShaders.put(((RenderTargetExtension) this.cameraRenderFramebuffer).getName(), this.createShaderGroup(resourcelocation1, this.cameraRenderFramebuffer));
             }
-            catch (Exception exception1)
+
+            for (PostChain postchain1 : list1)
             {
-                System.out.println(exception1.getMessage());
-                System.exit(-1);
+                postchain1.close();
             }
+
+            minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
 
             if (minecraft.screen != null)
             {
