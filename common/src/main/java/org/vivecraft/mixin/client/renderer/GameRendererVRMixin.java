@@ -13,7 +13,7 @@ import com.mojang.math.Vector3f;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -373,6 +373,7 @@ public abstract class GameRendererVRMixin
 		if(isInMenuRoom()) {
 			ci.cancel();
 		}
+	}
 
 	@Unique
 	private boolean shouldDrawScreen = false;
