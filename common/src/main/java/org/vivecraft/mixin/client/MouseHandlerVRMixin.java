@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.client;
 
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.tutorial.Tutorial;
 import org.vivecraft.ClientDataHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
@@ -9,6 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.provider.MCVR;
 
 @Mixin(MouseHandler.class)
 public class MouseHandlerVRMixin {
@@ -37,8 +39,23 @@ public class MouseHandlerVRMixin {
         return instance != null && instance.isSpectator();
     }
 
+
     @Inject(at = @At("HEAD"), method = "turnPlayer", cancellable = true)
-    public void noTurn(CallbackInfo ci) {
+    public void noTurnStanding(CallbackInfo ci) {
+        if (!ClientDataHolder.getInstance().vrSettings.seated) {
+            // call the tutorial before canceling
+            // head movement
+            // this.minecraft.getTutorial().onMouse(1.0 - MCVR.get().hmdHistory.averagePosition(0.2).subtract(MCVR.get().hmdPivotHistory.averagePosition(0.2)).normalize().dot(MCVR.get().hmdHistory.averagePosition(1.0).subtract(MCVR.get().hmdPivotHistory.averagePosition(1.0)).normalize()),0);
+            // controller movement
+            int mainController = ClientDataHolder.getInstance().vrSettings.reverseHands ? 1 : 0;
+            this.minecraft.getTutorial().onMouse(1.0 - MCVR.get().controllerForwardHistory[mainController].averagePosition(0.2).normalize().dot(MCVR.get().controllerForwardHistory[mainController].averagePosition(1.0).normalize()),0);
+            ci.cancel();
+        }
+    }
+
+    // cancel after tutorial call
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/Tutorial;onMouse(DD)V", shift = At.Shift.AFTER), method = "turnPlayer", cancellable = true)
+    public void noTurnSeated(CallbackInfo ci) {
         ci.cancel();
     }
 

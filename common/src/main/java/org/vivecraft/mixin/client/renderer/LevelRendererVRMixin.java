@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
@@ -236,11 +237,14 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 				BlockPos blockpos = ClientDataHolder.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolder.getInstance().interactTracker.inBlockHit[c].getBlockPos() : new BlockPos(ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
 				BlockState blockstate = this.level.getBlockState(blockpos);
 				this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
-				if (c==0) {
-					bl = false; //don't draw both
-				}
 			}
 		}
+	}
+
+	@ModifyVariable(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "renderLevel", ordinal = 0, argsOnly = true)
+	public boolean noBlockoutlineOnInteract(boolean renderBlockOutline) {
+		// don't draw the block outline when the interaction outline is active
+		return !(ClientDataHolder.getInstance().interactTracker.isInteractActive(0) && (ClientDataHolder.getInstance().interactTracker.inBlockHit[0] != null || ClientDataHolder.getInstance().interactTracker.bukkit[0])) && renderBlockOutline;
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;applyModelViewMatrix()V", ordinal = 1), method = "renderLevel")
