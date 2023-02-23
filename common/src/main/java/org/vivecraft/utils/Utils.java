@@ -25,6 +25,8 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -32,6 +34,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
+import org.vivecraft.Xplat;
 import org.vivecraft.render.VRShaders;
 import org.vivecraft.tweaker.LoaderUtils;
 import org.vivecraft.utils.lwjgl.Matrix3f;
@@ -456,22 +459,39 @@ public class Utils
             }
 
             System.out.println("Unpacking " + directory + " natives...");
-            ZipFile zipfile = LoaderUtils.getVivecraftZip();
-            Enumeration <? extends ZipEntry > enumeration = zipfile.entries();
 
-            while (enumeration.hasMoreElements())
+            Path jarPath = Xplat.getJarPath();
+            boolean didExtractSomething = false;
+            try (Stream<Path> natives = java.nio.file.Files.list(jarPath.resolve("natives/" + directory)))
             {
-                ZipEntry zipentry = enumeration.nextElement();
-
-                if (zipentry.getName().startsWith("natives/" + directory))
+                for (Path file : natives.collect(Collectors.toCollection(ArrayList::new)))
                 {
-                    String s = Paths.get(zipentry.getName()).getFileName().toString();
-                    System.out.println(s);
-                    writeStreamToFile(zipfile.getInputStream(zipentry), new File("openvr/" + directory + "/" + s));
+                    didExtractSomething = true;
+                    System.out.println(file);
+                    java.nio.file.Files.copy(file, new File("openvr/" + directory + "/" + file.getFileName()).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 }
+            } catch (IOException e)
+            {
+                System.out.println("Failed to unpack natives from jar");
             }
+            if (!didExtractSomething) {
+                ZipFile zipfile = LoaderUtils.getVivecraftZip();
+                Enumeration <? extends ZipEntry > enumeration = zipfile.entries();
 
-            zipfile.close();
+                while (enumeration.hasMoreElements())
+                {
+                    ZipEntry zipentry = enumeration.nextElement();
+
+                    if (zipentry.getName().startsWith("natives/" + directory))
+                    {
+                        String s = Paths.get(zipentry.getName()).getFileName().toString();
+                        System.out.println(s);
+                        writeStreamToFile(zipfile.getInputStream(zipentry), new File("openvr/" + directory + "/" + s));
+                    }
+                }
+
+                zipfile.close();
+            }
         }
         catch (Exception exception1)
         {

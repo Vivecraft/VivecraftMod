@@ -39,11 +39,6 @@ public class VRShaders
     public static AbstractUniform _Overlay_time;
     public static AbstractUniform _Overlay_BlackAlpha;
     public static AbstractUniform _Overlay_eye;
-    public static final String PASSTHRU_VERTEX_SHADER = Utils.loadAssetAsString("shaders/passthru.vsh", true);
-    public static final String DEPTH_MASK_FRAGMENT_SHADER = Utils.loadAssetAsString("shaders/mixedreality.fsh", true);
-    public static final String LANCZOS_SAMPLER_VERTEX_SHADER = Utils.loadAssetAsString("shaders/lanczos.vsh", true);
-    public static final String LANCZOS_SAMPLER_FRAGMENT_SHADER = Utils.loadAssetAsString("shaders/lanczos.fsh", true);
-    public static final String FOV_REDUCTION_FRAGMENT_SHADER = Utils.loadAssetAsString("shaders/fovreduction.fsh", true);
 
     private VRShaders()
     {

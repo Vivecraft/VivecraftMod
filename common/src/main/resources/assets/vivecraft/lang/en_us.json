@@ -393,5 +393,9 @@
     "_comment_m10": "Messages",
     "vivecraft.messages.mode": "Mode:",
     "vivecraft.messages.configWriteError":"§cFailed to write config, your changes are not saved",
-    "vivecraft.messages.configChangeRestart":"§6VR Mode changed, please restart the game for it to take effect."
+    "vivecraft.messages.configChangeRestart":"§6VR Mode changed, please restart the game for it to take effect.",
+    "vivecraft.toasts.point_controller":"Point with your %s",
+    "vivecraft.toasts.point_controller.left":"left Controller",
+    "vivecraft.toasts.point_controller.right":"right Controller",
+    "vivecraft.toasts.teleport":"Teleport with %s"
 }

@@ -729,10 +729,11 @@ public class MCOpenVR extends MCVR
         return inputorigininfo_t;
     }
 
-    private String getOriginName(long handle)
+    public String getOriginName(long handle)
     {
         Pointer pointer = new Memory(32769L);
-        int i = this.vrInput.GetOriginLocalizedName.apply(handle, pointer, 32768, -1);
+        // omit controller type
+        int i = this.vrInput.GetOriginLocalizedName.apply(handle, pointer, 32768, 5);
 
         if (i != 0)
         {

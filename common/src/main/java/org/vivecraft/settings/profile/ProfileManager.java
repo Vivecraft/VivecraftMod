@@ -15,10 +15,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 
 
 public class ProfileManager
@@ -34,6 +31,7 @@ public class ProfileManager
     static File vrProfileCfgFile = null;
     static JsonObject jsonConfigRoot = null;
     static JsonObject profiles = null;
+    static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     static boolean loaded = false;
     public static final String[] DEFAULT_BINDINGS = new String[] {"key.playerlist:b:6:Button 6", "axis.updown:a:2:-:Y Rotation", "walk.forward:a:0:-:Y ", "gui.axis.leftright:a:3:-:X Rotation", "gui.axis.updown:a:2:-:Y Rotation", "key.sneak:b:9:Button 9", "gui.Left:px:-", "key.itemright:b:5:Button 5", "gui.Right:px:+", "key.left:a:1:-:X ", "gui.Select:b:0:Button 0", "key.aimcenter:b:8:Button 8", "key.pickItem:b:2:Button 2", "key.menu:b:7:Button 7", "key.attack:a:4:-:Z ", "gui.Up:py:-", "key.use:a:4:+:Z ", "axis.leftright:a:3:-:X Rotation", "gui.Down:py:+", "key.right:a:1:+:X ", "key.back:a:0:+:Y ", "key.inventory:b:3:Button 3", "key.jump:b:0:Button 0", "key.drop:b:1:Button 1", "gui.Back:b:1:Button 1", "key.itemleft:b:4:Button 4"};
 
@@ -319,7 +317,7 @@ public class ProfileManager
         try
         {
             OutputStreamWriter outputstreamwriter = new OutputStreamWriter(new FileOutputStream(vrProfileCfgFile), "UTF-8");
-            String s = jsonConfigRoot.toString();
+            String s = gson.toJson(jsonConfigRoot);
             outputstreamwriter.write(s);
             outputstreamwriter.flush();
             outputstreamwriter.close();

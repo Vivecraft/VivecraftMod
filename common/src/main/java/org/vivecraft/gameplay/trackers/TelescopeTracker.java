@@ -39,7 +39,7 @@ public class TelescopeTracker extends Tracker
 
     public static boolean isTelescope(ItemStack i)
     {
-        return i.getItem() == Items.SPYGLASS || isLegacyTelescope(i) || i.is(ItemTags.VIVECRAFT_TELESCOPE);
+        return i != null && (i.getItem() == Items.SPYGLASS || isLegacyTelescope(i) || i.is(ItemTags.VIVECRAFT_TELESCOPE));
     }
 
     // TODO: old eye of the farseer, remove this eventually
