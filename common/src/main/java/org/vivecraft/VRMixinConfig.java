@@ -58,13 +58,14 @@ public class VRMixinConfig implements IMixinConfigPlugin {
                 Files.createFile(file);
             }
             properties.load(Files.newInputStream(file));
-            if (properties.containsKey("vrStatus")) {
+            boolean needToAsk = !properties.containsKey("askEveryStartup") || Boolean.parseBoolean(properties.getProperty("askEveryStartup"));
+            if (properties.containsKey("vrStatus") && ! needToAsk) {
                 VRState.isVR = Boolean.parseBoolean(properties.getProperty("vrStatus"));
             } else if (Xplat.isDedicatedServer()) {
                 VRState.isVR = false;
                 properties.setProperty("vrStatus", String.valueOf(VRState.isVR)); //set dedicated server to nonVR
             } else if (!asked) {
-                VRMixinConfigPopup.askVR(properties, file);
+                VRMixinConfigPopup.askVR(properties, file, !properties.containsKey("askEveryStartup"));
             }
             if (!unpackedNatives && VRState.isVR) {
                 unpackPlatformNatives();
