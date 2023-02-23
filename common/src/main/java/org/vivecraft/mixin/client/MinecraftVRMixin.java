@@ -471,6 +471,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 						Path file = Xplat.getConfigPath("vivecraft-config.properties");
 
 						Properties properties = new Properties();
+						try {
+							properties.load(Files.newInputStream(file));
+						}
+						catch (IOException e) {
+						}
+
 						properties.setProperty("vrStatus", "false");
 						try {
 							properties.store(Files.newOutputStream(file), "This file stores if VR should be enabled.");
