@@ -132,23 +132,6 @@ public class VRMixinConfig implements IMixinConfigPlugin {
             return false;
         }
 
-        // TODO: remove once rubidium updates to the new sodium version and limit use to the new sodium
-        if (mixinClassName.endsWith("IrisChunkProgramOverridesMixinPreSodium_0_4_9")) {
-            try {
-                Class.forName("me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType");
-                return VRState.isVR;
-            } catch(ClassNotFoundException e) {
-                return false;
-            }
-        }else if (mixinClassName.endsWith("IrisChunkProgramOverridesMixin")) {
-            try {
-                Class.forName("me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType");
-                return VRState.isVR;
-            } catch(ClassNotFoundException e) {
-                return false;
-            }
-        }
-
         return VRState.isVR;
     }
 }

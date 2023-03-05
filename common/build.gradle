@@ -16,6 +16,8 @@ dependencies {
     // needed to compile IrisChunkProgramOverridesMixinPreSodium_0_4_9
     modCompileOnly("maven.modrinth:rubidium:0.6.1")
 
+    modCompileOnly "883067831485366304:1076634925077364786:sodium-fabric-mc1.19.3-0.4.10rev.c131708-dirty:jar"
+
 /*
     modCompileOnly "maven.modrinth:lithium:mc1.19.2-0.10.0"
     modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"

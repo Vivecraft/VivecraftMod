@@ -31,7 +31,7 @@ public class IrisChunkProgramOverridesMixinPreSodium_0_4_9 {
     }
 
     @Inject(method = "createShaders(Lnet/coderbot/iris/pipeline/SodiumTerrainPipeline;Lme/jellysquid/mods/sodium/client/model/vertex/type/ChunkVertexType;)V", at = @At("HEAD"), remap = false)
-    public void createAllPipelinesShadersPost152(SodiumTerrainPipeline pipeline, ChunkVertexType vertexType, CallbackInfo ci){
+    public void createAllPipelinesShadersPreSodium_0_4_9(SodiumTerrainPipeline pipeline, ChunkVertexType vertexType, CallbackInfo ci){
         for (RenderPass renderPass : RenderPass.values()) {
             WorldRenderingPipeline worldPipeline = ((PipelineManagerExtension)Iris.getPipelineManager()).getVRPipeline(renderPass);
             // GUI and unused renderPasses don't have a pipeline

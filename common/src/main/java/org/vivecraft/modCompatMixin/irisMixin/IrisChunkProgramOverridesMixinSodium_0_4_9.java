@@ -1,7 +1,7 @@
 package org.vivecraft.modCompatMixin.irisMixin;
 
 import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
+import me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkProgramOverrides;
 import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkShaderInterface;
@@ -22,7 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.EnumMap;
 
 @Mixin(IrisChunkProgramOverrides.class)
-public class IrisChunkProgramOverridesMixin {
+public class IrisChunkProgramOverridesMixinSodium_0_4_9 {
 
     private final EnumMap<RenderPass, EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>>> pipelinePrograms = new EnumMap<>(RenderPass.class);
     @Shadow(remap = false)
@@ -30,8 +30,8 @@ public class IrisChunkProgramOverridesMixin {
         return null;
     }
 
-    @Inject(method = "createShaders(Lnet/coderbot/iris/pipeline/SodiumTerrainPipeline;Lme/jellysquid/mods/sodium/client/render/chunk/vertex/format/ChunkVertexType;)V", at = @At("HEAD"), remap = false)
-    public void createAllPipelinesShaders(SodiumTerrainPipeline pipeline, ChunkVertexType vertexType, CallbackInfo ci){
+    @Inject(method = "createShaders(Lnet/coderbot/iris/pipeline/SodiumTerrainPipeline;Lme/jellysquid/mods/sodium/client/render/vertex/type/ChunkVertexType;)V", at = @At("HEAD"), remap = false)
+    public void createAllPipelinesShadersSodium_0_4_9(SodiumTerrainPipeline pipeline, ChunkVertexType vertexType, CallbackInfo ci){
         for (RenderPass renderPass : RenderPass.values()) {
             WorldRenderingPipeline worldPipeline = ((PipelineManagerExtension)Iris.getPipelineManager()).getVRPipeline(renderPass);
             // GUI and unused renderPasses don't have a pipeline
