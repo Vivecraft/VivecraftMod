@@ -101,9 +101,10 @@ public abstract class VRRenderer
     protected void checkGLError(String message)
     {
         //Config.checkGlError(message); TODO
-    	if (GlStateManager._getError() != 0) {
+    	/*if (GlStateManager._getError() != 0) {
 			System.err.println(message);
-		}
+		}*/
+        System.out.println("OpenGL Error Check Skipped!");
     }
 
     public boolean clipPlanesChanged()
@@ -211,7 +212,7 @@ public abstract class VRRenderer
             this.reinitFrameBuffers("FSAA Setting Changed");
         }
         else {
-            GlStateManager._disableBlend();
+            RenderSystem.disableBlend();
             RenderSystem.backupProjectionMatrix();
             Matrix4f matrix4f = new Matrix4f();
             matrix4f.identity();
@@ -224,59 +225,59 @@ public abstract class VRRenderer
             RenderSystem.setShaderTexture(0, framebufferVrRender.getColorTextureId());
             RenderSystem.setShaderTexture(1, framebufferVrRender.getDepthTextureId());
 
-            GlStateManager._activeTexture(33985);
+            RenderSystem.activeTexture(33985);
             this.framebufferVrRender.bindRead();
-            GlStateManager._activeTexture(33986);
-            GlStateManager._bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
+            RenderSystem.activeTexture(33986);
+            RenderSystem.bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
 
-            GlStateManager._activeTexture(33984);
-            VRenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager._clearDepth(1.0D);
+            RenderSystem.activeTexture(33984);
+            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.clearDepth(1.0D);
             this.fsaaFirstPassResultFBO.bindRead();
             GlStateHelper.clear(16640);
             //GlStateManager._viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
-            VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
+/*            VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
             VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
             VRShaders._Lanczos_modelViewUniform.set(RenderSystem.getModelViewMatrix());
-            VRShaders._Lanczos_projectionUniform.set(RenderSystem.getProjectionMatrix());
+            VRShaders._Lanczos_projectionUniform.set(RenderSystem.getProjectionMatrix());*/
             for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
                 int l = RenderSystem.getShaderTexture(k);
-                VRShaders.lanczosShader.setSampler("Sampler" + k, l);
+                //VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }
-            VRShaders.lanczosShader.apply();
+            //VRShaders.lanczosShader.apply();
             GlStateHelper.clear(16384);
             this.drawQuad();
             this.fsaaLastPassResultFBO.clear(Minecraft.ON_OSX);
             this.fsaaLastPassResultFBO.bindWrite(false);
-            GlStateManager._activeTexture(33985);
+            RenderSystem.activeTexture(33985);
             this.fsaaFirstPassResultFBO.bindRead();
             RenderSystem.setShaderTexture(0, this.fsaaFirstPassResultFBO.getColorTextureId());
-            GlStateManager._activeTexture(33986);
+            RenderSystem.activeTexture(33986);
             RenderSystem.setShaderTexture(1, this.fsaaFirstPassResultFBO.getDepthTextureId());
-            GlStateManager._bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
+            RenderSystem.bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
 
-            GlStateManager._activeTexture(33984);
+            RenderSystem.activeTexture(33984);
             this.checkGLError("posttex");
             //GlStateManager._viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
-            VRenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager._clearDepth(1.0D);
+            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.clearDepth(1.0D);
             GlStateHelper.clear(16640);
             this.checkGLError("postclear");
-            GlStateManager._activeTexture(33984);
+            RenderSystem.activeTexture(33984);
             this.checkGLError("postact");
             for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
                 int l = RenderSystem.getShaderTexture(k);
-                VRShaders.lanczosShader.setSampler("Sampler" + k, l);
+                //VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }
-            VRShaders._Lanczos_texelWidthOffsetUniform.set(0.0F);
+/*            VRShaders._Lanczos_texelWidthOffsetUniform.set(0.0F);
             VRShaders._Lanczos_texelHeightOffsetUniform.set(1.0F / (3.0F * (float) this.framebufferEye0.viewHeight));
-            VRShaders.lanczosShader.apply();
+            VRShaders.lanczosShader.apply();*/
             this.drawQuad();
             this.checkGLError("postdraw");
             RenderSystem.restoreProjectionMatrix();
             RenderSystem.getModelViewStack().popPose();
             // Clean up time
-            VRShaders.lanczosShader.clear();
+            //VRShaders.lanczosShader.clear();
             Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
         }
     }
@@ -703,8 +704,7 @@ public abstract class VRRenderer
                     dataholder.print(this.fsaaFirstPassResultFBO.toString());
                     dataholder.print(this.fsaaLastPassResultFBO.toString());
                     this.checkGLError("FSAA FBO creation");
-                    VRShaders.setupFSAA();
-                    ShaderHelper.checkGLError("FBO init fsaa shader");
+                    //VRShaders.setupFSAA();
                 }
                 catch (Exception exception)
                 {
@@ -717,10 +717,8 @@ public abstract class VRRenderer
             }
 
             minecraft.mainRenderTarget = this.framebufferVrRender;
-            VRShaders.setupDepthMask();
-            ShaderHelper.checkGLError("init depth shader");
-            VRShaders.setupFOVReduction();
-            ShaderHelper.checkGLError("init FOV shader");
+            //VRShaders.setupDepthMask();
+            //VRShaders.setupFOVReduction();
             List<PostChain> list1 = new ArrayList<>();
             list1.addAll(this.entityShaders.values());
             this.entityShaders.clear();

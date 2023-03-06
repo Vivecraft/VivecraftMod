@@ -45,10 +45,10 @@ public class GuiFreeMoveSettings extends GuiVROptionsBase
             super.init(standingSettings, true);
         }
 
-        if (this.dataholder.vrSettings.useFOVReduction)
+/*        if (this.dataholder.vrSettings.useFOVReduction)
         {
             super.init(fovRed, false);
-        }
+        }*/
 
         super.addDefaultButtons();
     }

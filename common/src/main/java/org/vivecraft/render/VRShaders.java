@@ -8,7 +8,7 @@ import org.vivecraft.utils.Utils;
 
 public class VRShaders
 {
-    public static ShaderInstance lanczosShader;
+ /* public static ShaderInstance lanczosShader;
     public static AbstractUniform _Lanczos_texelWidthOffsetUniform;
     public static AbstractUniform _Lanczos_texelHeightOffsetUniform;
     public static AbstractUniform _Lanczos_inputImageTextureUniform;
@@ -77,7 +77,6 @@ public class VRShaders
     {
         fovReductionShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "fovreduction", DefaultVertexFormat.POSITION_TEX);
 
-
             _FOVReduction_RadiusUniform = fovReductionShader.safeGetUniform("circle_radius");
             _FOVReduction_OffsetUniform = fovReductionShader.safeGetUniform("circle_offset");
             _FOVReduction_BorderUniform = fovReductionShader.safeGetUniform("border");
@@ -89,5 +88,5 @@ public class VRShaders
             _Overlay_eye = fovReductionShader.safeGetUniform("eye");
             _Overlay_time = fovReductionShader.safeGetUniform("portaltime");
             _Overlay_BlackAlpha = fovReductionShader.safeGetUniform("blackalpha");
-    }
+    }*/
 }

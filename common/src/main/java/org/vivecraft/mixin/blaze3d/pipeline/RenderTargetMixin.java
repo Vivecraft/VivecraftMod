@@ -100,13 +100,13 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public void clearWithColor(float r, float g, float b, float a, boolean isMac) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		//this._bindWrite(true);
-		VRenderSystem.clearColor(r, g, b, a);
+		RenderSystem.clearColor(r, g, b, a);
 		int i = 16384;
 		if (this.useDepth) {
-			GlStateManager._clearDepth(1.0);
+			RenderSystem.clearDepth(1.0);
 			i |= 0x100;
 		}
-		VRenderSystem.clear(i);
+		RenderSystem.clear(i, isMac);
 		this.unbindWrite();
 	}
 
@@ -258,11 +258,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Override
 	public void blitFovReduction(ShaderInstance instance, int width, int height) {
 		RenderSystem.assertOnRenderThread();
-		VRenderSystem.colorMask(true, true, true, false);
-		GlStateManager._disableDepthTest();
-		VRenderSystem.depthMask(false);
+		RenderSystem.colorMask(true, true, true, false);
+		RenderSystem.disableDepthTest();
+		RenderSystem.depthMask(false);
 		//GlStateManager._viewport(0, 0, width, height);
-		GlStateManager._disableBlend();
+		RenderSystem.disableBlend();
 		Minecraft minecraft = Minecraft.getInstance();
 		RenderSystem.setShaderTexture(0, this.colorTextureId);
 		if (instance == null) {
@@ -305,19 +305,19 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		}
 		BufferUploader.draw(bufferBuilder.end());
 		instance.clear();
-		VRenderSystem.depthMask(true);
-		VRenderSystem.colorMask(true, true, true, true);
+		RenderSystem.depthMask(true);
+		RenderSystem.colorMask(true, true, true, true);
 	}
 
 	private void _blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean bl, float xCropFactor,
 			float yCropFactor, boolean keepAspect) {
 		RenderSystem.assertOnGameThreadOrInit();
-		VRenderSystem.colorMask(true, true, true, false);
-		GlStateManager._disableDepthTest();
-		VRenderSystem.depthMask(false);
+		RenderSystem.colorMask(true, true, true, false);
+		RenderSystem.disableDepthTest();
+		RenderSystem.depthMask(false);
 		//GlStateManager._viewport(left, top, width, height);
 		if (bl) {
-			GlStateManager._disableBlend();
+			RenderSystem.disableBlend();
 		}
 
 		Minecraft minecraft = Minecraft.getInstance();
@@ -386,8 +386,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			BufferUploader.draw(bufferbuilder.end());
 			instance.clear();
 
-		VRenderSystem.depthMask(true);
-		VRenderSystem.colorMask(true, true, true, true);
+		RenderSystem.depthMask(true);
+		RenderSystem.colorMask(true, true, true, true);
 	}
 
 }

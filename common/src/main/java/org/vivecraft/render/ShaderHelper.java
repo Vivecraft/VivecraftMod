@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ShaderHelper
 {
-    private static int createShader(String shaderGLSL, int shaderType) throws Exception
+/*    private static int createShader(String shaderGLSL, int shaderType) throws Exception
     {
         int i = 0;
 
@@ -39,21 +39,6 @@ public class ShaderHelper
             GlStateManager.glDeleteShader(i);
             throw exception;
         }
-    }
-
-    public static int checkGLError(String par1Str)
-    {
-        int i = GL11.glGetError();
-
-        if (i != 0)
-        {
-            String s = "";
-            System.out.println("########## GL ERROR ##########");
-            System.out.println("@ " + par1Str);
-            System.out.println(i + ": " + s);
-        }
-
-        return i;
     }
 
     public static int initShaders(String vertexShaderGLSL, String fragmentShaderGLSL, boolean doAttribs)
@@ -100,15 +85,11 @@ public class ShaderHelper
             if (doAttribs)
             {
                 GL20.glBindAttribLocation(k, 0, "in_Position");
-                checkGLError("@2");
                 GL20.glBindAttribLocation(k, 1, "in_Color");
-                checkGLError("@2a");
                 GL20.glBindAttribLocation(k, 2, "in_TextureCoord");
-                checkGLError("@3");
             }
 
             GL43C.glLinkProgram(k);
-            checkGLError("Link");
 
             String log = GL20C.glGetShaderInfoLog(i);
             if (!log.isEmpty()) {
@@ -125,5 +106,5 @@ public class ShaderHelper
                     return k;
                 }
             }
-        }
+        }*/
 }

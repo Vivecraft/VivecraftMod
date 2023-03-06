@@ -21,7 +21,7 @@ public class GLUtils
         return createByteBuffer(size << 2).asFloatBuffer();
     }
 
-    public static synchronized int generateDisplayLists(int range)
+   public static synchronized int generateDisplayLists(int range)
     {
         int i = GL12.glGenLists(range);
 

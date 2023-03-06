@@ -1,6 +1,7 @@
 package org.vivecraft.utils;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -189,10 +190,10 @@ public class Debug
             double d1 = player.yOld + (player.getY() - player.yOld) * (double)partialTicks;
             double d2 = player.zOld + (player.getZ() - player.zOld) * (double)partialTicks;
            // GlStateManager.lineWidth(5.0F);
-            GlStateManager._disableTexture();
+            RenderSystem.disableTexture();
             //GlStateManager._disableLighting();
-            VRenderSystem.depthMask(false);
-            GlStateManager._disableDepthTest();
+            RenderSystem.depthMask(false);
+            RenderSystem.disableDepthTest();
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder bufferbuilder = tesselator.getBuilder();
             //bufferbuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
@@ -206,10 +207,10 @@ public class Debug
             }
 
             tesselator.end();
-            VRenderSystem.depthMask(true);
-            GlStateManager._enableTexture();
+            RenderSystem.depthMask(true);
+            RenderSystem.enableTexture();
             //GlStateManager._enableLighting();
-            GlStateManager._enableDepthTest();
+            RenderSystem.enableDepthTest();
 
             if (!this.manualClearing)
             {
