@@ -1,5 +1,17 @@
 package org.vivecraft.gameplay.trackers;
 
+import java.util.HashSet;
+
+import org.vivecraft.ClientDataHolder;
+import org.vivecraft.Xplat;
+import org.vivecraft.extensions.PlayerExtension;
+import org.vivecraft.api.VRData;
+import org.vivecraft.provider.ControllerType;
+import org.vivecraft.settings.VRHotkeys;
+import org.vivecraft.settings.VRSettings;
+import org.vivecraft.render.RenderPass;
+import org.vivecraft.render.VRFirstPersonArmSwing;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -20,17 +32,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.api.VRData;
-import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.provider.ControllerType;
-import org.vivecraft.render.RenderPass;
-import org.vivecraft.render.VRFirstPersonArmSwing;
-import org.vivecraft.settings.VRHotkeys;
-import org.vivecraft.settings.VRSettings;
-
-import java.util.HashSet;
 
 public class InteractTracker extends Tracker
 {
@@ -125,20 +126,15 @@ public class InteractTracker extends Tracker
         {
             this.rightClickable = new HashSet<>();
 
-            String name = "use";
-            String unmappedName = "method_9534";
+            String name = Xplat.getUseMethodName();
             for (Object object : BuiltInRegistries.BLOCK)
             {
                 Class<?> oclass = object.getClass();
 
                 try
                 {
-                    if (oclass.getMethod(name, BlockState.class,
-                            net.minecraft.world.level.Level.class,
-                            BlockPos.class,
-                            net.minecraft.world.entity.player.Player.class,
-                            InteractionHand.class,
-                            BlockHitResult.class).getDeclaringClass() == oclass || oclass.getMethod(unmappedName, BlockState.class,
+                    if (oclass.getMethod(name,
+                            BlockState.class,
                             net.minecraft.world.level.Level.class,
                             BlockPos.class,
                             net.minecraft.world.entity.player.Player.class,
@@ -155,12 +151,8 @@ public class InteractTracker extends Tracker
 
                 try
                 {
-                    if (oclass.getMethod(name, BlockState.class,
-                            net.minecraft.world.level.Level.class,
-                            BlockPos.class,
-                            net.minecraft.world.entity.player.Player.class,
-                            InteractionHand.class,
-                            BlockHitResult.class).getDeclaringClass() == oclass || oclass.getMethod(unmappedName, BlockState.class,
+                    if (oclass.getMethod(name,
+                            BlockState.class,
                             net.minecraft.world.level.Level.class,
                             BlockPos.class,
                             net.minecraft.world.entity.player.Player.class,

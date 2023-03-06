@@ -783,6 +783,16 @@ public abstract class MCVR
                 this.controllerRotation[0].M[2][0] = matrix4f.m20;
                 this.controllerRotation[0].M[2][1] = matrix4f.m21;
                 this.controllerRotation[0].M[2][2] = matrix4f.m22;
+
+                this.handRotation[0].M[0][0] = matrix4f.m00;
+                this.handRotation[0].M[0][1] = matrix4f.m01;
+                this.handRotation[0].M[0][2] = matrix4f.m02;
+                this.handRotation[0].M[1][0] = matrix4f.m10;
+                this.handRotation[0].M[1][1] = matrix4f.m11;
+                this.handRotation[0].M[1][2] = matrix4f.m12;
+                this.handRotation[0].M[2][0] = matrix4f.m20;
+                this.handRotation[0].M[2][1] = matrix4f.m21;
+                this.handRotation[0].M[2][2] = matrix4f.m22;
             }
 
             Vec3 vec32 = this.getAimVector(0);
@@ -1479,4 +1489,6 @@ public abstract class MCVR
     public abstract boolean hasThirdController();
 
     public abstract List<Long> getOrigins(VRInputAction var1);
+
+    public abstract String getOriginName(long l);
 }

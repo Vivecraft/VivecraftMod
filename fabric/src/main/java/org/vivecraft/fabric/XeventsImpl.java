@@ -31,19 +31,4 @@ public class XeventsImpl {
 
     }
 
-    public static void drawScreen(Screen screen, PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        if (Xplat.isModLoaded("fabric")){
-            ScreenEvents.beforeRender(screen).invoker().beforeRender(screen, poseStack, mouseX, mouseY, partialTick);
-        }
-        if (Xplat.isModLoaded("architectury")){
-            ClientGuiEvent.RENDER_PRE.invoker().render(screen, poseStack, mouseX, mouseY, partialTick);
-        }
-        screen.renderWithTooltip(poseStack, mouseX, mouseY, partialTick);
-        if (Xplat.isModLoaded("fabric")){
-            ScreenEvents.afterRender(screen).invoker().afterRender(screen, poseStack, mouseX, mouseY, partialTick);
-        }
-        if (Xplat.isModLoaded("architectury")){
-            ClientGuiEvent.RENDER_POST.invoker().render(screen, poseStack, mouseX, mouseY, partialTick);
-        }
-    }
 }

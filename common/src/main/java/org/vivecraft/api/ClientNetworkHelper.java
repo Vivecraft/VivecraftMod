@@ -43,6 +43,8 @@ public class ClientNetworkHelper
     private static float capturedPitch;
     private static boolean overrideActive;
 
+    public static boolean needsReset = true;
+
     public static ServerboundCustomPayloadPacket getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators command, byte[] payload)
     {
         FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());

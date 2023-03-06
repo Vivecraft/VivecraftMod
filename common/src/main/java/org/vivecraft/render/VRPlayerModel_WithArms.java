@@ -41,8 +41,9 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 	{
 		super(p_170821_, p_170822_);
 		this.slim = p_170822_;
-		this.leftShoulder = p_170821_.getChild("leftShoulder");
-		this.rightShoulder = p_170821_.getChild("rightShoulder");
+		// use left/right arm as shoulders
+		this.leftShoulder = p_170821_.getChild("left_arm");
+		this.rightShoulder = p_170821_.getChild("right_arm");
 		this.leftShoulder_sleeve = p_170821_.getChild("leftShoulder_sleeve");
 		this.rightShoulder_sleeve = p_170821_.getChild("rightShoulder_sleeve");
 		this.rightHand = p_170821_.getChild("rightHand");
@@ -65,17 +66,13 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 		MeshDefinition meshdefinition = VRPlayerModel.createMesh(p_170826_, p_170827_);
 		PartDefinition partdefinition = meshdefinition.getRoot();
 
-		//its just a flesh wound
-		partdefinition.addOrReplaceChild("left_arm", CubeListBuilder.create(), PartPose.ZERO);
-		partdefinition.addOrReplaceChild("right_arm", CubeListBuilder.create(), PartPose.ZERO);
-
 		if(p_170827_) {
 			partdefinition.addOrReplaceChild("leftHand", CubeListBuilder.create().texOffs(32, 55).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(5.0F, 2.5F, 0.0F));
 			partdefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 55).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(5.0F, 2.5F, 0.0F));
 			partdefinition.addOrReplaceChild("rightHand", CubeListBuilder.create().texOffs(40, 23).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
 			partdefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 39).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(-5.0F, 2.5F, 0.0F));
-			partdefinition.addOrReplaceChild("leftShoulder", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(5.0F, 2.5F, 0.0F));
-			partdefinition.addOrReplaceChild("rightShoulder", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
+			partdefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(5.0F, 2.5F, 0.0F));
+			partdefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
 			partdefinition.addOrReplaceChild("leftShoulder_sleeve", CubeListBuilder.create().texOffs(48, 48).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(5.0F, 2.5F, 0.0F));
 			partdefinition.addOrReplaceChild("rightShoulder_sleeve", CubeListBuilder.create().texOffs(40, 32).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(-5.0F, 2.5F, 0.0F));
 		}else {
@@ -83,8 +80,8 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 			partdefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 55).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(5.0F, 2.5F, 0.0F));
 			partdefinition.addOrReplaceChild("rightHand", CubeListBuilder.create().texOffs(40, 23).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
 			partdefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 39).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(-5.0F, 2.5F, 0.0F));
-			partdefinition.addOrReplaceChild("leftShoulder", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(5.0F, 2.5F, 0.0F));
-			partdefinition.addOrReplaceChild("rightShoulder", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
+			partdefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(5.0F, 2.5F, 0.0F));
+			partdefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
 			partdefinition.addOrReplaceChild("leftShoulder_sleeve", CubeListBuilder.create().texOffs(48, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(5.0F, 2.5F, 0.0F));
 			partdefinition.addOrReplaceChild("rightShoulder_sleeve", CubeListBuilder.create().texOffs(40, 32).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(-5.0F, 2.5F, 0.0F));
 
@@ -117,9 +114,6 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 		double d1 = rotinfo.getBodyYawRadians();
 
 		this.laying = this.swimAmount > 0.0F || pEntity.isFallFlying() && !pEntity.isAutoSpinAttack();
-
-		this.rightShoulder.visible = true;
-		this.leftShoulder.visible = true;
 
 		if (!rotinfo.reverse)
 		{
@@ -236,8 +230,6 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 		this.leftShoulder_sleeve.visible = pVisible;
 		this.rightHand.visible = pVisible;
 		this.leftHand.visible = pVisible;
-		this.leftArm.visible = false;
-		this.rightArm.visible = false;
 
 	}
 

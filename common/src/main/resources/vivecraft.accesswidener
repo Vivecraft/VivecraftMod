@@ -75,7 +75,14 @@ accessible class net/minecraft/world/entity/monster/EnderMan$EndermanFreezeWhenL
 accessible class net/minecraft/world/entity/monster/EnderMan$EndermanLookForPlayerGoal
 accessible method net/minecraft/world/entity/monster/EnderMan isLookingAtMe (Lnet/minecraft/world/entity/player/Player;)Z
 
-accessible method net/minecraft/client/renderer/entity/player/PlayerRenderer setModelProperties (Lnet/minecraft/client/player/AbstractClientPlayer;)V
+extendable method net/minecraft/client/renderer/entity/player/PlayerRenderer setModelProperties (Lnet/minecraft/client/player/AbstractClientPlayer;)V
 
+accessible field net/minecraft/client/model/PlayerModel slim Z
+
+accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
+extendable method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
+
+mutable field net/minecraft/client/renderer/entity/layers/RenderLayer renderer Lnet/minecraft/client/renderer/entity/RenderLayerParent;
+accessible field net/minecraft/client/renderer/entity/layers/RenderLayer renderer Lnet/minecraft/client/renderer/entity/RenderLayerParent;
 accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES Lnet/minecraft/world/item/CreativeModeTab;
 accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/minecraft/world/item/CreativeModeTab;

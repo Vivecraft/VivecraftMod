@@ -2,7 +2,7 @@ package org.vivecraft.mixin.client.renderer.entity;
 
 import com.mojang.math.Axis;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.extensions.EntityRenderDispatcherExtension;
+import org.vivecraft.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.extensions.LevelRendererExtension;
 import org.joml.Quaternionf;
 import net.minecraft.client.Camera;
@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Mixin(EntityRenderDispatcher.class)
-public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerReloadListener, EntityRenderDispatcherExtension {
+public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerReloadListener, EntityRenderDispatcherVRExtension {
 
     @Unique
     private VRArmRenderer armRenderer;
@@ -36,11 +36,13 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
     public final Map<String, VRArmRenderer> armSkinMap = new HashMap<>();
     @Shadow
     public Camera camera;
+    @Shadow
+    private Quaternionf cameraOrientation;
 
     @Inject(at = @At("HEAD"), method = "cameraOrientation", cancellable = true)
     public void cameraOrientation(CallbackInfoReturnable<Quaternionf> cir) {
         if (ClientDataHolder.getInstance().currentPass == RenderPass.GUI) {
-            cir.setReturnValue(this.camera.rotation());
+            cir.setReturnValue(cameraOrientation);
             return;
         }
         else {
