@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client.gui;
 
+import net.minecraft.client.KeyMapping;
 import org.vivecraft.ClientDataHolder;
 import org.vivecraft.SodiumHelper;
 import org.vivecraft.Xplat;
@@ -12,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -23,8 +23,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -78,9 +76,9 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
 //        return ;
 //    }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/PlayerTabOverlay;render(Lcom/mojang/blaze3d/vertex/PoseStack;ILnet/minecraft/world/scores/Scoreboard;Lnet/minecraft/world/scores/Objective;)V"), method = "render")
-    public void noTabList(PlayerTabOverlay instance, PoseStack poseStack, int i, Scoreboard scoreboard, Objective objective) {
-        return ;
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"), method = "render")
+    public boolean toggleableTabList(KeyMapping instance) {
+        return instance.isDown() || showPlayerList;
     }
 
     @Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)
@@ -103,26 +101,31 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         return !(!instance.isEmpty() || ClientDataHolder.getInstance().vrSettings.vrTouchHotbar);
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2), method = "renderHotbar")
-    public void renderVRHotbarLeft(Gui instance, PoseStack poseStack, int x, int y, int uOffset, int vOffset, int uWidth, int vWidth) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2, shift = At.Shift.BEFORE), method = "renderHotbar")
+    public void renderVRHotbarLeft(float f, PoseStack poseStack, CallbackInfo ci) {
         if (ClientDataHolder.getInstance().interactTracker.hotbar == 9) {
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
-            this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        }
-        else {
-            this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 3), method = "renderHotbar")
-    public void renderVRHotbarRight(Gui instance, PoseStack poseStack, int x, int y, int uOffset, int vOffset, int uWidth, int vWidth) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2, shift = At.Shift.AFTER), method = "renderHotbar")
+    public void renderVRHotbarLeftReset(float f, PoseStack poseStack, CallbackInfo ci) {
+        if (ClientDataHolder.getInstance().interactTracker.hotbar == 9) {
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        }
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 3, shift = At.Shift.BEFORE), method = "renderHotbar")
+    public void renderVRHotbarRight(float f, PoseStack poseStack, CallbackInfo ci) {
         if (ClientDataHolder.getInstance().interactTracker.hotbar == 9){
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
-            this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
+        }
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 3, shift = At.Shift.AFTER), method = "renderHotbar")
+    public void renderVRHotbarRightReset(float f, PoseStack poseStack, CallbackInfo ci) {
+        if (ClientDataHolder.getInstance().interactTracker.hotbar == 9){
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        } else {
-            this.blit(poseStack, x, y, uOffset, vOffset, uWidth, vWidth);
         }
     }
 

@@ -54,8 +54,8 @@ public abstract class ServerPlayerMixin extends Player {
 		super(level, blockPos, f, gameProfile);
 	}
 
-	@Inject(at = @At("TAIL"), method = "initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V")
-	public void menu(AbstractContainerMenu p_143400_, CallbackInfo info) {
+	@Inject(at = @At("TAIL"), method = "initInventoryMenu")
+	public void menu(CallbackInfo ci) {
 		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
 		// TODO change setting to commonDataHolder?
 		if ((!this.server.isDedicatedServer() && ClientDataHolder.getInstance().vrSettings != null && !ClientDataHolder.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
