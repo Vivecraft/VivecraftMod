@@ -334,16 +334,14 @@ public class GuiHandler
             dh.vrSettings.worldRotation = 0.0F;
         }
 
-        // check if the new screen is meant to show the MenuRoom, instead of the current screen
-        boolean flag = mc.gameRenderer == null || (((GameRendererExtension) mc.gameRenderer).willBeInMenuRoom(newScreen));
+        boolean flag = mc.gameRenderer == null || ((GameRendererExtension) mc.gameRenderer).isInMenuRoom();
         flag = flag & (!dh.vrSettings.seated && !dh.vrSettings.menuAlwaysFollowFace);
 
         if (flag)
         {
             guiScale = 2.0F;
             float[] afloat = MCVR.get().getPlayAreaSize();
-            // slight offset to center of the room, to prevent z fighting
-            guiPos_room = new Vec3(0.02D, (double)1.3F, (double)(-Math.max(afloat != null ? afloat[1] / 2.0F : 0.0F, 1.5F)));
+            guiPos_room = new Vec3(0.0D, (double)1.3F, (double)(-Math.max(afloat != null ? afloat[1] / 2.0F : 0.0F, 1.5F)));
             guiRotation_room = new Matrix4f();
             guiRotation_room.M[0][0] = guiRotation_room.M[1][1] = guiRotation_room.M[2][2] = guiRotation_room.M[3][3] = 1.0F;
             guiRotation_room.M[0][1] = guiRotation_room.M[1][0] = guiRotation_room.M[2][3] = guiRotation_room.M[3][1] = 0.0F;

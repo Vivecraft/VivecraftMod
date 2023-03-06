@@ -6,12 +6,13 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallbackI;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = Window.class, priority = 1100)
@@ -25,6 +26,12 @@ public abstract class WindowVRMixin {
 	@Final
 	@Shadow
 	private WindowEventHandler eventHandler;
+	@Shadow
+	private double guiScale;
+	@Shadow
+	private int guiScaledWidth;
+	@Shadow
+	private int guiScaledHeight;
 	
 	@Shadow
 	public abstract int getScreenWidth();
@@ -37,10 +44,9 @@ public abstract class WindowVRMixin {
 		return null;
 	}
 
-	@Inject(method = "updateVsync", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapInterval(I)V", remap = false, shift = At.Shift.BEFORE), cancellable = true)
-	public void disableSwap(boolean bl, CallbackInfo ci) {
+	@Redirect(method = "updateVsync", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapInterval(I)V", remap = false))
+	public void disableSwap(int interval) {
 		GLFW.glfwSwapInterval(0);
-		ci.cancel();
 	}
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I"), method = "onFramebufferResize(JII)V")
@@ -62,26 +68,38 @@ public abstract class WindowVRMixin {
 		}
 		info.cancel();
 	}
-	@ModifyVariable(at = @At("HEAD"), method = "calculateScale", argsOnly = true)
-	private boolean noSpecialUnicodeScale(boolean forceUnicode){
-		return false;
-	}
-	@Redirect(at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lcom/mojang/blaze3d/platform/Window;framebufferWidth:I"), method = "calculateScale")
-	private int widthRedirectCalculateScale(Window instance){
-		return this.width;
-	}
-	@Redirect(at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lcom/mojang/blaze3d/platform/Window;framebufferHeight:I"), method = "calculateScale")
-	private int heightRedirectCalculateScale(Window instance){
-		return this.height;
+	
+	/**
+	 * @author
+	 * @reason
+	 */
+	@Overwrite
+	public int calculateScale(int pGuiScale, boolean bl) {
+		int i;
+		for (i = 1; i != pGuiScale && i < this.width && i < this.height && this.width / (i + 1) >= 320 && this.height / (i + 1) >= 240; ++i) {
+
+		}
+
+		if (bl && i % 2 != 0) {
+//			++j;
+		}
+
+		return i;
 	}
 
-	@Redirect(at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lcom/mojang/blaze3d/platform/Window;framebufferWidth:I"), method = "setGuiScale")
-	private int widthRedirectSetGuiScale(Window instance){
-		return this.width;
-	}
-	@Redirect(at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lcom/mojang/blaze3d/platform/Window;framebufferHeight:I"), method = "setGuiScale")
-	private int heightRedirectSetGuiScale(Window instance){
-		return this.height;
+	
+	/**
+	 * @author
+	 * @reason
+	 */
+	@Overwrite
+	public void setGuiScale(double pScaleFactor) {
+		this.guiScale = pScaleFactor;
+
+		int i = (int) ((double) this.width / pScaleFactor);
+		this.guiScaledWidth = (double) this.width / pScaleFactor > (double) i ? i + 1 : i;
+		int j = (int) ((double) this.height / pScaleFactor);
+		this.guiScaledHeight = (double) this.height / pScaleFactor > (double) j ? j + 1 : j;
 	}
 
 	/**

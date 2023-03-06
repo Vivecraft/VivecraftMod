@@ -30,9 +30,7 @@
     "client.multiplayer.ClientPacketListenerMixin",
     "client.player.AbstractClientPlayerMixin",
     "client.renderer.block.LiquidBlockRendererMixin",
-    "client.renderer.entity.EntityRenderDispatcherMixin",
-    "client.renderer.entity.PlayerRendererMixin",
-    "client.renderer.entity.layers.RenderLayerMixin"
+    "client.renderer.entity.EntityRenderDispatcherMixin"
 
   ],
   "server": [

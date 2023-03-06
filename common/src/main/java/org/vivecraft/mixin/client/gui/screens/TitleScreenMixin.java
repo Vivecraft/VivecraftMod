@@ -44,12 +44,7 @@ public abstract class TitleScreenMixin extends Screen {
     private void addVRModeButton() {
 
         // get first button, to position warnings
-        for (Renderable widget : renderables) {
-            if (widget instanceof AbstractWidget) {
-                firstButton = (AbstractWidget) widget;
-                break;
-            }
-        }
+        firstButton = (AbstractWidget)renderables.get(0);
 
         try {
             if (!Files.exists(vrConfigPath)) {
@@ -95,7 +90,7 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Inject(at =  @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;render(Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", shift = At.Shift.BEFORE, ordinal = 0), method = "render")
     public void renderText(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
-        int l = vrModeButton.getY() - 23;
+        int l = this.height / 4 + 49;
         drawString(poseStack, this.font, "Vivecraft", this.width / 2 + 106, l, 16777215);
         drawString(poseStack, this.font, Component.translatable("vivecraft.messages.mode"), this.width / 2 + 106, l + 10, 16777215);
     }

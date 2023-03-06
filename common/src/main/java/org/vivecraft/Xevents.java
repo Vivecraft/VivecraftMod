@@ -34,4 +34,10 @@ public interface Xevents {
 
     }
 
+    @ExpectPlatform
+    public static void drawScreen(Screen screen, PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+
+    }
+
+
 }
