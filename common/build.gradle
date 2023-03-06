@@ -68,7 +68,21 @@ dependencies {
     //include("org.lwjgl:lwjgl-stb:3.2.2:natives-windows")
     //include("org.lwjgl:lwjgl-openal:3.2.2:natives-windows")
 
+    //LaunchPopup
+    implementation 'com.github.fayer3:LaunchPopup:master-SNAPSHOT'
 
+}
+// extract the LaunchPopup classes
+jar {
+    from {
+        configurations
+                .runtimeClasspath
+                .collect {
+                    if(it.name.startsWith("LaunchPopup")) {
+                        zipTree(it)
+                    }
+                }
+    }
 
 }
 
