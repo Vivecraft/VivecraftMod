@@ -618,7 +618,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		// generate mipmaps
 		// TODO: does this do anything?
 		mainRenderTarget.bindRead();
-		((RenderTargetExtension) mainRenderTarget).genMipMaps();
+		//((RenderTargetExtension) mainRenderTarget).genMipMaps();
 		mainRenderTarget.unbindRead();
 
 		this.profiler.popPush("2D Keyboard");
@@ -1109,7 +1109,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	}
 
 	private void renderSingleView(RenderPass eye, float nano, boolean renderworld) {
-		GlStateManager._clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+		VRenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
 		GlStateHelper.clear(16384);
 		GlStateManager._enableTexture();
 		GlStateManager._enableDepthTest();
@@ -1124,7 +1124,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			RenderTarget rendertarget = this.mainRenderTarget;
 
 			if (ClientDataHolder.getInstance().vrSettings.useFsaa) {
-				GlStateManager._clearColor(RenderSystem.getShaderFogColor()[0], RenderSystem.getShaderFogColor()[1], RenderSystem.getShaderFogColor()[2], RenderSystem.getShaderFogColor()[3]);
+				VRenderSystem.clearColor(RenderSystem.getShaderFogColor()[0], RenderSystem.getShaderFogColor()[1], RenderSystem.getShaderFogColor()[2], RenderSystem.getShaderFogColor()[3]);
 				if (eye == RenderPass.LEFT) {
 					ClientDataHolder.getInstance().vrRenderer.framebufferEye0.bindWrite(true);
 				} else {
@@ -1284,7 +1284,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		if (ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA) {
 			this.profiler.push("cameracopy");
 			ClientDataHolder.getInstance().vrRenderer.cameraFramebuffer.bindWrite(true);
-			GlStateManager._clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+			VRenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
 			GlStateHelper.clear(16640);
 			((RenderTargetExtension) ClientDataHolder.getInstance().vrRenderer.cameraRenderFramebuffer).blitToScreen(0,
 					ClientDataHolder.getInstance().vrRenderer.cameraFramebuffer.viewWidth,
@@ -1359,12 +1359,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				&& ClientDataHolder.getInstance().vrSettings.mixedRealityAlphaMask;
 
 		if (!flag1) {
-			GlStateManager._clearColor(
+			VRenderSystem.clearColor(
 					(float) ClientDataHolder.getInstance().vrSettings.mixedRealityKeyColor.getRed() / 255.0F,
 					(float) ClientDataHolder.getInstance().vrSettings.mixedRealityKeyColor.getGreen() / 255.0F,
 					(float) ClientDataHolder.getInstance().vrSettings.mixedRealityKeyColor.getBlue() / 255.0F, 1.0F);
 		} else {
-			GlStateManager._clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+			VRenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
 		}
 
 		GlStateHelper.clear(16640);

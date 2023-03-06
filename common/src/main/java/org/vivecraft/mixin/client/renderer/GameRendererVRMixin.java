@@ -909,7 +909,7 @@ public abstract class GameRendererVRMixin
 		RenderSystem.applyModelViewMatrix();
 
 		this.minecraft.getMainRenderTarget().bindRead();
-		((RenderTargetExtension) this.minecraft.getMainRenderTarget()).genMipMaps();
+		//((RenderTargetExtension) this.minecraft.getMainRenderTarget()).genMipMaps();
 		this.minecraft.getMainRenderTarget().unbindRead();
 	}
 

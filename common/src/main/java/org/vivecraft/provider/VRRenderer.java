@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.texture.VulkanImage;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -132,7 +133,7 @@ public abstract class VRRenderer
         ClientDataHolder dataholder = ClientDataHolder.getInstance();
         
         //setup stencil for writing
-        GL11.glEnable(GL11.GL_STENCIL_TEST);
+        //GL11.glEnable(GL11.GL_STENCIL_TEST);
 		GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
 		GL11.glStencilMask(0xFF); // Write to stencil buffer
         
@@ -229,7 +230,7 @@ public abstract class VRRenderer
             GlStateManager._bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
 
             GlStateManager._activeTexture(33984);
-            GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            VRenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager._clearDepth(1.0D);
             this.fsaaFirstPassResultFBO.bindRead();
             GlStateHelper.clear(16640);
@@ -257,7 +258,7 @@ public abstract class VRRenderer
             GlStateManager._activeTexture(33984);
             this.checkGLError("posttex");
             //GlStateManager._viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
-            GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            VRenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager._clearDepth(1.0D);
             GlStateHelper.clear(16640);
             this.checkGLError("postclear");

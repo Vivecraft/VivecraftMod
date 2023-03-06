@@ -100,13 +100,13 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public void clearWithColor(float r, float g, float b, float a, boolean isMac) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		//this._bindWrite(true);
-		GlStateManager._clearColor(r, g, b, a);
+		VRenderSystem.clearColor(r, g, b, a);
 		int i = 16384;
 		if (this.useDepth) {
 			GlStateManager._clearDepth(1.0);
 			i |= 0x100;
 		}
-		GlStateManager._clear(i, isMac);
+		VRenderSystem.clear(i);
 		this.unbindWrite();
 	}
 

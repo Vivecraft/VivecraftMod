@@ -1,6 +1,9 @@
 package org.vivecraft.extensions;
 
 import net.minecraft.client.renderer.ShaderInstance;
+import net.vulkanmod.mixin.texture.MAbstractTexture;
+import net.vulkanmod.vulkan.VRenderSystem;
+import net.vulkanmod.vulkan.texture.VulkanImage;
 import org.lwjgl.opengl.GL30;
 
 public interface RenderTargetExtension {
@@ -18,9 +21,9 @@ public interface RenderTargetExtension {
 
 	int getDepthBufferId();
 
-	default void genMipMaps() {
+/*	default void genMipMaps() {
 		GL30.glGenerateMipmap(3553);
-	}
+	}*/
 
 	void setName(String name);
 
