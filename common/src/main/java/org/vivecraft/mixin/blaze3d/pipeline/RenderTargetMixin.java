@@ -99,7 +99,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Override
 	public void clearWithColor(float r, float g, float b, float a, boolean isMac) {
 		RenderSystem.assertOnRenderThreadOrInit();
-		//this._bindWrite(true);
+		this._bindWrite(true);
 		RenderSystem.clearColor(r, g, b, a);
 		int i = 16384;
 		if (this.useDepth) {
@@ -232,15 +232,15 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	 * @author
 	 * @reason
 	 */
-/*	@Overwrite
+	@Overwrite
 	private void _bindWrite(boolean bl) {
 		RenderSystem.assertOnGameThreadOrInit();
 		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
 		if (bl) {
-			GlStateManager._viewport(0, 0, this.viewWidth, this.viewHeight);
+			RenderSystem.viewport(0, 0, this.viewWidth, this.viewHeight);
 		}
 	}
-	*/
+
 
 	public void blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor,
 			float yCropFactor, boolean keepAspect) {
@@ -261,7 +261,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		RenderSystem.colorMask(true, true, true, false);
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
-		//GlStateManager._viewport(0, 0, width, height);
+		RenderSystem.viewport(0, 0, width, height);
 		RenderSystem.disableBlend();
 		Minecraft minecraft = Minecraft.getInstance();
 		RenderSystem.setShaderTexture(0, this.colorTextureId);
@@ -315,7 +315,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		RenderSystem.colorMask(true, true, true, false);
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
-		//GlStateManager._viewport(left, top, width, height);
+		RenderSystem.viewport(left, top, width, height);
 		if (bl) {
 			RenderSystem.disableBlend();
 		}
