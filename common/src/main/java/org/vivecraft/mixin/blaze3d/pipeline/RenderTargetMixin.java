@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.vulkanmod.vulkan.VRenderSystem;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -18,6 +19,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.extensions.RenderTargetExtension;
 import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
+import org.vivecraft.provider.VRRenderer;
 
 @Debug(export = true)
 @Mixin(RenderTarget.class)
@@ -97,7 +99,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Override
 	public void clearWithColor(float r, float g, float b, float a, boolean isMac) {
 		RenderSystem.assertOnRenderThreadOrInit();
-		this._bindWrite(true);
+		//this._bindWrite(true);
 		GlStateManager._clearColor(r, g, b, a);
 		int i = 16384;
 		if (this.useDepth) {
@@ -230,7 +232,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	 * @author
 	 * @reason
 	 */
-	@Overwrite
+/*	@Overwrite
 	private void _bindWrite(boolean bl) {
 		RenderSystem.assertOnGameThreadOrInit();
 		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
@@ -238,7 +240,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			GlStateManager._viewport(0, 0, this.viewWidth, this.viewHeight);
 		}
 	}
-	
+	*/
 
 	public void blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor,
 			float yCropFactor, boolean keepAspect) {
@@ -256,10 +258,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Override
 	public void blitFovReduction(ShaderInstance instance, int width, int height) {
 		RenderSystem.assertOnRenderThread();
-		GlStateManager._colorMask(true, true, true, false);
+		VRenderSystem.colorMask(true, true, true, false);
 		GlStateManager._disableDepthTest();
-		GlStateManager._depthMask(false);
-		GlStateManager._viewport(0, 0, width, height);
+		VRenderSystem.depthMask(false);
+		//GlStateManager._viewport(0, 0, width, height);
 		GlStateManager._disableBlend();
 		Minecraft minecraft = Minecraft.getInstance();
 		RenderSystem.setShaderTexture(0, this.colorTextureId);
@@ -303,17 +305,17 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		}
 		BufferUploader.draw(bufferBuilder.end());
 		instance.clear();
-		GlStateManager._depthMask(true);
-		GlStateManager._colorMask(true, true, true, true);
+		VRenderSystem.depthMask(true);
+		VRenderSystem.colorMask(true, true, true, true);
 	}
 
 	private void _blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean bl, float xCropFactor,
 			float yCropFactor, boolean keepAspect) {
 		RenderSystem.assertOnGameThreadOrInit();
-		GlStateManager._colorMask(true, true, true, false);
+		VRenderSystem.colorMask(true, true, true, false);
 		GlStateManager._disableDepthTest();
-		GlStateManager._depthMask(false);
-		GlStateManager._viewport(left, top, width, height);
+		VRenderSystem.depthMask(false);
+		//GlStateManager._viewport(left, top, width, height);
 		if (bl) {
 			GlStateManager._disableBlend();
 		}
@@ -384,8 +386,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			BufferUploader.draw(bufferbuilder.end());
 			instance.clear();
 
-		GlStateManager._depthMask(true);
-		GlStateManager._colorMask(true, true, true, true);
+		VRenderSystem.depthMask(true);
+		VRenderSystem.colorMask(true, true, true, true);
 	}
 
 }

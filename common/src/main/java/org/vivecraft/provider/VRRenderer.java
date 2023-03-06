@@ -233,7 +233,7 @@ public abstract class VRRenderer
             GlStateManager._clearDepth(1.0D);
             this.fsaaFirstPassResultFBO.bindRead();
             GlStateHelper.clear(16640);
-            GlStateManager._viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
+            //GlStateManager._viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
             VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
             VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
             VRShaders._Lanczos_modelViewUniform.set(RenderSystem.getModelViewMatrix());
@@ -256,7 +256,7 @@ public abstract class VRRenderer
 
             GlStateManager._activeTexture(33984);
             this.checkGLError("posttex");
-            GlStateManager._viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
+            //GlStateManager._viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
             GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager._clearDepth(1.0D);
             GlStateHelper.clear(16640);

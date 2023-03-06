@@ -47,6 +47,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.vulkanmod.vulkan.Drawer;
+import net.vulkanmod.vulkan.VRenderSystem;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
@@ -571,8 +572,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //		}
 
 		// v
-		GlStateManager._depthMask(true);
-		GlStateManager._colorMask(true, true, true, true);
+		VRenderSystem.depthMask(true);
+		VRenderSystem.colorMask(true, true, true, true);
 		this.mainRenderTarget = GuiHandler.guiFramebuffer;
 		this.mainRenderTarget.clear(Minecraft.ON_OSX);
 		this.mainRenderTarget.bindWrite(true);

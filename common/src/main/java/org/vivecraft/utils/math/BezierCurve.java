@@ -12,6 +12,7 @@ import java.util.Arrays;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import net.vulkanmod.vulkan.VRenderSystem;
 
 public class BezierCurve
 {
@@ -86,7 +87,7 @@ public class BezierCurve
         double d2 = player.zOld + (player.getZ() - player.zOld) * (double)partialTicks;
         GlStateManager._disableTexture();
         //GlStateManager._disableLighting();
-        GlStateManager._depthMask(false);
+        VRenderSystem.depthMask(false);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         bufferbuilder.begin(Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
@@ -100,7 +101,7 @@ public class BezierCurve
         tesselator.end();
         //GlStateManager._enableLighting();
         GlStateManager._enableTexture();
-        GlStateManager._depthMask(true);
+        VRenderSystem.depthMask(true);
     }
 
     void renderVertex(BufferBuilder buffer, Vec3 vert, Color color, double offX, double offY, double offZ)

@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.vulkanmod.vulkan.VRenderSystem;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
@@ -190,7 +191,7 @@ public class Debug
            // GlStateManager.lineWidth(5.0F);
             GlStateManager._disableTexture();
             //GlStateManager._disableLighting();
-            GlStateManager._depthMask(false);
+            VRenderSystem.depthMask(false);
             GlStateManager._disableDepthTest();
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder bufferbuilder = tesselator.getBuilder();
@@ -205,7 +206,7 @@ public class Debug
             }
 
             tesselator.end();
-            GlStateManager._depthMask(true);
+            VRenderSystem.depthMask(true);
             GlStateManager._enableTexture();
             //GlStateManager._enableLighting();
             GlStateManager._enableDepthTest();

@@ -10,6 +10,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Axis;
+import net.vulkanmod.vulkan.VRenderSystem;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -1259,7 +1260,7 @@ public abstract class GameRendererVRMixin
 				GlStateManager._depthFunc(515);
 			}
 
-			GlStateManager._depthMask(true);
+			VRenderSystem.depthMask(true);
 			GlStateManager._enableDepthTest();
 
 
