@@ -1362,7 +1362,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
 		}
 
-		GlStateHelper.clear(16640);
+		RenderSystem.clear(16640, ON_OSX);
 		Vec3 vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getHeadPivot()
 				.subtract(ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());
 		Matrix4f matrix4f = ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD)
