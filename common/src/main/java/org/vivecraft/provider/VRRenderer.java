@@ -23,7 +23,6 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.RenderSystemHelper;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.VRTextureTarget;
 import org.vivecraft.extensions.GameRendererExtension;
@@ -166,7 +165,7 @@ public abstract class VRRenderer
     		RenderSystem.colorMask(true, true, true, true); 
 		}
 		
-    	RenderSystemHelper.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
+    	RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT, false);
     	
 		GL11.glClearStencil(0);
     	GL43.glClearDepthf(1);
@@ -246,7 +245,7 @@ public abstract class VRRenderer
             RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.clearDepth(1.0D);
             this.fsaaFirstPassResultFBO.bindRead();
-            RenderSystemHelper.clear(16640);
+            RenderSystem.clear(16640, false);
             RenderSystem.viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
             VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
             VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
@@ -257,7 +256,7 @@ public abstract class VRRenderer
                 VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }
             VRShaders.lanczosShader.apply();
-            RenderSystemHelper.clear(16384);
+            RenderSystem.clear(16384, false);
             this.drawQuad();
             this.fsaaLastPassResultFBO.clear(Minecraft.ON_OSX);
             this.fsaaLastPassResultFBO.bindWrite(false);
@@ -273,7 +272,7 @@ public abstract class VRRenderer
             RenderSystem.viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
             RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.clearDepth(1.0D);
-            RenderSystemHelper.clear(16640);
+            RenderSystem.clear(16640, false);
             this.checkGLError("postclear");
             RenderSystem.activeTexture(33984);
             this.checkGLError("postact");
