@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ShaderHelper
 {
-/*    private static int createShader(String shaderGLSL, int shaderType) throws Exception
+    private static int createShader(String shaderGLSL, int shaderType) throws Exception
     {
         int i = 0;
 
@@ -106,5 +106,5 @@ public class ShaderHelper
                     return k;
                 }
             }
-        }*/
+        }
 }

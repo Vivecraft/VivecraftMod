@@ -2,7 +2,6 @@ package org.vivecraft.provider;
 
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -18,7 +17,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.texture.VulkanImage;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -98,14 +96,14 @@ public abstract class VRRenderer
         this.vr = vr;
     }
 
-    protected void checkGLError(String message)
+/*    protected void checkGLError(String message)
     {
         //Config.checkGlError(message); TODO
-    	/*if (GlStateManager._getError() != 0) {
+    	*//*if (GlStateManager._getError() != 0) {
 			System.err.println(message);
-		}*/
+		}*//*
         System.out.println("OpenGL Error Check Skipped!");
-    }
+    }*/
 
     public boolean clipPlanesChanged()
     {
@@ -134,7 +132,7 @@ public abstract class VRRenderer
         ClientDataHolder dataholder = ClientDataHolder.getInstance();
         
         //setup stencil for writing
-        //GL11.glEnable(GL11.GL_STENCIL_TEST);
+        GL11.glEnable(GL11.GL_STENCIL_TEST);
 		GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
 		GL11.glStencilMask(0xFF); // Write to stencil buffer
         
@@ -236,15 +234,15 @@ public abstract class VRRenderer
             this.fsaaFirstPassResultFBO.bindRead();
             GlStateHelper.clear(16640);
             RenderSystem.viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
-/*            VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
+            VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
             VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
             VRShaders._Lanczos_modelViewUniform.set(RenderSystem.getModelViewMatrix());
-            VRShaders._Lanczos_projectionUniform.set(RenderSystem.getProjectionMatrix());*/
+            VRShaders._Lanczos_projectionUniform.set(RenderSystem.getProjectionMatrix());
             for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
                 int l = RenderSystem.getShaderTexture(k);
-                //VRShaders.lanczosShader.setSampler("Sampler" + k, l);
+                VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }
-            //VRShaders.lanczosShader.apply();
+            VRShaders.lanczosShader.apply();
             GlStateHelper.clear(16384);
             this.drawQuad();
             this.fsaaLastPassResultFBO.clear(Minecraft.ON_OSX);
@@ -257,27 +255,27 @@ public abstract class VRRenderer
             RenderSystem.bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
 
             RenderSystem.activeTexture(33984);
-            this.checkGLError("posttex");
+            //this.checkGLError("posttex");
             RenderSystem.viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
             RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.clearDepth(1.0D);
             GlStateHelper.clear(16640);
-            this.checkGLError("postclear");
+            //this.checkGLError("postclear");
             RenderSystem.activeTexture(33984);
-            this.checkGLError("postact");
+            //this.checkGLError("postact");
             for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
                 int l = RenderSystem.getShaderTexture(k);
-                //VRShaders.lanczosShader.setSampler("Sampler" + k, l);
+                VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }
-/*            VRShaders._Lanczos_texelWidthOffsetUniform.set(0.0F);
+            VRShaders._Lanczos_texelWidthOffsetUniform.set(0.0F);
             VRShaders._Lanczos_texelHeightOffsetUniform.set(1.0F / (3.0F * (float) this.framebufferEye0.viewHeight));
-            VRShaders.lanczosShader.apply();*/
+            VRShaders.lanczosShader.apply();
             this.drawQuad();
-            this.checkGLError("postdraw");
+            //this.checkGLError("postdraw");
             RenderSystem.restoreProjectionMatrix();
             RenderSystem.getModelViewStack().popPose();
             // Clean up time
-            //VRShaders.lanczosShader.clear();
+            VRShaders.lanczosShader.clear();
             Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
         }
     }
@@ -463,7 +461,7 @@ public abstract class VRRenderer
         if (this.reinitFramebuffers)
         {
             this.reinitShadersFlag = true;
-            this.checkGLError("Start Init");
+            //this.checkGLError("Start Init");
             int i = minecraft.getWindow().getScreenWidth() < 1 ? 1 : minecraft.getWindow().getScreenWidth();
             int j = minecraft.getWindow().getScreenHeight() < 1 ? 1 : minecraft.getWindow().getScreenHeight();
 
@@ -569,20 +567,20 @@ public abstract class VRRenderer
                 dataholder.print("Provider supplied texture resolution: " + eyew + " x " + eyeh);
             }
 
-            this.checkGLError("Render Texture setup");
+            //this.checkGLError("Render Texture setup");
 
             if (this.framebufferEye0 == null)
             {
                 this.framebufferEye0 = new VRTextureTarget("L Eye", eyew, eyeh, false, false, (int) this.LeftEyeTextureId.getId(), false, true, false);
                 dataholder.print(this.framebufferEye0.toString());
-                this.checkGLError("Left Eye framebuffer setup");
+                //this.checkGLError("Left Eye framebuffer setup");
             }
 
             if (this.framebufferEye1 == null)
             {
                 this.framebufferEye1 = new VRTextureTarget("R Eye", eyew, eyeh, false, false, (int) this.RightEyeTextureId.getId(), false, true, false);
                 dataholder.print(this.framebufferEye1.toString());
-                this.checkGLError("Right Eye framebuffer setup");
+                //this.checkGLError("Right Eye framebuffer setup");
             }
 
             this.renderScale = (float)Math.sqrt((double)dataholder.vrSettings.renderScaleFactor);
@@ -590,7 +588,7 @@ public abstract class VRRenderer
             j = (int)Math.ceil((double)((float)eyeh * this.renderScale));
             this.framebufferVrRender = new VRTextureTarget("3D Render", i, j, true, false, -1, true, true,  dataholder.vrSettings.vrUseStencil);
             dataholder.print(this.framebufferVrRender.toString());
-            this.checkGLError("3D framebuffer setup");
+            //this.checkGLError("3D framebuffer setup");
             this.mirrorFBWidth = minecraft.getWindow().getScreenWidth();
             this.mirrorFBHeight = minecraft.getWindow().getScreenHeight();
 
@@ -621,25 +619,25 @@ public abstract class VRRenderer
             {
                 this.framebufferMR = new VRTextureTarget("Mixed Reality Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, true, false, false);
                 dataholder.print(this.framebufferMR.toString());
-                this.checkGLError("Mixed reality framebuffer setup");
+                //this.checkGLError("Mixed reality framebuffer setup");
             }
 
             if (list.contains(RenderPass.CENTER) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()))
             {
                 this.framebufferUndistorted = new VRTextureTarget("Undistorted View Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, false, false, false);
                 dataholder.print(this.framebufferUndistorted.toString());
-                this.checkGLError("Undistorted view framebuffer setup");
+                //this.checkGLError("Undistorted view framebuffer setup");
             }
 
             GuiHandler.guiFramebuffer = new VRTextureTarget("GUI", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true, false);
             dataholder.print(GuiHandler.guiFramebuffer.toString());
-            this.checkGLError("GUI framebuffer setup");
+            //this.checkGLError("GUI framebuffer setup");
             KeyboardHandler.Framebuffer = new VRTextureTarget("Keyboard", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true, false);
             dataholder.print(KeyboardHandler.Framebuffer.toString());
-            this.checkGLError("Keyboard framebuffer setup");
+            //this.checkGLError("Keyboard framebuffer setup");
             RadialHandler.Framebuffer = new VRTextureTarget("Radial Menu", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true, false);
             dataholder.print(RadialHandler.Framebuffer.toString());
-            this.checkGLError("Radial framebuffer setup");
+            //this.checkGLError("Radial framebuffer setup");
             int j2 = 720;
             int k2 = 720;
 
@@ -649,17 +647,17 @@ public abstract class VRRenderer
 //                k2 = j;
 //            }
 
-            this.checkGLError("Mirror framebuffer setup");
+            //this.checkGLError("Mirror framebuffer setup");
             this.telescopeFramebufferR = new VRTextureTarget("TelescopeR", j2, k2, true, false, -1, true, false, false);
             dataholder.print(this.telescopeFramebufferR.toString());
-            this.checkGLError("TelescopeR framebuffer setup");
+            //this.checkGLError("TelescopeR framebuffer setup");
             this.telescopeFramebufferR.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             this.telescopeFramebufferR.clear(Minecraft.ON_OSX);
             this.telescopeFramebufferL = new VRTextureTarget("TelescopeL", j2, k2, true, false, -1, true, false, false);
             dataholder.print(this.telescopeFramebufferL.toString());
             this.telescopeFramebufferL.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             this.telescopeFramebufferL.clear(Minecraft.ON_OSX);
-            this.checkGLError("TelescopeL framebuffer setup");
+            //this.checkGLError("TelescopeL framebuffer setup");
             int j1 = Math.round(1920.0F * dataholder.vrSettings.handCameraResScale);
             int k1 = Math.round(1080.0F * dataholder.vrSettings.handCameraResScale);
             int l1 = j1;
@@ -686,10 +684,10 @@ public abstract class VRRenderer
 
             this.cameraFramebuffer = new VRTextureTarget("Handheld Camera", j1, k1, true, false, -1, true, false, false);
             dataholder.print(this.cameraFramebuffer.toString());
-            this.checkGLError("Camera framebuffer setup");
+            //this.checkGLError("Camera framebuffer setup");
             this.cameraRenderFramebuffer = new VRTextureTarget("Handheld Camera Render", l1, i2, true, false, -1, true, true, false);
             dataholder.print(this.cameraRenderFramebuffer.toString());
-            this.checkGLError("Camera render framebuffer setup");
+            //this.checkGLError("Camera render framebuffer setup");
             ((GameRendererExtension) minecraft.gameRenderer).setupClipPlanes();
             this.eyeproj[0] = this.getProjectionMatrix(0, ((GameRendererExtension) minecraft.gameRenderer).getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).getClipDistance());
             this.eyeproj[1] = this.getProjectionMatrix(1, ((GameRendererExtension) minecraft.gameRenderer).getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).getClipDistance());
@@ -698,13 +696,13 @@ public abstract class VRRenderer
             {
                 try
                 {
-                    this.checkGLError("pre FSAA FBO creation");
+                    //this.checkGLError("pre FSAA FBO creation");
                     this.fsaaFirstPassResultFBO = new VRTextureTarget("FSAA Pass1 FBO", eyew, j, true, false, -1, false, false, false);
                     this.fsaaLastPassResultFBO = new VRTextureTarget("FSAA Pass2 FBO", eyew, eyeh, true, false, -1, false, false, false);
                     dataholder.print(this.fsaaFirstPassResultFBO.toString());
                     dataholder.print(this.fsaaLastPassResultFBO.toString());
-                    this.checkGLError("FSAA FBO creation");
-                    //VRShaders.setupFSAA();
+                    //this.checkGLError("FSAA FBO creation");
+                    VRShaders.setupFSAA();
                 }
                 catch (Exception exception)
                 {
@@ -717,8 +715,8 @@ public abstract class VRRenderer
             }
 
             minecraft.mainRenderTarget = this.framebufferVrRender;
-            //VRShaders.setupDepthMask();
-            //VRShaders.setupFOVReduction();
+            VRShaders.setupDepthMask();
+            VRShaders.setupFOVReduction();
             List<PostChain> list1 = new ArrayList<>();
             list1.addAll(this.entityShaders.values());
             this.entityShaders.clear();

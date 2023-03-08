@@ -398,7 +398,7 @@ public abstract class GameRendererVRMixin
 		}
 		if (!renderWorldIn || this.minecraft.level == null) {
 			this.minecraft.getProfiler().push("MainMenu");
-			//GL11.glDisable(GL11.GL_STENCIL_TEST);
+			GL11.glDisable(GL11.GL_STENCIL_TEST);
 
 			PoseStack pMatrixStack = new PoseStack();
 			applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, pMatrixStack);
@@ -508,7 +508,7 @@ public abstract class GameRendererVRMixin
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 1), method = "renderLevel")
 	public void noHandProfiler(ProfilerFiller instance, String s) {
-		//GL11.glDisable(GL11.GL_STENCIL_TEST);
+		GL11.glDisable(GL11.GL_STENCIL_TEST);
 		this.minecraft.getProfiler().popPush("ShadersEnd"); //TODO needed?
 		return;
 	}
@@ -1990,7 +1990,7 @@ public abstract class GameRendererVRMixin
 				GameRendererVRMixin.DATA_HOLDER.vrRenderer.doStencil(false);
 //				}
 			} else {
-				//GL11.glDisable(GL11.GL_STENCIL_TEST);
+				GL11.glDisable(GL11.GL_STENCIL_TEST);
 			}
 		} else {
 			// No stencil for telescope

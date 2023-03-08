@@ -8,7 +8,7 @@ import org.vivecraft.utils.Utils;
 
 public class VRShaders
 {
- /* public static ShaderInstance lanczosShader;
+  public static ShaderInstance lanczosShader;
     public static AbstractUniform _Lanczos_texelWidthOffsetUniform;
     public static AbstractUniform _Lanczos_texelHeightOffsetUniform;
     public static AbstractUniform _Lanczos_inputImageTextureUniform;
@@ -88,5 +88,5 @@ public class VRShaders
             _Overlay_eye = fovReductionShader.safeGetUniform("eye");
             _Overlay_time = fovReductionShader.safeGetUniform("portaltime");
             _Overlay_BlackAlpha = fovReductionShader.safeGetUniform("blackalpha");
-    }*/
+    }
 }
