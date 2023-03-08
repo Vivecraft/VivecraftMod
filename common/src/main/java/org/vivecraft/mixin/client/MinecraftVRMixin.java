@@ -46,7 +46,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
@@ -453,7 +452,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				// unbind the rendertarget, to draw directly to the screen
 				this.mainRenderTarget.unbindWrite();
 				this.screen = null;
-				GlStateManager._viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
+				RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
 
 				if (this.overlay != null) {
 					RenderSystem.clear(256, ON_OSX);
@@ -589,8 +588,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 		// v
 		this.profiler.push("gui setup");
-		GlStateManager._depthMask(true);
-		GlStateManager._colorMask(true, true, true, true);
+		RenderSystem.depthMask(true);
+		RenderSystem.colorMask(true, true, true, true);
 		this.mainRenderTarget = GuiHandler.guiFramebuffer;
 		this.mainRenderTarget.clear(Minecraft.ON_OSX);
 		this.mainRenderTarget.bindWrite(true);
@@ -1111,10 +1110,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	}
 
 	private void renderSingleView(RenderPass eye, float nano, boolean renderworld) {
-		GlStateManager._clearColor(0.0F, 0.0F, 0.0F, 1.0F);
-		GlStateHelper.clear(16384);
-		GlStateManager._enableTexture();
-		GlStateManager._enableDepthTest();
+		RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+		RenderSystemHelper.clear(16384);
+		RenderSystem.enableTexture();
+		RenderSystem.enableDepthTest();
 		this.profiler.push("updateCameraAndRender");
 		this.gameRenderer.render(nano, System.nanoTime(), renderworld);
 		this.profiler.pop();
@@ -1126,13 +1125,13 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			RenderTarget rendertarget = this.mainRenderTarget;
 
 			if (ClientDataHolder.getInstance().vrSettings.useFsaa) {
-				GlStateManager._clearColor(RenderSystem.getShaderFogColor()[0], RenderSystem.getShaderFogColor()[1], RenderSystem.getShaderFogColor()[2], RenderSystem.getShaderFogColor()[3]);
+				RenderSystem.clearColor(RenderSystem.getShaderFogColor()[0], RenderSystem.getShaderFogColor()[1], RenderSystem.getShaderFogColor()[2], RenderSystem.getShaderFogColor()[3]);
 				if (eye == RenderPass.LEFT) {
 					ClientDataHolder.getInstance().vrRenderer.framebufferEye0.bindWrite(true);
 				} else {
 					ClientDataHolder.getInstance().vrRenderer.framebufferEye1.bindWrite(true);
 				}
-				GlStateHelper.clear(16384);
+				RenderSystemHelper.clear(16384);
 				this.profiler.push("fsaa");
 				// DataHolder.getInstance().vrRenderer.doFSAA(Config.isShaders()); TODO
 				ClientDataHolder.getInstance().vrRenderer.doFSAA(eye, false);
@@ -1286,8 +1285,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		if (ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA) {
 			this.profiler.push("cameracopy");
 			ClientDataHolder.getInstance().vrRenderer.cameraFramebuffer.bindWrite(true);
-			GlStateManager._clearColor(0.0F, 0.0F, 0.0F, 1.0F);
-			GlStateHelper.clear(16640);
+			RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+			RenderSystemHelper.clear(16640);
 			((RenderTargetExtension) ClientDataHolder.getInstance().vrRenderer.cameraRenderFramebuffer).blitToScreen(0,
 					ClientDataHolder.getInstance().vrRenderer.cameraFramebuffer.viewWidth,
 					ClientDataHolder.getInstance().vrRenderer.cameraFramebuffer.viewHeight, 0, true, 0.0F, 0.0F, false);
@@ -1361,15 +1360,15 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				&& ClientDataHolder.getInstance().vrSettings.mixedRealityAlphaMask;
 
 		if (!flag1) {
-			GlStateManager._clearColor(
+			RenderSystem.clearColor(
 					(float) ClientDataHolder.getInstance().vrSettings.mixedRealityKeyColor.getRed() / 255.0F,
 					(float) ClientDataHolder.getInstance().vrSettings.mixedRealityKeyColor.getGreen() / 255.0F,
 					(float) ClientDataHolder.getInstance().vrSettings.mixedRealityKeyColor.getBlue() / 255.0F, 1.0F);
 		} else {
-			GlStateManager._clearColor(0.0F, 0.0F, 0.0F, 1.0F);
+			RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
 		}
 
-		GlStateHelper.clear(16640);
+		RenderSystemHelper.clear(16640);
 		Vec3 vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getHeadPivot()
 				.subtract(ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());
 		Matrix4f matrix4f = ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD)
@@ -1386,9 +1385,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				(float) ClientDataHolder.getInstance().vrSettings.mixedRealityKeyColor.getGreen() / 255.0F,
 				(float) ClientDataHolder.getInstance().vrSettings.mixedRealityKeyColor.getBlue() / 255.0F);
 		VRShaders._DepthMask_alphaModeUniform.set(flag1 ? 1 : 0);
-		GlStateManager._activeTexture(33985);
+		RenderSystem.activeTexture(33985);
 		RenderSystem.setShaderTexture(0, ClientDataHolder.getInstance().vrRenderer.framebufferMR.getColorTextureId());
-		GlStateManager._activeTexture(33986);
+		RenderSystem.activeTexture(33986);
 
 //		if (flag && Shaders.dfb != null) { TODO
 //			GlStateManager._bindTexture(Shaders.dfb.depthTextures.get(0));
@@ -1397,7 +1396,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 //		}
 
-		GlStateManager._activeTexture(33984);
+		RenderSystem.activeTexture(33984);
 
 		for (int i = 0; i < (flag1 ? 3 : 2); ++i) {
 			int j = this.window.getScreenWidth() / 2;

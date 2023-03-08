@@ -39,8 +39,8 @@ public class VRArmRenderer extends PlayerRenderer
     {
         PlayerModel<AbstractClientPlayer> playermodel = this.getModel();
         this.setModelProperties(playerIn);
-        GlStateManager._enableBlend();
-        GlStateManager._enableCull();
+        RenderSystem.enableBlend();
+        RenderSystem.enableCull();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         playermodel.attackTime = 0.0F;
         playermodel.crouching = false;
@@ -52,7 +52,7 @@ public class VRArmRenderer extends PlayerRenderer
         rendererArmIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.entityTranslucent(playerIn.getSkinTextureLocation())), combinedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, f);
         rendererArmwearIn.xRot = 0.0F;
         rendererArmwearIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.entityTranslucent(playerIn.getSkinTextureLocation())), combinedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, f);
-        GlStateManager._disableBlend();
+        RenderSystem.disableBlend();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 }

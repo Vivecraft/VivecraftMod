@@ -23,7 +23,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.GlStateHelper;
+import org.vivecraft.RenderSystemHelper;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.VRTextureTarget;
 import org.vivecraft.extensions.GameRendererExtension;
@@ -166,7 +166,7 @@ public abstract class VRRenderer
     		RenderSystem.colorMask(true, true, true, true); 
 		}
 		
-    	GlStateHelper.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
+    	RenderSystemHelper.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
     	
 		GL11.glClearStencil(0);
     	GL43.glClearDepthf(1);
@@ -223,7 +223,7 @@ public abstract class VRRenderer
             this.reinitFrameBuffers("FSAA Setting Changed");
         }
         else {
-            GlStateManager._disableBlend();
+            RenderSystem.disableBlend();
             RenderSystem.backupProjectionMatrix();
             Matrix4f matrix4f = new Matrix4f();
             matrix4f.setIdentity();
@@ -237,17 +237,17 @@ public abstract class VRRenderer
             RenderSystem.setShaderTexture(0, framebufferVrRender.getColorTextureId());
             RenderSystem.setShaderTexture(1, framebufferVrRender.getDepthTextureId());
 
-            GlStateManager._activeTexture(33985);
+            RenderSystem.activeTexture(33985);
             this.framebufferVrRender.bindRead();
-            GlStateManager._activeTexture(33986);
-            GlStateManager._bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
+            RenderSystem.activeTexture(33986);
+            RenderSystem.bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
 
-            GlStateManager._activeTexture(33984);
-            GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager._clearDepth(1.0D);
+            RenderSystem.activeTexture(33984);
+            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.clearDepth(1.0D);
             this.fsaaFirstPassResultFBO.bindRead();
-            GlStateHelper.clear(16640);
-            GlStateManager._viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
+            RenderSystemHelper.clear(16640);
+            RenderSystem.viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
             VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
             VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
             VRShaders._Lanczos_modelViewUniform.set(RenderSystem.getModelViewMatrix());
@@ -257,25 +257,25 @@ public abstract class VRRenderer
                 VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }
             VRShaders.lanczosShader.apply();
-            GlStateHelper.clear(16384);
+            RenderSystemHelper.clear(16384);
             this.drawQuad();
             this.fsaaLastPassResultFBO.clear(Minecraft.ON_OSX);
             this.fsaaLastPassResultFBO.bindWrite(false);
-            GlStateManager._activeTexture(33985);
+            RenderSystem.activeTexture(33985);
             this.fsaaFirstPassResultFBO.bindRead();
             RenderSystem.setShaderTexture(0, this.fsaaFirstPassResultFBO.getColorTextureId());
-            GlStateManager._activeTexture(33986);
+            RenderSystem.activeTexture(33986);
             RenderSystem.setShaderTexture(1, this.fsaaFirstPassResultFBO.getDepthTextureId());
-            GlStateManager._bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
+            RenderSystem.bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
 
-            GlStateManager._activeTexture(33984);
+            RenderSystem.activeTexture(33984);
             this.checkGLError("posttex");
-            GlStateManager._viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
-            GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager._clearDepth(1.0D);
-            GlStateHelper.clear(16640);
+            RenderSystem.viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
+            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.clearDepth(1.0D);
+            RenderSystemHelper.clear(16640);
             this.checkGLError("postclear");
-            GlStateManager._activeTexture(33984);
+            RenderSystem.activeTexture(33984);
             this.checkGLError("postact");
             for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
                 int l = RenderSystem.getShaderTexture(k);
