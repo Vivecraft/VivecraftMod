@@ -395,7 +395,10 @@
     "vivecraft.messages.mode": "Modus:",
     "vivecraft.messages.configWriteError":"§cSchreiben der Einstellungen fehlgeschlagen, Änderungen wurden nicht gespeichert",
     "vivecraft.messages.configChangeRestart":"§6VR Modus geändert, bitte starte das Spiel neu damit die Änderungen übernommen werden.",
-
+    "vivecraft.toasts.move1":"Laufe mit %s",
+    "vivecraft.toasts.move2":"Laufe mit %s und %s",
+    "vivecraft.toasts.move3":"Laufe mit %s, %s und %s",
+    "vivecraft.toasts.move4":"Laufe mit %s, %s, %s und %s",
     "vivecraft.toasts.point_controller":"Zeige mit deinem %s",
     "vivecraft.toasts.point_controller.left":"linken Controller",
     "vivecraft.toasts.point_controller.right":"rechten Controller",
