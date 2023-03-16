@@ -15,21 +15,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArrowItem;
-import net.minecraft.world.item.DiggerItem;
-import net.minecraft.world.item.FishingRodItem;
-import net.minecraft.world.item.FlintAndSteelItem;
-import net.minecraft.world.item.FoodOnAStickItem;
-import net.minecraft.world.item.HoeItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShearsItem;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -120,7 +111,7 @@ public class SwingTracker extends Tracker
 
     public static boolean isTool(Item item)
     {
-        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem || item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
+        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem || item instanceof BrushItem || item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
     }
 
     public void doProcess(LocalPlayer player)
@@ -269,6 +260,12 @@ public class SwingTracker extends Tracker
                                         // some scythes just need to be used
                                         this.mc.gameMode.useItem(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                                 }
+                            }
+                            else if ((item instanceof BrushItem /*|| itemstack.is(ItemTags.VIVECRAFT_BRUSHES*/))
+                            {
+                                ((BrushItem)item).spawnDustParticles(player.level, blockhitresult1, blockstate, player.getViewVector(0.0F));
+                                player.level.playSound(player, blockhitresult1.getBlockPos(), SoundEvents.BRUSH_BRUSHING, SoundSource.PLAYERS);
+                                this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1);
                             }
                             else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS))
                             {

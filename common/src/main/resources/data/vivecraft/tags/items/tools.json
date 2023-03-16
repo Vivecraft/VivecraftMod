@@ -21,6 +21,7 @@
     "#vivecraft:hoes",
     "#vivecraft:scythes",
     "#vivecraft:fishing_rods",
+    "#vivecraft:brushes",
 
     {
       "id": "#forge:tools/pickaxes",

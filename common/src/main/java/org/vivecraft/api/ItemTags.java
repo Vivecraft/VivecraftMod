@@ -8,6 +8,8 @@ import net.minecraft.world.item.Item;
 public class ItemTags {
     public final static TagKey<Item> VIVECRAFT_ARROWS = tag("arrows");
 
+    public final static TagKey<Item> VIVECRAFT_BRUSHES = tag("brushes");
+
     public final static TagKey<Item> VIVECRAFT_COMPASSES = tag("compasses");
 
     public final static TagKey<Item> VIVECRAFT_CROSSBOWS = tag("crossbows");
