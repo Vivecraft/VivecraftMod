@@ -6,7 +6,6 @@
   "mixins": [
     "IrisChunkProgramOverridesMixin",
     "IrisChunkProgramOverridesMixinSodium_0_4_9",
-    "IrisChunkProgramOverridesMixinPreSodium_0_4_9",
     "IrisHandRendererVRMixin",
     "IrisNewWorldRenderingPipelineVRMixin",
     "IrisBeginFrameHack",

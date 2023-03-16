@@ -1,9 +1,10 @@
 package org.vivecraft.mixin.client.gui.screens;
 
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.GridWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -32,8 +33,8 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;", ordinal = 4), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void addInit(CallbackInfo ci, GridWidget gridWidget, GridWidget.RowHelper rowHelper) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 4), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
+    public void addInit(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper rowHelper) {
         // reset row to above
         try {
             rowHelper.addChild(null, -2);
@@ -47,9 +48,9 @@ public abstract class PauseScreenVRMixin extends Screen {
                             KeyboardHandler.setOverlayShowing(true);
                     }).width(98).build());
         } else {
-            GridWidget gridWidgetChat_Social = new GridWidget();
+            GridLayout gridWidgetChat_Social = new GridLayout();
             gridWidgetChat_Social.defaultCellSetting().paddingRight(1);
-            GridWidget.RowHelper rowHelperChat_Social = gridWidgetChat_Social.createRowHelper(2);
+            GridLayout.RowHelper rowHelperChat_Social = gridWidgetChat_Social.createRowHelper(2);
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"), (p) ->
                     {
                         this.minecraft.setScreen(new ChatScreen(""));
@@ -65,10 +66,10 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
     @Inject(at =  @At(value = "FIELD", opcode = Opcodes.PUTFIELD,target = "Lnet/minecraft/client/gui/screens/PauseScreen;disconnectButton:Lnet/minecraft/client/gui/components/Button;", shift = At.Shift.BY, by = -3), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void addLowerButtons(CallbackInfo ci, GridWidget gridWidget, GridWidget.RowHelper rowHelper) {
-        GridWidget gridWidgetOverlay_Profiler = new GridWidget();
+    public void addLowerButtons(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper rowHelper) {
+        GridLayout gridWidgetOverlay_Profiler = new GridLayout();
         gridWidgetOverlay_Profiler.defaultCellSetting().paddingRight(1);
-        GridWidget.RowHelper rowHelperOverlay_Profiler = gridWidgetOverlay_Profiler.createRowHelper(2);
+        GridLayout.RowHelper rowHelperOverlay_Profiler = gridWidgetOverlay_Profiler.createRowHelper(2);
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.overlay"), (p) ->
         {
             this.minecraft.options.renderDebug = !this.minecraft.options.renderDebug;
@@ -121,19 +122,19 @@ public abstract class PauseScreenVRMixin extends Screen {
         }
     }
 
-    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;", ordinal = 2))
-    private AbstractWidget remove(GridWidget.RowHelper instance, AbstractWidget abstractWidget) {
+    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 2))
+    private LayoutElement remove(GridLayout.RowHelper instance, LayoutElement layoutElement) {
         // Feedback button
         // don't remove, just hide, so mods that rely on it being there, still work
-        abstractWidget.visible = false;
-        return instance.addChild(abstractWidget);
+        ((Button)layoutElement).visible = false;
+        return instance.addChild(layoutElement);
     }
-    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;", ordinal = 3))
-    private AbstractWidget remove2(GridWidget.RowHelper instance, AbstractWidget abstractWidget) {
+    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 3))
+    private LayoutElement remove2(GridLayout.RowHelper instance, LayoutElement layoutElement) {
         // report bugs button
         // don't remove, just hide, so mods that rely on it being there, still work
-        abstractWidget.visible = false;
-        return instance.addChild(abstractWidget);
+        ((Button)layoutElement).visible = false;
+        return instance.addChild(layoutElement);
     }
     @Redirect(method = "createPauseMenu", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/Button;active:Z"))
     private void remove3(Button instance, boolean value) {}

@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.client.gui.components.toasts;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
@@ -26,19 +27,19 @@ public abstract class TutorialToastVRMixin implements Toast{
 
     private int offset;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/ToastComponent;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", shift = At.Shift.AFTER), method = "render")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiComponent;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", shift = At.Shift.AFTER), method = "render")
     private void extendToast(PoseStack poseStack, ToastComponent toastComponent, long l, CallbackInfoReturnable<Toast.Visibility> cir){
         int width = Math.max(toastComponent.getMinecraft().font.width(this.title), message != null ? toastComponent.getMinecraft().font.width(this.message) : 0) + 34;
         offset = Math.min(this.width()-width, 0);
         if (offset < 0) {
             // draw a bigger toast from right to left, to override the left border
             for (int i = offset - (this.width() - 8) * (offset / (this.width() - 8)); i >= offset; i -= this.width() - 8) {
-                toastComponent.blit(poseStack, i, 0, 0, 96, this.width() - 4, this.height());
+                GuiComponent.blit(poseStack, i, 0, 0, 96, this.width() - 4, this.height());
             }
         }
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/gui/GuiComponent;II)V"), method = "render", index = 2)
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;render(Lcom/mojang/blaze3d/vertex/PoseStack;II)V"), method = "render", index = 1)
     private int offsetIcon(int x){
         return x + offset;
     }

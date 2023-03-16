@@ -593,7 +593,6 @@ public abstract class GameRendererVRMixin
 		this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(mainCamera, partialTicks, false)));
 		poseStack.pushPose();
 		poseStack.setIdentity();
-		RenderSystem.disableTexture();
 		RenderSystem.enableDepthTest();
 		RenderSystem.defaultBlendFunc();
 		applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, poseStack);
@@ -623,7 +622,7 @@ public abstract class GameRendererVRMixin
 
 		if (this.minecraft.level != null) {
 			float f = (float) this.minecraft.level.getMaxLocalRawBrightness(
-					new BlockPos(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition()));
+					BlockPos.containing(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition()));
 			// int i = Config.isShaders() ? 8 : 4; TODO
 			int i = 4;
 			if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
@@ -635,14 +634,13 @@ public abstract class GameRendererVRMixin
 			}
 
 			float f1 = f / (float) this.minecraft.level.getMaxLightLevel();
-			vec3i = new Vec3i((double) ((float) vec3i.getX() * f1), (double) ((float) vec3i.getY() * f1),
-					(double) ((float) vec3i.getZ() * f1));
+			vec3i = new Vec3i(Mth.floor(vec3i.getX() * f1), Mth.floor(vec3i.getY() * f1),
+					Mth.floor(vec3i.getZ() * f1));
 		}
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		tesselator.getBuilder().begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 		this.renderBox(tesselator, vec3, vec33, -0.02F, 0.02F, -0.0125F, 0.0125F, vec32, vec3i, b0, poseStack);
 		BufferUploader.drawWithShader(tesselator.getBuilder().end());
-		RenderSystem.enableTexture();
 		poseStack.popPose();
 		RenderSystem.depthFunc(515);
 	}
@@ -856,7 +854,6 @@ public abstract class GameRendererVRMixin
 			this.polycull = true;
 			GlStateManager._enableBlend();
 			RenderSystem.defaultBlendFunc();
-			GlStateManager._disableTexture();
 			// GlStateManager._disableLighting();
 			GlStateManager._disableCull();
 
@@ -873,7 +870,6 @@ public abstract class GameRendererVRMixin
 			}
 
 			if (this.polytex) {
-				GlStateManager._enableTexture();
 			}
 
 			if (this.polylight) {
@@ -1069,7 +1065,6 @@ public abstract class GameRendererVRMixin
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
 					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
 					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-			RenderSystem.disableTexture();
 
 			if (ClientNetworkHelper.isLimitedSurvivalTeleport() && !GameRendererVRMixin.DATA_HOLDER.vrPlayer.getFreeMove()
 					&& this.minecraft.gameMode.hasMissTime()
@@ -1109,7 +1104,6 @@ public abstract class GameRendererVRMixin
 
 			}
 
-			RenderSystem.enableTexture();
 			RenderSystem.defaultBlendFunc();
 
 //			if (Config.isShaders()) {
@@ -1146,7 +1140,6 @@ public abstract class GameRendererVRMixin
 
 			framebuffer.bindRead();
 			GlStateManager._disableCull();
-			GlStateManager._enableTexture();
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, framebuffer.getColorTextureId());
 
@@ -1188,7 +1181,7 @@ public abstract class GameRendererVRMixin
 				if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 					i = IrisHelper.ShaderLight();
 				}
-				int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec3), i);
+				int j = Utils.getCombinedLightWithMin(this.minecraft.level, BlockPos.containing(vec3), i);
 				this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
 						(float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
 						poseStack.last().pose());
@@ -1296,7 +1289,6 @@ public abstract class GameRendererVRMixin
 					Vec3 vec31 = GuiHandler.applyGUIModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, pMatrix);
 					GuiHandler.guiFramebuffer.bindRead();
 					RenderSystem.disableCull();
-					RenderSystem.enableTexture();
 					RenderSystem.setShaderTexture(0, GuiHandler.guiFramebuffer.getColorTextureId());
 
 					float[] color = new float[] { 1.0F, 1.0F, 1.0F, 1.0F };
@@ -1344,7 +1336,7 @@ public abstract class GameRendererVRMixin
 						if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
 							i = IrisHelper.ShaderLight();
 						}
-						int j = Utils.getCombinedLightWithMin(this.minecraft.level, new BlockPos(vec31), i);
+						int j = Utils.getCombinedLightWithMin(this.minecraft.level, BlockPos.containing(vec31), i);
 						this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
 								(float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
 								pMatrix.last().pose());
@@ -1528,7 +1520,6 @@ public abstract class GameRendererVRMixin
 		RenderSystem.depthMask(true); //TODO temp fix
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableTexture();
 		RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
 		RenderSystem.setShaderColor(1, 1, 1, 1);
 		pMatrixStack.pushPose();
@@ -1639,7 +1630,6 @@ public abstract class GameRendererVRMixin
 		((LevelRendererExtension)worldrendererin).getAlphaSortVRHandsFramebuffer().copyDepthFrom(this.minecraft.getMainRenderTarget());
 		((LevelRendererExtension)worldrendererin).getAlphaSortVRHandsFramebuffer().bindWrite(true);
 		this.renderVRHands(partialTicks, flag && !menuhandright, flag && !menuhandleft, false, false, pMatrix);
-		RenderSystem.enableTexture();
 		RenderSystem.defaultBlendFunc();
 		// RenderSystem.defaultAlphaFunc();
 		RenderSystem.setShaderColor(1,1,1,1);
@@ -2050,7 +2040,6 @@ public abstract class GameRendererVRMixin
 
 		GlStateManager._depthFunc(GL11.GL_ALWAYS);
 		GlStateManager._depthMask(true);
-		GlStateManager._disableTexture();
 		GlStateManager._enableBlend();
 		GlStateManager._disableCull();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION);
@@ -2060,7 +2049,6 @@ public abstract class GameRendererVRMixin
 		bufferbuilder.vertex(mat, -1.5F, 1.5F, 0.0F).endVertex();
 		tesselator.end();
 		GlStateManager._depthFunc(GL11.GL_LEQUAL);
-		GlStateManager._enableTexture();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
@@ -2186,7 +2174,7 @@ public abstract class GameRendererVRMixin
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR,
 					GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE,
 					GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-			int i = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(vec3));
+			int i = LevelRenderer.getLightColor(this.minecraft.level, BlockPos.containing(vec3));
 			float f2 = 1.0F;
 
 			if (this.minecraft.hitResult == null || this.minecraft.hitResult.getType() == HitResult.Type.MISS) {
@@ -2396,7 +2384,6 @@ public abstract class GameRendererVRMixin
 			//this.lightTexture.turnOffLightLayer();
 			matrixStackIn.pushPose();
 			RenderSystem.enableDepthTest();
-			RenderSystem.enableTexture();
 
 			if (i == 0) {
 				ClientDataHolder.getInstance().vrRenderer.telescopeFramebufferR.bindRead();
@@ -2416,7 +2403,7 @@ public abstract class GameRendererVRMixin
 			RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
 			RenderSystem.enableBlend();
 			matrixStackIn.translate(0.0D, 0.0D, 0.00001D);
-			int light = LevelRenderer.getLightColor(this.minecraft.level, new BlockPos(ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getController(i).getPosition()));
+			int light = LevelRenderer.getLightColor(this.minecraft.level, BlockPos.containing(ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getController(i).getPosition()));
 			this.drawSizedQuadWithLightmap(720.0F, 720.0F, scale, light, matrixStackIn.last().pose());
 
 			matrixStackIn.popPose();

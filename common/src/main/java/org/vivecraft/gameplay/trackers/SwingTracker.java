@@ -240,7 +240,7 @@ public class SwingTracker extends Tracker
 
                 if (!this.dh.climbTracker.isClimbeyClimb() || (i != 0 || !this.dh.vr.keyClimbeyGrab.isDown(ControllerType.RIGHT)) && flag && (i != 1 || !this.dh.vr.keyClimbeyGrab.isDown(ControllerType.LEFT)) && flag)
                 {
-                    BlockPos blockpos = new BlockPos(this.miningPoint[i]);
+                    BlockPos blockpos = BlockPos.containing(this.miningPoint[i]);
                     BlockState blockstate = this.mc.level.getBlockState(blockpos);
                     BlockHitResult blockhitresult1 = this.mc.level.clip(new ClipContext(this.lastWeaponEndAir[i], this.miningPoint[i], ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.mc.player));
 

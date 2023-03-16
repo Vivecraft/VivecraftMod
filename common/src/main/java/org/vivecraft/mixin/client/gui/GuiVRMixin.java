@@ -49,8 +49,8 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     protected abstract Player getCameraPlayer();
 
     //Moved to render for sodium
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderVignette(Lnet/minecraft/world/entity/Entity;)V"), method = "render")
-    public void noVignette(Gui instance, Entity entity) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderVignette(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/Entity;)V"), method = "render")
+    public void noVignette(Gui instance, PoseStack poseStack, Entity entity) {
         if(Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium")) {
             SodiumHelper.vignette(false);
         }
@@ -167,7 +167,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
             int i1 = this.minecraft.getWindow().getGuiScaledHeight() - 39;
 
             if (k == -1) {
-                this.minecraft.getItemRenderer().renderGuiItem(new ItemStack(Items.ELYTRA), l, i1);
+                this.minecraft.getItemRenderer().renderGuiItem(matrixstack, new ItemStack(Items.ELYTRA), l, i1);
                 mobeffect = null;
             }
             else if (k == -2) {
@@ -177,7 +177,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
                 else {
                     mobeffect = null;
                 }
-                this.minecraft.getItemRenderer().renderGuiItem(new ItemStack(Items.RABBIT_FOOT), l, i1);
+                this.minecraft.getItemRenderer().renderGuiItem(matrixstack, new ItemStack(Items.RABBIT_FOOT), l, i1);
             }
             if (mobeffect != null) {
                 TextureAtlasSprite textureatlassprite = this.minecraft.getMobEffectTextures().get(mobeffect);
@@ -210,6 +210,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
         this.drawCentredTexturedModalRect(mouseX, mouseY, f, f, 0, 0, 15, 15);
         RenderSystem.disableBlend();
+        RenderSystem.defaultBlendFunc();
     }
 
     public void drawCentredTexturedModalRect(int centreX, int centreY, float width, float height, int u, int v, int texWidth, int texHeight) {
@@ -217,9 +218,9 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         float f1 = 0.00390625F;
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY + height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + 0) * f, (float)(v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY + height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + texWidth) * f, (float)(v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY - height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + texWidth) * f, (float)(v + 0) * f1).endVertex();bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY - height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + 0) * f, (float)(v + 0) * f1).endVertex();
+        bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY + height / 2.0F), 0).uv((float)(u + 0) * f, (float)(v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY + height / 2.0F), 0).uv((float)(u + texWidth) * f, (float)(v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY - height / 2.0F), 0).uv((float)(u + texWidth) * f, (float)(v + 0) * f1).endVertex();bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY - height / 2.0F), 0).uv((float)(u + 0) * f, (float)(v + 0) * f1).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
     }
 }

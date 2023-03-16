@@ -45,7 +45,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
             this.btnDelete = new Button.Builder(  Component.translatable("X"),  (p) ->
                 {
                     this.txt.setValue("");
-                    this.txt.changeFocus(true);
+                    this.txt.setFocused(true);
                 })
                 .size( 18,  18)
                 .pos(0,  0)

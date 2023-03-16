@@ -240,7 +240,7 @@ public class InteractTracker extends Tracker
                 if (!this.active[j])
                 {
                     BlockPos blockpos = null;
-                    blockpos = new BlockPos(vec3);
+                    blockpos = BlockPos.containing(vec3);
                     BlockState blockstate = this.mc.level.getBlockState(blockpos);
                     BlockHitResult blockhitresult = blockstate.getOcclusionShape(this.mc.level, blockpos).clip(vec35, vec3, blockpos);
                     this.inBlockPos[j] = blockpos;

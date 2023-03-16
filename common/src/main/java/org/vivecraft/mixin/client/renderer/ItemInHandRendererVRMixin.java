@@ -107,7 +107,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 		if (this.minecraft.level == null) {
 			return false;
 		} else {
-			BlockPos blockpos = new BlockPos(in);
+			BlockPos blockpos = BlockPos.containing(in);
 			return this.minecraft.level.getBlockState(blockpos).isSolidRender(this.minecraft.level, blockpos);
 		}
 	}
@@ -155,15 +155,15 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
 			boolean useLeftHandModelinLeftHand = false;
 
-			ItemTransforms.TransformType transformType;
+			ItemDisplayContext itemDisplayContext;
 			if(dh.vrSettings.thirdPersonItems) {
 				useLeftHandModelinLeftHand = true; //test
 				VivecraftItemRendering.applyThirdPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
-				transformType = mainHand ? ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND : ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND);
+				itemDisplayContext = mainHand ? ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);
 			}
 			else {
 				VivecraftItemRendering.applyFirstPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
-				transformType = mainHand ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND : ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND);                
+				itemDisplayContext = mainHand ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.FIRST_PERSON_LEFT_HAND : ItemDisplayContext.FIRST_PERSON_RIGHT_HAND);
 			}
 
 			dh.isfphand = true;
@@ -195,7 +195,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 			}
 			else
 			{
-				this.renderItem(pPlayer, pStack, transformType, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
+				this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
 			}
 
 			dh.isfphand = false;
@@ -206,7 +206,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 	}
 
 	@Shadow
-	public abstract void renderItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i);
+	public abstract void renderItem(LivingEntity livingEntity, ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i);
 
 	@Shadow
 	protected abstract void renderMap(PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, ItemStack pStack);

@@ -26,65 +26,18 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    modRuntimeOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
-    modRuntimeOnly "maven.modrinth:iris:1.5.2+1.19.3"
-    //modRuntimeOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
-    //modRuntimeOnly "maven.modrinth:create-fabric:1.18.2-0.5.0d-728"
-/*
-    modRuntimeOnly "maven.modrinth:roughly-enough-items:9.1.555+fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.19.4-0.4.10"
+    modCompileOnly "maven.modrinth:iris:1.5.2+1.19.4"
+    //modRuntimeOnly "883067831485366304:1080535317330796584:iris-mc1.19.4-pre3-1.6.0-beta.2-d94cefc2-dirty:jar"
+    //modRuntimeOnly "883067831485366304:1080535317733462076:sodium-fabric-mc1.19.4-pre2-0.4.11rev.9a2a2ea-dirty:jar"
 
-
-//    modRuntimeOnly("io.github.fabricators_of_create:Porting-Lib:1.2.460-beta+1.18.2-dev.cca931b") //temp create
-//    modRuntimeOnly("me.alphamode:ForgeTags:2.1") //temp create
-//    modRuntimeOnly("com.electronwill.night-config:core:3.6.3") //temp create
-//    modRuntimeOnly("com.electronwill.night-config:toml:3.6.3") //temp create
-//    modRuntimeOnly("curse.maven:forge-config-api-port-fabric-547434:3671141") //temp create
-//    modRuntimeOnly("com.tterrag.registrate_fabric:Registrate:MC1.18.2-1.1.4") //temp create
-//    modRuntimeOnly("com.jozufozu.flywheel:flywheel-fabric-1.18.2:0.6.4-30") //temp create
-//    modRuntimeOnly("com.jamieswhiteshirt:reach-entity-attributes:2.1.1") //temp create
-//    modRuntimeOnly("dev.cafeteria:fake-player-api:0.3.0") //temp create
-//    modRuntimeOnly("io.github.tropheusj:milk-lib:0.3.2") //temp create
-//    modRuntimeOnly("me.luligabi:NoIndium:1.0.1+1.18.2") //temp create
-//    runtimeOnly("com.google.code.findbugs:jsr305:3.0.2") //temp create
-//    modRuntimeOnly("com.github.AlphaMode:fakeconfig:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
-//    modRuntimeOnly("com.github.AlphaMode:fakeconfigtoml:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
-
-//    modRuntimeOnly("com.github.qouteall:GravityChanger:v0.3.1") { transitive = false } //temp immersiveportals
-    modRuntimeOnly("me.shedaniel.cloth:cloth-config-fabric:6.2.57") { exclude(group: "net.fabricmc.fabric-api")} //temp immersiveportals
-//    modApi("com.github.Virtuoel:Pehkui:3.3.3", { exclude group: "net.fabricmc.fabric-api" }) //temp immersiveportals
-//    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.9-1.18'){ //temp immersiveportals
-//        exclude(group: "net.fabricmc.fabric-api")
-//        transitive(false)
-//    }
-//    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v1.4.9-1.18'){ //temp immersiveportals
-//        exclude(group: "net.fabricmc.fabric-api")
-//        transitive(false)
-//    }
-*/
-    modApi("dev.architectury:architectury-fabric:7.0.59") //temp rei
-    //modApi("me.shedaniel:error-notifier-fabric:1.0.9") //temp rei
-
-//    modRuntimeOnly(fabricApi.module("fabric-api-base", rootProject.fabric_api_version))//temp sodium
-//    modRuntimeOnly(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))//temp sodium
-//    modRuntimeOnly(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))//temp sodium
-//    modRuntimeOnly(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))//temp sodium
+    modApi("dev.architectury:architectury-fabric:8.1.72") //temp rei
 
     modRuntimeOnly 'org.anarres:jcpp:1.4.14'//temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre9'//temp iris
 
-    modCompileOnly 'com.github.2No2Name:McTester:v0.2.4' //temp lithium
-    modCompileOnly 'com.github.astei:lazydfu:0.1.2' //temp lithium
-
     // needed for resource loading
     include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
-
-//    include("org.lwjgl:lwjgl-ovr:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-opengl:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-jemalloc:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-glfw:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-stb:3.2.2:natives-windows")
-//    include("org.lwjgl:lwjgl-openal:3.2.2:natives-windows")
 
 }
 

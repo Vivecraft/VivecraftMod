@@ -28,9 +28,9 @@ public class VROptionLayout
     int _mini;
     int _incrementi;
     Class <? extends Screen > screen;
-    BiFunction<GuiVROptionButton, Vec2, Boolean> customHandler;
+    BiFunction<GuiVROption, Vec2, Boolean> customHandler;
 
-    public VROptionLayout(VRSettings.VrOptions e, BiFunction<GuiVROptionButton, Vec2, Boolean> handler, Position pos, float row, boolean enabled, String title)
+    public VROptionLayout(VRSettings.VrOptions e, BiFunction<GuiVROption, Vec2, Boolean> handler, Position pos, float row, boolean enabled, String title)
     {
         this._e = e;
         this._pos = pos;
@@ -59,7 +59,7 @@ public class VROptionLayout
         this._enabled = enabled;
     }
 
-    public VROptionLayout(Class <? extends Screen > screen, BiFunction<GuiVROptionButton, Vec2, Boolean> handler, Position pos, float row, boolean enabled, String title)
+    public VROptionLayout(Class <? extends Screen > screen, BiFunction<GuiVROption, Vec2, Boolean> handler, Position pos, float row, boolean enabled, String title)
     {
         this._pos = pos;
         this._row = row;
@@ -88,7 +88,7 @@ public class VROptionLayout
         this.screen = screen;
     }
 
-    public VROptionLayout(BiFunction<GuiVROptionButton, Vec2, Boolean> handler, Position pos, float row, boolean enabled, String title)
+    public VROptionLayout(BiFunction<GuiVROption, Vec2, Boolean> handler, Position pos, float row, boolean enabled, String title)
     {
         this._pos = pos;
         this._row = row;
@@ -143,7 +143,7 @@ public class VROptionLayout
         return this.screen;
     }
 
-    public BiFunction<GuiVROptionButton, Vec2, Boolean> getCustomHandler()
+    public BiFunction<GuiVROption, Vec2, Boolean> getCustomHandler()
     {
         return this.customHandler;
     }

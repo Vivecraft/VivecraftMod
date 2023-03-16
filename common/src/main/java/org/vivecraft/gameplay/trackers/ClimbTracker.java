@@ -225,7 +225,7 @@ public class ClimbTracker extends Tracker
             avec3[i] = this.dh.vrPlayer.vrdata_world_pre.getController(i).getPosition();
             Vec3 vec3 = this.dh.vrPlayer.vrdata_world_pre.getController(i).getDirection();
             this.inblock[i] = false;
-            BlockPos blockpos = new BlockPos(avec3[i]);
+            BlockPos blockpos = BlockPos.containing(avec3[i]);
             BlockState blockstate = this.mc.level.getBlockState(blockpos);
             Block block = blockstate.getBlock();
             VoxelShape voxelshape = blockstate.getCollisionShape(this.mc.level, blockpos);
@@ -248,7 +248,7 @@ public class ClimbTracker extends Tracker
 
                 if (!flag4)
                 {
-                    BlockPos blockpos1 = new BlockPos(vec31);
+                    BlockPos blockpos1 = BlockPos.containing(vec31);
                     BlockState blockstate1 = this.mc.level.getBlockState(blockpos1);
                     Block block1 = blockstate1.getBlock();
 
@@ -379,7 +379,7 @@ public class ClimbTracker extends Tracker
                     }
                     else
                     {
-                        BlockPos blockpos5 = new BlockPos(this.latchStart[i]);
+                        BlockPos blockpos5 = BlockPos.containing(this.latchStart[i]);
                         BlockState blockstate2 = this.mc.level.getBlockState(blockpos5);
                         this.inblock[i] = this.wasinblock[i] && blockstate2.getBlock() instanceof LadderBlock || blockstate2.getBlock() instanceof VineBlock || blockstate2.is(BlockTags.VIVECRAFT_CLIMBABLE);
                     }
@@ -495,7 +495,7 @@ public class ClimbTracker extends Tracker
                     this.latchbox[k] = this.box[k];
                     this.wantjump = false;
                     this.dh.vr.triggerHapticPulse(k, 2000);
-                    BlockPos blockpos4 = new BlockPos(this.latchStart[k]);
+                    BlockPos blockpos4 = BlockPos.containing(this.latchStart[k]);
                     BlockState blockstate4 = this.mc.level.getBlockState(blockpos4);
 
                     if (!flag3)
@@ -542,7 +542,7 @@ public class ClimbTracker extends Tracker
             if ((this.latched[0] || this.latched[1]) && this.rand.nextInt(20) == 10)
             {
                 this.mc.player.causeFoodExhaustion(0.1F);
-                BlockPos blockpos3 = new BlockPos(this.latchStart[this.latchStartController]);
+                BlockPos blockpos3 = BlockPos.containing(this.latchStart[this.latchStartController]);
                 BlockState blockstate3 = this.mc.level.getBlockState(blockpos3);
 
                 if (!flag3)
@@ -582,7 +582,7 @@ public class ClimbTracker extends Tracker
                 double d10 = d4;
                 double d0 = d8;
                 double d11 = d6 - vec36.y;
-                BlockPos blockpos2 = new BlockPos(vec37);
+                BlockPos blockpos2 = BlockPos.containing(vec37);
 
                 if (!flag3)
                 {

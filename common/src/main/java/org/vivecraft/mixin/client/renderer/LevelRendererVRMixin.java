@@ -234,7 +234,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 		double g = vec3.z();
 		for (int c=0;c<2;c++) {
 			if(ClientDataHolder.getInstance().interactTracker.isInteractActive(c) && (ClientDataHolder.getInstance().interactTracker.inBlockHit[c] != null || ClientDataHolder.getInstance().interactTracker.bukkit[c])) {
-				BlockPos blockpos = ClientDataHolder.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolder.getInstance().interactTracker.inBlockHit[c].getBlockPos() : new BlockPos(ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
+				BlockPos blockpos = ClientDataHolder.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolder.getInstance().interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
 				BlockState blockstate = this.level.getBlockState(blockpos);
 				this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
 			}
@@ -285,7 +285,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 			guiRendered = true;
 		}
 	}
-	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = Shift.BEFORE, ordinal = 4),
+	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = Shift.BEFORE, ordinal = 3),
 			method = "renderLevel")
 	public void renderFast2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
 		if (transparencyChain == null && (!((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()) || ClientDataHolder.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.AFTER_TRANSLUCENT)) {

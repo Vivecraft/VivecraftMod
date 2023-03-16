@@ -85,7 +85,7 @@ public abstract class GuiVROptionsBase extends Screen
         {
             if (vroptionlayout.getOption() != null && vroptionlayout.getOption().getEnumFloat())
             {
-                this.addRenderableWidget(new GuiVROptionSlider(vroptionlayout.getOrdinal(), vroptionlayout.getX(this.width), vroptionlayout.getY(this.height), vroptionlayout.getOption(), (double)vroptionlayout.getOption().getValueMin(), (double)vroptionlayout.getOption().getValueMax())
+                this.addRenderableWidget(new GuiVROptionSlider(vroptionlayout.getOrdinal(), vroptionlayout.getX(this.width), vroptionlayout.getY(this.height), vroptionlayout.getOption())
                 {
                     public void onClick(double pMouseX, double p_93635_)
                     {
@@ -147,11 +147,11 @@ public abstract class GuiVROptionsBase extends Screen
     protected void loadDefaults()
     {
         for (Renderable renderable : this.renderables) {
-            if (!(renderable instanceof GuiVROptionButton))
+            if (!(renderable instanceof GuiVROption))
                 continue;
 
-            GuiVROptionButton optionButton = (GuiVROptionButton)renderable;
-            this.settings.loadDefault(optionButton.enumOptions);
+            GuiVROption optionButton = (GuiVROption)renderable;
+            this.settings.loadDefault(optionButton.getOption());
         }
     }
 
@@ -337,7 +337,7 @@ public abstract class GuiVROptionsBase extends Screen
             }
         }
         if (hover != null ) {
-            if (hover instanceof GuiVROptionButton guiHover) {
+            if (hover instanceof GuiVROption guiHover) {
                 if (guiHover.getOption() != null) {
                     String tooltipString = "vivecraft.options." + guiHover.getOption().name() + ".tooltip";
                     // check if it has a tooltip

@@ -1,9 +1,8 @@
 package org.vivecraft.gui.settings;
 
-import org.vivecraft.ClientDataHolder;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.Xplat;
-import org.vivecraft.gui.framework.GuiVROptionButton;
+import org.vivecraft.gui.framework.GuiVROption;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.settings.VRHotkeys;
 import org.vivecraft.settings.VRSettings;
@@ -122,14 +121,14 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         super.addDefaultButtons();
         this.renderables.stream().filter((w) ->
         {
-            return w instanceof GuiVROptionButton;
+            return w instanceof GuiVROption;
         }).forEach((w) ->
         {
-            GuiVROptionButton guivroptionbutton = (GuiVROptionButton)w;
+            GuiVROption guivroption = (GuiVROption)w;
 
-//            if (guivroptionbutton.getOption() == VRSettings.VrOptions.HANDHELD_CAMERA_RENDER_SCALE && Config.isShaders())  //Optifine
+//            if (guivroption.getOption() == VRSettings.VrOptions.HANDHELD_CAMERA_RENDER_SCALE && Config.isShaders())  //Optifine
 //            {
-//                guivroptionbutton.active = false;
+//                guivroption.active = false;
 //            }
         });
     }
@@ -148,17 +147,16 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
 
     protected void actionPerformed(AbstractWidget widget)
     {
-        if (widget instanceof GuiVROptionButton)
+        if (widget instanceof GuiVROption guivroption)
         {
-            GuiVROptionButton guivroptionbutton = (GuiVROptionButton)widget;
 
-            if (guivroptionbutton.id == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroptionbutton.id == VRSettings.VrOptions.FSAA.ordinal() || guivroptionbutton.id == VRSettings.VrOptions.STENCIL_ON.ordinal())
+            if (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroption.getId() == VRSettings.VrOptions.FSAA.ordinal() || guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal())
             {
-                if (guivroptionbutton.id != VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                if (guivroption.getId() != VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
                     this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
                 }
             }
-            if (guivroptionbutton.id == VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA.ordinal())
+            if (guivroption.getId() == VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA.ordinal())
             {
                 VRHotkeys.loadExternalCameraConfig();
             }

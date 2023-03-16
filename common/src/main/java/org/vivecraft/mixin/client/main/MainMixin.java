@@ -18,25 +18,25 @@ import net.minecraft.client.main.Main;
 @Mixin(Main.class)
 public class MainMixin {
 	
-	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V", remap = false), method = "run", locals = LocalCapture.CAPTURE_FAILHARD)
-	private static void options(String[] strings, boolean bl, CallbackInfo ci, OptionParser optionparser) {
+	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V"), method = "main", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
+	private static void options(String[] strings, CallbackInfo ci, OptionParser optionparser) {
 		optionparser.accepts("kiosk");
 		optionparser.accepts("viewonly");
 		optionparser.accepts("katvr");
 		optionparser.accepts("infinadeck");
 	}
 	
-	@ModifyConstant(method = "run", constant = @Constant(intValue = 854))
+	@ModifyConstant(method = "main", constant = @Constant(intValue = 854), remap = false)
 	private static int width(int i) {
 		return 1280;
 	}
 	
-	@ModifyConstant(method = "run", constant = @Constant(intValue = 480))
+	@ModifyConstant(method = "main", constant = @Constant(intValue = 480), remap = false)
 	private static int height(int i) {
 		return 720;
 	}
 		
-	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "run")
+	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "main", remap = false)
 	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
 		OptionSet optionset = optionparser.parse(p_129642_);
 		ClientDataHolder.kiosk = optionset.has("kiosk");

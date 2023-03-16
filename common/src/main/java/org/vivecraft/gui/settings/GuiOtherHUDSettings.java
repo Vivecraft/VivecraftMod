@@ -2,7 +2,7 @@ package org.vivecraft.gui.settings;
 
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.gui.framework.GuiVROptionButton;
+import org.vivecraft.gui.framework.GuiVROption;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.settings.VRSettings;
 
@@ -41,11 +41,9 @@ public class GuiOtherHUDSettings extends GuiVROptionsBase
 
     protected void actionPerformed(AbstractWidget widget)
     {
-        if (widget instanceof GuiVROptionButton)
+        if (widget instanceof GuiVROption guivroption)
         {
-            GuiVROptionButton guivroptionbutton = (GuiVROptionButton)widget;
-
-            if (guivroptionbutton.id == VRSettings.VrOptions.CHAT_NOTIFICATIONS.ordinal())
+            if (guivroption.getId() == VRSettings.VrOptions.CHAT_NOTIFICATIONS.ordinal())
             {
                 this.reinit = true;
             }

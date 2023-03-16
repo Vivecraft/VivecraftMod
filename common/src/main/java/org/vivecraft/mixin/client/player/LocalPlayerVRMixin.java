@@ -218,9 +218,9 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 				super.move(pType, pPos);
 
 				if (ClientDataHolder.getInstance().vrSettings.walkUpBlocks) {
-					this.maxUpStep = this.getBlockJumpFactor() == 1.0F ? 1.0F : 0.6F;
+					this.setMaxUpStep(this.getBlockJumpFactor() == 1.0F ? 1.0F : 0.6F);
 				} else {
-					this.maxUpStep = 0.6F;
+					this.setMaxUpStep(0.6F);
 					this.updateAutoJump((float) (this.getX() - d2), (float) (this.getZ() - d3));
 				}
 
@@ -281,7 +281,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 				return;
 			}
 		}
-		float vec2 = Mth.fastInvSqrt(i);
+		float vec2 = Mth.invSqrt(i);
 		Vec3 j = vec33.scale(vec2);
 		Vec3 k = this.getForward();
 		l = (float)(k.x * j.x + k.z * j.z);
@@ -290,7 +290,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 			return;
 		}
 		CollisionContext m = CollisionContext.of(this);
-		BlockPos blockPos = new BlockPos(this.getX(), this.getBoundingBox().maxY, this.getZ());
+		BlockPos blockPos = BlockPos.containing(this.getX(), this.getBoundingBox().maxY, this.getZ());
 		BlockState blockState = this.level.getBlockState(blockPos);
 		if (!blockState.getCollisionShape(this.level, blockPos, m).isEmpty()) {
 			ci.cancel();
@@ -328,7 +328,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 			if (!aABB2.intersects(vec38, vec39) && !aABB2.intersects(vec310, vec311)) continue;
 			s = (float)aABB2.maxY;
 			Vec3 vec312 = aABB2.getCenter();
-			BlockPos blockPos2 = new BlockPos(vec312);
+			BlockPos blockPos2 = BlockPos.containing(vec312);
 			int t = 1;
 			while ((float)t < p) {
 				BlockState blockState4;
@@ -419,7 +419,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	public void doDrag() {
 		float f = 0.91F;
 		if (this.onGround) {
-			f = this.level.getBlockState(new BlockPos(this.getX(), this.getBoundingBox().minY - 1.0D, this.getZ())).getBlock().getFriction() * 0.91F;
+			f = this.level.getBlockState(BlockPos.containing(this.getX(), this.getBoundingBox().minY - 1.0D, this.getZ())).getBlock().getFriction() * 0.91F;
 		}
 		double d0 = (double) f;
 		double d1 = (double) f;

@@ -14,7 +14,8 @@ public class GuiComponentVRMixin {
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShader(Ljava/util/function/Supplier;)V", shift = At.Shift.AFTER), method = "innerBlit(Lorg/joml/Matrix4f;IIIIIFFFF)V")
     private static void addBlend(CallbackInfo ci) {
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        // only change the alpha blending
+        RenderSystem.blendFuncSeparate(GlStateManager.BLEND.srcRgb, GlStateManager.BLEND.dstRgb, GlStateManager.SourceFactor.ONE.value, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value);
     }
 
     @Inject(at = @At("TAIL"), method = "innerBlit(Lorg/joml/Matrix4f;IIIIIFFFF)V")

@@ -557,7 +557,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 		FogRenderer.setupNoFog();
 //		this.profiler.push("display");
-		RenderSystem.enableTexture();
 		RenderSystem.enableCull();
 //		this.profiler.pop();
 
@@ -597,14 +596,18 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		this.gameRenderer.render(f, System.nanoTime(), false);
 		// draw cursor
 		if (Minecraft.getInstance().screen != null) {
+			PoseStack poseStack = RenderSystem.getModelViewStack();
+			poseStack.pushPose();
+			poseStack.setIdentity();
+			poseStack.translate(0.0f, 0.0f, -2000.0f);
+			RenderSystem.applyModelViewMatrix();
+
 			int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
 			int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
 			((GuiExtension) Minecraft.getInstance().gui).drawMouseMenuQuad(x, y);
-		}
-		if (!this.noRender) {
-			this.profiler.push("toasts");
-			this.toast.render(new PoseStack());
-			this.profiler.pop();
+
+			poseStack.popPose();
+			RenderSystem.applyModelViewMatrix();
 		}
 		// draw debug pie
 		drawProfiler();
@@ -1105,7 +1108,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	private void renderSingleView(RenderPass eye, float nano, boolean renderworld) {
 		GlStateManager._clearColor(0.0F, 0.0F, 0.0F, 1.0F);
 		GlStateHelper.clear(16384);
-		GlStateManager._enableTexture();
 		GlStateManager._enableDepthTest();
 		this.profiler.push("updateCameraAndRender");
 		this.gameRenderer.render(nano, System.nanoTime(), renderworld);

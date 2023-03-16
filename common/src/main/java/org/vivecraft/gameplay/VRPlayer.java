@@ -453,7 +453,7 @@ public class VRPlayer
                                                         Vec3 vec33 = player.getLookAngle();
                                                         Vec3 vec34 = (new Vec3(vec33.x, 0.0D, vec33.z)).normalize();
                                                         player.fallDistance = 0.0F;
-                                                        ((PlayerExtension) minecraft.player).stepSound(new BlockPos(player.position()), player.position());
+                                                        ((PlayerExtension) minecraft.player).stepSound(BlockPos.containing(player.position()), player.position());
                                                         break;
                                                     }
                                                 }

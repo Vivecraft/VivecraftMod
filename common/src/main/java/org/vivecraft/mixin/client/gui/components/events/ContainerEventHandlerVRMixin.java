@@ -13,11 +13,11 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 @Mixin(ContainerEventHandler.class)
 public class ContainerEventHandlerVRMixin {
 
-	@Inject(at = @At("HEAD"), method = "setInitialFocus(Lnet/minecraft/client/gui/components/events/GuiEventListener;)V")
+	/*@Inject(at = @At("HEAD"), method = "setInitialFocus(Lnet/minecraft/client/gui/components/events/GuiEventListener;)V")
 	public void focus(GuiEventListener pEventListener, CallbackInfo info) {
 		if (!ClientDataHolder.getInstance().vrSettings.seated)
 		{
 			info.cancel();
 		}
-	}
+	}*/
 }

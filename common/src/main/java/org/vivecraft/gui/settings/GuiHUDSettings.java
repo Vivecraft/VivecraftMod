@@ -5,7 +5,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.gui.framework.GuiVROptionButton;
+import org.vivecraft.gui.framework.GuiVROption;
 import org.vivecraft.gui.framework.GuiVROptionsBase;
 import org.vivecraft.gui.framework.VROptionEntry;
 import org.vivecraft.settings.VRSettings;
@@ -56,13 +56,11 @@ public class GuiHUDSettings extends GuiVROptionsBase
     }
 
     protected void actionPerformed(AbstractWidget widget) {
-        if (widget instanceof GuiVROptionButton) {
-            GuiVROptionButton button = (GuiVROptionButton)widget;
-
-            if (button.id == VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME.ordinal()) {
+        if (widget instanceof GuiVROption button) {
+            if (button.getId() == VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME.ordinal()) {
                 KeyboardHandler.physicalKeyboard.init();
             }
-            if (button.id == VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE.ordinal()) {
+            if (button.getId() == VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE.ordinal()) {
                 GuiHandler.onScreenChanged(Minecraft.getInstance().screen, Minecraft.getInstance().screen, false);
             }
         }

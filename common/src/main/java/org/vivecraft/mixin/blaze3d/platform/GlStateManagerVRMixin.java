@@ -20,10 +20,11 @@ public class GlStateManagerVRMixin {
     }
 
     //Change the limit of textures to 32
-    @ModifyConstant(constant = @Constant(intValue = 12),method = "_getTextureId")
+    // This doesn't exist anymore
+    /*@ModifyConstant(constant = @Constant(intValue = 12),method = "_getTextureId")
     private static int properId(int i) {
         return RenderSystemAccessor.getShaderTextures().length;
-    }
+    }*/
 
     /**
      * @author

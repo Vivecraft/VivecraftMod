@@ -8,10 +8,10 @@ public class VROptionEntry
 {
     public final VRSettings.VrOptions option;
     public final String title;
-    public final BiFunction<GuiVROptionButton, Vec2, Boolean> customHandler;
+    public final BiFunction<GuiVROption, Vec2, Boolean> customHandler;
     public final boolean center;
 
-    public VROptionEntry(String label, BiFunction<GuiVROptionButton, Vec2, Boolean> customHandler, boolean center)
+    public VROptionEntry(String label, BiFunction<GuiVROption, Vec2, Boolean> customHandler, boolean center)
     {
         this.option = null;
         this.title = label;
@@ -19,7 +19,7 @@ public class VROptionEntry
         this.center = center;
     }
 
-    public VROptionEntry(String label, BiFunction<GuiVROptionButton, Vec2, Boolean> customHandler)
+    public VROptionEntry(String label, BiFunction<GuiVROption, Vec2, Boolean> customHandler)
     {
         this.option = null;
         this.title = label;
@@ -27,7 +27,7 @@ public class VROptionEntry
         this.center = false;
     }
 
-    public VROptionEntry(VRSettings.VrOptions option, BiFunction<GuiVROptionButton, Vec2, Boolean> customHandler, boolean center)
+    public VROptionEntry(VRSettings.VrOptions option, BiFunction<GuiVROption, Vec2, Boolean> customHandler, boolean center)
     {
         this.option = option;
         this.title = null;
@@ -35,7 +35,7 @@ public class VROptionEntry
         this.center = center;
     }
 
-    public VROptionEntry(VRSettings.VrOptions option, BiFunction<GuiVROptionButton, Vec2, Boolean> customHandler)
+    public VROptionEntry(VRSettings.VrOptions option, BiFunction<GuiVROption, Vec2, Boolean> customHandler)
     {
         this.option = option;
         this.title = null;
