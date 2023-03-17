@@ -1,5 +1,6 @@
 package org.vivecraft.provider.openvr_jna;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
@@ -97,8 +98,8 @@ public class OpenVRStereoRenderer extends VRRenderer
         this.LeftEyeTextureId = GL11.glGenTextures();
         int i = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.LeftEyeTextureId);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729.0F);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729.0F);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729);
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, (ByteBuffer)null);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, i);
         this.openvr.texType0.handle = Pointer.createConstant(this.LeftEyeTextureId);
@@ -108,8 +109,8 @@ public class OpenVRStereoRenderer extends VRRenderer
         this.RightEyeTextureId = GL11.glGenTextures();
         i = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.RightEyeTextureId);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729.0F);
-        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729.0F);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729);
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, (ByteBuffer)null);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, i);
         this.openvr.texType1.handle = Pointer.createConstant(this.RightEyeTextureId);

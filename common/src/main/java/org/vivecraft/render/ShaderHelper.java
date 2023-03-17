@@ -13,7 +13,7 @@ public class ShaderHelper
 
         try
         {
-            i = GL43C.glCreateShader(shaderType);
+            i = GlStateManager.glCreateShader(shaderType);
 
             if (i == 0)
             {
@@ -94,16 +94,16 @@ public class ShaderHelper
         }
         else
         {
-            GL43C.glAttachShader(k, i);
-            GL43C.glAttachShader(k, j);
+            GlStateManager.glAttachShader(k, i);
+            GlStateManager.glAttachShader(k, j);
 
             if (doAttribs)
             {
-                GL20.glBindAttribLocation(k, 0, "in_Position");
+                GlStateManager._glBindAttribLocation(k, 0, "in_Position");
                 checkGLError("@2");
-                GL20.glBindAttribLocation(k, 1, "in_Color");
+                GlStateManager._glBindAttribLocation(k, 1, "in_Color");
                 checkGLError("@2a");
-                GL20.glBindAttribLocation(k, 2, "in_TextureCoord");
+                GlStateManager._glBindAttribLocation(k, 2, "in_TextureCoord");
                 checkGLError("@3");
             }
 

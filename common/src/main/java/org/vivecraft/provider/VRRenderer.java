@@ -127,12 +127,12 @@ public abstract class VRRenderer
     {
         if (this.LeftEyeTextureId > 0)
         {
-            GL11.glDeleteTextures(this.LeftEyeTextureId);
+            RenderSystem.deleteTexture(this.LeftEyeTextureId);
         }
 
         if (this.RightEyeTextureId > 0)
         {
-            GL11.glDeleteTextures(this.RightEyeTextureId);
+            RenderSystem.deleteTexture(this.RightEyeTextureId);
         }
 
         this.LeftEyeTextureId = this.RightEyeTextureId = -1;
@@ -145,30 +145,30 @@ public abstract class VRRenderer
         
         //setup stencil for writing
         GL11.glEnable(GL11.GL_STENCIL_TEST);
-		GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-		GL11.glStencilMask(0xFF); // Write to stencil buffer
+		RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+		RenderSystem.stencilMask(0xFF); // Write to stencil buffer
         
 		if(inverse) {
 			//clear whole image for total mask in color, stencil, depth
-			GL11.glClearStencil(0xFF);
-	    	GL43.glClearDepthf(0);
+			RenderSystem.clearStencil(0xFF);
+	    	RenderSystem.clearDepth(0);
 
-			GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0xFF); // Set any stencil to 0	
+			RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF); // Set any stencil to 0
     		RenderSystem.colorMask(false, false, false, true); 
 
 		} else {
 			//clear whole image for total transparency
-			GL11.glClearStencil(0);
-	    	GL43.glClearDepthf(1);
+			RenderSystem.clearStencil(0);
+	    	RenderSystem.clearDepth(1);
 	       
-			GL11.glStencilFunc(GL11.GL_ALWAYS, 0xFF, 0xFF); // Set any stencil to 1
+			RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0xFF, 0xFF); // Set any stencil to 1
     		RenderSystem.colorMask(true, true, true, true); 
 		}
 		
     	RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT, false);
     	
-		GL11.glClearStencil(0);
-    	GL43.glClearDepthf(1);
+		RenderSystem.clearStencil(0);
+    	RenderSystem.clearDepth(1);
    	
 		RenderSystem.depthMask(true); 
         RenderSystem.enableDepthTest();
@@ -188,7 +188,7 @@ public abstract class VRRenderer
         if(inverse) //draw on far clip
         	RenderSystem.getModelViewStack().translate(0, 0, -20);
         RenderSystem.applyModelViewMatrix();
-        int s= GL43.glGetInteger(GL43.GL_CURRENT_PROGRAM);
+        int s= GlStateManager._getInteger(GL43.GL_CURRENT_PROGRAM);
 
         if(dataholder.currentPass == RenderPass.SCOPEL || dataholder.currentPass == RenderPass.SCOPER){
             drawCircle(fb.viewWidth, fb.viewHeight);
@@ -207,9 +207,9 @@ public abstract class VRRenderer
         RenderSystem.enableTexture();
         RenderSystem.enableCull();
         GL30.glUseProgram(s);
-        GL11.glStencilFunc(GL11.GL_NOTEQUAL, 255, 1);
-        GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-        GL11.glStencilMask(0); // Dont Write to stencil buffer
+        RenderSystem.stencilFunc(GL11.GL_NOTEQUAL, 255, 1);
+        RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+        RenderSystem.stencilMask(0); // Dont Write to stencil buffer
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
     }
     FloatBuffer buffer = MemoryUtil.memAllocFloat(16);
