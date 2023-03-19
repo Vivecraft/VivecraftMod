@@ -1,11 +1,14 @@
 package org.vivecraft.provider.openvr_jna;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
 import jopenvr.HiddenAreaMesh_t;
 import jopenvr.HmdMatrix44_t;
 import jopenvr.VRTextureBounds_t;
@@ -96,23 +99,24 @@ public class OpenVRStereoRenderer extends VRRenderer
     public void createRenderTexture(int lwidth, int lheight)
     {
         this.LeftEyeTextureId = GL11.glGenTextures();
-        int i = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.LeftEyeTextureId);
+//        this.LeftEyeTextureId = GlStateManager._genTextures();
+        int i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
+        RenderSystem.bindTexture(this.LeftEyeTextureId);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729);
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, (ByteBuffer)null);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, i);
+        GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, null);
+        RenderSystem.bindTexture(i);
         this.openvr.texType0.handle = Pointer.createConstant(this.LeftEyeTextureId);
         this.openvr.texType0.eColorSpace = 1;
         this.openvr.texType0.eType = 1;
         this.openvr.texType0.write();
         this.RightEyeTextureId = GL11.glGenTextures();
-        i = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.RightEyeTextureId);
+        i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
+        RenderSystem.bindTexture(this.RightEyeTextureId);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729);
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, (ByteBuffer)null);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, i);
+        GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, null);
+        RenderSystem.bindTexture(i);
         this.openvr.texType1.handle = Pointer.createConstant(this.RightEyeTextureId);
         this.openvr.texType1.eColorSpace = 1;
         this.openvr.texType1.eType = 1;
