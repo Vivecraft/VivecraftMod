@@ -98,8 +98,7 @@ public class OpenVRStereoRenderer extends VRRenderer
 
     public void createRenderTexture(int lwidth, int lheight)
     {
-        this.LeftEyeTextureId = GL11.glGenTextures();
-//        this.LeftEyeTextureId = GlStateManager._genTextures();
+        this.LeftEyeTextureId = GlStateManager._genTexture();
         int i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
         RenderSystem.bindTexture(this.LeftEyeTextureId);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729);
@@ -110,7 +109,7 @@ public class OpenVRStereoRenderer extends VRRenderer
         this.openvr.texType0.eColorSpace = 1;
         this.openvr.texType0.eType = 1;
         this.openvr.texType0.write();
-        this.RightEyeTextureId = GL11.glGenTextures();
+        this.RightEyeTextureId = GlStateManager._genTexture();
         i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
         RenderSystem.bindTexture(this.RightEyeTextureId);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729);
