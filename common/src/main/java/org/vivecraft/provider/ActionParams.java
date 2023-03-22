@@ -1,6 +1,6 @@
 package org.vivecraft.provider;
 
-import org.vivecraft.provider.openvr_jna.control.VRInputActionSet;
+import org.vivecraft.provider.openxr_jna.control.VRInputActionSet;
 
 public class ActionParams
 {
