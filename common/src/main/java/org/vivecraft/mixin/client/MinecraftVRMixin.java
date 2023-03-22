@@ -1111,7 +1111,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	private void renderSingleView(RenderPass eye, float nano, boolean renderworld) {
 		RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
-		RenderSystem.clear(16384, false);
+		RenderSystem.clear(16384, ON_OSX);
 		RenderSystem.enableTexture();
 		RenderSystem.enableDepthTest();
 		this.profiler.push("updateCameraAndRender");
@@ -1131,7 +1131,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 				} else {
 					ClientDataHolder.getInstance().vrRenderer.framebufferEye1.bindWrite(true);
 				}
-				RenderSystem.clear(16384, false);
+				RenderSystem.clear(16384, ON_OSX);
 				this.profiler.push("fsaa");
 				// DataHolder.getInstance().vrRenderer.doFSAA(Config.isShaders()); TODO
 				ClientDataHolder.getInstance().vrRenderer.doFSAA(eye, false);
@@ -1286,7 +1286,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			this.profiler.push("cameracopy");
 			ClientDataHolder.getInstance().vrRenderer.cameraFramebuffer.bindWrite(true);
 			RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
-			RenderSystem.clear(16640, false);
+			RenderSystem.clear(16640, ON_OSX);
 			((RenderTargetExtension) ClientDataHolder.getInstance().vrRenderer.cameraRenderFramebuffer).blitToScreen(0,
 					ClientDataHolder.getInstance().vrRenderer.cameraFramebuffer.viewWidth,
 					ClientDataHolder.getInstance().vrRenderer.cameraFramebuffer.viewHeight, 0, true, 0.0F, 0.0F, false);
@@ -1368,7 +1368,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
 		}
 
-		RenderSystem.clear(16640, false);
+		RenderSystem.clear(16640, ON_OSX);
 		Vec3 vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getHeadPivot()
 				.subtract(ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());
 		Matrix4f matrix4f = ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD)
