@@ -47,8 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.vivecraft.mixin.client.MinecraftVRMixin.ON_OSX;
-
 public abstract class VRRenderer
 {
     public static final String RENDER_SETUP_FAILURE_MESSAGE = "Failed to initialise stereo rendering plugin: ";
@@ -247,7 +245,7 @@ public abstract class VRRenderer
             RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.clearDepth(1.0D);
             this.fsaaFirstPassResultFBO.bindRead();
-            RenderSystem.clear(16640, ON_OSX);
+            RenderSystem.clear(16640, Minecraft.ON_OSX);
             RenderSystem.viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
             VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
             VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
@@ -258,7 +256,7 @@ public abstract class VRRenderer
                 VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }
             VRShaders.lanczosShader.apply();
-            RenderSystem.clear(16384, ON_OSX);
+            RenderSystem.clear(16384, Minecraft.ON_OSX);
             this.drawQuad();
             this.fsaaLastPassResultFBO.clear(Minecraft.ON_OSX);
             this.fsaaLastPassResultFBO.bindWrite(false);
@@ -274,7 +272,7 @@ public abstract class VRRenderer
             RenderSystem.viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
             RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.clearDepth(1.0D);
-            RenderSystem.clear(16640, ON_OSX);
+            RenderSystem.clear(16640, Minecraft.ON_OSX);
             this.checkGLError("postclear");
             RenderSystem.activeTexture(33984);
             this.checkGLError("postact");
