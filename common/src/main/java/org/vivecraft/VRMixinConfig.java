@@ -1,9 +1,9 @@
 package org.vivecraft;
 
 import com.sun.jna.NativeLibrary;
+import jopenvr.JOpenVRLibrary;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.lwjgl.openxr.XR10;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -70,7 +70,7 @@ public class VRMixinConfig implements IMixinConfigPlugin {
             if (!unpackedNatives && VRState.isVR) {
                 unpackPlatformNatives();
                 // disable VR if natives failed
-                VRState.isVR = !XR10.XR_FAILED(-1);
+                VRState.isVR = !JOpenVRLibrary.isErrored();
                 unpackedNatives = true;
             }
         } catch (IOException e) {

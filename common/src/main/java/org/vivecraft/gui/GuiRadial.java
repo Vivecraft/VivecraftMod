@@ -2,7 +2,7 @@ package org.vivecraft.gui;
 
 import org.vivecraft.gui.framework.TwoHandedScreen;
 import org.vivecraft.provider.MCVR;
-import org.vivecraft.provider.openxr_jna.VRInputAction;
+import org.vivecraft.provider.openvr_jna.VRInputAction;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
