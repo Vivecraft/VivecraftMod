@@ -37,7 +37,7 @@ public class OpenVRStereoRenderer extends VRRenderer
         {
             IntByReference intbyreference = new IntByReference();
             IntByReference intbyreference1 = new IntByReference();
-            this.openvr.vrsystem.GetRecommendedRenderTargetSize.apply(intbyreference, intbyreference1);
+            this.openvr.vrsystem.VRSystem_GetRecommendedRenderTargetSize(intbyreference, intbyreference1);
             this.resolution = new Tuple<>(intbyreference.getValue(), intbyreference1.getValue());
             System.out.println("OpenVR Render Res " + this.resolution.getA() + " x " + this.resolution.getB());
             this.ss = this.openvr.getSuperSampling();
@@ -45,7 +45,7 @@ public class OpenVRStereoRenderer extends VRRenderer
 
             for (int i = 0; i < 2; ++i)
             {
-                this.hiddenMeshes[i] = this.openvr.vrsystem.GetHiddenAreaMesh.apply(i, 0);
+                this.hiddenMeshes[i] = this.openvr.vrsystem.VRSystem_GetHiddenAreaMesh(i, 0);
                 this.hiddenMeshes[i].read();
                 int j = this.hiddenMeshes[i].unTriangleCount();
 
@@ -77,12 +77,12 @@ public class OpenVRStereoRenderer extends VRRenderer
     {
         if (eyeType == 0)
         {
-            HmdMatrix44 hmdmatrix44_t1 = this.openvr.vrsystem.GetProjectionMatrix.apply(0, nearClip, farClip);
+            HmdMatrix44 hmdmatrix44_t1 = this.openvr.vrsystem.VRSystem_GetProjectionMatrix(0, nearClip, farClip);
             return Utils.Matrix4fFromOpenVR(hmdmatrix44_t1);
         }
         else
         {
-            HmdMatrix44 hmdmatrix44_t = this.openvr.vrsystem.GetProjectionMatrix.apply(1, nearClip, farClip);
+            HmdMatrix44 hmdmatrix44_t = this.openvr.vrsystem.VRSystem_GetProjectionMatrix(1, nearClip, farClip);
             return Utils.Matrix4fFromOpenVR(hmdmatrix44_t);
         }
     }

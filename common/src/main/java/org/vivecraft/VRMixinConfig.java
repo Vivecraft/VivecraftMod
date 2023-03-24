@@ -69,7 +69,7 @@ public class VRMixinConfig implements IMixinConfigPlugin {
             if (!unpackedNatives && VRState.isVR) {
                 unpackPlatformNatives();
                 // disable VR if natives failed
-                VRState.isVR = !JOpenVRLibrary.isErrored();
+                VRState.isVR = !VR.isErrored();
                 unpackedNatives = true;
             }
         } catch (IOException e) {
