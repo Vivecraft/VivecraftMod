@@ -9,7 +9,7 @@ public class OpenVRHapticScheduler extends HapticScheduler
 {
     private void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude)
     {
-        int i = MCOpenVR.get().vrInput.TriggerHapticVibrationAction.apply(MCOpenVR.get().getHapticHandle(controller), 0.0F, durationSeconds, frequency, amplitude, 0L);
+        int i = MCOpenVR.get().vrInput.VRInput_TriggerHapticVibrationAction(MCOpenVR.get().getHapticHandle(controller), 0.0F, durationSeconds, frequency, amplitude, 0L);
 
         if (i != 0)
         {

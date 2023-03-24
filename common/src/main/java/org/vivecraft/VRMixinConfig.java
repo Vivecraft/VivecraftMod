@@ -1,7 +1,6 @@
 package org.vivecraft;
 
 import com.sun.jna.NativeLibrary;
-import jopenvr.JOpenVRLibrary;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.objectweb.asm.tree.ClassNode;

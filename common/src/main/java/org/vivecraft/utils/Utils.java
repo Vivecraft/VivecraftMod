@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
+import org.lwjgl.openvr.HmdMatrix44;
 import org.vivecraft.Xplat;
 import org.vivecraft.render.VRShaders;
 import org.vivecraft.tweaker.LoaderUtils;
@@ -51,7 +52,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
-import jopenvr.HmdMatrix44_t;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.ComponentCollector;
 import net.minecraft.client.Minecraft;
@@ -902,7 +902,7 @@ public class Utils
         }
     }
 
-    public static org.joml.Matrix4f Matrix4fFromOpenVR(HmdMatrix44_t in)
+    public static org.joml.Matrix4f Matrix4fFromOpenVR(HmdMatrix44 in)
     {
         return new org.joml.Matrix4f(in.m[0], in.m[4], in.m[8], in.m[12],
                 in.m[1], in.m[5],  in.m[9], in.m[13],
