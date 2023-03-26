@@ -1,16 +1,17 @@
 package org.vivecraft.provider.openvr_jna;
 
 import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.IntByReference;
+
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.openvr.HiddenAreaMesh;
 import org.lwjgl.openvr.HmdMatrix44;
+import org.lwjgl.openvr.VRSystem;
 import org.lwjgl.openvr.VRTextureBounds;
 import org.vivecraft.provider.VRRenderer;
 import org.vivecraft.provider.MCVR;
@@ -22,11 +23,13 @@ public class OpenVRStereoRenderer extends VRRenderer
 {
     private HiddenAreaMesh[] hiddenMeshes = new HiddenAreaMesh[2];
     private MCOpenVR openvr;
+    private ByteBuffer container;
 
-    public OpenVRStereoRenderer(MCVR vr)
+    public OpenVRStereoRenderer(MCVR vr, ByteBuffer container)
     {
         super(vr);
         this.openvr = (MCOpenVR)vr;
+        this.container = container;
     }
 
     public Tuple<Integer, Integer> getRenderTextureSizes()
@@ -37,9 +40,10 @@ public class OpenVRStereoRenderer extends VRRenderer
         }
         else
         {
-            IntBuffer intbyreference = null;
-            IntBuffer intbyreference1 = null;
-            this.openvr.vrsystem.GetRecommendedRenderTargetSize(intbyreference, intbyreference1);
+            IntBuffer intbyreference = BufferUtils.createIntBuffer(128);
+            IntBuffer intbyreference1 = BufferUtils.createIntBuffer(128);
+            HiddenAreaMesh result = HiddenAreaMesh.create();
+            VRSystem.VRSystem_GetRecommendedRenderTargetSize(intbyreference, intbyreference1);
             this.resolution = new Tuple<>(intbyreference.get(), intbyreference1.get());
             System.out.println("OpenVR Render Res " + this.resolution.getA() + " x " + this.resolution.getB());
             this.ss = this.openvr.getSuperSampling();
@@ -47,8 +51,7 @@ public class OpenVRStereoRenderer extends VRRenderer
 
             for (int i = 0; i < 2; ++i)
             {
-                this.hiddenMeshes[i] = this.openvr.vrsystem.GetHiddenAreaMesh(i, 0);
-                this.hiddenMeshes[i].read();
+                this.hiddenMeshes[i] = VRSystem.VRSystem_GetHiddenAreaMesh(i, 0, result);
                 int j = this.hiddenMeshes[i].unTriangleCount();
 
                 if (j <= 0)
@@ -58,13 +61,12 @@ public class OpenVRStereoRenderer extends VRRenderer
                 else
                 {
                     this.hiddenMesheVertecies[i] = new float[this.hiddenMeshes[i].unTriangleCount() * 3 * 2];
-                    new Memory((long)(this.hiddenMeshes[i].unTriangleCount() * 3 * 2));
-                    this.hiddenMeshes[i].pVertexData.getPointer().read(0L, this.hiddenMesheVertecies[i], 0, this.hiddenMesheVertecies[i].length);
+                    new Memory((long) this.hiddenMeshes[i].unTriangleCount() * 3 * 2);
 
                     for (int k = 0; k < this.hiddenMesheVertecies[i].length; k += 2)
                     {
-                        this.hiddenMesheVertecies[i][k] *= (float)this.resolution.getA().intValue();
-                        this.hiddenMesheVertecies[i][k + 1] *= (float)this.resolution.getB().intValue();
+                        this.hiddenMesheVertecies[i][k] *= (float) this.resolution.getA();
+                        this.hiddenMesheVertecies[i][k + 1] *= (float) this.resolution.getB();
                     }
 
                     System.out.println("Stencil mesh loaded for eye " + i);
@@ -79,12 +81,12 @@ public class OpenVRStereoRenderer extends VRRenderer
     {
         if (eyeType == 0)
         {
-            HmdMatrix44 hmdmatrix44_t1 = this.openvr.vrsystem.GetProjectionMatrix(0, nearClip, farClip);
+            HmdMatrix44 hmdmatrix44_t1 = VRSystem.VRSystem_GetProjectionMatrix(0, nearClip, farClip, new HmdMatrix44(container));
             return Utils.Matrix4fFromOpenVR(hmdmatrix44_t1);
         }
         else
         {
-            HmdMatrix44 hmdmatrix44_t = this.openvr.vrsystem.GetProjectionMatrix(1, nearClip, farClip);
+            HmdMatrix44 hmdmatrix44_t = VRSystem.VRSystem_GetProjectionMatrix(1, nearClip, farClip, new HmdMatrix44(container));
             return Utils.Matrix4fFromOpenVR(hmdmatrix44_t);
         }
     }
@@ -106,7 +108,6 @@ public class OpenVRStereoRenderer extends VRRenderer
         this.openvr.texType0.handle(this.LeftEyeTextureId);
         this.openvr.texType0.eColorSpace(1);
         this.openvr.texType0.eType(1);
-        this.openvr.texType0.write();
         this.RightEyeTextureId = GL11.glGenTextures();
         i = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.RightEyeTextureId);
@@ -117,7 +118,6 @@ public class OpenVRStereoRenderer extends VRRenderer
         this.openvr.texType1.handle(this.RightEyeTextureId);
         this.openvr.texType1.eColorSpace(1);
         this.openvr.texType1.eType(1);
-        this.openvr.texType1.write();
     }
 
     public boolean endFrame(RenderPass eye)
@@ -131,7 +131,6 @@ public class OpenVRStereoRenderer extends VRRenderer
         {
             int i = this.openvr.vrCompositor.Submit(0, this.openvr.texType0, (VRTextureBounds)null, 0);
             int j = this.openvr.vrCompositor.Submit(1, this.openvr.texType1, (VRTextureBounds)null, 0);
-            this.openvr.vrCompositor.VRCompositor_PostPresentHandoff();
 
             if (i + j > 0)
             {

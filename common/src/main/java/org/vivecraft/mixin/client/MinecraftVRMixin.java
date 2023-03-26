@@ -33,7 +33,6 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
@@ -44,7 +43,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -288,9 +286,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;", remap = false), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public Thread settings() {
 		if (!this.oculus) {
-			ClientDataHolder.getInstance().vr = new MCOpenVR((Minecraft) (Object) this, ClientDataHolder.getInstance());
-		} else {
-			//DataHolder.getInstance().vr = new MC_OVR((Minecraft) (Object) this, DataHolder.getInstance());
+			ClientDataHolder.getInstance().vr = new MCOpenVR((Minecraft) (Object) this, ClientDataHolder.getInstance(), container);
 		}
 
 		VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
@@ -322,9 +318,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			dh.vr.init();
 
 			if (!this.oculus) {
-				dh.vrRenderer = new OpenVRStereoRenderer(dh.vr);
-			} else {
-				//dh.vrRenderer = new OVR_StereoRenderer(dh.vr);
+				dh.vrRenderer = new OpenVRStereoRenderer(dh.vr, container);
 			}
 
 			dh.vrPlayer = new VRPlayer();
@@ -358,27 +352,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		ClientDataHolder.getInstance().vrSettings.firstRun = false;
 		ClientDataHolder.getInstance().vrSettings.saveOptions();
 	}
-
-//	/**
-//	 * @author
-//	 * @reason
-//	 */
-//	@Overwrite
-//	private void rollbackResourcePacks(Throwable pThrowable) {
-//		if (this.resourcePackRepository.getSelectedPacks().stream().anyMatch(e -> !e.isRequired())) {
-//			TextComponent component;
-//			if (pThrowable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure) {
-//				component = Component.literal(
-//						((SimpleReloadableResourceManager.ResourcePackLoadingFailure) pThrowable).getPack().getName());
-//			} else {
-//				component = null;
-//			}
-//
-//			this.clearResourcePacksOnError(pThrowable, component);
-//		} else {
-//			Util.throwAsRuntime(pThrowable);
-//		}
-//	}
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
 	public void destroy(CallbackInfo info) {
