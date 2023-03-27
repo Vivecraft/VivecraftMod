@@ -220,6 +220,8 @@ public abstract class GameRendererVRMixin
 	@Shadow
 	private long lastActiveTime;
 
+	@Shadow public abstract OverlayTexture overlayTexture();
+
 	@Override
 	public double getRveY() {
 		return rveY;
@@ -1738,6 +1740,7 @@ public abstract class GameRendererVRMixin
 	public void drawSizedQuadSolid(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
 		RenderSystem.setShader(GameRenderer::getRendertypeEntitySolidShader);
 		this.lightTexture.turnOnLightLayer();
+		this.overlayTexture().setupOverlayColor();
 		float f = displayHeight / displayWidth;
 		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
@@ -1780,6 +1783,7 @@ public abstract class GameRendererVRMixin
 		RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
 		float f = displayHeight / displayWidth;
 		this.lightTexture.turnOnLightLayer();
+		this.overlayTexture().setupOverlayColor();
 		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
