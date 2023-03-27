@@ -19,7 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.ClientDataHolder;
@@ -206,7 +205,7 @@ public abstract class VRRenderer
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableTexture();
         RenderSystem.enableCull();
-        GL30.glUseProgram(s);
+        GlStateManager._glUseProgram(s);
         RenderSystem.stencilFunc(GL11.GL_NOTEQUAL, 255, 1);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         RenderSystem.stencilMask(0); // Dont Write to stencil buffer
