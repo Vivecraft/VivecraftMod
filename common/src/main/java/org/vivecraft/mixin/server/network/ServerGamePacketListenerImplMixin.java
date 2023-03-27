@@ -61,8 +61,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 	@Inject(at = @At("TAIL"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ServerboundCustomPayloadPacket;)V" )
 	public void custompacket(ServerboundCustomPayloadPacket pPacket, CallbackInfo info) {
 
-		PacketUtils.ensureRunningOnSameThread(pPacket, this, this.player.getLevel());
-
 		FriendlyByteBuf friendlybytebuf = pPacket.getData();
 		ResourceLocation resourcelocation = pPacket.getIdentifier();
 		String s = resourcelocation.getNamespace();
@@ -70,6 +68,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 		
 		if (s.equalsIgnoreCase("vivecraft") && s1.equalsIgnoreCase("data"))
 		{
+			PacketUtils.ensureRunningOnSameThread(pPacket, this, this.player.getLevel());
 			int i = friendlybytebuf.readableBytes();
 			CommonNetworkHelper.PacketDiscriminators networkhelper$packetdiscriminators = CommonNetworkHelper.PacketDiscriminators.values()[friendlybytebuf.readByte()];
 			byte[] abyte = new byte[i - 1];
