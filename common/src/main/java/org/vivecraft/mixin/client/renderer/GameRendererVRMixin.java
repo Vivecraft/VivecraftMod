@@ -856,11 +856,11 @@ public abstract class GameRendererVRMixin
 			this.polytex = true;
 			this.polylight = false;
 			this.polycull = true;
-			GlStateManager._enableBlend();
+			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
-			GlStateManager._disableTexture();
+			RenderSystem.disableTexture();
 			// GlStateManager._disableLighting();
-			GlStateManager._disableCull();
+			RenderSystem.disableCull();
 
 			if (flag) {
 //				this.prog = Shaders.activeProgram; TODO
@@ -871,11 +871,11 @@ public abstract class GameRendererVRMixin
 					this.polyblenddsta);
 
 			if (!this.polyblend) {
-				GlStateManager._disableBlend();
+				RenderSystem.disableBlend();
 			}
 
 			if (this.polytex) {
-				GlStateManager._enableTexture();
+				RenderSystem.enableTexture();
 			}
 
 			if (this.polylight) {
@@ -883,7 +883,7 @@ public abstract class GameRendererVRMixin
 			}
 
 			if (this.polycull) {
-				GlStateManager._enableCull();
+				RenderSystem.enableCull();
 			}
 
 //			if (flag && this.polytex) {
@@ -1147,8 +1147,8 @@ public abstract class GameRendererVRMixin
 			poseStack.scale(f1, f1, f1);
 
 			framebuffer.bindRead();
-			GlStateManager._disableCull();
-			GlStateManager._enableTexture();
+			RenderSystem.disableCull();
+			RenderSystem.enableTexture();
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, framebuffer.getColorTextureId());
 
@@ -1162,22 +1162,22 @@ public abstract class GameRendererVRMixin
 					color[3] *= 0.75F;
 				}
 
-				GlStateManager._enableBlend();
+				RenderSystem.enableBlend();
 				RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
 						GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE_MINUS_DST_ALPHA,
 						GlStateManager.DestFactor.ONE);
 			} else {
-				GlStateManager._disableBlend();
+				RenderSystem.disableBlend();
 			}
 
 			if (depthAlways) {
-				GlStateManager._depthFunc(519);
+				RenderSystem.depthFunc(519);
 			} else {
-				GlStateManager._depthFunc(515);
+				RenderSystem.depthFunc(515);
 			}
 
-			GlStateManager._depthMask(true);
-			GlStateManager._enableDepthTest();
+			RenderSystem.depthMask(true);
+			RenderSystem.enableDepthTest();
 
 
 			if (this.minecraft.level != null) {
@@ -1200,8 +1200,8 @@ public abstract class GameRendererVRMixin
 			}
 
 			RenderSystem.defaultBlendFunc();
-			GlStateManager._depthFunc(515);
-			GlStateManager._enableCull();
+			RenderSystem.depthFunc(515);
+			RenderSystem.enableCull();
 
 			poseStack.popPose();
 		}
@@ -2056,19 +2056,19 @@ public abstract class GameRendererVRMixin
 		mat.m33 = 1.0F;
 		mat.m23 = -1.0F;
 
-		GlStateManager._depthFunc(GL11.GL_ALWAYS);
-		GlStateManager._depthMask(true);
-		GlStateManager._disableTexture();
-		GlStateManager._enableBlend();
-		GlStateManager._disableCull();
+		RenderSystem.depthFunc(GL11.GL_ALWAYS);
+		RenderSystem.depthMask(true);
+		RenderSystem.disableTexture();
+		RenderSystem.enableBlend();
+		RenderSystem.disableCull();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION);
 		bufferbuilder.vertex(mat, -1.5F, -1.5F, 0.0F).endVertex();
 		bufferbuilder.vertex(mat, 1.5F, -1.5F, 0.0F).endVertex();
 		bufferbuilder.vertex(mat, 1.5F, 1.5F, 0.0F).endVertex();
 		bufferbuilder.vertex(mat, -1.5F, 1.5F, 0.0F).endVertex();
 		tesselator.end();
-		GlStateManager._depthFunc(GL11.GL_LEQUAL);
-		GlStateManager._enableTexture();
+		RenderSystem.depthFunc(GL11.GL_LEQUAL);
+		RenderSystem.enableTexture();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
@@ -2257,7 +2257,7 @@ public abstract class GameRendererVRMixin
 
 							poseStack.pushPose();
 							poseStack.setIdentity();
-							GlStateManager._disableCull();
+							RenderSystem.disableCull();
 							this.applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, poseStack);
 							Vec3 vec3 = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render
 									.getEye(GameRendererVRMixin.DATA_HOLDER.currentPass).getPosition();
@@ -2272,7 +2272,7 @@ public abstract class GameRendererVRMixin
 							if (depthAlways) {
 								RenderSystem.depthFunc(519);
 							} else {
-								GlStateManager._depthFunc(515);
+								RenderSystem.depthFunc(515);
 							}
 
 							RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -2282,7 +2282,7 @@ public abstract class GameRendererVRMixin
 							RenderSystem.depthFunc(515);
 							this.setupPolyRendering(false);
 							poseStack.popPose();
-							GlStateManager._enableCull();
+							RenderSystem.enableCull();
 						}
 						this.minecraft.getProfiler().pop();
 					}
@@ -2318,7 +2318,7 @@ public abstract class GameRendererVRMixin
 
 		if (GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.THIRD
 				|| GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.CAMERA) {
-			GlStateManager._depthFunc(515);
+			RenderSystem.depthFunc(515);
 		}
 
 		RenderSystem.enableBlend();
