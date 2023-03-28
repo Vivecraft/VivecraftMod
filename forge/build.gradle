@@ -41,7 +41,8 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
     modRuntimeOnly("maven.modrinth:rubidium:0.6.2a")
-    modRuntimeOnly("maven.modrinth:oculus:1.19.2-1.2.8a")}
+    modRuntimeOnly("maven.modrinth:oculus:1.19.2-1.2.8a")
+}
 
 processResources {
     inputs.property "version", project.version
