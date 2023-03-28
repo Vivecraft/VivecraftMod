@@ -119,7 +119,7 @@ jobs:
           echo md version fabric: "${base_version}-fabric"
           echo "MD_VERSION_FABRIC=${base_version}-fabric" >> $GITHUB_OUTPUT
           echo md version forge: "${base_version}-forge"
-          echo "MD_VERSION__FORGE=${base_version}-forge" >> $GITHUB_OUTPUT
+          echo "MD_VERSION_FORGE=${base_version}-forge" >> $GITHUB_OUTPUT
           echo md version fquilt: "${base_version}-quilt"
           echo "MD_VERSION_QUILT=${base_version}-quilt" >> $GITHUB_OUTPUT
 
