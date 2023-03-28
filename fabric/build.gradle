@@ -26,15 +26,38 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    modCompileOnly "maven.modrinth:sodium:mc1.19.4-0.4.10"
-    modCompileOnly "maven.modrinth:iris:1.5.2+1.19.4"
-    //modRuntimeOnly "883067831485366304:1080535317330796584:iris-mc1.19.4-pre3-1.6.0-beta.2-d94cefc2-dirty:jar"
-    //modRuntimeOnly "883067831485366304:1080535317733462076:sodium-fabric-mc1.19.4-pre2-0.4.11rev.9a2a2ea-dirty:jar"
+    modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
-    modApi("dev.architectury:architectury-fabric:8.1.72") //temp rei
+    // for sodium compat
+    modRuntimeOnly "maven.modrinth:sodium:mc1.19.4-0.4.10"
 
-    modRuntimeOnly 'org.anarres:jcpp:1.4.14'//temp iris
-    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre9'//temp iris
+    // for iris compat
+    modRuntimeOnly "maven.modrinth:iris:1.5.2+1.19.4"
+    modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
+    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre9' //temp iris
+
+    // for REI compat
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:11.0.597"
+
+    // for Pehkui compat
+    modRuntimeOnly("com.github.Virtuoel:Pehkui:3.7.1", { exclude group: "net.fabricmc.fabric-api" })
+
+    // other mods
+    // modRuntimeOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
+    modRuntimeOnly "maven.modrinth:lithium:mc1.19.4-0.11.1"
+    modRuntimeOnly "maven.modrinth:indium:1.0.15+mc1.19.4"
+
+    /*
+    // for immersive portals compat
+    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v2.5.2-mc1.19.3'){ //temp immersiveportals
+        exclude(group: "net.fabricmc.fabric-api")
+        transitive(false)
+    }
+    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v2.5.2-mc1.19.3'){ //temp immersiveportals
+        exclude(group: "net.fabricmc.fabric-api")
+        transitive(false)
+    }
+    */
 
     // needed for resource loading
     include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
