@@ -1,6 +1,6 @@
 package org.vivecraft.utils.math;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -84,9 +84,9 @@ public class BezierCurve
         double d0 = player.xOld + (player.getX() - player.xOld) * (double)partialTicks;
         double d1 = player.yOld + (player.getY() - player.yOld) * (double)partialTicks;
         double d2 = player.zOld + (player.getZ() - player.zOld) * (double)partialTicks;
-        GlStateManager._disableTexture();
+        RenderSystem.disableTexture();
         //GlStateManager._disableLighting();
-        GlStateManager._depthMask(false);
+        RenderSystem.depthMask(false);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         bufferbuilder.begin(Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
@@ -99,8 +99,8 @@ public class BezierCurve
 
         tesselator.end();
         //GlStateManager._enableLighting();
-        GlStateManager._enableTexture();
-        GlStateManager._depthMask(true);
+        RenderSystem.enableTexture();
+        RenderSystem.depthMask(true);
     }
 
     void renderVertex(BufferBuilder buffer, Vec3 vert, Color color, double offX, double offY, double offZ)

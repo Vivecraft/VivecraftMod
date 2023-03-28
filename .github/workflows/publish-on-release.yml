@@ -1,0 +1,187 @@
+name: curseforge-modrinth-publish
+
+run-name: Posting jars on Curseforge and Modrinth
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: fetching asset paths
+        id: assets
+        shell: bash
+        run: |
+          echo Attachments
+          fileNames=(${{ github.event.release.assets[0].name }} ${{ github.event.release.assets[1].name }} ${{ github.event.release.assets[2].name }})
+          filePaths=(${{ github.event.release.assets[0].browser_download_url }} ${{ github.event.release.assets[1].browser_download_url }} ${{ github.event.release.assets[2].browser_download_url }})
+          
+          for i in 0 1 2
+          do
+            echo "${fileNames[i]}"
+            echo "${filePaths[i]}"
+            if [ -n "${filePaths[i]}" ]; then
+              curl -L -o "./${fileNames[i]}" "${filePaths[i]}"
+            fi
+
+            if [[ "${fileNames[i]}" == *"fabric"* ]]; then
+              echo "FABRIC_FILE_NAME=${fileNames[i]}" >> $GITHUB_OUTPUT
+              echo "FABRIC_FILE_PATH=./${fileNames[i]}" >> $GITHUB_OUTPUT
+            fi
+            if [[ "${fileNames[i]}" == *"forge"* ]]; then
+              echo "FORGE_FILE_NAME=${fileNames[i]}" >> $GITHUB_OUTPUT
+              echo "FORGE_FILE_PATH=./${fileNames[i]}" >> $GITHUB_OUTPUT
+            fi
+            if [[ "${fileNames[i]}" == *"quilt"* ]]; then
+              echo "QUILT_FILE_NAME=${fileNames[i]}" >> $GITHUB_OUTPUT
+              echo "QUILT_FILE_PATH=./${fileNames[i]}" >> $GITHUB_OUTPUT
+            fi
+          done
+          ls -l
+      - run: echo fabric is ${{ steps.assets.outputs.FABRIC_FILE_NAME }}
+      - run: echo forge is ${{ steps.assets.outputs.FORGE_FILE_NAME }}
+      - run: echo quilt is ${{ steps.assets.outputs.QUILT_FILE_NAME }}
+
+      - name: getting version info from files
+        id: version
+        shell: bash
+        run: |
+          file=""
+          if [ -n "${{ steps.assets.outputs.FABRIC_FILE_NAME }}" ]; then
+            file="${{ steps.assets.outputs.FABRIC_FILE_NAME }}"
+          elif [ -n "${{ steps.assets.outputs.FORGE_FILE_NAME }}" ]; then
+            file="${{ steps.assets.outputs.FORGE_FILE_NAME }}"
+          else
+            file="${{ steps.assets.outputs.QUILT_FILE_NAME }}"
+          fi
+          echo $file
+
+          # save the current IFS value
+          OLDIFS=$IFS
+          # set the IFS to the delimiter ("-")
+          IFS="-"
+          # split the string into an array, limiting it to a maximum of 3 fields
+          array=($file)
+          # restore the IFS value
+          IFS=$OLDIFS
+
+          # alphas or beats should be included in the version
+          if [ ${array[3]:0:1} = "a" ] || [ ${array[3]:0:1} = "b" ]; then
+            array[2]=${array[2]}-${array[3]}
+          fi
+
+          release_type="release"
+          if [ ${array[3]:0:1} = "a" ]; then
+            release_type="alpha"
+          elif [ ${array[3]:0:1} = "b" ]; then
+            release_type="beta"
+          fi
+
+          echo release type: ${release_type}
+          echo "RELEASE_TYPE=${release_type}" >> $GITHUB_OUTPUT
+
+          mc_version=${array[1]}
+
+          # mod loaders
+          loaders_fabric=fabric
+          # check if there is a quilt specific jar
+          if [ -z "${{ steps.assets.outputs.QUILT_FILE_NAME }}" ]; then
+            loaders_fabric="${loaders_fabric} quilt"
+          else
+            loaders_quilt="quilt"
+          fi
+          loaders_forge="forge"
+
+          echo mc version: $mc_version
+          echo "MC_VERSION=$mc_version" >> $GITHUB_OUTPUT
+
+          echo loaders fabric: ${loaders_fabric}
+          echo "LOADERS_FABRIC=${loaders_fabric}" >> $GITHUB_OUTPUT
+
+          echo loaders forge: ${loaders_forge}
+          echo "LOADERS_FORGE=${loaders_forge}" >> $GITHUB_OUTPUT
+
+          echo loaders quilt: ${loaders_quilt}
+          echo "LOADERS_QUILT=${loaders_quilt}" >> $GITHUB_OUTPUT
+
+          mod_name="${array[0]^} $mc_version-${array[2]}"
+          echo file name fabric: "${mod_name}-fabric"
+          echo "VERSION_NAME_FABRIC=${mod_name}-fabric" >> $GITHUB_OUTPUT
+          echo file name forge: "${mod_name}-forge"
+          echo "VERSION_NAME_FORGE=${mod_name}-forge" >> $GITHUB_OUTPUT
+          echo file name quilt: "${mod_name}-quilt"
+          echo "VERSION_NAME_QUILT=${mod_name}-quilt" >> $GITHUB_OUTPUT
+
+          # modrinth mod versions
+          base_version="$mc_version-${array[2]}"
+          echo md version fabric: "${base_version}-fabric"
+          echo "MD_VERSION_FABRIC=${base_version}-fabric" >> $GITHUB_OUTPUT
+          echo md version forge: "${base_version}-forge"
+          echo "MD_VERSION__FORGE=${base_version}-forge" >> $GITHUB_OUTPUT
+          echo md version fquilt: "${base_version}-quilt"
+          echo "MD_VERSION_QUILT=${base_version}-quilt" >> $GITHUB_OUTPUT
+
+      - run: echo Minecraft target version is ${{ steps.version.outputs.MC_VERSION }}
+      - run: echo release type is ${{ steps.version.outputs.RELEASE_TYPE }}
+
+      - name: publish fabric
+        if: steps.assets.outputs.FABRIC_FILE_PATH != ''
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files-primary: ${{ steps.assets.outputs.FABRIC_FILE_PATH }}
+
+          name: "${{ steps.version.outputs.VERSION_NAME_FABRIC }}"
+          version: "${{ steps.version.outputs.MD_VERSION_FABRIC }}"
+          version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
+
+          loaders: "${{ steps.version.outputs.LOADERS_FABRIC }}"
+          game-versions: "${{ steps.version.outputs.MC_VERSION }}"
+
+      - name: publish forge
+        if: steps.assets.outputs.FORGE_FILE_PATH != ''
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files-primary: ${{ steps.assets.outputs.FORGE_FILE_PATH }}
+
+          name: "${{ steps.version.outputs.VERSION_NAME_FORGE }}"
+          version: "${{ steps.version.outputs.MD_VERSION_FORGE }}"
+          version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
+
+          loaders: "${{ steps.version.outputs.LOADERS_FORGE}}"
+          game-versions: "${{ steps.version.outputs.MC_VERSION }}"
+
+      - name: publish quilt
+        if: steps.assets.outputs.QUILT_FILE_PATH != ''
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files-primary: ${{ steps.assets.outputs.QUILT_FILE_PATH }}
+
+          name: "${{ steps.version.outputs.VERSION_NAME_QUILT }}"
+          version: "${{ steps.version.outputs.MD_VERSION_QUILT}}"
+          version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
+
+          loaders: "${{ steps.version.outputs.LOADERS_QUILT}}"
+          game-versions: "${{ steps.version.outputs.MC_VERSION }}"

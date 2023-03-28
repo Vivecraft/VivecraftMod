@@ -28,16 +28,13 @@ public class MovementTutorialStepInstanceVRMixin {
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 0), index = 1, method = "tick")
     private Component alterMovementTitle(Component title) {
         if (!ClientDataHolder.getInstance().vrSettings.seated) {
-            String moveString = I18n.get("tutorial.move.title", "%s", "", "", "");
-            moveString = moveString.substring(0, moveString.indexOf(","));
-
             // find the currently used movement binding
             if (MCVR.get().getInputAction(MCVR.get().keyFreeMoveStrafe).isActive()) {
                 // moveStrafe active
-                return Component.literal(moveString.formatted("§l" + MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyFreeMoveStrafe).getLastOrigin()) + "§r"));
+                return Component.translatable("vivecraft.toasts.move1", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyFreeMoveStrafe).getLastOrigin())).withStyle(ChatFormatting.BOLD));
             } else if (MCVR.get().getInputAction(MCVR.get().keyFreeMoveRotate).isActive()) {
                 // moveRotate active
-                return Component.literal(moveString.formatted("§l" + MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyFreeMoveRotate).getLastOrigin()) + "§r"));
+                return Component.translatable("vivecraft.toasts.move1", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyFreeMoveRotate).getLastOrigin())).withStyle(ChatFormatting.BOLD));
             } else if (MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).isActive() ||
                     MCVR.get().getInputAction(Minecraft.getInstance().options.keyDown).isActive() ||
                     MCVR.get().getInputAction(Minecraft.getInstance().options.keyLeft).isActive() ||
@@ -45,22 +42,48 @@ public class MovementTutorialStepInstanceVRMixin {
             ) {
                 // individual movement bindings
                 Set<String> buttons = new HashSet<>();
-                buttons.add(MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).isActive() ? MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).getLastOrigin()) : "");
-                buttons.add(MCVR.get().getInputAction(Minecraft.getInstance().options.keyDown).isActive() ? MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).getLastOrigin()) : "");
-                buttons.add(MCVR.get().getInputAction(Minecraft.getInstance().options.keyLeft).isActive() ? MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).getLastOrigin()) : "");
-                buttons.add(MCVR.get().getInputAction(Minecraft.getInstance().options.keyRight).isActive() ? MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).getLastOrigin()) : "");
-
-                StringBuilder buttonsString = new StringBuilder();
-                for (String s : buttons) {
-                    if (s.isEmpty()) {
-                        continue;
-                    }
-                    buttonsString.append(buttonsString.isEmpty() ? "§l" + s + "§r" : ", " + "§l" + s + "§r");
+                if (MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).isActive()) {
+                    buttons.add(MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).getLastOrigin()));
                 }
-                return Component.literal(moveString.formatted(buttonsString.toString()));
+                if (MCVR.get().getInputAction(Minecraft.getInstance().options.keyDown).isActive()) {
+                    buttons.add(MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyDown).getLastOrigin()));
+                }
+                if (MCVR.get().getInputAction(Minecraft.getInstance().options.keyLeft).isActive()) {
+                    buttons.add(MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyLeft).getLastOrigin()));
+                }
+                if (MCVR.get().getInputAction(Minecraft.getInstance().options.keyRight).isActive()) {
+                    buttons.add(MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyRight).getLastOrigin()));
+                }
+
+                String[] stringArray = buttons.toArray(new String[0]);
+                return switch (buttons.size()) {
+                    case 1 -> Component.translatable(
+                            "vivecraft.toasts.move1",
+                            Component.literal(stringArray[0]).withStyle(ChatFormatting.BOLD)
+                    );
+                    case 2 -> Component.translatable(
+                            "vivecraft.toasts.move2",
+                            Component.literal(stringArray[0]).withStyle(ChatFormatting.BOLD),
+                            Component.literal(stringArray[1]).withStyle(ChatFormatting.BOLD)
+                    );
+                    case 3 -> Component.translatable(
+                            "vivecraft.toasts.move3",
+                            Component.literal(stringArray[0]).withStyle(ChatFormatting.BOLD),
+                            Component.literal(stringArray[1]).withStyle(ChatFormatting.BOLD),
+                            Component.literal(stringArray[2]).withStyle(ChatFormatting.BOLD)
+                    );
+                    case 4 -> Component.translatable(
+                            "vivecraft.toasts.move4",
+                            Component.literal(stringArray[0]).withStyle(ChatFormatting.BOLD),
+                            Component.literal(stringArray[1]).withStyle(ChatFormatting.BOLD),
+                            Component.literal(stringArray[2]).withStyle(ChatFormatting.BOLD),
+                            Component.literal(stringArray[3]).withStyle(ChatFormatting.BOLD)
+                    );
+                    default -> Component.literal("");
+                };
             } else if (MCVR.get().getInputAction(MCVR.get().keyTeleportFallback).isActive()) {
                 // teleport fallback
-                return Component.literal(moveString.formatted("§l" + MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyTeleportFallback).getLastOrigin()) + "§r"));
+                return Component.translatable("vivecraft.toasts.move1", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyTeleportFallback).getLastOrigin())).withStyle(ChatFormatting.BOLD));
             } else if (MCVR.get().getInputAction(MCVR.get().keyTeleport).isActive()) {
                 // teleport
                 return Component.translatable("vivecraft.toasts.teleport", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(MCVR.get().keyTeleport).getLastOrigin())).withStyle(ChatFormatting.BOLD));
