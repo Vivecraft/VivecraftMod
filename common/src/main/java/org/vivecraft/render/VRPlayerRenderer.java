@@ -2,12 +2,9 @@ package org.vivecraft.render;
 
 import java.util.UUID;
 
-import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import org.joml.Matrix4f;
 import org.vivecraft.ClientDataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import org.joml.Vector3f;
 
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -64,8 +61,7 @@ public class VRPlayerRenderer extends PlayerRenderer
     {
         super.setModelProperties(pClientPlayer);
 
-        VRPlayerModel<AbstractClientPlayer> playermodel = (VRPlayerModel<AbstractClientPlayer>) this.getModel();
-        playermodel.crouching &= !pClientPlayer.isVisuallySwimming();
+        this.getModel().crouching &= !pClientPlayer.isVisuallySwimming();
     }
 
     @Override

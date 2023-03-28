@@ -20,11 +20,9 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.ClientDataHolder;
-import org.vivecraft.GlStateHelper;
 import org.vivecraft.IrisHelper;
 import org.vivecraft.VRTextureTarget;
 import org.vivecraft.extensions.GameRendererExtension;
@@ -129,12 +127,12 @@ public abstract class VRRenderer
     {
         if (this.LeftEyeTextureId > 0)
         {
-            GL11.glDeleteTextures(this.LeftEyeTextureId);
+            RenderSystem.deleteTexture(this.LeftEyeTextureId);
         }
 
         if (this.RightEyeTextureId > 0)
         {
-            GL11.glDeleteTextures(this.RightEyeTextureId);
+            RenderSystem.deleteTexture(this.RightEyeTextureId);
         }
 
         this.LeftEyeTextureId = this.RightEyeTextureId = -1;
@@ -147,30 +145,30 @@ public abstract class VRRenderer
         
         //setup stencil for writing
         GL11.glEnable(GL11.GL_STENCIL_TEST);
-		GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-		GL11.glStencilMask(0xFF); // Write to stencil buffer
+		RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+		RenderSystem.stencilMask(0xFF); // Write to stencil buffer
         
 		if(inverse) {
 			//clear whole image for total mask in color, stencil, depth
-			GL11.glClearStencil(0xFF);
-	    	GL43.glClearDepthf(0);
+			RenderSystem.clearStencil(0xFF);
+	    	RenderSystem.clearDepth(0);
 
-			GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0xFF); // Set any stencil to 0	
+			RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF); // Set any stencil to 0
     		RenderSystem.colorMask(false, false, false, true); 
 
 		} else {
 			//clear whole image for total transparency
-			GL11.glClearStencil(0);
-	    	GL43.glClearDepthf(1);
+			RenderSystem.clearStencil(0);
+	    	RenderSystem.clearDepth(1);
 	       
-			GL11.glStencilFunc(GL11.GL_ALWAYS, 0xFF, 0xFF); // Set any stencil to 1
+			RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0xFF, 0xFF); // Set any stencil to 1
     		RenderSystem.colorMask(true, true, true, true); 
 		}
 		
-    	GlStateHelper.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
+    	RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT, false);
     	
-		GL11.glClearStencil(0);
-    	GL43.glClearDepthf(1);
+		RenderSystem.clearStencil(0);
+    	RenderSystem.clearDepth(1);
    	
 		RenderSystem.depthMask(true); 
         RenderSystem.enableDepthTest();
@@ -190,7 +188,7 @@ public abstract class VRRenderer
         if(inverse) //draw on far clip
         	RenderSystem.getModelViewStack().translate(0, 0, -20);
         RenderSystem.applyModelViewMatrix();
-        int s= GL43.glGetInteger(GL43.GL_CURRENT_PROGRAM);
+        int s= GlStateManager._getInteger(GL43.GL_CURRENT_PROGRAM);
 
         if(dataholder.currentPass == RenderPass.SCOPEL || dataholder.currentPass == RenderPass.SCOPER){
             drawCircle(fb.viewWidth, fb.viewHeight);
@@ -208,10 +206,10 @@ public abstract class VRRenderer
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableTexture();
         RenderSystem.enableCull();
-        GL30.glUseProgram(s);
-        GL11.glStencilFunc(GL11.GL_NOTEQUAL, 255, 1);
-        GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-        GL11.glStencilMask(0); // Dont Write to stencil buffer
+        GlStateManager._glUseProgram(s);
+        RenderSystem.stencilFunc(GL11.GL_NOTEQUAL, 255, 1);
+        RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+        RenderSystem.stencilMask(0); // Dont Write to stencil buffer
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
     }
     FloatBuffer buffer = MemoryUtil.memAllocFloat(16);
@@ -224,7 +222,7 @@ public abstract class VRRenderer
             this.reinitFrameBuffers("FSAA Setting Changed");
         }
         else {
-            GlStateManager._disableBlend();
+            RenderSystem.disableBlend();
             RenderSystem.backupProjectionMatrix();
             Matrix4f matrix4f = new Matrix4f();
             matrix4f.identity();
@@ -237,17 +235,17 @@ public abstract class VRRenderer
             RenderSystem.setShaderTexture(0, framebufferVrRender.getColorTextureId());
             RenderSystem.setShaderTexture(1, framebufferVrRender.getDepthTextureId());
 
-            GlStateManager._activeTexture(33985);
+            RenderSystem.activeTexture(33985);
             this.framebufferVrRender.bindRead();
-            GlStateManager._activeTexture(33986);
-            GlStateManager._bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
+            RenderSystem.activeTexture(33986);
+            RenderSystem.bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
 
-            GlStateManager._activeTexture(33984);
-            GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager._clearDepth(1.0D);
+            RenderSystem.activeTexture(33984);
+            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.clearDepth(1.0D);
             this.fsaaFirstPassResultFBO.bindRead();
-            GlStateHelper.clear(16640);
-            GlStateManager._viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
+            RenderSystem.clear(16640, Minecraft.ON_OSX);
+            RenderSystem.viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
             VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
             VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
             VRShaders._Lanczos_modelViewUniform.set(RenderSystem.getModelViewMatrix());
@@ -257,25 +255,25 @@ public abstract class VRRenderer
                 VRShaders.lanczosShader.setSampler("Sampler" + k, l);
             }
             VRShaders.lanczosShader.apply();
-            GlStateHelper.clear(16384);
+            RenderSystem.clear(16384, Minecraft.ON_OSX);
             this.drawQuad();
             this.fsaaLastPassResultFBO.clear(Minecraft.ON_OSX);
             this.fsaaLastPassResultFBO.bindWrite(false);
-            GlStateManager._activeTexture(33985);
+            RenderSystem.activeTexture(33985);
             this.fsaaFirstPassResultFBO.bindRead();
             RenderSystem.setShaderTexture(0, this.fsaaFirstPassResultFBO.getColorTextureId());
-            GlStateManager._activeTexture(33986);
+            RenderSystem.activeTexture(33986);
             RenderSystem.setShaderTexture(1, this.fsaaFirstPassResultFBO.getDepthTextureId());
-            GlStateManager._bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
+            RenderSystem.bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
 
-            GlStateManager._activeTexture(33984);
+            RenderSystem.activeTexture(33984);
             this.checkGLError("posttex");
-            GlStateManager._viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
-            GlStateManager._clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager._clearDepth(1.0D);
-            GlStateHelper.clear(16640);
+            RenderSystem.viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
+            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.clearDepth(1.0D);
+            RenderSystem.clear(16640, Minecraft.ON_OSX);
             this.checkGLError("postclear");
-            GlStateManager._activeTexture(33984);
+            RenderSystem.activeTexture(33984);
             this.checkGLError("postact");
             for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
                 int l = RenderSystem.getShaderTexture(k);

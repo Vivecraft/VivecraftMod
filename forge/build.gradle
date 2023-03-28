@@ -40,7 +40,7 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    modCompileOnly("maven.modrinth:rubidium:0.6.1")
+    modRuntimeOnly("maven.modrinth:rubidium:0.6.3")
     modCompileOnly("maven.modrinth:oculus:1.19-1.2.5a")
 }
 
