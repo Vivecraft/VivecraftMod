@@ -2,6 +2,7 @@ package org.vivecraft.gameplay.trackers;
 
 import java.util.List;
 
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.*;
 import org.vivecraft.ClientDataHolder;
@@ -263,8 +264,15 @@ public class SwingTracker extends Tracker
                             }
                             else if ((item instanceof BrushItem /*|| itemstack.is(ItemTags.VIVECRAFT_BRUSHES*/))
                             {
-                                ((BrushItem)item).spawnDustParticles(player.level, blockhitresult1, blockstate, player.getViewVector(0.0F));
-                                player.level.playSound(player, blockhitresult1.getBlockPos(), SoundEvents.BRUSH_BRUSHING, SoundSource.PLAYERS);
+                                ((BrushItem)item).spawnDustParticles(player.level, blockhitresult1, blockstate, player.getViewVector(0.0F), i==0);
+                                SoundEvent soundEvent;
+                                if (blockstate.getBlock() instanceof BrushableBlock) {
+                                    BrushableBlock brushableBlock = (BrushableBlock)blockstate.getBlock();
+                                    soundEvent = brushableBlock.getBrushSound();
+                                } else {
+                                    soundEvent = SoundEvents.BRUSH_GENERIC;
+                                }
+                                player.level.playSound(player, blockhitresult1.getBlockPos(), soundEvent, SoundSource.PLAYERS);
                                 this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1);
                             }
                             else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS))

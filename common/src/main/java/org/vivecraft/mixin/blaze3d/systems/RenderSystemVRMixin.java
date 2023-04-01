@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.VRMixinConfig;
 
 import static com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate;
 
@@ -13,7 +14,7 @@ import static com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate;
 public class RenderSystemVRMixin {
 
     // do remap because of forge
-    @Inject(at = @At("HEAD"), method = "defaultBlendFunc", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "defaultBlendFunc", cancellable = true, remap = VRMixinConfig.remapIsForgeAvailable)
     private static void defaultBlendFunc(CallbackInfo ci) {
         blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         ci.cancel();

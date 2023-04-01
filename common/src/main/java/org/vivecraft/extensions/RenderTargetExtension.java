@@ -25,11 +25,11 @@ public interface RenderTargetExtension {
 	void setName(String name);
 
 	void setTextid(int texid);
-
+/*
 	void setUseStencil(boolean useStencil);
 
 	boolean getUseStencil();
-
+*/
 	void isLinearFilter(boolean linearFilter);
 
 	void blitFovReduction(ShaderInstance instance, int width, int height);

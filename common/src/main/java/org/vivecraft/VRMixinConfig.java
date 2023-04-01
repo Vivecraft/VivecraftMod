@@ -21,6 +21,8 @@ public class VRMixinConfig implements IMixinConfigPlugin {
     protected static boolean asked = false;
     private static boolean unpackedNatives = false;
 
+    public static final boolean remapIsForgeAvailable = false;
+
     @Override
     public String getRefMapperConfig() {
         return null;

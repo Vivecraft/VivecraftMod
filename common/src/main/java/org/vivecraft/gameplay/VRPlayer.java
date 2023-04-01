@@ -162,6 +162,15 @@ public class VRPlayer
                 else if (this.worldScale < 0.025F) //minClip + player position indicator offset
                     this.worldScale = 0.025F;
             }
+            if (mc.player != null) {
+                // scale world with player size
+                this.worldScale *= mc.player.getTransformScale(mc.getFrameTime());
+                // limit scale
+                if (this.worldScale > 100F)
+                    this.worldScale = 100F;
+                else if (this.worldScale < 0.025F) //minClip + player position indicator offset
+                    this.worldScale = 0.025F;
+            }
         }
 
         if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).isInMenuRoom())

@@ -13,7 +13,7 @@ import org.vivecraft.api.ServerVivePlayer;
 @Mixin(AbstractHurtingProjectile.class)
 public abstract class AbstractHurtingProjectileMixin {
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getLookAngle()Lnet/minecraft/world/phys/Vec3;"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z")
+	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getLookAngle()Lnet/minecraft/world/phys/Vec3;"), method = "hurtInternal(Lnet/minecraft/world/damagesource/DamageSource;F)Z")
 	public Vec3 hurtvive(Entity instance) {
 		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(instance.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR()) {

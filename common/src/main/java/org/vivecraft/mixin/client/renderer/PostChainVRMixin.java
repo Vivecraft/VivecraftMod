@@ -16,7 +16,7 @@ public class PostChainVRMixin {
     @Shadow
     @Final
     private RenderTarget screenTarget;
-
+/*
     @ModifyVariable(method = "addTempTarget", at = @At(value = "STORE"), ordinal = 0)
     private RenderTarget vrTarget(RenderTarget old) {
         if (((RenderTargetExtension)screenTarget).getUseStencil()) {
@@ -25,4 +25,5 @@ public class PostChainVRMixin {
         }
         return old;
     }
+ */
 }

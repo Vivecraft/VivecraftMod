@@ -8,6 +8,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.Util;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.CloudStatus;
@@ -46,6 +47,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
@@ -452,7 +454,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 					Matrix4f matrix4f = new Matrix4f().setOrtho(
 							0, (float) (this.window.getScreenWidth() / this.window.getGuiScale()),
 							(float) (this.window.getScreenHeight() / this.window.getGuiScale()), 0, 1000.0F, 3000.0F);
-					RenderSystem.setProjectionMatrix(matrix4f);
+					RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 					PoseStack p = new PoseStack();
 					p.translate(0, 0, -2000);
 					this.overlay.render(p, 0, 0, 0.0F);
@@ -1009,6 +1011,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	@Group(name = "initMenuworld", min = 1, max = 1)
 	@Inject(at = @At("HEAD"), method = "method_24040", remap = false, expect = 0)
 	public void menuInitvarFabric(CallbackInfo ci) {
+		options.keyMappings = ArrayUtils.add(options.keyMappings, options.keyVoting);
 		if (ClientDataHolder.getInstance().vrRenderer.isInitialized()) {
 			//DataHolder.getInstance().menuWorldRenderer.init();
 		}
@@ -1056,7 +1059,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 			RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
 			Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float) this.window.getScreenWidth(),
 					(float) this.window.getScreenHeight(), 0.0F, 1000.0F, 3000.0F);
-			RenderSystem.setProjectionMatrix(matrix4f);
+			RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 			RenderSystem.getModelViewStack().pushPose();
 			RenderSystem.getModelViewStack().setIdentity();
 			RenderSystem.getModelViewStack().translate(0, 0, -2000);

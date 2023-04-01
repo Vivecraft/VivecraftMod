@@ -29,12 +29,14 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public String name = "Default";
 	@Unique
 	private boolean linearFilter;
+	/*
 	@Unique
 	private boolean useStencil = false;
+	*/
 	@Shadow
 	public int frameBufferId;
 	@Shadow
-	protected int depthBufferId;
+	protected int depthStencilBufferId;
 	@Shadow
 	public boolean useDepth;
 	@Shadow
@@ -71,7 +73,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	
 	@Override
 	public int getDepthBufferId() {
-		return depthBufferId;
+		return depthStencilBufferId;
 	}
 
 	@Override
@@ -83,7 +85,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public String getName() {
 		return name;
 	}
-
+/*
 	@Override
 	public void setUseStencil(boolean useStencil){
 		this.useStencil = useStencil;
@@ -93,7 +95,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public boolean getUseStencil(){
 		return useStencil;
 	}
-
+*/
 	@Override
 	public void clearWithColor(float r, float g, float b, float a, boolean isMac) {
 		RenderSystem.assertOnRenderThreadOrInit();
@@ -203,7 +205,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		}
 	}
 
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 2)
+	/*@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 2)
 	public int modifyTexImage2DInternalformat(int internalformat) {
 		return useStencil ? GL30.GL_DEPTH32F_STENCIL8 : internalformat;
 	}
@@ -215,17 +217,17 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public int modifyTexImage2DType(int type) {
 		return useStencil ? GL30.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
 	}
-
+*/
 	@ModifyConstant(method = "createBuffers", constant = @Constant(intValue = 9728))
 	public int changeTextPar(int i) {
 		return linearFilter ? GL11.GL_LINEAR : i;
 	}
-
+/*
 	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", ordinal = 1), method = "createBuffers", index = 1)
 	public int modifyGlFramebufferTexture2DAttachment(int attachment) {
 		return useStencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
 	}
-
+*/
 	/**
 	 * @author
 	 * @reason
@@ -273,7 +275,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			}
 		}
 		Matrix4f matrix4f = new Matrix4f().setOrtho(0, width, height, 0,1000.0f, 3000.0f);
-		RenderSystem.setProjectionMatrix(matrix4f);
+		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 		if (instance.MODEL_VIEW_MATRIX != null) {
 			instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0f, 0.0f, -2000.0f));
 		}
@@ -358,7 +360,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 				}
 			}
 			Matrix4f matrix4f = new Matrix4f().setOrtho(0, (float) width, (float) (height), 0, 1000.0F, 3000.0F);
-			RenderSystem.setProjectionMatrix(matrix4f);
+			RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 
 			if (instance.MODEL_VIEW_MATRIX != null) {
 				instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0F, 0.0F, -2000.0F));

@@ -1382,6 +1382,7 @@ public abstract class MCVR
         this.addActionParams(map, GuiHandler.keyShift, "suggested", "boolean", (VRInputActionSet)null);
         this.addActionParams(map, GuiHandler.keyKeyboardClick, "suggested", "boolean", (VRInputActionSet)null);
         this.addActionParams(map, GuiHandler.keyKeyboardShift, "suggested", "boolean", (VRInputActionSet)null);
+        this.addActionParams(map, mc.options.keyVoting, "optional", "boolean", VRInputActionSet.INGAME);
         File file1 = new File("customactionsets.txt");
 
         if (file1.exists())
