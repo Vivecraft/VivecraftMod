@@ -140,6 +140,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	public File gameDirectory;
 
 	@Shadow
+	@Final
 	public Options options;
 
 	@Shadow
@@ -285,25 +286,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Shadow protected abstract boolean startAttack();
 
-	@Redirect(at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;", remap = false), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
-	public Thread settings() {
-		if (!this.oculus) {
-			ClientDataHolder.getInstance().vr = new MCOpenVR((Minecraft) (Object) this, ClientDataHolder.getInstance());
-		} else {
-			//DataHolder.getInstance().vr = new MC_OVR((Minecraft) (Object) this, DataHolder.getInstance());
-		}
-
-		VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
-
-		if (!ClientDataHolder.getInstance().vrSettings.badStereoProviderPluginID.isEmpty()) {
-			ClientDataHolder.getInstance().vrSettings.stereoProviderPluginID = ClientDataHolder
-					.getInstance().vrSettings.badStereoProviderPluginID;
-			ClientDataHolder.getInstance().vrSettings.badStereoProviderPluginID = "";
-			ClientDataHolder.getInstance().vrSettings.saveOptions();
-		}
-		return Thread.currentThread();
-	}
-
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I", ordinal = 0), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
 	public int mainWidth(Window w) {
 		return this.window.getScreenWidth();
@@ -314,11 +296,30 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		return this.window.getScreenHeight();
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;selectMainFont(Z)V"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
-	public void minecrift(Minecraft mc, boolean b) {
-		this.selectMainFont(b);
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
+	public Overlay initVivecraft(Overlay overlay){
+
+		ClientDataHolder dh = ClientDataHolder.getInstance();
+
+		VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
+
+		if (!this.oculus) {
+			ClientDataHolder.getInstance().vr = new MCOpenVR((Minecraft) (Object) this, ClientDataHolder.getInstance());
+		} else {
+			//DataHolder.getInstance().vr = new MC_OVR((Minecraft) (Object) this, DataHolder.getInstance());
+		}
+
+		// add our keybinds to the settings
+		options.keyMappings = ClientDataHolder.getInstance().vr.initializeBindings(options.keyMappings);
+		options.load();
+
+		if (!dh.vrSettings.badStereoProviderPluginID.isEmpty()) {
+			dh.vrSettings.stereoProviderPluginID = dh.vrSettings.badStereoProviderPluginID;
+			dh.vrSettings.badStereoProviderPluginID = "";
+			dh.vrSettings.saveOptions();
+		}
+
 		try {
-			ClientDataHolder dh = ClientDataHolder.getInstance();
 			dh.vr.init();
 
 			if (!this.oculus) {
@@ -349,14 +350,15 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
-	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;resizeDisplay()V"), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
-	public void resize(Minecraft mc) {
-		this.resizeDisplay();
-		//DataHolder.getInstance().menuWorldRenderer = new MenuWorldRenderer();
-		ClientDataHolder.getInstance().vrSettings.firstRun = false;
-		ClientDataHolder.getInstance().vrSettings.saveOptions();
+		dh.vrSettings.firstRun = false;
+		dh.vrSettings.saveOptions();
+
+		if (dh.vrRenderer.isInitialized()) {
+			//dh.menuWorldRenderer.init();
+		}
+		dh.vr.postinit();
+		return overlay;
 	}
 
 //	/**
@@ -1010,23 +1012,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		ClientDataHolder.getInstance().vrPlayer.setRoomOrigin(0.0D, 0.0D, 0.0D, true);
 	}
 
-	@Group(name = "initMenuworld", min = 1, max = 1)
-	@Inject(at = @At("HEAD"), method = "method_24040", remap = false, expect = 0)
-	public void menuInitvarFabric(CallbackInfo ci) {
-		if (ClientDataHolder.getInstance().vrRenderer.isInitialized()) {
-			//DataHolder.getInstance().menuWorldRenderer.init();
-		}
-		ClientDataHolder.getInstance().vr.postinit();
-	}
-	@Group(name = "initMenuworld", min = 1, max = 1)
-	@Inject(at = @At("HEAD"), method = "lambda$new$2", remap = false, expect = 0)
-	public void menuInitvarForge(CallbackInfo ci) {
-		if (ClientDataHolder.getInstance().vrRenderer.isInitialized()) {
-			//DataHolder.getInstance().menuWorldRenderer.init();
-		}
-		ClientDataHolder.getInstance().vr.postinit();
-	}
-
+	// on resourcepack reload
 	@Group(name = "reloadMenuworld", min = 1, max = 1)
 	@Inject(at = @At("HEAD"), method = "method_24228", remap = false, expect = 0)
 	public void reloadMenuworldFabric(CallbackInfo ci) {

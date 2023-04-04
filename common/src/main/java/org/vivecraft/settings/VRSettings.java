@@ -1659,7 +1659,6 @@ public class VRSettings
     public static synchronized void initSettings( Minecraft mc, File dataDir )
     {
         ProfileManager.init(dataDir);
-        mc.options = new Options( mc, dataDir );
         // mc.gameSettings.saveOptions();
         ClientDataHolder.getInstance().vrSettings = new VRSettings( mc, dataDir );
         ClientDataHolder.getInstance().vrSettings.saveOptions();

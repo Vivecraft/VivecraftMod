@@ -18,7 +18,6 @@
     "client.KeyboardHandlerVRMixin",
     "client.MinecraftVRMixin",
     "client.MouseHandlerVRMixin",
-    "client.OptionsVRMixin",
     "client.OptionVRMixin",
     "client.gui.GuiVRMixin",
     "client.gui.GuiComponentVRMixin",
