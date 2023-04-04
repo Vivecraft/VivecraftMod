@@ -66,6 +66,8 @@ import org.vivecraft.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.provider.nullvr.NullVR;
+import org.vivecraft.provider.nullvr.NullVRStereoRenderer;
 import org.vivecraft.provider.openvr_jna.MCOpenVR;
 import org.vivecraft.provider.openvr_jna.OpenVRStereoRenderer;
 import org.vivecraft.provider.openvr_jna.VRInputAction;
@@ -303,10 +305,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 		VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
 
-		if (!this.oculus) {
-			ClientDataHolder.getInstance().vr = new MCOpenVR((Minecraft) (Object) this, ClientDataHolder.getInstance());
+		if (dh.vrSettings.vrProvider == VRSettings.VRProvider.NULLVR) {
+			dh.vr = new NullVR((Minecraft) (Object) this, dh);
 		} else {
-			//DataHolder.getInstance().vr = new MC_OVR((Minecraft) (Object) this, DataHolder.getInstance());
+			dh.vr = new MCOpenVR((Minecraft) (Object) this, dh);
 		}
 
 		// add our keybinds to the settings
@@ -322,10 +324,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 		try {
 			dh.vr.init();
 
-			if (!this.oculus) {
-				dh.vrRenderer = new OpenVRStereoRenderer(dh.vr);
+			if (dh.vrSettings.vrProvider == VRSettings.VRProvider.NULLVR) {
+				dh.vrRenderer = new NullVRStereoRenderer(dh.vr);
 			} else {
-				//dh.vrRenderer = new OVR_StereoRenderer(dh.vr);
+				dh.vrRenderer = new OpenVRStereoRenderer(dh.vr);
 			}
 
 			dh.vrPlayer = new VRPlayer();

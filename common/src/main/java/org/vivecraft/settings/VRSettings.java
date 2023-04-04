@@ -138,6 +138,11 @@ public class VRSettings
         AFTER_TRANSLUCENT,
         AFTER_SHADER
     }
+
+    public enum VRProvider implements OptionEnum<VRProvider> {
+        NULLVR,
+        OPENVR
+    }
     
     @SettingField
     public int version = UNKNOWN_VERSION;
@@ -399,6 +404,8 @@ public class VRSettings
     public boolean guiAppearOverBlock = true;
     @SettingField(VrOptions.SHADER_GUI_RENDER)
     public ShaderGUIRender shaderGUIRender = ShaderGUIRender.AFTER_SHADER;
+    @SettingField
+    public VRProvider vrProvider = VRProvider.OPENVR;
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
