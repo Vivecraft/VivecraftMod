@@ -29,14 +29,14 @@ import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.common.PehkuiHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.api.ItemTags;
-import org.vivecraft.client.extensions.GameRendererExtension;
-import org.vivecraft.client.extensions.PlayerExtension;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.api.client.ClientNetworkHelper;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.gameplay.trackers.VehicleTracker;
 
 import java.util.ArrayList;

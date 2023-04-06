@@ -9,7 +9,7 @@ import org.vivecraft.api.BlockTags;
 import org.vivecraft.api.ItemTags;
 import org.vivecraft.api.Vec3History;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

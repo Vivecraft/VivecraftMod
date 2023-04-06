@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.gui.framework;
 
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.GuiExtension;
+import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 

@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.settings.AutoCalibration;
+import org.vivecraft.client_vr.settings.AutoCalibration;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

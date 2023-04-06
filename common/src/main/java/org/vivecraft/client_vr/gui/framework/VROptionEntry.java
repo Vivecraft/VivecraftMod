@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gui.framework;
 
 import java.util.function.BiFunction;
 import net.minecraft.world.phys.Vec2;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 public class VROptionEntry
 {

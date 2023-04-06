@@ -10,7 +10,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.api.BlockTags;
 import org.vivecraft.api.CommonNetworkHelper;
-import org.vivecraft.client.extensions.PlayerExtension;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.api.client.ClientNetworkHelper;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;

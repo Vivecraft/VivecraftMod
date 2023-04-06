@@ -4,8 +4,8 @@ import org.vivecraft.client.IrisHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.gui.framework.GuiVROption;
 import org.vivecraft.client_vr.gui.framework.GuiVROptionsBase;
-import org.vivecraft.client.settings.VRHotkeys;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRHotkeys;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 

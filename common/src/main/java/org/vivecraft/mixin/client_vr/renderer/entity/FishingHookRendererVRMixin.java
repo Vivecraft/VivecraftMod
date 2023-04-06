@@ -10,7 +10,7 @@ import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 
 @Mixin(FishingHookRenderer.class)
 public abstract class FishingHookRendererVRMixin extends EntityRenderer<FishingHook> {

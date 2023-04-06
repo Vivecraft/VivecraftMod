@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client_vr.render.RenderPass;
 
 public class VRPlayerRenderer extends PlayerRenderer
 {

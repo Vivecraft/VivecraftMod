@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gui.settings;
 
 import org.vivecraft.client_vr.gui.framework.VROptionEntry;
 import org.vivecraft.client_vr.gui.framework.GuiVROptionsBase;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 

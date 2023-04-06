@@ -1,16 +1,16 @@
 package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.provider.openvr_jna.OpenVRUtil;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client.render.RenderPass;
+import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Quaternion;

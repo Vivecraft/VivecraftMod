@@ -4,7 +4,7 @@ import net.minecraft.client.Camera;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.coderbot.iris.mixin.LevelRendererAccessor;
 import net.coderbot.iris.pipeline.ShadowRenderer;

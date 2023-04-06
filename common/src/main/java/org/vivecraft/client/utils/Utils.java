@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client.render.VRShaders;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.tweaker.LoaderUtils;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector2;

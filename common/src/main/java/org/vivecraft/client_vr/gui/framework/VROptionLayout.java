@@ -3,7 +3,7 @@ package org.vivecraft.client_vr.gui.framework;
 import java.util.function.BiFunction;
 
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.phys.Vec2;

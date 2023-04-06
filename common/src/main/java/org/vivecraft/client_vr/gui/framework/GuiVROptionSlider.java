@@ -4,7 +4,7 @@ import net.minecraft.client.InputType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import net.minecraft.network.chat.Component;
 

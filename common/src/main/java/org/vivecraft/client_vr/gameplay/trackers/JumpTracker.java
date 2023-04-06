@@ -2,10 +2,10 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.PlayerExtension;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.api.client.ClientNetworkHelper;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client.settings.AutoCalibration;
+import org.vivecraft.client_vr.settings.AutoCalibration;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

@@ -4,8 +4,8 @@ import org.joml.Matrix4f;
 import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.client.IrisHelper;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client.extensions.GameRendererExtension;
-import org.vivecraft.client.extensions.LevelRendererExtension;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -35,8 +35,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client.render.RenderPass;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import javax.annotation.Nullable;
 

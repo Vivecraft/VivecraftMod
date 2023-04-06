@@ -32,7 +32,7 @@ import org.vivecraft.api.client.ClientNetworkHelper;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.openvr_jna.control.VivecraftMovementInput;
 import org.vivecraft.client.render.PlayerModelController;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.UUID;
 

@@ -4,7 +4,7 @@ import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.common.PehkuiHelper;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ItemPickupParticle;
 import net.minecraft.util.Mth;

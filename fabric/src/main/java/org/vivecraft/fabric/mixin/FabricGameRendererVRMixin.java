@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 
 @Mixin(GameRenderer.class)
 public class FabricGameRendererVRMixin {

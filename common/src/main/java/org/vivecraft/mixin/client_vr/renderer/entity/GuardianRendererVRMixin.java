@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.client.render.RenderPass;
+import org.vivecraft.client_vr.render.RenderPass;
 
 @Mixin(GuardianRenderer.class)
 public abstract class GuardianRendererVRMixin {

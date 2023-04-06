@@ -17,9 +17,9 @@ import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client.render.PlayerModelController;
-import org.vivecraft.client.render.RenderPass;
-import org.vivecraft.client.settings.AutoCalibration;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.AutoCalibration;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.lwjgl.Matrix4f;
 import org.vivecraft.common.utils.math.Quaternion;
 

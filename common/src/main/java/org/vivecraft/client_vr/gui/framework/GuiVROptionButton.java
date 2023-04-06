@@ -3,7 +3,7 @@ package org.vivecraft.client_vr.gui.framework;
 import javax.annotation.Nullable;
 
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;

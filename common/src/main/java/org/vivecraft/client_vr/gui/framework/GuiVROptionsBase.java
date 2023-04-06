@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.world.phys.Vec2;
 import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.client.ScreenUtils;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.ArrayList;
 import java.util.List;

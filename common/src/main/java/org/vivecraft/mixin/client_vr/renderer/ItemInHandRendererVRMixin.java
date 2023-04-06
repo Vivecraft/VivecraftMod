@@ -5,9 +5,9 @@ import java.util.stream.Stream;
 
 import com.mojang.math.Axis;
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.EntityRenderDispatcherVRExtension;
-import org.vivecraft.client.extensions.GameRendererExtension;
-import org.vivecraft.client.extensions.ItemInHandRendererExtension;
+import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -39,10 +39,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
-import org.vivecraft.client.render.RenderPass;
-import org.vivecraft.client.render.VRArmRenderer;
-import org.vivecraft.client.render.VRFirstPersonArmSwing;
-import org.vivecraft.client.render.VivecraftItemRendering;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.VRArmRenderer;
+import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
+import org.vivecraft.client_vr.render.VivecraftItemRendering;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {

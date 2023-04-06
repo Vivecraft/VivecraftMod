@@ -14,8 +14,8 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client.render.RenderConfigException;
-import org.vivecraft.client.render.RenderPass;
+import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client.utils.Utils;
 
 public class OpenVRStereoRenderer extends VRRenderer

@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.iris.PipelineManagerExtension;
-import org.vivecraft.client.render.RenderPass;
+import org.vivecraft.client_vr.extensions.iris.PipelineManagerExtension;
+import org.vivecraft.client_vr.render.RenderPass;
 
 import java.util.HashMap;
 import java.util.Map;

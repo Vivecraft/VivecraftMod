@@ -4,7 +4,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.api.ItemTags;
 import org.vivecraft.api.client.VRData;
-import org.vivecraft.client.render.RenderPass;
+import org.vivecraft.client_vr.render.RenderPass;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

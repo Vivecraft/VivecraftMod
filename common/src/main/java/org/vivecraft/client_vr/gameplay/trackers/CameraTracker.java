@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.api.client.VRData;
-import org.vivecraft.client.render.RenderPass;
+import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Quaternion;

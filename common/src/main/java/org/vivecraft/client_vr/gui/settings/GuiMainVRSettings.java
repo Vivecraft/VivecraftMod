@@ -4,7 +4,7 @@ import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.client_vr.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client_vr.gui.framework.VROptionLayout;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiMainVRSettings extends GuiVROptionsBase
 {

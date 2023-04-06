@@ -4,13 +4,13 @@ import java.util.HashSet;
 
 import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client.extensions.PlayerExtension;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client.settings.VRHotkeys;
-import org.vivecraft.client.settings.VRSettings;
-import org.vivecraft.client.render.RenderPass;
-import org.vivecraft.client.render.VRFirstPersonArmSwing;
+import org.vivecraft.client_vr.settings.VRHotkeys;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

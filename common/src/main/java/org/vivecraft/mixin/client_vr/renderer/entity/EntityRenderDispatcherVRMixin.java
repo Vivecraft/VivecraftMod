@@ -2,8 +2,8 @@ package org.vivecraft.mixin.client_vr.renderer.entity;
 
 import com.mojang.math.Axis;
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.EntityRenderDispatcherVRExtension;
-import org.vivecraft.client.extensions.LevelRendererExtension;
+import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
+import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.joml.Quaternionf;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -21,8 +21,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client.render.RenderPass;
-import org.vivecraft.client.render.VRArmRenderer;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.VRArmRenderer;
 
 import java.util.HashMap;
 import java.util.Map;

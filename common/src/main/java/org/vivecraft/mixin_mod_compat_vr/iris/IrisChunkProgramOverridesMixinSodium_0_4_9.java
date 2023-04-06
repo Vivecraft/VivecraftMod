@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.extensions.iris.PipelineManagerExtension;
-import org.vivecraft.client.render.RenderPass;
+import org.vivecraft.client_vr.extensions.iris.PipelineManagerExtension;
+import org.vivecraft.client_vr.render.RenderPass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.EnumMap;

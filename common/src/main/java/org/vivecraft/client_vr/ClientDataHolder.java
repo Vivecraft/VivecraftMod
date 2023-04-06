@@ -25,8 +25,8 @@ import org.vivecraft.client_vr.gameplay.trackers.TeleportTracker;
 import org.vivecraft.client_vr.gameplay.trackers.VehicleTracker;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
-import org.vivecraft.client.render.RenderPass;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;

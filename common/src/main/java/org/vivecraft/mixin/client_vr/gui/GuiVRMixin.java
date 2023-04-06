@@ -4,7 +4,7 @@ import net.minecraft.client.KeyMapping;
 import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.client.SodiumHelper;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client.extensions.GuiExtension;
+import org.vivecraft.client_vr.extensions.GuiExtension;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;

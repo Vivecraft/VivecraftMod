@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client_vr.renderer.entity;
 
-import org.vivecraft.client.extensions.EntityRenderDispatcherVRExtension;
+import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.joml.Quaternionf;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;

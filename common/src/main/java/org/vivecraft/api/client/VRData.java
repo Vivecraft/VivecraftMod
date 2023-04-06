@@ -1,8 +1,8 @@
 package org.vivecraft.api.client;
 
 import org.vivecraft.client_vr.ClientDataHolder;
-import org.vivecraft.client.render.RenderPass;
-import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Vector3;
