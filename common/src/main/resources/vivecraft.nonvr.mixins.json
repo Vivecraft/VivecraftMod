@@ -21,7 +21,6 @@
     "world.item.crafting.ShapedRecipeMixin"
   ],
   "client": [
-    "client.blaze3d.MainTargetMixin",
     "client.blaze3d.RenderTargetMixin",
     "client.blaze3d.RenderSystemAccessor",
     "client.gui.screens.TitleScreenMixin",

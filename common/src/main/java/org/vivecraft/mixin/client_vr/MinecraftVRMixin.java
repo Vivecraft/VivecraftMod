@@ -115,7 +115,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	}
 
 	@Unique
-	private boolean oculus = false;
+	private final boolean oculus = false;
 
 	@Unique
 	private long mirroNotifyStart;
@@ -131,9 +131,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
 	@Unique
 	private float fov = 1.0F;
-
-	@Unique
-	private FloatBuffer matrixBuffer = MemoryTracker.create(16).asFloatBuffer();
 
 	@Shadow
 	protected int missTime;
@@ -287,8 +284,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 	@Shadow @Final public LevelRenderer levelRenderer;
 
 	@Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
-
-	@Shadow private static Minecraft instance;
 
 	@Shadow protected abstract boolean startAttack();
 
