@@ -110,7 +110,8 @@ public class VRSettings
         CONTROLLER,
         HMD,
         RUN_IN_PLACE,
-        ROOM
+        ROOM,
+        AUTO // only for flying
     }
 
     public enum MenuWorld implements OptionEnum<MenuWorld> {
@@ -216,6 +217,8 @@ public class VRSettings
     public float movementSpeedMultiplier = 1.0f;   // VIVE - use full speed by default
     @SettingField(VrOptions.FREEMOVE_MODE)
     public FreeMove vrFreeMoveMode = FreeMove.CONTROLLER;
+    @SettingField(VrOptions.FREEMOVE_FLY_MODE)
+    public FreeMove vrFreeMoveFlyMode = FreeMove.AUTO;
     @SettingField(value = VrOptions.LIMIT_TELEPORT, config = "limitedTeleport")
     public boolean vrLimitedSurvivalTeleport = true;
 
@@ -1397,6 +1400,26 @@ public class VRSettings
                     };
                 } catch (NumberFormatException ex) {
                     return null;
+                }
+            }
+            @Override
+            Object setOptionValue(Object value) {
+                if (value == FreeMove.ROOM) {
+                    // skip Auto
+                    return FreeMove.CONTROLLER;
+                }
+                return null;
+            }
+        },
+        FREEMOVE_FLY_MODE(false, true) {
+            @Override
+            Object setOptionValue(Object value) {
+                if (value == FreeMove.CONTROLLER) {
+                    return FreeMove.HMD;
+                } else if (value == FreeMove.AUTO) {
+                    return FreeMove.CONTROLLER;
+                } else {
+                    return FreeMove.AUTO;
                 }
             }
         },

@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.ClientNetworkHelper;
 import org.vivecraft.gameplay.VRPlayer;
 import org.vivecraft.render.VRFirstPersonArmSwing;
+import org.vivecraft.settings.VRSettings;
 import org.vivecraft.utils.external.jinfinadeck;
 import org.vivecraft.utils.external.jkatvr;
 
@@ -508,8 +509,11 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
 					vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.getController(j).getYaw() * ((float) Math.PI / 180F));
 				} else {
+
+					VRSettings.FreeMove freeMoveType = !this.isPassenger() && this.getAbilities().flying && this.dataholder.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ? this.dataholder.vrSettings.vrFreeMoveFlyMode : this.dataholder.vrSettings.vrFreeMoveMode;
+
 					if (flag) {
-						switch (this.dataholder.vrSettings.vrFreeMoveMode) {
+						switch (freeMoveType) {
 							case CONTROLLER:
 								vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.getController(1).getPitch() * ((float) Math.PI / 180F));
 								break;
@@ -522,7 +526,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 					if (this.dataholder.jumpTracker.isjumping()) {
 						vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.hmd.getYaw() * ((float) Math.PI / 180F));
 					} else {
-						switch (this.dataholder.vrSettings.vrFreeMoveMode) {
+						switch (freeMoveType) {
 							case CONTROLLER:
 								vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.getController(1).getYaw() * ((float) Math.PI / 180F));
 								break;
