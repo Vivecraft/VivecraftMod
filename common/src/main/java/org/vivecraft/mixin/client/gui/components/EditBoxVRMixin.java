@@ -11,7 +11,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client.gameplay.screenhandlers.KeyboardHandler;
 
 @Mixin(EditBox.class)
 public abstract class EditBoxVRMixin extends AbstractWidget{

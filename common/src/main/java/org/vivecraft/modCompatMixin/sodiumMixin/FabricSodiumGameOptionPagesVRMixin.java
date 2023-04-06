@@ -1,6 +1,6 @@
 package org.vivecraft.modCompatMixin.sodiumMixin;
 
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.client.ClientDataHolder;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptionPages;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Options;

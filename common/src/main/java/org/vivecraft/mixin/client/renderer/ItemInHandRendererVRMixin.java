@@ -4,18 +4,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.mojang.math.Axis;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.extensions.EntityRenderDispatcherVRExtension;
-import org.vivecraft.extensions.GameRendererExtension;
-import org.vivecraft.extensions.ItemInHandRendererExtension;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.extensions.EntityRenderDispatcherVRExtension;
+import org.vivecraft.client.extensions.GameRendererExtension;
+import org.vivecraft.client.extensions.ItemInHandRendererExtension;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import org.joml.Vector3f;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -39,12 +37,12 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.gameplay.trackers.BowTracker;
-import org.vivecraft.gameplay.trackers.TelescopeTracker;
-import org.vivecraft.render.RenderPass;
-import org.vivecraft.render.VRArmRenderer;
-import org.vivecraft.render.VRFirstPersonArmSwing;
-import org.vivecraft.render.VivecraftItemRendering;
+import org.vivecraft.client.gameplay.trackers.BowTracker;
+import org.vivecraft.client.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.client.render.RenderPass;
+import org.vivecraft.client.render.VRArmRenderer;
+import org.vivecraft.client.render.VRFirstPersonArmSwing;
+import org.vivecraft.client.render.VivecraftItemRendering;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {

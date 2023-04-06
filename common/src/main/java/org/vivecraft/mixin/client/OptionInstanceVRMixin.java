@@ -13,8 +13,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.settings.VRSettings;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.settings.VRSettings;
 
 @Mixin(OptionInstance.class)
 public class OptionInstanceVRMixin {

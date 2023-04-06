@@ -5,8 +5,8 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.gameplay.screenhandlers.KeyboardHandler;
 
 @Pseudo
 @Mixin(targets = {"me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget"})

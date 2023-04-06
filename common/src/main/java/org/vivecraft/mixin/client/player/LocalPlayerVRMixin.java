@@ -1,10 +1,10 @@
 package org.vivecraft.mixin.client.player;
 
 import net.minecraft.world.level.Level;
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.client.ClientDataHolder;
 import org.vivecraft.api.CommonNetworkHelper;
-import org.vivecraft.extensions.ItemInHandRendererExtension;
-import org.vivecraft.extensions.PlayerExtension;
+import org.vivecraft.client.extensions.ItemInHandRendererExtension;
+import org.vivecraft.client.extensions.PlayerExtension;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -33,11 +33,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.api.ClientNetworkHelper;
-import org.vivecraft.gameplay.VRPlayer;
-import org.vivecraft.render.VRFirstPersonArmSwing;
-import org.vivecraft.utils.external.jinfinadeck;
-import org.vivecraft.utils.external.jkatvr;
+import org.vivecraft.api.client.ClientNetworkHelper;
+import org.vivecraft.client.gameplay.VRPlayer;
+import org.vivecraft.client.render.VRFirstPersonArmSwing;
+import org.vivecraft.client.utils.external.jinfinadeck;
+import org.vivecraft.client.utils.external.jkatvr;
 
 import com.mojang.authlib.GameProfile;
 

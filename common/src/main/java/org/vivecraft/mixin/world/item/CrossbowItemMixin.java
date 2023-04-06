@@ -10,7 +10,7 @@ import org.vivecraft.api.CommonNetworkHelper;
 import net.minecraft.world.item.CrossbowItem;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.api.ServerVivePlayer;
-import org.vivecraft.utils.math.Vector3;
+import org.vivecraft.common.utils.math.Vector3;
 
 @Mixin(CrossbowItem.class)
 public class CrossbowItemMixin {

@@ -1,10 +1,10 @@
 package org.vivecraft.mixin.client.gui;
 
 import net.minecraft.client.KeyMapping;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.SodiumHelper;
-import org.vivecraft.Xplat;
-import org.vivecraft.extensions.GuiExtension;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.SodiumHelper;
+import org.vivecraft.client.Xplat;
+import org.vivecraft.client.extensions.GuiExtension;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;

@@ -7,9 +7,9 @@ import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.extensions.GameRendererExtension;
-import org.vivecraft.render.RenderPass;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.extensions.GameRendererExtension;
+import org.vivecraft.client.render.RenderPass;
 
 @Mixin(GameRenderer.class)
 public class ForgeGameRendererVRMixin {

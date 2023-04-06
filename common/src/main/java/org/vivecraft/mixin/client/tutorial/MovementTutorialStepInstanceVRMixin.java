@@ -3,7 +3,6 @@ package org.vivecraft.mixin.client.tutorial;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.tutorial.MovementTutorialStepInstance;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.provider.MCVR;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.provider.MCVR;
 
 import java.util.HashSet;
 import java.util.Set;

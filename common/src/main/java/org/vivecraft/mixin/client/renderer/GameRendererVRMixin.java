@@ -52,31 +52,31 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.IrisHelper;
-import org.vivecraft.MethodHolder;
-import org.vivecraft.Xevents;
-import org.vivecraft.Xplat;
-import org.vivecraft.extensions.GameRendererExtension;
-import org.vivecraft.extensions.ItemInHandRendererExtension;
-import org.vivecraft.extensions.LevelRendererExtension;
-import org.vivecraft.extensions.PlayerExtension;
-import org.vivecraft.extensions.RenderTargetExtension;
-import org.vivecraft.api.ClientNetworkHelper;
-import org.vivecraft.api.VRData;
-import org.vivecraft.gameplay.VRPlayer;
-import org.vivecraft.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.gameplay.trackers.BowTracker;
-import org.vivecraft.gameplay.trackers.TelescopeTracker;
-import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
-import org.vivecraft.provider.ControllerType;
-import org.vivecraft.render.RenderPass;
-import org.vivecraft.render.VRCamera;
-import org.vivecraft.render.VRWidgetHelper;
-import org.vivecraft.settings.VRSettings;
-import org.vivecraft.utils.Utils;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.IrisHelper;
+import org.vivecraft.client.MethodHolder;
+import org.vivecraft.client.Xevents;
+import org.vivecraft.client.Xplat;
+import org.vivecraft.client.extensions.GameRendererExtension;
+import org.vivecraft.client.extensions.ItemInHandRendererExtension;
+import org.vivecraft.client.extensions.LevelRendererExtension;
+import org.vivecraft.client.extensions.PlayerExtension;
+import org.vivecraft.client.extensions.RenderTargetExtension;
+import org.vivecraft.api.client.ClientNetworkHelper;
+import org.vivecraft.api.client.VRData;
+import org.vivecraft.client.gameplay.VRPlayer;
+import org.vivecraft.client.gameplay.screenhandlers.GuiHandler;
+import org.vivecraft.client.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client.gameplay.screenhandlers.RadialHandler;
+import org.vivecraft.client.gameplay.trackers.BowTracker;
+import org.vivecraft.client.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.mixin.client.blaze3d.systems.RenderSystemAccessor;
+import org.vivecraft.client.provider.ControllerType;
+import org.vivecraft.client.render.RenderPass;
+import org.vivecraft.client.render.VRCamera;
+import org.vivecraft.client.render.VRWidgetHelper;
+import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client.utils.Utils;
 
 import java.nio.FloatBuffer;
 import java.nio.file.Path;
@@ -1116,7 +1116,7 @@ public abstract class GameRendererVRMixin
 		}
 	}
 
-	void render2D(float par1, RenderTarget framebuffer, Vec3 pos, org.vivecraft.utils.math.Matrix4f rot,
+	void render2D(float par1, RenderTarget framebuffer, Vec3 pos, org.vivecraft.common.utils.math.Matrix4f rot,
 			boolean depthAlways, PoseStack poseStack) {
 		if (!GameRendererVRMixin.DATA_HOLDER.bowTracker.isDrawing) {
 			boolean flag = this.isInMenuRoom();
@@ -1130,9 +1130,9 @@ public abstract class GameRendererVRMixin
 			float f = GuiHandler.guiScale;
 			VRPlayer vrplayer = GameRendererVRMixin.DATA_HOLDER.vrPlayer;
 			Vec3 guipos = VRPlayer.room_to_world_pos(pos, GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render);
-			org.vivecraft.utils.math.Matrix4f matrix4f = org.vivecraft.utils.math.Matrix4f
+			org.vivecraft.common.utils.math.Matrix4f matrix4f = org.vivecraft.common.utils.math.Matrix4f
 					.rotationY(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians);
-			org.vivecraft.utils.math.Matrix4f guirot = org.vivecraft.utils.math.Matrix4f.multiply(matrix4f, rot);
+			org.vivecraft.common.utils.math.Matrix4f guirot = org.vivecraft.common.utils.math.Matrix4f.multiply(matrix4f, rot);
 
 			poseStack.translate((float) (guipos.x - vec3.x), (float) (guipos.y - vec3.y), (float) (guipos.z - vec3.z));
 			poseStack.mulPoseMatrix(guirot.toMCMatrix());
@@ -1214,9 +1214,9 @@ public abstract class GameRendererVRMixin
 			VRPlayer vrplayer = GameRendererVRMixin.DATA_HOLDER.vrPlayer;
 			Vec3 guipos = VRPlayer.room_to_world_pos(KeyboardHandler.Pos_room,
 					GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render);
-			org.vivecraft.utils.math.Matrix4f matrix4f = org.vivecraft.utils.math.Matrix4f
+			org.vivecraft.common.utils.math.Matrix4f matrix4f = org.vivecraft.common.utils.math.Matrix4f
 					.rotationY(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians);
-			org.vivecraft.utils.math.Matrix4f guirot = org.vivecraft.utils.math.Matrix4f.multiply(matrix4f,
+			org.vivecraft.common.utils.math.Matrix4f guirot = org.vivecraft.common.utils.math.Matrix4f.multiply(matrix4f,
 					KeyboardHandler.Rotation_room);
 			poseStack.mulPoseMatrix(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render
 					.getEye(GameRendererVRMixin.DATA_HOLDER.currentPass).getMatrix().transposed().toMCMatrix());
@@ -1421,9 +1421,9 @@ public abstract class GameRendererVRMixin
 		vec31 = vec31.scale((double) maxX);
 		Vec3 vec33 = new Vec3(up.x * (double) minY, up.y * (double) minY, up.z * (double) minY);
 		up = up.scale((double) maxY);
-		org.vivecraft.utils.lwjgl.Vector3f vector3f = Utils.convertToVector3f(vec3);
-		org.vivecraft.utils.lwjgl.Vector3f vector3f1 = Utils.convertToVector3f(up.normalize());
-		org.vivecraft.utils.lwjgl.Vector3f vector3f2 = Utils.convertToVector3f(vec31.normalize());
+		org.vivecraft.common.utils.lwjgl.Vector3f vector3f = Utils.convertToVector3f(vec3);
+		org.vivecraft.common.utils.lwjgl.Vector3f vector3f1 = Utils.convertToVector3f(up.normalize());
+		org.vivecraft.common.utils.lwjgl.Vector3f vector3f2 = Utils.convertToVector3f(vec31.normalize());
 		Vec3 vec34 = start.add(vec31.x + vec33.x, vec31.y + vec33.y, vec31.z + vec33.z);
 		Vec3 vec35 = start.add(vec31.x + up.x, vec31.y + up.y, vec31.z + up.z);
 		Vec3 vec36 = start.add(vec32.x + vec33.x, vec32.y + vec33.y, vec32.z + vec33.z);

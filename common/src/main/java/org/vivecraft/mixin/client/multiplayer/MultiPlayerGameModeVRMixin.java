@@ -1,20 +1,18 @@
 package org.vivecraft.mixin.client.multiplayer;
 
-import org.vivecraft.ClientDataHolder;
-import net.minecraft.client.multiplayer.ClientLevel;
+import org.vivecraft.client.ClientDataHolder;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.api.ClientNetworkHelper;
+import org.vivecraft.api.client.ClientNetworkHelper;
 
 @Mixin(MultiPlayerGameMode.class)
 public class MultiPlayerGameModeVRMixin {

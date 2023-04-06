@@ -1,19 +1,15 @@
 {
   "required": true,
   "package": "org.vivecraft.mixin",
-  "plugin": "org.vivecraft.VRMixinConfig",
+  "plugin": "org.vivecraft.client.VRMixinConfig",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
-    "server.network.ServerGamePacketListnerImplVRMixin",
-    "server.packs.repository.PackRepositoryVRMixin"
-  ],
   "client": [
-    "blaze3d.audio.LibraryVRMixin",
-    "blaze3d.platform.InputConstantsVRMixin",
-    "blaze3d.platform.WindowVRMixin",
-    "blaze3d.platform.GlStateManagerVRMixin",
-    "blaze3d.systems.RenderSystemVRMixin",
-    "blaze3d.systems.RenderSystemAccessor",
+    "client.blaze3d.audio.LibraryVRMixin",
+    "client.blaze3d.platform.InputConstantsVRMixin",
+    "client.blaze3d.platform.WindowVRMixin",
+    "client.blaze3d.platform.GlStateManagerVRMixin",
+    "client.blaze3d.systems.RenderSystemVRMixin",
+    "client.blaze3d.systems.RenderSystemAccessor",
     "client.ClientBrandRetrieverVRMixin",
     "client.KeyboardHandlerVRMixin",
     "client.MinecraftVRMixin",
@@ -51,13 +47,12 @@
     "client.tutorial.MovementTutorialStepInstanceVRMixin",
     "client.tutorial.OpenInventoryTutorialStepVRMixin",
     "client.tutorial.PunchTreeTutorialStepInstanceVRMixin",
-
-    "world.entity.vehicle.BoatMixin",
-    "world.entity.projectile.FishingHookVRMixin",
-    "world.item.ItemVRMixin",
-    "world.item.PotionItemVRMixin"
-  ],
-  "server": [
+    "client.world.BoatMixin",
+    "client.world.FishingHookVRMixin",
+    "client.world.ItemVRMixin",
+    "client.world.PotionItemVRMixin",
+    "client.ServerGamePacketListnerImplVRMixin",
+    "client.PackRepositoryVRMixin"
   ],
   "minVersion": "0.8.4"
 }

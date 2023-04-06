@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.renderer;
 
-import org.vivecraft.mixin.blaze3d.systems.RenderSystemAccessor;
+import org.vivecraft.mixin.client.blaze3d.systems.RenderSystemAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;

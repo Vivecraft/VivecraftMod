@@ -2,9 +2,9 @@ package org.vivecraft.mixin.client.particle;
 
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.injection.*;
-import org.vivecraft.PehkuiHelper;
-import org.vivecraft.Xplat;
-import org.vivecraft.extensions.GameRendererExtension;
+import org.vivecraft.common.PehkuiHelper;
+import org.vivecraft.client.Xplat;
+import org.vivecraft.client.extensions.GameRendererExtension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ItemPickupParticle;
 import net.minecraft.util.Mth;

@@ -1,6 +1,5 @@
 package org.vivecraft.mixin.client.gui.screens;
 
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -15,13 +14,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.gui.settings.GuiQuickCommandsInGame;
-import org.vivecraft.settings.AutoCalibration;
-import org.vivecraft.settings.VRHotkeys;
-import org.vivecraft.settings.VRSettings;
-import org.vivecraft.utils.external.jkatvr;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client.gui.settings.GuiQuickCommandsInGame;
+import org.vivecraft.client.settings.AutoCalibration;
+import org.vivecraft.client.settings.VRHotkeys;
+import org.vivecraft.client.settings.VRSettings;
+import org.vivecraft.client.utils.external.jkatvr;
 
 @Mixin(PauseScreen.class)
 public abstract class PauseScreenVRMixin extends Screen {

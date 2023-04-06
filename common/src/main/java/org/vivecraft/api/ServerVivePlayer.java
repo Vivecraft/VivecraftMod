@@ -8,8 +8,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.utils.math.Quaternion;
-import org.vivecraft.utils.math.Vector3;
+import org.vivecraft.common.utils.math.Quaternion;
+import org.vivecraft.common.utils.math.Vector3;
 
 public class ServerVivePlayer
 {

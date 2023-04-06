@@ -7,8 +7,8 @@ import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.provider.MCVR;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.provider.MCVR;
 
 @Mixin(OpenInventoryTutorialStep.class)
 public class OpenInventoryTutorialStepVRMixin {

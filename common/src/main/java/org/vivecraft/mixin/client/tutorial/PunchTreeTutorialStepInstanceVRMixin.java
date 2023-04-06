@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.client.ClientDataHolder;
 
 @Mixin(PunchTreeTutorialStepInstance.class)
 public class PunchTreeTutorialStepInstanceVRMixin {

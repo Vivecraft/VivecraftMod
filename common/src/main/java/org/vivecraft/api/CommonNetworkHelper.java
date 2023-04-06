@@ -1,14 +1,11 @@
 package org.vivecraft.api;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.player.Player;
-import org.vivecraft.ClientDataHolder;
 
 import java.util.HashMap;
 import java.util.Map;

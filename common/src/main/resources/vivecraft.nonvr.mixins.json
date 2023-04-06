@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "org.vivecraft.mixin",
-  "plugin": "org.vivecraft.NonVRMixinConfig",
+  "plugin": "org.vivecraft.common.NonVRMixinConfig",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "server.level.ServerPlayerMixin",
@@ -21,9 +21,9 @@
     "world.item.crafting.ShapedRecipeMixin"
   ],
   "client": [
-    "blaze3d.pipeline.MainTargetMixin",
-    "blaze3d.pipeline.RenderTargetMixin",
-    "blaze3d.systems.RenderSystemAccessor",
+    "client.blaze3d.pipeline.MainTargetMixin",
+    "client.blaze3d.pipeline.RenderTargetMixin",
+    "client.blaze3d.systems.RenderSystemAccessor",
     "client.gui.screens.TitleScreenMixin",
     "client.MinecraftMixin",
     "client.main.MainMixin",
@@ -33,9 +33,6 @@
     "client.renderer.entity.EntityRenderDispatcherMixin",
     "client.renderer.entity.PlayerRendererMixin",
     "client.renderer.entity.layers.RenderLayerMixin"
-
-  ],
-  "server": [
   ],
   "minVersion": "0.8.4"
 }

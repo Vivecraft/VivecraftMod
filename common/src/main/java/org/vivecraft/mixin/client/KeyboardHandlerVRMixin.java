@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client;
 
-import org.vivecraft.ClientDataHolder;
-import org.vivecraft.MethodHolder;
+import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client.MethodHolder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
@@ -15,9 +15,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.provider.ControllerType;
-import org.vivecraft.settings.VRHotkeys;
+import org.vivecraft.client.gameplay.screenhandlers.RadialHandler;
+import org.vivecraft.client.provider.ControllerType;
+import org.vivecraft.client.settings.VRHotkeys;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -32,9 +32,9 @@ public class KeyboardHandlerVRMixin {
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/KeyboardHandler;debugCrashKeyTime:J", ordinal = 0), method = "keyPress", cancellable = true)
     public void screenHandler(long l, int i, int j, int k, int m, CallbackInfo ci) {
         if (i == 256 && k == 1) {
-            if (org.vivecraft.gameplay.screenhandlers.KeyboardHandler.Showing)
+            if (org.vivecraft.client.gameplay.screenhandlers.KeyboardHandler.Showing)
             {
-                org.vivecraft.gameplay.screenhandlers.KeyboardHandler.setOverlayShowing(false);
+                org.vivecraft.client.gameplay.screenhandlers.KeyboardHandler.setOverlayShowing(false);
                 if(this.minecraft.screen instanceof ChatScreen) {
                     minecraft.screen.onClose();
                 }
