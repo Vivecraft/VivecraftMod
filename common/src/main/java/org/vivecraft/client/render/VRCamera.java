@@ -1,7 +1,7 @@
 package org.vivecraft.client.render;
 
 import com.mojang.math.Axis;
-import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.api.client.VRData;
 
 import net.minecraft.client.Camera;

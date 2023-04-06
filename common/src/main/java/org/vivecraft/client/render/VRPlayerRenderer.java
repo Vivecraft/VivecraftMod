@@ -2,7 +2,7 @@ package org.vivecraft.client.render;
 
 import java.util.UUID;
 
-import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.geom.builders.CubeDeformation;

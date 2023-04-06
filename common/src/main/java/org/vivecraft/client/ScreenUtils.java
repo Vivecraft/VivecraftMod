@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import org.vivecraft.client_vr.ClientDataHolder;
 
 public class ScreenUtils {
 

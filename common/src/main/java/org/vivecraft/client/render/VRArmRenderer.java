@@ -1,7 +1,7 @@
 package org.vivecraft.client.render;
 
-import org.vivecraft.client.gameplay.trackers.SwingTracker;
-import org.vivecraft.client.provider.ControllerType;
+import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
+import org.vivecraft.client_vr.provider.ControllerType;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;

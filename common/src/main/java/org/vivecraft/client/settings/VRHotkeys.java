@@ -6,8 +6,8 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-import org.vivecraft.client.ClientDataHolder;
-import org.vivecraft.client.MethodHolder;
+import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client.extensions.MinecraftExtension;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client.utils.LangHelper;

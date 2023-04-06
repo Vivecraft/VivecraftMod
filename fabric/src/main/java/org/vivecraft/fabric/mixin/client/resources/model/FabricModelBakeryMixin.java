@@ -9,9 +9,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client.ClientDataHolder;
-import org.vivecraft.client.gameplay.trackers.CameraTracker;
-import org.vivecraft.client.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
+import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
 import java.util.Map;
 

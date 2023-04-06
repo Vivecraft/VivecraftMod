@@ -4,7 +4,7 @@
  */
 package org.vivecraft.client.settings;
 
-import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.client.IrisHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.OptionsExtension;
@@ -24,9 +24,9 @@ import org.apache.logging.log4j.Logger;
 import org.vivecraft.client.settings.profile.ProfileManager;
 import org.vivecraft.client.settings.profile.ProfileReader;
 import org.vivecraft.client.settings.profile.ProfileWriter;
-import org.vivecraft.client.gameplay.VRPlayer;
-import org.vivecraft.client.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client.gui.PhysicalKeyboard;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.common.utils.math.Angle;
 import org.vivecraft.common.utils.math.Quaternion;

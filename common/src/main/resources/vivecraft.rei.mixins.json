@@ -1,15 +1,10 @@
 {
   "required": false,
-  "package": "org.vivecraft.modCompatMixin.reiMixin",
+  "package": "org.vivecraft.mixin_mod_compat_vr.rei",
   "plugin": "org.vivecraft.client.VRMixinConfig",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
-    "reiTextFieldWidgetMixin"
-  ],
   "client": [
-
-  ],
-  "server": [
+    "reiTextFieldWidgetMixin"
   ],
   "minVersion": "0.8.4"
 }

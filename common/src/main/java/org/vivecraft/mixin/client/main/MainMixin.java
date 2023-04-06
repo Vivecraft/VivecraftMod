@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.main;
 
-import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;

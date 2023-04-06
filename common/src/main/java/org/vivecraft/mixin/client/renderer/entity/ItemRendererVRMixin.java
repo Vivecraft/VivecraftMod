@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -21,8 +21,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client.gameplay.trackers.SwingTracker;
-import org.vivecraft.client.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
+import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
 import java.util.Iterator;
 import java.util.List;

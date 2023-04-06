@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
 
-import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.common.utils.math.Quaternion;

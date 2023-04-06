@@ -1,6 +1,6 @@
 package org.vivecraft.client.settings;
 
-import org.vivecraft.client.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.client.utils.LangHelper;
 
 import net.minecraft.client.Minecraft;
