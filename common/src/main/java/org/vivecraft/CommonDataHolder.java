@@ -16,9 +16,9 @@ public class CommonDataHolder {
         }
 
         if (VRState.checkVR()) {
-            minecriftVerString = "Vivecraft " + mcVersion + " jrbudda-VR-" + Xplat.getModloader() + "-" + modVersion;
+            minecriftVerString = "Vivecraft " + mcVersion + " VR-" + Xplat.getModloader() + "-" + modVersion;
         } else {
-            minecriftVerString = "Vivecraft " + mcVersion + " jrbudda-NONVR-" + Xplat.getModloader() + "-" + modVersion;
+            minecriftVerString = "Vivecraft " + mcVersion + " NONVR-" + Xplat.getModloader() + "-" + modVersion;
         }
     }
 
