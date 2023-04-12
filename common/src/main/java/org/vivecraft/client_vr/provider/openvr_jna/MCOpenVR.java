@@ -17,15 +17,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.provider.InputSimulator;
+import org.vivecraft.client_vr.provider.*;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.HardwareType;
-import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.openvr_jna.control.TrackpadSwipeSampler;
 import org.vivecraft.client_vr.provider.openvr_jna.control.VRInputActionSet;
 import org.vivecraft.client.utils.Utils;
@@ -1768,5 +1765,10 @@ public class MCOpenVR extends MCVR
 
             return list;
         }
+    }
+
+    @Override
+    public VRRenderer createVRRenderer() {
+        return new OpenVRStereoRenderer(this);
     }
 }

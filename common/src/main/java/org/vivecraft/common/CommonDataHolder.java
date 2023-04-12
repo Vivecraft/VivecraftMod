@@ -6,7 +6,6 @@ import org.vivecraft.client.Xplat;
 public class CommonDataHolder {
 
     private static CommonDataHolder INSTANCE;
-    public boolean resourcePacksChanged;
     public final String minecriftVerString;
 
     public CommonDataHolder() {

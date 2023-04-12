@@ -15,6 +15,7 @@
     "client_vr.MouseHandlerVRMixin",
     "client_vr.OptionsVRMixin",
     "client_vr.OptionInstanceVRMixin",
+    "client_vr.ServerGamePacketListnerImplVRMixin",
     "client_vr.gui.GuiVRMixin",
     "client_vr.gui.GuiComponentVRMixin",
     "client_vr.gui.NoSodiumGuiVRMixin",
@@ -49,9 +50,7 @@
     "client_vr.world.BoatMixin",
     "client_vr.world.FishingHookVRMixin",
     "client_vr.world.ItemVRMixin",
-    "client_vr.world.PotionItemVRMixin",
-    "client_vr.ServerGamePacketListnerImplVRMixin",
-    "client_vr.PackRepositoryVRMixin"
+    "client_vr.world.PotionItemVRMixin"
   ],
   "minVersion": "0.8.4"
 }

@@ -1639,8 +1639,16 @@ public class VRSettings
         ProfileManager.init(dataDir);
         mc.options = new Options( mc, dataDir );
         // mc.gameSettings.saveOptions();
-        ClientDataHolder.getInstance().vrSettings = new VRSettings( mc, dataDir );
-        ClientDataHolder.getInstance().vrSettings.saveOptions();
+        var vrSettings = new VRSettings( mc, dataDir );
+        vrSettings.saveOptions();
+
+        if (!vrSettings.badStereoProviderPluginID.isEmpty()) {
+            vrSettings.stereoProviderPluginID = ClientDataHolder.getInstance().vrSettings.badStereoProviderPluginID;
+            vrSettings.badStereoProviderPluginID = "";
+            vrSettings.saveOptions();
+        }
+
+        ClientDataHolder.getInstance().vrSettings = vrSettings;
     }
 
     public static synchronized void loadAll( Minecraft mc )

@@ -1491,4 +1491,6 @@ public abstract class MCVR
     public abstract List<Long> getOrigins(VRInputAction var1);
 
     public abstract String getOriginName(long l);
+
+    public abstract VRRenderer createVRRenderer();
 }
