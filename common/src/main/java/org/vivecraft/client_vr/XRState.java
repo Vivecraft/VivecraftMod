@@ -4,7 +4,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class XRState {
 
-    public static boolean isXr;
+    public static boolean isXr = false;
 
     public void enableXR() {
         GLFW.glfwSwapInterval(0);

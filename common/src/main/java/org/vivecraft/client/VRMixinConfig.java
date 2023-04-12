@@ -50,7 +50,8 @@ public class VRMixinConfig implements IMixinConfigPlugin {
     public void onLoad(String mixinPackage) {
     }
 
-    static {
+    // NotFixed
+    public static void initializeVR() {
         Properties properties = new Properties();
         try {
             Path file = Xplat.getConfigPath("vivecraft-config.properties");
