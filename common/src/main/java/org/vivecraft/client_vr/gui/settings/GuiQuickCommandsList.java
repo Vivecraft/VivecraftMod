@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gui.settings;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 
 public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsList.CommandEntry>
 {
-	protected ClientDataHolder dataholder = ClientDataHolder.getInstance();
+	protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
     private final GuiQuickCommandEditor parent;
     private final Minecraft mc;
 

@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr.tweaker;
+package org.vivecraft.client_vr.utils;
 
 import java.io.File;
 import java.io.IOException;

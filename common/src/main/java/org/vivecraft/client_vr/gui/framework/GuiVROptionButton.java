@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gui.framework;
 
 import javax.annotation.Nullable;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import net.minecraft.client.gui.components.Button;
@@ -29,7 +29,7 @@ public class GuiVROptionButton extends Button implements GuiVROption
         super(x, y, width, height, Component.translatable(text), action, Button.DEFAULT_NARRATION);
         this.id = id;
         this.enumOptions = option;
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         if (option != null && dataholder.vrSettings.overrides.hasSetting(option) && dataholder.vrSettings.overrides.getSetting(option).isValueOverridden())
         {

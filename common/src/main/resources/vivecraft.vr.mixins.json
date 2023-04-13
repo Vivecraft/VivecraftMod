@@ -4,7 +4,6 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "client_vr.blaze3d.audio.LibraryVRMixin",
-    "client_vr.blaze3d.platform.InputConstantsVRMixin",
     "client_vr.blaze3d.platform.WindowVRMixin",
     "client_vr.blaze3d.platform.GlStateManagerVRMixin",
     "client_vr.blaze3d.systems.RenderSystemVRMixin",
@@ -15,9 +14,9 @@
     "client_vr.OptionsVRMixin",
     "client_vr.OptionInstanceVRMixin",
     "client_vr.ServerGamePacketListnerImplVRMixin",
+    "client_vr.KeyboardInputVRMixin",
     "client_vr.gui.GuiVRMixin",
     "client_vr.gui.GuiComponentVRMixin",
-    "client_vr.gui.NoSodiumGuiVRMixin",
     "client_vr.gui.EditBoxVRMixin",
     "client_vr.gui.TutorialToastVRMixin",
     "client_vr.gui.screens.ScreenVRMixin",

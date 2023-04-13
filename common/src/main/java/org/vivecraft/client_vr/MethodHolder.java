@@ -3,7 +3,6 @@ package org.vivecraft.client_vr;
 import com.mojang.math.Axis;
 import org.joml.AxisAngle4f;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client_vr.ClientDataHolder;
 import org.vivecraft.client_vr.provider.InputSimulator;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -19,11 +18,11 @@ public abstract class MethodHolder {
 	
 	public static void notifyMirror(String text, boolean clear, int lengthMs)
 	{
-		ClientDataHolder clientDataHolder = ClientDataHolder.getInstance();
-		clientDataHolder.mirroNotifyStart = System.currentTimeMillis();
-		clientDataHolder.mirroNotifyLen = (long)lengthMs;
-		clientDataHolder.mirrorNotifyText = text;
-		clientDataHolder.mirrorNotifyClear = clear;
+		ClientDataHolderVR clientDataHolderVR = ClientDataHolderVR.getInstance();
+		clientDataHolderVR.mirroNotifyStart = System.currentTimeMillis();
+		clientDataHolderVR.mirroNotifyLen = (long)lengthMs;
+		clientDataHolderVR.mirrorNotifyText = text;
+		clientDataHolderVR.mirrorNotifyClear = clear;
 	}
 	
 	public static void rotateDeg(PoseStack pose, float angle, float x, float y, float z) {

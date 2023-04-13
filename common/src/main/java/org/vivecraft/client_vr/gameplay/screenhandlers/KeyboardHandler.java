@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gameplay.screenhandlers;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.common.utils.lwjgl.Matrix4f;
 import org.vivecraft.client_vr.gui.GuiKeyboard;
@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 public class KeyboardHandler
 {
     public static Minecraft mc = Minecraft.getInstance();
-    public static ClientDataHolder dh = ClientDataHolder.getInstance();
+    public static ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
     public static boolean Showing = false;
     public static GuiKeyboard UI = new GuiKeyboard();
     public static PhysicalKeyboard physicalKeyboard = new PhysicalKeyboard();
@@ -36,7 +36,7 @@ public class KeyboardHandler
 
     public static boolean setOverlayShowing(boolean showingState)
     {
-        if (ClientDataHolder.kiosk)
+        if (ClientDataHolderVR.kiosk)
         {
             return false;
         }

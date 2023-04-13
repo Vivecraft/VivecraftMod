@@ -1,6 +1,7 @@
 package org.vivecraft.client_vr.provider.openvr_jna;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -93,7 +94,7 @@ public class MCOpenVR extends MCVR
     InputDigitalActionData_t digital = new InputDigitalActionData_t.ByReference();
     InputAnalogActionData_t analog = new InputAnalogActionData_t.ByReference();
 
-    public MCOpenVR(Minecraft mc, ClientDataHolder dh)
+    public MCOpenVR(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
         ome = this;
@@ -197,12 +198,12 @@ public class MCOpenVR extends MCVR
                 JOpenVRLibrary.VR_ShutdownInternal();
                 this.initialized = false;
 
-                if (ClientDataHolder.katvr)
+                if (ClientDataHolderVR.katvr)
                 {
                     jkatvr.Halt();
                 }
 
-                if (ClientDataHolder.infinadeck)
+                if (ClientDataHolderVR.infinadeck)
                 {
                     jinfinadeck.Destroy();
                 }
@@ -289,7 +290,7 @@ public class MCOpenVR extends MCVR
 
                 this.initialized = true;
 
-                if (ClientDataHolder.katvr)
+                if (ClientDataHolderVR.katvr)
                 {
                     try
                     {
@@ -314,7 +315,7 @@ public class MCOpenVR extends MCVR
                     }
                 }
 
-                if (ClientDataHolder.infinadeck)
+                if (ClientDataHolderVR.infinadeck)
                 {
                     try
                     {
@@ -382,7 +383,7 @@ public class MCOpenVR extends MCVR
 
     public void processInputs()
     {
-        if (!this.dh.vrSettings.seated && !ClientDataHolder.viewonly && this.inputInitialized)
+        if (!this.dh.vrSettings.seated && !ClientDataHolderVR.viewonly && this.inputInitialized)
         {
             for (VRInputAction vrinputaction : this.inputActions.values())
             {
@@ -407,21 +408,21 @@ public class MCOpenVR extends MCVR
             {
                 InputSimulator.scrollMouse(0.0D, -1.0D);
             });
-            this.processScrollInput(this.keyHotbarScroll, () ->
+            this.processScrollInput(VivecraftVRMod.INSTANCE.keyHotbarScroll, () ->
             {
                 this.changeHotbar(-1);
             }, () ->
             {
                 this.changeHotbar(1);
             });
-            this.processSwipeInput(this.keyHotbarSwipeX, () ->
+            this.processSwipeInput(VivecraftVRMod.INSTANCE.keyHotbarSwipeX, () ->
             {
                 this.changeHotbar(1);
             }, () ->
             {
                 this.changeHotbar(-1);
             }, (Runnable)null, (Runnable)null);
-            this.processSwipeInput(this.keyHotbarSwipeY, (Runnable)null, (Runnable)null, () ->
+            this.processSwipeInput(VivecraftVRMod.INSTANCE.keyHotbarSwipeY, (Runnable)null, (Runnable)null, () ->
             {
                 this.changeHotbar(-1);
             }, () ->

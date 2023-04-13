@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -79,7 +79,7 @@ public class ClientNetworkHelper
         {
             if (Minecraft.getInstance().getConnection() != null)
             {
-                float f = ClientDataHolder.getInstance().vrPlayer.vrdata_world_post.worldScale;
+                float f = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_post.worldScale;
 
                 if (f != worldScallast)
                 {
@@ -115,7 +115,7 @@ public class ClientNetworkHelper
                 Vec3 vec3 = player.vrdata_world_post.getEye(RenderPass.CENTER).getPosition().subtract(Minecraft.getInstance().player.position());
                 Quaternion quaternion = new Quaternion(matrix4f);
                 ByteBuf bytebuf1 = Unpooled.buffer();
-                bytebuf1.writeBoolean(ClientDataHolder.getInstance().vrSettings.seated);
+                bytebuf1.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.seated);
                 bytebuf1.writeFloat((float)vec3.x);
                 bytebuf1.writeFloat((float)vec3.y);
                 bytebuf1.writeFloat((float)vec3.z);
@@ -137,7 +137,7 @@ public class ClientNetworkHelper
                     matrix4f1.load(floatbuffer1);
                     Quaternion quaternion1 = new Quaternion(matrix4f1);
                     ByteBuf bytebuf3 = Unpooled.buffer();
-                    bytebuf3.writeBoolean(ClientDataHolder.getInstance().vrSettings.reverseHands);
+                    bytebuf3.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.reverseHands);
                     bytebuf3.writeFloat((float)vec31.x);
                     bytebuf3.writeFloat((float)vec31.y);
                     bytebuf3.writeFloat((float)vec31.z);
@@ -172,22 +172,22 @@ public class ClientNetworkHelper
 
     public static boolean isLimitedSurvivalTeleport()
     {
-        return ClientDataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.LIMIT_TELEPORT).getBoolean();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.LIMIT_TELEPORT).getBoolean();
     }
 
     public static int getTeleportUpLimit()
     {
-        return ClientDataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_UP_LIMIT).getInt();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_UP_LIMIT).getInt();
     }
 
     public static int getTeleportDownLimit()
     {
-        return ClientDataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_DOWN_LIMIT).getInt();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_DOWN_LIMIT).getInt();
     }
 
     public static int getTeleportHorizLimit()
     {
-        return ClientDataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_HORIZ_LIMIT).getInt();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_HORIZ_LIMIT).getInt();
     }
 
     public static void sendActiveHand(byte c)
@@ -205,7 +205,7 @@ public class ClientNetworkHelper
 
     public static void overridePose(LocalPlayer player)
     {
-        if (ClientDataHolder.getInstance().crawlTracker.crawling)
+        if (ClientDataHolderVR.getInstance().crawlTracker.crawling)
         {
             player.setPose(Pose.SWIMMING);
         }

@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client.utils.Utils;
@@ -26,7 +26,7 @@ public class CameraTracker extends Tracker
     private Quaternion startRotation;
     private boolean quickMode;
 
-    public CameraTracker(Minecraft mc, ClientDataHolder dh)
+    public CameraTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }

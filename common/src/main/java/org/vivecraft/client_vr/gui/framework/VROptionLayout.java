@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gui.framework;
 
 import java.util.function.BiFunction;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import net.minecraft.client.gui.screens.Screen;
@@ -130,7 +130,7 @@ public class VROptionLayout
 
     public String getButtonText()
     {
-        return this._title.isEmpty() && this._e != null ? ClientDataHolder.getInstance().vrSettings.getButtonDisplayString(this._e) : this._title;
+        return this._title.isEmpty() && this._e != null ? ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(this._e) : this._title;
     }
 
     public VRSettings.VrOptions getOption()

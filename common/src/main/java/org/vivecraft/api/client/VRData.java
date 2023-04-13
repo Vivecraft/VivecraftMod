@@ -1,6 +1,6 @@
 package org.vivecraft.api.client;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
@@ -29,8 +29,7 @@ public class VRData
 
     public VRData(Vec3 origin, float walkMul, float worldScale, float rotation)
     {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         this.origin = origin;
         this.worldScale = worldScale;
         this.rotation_radians = rotation;
@@ -54,9 +53,9 @@ public class VRData
         	this.t1 = new VRDevicePose(this, matrix4f1, dataholder.vr.getAimSource(1).subtract(vec3).add(vec31), matrix4f1.transform(Vector3.forward()).toVector3d());
         }
         
-        Matrix4f matrix4f2 = Matrix4f.multiply(Matrix4f.rotationY(-rotation), (new Matrix4f(ClientDataHolder.getInstance().cameraTracker.getRotation())).transposed());
+        Matrix4f matrix4f2 = Matrix4f.multiply(Matrix4f.rotationY(-rotation), (new Matrix4f(ClientDataHolderVR.getInstance().cameraTracker.getRotation())).transposed());
         float inverseWorldScale = 1.0F / worldScale;
-        this.cam = new VRData.VRDevicePose(this, matrix4f2, ClientDataHolder.getInstance().cameraTracker.getPosition().subtract(origin).yRot(-rotation).multiply(inverseWorldScale,inverseWorldScale,inverseWorldScale).subtract(vec3).add(vec31), matrix4f2.transform(Vector3.forward()).toVector3d());
+        this.cam = new VRData.VRDevicePose(this, matrix4f2, ClientDataHolderVR.getInstance().cameraTracker.getPosition().subtract(origin).yRot(-rotation).multiply(inverseWorldScale,inverseWorldScale,inverseWorldScale).subtract(vec3).add(vec31), matrix4f2.transform(Vector3.forward()).toVector3d());
 
         if (dataholder.vr.mrMovingCamActive)
         {
@@ -64,7 +63,7 @@ public class VRData
         }
         else
         {
-            VRSettings vrsettings = ClientDataHolder.getInstance().vrSettings;
+            VRSettings vrsettings = ClientDataHolderVR.getInstance().vrSettings;
             Matrix4f matrix4f3 = (new Matrix4f(vrsettings.vrFixedCamrotQuat)).transposed();
             Vec3 vec32 = new Vec3((double)vrsettings.vrFixedCamposX, (double)vrsettings.vrFixedCamposY, (double)vrsettings.vrFixedCamposZ);
             Vec3 vec33 = matrix4f3.transform(Vector3.forward()).toVector3d();
@@ -75,7 +74,7 @@ public class VRData
     private Matrix4f getSmoothedRotation(int c, float lenSec)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         Vec3 vec3 = dataholder.vr.controllerHistory[c].averagePosition((double)lenSec);
         Vec3 vec31 = dataholder.vr.controllerForwardHistory[c].averagePosition((double)lenSec);
@@ -96,7 +95,7 @@ public class VRData
 
     public float getBodyYaw()
     {
-        if (ClientDataHolder.getInstance().vrSettings.seated)
+        if (ClientDataHolderVR.getInstance().vrSettings.seated)
         {
             return this.hmd.getYaw();
         }
@@ -117,14 +116,14 @@ public class VRData
 
     public float getFacingYaw()
     {
-        if (ClientDataHolder.getInstance().vrSettings.seated)
+        if (ClientDataHolderVR.getInstance().vrSettings.seated)
         {
             return this.hmd.getYaw();
         }
         else
         {
             Vec3 vec3 = this.c1.getPosition().subtract(this.c0.getPosition()).normalize().yRot((-(float)Math.PI / 2F));
-            return ClientDataHolder.getInstance().vrSettings.reverseHands ? (float)Math.toDegrees(Math.atan2(vec3.x, -vec3.z)) : (float)Math.toDegrees(Math.atan2(-vec3.x, vec3.z));
+            return ClientDataHolderVR.getInstance().vrSettings.reverseHands ? (float)Math.toDegrees(Math.atan2(vec3.x, -vec3.z)) : (float)Math.toDegrees(Math.atan2(-vec3.x, vec3.z));
         }
     }
 

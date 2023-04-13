@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.gameplay;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.client.player.LocalPlayer;
@@ -24,7 +23,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRServerPerms;
 import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.common.PehkuiHelper;
 import org.vivecraft.client.Xplat;
@@ -45,17 +46,15 @@ import java.util.Random;
 public class VRPlayer
 {
     Minecraft mc = Minecraft.getInstance();
-    ClientDataHolder dh = ClientDataHolder.getInstance();
+    ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
     public VRData vrdata_room_pre;
     public VRData vrdata_world_pre;
     public VRData vrdata_room_post;
     public VRData vrdata_world_post;
     public VRData vrdata_world_render;
-    private long errorPrintTime = Util.getMillis();
     ArrayList<Tracker> trackers = new ArrayList<>();
-    public float worldScale = ClientDataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
-    private float rawWorldScale = ClientDataHolder.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
-    private boolean noTeleportClient = true;
+    public float worldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
+    private float rawWorldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean teleportOverride = false;
     public int teleportWarningTimer = -1;
     public Vec3 roomOrigin = new Vec3(0.0D, 0.0D, 0.0D);
@@ -86,7 +85,7 @@ public class VRPlayer
 
     public static VRPlayer get()
     {
-        return ClientDataHolder.getInstance().vrPlayer;
+        return ClientDataHolderVR.getInstance().vrPlayer;
     }
 
     public static Vec3 room_to_world_pos(Vec3 pos, VRData data)
@@ -172,7 +171,7 @@ public class VRPlayer
     public void postTick()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         VRData vrdata = new VRData(this.vrdata_world_pre.origin, dataholder.vrSettings.walkMultiplier, this.vrdata_world_pre.worldScale, this.vrdata_world_pre.rotation_radians);
         VRData vrdata1 = new VRData(this.vrdata_world_pre.origin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
         Vec3 vec3 = vrdata1.hmd.getPosition().subtract(vrdata.hmd.getPosition());
@@ -191,7 +190,7 @@ public class VRPlayer
     public void preRender(float par1)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         float f = this.vrdata_world_post.worldScale * par1 + this.vrdata_world_pre.worldScale * (1.0F - par1);
         float f1 = this.vrdata_world_post.rotation_radians;
         float f2 = this.vrdata_world_pre.rotation_radians;
@@ -252,7 +251,7 @@ public class VRPlayer
             if (player != null && player.position() != Vec3.ZERO)
             {
                 Minecraft minecraft = Minecraft.getInstance();
-                ClientDataHolder dataholder = ClientDataHolder.getInstance();
+                ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
                 if (dataholder.sneakTracker.sneakCounter <= 0)
                 {
@@ -364,7 +363,7 @@ public class VRPlayer
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolder dataholder = ClientDataHolder.getInstance();
+            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
             if (player != null)
             {
@@ -521,7 +520,7 @@ public class VRPlayer
 
     public String toString()
     {
-        return "VRPlayer: \r\n \t origin: " + this.roomOrigin + "\r\n \t rotation: " + String.format("%.3f", ClientDataHolder.getInstance().vrSettings.worldRotation) + "\r\n \t scale: " + String.format("%.3f", this.worldScale) + "\r\n \t room_pre " + this.vrdata_room_pre + "\r\n \t world_pre " + this.vrdata_world_pre + "\r\n \t world_post " + this.vrdata_world_post + "\r\n \t world_render " + this.vrdata_world_render;
+        return "VRPlayer: \r\n \t origin: " + this.roomOrigin + "\r\n \t rotation: " + String.format("%.3f", ClientDataHolderVR.getInstance().vrSettings.worldRotation) + "\r\n \t scale: " + String.format("%.3f", this.worldScale) + "\r\n \t room_pre " + this.vrdata_room_pre + "\r\n \t world_pre " + this.vrdata_world_pre + "\r\n \t world_post " + this.vrdata_world_post + "\r\n \t world_render " + this.vrdata_world_render;
     }
 
     public Vec3 getRightClickLookOverride(Player entity, int c)
@@ -655,7 +654,7 @@ public class VRPlayer
 
     public boolean isTeleportSupported()
     {
-        return !this.noTeleportClient;
+        return !VRServerPerms.INSTANCE.noTeleportClient;
     }
 
     public boolean isTeleportOverridden()
@@ -665,7 +664,7 @@ public class VRPlayer
 
     public boolean isTeleportEnabled()
     {
-        boolean flag = !this.noTeleportClient || this.teleportOverride;
+        boolean flag = !VRServerPerms.INSTANCE.noTeleportClient || this.teleportOverride;
 
         if (this.dh.vrSettings.seated)
         {
@@ -677,21 +676,15 @@ public class VRPlayer
         }
     }
 
-    public void setTeleportSupported(boolean supported)
-    {
-        this.noTeleportClient = !supported;
-        this.updateTeleportKeys();
-    }
-
     public void setTeleportOverride(boolean override)
     {
         this.teleportOverride = override;
         this.updateTeleportKeys();
     }
 
-    private void updateTeleportKeys()
+    public void updateTeleportKeys()
     {
-        this.dh.vr.getInputAction(this.dh.vr.keyTeleport).setEnabled(this.isTeleportEnabled());
-        this.dh.vr.getInputAction(this.dh.vr.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
+        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleport).setEnabled(this.isTeleportEnabled());
+        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
     }
 }

@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client_vr.multiplayer;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -19,12 +19,12 @@ public class MultiPlayerGameModeVRMixin {
 
     @Inject(at = @At("HEAD"), method = "useItem")
     public void overrideUse(Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
-        ClientNetworkHelper.overrideLook(player, ClientDataHolder.getInstance().vrPlayer.getRightClickLookOverride(player, interactionHand.ordinal()));
+        ClientNetworkHelper.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, interactionHand.ordinal()));
     }
 
     @Inject(at = @At("HEAD"), method = "releaseUsingItem")
     public void overrideReleaseUse(Player player, CallbackInfo ci) {
-        ClientNetworkHelper.overrideLook(player, ClientDataHolder.getInstance().vrPlayer.getRightClickLookOverride(player, player.getUsedItemHand().ordinal()));
+        ClientNetworkHelper.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, player.getUsedItemHand().ordinal()));
     }
 
     @Inject(at = @At("HEAD"), method = "useItemOn")

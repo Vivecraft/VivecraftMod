@@ -1,33 +1,14 @@
 package org.vivecraft.mixin.client_vr.blaze3d.platform;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.platform.WindowEventHandler;
 import net.minecraft.client.Minecraft;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.XRState;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.client_xr.XRState;
 
 @Mixin(Window.class)
 public abstract class WindowVRMixin {
-	
-
-	@Shadow
-	private int width;
-	@Shadow
-	private int height;
-	@Final
-	@Shadow
-	private WindowEventHandler eventHandler;
-	
-	@Shadow
-	public abstract int getScreenWidth();
-	@Shadow
-	public abstract int getScreenHeight();
 
 // NotFixed
 //	@Redirect(at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSetFramebufferSizeCallback(JLorg/lwjgl/glfw/GLFWFramebufferSizeCallbackI;)Lorg/lwjgl/glfw/GLFWFramebufferSizeCallback;", remap = false),
@@ -43,63 +24,70 @@ public abstract class WindowVRMixin {
 		}
 		return v;
 	}
-	
-	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I"), method = "onFramebufferResize(JII)V")
-	public int widthCorrection(Window w) {
-		return this.getScreenWidth();
-	}
-	
-	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getHeight()I"), method = "onFramebufferResize(JII)V")
-	public int heightCorrection(Window w) {
-		return this.getScreenHeight();
-	}
 
-	@Inject(at =  @At("HEAD"), method = "onResize(JII)V", cancellable = true)
-	public void resize(long pWindowPointer, int p_85429_, int pWindowWidth, CallbackInfo info) {
-		if (pWindowWidth * p_85429_ != 0) {
-			this.width = p_85429_;
-			this.height = pWindowWidth;
-			this.eventHandler.resizeDisplay();
+// NotFixed
+//	@Inject(at =  @At("HEAD"), method = "onResize(JII)V", cancellable = true)
+//	public void resize(long pWindowPointer, int p_85429_, int pWindowWidth, CallbackInfo info) {
+//		if (pWindowWidth * p_85429_ != 0) {
+//			this.width = p_85429_;
+//			this.height = pWindowWidth;
+//			this.eventHandler.resizeDisplay();
+//		}
+//		info.cancel();
+//	}
+
+	@Inject(method = {"getScreenWidth", "getWidth"}, at = @At("HEAD"), cancellable = true)
+	void getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
+		if (isCustomFramebuffer()) {
+//			if (mcxrGameRenderer.reloadingDepth > 0) {
+//				var swapchain = MCXRPlayClient.OPEN_XR_STATE.session.swapchain;
+//				cir.setReturnValue(swapchain.getRenderWidth());
+//			} else {
+				var mainTarget = Minecraft.getInstance().getMainRenderTarget();
+				cir.setReturnValue(mainTarget.viewWidth);
+//			}
 		}
-		info.cancel();
 	}
-	@ModifyVariable(at = @At("HEAD"), method = "calculateScale", argsOnly = true)
-	private boolean noSpecialUnicodeScale(boolean forceUnicode){
+
+	@Inject(method = {"getScreenHeight", "getHeight"}, at = @At("HEAD"), cancellable = true)
+	void getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
+		if (isCustomFramebuffer()) {
+//			if (mcxrGameRenderer.reloadingDepth > 0) {
+//				var swapchain = MCXRPlayClient.OPEN_XR_STATE.session.swapchain;
+//				cir.setReturnValue(swapchain.getRenderHeight());
+//			} else {
+				var mainTarget = Minecraft.getInstance().getMainRenderTarget();
+				cir.setReturnValue(mainTarget.viewHeight);
+//			}
+		}
+	}
+
+// NotFixed
+//	@Inject(method = "getGuiScaledHeight", at = @At("HEAD"), cancellable = true)
+//	void getScaledHeight(CallbackInfoReturnable<Integer> cir) {
+//		if (isCustomFramebuffer()) {
+//			cir.setReturnValue(FGM.scaledHeight);
+//		}
+//	}
+//
+//	@Inject(method = "getGuiScaledWidth", at = @At("HEAD"), cancellable = true)
+//	void getScaledWidth(CallbackInfoReturnable<Integer> cir) {
+//		if (isCustomFramebuffer()) {
+//			cir.setReturnValue(FGM.scaledWidth);
+//		}
+//	}
+//
+//	@Inject(method = "getGuiScale", at = @At("HEAD"), cancellable = true)
+//	void getScaleFactor(CallbackInfoReturnable<Double> cir) {
+//		if (isCustomFramebuffer()) {
+//			cir.setReturnValue(FGM.guiScale);
+//		}
+//	}
+
+
+	@Unique
+	private boolean isCustomFramebuffer() {
+		//MCXR:         return mcxrGameRenderer.overrideWindowSize || (mcxrGameRenderer.isXrMode() && mcxrGameRenderer.reloadingDepth > 0);
 		return false;
-	}
-	@Redirect(at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lcom/mojang/blaze3d/platform/Window;framebufferWidth:I"), method = "calculateScale")
-	private int widthRedirectCalculateScale(Window instance){
-		return this.width;
-	}
-	@Redirect(at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lcom/mojang/blaze3d/platform/Window;framebufferHeight:I"), method = "calculateScale")
-	private int heightRedirectCalculateScale(Window instance){
-		return this.height;
-	}
-
-	@Redirect(at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lcom/mojang/blaze3d/platform/Window;framebufferWidth:I"), method = "setGuiScale")
-	private int widthRedirectSetGuiScale(Window instance){
-		return this.width;
-	}
-	@Redirect(at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lcom/mojang/blaze3d/platform/Window;framebufferHeight:I"), method = "setGuiScale")
-	private int heightRedirectSetGuiScale(Window instance){
-		return this.height;
-	}
-
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	public int getWidth() {
-		return Minecraft.getInstance().getMainRenderTarget().viewWidth;
-	}
-
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	public int getHeight() {
-		return Minecraft.getInstance().getMainRenderTarget().viewHeight;
 	}
 }

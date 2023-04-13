@@ -1,6 +1,7 @@
 package org.vivecraft.client_vr.provider.openvr_jna.control;
 
 import net.minecraft.client.KeyMapping;
+import org.vivecraft.VivecraftVRMod;
 import org.vivecraft.client_vr.provider.MCVR;
 
 public enum VRInputActionSet
@@ -43,7 +44,7 @@ public enum VRInputActionSet
                 return KEYBOARD;
 
             default:
-                return MCVR.get().isModBinding(keyBinding) ? MOD : INGAME;
+                return VivecraftVRMod.INSTANCE.isModBinding(keyBinding) ? MOD : INGAME;
         }
     }
 }

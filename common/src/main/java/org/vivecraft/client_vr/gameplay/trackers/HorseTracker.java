@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
@@ -25,7 +25,7 @@ public class HorseTracker extends Tracker
     Horse horse = null;
     ModelInfo info = new ModelInfo();
 
-    public HorseTracker(Minecraft mc, ClientDataHolder dh)
+    public HorseTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }

@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client_vr;
 
 import net.minecraft.client.player.LocalPlayer;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Final;
@@ -9,17 +9,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client_xr.XRState;
 import org.vivecraft.client_vr.provider.MCVR;
 
 @Mixin(MouseHandler.class)
 public class MouseHandlerVRMixin {
-
-    @Shadow
-    private boolean isMiddlePressed;
-    @Shadow
-    private double accumulatedDX;
-    @Shadow
-    private double accumulatedDY;
 
     @Shadow private boolean mouseGrabbed;
     @Final
@@ -41,12 +35,16 @@ public class MouseHandlerVRMixin {
 
     @Inject(at = @At("HEAD"), method = "turnPlayer", cancellable = true)
     public void noTurnStanding(CallbackInfo ci) {
-        if (!ClientDataHolder.getInstance().vrSettings.seated) {
+        if (!XRState.isXr) {
+            return;
+        }
+
+        if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
             // call the tutorial before canceling
             // head movement
             // this.minecraft.getTutorial().onMouse(1.0 - MCVR.get().hmdHistory.averagePosition(0.2).subtract(MCVR.get().hmdPivotHistory.averagePosition(0.2)).normalize().dot(MCVR.get().hmdHistory.averagePosition(1.0).subtract(MCVR.get().hmdPivotHistory.averagePosition(1.0)).normalize()),0);
             // controller movement
-            int mainController = ClientDataHolder.getInstance().vrSettings.reverseHands ? 1 : 0;
+            int mainController = ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0;
             this.minecraft.getTutorial().onMouse(1.0 - MCVR.get().controllerForwardHistory[mainController].averagePosition(0.2).normalize().dot(MCVR.get().controllerForwardHistory[mainController].averagePosition(1.0).normalize()),0);
             ci.cancel();
         }
@@ -55,24 +53,20 @@ public class MouseHandlerVRMixin {
     // cancel after tutorial call
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/Tutorial;onMouse(DD)V", shift = At.Shift.AFTER), method = "turnPlayer", cancellable = true)
     public void noTurnSeated(CallbackInfo ci) {
+        if (!XRState.isXr) {
+            return;
+        }
+
         ci.cancel();
-    }
-
-    public boolean isMiddleDown() {
-        return this.isMiddlePressed;
-    }
-
-    public double getXVelocity() {
-        return this.accumulatedDX;
-    }
-
-    public double getYVelocity() {
-        return this.accumulatedDY;
     }
 
     @Inject(at = @At("HEAD"), method = "grabMouse", cancellable = true)
     public void seated(CallbackInfo ci) {
-        if (!ClientDataHolder.getInstance().vrSettings.seated) {
+        if (!XRState.isXr) {
+            return;
+        }
+
+        if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
             this.mouseGrabbed = true;
             ci.cancel();
         }
@@ -80,7 +74,11 @@ public class MouseHandlerVRMixin {
 
     @Inject(at = @At(value = "HEAD"), method = "releaseMouse", cancellable = true)
     public void grabMouse(CallbackInfo ci) {
-        if (!ClientDataHolder.getInstance().vrSettings.seated) {
+        if (!XRState.isXr) {
+            return;
+        }
+
+        if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
             this.mouseGrabbed = false;
             ci.cancel();
         }

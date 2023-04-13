@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gui.settings.GuiQuickCommandsInGame;
 import org.vivecraft.client_vr.settings.AutoCalibration;
@@ -25,7 +25,7 @@ import org.vivecraft.client_vr.utils.external.jkatvr;
 @Mixin(PauseScreen.class)
 public abstract class PauseScreenVRMixin extends Screen {
 
-    private ClientDataHolder dataholder = ClientDataHolder.getInstance();
+    private ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
     protected PauseScreenVRMixin(Component component) {
         super(component);
@@ -43,7 +43,7 @@ public abstract class PauseScreenVRMixin extends Screen {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"), (p) ->
                     {
                         this.minecraft.setScreen(new ChatScreen(""));
-                        if (ClientDataHolder.getInstance().vrSettings.autoOpenKeyboard)
+                        if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard)
                             KeyboardHandler.setOverlayShowing(true);
                     }).width(98).build());
         } else {
@@ -53,7 +53,7 @@ public abstract class PauseScreenVRMixin extends Screen {
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"), (p) ->
                     {
                         this.minecraft.setScreen(new ChatScreen(""));
-                        if (ClientDataHolder.getInstance().vrSettings.autoOpenKeyboard)
+                        if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard)
                             KeyboardHandler.setOverlayShowing(true);
                     }).width(48).build());
 
@@ -88,34 +88,34 @@ public abstract class PauseScreenVRMixin extends Screen {
         rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.screenshot"), (p) ->
         {
             this.minecraft.setScreen((Screen) null);
-            ClientDataHolder.getInstance().grabScreenShot = true;
+            ClientDataHolderVR.getInstance().grabScreenShot = true;
         }).width(98).build());
 
-        if (!ClientDataHolder.getInstance().vrSettings.seated) {
+        if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.calibrateheight"), (p) ->
             {
                 AutoCalibration.calibrateManual();
-                ClientDataHolder.getInstance().vrSettings.saveOptions();
+                ClientDataHolderVR.getInstance().vrSettings.saveOptions();
                 this.minecraft.setScreen((Screen) null);
             }).width(98).build());
         }
 
-        if (ClientDataHolder.katvr) {
+        if (ClientDataHolderVR.katvr) {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.alignkatwalk"), (p) ->
             {
-                jkatvr.resetYaw(ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.hmd.getYaw());
+                jkatvr.resetYaw(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.hmd.getYaw());
                 this.minecraft.setScreen((Screen) null);
             }).width(98).build());
         }
 
-        if (!ClientDataHolder.getInstance().vrSettings.seated || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
+        if (!ClientDataHolderVR.getInstance().vrSettings.seated || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.movethirdpersoncam"), (p) ->
             {
                 if (!VRHotkeys.isMovingThirdPersonCam()) {
                     VRHotkeys.startMovingThirdPersonCam(1, VRHotkeys.Triggerer.MENUBUTTON);
                 } else if (VRHotkeys.getMovingThirdPersonCamTriggerer() == VRHotkeys.Triggerer.MENUBUTTON) {
                     VRHotkeys.stopMovingThirdPersonCam();
-                    ClientDataHolder.getInstance().vrSettings.saveOptions();
+                    ClientDataHolderVR.getInstance().vrSettings.saveOptions();
                 }
             }).width(98).build());
         }

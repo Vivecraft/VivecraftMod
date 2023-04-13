@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.api.ServerVivePlayer;
 
@@ -54,7 +54,7 @@ public abstract class ServerPlayerMixin extends Player {
 	public void menu(CallbackInfo ci) {
 		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
 		// TODO change setting to commonDataHolder?
-		if ((!this.server.isDedicatedServer() && ClientDataHolder.getInstance().vrSettings != null && !ClientDataHolder.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
+		if ((!this.server.isDedicatedServer() && ClientDataHolderVR.getInstance().vrSettings != null && !ClientDataHolderVR.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
 			if (this.random.nextInt(2) == 1) {
 				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));

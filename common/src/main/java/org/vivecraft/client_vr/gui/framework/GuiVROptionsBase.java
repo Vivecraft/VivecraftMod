@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.phys.Vec2;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.ScreenUtils;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -20,7 +20,7 @@ import java.util.List;
 
 public abstract class GuiVROptionsBase extends Screen
 {
-	protected ClientDataHolder dataholder = ClientDataHolder.getInstance();
+	protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
     public static final int DONE_BUTTON = 200;
     public static final int DEFAULTS_BUTTON = 201;
     protected final Screen lastScreen;
@@ -38,7 +38,7 @@ public abstract class GuiVROptionsBase extends Screen
     {
         super(Component.literal(""));
         this.lastScreen = lastScreen;
-        this.settings = ClientDataHolder.getInstance().vrSettings;
+        this.settings = ClientDataHolderVR.getInstance().vrSettings;
     }
 
     protected void addDefaultButtons()

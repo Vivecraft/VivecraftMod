@@ -1,7 +1,8 @@
 package org.vivecraft.mixin.client_vr.gui;
 
 import net.minecraft.client.KeyMapping;
-import org.vivecraft.client_vr.ClientDataHolder;
+import net.minecraft.resources.ResourceLocation;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.SodiumHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.GuiExtension;
@@ -31,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client_xr.XRState;
 
 @Mixin(Gui.class)
 public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
@@ -48,83 +50,71 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     @Shadow
     protected abstract Player getCameraPlayer();
 
-    //Moved to render for sodium
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderVignette(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/Entity;)V"), method = "render")
-    public void noVignette(Gui instance, PoseStack poseStack, Entity entity) {
-        if(Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium")) {
-            SodiumHelper.vignette(false);
+    @Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
+    void cancelRenderVignette(PoseStack poseStack, Entity entity, CallbackInfo ci) {
+        if (XRState.isXr) {
+            RenderSystem.enableDepthTest();
+            ci.cancel();
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/CameraType;isFirstPerson()Z"), method = "render")
-    public boolean noFirstPerson(CameraType instance) {
-        return false;
+    @Inject(method = "renderTextureOverlay", at = @At("HEAD"), cancellable = true)
+    void cancelRenderOverlay(PoseStack poseStack, ResourceLocation resourceLocation, float f, CallbackInfo ci) {
+        if (XRState.isXr) {
+            ci.cancel();
+        }
     }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getTicksFrozen()I"), method = "render")
-    public int noFrozen(LocalPlayer instance) {
-        return 0;
+    @Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)
+    public void cancelRenderCrosshair(PoseStack poseStack, CallbackInfo ci) {
+        if (!XRState.isXr) {
+            ci.cancel();
+        }
     }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;hasEffect(Lnet/minecraft/world/effect/MobEffect;)Z"), method = "render")
-    public boolean noConfusion(LocalPlayer instance, MobEffect mobEffect) {
-        return true;
-    }
-
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderCrosshair(Lcom/mojang/blaze3d/vertex/PoseStack;)V"), method = "render")
-//    public void noCrosshair(Gui instance, PoseStack poseStack) {
-//        return ;
-//    }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"), method = "render")
     public boolean toggleableTabList(KeyMapping instance) {
         return instance.isDown() || showPlayerList;
     }
 
-    @Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)
-    public void noRenderCrosshair(PoseStack poseStack, CallbackInfo ci) {
-        ci.cancel();
-    }
-
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 1, shift = At.Shift.AFTER), method = "renderHotbar")
     public void hotbarContext(float f, PoseStack poseStack, CallbackInfo ci) {
         int i = this.screenWidth / 2;
-        if (ClientDataHolder.getInstance().interactTracker.hotbar >= 0 && ClientDataHolder.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != ClientDataHolder.getInstance().interactTracker.hotbar) {
+        if (ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().interactTracker.hotbar) {
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
-            this.blit(poseStack, i - 91 - 1 + ClientDataHolder.getInstance().interactTracker.hotbar * 20, this.screenHeight - 22 - 1, 0, 22, 24, 22);
+            blit(poseStack, i - 91 - 1 + ClientDataHolderVR.getInstance().interactTracker.hotbar * 20, this.screenHeight - 22 - 1, 0, 22, 24, 22);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0), method = "renderHotbar")
     public boolean slotSwap(ItemStack instance) {
-        return !(!instance.isEmpty() || ClientDataHolder.getInstance().vrSettings.vrTouchHotbar);
+        return !(!instance.isEmpty() || ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar);
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2, shift = At.Shift.BEFORE), method = "renderHotbar")
     public void renderVRHotbarLeft(float f, PoseStack poseStack, CallbackInfo ci) {
-        if (ClientDataHolder.getInstance().interactTracker.hotbar == 9) {
+        if (ClientDataHolderVR.getInstance().interactTracker.hotbar == 9) {
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2, shift = At.Shift.AFTER), method = "renderHotbar")
     public void renderVRHotbarLeftReset(float f, PoseStack poseStack, CallbackInfo ci) {
-        if (ClientDataHolder.getInstance().interactTracker.hotbar == 9) {
+        if (ClientDataHolderVR.getInstance().interactTracker.hotbar == 9) {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 3, shift = At.Shift.BEFORE), method = "renderHotbar")
     public void renderVRHotbarRight(float f, PoseStack poseStack, CallbackInfo ci) {
-        if (ClientDataHolder.getInstance().interactTracker.hotbar == 9){
+        if (ClientDataHolderVR.getInstance().interactTracker.hotbar == 9){
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 3, shift = At.Shift.AFTER), method = "renderHotbar")
     public void renderVRHotbarRightReset(float f, PoseStack poseStack, CallbackInfo ci) {
-        if (ClientDataHolder.getInstance().interactTracker.hotbar == 9){
+        if (ClientDataHolderVR.getInstance().interactTracker.hotbar == 9){
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
@@ -159,7 +149,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
             if (player.isFallFlying()) {
                 k = -1;
             }
-            if (ClientDataHolder.getInstance().crawlTracker.crawling) {
+            if (ClientDataHolderVR.getInstance().crawlTracker.crawling) {
                 k = -2;
             }
 
@@ -206,7 +196,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, Screen.GUI_ICONS_LOCATION);
-        float f = 16.0F * ClientDataHolder.getInstance().vrSettings.menuCrosshairScale;
+        float f = 16.0F * ClientDataHolderVR.getInstance().vrSettings.menuCrosshairScale;
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
         this.drawCentredTexturedModalRect(mouseX, mouseY, f, f, 0, 0, 15, 15);
         RenderSystem.disableBlend();

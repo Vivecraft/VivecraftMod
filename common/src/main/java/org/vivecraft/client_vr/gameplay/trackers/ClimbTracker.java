@@ -7,7 +7,8 @@ import java.util.Random;
 import java.util.Set;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.BlockTags;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
@@ -60,7 +61,7 @@ public class ClimbTracker extends Tracker
     private Random rand = new Random();
     boolean unsetflag;
 
-    public ClimbTracker(Minecraft mc, ClientDataHolder dh)
+    public ClimbTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }
@@ -115,7 +116,7 @@ public class ClimbTracker extends Tracker
         {
             return false;
         }
-        else if (!this.dh.vrPlayer.getFreeMove() && !ClientDataHolder.getInstance().vrSettings.simulateFalling)
+        else if (!this.dh.vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling)
         {
             return false;
         }
@@ -197,8 +198,8 @@ public class ClimbTracker extends Tracker
             this.forceActivate = false;
         }
 
-        this.dh.vr.getInputAction(this.dh.vr.keyClimbeyGrab).setEnabled(ControllerType.RIGHT, this.isClimbeyClimb() && (this.isGrabbingLadder() || this.inblock[0] || this.forceActivate));
-        this.dh.vr.getInputAction(this.dh.vr.keyClimbeyGrab).setEnabled(ControllerType.LEFT, this.isClimbeyClimb() && (this.isGrabbingLadder() || this.inblock[1] || this.forceActivate));
+        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyGrab).setEnabled(ControllerType.RIGHT, this.isClimbeyClimb() && (this.isGrabbingLadder() || this.inblock[0] || this.forceActivate));
+        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyGrab).setEnabled(ControllerType.LEFT, this.isClimbeyClimb() && (this.isGrabbingLadder() || this.inblock[1] || this.forceActivate));
     }
 
     public void reset(LocalPlayer player)
@@ -396,11 +397,11 @@ public class ClimbTracker extends Tracker
 
                 if (i == 0)
                 {
-                    aboolean[i] = this.dh.vr.keyClimbeyGrab.isDown(ControllerType.RIGHT);
+                    aboolean[i] = VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT);
                 }
                 else
                 {
-                    aboolean[i] = this.dh.vr.keyClimbeyGrab.isDown(ControllerType.LEFT);
+                    aboolean[i] = VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.LEFT);
                 }
 
                 this.inblock[i] = this.box[i] != null && this.box[i].move(blockpos).contains(avec3[i]);
@@ -427,11 +428,11 @@ public class ClimbTracker extends Tracker
 
                 if (i == 0)
                 {
-                    this.dh.vr.keyClimbeyGrab.unpressKey(ControllerType.RIGHT);
+                    VivecraftVRMod.INSTANCE.keyClimbeyGrab.unpressKey(ControllerType.RIGHT);
                 }
                 else
                 {
-                    this.dh.vr.keyClimbeyGrab.unpressKey(ControllerType.LEFT);
+                    VivecraftVRMod.INSTANCE.keyClimbeyGrab.unpressKey(ControllerType.LEFT);
                 }
 
                 flag2 = true;
@@ -507,7 +508,7 @@ public class ClimbTracker extends Tracker
 
         if (!this.wantjump && !flag3)
         {
-            this.wantjump = this.dh.vr.keyClimbeyJump.isDown() && this.dh.jumpTracker.isClimbeyJumpEquipped();
+            this.wantjump = VivecraftVRMod.INSTANCE.keyClimbeyJump.isDown() && this.dh.jumpTracker.isClimbeyJumpEquipped();
         }
 
         flag2 = flag2 & this.wantjump;
@@ -530,8 +531,8 @@ public class ClimbTracker extends Tracker
             if (player.isOnGround() && this.unsetflag)
             {
                 this.unsetflag = false;
-                this.dh.vr.keyClimbeyGrab.unpressKey(ControllerType.RIGHT);
-                this.dh.vr.keyClimbeyGrab.unpressKey(ControllerType.LEFT);
+                VivecraftVRMod.INSTANCE.keyClimbeyGrab.unpressKey(ControllerType.RIGHT);
+                VivecraftVRMod.INSTANCE.keyClimbeyGrab.unpressKey(ControllerType.LEFT);
             }
 
             this.latchStartController = -1;

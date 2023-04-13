@@ -19,7 +19,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
@@ -38,7 +38,7 @@ public class VRWidgetHelper
     public static void renderVRThirdPersonCamWidget()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         if (dataholder.vrSettings.mixedRealityRenderCameraModel)
         {
@@ -51,7 +51,7 @@ public class VRWidgetHelper
                     f *= 1.03F;
                 }
 
-                renderVRCameraWidget(-0.748F, -0.438F, -0.06F, f, RenderPass.THIRD, ClientDataHolder.thirdPersonCameraModel, ClientDataHolder.thirdPersonCameraDisplayModel, () ->
+                renderVRCameraWidget(-0.748F, -0.438F, -0.06F, f, RenderPass.THIRD, ClientDataHolderVR.thirdPersonCameraModel, ClientDataHolderVR.thirdPersonCameraDisplayModel, () ->
                 {
                 	dataholder.vrRenderer.framebufferMR.bindRead();
                     RenderSystem.setShaderTexture(0, dataholder.vrRenderer.framebufferMR.getColorTextureId());
@@ -72,7 +72,7 @@ public class VRWidgetHelper
     public static void renderVRHandheldCameraWidget()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         if (dataholder.currentPass != RenderPass.CAMERA && dataholder.cameraTracker.isVisible())
         {
@@ -103,7 +103,7 @@ public class VRWidgetHelper
     public static void renderVRCameraWidget(float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, ModelResourceLocation model, ModelResourceLocation displayModel, Runnable displayBindFunc, Function<Direction, DisplayFace> displayFaceFunc)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
         poseStack.setIdentity();

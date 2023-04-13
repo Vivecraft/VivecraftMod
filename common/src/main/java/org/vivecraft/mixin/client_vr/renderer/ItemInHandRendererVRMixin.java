@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.mojang.math.Axis;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
@@ -43,6 +43,7 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRArmRenderer;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.VivecraftItemRendering;
+import org.vivecraft.client_xr.XRState;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {
@@ -56,7 +57,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 	@Final
 	@Shadow
 	private Minecraft minecraft;
-	ClientDataHolder dh = ClientDataHolder.getInstance();
+	ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 	@Final
 	@Shadow
 	private EntityRenderDispatcher entityRenderDispatcher;
@@ -90,12 +91,18 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
 	@Inject(at = @At("HEAD"), method = "renderPlayerArm", cancellable = true)
 	public void overrideArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm, CallbackInfo ci) {
+		if (!XRState.isXr) {
+			return;
+		}
 		vrPlayerArm(poseStack, multiBufferSource, i, f, g, humanoidArm);
 		ci.cancel();
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderArmWithItem", cancellable = true)
 	public void overrideArmItem(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j, CallbackInfo ci) {
+		if (!XRState.isXr) {
+			return;
+		}
 		this.vrRenderArmWithItem(abstractClientPlayer, f, g, interactionHand, h, itemStack, i, poseStack, multiBufferSource, j);
 		ci.cancel();
 	}

@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 
 import net.minecraft.client.Minecraft;
@@ -11,22 +11,22 @@ public class SneakTracker extends Tracker
     public boolean sneakOverride = false;
     public int sneakCounter = 0;
 
-    public SneakTracker(Minecraft mc, ClientDataHolder dh)
+    public SneakTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)
     {
-        if (ClientDataHolder.getInstance().vrSettings.seated)
+        if (ClientDataHolderVR.getInstance().vrSettings.seated)
         {
             return false;
         }
-        else if (!ClientDataHolder.getInstance().vrPlayer.getFreeMove() && !ClientDataHolder.getInstance().vrSettings.simulateFalling)
+        else if (!ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling)
         {
             return false;
         }
-        else if (!ClientDataHolder.getInstance().vrSettings.realisticSneakEnabled)
+        else if (!ClientDataHolderVR.getInstance().vrSettings.realisticSneakEnabled)
         {
             return false;
         }

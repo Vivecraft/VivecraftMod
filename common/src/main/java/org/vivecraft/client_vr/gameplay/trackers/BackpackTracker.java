@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 
 import net.minecraft.client.Minecraft;
@@ -16,7 +16,7 @@ public class BackpackTracker extends Tracker
     public int previousSlot = 0;
     private Vec3 down = new Vec3(0.0D, -1.0D, 0.0D);
 
-    public BackpackTracker(Minecraft mc, ClientDataHolder dh)
+    public BackpackTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }
@@ -24,7 +24,7 @@ public class BackpackTracker extends Tracker
     public boolean isActive(LocalPlayer p)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         if (dataholder.vrSettings.seated)
         {
@@ -76,7 +76,7 @@ public class BackpackTracker extends Tracker
             boolean flag4 = d0 < 0.0D;
             boolean flag5 = flag && flag1 && flag2;
             Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolder dataholder = ClientDataHolder.getInstance();
+            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
             if (flag5)
             {

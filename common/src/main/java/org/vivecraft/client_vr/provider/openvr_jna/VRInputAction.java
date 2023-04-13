@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.vivecraft.VivecraftVRMod;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
@@ -547,7 +548,7 @@ public class VRInputAction
     {
         InputConstants.Key inputconstants$key = this.keyBinding.key;
 
-        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
             if (inputconstants$key.getType() == InputConstants.Type.KEYSYM)
             {
@@ -569,7 +570,7 @@ public class VRInputAction
     {
         InputConstants.Key inputconstants$key = this.keyBinding.key;
 
-        if (inputconstants$key.getValue() != -1 && !MCOpenVR.get().isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
             if (inputconstants$key.getType() == InputConstants.Type.KEYSYM)
             {

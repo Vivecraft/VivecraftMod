@@ -1,7 +1,8 @@
 package org.vivecraft.client_vr.render;
 
 import com.mojang.math.Axis;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.ItemTags;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
@@ -38,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class VivecraftItemRendering
 {
-	private static ClientDataHolder dh = ClientDataHolder.getInstance();
+	private static ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 	public static VivecraftItemTransformType getTransformType(ItemStack pStack, AbstractClientPlayer pPlayer, ItemRenderer itemRenderer) {
 		VivecraftItemTransformType rendertype = VivecraftItemTransformType.Item;
 		Item item = pStack.getItem();
@@ -438,7 +439,7 @@ public class VivecraftItemRendering
                         translateY += (double)0.02F;
                         translateX += (double)0.03F;
 
-						if (dh.vr.keyClimbeyGrab.isDown(ControllerType.RIGHT) && mainHand || dh.vr.keyClimbeyGrab.isDown(ControllerType.LEFT) && !mainHand)
+						if (VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT) && mainHand || VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.LEFT) && !mainHand)
                         {
                             translateZ += (double) - 0.2F;
                         }

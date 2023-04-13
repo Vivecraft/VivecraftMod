@@ -1,7 +1,8 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.api.client.ClientNetworkHelper;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -22,7 +23,7 @@ public class JumpTracker extends Tracker
     private boolean c0Latched = false;
     private boolean c1Latched = false;
 
-    public JumpTracker(Minecraft mc, ClientDataHolder dh)
+    public JumpTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }
@@ -39,15 +40,15 @@ public class JumpTracker extends Tracker
 
     public boolean isActive(LocalPlayer p)
     {
-        if (ClientDataHolder.getInstance().vrSettings.seated)
+        if (ClientDataHolderVR.getInstance().vrSettings.seated)
         {
             return false;
         }
-        else if (!ClientDataHolder.getInstance().vrPlayer.getFreeMove() && !ClientDataHolder.getInstance().vrSettings.simulateFalling)
+        else if (!ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling)
         {
             return false;
         }
-        else if (!ClientDataHolder.getInstance().vrSettings.realisticJumpEnabled)
+        else if (!ClientDataHolderVR.getInstance().vrSettings.realisticJumpEnabled)
         {
             return false;
         }
@@ -79,7 +80,7 @@ public class JumpTracker extends Tracker
 
     public void idleTick(LocalPlayer player)
     {
-        this.dh.vr.getInputAction(this.dh.vr.keyClimbeyJump).setEnabled(this.isClimbeyJumpEquipped() && (this.isActive(player) || this.dh.climbTracker.isClimbeyClimbEquipped() && this.dh.climbTracker.isGrabbingLadder()));
+        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyJump).setEnabled(this.isClimbeyJumpEquipped() && (this.isActive(player) || this.dh.climbTracker.isClimbeyClimbEquipped() && this.dh.climbTracker.isGrabbingLadder()));
     }
 
     public void reset(LocalPlayer player)
@@ -97,7 +98,7 @@ public class JumpTracker extends Tracker
 
             for (int i = 0; i < 2; ++i)
             {
-                aboolean[i] = this.dh.vr.keyClimbeyJump.isDown();
+                aboolean[i] = VivecraftVRMod.INSTANCE.keyClimbeyJump.isDown();
             }
 
             boolean flag = false;

@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.ItemTags;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
@@ -22,7 +22,7 @@ public class TelescopeTracker extends Tracker
     private static final double lensDotMax = 0.9D;
     private static final double lensDotMin = 0.75D;
 
-    public TelescopeTracker(Minecraft mc, ClientDataHolder dh)
+    public TelescopeTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }
@@ -67,13 +67,13 @@ public class TelescopeTracker extends Tracker
 
     private static Vec3 getLensOrigin(int controller)
     {
-        VRData.VRDevicePose vrdata$vrdevicepose = ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getController(controller);
+        VRData.VRDevicePose vrdata$vrdevicepose = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getController(controller);
         return vrdata$vrdevicepose.getPosition().add(getViewVector(controller).scale(-0.2D).add(vrdata$vrdevicepose.getDirection().scale((double)0.05F)));
     }
 
     private static Vec3 getViewVector(int controller)
     {
-        return ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getController(controller).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
+        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getController(controller).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
     }
 
     public static boolean isViewing(int controller)
@@ -84,7 +84,7 @@ public class TelescopeTracker extends Tracker
     public static float viewPercent(int controller)
     {
     	LocalPlayer p = Minecraft.getInstance().player;
-    	if(p!= null && ClientDataHolder.getInstance().vrSettings.seated) {
+    	if(p!= null && ClientDataHolderVR.getInstance().vrSettings.seated) {
     		if(isTelescope(p.getUseItem()))
     			return 1;
     		else 
@@ -114,7 +114,7 @@ public class TelescopeTracker extends Tracker
         }
         else
         {
-            VRData.VRDevicePose eye = ClientDataHolder.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.values()[e]);
+            VRData.VRDevicePose eye = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.values()[e]);
             double dist = eye.getPosition().subtract(getLensOrigin(controller)).length();
             Vec3 look = eye.getDirection();
             double dot = Math.abs(look.dot(getViewVector(controller)));

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
 //TODO needed?
 @Mixin(Boat.class)
@@ -55,12 +55,12 @@ public abstract class BoatMixin extends Entity {
 	public void roomscaleRowing(CallbackInfo ci, float f) {
 
 		double mx, mz;
-		ClientDataHolder clientDataHolder = ClientDataHolder.getInstance();
+		ClientDataHolderVR clientDataHolderVR = ClientDataHolderVR.getInstance();
 
-		if(this.inputUp && !clientDataHolder.vrSettings.seated){
+		if(this.inputUp && !clientDataHolderVR.vrSettings.seated){
 			//controller-based
-			float yaw = clientDataHolder.vrPlayer.vrdata_world_pre.getController(1).getYaw();
-			if(clientDataHolder.vrSettings.vehicleRotation){
+			float yaw = clientDataHolderVR.vrPlayer.vrdata_world_pre.getController(1).getYaw();
+			if(clientDataHolderVR.vrSettings.vehicleRotation){
 				//tank controls
 				float end = this.getYRot() % 360;
 				float start = yaw;
@@ -102,10 +102,10 @@ public abstract class BoatMixin extends Entity {
 
 		} else {
 			//roomscale or vanilla behavior
-			if(clientDataHolder.rowTracker.isRowing() && !clientDataHolder.vrSettings.seated){
+			if(clientDataHolderVR.rowTracker.isRowing() && !clientDataHolderVR.vrSettings.seated){
 
-				this.deltaRotation += clientDataHolder.rowTracker.LOar / 1.5;
-				this.deltaRotation -= clientDataHolder.rowTracker.ROar / 1.5;
+				this.deltaRotation += clientDataHolderVR.rowTracker.LOar / 1.5;
+				this.deltaRotation -= clientDataHolderVR.rowTracker.ROar / 1.5;
     				/*
     				this.deltaRotation += mc.rowTracker.forces[0] *50;
     				this.deltaRotation -= mc.rowTracker.forces[1] *50;
@@ -114,7 +114,7 @@ public abstract class BoatMixin extends Entity {
 				if (deltaRotation < 0) this.inputLeft = true;
 				if (deltaRotation > 0) this.inputRight = true;
 
-				f = 0.06f * clientDataHolder.rowTracker.Foar;
+				f = 0.06f * clientDataHolderVR.rowTracker.Foar;
 				if(f > 0) this.inputUp = true;
 
     				/*

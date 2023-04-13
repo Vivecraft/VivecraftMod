@@ -4,7 +4,8 @@ import java.util.List;
 
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.*;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.BlockTags;
 import org.vivecraft.api.ItemTags;
 import org.vivecraft.api.Vec3History;
@@ -39,7 +40,7 @@ public class SwingTracker extends Tracker
     Vec3 forward = new Vec3(0.0D, 0.0D, -1.0D);
     double speedthresh = 3.0D;
 
-    public SwingTracker(Minecraft mc, ClientDataHolder dh)
+    public SwingTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }
@@ -70,7 +71,7 @@ public class SwingTracker extends Tracker
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolder dataholder = ClientDataHolder.getInstance();
+            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
             if (minecraft.screen != null)
             {
@@ -228,7 +229,7 @@ public class SwingTracker extends Tracker
 
                 this.canact[i] = this.canact[i] && !flag1 && !flag2;
 
-                if (!this.dh.climbTracker.isClimbeyClimb() || (i != 0 || !this.dh.vr.keyClimbeyGrab.isDown(ControllerType.RIGHT)) && flag && (i != 1 || !this.dh.vr.keyClimbeyGrab.isDown(ControllerType.LEFT)) && flag)
+                if (!this.dh.climbTracker.isClimbeyClimb() || (i != 0 || !VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT)) && flag && (i != 1 || !VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.LEFT)) && flag)
                 {
                     BlockPos blockpos = BlockPos.containing(this.miningPoint[i]);
                     BlockState blockstate = this.mc.level.getBlockState(blockpos);
@@ -340,10 +341,10 @@ public class SwingTracker extends Tracker
             f = 0.75F;
         }
 
-        boolean[] aboolean = ClientDataHolder.getInstance().swingTracker.lastWeaponSolid;
+        boolean[] aboolean = ClientDataHolderVR.getInstance().swingTracker.lastWeaponSolid;
         Minecraft.getInstance().getItemRenderer();
 
-        if (aboolean[ClientDataHolder.ismainhand ? 0 : 1])
+        if (aboolean[ClientDataHolderVR.ismainhand ? 0 : 1])
         {
             f -= 0.25F;
         }

@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import net.minecraft.client.Minecraft;
@@ -13,16 +13,16 @@ public class RunTracker extends Tracker
     private double speed = 0.0D;
     private Vec3 movedir;
 
-    public RunTracker(Minecraft mc, ClientDataHolder dh)
+    public RunTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }
 
     public boolean isActive(LocalPlayer p)
     {
-        if (ClientDataHolder.getInstance().vrPlayer.getFreeMove() && !ClientDataHolder.getInstance().vrSettings.seated)
+        if (ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.seated)
         {
-            if (ClientDataHolder.getInstance().vrSettings.vrFreeMoveMode != VRSettings.FreeMove.RUN_IN_PLACE)
+            if (ClientDataHolderVR.getInstance().vrSettings.vrFreeMoveMode != VRSettings.FreeMove.RUN_IN_PLACE)
             {
                 return false;
             }
@@ -40,7 +40,7 @@ public class RunTracker extends Tracker
                     }
                     else
                     {
-                        return !ClientDataHolder.getInstance().bowTracker.isNotched();
+                        return !ClientDataHolderVR.getInstance().bowTracker.isNotched();
                     }
                 }
                 else

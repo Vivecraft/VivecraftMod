@@ -9,7 +9,7 @@ import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-public class ClientDataHolder {
+public class ClientDataHolderVR {
 
     public static boolean kiosk;
     public static boolean ismainhand;
@@ -18,7 +18,7 @@ public class ClientDataHolder {
     public static boolean viewonly;
     public static ModelResourceLocation thirdPersonCameraModel = new ModelResourceLocation("vivecraft", "camcorder", "");
     public static ModelResourceLocation thirdPersonCameraDisplayModel = new ModelResourceLocation("vivecraft", "camcorder_display", "");
-    private static ClientDataHolder INSTANCE;
+    private static ClientDataHolderVR INSTANCE;
 
     public VRPlayer vrPlayer;
     public MCVR vr;
@@ -55,9 +55,9 @@ public class ClientDataHolder {
     boolean mirrorNotifyClear;
     long mirroNotifyLen;
 
-    public static ClientDataHolder getInstance() {
+    public static ClientDataHolderVR getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new ClientDataHolder();
+            INSTANCE = new ClientDataHolderVR();
         }
         return INSTANCE;
     }

@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client_vr.renderer.entity;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.world.entity.Entity;
@@ -15,7 +15,7 @@ public class MobRendererVRMixin {
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getRopeHoldPosition(F)Lnet/minecraft/world/phys/Vec3;"), method = "renderLeash")
     public Vec3 leash(Entity instance, float f) {
         if (instance == Minecraft.getInstance().player) {
-            return ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getController(0).getPosition();
+            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(0).getPosition();
         }
         return instance.getRopeHoldPosition(f);
     }

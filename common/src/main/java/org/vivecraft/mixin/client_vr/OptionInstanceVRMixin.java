@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(OptionInstance.class)
@@ -26,16 +26,16 @@ public class OptionInstanceVRMixin {
         if ((Object)this == options.directionalAudio()) {
             cir.setReturnValue(CycleButton.builder((bool) -> (boolean)bool ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF)
                     .withValues(false, true)
-                    .withInitialValue(ClientDataHolder.getInstance().vrSettings.hrtfSelection >= 0)
+                    .withInitialValue(ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0)
                     .withTooltip(obj -> {
                         Tooltip tooltipON = Tooltip.create(Component.translatable("options.directionalAudio.on.tooltip"));
                         Tooltip tooltipOFF = Tooltip.create(Component.translatable("options.directionalAudio.off.tooltip"));
-                        return ClientDataHolder.getInstance().vrSettings.hrtfSelection >= 0 ? tooltipON : tooltipOFF;
+                        return ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0 ? tooltipON : tooltipOFF;
                     })
                     .create(i, j, k, 20, Component.translatable("options.directionalAudio"), (cycleButton, newValue) -> {
-                        ClientDataHolder.getInstance().vrSettings.hrtfSelection = (boolean)newValue ? 0 : -1;
-                        ClientDataHolder.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.HRTF_SELECTION);
-                        ClientDataHolder.getInstance().vrSettings.saveOptions();
+                        ClientDataHolderVR.getInstance().vrSettings.hrtfSelection = (boolean)newValue ? 0 : -1;
+                        ClientDataHolderVR.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.HRTF_SELECTION);
+                        ClientDataHolderVR.getInstance().vrSettings.saveOptions();
 
                         SoundManager soundManager = Minecraft.getInstance().getSoundManager();
                         soundManager.reload();

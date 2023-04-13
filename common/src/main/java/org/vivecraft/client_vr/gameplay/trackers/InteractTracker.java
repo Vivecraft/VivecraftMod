@@ -2,7 +2,8 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import java.util.HashSet;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.api.client.VRData;
@@ -47,7 +48,7 @@ public class InteractTracker extends Tracker
     boolean[] wasactive = new boolean[2];
     private HashSet<Class> rightClickable = null;
 
-    public InteractTracker(Minecraft mc, ClientDataHolder dh)
+    public InteractTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }
@@ -73,7 +74,7 @@ public class InteractTracker extends Tracker
         else
         {
             Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolder dataholder = ClientDataHolder.getInstance();
+            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
             if (dataholder.vrSettings.seated)
             {
@@ -117,7 +118,7 @@ public class InteractTracker extends Tracker
         this.inCamera[c] = false;
         this.inHandheldCamera[c] = false;
         this.active[c] = false;
-        this.dh.vr.getInputAction(this.dh.vr.keyVRInteract).setEnabled(ControllerType.values()[c], false);
+        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract).setEnabled(ControllerType.values()[c], false);
     }
 
     public void doProcess(LocalPlayer player)
@@ -175,7 +176,7 @@ public class InteractTracker extends Tracker
 
         for (int j = 0; j < 2; ++j)
         {
-            if (!this.inCamera[j] && !this.inHandheldCamera[j] || !this.dh.vr.keyVRInteract.isDown(ControllerType.values()[j]))
+            if (!this.inCamera[j] && !this.inHandheldCamera[j] || !VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.values()[j]))
             {
                 this.reset(player, j);
 
@@ -260,7 +261,7 @@ public class InteractTracker extends Tracker
                     this.dh.vr.triggerHapticPulse(j, 250);
                 }
 
-                this.dh.vr.getInputAction(this.dh.vr.keyVRInteract).setEnabled(ControllerType.values()[j], this.active[j]);
+                this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract).setEnabled(ControllerType.values()[j], this.active[j]);
                 this.wasactive[j] = this.active[j];
             }
         }
@@ -285,7 +286,7 @@ public class InteractTracker extends Tracker
     {
         for (int i = 0; i < 2; ++i)
         {
-            if (this.dh.vr.keyVRInteract.consumeClick(ControllerType.values()[i]) && this.active[i])
+            if (VivecraftVRMod.INSTANCE.keyVRInteract.consumeClick(ControllerType.values()[i]) && this.active[i])
             {
                 InteractionHand interactionhand = InteractionHand.values()[i];
                 boolean flag = false;

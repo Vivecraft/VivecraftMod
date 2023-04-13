@@ -14,20 +14,8 @@ import org.vivecraft.client.render.PlayerModelController;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
-
-
-    @Shadow
-    protected abstract int getFramerateLimit();
-
-    @ModifyConstant(method = "createTitle", constant = @Constant(stringValue = "Minecraft"))
-    private String title(String s) {
-        return CommonDataHolder.getInstance().minecriftVerString;
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;tick(Z)V", shift = Shift.BEFORE), method = "tick()V", cancellable = true)
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;tick(Z)V", shift = Shift.BEFORE), method = "tick()V")
     public void music(CallbackInfo info) {
         PlayerModelController.getInstance().tick();
     }
-
-
 }

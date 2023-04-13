@@ -1,31 +1,29 @@
 package org.vivecraft.client_vr.render;
 
 import com.mojang.math.Axis;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.client.VRData;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client_xr.XRState;
 
-public class VRCamera extends Camera
+
+public class XRCamera extends Camera
 {
     public void setup(BlockGetter pLevel, Entity pRenderViewEntity, boolean pThirdPerson, boolean pThirdPersonReverse, float pPartialTicks)
     {
+        if (!XRState.isXr) {
+            super.setup(pLevel, pRenderViewEntity, pThirdPerson, pThirdPersonReverse, pPartialTicks);
+            return;
+        }
         this.initialized = true;
         this.level = pLevel;
         this.entity = pRenderViewEntity;
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         RenderPass renderpass = dataholder.currentPass;
-
-//        if (Shaders.isShadowPass && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
-        if (false && renderpass != RenderPass.THIRD && renderpass != RenderPass.CAMERA)
-        {
-            renderpass = RenderPass.CENTER;
-        }
 
         VRData.VRDevicePose eye = dataholder.vrPlayer.vrdata_world_render.getEye(renderpass);
         this.setPosition(eye.getPosition());
@@ -41,10 +39,12 @@ public class VRCamera extends Camera
         this.rotation.mul(Axis.XP.rotationDegrees(this.xRot));
     }
 
-    public void tick()
-    {
-    }
+    // NotFixed
+//    public void tick()
+//    {
+//    }
 
+    //SorenonTODO Investigate
     public boolean isDetached()
     {
         return false;

@@ -1,9 +1,10 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
 import org.joml.Matrix4f;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.IrisHelper;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client_xr.XRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -17,9 +18,7 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,417 +40,432 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import javax.annotation.Nullable;
 
 // priority 999 to inject before iris, for the vrFast rendering
-@Mixin(value = LevelRenderer.class,priority = 999)
+@Mixin(value = LevelRenderer.class, priority = 999)
 public abstract class LevelRendererVRMixin implements ResourceManagerReloadListener, AutoCloseable, LevelRendererExtension {
-	
-	@Unique
-	@Nullable
-	public RenderTarget alphaSortVROccludedFramebuffer;
-	@Unique
-	@Nullable
-	public RenderTarget alphaSortVRUnoccludedFramebuffer;
-	@Unique
-	@Nullable
-	public RenderTarget alphaSortVRHandsFramebuffer;
-	@Unique
-	public float selR;
-	@Unique
-	public float selG;
-	@Unique
-	public float selB;
 
-	@Unique
-	private Entity capturedEntity;
-	
-	@Final
-	@Shadow
-	private Minecraft minecraft;
-	@Shadow
-	private ClientLevel level;
-	@Shadow
-	private PostChain transparencyChain;
-	@Shadow
-	private RenderTarget translucentTarget;
-	@Shadow
-	private RenderTarget itemEntityTarget;
-	@Shadow
-	private RenderTarget particlesTarget;
-	@Shadow
-	private RenderTarget weatherTarget;
-	@Shadow
-	private RenderTarget cloudsTarget;
-	@Shadow
-	private PostChain entityEffect;
-	@Shadow
-	private RenderTarget entityTarget;
-	@Shadow
-	private boolean needsFullRenderChunkUpdate;
-	@Final
-	@Shadow
-	private RenderBuffers renderBuffers;
-	@Unique
-	private Entity renderedEntity;
+    @Unique
+    @Nullable
+    public RenderTarget alphaSortVROccludedFramebuffer;
+    @Unique
+    @Nullable
+    public RenderTarget alphaSortVRUnoccludedFramebuffer;
+    @Unique
+    @Nullable
+    public RenderTarget alphaSortVRHandsFramebuffer;
+    @Unique
+    public float selR;
+    @Unique
+    public float selG;
+    @Unique
+    public float selB;
 
-	@Shadow
-	protected abstract void renderHitOutline(PoseStack poseStack, VertexConsumer buffer, Entity entity, double d, double e, double g, BlockPos blockpos, BlockState blockstate);
+    @Unique
+    private Entity capturedEntity;
 
-	@Shadow
-	private static void renderShape(PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j) {
-	}
+    @Final
+    @Shadow
+    private Minecraft minecraft;
+    @Shadow
+    private ClientLevel level;
+    @Shadow
+    private PostChain transparencyChain;
+    @Shadow
+    private RenderTarget translucentTarget;
+    @Shadow
+    private RenderTarget itemEntityTarget;
+    @Shadow
+    private RenderTarget particlesTarget;
+    @Shadow
+    private RenderTarget weatherTarget;
+    @Shadow
+    private RenderTarget cloudsTarget;
+    @Shadow
+    private PostChain entityEffect;
+    @Shadow
+    private RenderTarget entityTarget;
+    @Shadow
+    private boolean needsFullRenderChunkUpdate;
+    @Final
+    @Shadow
+    private RenderBuffers renderBuffers;
+    @Unique
+    private Entity renderedEntity;
 
-	public int rainX() {
-		return 0;
-	}
-	
-	public int rainY() {
-		return 0;
-	}
-	
-	public int rainZ() {
-		return 0;
-	}
+    @Shadow
+    protected abstract void renderHitOutline(PoseStack poseStack, VertexConsumer buffer, Entity entity, double d, double e, double g, BlockPos blockpos, BlockState blockstate);
 
-	@Override
-	public Entity getRenderedEntity() {
-		return this.renderedEntity;
-	}
+    @Shadow
+    private static void renderShape(PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j) {
+    }
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 0), method = "renderSnowAndRain")
-	public int rain1(double d) {
-		Vec3 vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
-		if (ClientDataHolder.getInstance().currentPass == RenderPass.THIRD || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA) {
-			vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolder.getInstance().currentPass).getPosition();
-		}
-		return Mth.floor(vec3.x);
-	}
+    @Override
+    public Entity getRenderedEntity() {
+        return this.renderedEntity;
+    }
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 1), method = "renderSnowAndRain")
-	public int rain2(double d) {
-		Vec3 vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
-		if (ClientDataHolder.getInstance().currentPass == RenderPass.THIRD || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA) {
-			vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolder.getInstance().currentPass).getPosition();
-		}
-		return Mth.floor(vec3.y);
-	}
+//NotFixed
+//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 0), method = "renderSnowAndRain")
+//    public int rain1(double d) {
+//        Vec3 vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
+//        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
+//            vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
+//        }
+//        return Mth.floor(vec3.x);
+//    }
+//
+//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 1), method = "renderSnowAndRain")
+//    public int rain2(double d) {
+//        Vec3 vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
+//        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
+//            vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
+//        }
+//        return Mth.floor(vec3.y);
+//    }
+//
+//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 2), method = "renderSnowAndRain")
+//    public int rain3(double d) {
+//        Vec3 vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
+//        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
+//            vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
+//        }
+//        return Mth.floor(vec3.z);
+//    }
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 2), method = "renderSnowAndRain")
-	public int rain3(double d) {
-		Vec3 vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
-		if (ClientDataHolder.getInstance().currentPass == RenderPass.THIRD || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA) {
-			vec3 = ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolder.getInstance().currentPass).getPosition();
-		}
-		return Mth.floor(vec3.z);
-	}
-	
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	public void onResourceManagerReload(ResourceManager pResourceManager) {
-		ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
-	}
+//	NotFixed
+//	/**
+//	 * @author
+//	 * @reason
+//	 */
+//	@Overwrite
+//	public void onResourceManagerReload(ResourceManager pResourceManager) {
+//		ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
+//	}
 
 //	@Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/resources/ResourceLocation;"), method = "initTransparency")
 //	public ResourceLocation vrShader(String string) {
 //		return new ResourceLocation("shaders/post/vrtransparency.json");
 //	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;graphicsChanged()V"), method = "allChanged()V")
-	public void removeGraphich(LevelRenderer l) {
-		return;
-	}
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;graphicsChanged()V"), method = "allChanged()V")
+    public void removeGraphich(LevelRenderer l) {
+        return;
+    }
 
-	//Moved for sodium
+    //Moved for sodium
 //	@Restriction(conflict = @Condition("sodium"))
 //	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;needsFullRenderChunkUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
 //	public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
 //		this.needsFullRenderChunkUpdate = true;
 //	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;pollLightUpdates()V"), method = "renderLevel")
-	public void noPoll(ClientLevel instance) {
+    /*
+     * Start `renderLevel` lighting poll
+     */
 
-	}
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;pollLightUpdates()V"), method = "renderLevel")
+    public void cancelPollLightUpdates(ClientLevel instance) {
+    }
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"), method = "renderLevel")
-	public int lightupdate(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
-		if (ClientDataHolder.getInstance().currentPass == RenderPass.LEFT) {
-			this.level.getProfiler().popPush("light_update_queue");
-			this.level.pollLightUpdates();
-			this.level.getProfiler().popPush("light_updates");
-			boolean flag = this.level.isLightUpdateQueueEmpty();
-			this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, flag, true);
-		}
-		this.setShaderGroup();
-		return 0; //not used?
-	}
-	
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE), 
-			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V ")
-	public void stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
-		this.minecraft.getProfiler().popPush("stencil");
-		((GameRendererExtension) gameRenderer).drawEyeStencil(false);
-	}
-	
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V")
-	public boolean drawSelf(Camera camera) {
-		boolean renderSelf = ClientDataHolder.getInstance().currentPass == RenderPass.THIRD && ClientDataHolder.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolder.getInstance().currentPass == RenderPass.CAMERA;
-		renderSelf = renderSelf | (ClientDataHolder.getInstance().vrSettings.shouldRenderSelf || ClientDataHolder.getInstance().vrSettings.tmpRenderSelf);
-		return !(!camera.isDetached() && !renderSelf);
-	}
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"), method = "renderLevel")
+    public int runLightingUpdates(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
+        if (!XRState.isXr || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
+            this.level.getProfiler().popPush("light_update_queue");
+            this.level.pollLightUpdates();
+            this.level.getProfiler().popPush("light_updates");
+            boolean flag = this.level.isLightUpdateQueueEmpty();
+            this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, flag, true);
+            instance.runUpdates(i, bl, bl2);
+        }
+        if (XRState.isXr) {
+            this.setShaderGroup();
+        }
+        return 0;
+    }
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z"), method = "renderLevel")
-	public boolean captureEntity(EntityRenderDispatcher instance, Entity entity, Frustum frustum, double d, double e, double f) {
-		this.capturedEntity = entity;
-		return instance.shouldRender(entity, frustum, d, e, f);
-	}
+    /*
+     * End `renderLevel` lighting poll
+     */
 
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;tickCount:I", shift = Shift.BEFORE), method = "renderLevel")
-	public void restoreLoc1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		if (capturedEntity == camera.getEntity()) {
-			((GameRendererExtension)gameRenderer).restoreRVEPos((LivingEntity)capturedEntity);
-		}
-		this.renderedEntity = capturedEntity;
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE),
+            method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V ")
+    public void stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
+        this.minecraft.getProfiler().popPush("stencil");
+        ((GameRendererExtension) gameRenderer).drawEyeStencil(false);
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", shift = Shift.AFTER), method = "renderLevel")
-	public void restoreLoc2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		if (capturedEntity == camera.getEntity()) {
-			((GameRendererExtension)gameRenderer).cacheRVEPos((LivingEntity)capturedEntity);
-			((GameRendererExtension)gameRenderer).setupRVE();
-		}
-		this.renderedEntity = null;
-	}
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V")
+    public boolean drawSelf(Camera camera) {
+        boolean renderSelf = ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA;
+        renderSelf = renderSelf | (ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf || ClientDataHolderVR.getInstance().vrSettings.tmpRenderSelf);
+        return !(!camera.isDetached() && !renderSelf);
+    }
 
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "renderLevel")
-	public void interactOutline(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		this.level.getProfiler().popPush("outline");
-		selR = selG = selB = 1f;
-		Vec3 vec3 = camera.getPosition();
-		double d = vec3.x();
-		double e = vec3.y();
-		double g = vec3.z();
-		for (int c=0;c<2;c++) {
-			if(ClientDataHolder.getInstance().interactTracker.isInteractActive(c) && (ClientDataHolder.getInstance().interactTracker.inBlockHit[c] != null || ClientDataHolder.getInstance().interactTracker.bukkit[c])) {
-				BlockPos blockpos = ClientDataHolder.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolder.getInstance().interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(ClientDataHolder.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
-				BlockState blockstate = this.level.getBlockState(blockpos);
-				this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
-			}
-		}
-	}
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z"), method = "renderLevel")
+    public boolean captureEntity(EntityRenderDispatcher instance, Entity entity, Frustum frustum, double d, double e, double f) {
+        this.capturedEntity = entity;
+        return instance.shouldRender(entity, frustum, d, e, f);
+    }
 
-	@ModifyVariable(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "renderLevel", ordinal = 0, argsOnly = true)
-	public boolean noBlockoutlineOnInteract(boolean renderBlockOutline) {
-		// don't draw the block outline when the interaction outline is active
-		return !(ClientDataHolder.getInstance().interactTracker.isInteractActive(0) && (ClientDataHolder.getInstance().interactTracker.inBlockHit[0] != null || ClientDataHolder.getInstance().interactTracker.bukkit[0])) && renderBlockOutline;
-	}
+    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;tickCount:I", shift = Shift.BEFORE), method = "renderLevel")
+    public void restoreLoc1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+        if (capturedEntity == camera.getEntity()) {
+            ((GameRendererExtension) gameRenderer).restoreRVEPos((LivingEntity) capturedEntity);
+        }
+        this.renderedEntity = capturedEntity;
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;applyModelViewMatrix()V", ordinal = 1), method = "renderLevel")
-	public void renderBukkake(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		this.level.getProfiler().popPush("render bukkake");
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", shift = Shift.AFTER), method = "renderLevel")
+    public void restoreLoc2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+        if (capturedEntity == camera.getEntity()) {
+            ((GameRendererExtension) gameRenderer).cacheRVEPos((LivingEntity) capturedEntity);
+            ((GameRendererExtension) gameRenderer).setupRVE();
+        }
+        this.renderedEntity = null;
+    }
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 13), method = "renderLevel")
-	public void blackOutline(ProfilerFiller instance, String s) {
-		selR = selG = selB = 0f;
-	}
+    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "renderLevel")
+    public void interactOutline(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+        this.level.getProfiler().popPush("outline");
+        selR = selG = selB = 1f;
+        Vec3 vec3 = camera.getPosition();
+        double d = vec3.x();
+        double e = vec3.y();
+        double g = vec3.z();
+        for (int c = 0; c < 2; c++) {
+            if (ClientDataHolderVR.getInstance().interactTracker.isInteractActive(c) && (ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null || ClientDataHolderVR.getInstance().interactTracker.bukkit[c])) {
+                BlockPos blockpos = ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
+                BlockState blockstate = this.level.getBlockState(blockpos);
+                this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
+            }
+        }
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V", ordinal = 0), method = "renderLevel")
-	public void renderFabulous(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		boolean menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
-		boolean menuhandright = menuHandleft || ClientDataHolder.getInstance().interactTracker.hotbar >= 0 && ClientDataHolder.getInstance().vrSettings.vrTouchHotbar;
-		((GameRendererExtension) gameRenderer).renderVRFabulous(f, (LevelRenderer)(Object)this, menuhandright, menuHandleft, poseStack);
-	}
+    @ModifyVariable(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "renderLevel", ordinal = 0, argsOnly = true)
+    public boolean noBlockoutlineOnInteract(boolean renderBlockOutline) {
+        // don't draw the block outline when the interaction outline is active
+        return !(ClientDataHolderVR.getInstance().interactTracker.isInteractActive(0) && (ClientDataHolderVR.getInstance().interactTracker.inBlockHit[0] != null || ClientDataHolderVR.getInstance().interactTracker.bukkit[0])) && renderBlockOutline;
+    }
 
-	private boolean menuHandleft;
-	private boolean menuhandright;
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;applyModelViewMatrix()V", ordinal = 1), method = "renderLevel")
+    public void renderBukkake(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+        this.level.getProfiler().popPush("render bukkake");
+    }
 
-	private boolean guiRendered = false;
-	@Inject(at = @At("HEAD"), method = "renderLevel")
-	public void resetGuiRendered(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		guiRendered = false;
-	}
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", shift = Shift.BEFORE, ordinal = 17),
-			method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V")
-	public void renderFast1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
-		menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
-		menuhandright = menuHandleft || ClientDataHolder.getInstance().interactTracker.hotbar >= 0 && ClientDataHolder.getInstance().vrSettings.vrTouchHotbar;
-		((GameRendererExtension) gameRenderer).renderVrFast(f, false, menuhandright, menuHandleft, poseStack);
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 13), method = "renderLevel")
+    public void blackOutline(ProfilerFiller instance, String s) {
+        selR = selG = selB = 0f;
+    }
 
-		if ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive() && ClientDataHolder.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID) {
-			// shaders active, and render gui before translucents
-			((GameRendererExtension) gameRenderer).renderVrFast(f, true, menuhandright, menuHandleft, poseStack);
-			guiRendered = true;
-		}
-	}
-	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = Shift.BEFORE, ordinal = 3),
-			method = "renderLevel")
-	public void renderFast2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-		if (transparencyChain == null && (!((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()) || ClientDataHolder.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.AFTER_TRANSLUCENT)) {
-			// no shaders, or shaders, and gui after translucents
-			((GameRendererExtension) gameRenderer).renderVrFast(f, true, menuhandright, menuHandleft, poseStack);
-			guiRendered = true;
-		}
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V", ordinal = 0), method = "renderLevel")
+    public void renderFabulous(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+        boolean menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
+        boolean menuhandright = menuHandleft || ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar;
+        ((GameRendererExtension) gameRenderer).renderVRFabulous(f, (LevelRenderer) (Object) this, menuhandright, menuHandleft, poseStack);
+    }
 
-	// if the gui didn't render yet, and something canceled the level renderer, render it now.
-	// or if shaders are on, and option AFTER_SHADER is selected
-	@Inject(at = @At("RETURN"), method = "renderLevel")
-	public void renderFast2Final(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
-		if (!guiRendered && transparencyChain == null) {
-			((GameRendererExtension) gameRenderer).renderVrFast(f, true, menuhandright, menuHandleft, poseStack);
-			guiRendered = true;
-		}
-	}
+    private boolean menuHandleft;
+    private boolean menuhandright;
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderShape(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/phys/shapes/VoxelShape;DDDFFFF)V"), method = "renderHitOutline")
-	public void colorHitBox(PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j) {
-		renderShape(poseStack, vertexConsumer, voxelShape, d, e,f, this.selR, this.selG, this.selB,j);
-	}
+    private boolean guiRendered = false;
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 11, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1011(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+    @Inject(at = @At("HEAD"), method = "renderLevel")
+    public void resetGuiRendered(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+        guiRendered = false;
+    }
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
-		}
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", shift = Shift.BEFORE, ordinal = 17),
+            method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V")
+    public void renderFast1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
+        if (!XRState.isXr) {
+            return;
+        }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 12, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1012(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+        menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
+        menuhandright = menuHandleft || ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar;
+        ((GameRendererExtension) gameRenderer).renderVrFast(f, false, menuhandright, menuHandleft, poseStack);
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
-		}
-	}
+        if ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive() && ClientDataHolderVR.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID) {
+            // shaders active, and render gui before translucents
+            ((GameRendererExtension) gameRenderer).renderVrFast(f, true, menuhandright, menuHandleft, poseStack);
+            guiRendered = true;
+        }
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 13, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1013(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = Shift.BEFORE, ordinal = 3),
+            method = "renderLevel")
+    public void renderFast2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+        if (!XRState.isXr) {
+            return;
+        }
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
-		}
-	}
+        if (transparencyChain == null && (!((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()) || ClientDataHolderVR.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.AFTER_TRANSLUCENT)) {
+            // no shaders, or shaders, and gui after translucents
+            ((GameRendererExtension) gameRenderer).renderVrFast(f, true, menuhandright, menuHandleft, poseStack);
+            guiRendered = true;
+        }
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 14, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1014(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+    // if the gui didn't render yet, and something canceled the level renderer, render it now.
+    // or if shaders are on, and option AFTER_SHADER is selected
+    @Inject(at = @At("RETURN"), method = "renderLevel")
+    public void renderFast2Final(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
+        if (!XRState.isXr) {
+            return;
+        }
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
-		}
-	}
+        if (!guiRendered && transparencyChain == null) {
+            ((GameRendererExtension) gameRenderer).renderVrFast(f, true, menuhandright, menuHandleft, poseStack);
+            guiRendered = true;
+        }
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 19, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1019(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderShape(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/phys/shapes/VoxelShape;DDDFFFF)V"), method = "renderHitOutline")
+    public void colorHitBox(PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j) {
+        renderShape(poseStack, vertexConsumer, voxelShape, d, e, f, this.selR, this.selG, this.selB, j);
+    }
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,750);
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(1,750);
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 11, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1011(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
-		}
-	}
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
+        }
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 20, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1020(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 12, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1012(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,750);
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(1,750);
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
+        }
+    }
 
-		}
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 13, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1013(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 21, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1021(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
+        }
+    }
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,750);
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(1,750);
-		}
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 14, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1014(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 28, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1030(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
+        }
+    }
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,500);
-		}
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 19, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1019(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 29, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1031(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 750);
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 750);
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,1250);
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(1,1250);
-		}
-	}
+        }
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 33, shift = Shift.BEFORE), method = "levelEvent")
-	public void levelEvent1036(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-		boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 20, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1020(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
-		if (playerNear) {
-			ClientDataHolder.getInstance().vr.triggerHapticPulse(0,250);
-		}
-	}
-	
-	public void setShaderGroup() {
-		this.transparencyChain = null;
-		this.translucentTarget = null;
-		this.itemEntityTarget = null;
-		this.particlesTarget = null;
-		this.weatherTarget = null;
-		this.cloudsTarget = null;
-		this.alphaSortVRHandsFramebuffer = null;
-		this.alphaSortVROccludedFramebuffer = null;
-		this.alphaSortVRUnoccludedFramebuffer = null;
-		PostChain postchain = ClientDataHolder.getInstance().vrRenderer.alphaShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 750);
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 750);
 
-		if (postchain != null) {
-			this.transparencyChain = postchain;
-			this.translucentTarget = postchain.getTempTarget("translucent");
-			this.itemEntityTarget = postchain.getTempTarget("itemEntity");
-			this.particlesTarget = postchain.getTempTarget("particles");
-			this.weatherTarget = postchain.getTempTarget("weather");
-			this.cloudsTarget = postchain.getTempTarget("clouds");
-			this.alphaSortVRHandsFramebuffer = postchain.getTempTarget("vrhands");
-			this.alphaSortVROccludedFramebuffer = postchain.getTempTarget("vroccluded");
-			this.alphaSortVRUnoccludedFramebuffer = postchain.getTempTarget("vrunoccluded");
-		}
+        }
+    }
 
-		this.entityEffect = null;
-		this.entityTarget = null;
-		PostChain postchain2 = ClientDataHolder.getInstance().vrRenderer.entityShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 21, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1021(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
-		if (postchain2 != null) {
-			this.entityEffect = postchain2;
-			this.entityTarget = postchain2.getTempTarget("final");
-		}
-	}
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 750);
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 750);
+        }
+    }
 
-	@Override
-	public RenderTarget getAlphaSortVROccludedFramebuffer() {
-		return alphaSortVROccludedFramebuffer;
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 28, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1030(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
 
-	@Override
-	public RenderTarget getAlphaSortVRUnoccludedFramebuffer() {
-		return alphaSortVRUnoccludedFramebuffer;
-	}
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 500);
+        }
+    }
 
-	@Override
-	public RenderTarget getAlphaSortVRHandsFramebuffer() {
-		return alphaSortVRHandsFramebuffer;
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 29, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1031(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 1250);
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 1250);
+        }
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 33, shift = Shift.BEFORE), method = "levelEvent")
+    public void levelEvent1036(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+
+        if (playerNear) {
+            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
+        }
+    }
+
+    public void setShaderGroup() {
+        this.transparencyChain = null;
+        this.translucentTarget = null;
+        this.itemEntityTarget = null;
+        this.particlesTarget = null;
+        this.weatherTarget = null;
+        this.cloudsTarget = null;
+        this.alphaSortVRHandsFramebuffer = null;
+        this.alphaSortVROccludedFramebuffer = null;
+        this.alphaSortVRUnoccludedFramebuffer = null;
+        PostChain postchain = ClientDataHolderVR.getInstance().vrRenderer.alphaShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
+
+        if (postchain != null) {
+            this.transparencyChain = postchain;
+            this.translucentTarget = postchain.getTempTarget("translucent");
+            this.itemEntityTarget = postchain.getTempTarget("itemEntity");
+            this.particlesTarget = postchain.getTempTarget("particles");
+            this.weatherTarget = postchain.getTempTarget("weather");
+            this.cloudsTarget = postchain.getTempTarget("clouds");
+            this.alphaSortVRHandsFramebuffer = postchain.getTempTarget("vrhands");
+            this.alphaSortVROccludedFramebuffer = postchain.getTempTarget("vroccluded");
+            this.alphaSortVRUnoccludedFramebuffer = postchain.getTempTarget("vrunoccluded");
+        }
+
+        this.entityEffect = null;
+        this.entityTarget = null;
+        PostChain postchain2 = ClientDataHolderVR.getInstance().vrRenderer.entityShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
+
+        if (postchain2 != null) {
+            this.entityEffect = postchain2;
+            this.entityTarget = postchain2.getTempTarget("final");
+        }
+    }
+
+    @Override
+    public RenderTarget getAlphaSortVROccludedFramebuffer() {
+        return alphaSortVROccludedFramebuffer;
+    }
+
+    @Override
+    public RenderTarget getAlphaSortVRUnoccludedFramebuffer() {
+        return alphaSortVRUnoccludedFramebuffer;
+    }
+
+    @Override
+    public RenderTarget getAlphaSortVRHandsFramebuffer() {
+        return alphaSortVRHandsFramebuffer;
+    }
 }

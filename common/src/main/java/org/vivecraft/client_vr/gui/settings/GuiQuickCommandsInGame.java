@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gui.settings;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.KeyMapping;
@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 
 public class GuiQuickCommandsInGame extends Screen
 {
-	protected ClientDataHolder dataholder = ClientDataHolder.getInstance();
+	protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
     private int field_146445_a;
     private int field_146444_f;
     private static final String __OBFID = "CL_00000703";

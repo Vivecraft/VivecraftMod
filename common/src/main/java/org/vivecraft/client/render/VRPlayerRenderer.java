@@ -2,7 +2,7 @@ package org.vivecraft.client.render;
 
 import java.util.UUID;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -68,7 +68,7 @@ public class VRPlayerRenderer extends PlayerRenderer
     protected void setupRotations(AbstractClientPlayer pEntityLiving, PoseStack pMatrixStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks)
     {
     	UUID uuid = pEntityLiving.getUUID();
-    	if (ClientDataHolder.getInstance().currentPass != RenderPass.GUI && PlayerModelController.getInstance().isTracked(uuid))
+    	if (ClientDataHolderVR.getInstance().currentPass != RenderPass.GUI && PlayerModelController.getInstance().isTracked(uuid))
     	{
     		PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(uuid);
     		pRotationYaw = (float)Math.toDegrees(playermodelcontroller$rotinfo.getBodyYawRadians());

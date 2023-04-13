@@ -6,7 +6,7 @@ import java.util.List;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class ScreenUtils {
 
@@ -40,13 +40,13 @@ public class ScreenUtils {
     }
 
     public static int getBGFrom(){
-        if(ClientDataHolder.getInstance().vrSettings==null || ClientDataHolder.getInstance().vrSettings.menuBackground)
+        if(ClientDataHolderVR.getInstance().vrSettings==null || ClientDataHolderVR.getInstance().vrSettings.menuBackground)
             return -1072689136;
         return 0;
     }
 
     public static int getBGTo(){
-        if(ClientDataHolder.getInstance().vrSettings==null || ClientDataHolder.getInstance().vrSettings.menuBackground)
+        if(ClientDataHolderVR.getInstance().vrSettings==null || ClientDataHolderVR.getInstance().vrSettings.menuBackground)
             return -804253680;
         return 0;
     }

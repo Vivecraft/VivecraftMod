@@ -15,7 +15,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.BlockTags;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
@@ -42,7 +43,7 @@ public class TeleportTracker extends Tracker
     public double lastTeleportArcDisplayOffset = 0.0D;
     public VRMovementStyle vrMovementStyle;
 
-    public TeleportTracker(Minecraft mc, ClientDataHolder dh)
+    public TeleportTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
         this.vrMovementStyle = new VRMovementStyle(dh);
@@ -101,7 +102,7 @@ public class TeleportTracker extends Tracker
 
         boolean flag = false;
         Vec3 vec3 = null;
-        boolean flag1 = this.dh.vr.keyTeleport.isDown() && this.dh.vrPlayer.isTeleportEnabled();
+        boolean flag1 = VivecraftVRMod.INSTANCE.keyTeleport.isDown() && this.dh.vrPlayer.isTeleportEnabled();
         boolean flag2 = this.dh.vrSettings.seated && !this.dh.vrPlayer.getFreeMove() && (player.input.forwardImpulse != 0.0F || player.input.leftImpulse != 0.0F);
 
         if ((flag1 || flag2) && !player.isPassenger())
@@ -364,7 +365,7 @@ public class TeleportTracker extends Tracker
     private void doTeleportCallback()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolder dataholder = ClientDataHolder.getInstance();
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         dataholder.swingTracker.disableSwing = 3;
 
         if (ClientNetworkHelper.isLimitedSurvivalTeleport())

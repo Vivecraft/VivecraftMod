@@ -4,7 +4,7 @@
  */
 package org.vivecraft.client_vr.settings;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.IrisHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.OptionsExtension;
@@ -1083,7 +1083,7 @@ public class VRSettings
         PHYSICAL_KEYBOARD_SCALE(true, false, 0.75f, 1.5f, 0.01f, -1) { // Keyboard Size
             @Override
             void onOptionChange() {
-                KeyboardHandler.physicalKeyboard.setScale(ClientDataHolder.getInstance().vrSettings.physicalKeyboardScale);
+                KeyboardHandler.physicalKeyboard.setScale(ClientDataHolderVR.getInstance().vrSettings.physicalKeyboardScale);
             }
         },
         PHYSICAL_KEYBOARD_THEME(false, false), // Keyboard Theme
@@ -1113,7 +1113,7 @@ public class VRSettings
             @Override
             void onOptionChange() {
                 if (!((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
-                    ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
                 }
             }
 
@@ -1169,19 +1169,19 @@ public class VRSettings
         MIXED_REALITY_UNITY_LIKE(false, true, "vivecraft.options.unity", "vivecraft.options.sidebyside") { // Layout
             @Override
             void onOptionChange() {
-            	ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+            	ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_UNDISTORTED(false, true) { // Undistorted Pass
             @Override
             void onOptionChange() {
-            	ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+            	ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_ALPHA_MASK(false, true) { // Alpha Mask
             @Override
             void onOptionChange() {
-            	ClientDataHolder.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+            	ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_FOV(true, false, 0, 179, 1, 0) { // Third Person FOV
@@ -1274,8 +1274,8 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-                ClientDataHolder.getInstance().vrPlayer.roomScaleMovementDelay = 2;
-                ClientDataHolder.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(Minecraft.getInstance().player, false, true);
+                ClientDataHolderVR.getInstance().vrPlayer.roomScaleMovementDelay = 2;
+                ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(Minecraft.getInstance().player, false, true);
                 VRPlayer.get().preTick();
             }
         },
@@ -1322,7 +1322,7 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-            	ClientDataHolder.getInstance().vrSettings.worldRotation = 0;
+            	ClientDataHolderVR.getInstance().vrSettings.worldRotation = 0;
             }
         },
         TOUCH_HOTBAR(false, true), // Touch Hotbar Enabled
@@ -1330,7 +1330,7 @@ public class VRSettings
         RENDER_SCALEFACTOR(true, false, 0.1f, 9f, 0.1f, 0) { // Resolution
             @Override
             String getDisplayString(String prefix, Object value) {
-                RenderTarget eye0 = ClientDataHolder.getInstance().vrRenderer.framebufferEye0;
+                RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
                 return prefix + Math.round((float)value * 100) + "% (" + (int)Math.ceil(eye0.viewWidth * Math.sqrt((float)value)) + "x" + (int)Math.ceil(eye0.viewHeight * Math.sqrt((float)value)) + ")";
             }
         },
@@ -1643,30 +1643,30 @@ public class VRSettings
         vrSettings.saveOptions();
 
         if (!vrSettings.badStereoProviderPluginID.isEmpty()) {
-            vrSettings.stereoProviderPluginID = ClientDataHolder.getInstance().vrSettings.badStereoProviderPluginID;
+            vrSettings.stereoProviderPluginID = ClientDataHolderVR.getInstance().vrSettings.badStereoProviderPluginID;
             vrSettings.badStereoProviderPluginID = "";
             vrSettings.saveOptions();
         }
 
-        ClientDataHolder.getInstance().vrSettings = vrSettings;
+        ClientDataHolderVR.getInstance().vrSettings = vrSettings;
     }
 
     public static synchronized void loadAll( Minecraft mc )
     {
         mc.options.load();
-        ClientDataHolder.getInstance().vrSettings.loadOptions();
+        ClientDataHolderVR.getInstance().vrSettings.loadOptions();
     }
 
     public static synchronized void saveAll( Minecraft mc )
     {
         mc.options.save();
-        ClientDataHolder.getInstance().vrSettings.saveOptions();
+        ClientDataHolderVR.getInstance().vrSettings.saveOptions();
     }
 
     public static synchronized void resetAll( Minecraft mc )
     {
     	((OptionsExtension) mc.options).resetSettings();
-        ClientDataHolder.getInstance().vrSettings.resetSettings();
+        ClientDataHolderVR.getInstance().vrSettings.resetSettings();
     }
 
     public static synchronized String getCurrentProfile()

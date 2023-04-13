@@ -1,6 +1,7 @@
 package org.vivecraft.client_vr.gameplay.screenhandlers;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_xr.XRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.provider.ControllerType;
@@ -44,7 +45,7 @@ import net.minecraft.world.phys.Vec3;
 public class GuiHandler
 {
     public static Minecraft mc = Minecraft.getInstance();
-    public static ClientDataHolder dh = ClientDataHolder.getInstance();
+    public static ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
     static boolean lastPressedLeftClick;
     static boolean lastPressedRightClick;
     static boolean lastPressedMiddleClick;
@@ -299,6 +300,10 @@ public class GuiHandler
 
     public static void onScreenChanged(Screen previousGuiScreen, Screen newScreen, boolean unpressKeys)
     {
+        if (!XRState.isXr) {
+            return;
+        }
+
         if (unpressKeys)
         {
             dh.vr.ignorePressesNextFrame = true;

@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.client_vr.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.client.ClientNetworkHelper;
 
 import net.minecraft.client.Minecraft;
@@ -15,7 +15,7 @@ public class CrawlTracker extends Tracker
     public boolean crawling;
     public boolean crawlsteresis;
 
-    public CrawlTracker(Minecraft mc, ClientDataHolder dh)
+    public CrawlTracker(Minecraft mc, ClientDataHolderVR dh)
     {
         super(mc, dh);
     }
