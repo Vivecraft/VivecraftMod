@@ -4,10 +4,10 @@ import org.joml.Matrix4f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.IrisHelper;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client_xr.RenderTargets;
 import org.vivecraft.client_xr.XRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
-import org.vivecraft.client.extensions.RenderTargetExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -430,7 +430,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         this.alphaSortVRHandsFramebuffer = null;
         this.alphaSortVROccludedFramebuffer = null;
         this.alphaSortVRUnoccludedFramebuffer = null;
-        PostChain postchain = ClientDataHolderVR.getInstance().vrRenderer.alphaShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
+        PostChain postchain = RenderTargets.wrp.transparencyChain;
 
         if (postchain != null) {
             this.transparencyChain = postchain;
@@ -446,7 +446,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
         this.entityEffect = null;
         this.entityTarget = null;
-        PostChain postchain2 = ClientDataHolderVR.getInstance().vrRenderer.entityShaders.get(((RenderTargetExtension) this.minecraft.getMainRenderTarget()).getName());
+        PostChain postchain2 = RenderTargets.wrp.outlineChain;
 
         if (postchain2 != null) {
             this.entityEffect = postchain2;

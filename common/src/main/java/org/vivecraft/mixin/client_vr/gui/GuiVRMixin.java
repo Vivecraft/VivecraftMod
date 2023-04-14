@@ -66,7 +66,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     }
     @Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)
     public void cancelRenderCrosshair(PoseStack poseStack, CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (XRState.isXr) {
             ci.cancel();
         }
     }

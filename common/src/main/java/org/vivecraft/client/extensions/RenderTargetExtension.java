@@ -22,8 +22,6 @@ public interface RenderTargetExtension {
 		GL30.glGenerateMipmap(3553);
 	}
 
-	void setName(String name);
-
 	void setTextid(int texid);
 
 	void setUseStencil(boolean useStencil);

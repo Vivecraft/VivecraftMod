@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.provider;
 
-import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.GlUtil;
@@ -12,9 +11,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -32,6 +29,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.client_xr.WorldRenderPass;
 import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.RenderPass;
@@ -40,22 +38,17 @@ import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client.Xplat;
 
-import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public abstract class VRRenderer
 {
     public static final String RENDER_SETUP_FAILURE_MESSAGE = "Failed to initialise stereo rendering plugin: ";
-    public Map<String, PostChain> alphaShaders = new HashMap<>();
     public RenderTarget cameraFramebuffer;
     public RenderTarget cameraRenderFramebuffer;
     protected int dispLastWidth;
     protected int dispLastHeight;
-    public Map<String, PostChain> entityShaders = new HashMap<>();
     public Matrix4f[] eyeproj = new Matrix4f[2];
     public RenderTarget framebufferEye0;
     public RenderTarget framebufferEye1;
@@ -114,14 +107,6 @@ public abstract class VRRenderer
     public abstract void endFrame() throws RenderConfigException;
 
     public abstract boolean providesStencilMask();
-
-    protected PostChain createShaderGroup(ResourceLocation resource, RenderTarget fb) throws JsonSyntaxException, IOException
-    {
-        Minecraft minecraft = Minecraft.getInstance();
-        PostChain postchain = new PostChain(minecraft.getTextureManager(), minecraft.getResourceManager(), fb, resource);
-        postchain.resize(fb.viewWidth, fb.viewHeight);
-        return postchain;
-    }
 
     public void deleteRenderTextures()
     {
@@ -491,18 +476,23 @@ public abstract class VRRenderer
 
             if (this.framebufferVrRender != null)
             {
-                this.framebufferVrRender.destroyBuffers();
+                WorldRenderPass.stereoXR.close();
+                WorldRenderPass.stereoXR = null;
                 this.framebufferVrRender = null;
             }
 
             if (this.framebufferMR != null)
             {
+                WorldRenderPass.mixedReality.close();
+                WorldRenderPass.mixedReality = null;
                 this.framebufferMR.destroyBuffers();
                 this.framebufferMR = null;
             }
 
             if (this.framebufferUndistorted != null)
             {
+                WorldRenderPass.center.close();
+                WorldRenderPass.center = null;
                 this.framebufferUndistorted.destroyBuffers();
                 this.framebufferUndistorted = null;
             }
@@ -527,12 +517,16 @@ public abstract class VRRenderer
 
             if (this.telescopeFramebufferL != null)
             {
+                WorldRenderPass.leftTelescope.close();
+                WorldRenderPass.leftTelescope = null;
                 this.telescopeFramebufferL.destroyBuffers();
                 this.telescopeFramebufferL = null;
             }
 
             if (this.telescopeFramebufferR != null)
             {
+                WorldRenderPass.rightTelescope.close();
+                WorldRenderPass.rightTelescope = null;
                 this.telescopeFramebufferR.destroyBuffers();
                 this.telescopeFramebufferR = null;
             }
@@ -545,6 +539,8 @@ public abstract class VRRenderer
 
             if (this.cameraRenderFramebuffer != null)
             {
+                WorldRenderPass.camera.close();
+                WorldRenderPass.camera = null;
                 this.cameraRenderFramebuffer.destroyBuffers();
                 this.cameraRenderFramebuffer = null;
             }
@@ -597,6 +593,7 @@ public abstract class VRRenderer
             i = (int)Math.ceil((double)((float)eyew * this.renderScale));
             j = (int)Math.ceil((double)((float)eyeh * this.renderScale));
             this.framebufferVrRender = new VRTextureTarget("3D Render", i, j, true, false, -1, true, true,  dataholder.vrSettings.vrUseStencil);
+            WorldRenderPass.stereoXR = new WorldRenderPass((VRTextureTarget) this.framebufferVrRender);
             dataholder.print(this.framebufferVrRender.toString());
             this.checkGLError("3D framebuffer setup");
             this.mirrorFBWidth = minecraft.getWindow().getScreenWidth();
@@ -628,6 +625,7 @@ public abstract class VRRenderer
             if (list.contains(RenderPass.THIRD) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()))
             {
                 this.framebufferMR = new VRTextureTarget("Mixed Reality Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, true, false, false);
+                WorldRenderPass.mixedReality = new WorldRenderPass((VRTextureTarget) this.framebufferMR);
                 dataholder.print(this.framebufferMR.toString());
                 this.checkGLError("Mixed reality framebuffer setup");
             }
@@ -635,6 +633,7 @@ public abstract class VRRenderer
             if (list.contains(RenderPass.CENTER) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()))
             {
                 this.framebufferUndistorted = new VRTextureTarget("Undistorted View Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, false, false, false);
+                WorldRenderPass.center = new WorldRenderPass((VRTextureTarget) this.framebufferUndistorted);
                 dataholder.print(this.framebufferUndistorted.toString());
                 this.checkGLError("Undistorted view framebuffer setup");
             }
@@ -659,11 +658,13 @@ public abstract class VRRenderer
 
             this.checkGLError("Mirror framebuffer setup");
             this.telescopeFramebufferR = new VRTextureTarget("TelescopeR", j2, k2, true, false, -1, true, false, false);
+            WorldRenderPass.rightTelescope = new WorldRenderPass((VRTextureTarget) this.telescopeFramebufferR);
             dataholder.print(this.telescopeFramebufferR.toString());
             this.checkGLError("TelescopeR framebuffer setup");
             this.telescopeFramebufferR.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             this.telescopeFramebufferR.clear(Minecraft.ON_OSX);
             this.telescopeFramebufferL = new VRTextureTarget("TelescopeL", j2, k2, true, false, -1, true, false, false);
+            WorldRenderPass.leftTelescope = new WorldRenderPass((VRTextureTarget) this.telescopeFramebufferL);
             dataholder.print(this.telescopeFramebufferL.toString());
             this.telescopeFramebufferL.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             this.telescopeFramebufferL.clear(Minecraft.ON_OSX);
@@ -696,6 +697,7 @@ public abstract class VRRenderer
             dataholder.print(this.cameraFramebuffer.toString());
             this.checkGLError("Camera framebuffer setup");
             this.cameraRenderFramebuffer = new VRTextureTarget("Handheld Camera Render", l1, i2, true, false, -1, true, true, false);
+            WorldRenderPass.camera = new WorldRenderPass((VRTextureTarget) this.cameraRenderFramebuffer);
             dataholder.print(this.cameraRenderFramebuffer.toString());
             this.checkGLError("Camera render framebuffer setup");
             ((GameRendererExtension) minecraft.gameRenderer).setupClipPlanes();
@@ -732,60 +734,6 @@ public abstract class VRRenderer
                 ShaderHelper.checkGLError("init depth shader");
                 VRShaders.setupFOVReduction();
                 ShaderHelper.checkGLError("init FOV shader");
-                List<PostChain> list1 = new ArrayList<>();
-                list1.addAll(this.entityShaders.values());
-                this.entityShaders.clear();
-                ResourceLocation resourcelocation = new ResourceLocation("shaders/post/entity_outline.json");
-                this.entityShaders.put(((RenderTargetExtension) this.framebufferVrRender).getName(), this.createShaderGroup(resourcelocation, this.framebufferVrRender));
-
-                if (list.contains(RenderPass.THIRD))
-                {
-                    this.entityShaders.put(((RenderTargetExtension) this.framebufferMR).getName(), this.createShaderGroup(resourcelocation, this.framebufferMR));
-                }
-
-                if (list.contains(RenderPass.CENTER))
-                {
-                    this.entityShaders.put(((RenderTargetExtension) this.framebufferUndistorted).getName(), this.createShaderGroup(resourcelocation, this.framebufferUndistorted));
-                }
-
-                this.entityShaders.put(((RenderTargetExtension) this.telescopeFramebufferL).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferL));
-                this.entityShaders.put(((RenderTargetExtension) this.telescopeFramebufferR).getName(), this.createShaderGroup(resourcelocation, this.telescopeFramebufferR));
-                this.entityShaders.put(((RenderTargetExtension) this.cameraRenderFramebuffer).getName(), this.createShaderGroup(resourcelocation, this.cameraRenderFramebuffer));
-
-                for (PostChain postchain : list1)
-                {
-                    postchain.close();
-                }
-
-                list1.clear();
-                list1.addAll(this.alphaShaders.values());
-                this.alphaShaders.clear();
-
-                if (Minecraft.useShaderTransparency())
-                {
-                    ResourceLocation resourcelocation1 = new ResourceLocation("shaders/post/vrtransparency.json");
-                    this.alphaShaders.put(((RenderTargetExtension) this.framebufferVrRender).getName(), this.createShaderGroup(resourcelocation1, this.framebufferVrRender));
-
-                    if (list.contains(RenderPass.THIRD))
-                    {
-                        this.alphaShaders.put(((RenderTargetExtension) this.framebufferMR).getName(), this.createShaderGroup(resourcelocation1, this.framebufferMR));
-                    }
-
-                    if (list.contains(RenderPass.CENTER))
-                    {
-                        this.alphaShaders.put(((RenderTargetExtension) this.framebufferUndistorted).getName(), this.createShaderGroup(resourcelocation1, this.framebufferUndistorted));
-                    }
-
-                    this.alphaShaders.put(((RenderTargetExtension) this.telescopeFramebufferL).getName(), this.createShaderGroup(resourcelocation1, this.telescopeFramebufferL));
-                    this.alphaShaders.put(((RenderTargetExtension) this.telescopeFramebufferR).getName(), this.createShaderGroup(resourcelocation1, this.telescopeFramebufferR));
-                    this.alphaShaders.put(((RenderTargetExtension) this.cameraRenderFramebuffer).getName(), this.createShaderGroup(resourcelocation1, this.cameraRenderFramebuffer));
-                }
-
-                for (PostChain postchain1 : list1)
-                {
-                    postchain1.close();
-                }
-
                 minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
             }
             catch (Exception exception1)

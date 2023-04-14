@@ -10,13 +10,6 @@ import org.vivecraft.client_xr.XRState;
 @Mixin(Window.class)
 public abstract class WindowVRMixin {
 
-// NotFixed
-//	@Redirect(at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSetFramebufferSizeCallback(JLorg/lwjgl/glfw/GLFWFramebufferSizeCallbackI;)Lorg/lwjgl/glfw/GLFWFramebufferSizeCallback;", remap = false),
-//			method = "<init>(Lcom/mojang/blaze3d/platform/WindowEventHandler;Lcom/mojang/blaze3d/platform/ScreenManager;Lcom/mojang/blaze3d/platform/DisplayData;Ljava/lang/String;Ljava/lang/String;)V")
-//	public GLFWFramebufferSizeCallback removebuffer(long l, GLFWFramebufferSizeCallbackI cl) {
-//		return null;
-//	}
-
 	@ModifyVariable(method = "updateVsync", ordinal = 0, at = @At("HEAD"), argsOnly = true)
 	boolean overwriteVsync(boolean v) {
 		if (XRState.isXr) {
@@ -24,17 +17,6 @@ public abstract class WindowVRMixin {
 		}
 		return v;
 	}
-
-// NotFixed
-//	@Inject(at =  @At("HEAD"), method = "onResize(JII)V", cancellable = true)
-//	public void resize(long pWindowPointer, int p_85429_, int pWindowWidth, CallbackInfo info) {
-//		if (pWindowWidth * p_85429_ != 0) {
-//			this.width = p_85429_;
-//			this.height = pWindowWidth;
-//			this.eventHandler.resizeDisplay();
-//		}
-//		info.cancel();
-//	}
 
 	@Inject(method = {"getScreenWidth", "getWidth"}, at = @At("HEAD"), cancellable = true)
 	void getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {

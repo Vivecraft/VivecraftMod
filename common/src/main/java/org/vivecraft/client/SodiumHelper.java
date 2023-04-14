@@ -24,6 +24,11 @@ public class SodiumHelper {
 
         fences.enqueue(fence);
     }
+
+    public static boolean isLoaded() {
+        return Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium");
+    }
+
 // NotFixed
 //    public static void vignette(boolean b) {
 //        SodiumClientMod.options().quality.enableVignette = b;

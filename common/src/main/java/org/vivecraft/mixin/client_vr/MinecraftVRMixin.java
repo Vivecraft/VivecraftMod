@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.client_vr;
 
 
+import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
@@ -8,7 +9,6 @@ import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -20,6 +20,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -78,6 +79,8 @@ import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client_xr.RenderTargets;
+import org.vivecraft.client_xr.WorldRenderPass;
 import org.vivecraft.common.utils.math.Vector3;
 //import org.vivecraft.provider.ovr_lwjgl.MC_OVR;
 //import org.vivecraft.provider.ovr_lwjgl.OVR_StereoRenderer;
@@ -262,18 +265,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Shadow
     protected abstract boolean startAttack();
 
-// NotFixed
-//	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getWidth()I", ordinal = 0), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
-//	public int mainWidth(Window w) {
-//		return this.window.getScreenWidth();
-//	}
-//
+    @Shadow public abstract RenderTarget getMainRenderTarget();
 
-// NotFixed
-//	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;getHeight()I", ordinal = 0), method = "<init>(Lnet/minecraft/client/main/GameConfig;)V")
-//	public int mainHeight(Window w) {
-//		return this.window.getScreenHeight();
-//	}
+    @Inject(method = "<init>", at = @At("RETURN"))
+    void afterInit(GameConfig gameConfig, CallbackInfo ci) {
+        RenderTargets.INSTANCE = new RenderTargets((MainTarget) this.getMainRenderTarget());
+    }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay initVivecraft(Overlay overlay){
@@ -325,7 +322,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     public void destroy(CallbackInfo info) {
         try {
             ClientDataHolderVR.getInstance().vr.destroy();
-        } catch (Exception exception) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -334,12 +331,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         if (!XRState.isXr) {
             return;
         }
-
-        if (Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium")) {
+        if (SodiumHelper.isLoaded()) {
             SodiumHelper.preRenderMinecraft();
         }
         newRunTick(bl);
-        if (Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium")) {
+        if (SodiumHelper.isLoaded()) {
             SodiumHelper.postRenderMinecraft();
         }
         callback.cancel();
@@ -616,29 +612,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 ClientDataHolderVR.getInstance().currentPass = renderpass;
 
                 switch (renderpass) {
-                    case LEFT:
-                    case RIGHT:
-                        this.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.framebufferVrRender;
-                        break;
-
-                    case CENTER:
-                        this.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.framebufferUndistorted;
-                        break;
-
-                    case THIRD:
-                        this.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.framebufferMR;
-                        break;
-
-                    case SCOPEL:
-                        this.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.telescopeFramebufferL;
-                        break;
-
-                    case SCOPER:
-                        this.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.telescopeFramebufferR;
-                        break;
-
-                    case CAMERA:
-                        this.mainRenderTarget = ClientDataHolderVR.getInstance().vrRenderer.cameraRenderFramebuffer;
+                    case LEFT, RIGHT -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.stereoXR);
+                    case CENTER -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.center);
+                    case THIRD -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.mixedReality);
+                    case SCOPEL -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.leftTelescope);
+                    case SCOPER -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.rightTelescope);
+                    case CAMERA -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.camera);
                 }
 
                 this.profiler.push("Eye:" + ClientDataHolderVR.getInstance().currentPass);
@@ -746,28 +725,23 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         }
         this.profiler.pop();
     }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setGuiScale(D)V", shift = Shift.AFTER), method = "resizeDisplay()V")
-    public void reinitFrame(CallbackInfo info) {
-        if (ClientDataHolderVR.getInstance().vrRenderer != null) {
-            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Main Window Changed");
-        }
-    }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;"), method = "resizeDisplay()V")
-    public RenderTarget removeRenderTarget(Minecraft mc) {
-        return null;
-    }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;resize(IIZ)V"), method = "resizeDisplay()V")
-    public void cancelResizeTarget(RenderTarget r, int w, int h, boolean b) {
-        return;
-    }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resize(II)V"), method = "resizeDisplay()V")
-    public void cancelResizeGame(GameRenderer r, int w, int h) {
-        return;
-    }
+// NotFixed
+//    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setGuiScale(D)V", shift = Shift.AFTER), method = "resizeDisplay()V")
+//    public void reinitFrame(CallbackInfo info) {
+//        if (ClientDataHolderVR.getInstance().vrRenderer != null) {
+//            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Main Window Changed");
+//        }
+//    }
+//
+//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;"), method = "resizeDisplay()V")
+//    public RenderTarget removeRenderTarget(Minecraft mc) {
+//        return RenderTargets.INSTANCE.vanillaRenderTarget;
+//    }
+//
+//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resize(II)V"), method = "resizeDisplay()V")
+//    public void cancelResizeGame(GameRenderer r, int w, int h) {
+//        return;
+//    }
 
     public void drawProfiler() {
         if (this.fpsPieResults != null) {
@@ -960,8 +934,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(0.0D, 0.0D, 0.0D, true);
     }
 
-    @Inject(at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = At.Shift.BEFORE, ordinal = 0), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
-    public void gui(Screen pGuiScreen, CallbackInfo info) {
+    @Inject(method = "setScreen", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferUploader;reset()V"))
+    public void onOpenScreen(Screen pGuiScreen, CallbackInfo info) {
         GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
     }
 

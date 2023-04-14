@@ -25,8 +25,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Unique
 	private int texid = -1;
 	@Unique
-	public String name = "Default";
-	@Unique
 	private boolean linearFilter;
 	@Unique
 	private boolean useStencil = false;
@@ -74,16 +72,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	}
 
 	@Override
-	public void setName(String name) {
-		this.name=name;
-	}
-	
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
 	public void setUseStencil(boolean useStencil){
 		this.useStencil = useStencil;
 	}
@@ -121,10 +109,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public String toString() {
 		StringBuilder stringbuilder = new StringBuilder();
 		stringbuilder.append("\n");
-		if (this.name != null) {
-
-			stringbuilder.append("Name:   " + this.name).append("\n");
-		}
 		stringbuilder.append("Size:   " + this.viewWidth + " x " + this.viewHeight).append("\n");
 		stringbuilder.append("FB ID:  " + this.frameBufferId).append("\n");
 		stringbuilder.append("Tex ID: " + this.colorTextureId).append("\n");
