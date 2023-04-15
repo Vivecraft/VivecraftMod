@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gameplay.screenhandlers;
 
-import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.provider.ControllerType;

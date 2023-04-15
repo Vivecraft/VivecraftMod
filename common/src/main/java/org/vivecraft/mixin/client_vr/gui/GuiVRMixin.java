@@ -3,19 +3,15 @@ package org.vivecraft.mixin.client_vr.gui;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client.SodiumHelper;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.GuiExtension;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.effect.MobEffect;
@@ -32,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(Gui.class)
 public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
@@ -52,7 +48,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
 
     @Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
     void cancelRenderVignette(PoseStack poseStack, Entity entity, CallbackInfo ci) {
-        if (XRState.isXr) {
+        if (RenderPassType.isGuiOnly()) {
             RenderSystem.enableDepthTest();
             ci.cancel();
         }
@@ -60,13 +56,13 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
 
     @Inject(method = "renderTextureOverlay", at = @At("HEAD"), cancellable = true)
     void cancelRenderOverlay(PoseStack poseStack, ResourceLocation resourceLocation, float f, CallbackInfo ci) {
-        if (XRState.isXr) {
+        if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
     @Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)
     public void cancelRenderCrosshair(PoseStack poseStack, CallbackInfo ci) {
-        if (XRState.isXr) {
+        if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }

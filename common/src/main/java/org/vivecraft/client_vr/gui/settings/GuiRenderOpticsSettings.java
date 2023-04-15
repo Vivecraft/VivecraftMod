@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gui.settings;
 
-import org.vivecraft.client.IrisHelper;
+import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.gui.framework.GuiVROption;
 import org.vivecraft.client_vr.gui.framework.GuiVROptionsBase;

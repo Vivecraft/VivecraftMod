@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_xr.XRState;
 
 @Mixin(Window.class)
@@ -44,32 +45,31 @@ public abstract class WindowVRMixin {
 		}
 	}
 
-// NotFixed
-//	@Inject(method = "getGuiScaledHeight", at = @At("HEAD"), cancellable = true)
-//	void getScaledHeight(CallbackInfoReturnable<Integer> cir) {
-//		if (isCustomFramebuffer()) {
-//			cir.setReturnValue(FGM.scaledHeight);
-//		}
-//	}
-//
-//	@Inject(method = "getGuiScaledWidth", at = @At("HEAD"), cancellable = true)
-//	void getScaledWidth(CallbackInfoReturnable<Integer> cir) {
-//		if (isCustomFramebuffer()) {
-//			cir.setReturnValue(FGM.scaledWidth);
-//		}
-//	}
-//
-//	@Inject(method = "getGuiScale", at = @At("HEAD"), cancellable = true)
-//	void getScaleFactor(CallbackInfoReturnable<Double> cir) {
-//		if (isCustomFramebuffer()) {
-//			cir.setReturnValue(FGM.guiScale);
-//		}
-//	}
+	@Inject(method = "getGuiScaledHeight", at = @At("HEAD"), cancellable = true)
+	void getScaledHeight(CallbackInfoReturnable<Integer> cir) {
+		if (isCustomFramebuffer()) {
+			cir.setReturnValue(GuiHandler.scaledHeight);
+		}
+	}
+
+	@Inject(method = "getGuiScaledWidth", at = @At("HEAD"), cancellable = true)
+	void getScaledWidth(CallbackInfoReturnable<Integer> cir) {
+		if (isCustomFramebuffer()) {
+			cir.setReturnValue(GuiHandler.scaledWidth);
+		}
+	}
+
+	@Inject(method = "getGuiScale", at = @At("HEAD"), cancellable = true)
+	void getScaleFactor(CallbackInfoReturnable<Double> cir) {
+		if (isCustomFramebuffer()) {
+			cir.setReturnValue((double) GuiHandler.guiScaleFactor);
+		}
+	}
 
 
 	@Unique
 	private boolean isCustomFramebuffer() {
 		//MCXR:         return mcxrGameRenderer.overrideWindowSize || (mcxrGameRenderer.isXrMode() && mcxrGameRenderer.reloadingDepth > 0);
-		return false;
+		return Minecraft.getInstance().getMainRenderTarget() != null;
 	}
 }

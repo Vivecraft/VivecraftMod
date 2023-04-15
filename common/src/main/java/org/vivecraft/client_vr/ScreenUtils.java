@@ -1,4 +1,4 @@
-package org.vivecraft.client;
+package org.vivecraft.client_vr;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.render;
 
 import com.mojang.math.Axis;
-import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.ItemTags;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;

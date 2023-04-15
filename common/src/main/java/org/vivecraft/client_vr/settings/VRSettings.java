@@ -5,7 +5,7 @@
 package org.vivecraft.client_vr.settings;
 
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client.IrisHelper;
+import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.OptionsExtension;
 import com.google.gson.JsonObject;
@@ -194,8 +194,6 @@ public class VRSettings
     public int hrtfSelection = 0;
     @SettingField
     public boolean disableFun = false;
-    @SettingField
-    public boolean firstRun = true;
     @SettingField(VrOptions.RIGHT_CLICK_DELAY)
     public RightClickDelay rightclickDelay = RightClickDelay.VANILLA;
     @SettingField(VrOptions.THIRDPERSON_ITEMTRANSFORMS)
@@ -1640,13 +1638,12 @@ public class VRSettings
         mc.options = new Options( mc, dataDir );
         // mc.gameSettings.saveOptions();
         var vrSettings = new VRSettings( mc, dataDir );
-        vrSettings.saveOptions();
 
         if (!vrSettings.badStereoProviderPluginID.isEmpty()) {
             vrSettings.stereoProviderPluginID = ClientDataHolderVR.getInstance().vrSettings.badStereoProviderPluginID;
             vrSettings.badStereoProviderPluginID = "";
-            vrSettings.saveOptions();
         }
+        vrSettings.saveOptions();
 
         ClientDataHolderVR.getInstance().vrSettings = vrSettings;
     }

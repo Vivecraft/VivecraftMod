@@ -20,7 +20,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client.IrisHelper;
+import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -29,7 +29,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
-import org.vivecraft.client_xr.WorldRenderPass;
+import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.RenderPass;
@@ -93,11 +93,6 @@ public abstract class VRRenderer
     	if (GlStateManager._getError() != 0) {
 			System.err.println(message);
 		}
-    }
-
-    public boolean clipPlanesChanged()
-    {
-        return false;
     }
 
     public abstract void createRenderTexture(int var1, int var2);
@@ -422,12 +417,6 @@ public abstract class VRRenderer
     {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        boolean flag = false;
-
-        if (this.clipPlanesChanged())
-        {
-            this.reinitFrameBuffers("Clip Planes Changed");
-        }
 
         if (minecraft.getWindow().getWindow() != this.lastWindow)
         {
@@ -638,13 +627,13 @@ public abstract class VRRenderer
                 this.checkGLError("Undistorted view framebuffer setup");
             }
 
-            GuiHandler.guiFramebuffer = new VRTextureTarget("GUI", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true, false);
+            GuiHandler.guiFramebuffer = new VRTextureTarget("GUI", GuiHandler.guiWidth, GuiHandler.guiHeight, true, false, -1, false, true, false);
             dataholder.print(GuiHandler.guiFramebuffer.toString());
             this.checkGLError("GUI framebuffer setup");
-            KeyboardHandler.Framebuffer = new VRTextureTarget("Keyboard", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true, false);
+            KeyboardHandler.Framebuffer = new VRTextureTarget("Keyboard", GuiHandler.guiWidth, GuiHandler.guiHeight, true, false, -1, false, true, false);
             dataholder.print(KeyboardHandler.Framebuffer.toString());
             this.checkGLError("Keyboard framebuffer setup");
-            RadialHandler.Framebuffer = new VRTextureTarget("Radial Menu", minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight(), true, false, -1, false, true, false);
+            RadialHandler.Framebuffer = new VRTextureTarget("Radial Menu", GuiHandler.guiWidth, GuiHandler.guiHeight, true, false, -1, false, true, false);
             dataholder.print(RadialHandler.Framebuffer.toString());
             this.checkGLError("Radial framebuffer setup");
             int j2 = 720;

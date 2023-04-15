@@ -8,14 +8,12 @@ import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 
-public class XRCamera extends Camera
-{
-    public void setup(BlockGetter pLevel, Entity pRenderViewEntity, boolean pThirdPerson, boolean pThirdPersonReverse, float pPartialTicks)
-    {
-        if (!XRState.isXr) {
+public class XRCamera extends Camera {
+    public void setup(BlockGetter pLevel, Entity pRenderViewEntity, boolean pThirdPerson, boolean pThirdPersonReverse, float pPartialTicks) {
+        if (RenderPassType.isVanilla()) {
             super.setup(pLevel, pRenderViewEntity, pThirdPerson, pThirdPersonReverse, pPartialTicks);
             return;
         }
@@ -29,24 +27,24 @@ public class XRCamera extends Camera
         this.setPosition(eye.getPosition());
         this.xRot = -eye.getPitch();
         this.yRot = eye.getYaw();
-        this.forwards.set((float)eye.getDirection().x, (float)eye.getDirection().y, (float)eye.getDirection().z);
+        this.forwards.set((float) eye.getDirection().x, (float) eye.getDirection().y, (float) eye.getDirection().z);
         Vec3 vec3 = eye.getCustomVector(new Vec3(0.0D, 1.0D, 0.0D));
-        this.up.set((float)vec3.x, (float)vec3.y, (float)vec3.z);
+        this.up.set((float) vec3.x, (float) vec3.y, (float) vec3.z);
         eye.getCustomVector(new Vec3(1.0D, 0.0D, 0.0D));
-        this.left.set((float)vec3.x, (float)vec3.y, (float)vec3.z);
+        this.left.set((float) vec3.x, (float) vec3.y, (float) vec3.z);
         this.rotation.set(0.0F, 0.0F, 0.0F, 1.0F);
         this.rotation.mul(Axis.YP.rotationDegrees(-this.yRot));
         this.rotation.mul(Axis.XP.rotationDegrees(this.xRot));
     }
 
-    // NotFixed
-//    public void tick()
-//    {
-//    }
+    public void tick() {
+        if (RenderPassType.isVanilla()) {
+            super.tick();
+        }
+    }
 
     //SorenonTODO Investigate
-    public boolean isDetached()
-    {
+    public boolean isDetached() {
         return false;
     }
 }

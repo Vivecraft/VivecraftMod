@@ -1,4 +1,4 @@
-package org.vivecraft.client_xr;
+package org.vivecraft.client_xr.render_pass;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
@@ -38,11 +38,6 @@ public class WorldRenderPass implements AutoCloseable {
         PostChain postchain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), target, resourceLocation);
         postchain.resize(target.viewWidth, target.viewHeight);
         return postchain;
-    }
-
-    public static void setWorldRenderPass(WorldRenderPass wrp) {
-        RenderTargets.wrp = wrp;
-        mc.mainRenderTarget = wrp.target;
     }
 
     @Override

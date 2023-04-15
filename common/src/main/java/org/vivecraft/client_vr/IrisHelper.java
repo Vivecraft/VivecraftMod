@@ -1,4 +1,4 @@
-package org.vivecraft.client;
+package org.vivecraft.client_vr;
 
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;

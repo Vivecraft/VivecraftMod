@@ -2,10 +2,10 @@ package org.vivecraft.mixin.client_vr.renderer;
 
 import org.joml.Matrix4f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client.IrisHelper;
+import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_xr.RenderTargets;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -145,11 +145,11 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 //	public ResourceLocation vrShader(String string) {
 //		return new ResourceLocation("shaders/post/vrtransparency.json");
 //	}
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;graphicsChanged()V"), method = "allChanged()V")
-    public void removeGraphich(LevelRenderer l) {
-        return;
-    }
+//
+//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;graphicsChanged()V"), method = "allChanged()V")
+//    public void removeGraphich(LevelRenderer l) {
+//        return;
+//    }
 
     //Moved for sodium
 //	@Restriction(conflict = @Condition("sodium"))
@@ -168,7 +168,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"), method = "renderLevel")
     public int runLightingUpdates(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
-        if (!XRState.isXr || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
+        if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
             this.level.getProfiler().popPush("light_update_queue");
             this.level.pollLightUpdates();
             this.level.getProfiler().popPush("light_updates");
@@ -176,7 +176,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, flag, true);
             instance.runUpdates(i, bl, bl2);
         }
-        if (XRState.isXr) {
+        if (!RenderPassType.isVanilla()) {
             this.setShaderGroup();
         }
         return 0;
@@ -276,7 +276,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", shift = Shift.BEFORE, ordinal = 17),
             method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V")
     public void renderFast1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
-        if (!XRState.isXr) {
+        if (RenderPassType.isVanilla()) {
             return;
         }
 
@@ -294,7 +294,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = Shift.BEFORE, ordinal = 3),
             method = "renderLevel")
     public void renderFast2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (RenderPassType.isVanilla()) {
             return;
         }
 
@@ -309,7 +309,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     // or if shaders are on, and option AFTER_SHADER is selected
     @Inject(at = @At("RETURN"), method = "renderLevel")
     public void renderFast2Final(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
-        if (!XRState.isXr) {
+        if (RenderPassType.isVanilla()) {
             return;
         }
 
@@ -421,36 +421,38 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     public void setShaderGroup() {
-        this.transparencyChain = null;
-        this.translucentTarget = null;
-        this.itemEntityTarget = null;
-        this.particlesTarget = null;
-        this.weatherTarget = null;
-        this.cloudsTarget = null;
-        this.alphaSortVRHandsFramebuffer = null;
-        this.alphaSortVROccludedFramebuffer = null;
-        this.alphaSortVRUnoccludedFramebuffer = null;
-        PostChain postchain = RenderTargets.wrp.transparencyChain;
+        PostChain transparencyChain = RenderPassManager.wrp.transparencyChain;
 
-        if (postchain != null) {
-            this.transparencyChain = postchain;
-            this.translucentTarget = postchain.getTempTarget("translucent");
-            this.itemEntityTarget = postchain.getTempTarget("itemEntity");
-            this.particlesTarget = postchain.getTempTarget("particles");
-            this.weatherTarget = postchain.getTempTarget("weather");
-            this.cloudsTarget = postchain.getTempTarget("clouds");
-            this.alphaSortVRHandsFramebuffer = postchain.getTempTarget("vrhands");
-            this.alphaSortVROccludedFramebuffer = postchain.getTempTarget("vroccluded");
-            this.alphaSortVRUnoccludedFramebuffer = postchain.getTempTarget("vrunoccluded");
+        if (transparencyChain != null) {
+            this.transparencyChain = transparencyChain;
+            this.translucentTarget = transparencyChain.getTempTarget("translucent");
+            this.itemEntityTarget = transparencyChain.getTempTarget("itemEntity");
+            this.particlesTarget = transparencyChain.getTempTarget("particles");
+            this.weatherTarget = transparencyChain.getTempTarget("weather");
+            this.cloudsTarget = transparencyChain.getTempTarget("clouds");
+            this.alphaSortVRHandsFramebuffer = transparencyChain.getTempTarget("vrhands");
+            this.alphaSortVROccludedFramebuffer = transparencyChain.getTempTarget("vroccluded");
+            this.alphaSortVRUnoccludedFramebuffer = transparencyChain.getTempTarget("vrunoccluded");
+        } else {
+            this.transparencyChain = null;
+            this.translucentTarget = null;
+            this.itemEntityTarget = null;
+            this.particlesTarget = null;
+            this.weatherTarget = null;
+            this.cloudsTarget = null;
+            this.alphaSortVRHandsFramebuffer = null;
+            this.alphaSortVROccludedFramebuffer = null;
+            this.alphaSortVRUnoccludedFramebuffer = null;
         }
 
-        this.entityEffect = null;
-        this.entityTarget = null;
-        PostChain postchain2 = RenderTargets.wrp.outlineChain;
+        PostChain outlineChain = RenderPassManager.wrp.outlineChain;
 
-        if (postchain2 != null) {
-            this.entityEffect = postchain2;
-            this.entityTarget = postchain2.getTempTarget("final");
+        if (outlineChain != null) {
+            this.entityEffect = outlineChain;
+            this.entityTarget = outlineChain.getTempTarget("final");
+        } else {
+            this.entityEffect = null;
+            this.entityTarget = null;
         }
     }
 

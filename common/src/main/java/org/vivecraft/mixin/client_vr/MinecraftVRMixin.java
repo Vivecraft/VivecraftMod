@@ -8,6 +8,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.KeyMapping;
@@ -53,7 +54,8 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client.*;
+import org.vivecraft.client_vr.IrisHelper;
+import org.vivecraft.client_vr.SodiumHelper;
 import org.vivecraft.client_xr.XRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.GuiExtension;
@@ -79,8 +81,8 @@ import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client.utils.Utils;
-import org.vivecraft.client_xr.RenderTargets;
-import org.vivecraft.client_xr.WorldRenderPass;
+import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.common.utils.math.Vector3;
 //import org.vivecraft.provider.ovr_lwjgl.MC_OVR;
 //import org.vivecraft.provider.ovr_lwjgl.OVR_StereoRenderer;
@@ -90,10 +92,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(Minecraft.class)
@@ -265,63 +264,31 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Shadow
     protected abstract boolean startAttack();
 
-    @Shadow public abstract RenderTarget getMainRenderTarget();
+    @Shadow
+    public abstract RenderTarget getMainRenderTarget();
+
+    @Shadow private double gpuUtilization;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     void afterInit(GameConfig gameConfig, CallbackInfo ci) {
-        RenderTargets.INSTANCE = new RenderTargets((MainTarget) this.getMainRenderTarget());
+        RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
-    public Overlay initVivecraft(Overlay overlay){
-        ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-
+    public Overlay initVivecraft(Overlay overlay) {
         try {
-            // NotFixed
-            //        ClientDataHolder.getInstance().vr = new MCOpenVR((Minecraft) (Object) this, ClientDataHolder.getInstance());
             VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
-
-//            dh.vr.init();
-//            dh.vrRenderer = dh.vr.createVRRenderer();
-//             dh.vrRenderer.lastGuiScale = this.options.guiScale().get();
-
-//            dh.vrPlayer = new VRPlayer();
-//            dh.vrPlayer.registerTracker(dh.backpackTracker);
-//            dh.vrPlayer.registerTracker(dh.bowTracker);
-//            dh.vrPlayer.registerTracker(dh.climbTracker);
-//            dh.vrPlayer.registerTracker(dh.autoFood);
-//            dh.vrPlayer.registerTracker(dh.jumpTracker);
-//            dh.vrPlayer.registerTracker(dh.rowTracker);
-//            dh.vrPlayer.registerTracker(dh.runTracker);
-//            dh.vrPlayer.registerTracker(dh.sneakTracker);
-//            dh.vrPlayer.registerTracker(dh.swimTracker);
-//            dh.vrPlayer.registerTracker(dh.swingTracker);
-//            dh.vrPlayer.registerTracker(dh.interactTracker);
-//            dh.vrPlayer.registerTracker(dh.teleportTracker);
-//            dh.vrPlayer.registerTracker(dh.horseTracker);
-//            dh.vrPlayer.registerTracker(dh.vehicleTracker);
-//            // this.vrPlayer.registerTracker(this.physicalGuiManager);
-//            dh.vrPlayer.registerTracker(dh.crawlTracker);
-//            dh.vrPlayer.registerTracker(dh.cameraTracker);
+            XRState.enableVR();
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-
-        dh.vrSettings.firstRun = false;
-        dh.vrSettings.saveOptions();
-
-// NotFixed
-//        if (dh.vrRenderer.isInitialized()) {
-//            //dh.menuWorldRenderer.init();
-//        }
-//        dh.vr.postinit();
         return overlay;
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
     public void destroy(CallbackInfo info) {
         try {
-            ClientDataHolderVR.getInstance().vr.destroy();
+            XRState.disableVR();
         } catch (Exception ignored) {
         }
     }
@@ -334,7 +301,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         if (SodiumHelper.isLoaded()) {
             SodiumHelper.preRenderMinecraft();
         }
-        newRunTick(bl);
+        RenderPassManager.setGUIRenderPass();
+        this.preRender(bl);
+        this.newRunTick(bl);
+        this.postRender();
         if (SodiumHelper.isLoaded()) {
             SodiumHelper.postRenderMinecraft();
         }
@@ -352,117 +322,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     //Replaces normal runTick
     public void newRunTick(boolean bl) {
-        this.window.setErrorSection("Pre render");
-        // long l = Util.getNanos();
-        if (this.window.shouldClose()) {
-            this.stop();
-        }
-
-        if (this.pendingReload != null && !(this.overlay instanceof LoadingOverlay)) {
-            CompletableFuture<Void> completableFuture = this.pendingReload;
-            this.pendingReload = null;
-            this.reloadResourcePacks().thenRun(() -> {
-                completableFuture.complete(null);
-            });
-        }
-
-        Runnable completableFuture;
-        while ((completableFuture = (Runnable) this.progressTasks.poll()) != null) {
-            completableFuture.run();
-        }
-
-        int j;
-        int i = 0;
-        // v
-        ++ClientDataHolderVR.getInstance().frameIndex;
-        //
-        if (bl) {
-            i = this.timer.advanceTime(Util.getMillis());
-            this.profiler.push("scheduledExecutables");
-            this.runAllTasks();
-            this.profiler.pop();
-            // v
-            try {
-                ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
-            } catch (RenderConfigException renderconfigexception) {
-                // unbind the rendertarget, to draw directly to the screen
-                this.mainRenderTarget.unbindWrite();
-                this.screen = null;
-                RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
-
-                if (this.overlay != null) {
-                    RenderSystem.clear(256, ON_OSX);
-                    Matrix4f matrix4f = new Matrix4f().setOrtho(
-                            0, (float) (this.window.getScreenWidth() / this.window.getGuiScale()),
-                            (float) (this.window.getScreenHeight() / this.window.getGuiScale()), 0, 1000.0F, 3000.0F);
-                    RenderSystem.setProjectionMatrix(matrix4f);
-                    PoseStack p = new PoseStack();
-                    p.translate(0, 0, -2000);
-                    this.overlay.render(p, 0, 0, 0.0F);
-                } else {
-                    if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_Q)) {
-                        System.out.println("Resetting VR status!");
-                        Path file = Xplat.getConfigPath("vivecraft-config.properties");
-
-                        Properties properties = new Properties();
-                        try {
-                            properties.load(Files.newInputStream(file));
-                        } catch (IOException e) {
-                        }
-
-                        properties.setProperty("vrStatus", "false");
-                        try {
-                            properties.store(Files.newOutputStream(file), "This file stores if VR should be enabled.");
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        Minecraft.getInstance().stop();
-                    }
-                    this.notifyMirror(
-                            LangHelper.get("vivecraft.messages.rendersetupfailed", renderconfigexception.error), true,
-                            10000);
-                    this.drawNotifyMirror();
-
-                    if (ClientDataHolderVR.getInstance().frameIndex % 300L == 0L) {
-                        System.out.println(renderconfigexception.title + " " + renderconfigexception.error);
-                    }
-
-                    try {
-                        Thread.sleep(10L);
-                    } catch (InterruptedException interruptedexception) {
-                    }
-                }
-
-                this.window.updateDisplay();
-                return;
-            } catch (Exception exception2) {
-                exception2.printStackTrace();
-            }
-        }
-
-        this.profiler.push("VR Poll/VSync");
-        ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
-        this.profiler.pop();
-        ClientDataHolderVR.getInstance().vrPlayer.postPoll();
-
-        if (bl) {
-            //
-            this.profiler.push("tick");
-
-            for (j = 0; j < Math.min(10, i); ++j) {
-                this.profiler.incrementCounter("clientTick");
-                // v
-                ClientDataHolderVR.getInstance().vrPlayer.preTick();
-                //
-                this.tick();
-                // v
-                ClientDataHolderVR.getInstance().vrPlayer.postTick();
-                //
-            }
-
-            this.profiler.pop();
-        }
-
         // v
         this.profiler.push("setupRenderConfiguration");
         //
@@ -500,7 +359,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
         // v
         this.profiler.push("Gui");
-        ClientDataHolderVR.getInstance().currentPass = RenderPass.GUI;
+        RenderPassManager.setGUIRenderPass();
         this.gameRenderer.getMainCamera().setup(this.level, this.getCameraEntity(), false, false, f);
 
         //
@@ -599,7 +458,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         this.profiler.pop();
         //
 
-        j = this.getFramerateLimit();
 //		if ((double) j < Option.FRAMERATE_LIMIT.getMaxValue()) {
 //			RenderSystem.limitDisplayFPS(j);
 //		}
@@ -612,12 +470,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 ClientDataHolderVR.getInstance().currentPass = renderpass;
 
                 switch (renderpass) {
-                    case LEFT, RIGHT -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.stereoXR);
-                    case CENTER -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.center);
-                    case THIRD -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.mixedReality);
-                    case SCOPEL -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.leftTelescope);
-                    case SCOPER -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.rightTelescope);
-                    case CAMERA -> WorldRenderPass.setWorldRenderPass(WorldRenderPass.camera);
+                    case LEFT, RIGHT -> RenderPassManager.setWorldRenderPass(WorldRenderPass.stereoXR);
+                    case CENTER -> RenderPassManager.setWorldRenderPass(WorldRenderPass.center);
+                    case THIRD -> RenderPassManager.setWorldRenderPass(WorldRenderPass.mixedReality);
+                    case SCOPEL -> RenderPassManager.setWorldRenderPass(WorldRenderPass.leftTelescope);
+                    case SCOPER -> RenderPassManager.setWorldRenderPass(WorldRenderPass.rightTelescope);
+                    case CAMERA -> RenderPassManager.setWorldRenderPass(WorldRenderPass.camera);
                 }
 
                 this.profiler.push("Eye:" + ClientDataHolderVR.getInstance().currentPass);
@@ -679,52 +537,181 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             this.checkGLError("post-mirror ");
             this.profiler.pop();
         }
+    }
 
-        //
+    public void preRender(boolean tick) {
+        this.window.setErrorSection("Pre render");
+        if (this.window.shouldClose()) {
+            this.stop();
+        }
 
-//		this.profiler.popPush("yield");
-//		Thread.yield();
-//		this.profiler.pop();
-        this.window.setErrorSection("Post render");
+        if (this.pendingReload != null && !(this.overlay instanceof LoadingOverlay)) {
+            CompletableFuture<Void> completableFuture = this.pendingReload;
+            this.pendingReload = null;
+            this.reloadResourcePacks().thenRun(() -> completableFuture.complete(null));
+        }
 
-        //v
+        Runnable runnable;
+        while ((runnable = this.progressTasks.poll()) != null) {
+            runnable.run();
+        }
+
+        ++ClientDataHolderVR.getInstance().frameIndex;
+
+        if (tick) {
+            int i = this.timer.advanceTime(Util.getMillis());
+            this.profiler.push("scheduledExecutables");
+            this.runAllTasks();
+            this.profiler.pop();
+
+            try {
+                ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
+            } catch (RenderConfigException renderconfigexception) {
+                handleBadConfig(renderconfigexception);
+            } catch (Exception exception2) {
+                exception2.printStackTrace();
+            }
+
+            this.profiler.push("VR Poll/VSync");
+            ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
+            this.profiler.pop();
+            ClientDataHolderVR.getInstance().vrPlayer.postPoll();
+
+            this.profiler.push("tick");
+
+            for (int j = 0; j < Math.min(10, i); ++j) {
+                this.profiler.incrementCounter("clientTick");
+                ClientDataHolderVR.getInstance().vrPlayer.preTick();
+                this.tick();
+                ClientDataHolderVR.getInstance().vrPlayer.postTick();
+            }
+
+            this.profiler.pop();
+        } else {
+            this.profiler.push("VR Poll/VSync");
+            ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
+            this.profiler.pop();
+            ClientDataHolderVR.getInstance().vrPlayer.postPoll();
+        }
+    }
+
+    private void handleBadConfig(RenderConfigException renderconfigexception) {
+        // unbind the rendertarget, to draw directly to the screen
+        this.mainRenderTarget.unbindWrite();
+        this.screen = null;
+        RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
+
+        if (this.overlay != null) {
+            RenderSystem.clear(256, ON_OSX);
+            Matrix4f matrix4f = new Matrix4f().setOrtho(
+                    0, (float) (this.window.getScreenWidth() / this.window.getGuiScale()),
+                    (float) (this.window.getScreenHeight() / this.window.getGuiScale()), 0, 1000.0F, 3000.0F);
+            RenderSystem.setProjectionMatrix(matrix4f);
+            PoseStack p = new PoseStack();
+            p.translate(0, 0, -2000);
+            this.overlay.render(p, 0, 0, 0.0F);
+        } else {
+            if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_Q)) {
+                System.out.println("Resetting VR status!");
+                Path file = Xplat.getConfigPath("vivecraft-config.properties");
+
+                Properties properties = new Properties();
+                try {
+                    properties.load(Files.newInputStream(file));
+                } catch (IOException e) {
+                }
+
+                properties.setProperty("vrStatus", "false");
+                try {
+                    properties.store(Files.newOutputStream(file), "This file stores if VR should be enabled.");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                Minecraft.getInstance().stop();
+            }
+            this.notifyMirror(
+                    LangHelper.get("vivecraft.messages.rendersetupfailed", renderconfigexception.error), true,
+                    10000);
+            this.drawNotifyMirror();
+
+            if (ClientDataHolderVR.getInstance().frameIndex % 300L == 0L) {
+                System.out.println(renderconfigexception.title + " " + renderconfigexception.error);
+            }
+
+            try {
+                Thread.sleep(10L);
+            } catch (InterruptedException interruptedexception) {
+            }
+        }
+
         this.window.updateDisplay();
-        //
+    }
 
+    public void postRender() {
+        this.profiler.popPush("updateDisplay");
+        this.window.updateDisplay();
+        int k = this.getFramerateLimit();
+
+        this.window.setErrorSection("Post render");
         ++this.frames;
-        boolean bl2 = this.hasSingleplayerServer()
-                && (this.screen != null && this.screen.isPauseScreen()
-                || this.overlay != null && this.overlay.isPauseScreen())
+        boolean bl3 = this.hasSingleplayerServer()
+                && (this.screen != null && this.screen.isPauseScreen() || this.overlay != null && this.overlay.isPauseScreen())
                 && !this.singleplayerServer.isPublished();
-        if (this.pause != bl2) {
+        if (this.pause != bl3) {
             if (this.pause) {
                 this.pausePartialTick = this.timer.partialTick;
             } else {
                 this.timer.partialTick = this.pausePartialTick;
             }
 
-            this.pause = bl2;
+            this.pause = bl3;
         }
 
-        long m = Util.getNanos();
-        this.frameTimer.logFrameDuration(m - this.lastNanoTime);
-        this.lastNanoTime = m;
-        this.profiler.push("fpsUpdate");
+        long n = Util.getNanos();
+        long o = n - this.lastNanoTime;
+//        if (bl2) {
+//            this.savedCpuDuration = o;
+//        }
 
-        while (Util.getMillis() >= this.lastTime + 1000L) {
+        this.frameTimer.logFrameDuration(o);
+        this.lastNanoTime = n;
+        this.profiler.push("fpsUpdate");
+//        if (this.currentFrameProfile != null && this.currentFrameProfile.isDone()) {
+//            this.gpuUtilization = (double)this.currentFrameProfile.get() * 100.0 / (double)this.savedCpuDuration;
+//        }
+
+        while(Util.getMillis() >= this.lastTime + 1000L) {
+            String string;
+            if (this.gpuUtilization > 0.0) {
+                string = " GPU: " + (this.gpuUtilization > 100.0 ? ChatFormatting.RED + "100%" : Math.round(this.gpuUtilization) + "%");
+            } else {
+                string = "";
+            }
+
             fps = this.frames;
-            this.fpsString = String.format("%d fps T: %s%s%s%s B: %d", fps,
-                    (double) this.options.framerateLimit().get() == 260 ? "inf"
-                            : this.options.framerateLimit().get(),
-                    this.options.enableVsync().get() ? " vsync" : "", this.options.graphicsMode().get().toString(),
-                    this.options.cloudStatus().get() == CloudStatus.OFF ? ""
-                            : (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
-                    this.options.biomeBlendRadius().get());
+            this.fpsString = String.format(
+                    Locale.ROOT,
+                    "%d fps T: %s%s%s%s B: %d%s",
+                    fps,
+                    k == 260 ? "inf" : k,
+                    this.options.enableVsync().get() ? " vsync" : "",
+                    this.options.graphicsMode().get(),
+                    this.options.cloudStatus().get() == CloudStatus.OFF ? "" : (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
+                    this.options.biomeBlendRadius().get(),
+                    string
+            );
             this.lastTime += 1000L;
             this.frames = 0;
         }
+
         this.profiler.pop();
     }
+
+    @Inject(at = @At("HEAD"), method = "resizeDisplay", cancellable = true)
+    void c(CallbackInfo ci) {
+        ci.cancel();
+    }
+
 // NotFixed
 //    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setGuiScale(D)V", shift = Shift.AFTER), method = "resizeDisplay()V")
 //    public void reinitFrame(CallbackInfo info) {

@@ -1,8 +1,9 @@
-package org.vivecraft.client;
+package org.vivecraft.client_vr;
 
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import org.lwjgl.opengl.GL32C;
+import org.vivecraft.client.Xplat;
 
 public class SodiumHelper {
     static final LongArrayFIFOQueue fences = new LongArrayFIFOQueue();

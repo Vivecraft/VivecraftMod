@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import java.util.HashSet;
 
-import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.PlayerExtension;

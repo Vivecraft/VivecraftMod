@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
-import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.api.client.ClientNetworkHelper;

@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.provider.openvr_jna;
 
-import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -96,7 +96,7 @@ public class MCOpenVR extends MCVR
 
     public MCOpenVR(Minecraft mc, ClientDataHolderVR dh)
     {
-        super(mc, dh);
+        super(mc, dh, VivecraftVRMod.INSTANCE);
         ome = this;
         this.hapticScheduler = new OpenVRHapticScheduler();
 

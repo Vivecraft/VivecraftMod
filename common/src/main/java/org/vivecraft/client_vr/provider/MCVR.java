@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.api.client.VRData;
@@ -109,10 +109,11 @@ public abstract class MCVR
     protected Map<String, VRInputAction> inputActions = new HashMap<>();
     protected Map<String, VRInputAction> inputActionsByKeyBinding = new HashMap<>();
 
-    public MCVR(Minecraft mc, ClientDataHolderVR dh)
+    public MCVR(Minecraft mc, ClientDataHolderVR dh, VivecraftVRMod vrMod)
     {
         this.mc = mc;
         this.dh = dh;
+        mod = vrMod;
         me = this;
 
         for (int i = 0; i < 3; ++i)

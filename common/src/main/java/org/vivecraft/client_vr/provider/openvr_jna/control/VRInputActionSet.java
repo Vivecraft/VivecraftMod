@@ -1,8 +1,7 @@
 package org.vivecraft.client_vr.provider.openvr_jna.control;
 
 import net.minecraft.client.KeyMapping;
-import org.vivecraft.VivecraftVRMod;
-import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client.VivecraftVRMod;
 
 public enum VRInputActionSet
 {

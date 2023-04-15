@@ -1,4 +1,4 @@
-package org.vivecraft;
+package org.vivecraft.client;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;

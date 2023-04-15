@@ -16,7 +16,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.*;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -51,13 +50,13 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client.IrisHelper;
+import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client.Xevents;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
@@ -393,7 +392,7 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.BEFORE, ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
     public void mainMenu(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
-        if (!XRState.isXr) {
+        if (RenderPassType.isVanilla()) {
             return;
         }
 
@@ -430,7 +429,7 @@ public abstract class GameRendererVRMixin
 
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.AFTER, ordinal = 6), method = "render(FJZ)V", ordinal = 0, argsOnly = true)
     private boolean renderGui(boolean doRender) {
-        if (!XRState.isXr) {
+        if (RenderPassType.isVanilla()) {
             return doRender;
         }
         return shouldDrawGui;
@@ -478,7 +477,7 @@ public abstract class GameRendererVRMixin
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
     public void renderpick(GameRenderer g, float pPartialTicks) {
-        if (!XRState.isXr) {
+        if (RenderPassType.isVanilla()) {
             g.pick(pPartialTicks);
             return;
         }
@@ -503,14 +502,14 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At("HEAD"), method = "bobHurt", cancellable = true)
     public void removeBobHurt(PoseStack poseStack, float f, CallbackInfo ci) {
-        if (XRState.isXr) {
+        if (!RenderPassType.isVanilla()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "bobView", at = @At("HEAD"), cancellable = true)
     void cancelBobView(PoseStack matrixStack, float f, CallbackInfo ci) {
-        if (XRState.isXr) {
+        if (!RenderPassType.isVanilla()) {
             ci.cancel();
         }
     }
@@ -534,12 +533,12 @@ public abstract class GameRendererVRMixin
 
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"), method = "renderLevel")
     public boolean noHands(GameRenderer instance) {
-        return !XRState.isXr;
+        return RenderPassType.isVanilla();
     }
 
     @Inject(at = @At(value = "TAIL", shift = Shift.BEFORE), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
     public void restoreVE(float f, long j, PoseStack p, CallbackInfo i) {
-        if (!XRState.isXr) {
+        if (RenderPassType.isVanilla()) {
             return;
         }
         this.restoreRVEPos((LivingEntity) this.minecraft.getCameraEntity());

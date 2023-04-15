@@ -4,7 +4,7 @@ import java.util.List;
 
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.*;
-import org.vivecraft.VivecraftVRMod;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.BlockTags;
 import org.vivecraft.api.ItemTags;

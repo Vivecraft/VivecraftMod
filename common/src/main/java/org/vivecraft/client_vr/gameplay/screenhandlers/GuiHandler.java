@@ -102,6 +102,31 @@ public class GuiHandler
         }
     };
     public static RenderTarget guiFramebuffer = null;
+    public static int guiWidth = 1280;
+    public static int guiHeight = 720;
+    public static int guiScaleFactor = calculateScale(2, false, guiWidth, guiHeight);
+    public static int scaledWidth;
+    public static int scaledHeight;
+
+    public static int calculateScale(int scaleIn, boolean forceUnicode, int framebufferWidth, int framebufferHeight) {
+        int j = 1;
+
+        while(j != scaleIn && j < framebufferWidth && j < framebufferHeight && framebufferWidth / (j + 1) >= 320 && framebufferHeight / (j + 1) >= 240) {
+            ++j;
+        }
+
+        if (forceUnicode && j % 2 != 0) {
+            ++j;
+        }
+
+        int widthFloor = (int) (framebufferWidth / scaleIn);
+        scaledWidth = framebufferWidth / scaleIn > widthFloor ? widthFloor + 1 : widthFloor;
+
+        int heightFloor = (int) (framebufferHeight / scaleIn);
+        scaledHeight = framebufferHeight / scaleIn > heightFloor ? heightFloor + 1 : heightFloor;
+
+        return j;
+    }
 
     public static void processGui()
     {
