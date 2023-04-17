@@ -27,6 +27,7 @@ import org.vivecraft.client_vr.provider.openvr_jna.control.VRInputActionSet;
 import org.vivecraft.client_vr.provider.openvr_jna.control.VivecraftMovementInput;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.utils.lwjgl.Matrix4f;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client.utils.Utils;
@@ -523,6 +524,9 @@ public abstract class MCVR
 
     protected void updateAim()
     {
+        RenderPassManager.setGUIRenderPass();
+
+
         if (this.mc != null)
         {
             this.hmdRotation.M[0][0] = this.hmdPose.M[0][0];

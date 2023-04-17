@@ -13,6 +13,7 @@ import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
@@ -130,6 +131,8 @@ public class GuiHandler
 
     public static void processGui()
     {
+        RenderPassManager.setGUIRenderPass();
+
         if (mc.screen != null)
         {
             if (!dh.vrSettings.seated)

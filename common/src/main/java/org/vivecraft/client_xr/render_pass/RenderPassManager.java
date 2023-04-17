@@ -3,6 +3,7 @@ package org.vivecraft.client_xr.render_pass;
 import com.mojang.blaze3d.pipeline.MainTarget;
 import net.minecraft.client.Minecraft;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.RenderPass;
 
 public class RenderPassManager {
@@ -27,5 +28,6 @@ public class RenderPassManager {
     public static void setGUIRenderPass() {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.GUI;
         renderPassType = RenderPassType.GUI_ONLY;
+        mc.mainRenderTarget = GuiHandler.guiFramebuffer;
     }
 }
