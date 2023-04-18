@@ -43,7 +43,7 @@ public class KeyboardInputVRMixin extends Input {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(boolean isSneaking, float sneakSpeed, CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 

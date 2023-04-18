@@ -13,7 +13,7 @@ public abstract class WindowVRMixin {
 
 	@ModifyVariable(method = "updateVsync", ordinal = 0, at = @At("HEAD"), argsOnly = true)
 	boolean overwriteVsync(boolean v) {
-		if (XRState.isXr) {
+		if (XRState.vrRunning) {
 			return false;
 		}
 		return v;
@@ -21,7 +21,7 @@ public abstract class WindowVRMixin {
 
 	@Inject(method = {"getScreenWidth", "getWidth"}, at = @At("HEAD"), cancellable = true)
 	void getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
-		if (isCustomFramebuffer()) {
+		if (shouldOverrideSide()) {
 //			if (mcxrGameRenderer.reloadingDepth > 0) {
 //				var swapchain = MCXRPlayClient.OPEN_XR_STATE.session.swapchain;
 //				cir.setReturnValue(swapchain.getRenderWidth());
@@ -34,7 +34,7 @@ public abstract class WindowVRMixin {
 
 	@Inject(method = {"getScreenHeight", "getHeight"}, at = @At("HEAD"), cancellable = true)
 	void getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
-		if (isCustomFramebuffer()) {
+		if (shouldOverrideSide()) {
 //			if (mcxrGameRenderer.reloadingDepth > 0) {
 //				var swapchain = MCXRPlayClient.OPEN_XR_STATE.session.swapchain;
 //				cir.setReturnValue(swapchain.getRenderHeight());
@@ -47,29 +47,29 @@ public abstract class WindowVRMixin {
 
 	@Inject(method = "getGuiScaledHeight", at = @At("HEAD"), cancellable = true)
 	void getScaledHeight(CallbackInfoReturnable<Integer> cir) {
-		if (isCustomFramebuffer()) {
+		if (shouldOverrideSide()) {
 			cir.setReturnValue(GuiHandler.scaledHeight);
 		}
 	}
 
 	@Inject(method = "getGuiScaledWidth", at = @At("HEAD"), cancellable = true)
 	void getScaledWidth(CallbackInfoReturnable<Integer> cir) {
-		if (isCustomFramebuffer()) {
+		if (shouldOverrideSide()) {
 			cir.setReturnValue(GuiHandler.scaledWidth);
 		}
 	}
 
 	@Inject(method = "getGuiScale", at = @At("HEAD"), cancellable = true)
 	void getScaleFactor(CallbackInfoReturnable<Double> cir) {
-		if (isCustomFramebuffer()) {
+		if (shouldOverrideSide()) {
 			cir.setReturnValue((double) GuiHandler.guiScaleFactor);
 		}
 	}
 
 
 	@Unique
-	private boolean isCustomFramebuffer() {
+	private boolean shouldOverrideSide() {
 		//MCXR:         return mcxrGameRenderer.overrideWindowSize || (mcxrGameRenderer.isXrMode() && mcxrGameRenderer.reloadingDepth > 0);
-		return Minecraft.getInstance().getMainRenderTarget() != null;
+		return XRState.vrRunning;
 	}
 }

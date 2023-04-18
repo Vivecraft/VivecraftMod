@@ -44,7 +44,7 @@ import java.nio.LongBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
+import static org.lwjgl.openvr.VR.*;
 import static org.lwjgl.openvr.VRApplications.*;
 import static org.lwjgl.openvr.VRCompositor.*;
 import static org.lwjgl.openvr.VRInput.*;
@@ -1298,5 +1298,11 @@ public class MCOpenVR extends MCVR {
     @Override
     public VRRenderer createVRRenderer() {
         return new OpenVRStereoRenderer(this);
+    }
+
+    @Override
+    public boolean isActive() {
+        int activityLevel = VRSystem_GetTrackedDeviceActivityLevel(0);
+        return activityLevel == EDeviceActivityLevel_k_EDeviceActivityLevel_UserInteraction || activityLevel == EDeviceActivityLevel_k_EDeviceActivityLevel_UserInteraction_Timeout;
     }
 }

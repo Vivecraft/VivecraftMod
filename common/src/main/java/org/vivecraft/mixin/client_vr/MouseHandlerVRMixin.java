@@ -35,7 +35,7 @@ public class MouseHandlerVRMixin {
 
     @Inject(at = @At("HEAD"), method = "turnPlayer", cancellable = true)
     public void noTurnStanding(CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 
@@ -53,7 +53,7 @@ public class MouseHandlerVRMixin {
     // cancel after tutorial call
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/Tutorial;onMouse(DD)V", shift = At.Shift.AFTER), method = "turnPlayer", cancellable = true)
     public void noTurnSeated(CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 
@@ -62,7 +62,7 @@ public class MouseHandlerVRMixin {
 
     @Inject(at = @At("HEAD"), method = "grabMouse", cancellable = true)
     public void seated(CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 
@@ -74,7 +74,7 @@ public class MouseHandlerVRMixin {
 
     @Inject(at = @At(value = "HEAD"), method = "releaseMouse", cancellable = true)
     public void grabMouse(CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 

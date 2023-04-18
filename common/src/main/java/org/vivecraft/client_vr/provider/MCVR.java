@@ -1386,4 +1386,6 @@ public abstract class MCVR
     public abstract String getOriginName(long l);
 
     public abstract VRRenderer createVRRenderer();
+
+    public abstract boolean isActive();
 }

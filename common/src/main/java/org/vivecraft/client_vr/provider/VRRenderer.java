@@ -42,8 +42,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class VRRenderer
-{
+public abstract class VRRenderer {
     public static final String RENDER_SETUP_FAILURE_MESSAGE = "Failed to initialise stereo rendering plugin: ";
     public RenderTarget cameraFramebuffer;
     public RenderTarget cameraRenderFramebuffer;
@@ -82,17 +81,15 @@ public abstract class VRRenderer
     public RenderTarget telescopeFramebufferR;
     protected MCVR vr;
 
-    public VRRenderer(MCVR vr)
-    {
+    public VRRenderer(MCVR vr) {
         this.vr = vr;
     }
 
-    protected void checkGLError(String message)
-    {
+    protected void checkGLError(String message) {
         //Config.checkGlError(message); TODO
-    	if (GlStateManager._getError() != 0) {
-			System.err.println(message);
-		}
+        if (GlStateManager._getError() != 0) {
+            System.err.println(message);
+        }
     }
 
     public abstract void createRenderTexture(int var1, int var2);
@@ -103,60 +100,56 @@ public abstract class VRRenderer
 
     public abstract boolean providesStencilMask();
 
-    public void deleteRenderTextures()
-    {
-        if (this.LeftEyeTextureId > 0)
-        {
+    public void deleteRenderTextures() {
+        if (this.LeftEyeTextureId > 0) {
             RenderSystem.deleteTexture(this.LeftEyeTextureId);
         }
 
-        if (this.RightEyeTextureId > 0)
-        {
+        if (this.RightEyeTextureId > 0) {
             RenderSystem.deleteTexture(this.RightEyeTextureId);
         }
 
         this.LeftEyeTextureId = this.RightEyeTextureId = -1;
     }
 
-    public void doStencil(boolean inverse)
-    {
+    public void doStencil(boolean inverse) {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        
+
         //setup stencil for writing
         GL11.glEnable(GL11.GL_STENCIL_TEST);
-		RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-		RenderSystem.stencilMask(0xFF); // Write to stencil buffer
-        
-		if(inverse) {
-			//clear whole image for total mask in color, stencil, depth
-			RenderSystem.clearStencil(0xFF);
-	    	RenderSystem.clearDepth(0);
+        RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+        RenderSystem.stencilMask(0xFF); // Write to stencil buffer
 
-			RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF); // Set any stencil to 0
-    		RenderSystem.colorMask(false, false, false, true); 
+        if (inverse) {
+            //clear whole image for total mask in color, stencil, depth
+            RenderSystem.clearStencil(0xFF);
+            RenderSystem.clearDepth(0);
 
-		} else {
-			//clear whole image for total transparency
-			RenderSystem.clearStencil(0);
-	    	RenderSystem.clearDepth(1);
-	       
-			RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0xFF, 0xFF); // Set any stencil to 1
-    		RenderSystem.colorMask(true, true, true, true); 
-		}
-		
-    	RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT, false);
-    	
-		RenderSystem.clearStencil(0);
-    	RenderSystem.clearDepth(1);
-   	
-		RenderSystem.depthMask(true); 
+            RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF); // Set any stencil to 0
+            RenderSystem.colorMask(false, false, false, true);
+
+        } else {
+            //clear whole image for total transparency
+            RenderSystem.clearStencil(0);
+            RenderSystem.clearDepth(1);
+
+            RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0xFF, 0xFF); // Set any stencil to 1
+            RenderSystem.colorMask(true, true, true, true);
+        }
+
+        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT, false);
+
+        RenderSystem.clearStencil(0);
+        RenderSystem.clearDepth(1);
+
+        RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.depthFunc(GL11.GL_ALWAYS);
         RenderSystem.disableCull();
-        
+
         RenderSystem.setShaderColor(0F, 0F, 0F, 1.0F);
-        
+
 
         RenderTarget fb = minecraft.getMainRenderTarget();
         RenderSystem.viewport(0, 0, fb.viewWidth, fb.viewHeight);
@@ -164,15 +157,15 @@ public abstract class VRRenderer
         RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F));
         RenderSystem.getModelViewStack().pushPose();
         RenderSystem.getModelViewStack().setIdentity();
-        if(inverse) //draw on far clip
-        	RenderSystem.getModelViewStack().translate(0, 0, -20);
+        if (inverse) //draw on far clip
+            RenderSystem.getModelViewStack().translate(0, 0, -20);
         RenderSystem.applyModelViewMatrix();
-        int s= GlStateManager._getInteger(GL43.GL_CURRENT_PROGRAM);
+        int s = GlStateManager._getInteger(GL43.GL_CURRENT_PROGRAM);
 
-        if(dataholder.currentPass == RenderPass.SCOPEL || dataholder.currentPass == RenderPass.SCOPER){
+        if (dataholder.currentPass == RenderPass.SCOPEL || dataholder.currentPass == RenderPass.SCOPER) {
             drawCircle(fb.viewWidth, fb.viewHeight);
-        } else if(dataholder.currentPass == RenderPass.LEFT||dataholder.currentPass == RenderPass.RIGHT) {
-        	drawMask();
+        } else if (dataholder.currentPass == RenderPass.LEFT || dataholder.currentPass == RenderPass.RIGHT) {
+            drawMask();
         }
 
         RenderSystem.restoreProjectionMatrix();
@@ -190,16 +183,14 @@ public abstract class VRRenderer
         RenderSystem.stencilMask(0); // Dont Write to stencil buffer
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
     }
+
     FloatBuffer buffer = MemoryUtil.memAllocFloat(16);
     FloatBuffer buffer2 = MemoryUtil.memAllocFloat(16);
 
-    public void doFSAA(RenderPass eye, boolean hasShaders)
-    {
-        if (this.fsaaFirstPassResultFBO == null)
-        {
+    public void doFSAA(RenderPass eye, boolean hasShaders) {
+        if (this.fsaaFirstPassResultFBO == null) {
             this.reinitFrameBuffers("FSAA Setting Changed");
-        }
-        else {
+        } else {
             RenderSystem.disableBlend();
             RenderSystem.backupProjectionMatrix();
             Matrix4f matrix4f = new Matrix4f();
@@ -269,34 +260,32 @@ public abstract class VRRenderer
             Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
         }
     }
-    
+
     private void drawCircle(float width, float height) {
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         builder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
         int i = 32;
-        float f = (float)(width / 2);
-        builder.vertex((float)(width / 2), (float)(width / 2), 0.0F).endVertex();
-        for (int j = 0; j < i + 1; ++j)
-        {
-            float f1 = (float)j / (float)i * (float)Math.PI * 2.0F;
-            float f2 = (float)((double)(width / 2) + Math.cos((double)f1) * (double)f);
-            float f3 = (float)((double)(width / 2) + Math.sin((double)f1) * (double)f);
+        float f = (float) (width / 2);
+        builder.vertex((float) (width / 2), (float) (width / 2), 0.0F).endVertex();
+        for (int j = 0; j < i + 1; ++j) {
+            float f1 = (float) j / (float) i * (float) Math.PI * 2.0F;
+            float f2 = (float) ((double) (width / 2) + Math.cos((double) f1) * (double) f);
+            float f3 = (float) ((double) (width / 2) + Math.sin((double) f1) * (double) f);
             builder.vertex(f2, f3, 0.0F).endVertex();
         }
         BufferUploader.drawWithShader(builder.end());
     }
-    
+
     private void drawMask() {
-		Minecraft mc = Minecraft.getInstance();
-		ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-		float[] verts = getStencilMask(dh.currentPass);
-		if (verts == null) return;
-		
+        Minecraft mc = Minecraft.getInstance();
+        ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
+        float[] verts = getStencilMask(dh.currentPass);
+        if (verts == null) return;
+
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
 
-        for (int i = 0; i < verts.length; i += 2)
-        {
+        for (int i = 0; i < verts.length; i += 2) {
             builder.vertex(verts[i] * dh.vrRenderer.renderScale, verts[i + 1] * dh.vrRenderer.renderScale, 0.0F).endVertex();
         }
 
@@ -304,8 +293,7 @@ public abstract class VRRenderer
         BufferUploader.drawWithShader(builder.end());
     }
 
-    private void drawQuad()
-    {
+    private void drawQuad() {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
@@ -316,71 +304,55 @@ public abstract class VRRenderer
         BufferUploader.draw(builder.end());
     }
 
-    public double getCurrentTimeSecs()
-    {
-        return (double)System.nanoTime() / 1.0E9D;
+    public double getCurrentTimeSecs() {
+        return (double) System.nanoTime() / 1.0E9D;
     }
 
-    public double getFrameTiming()
-    {
+    public double getFrameTiming() {
         return this.getCurrentTimeSecs();
     }
 
-    public String getinitError()
-    {
+    public String getinitError() {
         return this.vr.initStatus;
     }
 
-    public String getLastError()
-    {
+    public String getLastError() {
         return "";
     }
 
-    public String getName()
-    {
+    public String getName() {
         return "OpenVR";
     }
 
-    public List<RenderPass> getRenderPasses()
-    {
+    public List<RenderPass> getRenderPasses() {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         List<RenderPass> list = new ArrayList<>();
         list.add(RenderPass.LEFT);
         list.add(RenderPass.RIGHT);
 
-        if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON)
-        {
+        if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
             list.add(RenderPass.CENTER);
-        }
-        else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY)
-        {
-            if (dataholder.vrSettings.mixedRealityUndistorted && dataholder.vrSettings.mixedRealityUnityLike)
-            {
+        } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
+            if (dataholder.vrSettings.mixedRealityUndistorted && dataholder.vrSettings.mixedRealityUnityLike) {
                 list.add(RenderPass.CENTER);
             }
 
             list.add(RenderPass.THIRD);
-        }
-        else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON)
-        {
+        } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
             list.add(RenderPass.THIRD);
         }
 
-        if (minecraft.player != null)
-        {
-            if (TelescopeTracker.isTelescope(minecraft.player.getMainHandItem()) && TelescopeTracker.isViewing(0))
-            {
+        if (minecraft.player != null) {
+            if (TelescopeTracker.isTelescope(minecraft.player.getMainHandItem()) && TelescopeTracker.isViewing(0)) {
                 list.add(RenderPass.SCOPER);
             }
 
-            if (TelescopeTracker.isTelescope(minecraft.player.getOffhandItem()) && TelescopeTracker.isViewing(1))
-            {
+            if (TelescopeTracker.isTelescope(minecraft.player.getOffhandItem()) && TelescopeTracker.isViewing(1)) {
                 list.add(RenderPass.SCOPEL);
             }
 
-            if (dataholder.cameraTracker.isVisible())
-            {
+            if (dataholder.cameraTracker.isVisible()) {
                 list.add(RenderPass.CAMERA);
             }
         }
@@ -390,42 +362,33 @@ public abstract class VRRenderer
 
     public abstract Tuple<Integer, Integer> getRenderTextureSizes();
 
-    public float[] getStencilMask(RenderPass eye)
-    {
-        if (this.hiddenMesheVertecies != null && (eye == RenderPass.LEFT || eye == RenderPass.RIGHT))
-        {
+    public float[] getStencilMask(RenderPass eye) {
+        if (this.hiddenMesheVertecies != null && (eye == RenderPass.LEFT || eye == RenderPass.RIGHT)) {
             return eye == RenderPass.LEFT ? this.hiddenMesheVertecies[0] : this.hiddenMesheVertecies[1];
-        }
-        else
-        {
+        } else {
             return null;
         }
     }
 
-    public boolean isInitialized()
-    {
+    public boolean isInitialized() {
         return this.vr.initSuccess;
     }
 
-    public void reinitFrameBuffers(String cause)
-    {
+    public void reinitFrameBuffers(String cause) {
         this.reinitFramebuffers = true;
         System.out.println("Reinit Render: " + cause);
     }
 
-    public void setupRenderConfiguration() throws Exception
-    {
+    public void setupRenderConfiguration() throws Exception {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
-        if (minecraft.getWindow().getWindow() != this.lastWindow)
-        {
+        if (minecraft.getWindow().getWindow() != this.lastWindow) {
             this.lastWindow = minecraft.getWindow().getWindow();
             this.reinitFrameBuffers("Window Handle Changed");
         }
 
-        if (this.lastEnableVsync != minecraft.options.enableVsync().get())
-        {
+        if (this.lastEnableVsync != minecraft.options.enableVsync().get()) {
             this.reinitFrameBuffers("VSync Changed");
             this.lastEnableVsync = minecraft.options.enableVsync().get();
         }
@@ -442,20 +405,16 @@ public abstract class VRRenderer
             this.reinitFrameBuffers("Shaders on, but some buffers not initialized");
         }
 
-        if (this.reinitFramebuffers)
-        {
+        if (this.reinitFramebuffers) {
             this.reinitShadersFlag = true;
             this.checkGLError("Start Init");
-            int i = minecraft.getWindow().getScreenWidth() < 1 ? 1 : minecraft.getWindow().getScreenWidth();
-            int j = minecraft.getWindow().getScreenHeight() < 1 ? 1 : minecraft.getWindow().getScreenHeight();
 
-           if(GlUtil.getRenderer().toLowerCase().contains("intel")) //Optifine
-           {
-               throw new RenderConfigException("Incompatible", LangHelper.get("vivecraft.messages.intelgraphics", GlUtil.getRenderer()));
-           }
-
-            if (!this.isInitialized())
+            if (GlUtil.getRenderer().toLowerCase().contains("intel")) //Optifine
             {
+                throw new RenderConfigException("Incompatible", LangHelper.get("vivecraft.messages.intelgraphics", GlUtil.getRenderer()));
+            }
+
+            if (!this.isInitialized()) {
                 throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), LangHelper.get(this.getinitError()));
             }
 
@@ -463,85 +422,73 @@ public abstract class VRRenderer
             int eyew = tuple.getA();
             int eyeh = tuple.getB();
 
-            if (this.framebufferVrRender != null)
-            {
+            if (this.framebufferVrRender != null) {
                 WorldRenderPass.stereoXR.close();
                 WorldRenderPass.stereoXR = null;
                 this.framebufferVrRender = null;
             }
 
-            if (this.framebufferMR != null)
-            {
+            if (this.framebufferMR != null) {
                 WorldRenderPass.mixedReality.close();
                 WorldRenderPass.mixedReality = null;
                 this.framebufferMR.destroyBuffers();
                 this.framebufferMR = null;
             }
 
-            if (this.framebufferUndistorted != null)
-            {
+            if (this.framebufferUndistorted != null) {
                 WorldRenderPass.center.close();
                 WorldRenderPass.center = null;
                 this.framebufferUndistorted.destroyBuffers();
                 this.framebufferUndistorted = null;
             }
 
-            if (GuiHandler.guiFramebuffer != null)
-            {
+            if (GuiHandler.guiFramebuffer != null) {
                 GuiHandler.guiFramebuffer.destroyBuffers();
                 GuiHandler.guiFramebuffer = null;
             }
 
-            if (KeyboardHandler.Framebuffer != null)
-            {
+            if (KeyboardHandler.Framebuffer != null) {
                 KeyboardHandler.Framebuffer.destroyBuffers();
                 KeyboardHandler.Framebuffer = null;
             }
 
-            if (RadialHandler.Framebuffer != null)
-            {
+            if (RadialHandler.Framebuffer != null) {
                 RadialHandler.Framebuffer.destroyBuffers();
                 RadialHandler.Framebuffer = null;
             }
 
-            if (this.telescopeFramebufferL != null)
-            {
+            if (this.telescopeFramebufferL != null) {
                 WorldRenderPass.leftTelescope.close();
                 WorldRenderPass.leftTelescope = null;
                 this.telescopeFramebufferL.destroyBuffers();
                 this.telescopeFramebufferL = null;
             }
 
-            if (this.telescopeFramebufferR != null)
-            {
+            if (this.telescopeFramebufferR != null) {
                 WorldRenderPass.rightTelescope.close();
                 WorldRenderPass.rightTelescope = null;
                 this.telescopeFramebufferR.destroyBuffers();
                 this.telescopeFramebufferR = null;
             }
 
-            if (this.cameraFramebuffer != null)
-            {
+            if (this.cameraFramebuffer != null) {
                 this.cameraFramebuffer.destroyBuffers();
                 this.cameraFramebuffer = null;
             }
 
-            if (this.cameraRenderFramebuffer != null)
-            {
+            if (this.cameraRenderFramebuffer != null) {
                 WorldRenderPass.camera.close();
                 WorldRenderPass.camera = null;
                 this.cameraRenderFramebuffer.destroyBuffers();
                 this.cameraRenderFramebuffer = null;
             }
 
-            if (this.fsaaFirstPassResultFBO != null)
-            {
+            if (this.fsaaFirstPassResultFBO != null) {
                 this.fsaaFirstPassResultFBO.destroyBuffers();
                 this.fsaaFirstPassResultFBO = null;
             }
 
-            if (this.fsaaLastPassResultFBO != null)
-            {
+            if (this.fsaaLastPassResultFBO != null) {
                 this.fsaaLastPassResultFBO.destroyBuffers();
                 this.fsaaLastPassResultFBO = null;
             }
@@ -549,12 +496,10 @@ public abstract class VRRenderer
             int i1 = 0;
             boolean flag1 = i1 > 0;
 
-            if (this.LeftEyeTextureId == -1)
-            {
+            if (this.LeftEyeTextureId == -1) {
                 this.createRenderTexture(eyew, eyeh);
 
-                if (this.LeftEyeTextureId == -1)
-                {
+                if (this.LeftEyeTextureId == -1) {
                     throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), this.getLastError());
                 }
 
@@ -564,36 +509,32 @@ public abstract class VRRenderer
 
             this.checkGLError("Render Texture setup");
 
-            if (this.framebufferEye0 == null)
-            {
+            if (this.framebufferEye0 == null) {
                 this.framebufferEye0 = new VRTextureTarget("L Eye", eyew, eyeh, false, false, this.LeftEyeTextureId, false, true, false);
                 dataholder.print(this.framebufferEye0.toString());
                 this.checkGLError("Left Eye framebuffer setup");
             }
 
-            if (this.framebufferEye1 == null)
-            {
+            if (this.framebufferEye1 == null) {
                 this.framebufferEye1 = new VRTextureTarget("R Eye", eyew, eyeh, false, false, this.RightEyeTextureId, false, true, false);
                 dataholder.print(this.framebufferEye1.toString());
                 this.checkGLError("Right Eye framebuffer setup");
             }
 
-            this.renderScale = (float)Math.sqrt((double)dataholder.vrSettings.renderScaleFactor);
-            i = (int)Math.ceil((double)((float)eyew * this.renderScale));
-            j = (int)Math.ceil((double)((float)eyeh * this.renderScale));
-            this.framebufferVrRender = new VRTextureTarget("3D Render", i, j, true, false, -1, true, true,  dataholder.vrSettings.vrUseStencil);
+            this.renderScale = (float) Math.sqrt((double) dataholder.vrSettings.renderScaleFactor);
+            int i = (int) Math.ceil((double) ((float) eyew * this.renderScale));
+            int j = (int) Math.ceil((double) ((float) eyeh * this.renderScale));
+            this.framebufferVrRender = new VRTextureTarget("3D Render", i, j, true, false, -1, true, true, dataholder.vrSettings.vrUseStencil);
             WorldRenderPass.stereoXR = new WorldRenderPass((VRTextureTarget) this.framebufferVrRender);
             dataholder.print(this.framebufferVrRender.toString());
             this.checkGLError("3D framebuffer setup");
             this.mirrorFBWidth = minecraft.getWindow().getScreenWidth();
             this.mirrorFBHeight = minecraft.getWindow().getScreenHeight();
 
-            if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY)
-            {
+            if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
                 this.mirrorFBWidth = minecraft.getWindow().getScreenWidth() / 2;
 
-                if (dataholder.vrSettings.mixedRealityUnityLike)
-                {
+                if (dataholder.vrSettings.mixedRealityUnityLike) {
                     this.mirrorFBHeight = minecraft.getWindow().getScreenHeight() / 2;
                 }
             }
@@ -606,21 +547,18 @@ public abstract class VRRenderer
 
             List<RenderPass> list = this.getRenderPasses();
 
-            for (RenderPass renderpass : list)
-            {
+            for (RenderPass renderpass : list) {
                 System.out.println("Passes: " + renderpass.toString());
             }
 
-            if (list.contains(RenderPass.THIRD) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()))
-            {
+            if (list.contains(RenderPass.THIRD) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
                 this.framebufferMR = new VRTextureTarget("Mixed Reality Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, true, false, false);
                 WorldRenderPass.mixedReality = new WorldRenderPass((VRTextureTarget) this.framebufferMR);
                 dataholder.print(this.framebufferMR.toString());
                 this.checkGLError("Mixed reality framebuffer setup");
             }
 
-            if (list.contains(RenderPass.CENTER) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()))
-            {
+            if (list.contains(RenderPass.CENTER) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
                 this.framebufferUndistorted = new VRTextureTarget("Undistorted View Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, false, false, false);
                 WorldRenderPass.center = new WorldRenderPass((VRTextureTarget) this.framebufferUndistorted);
                 dataholder.print(this.framebufferUndistorted.toString());
@@ -693,10 +631,8 @@ public abstract class VRRenderer
             this.eyeproj[0] = this.getProjectionMatrix(0, ((GameRendererExtension) minecraft.gameRenderer).getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).getClipDistance());
             this.eyeproj[1] = this.getProjectionMatrix(1, ((GameRendererExtension) minecraft.gameRenderer).getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).getClipDistance());
 
-            if (dataholder.vrSettings.useFsaa)
-            {
-                try
-                {
+            if (dataholder.vrSettings.useFsaa) {
+                try {
                     this.checkGLError("pre FSAA FBO creation");
                     this.fsaaFirstPassResultFBO = new VRTextureTarget("FSAA Pass1 FBO", eyew, j, true, false, -1, false, false, false);
                     this.fsaaLastPassResultFBO = new VRTextureTarget("FSAA Pass2 FBO", eyew, eyeh, true, false, -1, false, false, false);
@@ -705,9 +641,7 @@ public abstract class VRRenderer
                     this.checkGLError("FSAA FBO creation");
                     VRShaders.setupFSAA();
                     ShaderHelper.checkGLError("FBO init fsaa shader");
-                }
-                catch (Exception exception)
-                {
+                } catch (Exception exception) {
                     dataholder.vrSettings.useFsaa = false;
                     dataholder.vrSettings.saveOptions();
                     System.out.println(exception.getMessage());
@@ -716,42 +650,36 @@ public abstract class VRRenderer
                 }
             }
 
-            try
-            {
+            try {
                 minecraft.mainRenderTarget = this.framebufferVrRender;
                 VRShaders.setupDepthMask();
                 ShaderHelper.checkGLError("init depth shader");
                 VRShaders.setupFOVReduction();
                 ShaderHelper.checkGLError("init FOV shader");
                 minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
-            }
-            catch (Exception exception1)
-            {
+            } catch (Exception exception1) {
                 System.out.println(exception1.getMessage());
                 System.exit(-1);
             }
 
-            if (minecraft.screen != null)
-            {
+            if (minecraft.screen != null) {
                 int l2 = minecraft.getWindow().getGuiScaledWidth();
                 int j3 = minecraft.getWindow().getGuiScaledHeight();
                 minecraft.screen.init(minecraft, l2, j3);
             }
 
-            long i3 = (long)(minecraft.getWindow().getScreenWidth() * minecraft.getWindow().getScreenHeight());
-            long k3 = (long)(i * j * 2);
+            long i3 = (long) (minecraft.getWindow().getScreenWidth() * minecraft.getWindow().getScreenHeight());
+            long k3 = (long) (i * j * 2);
 
-            if (list.contains(RenderPass.CENTER))
-            {
+            if (list.contains(RenderPass.CENTER)) {
                 k3 += i3;
             }
 
-            if (list.contains(RenderPass.THIRD))
-            {
+            if (list.contains(RenderPass.THIRD)) {
                 k3 += i3;
             }
 
-            System.out.println("[Minecrift] New render config:\nOpenVR target width: " + eyew + ", height: " + eyeh + " [" + String.format("%.1f", (float)(eyew * eyeh) / 1000000.0F) + " MP]\nRender target width: " + i + ", height: " + j + " [Render scale: " + Math.round(dataholder.vrSettings.renderScaleFactor * 100.0F) + "%, " + String.format("%.1f", (float)(i * j) / 1000000.0F) + " MP]\nMain window width: " + minecraft.getWindow().getScreenWidth() + ", height: " + minecraft.getWindow().getScreenHeight() + " [" + String.format("%.1f", (float)i3 / 1000000.0F) + " MP]\nTotal shaded pixels per frame: " + String.format("%.1f", (float)k3 / 1000000.0F) + " MP (eye stencil not accounted for)");
+            System.out.println("[Minecrift] New render config:\nOpenVR target width: " + eyew + ", height: " + eyeh + " [" + String.format("%.1f", (float) (eyew * eyeh) / 1000000.0F) + " MP]\nRender target width: " + i + ", height: " + j + " [Render scale: " + Math.round(dataholder.vrSettings.renderScaleFactor * 100.0F) + "%, " + String.format("%.1f", (float) (i * j) / 1000000.0F) + " MP]\nMain window width: " + minecraft.getWindow().getScreenWidth() + ", height: " + minecraft.getWindow().getScreenHeight() + " [" + String.format("%.1f", (float) i3 / 1000000.0F) + " MP]\nTotal shaded pixels per frame: " + String.format("%.1f", (float) k3 / 1000000.0F) + " MP (eye stencil not accounted for)");
             this.lastDisplayFBWidth = i;
             this.lastDisplayFBHeight = j;
             this.reinitFramebuffers = false;
@@ -763,8 +691,7 @@ public abstract class VRRenderer
         }
     }
 
-    public boolean wasDisplayResized()
-    {
+    public boolean wasDisplayResized() {
         Minecraft minecraft = Minecraft.getInstance();
         int i = minecraft.getWindow().getScreenHeight();
         int j = minecraft.getWindow().getScreenWidth();

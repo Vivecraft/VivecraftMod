@@ -12,7 +12,7 @@ public class RenderPassManager {
     public static RenderPassManager INSTANCE;
 
     public final MainTarget vanillaRenderTarget;
-    public static RenderPassType renderPassType = RenderPassType.WORLD_ONLY;
+    public static RenderPassType renderPassType = RenderPassType.VANILLA;
     public static WorldRenderPass wrp;
 
     public RenderPassManager(MainTarget vanillaRenderTarget) {
@@ -29,5 +29,11 @@ public class RenderPassManager {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.GUI;
         renderPassType = RenderPassType.GUI_ONLY;
         mc.mainRenderTarget = GuiHandler.guiFramebuffer;
+    }
+
+    public static void setVanillaRenderPass() {
+        ClientDataHolderVR.getInstance().currentPass = null;
+        renderPassType = RenderPassType.VANILLA;
+        mc.mainRenderTarget = INSTANCE.vanillaRenderTarget;
     }
 }

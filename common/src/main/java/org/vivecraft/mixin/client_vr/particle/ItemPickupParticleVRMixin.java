@@ -1,7 +1,9 @@
 package org.vivecraft.mixin.client_vr.particle;
 
 import net.minecraft.world.entity.Entity;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
+import org.vivecraft.client_xr.XRState;
 import org.vivecraft.common.PehkuiHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -16,6 +18,9 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ItemPickupParticle.class)
 public class ItemPickupParticleVRMixin {
 
+    @Unique
+    private static final Minecraft mc = Minecraft.getInstance();
+
     @Final
     @Shadow
     private Entity target;
@@ -23,13 +28,13 @@ public class ItemPickupParticleVRMixin {
     @Shadow
     private Entity itemEntity;
 
+    @Unique
     private Vec3 playerPos;
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 0), method = "render")
     public double updateX(double d, double e, double f) {
-        Minecraft mc = Minecraft.getInstance();
-        if (target == mc.player) {
-            playerPos = ((GameRendererExtension)mc.gameRenderer).getControllerRenderPos(0);
+        if (XRState.vrRunning && target == mc.player) {
+            playerPos = ((GameRendererExtension) mc.gameRenderer).getControllerRenderPos(0);
             e = f = playerPos.x;
         }
 
@@ -38,11 +43,11 @@ public class ItemPickupParticleVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 1), method = "render")
     public double updateY(double d, double e, double f) {
-        if (target == Minecraft.getInstance().player) {
+        if (XRState.vrRunning && target == mc.player) {
             float offset = 0.5F;
-            if (Xplat.isModLoaded("pehkui")){
+            if (Xplat.isModLoaded("pehkui")) {
                 // pehkui changes the offset, need to account for that
-                offset *= PehkuiHelper.getPlayerScale(target, (float)d);
+                offset *= PehkuiHelper.getPlayerScale(target, (float) d);
             }
             // offset, so the particle is centered around the arm
             offset += itemEntity.getBbHeight();
@@ -54,7 +59,7 @@ public class ItemPickupParticleVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 2), method = "render")
     public double updateZ(double d, double e, double f) {
-        if (target == Minecraft.getInstance().player) {
+        if (XRState.vrRunning && target == mc.player) {
             e = f = playerPos.z;
             playerPos = null;
         }

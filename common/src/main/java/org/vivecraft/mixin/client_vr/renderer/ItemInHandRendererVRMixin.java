@@ -91,7 +91,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
 	@Inject(at = @At("HEAD"), method = "renderPlayerArm", cancellable = true)
 	public void overrideArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm, CallbackInfo ci) {
-		if (!XRState.isXr) {
+		if (!XRState.vrRunning) {
 			return;
 		}
 		vrPlayerArm(poseStack, multiBufferSource, i, f, g, humanoidArm);
@@ -100,7 +100,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
 	@Inject(at = @At("HEAD"), method = "renderArmWithItem", cancellable = true)
 	public void overrideArmItem(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j, CallbackInfo ci) {
-		if (!XRState.isXr) {
+		if (!XRState.vrRunning) {
 			return;
 		}
 		this.vrRenderArmWithItem(abstractClientPlayer, f, g, interactionHand, h, itemStack, i, poseStack, multiBufferSource, j);

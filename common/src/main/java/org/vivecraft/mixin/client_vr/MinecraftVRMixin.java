@@ -278,7 +278,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     public Overlay initVivecraft(Overlay overlay) {
         try {
             VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
-            XRState.enableVR();
+            if (XRState.vrEnabled) {
+                XRState.initializeVR();
+            }
         } catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -288,23 +290,28 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
     public void destroy(CallbackInfo info) {
         try {
-            XRState.disableVR();
+            XRState.destroyVR();
         } catch (Exception ignored) {
         }
     }
 
     @Inject(at = @At("HEAD"), method = "runTick(Z)V", cancellable = true)
     public void replaceTick(boolean bl, CallbackInfo callback) {
-        if (!XRState.isXr) {
+        if (!XRState.vrInitialized) {
+            return;
+        }
+        XRState.vrRunning = ClientDataHolderVR.getInstance().vr.isActive();
+//            ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
+        if (!XRState.vrRunning) {
             return;
         }
         if (SodiumHelper.isLoaded()) {
             SodiumHelper.preRenderMinecraft();
         }
-        RenderPassManager.setGUIRenderPass();
         this.preRender(bl);
         this.newRunTick(bl);
         this.postRender();
+        RenderPassManager.setVanillaRenderPass();
         if (SodiumHelper.isLoaded()) {
             SodiumHelper.postRenderMinecraft();
         }
@@ -314,7 +321,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     // the VR runtime handles the frame limit, no need to manually limit it 60fps
     @ModifyConstant(constant = @Constant(longValue = 16), method = "doWorldLoad", expect = 0)
     private long noWaitOnLevelLoadFabric(long constant) {
-        if (XRState.isXr) {
+        if (XRState.vrRunning) {
             return 0L;
         }
         return constant;
@@ -572,6 +579,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 exception2.printStackTrace();
             }
 
+            RenderPassManager.setGUIRenderPass();
             this.profiler.push("VR Poll/VSync");
             ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
             this.profiler.pop();
@@ -588,6 +596,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
             this.profiler.pop();
         } else {
+            RenderPassManager.setGUIRenderPass();
             this.profiler.push("VR Poll/VSync");
             ClientDataHolderVR.getInstance().vr.poll(ClientDataHolderVR.getInstance().frameIndex);
             this.profiler.pop();
@@ -707,10 +716,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         this.profiler.pop();
     }
 
-    @Inject(at = @At("HEAD"), method = "resizeDisplay", cancellable = true)
-    void c(CallbackInfo ci) {
-        ci.cancel();
-    }
+    // NotFixed
+//    @Inject(at = @At("HEAD"), method = "resizeDisplay", cancellable = true)
+//    void c(CallbackInfo ci) {
+//        ci.cancel();
+//    }
 
 // NotFixed
 //    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setGuiScale(D)V", shift = Shift.AFTER), method = "resizeDisplay()V")
@@ -810,7 +820,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;overlay:Lnet/minecraft/client/gui/screens/Overlay;", shift = Shift.BEFORE), method = "tick")
     public void vrInputs(CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 
@@ -821,7 +831,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;", ordinal = 4, shift = Shift.BEFORE), method = "tick")
     public void vrActions(CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 
@@ -914,7 +924,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Inject(at = @At("HEAD"), method = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V")
     public void roomScale(ClientLevel pLevelClient, CallbackInfo info) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 

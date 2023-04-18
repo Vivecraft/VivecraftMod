@@ -32,7 +32,6 @@ import org.vivecraft.api.client.ClientNetworkHelper;
 import org.vivecraft.client_vr.VRServerPerms;
 import org.vivecraft.client_xr.XRState;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.openvr_jna.control.VivecraftMovementInput;
 import org.vivecraft.client.render.PlayerModelController;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -58,7 +57,7 @@ public class ClientPacketListenerVRMixin {
         CommonNetworkHelper.vivePlayers.clear();
         ClientNetworkHelper.sendVersionInfo();
 
-        if (XRState.isXr) {
+        if (XRState.vrRunning) {
             ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer = 200;
         }
     }
@@ -158,7 +157,7 @@ public class ClientPacketListenerVRMixin {
                     case VERSION -> {
                         String s11 = friendlybytebuf.readUtf(1024);
                         VRServerPerms.INSTANCE.setTeleportSupported(true);
-                        if (XRState.isXr) {
+                        if (XRState.vrRunning) {
                             dataholder.vrPlayer.teleportWarningTimer = -1;
                         }
                         if (!ClientNetworkHelper.displayedChatMessage) {

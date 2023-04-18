@@ -178,7 +178,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Inject(at = @At("HEAD"), method = "swing")
     public void vrSwing(InteractionHand interactionHand, CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
         if (!this.swinging) {
@@ -192,14 +192,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;aiStep()V"), method = "aiStep")
     public void ai(CallbackInfo ci) {
-        if (XRState.isXr) {
+        if (XRState.vrRunning) {
             this.dataholder.vrPlayer.tick((LocalPlayer) (Object) this, this.minecraft, this.random);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V", cancellable = true)
     public void overwriteMove(MoverType pType, Vec3 pPos, CallbackInfo info) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 
@@ -268,7 +268,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Inject(at = @At("HEAD"), method = "updateAutoJump", cancellable = true)
     public void autostep1(float f, float g, CallbackInfo ci) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 
@@ -376,7 +376,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public ItemStack eat(Level level, ItemStack itemStack) {
-        if (XRState.isXr && itemStack.isEdible() && ((LocalPlayer) (Object) this) == Minecraft.getInstance().player && itemStack.getHoverName().getString().equals("EAT ME")) {
+        if (XRState.vrRunning && itemStack.isEdible() && ((LocalPlayer) (Object) this) == Minecraft.getInstance().player && itemStack.getHoverName().getString().equals("EAT ME")) {
             ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
             ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
         }
@@ -389,7 +389,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Override
     public void moveTo(double pX, double p_20109_, double pY, float p_20111_, float pZ) {
         super.moveTo(pX, p_20109_, pY, p_20111_, pZ);
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
         if (this.initFromServer) {
@@ -400,7 +400,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Override
     public void absMoveTo(double pX, double p_19892_, double pY, float p_19894_, float pZ) {
         super.absMoveTo(pX, p_19892_, pY, p_19894_, pZ);
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
         ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity((LocalPlayer) (Object) this, false, false);
@@ -408,7 +408,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void setPos(double pX, double p_20211_, double pY) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             super.setPos(pX, p_20211_, pY);
             return;
         }
@@ -465,7 +465,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void moveRelative(float pAmount, Vec3 pRelative) {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             super.moveRelative(pAmount, pRelative);
             return;
         }
@@ -589,7 +589,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Override
     public void die(DamageSource pCause) {
         super.die(pCause);
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
         ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 2000);

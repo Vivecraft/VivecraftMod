@@ -8,23 +8,15 @@ import org.vivecraft.client_vr.provider.openvr_jna.MCOpenVR;
 
 public class XRState {
 
-    public static boolean isXr = true;
+    public static boolean vrRunning = false;
+    public static boolean vrEnabled = true;
+    public static boolean vrInitialized = false;
 
-    private static boolean vrLoaded = false;
-
-    public static void setupVR() {
-        if (vrLoaded) {
+    public static void initializeVR() {
+        if (vrInitialized) {
             return;
         }
-        vrLoaded = true;
-//        VRNatives.initializeVR();
-    }
-
-    public static void enableVR() {
-        setupVR();
-
-        GLFW.glfwSwapInterval(0);
-
+        vrInitialized = true;
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
         dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
         dh.vr.init();
@@ -53,13 +45,21 @@ public class XRState {
         dh.vr.postinit();
     }
 
-    public static void disableVR() {
+    public static void startVR() {
+        GLFW.glfwSwapInterval(0);
+    }
+
+    public static void destroyVR() {
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 
         dh.vr.destroy();
         dh.vr = null;
         dh.vrPlayer = null;
         dh.vrRenderer = null;
-//        GLFW.glfwSwapInterval(bl ? 1 : 0);
+        vrInitialized = false;
+    }
+
+    public static void pauseVR() {
+        //        GLFW.glfwSwapInterval(bl ? 1 : 0);
     }
 }

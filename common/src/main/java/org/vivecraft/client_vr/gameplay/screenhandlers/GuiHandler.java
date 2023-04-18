@@ -329,7 +329,7 @@ public class GuiHandler
 
     public static void onScreenChanged(Screen previousGuiScreen, Screen newScreen, boolean unpressKeys)
     {
-        if (!XRState.isXr) {
+        if (!XRState.vrRunning) {
             return;
         }
 
