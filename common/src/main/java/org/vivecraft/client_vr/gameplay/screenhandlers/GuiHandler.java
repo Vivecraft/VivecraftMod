@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.screenhandlers;
 
+import org.joml.Vector2f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_xr.XRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -374,9 +375,9 @@ public class GuiHandler
         if (flag)
         {
             guiScale = 2.0F;
-            float[] afloat = MCVR.get().getPlayAreaSize();
+            Vector2f afloat = MCVR.get().getPlayAreaSize();
             // slight offset to center of the room, to prevent z fighting
-            guiPos_room = new Vec3(0.02D, (double)1.3F, (double)(-Math.max(afloat != null ? afloat[1] / 2.0F : 0.0F, 1.5F)));
+            guiPos_room = new Vec3(0.02D, (double)1.3F, (double)(-Math.max(afloat != null ? afloat.y / 2.0F : 0.0F, 1.5F)));
             guiRotation_room = new Matrix4f();
             guiRotation_room.M[0][0] = guiRotation_room.M[1][1] = guiRotation_room.M[2][2] = guiRotation_room.M[3][3] = 1.0F;
             guiRotation_room.M[0][1] = guiRotation_room.M[1][0] = guiRotation_room.M[2][3] = guiRotation_room.M[3][1] = 0.0F;

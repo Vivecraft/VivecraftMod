@@ -2,9 +2,7 @@ package org.vivecraft.client_xr;
 
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client.VRMixinConfig;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRNatives;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.openvr_jna.MCOpenVR;
 
@@ -19,7 +17,7 @@ public class XRState {
             return;
         }
         vrLoaded = true;
-        VRNatives.initializeVR();
+//        VRNatives.initializeVR();
     }
 
     public static void enableVR() {

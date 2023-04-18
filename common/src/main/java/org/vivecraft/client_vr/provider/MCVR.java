@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -1370,7 +1371,7 @@ public abstract class MCVR
 
     public abstract void poll(long var1);
 
-    public abstract float[] getPlayAreaSize();
+    public abstract Vector2f getPlayAreaSize();
 
     public abstract boolean init();
 

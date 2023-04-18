@@ -27,6 +27,10 @@ subprojects {
         mappings loom.officialMojangMappings()
         // The following line declares the yarn mappings you may select this one as well.
         // mappings "net.fabricmc:yarn:1.18.2+build.4:v2"
+        include(implementation("org.lwjgl:lwjgl-openvr:3.3.1"))
+        include(implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux"))
+        include(implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos"))
+        include(implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows"))
     }
 
     tasks.withType(JavaCompile) {
@@ -63,7 +67,7 @@ allprojects {
         // See https://docs.gradle.org/current/userguide/declaring_repositories.html
         // for more information about repositories.
 
-        maven {url = 'https://mvnrepository.com/'}
+        maven { url = 'https://mvnrepository.com/' }
         maven { url 'https://jitpack.io' }
         maven {
             name = "Modrinth"

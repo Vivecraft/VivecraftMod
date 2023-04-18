@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Axis;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
@@ -1533,9 +1534,9 @@ public abstract class GameRendererVRMixin
         int i = 4;
         float f = 2.5F;
         float f1 = 1.3F;
-        float[] afloat = GameRendererVRMixin.DATA_HOLDER.vr.getPlayAreaSize();
+        Vector2f afloat = GameRendererVRMixin.DATA_HOLDER.vr.getPlayAreaSize();
         if (afloat == null)
-            afloat = new float[]{2, 2};
+            afloat = new Vector2f(2, 2);
 
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
@@ -1546,8 +1547,8 @@ public abstract class GameRendererVRMixin
         RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
         RenderSystem.setShaderColor(1, 1, 1, 1);
         pMatrixStack.pushPose();
-        float f2 = afloat[0] + f1;
-        float f3 = afloat[1] + f1;
+        float f2 = afloat.x + f1;
+        float f3 = afloat.y + f1;
         pMatrixStack.translate(-f2 / 2.0F, 0.0F, -f3 / 2.0F);
 
         Matrix4f matrix4f = pMatrixStack.last().pose();
