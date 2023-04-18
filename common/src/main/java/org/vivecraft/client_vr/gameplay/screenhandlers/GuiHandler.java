@@ -61,8 +61,8 @@ public class GuiHandler
     public static float guiScale = 1.0F;
     public static float guiScaleApplied = 1.0F;
     public static Vec3 IPoint = new Vec3(0.0D, 0.0D, 0.0D);
-    public static Vec3 guiPos_room = new Vec3(0.0D, 0.0D, 0.0D);
-    public static Matrix4f guiRotation_room = new Matrix4f();
+    public static Vec3 guiPos_room = null;
+    public static Matrix4f guiRotation_room = null;
     public static float hudScale = 1.0F;
     public static Vec3 hudPos_room = new Vec3(0.0D, 0.0D, 0.0D);
     public static Matrix4f hudRotation_room = new Matrix4f();
@@ -121,10 +121,10 @@ public class GuiHandler
             ++j;
         }
 
-        int widthFloor = (int) (framebufferWidth / scaleIn);
+        int widthFloor = framebufferWidth / scaleIn;
         scaledWidth = framebufferWidth / scaleIn > widthFloor ? widthFloor + 1 : widthFloor;
 
-        int heightFloor = (int) (framebufferHeight / scaleIn);
+        int heightFloor = framebufferHeight / scaleIn;
         scaledHeight = framebufferHeight / scaleIn > heightFloor ? heightFloor + 1 : heightFloor;
 
         return j;
@@ -132,8 +132,6 @@ public class GuiHandler
 
     public static void processGui()
     {
-        RenderPassManager.setGUIRenderPass();
-
         if (mc.screen != null)
         {
             if (!dh.vrSettings.seated)
@@ -572,7 +570,7 @@ public class GuiHandler
         }
 
         //GL11.glMultMatrixf(dh.vrPlayer.vrdata_world_render.getEye(currentPass).getMatrix().toFloatBuffer());
-        
+
         Vec3 vec36 = guipos.subtract(vec3);
         pMatrixStack.translate(vec36.x, vec36.y, vec36.z);
         pMatrixStack.mulPoseMatrix(guirot.toMCMatrix());

@@ -8,6 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Axis;
+import net.minecraft.client.multiplayer.ClientLevel;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -57,6 +58,7 @@ import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client.Xevents;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client_xr.XRState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
@@ -239,22 +241,31 @@ public abstract class GameRendererVRMixin
         return new XRCamera();
     }
 // NotFixed
-//    @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"), method = "pick")
-//    public ClientLevel appendCheck(Minecraft instance) {
-//        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render == null ? null : instance.level;
-//    }
-//
-//    @ModifyVariable(at = @At("STORE"), method = "pick(F)V", ordinal = 0)
-//    public Vec3 rayTrace(Vec3 original) {
-//        this.minecraft.hitResult = GameRendererVRMixin.DATA_HOLDER.vrPlayer.rayTraceBlocksVR(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render, 0, this.minecraft.gameMode.getPickRange(), false);
-//        this.crossVec = GameRendererVRMixin.DATA_HOLDER.vrPlayer.AimedPointAtDistance(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render, 0, this.minecraft.gameMode.getPickRange());
-//        return GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getController(0).getPosition();
-//    }
-//
-//    @ModifyVariable(at = @At("STORE"), method = "pick(F)V", ordinal = 1)
-//    public Vec3 vrVec31(Vec3 original) {
-//        return GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getController(0).getDirection();
-//    }
+    @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"), method = "pick")
+    public ClientLevel appendCheck(Minecraft instance) {
+        if (!XRState.vrRunning) {
+            return instance.level;
+        }
+        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render == null ? null : instance.level;
+    }
+
+    @ModifyVariable(at = @At("STORE"), method = "pick(F)V", ordinal = 0)
+    public Vec3 rayTrace(Vec3 original) {
+        if (!XRState.vrRunning) {
+            return original;
+        }
+        this.minecraft.hitResult = GameRendererVRMixin.DATA_HOLDER.vrPlayer.rayTraceBlocksVR(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render, 0, this.minecraft.gameMode.getPickRange(), false);
+        this.crossVec = GameRendererVRMixin.DATA_HOLDER.vrPlayer.AimedPointAtDistance(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render, 0, this.minecraft.gameMode.getPickRange());
+        return GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getController(0).getPosition();
+    }
+
+    @ModifyVariable(at = @At("STORE"), method = "pick(F)V", ordinal = 1)
+    public Vec3 vrVec31(Vec3 original) {
+        if (!XRState.vrRunning) {
+            return original;
+        }
+        return GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getController(0).getDirection();
+    }
 
     //TODO Vivecraft add riding check in case your hand is somewhere inappropriate
 

@@ -300,8 +300,16 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         if (!XRState.vrInitialized) {
             return;
         }
-        XRState.vrRunning = ClientDataHolderVR.getInstance().vr.isActive();
-//            ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
+        boolean vrActive = ClientDataHolderVR.getInstance().vr.isActive();
+        if (XRState.vrRunning != vrActive) {
+            XRState.vrRunning = vrActive;
+            if (vrActive) {
+                //TODO
+            } else {
+                GuiHandler.guiPos_room = null;
+                GuiHandler.guiRotation_room = null;
+            }
+        }
         if (!XRState.vrRunning) {
             return;
         }
