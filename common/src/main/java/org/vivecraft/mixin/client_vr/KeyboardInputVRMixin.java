@@ -16,7 +16,7 @@ import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.provider.openvr_jna.VRInputAction;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.VRState;
 import org.vivecraft.common.utils.math.Vector2;
 
 import static org.vivecraft.client_vr.provider.openvr_jna.control.VivecraftMovementInput.getMovementAxisValue;
@@ -43,7 +43,7 @@ public class KeyboardInputVRMixin extends Input {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(boolean isSneaking, float sneakSpeed, CallbackInfo ci) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return;
         }
 

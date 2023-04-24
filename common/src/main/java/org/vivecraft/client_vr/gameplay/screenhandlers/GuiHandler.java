@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import org.joml.Vector2f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.provider.ControllerType;
@@ -14,7 +14,6 @@ import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client.utils.Utils;
-import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
@@ -327,7 +326,7 @@ public class GuiHandler
 
     public static void onScreenChanged(Screen previousGuiScreen, Screen newScreen, boolean unpressKeys)
     {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return;
         }
 

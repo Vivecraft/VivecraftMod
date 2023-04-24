@@ -6,7 +6,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.openvr_jna.MCOpenVR;
 
-public class XRState {
+public class VRState {
 
     public static boolean vrRunning = false;
     public static boolean vrEnabled = true;

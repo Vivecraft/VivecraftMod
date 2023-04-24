@@ -56,7 +56,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client_vr.SodiumHelper;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
@@ -278,8 +278,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     public Overlay initVivecraft(Overlay overlay) {
         try {
             VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
-            if (XRState.vrEnabled) {
-                XRState.initializeVR();
+            if (VRState.vrEnabled) {
+                VRState.initializeVR();
             }
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -290,19 +290,19 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
     public void destroy(CallbackInfo info) {
         try {
-            XRState.destroyVR();
+            VRState.destroyVR();
         } catch (Exception ignored) {
         }
     }
 
     @Inject(at = @At("HEAD"), method = "runTick(Z)V", cancellable = true)
     public void replaceTick(boolean bl, CallbackInfo callback) {
-        if (!XRState.vrInitialized) {
+        if (!VRState.vrInitialized) {
             return;
         }
         boolean vrActive = ClientDataHolderVR.getInstance().vr.isActive();
-        if (XRState.vrRunning != vrActive) {
-            XRState.vrRunning = vrActive;
+        if (VRState.vrRunning != vrActive) {
+            VRState.vrRunning = vrActive;
             if (vrActive) {
                 //TODO
             } else {
@@ -310,7 +310,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 GuiHandler.guiRotation_room = null;
             }
         }
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return;
         }
         if (SodiumHelper.isLoaded()) {
@@ -329,7 +329,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     // the VR runtime handles the frame limit, no need to manually limit it 60fps
     @ModifyConstant(constant = @Constant(longValue = 16), method = "doWorldLoad", expect = 0)
     private long noWaitOnLevelLoadFabric(long constant) {
-        if (XRState.vrRunning) {
+        if (VRState.vrRunning) {
             return 0L;
         }
         return constant;
@@ -828,7 +828,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;overlay:Lnet/minecraft/client/gui/screens/Overlay;", shift = Shift.BEFORE), method = "tick")
     public void vrInputs(CallbackInfo ci) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return;
         }
 
@@ -839,7 +839,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;", ordinal = 4, shift = Shift.BEFORE), method = "tick")
     public void vrActions(CallbackInfo ci) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return;
         }
 
@@ -932,7 +932,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Inject(at = @At("HEAD"), method = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V")
     public void roomScale(ClientLevel pLevelClient, CallbackInfo info) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return;
         }
 

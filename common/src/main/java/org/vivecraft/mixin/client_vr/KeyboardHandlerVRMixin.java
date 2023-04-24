@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.settings.VRHotkeys;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.VRState;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -55,7 +55,7 @@ public class KeyboardHandlerVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Screenshot;grab(Ljava/io/File;Lcom/mojang/blaze3d/pipeline/RenderTarget;Ljava/util/function/Consumer;)V"), method = "keyPress")
     public void noScreenshot(File file, RenderTarget renderTarget, Consumer<Component> consumer) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             Screenshot.grab(file, renderTarget, consumer);
         }
         ClientDataHolderVR.getInstance().grabScreenShot = true;

@@ -58,7 +58,7 @@ import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client.Xevents;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.VRState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
@@ -243,7 +243,7 @@ public abstract class GameRendererVRMixin
 // NotFixed
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"), method = "pick")
     public ClientLevel appendCheck(Minecraft instance) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return instance.level;
         }
         return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render == null ? null : instance.level;
@@ -251,7 +251,7 @@ public abstract class GameRendererVRMixin
 
     @ModifyVariable(at = @At("STORE"), method = "pick(F)V", ordinal = 0)
     public Vec3 rayTrace(Vec3 original) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return original;
         }
         this.minecraft.hitResult = GameRendererVRMixin.DATA_HOLDER.vrPlayer.rayTraceBlocksVR(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render, 0, this.minecraft.gameMode.getPickRange(), false);
@@ -261,7 +261,7 @@ public abstract class GameRendererVRMixin
 
     @ModifyVariable(at = @At("STORE"), method = "pick(F)V", ordinal = 1)
     public Vec3 vrVec31(Vec3 original) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return original;
         }
         return GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getController(0).getDirection();

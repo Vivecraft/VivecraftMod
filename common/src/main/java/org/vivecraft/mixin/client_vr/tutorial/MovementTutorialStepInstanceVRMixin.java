@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.VRState;
 import org.vivecraft.client_vr.provider.MCVR;
 
 import java.util.HashSet;
@@ -28,7 +28,7 @@ public class MovementTutorialStepInstanceVRMixin {
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 0), index = 1, method = "tick")
     private Component alterMovementTitle(Component title) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return title;
         }
 
@@ -98,7 +98,7 @@ public class MovementTutorialStepInstanceVRMixin {
     }
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 0), index = 2, method = "tick")
     private Component alterMovementDescription(Component description) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return description;
         }
 
@@ -110,7 +110,7 @@ public class MovementTutorialStepInstanceVRMixin {
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 1), index = 2, method = "tick")
     private Component alterLookDescription(Component title) {
-        if (!XRState.vrRunning) {
+        if (!VRState.vrRunning) {
             return title;
         }
 

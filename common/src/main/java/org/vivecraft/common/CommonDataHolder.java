@@ -1,6 +1,5 @@
 package org.vivecraft.common;
 
-import org.vivecraft.client.VRState;
 import org.vivecraft.client.Xplat;
 
 public class CommonDataHolder {

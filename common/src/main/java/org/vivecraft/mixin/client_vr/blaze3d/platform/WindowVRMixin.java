@@ -6,14 +6,14 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.VRState;
 
 @Mixin(Window.class)
 public abstract class WindowVRMixin {
 
 	@ModifyVariable(method = "updateVsync", ordinal = 0, at = @At("HEAD"), argsOnly = true)
 	boolean overwriteVsync(boolean v) {
-		if (XRState.vrRunning) {
+		if (VRState.vrRunning) {
 			return false;
 		}
 		return v;
@@ -70,6 +70,6 @@ public abstract class WindowVRMixin {
 	@Unique
 	private boolean shouldOverrideSide() {
 		//MCXR:         return mcxrGameRenderer.overrideWindowSize || (mcxrGameRenderer.isXrMode() && mcxrGameRenderer.reloadingDepth > 0);
-		return XRState.vrRunning;
+		return VRState.vrRunning;
 	}
 }

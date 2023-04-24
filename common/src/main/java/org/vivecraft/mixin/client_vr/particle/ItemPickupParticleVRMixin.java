@@ -3,7 +3,7 @@ package org.vivecraft.mixin.client_vr.particle;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
-import org.vivecraft.client_xr.XRState;
+import org.vivecraft.client_xr.VRState;
 import org.vivecraft.common.PehkuiHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -33,7 +33,7 @@ public class ItemPickupParticleVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 0), method = "render")
     public double updateX(double d, double e, double f) {
-        if (XRState.vrRunning && target == mc.player) {
+        if (VRState.vrRunning && target == mc.player) {
             playerPos = ((GameRendererExtension) mc.gameRenderer).getControllerRenderPos(0);
             e = f = playerPos.x;
         }
@@ -43,7 +43,7 @@ public class ItemPickupParticleVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 1), method = "render")
     public double updateY(double d, double e, double f) {
-        if (XRState.vrRunning && target == mc.player) {
+        if (VRState.vrRunning && target == mc.player) {
             float offset = 0.5F;
             if (Xplat.isModLoaded("pehkui")) {
                 // pehkui changes the offset, need to account for that
@@ -59,7 +59,7 @@ public class ItemPickupParticleVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 2), method = "render")
     public double updateZ(double d, double e, double f) {
-        if (XRState.vrRunning && target == mc.player) {
+        if (VRState.vrRunning && target == mc.player) {
             e = f = playerPos.z;
             playerPos = null;
         }
