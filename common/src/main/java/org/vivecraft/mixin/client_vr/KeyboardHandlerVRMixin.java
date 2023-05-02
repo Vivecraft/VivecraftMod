@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.settings.VRHotkeys;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.client_vr.VRState;
 
 import java.io.File;
 import java.util.function.Consumer;

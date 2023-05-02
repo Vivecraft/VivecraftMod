@@ -193,13 +193,6 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         ((GameRendererExtension) gameRenderer).drawEyeStencil(false);
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;isDetached()Z"), method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V")
-    public boolean drawSelf(Camera camera) {
-        boolean renderSelf = ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA;
-        renderSelf = renderSelf | (ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf || ClientDataHolderVR.getInstance().vrSettings.tmpRenderSelf);
-        return !(!camera.isDetached() && !renderSelf);
-    }
-
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z"), method = "renderLevel")
     public boolean captureEntity(EntityRenderDispatcher instance, Entity entity, Frustum frustum, double d, double e, double f) {
         this.capturedEntity = entity;
@@ -208,7 +201,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;tickCount:I", shift = Shift.BEFORE), method = "renderLevel")
     public void restoreLoc1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-        if (capturedEntity == camera.getEntity()) {
+        if (!RenderPassType.isVanilla() && capturedEntity == camera.getEntity()) {
             ((GameRendererExtension) gameRenderer).restoreRVEPos((LivingEntity) capturedEntity);
         }
         this.renderedEntity = capturedEntity;
@@ -216,7 +209,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", shift = Shift.AFTER), method = "renderLevel")
     public void restoreLoc2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-        if (capturedEntity == camera.getEntity()) {
+        if (!RenderPassType.isVanilla() && capturedEntity == camera.getEntity()) {
             ((GameRendererExtension) gameRenderer).cacheRVEPos((LivingEntity) capturedEntity);
             ((GameRendererExtension) gameRenderer).setupRVE();
         }

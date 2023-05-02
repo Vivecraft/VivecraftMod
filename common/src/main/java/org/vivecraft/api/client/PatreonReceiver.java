@@ -10,7 +10,7 @@ import java.util.Map;
 
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.io.IOUtils;
-import org.vivecraft.client.render.PlayerModelController;
+import org.vivecraft.client.VRPlayersClient;
 
 public class PatreonReceiver
 {
@@ -43,7 +43,7 @@ public class PatreonReceiver
                             {
                                 if (astring1[0].equalsIgnoreCase(player.getGameProfile().getName()))
                                 {
-                                    PlayerModelController.getInstance().setHMD(player.getUUID(), i);
+                                    VRPlayersClient.getInstance().setHMD(player.getUUID(), i);
                                 }
                             }
                         }
@@ -79,7 +79,7 @@ public class PatreonReceiver
                 if (cache == null)
                 {
                     queuedPlayers.add(p);
-                    PlayerModelController.getInstance().setHMD(p.getUUID(), 0);
+                    VRPlayersClient.getInstance().setHMD(p.getUUID(), 0);
 
                     if (!downloadStarted)
                     {
@@ -97,7 +97,7 @@ public class PatreonReceiver
                 }
                 else
                 {
-                    PlayerModelController.getInstance().setHMD(p.getUUID(), cache.getOrDefault(p.getGameProfile().getName(), 0));
+                    VRPlayersClient.getInstance().setHMD(p.getUUID(), cache.getOrDefault(p.getGameProfile().getName(), 0));
                 }
             }
         }

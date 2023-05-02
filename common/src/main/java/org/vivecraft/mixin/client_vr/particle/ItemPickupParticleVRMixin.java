@@ -3,7 +3,7 @@ package org.vivecraft.mixin.client_vr.particle;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.common.PehkuiHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;

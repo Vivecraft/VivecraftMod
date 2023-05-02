@@ -1,21 +1,15 @@
 package org.vivecraft.common.utils.lwjgl;
 
-import java.io.Serializable;
 import java.nio.FloatBuffer;
 
-public class Vector2f extends Vector implements Serializable, ReadableVector2f, WritableVector2f
+@Deprecated
+public class Vector2f extends Vector
 {
-    private static final long serialVersionUID = 1L;
     public float x;
     public float y;
 
     public Vector2f()
     {
-    }
-
-    public Vector2f(ReadableVector2f src)
-    {
-        this.set(src);
     }
 
     public Vector2f(float x, float y)
@@ -27,13 +21,6 @@ public class Vector2f extends Vector implements Serializable, ReadableVector2f, 
     {
         this.x = x;
         this.y = y;
-    }
-
-    public Vector2f set(ReadableVector2f src)
-    {
-        this.x = src.getX();
-        this.y = src.getY();
-        return this;
     }
 
     public float lengthSquared()

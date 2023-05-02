@@ -15,12 +15,13 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import org.vivecraft.client.VRPlayersClient;
 
 public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
 {
     private final boolean slim;
     public ModelPart vrHMD;
-    PlayerModelController.RotInfo rotInfo;
+    VRPlayersClient.RotInfo rotInfo;
     private boolean laying;
     private final List<ModelPart> parts;
     
@@ -47,8 +48,8 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
     public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch)
     {
     	super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
-    	this.rotInfo = PlayerModelController.getInstance().getRotationsForPlayer(((Player)pEntity).getUUID());
-    	PlayerModelController.RotInfo rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(((Player)pEntity).getUUID());
+    	this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player)pEntity).getUUID());
+    	VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player)pEntity).getUUID());
 
     	if (rotinfo == null) return; //how
 

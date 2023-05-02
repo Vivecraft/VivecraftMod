@@ -22,7 +22,7 @@ public class ProjectileMixin {
 	@ModifyVariable(method = "shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V",
 			at = @At("HEAD"), ordinal = 3, argsOnly = true)
 	public float pVelocity(float pVelocity, Entity pProjectile) {
-		ServerVivePlayer serverVivePlayer = CommonNetworkHelper.vivePlayers.get(pProjectile.getUUID());
+		ServerVivePlayer serverVivePlayer = CommonNetworkHelper.playersWithVivecraft.get(pProjectile.getUUID());
 		if (serverVivePlayer != null && serverVivePlayer.isVR()) {
 			this.controllerDir = serverVivePlayer.getControllerDir(serverVivePlayer.activeHand);
 			if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !serverVivePlayer.isSeated() && serverVivePlayer.getDraw() > 0.0F){

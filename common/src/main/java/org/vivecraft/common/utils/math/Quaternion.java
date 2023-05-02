@@ -4,6 +4,7 @@ import net.minecraft.world.phys.Vec3;
 import org.vivecraft.common.utils.lwjgl.Matrix3f;
 import org.vivecraft.client.utils.Utils;
 
+@Deprecated
 public class Quaternion
 {
     public float w;

@@ -19,7 +19,7 @@ public class CrossbowItemMixin {
 			method = "shootProjectile(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;FZFFF)V")
 	private static Vec3 shoot(LivingEntity LivingEntity, float v) {
 		Vec3 vec3 = LivingEntity.getViewVector(v);
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(LivingEntity.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(LivingEntity.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			vec3 = serverviveplayer.getControllerDir(serverviveplayer.activeHand);
 			serverviveplayer.getControllerVectorCustom(serverviveplayer.activeHand, new Vector3(0.0F, 1.0F, 0.0F));

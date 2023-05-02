@@ -28,7 +28,7 @@ public abstract class EndermanMixin extends Monster {
 
     @Inject(at = @At("HEAD"), method = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z", cancellable = true)
     public void lookAtVR(Player player, CallbackInfoReturnable<Boolean> cir){
-        if (CommonNetworkHelper.isVive((ServerPlayer) player)) {
+        if (CommonNetworkHelper.isVRPlayer((ServerPlayer) player)) {
             cir.setReturnValue(shouldEndermanAttackVRPlayer((EnderMan) (Object) this, (ServerPlayer) player));
         }
     }
@@ -36,7 +36,7 @@ public abstract class EndermanMixin extends Monster {
     private static boolean shouldEndermanAttackVRPlayer(EnderMan enderman, ServerPlayer player) {
         ItemStack itemstack = player.getInventory().armor.get(3);
         if (!itemstack.is(Items.CARVED_PUMPKIN)) { //no enderitem
-            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player.getUUID());
+            ServerVivePlayer data = CommonNetworkHelper.playersWithVivecraft.get(player.getUUID());
             Vec3 vector3d = data.getHMDDir();
             Vec3 vector3d1 = new Vec3(enderman.getX() - data.getHMDPos(player).x, enderman.getEyeY() - data.getHMDPos(player).y, enderman.getZ() - data.getHMDPos(player).z);
             double d0 = vector3d1.length();

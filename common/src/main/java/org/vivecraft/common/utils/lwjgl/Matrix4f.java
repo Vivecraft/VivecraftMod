@@ -1,11 +1,10 @@
 package org.vivecraft.common.utils.lwjgl;
 
-import java.io.Serializable;
 import java.nio.FloatBuffer;
 
-public class Matrix4f extends Matrix implements Serializable
+@Deprecated
+public class Matrix4f extends Matrix
 {
-    private static final long serialVersionUID = 1L;
     public float m00;
     public float m01;
     public float m02;

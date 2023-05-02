@@ -27,7 +27,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
         ServerPlayer serverplayer = ((ServerGamePacketListenerImpl)this.netManager.getPacketListener()).player;
         boolean flag = msg instanceof ServerboundUseItemPacket || msg instanceof ServerboundUseItemOnPacket || msg instanceof ServerboundPlayerActionPacket;
 
-        if (!CommonNetworkHelper.isVive(serverplayer) || !flag || serverplayer.getServer() == null) {
+        if (!CommonNetworkHelper.isVRPlayer(serverplayer) || !flag || serverplayer.getServer() == null) {
             ctx.fireChannelRead(msg);
             return;
         }
@@ -44,7 +44,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
             float yHeadRotO = serverplayer.yHeadRotO;
             float eyeHeight = serverplayer.getEyeHeight();
 
-            ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(serverplayer.getGameProfile().getId());
+            ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(serverplayer.getGameProfile().getId());
 
             if (serverviveplayer != null) {
                 Vec3 pos = serverviveplayer.getControllerPos(0, serverplayer, true);

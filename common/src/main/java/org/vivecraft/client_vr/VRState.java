@@ -1,4 +1,4 @@
-package org.vivecraft.client_xr;
+package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
@@ -9,7 +9,7 @@ import org.vivecraft.client_vr.provider.openvr_jna.MCOpenVR;
 public class VRState {
 
     public static boolean vrRunning = false;
-    public static boolean vrEnabled = true;
+    public static boolean vrEnabled = false;
     public static boolean vrInitialized = false;
 
     public static void initializeVR() {
@@ -19,7 +19,12 @@ public class VRState {
         vrInitialized = true;
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
         dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
-        dh.vr.init();
+        if (!dh.vr.init()) {
+            vrEnabled = false;
+            vrInitialized = false;
+            dh.vr = null;
+            return;
+        }
 
         dh.vrRenderer = dh.vr.createVRRenderer();
         dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();

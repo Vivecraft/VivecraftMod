@@ -2,6 +2,7 @@ package org.vivecraft.client.render;
 
 import java.util.UUID;
 
+import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -38,7 +39,7 @@ public class VRPlayerRenderer extends PlayerRenderer
     public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight)
     {
 
-        PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(entityIn.getUUID());
+        VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entityIn.getUUID());
 
         if (playermodelcontroller$rotinfo != null)
         {
@@ -68,9 +69,9 @@ public class VRPlayerRenderer extends PlayerRenderer
     protected void setupRotations(AbstractClientPlayer pEntityLiving, PoseStack pMatrixStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks)
     {
     	UUID uuid = pEntityLiving.getUUID();
-    	if (ClientDataHolderVR.getInstance().currentPass != RenderPass.GUI && PlayerModelController.getInstance().isTracked(uuid))
+    	if (ClientDataHolderVR.getInstance().currentPass != RenderPass.GUI && VRPlayersClient.getInstance().isTracked(uuid))
     	{
-    		PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(uuid);
+    		VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(uuid);
     		pRotationYaw = (float)Math.toDegrees(playermodelcontroller$rotinfo.getBodyYawRadians());
     	}
 

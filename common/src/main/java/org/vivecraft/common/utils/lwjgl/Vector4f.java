@@ -1,11 +1,10 @@
 package org.vivecraft.common.utils.lwjgl;
 
-import java.io.Serializable;
 import java.nio.FloatBuffer;
 
-public class Vector4f extends Vector implements Serializable, ReadableVector4f, WritableVector4f
+@Deprecated
+public class Vector4f extends Vector
 {
-    private static final long serialVersionUID = 1L;
     public float x;
     public float y;
     public float z;
@@ -13,11 +12,6 @@ public class Vector4f extends Vector implements Serializable, ReadableVector4f, 
 
     public Vector4f()
     {
-    }
-
-    public Vector4f(ReadableVector4f src)
-    {
-        this.set(src);
     }
 
     public Vector4f(float x, float y, float z, float w)
@@ -44,15 +38,6 @@ public class Vector4f extends Vector implements Serializable, ReadableVector4f, 
         this.y = y;
         this.z = z;
         this.w = w;
-    }
-
-    public Vector4f set(ReadableVector4f src)
-    {
-        this.x = src.getX();
-        this.y = src.getY();
-        this.z = src.getZ();
-        this.w = src.getW();
-        return this;
     }
 
     public float lengthSquared()

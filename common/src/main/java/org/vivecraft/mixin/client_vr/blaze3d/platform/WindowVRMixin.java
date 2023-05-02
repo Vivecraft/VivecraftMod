@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.client_vr.VRState;
 
 @Mixin(Window.class)
 public abstract class WindowVRMixin {

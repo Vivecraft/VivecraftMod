@@ -17,7 +17,7 @@ public class ThrownTridentMixin {
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getEyePosition()Lnet/minecraft/world/phys/Vec3;"), method = "tick()V")
 	public Vec3 tick(Entity entity) {
 		Vec3 vec3 = entity.getEyePosition();
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(entity.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(entity.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			vec3 = serverviveplayer.getControllerPos(0, (Player)entity);
 		}

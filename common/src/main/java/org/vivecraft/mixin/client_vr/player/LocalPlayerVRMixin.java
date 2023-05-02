@@ -3,7 +3,7 @@ package org.vivecraft.mixin.client_vr.player;
 import net.minecraft.world.level.Level;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.CommonNetworkHelper;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import io.netty.buffer.ByteBuf;

@@ -1,6 +1,8 @@
 package org.vivecraft.client_vr.render;
 
 import com.mojang.math.Axis;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.client.VRData;
 
@@ -8,6 +10,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 
@@ -43,8 +46,12 @@ public class XRCamera extends Camera {
         }
     }
 
-    //SorenonTODO Investigate
+    @Override
     public boolean isDetached() {
-        return false;
+        if (RenderPassType.isVanilla()) {
+            return super.isDetached();
+        }
+        boolean renderSelf = ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA;
+        return super.isDetached() || renderSelf || ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf;
     }
 }

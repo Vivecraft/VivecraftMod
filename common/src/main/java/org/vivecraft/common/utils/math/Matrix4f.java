@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+@Deprecated
 public class Matrix4f
 {
     public float[][] M = new float[4][4];

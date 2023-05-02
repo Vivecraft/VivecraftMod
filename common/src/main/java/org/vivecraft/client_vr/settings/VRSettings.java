@@ -293,7 +293,6 @@ public class VRSettings
     @SettingField(VrOptions.MIRROR_EYE)
     public boolean displayMirrorLeftEye = false;
     public boolean shouldRenderSelf=false;
-    public boolean tmpRenderSelf;
     @SettingField(VrOptions.MENU_WORLD_SELECTION)
     public MenuWorld menuWorldSelection = MenuWorld.BOTH;
     //

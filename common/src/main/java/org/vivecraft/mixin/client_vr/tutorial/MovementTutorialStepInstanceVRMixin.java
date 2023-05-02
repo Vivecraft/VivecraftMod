@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.MCVR;
 
 import java.util.HashSet;

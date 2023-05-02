@@ -1,4 +1,6 @@
-package org.vivecraft.client_vr;
+package org.vivecraft.common;
+
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class VRServerPerms {
 

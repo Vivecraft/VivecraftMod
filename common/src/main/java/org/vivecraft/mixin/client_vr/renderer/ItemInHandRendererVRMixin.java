@@ -43,7 +43,7 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRArmRenderer;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.VivecraftItemRendering;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.client_vr.VRState;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {

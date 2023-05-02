@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
-import org.vivecraft.client.render.PlayerModelController;
+import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.render.VRPlayerRenderer;
 
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -49,7 +49,7 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 	public void renderer(Entity pEntity, CallbackInfoReturnable<EntityRenderer<AbstractClientPlayer>> info) {
 		if (pEntity instanceof AbstractClientPlayer) {
 			String s = ((AbstractClientPlayer) pEntity).getModelName();
-			PlayerModelController.RotInfo playermodelcontroller$rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(pEntity.getUUID());
+			VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(pEntity.getUUID());
 			if (playermodelcontroller$rotinfo != null) {
 				VRPlayerRenderer vrplayerrenderer;
 				if (playermodelcontroller$rotinfo.seated) {

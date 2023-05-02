@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogRenderer;
@@ -56,7 +57,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client_vr.SodiumHelper;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
@@ -72,7 +73,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.openvr_jna.VRInputAction;
-import org.vivecraft.client.render.PlayerModelController;
+import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
@@ -88,6 +89,7 @@ import org.vivecraft.common.utils.math.Vector3;
 //import org.vivecraft.provider.ovr_lwjgl.OVR_StereoRenderer;
 //import org.vivecraft.provider.ovr_lwjgl.OVR_StereoRenderer;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -269,6 +271,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Shadow private double gpuUtilization;
 
+    @Shadow @Nullable public abstract ClientPacketListener getConnection();
+
     @Inject(method = "<init>", at = @At("RETURN"))
     void afterInit(GameConfig gameConfig, CallbackInfo ci) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
@@ -308,6 +312,13 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             } else {
                 GuiHandler.guiPos_room = null;
                 GuiHandler.guiRotation_room = null;
+                if (player != null) {
+                    VRPlayersClient.getInstance().disableVR(player.getUUID());
+                }
+            }
+            var connection = this.getConnection();
+            if (connection != null) {
+                connection.send(ClientNetworkHelper.createVRActivePacket(vrActive));
             }
         }
         if (!VRState.vrRunning) {
@@ -872,7 +883,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //			DataHolder.getInstance().menuWorldRenderer.tick();
 //		}
 
-        PlayerModelController.getInstance().tick();
+        VRPlayersClient.getInstance().tick();
 
     }
 

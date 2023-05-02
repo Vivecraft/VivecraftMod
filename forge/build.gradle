@@ -13,15 +13,13 @@ loom {
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
-        mixinConfig "vivecraft.vr.mixins.json"
-        mixinConfig "vivecraft.nonvr.mixins.json"
+        mixinConfig "vivecraft.mixins.json"
 //        mixinConfig "vivecraft.sodium.mixins.json"
 //        mixinConfig "vivecraft.forge.sodium.mixins.json"
 //        mixinConfig "vivecraft.iris.mixins.json"
         mixinConfig "vivecraft.rei.mixins.json"
 
-        mixinConfig "vivecraft.vr.forge.mixins.json"
-        mixinConfig "vivecraft.nonvr.forge.mixins.json"
+        mixinConfig "vivecraft.forge.mixins.json"
     }
 }
 

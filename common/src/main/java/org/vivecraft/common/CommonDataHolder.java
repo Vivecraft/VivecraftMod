@@ -5,7 +5,7 @@ import org.vivecraft.client.Xplat;
 public class CommonDataHolder {
 
     private static CommonDataHolder INSTANCE;
-    public final String minecriftVerString;
+    public final String versionIdentifier;
 
     public CommonDataHolder() {
         String mcVersion = "";
@@ -16,11 +16,7 @@ public class CommonDataHolder {
             modVersion = version[1];
         }
 
-        if (VRState.checkVR()) {
-            minecriftVerString = "Vivecraft " + mcVersion + " jrbudda-VR-" + Xplat.getModloader() + "-" + modVersion;
-        } else {
-            minecriftVerString = "Vivecraft " + mcVersion + " jrbudda-NONVR-" + Xplat.getModloader() + "-" + modVersion;
-        }
+        versionIdentifier = "Vivecraft-" + mcVersion + "-" + Xplat.getModloader() + "-" + modVersion;
     }
 
     public static CommonDataHolder getInstance() {

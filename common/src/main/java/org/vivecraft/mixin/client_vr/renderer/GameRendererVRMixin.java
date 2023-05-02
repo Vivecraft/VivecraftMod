@@ -58,7 +58,7 @@ import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client.Xevents;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
@@ -240,7 +240,7 @@ public abstract class GameRendererVRMixin
     Camera replaceCamera() {
         return new XRCamera();
     }
-// NotFixed
+
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;"), method = "pick")
     public ClientLevel appendCheck(Minecraft instance) {
         if (!VRState.vrRunning) {

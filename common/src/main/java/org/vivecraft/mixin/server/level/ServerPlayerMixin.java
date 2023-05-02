@@ -52,7 +52,7 @@ public abstract class ServerPlayerMixin extends Player {
 
 	@Inject(at = @At("TAIL"), method = "initInventoryMenu")
 	public void menu(CallbackInfo ci) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
 		// TODO change setting to commonDataHolder?
 		if ((!this.server.isDedicatedServer() && ClientDataHolderVR.getInstance().vrSettings != null && !ClientDataHolderVR.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
@@ -77,7 +77,7 @@ public abstract class ServerPlayerMixin extends Player {
 	}
 
 	public void sweepAttack() {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
 
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			Vec3 vec3 = serverviveplayer.getControllerDir(0);
@@ -110,7 +110,7 @@ public abstract class ServerPlayerMixin extends Player {
 	}
 
 	private void addItemParticles(ItemStack stack, int count) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
 		for (int i = 0; i < count; ++i) {
 			Vec3 vec3 = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
 			vec3 = vec3.xRot(-this.getXRot() * ((float) Math.PI / 180F));
@@ -138,7 +138,7 @@ public abstract class ServerPlayerMixin extends Player {
 			locals = LocalCapture.CAPTURE_FAILHARD)
 	public void dropvive(ItemStack p_9085_, boolean p_9086_, boolean p_9087_, CallbackInfoReturnable<ItemEntity> info,
 			ItemEntity itementity) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR() && !p_9087_) {
 			Vec3 vec3 = serverviveplayer.getControllerPos(0, this);
 			Vec3 vec31 = serverviveplayer.getControllerDir(0);

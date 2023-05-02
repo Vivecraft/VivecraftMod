@@ -5,6 +5,7 @@ import org.vivecraft.common.utils.lwjgl.Matrix3f;
 import org.vivecraft.common.utils.lwjgl.Matrix4f;
 import org.vivecraft.common.utils.lwjgl.Vector3f;
 
+@Deprecated
 public class Vector3
 {
     public float x;

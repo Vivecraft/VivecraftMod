@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import org.vivecraft.client.VRPlayersClient;
 
 public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
@@ -23,7 +24,7 @@ public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abst
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer entity, float f, float g, float h, float j, float k, float l) {
-        PlayerModelController.RotInfo rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(((Player)entity).getUUID());
+        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player)entity).getUUID());
         ResourceLocation hmd = null; //this.BLACK_HMD;
         switch (rotinfo.hmd) {
    	        case 0:

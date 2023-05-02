@@ -20,6 +20,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.common.PehkuiHelper;
 import org.vivecraft.client.Xplat;
 
@@ -32,7 +33,7 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 	public ModelPart rightShoulder_sleeve;
 	public ModelPart leftHand;
 	public ModelPart rightHand;
-	PlayerModelController.RotInfo rotInfo;
+	VRPlayersClient.RotInfo rotInfo;
 	private boolean laying;
 	private final List<ModelPart> parts;
 
@@ -97,8 +98,8 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 	public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch)
 	{
 		super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
-		this.rotInfo = PlayerModelController.getInstance().getRotationsForPlayer(((Player)pEntity).getUUID());
-		PlayerModelController.RotInfo rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(((Player)pEntity).getUUID());
+		this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player)pEntity).getUUID());
+		VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player)pEntity).getUUID());
 
 		if (rotinfo == null) return;
 

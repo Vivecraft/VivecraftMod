@@ -26,7 +26,7 @@ public abstract class AbstractArrowMixin extends Entity {
 
 	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V")
 	public void pickup(EntityType<? extends AbstractArrow> p_36717_, LivingEntity p_36718_, Level p_36719_, CallbackInfo info) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(p_36718_.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(p_36718_.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			Vec3 vec3 = serverviveplayer.getControllerPos(serverviveplayer.activeHand, (Player) p_36718_);
 			Vec3 vec31 = serverviveplayer.getControllerDir(serverviveplayer.activeHand);

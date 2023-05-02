@@ -12,5 +12,5 @@ public interface VivecraftAPI {
     }
 
     @Beta
-    boolean isVrPlayer(Player player);
+    boolean isVRPlayer(Player player);
 }

@@ -25,7 +25,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRServerPerms;
+import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.common.PehkuiHelper;
 import org.vivecraft.client.Xplat;

@@ -1,14 +1,11 @@
 {
   "required": true,
   "package": "org.vivecraft.fabric.mixin",
+  "plugin": "org.vivecraft.client.VRMixinConfig",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
-
-  ],
   "client": [
-    "client.resources.model.FabricModelBakeryMixin"
-  ],
-  "server": [
+    "client.resources.model.FabricModelBakeryMixin",
+    "FabricGameRendererVRMixin"
   ],
   "minVersion": "0.8.4"
 }

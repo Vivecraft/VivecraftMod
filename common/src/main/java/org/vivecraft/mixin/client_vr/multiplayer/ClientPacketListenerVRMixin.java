@@ -29,11 +29,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.api.client.ClientNetworkHelper;
-import org.vivecraft.client_vr.VRServerPerms;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.common.VRServerPerms;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client.render.PlayerModelController;
+import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.network.VrPlayerState;
 
 import java.util.UUID;
 
@@ -54,7 +55,7 @@ public class ClientPacketListenerVRMixin {
 
     @Inject(at = @At("TAIL"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
     public void login(ClientboundLoginPacket p_105030_, CallbackInfo callback) {
-        CommonNetworkHelper.vivePlayers.clear();
+        CommonNetworkHelper.playersWithVivecraft.clear();
         ClientNetworkHelper.sendVersionInfo();
 
         if (VRState.vrRunning) {
@@ -146,116 +147,12 @@ public class ClientPacketListenerVRMixin {
     }
 
     @Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getData()Lnet/minecraft/network/FriendlyByteBuf;"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;)V", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-	public void handlepacket(ClientboundCustomPayloadPacket p_105004_, CallbackInfo info, ResourceLocation resourcelocation, FriendlyByteBuf friendlybytebuf) {
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        if (resourcelocation.getNamespace().equalsIgnoreCase("vivecraft")) {
-			if (resourcelocation.getPath().equalsIgnoreCase("data")) {
-				byte b0 = friendlybytebuf.readByte();
-                CommonNetworkHelper.PacketDiscriminators networkhelper$packetdiscriminators = CommonNetworkHelper.PacketDiscriminators.values()[b0];
-
-                switch (networkhelper$packetdiscriminators) {
-                    case VERSION -> {
-                        String s11 = friendlybytebuf.readUtf(1024);
-                        VRServerPerms.INSTANCE.setTeleportSupported(true);
-                        if (VRState.vrRunning) {
-                            dataholder.vrPlayer.teleportWarningTimer = -1;
-                        }
-                        if (!ClientNetworkHelper.displayedChatMessage) {
-                            ClientNetworkHelper.displayedChatMessage = true;
-                            this.minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
-                        }
-                        if (dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
-                            this.minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibrateheight"));
-                        }
-                    }
-                    case REQUESTDATA -> ClientNetworkHelper.serverWantsData = true;
-                    case CLIMBING -> {
-                        ClientNetworkHelper.serverAllowsClimbey = friendlybytebuf.readBoolean();
-                        if (friendlybytebuf.readableBytes() > 0) {
-                            dataholder.climbTracker.serverblockmode = friendlybytebuf.readByte();
-                            dataholder.climbTracker.blocklist.clear();
-
-                            while (friendlybytebuf.readableBytes() > 0) {
-                                String s12 = friendlybytebuf.readUtf(16384);
-                                Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s12));
-
-                                if (block != null) {
-                                    dataholder.climbTracker.blocklist.add(block);
-                                }
-                            }
-                        }
-                    }
-                    case TELEPORT -> ClientNetworkHelper.serverSupportsDirectTeleport = true;
-                    case UBERPACKET -> {
-                        Long olong = friendlybytebuf.readLong();
-                        Long olong1 = friendlybytebuf.readLong();
-                        byte[] abyte = new byte[29];
-                        byte[] abyte1 = new byte[29];
-                        byte[] abyte2 = new byte[29];
-                        friendlybytebuf.readBytes(29).getBytes(0, abyte);
-                        friendlybytebuf.readBytes(29).getBytes(0, abyte1);
-                        friendlybytebuf.readBytes(29).getBytes(0, abyte2);
-                        UUID uuid2 = new UUID(olong, olong1);
-                        float f3 = 1.0F;
-                        float f4 = 1.0F;
-                        if (friendlybytebuf.isReadable()) {
-                            f3 = friendlybytebuf.readFloat();
-                        }
-                        if (friendlybytebuf.isReadable()) {
-                            f4 = friendlybytebuf.readFloat();
-                        }
-                        PlayerModelController.getInstance().Update(uuid2, abyte, abyte1, abyte2, f3, f4);
-                    }
-                    case SETTING_OVERRIDE -> {
-                        while (friendlybytebuf.readableBytes() > 0) {
-                            String s13 = friendlybytebuf.readUtf(16384);
-                            String s14 = friendlybytebuf.readUtf(16384);
-                            String[] astring = s13.split("\\.", 2);
-
-                            if (dataholder.vrSettings.overrides.hasSetting(astring[0])) {
-                                VRSettings.ServerOverrides.Setting vrsettings$serveroverrides$setting = dataholder.vrSettings.overrides.getSetting(astring[0]);
-
-                                try {
-                                    if (astring.length > 1) {
-                                        String s15 = astring[1];
-                                        switch (s15) {
-                                            case "min":
-                                                vrsettings$serveroverrides$setting.setValueMin(Float.parseFloat(s14));
-                                                break;
-
-                                            case "max":
-                                                vrsettings$serveroverrides$setting.setValueMax(Float.parseFloat(s14));
-                                        }
-                                    } else {
-                                        Object object = vrsettings$serveroverrides$setting.getOriginalValue();
-
-                                        if (object instanceof Boolean) {
-                                            vrsettings$serveroverrides$setting.setValue(s14.equals("true"));
-                                        } else if (!(object instanceof Integer) && !(object instanceof Byte) && !(object instanceof Short)) {
-                                            if (!(object instanceof Float) && !(object instanceof Double)) {
-                                                vrsettings$serveroverrides$setting.setValue(s14);
-                                            } else {
-                                                vrsettings$serveroverrides$setting.setValue(Float.parseFloat(s14));
-                                            }
-                                        } else {
-                                            vrsettings$serveroverrides$setting.setValue(Integer.parseInt(s14));
-                                        }
-                                    }
-
-                                    System.out.println("Server setting override: " + s13 + " = " + s14);
-                                } catch (Exception exception) {
-                                    exception.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-                    case CRAWL -> ClientNetworkHelper.serverAllowsCrawling = true;
-                }
-			}
-			if (friendlybytebuf != null) {
-				friendlybytebuf.release();
-			}
-			info.cancel();
-		}
+	public void handlepacket(ClientboundCustomPayloadPacket p_105004_, CallbackInfo info, ResourceLocation channelID, FriendlyByteBuf buffer) {
+        if (channelID.equals(CommonNetworkHelper.channel)) {
+            var packetID = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
+            ClientNetworkHelper.handlePacket(packetID, buffer);
+            buffer.release();
+            info.cancel();
+        }
 	}
 }

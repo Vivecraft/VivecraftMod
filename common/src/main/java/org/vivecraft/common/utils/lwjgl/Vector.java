@@ -1,9 +1,9 @@
 package org.vivecraft.common.utils.lwjgl;
 
-import java.io.Serializable;
 import java.nio.FloatBuffer;
 
-public abstract class Vector implements Serializable, ReadableVector
+@Deprecated
+public abstract class Vector
 {
     protected Vector()
     {
@@ -11,7 +11,7 @@ public abstract class Vector implements Serializable, ReadableVector
 
     public final float length()
     {
-        return (float)Math.sqrt((double)this.lengthSquared());
+        return (float)Math.sqrt(this.lengthSquared());
     }
 
     public abstract float lengthSquared();

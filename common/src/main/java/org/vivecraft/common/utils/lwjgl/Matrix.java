@@ -1,14 +1,10 @@
 package org.vivecraft.common.utils.lwjgl;
 
-import java.io.Serializable;
 import java.nio.FloatBuffer;
 
-public abstract class Matrix implements Serializable
+@Deprecated
+public abstract class Matrix
 {
-    protected Matrix()
-    {
-    }
-
     public abstract Matrix setIdentity();
 
     public abstract Matrix invert();

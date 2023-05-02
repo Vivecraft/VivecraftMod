@@ -2,6 +2,7 @@ package org.vivecraft.common.utils.math;
 
 import org.vivecraft.common.utils.lwjgl.Vector2f;
 
+@Deprecated
 public class Vector2
 {
     protected float x;

@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import org.joml.Vector2f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_xr.VRState;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.provider.ControllerType;
