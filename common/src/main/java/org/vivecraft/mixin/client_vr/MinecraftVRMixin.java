@@ -301,6 +301,14 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Inject(at = @At("HEAD"), method = "runTick(Z)V", cancellable = true)
     public void replaceTick(boolean bl, CallbackInfo callback) {
+        if (VRState.vrEnabled) {
+            VRState.initializeVR();
+        } else {
+            if (VRState.vrInitialized) {
+                VRState.destroyVR();
+                resizeDisplay();
+            }
+        }
         if (!VRState.vrInitialized) {
             return;
         }
@@ -320,6 +328,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             if (connection != null) {
                 connection.send(ClientNetworkHelper.createVRActivePacket(vrActive));
             }
+            resizeDisplay();
         }
         if (!VRState.vrRunning) {
             return;
@@ -742,6 +751,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //    }
 
 // NotFixed
+    // moved to window
 //    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setGuiScale(D)V", shift = Shift.AFTER), method = "resizeDisplay()V")
 //    public void reinitFrame(CallbackInfo info) {
 //        if (ClientDataHolderVR.getInstance().vrRenderer != null) {

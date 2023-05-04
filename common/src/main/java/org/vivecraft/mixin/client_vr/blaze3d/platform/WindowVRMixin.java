@@ -4,13 +4,16 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.VRState;
 
 @Mixin(Window.class)
 public abstract class WindowVRMixin {
 
+	// TODO: check if that actually works like that with sodium extras adaptive sync
 	@ModifyVariable(method = "updateVsync", ordinal = 0, at = @At("HEAD"), argsOnly = true)
 	boolean overwriteVsync(boolean v) {
 		if (VRState.vrRunning) {
@@ -19,7 +22,7 @@ public abstract class WindowVRMixin {
 		return v;
 	}
 
-	@Inject(method = {"getScreenWidth", "getWidth"}, at = @At("HEAD"), cancellable = true)
+	@Inject(method = {/*"getScreenWidth", */"getWidth"}, at = @At("HEAD"), cancellable = true)
 	void getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
 		if (shouldOverrideSide()) {
 //			if (mcxrGameRenderer.reloadingDepth > 0) {
@@ -32,7 +35,7 @@ public abstract class WindowVRMixin {
 		}
 	}
 
-	@Inject(method = {"getScreenHeight", "getHeight"}, at = @At("HEAD"), cancellable = true)
+	@Inject(method = {/*"getScreenHeight",*/ "getHeight"}, at = @At("HEAD"), cancellable = true)
 	void getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
 		if (shouldOverrideSide()) {
 //			if (mcxrGameRenderer.reloadingDepth > 0) {
@@ -66,6 +69,12 @@ public abstract class WindowVRMixin {
 		}
 	}
 
+	@Inject(method = "onResize", at = @At("HEAD"))
+	private void reinitFrameBuffers(long l, int i, int j, CallbackInfo ci){
+		if (VRState.vrEnabled) {
+			ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Main Window Resized");
+		}
+	}
 
 	@Unique
 	private boolean shouldOverrideSide() {

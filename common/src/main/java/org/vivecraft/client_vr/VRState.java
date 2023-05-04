@@ -5,6 +5,7 @@ import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.openvr_jna.MCOpenVR;
+import org.vivecraft.client_xr.render_pass.RenderPassManager;
 
 public class VRState {
 
@@ -28,6 +29,12 @@ public class VRState {
 
         dh.vrRenderer = dh.vr.createVRRenderer();
         dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
+        try {
+            dh.vrRenderer.setupRenderConfiguration();
+            RenderPassManager.setVanillaRenderPass();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
 
         dh.vrPlayer = new VRPlayer();
         dh.vrPlayer.registerTracker(dh.backpackTracker);
@@ -62,6 +69,7 @@ public class VRState {
         dh.vrPlayer = null;
         dh.vrRenderer = null;
         vrInitialized = false;
+        vrRunning = false;
     }
 
     public static void pauseVR() {

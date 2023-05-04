@@ -56,20 +56,13 @@ public abstract class TitleScreenMixin extends Screen {
         String vrMode = VRState.vrEnabled ? "VR ON" : "VR OFF";
         vrModeButton = new Button.Builder(Component.literal(getIcon() + vrMode), (button) -> {
             showError = false;
-            VRState.vrEnabled = true;
-            VRState.initializeVR();
-            if (VRState.vrEnabled) {
-                button.setMessage(Component.translatable(getIcon() + "VR ON"));
-                button.active = false;
-            }
+            VRState.vrEnabled = !VRState.vrEnabled;
+            button.setMessage(Component.translatable(getIcon() + (VRState.vrEnabled ? "VR ON" : "VR OFF")));
         })
                 .size(56, 20)
                 .pos(this.width / 2 + 104, this.height / 4 + 72)
                 .build();
 
-        if (VRState.vrEnabled) {
-            vrModeButton.active = false;
-        }
         this.addRenderableWidget(vrModeButton);
     }
 
