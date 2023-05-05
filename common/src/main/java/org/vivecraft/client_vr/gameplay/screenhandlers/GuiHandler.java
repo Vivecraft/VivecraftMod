@@ -105,14 +105,18 @@ public class GuiHandler
     public static RenderTarget guiFramebuffer = null;
     public static int guiWidth = 1280;
     public static int guiHeight = 720;
-    public static int guiScaleFactor = calculateScale(2, false, guiWidth, guiHeight);
+    public static int guiScaleFactor = calculateScale(0, false, guiWidth, guiHeight);
     public static int scaledWidth;
     public static int scaledHeight;
 
     public static int calculateScale(int scaleIn, boolean forceUnicode, int framebufferWidth, int framebufferHeight) {
         int j = 1;
 
-        while(j != scaleIn && j < framebufferWidth && j < framebufferHeight && framebufferWidth / (j + 1) >= 320 && framebufferHeight / (j + 1) >= 240) {
+        while(j != scaleIn &&
+                j < framebufferWidth &&
+                j < framebufferHeight &&
+                framebufferWidth / (j + 1) >= 320 &&
+                framebufferHeight / (j + 1) >= 240) {
             ++j;
         }
 
@@ -120,11 +124,11 @@ public class GuiHandler
             ++j;
         }
 
-        int widthFloor = framebufferWidth / scaleIn;
-        scaledWidth = framebufferWidth / scaleIn > widthFloor ? widthFloor + 1 : widthFloor;
+        int widthFloor = framebufferWidth / j;
+        scaledWidth = framebufferWidth / j > widthFloor ? widthFloor + 1 : widthFloor;
 
-        int heightFloor = framebufferHeight / scaleIn;
-        scaledHeight = framebufferHeight / scaleIn > heightFloor ? heightFloor + 1 : heightFloor;
+        int heightFloor = framebufferHeight / j;
+        scaledHeight = framebufferHeight / j > heightFloor ? heightFloor + 1 : heightFloor;
 
         return j;
     }
