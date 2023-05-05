@@ -2,6 +2,7 @@ package org.vivecraft.client_vr.gui.settings;
 
 import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gui.framework.GuiVROption;
 import org.vivecraft.client_vr.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client_vr.settings.VRHotkeys;
@@ -150,7 +151,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         if (widget instanceof GuiVROption guivroption)
         {
 
-            if (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroption.getId() == VRSettings.VrOptions.FSAA.ordinal() || guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal())
+            if (VRState.vrRunning && (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroption.getId() == VRSettings.VrOptions.FSAA.ordinal() || guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal()))
             {
                 if (guivroption.getId() != VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
                     this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
@@ -169,7 +170,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         {
             this.prevRenderScaleFactor = this.settings.renderScaleFactor;
             this.prevHandCameraResScale = this.settings.handCameraResScale;
-            this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
+            if (VRState.vrRunning) {
+                this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
+            }
         }
 
         return super.mouseReleased(pMouseX, p_94754_, pMouseY);

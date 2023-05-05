@@ -7,6 +7,7 @@ package org.vivecraft.client_vr.settings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.IrisHelper;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.OptionsExtension;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -1109,7 +1110,7 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-                if (!((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                if (VRState.vrRunning && !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
                     ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
                 }
             }
@@ -1327,8 +1328,12 @@ public class VRSettings
         RENDER_SCALEFACTOR(true, false, 0.1f, 9f, 0.1f, 0) { // Resolution
             @Override
             String getDisplayString(String prefix, Object value) {
-                RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
-                return prefix + Math.round((float)value * 100) + "% (" + (int)Math.ceil(eye0.viewWidth * Math.sqrt((float)value)) + "x" + (int)Math.ceil(eye0.viewHeight * Math.sqrt((float)value)) + ")";
+                if (VRState.vrEnabled) {
+                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
+                    return prefix + Math.round((float) value * 100) + "% (" + (int) Math.ceil(eye0.viewWidth * Math.sqrt((float) value)) + "x" + (int) Math.ceil(eye0.viewHeight * Math.sqrt((float) value)) + ")";
+                } else {
+                    return prefix + Math.round((float) value * 100) + "%";
+                }
             }
         },
         MONO_FOV(true, false, 0, 179, 1, 0) { // Undistorted FOV

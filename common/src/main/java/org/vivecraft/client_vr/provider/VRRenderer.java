@@ -375,8 +375,11 @@ public abstract class VRRenderer {
     }
 
     public void reinitFrameBuffers(String cause) {
+        if (!reinitFramebuffers) {
+            // only print the first cause
+            System.out.println("Reinit Render: " + cause);
+        }
         this.reinitFramebuffers = true;
-        System.out.println("Reinit Render: " + cause);
     }
 
     public void setupRenderConfiguration() throws Exception {
