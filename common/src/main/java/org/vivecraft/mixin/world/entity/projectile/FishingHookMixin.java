@@ -33,7 +33,7 @@ public abstract class FishingHookMixin extends Entity {
 
 	@ModifyVariable(at = @At(value = "STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 0)
 	private float modifyXrot(float xRot, Player player) {
-		serverviveplayer = CommonNetworkHelper.vivePlayers.get(player.getUUID());
+		serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(player.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			controllerDir = serverviveplayer.getControllerDir(serverviveplayer.activeHand);
 			controllerPos = serverviveplayer.getControllerPos(serverviveplayer.activeHand, player);

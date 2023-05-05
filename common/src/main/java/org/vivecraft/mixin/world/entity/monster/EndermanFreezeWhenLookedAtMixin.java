@@ -25,8 +25,8 @@ public class EndermanFreezeWhenLookedAtMixin {
 
     @Inject(at = @At("HEAD"), method = "tick", cancellable = true)
     public void vrTick(CallbackInfo ci) {
-        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player)) {
-            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player.getUUID());
+        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVRPlayer(player)) {
+            ServerVivePlayer data = CommonNetworkHelper.playersWithVivecraft.get(player.getUUID());
             this.enderman.getLookControl().setLookAt(data.getHMDPos(player));
             ci.cancel();
         }

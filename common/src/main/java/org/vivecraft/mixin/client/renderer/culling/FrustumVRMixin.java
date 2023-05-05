@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.renderer.culling;
 
-import org.vivecraft.extensions.FrustumExtension;
+import org.vivecraft.client_vr.extensions.FrustumExtension;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;

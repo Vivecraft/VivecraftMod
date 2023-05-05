@@ -14,15 +14,15 @@ import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.vivecraft.extensions.EntityRenderDispatcherExtension;
-import org.vivecraft.extensions.RenderLayerExtension;
-import org.vivecraft.settings.VRSettings;
-import org.vivecraft.utils.RenderLayerTypes;
+import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
+import org.vivecraft.client.extensions.RenderLayerExtension;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client.utils.RenderLayerTypes;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import static org.vivecraft.utils.RenderLayerTypes.LayerType.*;
+import static org.vivecraft.client.utils.RenderLayerTypes.LayerType.*;
 
 /**
 * A hacky way of copying regular PlayerRenderer layers to the VRPlayerRenderers

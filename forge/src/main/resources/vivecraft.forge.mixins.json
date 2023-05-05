@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "org.vivecraft.forge.mixin",
+  "plugin": "org.vivecraft.client.VRMixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ForgeIngameGuiVRMixin",
+    "ForgeGameRendererVRMixin"
+  ],
+  "minVersion": "0.8.4"
+}

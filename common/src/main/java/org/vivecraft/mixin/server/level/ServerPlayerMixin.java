@@ -1,7 +1,5 @@
 package org.vivecraft.mixin.server.level;
 
-import net.minecraft.world.entity.player.ProfilePublicKey;
-import org.jetbrains.annotations.Nullable;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.ClientDataHolder;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.api.ServerVivePlayer;
 
@@ -23,14 +21,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
@@ -56,9 +52,9 @@ public abstract class ServerPlayerMixin extends Player {
 
 	@Inject(at = @At("TAIL"), method = "initInventoryMenu")
 	public void menu(CallbackInfo ci) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
 		// TODO change setting to commonDataHolder?
-		if ((!this.server.isDedicatedServer() && ClientDataHolder.getInstance().vrSettings != null && !ClientDataHolder.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
+		if ((!this.server.isDedicatedServer() && ClientDataHolderVR.getInstance().vrSettings != null && !ClientDataHolderVR.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
 			if (this.random.nextInt(2) == 1) {
 				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
@@ -81,7 +77,7 @@ public abstract class ServerPlayerMixin extends Player {
 	}
 
 	public void sweepAttack() {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
 
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			Vec3 vec3 = serverviveplayer.getControllerDir(0);
@@ -114,7 +110,7 @@ public abstract class ServerPlayerMixin extends Player {
 	}
 
 	private void addItemParticles(ItemStack stack, int count) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
 		for (int i = 0; i < count; ++i) {
 			Vec3 vec3 = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
 			vec3 = vec3.xRot(-this.getXRot() * ((float) Math.PI / 180F));
@@ -142,7 +138,7 @@ public abstract class ServerPlayerMixin extends Player {
 			locals = LocalCapture.CAPTURE_FAILHARD)
 	public void dropvive(ItemStack p_9085_, boolean p_9086_, boolean p_9087_, CallbackInfoReturnable<ItemEntity> info,
 			ItemEntity itementity) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.vivePlayers.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
 		if (serverviveplayer != null && serverviveplayer.isVR() && !p_9087_) {
 			Vec3 vec3 = serverviveplayer.getControllerPos(0, this);
 			Vec3 vec31 = serverviveplayer.getControllerDir(0);
