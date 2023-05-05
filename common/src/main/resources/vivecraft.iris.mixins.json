@@ -1,0 +1,9 @@
+{
+  "required": false,
+  "package": "org.vivecraft.mixin_mod_compat_vr.iris",
+  "plugin": "org.vivecraft.client.VRMixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+  ],
+  "minVersion": "0.8.4"
+}
