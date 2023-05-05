@@ -317,6 +317,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             VRState.vrRunning = vrActive;
             if (vrActive) {
                 //TODO
+                if (player != null) {
+                    ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(player.position().x, player.position().y, player.position().z, true);
+                }
             } else {
                 GuiHandler.guiPos_room = null;
                 GuiHandler.guiRotation_room = null;
