@@ -11,6 +11,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 
 @Mixin(EditBox.class)
@@ -31,7 +32,7 @@ public abstract class EditBoxVRMixin extends AbstractWidget{
 
 @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/EditBox;isFocused()Z", shift = At.Shift.BEFORE), method = "Lnet/minecraft/client/gui/components/EditBox;mouseClicked(DDI)Z", locals = LocalCapture.CAPTURE_FAILHARD)
 public void openKeyboard(double d, double e, int i, CallbackInfoReturnable<Boolean> cir, boolean bl) {
-	if (bl) {
+	if (bl && VRState.vrRunning) {
 		KeyboardHandler.setOverlayShowing(true);
 	}
 }
