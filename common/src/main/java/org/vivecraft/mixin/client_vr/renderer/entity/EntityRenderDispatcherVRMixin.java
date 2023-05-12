@@ -2,6 +2,7 @@ package org.vivecraft.mixin.client_vr.renderer.entity;
 
 import com.mojang.math.Axis;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.joml.Quaternionf;
@@ -41,7 +42,7 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
 
     @Inject(at = @At("HEAD"), method = "cameraOrientation", cancellable = true)
     public void cameraOrientation(CallbackInfoReturnable<Quaternionf> cir) {
-        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.GUI) {
+        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().currentPass == RenderPass.GUI) {
             cir.setReturnValue(cameraOrientation);
             return;
         }
