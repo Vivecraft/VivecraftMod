@@ -35,7 +35,7 @@ public class CommonNetworkHelper {
         if (vivePlayer.player == null || vivePlayer.player.hasDisconnected()) {
             playersWithVivecraft.remove(vrPlayerEntity.getUUID());
         }
-        if (!vivePlayer.isVR()) {
+        if (!vivePlayer.isVR() || vivePlayer.vrPlayerState == null) {
             return;
         }
         for (var trackingPlayer : ServerNetworking.getTrackingPlayers(vrPlayerEntity)) {
