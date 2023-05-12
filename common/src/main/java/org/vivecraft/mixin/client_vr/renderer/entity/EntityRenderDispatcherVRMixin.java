@@ -76,8 +76,8 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
 
     @Override
     public Quaternionf getCameraOrientationOffset(float offset) {
-        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.GUI) {
-            return this.camera.rotation();
+        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().currentPass == RenderPass.GUI) {
+            return cameraOrientation;
         } else {
             Entity entity = ((LevelRendererExtension)Minecraft.getInstance().levelRenderer).getRenderedEntity();
             if (entity == null) {
