@@ -118,7 +118,7 @@ public class ServerNetworking {
 
     public static ClientboundCustomPayloadPacket createUberPacket(Player player, VrPlayerState vrPlayerState, float worldScale, float heightScale) {
         var buffer = new FriendlyByteBuf(Unpooled.buffer());
-        buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE.ordinal());
+        buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.UBERPACKET.ordinal());
         buffer.writeUUID(player.getUUID());
         vrPlayerState.serialize(buffer);
         buffer.writeFloat(worldScale);
