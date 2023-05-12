@@ -176,7 +176,7 @@ public class ClientNetworkHelper {
             case VERSION -> {
                 String s11 = buffer.readUtf(1024);
                 VRServerPerms.INSTANCE.setTeleportSupported(true);
-                if (VRState.vrRunning) {
+                if (VRState.vrInitialized) {
                     dataholder.vrPlayer.teleportWarningTimer = -1;
                 }
                 if (!ClientNetworkHelper.displayedChatMessage) {

@@ -58,7 +58,8 @@ public class ClientPacketListenerVRMixin {
         CommonNetworkHelper.playersWithVivecraft.clear();
         ClientNetworkHelper.sendVersionInfo();
 
-        if (VRState.vrRunning) {
+        if (VRState.vrInitialized) {
+            // set the timer, even if vr is currently not running
             ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer = 200;
         }
     }
@@ -71,7 +72,9 @@ public class ClientPacketListenerVRMixin {
     @Inject(at = @At("TAIL"), method = "onDisconnect")
     public void disconnect(Component component, CallbackInfo ci) {
         VRServerPerms.INSTANCE.setTeleportSupported(false);
-        ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
+        if (VRState.vrInitialized) {
+            ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
+        }
         ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
     }
 
@@ -138,7 +141,10 @@ public class ClientPacketListenerVRMixin {
     public void readdInput2(ClientboundRespawnPacket clientboundRespawnPacket, CallbackInfo ci) {
         ClientNetworkHelper.resetServerSettings();
         ClientNetworkHelper.sendVersionInfo();
-        ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer = 200;
+        if (VRState.vrInitialized) {
+            // set the timer, even if vr is currently not running
+            ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer = 200;
+        }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 0, shift = At.Shift.AFTER), method = "handleRespawn(Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;)V")
