@@ -13,22 +13,29 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.api.client.ClientNetworkHelper;
+import org.vivecraft.client_vr.VRState;
 
 @Mixin(MultiPlayerGameMode.class)
 public class MultiPlayerGameModeVRMixin {
 
     @Inject(at = @At("HEAD"), method = "useItem")
     public void overrideUse(Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
-        ClientNetworkHelper.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, interactionHand.ordinal()));
+        if (VRState.vrRunning) {
+            ClientNetworkHelper.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, interactionHand.ordinal()));
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "releaseUsingItem")
     public void overrideReleaseUse(Player player, CallbackInfo ci) {
-        ClientNetworkHelper.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, player.getUsedItemHand().ordinal()));
+        if (VRState.vrRunning) {
+            ClientNetworkHelper.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, player.getUsedItemHand().ordinal()));
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "useItemOn")
     public void overrideUseOn(LocalPlayer localPlayer, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
-        ClientNetworkHelper.overrideLook(localPlayer, blockHitResult.getLocation().subtract(localPlayer.getEyePosition(1.0F)).normalize());
+        if (VRState.vrRunning) {
+            ClientNetworkHelper.overrideLook(localPlayer, blockHitResult.getLocation().subtract(localPlayer.getEyePosition(1.0F)).normalize());
+        }
     }
 }
