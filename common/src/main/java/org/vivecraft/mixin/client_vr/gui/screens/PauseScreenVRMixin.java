@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gui.settings.GuiQuickCommandsInGame;
 import org.vivecraft.client_vr.settings.AutoCalibration;
@@ -34,6 +35,9 @@ public abstract class PauseScreenVRMixin extends Screen {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 4), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
     public void addInit(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper rowHelper) {
+        if (!VRState.vrEnabled) {
+            return;
+        }
         // reset row to above
         try {
             rowHelper.addChild(null, -2);
@@ -66,6 +70,9 @@ public abstract class PauseScreenVRMixin extends Screen {
 
     @Inject(at =  @At(value = "FIELD", opcode = Opcodes.PUTFIELD,target = "Lnet/minecraft/client/gui/screens/PauseScreen;disconnectButton:Lnet/minecraft/client/gui/components/Button;", shift = At.Shift.BY, by = -3), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
     public void addLowerButtons(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper rowHelper) {
+        if (!VRState.vrEnabled) {
+            return;
+        }
         GridLayout gridWidgetOverlay_Profiler = new GridLayout();
         gridWidgetOverlay_Profiler.defaultCellSetting().paddingRight(1);
         GridLayout.RowHelper rowHelperOverlay_Profiler = gridWidgetOverlay_Profiler.createRowHelper(2);
@@ -125,14 +132,14 @@ public abstract class PauseScreenVRMixin extends Screen {
     private LayoutElement remove(GridLayout.RowHelper instance, LayoutElement layoutElement) {
         // Feedback button
         // don't remove, just hide, so mods that rely on it being there, still work
-        ((Button)layoutElement).visible = false;
+        ((Button)layoutElement).visible = !VRState.vrEnabled;
         return instance.addChild(layoutElement);
     }
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 3))
     private LayoutElement remove2(GridLayout.RowHelper instance, LayoutElement layoutElement) {
         // report bugs button
         // don't remove, just hide, so mods that rely on it being there, still work
-        ((Button)layoutElement).visible = false;
+        ((Button)layoutElement).visible = !VRState.vrEnabled;
         return instance.addChild(layoutElement);
     }
     @Redirect(method = "createPauseMenu", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/Button;active:Z"))
