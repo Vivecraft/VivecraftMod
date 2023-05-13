@@ -57,6 +57,7 @@ public class VRPlayer
     private float rawWorldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean teleportOverride = false;
     public int teleportWarningTimer = -1;
+    public int vrSwitchWarningTimer = -1;
     public Vec3 roomOrigin = new Vec3(0.0D, 0.0D, 0.0D);
     private boolean isFreeMoveCurrent = true;
     public double wfMode = 0.0D;

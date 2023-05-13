@@ -70,9 +70,10 @@ public class CommonNetworkHelper {
 
     public enum PacketDiscriminators {
         VERSION,
-        IS_VR_ACTIVE,
         REQUESTDATA,
-        VR_PLAYER_STATE,
+        HEADDATA,
+        CONTROLLER0DATA,
+        CONTROLLER1DATA,
         WORLDSCALE,
         DRAW,
         MOVEMODE,
@@ -82,7 +83,11 @@ public class CommonNetworkHelper {
         SETTING_OVERRIDE,
         HEIGHT,
         ACTIVEHAND,
-        CRAWL
+        CRAWL,
+        NEW_NETWORKING,
+        VR_SWITCHING,
+        IS_VR_ACTIVE,
+        VR_PLAYER_STATE
     }
 
     public static void serializeF(FriendlyByteBuf buffer, Vec3 vec3) {

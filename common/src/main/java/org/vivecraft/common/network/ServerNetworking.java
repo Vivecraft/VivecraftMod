@@ -14,12 +14,17 @@ import org.vivecraft.api.ServerVivePlayer;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.vivecraft.api.CommonNetworkHelper.playersWithVivecraft;
 
 public class ServerNetworking {
+
+    // temporarily stores the packets from legacy clients to assemble a complete VrPlayerState
+    private final static Map<UUID, Map<CommonNetworkHelper.PacketDiscriminators,FriendlyByteBuf>> legacyDataMap= new HashMap<>();
 
     public static void handlePacket(CommonNetworkHelper.PacketDiscriminators packetID, FriendlyByteBuf buffer, ServerGamePacketListenerImpl listener) {
         var playerEntity = listener.player;
@@ -36,6 +41,9 @@ public class ServerNetworking {
                 listener.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.CLIMBING, new byte[]{1, 0}));
                 listener.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.TELEPORT, new byte[0]));
                 listener.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[0]));
+                listener.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VR_SWITCHING, new byte[0]));
+                listener.send(CommonNetworkHelper.getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.NEW_NETWORKING, new byte[0]));
+
                 vivePlayer = new ServerVivePlayer(playerEntity);
                 playersWithVivecraft.put(playerEntity.getUUID(), vivePlayer);
 
@@ -98,6 +106,37 @@ public class ServerNetworking {
                 if (vivePlayer.crawling) {
                     playerEntity.setPose(Pose.SWIMMING);
                 }
+                break;
+            // legacy support
+            case CONTROLLER0DATA:
+            case CONTROLLER1DATA:
+            case HEADDATA:
+                Map<CommonNetworkHelper.PacketDiscriminators,FriendlyByteBuf> playerData;
+                if ((playerData = legacyDataMap.get(playerEntity.getUUID())) == null) {
+                    playerData = new HashMap<>();
+                    legacyDataMap.put(playerEntity.getUUID(), playerData);
+                }
+
+                playerData.put(packetID, buffer);
+
+                if (playerData.size() == 3) {
+                    FriendlyByteBuf controller0Data = playerData.get(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA);
+                    controller0Data.resetReaderIndex().readByte();
+                    FriendlyByteBuf controller1Data = playerData.get(CommonNetworkHelper.PacketDiscriminators.CONTROLLER1DATA);
+                    controller1Data.resetReaderIndex().readByte();
+                    FriendlyByteBuf headData = playerData.get(CommonNetworkHelper.PacketDiscriminators.HEADDATA);
+                    headData.resetReaderIndex().readByte();
+
+                    vivePlayer.vrPlayerState = new VrPlayerState(
+                            headData.readBoolean(), // isSeated
+                            org.vivecraft.common.network.Pose.deserialize(headData), // head pose
+                            controller0Data.readBoolean(), // reverseHands 0
+                            org.vivecraft.common.network.Pose.deserialize(controller0Data), // controller0 pose
+                            controller1Data.readBoolean(), // reverseHands 1
+                            org.vivecraft.common.network.Pose.deserialize(controller1Data)); // controller1 pose
+                    legacyDataMap.remove(playerEntity.getUUID());
+                }
+                break;
         }
     }
     

@@ -313,7 +313,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             return;
         }
         boolean vrActive = ClientDataHolderVR.getInstance().vr.isActive();
-        if (VRState.vrRunning != vrActive) {
+        if (VRState.vrRunning != vrActive && (ClientNetworkHelper.serverAllowsVrSwitching || player == null)) {
             VRState.vrRunning = vrActive;
             if (vrActive) {
                 //TODO
@@ -885,6 +885,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
             if (ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer == 0) {
                 this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.noserverplugin"));
+            }
+            if (ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer == 0) {
+                this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitchinglegacy"));
             }
         }
     }

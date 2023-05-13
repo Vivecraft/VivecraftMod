@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -35,6 +36,9 @@ public class ClientNetworkHelper {
     public static boolean serverAllowsClimbey = false;
     public static boolean serverSupportsDirectTeleport = false;
     public static boolean serverAllowsCrawling = false;
+    public static boolean serverAllowsVrSwitching = false;
+    // assume a legacy server by default, to not send invalid packets
+    public static boolean legacyServer = true;
     private static float worldScallast = 0.0F;
     private static float heightlast = 0.0F;
     private static float capturedYaw;
@@ -64,6 +68,8 @@ public class ClientNetworkHelper {
         serverWantsData = false;
         serverSupportsDirectTeleport = false;
         serverAllowsCrawling = false;
+        serverAllowsVrSwitching = false;
+        legacyServer = true;
         //DataHolder.getInstance().vrSettings.overrides.resetAll(); move to mixin
     }
 
@@ -72,7 +78,7 @@ public class ClientNetworkHelper {
         FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
         friendlybytebuf.writeBytes(s.getBytes());
         Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new ResourceLocation("minecraft:register"), friendlybytebuf));
-        Minecraft.getInstance().getConnection().send(getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.VERSION, CommonDataHolder.getInstance().versionIdentifier.getBytes(Charsets.UTF_8)));
+        Minecraft.getInstance().getConnection().send(getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.VERSION, (CommonDataHolder.getInstance().versionIdentifier + (VRState.vrEnabled ? " VR" : " NONVR")).getBytes(Charsets.UTF_8)));
     }
 
     public static void sendVRPlayerPositions(VRPlayer vrPlayer) {
@@ -106,7 +112,12 @@ public class ClientNetworkHelper {
         }
 
         var vrPlayerState = VrPlayerState.create(vrPlayer);
-        connection.send(createVrPlayerStatePacket(vrPlayerState));
+
+        if (!legacyServer) {
+            connection.send(createVrPlayerStatePacket(vrPlayerState));
+        } else {
+            sendLegacyPackets(connection, vrPlayerState);
+        }
         VRPlayersClient.getInstance().Update(Minecraft.getInstance().player.getGameProfile().getId(), vrPlayerState, worldScale, f1 / 1.52F, true);
     }
 
@@ -115,6 +126,29 @@ public class ClientNetworkHelper {
         buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.VR_PLAYER_STATE.ordinal());
         vrPlayerState.serialize(buffer);
         return new ServerboundCustomPayloadPacket(CommonNetworkHelper.channel, buffer);
+    }
+
+    public static void sendLegacyPackets(ClientPacketListener connection, VrPlayerState vrPlayerState) {
+        // left controller packet
+        FriendlyByteBuf controller0Buffer = new FriendlyByteBuf(Unpooled.buffer());
+        controller0Buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA.ordinal());
+        controller0Buffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.reverseHands);
+        vrPlayerState.controller0().serialize(controller0Buffer);
+        connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.channel, controller0Buffer));
+
+        // right controller packet
+        FriendlyByteBuf controller1Buffer = new FriendlyByteBuf(Unpooled.buffer());
+        controller1Buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.CONTROLLER1DATA.ordinal());
+        controller1Buffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.reverseHands);
+        vrPlayerState.controller1().serialize(controller1Buffer);
+        connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.channel, controller1Buffer));
+
+        // hmd packet
+        FriendlyByteBuf headBuffer = new FriendlyByteBuf(Unpooled.buffer());
+        headBuffer.writeByte(CommonNetworkHelper.PacketDiscriminators.HEADDATA.ordinal());
+        headBuffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.seated);
+        vrPlayerState.hmd().serialize(headBuffer);
+        connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.channel, headBuffer));
     }
 
     public static boolean isLimitedSurvivalTeleport() {
@@ -261,6 +295,13 @@ public class ClientNetworkHelper {
                 }
             }
             case CRAWL -> ClientNetworkHelper.serverAllowsCrawling = true;
+            case NEW_NETWORKING -> ClientNetworkHelper.legacyServer = false;
+            case VR_SWITCHING -> {
+                ClientNetworkHelper.serverAllowsVrSwitching = true;
+                if (VRState.vrInitialized) {
+                    dataholder.vrPlayer.vrSwitchWarningTimer = -1;
+                }
+            }
         }
     }
 }

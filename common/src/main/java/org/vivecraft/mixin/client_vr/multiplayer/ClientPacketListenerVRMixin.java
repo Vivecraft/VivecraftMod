@@ -18,7 +18,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,9 +31,7 @@ import org.vivecraft.api.client.ClientNetworkHelper;
 import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.VrPlayerState;
 
 import java.util.UUID;
 
@@ -61,6 +58,7 @@ public class ClientPacketListenerVRMixin {
         if (VRState.vrInitialized) {
             // set the timer, even if vr is currently not running
             ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer = 200;
+            ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer = 200;
         }
     }
 
@@ -144,6 +142,7 @@ public class ClientPacketListenerVRMixin {
         if (VRState.vrInitialized) {
             // set the timer, even if vr is currently not running
             ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer = 200;
+            ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer = 200;
         }
     }
 

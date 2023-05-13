@@ -12,14 +12,15 @@ import org.vivecraft.common.utils.math.Quaternion;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
-public record VrPlayerState(boolean seated, boolean reverseHands, Pose hmd, Pose controller0, Pose controller1) {
+public record VrPlayerState(boolean seated, Pose hmd, boolean reverseHands, Pose controller0, boolean reverseHands1legacy, Pose controller1) {
 
     public static VrPlayerState create(VRPlayer vrPlayer) {
         return new VrPlayerState(
                 ClientDataHolderVR.getInstance().vrSettings.seated,
-                ClientDataHolderVR.getInstance().vrSettings.reverseHands,
                 hmdPose(vrPlayer),
+                ClientDataHolderVR.getInstance().vrSettings.reverseHands,
                 controllerPose(vrPlayer, 0),
+                ClientDataHolderVR.getInstance().vrSettings.reverseHands,
                 controllerPose(vrPlayer, 1)
         );
     }
@@ -45,14 +46,15 @@ public record VrPlayerState(boolean seated, boolean reverseHands, Pose hmd, Pose
     }
 
     public static VrPlayerState deserialize(FriendlyByteBuf byteBuf) {
-        return new VrPlayerState(byteBuf.readBoolean(), byteBuf.readBoolean(), Pose.deserialize(byteBuf), Pose.deserialize(byteBuf), Pose.deserialize(byteBuf));
+        return new VrPlayerState(byteBuf.readBoolean(), Pose.deserialize(byteBuf), byteBuf.readBoolean(), Pose.deserialize(byteBuf), byteBuf.readBoolean(), Pose.deserialize(byteBuf));
     }
 
     public void serialize(FriendlyByteBuf buffer) {
         buffer.writeBoolean(this.seated);
-        buffer.writeBoolean(this.reverseHands);
         this.hmd.serialize(buffer);
+        buffer.writeBoolean(this.reverseHands);
         this.controller0.serialize(buffer);
+        buffer.writeBoolean(this.reverseHands);
         this.controller1.serialize(buffer);
     }
 }

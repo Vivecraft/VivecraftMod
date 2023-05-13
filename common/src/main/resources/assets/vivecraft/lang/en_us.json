@@ -394,6 +394,7 @@
     "vivecraft.messages.mode": "Mode:",
     "vivecraft.messages.configWriteError":"§cFailed to write config, your changes are not saved",
     "vivecraft.messages.configChangeRestart":"§6VR Mode changed, please restart the game for it to take effect.",
+    "vivecraft.messages.novrhotswitchinglegacy": "Legacy Vivecraft server mod detected. This Server does not support VR hot switching, you can only change it in the main menu.",
     "vivecraft.toasts.move1":"Move with %s",
     "vivecraft.toasts.move2":"Move with %s and %s",
     "vivecraft.toasts.move3":"Move with %s, %s and %s",
