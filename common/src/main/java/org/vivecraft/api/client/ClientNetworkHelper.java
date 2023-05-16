@@ -217,7 +217,7 @@ public class ClientNetworkHelper {
                     ClientNetworkHelper.displayedChatMessage = true;
                     mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
                 }
-                if (dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
+                if (VRState.vrEnabled && dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
                     mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibrateheight"));
                 }
             }
