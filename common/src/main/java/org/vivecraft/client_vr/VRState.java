@@ -74,6 +74,9 @@ public class VRState {
         dh.vr.destroy();
         dh.vr = null;
         dh.vrPlayer = null;
+        if (dh.vrRenderer != null) {
+            dh.vrRenderer.destroy();
+        }
         dh.vrRenderer = null;
         vrInitialized = false;
         vrRunning = false;

@@ -1,15 +1,12 @@
 package org.vivecraft.client_vr.provider.openvr_jna;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.sun.jna.Pointer;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.openvr.HiddenAreaMesh;
-import org.lwjgl.openvr.HmdMatrix44;
-import org.lwjgl.openvr.OpenVR;
-import org.lwjgl.openvr.VRCompositor;
+import org.lwjgl.openvr.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.client.utils.Utils;
@@ -23,7 +20,7 @@ import static org.lwjgl.openvr.VRSystem.*;
 
 public class OpenVRStereoRenderer extends VRRenderer {
     private HiddenAreaMesh[] hiddenMeshes = new HiddenAreaMesh[2];
-    private MCOpenVR openvr;
+    private final MCOpenVR openvr;
 
     public OpenVRStereoRenderer(MCVR vr) {
         super(vr);
@@ -87,23 +84,24 @@ public class OpenVRStereoRenderer extends VRRenderer {
         this.LeftEyeTextureId = GlStateManager._genTexture();
         int i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
         RenderSystem.bindTexture(this.LeftEyeTextureId);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, null);
         RenderSystem.bindTexture(i);
         this.openvr.texType0.handle(this.LeftEyeTextureId);
-        this.openvr.texType0.eColorSpace(1);
-        this.openvr.texType0.eType(1);
+        this.openvr.texType0.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
+        this.openvr.texType0.eType(VR.ETextureType_TextureType_OpenGL);
+
         this.RightEyeTextureId = GlStateManager._genTexture();
         i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
         RenderSystem.bindTexture(this.RightEyeTextureId);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, 9729);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, 9729);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, null);
         RenderSystem.bindTexture(i);
         this.openvr.texType1.handle(this.RightEyeTextureId);
-        this.openvr.texType1.eColorSpace(1);
-        this.openvr.texType1.eType(1);
+        this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
+        this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
     }
 
     public boolean endFrame(RenderPass eye) {
@@ -184,5 +182,19 @@ public class OpenVRStereoRenderer extends VRRenderer {
 
     public String getinitError() {
         return this.vr.initStatus;
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        if (this.LeftEyeTextureId > -1) {
+            TextureUtil.releaseTextureId(this.LeftEyeTextureId);
+            this.LeftEyeTextureId = -1;
+        }
+
+        if (this.RightEyeTextureId > -1) {
+            TextureUtil.releaseTextureId(this.RightEyeTextureId);
+            this.RightEyeTextureId = -1;
+        }
     }
 }

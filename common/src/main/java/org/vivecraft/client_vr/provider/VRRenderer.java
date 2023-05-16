@@ -425,79 +425,7 @@ public abstract class VRRenderer {
             int eyew = tuple.getA();
             int eyeh = tuple.getB();
 
-            if (this.framebufferVrRender != null) {
-                WorldRenderPass.stereoXR.close();
-                WorldRenderPass.stereoXR = null;
-                this.framebufferVrRender = null;
-            }
-
-            if (this.framebufferMR != null) {
-                WorldRenderPass.mixedReality.close();
-                WorldRenderPass.mixedReality = null;
-                this.framebufferMR.destroyBuffers();
-                this.framebufferMR = null;
-            }
-
-            if (this.framebufferUndistorted != null) {
-                WorldRenderPass.center.close();
-                WorldRenderPass.center = null;
-                this.framebufferUndistorted.destroyBuffers();
-                this.framebufferUndistorted = null;
-            }
-
-            if (GuiHandler.guiFramebuffer != null) {
-                GuiHandler.guiFramebuffer.destroyBuffers();
-                GuiHandler.guiFramebuffer = null;
-            }
-
-            if (KeyboardHandler.Framebuffer != null) {
-                KeyboardHandler.Framebuffer.destroyBuffers();
-                KeyboardHandler.Framebuffer = null;
-            }
-
-            if (RadialHandler.Framebuffer != null) {
-                RadialHandler.Framebuffer.destroyBuffers();
-                RadialHandler.Framebuffer = null;
-            }
-
-            if (this.telescopeFramebufferL != null) {
-                WorldRenderPass.leftTelescope.close();
-                WorldRenderPass.leftTelescope = null;
-                this.telescopeFramebufferL.destroyBuffers();
-                this.telescopeFramebufferL = null;
-            }
-
-            if (this.telescopeFramebufferR != null) {
-                WorldRenderPass.rightTelescope.close();
-                WorldRenderPass.rightTelescope = null;
-                this.telescopeFramebufferR.destroyBuffers();
-                this.telescopeFramebufferR = null;
-            }
-
-            if (this.cameraFramebuffer != null) {
-                this.cameraFramebuffer.destroyBuffers();
-                this.cameraFramebuffer = null;
-            }
-
-            if (this.cameraRenderFramebuffer != null) {
-                WorldRenderPass.camera.close();
-                WorldRenderPass.camera = null;
-                this.cameraRenderFramebuffer.destroyBuffers();
-                this.cameraRenderFramebuffer = null;
-            }
-
-            if (this.fsaaFirstPassResultFBO != null) {
-                this.fsaaFirstPassResultFBO.destroyBuffers();
-                this.fsaaFirstPassResultFBO = null;
-            }
-
-            if (this.fsaaLastPassResultFBO != null) {
-                this.fsaaLastPassResultFBO.destroyBuffers();
-                this.fsaaLastPassResultFBO = null;
-            }
-
-            int i1 = 0;
-            boolean flag1 = i1 > 0;
+            destroy();
 
             if (this.LeftEyeTextureId == -1) {
                 this.createRenderTexture(eyew, eyeh);
@@ -702,5 +630,79 @@ public abstract class VRRenderer {
         this.dispLastHeight = i;
         this.dispLastWidth = j;
         return flag;
+    }
+
+    public void destroy() {
+        if (this.framebufferVrRender != null) {
+            WorldRenderPass.stereoXR.close();
+            WorldRenderPass.stereoXR = null;
+            this.framebufferVrRender.destroyBuffers();
+            this.framebufferVrRender = null;
+        }
+
+        if (this.framebufferMR != null) {
+            WorldRenderPass.mixedReality.close();
+            WorldRenderPass.mixedReality = null;
+            this.framebufferMR.destroyBuffers();
+            this.framebufferMR = null;
+        }
+
+        if (this.framebufferUndistorted != null) {
+            WorldRenderPass.center.close();
+            WorldRenderPass.center = null;
+            this.framebufferUndistorted.destroyBuffers();
+            this.framebufferUndistorted = null;
+        }
+
+        if (GuiHandler.guiFramebuffer != null) {
+            GuiHandler.guiFramebuffer.destroyBuffers();
+            GuiHandler.guiFramebuffer = null;
+        }
+
+        if (KeyboardHandler.Framebuffer != null) {
+            KeyboardHandler.Framebuffer.destroyBuffers();
+            KeyboardHandler.Framebuffer = null;
+        }
+
+        if (RadialHandler.Framebuffer != null) {
+            RadialHandler.Framebuffer.destroyBuffers();
+            RadialHandler.Framebuffer = null;
+        }
+
+        if (this.telescopeFramebufferL != null) {
+            WorldRenderPass.leftTelescope.close();
+            WorldRenderPass.leftTelescope = null;
+            this.telescopeFramebufferL.destroyBuffers();
+            this.telescopeFramebufferL = null;
+        }
+
+        if (this.telescopeFramebufferR != null) {
+            WorldRenderPass.rightTelescope.close();
+            WorldRenderPass.rightTelescope = null;
+            this.telescopeFramebufferR.destroyBuffers();
+            this.telescopeFramebufferR = null;
+        }
+
+        if (this.cameraFramebuffer != null) {
+            this.cameraFramebuffer.destroyBuffers();
+            this.cameraFramebuffer = null;
+        }
+
+        if (this.cameraRenderFramebuffer != null) {
+            WorldRenderPass.camera.close();
+            WorldRenderPass.camera = null;
+            this.cameraRenderFramebuffer.destroyBuffers();
+            this.cameraRenderFramebuffer = null;
+        }
+
+        if (this.fsaaFirstPassResultFBO != null) {
+            this.fsaaFirstPassResultFBO.destroyBuffers();
+            this.fsaaFirstPassResultFBO = null;
+        }
+
+        if (this.fsaaLastPassResultFBO != null) {
+            this.fsaaLastPassResultFBO.destroyBuffers();
+            this.fsaaLastPassResultFBO = null;
+        }
     }
 }
