@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr.provider.openvr_jna.control;
+package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 
 import net.minecraft.client.KeyMapping;
 import org.vivecraft.client.VivecraftVRMod;

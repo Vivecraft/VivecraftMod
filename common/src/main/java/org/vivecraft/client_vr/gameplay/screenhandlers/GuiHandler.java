@@ -8,7 +8,7 @@ import org.vivecraft.api.client.VRData;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
-import org.vivecraft.client_vr.provider.openvr_jna.OpenVRUtil;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.OpenVRUtil;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.MCVR;

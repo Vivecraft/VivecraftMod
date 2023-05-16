@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr.provider.openvr_jna;
+package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;

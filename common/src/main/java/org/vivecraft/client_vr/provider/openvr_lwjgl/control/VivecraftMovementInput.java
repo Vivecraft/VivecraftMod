@@ -1,8 +1,8 @@
-package org.vivecraft.client_vr.provider.openvr_jna.control;
+package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 
 import net.minecraft.client.KeyMapping;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.provider.openvr_jna.VRInputAction;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 
 public class VivecraftMovementInput
 {

@@ -15,11 +15,11 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client_vr.provider.openvr_jna.VRInputAction;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.common.utils.math.Vector2;
 
-import static org.vivecraft.client_vr.provider.openvr_jna.control.VivecraftMovementInput.getMovementAxisValue;
+import static org.vivecraft.client_vr.provider.openvr_lwjgl.control.VivecraftMovementInput.getMovementAxisValue;
 
 @Mixin(KeyboardInput.class)
 public class KeyboardInputVRMixin extends Input {

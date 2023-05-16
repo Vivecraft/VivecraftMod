@@ -1,12 +1,10 @@
-package org.vivecraft.client_vr.provider.openvr_jna;
+package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.sun.jna.Memory;
 import com.sun.jna.NativeLibrary;
-import com.sun.jna.Pointer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -23,8 +21,8 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.provider.*;
-import org.vivecraft.client_vr.provider.openvr_jna.control.TrackpadSwipeSampler;
-import org.vivecraft.client_vr.provider.openvr_jna.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.control.TrackpadSwipeSampler;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jinfinadeck;
@@ -191,11 +189,11 @@ public class MCOpenVR extends MCVR {
     }
 
     public String getID() {
-        return "openvr_jna";
+        return "openvr_lwjgl";
     }
 
     public String getName() {
-        return "OpenVR_JNA";
+        return "OpenVR_LWJGL";
     }
 
     public Vector2f getPlayAreaSize() {
@@ -451,11 +449,11 @@ public class MCOpenVR extends MCVR {
             list2.add(ImmutableMap.<String, Object>builder().put("name", vrinputaction.name).put("requirement", vrinputaction.requirement).put("type", vrinputaction.type).build());
         }
 
-        list2.add(ImmutableMap.<String, Object>builder().put("name", "/actions/global/in/lefthand").put("requirement", "suggested").put("type", "pose").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", "/actions/global/in/righthand").put("requirement", "suggested").put("type", "pose").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", "/actions/mixedreality/in/externalcamera").put("requirement", "optional").put("type", "pose").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", "/actions/global/out/lefthaptic").put("requirement", "suggested").put("type", "vibration").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", "/actions/global/out/righthaptic").put("requirement", "suggested").put("type", "vibration").build());
+        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAND).put("requirement", "suggested").put("type", "pose").build());
+        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAND).put("requirement", "suggested").put("type", "pose").build());
+        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_EXTERNAL_CAMERA).put("requirement", "optional").put("type", "pose").build());
+        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
+        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
         map.put("actions", list2);
         Map<String, Object> map1 = new HashMap<>();
 
@@ -469,11 +467,11 @@ public class MCOpenVR extends MCVR {
             map1.put(vrinputactionset1.name, component.getString());
         }
 
-        map1.put("/actions/global/in/lefthand", "Left Hand Pose");
-        map1.put("/actions/global/in/righthand", "Right Hand Pose");
-        map1.put("/actions/mixedreality/in/externalcamera", "External Camera");
-        map1.put("/actions/global/out/lefthaptic", "Left Hand Haptic");
-        map1.put("/actions/global/out/righthaptic", "Right Hand Haptic");
+        map1.put(ACTION_LEFT_HAND, "Left Hand Pose");
+        map1.put(ACTION_RIGHT_HAND, "Right Hand Pose");
+        map1.put(ACTION_EXTERNAL_CAMERA, "External Camera");
+        map1.put(ACTION_LEFT_HAPTIC, "Left Hand Haptic");
+        map1.put(ACTION_RIGHT_HAPTIC, "Right Hand Haptic");
         map1.put("languageag", "en_US");
         map.put("localization", ImmutableList.<Map<String, Object>>builder().add(map1).build());
         List<Map<String, Object>> list3 = new ArrayList<>();
@@ -838,11 +836,11 @@ public class MCOpenVR extends MCVR {
                 vrinputaction.setHandle(longbyreference.get(0));
             }
 
-            this.leftPoseHandle = this.getActionHandle("/actions/global/in/lefthand");
-            this.rightPoseHandle = this.getActionHandle("/actions/global/in/righthand");
-            this.leftHapticHandle = this.getActionHandle("/actions/global/out/lefthaptic");
-            this.rightHapticHandle = this.getActionHandle("/actions/global/out/righthaptic");
-            this.externalCameraPoseHandle = this.getActionHandle("/actions/mixedreality/in/externalcamera");
+            this.leftPoseHandle = this.getActionHandle(ACTION_LEFT_HAND);
+            this.rightPoseHandle = this.getActionHandle(ACTION_RIGHT_HAND);
+            this.leftHapticHandle = this.getActionHandle(ACTION_LEFT_HAPTIC);
+            this.rightHapticHandle = this.getActionHandle(ACTION_RIGHT_HAPTIC);
+            this.externalCameraPoseHandle = this.getActionHandle(ACTION_EXTERNAL_CAMERA);
 
             for (VRInputActionSet vrinputactionset : VRInputActionSet.values()) {
                 int j = VRInput_GetActionSetHandle(vrinputactionset.name, longbyreference);
@@ -961,12 +959,6 @@ public class MCOpenVR extends MCVR {
         }
     }
 
-    private Pointer ptrFomrString(String in) {
-        Pointer pointer = new Memory((long) (in.getBytes(StandardCharsets.UTF_8).length + 1));
-        pointer.setString(0L, in, StandardCharsets.UTF_8.name());
-        return pointer;
-    }
-
     private void readOriginInfo(long inputValueHandle) {
         int i = VRInput_GetOriginTrackedDeviceInfo(inputValueHandle, this.originInfo, InputOriginInfo.SIZEOF);
 
@@ -981,37 +973,6 @@ public class MCOpenVR extends MCVR {
         if (i != 0) {
             throw new RuntimeException("Error reading pose data: " + getInputErrorName(i));
         }
-    }
-
-    private void unpackPlatformNatives() {
-        String s = System.getProperty("os.name").toLowerCase();
-        String s1 = System.getProperty("os.arch").toLowerCase();
-        String s2 = "win";
-
-        if (s.contains("linux")) {
-            s2 = "linux";
-        } else if (s.contains("mac")) {
-            s2 = "osx";
-        }
-
-        if (!s.contains("mac")) {
-            if (s1.contains("64")) {
-                s2 = s2 + "64";
-            } else {
-                s2 = s2 + "32";
-            }
-        }
-
-        try {
-            Utils.unpackNatives(s2);
-        } catch (Exception exception) {
-            System.out.println("Native path not found");
-            return;
-        }
-
-        String s3 = (new File("openvr/" + s2)).getAbsolutePath();
-        System.out.println("Adding OpenVR search path: " + s3);
-        NativeLibrary.addSearchPath("openvr_api", s3);
     }
 
     private void updateControllerPose(int controller, long actionHandle) {

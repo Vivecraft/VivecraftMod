@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr.provider.openvr_jna.control;
+package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.openvr_jna.MCOpenVR;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 
 public class HapticMusicPlayer
 {

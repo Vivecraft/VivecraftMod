@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr.provider.openvr_jna;
+package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.provider.openvr_jna.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.common.utils.math.Vector2;
 import org.vivecraft.common.utils.math.Vector3;
 

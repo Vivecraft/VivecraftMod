@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr.provider.openvr_jna;
+package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
 import org.lwjgl.openvr.HmdMatrix34;
 import org.vivecraft.client.utils.Utils;

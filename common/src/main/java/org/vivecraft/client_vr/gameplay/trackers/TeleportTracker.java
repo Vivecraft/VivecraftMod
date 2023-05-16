@@ -21,7 +21,7 @@ import org.vivecraft.api.BlockTags;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.api.client.ClientNetworkHelper;
-import org.vivecraft.client_vr.provider.openvr_jna.OpenVRUtil;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.OpenVRUtil;
 import org.vivecraft.client_vr.gameplay.VRMovementStyle;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.common.utils.math.Angle;
