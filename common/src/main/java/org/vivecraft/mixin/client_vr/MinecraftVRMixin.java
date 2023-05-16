@@ -72,6 +72,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.client_vr.gui.ErrorScreen;
 import org.vivecraft.client_vr.provider.openvr_jna.VRInputAction;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -557,7 +558,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
             try {
                 ClientDataHolderVR.getInstance().vrRenderer.endFrame();
-            } catch (Exception exception) {
+            } catch (RenderConfigException exception) {
                 VRSettings.logger.error(exception.toString());
             }
 
@@ -604,8 +605,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
             try {
                 ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
-            } catch (RenderConfigException renderconfigexception) {
-                handleBadConfig(renderconfigexception);
+            } catch (RenderConfigException renderConfigException) {
+                // TODO: could disabling VR here cause issues?
+                Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + ClientDataHolderVR.getInstance().vr.getName())));
+                VRState.vrEnabled = false;
+                VRState.destroyVR();
+                return;
             } catch (Exception exception2) {
                 exception2.printStackTrace();
             }

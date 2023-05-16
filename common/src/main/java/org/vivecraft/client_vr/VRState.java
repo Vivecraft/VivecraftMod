@@ -1,10 +1,12 @@
 package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.gui.ErrorScreen;
 import org.vivecraft.client_vr.provider.openvr_jna.MCOpenVR;
+import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 
 public class VRState {
@@ -21,9 +23,9 @@ public class VRState {
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
         dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
         if (!dh.vr.init()) {
+            Minecraft.getInstance().setScreen(new ErrorScreen("VR init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus + "\nVR provider: " + dh.vr.getName())));
             vrEnabled = false;
-            vrInitialized = false;
-            dh.vr = null;
+            destroyVR();
             return;
         }
 
@@ -32,6 +34,11 @@ public class VRState {
         try {
             dh.vrRenderer.setupRenderConfiguration();
             RenderPassManager.setVanillaRenderPass();
+        } catch(RenderConfigException renderConfigException) {
+            Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + dh.vr.getName())));
+            vrEnabled = false;
+            destroyVR();
+            return;
         } catch(Exception e) {
             e.printStackTrace();
         }
