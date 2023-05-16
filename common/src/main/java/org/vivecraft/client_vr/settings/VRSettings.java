@@ -5,7 +5,7 @@
 package org.vivecraft.client_vr.settings;
 
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.IrisHelper;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.OptionsExtension;

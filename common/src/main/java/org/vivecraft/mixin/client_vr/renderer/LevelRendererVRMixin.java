@@ -2,7 +2,7 @@ package org.vivecraft.mixin.client_vr.renderer;
 
 import org.joml.Matrix4f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.IrisHelper;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;

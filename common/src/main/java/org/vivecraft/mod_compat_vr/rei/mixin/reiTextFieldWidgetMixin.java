@@ -1,4 +1,4 @@
-package org.vivecraft.mixin_mod_compat_vr.rei;
+package org.vivecraft.mod_compat_vr.rei.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;

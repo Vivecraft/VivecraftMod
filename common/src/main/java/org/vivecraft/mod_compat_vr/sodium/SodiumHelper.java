@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr;
+package org.vivecraft.mod_compat_vr.sodium;
 
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;

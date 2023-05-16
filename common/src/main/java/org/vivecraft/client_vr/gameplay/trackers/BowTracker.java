@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.common.PehkuiHelper;
+import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.api.CommonNetworkHelper;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
