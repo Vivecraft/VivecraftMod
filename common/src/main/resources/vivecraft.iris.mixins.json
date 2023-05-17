@@ -5,5 +5,16 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
   ],
-  "minVersion": "0.8.4"
+  "minVersion": "0.8.4",
+  "mixins": [
+    "IrisBeginFrameHack",
+    "IrisChunkProgramOverridesMixin",
+    "IrisChunkProgramOverridesMixinSodium_0_4_9",
+    "IrisHandRendererVRMixin",
+    "IrisNewWorldRenderingPipelineVRMixin",
+    "IrisPipelineManagerVRMixin",
+    "IrisProgramUniformsMixin",
+    "IrisShadowMatricesMixin",
+    "IrisShadowRendererMixin"
+  ]
 }
