@@ -369,7 +369,7 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
     public void renderoverlay(float f, long l, boolean bl, CallbackInfo ci) {
-        if (GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.THIRD
+        if (VRState.vrRunning && GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.THIRD
                 && GameRendererVRMixin.DATA_HOLDER.currentPass != RenderPass.CAMERA) {
             this.renderFaceOverlay(f, this.stack);
         }
