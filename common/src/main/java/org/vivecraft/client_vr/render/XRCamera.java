@@ -52,6 +52,6 @@ public class XRCamera extends Camera {
             return super.isDetached();
         }
         boolean renderSelf = ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA;
-        return super.isDetached() || renderSelf || ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf;
+        return renderSelf || ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf;
     }
 }
