@@ -34,6 +34,10 @@ public class VRPlayersClient {
         return instance;
     }
 
+    public static void clear() {
+        instance = null;
+    }
+
     private VRPlayersClient() {
         this.mc = Minecraft.getInstance();
     }

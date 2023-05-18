@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.*;
 import org.spongepowered.asm.mixin.Unique;
+import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.api.CommonNetworkHelper;
 import net.minecraft.client.Minecraft;
@@ -53,6 +54,7 @@ public class ClientPacketListenerVRMixin {
     @Inject(at = @At("TAIL"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
     public void login(ClientboundLoginPacket p_105030_, CallbackInfo callback) {
         CommonNetworkHelper.playersWithVivecraft.clear();
+        VRPlayersClient.clear();
         ClientNetworkHelper.sendVersionInfo();
 
         if (VRState.vrInitialized) {
