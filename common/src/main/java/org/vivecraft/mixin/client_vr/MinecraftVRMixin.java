@@ -28,6 +28,7 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
@@ -55,18 +56,15 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.client_vr.extensions.*;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
-import org.vivecraft.client_vr.extensions.GuiExtension;
-import org.vivecraft.client_vr.extensions.MinecraftExtension;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.Xevents;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.api.client.ClientNetworkHelper;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -274,6 +272,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Shadow @Nullable public abstract ClientPacketListener getConnection();
 
+    @Shadow @Final public LevelRenderer levelRenderer;
+
     @Inject(method = "<init>", at = @At("RETURN"))
     void afterInit(GameConfig gameConfig, CallbackInfo ci) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
@@ -331,6 +331,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             var connection = this.getConnection();
             if (connection != null) {
                 connection.send(ClientNetworkHelper.createVRActivePacket(vrActive));
+            }
+            // restore vanilla post chains before the resize, or it will resize the wrong ones
+            if (levelRenderer != null) {
+                ((LevelRendererExtension)levelRenderer).restoreVanillaPostChains();
             }
             resizeDisplay();
         }

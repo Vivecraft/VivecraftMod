@@ -11,4 +11,6 @@ public interface LevelRendererExtension {
     RenderTarget getAlphaSortVRUnoccludedFramebuffer();
 
     RenderTarget getAlphaSortVRHandsFramebuffer();
+
+    void restoreVanillaPostChains();
 }

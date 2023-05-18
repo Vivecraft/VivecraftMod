@@ -413,6 +413,52 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
+    @Inject(at = @At("TAIL"), method = "initOutline")
+    public void captureOutlineChain(CallbackInfo ci){
+        RenderPassManager.INSTANCE.vanillaOutlineChain = entityEffect;
+    }
+
+    @Inject(at = @At("TAIL"), method = "initTransparency")
+    public void captureTransparencyChain(CallbackInfo ci){
+        RenderPassManager.INSTANCE.vanillaTransparencyChain = transparencyChain;
+    }
+    @Inject(at = @At("TAIL"), method = "deinitTransparency")
+    public void removeTransparencyChain(CallbackInfo ci){
+        RenderPassManager.INSTANCE.vanillaTransparencyChain = null;
+    }
+
+    @Inject(at = @At("TAIL"), method = "close")
+    public void removePostChains(CallbackInfo ci){
+        RenderPassManager.INSTANCE.vanillaOutlineChain = null;
+        RenderPassManager.INSTANCE.vanillaTransparencyChain = null;
+    }
+
+    @Override
+    public void restoreVanillaPostChains(){
+        transparencyChain = RenderPassManager.INSTANCE.vanillaTransparencyChain;
+
+        if (transparencyChain != null) {
+            this.translucentTarget = transparencyChain.getTempTarget("translucent");
+            this.itemEntityTarget = transparencyChain.getTempTarget("itemEntity");
+            this.particlesTarget = transparencyChain.getTempTarget("particles");
+            this.weatherTarget = transparencyChain.getTempTarget("weather");
+            this.cloudsTarget = transparencyChain.getTempTarget("clouds");
+        } else {
+            this.translucentTarget = null;
+            this.itemEntityTarget = null;
+            this.particlesTarget = null;
+            this.weatherTarget = null;
+            this.cloudsTarget = null;
+        }
+
+        entityEffect = RenderPassManager.INSTANCE.vanillaOutlineChain;
+        if (entityEffect != null) {
+            this.entityTarget = entityEffect.getTempTarget("final");
+        } else {
+            this.entityTarget = null;
+        }
+    }
+
     public void setShaderGroup() {
         PostChain transparencyChain = RenderPassManager.wrp.transparencyChain;
 
