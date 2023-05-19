@@ -251,6 +251,9 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V", ordinal = 0), method = "renderLevel")
     public void renderFabulous(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+        if (RenderPassType.isVanilla()) {
+            return;
+        }
         boolean menuHandleft = ((GameRendererExtension) gameRenderer).isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
         boolean menuhandright = menuHandleft || ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar;
         ((GameRendererExtension) gameRenderer).renderVRFabulous(f, (LevelRenderer) (Object) this, menuhandright, menuHandleft, poseStack);
