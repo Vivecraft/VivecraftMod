@@ -26,6 +26,11 @@ loom {
 configurations {
     common
     shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    bundle {
+        // bundle command, to copy jar contents with the shadow plugin
+        canBeResolved = true
+        canBeConsumed = false
+    }
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
@@ -42,9 +47,15 @@ dependencies {
     modRuntimeOnly("maven.modrinth:oculus:1.19.4-1.5.2")
 
     include(forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1"))
-    include(forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux"))
-    include(forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos"))
-    include(forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows"))
+
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
+
+    // shadow the natives
+    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
+    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
+    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }
 }
 
 processResources {
@@ -59,7 +70,10 @@ shadowJar {
     exclude "fabric.mod.json"
     exclude "architectury.common.json"
 
-    configurations = [project.configurations.shadowCommon]
+    configurations = [
+            project.configurations.shadowCommon,
+            project.configurations.bundle
+    ]
     classifier "dev-shadow"
 }
 
