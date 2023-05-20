@@ -58,7 +58,10 @@
     "client_vr.world.BoatMixin",
     "client_vr.world.FishingHookVRMixin",
     "client_vr.world.ItemVRMixin",
-    "client_vr.world.PotionItemVRMixin"
+    "client_vr.world.PotionItemVRMixin",
+    "client_vr.world.level.block.DoorBlockVRMixin",
+    "client_vr.world.level.block.FenceGateBlockVRMixin",
+    "client_vr.world.level.block.TrapDoorBlockVRMixin"
   ],
   "minVersion": "0.8.4",
   "mixins": [

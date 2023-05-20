@@ -2,6 +2,7 @@ package org.vivecraft.mixin.client_vr.renderer;
 
 import org.joml.Matrix4f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -320,99 +321,33 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         renderShape(poseStack, vertexConsumer, voxelShape, d, e, f, this.selR, this.selG, this.selB, j);
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 11, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1011(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 12, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1012(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 13, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1013(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 14, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1014(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 19, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1019(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 750);
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 750);
-
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 20, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1020(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 750);
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 750);
-
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 21, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1021(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 750);
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 750);
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 28, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1030(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 500);
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 29, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1031(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 1250);
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 1250);
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;playLocalSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FFZ)V", ordinal = 33, shift = Shift.BEFORE), method = "levelEvent")
-    public void levelEvent1036(int i, BlockPos blockPos, int j, CallbackInfo ci) {
-        boolean playerNear = this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
-
-        if (playerNear) {
-            ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
+    @Inject(at = @At("HEAD"), method = "levelEvent")
+    public void shakeOnSound(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+        boolean playerNearAndVR = VRState.vrRunning && this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
+        if (playerNearAndVR) {
+            switch (i) {
+                /* pre 1.19.4, they are now separate
+                case 1011,      // IRON_DOOR_CLOSE
+                        1012,   // WOODEN_DOOR_CLOSE
+                        1013,   // WOODEN_TRAPDOOR_CLOSE
+                        1014,   // FENCE_GATE_CLOSE
+                        1036    // IRON_TRAPDOOR_CLOSE
+                        -> ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
+                 */
+                case 1019,      // ZOMBIE_ATTACK_WOODEN_DOOR
+                        1020,   // ZOMBIE_ATTACK_IRON_DOOR
+                        1021    // ZOMBIE_BREAK_WOODEN_DOOR
+                        -> {
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 750);
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 750);
+                }
+                case 1030 ->    // ANVIL_USE
+                        ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 500);
+                case 1031 -> {  // ANVIL_LAND
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 1250);
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 1250);
+                }
+            }
         }
     }
 
