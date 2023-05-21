@@ -105,7 +105,7 @@ public abstract class MCVR
     protected ControllerType walkaboutController;
     protected ControllerType freeRotateController;
     protected float walkaboutYawStart;
-    protected float hmdForwardYaw;
+    protected float hmdForwardYaw = 180;
     public boolean ignorePressesNextFrame = false;
     protected int quickTorchPreviousSlot;
     protected Map<String, VRInputAction> inputActions = new HashMap<>();
