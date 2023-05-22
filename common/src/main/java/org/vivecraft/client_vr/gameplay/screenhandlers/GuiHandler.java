@@ -551,7 +551,7 @@ public class GuiHandler
             float f4 = ((GameRendererExtension) mc.gameRenderer).isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
             Vec3 vec39 = vec35.add(new Vec3(vec38.x * (double)f4, vec38.y * (double)f4, vec38.z * (double)f4));
             Vec3 vec310 = new Vec3(vec39.x, vec39.y, vec39.z);
-            Matrix4f matrix4f3 = Matrix4f.rotationY(135.0F - f1);
+            Matrix4f matrix4f3 = Matrix4f.rotationY((float)Math.PI - f1);
             guirot = Matrix4f.multiply(matrix4f3, Matrix4f.rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians));
             VRPlayer vrplayer = dh.vrPlayer;
             guipos = VRPlayer.room_to_world_pos(vec310, dh.vrPlayer.vrdata_world_render);
