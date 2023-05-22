@@ -1,23 +1,5 @@
 package org.vivecraft.client_vr.gameplay.screenhandlers;
 
-import org.joml.Vector2f;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
-import org.vivecraft.api.client.VRData;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.HandedKeyBinding;
-import org.vivecraft.client_vr.provider.InputSimulator;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.OpenVRUtil;
-import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.common.utils.math.Matrix4f;
-import org.vivecraft.common.utils.math.Quaternion;
-import org.vivecraft.common.utils.math.Vector3;
-
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -26,22 +8,30 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.WinScreen;
-import net.minecraft.client.gui.screens.inventory.AnvilScreen;
-import net.minecraft.client.gui.screens.inventory.BeaconScreen;
-import net.minecraft.client.gui.screens.inventory.BookEditScreen;
-import net.minecraft.client.gui.screens.inventory.BrewingStandScreen;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
-import net.minecraft.client.gui.screens.inventory.CraftingScreen;
-import net.minecraft.client.gui.screens.inventory.DispenserScreen;
-import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
-import net.minecraft.client.gui.screens.inventory.FurnaceScreen;
-import net.minecraft.client.gui.screens.inventory.HopperScreen;
-import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
-import net.minecraft.client.gui.screens.inventory.SignEditScreen;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.gui.screens.inventory.*;
+import net.minecraft.world.entity.vehicle.ChestBoat;
+import net.minecraft.world.entity.vehicle.MinecartChest;
+import net.minecraft.world.entity.vehicle.MinecartHopper;
+import net.minecraft.world.phys.*;
+
+import org.joml.Vector2f;
+
+import org.vivecraft.api.client.VRData;
+import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.HandedKeyBinding;
+import org.vivecraft.client_vr.provider.InputSimulator;
+import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.OpenVRUtil;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.math.Matrix4f;
+import org.vivecraft.common.utils.math.Quaternion;
+import org.vivecraft.common.utils.math.Vector3;
 
 public class GuiHandler
 {
@@ -370,10 +360,10 @@ public class GuiHandler
         }
 
         // check if the new screen is meant to show the MenuRoom, instead of the current screen
-        boolean flag = mc.gameRenderer == null || (((GameRendererExtension) mc.gameRenderer).willBeInMenuRoom(newScreen));
-        flag = flag & (!dh.vrSettings.seated && !dh.vrSettings.menuAlwaysFollowFace);
+        boolean staticScreen = mc.gameRenderer == null || (((GameRendererExtension) mc.gameRenderer).willBeInMenuRoom(newScreen));
+        staticScreen = staticScreen & (!dh.vrSettings.seated && !dh.vrSettings.menuAlwaysFollowFace);
 
-        if (flag)
+        if (staticScreen)
         {
             guiScale = 2.0F;
             Vector2f afloat = MCVR.get().getPlayAreaSize();
@@ -389,29 +379,26 @@ public class GuiHandler
         {
             if (previousGuiScreen == null && newScreen != null || newScreen instanceof ChatScreen || newScreen instanceof BookEditScreen || newScreen instanceof SignEditScreen)
             {
-                boolean flag1 = newScreen instanceof CraftingScreen || newScreen instanceof ContainerScreen || newScreen instanceof ShulkerBoxScreen || newScreen instanceof HopperScreen || newScreen instanceof FurnaceScreen || newScreen instanceof BrewingStandScreen || newScreen instanceof BeaconScreen || newScreen instanceof DispenserScreen || newScreen instanceof EnchantmentScreen || newScreen instanceof AnvilScreen;
+                boolean isBlockScreen = newScreen instanceof CraftingScreen || newScreen instanceof ContainerScreen || newScreen instanceof ShulkerBoxScreen || newScreen instanceof HopperScreen || newScreen instanceof FurnaceScreen || newScreen instanceof BrewingStandScreen || newScreen instanceof BeaconScreen || newScreen instanceof DispenserScreen || newScreen instanceof EnchantmentScreen || newScreen instanceof AnvilScreen || newScreen instanceof StonecutterScreen;
+                boolean isEntityScreen = isBlockScreen && mc.hitResult instanceof EntityHitResult && (((EntityHitResult)mc.hitResult).getEntity() instanceof MinecartChest || ((EntityHitResult)mc.hitResult).getEntity() instanceof MinecartHopper || ((EntityHitResult)mc.hitResult).getEntity() instanceof ChestBoat);
 
-                if (flag1 && dh.vrSettings.guiAppearOverBlock && mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.BLOCK)
+                if (isBlockScreen && dh.vrSettings.guiAppearOverBlock && mc.hitResult != null && (mc.hitResult.getType() == HitResult.Type.BLOCK || isEntityScreen))
                 {
-                    BlockHitResult blockhitresult = (BlockHitResult)mc.hitResult;
-                    Vec3 vec34 = new Vec3((double)((float)blockhitresult.getBlockPos().getX() + 0.5F), (double)blockhitresult.getBlockPos().getY(), (double)((float)blockhitresult.getBlockPos().getZ() + 0.5F));
-                    VRPlayer vrplayer = dh.vrPlayer;
-                    Vec3 vec35 = VRPlayer.world_to_room_pos(vec34, dh.vrPlayer.vrdata_world_pre);
-                    Vec3 vec36 = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
-                    double d0 = vec35.subtract(vec36).length();
-                    guiScale = (float)Math.sqrt(d0);
-                    Vec3 vec37 = new Vec3(vec34.x, (double)blockhitresult.getBlockPos().getY() + 1.1D + (double)(0.5F * guiScale / 2.0F), vec34.z);
-                    vrplayer = dh.vrPlayer;
-                    guiPos_room = VRPlayer.world_to_room_pos(vec37, dh.vrPlayer.vrdata_world_pre);
-                    Vector3 vector31 = new Vector3();
-                    vector31.setX((float)(guiPos_room.x - vec36.x));
-                    vector31.setY((float)(guiPos_room.y - vec36.y));
-                    vector31.setZ((float)(guiPos_room.z - vec36.z));
-                    float f2 = (float)Math.asin((double)(vector31.getY() / vector31.length()));
-                    float f3 = (float)((double)(float)Math.PI + Math.atan2((double)vector31.getX(), (double)vector31.getZ()));
-                    guiRotation_room = Matrix4f.rotationY(f3);
-                    Matrix4f matrix4f1 = Utils.rotationXMatrix(f2);
-                    guiRotation_room = Matrix4f.multiply(guiRotation_room, matrix4f1);
+                    Vec3 sourcePos;
+                    if (isEntityScreen) {
+                        EntityHitResult entityHitResult = (EntityHitResult)mc.hitResult;
+                        sourcePos = new Vec3(entityHitResult.getEntity().getX(), entityHitResult.getEntity().getY(), entityHitResult.getEntity().getZ());
+                    } else {
+                        BlockHitResult blockHitResult = (BlockHitResult)mc.hitResult;
+                        sourcePos = new Vec3(((float)blockHitResult.getBlockPos().getX() + 0.5F), blockHitResult.getBlockPos().getY(), ((float)blockHitResult.getBlockPos().getZ() + 0.5F));
+                    }
+
+                    Vec3 roomPos = VRPlayer.world_to_room_pos(sourcePos, dh.vrPlayer.vrdata_world_pre);
+                    Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
+                    double distance = roomPos.subtract(hmdPos).length();
+                    guiScale = (float)Math.sqrt(distance);
+                    Vec3 sourcePosWorld = new Vec3(sourcePos.x, sourcePos.y + 1.1D + (double)(0.5F * guiScale / 2.0F), sourcePos.z);
+                    guiPos_room = VRPlayer.world_to_room_pos(sourcePosWorld, dh.vrPlayer.vrdata_world_pre);
                 }
                 else
                 {
@@ -426,26 +413,27 @@ public class GuiHandler
                         vec3 = new Vec3(0.0D, 0.25D, -2.0D);
                     }
 
-                    Vec3 vec31 = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
+                    Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
                     Vec3 vec32 = dh.vrPlayer.vrdata_room_pre.hmd.getCustomVector(vec3);
-                    guiPos_room = new Vec3(vec32.x / 2.0D + vec31.x, vec32.y / 2.0D + vec31.y, vec32.z / 2.0D + vec31.z);
+                    guiPos_room = new Vec3(vec32.x / 2.0D + hmdPos.x, vec32.y / 2.0D + hmdPos.y, vec32.z / 2.0D + hmdPos.z);
 
-                    if (dh.vrSettings.physicalKeyboard && KeyboardHandler.Showing && guiPos_room.y < vec31.y + 0.2D)
+                    if (dh.vrSettings.physicalKeyboard && KeyboardHandler.Showing && guiPos_room.y < hmdPos.y + 0.2D)
                     {
-                        guiPos_room = new Vec3(guiPos_room.x, vec31.y + 0.2D, guiPos_room.z);
+                        guiPos_room = new Vec3(guiPos_room.x, hmdPos.y + 0.2D, guiPos_room.z);
                     }
-
-                    Vec3 vec33 = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
-                    Vector3 vector3 = new Vector3();
-                    vector3.setX((float)(guiPos_room.x - vec33.x));
-                    vector3.setY((float)(guiPos_room.y - vec33.y));
-                    vector3.setZ((float)(guiPos_room.z - vec33.z));
-                    float f = (float)Math.asin((double)(vector3.getY() / vector3.length()));
-                    float f1 = (float)((double)(float)Math.PI + Math.atan2((double)vector3.getX(), (double)vector3.getZ()));
-                    guiRotation_room = Matrix4f.rotationY(f1);
-                    Matrix4f matrix4f = Utils.rotationXMatrix(f);
-                    guiRotation_room = Matrix4f.multiply(guiRotation_room, matrix4f);
                 }
+
+                // orient screen
+                Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
+                Vector3 look = new Vector3();
+                look.setX((float)(guiPos_room.x - hmdPos.x));
+                look.setY((float)(guiPos_room.y - hmdPos.y));
+                look.setZ((float)(guiPos_room.z - hmdPos.z));
+                float pitch = (float)Math.asin((look.getY() / look.length()));
+                float yaw = (float)(Math.PI + Math.atan2(look.getX(), look.getZ()));
+                guiRotation_room = Matrix4f.rotationY(yaw);
+                Matrix4f tilt = Utils.rotationXMatrix(pitch);
+                guiRotation_room = Matrix4f.multiply(guiRotation_room, tilt);
             }
 
             KeyboardHandler.orientOverlay(newScreen != null);
