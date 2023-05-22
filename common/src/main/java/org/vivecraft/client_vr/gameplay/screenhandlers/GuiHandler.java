@@ -8,10 +8,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.WinScreen;
-import net.minecraft.client.gui.screens.inventory.*;
-import net.minecraft.world.entity.vehicle.ChestBoat;
-import net.minecraft.world.entity.vehicle.MinecartChest;
-import net.minecraft.world.entity.vehicle.MinecartHopper;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
+import net.minecraft.client.gui.screens.inventory.BookEditScreen;
+import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.*;
 
 import org.joml.Vector2f;
@@ -377,10 +377,10 @@ public class GuiHandler
         }
         else
         {
-            if (previousGuiScreen == null && newScreen != null || newScreen instanceof ChatScreen || newScreen instanceof BookEditScreen || newScreen instanceof SignEditScreen)
+            if (previousGuiScreen == null && newScreen != null || newScreen instanceof ChatScreen || newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen)
             {
-                boolean isBlockScreen = newScreen instanceof CraftingScreen || newScreen instanceof ContainerScreen || newScreen instanceof ShulkerBoxScreen || newScreen instanceof HopperScreen || newScreen instanceof FurnaceScreen || newScreen instanceof BrewingStandScreen || newScreen instanceof BeaconScreen || newScreen instanceof DispenserScreen || newScreen instanceof EnchantmentScreen || newScreen instanceof AnvilScreen || newScreen instanceof StonecutterScreen;
-                boolean isEntityScreen = isBlockScreen && mc.hitResult instanceof EntityHitResult && (((EntityHitResult)mc.hitResult).getEntity() instanceof MinecartChest || ((EntityHitResult)mc.hitResult).getEntity() instanceof MinecartHopper || ((EntityHitResult)mc.hitResult).getEntity() instanceof ChestBoat);
+                boolean isBlockScreen = newScreen instanceof AbstractContainerScreen;
+                boolean isEntityScreen = isBlockScreen && mc.hitResult instanceof EntityHitResult && ((EntityHitResult) mc.hitResult).getEntity() instanceof ContainerEntity;
 
                 if (isBlockScreen && dh.vrSettings.guiAppearOverBlock && mc.hitResult != null && (mc.hitResult.getType() == HitResult.Type.BLOCK || isEntityScreen))
                 {
@@ -408,7 +408,7 @@ public class GuiHandler
                     {
                         vec3 = new Vec3(0.0D, 0.5D, -2.0D);
                     }
-                    else if (newScreen instanceof BookEditScreen || newScreen instanceof SignEditScreen)
+                    else if (newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen)
                     {
                         vec3 = new Vec3(0.0D, 0.25D, -2.0D);
                     }
