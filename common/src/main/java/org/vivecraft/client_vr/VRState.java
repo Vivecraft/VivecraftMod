@@ -5,8 +5,10 @@ import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gui.ErrorScreen;
+import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.render.RenderConfigException;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 
 public class VRState {
@@ -21,7 +23,11 @@ public class VRState {
         }
         vrInitialized = true;
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-        dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
+        if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
+            dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
+        } else {
+            dh.vr = new NullVR(Minecraft.getInstance(), dh);
+        }
         if (!dh.vr.init()) {
             Minecraft.getInstance().setScreen(new ErrorScreen("VR init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus + "\nVR provider: " + dh.vr.getName())));
             vrEnabled = false;

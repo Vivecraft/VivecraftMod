@@ -138,14 +138,17 @@ public class VRSettings
         AFTER_TRANSLUCENT,
         AFTER_SHADER
     }
+
+    public enum VRProvider implements OptionEnum<VRProvider> {
+        OPENVR,
+        NULLVR
+    }
     
     @SettingField
     public int version = UNKNOWN_VERSION;
 
     @SettingField
-    public String stereoProviderPluginID = "openvr";
-    @SettingField
-    public String badStereoProviderPluginID = "";
+    public VRProvider stereoProviderPluginID = VRProvider.OPENVR;
     public boolean storeDebugAim = false;
     @SettingField
     public int smoothRunTickCount = 20;
@@ -1643,10 +1646,6 @@ public class VRSettings
         // mc.gameSettings.saveOptions();
         var vrSettings = new VRSettings( mc, dataDir );
 
-        if (!vrSettings.badStereoProviderPluginID.isEmpty()) {
-            vrSettings.stereoProviderPluginID = ClientDataHolderVR.getInstance().vrSettings.badStereoProviderPluginID;
-            vrSettings.badStereoProviderPluginID = "";
-        }
         vrSettings.saveOptions();
 
         ClientDataHolderVR.getInstance().vrSettings = vrSettings;
