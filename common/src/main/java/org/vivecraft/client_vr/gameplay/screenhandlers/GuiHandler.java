@@ -11,7 +11,9 @@ import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.phys.*;
 
 import org.joml.Vector2f;
@@ -379,10 +381,28 @@ public class GuiHandler
         {
             if (previousGuiScreen == null && newScreen != null || newScreen instanceof ChatScreen || newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen)
             {
-                boolean isBlockScreen = newScreen instanceof AbstractContainerScreen;
-                boolean isEntityScreen = isBlockScreen && mc.hitResult instanceof EntityHitResult && ((EntityHitResult) mc.hitResult).getEntity() instanceof ContainerEntity;
+                // check if screen is a container screen
+                boolean isBlockScreen = newScreen instanceof AbstractContainerScreen
+                        && mc.hitResult != null
+                        && (mc.hitResult.getType() == HitResult.Type.BLOCK)
+                        && mc.player != null
+                        && mc.level != null;
+                if (isBlockScreen) {
+                    // check if the pointed at block would open the same screen that got opened
+                    MenuProvider menu = mc.level
+                            .getBlockState(((BlockHitResult) mc.hitResult).getBlockPos())
+                            .getMenuProvider(mc.level, ((BlockHitResult) mc.hitResult).getBlockPos());
+                    if (menu != null) {
+                        AbstractContainerMenu container = menu.createMenu(-1, mc.player.getInventory(), mc.player);
+                        isBlockScreen = container != null && container.getClass() ==  ((AbstractContainerScreen<?>) newScreen).getMenu().getClass();
+                    } else {
+                        isBlockScreen = false;
+                    }
+                }
 
-                if (isBlockScreen && dh.vrSettings.guiAppearOverBlock && mc.hitResult != null && (mc.hitResult.getType() == HitResult.Type.BLOCK || isEntityScreen))
+                boolean isEntityScreen = newScreen instanceof AbstractContainerScreen && mc.hitResult instanceof EntityHitResult && ((EntityHitResult) mc.hitResult).getEntity() instanceof ContainerEntity;
+
+                if ((isBlockScreen || isEntityScreen) && dh.vrSettings.guiAppearOverBlock)
                 {
                     Vec3 sourcePos;
                     if (isEntityScreen) {
