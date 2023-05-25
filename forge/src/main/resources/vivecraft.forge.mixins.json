@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "org.vivecraft.forge.mixin",
-  "plugin": "org.vivecraft.client.VRMixinConfig",
+  "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
   "client": [
     "ForgeIngameGuiVRMixin",

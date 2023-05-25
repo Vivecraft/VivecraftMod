@@ -61,7 +61,7 @@ import org.vivecraft.client.Xevents;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.api.client.ClientNetworkHelper;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -310,7 +310,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             return;
         }
         boolean vrActive = ClientDataHolderVR.getInstance().vr.isActive();
-        if (VRState.vrRunning != vrActive && (ClientNetworkHelper.serverAllowsVrSwitching || player == null)) {
+        if (VRState.vrRunning != vrActive && (ClientNetworking.serverAllowsVrSwitching || player == null)) {
             VRState.vrRunning = vrActive;
             if (vrActive) {
                 //TODO
@@ -326,7 +326,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             }
             var connection = this.getConnection();
             if (connection != null) {
-                connection.send(ClientNetworkHelper.createVRActivePacket(vrActive));
+                connection.send(ClientNetworking.createVRActivePacket(vrActive));
             }
             // restore vanilla post chains before the resize, or it will resize the wrong ones
             if (levelRenderer != null) {
@@ -823,7 +823,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem", locals = LocalCapture.CAPTURE_FAILHARD)
     public void activeHandSend(CallbackInfo ci, InteractionHand[] var1, int var2, int var3, InteractionHand interactionHand) {
         if (ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemInHand)) {
-            ClientNetworkHelper.sendActiveHand((byte) interactionHand.ordinal());
+            ClientNetworking.sendActiveHand((byte) interactionHand.ordinal());
         }
     }
 
@@ -936,7 +936,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;releaseUsingItem(Lnet/minecraft/world/entity/player/Player;)V", shift = Shift.BEFORE), method = "handleKeybinds")
     public void activeHand(CallbackInfo ci) {
-        ClientNetworkHelper.sendActiveHand((byte) this.player.getUsedItemHand().ordinal());
+        ClientNetworking.sendActiveHand((byte) this.player.getUsedItemHand().ordinal());
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z", ordinal = 13), method = "handleKeybinds")

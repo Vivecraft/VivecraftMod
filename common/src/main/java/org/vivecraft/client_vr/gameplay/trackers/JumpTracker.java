@@ -4,7 +4,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.api.client.ClientNetworkHelper;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 
@@ -35,7 +35,7 @@ public class JumpTracker extends Tracker
 
     public boolean isClimbeyJumpEquipped()
     {
-        return ClientNetworkHelper.serverAllowsClimbey && ((PlayerExtension) Minecraft.getInstance().player).isClimbeyJumpEquipped();
+        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) Minecraft.getInstance().player).isClimbeyJumpEquipped();
     }
 
     public boolean isActive(LocalPlayer p)

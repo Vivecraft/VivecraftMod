@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.api.client.VRData;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.common.utils.math.Matrix4f;

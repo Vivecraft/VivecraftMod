@@ -2,7 +2,7 @@ package org.vivecraft.mixin.client_vr.player;
 
 import net.minecraft.world.level.Level;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.api.CommonNetworkHelper;
+import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.api.client.ClientNetworkHelper;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.utils.external.jinfinadeck;
@@ -157,7 +157,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             bytebuf.writeFloat((float) this.getZ());
             byte[] abyte = new byte[bytebuf.readableBytes()];
             bytebuf.readBytes(abyte);
-            ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworkHelper.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.TELEPORT, abyte);
+            ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.TELEPORT, abyte);
             this.connection.send(serverboundcustompayloadpacket);
         }
     }
@@ -657,7 +657,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void releaseUsingItem() {
-        ClientNetworkHelper.sendActiveHand((byte) this.getUsedItemHand().ordinal());
+        ClientNetworking.sendActiveHand((byte) this.getUsedItemHand().ordinal());
         super.releaseUsingItem();
     }
     @Override

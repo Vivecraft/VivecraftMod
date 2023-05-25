@@ -1,4 +1,4 @@
-package org.vivecraft.api.client;
+package org.vivecraft.client.network;
 
 import java.io.IOException;
 import java.net.URL;

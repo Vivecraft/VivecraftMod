@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.server.network;
+package org.vivecraft.mixin.server;
 
 import net.minecraft.network.protocol.PacketUtils;
 import org.spongepowered.asm.mixin.Final;
@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.api.AimFixHandler;
-import org.vivecraft.api.CommonNetworkHelper;
+import org.vivecraft.server.AimFixHandler;
+import org.vivecraft.common.network.CommonNetworkHelper;
 
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -17,9 +17,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerPlayerConnection;
-import org.vivecraft.common.network.ServerNetworking;
+import org.vivecraft.server.ServerNetworking;
 
-import static org.vivecraft.api.CommonNetworkHelper.PacketDiscriminators.CLIMBING;
+import static org.vivecraft.common.network.CommonNetworkHelper.PacketDiscriminators.CLIMBING;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerConnection, ServerGamePacketListener {
@@ -45,7 +45,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
 
     @Inject(at = @At("TAIL"), method = "tick()V")
     public void afterTick(CallbackInfo info) {
-        CommonNetworkHelper.sendVrPlayerStateToClients(this.player);
+        ServerNetworking.sendVrPlayerStateToClients(this.player);
     }
 
     @Inject(at = @At("TAIL"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ServerboundCustomPayloadPacket;)V")
@@ -53,7 +53,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
         var buffer = pPacket.getData();
         var channelID = pPacket.getIdentifier();
 
-        if (channelID.equals(CommonNetworkHelper.channel)) {
+        if (channelID.equals(CommonNetworkHelper.CHANNEL)) {
             PacketUtils.ensureRunningOnSameThread(pPacket, this, this.player.getLevel());
             CommonNetworkHelper.PacketDiscriminators packetDiscriminator = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
             ServerNetworking.handlePacket(packetDiscriminator, buffer, (ServerGamePacketListenerImpl) (Object)this);

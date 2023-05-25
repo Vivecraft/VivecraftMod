@@ -1,15 +1,16 @@
-package org.vivecraft.client;
+package org.vivecraft;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.vivecraft.client.Xplat;
 
 import java.util.List;
 import java.util.Set;
 
-public class VRMixinConfig implements IMixinConfigPlugin {
+public class MixinConfig implements IMixinConfigPlugin {
 
     @Override
     public String getRefMapperConfig() {

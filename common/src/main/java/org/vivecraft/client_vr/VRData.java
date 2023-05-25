@@ -1,6 +1,5 @@
-package org.vivecraft.api.client;
+package org.vivecraft.client_vr;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;

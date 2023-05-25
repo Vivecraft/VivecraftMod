@@ -1,10 +1,8 @@
 package org.vivecraft.client_vr.render;
 
 import com.mojang.math.Axis;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.api.client.VRData;
+import org.vivecraft.client_vr.VRData;
 
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;

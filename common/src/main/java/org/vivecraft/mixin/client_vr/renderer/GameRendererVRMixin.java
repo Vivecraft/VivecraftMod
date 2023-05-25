@@ -65,8 +65,8 @@ import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client.extensions.RenderTargetExtension;
-import org.vivecraft.api.client.ClientNetworkHelper;
-import org.vivecraft.api.client.VRData;
+import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -1101,7 +1101,7 @@ public abstract class GameRendererVRMixin
                     GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
                     GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-            if (ClientNetworkHelper.isLimitedSurvivalTeleport() && !GameRendererVRMixin.DATA_HOLDER.vrPlayer.getFreeMove()
+            if (ClientNetworking.isLimitedSurvivalTeleport() && !GameRendererVRMixin.DATA_HOLDER.vrPlayer.getFreeMove()
                     && this.minecraft.gameMode.hasMissTime()
                     && GameRendererVRMixin.DATA_HOLDER.teleportTracker.vrMovementStyle.arcAiming
                     && !GameRendererVRMixin.DATA_HOLDER.bowTracker.isActive(this.minecraft.player)) {
@@ -1860,7 +1860,7 @@ public abstract class GameRendererVRMixin
                 vec3i = new Vec3i(83, 75, 83);
                 b0 = -128;
             } else {
-                if (ClientNetworkHelper.isLimitedSurvivalTeleport() && !this.minecraft.player.getAbilities().mayfly) {
+                if (ClientNetworking.isLimitedSurvivalTeleport() && !this.minecraft.player.getAbilities().mayfly) {
                     vec3i = this.tpLimitedColor;
                 } else {
                     vec3i = this.tpUnlimitedColor;

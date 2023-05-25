@@ -17,10 +17,10 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.api.BlockTags;
+import org.vivecraft.client_vr.BlockTags;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.api.client.ClientNetworkHelper;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.OpenVRUtil;
 import org.vivecraft.client_vr.gameplay.VRMovementStyle;
 import org.vivecraft.client.utils.Utils;
@@ -234,7 +234,7 @@ public class TeleportTracker extends Tracker
             }
             else
             {
-                if (ClientNetworkHelper.serverSupportsDirectTeleport)
+                if (ClientNetworking.serverSupportsDirectTeleport)
                 {
                 	((PlayerExtension) player).setTeleported(true);
                 }
@@ -330,17 +330,17 @@ public class TeleportTracker extends Tracker
                     flag1 = false;
                 }
 
-                if (!mc.player.getAbilities().mayfly && ClientNetworkHelper.isLimitedSurvivalTeleport())
+                if (!mc.player.getAbilities().mayfly && ClientNetworking.isLimitedSurvivalTeleport())
                 {
-                    if (ClientNetworkHelper.getTeleportDownLimit() > 0 && d0 > (double) ClientNetworkHelper.getTeleportDownLimit() + 0.2D)
+                    if (ClientNetworking.getTeleportDownLimit() > 0 && d0 > (double) ClientNetworking.getTeleportDownLimit() + 0.2D)
                     {
                         flag1 = false;
                     }
-                    else if (ClientNetworkHelper.getTeleportUpLimit() > 0 && -d0 > (double) ClientNetworkHelper.getTeleportUpLimit() * (double)((PlayerExtension) player).getMuhJumpFactor() + 0.2D)
+                    else if (ClientNetworking.getTeleportUpLimit() > 0 && -d0 > (double) ClientNetworking.getTeleportUpLimit() * (double)((PlayerExtension) player).getMuhJumpFactor() + 0.2D)
                     {
                         flag1 = false;
                     }
-                    else if (ClientNetworkHelper.getTeleportHorizLimit() > 0 && d1 > (double) ClientNetworkHelper.getTeleportHorizLimit() * (double)((PlayerExtension) player).getMuhSpeedFactor() + 0.2D)
+                    else if (ClientNetworking.getTeleportHorizLimit() > 0 && d1 > (double) ClientNetworking.getTeleportHorizLimit() * (double)((PlayerExtension) player).getMuhSpeedFactor() + 0.2D)
                     {
                         flag1 = false;
                     }
@@ -368,7 +368,7 @@ public class TeleportTracker extends Tracker
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         dataholder.swingTracker.disableSwing = 3;
 
-        if (ClientNetworkHelper.isLimitedSurvivalTeleport())
+        if (ClientNetworking.isLimitedSurvivalTeleport())
         {
             minecraft.player.causeFoodExhaustion((float)(this.movementTeleportDistance / 16.0D * (double)1.2F));
 
@@ -433,7 +433,7 @@ public class TeleportTracker extends Tracker
                 return true;
             }
 
-            if (!mc.player.getAbilities().mayfly && ClientNetworkHelper.isLimitedSurvivalTeleport())
+            if (!mc.player.getAbilities().mayfly && ClientNetworking.isLimitedSurvivalTeleport())
             {
                 return false;
             }

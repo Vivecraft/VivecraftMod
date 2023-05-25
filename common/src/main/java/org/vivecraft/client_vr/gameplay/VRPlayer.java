@@ -29,11 +29,11 @@ import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.api.ItemTags;
+import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.api.client.ClientNetworkHelper;
-import org.vivecraft.api.client.VRData;
+import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -184,7 +184,7 @@ public class VRPlayer
         this.vrdata_room_post = new VRData(new Vec3(0.0D, 0.0D, 0.0D), dataholder.vrSettings.walkMultiplier, 1.0F, 0.0F);
         this.vrdata_world_post = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float)Math.toRadians((double)dataholder.vrSettings.worldRotation));
         this.doPermanantLookOverride(minecraft.player, this.vrdata_world_post);
-        ClientNetworkHelper.sendVRPlayerPositions(this);
+        ClientNetworking.sendVRPlayerPositions(this);
         this.onTick = false;
     }
 
