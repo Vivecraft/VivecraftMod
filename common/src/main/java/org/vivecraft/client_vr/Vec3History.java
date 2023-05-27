@@ -1,4 +1,4 @@
-package org.vivecraft.api;
+package org.vivecraft.client_vr;
 
 import java.util.LinkedList;
 import java.util.ListIterator;

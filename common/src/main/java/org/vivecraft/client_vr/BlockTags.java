@@ -1,4 +1,4 @@
-package org.vivecraft.api;
+package org.vivecraft.client_vr;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;

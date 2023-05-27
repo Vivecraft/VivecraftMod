@@ -16,7 +16,7 @@ import net.minecraft.world.phys.*;
 
 import org.joml.Vector2f;
 
-import org.vivecraft.api.client.VRData;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;

@@ -9,10 +9,10 @@ import java.util.Set;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.api.BlockTags;
-import org.vivecraft.api.CommonNetworkHelper;
+import org.vivecraft.client_vr.BlockTags;
+import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.api.client.ClientNetworkHelper;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;
 
@@ -152,7 +152,7 @@ public class ClimbTracker extends Tracker
 
     public boolean isClimbeyClimbEquipped()
     {
-        return ClientNetworkHelper.serverAllowsClimbey && ((PlayerExtension) this.mc.player).isClimbeyClimbEquipped();
+        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) this.mc.player).isClimbeyClimbEquipped();
     }
 
     private boolean canstand(BlockPos bp, LocalPlayer p)
@@ -707,7 +707,7 @@ public class ClimbTracker extends Tracker
                 }
                 else
                 {
-                    ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworkHelper.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CLIMBING, new byte[0]);
+                    ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CLIMBING, new byte[0]);
 
                     if (this.mc.getConnection() != null)
                     {

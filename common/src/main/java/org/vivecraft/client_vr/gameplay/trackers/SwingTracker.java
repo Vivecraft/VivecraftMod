@@ -6,9 +6,9 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.*;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.api.BlockTags;
-import org.vivecraft.api.ItemTags;
-import org.vivecraft.api.Vec3History;
+import org.vivecraft.client_vr.BlockTags;
+import org.vivecraft.client_vr.ItemTags;
+import org.vivecraft.client_vr.Vec3History;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
 

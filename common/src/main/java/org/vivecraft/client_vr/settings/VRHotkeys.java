@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
-import org.vivecraft.api.client.VRData;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.common.utils.math.Angle;

@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.server.level;
+package org.vivecraft.mixin.server;
 
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Final;
@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.api.CommonNetworkHelper;
-import org.vivecraft.api.ServerVivePlayer;
+import org.vivecraft.server.ServerVRPlayers;
+import org.vivecraft.server.ServerVivePlayer;
 
 import com.mojang.authlib.GameProfile;
 
@@ -52,7 +52,7 @@ public abstract class ServerPlayerMixin extends Player {
 
 	@Inject(at = @At("TAIL"), method = "initInventoryMenu")
 	public void menu(CallbackInfo ci) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = getVivePlayer();
 		// TODO change setting to commonDataHolder?
 		if ((!this.server.isDedicatedServer() && ClientDataHolderVR.getInstance().vrSettings != null && !ClientDataHolderVR.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
@@ -73,11 +73,12 @@ public abstract class ServerPlayerMixin extends Player {
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;tick()V", shift = Shift.AFTER), method = "doTick()V")
 	public void tick(CallbackInfo info) {
-		CommonNetworkHelper.overridePose((ServerPlayer) (Object)this);
+		ServerVRPlayers.overridePose((ServerPlayer) (Object)this);
 	}
 
+	@Unique
 	public void sweepAttack() {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = getVivePlayer();
 
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			Vec3 vec3 = serverviveplayer.getControllerDir(0);
@@ -95,6 +96,7 @@ public abstract class ServerPlayerMixin extends Player {
 		}
 	}
 
+	@Unique
 	protected void triggerItemUseEffects(ItemStack pStack, int pCount) {
 		if (!pStack.isEmpty() && this.isUsingItem()) {
 			if (pStack.getUseAnimation() == UseAnim.DRINK) {
@@ -109,8 +111,9 @@ public abstract class ServerPlayerMixin extends Player {
 		}
 	}
 
+	@Unique
 	private void addItemParticles(ItemStack stack, int count) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = getVivePlayer();
 		for (int i = 0; i < count; ++i) {
 			Vec3 vec3 = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
 			vec3 = vec3.xRot(-this.getXRot() * ((float) Math.PI / 180F));
@@ -138,7 +141,7 @@ public abstract class ServerPlayerMixin extends Player {
 			locals = LocalCapture.CAPTURE_FAILHARD)
 	public void dropvive(ItemStack p_9085_, boolean p_9086_, boolean p_9087_, CallbackInfoReturnable<ItemEntity> info,
 			ItemEntity itementity) {
-		ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(this.getUUID());
+		ServerVivePlayer serverviveplayer = getVivePlayer();
 		if (serverviveplayer != null && serverviveplayer.isVR() && !p_9087_) {
 			Vec3 vec3 = serverviveplayer.getControllerPos(0, this);
 			Vec3 vec31 = serverviveplayer.getControllerDir(0);
@@ -149,8 +152,8 @@ public abstract class ServerPlayerMixin extends Player {
 		}
 	}
 
-	public String getLanguage() {
-		return this.language;
+	@Unique
+	private ServerVivePlayer getVivePlayer() {
+		return ServerVRPlayers.getVivePlayer((ServerPlayer)(Object)this);
 	}
-
 }

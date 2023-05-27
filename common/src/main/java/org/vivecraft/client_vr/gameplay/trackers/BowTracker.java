@@ -6,10 +6,10 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.api.CommonNetworkHelper;
+import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.api.client.ClientNetworkHelper;
-import org.vivecraft.api.client.VRData;
+import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.math.Vector3;
 
@@ -237,10 +237,10 @@ public class BowTracker extends Tracker
             {
                 this.dh.vr.triggerHapticPulse(0, 500);
                 this.dh.vr.triggerHapticPulse(1, 3000);
-                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworkHelper.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(this.getDrawPercent()).array());
+                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(this.getDrawPercent()).array());
                 Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
                 this.mc.gameMode.releaseUsingItem(player);
-                serverboundcustompayloadpacket = ClientNetworkHelper.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(0.0F).array());
+                serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(0.0F).array());
                 Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
                 this.isDrawing = false;
             }

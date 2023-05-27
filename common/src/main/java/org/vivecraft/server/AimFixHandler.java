@@ -1,4 +1,4 @@
-package org.vivecraft.api;
+package org.vivecraft.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -22,12 +22,11 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
         this.netManager = netManager;
     }
 
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception
-    {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ServerPlayer serverplayer = ((ServerGamePacketListenerImpl)this.netManager.getPacketListener()).player;
         boolean flag = msg instanceof ServerboundUseItemPacket || msg instanceof ServerboundUseItemOnPacket || msg instanceof ServerboundPlayerActionPacket;
 
-        if (!CommonNetworkHelper.isVRPlayer(serverplayer) || !flag || serverplayer.getServer() == null) {
+        if (!ServerVRPlayers.isVRPlayer(serverplayer) || !flag || serverplayer.getServer() == null) {
             ctx.fireChannelRead(msg);
             return;
         }
@@ -44,7 +43,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
             float yHeadRotO = serverplayer.yHeadRotO;
             float eyeHeight = serverplayer.getEyeHeight();
 
-            ServerVivePlayer serverviveplayer = CommonNetworkHelper.playersWithVivecraft.get(serverplayer.getGameProfile().getId());
+            ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(serverplayer);
 
             if (serverviveplayer != null) {
                 Vec3 pos = serverviveplayer.getControllerPos(0, serverplayer, true);
