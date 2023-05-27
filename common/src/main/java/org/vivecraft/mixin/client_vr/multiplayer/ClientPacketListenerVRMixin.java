@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.api.client.ClientNetworkHelper;
+import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;
@@ -162,4 +163,9 @@ public class ClientPacketListenerVRMixin {
             info.cancel();
         }
 	}
+
+    @Inject(at = @At("HEAD"), method = "handleOpenScreen")
+    public void markScreenActive(ClientboundOpenScreenPacket clientboundOpenScreenPacket, CallbackInfo ci) {
+        GuiHandler.guiAppearOverBlockActive = true;
+    }
 }

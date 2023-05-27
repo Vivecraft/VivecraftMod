@@ -974,9 +974,15 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(0.0D, 0.0D, 0.0D, true);
     }
 
-    @Inject(method = "setScreen", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferUploader;reset()V"))
+    @Inject(at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = At.Shift.BEFORE, ordinal = 0), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
     public void onOpenScreen(Screen pGuiScreen, CallbackInfo info) {
         GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
+    }
+    @Inject(method = "setScreen", at = @At("HEAD"))
+    public void onCloseScreen(Screen screen, CallbackInfo info) {
+        if (screen == null) {
+            GuiHandler.guiAppearOverBlockActive = false;
+        }
     }
 
     private void drawNotifyMirror() {

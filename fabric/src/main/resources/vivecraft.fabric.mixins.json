@@ -4,8 +4,9 @@
   "plugin": "org.vivecraft.client.VRMixinConfig",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "FabricGameRendererVRMixin",
     "client.resources.model.FabricModelBakeryMixin",
-    "FabricGameRendererVRMixin"
+    "screenhandler.client.FabricClientNetworkingVRMixin"
   ],
   "minVersion": "0.8.4"
 }
