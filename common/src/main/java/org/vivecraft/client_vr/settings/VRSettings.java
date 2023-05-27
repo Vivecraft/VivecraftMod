@@ -12,7 +12,6 @@ import org.vivecraft.client_vr.extensions.OptionsExtension;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -1642,8 +1641,6 @@ public class VRSettings
     public static synchronized void initSettings( Minecraft mc, File dataDir )
     {
         ProfileManager.init(dataDir);
-        mc.options = new Options( mc, dataDir );
-        // mc.gameSettings.saveOptions();
         var vrSettings = new VRSettings( mc, dataDir );
 
         vrSettings.saveOptions();
