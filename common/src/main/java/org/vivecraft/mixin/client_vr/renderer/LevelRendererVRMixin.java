@@ -351,6 +351,14 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
+    @Inject(at = @At("HEAD"), method = {"initOutline", "initTransparency"})
+    public void restorePostChain(CallbackInfo ci){
+        if (VRState.vrInitialized) {
+            restoreVanillaPostChains();
+            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Outline/Transparency shaders Reloaded");
+        }
+    }
+
     @Inject(at = @At("TAIL"), method = "initOutline")
     public void captureOutlineChain(CallbackInfo ci){
         RenderPassManager.INSTANCE.vanillaOutlineChain = entityEffect;
