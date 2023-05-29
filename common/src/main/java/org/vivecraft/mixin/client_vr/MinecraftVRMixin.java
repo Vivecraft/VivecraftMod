@@ -842,70 +842,51 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     }
 
     @Inject(at = @At("HEAD"), method = "tick()V")
-    public void tick(CallbackInfo info) {
+    public void vrTick(CallbackInfo info) {
         ++ClientDataHolderVR.getInstance().tickCounter;
+
+        if (VRState.vrRunning) {
+            this.profiler.push("vrProcessInputs");
+            ClientDataHolderVR.getInstance().vr.processInputs();
+            ClientDataHolderVR.getInstance().vr.processBindings();
+
+            this.profiler.popPush("vrInputActionsTick");
+
+            for (VRInputAction vrinputaction : ClientDataHolderVR.getInstance().vr.getInputActions()) {
+                vrinputaction.tick();
+            }
+
+            if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
+                VRHotkeys.handleMRKeys();
+            }
+
+            if (this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
+                ClientDataHolderVR.getInstance().vrPlayer.updateFreeMove();
+
+                if (ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer == 0) {
+                    this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.noserverplugin"));
+                }
+                if (ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer == 0) {
+                    this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitchinglegacy"));
+                }
+            }
+            this.profiler.pop();
+
+//		if (DataHolder.getInstance().menuWorldRenderer != null) {
+//			DataHolder.getInstance().menuWorldRenderer.tick();
+//		}
+        }
+
+        this.profiler.push("vrPlayers");
+
+        VRPlayersClient.getInstance().tick();
+
+        this.profiler.pop();
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "tick")
     public void removePick(GameRenderer instance, float f) {
         return;
-    }
-
-    public void textures() {
-        this.textureManager.tick();
-    }
-
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;overlay:Lnet/minecraft/client/gui/screens/Overlay;", shift = Shift.BEFORE), method = "tick")
-    public void vrInputs(CallbackInfo ci) {
-        if (!VRState.vrRunning) {
-            return;
-        }
-
-        this.profiler.popPush("vrProcessInputs");
-        ClientDataHolderVR.getInstance().vr.processInputs();
-        ClientDataHolderVR.getInstance().vr.processBindings();
-    }
-
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;level:Lnet/minecraft/client/multiplayer/ClientLevel;", ordinal = 4, shift = Shift.BEFORE), method = "tick")
-    public void vrActions(CallbackInfo ci) {
-        if (!VRState.vrRunning) {
-            return;
-        }
-
-        this.profiler.popPush("vrInputActionsTick");
-
-        for (VRInputAction vrinputaction : ClientDataHolderVR.getInstance().vr.getInputActions()) {
-            vrinputaction.tick();
-        }
-
-        if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
-            VRHotkeys.handleMRKeys();
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 2, shift = Shift.BEFORE), method = "tick")
-    public void freeMove(CallbackInfo ci) {
-        if (ClientDataHolderVR.getInstance().vrPlayer != null) {
-            ClientDataHolderVR.getInstance().vrPlayer.updateFreeMove();
-
-            if (ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer == 0) {
-                this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.noserverplugin"));
-            }
-            if (ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer == 0) {
-                this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitchinglegacy"));
-            }
-        }
-    }
-
-
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;pause:Z", ordinal = 5, shift = Shift.BEFORE), method = "tick()V")
-    public void tickmenu(CallbackInfo info) {
-//		if (DataHolder.getInstance().menuWorldRenderer != null) {
-//			DataHolder.getInstance().menuWorldRenderer.tick();
-//		}
-
-        VRPlayersClient.getInstance().tick();
-
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;setCameraType(Lnet/minecraft/client/CameraType;)V"), method = "handleKeybinds")
