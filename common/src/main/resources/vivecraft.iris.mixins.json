@@ -10,10 +10,12 @@
     "IrisBeginFrameHack",
     "IrisChunkProgramOverridesMixin",
     "IrisChunkProgramOverridesMixinSodium_0_4_9",
+    "IrisChunkProgramOverridesMixinSodium_0_4_11",
     "IrisHandRendererVRMixin",
     "IrisNewWorldRenderingPipelineVRMixin",
     "IrisPipelineManagerVRMixin",
     "IrisProgramUniformsMixin",
+    "IrisRenderSystemVRMixin",
     "IrisShadowMatricesMixin",
     "IrisShadowRendererMixin"
   ]

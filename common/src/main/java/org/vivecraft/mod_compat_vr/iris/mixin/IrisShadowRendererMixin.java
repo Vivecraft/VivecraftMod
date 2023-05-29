@@ -52,6 +52,8 @@ public class IrisShadowRendererMixin {
                 ((GameRendererExtension) Minecraft.getInstance().gameRenderer).cacheRVEPos((LivingEntity) entity);
                 ((GameRendererExtension) Minecraft.getInstance().gameRenderer).setupRVE();
             }
+        } else {
+            instance.invokeRenderEntity(entity, x, y, z, f, poseStack, multiBufferSource);
         }
     }
 

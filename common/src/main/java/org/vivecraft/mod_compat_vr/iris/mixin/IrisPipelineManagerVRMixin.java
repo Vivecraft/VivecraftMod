@@ -4,10 +4,7 @@ import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.DimensionId;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -48,12 +45,23 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     private final Map<DimensionId, Map<RenderPass, WorldRenderingPipeline>> vrPipelinesPerDimension = new HashMap<>();
     private  Map<RenderPass, WorldRenderingPipeline> vrPipelinesCurrentDimension;
 
+    private WorldRenderPass currentWorldRenderPass = null;
+    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.BEFORE), remap = false)
+    private void generateVanillaPipeline(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+        // this also runs on game startup, when the renderpassManager isn't initialized yet
+        if (VRState.vrInitialized && RenderPassManager.INSTANCE != null) {
+            currentWorldRenderPass = RenderPassManager.wrp;
+            RenderPass currentRenderPass = ClientDataHolderVR.getInstance().currentPass;
+            RenderPassManager.setVanillaRenderPass();
+            ClientDataHolderVR.getInstance().currentPass = currentRenderPass;
+        }
+    }
     @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.AFTER), remap = false)
     private void generateVRPipelines(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         if (VRState.vrInitialized) {
             if (!this.vrPipelinesPerDimension.containsKey(newDimension)) {
                 vrPipelinesPerDimension.put(newDimension, new HashMap<>());
-
+                vrPipelinesCurrentDimension = vrPipelinesPerDimension.get(newDimension);
                 // main pipeline also sets this, but we don't want that, since it is unused
                 shadowRenderTargets = null;
 
@@ -82,8 +90,14 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                     WorldRenderingPipeline pipe = pipelineFactory.apply(newDimension);
                     vrPipelinesPerDimension.get(newDimension).put(renderPass, pipe);
                 }
-                RenderPassManager.setVanillaRenderPass();
-
+                // set to currently needed renderpass again
+                if (currentWorldRenderPass != null) {
+                    RenderPassManager.setWorldRenderPass(currentWorldRenderPass);
+                } else if (ClientDataHolderVR.getInstance().currentPass == RenderPass.GUI) {
+                    RenderPassManager.setGUIRenderPass();
+                } else {
+                    RenderPassManager.setVanillaRenderPass();
+                }
             }
             vrPipelinesCurrentDimension = vrPipelinesPerDimension.get(newDimension);
 

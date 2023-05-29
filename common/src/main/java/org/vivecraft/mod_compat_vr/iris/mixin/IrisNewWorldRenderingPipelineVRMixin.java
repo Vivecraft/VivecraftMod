@@ -78,7 +78,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
 
     @Inject(method = "shouldDisableVanillaEntityShadows()Z", at = @At("HEAD"), cancellable = true, remap = false)
     private void shouldDisableEntityShadows(CallbackInfoReturnable<Boolean> cir) {
-        if (!RenderPassType.isVanilla() && shadowRenderer != null || ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null) {
+        if (!RenderPassType.isVanilla() && (shadowRenderer != null || ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets() != null)) {
             cir.setReturnValue(true);
         }
     }
@@ -94,7 +94,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
             ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
             return Objects.requireNonNull(targets != null ? targets : obj);
         } else {
-            return obj;
+            return Objects.requireNonNull(obj);
         }
     }
 
@@ -111,7 +111,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
             ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
             return Objects.requireNonNull(targets != null ? targets : obj);
         } else {
-            return obj;
+            return Objects.requireNonNull(obj);
         }
     }
 
@@ -128,7 +128,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
             ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
             return Objects.requireNonNull(targets != null ? targets : obj);
         } else {
-            return obj;
+            return Objects.requireNonNull(obj);
         }
     }
 
@@ -145,7 +145,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
             ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
             return Objects.requireNonNull(targets != null ? targets : obj);
         } else {
-            return obj;
+            return Objects.requireNonNull(obj);
         }
     }
 
@@ -162,7 +162,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
             ShadowRenderTargets targets = ((PipelineManagerExtension) Iris.getPipelineManager()).getShadowRenderTargets();
             return Objects.requireNonNull(targets != null ? targets : obj);
         } else {
-            return obj;
+            return Objects.requireNonNull(obj);
         }
     }
 

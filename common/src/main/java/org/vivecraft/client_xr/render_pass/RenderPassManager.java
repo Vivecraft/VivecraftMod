@@ -30,12 +30,14 @@ public class RenderPassManager {
 
     public static void setGUIRenderPass() {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.GUI;
+        RenderPassManager.wrp = null;
         renderPassType = RenderPassType.GUI_ONLY;
         mc.mainRenderTarget = GuiHandler.guiFramebuffer;
     }
 
     public static void setVanillaRenderPass() {
         ClientDataHolderVR.getInstance().currentPass = null;
+        RenderPassManager.wrp = null;
         renderPassType = RenderPassType.VANILLA;
         mc.mainRenderTarget = INSTANCE.vanillaRenderTarget;
     }
