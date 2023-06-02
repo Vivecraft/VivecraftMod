@@ -628,6 +628,15 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
             this.profiler.push("tick");
 
+            // reset camera position, if there is on, since it only gets set at the start of rendering, and the last renderpass can be anywhere
+            if (gameRenderer != null && gameRenderer.getMainCamera() != null) {
+                if (gameRenderer.getMainCamera().getEntity() != null) {
+                    gameRenderer.getMainCamera().setPosition(gameRenderer.getMainCamera().getEntity().getEyePosition());
+                } else if (player != null){
+                    gameRenderer.getMainCamera().setPosition(player.getEyePosition());
+                }
+            }
+
             for (int j = 0; j < Math.min(10, i); ++j) {
                 this.profiler.incrementCounter("clientTick");
                 ClientDataHolderVR.getInstance().vrPlayer.preTick();

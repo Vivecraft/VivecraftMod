@@ -22,6 +22,7 @@ accessible field net/minecraft/client/Camera forwards Lorg/joml/Vector3f;
 accessible field net/minecraft/client/Camera up Lorg/joml/Vector3f;
 accessible field net/minecraft/client/Camera left Lorg/joml/Vector3f;
 accessible field net/minecraft/client/Camera rotation Lorg/joml/Quaternionf;
+accessible method net/minecraft/client/Camera setPosition (Lnet/minecraft/world/phys/Vec3;)V
 mutable field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options;
 accessible method net/minecraft/client/Minecraft isMultiplayerServer ()Z
 mutable field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;

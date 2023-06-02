@@ -1338,7 +1338,7 @@ public class VRSettings
                 }
             }
         },
-        MONO_FOV(true, false, 0, 179, 1, 0) { // Undistorted FOV
+        MONO_FOV(true, false, 1, 179, 1, 0) { // Undistorted FOV
             @Override
             String getDisplayString(String prefix, Object value) {
                 return prefix + String.format("%.0f" + DEGREE, (float)Minecraft.getInstance().options.fov().get());
@@ -1355,7 +1355,7 @@ public class VRSettings
                 return 0f;
             }
         },
-        HANDHELD_CAMERA_FOV(true, false, 0, 179, 1, 0) { // Camera FOV
+        HANDHELD_CAMERA_FOV(true, false, 1, 179, 1, 0) { // Camera FOV
             @Override
             String getDisplayString(String prefix, Object value) {
                 return prefix + String.format("%.0f" + DEGREE, (float)value);
