@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 
 @Mixin(Library.class)
 public class LibraryVRMixin {
@@ -17,7 +18,11 @@ public class LibraryVRMixin {
 
     @ModifyVariable(method = "init", at = @At("HEAD"), argsOnly = true)
     private boolean shouldDoHRTF(boolean vanillaHRTF) {
-        LOGGER.info("enabling HRTF: {}", ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0);
-        return ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0;
+        if (VRState.vrRunning) {
+            // don't force HRTF in nonvr
+            LOGGER.info("enabling HRTF: {}", ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0);
+            return ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0;
+        }
+        return vanillaHRTF;
     }
 }

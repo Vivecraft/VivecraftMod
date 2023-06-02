@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.client.blaze3d;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -54,6 +53,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public abstract void checkStatus();
 	@Shadow
 	public abstract void setFilterMode(int i);
+	@Shadow
+	private void _bindWrite(boolean b){};
 
 	@Shadow public abstract void unbindWrite();
 
@@ -208,20 +209,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	public int modifyGlFramebufferTexture2DAttachment(int attachment) {
 		return useStencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
 	}
-
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	private void _bindWrite(boolean bl) {
-		RenderSystem.assertOnGameThreadOrInit();
-		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
-		if (bl) {
-			RenderSystem.viewport(0, 0, this.viewWidth, this.viewHeight);
-		}
-	}
-	
 
 	public void blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor,
 			float yCropFactor, boolean keepAspect) {

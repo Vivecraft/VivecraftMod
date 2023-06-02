@@ -13,6 +13,7 @@ import net.minecraft.client.Options;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.vivecraft.client_vr.VRState;
 
 @Mixin(Options.class)
 public abstract class OptionsVRMixin {
@@ -28,13 +29,17 @@ public abstract class OptionsVRMixin {
     @Group(name = "reinitFrameBuffers", min = 1, max = 1)
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;allChanged()V", remap = true), method = "method_42464", remap = false, expect = 0)
     private static void reinitFabric(OptionInstance optionInstance, GraphicsStatus graphicsStatus, CallbackInfo ci) {
-        ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
+        if (VRState.vrInitialized) {
+            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
+        }
     }
 
     @Group(name = "reinitFrameBuffers", min = 1, max = 1)
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;allChanged()V",remap = true), method = "m_231861_", remap = false, expect = 0)
     private static void reinitForge(OptionInstance optionInstance, GraphicsStatus graphicsStatus, CallbackInfo ci) {
-        ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
+        if (VRState.vrInitialized) {
+            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
+        }
     }
 
 }

@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(GuardianRenderer.class)
 public abstract class GuardianRendererVRMixin {
@@ -19,7 +20,7 @@ public abstract class GuardianRendererVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/GuardianRenderer;getPosition(Lnet/minecraft/world/entity/LivingEntity;DF)Lnet/minecraft/world/phys/Vec3;"), method = "render(Lnet/minecraft/world/entity/monster/Guardian;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V")
     public Vec3 changeEye(GuardianRenderer instance, LivingEntity livingEntity, double d, float f) {
-        if (livingEntity == Minecraft.getInstance().getCameraEntity()) {
+        if (!RenderPassType.isVanilla() && livingEntity == Minecraft.getInstance().getCameraEntity()) {
             return ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition().subtract(0.0D, 0.3D * (double) ClientDataHolderVR.getInstance().vrPlayer.worldScale, 0.0D);
         }
         return this.getPosition(livingEntity, d, f);

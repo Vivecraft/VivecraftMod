@@ -1,12 +1,5 @@
 package org.vivecraft.client.utils;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import net.minecraft.client.resources.language.I18n;
 
 public class LangHelper

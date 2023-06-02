@@ -49,9 +49,6 @@ import org.vivecraft.client_vr.VRState;
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {
 
 	@Unique
-	private float xdist = 0F;
-
-	@Unique
 	private VRFirstPersonArmSwing swingType = VRFirstPersonArmSwing.Attack;
 
 	@Final
@@ -265,12 +262,6 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 			vrarmrenderer.renderLeftHand(poseStack, multiBufferSource, i, abstractclientplayer);
 		}
 		poseStack.popPose();
-	}
-
-
-	@Override
-	public void setXdist(float v) {
-		this.xdist = v;
 	}
 
 	@Override

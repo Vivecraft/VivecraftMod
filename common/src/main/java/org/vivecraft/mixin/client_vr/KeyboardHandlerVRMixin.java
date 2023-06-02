@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.client_vr;
 
 import net.minecraft.client.Screenshot;
+import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -57,23 +58,24 @@ public class KeyboardHandlerVRMixin {
     public void noScreenshot(File file, RenderTarget renderTarget, Consumer<Component> consumer) {
         if (!VRState.vrRunning) {
             Screenshot.grab(file, renderTarget, consumer);
+        } else {
+            ClientDataHolderVR.getInstance().grabScreenShot = true;
         }
-        ClientDataHolderVR.getInstance().grabScreenShot = true;
     }
 
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/Screen;passEvents:Z"), method = "keyPress")
     public boolean passEvents(Screen instance) {
-        return instance.passEvents && !MethodHolder.isKeyDown(345);
+        return instance.passEvents && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL);
     }
 
     //TODO really bad
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", ordinal = 2), method = "keyPress")
     public Screen screenKey(Minecraft instance) {
-        return !MethodHolder.isKeyDown(345)? instance.screen : null;
+        return !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) ? instance.screen : null;
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z", ordinal = 1, shift = At.Shift.AFTER), method = "keyPress")
-    public void saveOptions(long l, int i, int j, int k, int m, CallbackInfo ci) {
+    public void saveHideGuiOptions(long l, int i, int j, int k, int m, CallbackInfo ci) {
         ClientDataHolderVR.getInstance().vrSettings.saveOptions();
     }
 }

@@ -1,6 +1,8 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.joml.Matrix4f;
+import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
@@ -28,11 +30,7 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.RenderPass;
@@ -104,77 +102,51 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         return this.renderedEntity;
     }
 
-//NotFixed
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 0), method = "renderSnowAndRain")
-//    public int rain1(double d) {
-//        Vec3 vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
-//        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
-//            vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
-//        }
-//        return Mth.floor(vec3.x);
-//    }
-//
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 1), method = "renderSnowAndRain")
-//    public int rain2(double d) {
-//        Vec3 vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
-//        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
-//            vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
-//        }
-//        return Mth.floor(vec3.y);
-//    }
-//
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 2), method = "renderSnowAndRain")
-//    public int rain3(double d) {
-//        Vec3 vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition();
-//        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
-//            vec3 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
-//        }
-//        return Mth.floor(vec3.z);
-//    }
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 0), method = "renderSnowAndRain")
+    public double rainX(double x) {
+        if (!RenderPassType.isVanilla() && (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT || ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT)) {
+            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().x;
+        }
+        return x;
+    }
 
-//	NotFixed
-//	/**
-//	 * @author
-//	 * @reason
-//	 */
-//	@Overwrite
-//	public void onResourceManagerReload(ResourceManager pResourceManager) {
-//		ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
-//	}
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 1), method = "renderSnowAndRain")
+    public double rainY(double y) {
+        if (!RenderPassType.isVanilla() && (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT || ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT)) {
+            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().y;
+        }
+        return y;
+    }
 
-//	@Redirect(at = @At(value = "NEW", target = "Lnet/minecraft/resources/ResourceLocation;"), method = "initTransparency")
-//	public ResourceLocation vrShader(String string) {
-//		return new ResourceLocation("shaders/post/vrtransparency.json");
-//	}
-//
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;graphicsChanged()V"), method = "allChanged()V")
-//    public void removeGraphich(LevelRenderer l) {
-//        return;
-//    }
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 2), method = "renderSnowAndRain")
+    public double rainZ(double z) {
+        if (!RenderPassType.isVanilla() && (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT || ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT)) {
+            return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().z;
+        }
+        return z;
+    }
 
-    //Moved for sodium
-//	@Restriction(conflict = @Condition("sodium"))
-//	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;needsFullRenderChunkUpdate:Z", ordinal = 1, shift = Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
-//	public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
-//		this.needsFullRenderChunkUpdate = true;
-//	}
+	@Inject(at = @At("TAIL"), method = "onResourceManagerReload")
+	public void reinitVR(ResourceManager resourceManager, CallbackInfo ci) {
+        if (VRState.vrInitialized) {
+            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Resource Reload");
+        }
+	}
 
     /*
      * Start `renderLevel` lighting poll
      */
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;pollLightUpdates()V"), method = "renderLevel")
-    public void cancelPollLightUpdates(ClientLevel instance) {
+    public void onePollLightUpdates(ClientLevel instance) {
+        if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
+            instance.pollLightUpdates();
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"), method = "renderLevel")
-    public int runLightingUpdates(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
+    public int oneLightingUpdates(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
         if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
-            this.level.getProfiler().popPush("light_update_queue");
-            this.level.pollLightUpdates();
-            this.level.getProfiler().popPush("light_updates");
-            boolean flag = this.level.isLightUpdateQueueEmpty();
-            this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, flag, true);
             instance.runUpdates(i, bl, bl2);
         }
         if (!RenderPassType.isVanilla()) {
@@ -190,8 +162,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE),
             method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V ")
     public void stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
-        this.minecraft.getProfiler().popPush("stencil");
-        ((GameRendererExtension) gameRenderer).drawEyeStencil(false);
+        if (!RenderPassType.isVanilla()) {
+            this.minecraft.getProfiler().popPush("stencil");
+            ((GameRendererExtension) gameRenderer).drawEyeStencil(false);
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z"), method = "renderLevel")
@@ -219,17 +193,19 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "renderLevel")
     public void interactOutline(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-        this.level.getProfiler().popPush("outline");
-        selR = selG = selB = 1f;
-        Vec3 vec3 = camera.getPosition();
-        double d = vec3.x();
-        double e = vec3.y();
-        double g = vec3.z();
-        for (int c = 0; c < 2; c++) {
-            if (ClientDataHolderVR.getInstance().interactTracker.isInteractActive(c) && (ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null || ClientDataHolderVR.getInstance().interactTracker.bukkit[c])) {
-                BlockPos blockpos = ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
-                BlockState blockstate = this.level.getBlockState(blockpos);
-                this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
+        if (!RenderPassType.isVanilla()) {
+            this.level.getProfiler().popPush("interact outline");
+            selR = selG = selB = 1f;
+            Vec3 vec3 = camera.getPosition();
+            double d = vec3.x();
+            double e = vec3.y();
+            double g = vec3.z();
+            for (int c = 0; c < 2; c++) {
+                if (ClientDataHolderVR.getInstance().interactTracker.isInteractActive(c) && (ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null || ClientDataHolderVR.getInstance().interactTracker.bukkit[c])) {
+                    BlockPos blockpos = ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
+                    BlockState blockstate = this.level.getBlockState(blockpos);
+                    this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
+                }
             }
         }
     }
@@ -237,16 +213,14 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @ModifyVariable(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "renderLevel", ordinal = 0, argsOnly = true)
     public boolean noBlockoutlineOnInteract(boolean renderBlockOutline) {
         // don't draw the block outline when the interaction outline is active
-        return !(ClientDataHolderVR.getInstance().interactTracker.isInteractActive(0) && (ClientDataHolderVR.getInstance().interactTracker.inBlockHit[0] != null || ClientDataHolderVR.getInstance().interactTracker.bukkit[0])) && renderBlockOutline;
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;applyModelViewMatrix()V", ordinal = 1), method = "renderLevel")
-    public void renderBukkake(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-        this.level.getProfiler().popPush("render bukkake");
+        return renderBlockOutline && (RenderPassType.isVanilla() || !(ClientDataHolderVR.getInstance().interactTracker.isInteractActive(0) && (ClientDataHolderVR.getInstance().interactTracker.inBlockHit[0] != null || ClientDataHolderVR.getInstance().interactTracker.bukkit[0])));
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 13), method = "renderLevel")
-    public void blackOutline(ProfilerFiller instance, String s) {
+    public void blackOutline(ProfilerFiller profiler, String s) {
+        if (RenderPassType.isVanilla()) {
+            profiler.popPush("outline");
+        }
         selR = selG = selB = 0f;
     }
 
@@ -260,9 +234,11 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         ((GameRendererExtension) gameRenderer).renderVRFabulous(f, (LevelRenderer) (Object) this, menuhandright, menuHandleft, poseStack);
     }
 
+    @Unique
     private boolean menuHandleft;
+    @Unique
     private boolean menuhandright;
-
+    @Unique
     private boolean guiRendered = false;
 
     @Inject(at = @At("HEAD"), method = "renderLevel")

@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -20,7 +21,7 @@ public class NoSodiumLevelRendererVRMixin {
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;needsFullRenderChunkUpdate:Z", ordinal = 1, shift = At.Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
     public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
-        this.needsFullRenderChunkUpdate = true;
+        this.needsFullRenderChunkUpdate = needsFullRenderChunkUpdate || VRState.vrRunning;
     }
 
     @ModifyConstant(method = "renderChunkLayer", constant = @Constant(intValue = 12))

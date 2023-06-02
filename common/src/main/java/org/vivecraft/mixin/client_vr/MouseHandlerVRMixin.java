@@ -20,6 +20,7 @@ public class MouseHandlerVRMixin {
     @Shadow
     private Minecraft minecraft;
 
+    // TODO, this seems unnecessary, and wrong
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseScrolled(DDD)Z", shift = At.Shift.BEFORE), method = "onScroll", cancellable = true)
     public void cancelScroll(long g, double h, double f, CallbackInfo ci) {
         if (this.minecraft.screen.mouseScrolled(g, h, f)) {

@@ -10,14 +10,9 @@ import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.VRState;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Properties;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {

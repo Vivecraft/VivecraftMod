@@ -13,7 +13,5 @@ public interface ItemInHandRendererExtension {
 
 	boolean isInsideOpaqueBlock(Vec3 vec31);
 
-    void setXdist(float v);
-
 	void setSwingType(VRFirstPersonArmSwing interact);
 }

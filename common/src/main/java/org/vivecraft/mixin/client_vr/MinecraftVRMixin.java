@@ -4,6 +4,7 @@ package org.vivecraft.mixin.client_vr;
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -26,7 +27,6 @@ import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
@@ -223,15 +223,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Shadow
     public String fpsString;
 
-    @Final
-    @Shadow
-    private TextureManager textureManager;
-
     @Shadow
     private static int fps;
-
-    @Shadow
-    abstract void selectMainFont(boolean p_91337_);
 
     @Shadow
     public abstract Entity getCameraEntity();
@@ -300,11 +293,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     public void replaceTick(boolean bl, CallbackInfo callback) {
         if (VRState.vrEnabled) {
             VRState.initializeVR();
-        } else {
-            if (VRState.vrInitialized) {
+        } else if (VRState.vrInitialized) {
                 VRState.destroyVR();
                 resizeDisplay();
-            }
         }
         if (!VRState.vrInitialized) {
             return;
@@ -317,21 +308,35 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 if (player != null) {
                     ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(player.position().x, player.position().y, player.position().z, true);
                 }
+                // release mouse when switching to standing
+                if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
+                    mouseHandler.releaseMouse();
+                    InputConstants.grabOrReleaseMouse(window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseHandler.xpos(), mouseHandler.ypos());
+                }
             } else {
                 GuiHandler.guiPos_room = null;
                 GuiHandler.guiRotation_room = null;
                 if (player != null) {
                     VRPlayersClient.getInstance().disableVR(player.getUUID());
                 }
+                if (gameRenderer != null) {
+                    gameRenderer.checkEntityPostEffect(this.options.getCameraType().isFirstPerson() ? this.getCameraEntity() : null);
+                }
+                // grab/release mouse
+                if (screen != null) {
+                    mouseHandler.releaseMouse();
+                    InputConstants.grabOrReleaseMouse(window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseHandler.xpos(), mouseHandler.ypos());
+                } else {
+                    mouseHandler.grabMouse();
+                    InputConstants.grabOrReleaseMouse(window.getWindow(), GLFW.GLFW_CURSOR_DISABLED, mouseHandler.xpos(), mouseHandler.ypos());
+                }
             }
             var connection = this.getConnection();
             if (connection != null) {
                 connection.send(ClientNetworking.createVRActivePacket(vrActive));
             }
-            // restore vanilla post chains before the resize, or it will resize the wrong ones
-            if (levelRenderer != null) {
-                ((LevelRendererExtension)levelRenderer).restoreVanillaPostChains();
-            }
+            // reload sound manager, to toggle HRTF between VR and NONVR one
+            Minecraft.getInstance().getSoundManager().reload();
             resizeDisplay();
         }
         if (!VRState.vrRunning) {
@@ -752,30 +757,16 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         this.profiler.pop();
     }
 
-    // NotFixed
-//    @Inject(at = @At("HEAD"), method = "resizeDisplay", cancellable = true)
-//    void c(CallbackInfo ci) {
-//        ci.cancel();
-//    }
-
-// NotFixed
-    // moved to window
-//    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setGuiScale(D)V", shift = Shift.AFTER), method = "resizeDisplay()V")
-//    public void reinitFrame(CallbackInfo info) {
-//        if (ClientDataHolderVR.getInstance().vrRenderer != null) {
-//            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Main Window Changed");
-//        }
-//    }
-//
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;"), method = "resizeDisplay()V")
-//    public RenderTarget removeRenderTarget(Minecraft mc) {
-//        return RenderTargets.INSTANCE.vanillaRenderTarget;
-//    }
-//
-//    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resize(II)V"), method = "resizeDisplay()V")
-//    public void cancelResizeGame(GameRenderer r, int w, int h) {
-//        return;
-//    }
+    @Inject(at = @At("HEAD"), method = "resizeDisplay")
+    void restoreVanillaState(CallbackInfo ci) {
+        if (VRState.vrInitialized) {
+            // restore vanilla post chains before the resize, or it will resize the wrong ones
+            if (levelRenderer != null) {
+                ((LevelRendererExtension) levelRenderer).restoreVanillaPostChains();
+            }
+            RenderPassManager.setVanillaRenderPass();
+        }
+    }
 
     public void drawProfiler() {
         if (this.fpsPieResults != null) {
@@ -786,32 +777,39 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"), method = "continueAttack(Z)V")
-    public void swingArmcontinueAttack(LocalPlayer player, InteractionHand hand) {
-        ((PlayerExtension) player).swingArm(InteractionHand.MAIN_HAND, VRFirstPersonArmSwing.Attack);
+    public void swingArmContinueAttack(LocalPlayer player, InteractionHand hand) {
+        if (VRState.vrRunning) {
+            ((PlayerExtension) player).swingArm(InteractionHand.MAIN_HAND, VRFirstPersonArmSwing.Attack);
+        } else {
+            player.swing(hand);
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;stopDestroyBlock()V"), method = "continueAttack(Z)V")
     public void destroyseated(MultiPlayerGameMode gm) {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated) {
+        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().vrSettings.seated || lastClick) {
             this.gameMode.stopDestroyBlock();
+            lastClick = false;
         }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;isDestroying()Z"), method = "startUseItem()V")
     public boolean seatedCheck(MultiPlayerGameMode gameMode) {
-        return !(!gameMode.isDestroying() || !ClientDataHolderVR.getInstance().vrSettings.seated);
+        return gameMode.isDestroying() && (!VRState.vrRunning || ClientDataHolderVR.getInstance().vrSettings.seated);
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;rightClickDelay:I", shift = Shift.AFTER, opcode = Opcodes.PUTFIELD), method = "startUseItem()V")
     public void breakDelay(CallbackInfo info) {
-        if (ClientDataHolderVR.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.VANILLA)
-            this.rightClickDelay = 4;
-        else if (ClientDataHolderVR.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.SLOW)
-            this.rightClickDelay = 6;
-        else if (ClientDataHolderVR.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.SLOWER)
-            this.rightClickDelay = 8;
-        else if (ClientDataHolderVR.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.SLOWEST)
-            this.rightClickDelay = 10;
+        if (VRState.vrRunning) {
+            if (ClientDataHolderVR.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.VANILLA)
+                this.rightClickDelay = 4;
+            else if (ClientDataHolderVR.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.SLOW)
+                this.rightClickDelay = 6;
+            else if (ClientDataHolderVR.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.SLOWER)
+                this.rightClickDelay = 8;
+            else if (ClientDataHolderVR.getInstance().vrSettings.rightclickDelay == VRSettings.RightClickDelay.SLOWEST)
+                this.rightClickDelay = 10;
+        }
     }
 
     @ModifyVariable(at = @At(value = "STORE", ordinal = 0), method = "startUseItem")
@@ -822,14 +820,14 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem", locals = LocalCapture.CAPTURE_FAILHARD)
     public void activeHandSend(CallbackInfo ci, InteractionHand[] var1, int var2, int var3, InteractionHand interactionHand) {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemInHand)) {
+        if (VRState.vrRunning && (ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemInHand))) {
             ClientNetworking.sendActiveHand((byte) interactionHand.ordinal());
         }
     }
 
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem")
     public HitResult activeHand2(Minecraft instance) {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemInHand)) {
+        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(itemInHand)) {
             return instance.hitResult;
         }
         return null;
@@ -838,7 +836,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"), method = "startUseItem")
     public void swingUse(LocalPlayer instance, InteractionHand interactionHand) {
-        ((PlayerExtension) instance).swingArm(interactionHand, VRFirstPersonArmSwing.Use);
+        if (VRState.vrRunning) {
+            ((PlayerExtension) instance).swingArm(interactionHand, VRFirstPersonArmSwing.Use);
+        } else {
+            instance.swing(interactionHand);
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "tick()V")
@@ -886,7 +888,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "tick")
     public void removePick(GameRenderer instance, float f) {
-        return;
+        if (!VRState.vrRunning) {
+            instance.pick(f);
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;setCameraType(Lnet/minecraft/client/CameraType;)V"), method = "handleKeybinds")
@@ -894,71 +898,63 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         if (VRState.vrRunning) {
             ClientDataHolderVR.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
             this.notifyMirror(ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
+            // this.levelRenderer.needsUpdate();
         } else {
             instance.setCameraType(cameraType);
         }
-        //this.levelRenderer.needsUpdate();
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;checkEntityPostEffect(Lnet/minecraft/world/entity/Entity;)V"), method = "handleKeybinds")
     public void noPosEffect(GameRenderer instance, Entity entity) {
-        return;
+        if (!VRState.vrRunning) {
+            instance.checkEntityPostEffect(entity);
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"), method = "handleKeybinds()V")
     public void swingArmhandleKeybinds(LocalPlayer instance, InteractionHand interactionHand) {
-        ((PlayerExtension) player).swingArm(InteractionHand.MAIN_HAND, VRFirstPersonArmSwing.Attack);
+        if (VRState.vrRunning) {
+            ((PlayerExtension) player).swingArm(InteractionHand.MAIN_HAND, VRFirstPersonArmSwing.Attack);
+        } else {
+            instance.swing(interactionHand);
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z", ordinal = 2), method = "handleKeybinds")
     public boolean vrKeyuse(KeyMapping instance) {
-        return !(!instance.isDown() && (!ClientDataHolderVR.getInstance().bowTracker.isActive(this.player) || ClientDataHolderVR.getInstance().vrSettings.seated) && !ClientDataHolderVR.getInstance().autoFood.isEating());
+        return !(!instance.isDown() && (!VRState.vrRunning || ((!ClientDataHolderVR.getInstance().bowTracker.isActive(this.player) || ClientDataHolderVR.getInstance().vrSettings.seated) && !ClientDataHolderVR.getInstance().autoFood.isEating())));
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;releaseUsingItem(Lnet/minecraft/world/entity/player/Player;)V", shift = Shift.BEFORE), method = "handleKeybinds")
     public void activeHand(CallbackInfo ci) {
-        ClientNetworking.sendActiveHand((byte) this.player.getUsedItemHand().ordinal());
-    }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z", ordinal = 13), method = "handleKeybinds")
-    public boolean notConsumeClick(KeyMapping instance) {
-        return false;
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z", ordinal = 14, shift = Shift.BEFORE), method = "handleKeybinds")
-    public void attackDown(CallbackInfo ci) {
-        if (this.options.keyAttack.consumeClick() && this.screen == null) {
-            this.startAttack();
-            this.lastClick = true;
-        } else if (!this.options.keyAttack.isDown()) {
-            this.missTime = 0;
-
-            if (this.lastClick) {
-                this.gameMode.stopDestroyBlock();
-            }
-
-            this.lastClick = false;
+        if (VRState.vrRunning) {
+            ClientNetworking.sendActiveHand((byte) this.player.getUsedItemHand().ordinal());
         }
     }
 
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startAttack()Z"), method = "handleKeybinds")
+    public void attackDown(CallbackInfo ci) {
+        // detect, if the attack buttun was used to testroy blocks
+        this.lastClick = true;
+    }
+
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MouseHandler;isMouseGrabbed()Z"), method = "handleKeybinds")
-    public boolean alwaysGrapped(MouseHandler instance) {
-        return true;
+    public boolean vrAlwaysGrapped(MouseHandler instance) {
+        return VRState.vrRunning || instance.isMouseGrabbed();
     }
 
     @Inject(at = @At("HEAD"), method = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V")
     public void roomScale(ClientLevel pLevelClient, CallbackInfo info) {
-        if (!VRState.vrRunning) {
-            return;
+        if (VRState.vrRunning) {
+            ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(0.0D, 0.0D, 0.0D, true);
         }
-
-        ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(0.0D, 0.0D, 0.0D, true);
     }
 
     @Inject(at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = At.Shift.BEFORE, ordinal = 0), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
     public void onOpenScreen(Screen pGuiScreen, CallbackInfo info) {
         GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
     }
+
     @Inject(method = "setScreen", at = @At("HEAD"))
     public void onCloseScreen(Screen screen, CallbackInfo info) {
         if (screen == null) {

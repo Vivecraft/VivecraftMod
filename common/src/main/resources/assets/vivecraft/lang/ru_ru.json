@@ -162,7 +162,7 @@
     "vivecraft.options.FORCE_STANDING_FREE_MOVE": "Свободное движение",
     "vivecraft.options.ALLOW_ADVANCED_BINDINGS": "Глобальные бинды",
     "vivecraft.options.MENU_WORLD_SELECTION": "Миры",
-    "vivecraft.options.HRTF_SELECTION": "HRTF",
+    "vivecraft.options.HRTF_SELECTION": "Позиционируемый звук (VR)",
     "vivecraft.options.RELOAD_EXTERNAL_CAMERA": "Перезагрузка камеры",
     "vivecraft.options.RIGHT_CLICK_DELAY": "Повтор ПКМ",
     "vivecraft.options.ANIMAL_TOUCHING": "Прикосновения к животным",

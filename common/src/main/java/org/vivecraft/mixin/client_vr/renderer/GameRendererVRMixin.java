@@ -3,7 +3,6 @@ package org.vivecraft.mixin.client_vr.renderer;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
@@ -81,7 +80,6 @@ import org.vivecraft.client_vr.render.VRWidgetHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
 
-import java.nio.FloatBuffer;
 import java.nio.file.Path;
 
 @Mixin(GameRenderer.class)
@@ -93,8 +91,6 @@ public abstract class GameRendererVRMixin
     public float minClipDistance = 0.02F;
     @Unique
     public Vec3 crossVec;
-    @Unique
-    private final FloatBuffer matrixBuffer = MemoryTracker.create(16).asFloatBuffer();
     @Unique
     public Matrix4f thirdPassProjectionMatrix = new Matrix4f();
     @Unique
@@ -109,8 +105,6 @@ public abstract class GameRendererVRMixin
     public boolean onfire;
     @Unique
     public float inBlock = 0.0F;
-    @Unique
-    private boolean always_true = true;
     @Unique
     public double rveX;
     @Unique
@@ -318,40 +312,25 @@ public abstract class GameRendererVRMixin
         info.setReturnValue(posestack.last().pose());
     }
 
-    // TODO optifine?
-//	public void initFrame() {
-//		if (this.minecraft.currentPass == RenderPass.LEFT) {
-//			this.frameInit();
-//
-//			if (!this.always_true && !this.minecraft.isWindowActive() && this.minecraft.options.pauseOnLostFocus
-//					&& (!this.minecraft.options.touchscreen || !this.minecraft.mouseHandler.isRightPressed())) {
-//				if (Util.getMillis() - this.lastActiveTime > 500L) {
-//					this.minecraft.pauseGame(false);
-//				}
-//			} else {
-//				this.lastActiveTime = Util.getMillis();
-//			}
-//		}
-//	}
-
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isWindowActive()Z"), method = "render")
     public boolean focus(Minecraft instance) {
-        return true;
+        return VRState.vrRunning || instance.isWindowActive();
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;pauseGame(Z)V"), method = "render")
     public void pause(Minecraft instance, boolean bl) {
-        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
+        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
             instance.pauseGame(bl);
         }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;getMillis()J"), method = "render")
     public long active() {
-        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
+        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
             return Util.getMillis();
+        } else {
+            return this.lastActiveTime;
         }
-        return this.lastActiveTime;
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
@@ -382,7 +361,7 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At("HEAD"), method = "takeAutoScreenshot", cancellable = true)
     public void noScreenshotInMenu(Path path, CallbackInfo ci) {
-        if (isInMenuRoom()) {
+        if (VRState.vrRunning && isInMenuRoom()) {
             ci.cancel();
         }
     }
@@ -449,11 +428,14 @@ public abstract class GameRendererVRMixin
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemActivationAnimation(IIF)V"), method = "render(FJZ)V")
     private void noItemActivationAnimationOnGUI(GameRenderer instance, int i, int j, float f) {
+        if (RenderPassType.isVanilla()) {
+            renderItemActivationAnimation(i, j, f);
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "render(FJZ)V")
     private void noGUIwithViewOnly(Gui instance, PoseStack poseStack, float f) {
-        if (!ClientDataHolderVR.viewonly) {
+        if (RenderPassType.isVanilla() || !ClientDataHolderVR.viewonly) {
             instance.render(poseStack, f);
         }
     }
@@ -467,24 +449,32 @@ public abstract class GameRendererVRMixin
 
     @Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"))
     private void noTranslateItem(PoseStack poseStack, float x, float y, float z) {
+        if (RenderPassType.isVanilla()) {
+            poseStack.translate(x, y, z);
+        }
     }
 
     @Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
     private void noScaleItem(PoseStack poseStack, float x, float y, float z) {
+        if (RenderPassType.isVanilla()) {
+            poseStack.scale(x, y, z);
+        }
     }
 
     @Inject(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"), locals = LocalCapture.CAPTURE_FAILHARD)
     private void transformItem(int i, int j, float f, CallbackInfo ci, int k, float g, float h, float l, float m, float n, float o, float p, PoseStack posestack) {
-        float sinN = Mth.sin(n) * 0.5F;
-        posestack.translate(0, 0, sinN - 1.0);
-        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD) {
-            sinN *= ClientDataHolderVR.getInstance().vrSettings.mixedRealityFov / 70.0;
+        if (!RenderPassType.isVanilla()) {
+            float sinN = Mth.sin(n) * 0.5F;
+            posestack.translate(0, 0, sinN - 1.0);
+            if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD) {
+                sinN *= ClientDataHolderVR.getInstance().vrSettings.mixedRealityFov / 70.0;
+            }
+            applyVRModelView(ClientDataHolderVR.getInstance().currentPass, posestack);
+            applystereo(ClientDataHolderVR.getInstance().currentPass, posestack);
+            posestack.scale(sinN, sinN, sinN);
+            posestack.mulPose(Axis.YP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getYaw()));
+            posestack.mulPose(Axis.XP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPitch()));
         }
-        applyVRModelView(ClientDataHolderVR.getInstance().currentPass, posestack);
-        applystereo(ClientDataHolderVR.getInstance().currentPass, posestack);
-        posestack.scale(sinN, sinN, sinN);
-        posestack.mulPose(Axis.YP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getYaw()));
-        posestack.mulPose(Axis.XP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPitch()));
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
@@ -528,13 +518,21 @@ public abstract class GameRendererVRMixin
 
     @ModifyVariable(at = @At(value = "STORE"), method = "renderLevel")
     public int reduceNauseaSpeed(int oldVal) {
-        return oldVal / 5;
+        if (!RenderPassType.isVanilla()) {
+            return oldVal / 5;
+        } else {
+            return oldVal;
+        }
     }
 
     @ModifyVariable(at = @At(value = "STORE", ordinal = 1), ordinal = 3, method = "renderLevel")
     public float reduceNauseaAffect(float oldVal) {
-        // scales down the effect from (1,0.65) to (1,0.9)
-        return 1f - (1f - oldVal) * 0.25f;
+        if (!RenderPassType.isVanilla()) {
+            // scales down the effect from (1,0.65) to (1,0.9)
+            return 1f - (1f - oldVal) * 0.25f;
+        } else {
+            return oldVal;
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 1), method = "renderLevel")
@@ -544,8 +542,8 @@ public abstract class GameRendererVRMixin
     }
 
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"), method = "renderLevel")
-    public boolean noHands(GameRenderer instance) {
-        return RenderPassType.isVanilla();
+    public boolean noHandsVR(GameRenderer instance) {
+        return RenderPassType.isVanilla() && renderHand;
     }
 
     @Inject(at = @At(value = "TAIL", shift = Shift.BEFORE), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")

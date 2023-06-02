@@ -26,8 +26,6 @@ import org.vivecraft.client_vr.utils.external.jkatvr;
 @Mixin(PauseScreen.class)
 public abstract class PauseScreenVRMixin extends Screen {
 
-    private ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-
     protected PauseScreenVRMixin(Component component) {
         super(component);
     }
@@ -142,6 +140,7 @@ public abstract class PauseScreenVRMixin extends Screen {
         ((Button)layoutElement).visible = !VRState.vrEnabled;
         return instance.addChild(layoutElement);
     }
+    // TODO this seems unneeded?
     @Redirect(method = "createPauseMenu", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/Button;active:Z"))
     private void remove3(Button instance, boolean value) {}
 }

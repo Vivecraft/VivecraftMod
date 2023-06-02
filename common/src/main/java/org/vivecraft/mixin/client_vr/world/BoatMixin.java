@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 
 //TODO needed?
 @Mixin(Boat.class)
@@ -53,6 +54,9 @@ public abstract class BoatMixin extends Entity {
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/Boat;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.BEFORE), method = "controlBoat", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
 	public void roomscaleRowing(CallbackInfo ci, float f) {
+		if (!VRState.vrRunning) {
+			return;
+		}
 
 		double mx, mz;
 		ClientDataHolderVR clientDataHolderVR = ClientDataHolderVR.getInstance();

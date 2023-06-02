@@ -2,7 +2,6 @@ package org.vivecraft.mixin.client_vr.renderer.entity;
 
 import com.mojang.math.Axis;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.joml.Quaternionf;
@@ -24,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRArmRenderer;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,15 +42,13 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
 
     @Inject(at = @At("HEAD"), method = "cameraOrientation", cancellable = true)
     public void cameraOrientation(CallbackInfoReturnable<Quaternionf> cir) {
-        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().currentPass == RenderPass.GUI) {
+        if (RenderPassType.isVanilla() || RenderPassType.isGuiOnly()) {
             cir.setReturnValue(cameraOrientation);
-            return;
         }
         else {
             Entity entity = ((LevelRendererExtension)Minecraft.getInstance().levelRenderer).getRenderedEntity();
             if (entity == null) {
                 cir.setReturnValue(this.camera.rotation());
-                return;
             }
             else {
                 Vec3 vec3 = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition();
@@ -76,7 +74,7 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
 
     @Override
     public Quaternionf getCameraOrientationOffset(float offset) {
-        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().currentPass == RenderPass.GUI) {
+        if (RenderPassType.isVanilla() || RenderPassType.isGuiOnly()) {
             return cameraOrientation;
         } else {
             Entity entity = ((LevelRendererExtension)Minecraft.getInstance().levelRenderer).getRenderedEntity();

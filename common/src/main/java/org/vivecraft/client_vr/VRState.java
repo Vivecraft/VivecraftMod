@@ -76,8 +76,9 @@ public class VRState {
 
     public static void destroyVR() {
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-
-        dh.vr.destroy();
+        if (dh.vr != null) {
+            dh.vr.destroy();
+        }
         dh.vr = null;
         dh.vrPlayer = null;
         if (dh.vrRenderer != null) {

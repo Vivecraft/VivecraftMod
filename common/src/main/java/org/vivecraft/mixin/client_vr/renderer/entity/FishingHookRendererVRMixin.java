@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(FishingHookRenderer.class)
 public abstract class FishingHookRendererVRMixin extends EntityRenderer<FishingHook> {
@@ -25,7 +26,7 @@ public abstract class FishingHookRendererVRMixin extends EntityRenderer<FishingH
     @ModifyVariable(at = @At(value = "LOAD"),
             method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", index = 25)
     private double fishingLineStartX(double value, FishingHook fishingHook) {
-        if ((this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
+        if (!RenderPassType.isVanilla() && (this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
             int j = 1;
             if (fishingHook.getPlayerOwner().getMainHandItem().getItem() instanceof FishingRodItem) {
                 j = 0;
@@ -41,7 +42,7 @@ public abstract class FishingHookRendererVRMixin extends EntityRenderer<FishingH
     @ModifyVariable(at = @At(value = "LOAD"),
             method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", index = 27)
     private double fishingLineStartY(double value, FishingHook fishingHook) {
-        if ((this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
+        if (!RenderPassType.isVanilla() && (this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
             return CachedHandPos.y;
         } else {
             return value;
@@ -50,7 +51,7 @@ public abstract class FishingHookRendererVRMixin extends EntityRenderer<FishingH
     @ModifyVariable(at = @At(value = "LOAD"),
             method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", index = 29)
     private double fishingLineStartZ(double value, FishingHook fishingHook) {
-        if ((this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
+        if (!RenderPassType.isVanilla() && (this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
             return CachedHandPos.z;
         } else {
             return value;
@@ -59,7 +60,7 @@ public abstract class FishingHookRendererVRMixin extends EntityRenderer<FishingH
     @ModifyVariable(at = @At(value = "LOAD"),
             method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", index = 31)
     private float fishingLineStartOffset(float value, FishingHook fishingHook) {
-        if ((this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
+        if (!RenderPassType.isVanilla() && (this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
             return 0.0F;
         } else {
             return value;

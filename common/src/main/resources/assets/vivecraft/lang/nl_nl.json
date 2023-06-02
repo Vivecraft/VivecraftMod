@@ -162,7 +162,7 @@
     "vivecraft.options.FORCE_STANDING_FREE_MOVE": "Forceer Vrije Beweging",
     "vivecraft.options.ALLOW_ADVANCED_BINDINGS": "Geavanceerde Bindingen Weergeven",
     "vivecraft.options.MENU_WORLD_SELECTION": "Werelden",
-    "vivecraft.options.HRTF_SELECTION": "HRTF",
+    "vivecraft.options.HRTF_SELECTION": "3D-geluid (VR)",
     "vivecraft.options.RELOAD_EXTERNAL_CAMERA": "Laad de Externe Camera Opnieuw",
     "vivecraft.options.RIGHT_CLICK_DELAY": "Klik Met de Rechtermuisknop Op Herhalen",
     "vivecraft.options.ANIMAL_TOUCHING": "Dier Betasting",

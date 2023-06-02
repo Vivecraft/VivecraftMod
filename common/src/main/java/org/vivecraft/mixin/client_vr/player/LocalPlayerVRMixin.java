@@ -1,6 +1,8 @@
 package org.vivecraft.mixin.client_vr.player;
 
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.client_vr.VRState;
@@ -30,8 +32,6 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.network.ClientNetworking;
@@ -63,10 +63,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Unique
     private int movementTeleportTimer;
     @Unique
-    public String lastMsg = null;
-    @Unique
-    private boolean snapReq;
-    @Unique
     private boolean teleported;
     @Unique
     private double additionX;
@@ -81,24 +77,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Final
     public ClientPacketListener connection;
     private final ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-    @Shadow
-    public double xLast;
-    @Shadow
-    public double yLast1;
-    @Shadow
-    public double zLast;
-    @Shadow
-    public float yRotLast;
-    @Shadow
-    public float xRotLast;
-    @Shadow
-    public boolean lastOnGround;
-    @Shadow
-    public boolean wasShiftKeyDown;
-    @Shadow
-    public boolean wasSprinting;
-    @Shadow
-    public int positionReminder;
     @Shadow
     private InteractionHand usingItemHand;
     @Shadow
@@ -118,39 +96,37 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Inject(at = @At("TAIL"), method = "startRiding")
     public void startRidingTracker(Entity entity, boolean bl, CallbackInfoReturnable<Boolean> cir) {
-        ClientDataHolderVR.getInstance().vehicleTracker.onStartRiding(entity, (LocalPlayer) (Object) this);
-        this.snapReq = true;
+        if (VRState.vrInitialized) {
+            ClientDataHolderVR.getInstance().vehicleTracker.onStartRiding(entity, (LocalPlayer) (Object) this);
+        }
     }
 
     @Inject(at = @At("TAIL"), method = "removeVehicle")
     public void stopRidingTracker(CallbackInfo ci) {
-        ClientDataHolderVR.getInstance().vehicleTracker.onStopRiding((LocalPlayer) (Object) this);
+        if (VRState.vrInitialized) {
+            ClientDataHolderVR.getInstance().vehicleTracker.onStopRiding((LocalPlayer) (Object) this);
+        }
     }
-//	NotFixed
-//	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.BEFORE), method = "tick")
-//	public void overrideLookPre(CallbackInfo ci) {
-//		ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
-//	}
-//
-//	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.AFTER), method = "tick")
-//	public void overridePose(CallbackInfo ci) {
-//		ClientNetworkHelper.overridePose((LocalPlayer) (Object) this);
-//		ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
-//	}
 
-	/* TODO: not working, is this needed?
-	//TODO verify
-	@ModifyVariable(at = @At("STORE"), ordinal = 3, method = "sendPosition")
-	public boolean changeFlag(boolean b) {
-		return this.teleported || b;
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.BEFORE), method = "tick")
+	public void overrideLookPre(CallbackInfo ci) {
+        if (VRState.vrRunning) {
+            ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
+        }
 	}
-	*/
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z", shift = At.Shift.BEFORE), method = "sendPosition")
-    public void passenger(CallbackInfo ci) {
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.AFTER), method = "tick")
+	public void overridePose(CallbackInfo ci) {
+        if (VRState.vrRunning) {
+            ClientNetworking.overridePose((LocalPlayer) (Object) this);
+            ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
+        }
+	}
+
+    @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z"), ordinal = 2, method = "sendPosition")
+    private boolean directTeleport(boolean updateRotation) {
         if (this.teleported) {
-            this.teleported = false;
-            // flag2 = true; TODO?
+            updateRotation = true;
             ByteBuf bytebuf = Unpooled.buffer();
             bytebuf.writeFloat((float) this.getX());
             bytebuf.writeFloat((float) this.getY());
@@ -160,11 +136,22 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.TELEPORT, abyte);
             this.connection.send(serverboundcustompayloadpacket);
         }
+        return updateRotation;
+    }
+
+    // this seems to work without that as well, not sure if that is actually needed
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"), method = "sendPosition", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z")))
+    public void noMovePacketsOnTeleport(ClientPacketListener instance, Packet<?> packet) {
+        if (!this.teleported) {
+            instance.send(packet);
+        }
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/LocalPlayer;lastOnGround:Z", shift = At.Shift.AFTER, ordinal = 1), method = "sendPosition")
     public void walkUp(CallbackInfo ci) {
-        if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
+        // clear teleport here, after all the packets would be sent
+        this.teleported = false;
+        if (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
             this.minecraft.options.autoJump().set(false);
         }
     }
@@ -173,21 +160,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     public void swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact) {
         ((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).setSwingType(interact);
         this.swing(interactionhand);
-    }
-
-
-    @Inject(at = @At("HEAD"), method = "swing")
-    public void vrSwing(InteractionHand interactionHand, CallbackInfo ci) {
-        if (!VRState.vrRunning) {
-            return;
-        }
-        if (!this.swinging) {
-            if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
-                ((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).setXdist((float) this.minecraft.hitResult.getLocation().subtract(ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getController(interactionHand.ordinal()).getPosition()).length());
-            } else {
-                ((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).setXdist(0F);
-            }
-        }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;aiStep()V"), method = "aiStep")
