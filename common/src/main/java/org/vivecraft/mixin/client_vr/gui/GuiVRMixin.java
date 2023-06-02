@@ -60,6 +60,14 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
             ci.cancel();
         }
     }
+
+    @Inject(at = @At("HEAD"), method = "renderSpyglassOverlay", cancellable = true)
+    public void cancelRenderSpyglass(PoseStack poseStack, float f, CallbackInfo ci) {
+        if (RenderPassType.isGuiOnly()) {
+            ci.cancel();
+        }
+    }
+
     @Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)
     public void cancelRenderCrosshair(PoseStack poseStack, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
