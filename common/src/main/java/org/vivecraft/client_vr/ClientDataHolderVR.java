@@ -55,6 +55,10 @@ public class ClientDataHolderVR {
     boolean mirrorNotifyClear;
     long mirroNotifyLen;
 
+    // showed chat notifications
+    public boolean showedUpdateNotification;
+
+
     public static ClientDataHolderVR getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new ClientDataHolderVR();

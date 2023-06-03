@@ -7,6 +7,7 @@
     "client.blaze3d.RenderSystemAccessor",
     "client.blaze3d.RenderTargetMixin",
     "client.gui.screens.TitleScreenMixin",
+    "client.gui.screens.ScreenMixin",
     "client.main.MainMixin",
     "client.player.AbstractClientPlayerMixin",
     "client.renderer.block.LiquidBlockRendererMixin",

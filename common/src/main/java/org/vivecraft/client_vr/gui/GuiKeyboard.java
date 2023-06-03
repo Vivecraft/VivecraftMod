@@ -2,7 +2,7 @@ package org.vivecraft.client_vr.gui;
 
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client_vr.gui.framework.TwoHandedScreen;
+import org.vivecraft.client.gui.framework.TwoHandedScreen;
 import org.vivecraft.client_vr.provider.InputSimulator;
 
 import com.mojang.blaze3d.vertex.PoseStack;

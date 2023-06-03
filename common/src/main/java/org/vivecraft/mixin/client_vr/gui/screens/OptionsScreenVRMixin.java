@@ -1,9 +1,6 @@
 package org.vivecraft.mixin.client_vr.gui.screens;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.OptionInstance;
-import net.minecraft.client.Options;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.screens.OptionsScreen;
@@ -13,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client_vr.gui.settings.GuiMainVRSettings;
+import org.vivecraft.client.gui.settings.GuiMainVRSettings;
 
 @Mixin(OptionsScreen.class)
 public class OptionsScreenVRMixin extends Screen {

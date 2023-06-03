@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client_vr.gui.settings.GuiQuickCommandsInGame;
+import org.vivecraft.client.gui.settings.GuiQuickCommandsInGame;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;

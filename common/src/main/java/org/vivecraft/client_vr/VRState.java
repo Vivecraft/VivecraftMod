@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.gui.ErrorScreen;
+import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.render.RenderConfigException;

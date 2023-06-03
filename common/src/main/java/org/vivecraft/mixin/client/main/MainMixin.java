@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client.main;
 
+import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,6 +26,7 @@ public class MainMixin {
 
 	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "main", remap = false)
 	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
+		new Thread(UpdateChecker::checkForUpdates).start();
 		OptionSet optionset = optionparser.parse(p_129642_);
 		ClientDataHolderVR.kiosk = optionset.has("kiosk");
 		
