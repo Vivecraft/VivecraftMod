@@ -213,7 +213,9 @@ public class ClientNetworking {
                 if (VRState.vrInitialized) {
                     dataholder.vrPlayer.teleportWarningTimer = -1;
                 }
-                if (!ClientNetworking.displayedChatMessage) {
+                if (!ClientNetworking.displayedChatMessage
+                        && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
+                        || (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()))) {
                     ClientNetworking.displayedChatMessage = true;
                     mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
                 }
