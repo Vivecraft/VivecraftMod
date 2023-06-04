@@ -12,4 +12,6 @@ public interface PipelineManagerExtension {
     // needed for sodium terrain shaders, to get all pipelines, and not just the one from the current pass
     WorldRenderingPipeline getVRPipeline(RenderPass pass);
 
+    WorldRenderingPipeline getVanillaPipeline();
+
 }

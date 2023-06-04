@@ -64,7 +64,7 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
 
             RenderPassManager.setVanillaRenderPass();
             Iris.logger.info("Creating sodium shaders for vanilla RenderPass");
-            createShadersMethod.invoke(this, sodiumTerrainPipeline, chunkVertexType);
+            createShadersMethod.invoke(this, ((PipelineManagerExtension) Iris.getPipelineManager()).getVanillaPipeline().getSodiumTerrainPipeline(), chunkVertexType);
             if (current != null) {
                 RenderPassManager.setWorldRenderPass(current);
                 ClientDataHolderVR.getInstance().currentPass = currentPass;

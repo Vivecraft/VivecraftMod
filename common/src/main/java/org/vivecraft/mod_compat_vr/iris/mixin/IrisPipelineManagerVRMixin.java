@@ -43,6 +43,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     }
 
     private final Map<DimensionId, Map<RenderPass, WorldRenderingPipeline>> vrPipelinesPerDimension = new HashMap<>();
+    private WorldRenderingPipeline vanillaPipeline;
     private  Map<RenderPass, WorldRenderingPipeline> vrPipelinesCurrentDimension;
 
     private WorldRenderPass currentWorldRenderPass = null;
@@ -59,6 +60,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.AFTER), remap = false)
     private void generateVRPipelines(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         if (VRState.vrInitialized) {
+            vanillaPipeline = pipeline;
             if (!this.vrPipelinesPerDimension.containsKey(newDimension)) {
                 vrPipelinesPerDimension.put(newDimension, new HashMap<>());
                 vrPipelinesCurrentDimension = vrPipelinesPerDimension.get(newDimension);
@@ -132,10 +134,15 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
             });
             shadowRenderTargets = null;
             vrPipelinesPerDimension.clear();
+            vanillaPipeline = null;
         }
     }
 
     public WorldRenderingPipeline getVRPipeline(RenderPass pass){
         return vrPipelinesCurrentDimension.get(pass);
+    }
+
+    public WorldRenderingPipeline getVanillaPipeline(){
+        return vanillaPipeline;
     }
 }
