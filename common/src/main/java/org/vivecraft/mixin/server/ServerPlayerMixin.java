@@ -139,10 +139,10 @@ public abstract class ServerPlayerMixin extends Player {
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z", shift = Shift.BEFORE), method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
 			locals = LocalCapture.CAPTURE_FAILHARD)
-	public void dropvive(ItemStack p_9085_, boolean p_9086_, boolean p_9087_, CallbackInfoReturnable<ItemEntity> info,
+	public void dropvive(ItemStack p_9085_, boolean dropAround, boolean includeName, CallbackInfoReturnable<ItemEntity> info,
 			ItemEntity itementity) {
 		ServerVivePlayer serverviveplayer = getVivePlayer();
-		if (serverviveplayer != null && serverviveplayer.isVR() && !p_9087_) {
+		if (serverviveplayer != null && serverviveplayer.isVR() && !dropAround) {
 			Vec3 vec3 = serverviveplayer.getControllerPos(0, this);
 			Vec3 vec31 = serverviveplayer.getControllerDir(0);
 			float f = 0.3F;
