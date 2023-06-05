@@ -123,6 +123,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Unique
     private float fov = 1.0F;
 
+    @Unique
+    private long currentNanoTime;
+
     @Shadow
     protected int missTime;
 
@@ -370,6 +373,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     //Replaces normal runTick
     public void newRunTick(boolean bl) {
+
+        currentNanoTime = Util.getNanos();
+
         // v
         this.profiler.push("setupRenderConfiguration");
         //
@@ -438,7 +444,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         // only draw the gui when the level was rendered once, since some mods expect that
         ((GameRendererExtension) this.gameRenderer).setShouldDrawGui(bl && this.entityRenderDispatcher.camera != null);
 
-        this.gameRenderer.render(f, System.nanoTime(), false);
+        this.gameRenderer.render(f, currentNanoTime, false);
         // draw cursor
         if (Minecraft.getInstance().screen != null) {
             PoseStack poseStack = RenderSystem.getModelViewStack();
@@ -1047,7 +1053,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         RenderSystem.clear(16384, ON_OSX);
         RenderSystem.enableDepthTest();
         this.profiler.push("updateCameraAndRender");
-        this.gameRenderer.render(nano, System.nanoTime(), renderworld);
+        this.gameRenderer.render(nano, currentNanoTime, renderworld);
         this.profiler.pop();
         this.checkGLError("post game render " + eye.name());
 
