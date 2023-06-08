@@ -29,13 +29,13 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modRuntimeOnly "maven.modrinth:sodium:mc1.19.4-0.4.10"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.20-0.4.10"
 
     // for iris compat
-    modRuntimeOnly "maven.modrinth:iris:1.5.2+1.19.4"
+    modRuntimeOnly "maven.modrinth:iris:1.6.4+1.20"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
-    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre9' //temp iris
-
+    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
+/*
     // for REI compat
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:11.0.597"
 

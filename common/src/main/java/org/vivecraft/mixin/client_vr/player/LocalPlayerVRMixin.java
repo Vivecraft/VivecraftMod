@@ -213,7 +213,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 VRPlayer.get().setRoomOrigin(VRPlayer.get().roomOrigin.x, this.getY() + this.getRoomYOffsetFromPose(),
                         VRPlayer.get().roomOrigin.z, false);
             } else {
-                this.onGround = true;
+                this.setOnGround(true);
             }
         } else {
             super.move(pType, pPos);
@@ -277,13 +277,13 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         }
         CollisionContext m = CollisionContext.of(this);
         BlockPos blockPos = BlockPos.containing(this.getX(), this.getBoundingBox().maxY, this.getZ());
-        BlockState blockState = this.level.getBlockState(blockPos);
-        if (!blockState.getCollisionShape(this.level, blockPos, m).isEmpty()) {
+        BlockState blockState = this.level().getBlockState(blockPos);
+        if (!blockState.getCollisionShape(this.level(), blockPos, m).isEmpty()) {
             ci.cancel();
             return;
         }
-        BlockState blockState2 = this.level.getBlockState(blockPos = blockPos.above());
-        if (!blockState2.getCollisionShape(this.level, blockPos, m).isEmpty()) {
+        BlockState blockState2 = this.level().getBlockState(blockPos = blockPos.above());
+        if (!blockState2.getCollisionShape(this.level(), blockPos, m).isEmpty()) {
             ci.cancel();
             return;
         }
@@ -306,7 +306,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         Vec3 vec39 = vec35.subtract(vec37);
         Vec3 vec310 = vec34.add(vec37);
         Vec3 vec311 = vec35.add(vec37);
-        Iterable<VoxelShape> iterable = this.level.getCollisions(this, aABB);
+        Iterable<VoxelShape> iterable = this.level().getCollisions(this, aABB);
         Iterator iterator = StreamSupport.stream(iterable.spliterator(), false).flatMap(voxelShape -> voxelShape.toAabbs().stream()).iterator();
         float s = Float.MIN_VALUE;
         while (iterator.hasNext()) {
@@ -319,13 +319,13 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             while ((float) t < p) {
                 BlockState blockState4;
                 BlockPos blockPos3 = blockPos2.above(t);
-                BlockState blockState3 = this.level.getBlockState(blockPos3);
-                VoxelShape voxelShape2 = blockState3.getCollisionShape(this.level, blockPos3, m);
+                BlockState blockState3 = this.level().getBlockState(blockPos3);
+                VoxelShape voxelShape2 = blockState3.getCollisionShape(this.level(), blockPos3, m);
                 if (!voxelShape2.isEmpty() && (double) (s = (float) voxelShape2.max(Direction.Axis.Y) + (float) blockPos3.getY()) - this.getY() > (double) p) {
                     ci.cancel();
                     return;
                 }
-                if (t > 1 && !(blockState4 = this.level.getBlockState(blockPos = blockPos.above())).getCollisionShape(this.level, blockPos, m).isEmpty()) {
+                if (t > 1 && !(blockState4 = this.level().getBlockState(blockPos = blockPos.above())).getCollisionShape(this.level(), blockPos, m).isEmpty()) {
                     ci.cancel();
                     return;
                 }
@@ -413,8 +413,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     public void doDrag() {
         float f = 0.91F;
-        if (this.onGround) {
-            f = this.level.getBlockState(BlockPos.containing(this.getX(), this.getBoundingBox().minY - 1.0D, this.getZ())).getBlock().getFriction() * 0.91F;
+        if (this.onGround()) {
+            f = this.level().getBlockState(BlockPos.containing(this.getX(), this.getBoundingBox().minY - 1.0D, this.getZ())).getBlock().getFriction() * 0.91F;
         }
         double d0 = (double) f;
         double d1 = (double) f;
@@ -595,10 +595,10 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void stepSound(BlockPos blockforNoise, Vec3 soundPos) {
-        BlockState blockstate = this.level.getBlockState(blockforNoise);
+        BlockState blockstate = this.level().getBlockState(blockforNoise);
         Block block = blockstate.getBlock();
         SoundType soundtype = block.getSoundType(blockstate);
-        BlockState blockstate1 = this.level.getBlockState(blockforNoise.above());
+        BlockState blockstate1 = this.level().getBlockState(blockforNoise.above());
 
         if (blockstate1.getBlock() == Blocks.SNOW) {
             soundtype = Blocks.SNOW.getSoundType(blockstate1);
@@ -608,8 +608,9 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         float f1 = soundtype.getPitch();
         SoundEvent soundevent = soundtype.getStepSound();
 
-        if (!this.isSilent() && !block.defaultBlockState().getMaterial().isLiquid()) {
-            this.level.playSound((LocalPlayer) null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
+        // TODO: liquid is deprecated
+        if (!this.isSilent() && !block.defaultBlockState().liquid()) {
+            this.level().playSound((LocalPlayer) null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
         }
     }
 

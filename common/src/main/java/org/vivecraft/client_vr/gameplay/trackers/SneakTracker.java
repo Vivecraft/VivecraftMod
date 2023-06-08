@@ -34,7 +34,7 @@ public class SneakTracker extends Tracker
         {
             return false;
         }
-        else if (p != null && p.isAlive() && p.isOnGround())
+        else if (p != null && p.isAlive() && p.onGround())
         {
             return !p.isPassenger();
         }

@@ -1,5 +1,6 @@
 package org.vivecraft.client.gui.settings;
 
+import net.minecraft.client.gui.GuiGraphics;
 import org.apache.commons.lang3.ArrayUtils;
 import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionLayout;
@@ -224,18 +225,18 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
         }
     }
 
-    public void render(PoseStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks)
+    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks)
     {
-        super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
 
         if (this.visibleList == null)
         {
-            drawCenteredString(pMatrixStack, this.minecraft.font,  Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925);
+            guiGraphics.drawCenteredString(this.minecraft.font,  Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925);
         }
 
         if (this.isShift)
         {
-            drawCenteredString(pMatrixStack, this.minecraft.font,  Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015);
+            guiGraphics.drawCenteredString(this.minecraft.font,  Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015);
         }
     }
 }

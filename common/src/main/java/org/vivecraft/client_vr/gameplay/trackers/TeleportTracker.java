@@ -385,7 +385,7 @@ public class TeleportTracker extends Tracker
     private boolean checkAndSetTeleportDestination(Minecraft mc, LocalPlayer player, Vec3 start, BlockHitResult collision, Vec3 reverseEpsilon)
     {
         BlockPos blockpos = collision.getBlockPos();
-        BlockState blockstate = player.level.getBlockState(blockpos);
+        BlockState blockstate = player.level().getBlockState(blockpos);
 
         if (!mc.level.getFluidState(blockpos).isEmpty())
         {
@@ -444,7 +444,7 @@ public class TeleportTracker extends Tracker
 
         for (int i = 0; i < 2; ++i)
         {
-            blockstate = player.level.getBlockState(blockpos1);
+            blockstate = player.level().getBlockState(blockpos1);
 
             if (blockstate.getCollisionShape(mc.level, blockpos1).isEmpty())
             {

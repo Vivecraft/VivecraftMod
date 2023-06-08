@@ -157,12 +157,12 @@ public class ClimbTracker extends Tracker
 
     private boolean canstand(BlockPos bp, LocalPlayer p)
     {
-        AABB aabb = p.level.getBlockState(bp).getCollisionShape(p.level, bp).bounds();
+        AABB aabb = p.level().getBlockState(bp).getCollisionShape(p.level(), bp).bounds();
 
         if (aabb != null && aabb.maxY != 0.0D)
         {
             BlockPos blockpos = bp.above();
-            AABB aabb1 = p.level.getBlockState(blockpos).getCollisionShape(p.level, blockpos).bounds();
+            AABB aabb1 = p.level().getBlockState(blockpos).getCollisionShape(p.level(), blockpos).bounds();
 
             if (aabb1 != null && aabb1.maxY > 0.0D)
             {
@@ -171,7 +171,7 @@ public class ClimbTracker extends Tracker
             else
             {
                 BlockPos blockpos1 = blockpos.above();
-                AABB aabb2 = p.level.getBlockState(blockpos1).getCollisionShape(p.level, blockpos1).bounds();
+                AABB aabb2 = p.level().getBlockState(blockpos1).getCollisionShape(p.level(), blockpos1).bounds();
                 return aabb2 == null || !(aabb2.maxY > 0.0D);
             }
         }
@@ -193,7 +193,7 @@ public class ClimbTracker extends Tracker
         {
             this.forceActivate = true;
         }
-        else if (this.mc.player.isOnGround() || this.mc.player.getAbilities().flying)
+        else if (this.mc.player.onGround() || this.mc.player.getAbilities().flying)
         {
             this.forceActivate = false;
         }
@@ -390,7 +390,7 @@ public class ClimbTracker extends Tracker
             }
             else
             {
-                if (this.mc.player.isOnGround())
+                if (this.mc.player.onGround())
                 {
                     this.mc.player.setOnGround(!this.latched[0] && !this.latched[1]);
                 }
@@ -528,7 +528,7 @@ public class ClimbTracker extends Tracker
 
         if (!this.latched[0] && !this.latched[1] && !flag2)
         {
-            if (player.isOnGround() && this.unsetflag)
+            if (player.onGround() && this.unsetflag)
             {
                 this.unsetflag = false;
                 VivecraftVRMod.INSTANCE.keyClimbeyGrab.unpressKey(ControllerType.RIGHT);

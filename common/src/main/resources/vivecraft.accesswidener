@@ -28,6 +28,7 @@ accessible method net/minecraft/client/Minecraft isMultiplayerServer ()Z
 mutable field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
 accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
 accessible class net/minecraft/client/gui/screens/Screen
+accessible field net/minecraft/client/gui/Gui GUI_ICONS_LOCATION Lnet/minecraft/resources/ResourceLocation;
 mutable field com/mojang/blaze3d/pipeline/RenderTarget useDepth Z
 accessible class com/mojang/blaze3d/pipeline/MainTarget$Dimension
 accessible method com/mojang/blaze3d/pipeline/MainTarget$Dimension <init> (II)V
@@ -85,5 +86,5 @@ extendable method net/minecraft/client/renderer/entity/LivingEntityRenderer addL
 
 mutable field net/minecraft/client/renderer/entity/layers/RenderLayer renderer Lnet/minecraft/client/renderer/entity/RenderLayerParent;
 accessible field net/minecraft/client/renderer/entity/layers/RenderLayer renderer Lnet/minecraft/client/renderer/entity/RenderLayerParent;
-accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES Lnet/minecraft/world/item/CreativeModeTab;
-accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/minecraft/world/item/CreativeModeTab;
+accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES Lnet/minecraft/resources/ResourceKey;
+accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/minecraft/resources/ResourceKey;

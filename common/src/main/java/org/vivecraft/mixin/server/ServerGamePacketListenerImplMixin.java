@@ -54,7 +54,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
         var channelID = pPacket.getIdentifier();
 
         if (channelID.equals(CommonNetworkHelper.CHANNEL)) {
-            PacketUtils.ensureRunningOnSameThread(pPacket, this, this.player.getLevel());
+            PacketUtils.ensureRunningOnSameThread(pPacket, this, this.player.serverLevel());
             CommonNetworkHelper.PacketDiscriminators packetDiscriminator = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
             ServerNetworking.handlePacket(packetDiscriminator, buffer, (ServerGamePacketListenerImpl) (Object)this);
             if (packetDiscriminator == CLIMBING) {

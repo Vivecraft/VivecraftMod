@@ -1,7 +1,7 @@
 package org.vivecraft.client.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -52,16 +52,16 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+    public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
         // draw box outline
-        fill(poseStack,
+        guiGraphics.fill(
                 getX(),
                 getY(),
                 getX() + width,
                 getY() + this.height,
                 -6250336);
         // draw box inside
-        fill(poseStack,
+        guiGraphics.fill(
                 getX() + 1,
                 getY() + 1,
                 getX() + width - 1,
@@ -70,14 +70,14 @@ public class TextScrollWidget extends AbstractWidget {
 
         // draw text
         for (int line = 0; line + currentLine < formattedText.size() && line < maxLines; line++) {
-            drawString(poseStack, Minecraft.getInstance().font, formattedText.get(line + currentLine).getString(), getX() + padding, getY() + padding + line * 12, 16777215);
+            guiGraphics.drawString(Minecraft.getInstance().font, formattedText.get(line + currentLine).getString(), getX() + padding, getY() + padding + line * 12, 16777215);
         }
 
         float scrollbarStart = scrollSteps == 0 ? 0 : currentLine/(float)scrollSteps * scrollBarOffset;
 
         if (isFocused() || isHovered) {
             // draw scroll bar outline
-            fill(poseStack,
+            guiGraphics.fill(
                     getX() + width - scrollBarWidth - 2,
                     (int) (getY() + 1 + scrollbarStart),
                     getX() + width - 1,
@@ -86,7 +86,7 @@ public class TextScrollWidget extends AbstractWidget {
         }
 
         // draw scroll bar
-        fill(poseStack,
+        guiGraphics.fill(
                 getX() + width - scrollBarWidth - (isFocused() || isHovered ? 1 : 2),
                 (int)(getY() + (isFocused() || isHovered ? 2 : 1) + scrollbarStart),
                 getX() + width - (isFocused() || isHovered ? 2 : 1),

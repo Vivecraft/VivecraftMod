@@ -32,7 +32,7 @@ public class RunTracker extends Tracker
                 {
                     return false;
                 }
-                else if (p.isOnGround() || !p.isInWater() && !p.isInLava())
+                else if (p.onGround() || !p.isInWater() && !p.isInLava())
                 {
                     if (p.onClimbable())
                     {

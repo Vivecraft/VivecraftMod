@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Axis;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -446,15 +447,15 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "render(FJZ)V")
-    private void noGUIwithViewOnly(Gui instance, PoseStack poseStack, float f) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V"), method = "render(FJZ)V")
+    private void noGUIwithViewOnly(Gui instance, GuiGraphics guiGraphics, float f) {
         if (RenderPassType.isVanilla() || !ClientDataHolderVR.viewonly) {
-            instance.render(poseStack, f);
+            instance.render(guiGraphics, f);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "renderConfusionOverlay", cancellable = true)
-    private void noConfusionOverlayOnGUI(float f, CallbackInfo ci) {
+    private void noConfusionOverlayOnGUI(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
         if (DATA_HOLDER.currentPass == RenderPass.GUI) {
             ci.cancel();
         }
@@ -933,7 +934,7 @@ public abstract class GameRendererVRMixin
     }
 
     @Override
-    public void drawScreen(float f, Screen screen, PoseStack poseStack) {
+    public void drawScreen(float f, Screen screen, GuiGraphics guiGraphics) {
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
         posestack.setIdentity();
@@ -942,7 +943,7 @@ public abstract class GameRendererVRMixin
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ONE);
-        screen.render(poseStack, 0, 0, f);
+        screen.render(guiGraphics, 0, 0, f);
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ONE);
@@ -2229,7 +2230,7 @@ public abstract class GameRendererVRMixin
                 f2 = 0.5F;
             }
 
-            RenderSystem.setShaderTexture(0, Screen.GUI_ICONS_LOCATION);
+            RenderSystem.setShaderTexture(0, Gui.GUI_ICONS_LOCATION);
             float f3 = 0.00390625F;
             float f4 = 0.00390625F;
 

@@ -50,7 +50,7 @@ public abstract class EndermanMixin extends Monster {
 
     private static boolean canEntityBeSeen(Entity entity, Vec3 playerEyePos) {
         Vec3 entityEyePos = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
-        return entity.level.clip(new ClipContext(playerEyePos, entityEyePos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS;
+        return entity.level().clip(new ClipContext(playerEyePos, entityEyePos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS;
     }
 
 }

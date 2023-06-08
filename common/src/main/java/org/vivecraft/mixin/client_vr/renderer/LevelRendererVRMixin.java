@@ -144,10 +144,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"), method = "renderLevel")
-    public int oneLightingUpdates(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"), method = "renderLevel")
+    public int oneLightingUpdates(LevelLightEngine instance) {
         if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
-            instance.runUpdates(i, bl, bl2);
+            instance.runLightUpdates();
         }
         if (!RenderPassType.isVanilla()) {
             this.setShaderGroup();

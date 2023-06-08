@@ -87,8 +87,8 @@ public abstract class ServerPlayerMixin extends Player {
 			double d1 = (double) Mth.cos(f * ((float) Math.PI / 180F));
 			Vec3 vec31 = serverviveplayer.getControllerPos(0, this);
 
-			if (this.level instanceof ServerLevel) {
-				((ServerLevel) this.level).sendParticles(ParticleTypes.SWEEP_ATTACK, vec31.x + d0, vec31.y,
+			if (this.level() instanceof ServerLevel) {
+				((ServerLevel) this.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, vec31.x + d0, vec31.y,
 						vec31.z + d1, 0, d0, 0.0D, d1, 0.0D);
 			}
 		} else {
@@ -100,7 +100,7 @@ public abstract class ServerPlayerMixin extends Player {
 	protected void triggerItemUseEffects(ItemStack pStack, int pCount) {
 		if (!pStack.isEmpty() && this.isUsingItem()) {
 			if (pStack.getUseAnimation() == UseAnim.DRINK) {
-				this.playSound(this.getDrinkingSound(pStack), 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
+				this.playSound(this.getDrinkingSound(pStack), 0.5F, this.level().random.nextFloat() * 0.1F + 0.9F);
 			}
 
 			if (pStack.getUseAnimation() == UseAnim.EAT) {
@@ -132,7 +132,7 @@ public abstract class ServerPlayerMixin extends Player {
 					vec31 = serverviveplayer.getControllerPos(1, this);
 				}
 			}
-			this.level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, stack), vec31.x, vec31.y, vec31.z, vec3.x,
+			this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, stack), vec31.x, vec31.y, vec31.z, vec3.x,
 					vec3.y + 0.05D, vec3.z);
 		}
 	}
