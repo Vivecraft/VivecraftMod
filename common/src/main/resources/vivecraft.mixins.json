@@ -6,8 +6,8 @@
   "client": [
     "client.blaze3d.RenderSystemAccessor",
     "client.blaze3d.RenderTargetMixin",
-    "client.gui.screens.TitleScreenMixin",
     "client.gui.screens.ScreenMixin",
+    "client.gui.screens.TitleScreenMixin",
     "client.main.MainMixin",
     "client.player.AbstractClientPlayerMixin",
     "client.renderer.block.LiquidBlockRendererMixin",
@@ -21,6 +21,7 @@
     "client_vr.OptionsVRMixin",
     "client_vr.blaze3d.audio.LibraryVRMixin",
     "client_vr.blaze3d.platform.GlStateManagerVRMixin",
+    "client_vr.blaze3d.platform.InputConstantsVRMixin",
     "client_vr.blaze3d.platform.WindowVRMixin",
     "client_vr.blaze3d.systems.RenderSystemVRMixin",
     "client_vr.gui.EditBoxVRMixin",
