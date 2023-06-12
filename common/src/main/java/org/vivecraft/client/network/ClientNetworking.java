@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.common.network.CommonNetworkHelper;
@@ -78,7 +79,8 @@ public class ClientNetworking {
         FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
         friendlybytebuf.writeBytes(s.getBytes());
         Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new ResourceLocation("minecraft:register"), friendlybytebuf));
-        Minecraft.getInstance().getConnection().send(getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.VERSION, (CommonDataHolder.getInstance().versionIdentifier + (VRState.vrEnabled ? " VR" : " NONVR")).getBytes(Charsets.UTF_8)));
+        // send version string, with currently running
+        Minecraft.getInstance().getConnection().send(getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.VERSION, (CommonDataHolder.getInstance().versionIdentifier + (VRState.vrRunning ? " VR" : " NONVR")).getBytes(Charsets.UTF_8)));
     }
 
     public static void sendVRPlayerPositions(VRPlayer vrPlayer) {
@@ -239,7 +241,8 @@ public class ClientNetworking {
                         String s12 = buffer.readUtf(16384);
                         Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s12));
 
-                        if (block != null) {
+                        // if the block is not there AIR is returned
+                        if (block != Blocks.AIR) {
                             dataholder.climbTracker.blocklist.add(block);
                         }
                     }
@@ -299,8 +302,9 @@ public class ClientNetworking {
             case CRAWL -> ClientNetworking.serverAllowsCrawling = true;
             case NEW_NETWORKING -> ClientNetworking.legacyServer = false;
             case VR_SWITCHING -> {
-                ClientNetworking.serverAllowsVrSwitching = true;
+                ClientNetworking.serverAllowsVrSwitching = buffer.readBoolean();
                 if (VRState.vrInitialized) {
+                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
                     dataholder.vrPlayer.vrSwitchWarningTimer = -1;
                 }
             }

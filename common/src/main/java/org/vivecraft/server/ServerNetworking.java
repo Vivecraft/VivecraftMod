@@ -45,7 +45,15 @@ public class ServerNetworking {
                 listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VR_SWITCHING, new byte[0]));
                 listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.NEW_NETWORKING, new byte[0]));
 
+                // read initial VR State
+                byte[] string = new byte[buffer.readableBytes()];
+                buffer.readBytes(string);
+                String clientVivecraftVersion = new String(string);
+
                 vivePlayer = new ServerVivePlayer(playerEntity);
+
+                vivePlayer.setVR(!clientVivecraftVersion.contains("NONVR"));
+
                 ServerVRPlayers.getPlayersWithVivecraft(listener.player.server).put(playerEntity.getUUID(), vivePlayer);
 
                 break;
