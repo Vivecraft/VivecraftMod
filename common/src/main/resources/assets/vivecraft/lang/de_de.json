@@ -399,7 +399,7 @@
     "vivecraft.options.VR_MODE.tooltip": "wechsle zwischen VR/NONVR",
     "_comment_m10": "Messages",
     "vivecraft.messages.mode": "Modus:",
-    "vivecraft.messages.novrhotswitchinglegacy": "Veralteten Vivecraft server mod erkannt. Dieser Server unterstützt kein VR Modus wechsel. Sie können the Modus nur im Hauptmenü wechseln.",
+    "vivecraft.messages.novrhotswitchinglegacy": "Veralteten Vivecraft server mod erkannt. Dieser Server unterstützt kein VR Modus wechsel. Sie können den Modus nur im Hauptmenü wechseln.",
     "vivecraft.messages.updateAvailable": "§a[Vivecraft]§r Update verfügbar: %s. Klicke für mehr Details.",
     "vivecraft.messages.click": "Klicke für mehr Details.",
 
