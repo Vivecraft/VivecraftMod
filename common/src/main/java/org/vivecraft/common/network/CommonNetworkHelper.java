@@ -9,6 +9,11 @@ public class CommonNetworkHelper {
 
     public static final ResourceLocation CHANNEL = new ResourceLocation("vivecraft:data");
 
+    // maximum supported network version
+    public static final int MAX_SUPPORTED_NETWORK_VERSION = 0;
+    // minimum supported network version
+    public static final int MIN_SUPPORTED_NETWORK_VERSION = 0;
+
     public enum PacketDiscriminators {
         VERSION,
         REQUESTDATA,
@@ -25,7 +30,7 @@ public class CommonNetworkHelper {
         HEIGHT,
         ACTIVEHAND,
         CRAWL,
-        NEW_NETWORKING,
+        NETWORK_VERSION,
         VR_SWITCHING,
         IS_VR_ACTIVE,
         VR_PLAYER_STATE
