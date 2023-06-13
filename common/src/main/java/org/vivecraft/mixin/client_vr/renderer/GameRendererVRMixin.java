@@ -279,7 +279,7 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At("HEAD"), method = "getFov(Lnet/minecraft/client/Camera;FZ)D", cancellable = true)
     public void fov(Camera camera, float f, boolean bl, CallbackInfoReturnable<Double> info) {
-        if (this.minecraft.level == null) { // Vivecraft: using this on the main menu
+        if (this.minecraft.level == null || isInMenuRoom()) { // Vivecraft: using this on the main menu
             info.setReturnValue(Double.valueOf(this.minecraft.options.fov().get()));
         }
     }

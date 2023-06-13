@@ -3,6 +3,7 @@ package org.vivecraft.server;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.utils.math.Vector3;
 
@@ -20,6 +21,8 @@ public class ServerVivePlayer {
     public Vec3 offset = new Vec3(0.0D, 0.0D, 0.0D);
     public ServerPlayer player;
     final Vector3 forward = new Vector3(0.0F, 0.0F, -1.0F);
+
+    public int networkVersion = CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION;
 
     public ServerVivePlayer(ServerPlayer player) {
         this.player = player;

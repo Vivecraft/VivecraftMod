@@ -2,6 +2,7 @@ package org.vivecraft.server;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,16 +38,43 @@ public class ServerNetworking {
 
         switch (packetID) {
             case VERSION:
+
+                vivePlayer = new ServerVivePlayer(playerEntity);
+
+                // read initial VR State
+                byte[] stringBytes = new byte[buffer.readableBytes()];
+                buffer.readBytes(stringBytes);
+                String[] parts = new String(stringBytes).split("\\n");
+                String clientVivecraftVersion = parts[0];
+                if (parts.length >= 3) {
+                    // has versions
+                    int clientMaxVersion = Integer.parseInt(parts[1]);
+                    int clientMinVersion = Integer.parseInt(parts[2]);
+                    // check if client supports a supported version
+                    if (CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION <= clientMaxVersion
+                        && clientMinVersion <= CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION) {
+                        vivePlayer.networkVersion = Math.min(clientMaxVersion, CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION);
+                    } else {
+                        // unsupported version, send notification, and disregard
+                        listener.player.sendSystemMessage(Component.literal("Unsupported vivecraft version, VR features will not work"));
+                        return;
+                    }
+                } else {
+                    // client didn't send a version, so it's a legacy client
+                    vivePlayer.networkVersion = -1;
+                }
+
+                vivePlayer.setVR(!clientVivecraftVersion.contains("NONVR"));
+
+                ServerVRPlayers.getPlayersWithVivecraft(listener.player.server).put(playerEntity.getUUID(), vivePlayer);
+
                 listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VERSION, CommonDataHolder.getInstance().versionIdentifier));
                 listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.REQUESTDATA, new byte[0]));
                 listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.CLIMBING, new byte[]{1, 0}));
                 listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.TELEPORT, new byte[0]));
                 listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[0]));
-                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VR_SWITCHING, new byte[0]));
-                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.NEW_NETWORKING, new byte[0]));
-
-                vivePlayer = new ServerVivePlayer(playerEntity);
-                ServerVRPlayers.getPlayersWithVivecraft(listener.player.server).put(playerEntity.getUUID(), vivePlayer);
+                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VR_SWITCHING, new byte[]{1}));
+                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.NETWORK_VERSION, new byte[]{(byte)vivePlayer.networkVersion}));
 
                 break;
             case IS_VR_ACTIVE:
