@@ -310,7 +310,9 @@ public class ClientNetworking {
             case VR_SWITCHING -> {
                 ClientNetworking.serverAllowsVrSwitching = buffer.readBoolean();
                 if (VRState.vrInitialized) {
-                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
+                    if (!ClientNetworking.serverAllowsVrSwitching) {
+                        Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
+                    }
                     dataholder.vrPlayer.vrSwitchWarningTimer = -1;
                 }
             }
