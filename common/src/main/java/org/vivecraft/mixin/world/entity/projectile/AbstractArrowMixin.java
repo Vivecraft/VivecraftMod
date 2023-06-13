@@ -1,11 +1,23 @@
 package org.vivecraft.mixin.world.entity.projectile;
 
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.common.utils.Utils;
+import org.vivecraft.server.ServerConfig;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
@@ -25,6 +37,9 @@ public abstract class AbstractArrowMixin extends Entity {
 		// TODO Auto-generated constructor stub
 	}
 
+	@Shadow
+	private double baseDamage;
+
 	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V")
 	public void pickup(EntityType<? extends AbstractArrow> p_36717_, LivingEntity p_36718_, Level p_36719_, CallbackInfo info) {
 		if (p_36718_ instanceof ServerPlayer player) {
@@ -41,5 +56,69 @@ public abstract class AbstractArrowMixin extends Entity {
 				this.setPos(vec3.x + vec31.x, vec3.y + vec31.y, vec3.z + vec31.z);
 			}
 		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "onHitEntity")
+	public void damageMultiplier(EntityHitResult entityHitResult, CallbackInfo ci) {
+		if (((Projectile)(Object)this).getOwner() instanceof ServerPlayer owner) {
+			ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(owner);
+			Vec3 hitpos;
+			double multiplier = 1.0;
+			if ((hitpos = isHeadshot(entityHitResult)) != null) {
+				if (serverVivePlayer != null && serverVivePlayer.isVR()) {
+					if (serverVivePlayer.isSeated()) {
+						multiplier = baseDamage * ServerConfig.getDouble(ServerConfig.bowSeatedHeadshotMultiplier);
+					} else {
+						multiplier = baseDamage * ServerConfig.getDouble(ServerConfig.bowStandingHeadshotMultiplier);
+					}
+				} else {
+					multiplier = baseDamage * ServerConfig.getDouble(ServerConfig.bowVanillaHeadshotMultiplier);
+				}
+
+				if (multiplier > 1.0) {
+					// send headshot particles
+					((ServerLevel)this.level).sendParticles(
+						owner,
+						ParticleTypes.CRIT,
+						true, // always render the hit particles on the client
+						hitpos.x,
+						hitpos.y,
+						hitpos.z,
+						5,
+						- this.getDeltaMovement().x,
+						- this.getDeltaMovement().y,
+						- this.getDeltaMovement().z,
+						0.1);
+					// send sound effect
+					owner.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.ITEM_BREAK), SoundSource.PLAYERS, owner.getX(), owner.getY(), owner.getZ(), 0.7f, 0.5f, owner.level.random.nextLong()));
+				}
+			}
+			// if headshots are disabled, still use the regular multiplier
+			if (serverVivePlayer != null) {
+				if (serverVivePlayer.isSeated()) {
+					multiplier = Math.max(multiplier, ServerConfig.getDouble(ServerConfig.bowSeatedMultiplier));
+				} else {
+					multiplier = Math.max(multiplier, ServerConfig.getDouble(ServerConfig.bowStandingMultiplier));
+				}
+			}
+
+			baseDamage *= multiplier;
+		}
+	}
+
+	@Unique
+	// checks if the hit was a headshot, and returns the hit position, if it was, null otherwise
+	private Vec3 isHeadshot(EntityHitResult hit) {
+		AABB headBox;
+		if ((headBox = Utils.getEntityHeadHitbox(hit.getEntity(), 0.3)) != null) {
+			Vec3 originalHitpos = hit.getEntity()
+				.getBoundingBox()
+				.clip(this.position(), this.position().add(this.getDeltaMovement().scale(2.0)))
+				.orElse(this.position().add(this.getDeltaMovement()));
+			return headBox
+				.clip(this.position(), originalHitpos)
+				.orElse(headBox.contains(this.position()) ? this.position() : null);
+		}
+		return null;
 	}
 }

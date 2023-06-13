@@ -20,6 +20,9 @@
   "entrypoints": {
     "mm:early_risers": [
       "org.vivecraft.VivecraftEarlyEntryForOptifabric"
+    ],
+    "main": [
+      "org.vivecraft.fabric.VivecraftMod"
     ]
   },
   "mixins": [
