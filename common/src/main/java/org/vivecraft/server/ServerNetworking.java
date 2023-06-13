@@ -16,10 +16,7 @@ import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.vivecraft.server.ServerVRPlayers.getVivePlayer;
 
@@ -173,7 +170,7 @@ public class ServerNetworking {
         var manager = entity.level().getChunkSource();
         var storage = ((ServerChunkCache) manager).chunkMap;
         var playerTracker = ((ChunkMapAccessor) storage).getTrackedEntities().get(entity.getId());
-        return playerTracker.getPlayersTracking();
+        return playerTracker != null ? playerTracker.getPlayersTracking() : Collections.emptySet();
     }
 
     public static ClientboundCustomPayloadPacket createVRActivePlayerPacket(boolean vrActive, UUID playerID) {
