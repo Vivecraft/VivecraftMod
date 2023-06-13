@@ -24,7 +24,7 @@ public class UpdateChecker {
 
     public static String newestVersion = "";
 
-    public static void checkForUpdates() {
+    public static boolean checkForUpdates() {
         System.out.println("Checking for Vivecraft Updates");
         try {
             String apiURL = "https://api.modrinth.com/v2/project/vivecraft/version?loaders=[%22" +  Xplat.getModloader() + "%22]&game_versions=[%22" + SharedConstants.VERSION_STRING + "%22]";
@@ -37,7 +37,7 @@ public class UpdateChecker {
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 LogUtils.getLogger().error("Error " + conn.getResponseCode() + " fetching Vivecraft updates");
-                return;
+                return false;
             }
 
             JsonElement j = JsonParser.parseString(inputStreamToString(conn.getInputStream()));
@@ -78,6 +78,7 @@ public class UpdateChecker {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return hasUpdate;
     }
 
     private static String inputStreamToString(InputStream inputStream) {
