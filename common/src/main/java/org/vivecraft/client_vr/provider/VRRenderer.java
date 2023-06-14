@@ -331,16 +331,19 @@ public abstract class VRRenderer {
         list.add(RenderPass.LEFT);
         list.add(RenderPass.RIGHT);
 
-        if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
-            list.add(RenderPass.CENTER);
-        } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
-            if (dataholder.vrSettings.mixedRealityUndistorted && dataholder.vrSettings.mixedRealityUnityLike) {
+        // only do these, if the window is not minimized
+        if (minecraft.getWindow().getScreenWidth() > 0 && minecraft.getWindow().getScreenHeight() > 0) {
+            if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
                 list.add(RenderPass.CENTER);
-            }
+            } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
+                if (dataholder.vrSettings.mixedRealityUndistorted && dataholder.vrSettings.mixedRealityUnityLike) {
+                    list.add(RenderPass.CENTER);
+                }
 
-            list.add(RenderPass.THIRD);
-        } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
-            list.add(RenderPass.THIRD);
+                list.add(RenderPass.THIRD);
+            } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
+                list.add(RenderPass.THIRD);
+            }
         }
 
         if (minecraft.player != null) {
@@ -482,18 +485,21 @@ public abstract class VRRenderer {
                 System.out.println("Passes: " + renderpass.toString());
             }
 
-            if (list.contains(RenderPass.THIRD) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
-                this.framebufferMR = new VRTextureTarget("Mixed Reality Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, true, false, false);
-                WorldRenderPass.mixedReality = new WorldRenderPass((VRTextureTarget) this.framebufferMR);
-                dataholder.print(this.framebufferMR.toString());
-                this.checkGLError("Mixed reality framebuffer setup");
-            }
+            // only do these, if the window is not minimized
+            if (mirrorFBWidth > 0 && mirrorFBHeight > 0) {
+                if (list.contains(RenderPass.THIRD) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                    this.framebufferMR = new VRTextureTarget("Mixed Reality Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, true, false, false);
+                    WorldRenderPass.mixedReality = new WorldRenderPass((VRTextureTarget) this.framebufferMR);
+                    dataholder.print(this.framebufferMR.toString());
+                    this.checkGLError("Mixed reality framebuffer setup");
+                }
 
-            if (list.contains(RenderPass.CENTER) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
-                this.framebufferUndistorted = new VRTextureTarget("Undistorted View Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, false, false, false);
-                WorldRenderPass.center = new WorldRenderPass((VRTextureTarget) this.framebufferUndistorted);
-                dataholder.print(this.framebufferUndistorted.toString());
-                this.checkGLError("Undistorted view framebuffer setup");
+                if (list.contains(RenderPass.CENTER) || ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                    this.framebufferUndistorted = new VRTextureTarget("Undistorted View Render", this.mirrorFBWidth, this.mirrorFBHeight, true, false, -1, false, false, false);
+                    WorldRenderPass.center = new WorldRenderPass((VRTextureTarget) this.framebufferUndistorted);
+                    dataholder.print(this.framebufferUndistorted.toString());
+                    this.checkGLError("Undistorted view framebuffer setup");
+                }
             }
 
             GuiHandler.guiFramebuffer = new VRTextureTarget("GUI", GuiHandler.guiWidth, GuiHandler.guiHeight, true, false, -1, false, true, false);
