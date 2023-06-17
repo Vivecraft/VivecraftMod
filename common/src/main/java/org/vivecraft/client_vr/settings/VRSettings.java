@@ -5,8 +5,7 @@
 package org.vivecraft.client_vr.settings;
 
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.OptionsExtension;
 import com.google.gson.JsonObject;
@@ -1126,7 +1125,7 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-                if (VRState.vrRunning && !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                if (VRState.vrRunning && !ShadersHelper.isShaderActive()) {
                     ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
                 }
             }

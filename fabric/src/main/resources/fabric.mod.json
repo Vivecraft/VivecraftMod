@@ -17,6 +17,11 @@
   "license": "LGPLv3",
 
   "environment": "*",
+  "entrypoints": {
+    "mm:early_risers": [
+      "org.vivecraft.VivecraftEarlyEntryForOptifabric"
+    ]
+  },
   "mixins": [
     "vivecraft.mixins.json",
     "vivecraft.sodium.mixins.json",

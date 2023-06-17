@@ -9,12 +9,6 @@ import java.io.IOException;
 
 public class IrisHelper {
 
-    public static int ShaderLight() {
-        if (IrisApi.getInstance().isShaderPackInUse()) {
-            return 8;
-        }
-        return 4;
-    }
 
     public static void setShadersActive(boolean bl) {
         IrisApi.getInstance().getConfig().setShadersEnabledAndApply(bl);

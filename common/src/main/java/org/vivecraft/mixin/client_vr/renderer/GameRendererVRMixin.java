@@ -53,10 +53,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client.Xevents;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -668,11 +667,8 @@ public abstract class GameRendererVRMixin
         if (this.minecraft.level != null) {
             float f = (float) this.minecraft.level.getMaxLocalRawBrightness(
                     BlockPos.containing(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition()));
-            // int i = Config.isShaders() ? 8 : 4; TODO
-            int i = 4;
-            if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
-                i = IrisHelper.ShaderLight();
-            }
+
+            int i = ShadersHelper.ShaderLight();
 
             if (f < (float) i) {
                 f = (float) i;
@@ -1222,11 +1218,7 @@ public abstract class GameRendererVRMixin
                     vec3 = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition();
                 }
 
-//				int i = Config.isShaders() ? 8 : 4; TODO
-                int i = 4;
-                if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
-                    i = IrisHelper.ShaderLight();
-                }
+                int i = ShadersHelper.ShaderLight();
                 int j = Utils.getCombinedLightWithMin(this.minecraft.level, BlockPos.containing(vec3), i);
                 this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
                         (float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
@@ -1354,7 +1346,7 @@ public abstract class GameRendererVRMixin
                         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
                                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
                                 GlStateManager.SourceFactor.ONE_MINUS_DST_ALPHA, GlStateManager.DestFactor.ONE);
-                        if (GameRendererVRMixin.DATA_HOLDER.vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID && (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()) {
+                        if (GameRendererVRMixin.DATA_HOLDER.vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID && ShadersHelper.isShaderActive()) {
                             RenderSystem.disableBlend();
                         }
                     } else {
@@ -1377,11 +1369,7 @@ public abstract class GameRendererVRMixin
                             vec31 = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition();
                         }
 
-//						int i = Config.isShaders() ? 8 : 4; TODO
-                        int i = 4;
-                        if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
-                            i = IrisHelper.ShaderLight();
-                        }
+                        int i = ShadersHelper.ShaderLight();
                         int j = Utils.getCombinedLightWithMin(this.minecraft.level, BlockPos.containing(vec31), i);
                         this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
                                 (float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,

@@ -28,4 +28,12 @@ public class FabricGameRendererVRMixin {
             ((GameRendererExtension) this).applyVRModelView(ClientDataHolderVR.getInstance().currentPass, s);
         }
     }
+
+    //optifabric only
+    @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V ", ordinal = 4), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V", expect = 0)
+    public void removeMulposeY2(PoseStack s, Quaternionf quaternion) {
+        if (RenderPassType.isVanilla()) {
+            s.mulPose(quaternion);
+        }
+    }
 }
