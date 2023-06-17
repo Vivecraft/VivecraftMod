@@ -41,6 +41,7 @@ accessible class com/mojang/blaze3d/platform/GlStateManager$BlendState
 mutable field com/mojang/blaze3d/pipeline/MainTarget DEFAULT_WIDTH I
 mutable field com/mojang/blaze3d/pipeline/MainTarget DEFAULT_HEIGHT I
 accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWithItem (Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V
+accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
 
 accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
 accessible field net/minecraft/world/level/block/state/StateHolder propertiesCodec Lcom/mojang/serialization/MapCodec;
