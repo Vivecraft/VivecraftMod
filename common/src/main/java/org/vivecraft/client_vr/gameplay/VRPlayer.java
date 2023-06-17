@@ -605,9 +605,10 @@ public class VRPlayer
     	else  if (entity.isSprinting() && (entity.input.jumping || mc.options.keyJump.isDown()) || entity.isFallFlying() || entity.isSwimming() && entity.zza > 0.0F)
             {
     		//Server-side movement
-    		VRSettings vrsettings = this.dh.vrSettings;
+            VRSettings.FreeMove freeMoveType = entity.isFallFlying() && this.dh.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ? this.dh.vrSettings.vrFreeMoveFlyMode : this.dh.vrSettings.vrFreeMoveMode;
 
-    		if (this.dh.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.CONTROLLER)
+
+    		if (freeMoveType == VRSettings.FreeMove.CONTROLLER)
                 {
                     entity.setYRot(data.getController(1).getYaw());
                     entity.setYHeadRot(entity.getYRot());

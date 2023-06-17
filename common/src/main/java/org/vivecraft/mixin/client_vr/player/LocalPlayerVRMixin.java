@@ -4,6 +4,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
@@ -466,14 +467,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 d2 = d2 * d3;
                 Vec3 vec3 = new Vec3(d1, 0.0D, d2);
                 VRPlayer vrplayer1 = this.dataholder.vrPlayer;
-                boolean flag = !this.isPassenger() && (this.getAbilities().flying || this.isSwimming());
+                boolean isFlyingOrSwimming = !this.isPassenger() && (this.getAbilities().flying || this.isSwimming());
 
                 if (ClientDataHolderVR.katvr) {
                     jkatvr.query();
                     d3 = (double) (jkatvr.getSpeed() * jkatvr.walkDirection() * this.dataholder.vrSettings.movementSpeedMultiplier);
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
-                    if (flag) {
+                    if (isFlyingOrSwimming) {
                         vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float) Math.PI / 180F));
                     }
 
@@ -483,7 +484,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                     d3 = (double) (jinfinadeck.getSpeed() * jinfinadeck.walkDirection() * this.dataholder.vrSettings.movementSpeedMultiplier);
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
-                    if (flag) {
+                    if (isFlyingOrSwimming) {
                         vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float) Math.PI / 180F));
                     }
 
@@ -494,13 +495,16 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                         j = 1;
                     }
 
-                    if (flag) {
+                    if (isFlyingOrSwimming) {
                         vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.getController(j).getPitch() * ((float) Math.PI / 180F));
                     }
 
                     vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.getController(j).getYaw() * ((float) Math.PI / 180F));
                 } else {
-                    if (flag) {
+
+                    VRSettings.FreeMove freeMoveType = !this.isPassenger() && this.getAbilities().flying && this.dataholder.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ? this.dataholder.vrSettings.vrFreeMoveFlyMode : this.dataholder.vrSettings.vrFreeMoveMode;
+
+                    if (isFlyingOrSwimming) {
                         switch (this.dataholder.vrSettings.vrFreeMoveMode) {
                             case CONTROLLER:
                                 vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.getController(1).getPitch() * ((float) Math.PI / 180F));

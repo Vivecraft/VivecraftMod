@@ -10,6 +10,7 @@ public class GuiFreeMoveSettings extends GuiVROptionsBase
 {
     private static VRSettings.VrOptions[] standingSettings = new VRSettings.VrOptions[] {
     		VRSettings.VrOptions.FREEMOVE_MODE,
+            VRSettings.VrOptions.FREEMOVE_FLY_MODE,
 			VRSettings.VrOptions.FOV_REDUCTION,
 			VRSettings.VrOptions.INERTIA_FACTOR,
 			VRSettings.VrOptions.MOVEMENT_MULTIPLIER,
