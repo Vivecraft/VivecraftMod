@@ -593,6 +593,8 @@ public abstract class VRRenderer {
                 ShaderHelper.checkGLError("init depth shader");
                 VRShaders.setupFOVReduction();
                 ShaderHelper.checkGLError("init FOV shader");
+                VRShaders.setupPortalShaders();
+                ShaderHelper.checkGLError("init portal shader");
                 minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
             } catch (Exception exception1) {
                 System.out.println(exception1.getMessage());
