@@ -61,6 +61,7 @@
     "client_vr.world.FishingHookVRMixin",
     "client_vr.world.ItemVRMixin",
     "client_vr.world.PotionItemVRMixin",
+    "client_vr.world.entity.projectile.FireworkRocketEntityVRMixin",
     "client_vr.world.level.block.DoorBlockVRMixin",
     "client_vr.world.level.block.FenceGateBlockVRMixin",
     "client_vr.world.level.block.TrapDoorBlockVRMixin"
