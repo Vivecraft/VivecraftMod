@@ -305,7 +305,7 @@ public class VRSettings
     public boolean displayMirrorLeftEye = false;
     public boolean shouldRenderSelf=false;
     @SettingField(VrOptions.MENU_WORLD_SELECTION)
-    public MenuWorld menuWorldSelection = MenuWorld.BOTH;
+    public boolean menuWorldSelection = false;
     //
 
     //Mixed Reality

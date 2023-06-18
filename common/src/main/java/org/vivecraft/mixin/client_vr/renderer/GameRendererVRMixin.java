@@ -78,6 +78,7 @@ import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.VRWidgetHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 
 import java.nio.file.Path;
 
@@ -734,6 +735,7 @@ public abstract class GameRendererVRMixin
     @Override
     public boolean isInMenuRoom() {
         return this.minecraft.level == null ||
+                TitleWorldsMod.state.isTitleWorld ||
                 this.minecraft.screen instanceof WinScreen ||
                 this.minecraft.screen instanceof ReceivingLevelScreen ||
                 this.minecraft.screen instanceof ProgressScreen ||
@@ -1295,7 +1297,7 @@ public abstract class GameRendererVRMixin
                     poseStack.setIdentity();
                     RenderSystem.applyModelViewMatrix();
 
-                    if (flag) {
+                    if (flag && (!TitleWorldsMod.state.isTitleWorld || !TitleWorldsMod.state.finishedLoading)) {
                         pMatrix.pushPose();
                         Vec3 eye = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render
                                 .getEye(GameRendererVRMixin.DATA_HOLDER.currentPass).getPosition();

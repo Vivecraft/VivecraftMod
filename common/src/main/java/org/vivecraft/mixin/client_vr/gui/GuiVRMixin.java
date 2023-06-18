@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 
 @Mixin(Gui.class)
 public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
@@ -100,6 +101,13 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0), method = "renderHotbar")
     public boolean slotSwap(ItemStack instance) {
         return !(!instance.isEmpty() || (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar));
+    }
+
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    public void stopTitleWorlds(PoseStack poseStack, float f, CallbackInfo ci) {
+        if (TitleWorldsMod.state.isTitleWorld) {
+            ci.cancel();
+        }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2, shift = At.Shift.BEFORE), method = "renderHotbar")
