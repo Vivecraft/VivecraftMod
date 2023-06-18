@@ -413,23 +413,29 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     public void doDrag() {
-        float f = 0.91F;
+        float friction = 0.91F;
+
         if (this.onGround) {
-            f = this.level.getBlockState(BlockPos.containing(this.getX(), this.getBoundingBox().minY - 1.0D, this.getZ())).getBlock().getFriction() * 0.91F;
+            friction = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.91F;
         }
-        double d0 = (double) f;
-        double d1 = (double) f;
-        this.setDeltaMovement(this.getDeltaMovement().x / d0, this.getDeltaMovement().y, this.getDeltaMovement().z / d1);
-        double d2 = dataholder.vrSettings.inertiaFactor.getFactor();
-        double d3 = this.getBoundedAddition(this.additionX);
-        double d4 = (double) f * d3 / (double) (1.0F - f);
-        double d5 = d4 / ((double) f * (d4 + d3 * d2));
-        d0 = d0 * d5;
-        double d6 = this.getBoundedAddition(this.additionZ);
-        double d7 = (double) f * d6 / (double) (1.0F - f);
-        double d8 = d7 / ((double) f * (d7 + d6 * d2));
-        d1 = d1 * d8;
-        this.setDeltaMovement(this.getDeltaMovement().x * d0, this.getDeltaMovement().y, this.getDeltaMovement().z * d1);
+        double xFactor = friction;
+        double zFactor = friction;
+        // account for stock drag code we can't change in LivingEntity#travel
+        this.setDeltaMovement(this.getDeltaMovement().x / xFactor, this.getDeltaMovement().y, this.getDeltaMovement().z / zFactor);
+
+        double addFactor = dataholder.vrSettings.inertiaFactor.getFactor();
+
+        double boundedAdditionX = getBoundedAddition(additionX);
+        double targetLimitX = (friction * boundedAdditionX) / (1f - friction);
+        double multiFactorX = targetLimitX / (friction * (targetLimitX + (boundedAdditionX * addFactor)));
+        xFactor *= multiFactorX;
+
+        double boundedAdditionZ = getBoundedAddition(additionZ);
+        double targetLimitZ = (friction * boundedAdditionZ) / (1f - friction);
+        double multiFactorZ = targetLimitZ / (friction * (targetLimitZ + (boundedAdditionZ * addFactor)));
+        zFactor *= multiFactorZ;
+
+        this.setDeltaMovement(this.getDeltaMovement().x * xFactor, this.getDeltaMovement().y, this.getDeltaMovement().z * zFactor);
     }
 
     public double getBoundedAddition(double orig) {
