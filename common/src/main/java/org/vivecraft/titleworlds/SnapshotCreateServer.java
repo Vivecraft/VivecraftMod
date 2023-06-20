@@ -1,6 +1,7 @@
 package org.vivecraft.titleworlds;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.logging.LogUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.SharedConstants;
@@ -9,7 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -54,9 +57,7 @@ public class SnapshotCreateServer extends MinecraftServer {
                 worldStem,
                 Proxy.NO_PROXY,
                 minecraft.getFixerUpper(),
-                null,
-                null,
-                null,
+                Services.create(new YggdrasilAuthenticationService(minecraft.getProxy()), minecraft.gameDirectory),
                 LoggerChunkProgressListener::new
         );
         this.minecraft = minecraft;
@@ -65,7 +66,7 @@ public class SnapshotCreateServer extends MinecraftServer {
 
     @Override
     protected boolean initServer() {
-        this.setPlayerList(new PlayerList(this, this.registryAccess(), this.playerDataStorage, 1) {
+        this.setPlayerList(new PlayerList(this, this.registries(), this.playerDataStorage, 1) {
             @Override
             public @NotNull CompoundTag getSingleplayerData() {
                 assert Minecraft.getInstance().player != null;
@@ -127,7 +128,7 @@ public class SnapshotCreateServer extends MinecraftServer {
 
         CompoundTag compoundTag = new CompoundTag();
         compoundTag.put("data", idCounts);
-        compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+        NbtUtils.addCurrentDataVersion(compoundTag);
 
         try {
             NbtIo.writeCompressed(compoundTag, new File(dataStorageFolder, "idcounts.dat"));
@@ -190,7 +191,7 @@ public class SnapshotCreateServer extends MinecraftServer {
 
     @Override
     public void onServerCrash(CrashReport report) {
-        this.minecraft.delayCrash(() -> report);
+        this.minecraft.delayCrash(report);
     }
 
     @Override

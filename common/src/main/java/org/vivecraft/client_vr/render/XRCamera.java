@@ -10,6 +10,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 
 
 public class XRCamera extends Camera {
@@ -49,7 +50,7 @@ public class XRCamera extends Camera {
         if (RenderPassType.isVanilla()) {
             return super.isDetached();
         }
-        boolean renderSelf = ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA;
+        boolean renderSelf = (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON && !TitleWorldsMod.state.isTitleWorld) || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA;
         return renderSelf || ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf;
     }
 }

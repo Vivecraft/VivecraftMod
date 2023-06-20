@@ -48,6 +48,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.titleworlds.TitleWorldsMod;
 
 public abstract class MCVR
 {

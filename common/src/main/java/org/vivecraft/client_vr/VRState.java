@@ -10,6 +10,8 @@ import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.titleworlds.TitleWorldsMod;
+import org.vivecraft.titleworlds.extensions.MinecraftTitleworldExtension;
 
 public class VRState {
 
@@ -68,6 +70,10 @@ public class VRState {
         dh.vrPlayer.registerTracker(dh.cameraTracker);
 
         dh.vr.postinit();
+
+        if (ClientDataHolderVR.getInstance().vrSettings.menuWorldSelection && !TitleWorldsMod.state.isTitleWorld) {
+            ((MinecraftTitleworldExtension) Minecraft.getInstance()).tryLoadTitleWorld();
+        }
     }
 
     public static void startVR() {
@@ -87,6 +93,10 @@ public class VRState {
         dh.vrRenderer = null;
         vrInitialized = false;
         vrRunning = false;
+
+        if(TitleWorldsMod.state.isTitleWorld){
+            //Minecraft.getInstance().clearLevel(null);
+        }
     }
 
     public static void pauseVR() {

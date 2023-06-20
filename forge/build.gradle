@@ -22,7 +22,6 @@ loom {
         mixinConfig "vivecraft.optifine.mixins.json"
 
         mixinConfig "vivecraft.forge.mixins.json"
-        mixinConfig "titleworlds.forge.mixins.json"
     }
 }
 

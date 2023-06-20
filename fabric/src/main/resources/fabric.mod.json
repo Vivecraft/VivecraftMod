@@ -32,8 +32,7 @@
     "vivecraft.fabric.sodium.mixins.json",
     "vivecraft.iris.mixins.json",
     "vivecraft.rei.mixins.json",
-    "vivecraft.fabric.mixins.json",
-    "titleworlds.fabric.mixins.json"
+    "vivecraft.fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.14",

@@ -84,6 +84,8 @@ import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.titleworlds.TitleWorldsMod;
+import org.vivecraft.titleworlds.extensions.MinecraftTitleworldExtension;
 //import org.vivecraft.provider.ovr_lwjgl.MC_OVR;
 //import org.vivecraft.provider.ovr_lwjgl.OVR_StereoRenderer;
 //import org.vivecraft.provider.ovr_lwjgl.OVR_StereoRenderer;
@@ -270,22 +272,26 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Shadow @Final public LevelRenderer levelRenderer;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    void afterInit(GameConfig gameConfig, CallbackInfo ci) {
-        RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
-    }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay initVivecraft(Overlay overlay) {
+        RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
         try {
             VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
             if (VRState.vrEnabled) {
                 VRState.initializeVR();
+
             }
         } catch (Exception exception) {
             exception.printStackTrace();
         }
         return overlay;
+    }
+    @Inject(method = "<init>", at = @At("RETURN"))
+    void afterInit(GameConfig gameConfig, CallbackInfo ci) {
+        if (ClientDataHolderVR.getInstance().vrSettings.menuWorldSelection && !TitleWorldsMod.state.isTitleWorld) {
+            ((MinecraftTitleworldExtension) Minecraft.getInstance()).tryLoadTitleWorld();
+        }
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
@@ -312,6 +318,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             VRState.vrRunning = vrActive;
             if (vrActive) {
                 //TODO
+                /*
+                // TODO WORLDSPAWN is wrong
+                if (TitleWorldsMod.state.isTitleWorld) {
+                    ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(level.getLevelData().getXSpawn(), level.getLevelData().getYSpawn(), level.getLevelData().getZSpawn(), true);
+                } else*/
                 if (player != null) {
                     ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(player.position().x, player.position().y, player.position().z, true);
                 }
@@ -724,7 +735,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         this.window.setErrorSection("Post render");
         ++this.frames;
         boolean bl3 = this.hasSingleplayerServer()
-                && (this.screen != null && this.screen.isPauseScreen() || this.overlay != null && this.overlay.isPauseScreen())
+                && (this.screen != null && (this.screen.isPauseScreen() && !TitleWorldsMod.state.isTitleWorld) || this.overlay != null && this.overlay.isPauseScreen())
                 && !this.singleplayerServer.isPublished();
         if (this.pause != bl3) {
             if (this.pause) {

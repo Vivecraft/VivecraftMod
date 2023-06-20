@@ -16,7 +16,7 @@ public abstract class GameRendererMixin {
 
     @Shadow
     @Final
-    private Minecraft minecraft;
+    Minecraft minecraft;
 
     @Unique
     private boolean hideGui;
