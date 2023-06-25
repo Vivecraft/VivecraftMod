@@ -27,6 +27,7 @@ import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
@@ -270,13 +271,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Shadow @Final public LevelRenderer levelRenderer;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    void afterInit(GameConfig gameConfig, CallbackInfo ci) {
-        RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
-    }
+    @Shadow @Final private TextureManager textureManager;
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay initVivecraft(Overlay overlay) {
+        RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
+
         try {
             VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
             if (VRState.vrEnabled) {
@@ -286,6 +286,25 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             exception.printStackTrace();
         }
         return overlay;
+    }
+
+    // on resourcepack reload
+    @Group(name = "reloadMenuworld", min = 1, max = 1)
+    @Inject(at = @At("TAIL"), method = {
+        "method_24228",
+        "lambda$reloadResourcePacks$24"
+    }, remap = false, allow = 1)
+    public void reloadMenuworld(CallbackInfo ci) {
+        // reload menu world, because models might have changed
+        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null
+            && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
+			try {
+                ClientDataHolderVR.getInstance().menuWorldRenderer.destroy();
+                ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
+			} catch (Exception exception) {
+				exception.printStackTrace();
+			}
+		}
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
@@ -880,6 +899,15 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         }
 
         if (VRState.vrRunning) {
+
+            if (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
+                // update textures in the menu
+                if (this.level == null) {
+                    this.textureManager.tick();
+                }
+                ClientDataHolderVR.getInstance().menuWorldRenderer.tick();
+            }
+
             this.profiler.push("vrProcessInputs");
             ClientDataHolderVR.getInstance().vr.processInputs();
             ClientDataHolderVR.getInstance().vr.processBindings();
@@ -906,10 +934,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 }
             }
             this.profiler.pop();
-
-//		if (DataHolder.getInstance().menuWorldRenderer != null) {
-//			DataHolder.getInstance().menuWorldRenderer.tick();
-//		}
         }
 
         this.profiler.push("vrPlayers");

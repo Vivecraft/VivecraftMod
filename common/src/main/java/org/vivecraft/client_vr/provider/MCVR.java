@@ -11,11 +11,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.client_vr.VRData;
@@ -23,6 +27,8 @@ import org.vivecraft.client_vr.Vec3History;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
+import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
+import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VivecraftMovementInput;
@@ -1098,64 +1104,61 @@ public abstract class MCVR
 
             if (mod.keyExportWorld.consumeClick() && this.mc.level != null && this.mc.player != null)
             {
-//                try
-//                {
-//                    final BlockPos blockpos = this.mc.player.blockPosition();
-//                    int k = 320;
-//                    File file1 = new File("menuworlds/custom_114");
-//                    file1.mkdirs();
-//                    int i = 0;
-//
-//                    while (true)
-//                    {
-//                        final File file2 = new File(file1, "world" + i + ".mmw");
-//
-//                        if (!file2.exists())
-//                        {
-//                            System.out.println("Exporting world... area size: 320");
-//                            System.out.println("Saving to " + file2.getAbsolutePath());
-//
-//                            if (this.mc.isLocalServer())
-//                            {
-//                                final Level level = this.mc.getSingleplayerServer().getLevel(this.mc.player.level.dimension());
-//                                CompletableFuture<Void> completablefuture = this.mc.getSingleplayerServer().submit(new Runnable()
-//                                {
-//                                    public void run()
-//                                    {
-//                                        try
-//                                        {
-//                                            MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - 160, blockpos.getZ() - 160, 320, 320, blockpos.getY(), file2);
-//                                        }
-//                                        catch (IOException ioexception)
-//                                        {
-//                                            ioexception.printStackTrace();
-//                                        }
-//                                    }
-//                                });
-//
-//                                while (!completablefuture.isDone())
-//                                {
-//                                    Thread.sleep(10L);
-//                                }
-//                            }
-//                            else
-//                            {
-//                                MenuWorldExporter.saveAreaToFile(this.mc.level, blockpos.getX() - 160, blockpos.getZ() - 160, 320, 320, blockpos.getY(), file2);
-//                                this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
-//                            }
-//
-//                            this.mc.gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", 320)));
-//                            this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
-//                            break;
-//                        }
-//
-//                        ++i;
-//                    }
-//                }
-//                catch (Exception exception)
-//                {
-//                    exception.printStackTrace();
-//                }
+                try
+                {
+                    final BlockPos blockpos = this.mc.player.blockPosition();
+                    int size = 320;
+                    int offset = size/2;
+                    File file1 = new File(MenuWorldDownloader.customWorldFolder);
+                    file1.mkdirs();
+                    int i = 0;
+
+                    while (true)
+                    {
+                        final File file2 = new File(file1, "world" + i + ".mmw");
+
+                        if (!file2.exists())
+                        {
+                            VRSettings.logger.info("Exporting world... area size: " + size);
+                            VRSettings.logger.info("Saving to " + file2.getAbsolutePath());
+
+                            if (this.mc.isLocalServer())
+                            {
+                                final Level level = this.mc.getSingleplayerServer().getLevel(this.mc.player.level.dimension());
+                                CompletableFuture<Void> completablefuture = this.mc.getSingleplayerServer().submit(() -> {
+                                    try
+                                    {
+                                        MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset, size, size, blockpos.getY(), file2);
+                                    }
+                                    catch (IOException ioexception)
+                                    {
+                                        ioexception.printStackTrace();
+                                    }
+                                });
+
+                                while (!completablefuture.isDone())
+                                {
+                                    Thread.sleep(10L);
+                                }
+                            }
+                            else
+                            {
+                                MenuWorldExporter.saveAreaToFile(this.mc.level, blockpos.getX() - offset, blockpos.getZ() - offset, size, size, blockpos.getY(), file2);
+                                this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
+                            }
+
+                            this.mc.gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", size)));
+                            this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
+                            break;
+                        }
+
+                        ++i;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    exception.printStackTrace();
+                }
             }
 
             if (mod.keyTogglePlayerList.consumeClick())

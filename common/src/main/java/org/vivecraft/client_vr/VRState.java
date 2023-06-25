@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client.gui.screens.ErrorScreen;
+import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -68,6 +69,10 @@ public class VRState {
         dh.vrPlayer.registerTracker(dh.cameraTracker);
 
         dh.vr.postinit();
+
+        dh.menuWorldRenderer = new MenuWorldRenderer();
+
+        dh.menuWorldRenderer.init();
     }
 
     public static void startVR() {
@@ -85,6 +90,10 @@ public class VRState {
             dh.vrRenderer.destroy();
         }
         dh.vrRenderer = null;
+        if (dh.menuWorldRenderer != null) {
+            dh.menuWorldRenderer.completeDestroy();
+            dh.menuWorldRenderer = null;
+        }
         vrInitialized = false;
         vrRunning = false;
     }

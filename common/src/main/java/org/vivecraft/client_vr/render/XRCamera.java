@@ -1,6 +1,7 @@
 package org.vivecraft.client_vr.render;
 
 import com.mojang.math.Axis;
+import net.minecraft.world.level.material.FogType;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 
@@ -51,5 +52,15 @@ public class XRCamera extends Camera {
         }
         boolean renderSelf = ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA;
         return renderSelf || ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf;
+    }
+    
+    // some mods call this, when querying the sunrise color in the menu world
+    @Override
+    public FogType getFluidInCamera() {
+        if (this.level == null) {
+            return FogType.NONE;
+        } else {
+            return super.getFluidInCamera();
+        }
     }
 }
