@@ -2223,17 +2223,17 @@ public abstract class GameRendererVRMixin
 
             BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 
-            RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
-            bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
+            RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
+            bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
             bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).color(f2, f2, f2, 1.0F)
-                    .uv(0.0F, 15.0F * f4).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+                    .uv(0.0F, 15.0F * f4).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).color(f2, f2, f2, 1.0F)
-                    .uv(15.0F * f3, 15.0F * f4).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+                    .uv(15.0F * f3, 15.0F * f4).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).color(f2, f2, f2, 1.0F)
-                    .uv(15.0F * f3, 0.0F).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+                    .uv(15.0F * f3, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).color(f2, f2, f2, 1.0F)
-                    .uv(0.0F, 0.0F).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+                    .uv(0.0F, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
 
             BufferUploader.drawWithShader(bufferbuilder.end());
 

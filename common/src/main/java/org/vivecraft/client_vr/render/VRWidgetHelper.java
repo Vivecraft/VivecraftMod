@@ -135,23 +135,23 @@ public class VRWidgetHelper
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
         if (minecraft.level != null)
-            RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
+            RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
         else
             RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
         minecraft.gameRenderer.lightTexture().turnOnLightLayer();
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
+        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
         minecraft.getBlockRenderer().getModelRenderer().renderModel((new PoseStack()).last(), bufferbuilder, (BlockState)null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
         tesselator.end();
 
         RenderSystem.disableBlend();
         displayBindFunc.run();
-        RenderSystem.setShader(GameRenderer::getRendertypeSolidShader);
+        RenderSystem.setShader(GameRenderer::getRendertypeEntitySolidShader);
 
         BufferBuilder bufferbuilder1 = tesselator.getBuilder();
-        bufferbuilder1.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
+        bufferbuilder1.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
         for (BakedQuad bakedquad : minecraft.getModelManager().getModel(displayModel).getQuads((BlockState)null, (Direction)null, random))
         {
@@ -167,6 +167,7 @@ public class VRWidgetHelper
                                 Float.intBitsToFloat(vertexList[2]))
                         .color(1.0F, 1.0F, 1.0F, 1.0F)
                         .uv(flag ? 1.0F : 0.0F, 1.0F)
+                        .overlayCoords(OverlayTexture.NO_OVERLAY)
                         .uv2(j)
                         .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F)
                         .endVertex();
@@ -176,6 +177,7 @@ public class VRWidgetHelper
                                 Float.intBitsToFloat(vertexList[step+2]))
                         .color(1.0F, 1.0F, 1.0F, 1.0F)
                         .uv(flag ? 1.0F : 0.0F, 0.0F)
+                        .overlayCoords(OverlayTexture.NO_OVERLAY)
                         .uv2(j)
                         .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
                 bufferbuilder1.vertex(
@@ -184,6 +186,7 @@ public class VRWidgetHelper
                                 Float.intBitsToFloat(vertexList[step*2+2]))
                         .color(1.0F, 1.0F, 1.0F, 1.0F)
                         .uv(flag ? 0.0F : 1.0F, 0.0F)
+                        .overlayCoords(OverlayTexture.NO_OVERLAY)
                         .uv2(j)
                         .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
                 bufferbuilder1.vertex(
@@ -192,6 +195,7 @@ public class VRWidgetHelper
                                 Float.intBitsToFloat(vertexList[step*3+2]))
                         .color(1.0F, 1.0F, 1.0F, 1.0F)
                         .uv(flag ? 0.0F : 1.0F, 1.0F)
+                        .overlayCoords(OverlayTexture.NO_OVERLAY)
                         .uv2(j)
                         .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
             }
