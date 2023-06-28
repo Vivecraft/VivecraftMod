@@ -296,7 +296,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
         try {
             VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
-            if (VRState.vrEnabled) {
+            if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled) {
+                VRState.vrEnabled = true;
+                VRState.vrRunning = true;
                 VRState.initializeVR();
             }
         } catch (Exception exception) {
@@ -324,7 +326,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
     public void destroy(CallbackInfo info) {
         try {
-            VRState.destroyVR();
+            // the game crashed probably not because of us, so keep the vr choice
+            VRState.destroyVR(false);
         } catch (Exception ignored) {
         }
     }
@@ -334,13 +337,13 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         if (VRState.vrEnabled) {
             VRState.initializeVR();
         } else if (VRState.vrInitialized) {
-                VRState.destroyVR();
+                VRState.destroyVR(true);
                 resizeDisplay();
         }
         if (!VRState.vrInitialized) {
             return;
         }
-        boolean vrActive = ClientDataHolderVR.getInstance().vr.isActive();
+        boolean vrActive = !ClientDataHolderVR.getInstance().vrSettings.vrHotswitchingEnabled || ClientDataHolderVR.getInstance().vr.isActive();
         if (VRState.vrRunning != vrActive && (ClientNetworking.serverAllowsVrSwitching || player == null)) {
             VRState.vrRunning = vrActive;
             if (vrActive) {
@@ -656,8 +659,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             } catch (RenderConfigException renderConfigException) {
                 // TODO: could disabling VR here cause issues?
                 Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + ClientDataHolderVR.getInstance().vr.getName())));
-                VRState.vrEnabled = false;
-                VRState.destroyVR();
+                VRState.destroyVR(true);
                 return;
             } catch (Exception exception2) {
                 exception2.printStackTrace();
@@ -1024,6 +1026,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Inject(at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = At.Shift.BEFORE, ordinal = 0), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
     public void onOpenScreen(Screen pGuiScreen, CallbackInfo info) {
         GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
+    }
+
+    @Inject(at = @At("TAIL"), method = "setOverlay")
+    public void onOverlaySet(Overlay overlay, CallbackInfo ci) {
+        GuiHandler.onScreenChanged(this.screen, this.screen, true);
     }
 
     @Inject(method = "setScreen", at = @At("HEAD"))

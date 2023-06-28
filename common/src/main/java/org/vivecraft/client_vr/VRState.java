@@ -31,8 +31,7 @@ public class VRState {
         }
         if (!dh.vr.init()) {
             Minecraft.getInstance().setScreen(new ErrorScreen("VR init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus + "\nVR provider: " + dh.vr.getName())));
-            vrEnabled = false;
-            destroyVR();
+            destroyVR(true);
             return;
         }
 
@@ -43,8 +42,7 @@ public class VRState {
             RenderPassManager.setVanillaRenderPass();
         } catch(RenderConfigException renderConfigException) {
             Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + dh.vr.getName())));
-            vrEnabled = false;
-            destroyVR();
+            destroyVR(true);
             return;
         } catch(Exception e) {
             e.printStackTrace();
@@ -79,7 +77,7 @@ public class VRState {
         GLFW.glfwSwapInterval(0);
     }
 
-    public static void destroyVR() {
+    public static void destroyVR(boolean disableVRSetting) {
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
         if (dh.vr != null) {
             dh.vr.destroy();
@@ -94,8 +92,13 @@ public class VRState {
             dh.menuWorldRenderer.completeDestroy();
             dh.menuWorldRenderer = null;
         }
+        vrEnabled = false;
         vrInitialized = false;
         vrRunning = false;
+        if (disableVRSetting) {
+            ClientDataHolderVR.getInstance().vrSettings.vrEnabled = false;
+            ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+        }
     }
 
     public static void pauseVR() {

@@ -13,6 +13,7 @@ import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client.gui.screens.UpdateScreen;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
@@ -44,6 +45,9 @@ public abstract class TitleScreenMixin extends Screen {
         vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", getIcon() , VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
             showError = false;
             VRState.vrEnabled = !VRState.vrEnabled;
+            ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
+            ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+
             button.setMessage(Component.translatable("vivecraft.gui.vr", getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
         })
                 .size(56, 20)

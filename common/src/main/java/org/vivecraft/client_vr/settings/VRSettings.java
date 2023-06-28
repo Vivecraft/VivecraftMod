@@ -412,6 +412,10 @@ public class VRSettings
     public String lastUpdate = "";
     @SettingField(VrOptions.SHOW_PLUGIN)
     public ChatServerPluginMessage showServerPluginMessage = ChatServerPluginMessage.SERVER_ONLY;
+    @SettingField
+    public boolean vrEnabled = false;
+    @SettingField(VrOptions.VR_HOTSWITCH)
+    public boolean vrHotswitchingEnabled = true;
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
@@ -1343,6 +1347,7 @@ public class VRSettings
         },
         TOUCH_HOTBAR(false, true), // Touch Hotbar Enabled
         PLAY_MODE_SEATED(false, true, "vivecraft.options.seated", "vivecraft.options.standing"), // Play Mode
+        VR_HOTSWITCH(false, true),
         RENDER_SCALEFACTOR(true, false, 0.1f, 9f, 0.1f, 0) { // Resolution
             @Override
             String getDisplayString(String prefix, Object value) {
