@@ -34,11 +34,11 @@ public class MenuWorldDownloader {
 			String localSha1 = Utils.getFileChecksum(file, "SHA-1");
 			String remoteSha1 = Utils.httpReadLine(baseUrl + "checksum.php?file=" + path);
 			if (localSha1.equals(remoteSha1)) {
-				System.out.println("SHA-1 matches for " + path);
+				VRSettings.logger.info("MenuWorlds: SHA-1 matches for " + path);
 				return;
 			}
 		}
-		System.out.println("Downloading world " + path);
+		VRSettings.logger.info("MenuWorlds: Downloading world " + path);
 		Utils.httpReadToFile(baseUrl + path, file, true);
 	}
 	
@@ -54,7 +54,9 @@ public class MenuWorldDownloader {
 				worldList.addAll(getOfficialWorlds());
 
 			// don't load the same world twice in a row
-			worldList.removeIf(world -> lastWorld.equals(world.path) || lastWorld.equals(world.file.getPath()));
+			if (worldList.size() > 1) {
+				worldList.removeIf(world -> lastWorld.equals(world.path) || lastWorld.equals(world.file.getPath()));
+			}
 
 			if (worldList.size() == 0)
 				return getRandomWorldFallback();
@@ -72,11 +74,11 @@ public class MenuWorldDownloader {
 
 	private static InputStream getStreamForWorld(MenuWorldItem world) throws IOException, NoSuchAlgorithmException {
 		if (world.file != null) {
-			System.out.println("Using world " + world.file.getName());
+			VRSettings.logger.info("MenuWorlds: Using world " + world.file.getName());
 			return new FileInputStream(world.file);
 		} else if (world.path != null) {
 			downloadWorld(world.path);
-			System.out.println("Using official world " + world.path);
+			VRSettings.logger.info("MenuWorlds: Using official world " + world.path);
 			return new FileInputStream(world.path);
 		} else {
 			throw new IllegalArgumentException("File or path must be assigned");
@@ -99,7 +101,7 @@ public class MenuWorldDownloader {
 	}
 	
 	private static InputStream getRandomWorldFallback() throws IOException, NoSuchAlgorithmException {
-		System.out.println("Couldn't find a world, trying random file from directory");
+		VRSettings.logger.info("MenuWorlds: Couldn't find a world, trying random file from directory");
 		File dir = new File("menuworlds");
 		if (dir.exists()) {
 			MenuWorldItem world = getRandomWorldFromList(getWorldsInDirectory(dir));

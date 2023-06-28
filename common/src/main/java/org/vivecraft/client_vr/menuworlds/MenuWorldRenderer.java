@@ -66,12 +66,12 @@ public class MenuWorldRenderer {
 	private final NativeImage lightPixels;
 	private final ResourceLocation lightTextureLocation;
 	private boolean lightmapUpdateNeeded;
-	private float torchFlickerX;
 	private float blockLightRedFlicker;
 	private int waterVisionTime;
 
 	public int ticks = 0;
 	public long time = 1000;
+	public boolean fastTime;
 	private HashMap<RenderType, VertexBuffer> vertexBuffers;
 	private VertexBuffer starVBO;
 	private VertexBuffer skyVBO;
@@ -99,6 +99,9 @@ public class MenuWorldRenderer {
 	private final float[] rainSizeX = new float[1024];
 	private final float[] rainSizeZ = new float[1024];
 
+	// signals, that initial resource loading is done, and geometry baking can start
+	public static boolean canPrepare = false;
+
 	public MenuWorldRenderer() {
 		this.mc = Minecraft.getInstance();
 		this.lightTexture = new DynamicTexture(16, 16, false);
@@ -118,14 +121,15 @@ public class MenuWorldRenderer {
 		try {
 			InputStream inputStream = MenuWorldDownloader.getRandomWorld();
 			if (inputStream != null) {
-				VRSettings.logger.info("Initializing main menu world renderer...");
+				VRSettings.logger.info("MenuWorlds: Initializing main menu world renderer...");
 				loadRenderers();
-				VRSettings.logger.info("Loading world data...");
+				VRSettings.logger.info("MenuWorlds: Loading world data...");
 				setWorld(MenuWorldExporter.loadWorld(inputStream));
-				VRSettings.logger.info("Building geometry...");
-				prepare();
-				// TODO what does this do
-				//mc.gameRenderer.menuWorldFastTime = new Random().nextInt(10) == 0;
+				if (canPrepare) {
+					// if it's possible to prepare, do it now
+					prepare();
+				}
+				fastTime = new Random().nextInt(10) == 0;
 			} else {
 				VRSettings.logger.warn("Failed to load any main menu world, falling back to old menu room");
 			}
@@ -148,7 +152,6 @@ public class MenuWorldRenderer {
 		poseStack.pushPose();
 
 		//rotate World
-
 		poseStack.mulPose(Axis.YP.rotationDegrees(worldRotation));
 
 		float ground = blockAccess.getGround()-blockAccess.dimensionType().minY();
@@ -183,7 +186,7 @@ public class MenuWorldRenderer {
 		renderClouds(poseStack, eyePosition.x, eyePosition.y, eyePosition.z);
 
 		RenderSystem.depthMask(false);
-		renderSnowAndRain(poseStack, eyePosition.x, eyePosition.y, eyePosition.z);
+		renderSnowAndRain(poseStack, eyePosition.x, ground, eyePosition.z, (float)eyePosition.x+offsetX, (float)eyePosition.z+offsetZ);
 		RenderSystem.depthMask(true);
 
 		poseStack.popPose();
@@ -207,7 +210,8 @@ public class MenuWorldRenderer {
 	}
 
 	public void prepare() {
-		if (vertexBuffers == null) {
+		if (canPrepare && vertexBuffers == null) {
+			VRSettings.logger.info("MenuWorlds: Building geometry...");
 			boolean ao = mc.options.ambientOcclusion().get();
 			mc.options.ambientOcclusion().set(true);
 			// TODO: ShaderCompat
@@ -233,6 +237,8 @@ public class MenuWorldRenderer {
 				// disable liquid chunk wrapping
 				ClientDataHolderVR.getInstance().skipStupidGoddamnChunkBoundaryClipping = true;
 
+				int renderDistSquare = (renderDistance + 1) * (renderDistance + 1);
+
 				for (RenderType layer : layers) {
 					// generate the data in parallel
 					futures.add(CompletableFuture.supplyAsync(() -> {
@@ -242,9 +248,17 @@ public class MenuWorldRenderer {
 						vertBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 						RandomSource randomSource = RandomSource.create();
 						int c = 0;
+							float ground = blockAccess.getGround() - blockAccess.dimensionType().minY();
 						for (int x = 0; x < blockAccess.getXSize(); x++) {
 							for (int y = 0; y < blockAccess.getYSize(); y++) {
+								// don't build unnecessary blocks in tall worlds
+								if (Mth.abs(y - ground) > renderDistance + 1)
+									continue;
 								for (int z = 0; z < blockAccess.getZSize(); z++) {
+									// don't build unnecessary blocks in fog
+									if (Mth.lengthSquared(x - blockAccess.getXSize() * 0.5, z - blockAccess.getZSize() * 0.5) > renderDistSquare)
+										continue;
+
 									BlockPos pos = new BlockPos(x, y, z);
 									BlockState state = blockAccess.getBlockState(pos);
 									if (state != null) {
@@ -269,7 +283,7 @@ public class MenuWorldRenderer {
 							vertBuffer.setQuadSortOrigin(blockAccess.getXSize() / 2F, blockAccess.getGround(), blockAccess.getXSize() / 2F);
 						}
 						return Pair.of(layer,vertBuffer.end());
-					}));
+					}, Util.backgroundExecutor()));
 				}
 				for (Future<Pair<RenderType,BufferBuilder.RenderedBuffer>> future : futures) {
 					try {
@@ -845,7 +859,7 @@ public class MenuWorldRenderer {
 		return bufferBuilder.end();
 	}
 
-	private void renderSnowAndRain(PoseStack poseStack, double inX, double inY, double inZ) {
+	private void renderSnowAndRain(PoseStack poseStack, double inX, double inY, double inZ, float xRenderOffset, float zRenderOffset) {
 		if (getRainLevel() <= 0.0f) {
 			return;
 		}
@@ -869,8 +883,7 @@ public class MenuWorldRenderer {
 		}
 		RenderSystem.depthMask(true);
 		int count = -1;
-		// TODO renenable
-		float rainAnimationTime = 0;//this.ticks + mc.getFrameTime();
+		float rainAnimationTime = this.ticks + mc.getFrameTime();
 		RenderSystem.setShader(GameRenderer::getParticleShader);
 		turnOnLightLayer();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -902,8 +915,8 @@ public class MenuWorldRenderer {
 
 				mutableBlockPos.setY(rainY);
 
-				double localX = rainX - xFloor + 0.5;
-				double localZ = rainZ - zFloor + 0.5;
+				double localX = rainX - inX + 0.5 + xRenderOffset;
+				double localZ = rainZ - inZ + 0.5 + zRenderOffset;
 				float distance = (float)Math.sqrt(localX * localX + localZ * localZ) / (float)rainDistance;
 				float blend;
 				float xOffset = 0;

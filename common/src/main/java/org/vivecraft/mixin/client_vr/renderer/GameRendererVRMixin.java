@@ -94,8 +94,6 @@ public abstract class GameRendererVRMixin
     @Unique
     public Matrix4f thirdPassProjectionMatrix = new Matrix4f();
     @Unique
-    public boolean menuWorldFastTime;
-    @Unique
     public boolean inwater;
     @Unique
     public boolean wasinwater;
@@ -800,11 +798,6 @@ public abstract class GameRendererVRMixin
     @Override
     public Vec3 getCrossVec() {
         return crossVec;
-    }
-
-    @Override
-    public void setMenuWorldFastTime(boolean b) {
-        this.menuWorldFastTime = b;
     }
 
     @Override
@@ -1614,8 +1607,8 @@ public abstract class GameRendererVRMixin
         poseStack.pushPose();
 
         int tzOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
-        DATA_HOLDER.menuWorldRenderer.time = menuWorldFastTime
-            ? (long)((DATA_HOLDER.menuWorldRenderer.ticks * 10L) + 10 * minecraft.getFrameTime())
+        DATA_HOLDER.menuWorldRenderer.time = DATA_HOLDER.menuWorldRenderer.fastTime
+            ? (long)(DATA_HOLDER.menuWorldRenderer.ticks * 10L + 10 * minecraft.getFrameTime())
             : (long)((System.currentTimeMillis() + tzOffset - 21600000) / 86400000D * 24000D);
 
         DATA_HOLDER.menuWorldRenderer.fogRenderer.setupFogColor();

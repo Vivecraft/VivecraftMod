@@ -18,7 +18,6 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -32,6 +31,8 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfileResults;
@@ -58,6 +59,7 @@ import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.extensions.*;
+import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 import org.vivecraft.client_vr.VRState;
@@ -273,9 +275,24 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Shadow @Final private TextureManager textureManager;
 
+    @Shadow @Final private ReloadableResourceManager resourceManager;
+
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay initVivecraft(Overlay overlay) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
+
+        // register a resource reload listener, to reload the menu world
+        resourceManager.registerReloadListener((ResourceManagerReloadListener) resourceManager -> {
+            if (ClientDataHolderVR.getInstance().menuWorldRenderer != null
+                && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
+                try {
+                    ClientDataHolderVR.getInstance().menuWorldRenderer.destroy();
+                    ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+        });
 
         try {
             VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
@@ -288,23 +305,20 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         return overlay;
     }
 
-    // on resourcepack reload
-    @Group(name = "reloadMenuworld", min = 1, max = 1)
-    @Inject(at = @At("TAIL"), method = {
-        "method_24228",
-        "lambda$reloadResourcePacks$24"
-    }, remap = false, allow = 1)
-    public void reloadMenuworld(CallbackInfo ci) {
-        // reload menu world, because models might have changed
+    // on first resource load finished
+    @Inject(at = @At("HEAD"), method = {
+        "method_24040", // fabric
+        "lambda$new$3"} // forge
+        , remap = false, expect = 0)
+    public void initMenuworldOnLaunch(CallbackInfo ci) {
+        // tell the MenuWorldRenderer that it is safe to prepare now
+        MenuWorldRenderer.canPrepare =  true;
+        // if a world is already loaded, prepare it
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null
-            && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
-			try {
-                ClientDataHolderVR.getInstance().menuWorldRenderer.destroy();
-                ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
-			} catch (Exception exception) {
-				exception.printStackTrace();
-			}
-		}
+            && ClientDataHolderVR.getInstance().menuWorldRenderer.getLevel() != null)
+        {
+            ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
+        }
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")

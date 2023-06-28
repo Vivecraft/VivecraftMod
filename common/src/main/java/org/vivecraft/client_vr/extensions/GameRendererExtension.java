@@ -30,8 +30,6 @@ public interface GameRendererExtension {
 
 	Vec3 getCrossVec();
 
-	void setMenuWorldFastTime(boolean b);
-
 	void setupClipPlanes();
 
 	float getMinClipDistance();
