@@ -2,7 +2,12 @@ package org.vivecraft.client.fabric;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.material.FluidState;
 
 import java.nio.file.Path;
 
@@ -53,5 +58,9 @@ public class XplatImpl {
                         "Lnet/minecraft/class_1268;"+
                         "Lnet/minecraft/class_3965;)"+
                         "Lnet/minecraft/class_1269;");
+    }
+
+    public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn){
+        return FluidRenderHandlerRegistry.INSTANCE.get(fluidStateIn.getType()).getFluidSprites(level, pos, fluidStateIn);
     }
 }

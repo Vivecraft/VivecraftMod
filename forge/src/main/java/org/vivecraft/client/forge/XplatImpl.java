@@ -1,7 +1,12 @@
 package org.vivecraft.client.forge;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -56,5 +61,9 @@ public class XplatImpl {
                 net.minecraft.world.entity.player.Player.class,
                 net.minecraft.world.InteractionHand.class,
                 net.minecraft.world.phys.BlockHitResult.class).getName();
+    }
+
+    public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn){
+        return ForgeHooksClient.getFluidSprites(level, pos, fluidStateIn);
     }
 }

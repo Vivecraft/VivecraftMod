@@ -2,6 +2,10 @@ package org.vivecraft.client;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.material.FluidState;
 
 import java.nio.file.Path;
 
@@ -62,5 +66,10 @@ public interface Xplat {
     @ExpectPlatform
     static String getUseMethodName() {
         return "";
+    }
+
+    @ExpectPlatform
+    static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn){
+        return new TextureAtlasSprite[]{};
     }
 }

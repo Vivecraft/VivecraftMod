@@ -38,8 +38,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
 import java.io.InputStream;
 import java.util.*;
@@ -101,6 +103,8 @@ public class MenuWorldRenderer {
 
 	// signals, that initial resource loading is done, and geometry baking can start
 	public static boolean canPrepare = false;
+
+	private Set<TextureAtlasSprite> animatedSprites = null;
 
 	public MenuWorldRenderer() {
 		this.mc = Minecraft.getInstance();
@@ -229,6 +233,7 @@ public class MenuWorldRenderer {
 			try {
 				List<RenderType> layers = RenderType.chunkBufferLayers();
 				vertexBuffers = new HashMap<>();
+				animatedSprites = new HashSet<>();
 
 				BlockRenderDispatcher blockRenderer = mc.getBlockRenderer();
 
@@ -264,10 +269,20 @@ public class MenuWorldRenderer {
 									if (state != null) {
 										FluidState fluidState = state.getFluidState();
 										if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
+											for (var sprite : Xplat.getFluidTextures(blockAccess, pos, fluidState)){
+												if (sprite != null && sprite.contents().getUniqueFrames().sum() > 1) {
+													animatedSprites.add(sprite);
+												}
+											}
 											blockRenderer.renderLiquid(pos, blockAccess, vertBuffer, state, new FluidStateWrapper(fluidState));
 											c++;
 										}
 										if (state.getRenderShape() != RenderShape.INVISIBLE && ItemBlockRenderTypes.getChunkRenderType(state) == layer) {
+											for (var quad : mc.getModelManager().getBlockModelShaper().getBlockModel(state).getQuads(state, null, randomSource)){
+												if (quad.getSprite().contents().getUniqueFrames().sum() > 1) {
+													animatedSprites.add(quad.getSprite());
+												}
+											}
 											thisPose.pushPose();
 											thisPose.translate(pos.getX(), pos.getY(), pos.getZ());
 											blockRenderer.renderBatched(state, pos, blockAccess, thisPose, vertBuffer, true, randomSource);
@@ -322,6 +337,7 @@ public class MenuWorldRenderer {
 			}
 			vertexBuffers = null;
 		}
+		animatedSprites = null;
 		ready = false;
 	}
 
@@ -347,6 +363,11 @@ public class MenuWorldRenderer {
 		{
 			this.areEyesInFluid(FluidTags.WATER);
 			this.waterVisionTime = Mth.clamp(this.waterVisionTime - 10, 0, 600);
+		}
+		if (SodiumHelper.isLoaded() && animatedSprites != null) {
+			for (TextureAtlasSprite sprite : animatedSprites) {
+				SodiumHelper.markTextureAsActive(sprite);
+			}
 		}
 	}
 
