@@ -48,6 +48,18 @@ public class ConfigBuilder {
         return this;
     }
 
+    private void addDefaultValueComment(List<String> path, int defaultValue, int min, int max) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+            +"default: %d, min: %d, max: %d".formatted(defaultValue, min, max));
+    }
+
+    private void addDefaultValueComment(List<String> path, double defaultValue, double min, double max) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+            + new Formatter(Locale.US).format("default: %.2f, min: %.2f, max: %.2f", defaultValue, min, max));
+    }
+
     /**
      * corrects the attached config, with the built spec
      * @param listener listener to send correction to
@@ -158,6 +170,7 @@ public class ConfigBuilder {
         List<String> path = stack.stream().toList();
         spec.defineInRange(path, defaultValue, min, max);
         stack.removeLast();
+        addDefaultValueComment(path, defaultValue, min, max);
 
         DoubleValue value = new DoubleValue(config, path, defaultValue);
         configValues.add(value);
@@ -171,6 +184,7 @@ public class ConfigBuilder {
         List<String> path = stack.stream().toList();
         spec.defineInRange(path, defaultValue, min, max);
         stack.removeLast();
+        addDefaultValueComment(path, defaultValue, min, max);
 
         IntValue value = new IntValue(config, path, defaultValue);
         configValues.add(value);
