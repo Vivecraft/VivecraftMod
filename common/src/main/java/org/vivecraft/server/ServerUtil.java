@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.server.config.ConfigBuilder;
+import org.vivecraft.server.config.ServerConfig;
 
 import java.util.List;
 import java.util.concurrent.Executors;

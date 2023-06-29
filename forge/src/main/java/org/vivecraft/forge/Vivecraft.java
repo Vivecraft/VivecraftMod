@@ -1,7 +1,7 @@
 package org.vivecraft.forge;
 
 import net.minecraftforge.fml.common.Mod;
-import org.vivecraft.server.ServerConfig;
+import org.vivecraft.server.config.ServerConfig;
 
 @Mod(Vivecraft.MODID)
 public class Vivecraft {

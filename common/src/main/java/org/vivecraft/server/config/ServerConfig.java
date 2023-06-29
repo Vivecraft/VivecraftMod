@@ -1,4 +1,4 @@
-package org.vivecraft.server;
+package org.vivecraft.server.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
