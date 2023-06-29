@@ -12,8 +12,6 @@ public class ConfigBuilder {
     private final CommentedConfig config;
     private final ConfigSpec spec;
     private final Deque<String> stack = new ArrayDeque<>();
-    private final List<String> settingPaths = new ArrayList<>();
-
     private final List<ConfigValue> configValues = new ArrayList<>();
 
     public ConfigBuilder(CommentedConfig config, ConfigSpec spec){
@@ -58,13 +56,6 @@ public class ConfigBuilder {
         spec.correct(config, listener);
     }
 
-    /**
-     * @return List containing all setting paths that were generated with this builder
-     */
-    public List<String> getSettingPaths() {
-        return settingPaths;
-    }
-
     public List<ConfigValue> getConfigValues() {
         return configValues;
     }
@@ -94,7 +85,6 @@ public class ConfigBuilder {
      */
     public <T extends Comparable<? super T>> ConfigValue<T> defineInRange(T defaultValue, T min, T max) {
         List<String> path = stack.stream().toList();
-        settingPaths.add(String.join(".", path));
         spec.defineInRange(path, defaultValue, min, max);
         stack.removeLast();
 
@@ -111,7 +101,6 @@ public class ConfigBuilder {
      */
     public <T> ConfigValue<List<? extends T>> defineList(List<? extends T> defaultValue, Predicate<Object> validator) {
         List<String> path = stack.stream().toList();
-        settingPaths.add(String.join(".", path));
         spec.defineList(path, defaultValue, validator);
         stack.removeLast();
 
@@ -128,7 +117,6 @@ public class ConfigBuilder {
      */
     public <T> ConfigValue<T> defineInList(T defaultValue, Collection<? extends T> validValues) {
         List<String> path = stack.stream().toList();
-        settingPaths.add(String.join(".", path));
         spec.defineInList(path, defaultValue, validValues);
         stack.removeLast();
 
@@ -142,7 +130,6 @@ public class ConfigBuilder {
      */
     public BooleanValue define(boolean defaultValue) {
         List<String> path = stack.stream().toList();
-        settingPaths.add(String.join(".", path));
         spec.define(path, defaultValue);
         stack.removeLast();
 
@@ -156,7 +143,6 @@ public class ConfigBuilder {
      */
     public StringValue define(String defaultValue) {
         List<String> path = stack.stream().toList();
-        settingPaths.add(String.join(".", path));
         spec.define(path, defaultValue);
         stack.removeLast();
 
@@ -170,11 +156,23 @@ public class ConfigBuilder {
      */
     public DoubleValue defineInRange(double defaultValue, double min, double max) {
         List<String> path = stack.stream().toList();
-        settingPaths.add(String.join(".", path));
         spec.defineInRange(path, defaultValue, min, max);
         stack.removeLast();
 
         DoubleValue value = new DoubleValue(config, path, defaultValue);
+        configValues.add(value);
+        return value;
+    }
+
+    /**
+     *  same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
+     */
+    public IntValue defineInRange(int defaultValue, int min, int max) {
+        List<String> path = stack.stream().toList();
+        spec.defineInRange(path, defaultValue, min, max);
+        stack.removeLast();
+
+        IntValue value = new IntValue(config, path, defaultValue);
         configValues.add(value);
         return value;
     }
@@ -226,6 +224,12 @@ public class ConfigBuilder {
 
     public static class StringValue extends ConfigValue<String>{
         public StringValue(Config config, List<String> path, String defaultValue) {
+            super(config, path, defaultValue);
+        }
+    }
+
+    public static class IntValue extends ConfigValue<Integer>{
+        public IntValue(Config config, List<String> path, int defaultValue) {
             super(config, path, defaultValue);
         }
     }
