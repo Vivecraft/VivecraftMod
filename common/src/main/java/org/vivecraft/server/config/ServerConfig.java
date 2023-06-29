@@ -52,9 +52,9 @@ public class ServerConfig {
 
     public static ConfigBuilder.BooleanValue teleportEnabled;
     public static ConfigBuilder.BooleanValue teleportLimitedSurvival;
-    public static ConfigBuilder.DoubleValue teleportUpLimit;
-    public static ConfigBuilder.DoubleValue teleportDownLimit;
-    public static ConfigBuilder.DoubleValue teleportHorizontalLimit;
+    public static ConfigBuilder.IntValue teleportUpLimit;
+    public static ConfigBuilder.IntValue teleportDownLimit;
+    public static ConfigBuilder.IntValue teleportHorizontalLimit;
 
     public static ConfigBuilder.BooleanValue worldscaleLimited;
     public static ConfigBuilder.DoubleValue worldscaleMax;
