@@ -47,13 +47,13 @@ dependencies {
     modRuntimeOnly("maven.modrinth:rubidium:0.6.4")
     modRuntimeOnly("maven.modrinth:oculus:1.19.4-1.5.2")
 
-    include(forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1"))
-
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
 
     // shadow the natives
+    bundle ("org.lwjgl:lwjgl-openvr:3.3.1") { transitive = false }
     bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
     bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
     bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }
