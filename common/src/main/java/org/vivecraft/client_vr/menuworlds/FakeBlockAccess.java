@@ -45,14 +45,14 @@ public class FakeBlockAccess implements LevelReader {
 	private int zSize;
 	private float ground;
 
-	private int rotation;
+	private float rotation;
 	private boolean rain;
 	private boolean thunder;
 
 	private BiomeManager biomeManager;
 	private DimensionSpecialEffects dimensionInfo;
 	
-	public FakeBlockAccess(int version, long seed, BlockState[] blocks, byte[] skylightmap, byte[] blocklightmap, Biome[] biomemap, short[][] heightmap, int xSize, int ySize, int zSize, int ground, DimensionType dimensionType, boolean isFlat, int rotation, boolean rain, boolean thunder) {
+	public FakeBlockAccess(int version, long seed, BlockState[] blocks, byte[] skylightmap, byte[] blocklightmap, Biome[] biomemap, short[][] heightmap, int xSize, int ySize, int zSize, int ground, DimensionType dimensionType, boolean isFlat, float rotation, boolean rain, boolean thunder) {
 		this.version = version;
 		this.seed = seed;
 		this.blocks = blocks;
@@ -77,7 +77,7 @@ public class FakeBlockAccess implements LevelReader {
 		// set the ground to the height of the center block
 		BlockPos pos = new BlockPos(xSize/2, ground-dimensionType.minY(), zSize/2);
 		BlockState standing = blocks[encodeCoords(pos)];
-		this.ground += standing.getCollisionShape(this, pos).max(Direction.Axis.Y);
+		this.ground += Math.max(standing.getCollisionShape(this, pos).max(Direction.Axis.Y), 0);
 	}
 	
 	private int encodeCoords(int x, int z) {
@@ -120,7 +120,7 @@ public class FakeBlockAccess implements LevelReader {
 		return seed;
 	}
 
-	public int getRotation() {
+	public float getRotation() {
 		return rotation;
 	}
 	public boolean getRain() {

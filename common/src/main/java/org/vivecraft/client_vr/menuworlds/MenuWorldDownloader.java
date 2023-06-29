@@ -54,7 +54,8 @@ public class MenuWorldDownloader {
 				worldList.addAll(getOfficialWorlds());
 
 			// don't load the same world twice in a row
-			worldList.removeIf(world -> lastWorld.equals(world.path) || lastWorld.equals(world.file.getPath()));
+			if (worldList.size() > 1)
+				worldList.removeIf(world -> lastWorld.equals(world.path) || (world.file != null && lastWorld.equals(world.file.getPath())));
 
 			if (worldList.size() == 0)
 				return getRandomWorldFallback();
