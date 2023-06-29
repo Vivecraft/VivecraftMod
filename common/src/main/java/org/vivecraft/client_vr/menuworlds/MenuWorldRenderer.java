@@ -41,6 +41,7 @@ import org.lwjgl.opengl.GL11;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
 import java.io.InputStream;
@@ -367,6 +368,11 @@ public class MenuWorldRenderer {
 		if (SodiumHelper.isLoaded() && animatedSprites != null) {
 			for (TextureAtlasSprite sprite : animatedSprites) {
 				SodiumHelper.markTextureAsActive(sprite);
+			}
+		}
+		if (OptifineHelper.isOptifineLoaded()) {
+			for (TextureAtlasSprite sprite : animatedSprites) {
+				OptifineHelper.markTextureAsActive(sprite);
 			}
 		}
 	}
