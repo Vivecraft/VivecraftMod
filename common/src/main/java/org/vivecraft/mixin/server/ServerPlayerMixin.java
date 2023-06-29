@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.server.ServerConfig;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
@@ -57,7 +56,7 @@ public abstract class ServerPlayerMixin extends Player {
 	@Inject(at = @At("TAIL"), method = "initInventoryMenu")
 	public void menu(CallbackInfo ci) {
 		ServerVivePlayer serverviveplayer = getVivePlayer();
-		if (ServerConfig.getBoolean(ServerConfig.vrFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
+		if (ServerConfig.vrFun.get() && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
 			if (this.random.nextInt(2) == 1) {
 				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
@@ -185,33 +184,33 @@ public abstract class ServerPlayerMixin extends Player {
 			if ((!otherVive.isVR() && thisVive.isVR() && thisVive.isSeated())
 				|| (!thisVive.isVR() && otherVive.isVR() && otherVive.isSeated())) {
 				// nonvr vs Seated
-				if (!ServerConfig.getBoolean(ServerConfig.pvpSEATEDVRvsNONVR)) {
+				if (!ServerConfig.pvpSEATEDVRvsNONVR.get()) {
 					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs seat"), false);
 					cir.setReturnValue(false);
 				}
 			} else if ((!otherVive.isVR() && thisVive.isVR() && !thisVive.isSeated())
 				|| (!thisVive.isVR() && otherVive.isVR() && !otherVive.isSeated())) {
 				// nonvr vs Standing
-				if (!ServerConfig.getBoolean(ServerConfig.pvpVRvsNONVR)) {
+				if (!ServerConfig.pvpVRvsNONVR.get()) {
 					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs stand"), false);
 					cir.setReturnValue(false);
 				}
 			} else if ((otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated())
 				|| (thisVive.isVR() && thisVive.isSeated() && otherVive.isVR() && !otherVive.isSeated())) {
 				// Standing vs Seated
-				if (!ServerConfig.getBoolean(ServerConfig.pvpVRvsSEATEDVR)) {
+				if (!ServerConfig.pvpVRvsSEATEDVR.get()) {
 					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs stand"), false);
 					cir.setReturnValue(false);
 				}
 			} else if (otherVive.isVR() && !otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated()) {
 				// Standing vs Standing
-				if (!ServerConfig.getBoolean(ServerConfig.pvpVRvsVR)) {
+				if (!ServerConfig.pvpVRvsVR.get()) {
 					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled stand vs stand"), false);
 					cir.setReturnValue(false);
 				}
 			} else if (otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && thisVive.isSeated()){
 				// Seated vs Seated
-				if (!ServerConfig.getBoolean(ServerConfig.pvpSEATEDVRvsSEATEDVR)) {
+				if (!ServerConfig.pvpSEATEDVRvsSEATEDVR.get()) {
 					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs seat"), false);
 					cir.setReturnValue(false);
 				}

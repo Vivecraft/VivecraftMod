@@ -70,8 +70,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
     }
     @Inject(at = @At("TAIL"), method = "onDisconnect")
     public void doLeaveMessage(Component component, CallbackInfo ci) {
-        if (ServerConfig.getBoolean(ServerConfig.messagesEnabled)) {
-            String message = ServerConfig.getString(ServerConfig.messagesLeaveMessage);
+        if (ServerConfig.messagesEnabled.get()) {
+            String message = ServerConfig.messagesLeaveMessage.get();
             if (!message.isEmpty()) {
                 this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(this.player.getName().getString())), false);
             }

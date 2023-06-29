@@ -27,7 +27,7 @@ public class SwellGoalMixin {
         if (target instanceof ServerPlayer player && ServerVRPlayers.isVRPlayer(player)) {
             ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);
             if (data != null && !data.isSeated()) {
-                double swellDistance = ServerConfig.getDouble(ServerConfig.creeperSwellDistance);
+                double swellDistance = ServerConfig.creeperSwellDistance.get();
                 cir.setReturnValue(this.creeper.getSwellDir() > 0 || this.creeper.distanceToSqr(target) < swellDistance * swellDistance);
             }
         }
