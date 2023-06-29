@@ -7,6 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.vivecraft.client.utils.UpdateChecker;
+import org.vivecraft.server.config.ConfigBuilder;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -22,42 +23,42 @@ public class ServerUtil {
     }
 
     public static void scheduleWelcomeMessageOrKick(ServerPlayer serverPlayer) {
-        if (ServerConfig.getBoolean(ServerConfig.messagesEnabled) ||
-            (!serverPlayer.server.isDedicatedServer() && (ServerConfig.getBoolean(ServerConfig.vive_only) || ServerConfig.getBoolean(ServerConfig.vr_only)))) {
+        if (ServerConfig.messagesEnabled.get() ||
+            (!serverPlayer.server.isDedicatedServer() && (ServerConfig.vive_only.get() || ServerConfig.vr_only.get()))) {
             scheduler.schedule(() -> {
                 // only do stuff, if the player is still on the server
                 if(!serverPlayer.hasDisconnected()) {
                     ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
                     String message = "";
 
-                    boolean isOpAndAllowed = ServerConfig.getBoolean(ServerConfig.allow_op) && serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile());
+                    boolean isOpAndAllowed = ServerConfig.allow_op.get() && serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile());
 
                     // kick non VR players
-                    if (!isOpAndAllowed && ServerConfig.getBoolean(ServerConfig.vr_only)
+                    if (!isOpAndAllowed && ServerConfig.vr_only.get()
                         && (vivePlayer == null || !vivePlayer.isVR())) {
-                        serverPlayer.connection.disconnect(Component.literal(ServerConfig.getString(ServerConfig.messagesKickVROnly)));
+                        serverPlayer.connection.disconnect(Component.literal(ServerConfig.messagesKickVROnly.get()));
                         return;
                     }
 
                     // kick non vivecraft players
-                    if (!isOpAndAllowed && ServerConfig.getBoolean(ServerConfig.vive_only)
+                    if (!isOpAndAllowed && ServerConfig.vive_only.get()
                         && (vivePlayer == null)) {
-                        serverPlayer.connection.disconnect(Component.literal(ServerConfig.getString(ServerConfig.messagesKickViveOnly)));
+                        serverPlayer.connection.disconnect(Component.literal(ServerConfig.messagesKickViveOnly.get()));
                         return;
                     }
 
 
                     // welcome message
-                    if (ServerConfig.getBoolean(ServerConfig.messagesEnabled)) {
+                    if (ServerConfig.messagesEnabled.get()) {
                         // get the right message
                         if (vivePlayer == null) {
-                            message = ServerConfig.getString(ServerConfig.messagesWelcomeVanilla);
+                            message = ServerConfig.messagesWelcomeVanilla.get();
                         } else if (!vivePlayer.isVR()) {
-                            message = ServerConfig.getString(ServerConfig.messagesWelcomeNonVR);
+                            message = ServerConfig.messagesWelcomeNonVR.get();
                         } else if (vivePlayer.isSeated()) {
-                            message = ServerConfig.getString(ServerConfig.messagesWelcomeSeated);
+                            message = ServerConfig.messagesWelcomeSeated.get();
                         } else {
-                            message = ServerConfig.getString(ServerConfig.messagesWelcomeVR);
+                            message = ServerConfig.messagesWelcomeVR.get();
                         }
                         // actually send the message, if there is one set
                         if (!message.isEmpty()) {
@@ -65,12 +66,12 @@ public class ServerUtil {
                         }
                     }
                 }
-            }, (long)(ServerConfig.getDouble(ServerConfig.messageKickDelay) * 1000), TimeUnit.MILLISECONDS);
+            }, (long)(ServerConfig.messageKickDelay.get() * 1000), TimeUnit.MILLISECONDS);
         }
     }
 
     public static void sendUpdateNotificationIfOP (ServerPlayer serverPlayer) {
-        if (ServerConfig.getBoolean(ServerConfig.checkForUpdate)) {
+        if (ServerConfig.checkForUpdate.get()) {
             // don't send update notifications on singleplayer
             if (serverPlayer.server.isDedicatedServer() && serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile())) {
                 // check for update on not the main thread
@@ -85,15 +86,16 @@ public class ServerUtil {
     public static void registerCommands(CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("vivecraft-server-config")
             .requires(source -> source.hasPermission(4)).then(
-            Commands.literal("reload")
-                        .executes(context -> {
-            ServerConfig.init((action, path, incorrectValue, correctedValue) -> context.getSource().sendSystemMessage(Component.literal("Corrected §a[" + String.join("§r.§a", path) + "]§r: was '(" + incorrectValue.getClass().getSimpleName() + ")" + incorrectValue + "', is now '(" + correctedValue.getClass().getSimpleName() + ")" + correctedValue + "'")));
-            return 1;
-        })
-            ));
+                Commands.literal("reload").executes(context -> {
+                    ServerConfig.init((action, path, incorrectValue, correctedValue) -> context.getSource()
+                        .sendSystemMessage(Component.literal("Corrected §a[" + String.join("§r.§a", path) + "]§r: was '(" + incorrectValue.getClass().getSimpleName() + ")" + incorrectValue + "', is now '(" + correctedValue.getClass().getSimpleName() + ")" + correctedValue + "'")));
+                    return 1;
+                })
+            )
+        );
 
-                for (String setting : ServerConfig.getSettings()) {
-            Class<?> clazz = ServerConfig.getObject(setting).getClass();
+        for (var setting : ServerConfig.getConfigValues()) {
+            Class<?> clazz = setting.get().getClass();
             final ArgumentType<?> argument;
             String argumentName;
             if (clazz == Integer.class) {
@@ -110,17 +112,17 @@ public class ServerUtil {
                 argument = StringArgumentType.string();
             }
 
-            if (!setting.equals(ServerConfig.climbeyBlocklist)) {
+            if (!(setting.get()instanceof List)) {
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
-                    Commands.literal(setting).then(
+                    Commands.literal(setting.getPath()).then(
                         Commands.literal("set").then(
                             Commands.argument(argumentName, argument)
                                 .executes(context -> {
                                     try {
                                         Object newValue = context.getArgument(argumentName, clazz);
-                                        ServerConfig.setSetting(setting, newValue);
-                                        context.getSource().sendSystemMessage(Component.literal("set §a[" + setting + "]§r to '" + newValue + "'"));
+                                        setting.set(newValue);
+                                        context.getSource().sendSystemMessage(Component.literal("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"));
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -132,9 +134,9 @@ public class ServerUtil {
             } else {
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
-                    Commands.literal(setting).then(
+                    Commands.literal(setting.getPath()).then(
                         Commands.literal("add").then(
-                            Commands.argument("block", StringArgumentType.string())
+                            Commands.argument("block", StringArgumentType.greedyString())
                                 .suggests((context, builder) -> {
                                     for (var block : BuiltInRegistries.BLOCK.keySet()) {
                                         builder.suggest(block.toString());
@@ -143,30 +145,31 @@ public class ServerUtil {
                                 })
                                 .executes(context -> {
                                     String newValue = context.getArgument("block", String.class);
-                                    context.getSource().sendSystemMessage(Component.literal("added '" + newValue + "' to §a[" + setting + "]§r"));
+                                    context.getSource().sendSystemMessage(Component.literal("added '" + newValue + "' to §a[" + setting.getPath() + "]§r"));
                                     return 1;
                                 })
                         )
                     )
                 ));
+                ConfigBuilder.ConfigValue<List<? extends String>> listConfig = setting;
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
-                    Commands.literal(setting).then(
+                    Commands.literal(setting.getPath()).then(
                         Commands.literal("remove").then(
                             Commands.argument("block", StringArgumentType.string())
                                 .suggests((context, builder) -> {
-                                    for (var block : ServerConfig.getList(setting)) {
+                                    for (String block : listConfig.get()) {
                                         builder.suggest(block);
                                     }
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
                                     String newValue = context.getArgument("block", String.class);
-                                    List<?> list = ServerConfig.getList(setting);
+                                    List<? extends String> list = listConfig.get();
                                     list.remove(newValue);
-                                    ServerConfig.setSetting(setting, list);
-                                    context.getSource().sendSystemMessage(Component.literal("removed '" + newValue + "' from §a[" + setting + "]§r"));
-                                    context.getSource().sendSystemMessage(Component.literal("is now '" + ServerConfig.getList(setting)));
+                                    listConfig.set(list);
+                                    context.getSource().sendSystemMessage(Component.literal("removed '" + newValue + "' from §a[" + setting.getPath() + "]§r"));
+                                    context.getSource().sendSystemMessage(Component.literal("is now '" + setting.get()));
                                     return 1;
                                 })
                         )
@@ -175,15 +178,23 @@ public class ServerUtil {
             }
             dispatcher.register(Commands.literal("vivecraft-server-config")
                 .requires(source -> source.hasPermission(4)).then(
-                Commands.literal(setting).then(
+                Commands.literal(setting.getPath()).then(
                     Commands.literal("reset")
                         .executes(context -> {
-                            Object newValue = ServerConfig.resetOption(setting);
-                            context.getSource().sendSystemMessage(Component.literal("reset §a[" + setting + "]§r to '" + newValue + "'"));
+                            Object newValue = setting.reset();
+                            context.getSource().sendSystemMessage(Component.literal("reset §a[" + setting.getPath() + "]§r to '" + newValue + "'"));
                             return 1;
                         })
                 )
             ));
+            dispatcher.register(Commands.literal("vivecraft-server-config")
+                .requires(source -> source.hasPermission(4)).then(
+                    Commands.literal(setting.getPath())
+                        .executes(context -> {
+                            context.getSource().sendSystemMessage(Component.literal("§a[" + setting.getPath() + "]§r is set to '" + setting.get() + "'"));
+                            return 1;
+                        })
+                ));
         }
     }
 

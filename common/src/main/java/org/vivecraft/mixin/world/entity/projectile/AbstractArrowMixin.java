@@ -67,12 +67,12 @@ public abstract class AbstractArrowMixin extends Entity {
 			if ((hitpos = isHeadshot(entityHitResult)) != null) {
 				if (serverVivePlayer != null && serverVivePlayer.isVR()) {
 					if (serverVivePlayer.isSeated()) {
-						multiplier = baseDamage * ServerConfig.getDouble(ServerConfig.bowSeatedHeadshotMultiplier);
+						multiplier = baseDamage * ServerConfig.bowSeatedHeadshotMultiplier.get();
 					} else {
-						multiplier = baseDamage * ServerConfig.getDouble(ServerConfig.bowStandingHeadshotMultiplier);
+						multiplier = baseDamage * ServerConfig.bowStandingHeadshotMultiplier.get();
 					}
 				} else {
-					multiplier = baseDamage * ServerConfig.getDouble(ServerConfig.bowVanillaHeadshotMultiplier);
+					multiplier = baseDamage * ServerConfig.bowVanillaHeadshotMultiplier.get();
 				}
 
 				if (multiplier > 1.0) {
@@ -96,9 +96,9 @@ public abstract class AbstractArrowMixin extends Entity {
 			// if headshots are disabled, still use the regular multiplier
 			if (serverVivePlayer != null) {
 				if (serverVivePlayer.isSeated()) {
-					multiplier = Math.max(multiplier, ServerConfig.getDouble(ServerConfig.bowSeatedMultiplier));
+					multiplier = Math.max(multiplier, ServerConfig.bowSeatedMultiplier.get());
 				} else {
-					multiplier = Math.max(multiplier, ServerConfig.getDouble(ServerConfig.bowStandingMultiplier));
+					multiplier = Math.max(multiplier, ServerConfig.bowStandingMultiplier.get());
 				}
 			}
 
