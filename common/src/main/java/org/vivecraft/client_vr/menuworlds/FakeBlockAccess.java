@@ -63,7 +63,7 @@ public class FakeBlockAccess implements LevelReader {
 		this.xSize = xSize;
 		this.ySize = ySize;
 		this.zSize = zSize;
-		this.ground = ground;
+		this.ground = ground - dimensionType.minY();
 		this.dimensionType = dimensionType;
 		this.isFlat = isFlat;
 
@@ -75,7 +75,7 @@ public class FakeBlockAccess implements LevelReader {
 		this.dimensionInfo = DimensionSpecialEffects.forType(dimensionType);
 
 		// set the ground to the height of the center block
-		BlockPos pos = new BlockPos(xSize/2, ground - dimensionType.minY(), zSize/2);
+		BlockPos pos = new BlockPos(xSize/2, ground, zSize/2);
 		BlockState standing = blocks[encodeCoords(pos)];
 		this.ground += Math.max(standing.getCollisionShape(this, pos).max(Direction.Axis.Y), 0.0);
 	}

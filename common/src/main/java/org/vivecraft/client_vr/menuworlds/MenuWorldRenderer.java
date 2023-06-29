@@ -159,7 +159,7 @@ public class MenuWorldRenderer {
 		//rotate World
 		poseStack.mulPose(Axis.YP.rotationDegrees(worldRotation));
 
-		float ground = blockAccess.getGround()-blockAccess.dimensionType().minY();
+		float ground = blockAccess.getGround();
 		if (lol) ground += 100;
 		float offsetX = -blockAccess.getXSize() / 2F;
 		float offsetZ = -blockAccess.getZSize() / 2F;
@@ -254,11 +254,10 @@ public class MenuWorldRenderer {
 						vertBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 						RandomSource randomSource = RandomSource.create();
 						int c = 0;
-							float ground = blockAccess.getGround() - blockAccess.dimensionType().minY();
 						for (int x = 0; x < blockAccess.getXSize(); x++) {
 							for (int y = 0; y < blockAccess.getYSize(); y++) {
 								// don't build unnecessary blocks in tall worlds
-								if (Mth.abs(y - ground) > renderDistance + 1)
+								if (Mth.abs(y - blockAccess.getGround()) > renderDistance + 1)
 									continue;
 								for (int z = 0; z < blockAccess.getZSize(); z++) {
 									// don't build unnecessary blocks in fog
@@ -1413,7 +1412,7 @@ public class MenuWorldRenderer {
 
 		if (blockAccess == null)
 			return hmd;
-		return new Vec3(hmd.x + blockAccess.getXSize() / 2F, hmd.y + blockAccess.getGround() - blockAccess.dimensionType().minY(), hmd.z + blockAccess.getZSize() / 2F);
+		return new Vec3(hmd.x + blockAccess.getXSize() / 2F, hmd.y + blockAccess.getGround(), hmd.z + blockAccess.getZSize() / 2F);
 	}
 
 	private boolean isFluidTagged(Fluid fluid, TagKey<Fluid> tag) {
