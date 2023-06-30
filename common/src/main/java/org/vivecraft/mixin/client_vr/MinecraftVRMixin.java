@@ -366,7 +366,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                     gameRenderer.checkEntityPostEffect(this.options.getCameraType().isFirstPerson() ? this.getCameraEntity() : null);
                 }
                 // grab/release mouse
-                if (screen != null) {
+                if (screen != null || level == null) {
                     mouseHandler.releaseMouse();
                     InputConstants.grabOrReleaseMouse(window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseHandler.xpos(), mouseHandler.ypos());
                 } else {
