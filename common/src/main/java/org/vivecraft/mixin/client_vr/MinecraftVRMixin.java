@@ -379,7 +379,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 connection.send(ClientNetworking.createVRActivePacket(vrActive));
             }
             // reload sound manager, to toggle HRTF between VR and NONVR one
-            Minecraft.getInstance().getSoundManager().reload();
+            if (!Minecraft.getInstance().getSoundManager().getAvailableSounds().isEmpty()) {
+                Minecraft.getInstance().getSoundManager().reload();
+            }
             resizeDisplay();
         }
         if (!VRState.vrRunning) {
