@@ -6,7 +6,8 @@
   "client": [
     "FabricGameRendererVRMixin",
     "client.resources.model.FabricModelBakeryMixin",
-    "screenhandler.client.FabricClientNetworkingVRMixin"
+    "screenhandler.client.FabricClientNetworkingVRMixin",
+    "world.level.biome.BiomeAccessor"
   ],
   "minVersion": "0.8.4"
 }

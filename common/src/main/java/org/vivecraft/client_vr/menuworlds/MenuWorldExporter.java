@@ -55,6 +55,7 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.vivecraft.client.Xplat;
 
 public class MenuWorldExporter {
 	public static final int VERSION = 5;
@@ -484,29 +485,33 @@ public class MenuWorldExporter {
 
 				dos.writeUTF(registryAccess.registryOrThrow(Registries.BIOME).getKey(biome).toString());
 
-				dos.writeBoolean(biome.climateSettings.hasPrecipitation());
-				dos.writeFloat(biome.climateSettings.temperature());
-				dos.writeUTF(biome.climateSettings.temperatureModifier().getSerializedName());
-				dos.writeFloat(biome.climateSettings.downfall());
+				Biome.ClimateSettings climateSettings = Xplat.getBiomeClimateSettings(biome);
 
-				dos.writeInt(biome.specialEffects.getFogColor());
-				dos.writeInt(biome.specialEffects.getWaterColor());
-				dos.writeInt(biome.specialEffects.getWaterFogColor());
-				dos.writeInt(biome.specialEffects.getSkyColor());
+				dos.writeBoolean(climateSettings.hasPrecipitation());
+				dos.writeFloat(climateSettings.temperature());
+				dos.writeUTF(climateSettings.temperatureModifier().getSerializedName());
+				dos.writeFloat(climateSettings.downfall());
 
-				dos.writeBoolean(biome.specialEffects.getFoliageColorOverride().isPresent());
-				if (biome.specialEffects.getFoliageColorOverride().isPresent())
-					dos.writeInt(biome.specialEffects.getFoliageColorOverride().get());
+				BiomeSpecialEffects specialEffects = Xplat.getBiomeEffects(biome);
 
-				dos.writeBoolean(biome.specialEffects.getGrassColorOverride().isPresent());
-				if (biome.specialEffects.getGrassColorOverride().isPresent())
-					dos.writeInt(biome.specialEffects.getGrassColorOverride().get());
+				dos.writeInt(specialEffects.getFogColor());
+				dos.writeInt(specialEffects.getWaterColor());
+				dos.writeInt(specialEffects.getWaterFogColor());
+				dos.writeInt(specialEffects.getSkyColor());
 
-				dos.writeUTF(biome.specialEffects.getGrassColorModifier().getSerializedName());
+				dos.writeBoolean(specialEffects.getFoliageColorOverride().isPresent());
+				if (specialEffects.getFoliageColorOverride().isPresent())
+					dos.writeInt(specialEffects.getFoliageColorOverride().get());
 
-				dos.writeBoolean(biome.specialEffects.getAmbientParticleSettings().isPresent());
-				if (biome.specialEffects.getAmbientParticleSettings().isPresent()) {
-					AmbientParticleSettings ambientParticleSettings = biome.specialEffects.getAmbientParticleSettings().get();
+				dos.writeBoolean(specialEffects.getGrassColorOverride().isPresent());
+				if (specialEffects.getGrassColorOverride().isPresent())
+					dos.writeInt(specialEffects.getGrassColorOverride().get());
+
+				dos.writeUTF(specialEffects.getGrassColorModifier().getSerializedName());
+
+				dos.writeBoolean(specialEffects.getAmbientParticleSettings().isPresent());
+				if (specialEffects.getAmbientParticleSettings().isPresent()) {
+					AmbientParticleSettings ambientParticleSettings = specialEffects.getAmbientParticleSettings().get();
 					dos.writeUTF(BuiltInRegistries.PARTICLE_TYPE.getKey(ambientParticleSettings.getOptions().getType()).toString());
 					dos.writeFloat(ambientParticleSettings.probability);
 				}
