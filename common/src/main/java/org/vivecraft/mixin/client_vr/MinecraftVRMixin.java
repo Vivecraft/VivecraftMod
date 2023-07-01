@@ -29,6 +29,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -41,6 +42,7 @@ import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -55,10 +57,13 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.extensions.*;
+import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
+import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
@@ -276,6 +281,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Shadow @Final private TextureManager textureManager;
 
     @Shadow @Final private ReloadableResourceManager resourceManager;
+
+    @Shadow public abstract boolean isLocalServer();
+
+    @Shadow public abstract IntegratedServer getSingleplayerServer();
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay initVivecraft(Overlay overlay) {
@@ -957,6 +966,65 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         this.profiler.push("vrPlayers");
 
         VRPlayersClient.getInstance().tick();
+
+        if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && level != null && player != null)
+        {
+            try
+            {
+                final BlockPos blockpos = player.blockPosition();
+                int size = 320;
+                int offset = size/2;
+                File file1 = new File(MenuWorldDownloader.customWorldFolder);
+                file1.mkdirs();
+                int i = 0;
+
+                while (true)
+                {
+                    final File file2 = new File(file1, "world" + i + ".mmw");
+
+                    if (!file2.exists())
+                    {
+                        VRSettings.logger.info("Exporting world... area size: " + size);
+                        VRSettings.logger.info("Saving to " + file2.getAbsolutePath());
+
+                        if (isLocalServer())
+                        {
+                            final Level level = getSingleplayerServer().getLevel(player.level.dimension());
+                            CompletableFuture<Void> completablefuture = getSingleplayerServer().submit(() -> {
+                                try
+                                {
+                                    MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset, size, size, blockpos.getY(), file2);
+                                }
+                                catch (Throwable throwable)
+                                {
+                                    throwable.printStackTrace();
+                                }
+                            });
+
+                            while (!completablefuture.isDone())
+                            {
+                                Thread.sleep(10L);
+                            }
+                        }
+                        else
+                        {
+                            MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset, size, size, blockpos.getY(), file2);
+                            gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
+                        }
+
+                        gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", size)));
+                        gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
+                        break;
+                    }
+
+                    ++i;
+                }
+            }
+            catch (Exception exception)
+            {
+                exception.printStackTrace();
+            }
+        }
 
         this.profiler.pop();
     }
