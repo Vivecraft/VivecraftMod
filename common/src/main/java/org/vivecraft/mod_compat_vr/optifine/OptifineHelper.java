@@ -229,7 +229,7 @@ public class OptifineHelper {
             customColorsGetFogColorEndMethod = customColors.getDeclaredMethod("getFogColorEnd", Vec3.class);
             customColorsGetFogColorEndMethod.setAccessible(true);
             customColorsGetFogColorNetherMethod = customColors.getDeclaredMethod("getFogColorNether", Vec3.class);
-            customColorsGetFogColorEndMethod.setAccessible(true);
+            customColorsGetFogColorNetherMethod.setAccessible(true);
 
         } catch (ClassNotFoundException e) {
             LogUtils.getLogger().error("Optifine detected, but couldn't load class: {}", e.getMessage());
