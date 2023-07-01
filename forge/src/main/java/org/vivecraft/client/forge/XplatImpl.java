@@ -69,11 +69,11 @@ public class XplatImpl {
         return ForgeHooksClient.getFluidSprites(level, pos, fluidStateIn);
     }
 
-    static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
+    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
         return biome.getModifiedClimateSettings();
     }
 
-    static BiomeSpecialEffects getBiomeEffects(Biome biome){
+    public static BiomeSpecialEffects getBiomeEffects(Biome biome){
         return biome.getModifiedSpecialEffects();
     }
 }

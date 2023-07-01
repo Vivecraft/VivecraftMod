@@ -41,7 +41,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.valueproviders.ConstantInt;

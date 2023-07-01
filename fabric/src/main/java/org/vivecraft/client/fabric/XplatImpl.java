@@ -67,11 +67,11 @@ public class XplatImpl {
         return FluidRenderHandlerRegistry.INSTANCE.get(fluidStateIn.getType()).getFluidSprites(level, pos, fluidStateIn);
     }
 
-    static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
+    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
         return ((BiomeAccessor)(Object)biome).getClimateSettings();
     }
 
-    static BiomeSpecialEffects getBiomeEffects(Biome biome){
+    public static BiomeSpecialEffects getBiomeEffects(Biome biome){
         return biome.getSpecialEffects();
     }
 }
