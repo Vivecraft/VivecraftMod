@@ -29,6 +29,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -219,15 +220,15 @@ public class MenuWorldRenderer {
 			VRSettings.logger.info("MenuWorlds: Building geometry...");
 			boolean ao = mc.options.ambientOcclusion().get();
 			mc.options.ambientOcclusion().set(true);
-			// TODO: ShaderCompat
-			/*
-			boolean shaders = Shaders.shaderPackLoaded;
-			Shaders.shaderPackLoaded = false;
-			DefaultVertexFormat.updateVertexFormats();
-			 */
+
+			// disable redner regions during building, they mess with liquids
+			boolean optifineRenderRegions = false;
+			if (OptifineHelper.isOptifineLoaded()) {
+				optifineRenderRegions = OptifineHelper.isRenderRegions();
+				OptifineHelper.setRenderRegions(false);
+			}
+
 			ItemBlockRenderTypes.setFancy(true);
-			// TODO RELOAD Recources
-			//TextureUtils.resourcesReloaded(Config.getResourceManager());
 			visibleTextures.clear();
 			lol = rand.nextInt(1000) == 0;
 
@@ -317,15 +318,10 @@ public class MenuWorldRenderer {
 				ready = true;
 			} finally {
 				mc.options.ambientOcclusion().set(ao);
-				ClientDataHolderVR.getInstance().skipStupidGoddamnChunkBoundaryClipping = false;
-				/*
-				// TODO optifine
-				if (shaders) {
-					Shaders.shaderPackLoaded = shaders;
-					TextureUtils.resourcesReloaded(Config.getResourceManager());
+				if (OptifineHelper.isOptifineLoaded()) {
+					OptifineHelper.setRenderRegions(optifineRenderRegions);
 				}
-				DefaultVertexFormats.updateVertexFormats();
-				*/
+				ClientDataHolderVR.getInstance().skipStupidGoddamnChunkBoundaryClipping = false;
 			}
 		}
 	}
@@ -458,67 +454,35 @@ public class MenuWorldRenderer {
 
 			Vec3 skyColor = this.getSkyColor(position);
 
-			// TODO optifine
-			//boolean flag = Config.isShaders();
-
-            /*if (flag)
-            {
-                Shaders.disableTexture();
-            }*/
-
-			//skyColor = CustomColors.getSkyColor(skyColor, this.mc.world, this.mc.getRenderViewEntity().posX, this.mc.getRenderViewEntity().posY + 1.0D, this.mc.getRenderViewEntity().posZ);
-
-            /*if (flag)
-            {
-                Shaders.setSkyColor(skyColor);
-            }*/
+			if (OptifineHelper.isOptifineLoaded()) {
+				skyColor = OptifineHelper.getCustomSkyColor(skyColor, blockAccess, position.x, position.y, position.z);
+			}
 
 			fogRenderer.levelFogColor();
-
-            /*if (flag)
-            {
-                Shaders.enableFog();
-            }*/
 
 			BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 			RenderSystem.depthMask(false);
 			RenderSystem.setShaderColor((float)skyColor.x, (float)skyColor.y, (float)skyColor.z, 1.0f);
 
-            /*if (flag)
-            {
-                Shaders.preSkyList();
-            }*/
 
-			// TODO optifine
-			//if (Config.isSkyEnabled())
+			if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSkyEnabled())
 			{
 				this.skyVBO.bind();
 				this.skyVBO.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(), skyShader);
 				VertexBuffer.unbind();
 			}
 
-			// TODO FOG?
-
-            /*if (flag)
-            {
-                Shaders.disableFog();
-            }*/
-
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
 			float[] sunriseColor = this.dimensionInfo.getSunriseColor(this.getTimeOfDay(), 0); // calcSunriseSunsetColors
 
-			if (sunriseColor != null /*&& Config.isSunMoonEnabled()*/) //TODO optifine
+			if (sunriseColor != null && (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()))
 			{
 				//RenderSystem.disableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionColorShader);
 				RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 				poseStack.pushPose();
-                /*if (flag)
-                {
-                    Shaders.disableTexture();
-                }*/
 
 				poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
 				poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(this.getSunAngle()) < 0.0f ? 180.0f : 0.0f));
@@ -548,35 +512,23 @@ public class MenuWorldRenderer {
 
 			//RenderSystem.enableTexture();
 
-            /*if (flag)
-            {
-                Shaders.enableTexture();
-            }*/
-
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 			poseStack.pushPose();
 
-			float f10 = 1.0F; //1.0F - this.getRainStrength(partialTicks);
+			float f10 = 1.0F - getRainLevel();
 			RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, f10);
 			poseStack.mulPose(Axis.YP.rotationDegrees(-90.0f));
 			Matrix4f modelView = poseStack.last().pose();
-			//CustomSky.renderSky(this.world, this.textureManager, partialTicks);
 
-            /*if (flag)
-            {
-                Shaders.preCelestialRotate();
-            }*/
+			//if (OptifineHelper.isOptifineLoaded()) {
+				// needs a full Level
+				//CustomSky.renderSky(this.world, poseStack, Minecraft.getInstance().getFrameTime());
+			//}
 
 			poseStack.mulPose(Axis.XP.rotationDegrees(this.getTimeOfDay() * 360.0f));
 
-            /*if (flag)
-            {
-                Shaders.postCelestialRotate();
-            }*/
-
 			float size = 30.0F;
-			// TODO optifine
-			//if (Config.isSunTexture())
+			if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled())
 			{
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderTexture(0, SUN_LOCATION);
@@ -589,8 +541,7 @@ public class MenuWorldRenderer {
 			}
 
 			size = 20.0F;
-			// TODO optifine
-			//if (Config.isMoonTexture())
+			if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled())
 			{
 				RenderSystem.setShaderTexture(0, MOON_LOCATION);
 				int moonPhase = this.getMoonPhase();
@@ -610,14 +561,9 @@ public class MenuWorldRenderer {
 
 			//GlStateManager.disableTexture();
 
-            /*if (flag)
-            {
-                Shaders.disableTexture();
-            }*/
-
 			float starBrightness = this.getStarBrightness() * f10;
 
-			if (starBrightness > 0.0F /*&& Config.isStarsEnabled() /*&& !CustomSky.hasSkyLayers(this.world)*/) // TODO optifine
+			if (starBrightness > 0.0F && (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isStarsEnabled()) /*&& !CustomSky.hasSkyLayers(this.world)*/)
 			{
 				RenderSystem.setShaderColor(starBrightness, starBrightness, starBrightness, starBrightness);
 				fogRenderer.setupNoFog();
@@ -631,18 +577,8 @@ public class MenuWorldRenderer {
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
 
-            /*if (flag)
-            {
-                Shaders.enableFog();
-            }*/
-
 			poseStack.popPose();
 			//RenderSystem.disableTexture();
-
-            /*if (flag)
-            {
-                Shaders.disableTexture();
-            }*/
 
 			double horizonDistance = position.y - this.blockAccess.getHorizon();
 
@@ -664,10 +600,8 @@ public class MenuWorldRenderer {
 
 	private void renderEndSky(PoseStack poseStack)
 	{
-		//if (Config.isSkyEnabled()) TODO optifine
+		if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSkyEnabled())
 		{
-			// TODO needed?
-			//GlStateManager.disableFog();
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 			RenderSystem.depthMask(false);
@@ -692,16 +626,14 @@ public class MenuWorldRenderer {
 				int g = 40;
 				int b = 40;
 
-				/* TODO optifine
-				if (Config.isCustomColors())
+				if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isCustomColors())
 				{
-					Vector3d vec3d = new Vector3d((double)r / 255.0D, (double)g / 255.0D, (double)b / 255.0D);
-					//vec3d = CustomColors.getWorldSkyColor(vec3d, this.world, this.mc.getRenderViewEntity(), 0.0F);
-					r = (int)(vec3d.x * 255.0D);
-					g = (int)(vec3d.y * 255.0D);
-					b = (int)(vec3d.z * 255.0D);
+					Vec3 newSkyColor = new Vec3((double)r / 255.0D, (double)g / 255.0D, (double)b / 255.0D);
+					newSkyColor = OptifineHelper.getCustomSkyColorEnd(newSkyColor);
+					r = (int)(newSkyColor.x * 255.0D);
+					g = (int)(newSkyColor.y * 255.0D);
+					b = (int)(newSkyColor.z * 255.0D);
 				}
-*/
 				bufferBuilder.vertex(modelView, -100.0f, -100.0f, -100.0f).uv( 0.0f,  0.0f).color(r, g, b, 255).endVertex();
 				bufferBuilder.vertex(modelView, -100.0f, -100.0f,  100.0f).uv( 0.0f, 16.0f).color(r, g, b, 255).endVertex();
 				bufferBuilder.vertex(modelView,  100.0f, -100.0f,  100.0f).uv(16.0f, 16.0f).color(r, g, b, 255).endVertex();
@@ -711,7 +643,6 @@ public class MenuWorldRenderer {
 			}
 
 			RenderSystem.depthMask(true);
-			// TODO wasn't there?
 			RenderSystem.disableBlend();
 		}
 	}
@@ -734,9 +665,10 @@ public class MenuWorldRenderer {
 			double cloudOffset = ((float) ticks + mc.getFrameTime()) * 0.03f;
 			double cloudX = (x + cloudOffset) / 12.0;
 			double cloudY = cloudHeight - y + 0.33;
-			/*TODO Optifine
-			cloudY = cloudY + (float)mc.gameSettings.ofCloudsHeight * 128.0F;
-			 */
+			if (OptifineHelper.isOptifineLoaded()) {
+				cloudY = cloudY + OptifineHelper.getCloudHeight() * 128.0;
+			}
+
 			double cloudZ = z / 12.0 + 0.33;
 			cloudX -= Mth.floor(cloudX / 2048.0) * 2048;
 			cloudZ -= Mth.floor(cloudZ / 2048.0) * 2048;
@@ -1046,7 +978,6 @@ public class MenuWorldRenderer {
 		return h * 0.8f + 0.2f;
 	}
 
-	//TODO
 	public float getRainLevel() {
 		return this.rainLevel;
 	}
@@ -1063,7 +994,6 @@ public class MenuWorldRenderer {
 		return f1 * f1 * 0.5F;
 	}
 
-	// TODO check if that is correct
 	public Vec3 getSkyColor(Vec3 position)
 	{
 		float dayTime = this.getTimeOfDay();
@@ -1270,7 +1200,6 @@ public class MenuWorldRenderer {
 	{
 		this.blockLightRedFlicker += (float)((Math.random() - Math.random()) * Math.random() * Math.random() * 0.1);
 		this.blockLightRedFlicker *= 0.9f;
-		//this.torchFlickerX += this.blockLightRedFlicker - this.torchFlickerX;
 		this.lightmapUpdateNeeded = true;
 	}
 
@@ -1278,7 +1207,7 @@ public class MenuWorldRenderer {
 	{
 		if (this.lightmapUpdateNeeded)
 		{
-			// TODO OPTIFINE
+			// not possible, needs a full world
 			/*if (Config.isCustomColors())
 			{
 				boolean flag = this.client.player.isPotionActive(MobEffects.NIGHT_VISION) || this.client.player.isPotionActive(MobEffects.CONDUIT_POWER);
@@ -1309,7 +1238,6 @@ public class MenuWorldRenderer {
 			*/
 			float nightVision = 0.0f;
 
-			// TODO whats this for?
 			Vector3f skylightColor = new Vector3f(skyLight, skyLight, 1.0f).lerp(new Vector3f(1.0f, 1.0f, 1.0f), 0.35f);
 
 			Vector3f finalColor = new Vector3f();
@@ -1504,29 +1432,25 @@ public class MenuWorldRenderer {
 				fogGreen = fogGreen * (1.0F - f1) + fogGreen * f3 * f1;
 				fogBlue = fogBlue * (1.0F - f1) + fogBlue * f3 * f1;
 			}
-			// TODO optifine custom fog
-			/*if (menuWorldRenderer.areEyesInFluid(FluidTags.WATER))
-			{
-				Vector3d vec3d = CustomColors.getUnderwaterColor(this.mc.world, this.mc.getRenderViewEntity().posX, this.mc.getRenderViewEntity().posY + 1.0D, this.mc.getRenderViewEntity().posZ);
 
-				if (vec3d != null)
-				{
-					fogRed = (float)vec3d.x;
-					fogGreen = (float)vec3d.y;
-					fogBlue = (float)vec3d.z;
+			if (OptifineHelper.isOptifineLoaded()) {
+				// custom fog colors
+				if (fogType == FogType.WATER) {
+					Vec3 colUnderwater = OptifineHelper.getCustomUnderwaterColor(menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
+					if (colUnderwater != null) {
+						fogRed = (float)colUnderwater.x;
+						fogGreen = (float)colUnderwater.y;
+						fogBlue = (float)colUnderwater.z;
+					}
+				} else if (fogType == FogType.LAVA) {
+					Vec3 colUnderlava = OptifineHelper.getCustomUnderlavaColor(menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
+					if (colUnderlava != null) {
+						fogRed = (float) colUnderlava.x;
+						fogGreen = (float) colUnderlava.y;
+						fogBlue = (float) colUnderlava.z;
+					}
 				}
 			}
-			else if (menuWorldRenderer.areEyesInFluid(FluidTags.LAVA))
-			{
-				Vector3d vec3d1 = CustomColors.getUnderlavaColor(this.mc.world, this.mc.getRenderViewEntity().posX, this.mc.getRenderViewEntity().posY + 1.0D, this.mc.getRenderViewEntity().posZ);
-
-				if (vec3d1 != null)
-				{
-					fogRed = (float)vec3d1.x;
-					fogGreen = (float)vec3d1.y;
-					fogBlue = (float)vec3d1.z;
-				}
-			}*/
 
 			RenderSystem.clearColor(fogRed, fogGreen, fogBlue, 0.0f);
 		}
@@ -1536,12 +1460,26 @@ public class MenuWorldRenderer {
 			f = 1.0F - (float) Math.pow(f, 0.25);
 			Vec3 eyePos = this.menuWorldRenderer.getEyePos();
 			Vec3 skyColor = this.menuWorldRenderer.getSkyColor(eyePos);
-			//skyColor = CustomColors.getWorldSkyColor(skyColor, worldIn, this.mc.getRenderViewEntity(), partialTicks);
+			if (OptifineHelper.isOptifineLoaded()) {
+				if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS)) {
+					skyColor = OptifineHelper.getCustomSkyColor(skyColor, menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
+				} else if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.END_EFFECTS)) {
+					skyColor = OptifineHelper.getCustomSkyColorEnd(skyColor);
+				}
+			}
 			float f1 = (float) skyColor.x;
 			float f2 = (float) skyColor.y;
 			float f3 = (float) skyColor.z;
 			Vec3 fogColor = this.menuWorldRenderer.getFogColor(eyePos);
-			//fogColor = CustomColors.getWorldFogColor(fogColor, worldIn, this.mc.getRenderViewEntity(), partialTicks);
+			if (OptifineHelper.isOptifineLoaded()) {
+				if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS)) {
+					fogColor = OptifineHelper.getCustomFogColor(fogColor, menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
+				} else if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.END_EFFECTS)) {
+					fogColor = OptifineHelper.getCustomFogColorEnd(fogColor);
+				} else if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.NETHER_EFFECTS)) {
+					fogColor = OptifineHelper.getCustomFogColorNether(fogColor);
+				}
+			}
 			fogRed = (float) fogColor.x;
 			fogGreen = (float) fogColor.y;
 			fogBlue = (float) fogColor.z;
