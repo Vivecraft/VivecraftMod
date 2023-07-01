@@ -19,6 +19,11 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import org.vivecraft.client_vr.settings.VRSettings;
+
+import com.mojang.datafixers.DataFixer;
+import com.mojang.serialization.Dynamic;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -29,12 +34,16 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -50,6 +59,8 @@ import net.minecraft.world.level.dimension.DimensionType;
 public class MenuWorldExporter {
 	public static final int VERSION = 5;
 	public static final int MIN_VERSION = 2;
+
+	private static final DataFixer dataFixer = DataFixers.getDataFixer();
 
 	public static byte[] saveArea(Level level, int xMin, int zMin, int xSize, int zSize, int ground) throws IOException {
 		BlockStateMapper blockStateMapper = new BlockStateMapper();
@@ -102,6 +113,8 @@ public class MenuWorldExporter {
 			dos.writeLong(((ServerLevel)level).getSeed());
 		else
 			dos.writeLong(level.getBiomeManager().biomeZoomSeed); // not really correct :/
+
+		dos.writeInt(SharedConstants.getCurrentVersion().getDataVersion().getVersion());
 
 		dos.writeBoolean(level.dimensionType().fixedTime().isPresent());
 		if (level.dimensionType().fixedTime().isPresent())
@@ -208,6 +221,19 @@ public class MenuWorldExporter {
 		if (header.version >= 3)
 			seed = dis.readLong();
 
+		int dataVersion;
+		if (header.version == 2)
+			dataVersion = 1631; // assume 1.13.2
+		else if (header.version == 3)
+			dataVersion = 2230; // assume 1.15.2
+		else if (header.version == 4)
+			dataVersion = 2586; // assume 1.16.5
+		else
+			dataVersion = dis.readInt(); // v5+ stores the real data version
+
+		if (dataVersion > SharedConstants.getCurrentVersion().getDataVersion().getVersion())
+			VRSettings.logger.warn("Data version is newer than current, this menu world may not load correctly.");
+
 		OptionalLong dimFixedTime = OptionalLong.empty();
 		boolean dimHasCeiling;
 		int dimMinY;
@@ -250,7 +276,7 @@ public class MenuWorldExporter {
 		}
 
 		BlockStateMapper blockStateMapper = new BlockStateMapper();
-		blockStateMapper.readPalette(dis);
+		blockStateMapper.readPalette(dis, dataVersion);
 
 		BiomeMapper biomeMapper;
 		if (header.version >= 5) {
@@ -364,12 +390,13 @@ public class MenuWorldExporter {
 			return this.paletteMap.byId(id);
 		}
 
-		void readPalette(DataInputStream dis) throws IOException {
+		void readPalette(DataInputStream dis, int dataVersion) throws IOException {
 			this.paletteMap.clear();
 			int size = dis.readInt();
 
 			for (int i = 0; i < size; i++) {
 				CompoundTag tag = CompoundTag.TYPE.load(dis, 0, NbtAccounter.UNLIMITED);
+				tag = (CompoundTag)dataFixer.update(References.BLOCK_STATE, new Dynamic<>(NbtOps.INSTANCE, tag), dataVersion, SharedConstants.getCurrentVersion().getDataVersion().getVersion()).getValue();
 				this.paletteMap.add(NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag));
 			}
 		}
@@ -488,7 +515,7 @@ public class MenuWorldExporter {
 	}
 
 	private static class LegacyBiomeMapper implements BiomeMapper {
-		private static Map<Integer, Biome> map = new HashMap<>();
+		private static final Map<Integer, Biome> map = new HashMap<>();
 		static {
 			// big hard-coded map of biomes from 1.16
 			// the commented line here is just a builder reference
