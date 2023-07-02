@@ -294,7 +294,7 @@ public class MenuWorldRenderer {
 						}
 						VRSettings.logger.info("Built " + c + " blocks.");
 						if (layer == RenderType.translucent()) {
-							vertBuffer.setQuadSortOrigin(blockAccess.getXSize() / 2F, blockAccess.getGround(), blockAccess.getXSize() / 2F);
+							vertBuffer.setQuadSortOrigin(0, Mth.frac(blockAccess.getGround()), 0);
 						}
 						return Pair.of(layer,vertBuffer.end());
 					}, Util.backgroundExecutor()));
