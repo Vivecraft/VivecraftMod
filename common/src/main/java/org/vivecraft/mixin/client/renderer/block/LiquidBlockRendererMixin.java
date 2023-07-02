@@ -13,7 +13,9 @@ public class LiquidBlockRendererMixin {
 	//TODO a bit hacky, when does it happen?
 	@ModifyConstant(method = "tesselate", constant = @Constant(intValue = 15))
 	public int chunckClipping(int i) {
-		return ClientDataHolderVR.getInstance().skipStupidGoddamnChunkBoundaryClipping ? Integer.MAX_VALUE : 15;
+		// -1 is 0xFFFF FFFF
+		// so no change
+		return ClientDataHolderVR.getInstance().skipStupidGoddamnChunkBoundaryClipping ? -1 : 15;
 	}
 
 //	//TODO not found?

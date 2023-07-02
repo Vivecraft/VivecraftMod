@@ -87,7 +87,6 @@ public class MenuWorldRenderer {
 	public Set<TextureAtlasSprite> visibleTextures = new HashSet<>();
 	private Random rand;
 	private boolean ready;
-	private boolean lol;
 	private CloudStatus prevCloudsType;
 	private int prevCloudX;
 	private int prevCloudY;
@@ -160,12 +159,12 @@ public class MenuWorldRenderer {
 		//rotate World
 		poseStack.mulPose(Axis.YP.rotationDegrees(worldRotation));
 
-		float ground = blockAccess.getGround();
-		if (lol) ground += 100;
-		float offsetX = -blockAccess.getXSize() / 2F;
-		float offsetZ = -blockAccess.getZSize() / 2F;
+		// small offset to center on source block, and add the partial block offset, this shouldn't be too noticable on the fog
+		poseStack.translate(-0.5,-blockAccess.getGround()+(int)blockAccess.getGround(),-0.5);
 
-		Vec3 eyePosition = getEyePos();
+		// not sure why this needs to be rotated twice, but it works
+		Vec3 offset = new Vec3(0.5,-blockAccess.getGround()+(int)blockAccess.getGround(),0.5).yRot(worldRotation*0.0174533f);
+		Vec3 eyePosition = getEyePos().add(offset).yRot(-worldRotation*0.0174533f);
 
 		fogRenderer.levelFogColor();
 
@@ -181,35 +180,30 @@ public class MenuWorldRenderer {
 
 		RenderSystem.disableBlend();
 
-		renderChunkLayer(RenderType.solid(), modelView, projection, offsetX, -ground, offsetZ);
-		renderChunkLayer(RenderType.cutoutMipped(), modelView, projection, offsetX, -ground, offsetZ);
-		renderChunkLayer(RenderType.cutout(), modelView, projection, offsetX, -ground, offsetZ);
+		renderChunkLayer(RenderType.solid(), modelView, projection);
+		renderChunkLayer(RenderType.cutoutMipped(), modelView, projection);
+		renderChunkLayer(RenderType.cutout(), modelView, projection);
 
 		RenderSystem.enableBlend();
-		renderChunkLayer(RenderType.translucent(), modelView, projection, offsetX, -ground, offsetZ);
-		renderChunkLayer(RenderType.tripwire(), modelView, projection, offsetX, -ground, offsetZ);
+		renderChunkLayer(RenderType.translucent(), modelView, projection);
+		renderChunkLayer(RenderType.tripwire(), modelView, projection);
 
-		renderClouds(poseStack, eyePosition.x, eyePosition.y, eyePosition.z);
+		renderClouds(poseStack, eyePosition.x, eyePosition.y+blockAccess.getGround()+blockAccess.getMinBuildHeight(), eyePosition.z);
 
 		RenderSystem.depthMask(false);
-		renderSnowAndRain(poseStack, eyePosition.x, ground, eyePosition.z, (float)eyePosition.x+offsetX, (float)eyePosition.z+offsetZ);
+		renderSnowAndRain(poseStack, eyePosition.x, 0, eyePosition.z);
 		RenderSystem.depthMask(true);
 
 		poseStack.popPose();
 		turnOffLightLayer();
 	}
 
-	private void renderChunkLayer(RenderType layer, Matrix4f modelView, Matrix4f Projection, float offsetX, float offsetY, float offsetZ) {
+	private void renderChunkLayer(RenderType layer, Matrix4f modelView, Matrix4f Projection) {
 		layer.setupRenderState();
 		VertexBuffer vertexBuffer = vertexBuffers.get(layer);
 		vertexBuffer.bind();
 		ShaderInstance shaderInstance = RenderSystem.getShader();
 		shaderInstance.apply();
-		Uniform uniform = shaderInstance.CHUNK_OFFSET;
-		if (uniform != null) {
-			uniform.set(offsetX, offsetY, offsetZ);
-			uniform.upload();
-		}
 		turnOnLightLayer();
 		vertexBuffer.drawWithShader(modelView, Projection, shaderInstance);
 		turnOffLightLayer();
@@ -230,7 +224,11 @@ public class MenuWorldRenderer {
 
 			ItemBlockRenderTypes.setFancy(true);
 			visibleTextures.clear();
-			lol = rand.nextInt(1000) == 0;
+
+			// random offset to make the player fly
+			if (rand.nextInt(1000) == 0) {
+				blockAccess.setGroundOffset(100);
+			}
 
 			try {
 				List<RenderType> layers = RenderType.chunkBufferLayers();
@@ -255,14 +253,14 @@ public class MenuWorldRenderer {
 						vertBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 						RandomSource randomSource = RandomSource.create();
 						int c = 0;
-						for (int x = 0; x < blockAccess.getXSize(); x++) {
-							for (int y = 0; y < blockAccess.getYSize(); y++) {
+						for (int x = -blockAccess.getXSize()/2; x < blockAccess.getXSize()/2; x++) {
+							for (int y = (int)-blockAccess.getGround(); y < blockAccess.getYSize()-(int)blockAccess.getGround(); y++) {
 								// don't build unnecessary blocks in tall worlds
-								if (Mth.abs(y - blockAccess.getGround()) > renderDistance + 1)
+								if (Mth.abs(y) > renderDistance + 1)
 									continue;
-								for (int z = 0; z < blockAccess.getZSize(); z++) {
+								for (int z = -blockAccess.getZSize()/2; z < blockAccess.getZSize()/2; z++) {
 									// don't build unnecessary blocks in fog
-									if (Mth.lengthSquared(x - blockAccess.getXSize() * 0.5, z - blockAccess.getZSize() * 0.5) > renderDistSquare)
+									if (Mth.lengthSquared(x, z) > renderDistSquare)
 										continue;
 
 									BlockPos pos = new BlockPos(x, y, z);
@@ -817,14 +815,13 @@ public class MenuWorldRenderer {
 		return bufferBuilder.end();
 	}
 
-	private void renderSnowAndRain(PoseStack poseStack, double inX, double inY, double inZ, float xRenderOffset, float zRenderOffset) {
+	private void renderSnowAndRain(PoseStack poseStack, double inX, double inY, double inZ) {
 		if (getRainLevel() <= 0.0f) {
 			return;
 		}
 
 		RenderSystem.getModelViewStack().pushPose();
 		RenderSystem.getModelViewStack().mulPoseMatrix(poseStack.last().pose());
-		RenderSystem.getModelViewStack().mulPose(Axis.YP.rotationDegrees(-worldRotation));
 		RenderSystem.applyModelViewMatrix();
 
 		int xFloor = Mth.floor(inX);
@@ -873,8 +870,8 @@ public class MenuWorldRenderer {
 
 				mutableBlockPos.setY(rainY);
 
-				double localX = rainX - inX + 0.5 + xRenderOffset;
-				double localZ = rainZ - inZ + 0.5 + zRenderOffset;
+				double localX = rainX + 0.5;
+				double localZ = rainZ + 0.5;
 				float distance = (float)Math.sqrt(localX * localX + localZ * localZ) / (float)rainDistance;
 				float blend;
 				float xOffset = 0;
@@ -1336,11 +1333,7 @@ public class MenuWorldRenderer {
 	}
 
 	public Vec3 getEyePos() {
-		Vec3 hmd = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getPosition();
-
-		if (blockAccess == null)
-			return hmd;
-		return new Vec3(hmd.x + blockAccess.getXSize() / 2F, hmd.y + blockAccess.getGround(), hmd.z + blockAccess.getZSize() / 2F);
+		return ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getPosition();
 	}
 
 	private boolean isFluidTagged(Fluid fluid, TagKey<Fluid> tag) {
@@ -1395,7 +1388,7 @@ public class MenuWorldRenderer {
 				this.biomeChangedTime = -1L;
 			}
 
-			float d0 = (float)((eyePos.y - this.menuWorldRenderer.getLevel().getMinBuildHeight()) * this.menuWorldRenderer.getLevel().getVoidFogYFactor());
+			float d0 = (float)((eyePos.y + this.menuWorldRenderer.getLevel().getGround()) * this.menuWorldRenderer.getLevel().getVoidFogYFactor());
 
 			/* no entity available
 			MobEffectFogFunction mobEffectFogFunction = FogRenderer.getPriorityFogFunction(entity, f);

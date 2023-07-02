@@ -44,6 +44,9 @@ public class FakeBlockAccess implements LevelReader {
 	private int zSize;
 	private float ground;
 
+	// same as ground, but includes an optional vertical view offset
+	public float effectiveGround;
+
 	private float rotation;
 	private boolean rain;
 	private boolean thunder;
@@ -74,9 +77,10 @@ public class FakeBlockAccess implements LevelReader {
 		this.dimensionInfo = DimensionSpecialEffects.forType(dimensionType);
 
 		// set the ground to the height of the center block
-		BlockPos pos = new BlockPos(xSize/2, ground, zSize/2);
+		BlockPos pos = new BlockPos(0, (int)this.ground, 0);
 		BlockState standing = blocks[encodeCoords(pos)];
 		this.ground += Math.max(standing.getCollisionShape(this, pos).max(Direction.Axis.Y), 0.0);
+		this.effectiveGround = this.ground;
 	}
 	
 	private int encodeCoords(int x, int z) {
@@ -84,7 +88,7 @@ public class FakeBlockAccess implements LevelReader {
 	}
 	
 	private int encodeCoords(int x, int y, int z) {
-		return (y * zSize + z) * xSize + x;
+		return ((y+(int)effectiveGround) * zSize + (z+zSize/2)) * xSize + (x+xSize/2);
 	}
 
 	private int encodeCoords(BlockPos pos) {
@@ -92,7 +96,7 @@ public class FakeBlockAccess implements LevelReader {
 	}
 	
 	private boolean checkCoords(int x, int y, int z) {
-		return x >= 0 && y >= 0 && z >= 0 && x < xSize && y < ySize && z < xSize;
+		return x >= -xSize/2 && y >= -(int)effectiveGround && z >= -zSize/2 && x < xSize/2 && y < ySize-(int)effectiveGround && z < zSize/2;
 	}
 
 	private boolean checkCoords(BlockPos pos) {
@@ -100,7 +104,11 @@ public class FakeBlockAccess implements LevelReader {
 	}
 	
 	public float getGround() {
-		return ground;
+		return effectiveGround;
+	}
+
+	public void setGroundOffset(float offset) {
+		effectiveGround = ground + offset;
 	}
 	
 	public int getXSize() {
@@ -143,7 +151,7 @@ public class FakeBlockAccess implements LevelReader {
 	}
 
 	public double getHorizon() {
-		return isFlat ? dimensionType.minY() : 63.0D;
+		return isFlat ? -effectiveGround : 63.0D-effectiveGround+getMinBuildHeight();
 	}
 
 	@Override
@@ -275,7 +283,7 @@ public class FakeBlockAccess implements LevelReader {
 	}
 
 	public int getHeightBlocking(int x, int z) {
-		return heightmap[x][z];
+		return heightmap[x+xSize/2][z+zSize/2] - (int)effectiveGround;
 	}
 
 	@Override
@@ -310,13 +318,15 @@ public class FakeBlockAccess implements LevelReader {
 
 	@Override
 	public Holder<Biome> getNoiseBiome(int x, int y, int z) {
+		int xMoved = x + xSize/8;
+		int yMoved = y + (int)effectiveGround/4;
+		int zMoved = z + zSize/8;
 		if (!checkCoords(x * 4, y * 4, z * 4)) {
-			x = Mth.clamp(x, 0, xSize / 4 - 1);
-			y = Mth.clamp(y, 0, ySize / 4 - 1);
-			z = Mth.clamp(z, 0, zSize / 4 - 1);
+			xMoved = Mth.clamp(xMoved, 0, xSize / 4 - 1);
+			yMoved = Mth.clamp(yMoved, 0, (ySize-(int)effectiveGround) / 4 - 1);
+			zMoved = Mth.clamp(zMoved, 0, zSize / 4 - 1);
 		}
-
-		return Holder.direct(biomemap[(y * (zSize / 4) + z) * (xSize / 4) + x]);
+		return Holder.direct(biomemap[(yMoved * (zSize / 4) + zMoved) * (xSize / 4) + xMoved]);
 	}
 
 	@Override
@@ -331,7 +341,7 @@ public class FakeBlockAccess implements LevelReader {
 
 	@Override
 	public int getSeaLevel() {
-		return 63; // magic number
+		return (int)(63-effectiveGround+getMinBuildHeight()); // magic number
 	}
 
 	@Override
