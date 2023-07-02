@@ -32,6 +32,7 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.FrameTimer;
@@ -286,14 +287,19 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Shadow public abstract IntegratedServer getSingleplayerServer();
 
+    @Unique private List<String> resourcepacks;
+
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay initVivecraft(Overlay overlay) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
 
         // register a resource reload listener, to reload the menu world
         resourceManager.registerReloadListener((ResourceManagerReloadListener) resourceManager -> {
-            if (ClientDataHolderVR.getInstance().menuWorldRenderer != null
+            List<String> newPacks = resourceManager.listPacks().map(PackResources::packId).toList();
+            if ((resourcepacks == null || !resourcepacks.equals(newPacks)) &&
+                ClientDataHolderVR.getInstance().menuWorldRenderer != null
                 && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
+                resourcepacks = newPacks;
                 try {
                     ClientDataHolderVR.getInstance().menuWorldRenderer.destroy();
                     ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
@@ -324,6 +330,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     public void initMenuworldOnLaunch(CallbackInfo ci) {
         // tell the MenuWorldRenderer that it is safe to prepare now
         MenuWorldRenderer.canPrepare =  true;
+
+        // set initial resourcepacks
+        resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
+
         // if a world is already loaded, prepare it
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null
             && ClientDataHolderVR.getInstance().menuWorldRenderer.getLevel() != null)
