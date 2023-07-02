@@ -1620,22 +1620,41 @@ public abstract class GameRendererVRMixin
         Vector2f area = DATA_HOLDER.vr.getPlayAreaSize();
         if (area != null) {
             poseStack.pushPose();
-            float width = (float)Math.ceil(area.x);
-            float length = (float)Math.ceil(area.y);
+            float width = area.x;//(float)Math.ceil(area.x);
+            float length = area.y;//(float)Math.ceil(area.y);
 
-            Minecraft.getInstance().getTextureManager().bindForSetup(Screen.BACKGROUND_LOCATION);
+            RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+            RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
             float sun = DATA_HOLDER.menuWorldRenderer.getSkyDarken();
             RenderSystem.setShaderColor(sun, sun, sun, 0.3f);
 
-            poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
+
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.enableBlend();
             Matrix4f matrix4f = poseStack.last().pose();
             BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
             bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-
-            bufferbuilder.vertex(matrix4f, 0, 0, 0).uv(0, 0).color(1,1,1,1).normal(0, 1, 0).endVertex();
-            bufferbuilder.vertex(matrix4f, 0, 0, length).uv(0, 4 * length).color(1,1,1,1).normal(0, 1, 0).endVertex();
-            bufferbuilder.vertex(matrix4f, width, 0, length).uv(4 * width, 4 * length).color(1,1,1,1).normal(0, 1, 0).endVertex();
-            bufferbuilder.vertex(matrix4f, width, 0, 0).uv(4 * width, 0).color(1,1,1,1).normal(0, 1, 0).endVertex();
+            poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
+            bufferbuilder
+                .vertex(matrix4f, 0, 0.005f, 0)
+                .uv(0, 0)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+            bufferbuilder
+                .vertex(matrix4f, 0, 0.005f, length)
+                .uv(0, 4 * length)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+            bufferbuilder
+                .vertex(matrix4f, width, 0.005f, length)
+                .uv(4 * width, 4 * length)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+            bufferbuilder
+                .vertex(matrix4f, width, 0.005f, 0)
+                .uv(4 * width, 0)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
 
             BufferUploader.drawWithShader(bufferbuilder.end());
 
