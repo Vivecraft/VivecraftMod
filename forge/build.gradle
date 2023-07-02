@@ -13,21 +13,25 @@ loom {
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
-        mixinConfig "vivecraft.vr.mixins.json"
-        mixinConfig "vivecraft.nonvr.mixins.json"
+        mixinConfig "vivecraft.mixins.json"
         mixinConfig "vivecraft.sodium.mixins.json"
         mixinConfig "vivecraft.forge.sodium.mixins.json"
         mixinConfig "vivecraft.iris.mixins.json"
         mixinConfig "vivecraft.rei.mixins.json"
+        mixinConfig "vivecraft.optifine.mixins.json"
 
-        mixinConfig "vivecraft.vr.forge.mixins.json"
-        mixinConfig "vivecraft.nonvr.forge.mixins.json"
+        mixinConfig "vivecraft.forge.mixins.json"
     }
 }
 
 configurations {
     common
     shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    bundle {
+        // bundle command, to copy jar contents with the shadow plugin
+        canBeResolved = true
+        canBeConsumed = false
+    }
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
@@ -42,6 +46,17 @@ dependencies {
 
     modRuntimeOnly("maven.modrinth:rubidium:0.6.4")
     modRuntimeOnly("maven.modrinth:oculus:1.19.4-1.5.2")
+
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
+
+    // shadow the natives
+    bundle ("org.lwjgl:lwjgl-openvr:3.3.1") { transitive = false }
+    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
+    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
+    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }
 }
 
 processResources {
@@ -56,7 +71,10 @@ shadowJar {
     exclude "fabric.mod.json"
     exclude "architectury.common.json"
 
-    configurations = [project.configurations.shadowCommon]
+    configurations = [
+            project.configurations.shadowCommon,
+            project.configurations.bundle
+    ]
     classifier "dev-shadow"
 }
 

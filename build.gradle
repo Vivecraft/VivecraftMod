@@ -1,6 +1,7 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "1.0-SNAPSHOT" apply false
+    id 'io.github.juuxel.loom-quiltflower' version '1.8.0' apply false
 }
 
 architectury {
@@ -10,6 +11,7 @@ architectury {
 subprojects {
     apply plugin: "java"
     apply plugin: "dev.architectury.loom"
+    apply plugin: "io.github.juuxel.loom-quiltflower"
 
     archivesBaseName = rootProject.archives_base_name
     version = rootProject.minecraft_version + "-" + rootProject.mod_version
@@ -25,6 +27,10 @@ subprojects {
         mappings loom.officialMojangMappings()
         // The following line declares the yarn mappings you may select this one as well.
         // mappings "net.fabricmc:yarn:1.18.2+build.4:v2"
+        implementation("org.lwjgl:lwjgl-openvr:3.3.1")
+        implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
+        implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
+        implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
     }
 
     tasks.withType(JavaCompile) {
@@ -61,7 +67,7 @@ allprojects {
         // See https://docs.gradle.org/current/userguide/declaring_repositories.html
         // for more information about repositories.
 
-        maven {url = 'https://mvnrepository.com/'}
+        maven { url = 'https://mvnrepository.com/' }
         maven { url 'https://jitpack.io' }
         maven {
             name = "Modrinth"

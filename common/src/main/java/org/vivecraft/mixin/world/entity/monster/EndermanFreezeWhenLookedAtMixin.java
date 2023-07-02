@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.api.CommonNetworkHelper;
-import org.vivecraft.api.ServerVivePlayer;
+import org.vivecraft.server.ServerVRPlayers;
+import org.vivecraft.server.ServerVivePlayer;
 
 @Mixin(EnderMan.EndermanFreezeWhenLookedAt.class)
 public class EndermanFreezeWhenLookedAtMixin {
@@ -25,8 +25,8 @@ public class EndermanFreezeWhenLookedAtMixin {
 
     @Inject(at = @At("HEAD"), method = "tick", cancellable = true)
     public void vrTick(CallbackInfo ci) {
-        if (this.target instanceof ServerPlayer player && CommonNetworkHelper.isVive(player)) {
-            ServerVivePlayer data = CommonNetworkHelper.vivePlayers.get(player.getUUID());
+        if (this.target instanceof ServerPlayer player && ServerVRPlayers.isVRPlayer(player)) {
+            ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);
             this.enderman.getLookControl().setLookAt(data.getHMDPos(player));
             ci.cancel();
         }

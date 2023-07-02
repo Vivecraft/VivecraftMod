@@ -1,13 +1,14 @@
 package org.vivecraft.mixin.world.entity.projectile;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.api.CommonNetworkHelper;
-import org.vivecraft.api.ServerVivePlayer;
+import org.vivecraft.server.ServerVRPlayers;
+import org.vivecraft.server.ServerVivePlayer;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +34,7 @@ public abstract class FishingHookMixin extends Entity {
 
 	@ModifyVariable(at = @At(value = "STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 0)
 	private float modifyXrot(float xRot, Player player) {
-		serverviveplayer = CommonNetworkHelper.vivePlayers.get(player.getUUID());
+		serverviveplayer = ServerVRPlayers.getVivePlayer((ServerPlayer) player);
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			controllerDir = serverviveplayer.getControllerDir(serverviveplayer.activeHand);
 			controllerPos = serverviveplayer.getControllerPos(serverviveplayer.activeHand, player);

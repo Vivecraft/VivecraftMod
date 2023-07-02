@@ -17,15 +17,18 @@
   "license": "LGPLv3",
 
   "environment": "*",
+  "entrypoints": {
+    "mm:early_risers": [
+      "org.vivecraft.VivecraftEarlyEntryForOptifabric"
+    ]
+  },
   "mixins": [
-    "vivecraft.vr.mixins.json",
-    "vivecraft.nonvr.mixins.json",
+    "vivecraft.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.fabric.sodium.mixins.json",
     "vivecraft.iris.mixins.json",
     "vivecraft.rei.mixins.json",
-    "vivecraft.nonvr.fabric.mixins.json",
-    "vivecraft.vr.fabric.mixins.json"
+    "vivecraft.fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.14",

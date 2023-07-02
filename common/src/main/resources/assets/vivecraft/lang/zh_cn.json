@@ -162,7 +162,7 @@
     "vivecraft.options.FORCE_STANDING_FREE_MOVE": "强制自由移动",
     "vivecraft.options.ALLOW_ADVANCED_BINDINGS": "显示高级按键设置",
     "vivecraft.options.MENU_WORLD_SELECTION": "世界",
-    "vivecraft.options.HRTF_SELECTION": "3D环绕音效（头部相关传递函数）",
+    "vivecraft.options.HRTF_SELECTION": "定向音频(VR)",
     "vivecraft.options.RELOAD_EXTERNAL_CAMERA": "重载外部摄像机",
     "vivecraft.options.RIGHT_CLICK_DELAY": "重复右键点击",
     "vivecraft.options.ANIMAL_TOUCHING": "动物触摸识别",

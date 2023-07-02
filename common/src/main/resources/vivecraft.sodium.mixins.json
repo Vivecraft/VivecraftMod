@@ -1,16 +1,11 @@
 {
   "required": false,
-  "package": "org.vivecraft.modCompatMixin.sodiumMixin",
-  "plugin": "org.vivecraft.VRMixinConfig",
+  "package": "org.vivecraft.mod_compat_vr.sodium.mixin",
+  "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
+  "client": [
     "RenderSectionManagerVRMixin",
     "SodiumWorldRendererVRMixin"
-  ],
-  "client": [
-
-  ],
-  "server": [
   ],
   "minVersion": "0.8.4"
 }

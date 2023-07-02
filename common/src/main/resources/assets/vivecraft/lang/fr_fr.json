@@ -162,7 +162,7 @@
     "vivecraft.options.FORCE_STANDING_FREE_MOVE": "Forcer le déplacement libre",
     "vivecraft.options.ALLOW_ADVANCED_BINDINGS": "Afficher contrôles avancés",
     "vivecraft.options.MENU_WORLD_SELECTION": "Mondes",
-    "vivecraft.options.HRTF_SELECTION": "HRTF",
+    "vivecraft.options.HRTF_SELECTION": "Audio directionnel (VR)",
     "vivecraft.options.RELOAD_EXTERNAL_CAMERA": "Recharger la caméra externe",
     "vivecraft.options.RIGHT_CLICK_DELAY": "Répéter clic droit",
     "vivecraft.options.ANIMAL_TOUCHING": "Toucher les animales",

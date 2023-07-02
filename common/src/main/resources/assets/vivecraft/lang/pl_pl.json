@@ -162,7 +162,7 @@
     "vivecraft.options.FORCE_STANDING_FREE_MOVE": "Wymuś swobodny ruch",
     "vivecraft.options.ALLOW_ADVANCED_BINDINGS": "Pokaż zaawansowane sterowanie",
     "vivecraft.options.MENU_WORLD_SELECTION": "Światy",
-    "vivecraft.options.HRTF_SELECTION": "HRTF",
+    "vivecraft.options.HRTF_SELECTION": "Dźwięk przestrzenny (VR)",
     "vivecraft.options.RELOAD_EXTERNAL_CAMERA": "Przeładuj zewnętrzną kamerę",
     "vivecraft.options.RIGHT_CLICK_DELAY": "Powtórzenie prawego kliknięcia",
     "vivecraft.options.ANIMAL_TOUCHING": "Dotykanie zwierząt",
