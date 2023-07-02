@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import net.minecraft.Util;
 import net.minecraft.client.CloudStatus;
+import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -152,6 +153,13 @@ public class MenuWorldRenderer {
 
 
 	public void render(PoseStack poseStack) {
+
+		// temporarily disable fabulous to render the menu world
+		GraphicsStatus current = mc.options.graphicsMode().get();
+		if (current == GraphicsStatus.FABULOUS) {
+			mc.options.graphicsMode().set(GraphicsStatus.FANCY);
+		}
+
 		turnOnLightLayer();
 
 		poseStack.pushPose();
@@ -196,6 +204,7 @@ public class MenuWorldRenderer {
 
 		poseStack.popPose();
 		turnOffLightLayer();
+		mc.options.graphicsMode().set(current);
 	}
 
 	private void renderChunkLayer(RenderType layer, Matrix4f modelView, Matrix4f Projection) {
