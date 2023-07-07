@@ -1290,9 +1290,11 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-                ClientDataHolderVR.getInstance().vrPlayer.roomScaleMovementDelay = 2;
-                ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(Minecraft.getInstance().player, false, true);
-                VRPlayer.get().preTick();
+                if (VRState.vrRunning) {
+                    ClientDataHolderVR.getInstance().vrPlayer.roomScaleMovementDelay = 2;
+                    ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(Minecraft.getInstance().player, false, true);
+                    VRPlayer.get().preTick();
+                }
             }
         },
         WORLD_ROTATION(true, false, 0, 360, 30, 0) { // World Rotation
