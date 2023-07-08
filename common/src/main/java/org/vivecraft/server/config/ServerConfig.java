@@ -107,7 +107,7 @@ public class ServerConfig {
             .define(true);
         vr_only = builder
             .push("vr_only")
-            .comment("Set to true to only allow VR players to play.")
+            .comment("Set to true to only allow VR players to play.\n If enabled, VR hotswitching will be automatically disabled.")
             .define(false);
         vive_only = builder
             .push("vive_only")

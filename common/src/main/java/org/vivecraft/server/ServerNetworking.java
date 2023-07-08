@@ -133,7 +133,7 @@ public class ServerNetworking {
                 }
 
                 // send if hotswitching is allowed
-                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VR_SWITCHING, new byte[]{(byte)(ServerConfig.vrSwitchingEnabled.get() ? 1 : 0)}));
+                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VR_SWITCHING, new byte[]{(byte)(ServerConfig.vrSwitchingEnabled.get() && !ServerConfig.vr_only.get() ? 1 : 0)}));
 
                 listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.NETWORK_VERSION, new byte[]{(byte)vivePlayer.networkVersion}));
 
