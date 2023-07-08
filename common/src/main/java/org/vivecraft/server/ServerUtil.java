@@ -25,7 +25,7 @@ public class ServerUtil {
 
     public static void scheduleWelcomeMessageOrKick(ServerPlayer serverPlayer) {
         if (ServerConfig.messagesEnabled.get() ||
-            (!serverPlayer.server.isDedicatedServer() && (ServerConfig.vive_only.get() || ServerConfig.vr_only.get()))) {
+            (ServerConfig.vive_only.get() || ServerConfig.vr_only.get())) {
             scheduler.schedule(() -> {
                 // only do stuff, if the player is still on the server
                 if(!serverPlayer.hasDisconnected()) {

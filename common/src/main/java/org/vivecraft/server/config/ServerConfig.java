@@ -113,7 +113,7 @@ public class ServerConfig {
             .push("vive_only")
             .comment("Set to true to only allow vivecraft players to play.")
             .define(false);
-        vive_only = builder
+        allow_op = builder
             .push("allow_op")
             .comment("If true, will allow server ops to be in any mode. No effect if vive-only/vr-only is false.")
             .define(true);
