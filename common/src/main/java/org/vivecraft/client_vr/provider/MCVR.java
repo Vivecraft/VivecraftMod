@@ -1096,68 +1096,6 @@ public abstract class MCVR
                 KeyboardHandler.setOverlayShowing(false);
             }
 
-            if (mod.keyExportWorld.consumeClick() && this.mc.level != null && this.mc.player != null)
-            {
-//                try
-//                {
-//                    final BlockPos blockpos = this.mc.player.blockPosition();
-//                    int k = 320;
-//                    File file1 = new File("menuworlds/custom_114");
-//                    file1.mkdirs();
-//                    int i = 0;
-//
-//                    while (true)
-//                    {
-//                        final File file2 = new File(file1, "world" + i + ".mmw");
-//
-//                        if (!file2.exists())
-//                        {
-//                            System.out.println("Exporting world... area size: 320");
-//                            System.out.println("Saving to " + file2.getAbsolutePath());
-//
-//                            if (this.mc.isLocalServer())
-//                            {
-//                                final Level level = this.mc.getSingleplayerServer().getLevel(this.mc.player.level.dimension());
-//                                CompletableFuture<Void> completablefuture = this.mc.getSingleplayerServer().submit(new Runnable()
-//                                {
-//                                    public void run()
-//                                    {
-//                                        try
-//                                        {
-//                                            MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - 160, blockpos.getZ() - 160, 320, 320, blockpos.getY(), file2);
-//                                        }
-//                                        catch (IOException ioexception)
-//                                        {
-//                                            ioexception.printStackTrace();
-//                                        }
-//                                    }
-//                                });
-//
-//                                while (!completablefuture.isDone())
-//                                {
-//                                    Thread.sleep(10L);
-//                                }
-//                            }
-//                            else
-//                            {
-//                                MenuWorldExporter.saveAreaToFile(this.mc.level, blockpos.getX() - 160, blockpos.getZ() - 160, 320, 320, blockpos.getY(), file2);
-//                                this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
-//                            }
-//
-//                            this.mc.gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", 320)));
-//                            this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
-//                            break;
-//                        }
-//
-//                        ++i;
-//                    }
-//                }
-//                catch (Exception exception)
-//                {
-//                    exception.printStackTrace();
-//                }
-            }
-
             if (mod.keyTogglePlayerList.consumeClick())
             {
                 ((GuiExtension) this.mc.gui).setShowPlayerList(!((GuiExtension) this.mc.gui).getShowPlayerList());

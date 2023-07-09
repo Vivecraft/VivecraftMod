@@ -80,6 +80,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
 
 import java.nio.file.Path;
+import java.util.Calendar;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererVRMixin
@@ -92,8 +93,6 @@ public abstract class GameRendererVRMixin
     public Vec3 crossVec;
     @Unique
     public Matrix4f thirdPassProjectionMatrix = new Matrix4f();
-    @Unique
-    public boolean menuWorldFastTime;
     @Unique
     public boolean inwater;
     @Unique
@@ -802,11 +801,6 @@ public abstract class GameRendererVRMixin
     }
 
     @Override
-    public void setMenuWorldFastTime(boolean b) {
-        this.menuWorldFastTime = b;
-    }
-
-    @Override
     public void setupClipPlanes() {
         this.renderDistance = (float) (this.minecraft.options.getEffectiveRenderDistance() * 16);
 
@@ -1309,18 +1303,17 @@ public abstract class GameRendererVRMixin
                         //System.out.println(eye + " eye");
                         //System.out.println(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin + " world");
 
-//						if (GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer != null
-//								&& GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.isReady()) {
-//							try {
-//								//this.renderTechjarsAwesomeMainMenuRoom();
-//							} catch (Exception exception) {
-//								System.out.println("Error rendering main menu world, unloading to prevent more errors");
-//								exception.printStackTrace();
-//								GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.destroy();
-//							}
-//						} else {
-                        this.renderJrbuddasAwesomeMainMenuRoomNew(pMatrix);
-//						}
+						if (GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.isReady()) {
+							try {
+								this.renderTechjarsAwesomeMainMenuRoom(pMatrix);
+							} catch (Exception exception) {
+								System.out.println("Error rendering main menu world, unloading to prevent more errors");
+								exception.printStackTrace();
+								GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.destroy();
+							}
+						} else {
+                            this.renderJrbuddasAwesomeMainMenuRoomNew(pMatrix);
+						}
                         pMatrix.popPose();
                     }
 
@@ -1601,6 +1594,76 @@ public abstract class GameRendererVRMixin
         BufferUploader.drawWithShader(bufferbuilder.end());
         pMatrixStack.popPose();
 
+    }
+
+    private void renderTechjarsAwesomeMainMenuRoom(PoseStack poseStack) {
+        RenderSystem.setShaderColor(1f,1f,1f,1f);
+
+        RenderSystem.enableDepthTest();
+        //RenderSystem.enableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.enableCull();
+
+        poseStack.pushPose();
+
+        int tzOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
+        DATA_HOLDER.menuWorldRenderer.time = DATA_HOLDER.menuWorldRenderer.fastTime
+            ? (long)(DATA_HOLDER.menuWorldRenderer.ticks * 10L + 10 * minecraft.getFrameTime())
+            : (long)((System.currentTimeMillis() + tzOffset - 21600000) / 86400000D * 24000D);
+
+        DATA_HOLDER.menuWorldRenderer.fogRenderer.setupFogColor();
+        RenderSystem.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+
+        DATA_HOLDER.menuWorldRenderer.updateLightmap();
+        DATA_HOLDER.menuWorldRenderer.render(poseStack);
+
+        Vector2f area = DATA_HOLDER.vr.getPlayAreaSize();
+        if (area != null) {
+            poseStack.pushPose();
+            float width = area.x;//(float)Math.ceil(area.x);
+            float length = area.y;//(float)Math.ceil(area.y);
+
+            RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+            RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
+            float sun = DATA_HOLDER.menuWorldRenderer.getSkyDarken();
+            RenderSystem.setShaderColor(sun, sun, sun, 0.3f);
+
+
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.enableBlend();
+            Matrix4f matrix4f = poseStack.last().pose();
+            BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+            bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+            poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
+            bufferbuilder
+                .vertex(matrix4f, 0, 0.005f, 0)
+                .uv(0, 0)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+            bufferbuilder
+                .vertex(matrix4f, 0, 0.005f, length)
+                .uv(0, 4 * length)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+            bufferbuilder
+                .vertex(matrix4f, width, 0.005f, length)
+                .uv(4 * width, 4 * length)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+            bufferbuilder
+                .vertex(matrix4f, width, 0.005f, 0)
+                .uv(4 * width, 0)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+
+            BufferUploader.drawWithShader(bufferbuilder.end());
+
+            RenderSystem.setShaderColor(1.0f,1.0f,1.0f,1.0f);
+            poseStack.popPose();
+        }
+
+        poseStack.popPose();
+        RenderSystem.defaultBlendFunc();
     }
 
     public void renderVRFabulous(float partialTicks, LevelRenderer worldrendererin, boolean menuhandright,

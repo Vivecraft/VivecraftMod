@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.trackers.*;
+import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderPass;
@@ -23,6 +24,7 @@ public class ClientDataHolderVR {
     public VRPlayer vrPlayer;
     public MCVR vr;
     public VRRenderer vrRenderer;
+    public MenuWorldRenderer menuWorldRenderer;
     public BackpackTracker backpackTracker = new BackpackTracker(Minecraft.getInstance(), this);
     public BowTracker bowTracker = new BowTracker(Minecraft.getInstance(), this);
     public SwimTracker swimTracker = new SwimTracker(Minecraft.getInstance(), this);
@@ -57,6 +59,8 @@ public class ClientDataHolderVR {
 
     // showed chat notifications
     public boolean showedUpdateNotification;
+
+    public boolean skipStupidGoddamnChunkBoundaryClipping;
 
 
     public static ClientDataHolderVR getInstance() {

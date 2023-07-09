@@ -3,14 +3,17 @@ package org.vivecraft.mixin.client.gui.screens;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.*;
+import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.utils.UpdateChecker;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client.gui.screens.UpdateScreen;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
@@ -42,6 +45,9 @@ public abstract class TitleScreenMixin extends Screen {
         vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", getIcon() , VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
             showError = false;
             VRState.vrEnabled = !VRState.vrEnabled;
+            ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
+            ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+
             button.setMessage(Component.translatable("vivecraft.gui.vr", getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
         })
                 .size(56, 20)
@@ -71,5 +77,13 @@ public abstract class TitleScreenMixin extends Screen {
         if (vrModeButton.isMouseOver(i, j)) {
             renderTooltip(poseStack, font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
         }
+    }
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), method = "render")
+    public void maybeNoPanorama(PanoramaRenderer instance, float f, float g){
+        if (VRState.vrRunning && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()){
+            return;
+        }
+        instance.render(f, g);
     }
 }

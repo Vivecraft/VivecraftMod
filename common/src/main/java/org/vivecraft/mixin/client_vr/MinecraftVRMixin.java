@@ -18,7 +18,6 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -27,10 +26,15 @@ import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfileResults;
@@ -39,6 +43,7 @@ import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -53,10 +58,14 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.extensions.*;
+import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
+import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
+import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 import org.vivecraft.client_vr.VRState;
@@ -270,16 +279,41 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Shadow @Final public LevelRenderer levelRenderer;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    void afterInit(GameConfig gameConfig, CallbackInfo ci) {
-        RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
-    }
+    @Shadow @Final private TextureManager textureManager;
+
+    @Shadow @Final private ReloadableResourceManager resourceManager;
+
+    @Shadow public abstract boolean isLocalServer();
+
+    @Shadow public abstract IntegratedServer getSingleplayerServer();
+
+    @Unique private List<String> resourcepacks;
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay initVivecraft(Overlay overlay) {
+        RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
+
+        // register a resource reload listener, to reload the menu world
+        resourceManager.registerReloadListener((ResourceManagerReloadListener) resourceManager -> {
+            List<String> newPacks = resourceManager.listPacks().map(PackResources::packId).toList();
+            if ((resourcepacks == null || !resourcepacks.equals(newPacks)) &&
+                ClientDataHolderVR.getInstance().menuWorldRenderer != null
+                && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
+                resourcepacks = newPacks;
+                try {
+                    ClientDataHolderVR.getInstance().menuWorldRenderer.destroy();
+                    ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+        });
+
         try {
             VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
-            if (VRState.vrEnabled) {
+            if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled) {
+                VRState.vrEnabled = true;
+                VRState.vrRunning = true;
                 VRState.initializeVR();
             }
         } catch (Exception exception) {
@@ -288,10 +322,31 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         return overlay;
     }
 
+    // on first resource load finished
+    @Inject(at = @At("HEAD"), method = {
+        "method_24040", // fabric
+        "lambda$new$3"} // forge
+        , remap = false, expect = 0)
+    public void initMenuworldOnLaunch(CallbackInfo ci) {
+        // tell the MenuWorldRenderer that it is safe to prepare now
+        MenuWorldRenderer.canPrepare =  true;
+
+        // set initial resourcepacks
+        resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
+
+        // if a world is already loaded, prepare it
+        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null
+            && ClientDataHolderVR.getInstance().menuWorldRenderer.getLevel() != null)
+        {
+            ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
+        }
+    }
+
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
     public void destroy(CallbackInfo info) {
         try {
-            VRState.destroyVR();
+            // the game crashed probably not because of us, so keep the vr choice
+            VRState.destroyVR(false);
         } catch (Exception ignored) {
         }
     }
@@ -301,13 +356,13 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         if (VRState.vrEnabled) {
             VRState.initializeVR();
         } else if (VRState.vrInitialized) {
-                VRState.destroyVR();
+                VRState.destroyVR(true);
                 resizeDisplay();
         }
         if (!VRState.vrInitialized) {
             return;
         }
-        boolean vrActive = ClientDataHolderVR.getInstance().vr.isActive();
+        boolean vrActive = !ClientDataHolderVR.getInstance().vrSettings.vrHotswitchingEnabled || ClientDataHolderVR.getInstance().vr.isActive();
         if (VRState.vrRunning != vrActive && (ClientNetworking.serverAllowsVrSwitching || player == null)) {
             VRState.vrRunning = vrActive;
             if (vrActive) {
@@ -330,7 +385,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                     gameRenderer.checkEntityPostEffect(this.options.getCameraType().isFirstPerson() ? this.getCameraEntity() : null);
                 }
                 // grab/release mouse
-                if (screen != null) {
+                if (screen != null || level == null) {
                     mouseHandler.releaseMouse();
                     InputConstants.grabOrReleaseMouse(window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseHandler.xpos(), mouseHandler.ypos());
                 } else {
@@ -343,7 +398,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 connection.send(ClientNetworking.createVRActivePacket(vrActive));
             }
             // reload sound manager, to toggle HRTF between VR and NONVR one
-            Minecraft.getInstance().getSoundManager().reload();
+            if (!Minecraft.getInstance().getSoundManager().getAvailableSounds().isEmpty()) {
+                Minecraft.getInstance().getSoundManager().reload();
+            }
             resizeDisplay();
         }
         if (!VRState.vrRunning) {
@@ -623,8 +680,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             } catch (RenderConfigException renderConfigException) {
                 // TODO: could disabling VR here cause issues?
                 Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + ClientDataHolderVR.getInstance().vr.getName())));
-                VRState.vrEnabled = false;
-                VRState.destroyVR();
+                VRState.destroyVR(true);
                 return;
             } catch (Exception exception2) {
                 exception2.printStackTrace();
@@ -880,6 +936,15 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         }
 
         if (VRState.vrRunning) {
+
+            if (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
+                // update textures in the menu
+                if (this.level == null) {
+                    this.textureManager.tick();
+                }
+                ClientDataHolderVR.getInstance().menuWorldRenderer.tick();
+            }
+
             this.profiler.push("vrProcessInputs");
             ClientDataHolderVR.getInstance().vr.processInputs();
             ClientDataHolderVR.getInstance().vr.processBindings();
@@ -906,15 +971,70 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 }
             }
             this.profiler.pop();
-
-//		if (DataHolder.getInstance().menuWorldRenderer != null) {
-//			DataHolder.getInstance().menuWorldRenderer.tick();
-//		}
         }
 
         this.profiler.push("vrPlayers");
 
         VRPlayersClient.getInstance().tick();
+
+        if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && level != null && player != null)
+        {
+            try
+            {
+                final BlockPos blockpos = player.blockPosition();
+                int size = 320;
+                int offset = size/2;
+                File file1 = new File(MenuWorldDownloader.customWorldFolder);
+                file1.mkdirs();
+                int i = 0;
+
+                while (true)
+                {
+                    final File file2 = new File(file1, "world" + i + ".mmw");
+
+                    if (!file2.exists())
+                    {
+                        VRSettings.logger.info("Exporting world... area size: " + size);
+                        VRSettings.logger.info("Saving to " + file2.getAbsolutePath());
+
+                        if (isLocalServer())
+                        {
+                            final Level level = getSingleplayerServer().getLevel(player.level.dimension());
+                            CompletableFuture<Void> completablefuture = getSingleplayerServer().submit(() -> {
+                                try
+                                {
+                                    MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset, size, size, blockpos.getY(), file2);
+                                }
+                                catch (Throwable throwable)
+                                {
+                                    throwable.printStackTrace();
+                                }
+                            });
+
+                            while (!completablefuture.isDone())
+                            {
+                                Thread.sleep(10L);
+                            }
+                        }
+                        else
+                        {
+                            MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset, size, size, blockpos.getY(), file2);
+                            gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
+                        }
+
+                        gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", size)));
+                        gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
+                        break;
+                    }
+
+                    ++i;
+                }
+            }
+            catch (Exception exception)
+            {
+                exception.printStackTrace();
+            }
+        }
 
         this.profiler.pop();
     }
@@ -986,6 +1106,11 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Inject(at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", shift = At.Shift.BEFORE, ordinal = 0), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
     public void onOpenScreen(Screen pGuiScreen, CallbackInfo info) {
         GuiHandler.onScreenChanged(this.screen, pGuiScreen, true);
+    }
+
+    @Inject(at = @At("TAIL"), method = "setOverlay")
+    public void onOverlaySet(Overlay overlay, CallbackInfo ci) {
+        GuiHandler.onScreenChanged(this.screen, this.screen, true);
     }
 
     @Inject(method = "setScreen", at = @At("HEAD"))
