@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -146,11 +146,11 @@ public abstract class GuiVROptionsBase extends Screen
 
     protected void loadDefaults()
     {
-        for (Renderable renderable : this.renderables) {
-            if (!(renderable instanceof GuiVROption))
+        for (GuiEventListener child : this.children()) {
+            if (!(child instanceof GuiVROption))
                 continue;
 
-            GuiVROption optionButton = (GuiVROption)renderable;
+            GuiVROption optionButton = (GuiVROption)child;
             this.settings.loadDefault(optionButton.getOption());
         }
     }
@@ -331,9 +331,9 @@ public abstract class GuiVROptionsBase extends Screen
     private void renderTooltip(PoseStack pMatrixStack, int pMouseX, int pMouseY) {
         AbstractWidget hover = null;
         // find active button
-        for (Renderable renderable: renderables) {
-            if (renderable instanceof AbstractWidget && ((AbstractWidget) renderable).isMouseOver(pMouseX, pMouseY)) {
-                hover = (AbstractWidget) renderable;
+        for (GuiEventListener child: children()) {
+            if (child instanceof AbstractWidget && child.isMouseOver(pMouseX, pMouseY)) {
+                hover = (AbstractWidget) child;
             }
         }
         if (hover != null ) {

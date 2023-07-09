@@ -122,7 +122,7 @@ public class MovementTutorialStepInstanceVRMixin {
 
     @Inject(at = @At("TAIL"), method = "onInput")
     private void addTeleport(Input input, CallbackInfo ci) {
-        moved |= VivecraftVRMod.INSTANCE.keyTeleport.isDown;
+        moved |= VivecraftVRMod.INSTANCE.keyTeleport.isDown();
     }
 
     @Inject(at = @At("HEAD"), method = "onMouse", cancellable = true)

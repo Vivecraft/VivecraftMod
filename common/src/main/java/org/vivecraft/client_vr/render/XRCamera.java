@@ -29,14 +29,14 @@ public class XRCamera extends Camera {
         this.setPosition(eye.getPosition());
         this.xRot = -eye.getPitch();
         this.yRot = eye.getYaw();
-        this.forwards.set((float) eye.getDirection().x, (float) eye.getDirection().y, (float) eye.getDirection().z);
+        this.getLookVector().set((float) eye.getDirection().x, (float) eye.getDirection().y, (float) eye.getDirection().z);
         Vec3 vec3 = eye.getCustomVector(new Vec3(0.0D, 1.0D, 0.0D));
-        this.up.set((float) vec3.x, (float) vec3.y, (float) vec3.z);
+        this.getUpVector().set((float) vec3.x, (float) vec3.y, (float) vec3.z);
         eye.getCustomVector(new Vec3(1.0D, 0.0D, 0.0D));
-        this.left.set((float) vec3.x, (float) vec3.y, (float) vec3.z);
-        this.rotation.set(0.0F, 0.0F, 0.0F, 1.0F);
-        this.rotation.mul(Axis.YP.rotationDegrees(-this.yRot));
-        this.rotation.mul(Axis.XP.rotationDegrees(this.xRot));
+        this.getLeftVector().set((float) vec3.x, (float) vec3.y, (float) vec3.z);
+        this.rotation().set(0.0F, 0.0F, 0.0F, 1.0F);
+        this.rotation().mul(Axis.YP.rotationDegrees(-this.yRot));
+        this.rotation().mul(Axis.XP.rotationDegrees(this.xRot));
     }
 
     public void tick() {

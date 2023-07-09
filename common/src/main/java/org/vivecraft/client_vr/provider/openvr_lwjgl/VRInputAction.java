@@ -539,7 +539,7 @@ public class VRInputAction
     {
         if (kb != null)
         {
-            kb.isDown = pressed;
+            kb.setDown(pressed);
             kb.clickCount += 1;
         }
     }
