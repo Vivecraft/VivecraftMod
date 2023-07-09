@@ -1,6 +1,9 @@
 package org.vivecraft.mixin.server;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -11,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.server.config.ServerConfig;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
@@ -53,8 +56,7 @@ public abstract class ServerPlayerMixin extends Player {
 	@Inject(at = @At("TAIL"), method = "initInventoryMenu")
 	public void menu(CallbackInfo ci) {
 		ServerVivePlayer serverviveplayer = getVivePlayer();
-		// TODO change setting to commonDataHolder?
-		if ((!this.server.isDedicatedServer() && ClientDataHolderVR.getInstance().vrSettings != null && !ClientDataHolderVR.getInstance().vrSettings.disableFun) && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
+		if (ServerConfig.vrFun.get() && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
 			if (this.random.nextInt(2) == 1) {
 				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
@@ -149,6 +151,70 @@ public abstract class ServerPlayerMixin extends Player {
 			itementity.setDeltaMovement(vec31.x * (double) f, vec31.y * (double) f, vec31.z * (double) f);
 			itementity.setPos(vec3.x() + itementity.getDeltaMovement().x(),
 					vec3.y() + itementity.getDeltaMovement().y(), vec3.z() + itementity.getDeltaMovement().z());
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "hurt", cancellable = true)
+	public void checkCanGetHurt(DamageSource damageSource, float f, CallbackInfoReturnable<Boolean> cir){
+		Entity entity = damageSource.getEntity();
+		ServerPlayer other = null;
+
+		// check if the damage came from another player
+		if (entity instanceof ServerPlayer) {
+			other = (ServerPlayer)entity;
+		} else if ((entity instanceof AbstractArrow && (((AbstractArrow)entity).getOwner() instanceof ServerPlayer))) {
+			other = (ServerPlayer)((AbstractArrow)entity).getOwner();
+		}
+
+		if (other != null) {
+			// both entities are players, so need to check
+
+			ServerVivePlayer otherVive = ServerVRPlayers.getVivePlayer(other);
+			ServerVivePlayer thisVive = getVivePlayer();
+
+			// create new object, if they are null, simplifies the checks
+			if (otherVive == null) {
+				otherVive = new ServerVivePlayer(other);
+			}
+
+			if (thisVive == null) {
+				thisVive = new ServerVivePlayer((ServerPlayer)(Object)this);
+			}
+
+			if ((!otherVive.isVR() && thisVive.isVR() && thisVive.isSeated())
+				|| (!thisVive.isVR() && otherVive.isVR() && otherVive.isSeated())) {
+				// nonvr vs Seated
+				if (!ServerConfig.pvpSEATEDVRvsNONVR.get()) {
+					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs seat"), false);
+					cir.setReturnValue(false);
+				}
+			} else if ((!otherVive.isVR() && thisVive.isVR() && !thisVive.isSeated())
+				|| (!thisVive.isVR() && otherVive.isVR() && !otherVive.isSeated())) {
+				// nonvr vs Standing
+				if (!ServerConfig.pvpVRvsNONVR.get()) {
+					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs stand"), false);
+					cir.setReturnValue(false);
+				}
+			} else if ((otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated())
+				|| (thisVive.isVR() && thisVive.isSeated() && otherVive.isVR() && !otherVive.isSeated())) {
+				// Standing vs Seated
+				if (!ServerConfig.pvpVRvsSEATEDVR.get()) {
+					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs stand"), false);
+					cir.setReturnValue(false);
+				}
+			} else if (otherVive.isVR() && !otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated()) {
+				// Standing vs Standing
+				if (!ServerConfig.pvpVRvsVR.get()) {
+					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled stand vs stand"), false);
+					cir.setReturnValue(false);
+				}
+			} else if (otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && thisVive.isSeated()){
+				// Seated vs Seated
+				if (!ServerConfig.pvpSEATEDVRvsSEATEDVR.get()) {
+					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs seat"), false);
+					cir.setReturnValue(false);
+				}
+			}
 		}
 	}
 

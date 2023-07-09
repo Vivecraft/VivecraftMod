@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.server;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketUtils;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +18,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerPlayerConnection;
+import org.vivecraft.server.config.ServerConfig;
 import org.vivecraft.server.ServerNetworking;
 
 import static org.vivecraft.common.network.CommonNetworkHelper.PacketDiscriminators.CLIMBING;
@@ -27,6 +29,10 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
     @Shadow
     @Final
     private Connection connection;
+
+    @Shadow
+    @Final
+    private MinecraftServer server;
 
     @Shadow
     public ServerPlayer player;
@@ -59,6 +65,15 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
             ServerNetworking.handlePacket(packetDiscriminator, buffer, (ServerGamePacketListenerImpl) (Object)this);
             if (packetDiscriminator == CLIMBING) {
                 this.aboveGroundTickCount = 0;
+            }
+        }
+    }
+    @Inject(at = @At("TAIL"), method = "onDisconnect")
+    public void doLeaveMessage(Component component, CallbackInfo ci) {
+        if (ServerConfig.messagesEnabled.get()) {
+            String message = ServerConfig.messagesLeaveMessage.get();
+            if (!message.isEmpty()) {
+                this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(this.player.getName().getString())), false);
             }
         }
     }

@@ -29,8 +29,6 @@ public class ProjectileMixin {
 				this.controllerDir = serverVivePlayer.getControllerDir(serverVivePlayer.activeHand);
 				if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !serverVivePlayer.isSeated() && serverVivePlayer.getDraw() > 0.0F){
 					this.controllerDir = serverVivePlayer.getControllerPos(1, (Player) pProjectile).subtract(serverVivePlayer.getControllerPos(0, (Player) pProjectile)).normalize();
-					((AbstractArrow)(Object)this).setBaseDamage(((AbstractArrow)(Object)this).getBaseDamage() * 2.0D);
-					return pVelocity * serverVivePlayer.getDraw();
 				}
 			}
 		}

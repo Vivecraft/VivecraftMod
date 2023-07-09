@@ -73,6 +73,7 @@
     "server.ServerGamePacketListenerImplMixin",
     "server.ServerPlayerMixin",
     "server.TrackedEntityAccessor",
+    "server.ServerLoginPacketListenerImplMixin",
     "world.entity.ai.goal.SwellGoalMixin",
     "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
     "world.entity.monster.EndermanMixin",

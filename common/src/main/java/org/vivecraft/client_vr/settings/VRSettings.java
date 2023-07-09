@@ -201,8 +201,6 @@ public class VRSettings
     public String keyboardKeysShift ="~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;\':\"ZXCVBNM,./?<>";
     @SettingField(VrOptions.HRTF_SELECTION)
     public int hrtfSelection = 0;
-    @SettingField
-    public boolean disableFun = false;
     @SettingField(VrOptions.RIGHT_CLICK_DELAY)
     public RightClickDelay rightclickDelay = RightClickDelay.VANILLA;
     @SettingField(VrOptions.THIRDPERSON_ITEMTRANSFORMS)

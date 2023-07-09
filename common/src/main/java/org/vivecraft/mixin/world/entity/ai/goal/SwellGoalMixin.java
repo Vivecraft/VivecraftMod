@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.server.config.ServerConfig;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
@@ -25,8 +26,10 @@ public class SwellGoalMixin {
         LivingEntity target = this.creeper.getTarget();
         if (target instanceof ServerPlayer player && ServerVRPlayers.isVRPlayer(player)) {
             ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);
-            if (data != null && !data.isSeated())
-                cir.setReturnValue(this.creeper.getSwellDir() > 0 || this.creeper.distanceToSqr(target) < 1.75 * 1.75); //ServerConfig.creeperSwellDistance.get()
+            if (data != null && !data.isSeated()) {
+                double swellDistance = ServerConfig.creeperSwellDistance.get();
+                cir.setReturnValue(this.creeper.getSwellDir() > 0 || this.creeper.distanceToSqr(target) < swellDistance * swellDistance);
+            }
         }
     }
 }
