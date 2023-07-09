@@ -1375,7 +1375,6 @@ public abstract class GameRendererVRMixin
                                 (float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
                                 pMatrix.last().pose());
                     } else {
-                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
                         this.drawSizedQuad((float) this.minecraft.getWindow().getGuiScaledWidth(),
                                 (float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, color,
                                 pMatrix.last().pose());
@@ -1551,7 +1550,8 @@ public abstract class GameRendererVRMixin
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.depthFunc(519);
-        RenderSystem.depthMask(true); //TODO temp fix
+        RenderSystem.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
@@ -1741,19 +1741,17 @@ public abstract class GameRendererVRMixin
     }
 
     public void drawSizedQuad(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(color[0], color[1], color[2], color[3]);
         float f = displayHeight / displayWidth;
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).uv(0.0F, 0.0F)
-                .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F)
-                .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F)
-                .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F)
-                .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
+        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).uv(0.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F).endVertex();
+        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
     public void drawSizedQuadSolid(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
