@@ -43,26 +43,20 @@ public abstract class GuiVROptionsBase extends Screen
 
     protected void addDefaultButtons()
     {
-        this.addRenderableWidget(this.btnDone = new Button.Builder(Component.translatable("gui.back"), (p) ->
-                    {
-                        if (!this.onDoneClicked())
-                        {
-                            this.dataholder.vrSettings.saveOptions();
-                            this.minecraft.setScreen(this.lastScreen);
-                        }
-                    })
-                .pos(this.width / 2 + 5, this.height - 30)
-                .size(150, 20)
-                .build());
-        this.addRenderableWidget(this.btnDefaults = new Button.Builder(Component.translatable("vivecraft.gui.loaddefaults"), (p) ->
-                {
-                    this.loadDefaults();
-                    this.dataholder.vrSettings.saveOptions();
-                    this.reinit = true;
-                })
-                .pos(this.width / 2 - 155, this.height - 30)
-                .size(150, 20)
-                .build());
+        this.addRenderableWidget(this.btnDone = new Button(this.width / 2 + 5, this.height - 30, 150, 20, Component.translatable("gui.back"), (p) ->
+        {
+            if (!this.onDoneClicked())
+            {
+                this.dataholder.vrSettings.saveOptions();
+                this.minecraft.setScreen(this.lastScreen);
+            }
+        }));
+        this.addRenderableWidget(this.btnDefaults = new Button(this.width / 2 - 155, this.height - 30, 150, 20, Component.translatable("vivecraft.gui.loaddefaults"), (p) ->
+        {
+            this.loadDefaults();
+            this.dataholder.vrSettings.saveOptions();
+            this.reinit = true;
+        }));
     }
 
     protected boolean onDoneClicked()

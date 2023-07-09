@@ -5,8 +5,10 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Axis;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.minecraft.Util;
+import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
@@ -36,8 +38,6 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -158,7 +158,7 @@ public class MenuWorldRenderer {
 		poseStack.pushPose();
 
 		//rotate World
-		poseStack.mulPose(Axis.YP.rotationDegrees(worldRotation));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(worldRotation));
 
 		// small offset to center on source block, and add the partial block offset, this shouldn't be too noticable on the fog
 		poseStack.translate(-0.5,-blockAccess.getGround()+(int)blockAccess.getGround(),-0.5);
@@ -226,8 +226,8 @@ public class MenuWorldRenderer {
 	public void prepare() {
 		if (vertexBuffers == null) {
 			VRSettings.logger.info("MenuWorlds: Building geometry...");
-			boolean ao = mc.options.ambientOcclusion().get();
-			mc.options.ambientOcclusion().set(true);
+			AmbientOcclusionStatus ao = mc.options.ambientOcclusion().get();
+			mc.options.ambientOcclusion().set(AmbientOcclusionStatus.MAX);
 
 			// disable redner regions during building, they mess with liquids
 			boolean optifineRenderRegions = false;
@@ -311,7 +311,7 @@ public class MenuWorldRenderer {
 						FluidState fluidState = state.getFluidState();
 						if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
 							for (var sprite : Xplat.getFluidTextures(blockAccess, pos, fluidState)) {
-								if (sprite != null && sprite.contents().getUniqueFrames().sum() > 1) {
+								if (sprite != null && sprite.getUniqueFrames().sum() > 1) {
 									animatedSprites.add(sprite);
 								}
 							}
@@ -320,7 +320,7 @@ public class MenuWorldRenderer {
 						}
 						if (state.getRenderShape() != RenderShape.INVISIBLE && ItemBlockRenderTypes.getChunkRenderType(state) == layer) {
 							for (var quad : mc.getModelManager().getBlockModelShaper().getBlockModel(state).getQuads(state, null, randomSource)) {
-								if (quad.getSprite().contents().getUniqueFrames().sum() > 1) {
+								if (quad.getSprite().getUniqueFrames().sum() > 1) {
 									animatedSprites.add(quad.getSprite());
 								}
 							}
@@ -508,9 +508,9 @@ public class MenuWorldRenderer {
 				RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 				poseStack.pushPose();
 
-				poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
-				poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(this.getSunAngle()) < 0.0f ? 180.0f : 0.0f));
-				poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.sin(this.getSunAngle()) < 0.0f ? 180.0f : 0.0f));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
 
 				Matrix4f modelView = poseStack.last().pose();
 				bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
@@ -541,7 +541,7 @@ public class MenuWorldRenderer {
 
 			float f10 = 1.0F - getRainLevel();
 			RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, f10);
-			poseStack.mulPose(Axis.YP.rotationDegrees(-90.0f));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0f));
 			Matrix4f modelView = poseStack.last().pose();
 
 			//if (OptifineHelper.isOptifineLoaded()) {
@@ -549,7 +549,7 @@ public class MenuWorldRenderer {
 				//CustomSky.renderSky(this.world, poseStack, Minecraft.getInstance().getFrameTime());
 			//}
 
-			poseStack.mulPose(Axis.XP.rotationDegrees(this.getTimeOfDay() * 360.0f));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(this.getTimeOfDay() * 360.0f));
 
 			float size = 30.0F;
 			if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled())
@@ -638,11 +638,11 @@ public class MenuWorldRenderer {
 			{
 				poseStack.pushPose();
 				switch (i) {
-					case 1 -> poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
-					case 2 -> poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
-					case 3 -> poseStack.mulPose(Axis.XP.rotationDegrees(180.0f));
-					case 4 -> poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
-					case 5 -> poseStack.mulPose(Axis.ZP.rotationDegrees(-90.0f));
+					case 1 -> poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
+					case 2 -> poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f));
+					case 3 -> poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0f));
+					case 4 -> poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
+					case 5 -> poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90.0f));
 				}
 
 				Matrix4f modelView = poseStack.last().pose();
@@ -1257,7 +1257,8 @@ public class MenuWorldRenderer {
 			*/
 			float nightVision = 0.0f;
 
-			Vector3f skylightColor = new Vector3f(skyLight, skyLight, 1.0f).lerp(new Vector3f(1.0f, 1.0f, 1.0f), 0.35f);
+			Vector3f skylightColor = new Vector3f(skyLight, skyLight, 1.0f);
+			skylightColor.lerp(new Vector3f(1.0f, 1.0f, 1.0f), 0.35f);
 
 			Vector3f finalColor = new Vector3f();
 			for (int i = 0; i < 16; ++i)
@@ -1273,9 +1274,11 @@ public class MenuWorldRenderer {
 
 					if (dimensionInfo.forceBrightLightmap()) {
 						finalColor.lerp(new Vector3f(0.99f, 1.12f, 1.0f), 0.25f);
-						finalColor.set(Mth.clamp(finalColor.x, 0.0f, 1.0f), Mth.clamp(finalColor.y, 0.0f, 1.0f), Mth.clamp(finalColor.z, 0.0f, 1.0f));
+						finalColor.clamp(0.0f, 1.0f);
 					} else {
-						finalColor.add(new Vector3f(skylightColor).mul(skyBrightness));
+						Vector3f skylightColorCopy = skylightColor.copy();
+						skylightColorCopy.mul(skyBrightness);
+						finalColor.add(skylightColorCopy);
 						finalColor.lerp(new Vector3f(0.75f, 0.75f, 0.75f), 0.04f);
 						// no darkening from bosses
 //						if (getDarkenWorldAmount() > 0.0f) {
@@ -1297,14 +1300,16 @@ public class MenuWorldRenderer {
 							finalColor.add(-effectiveDarknessScale, -effectiveDarknessScale, -effectiveDarknessScale);
 						}
 						 */
-						finalColor.set(Mth.clamp(finalColor.x, 0.0f, 1.0f), Mth.clamp(finalColor.y, 0.0f, 1.0f), Mth.clamp(finalColor.z, 0.0f, 1.0f));
+						finalColor.clamp(0.0f, 1.0f);
 					}
 
 					float gamma = this.mc.options.gamma().get().floatValue();
-					Vector3f vector3f5 = new Vector3f(this.notGamma(finalColor.x), this.notGamma(finalColor.y), this.notGamma(finalColor.z));
+
+					Vector3f vector3f5 = finalColor.copy();
+					vector3f5.map(this::notGamma);
 					finalColor.lerp(vector3f5, Math.max(0.0f, gamma /*- darknessGamma*/));
 					finalColor.lerp(new Vector3f(0.75f, 0.75f, 0.75f), 0.04f);
-					finalColor.set(Mth.clamp(finalColor.x, 0.0f, 1.0f), Mth.clamp(finalColor.y, 0.0f, 1.0f), Mth.clamp(finalColor.z, 0.0f, 1.0f));
+					finalColor.clamp(0.0f, 1.0f);
 					finalColor.mul(255.0f);
 
 					int r = (int)finalColor.x();

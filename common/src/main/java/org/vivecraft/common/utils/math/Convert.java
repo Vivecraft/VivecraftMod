@@ -149,14 +149,14 @@ public class Convert
             }
         }
 
-        public org.joml.Matrix4f toMCMatrix4f()
+        public com.mojang.math.Matrix4f toMCMatrix4f()
         {
             this.needFloats();
 
             if (this.dimension == 4)
             {
-                org.joml.Matrix4f matrix4f = new org.joml.Matrix4f();
-                matrix4f.get(this.toFloatBuffer());
+                com.mojang.math.Matrix4f matrix4f = new com.mojang.math.Matrix4f();
+                matrix4f.store(this.toFloatBuffer());
                 return matrix4f;
             }
             else

@@ -52,14 +52,11 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         {
             this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, Component.literal(""));
             this.txt.setValue(command);
-            this.btnDelete = new Button.Builder(  Component.literal("X"),  (p) ->
-                {
-                    this.txt.setValue("");
-                    this.txt.changeFocus(true);
-                })
-                .size( 18,  18)
-                .pos(0,  0)
-                .build();
+            this.btnDelete = new Button(0, 0, 18, 18,  Component.literal("X"), (p) ->
+            {
+                this.txt.setValue("");
+                this.txt.changeFocus(true);
+            });
         }
 
         @Override
@@ -128,11 +125,11 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
 
         public void render(PoseStack pMatrixStack, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks)
         {
-            this.txt.setX(pLeft);
-            this.txt.setY(pTop);
+            this.txt.x = pLeft;
+            this.txt.y = pTop;
             this.txt.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
-            this.btnDelete.setX(this.txt.getX() + this.txt.getWidth() + 2);
-            this.btnDelete.setY(this.txt.getY());
+            this.btnDelete.x = this.txt.x + this.txt.getWidth() + 2;
+            this.btnDelete.y = this.txt.y;
             this.btnDelete.visible = true;
             this.btnDelete.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
         }

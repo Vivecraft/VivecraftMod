@@ -9,12 +9,10 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
+import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.*;
-
-import org.joml.Vector2f;
 
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client.utils.Utils;
@@ -367,9 +365,9 @@ public class GuiHandler
         if (staticScreen)
         {
             guiScale = 2.0F;
-            Vector2f afloat = MCVR.get().getPlayAreaSize();
+            float[] afloat = MCVR.get().getPlayAreaSize();
             // slight offset to center of the room, to prevent z fighting
-            guiPos_room = new Vec3(0.02D, (double)1.3F, (double)(-Math.max(afloat != null ? afloat.y / 2.0F : 0.0F, 1.5F)));
+            guiPos_room = new Vec3(0.02D, (double)1.3F, (double)(-Math.max(afloat != null ? afloat[1] / 2.0F : 0.0F, 1.5F)));
             guiRotation_room = new Matrix4f();
             guiRotation_room.M[0][0] = guiRotation_room.M[1][1] = guiRotation_room.M[2][2] = guiRotation_room.M[3][3] = 1.0F;
             guiRotation_room.M[0][1] = guiRotation_room.M[1][0] = guiRotation_room.M[2][3] = guiRotation_room.M[3][1] = 0.0F;
@@ -378,7 +376,7 @@ public class GuiHandler
         }
         else
         {
-            if (previousGuiScreen == null && newScreen != null || newScreen instanceof ChatScreen || newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen)
+            if (previousGuiScreen == null && newScreen != null || newScreen instanceof ChatScreen || newScreen instanceof BookEditScreen || newScreen instanceof SignEditScreen)
             {
                 // check if screen is a container screen
                 // and if the pointed at block is the same that was last interacted with
@@ -418,7 +416,7 @@ public class GuiHandler
                     {
                         vec3 = new Vec3(0.0D, 0.5D, -2.0D);
                     }
-                    else if (newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen)
+                    else if (newScreen instanceof BookEditScreen || newScreen instanceof SignEditScreen)
                     {
                         vec3 = new Vec3(0.0D, 0.25D, -2.0D);
                     }

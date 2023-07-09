@@ -3,7 +3,7 @@ package org.vivecraft.mixin.world.item.crafting;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -27,7 +27,7 @@ public class ShapedRecipeMixin {
 
     private static Item getVivecraftVanillaItem(JsonObject jsonObject, String resourceLocation){
         String vanillaItem = GsonHelper.getAsString(jsonObject, "vanillaitem");
-        return BuiltInRegistries.ITEM.getOptional(new ResourceLocation(vanillaItem)).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + vanillaItem + "'"));
+        return Registry.ITEM.getOptional(new ResourceLocation(vanillaItem)).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + vanillaItem + "'"));
     }
 
     @Inject(method = "itemStackFromJson", at = @At("HEAD"), cancellable = true)

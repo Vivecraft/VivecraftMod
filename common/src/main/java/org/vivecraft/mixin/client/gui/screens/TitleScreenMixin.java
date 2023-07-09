@@ -41,24 +41,25 @@ public abstract class TitleScreenMixin extends Screen {
 
     private void addVRModeButton() {
 
-        vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", getIcon() , VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
-            showError = false;
-            VRState.vrEnabled = !VRState.vrEnabled;
-            ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
-            ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-
-            button.setMessage(Component.translatable("vivecraft.gui.vr", getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
-        })
-                .size(56, 20)
-                .pos(this.width / 2 + 104, this.height / 4 + 72)
-                .build();
+        vrModeButton = new Button(
+            this.width / 2 + 104, this.height / 4 + 72,
+            56, 20,
+            Component.translatable("vivecraft.gui.vr", getIcon() , VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF),
+            (button) -> {
+                showError = false;
+                VRState.vrEnabled = !VRState.vrEnabled;
+                ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
+                ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+                button.setMessage(Component.translatable("vivecraft.gui.vr", getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
+            });
 
         this.addRenderableWidget(vrModeButton);
 
-        updateButton = new Button.Builder(Component.translatable("vivecraft.gui.update"), (button) -> minecraft.setScreen(new UpdateScreen()))
-                .size(56, 20)
-                .pos(this.width / 2 + 104, this.height / 4 + 96)
-                .build();
+        updateButton = new Button(
+            this.width / 2 + 104, this.height / 4 + 96,
+            56, 20,
+            Component.translatable("vivecraft.gui.update"),
+            (button) -> minecraft.setScreen(new UpdateScreen()));
 
         updateButton.visible = UpdateChecker.hasUpdate;
 

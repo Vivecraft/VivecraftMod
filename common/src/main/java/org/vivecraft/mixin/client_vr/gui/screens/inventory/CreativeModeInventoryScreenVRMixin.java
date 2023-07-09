@@ -7,7 +7,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -34,14 +33,14 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
         addCreativeSearch(this.searchBox.getValue(), this.menu.items);
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;addAll(Ljava/util/Collection;)Z", ordinal = 1), method = "selectTab")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CreativeModeTab;fillItemList(Lnet/minecraft/core/NonNullList;)V"), method = "selectTab")
     public void fill(CreativeModeTab creativeModeTab, CallbackInfo ci) {
         addCreativeItems(creativeModeTab, this.menu.items);
     }
 
     @Unique
     private void addCreativeItems(CreativeModeTab tab, NonNullList<ItemStack> list) {
-        if (tab == CreativeModeTabs.FOOD_AND_DRINKS || tab == null) {
+        if (tab == CreativeModeTab.TAB_FOOD || tab == null) {
             ItemStack itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
             ItemStack itemstack1 = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER).setHoverName(Component.literal("DRINK ME"));
             itemstack1.getTag().putInt("HideFlags", 32);
@@ -49,7 +48,7 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
             list.add(itemstack1);
         }
 
-        if (tab == CreativeModeTabs.TOOLS_AND_UTILITIES || tab == null) {
+        if (tab == CreativeModeTab.TAB_TOOLS || tab == null) {
             ItemStack itemstack3 = (new ItemStack(Items.LEATHER_BOOTS)).setHoverName(Component.translatable("vivecraft.item.jumpboots"));
             itemstack3.getTag().putBoolean("Unbreakable", true);
             itemstack3.getTag().putInt("HideFlags", 4);

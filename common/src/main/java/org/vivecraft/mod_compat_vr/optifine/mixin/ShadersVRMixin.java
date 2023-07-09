@@ -31,7 +31,7 @@ public class ShadersVRMixin {
         }
     }
 
-    @ModifyVariable(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack$Pose;pose()Lorg/joml/Matrix4f;", shift = At.Shift.AFTER, remap = true), method = "setCameraShadow", remap = false)
+    @ModifyVariable(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack$Pose;pose()Lcom/mojang/math/Matrix4f;", shift = At.Shift.AFTER, remap = true), method = "setCameraShadow", remap = false)
     private static PoseStack offsetShadow(PoseStack shadowModelViewMat){
         if (!RenderPassType.isVanilla()) {
             Vec3 offset = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPosition().subtract(ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition());

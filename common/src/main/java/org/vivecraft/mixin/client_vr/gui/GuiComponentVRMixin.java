@@ -12,7 +12,7 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(GuiComponent.class)
 public class GuiComponentVRMixin {
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShader(Ljava/util/function/Supplier;)V", shift = At.Shift.AFTER), method = "innerBlit(Lorg/joml/Matrix4f;IIIIIFFFF)V")
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShader(Ljava/util/function/Supplier;)V", shift = At.Shift.AFTER), method = "innerBlit(Lcom/mojang/math/Matrix4f;IIIIIFFFF)V")
     private static void addBlend(CallbackInfo ci) {
         if (VRState.vrRunning) {
             RenderSystem.enableBlend();
@@ -21,7 +21,7 @@ public class GuiComponentVRMixin {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "innerBlit(Lorg/joml/Matrix4f;IIIIIFFFF)V")
+    @Inject(at = @At("TAIL"), method = "innerBlit(Lcom/mojang/math/Matrix4f;IIIIIFFFF)V")
     private static void stopBlend(CallbackInfo ci) {
         if (VRState.vrRunning) {
             RenderSystem.disableBlend();

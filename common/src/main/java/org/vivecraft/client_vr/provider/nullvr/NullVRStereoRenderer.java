@@ -3,8 +3,8 @@ package org.vivecraft.client_vr.provider.nullvr;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Matrix4f;
 import net.minecraft.util.Tuple;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
@@ -38,7 +38,7 @@ public class NullVRStereoRenderer extends VRRenderer
     @Override
     public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip)
     {
-        return new Matrix4f().setPerspective(90.0F, 1.0F, nearClip, farClip);
+        return Matrix4f.perspective(90.0F, 1.0F, nearClip, farClip);
     }
 
     @Override

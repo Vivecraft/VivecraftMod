@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import net.minecraft.world.level.material.FogType;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
@@ -35,8 +35,8 @@ public class XRCamera extends Camera {
         eye.getCustomVector(new Vec3(1.0D, 0.0D, 0.0D));
         this.getLeftVector().set((float) vec3.x, (float) vec3.y, (float) vec3.z);
         this.rotation().set(0.0F, 0.0F, 0.0F, 1.0F);
-        this.rotation().mul(Axis.YP.rotationDegrees(-this.yRot));
-        this.rotation().mul(Axis.XP.rotationDegrees(this.xRot));
+        this.rotation().mul(Vector3f.YP.rotationDegrees(-this.yRot));
+        this.rotation().mul(Vector3f.XP.rotationDegrees(this.xRot));
     }
 
     public void tick() {

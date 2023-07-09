@@ -4,7 +4,7 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.server.config.ConfigBuilder;
@@ -238,7 +238,7 @@ public class ServerConfig {
         climbeyBlocklist = builder
             .push("blocklist")
             .comment("The list of block names for use with include/exclude block mode.")
-            .defineList(Arrays.asList("white_wool","dirt","grass_block"), (s) -> s instanceof String && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation((String) s)));
+            .defineList(Arrays.asList("white_wool","dirt","grass_block"), (s) -> s instanceof String && Registry.BLOCK.containsKey(new ResourceLocation((String) s)));
         // end climbey
         builder.pop();
 

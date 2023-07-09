@@ -2,14 +2,12 @@ package org.vivecraft.mixin.client_vr.gui.screens;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.GridWidget;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.gui.settings.GuiMainVRSettings;
 
 @Mixin(OptionsScreen.class)
@@ -38,17 +36,12 @@ public class OptionsScreenVRMixin extends Screen {
     */
 
     // place below FOV slider
-    @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;I)Lnet/minecraft/client/gui/components/AbstractWidget;"),index = 1)
-    private int makeSpacer1wide(int layoutElement) {
-        return 1;
-    }
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;I)Lnet/minecraft/client/gui/components/AbstractWidget;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void addVivecraftSettings(CallbackInfo ci, GridWidget gridLayout, GridWidget.RowHelper rowHelper) {
-        rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
+    @Inject(method = "init", at = @At(value = "HEAD"))
+    private void addVivecraftSettings(CallbackInfo ci) {
+        this.addRenderableWidget(new Button(this.width / 2 - 155,  this.height / 6 - 12 + 24, 150, 20, Component.translatable("vivecraft.options.screen.main.button"), (p) ->
         {
             Minecraft.getInstance().options.save();
             Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
-        })
-                .build());
+        }));
     }
 }

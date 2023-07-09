@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
 import net.minecraft.server.packs.resources.ResourceManager;
-import org.joml.Matrix4f;
+import com.mojang.math.Matrix4f;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -157,7 +157,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
      */
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE),
-            method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V ")
+            method = "renderLevel")
     public void stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
         if (!RenderPassType.isVanilla()) {
             this.minecraft.getProfiler().popPush("stencil");
@@ -298,14 +298,13 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         boolean playerNearAndVR = VRState.vrRunning && this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
         if (playerNearAndVR) {
             switch (i) {
-                /* pre 1.19.4, they are now separate
+                // pre 1.19.4, they are now separate
                 case 1011,      // IRON_DOOR_CLOSE
                         1012,   // WOODEN_DOOR_CLOSE
                         1013,   // WOODEN_TRAPDOOR_CLOSE
                         1014,   // FENCE_GATE_CLOSE
                         1036    // IRON_TRAPDOOR_CLOSE
                         -> ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
-                 */
                 case 1019,      // ZOMBIE_ATTACK_WOODEN_DOOR
                         1020,   // ZOMBIE_ATTACK_IRON_DOOR
                         1021    // ZOMBIE_BREAK_WOODEN_DOOR

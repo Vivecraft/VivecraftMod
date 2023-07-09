@@ -2,7 +2,6 @@ package org.vivecraft.client_vr.provider.nullvr;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -56,9 +55,9 @@ public class NullVR extends MCVR
     }
 
     @Override
-    public Vector2f getPlayAreaSize()
+    public float[] getPlayAreaSize()
     {
-        return new Vector2f(2);
+        return new float[]{2,2};
     }
 
     @Override

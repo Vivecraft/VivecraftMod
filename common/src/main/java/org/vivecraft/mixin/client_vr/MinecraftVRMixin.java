@@ -9,6 +9,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.*;
@@ -48,7 +49,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -298,7 +298,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
         // register a resource reload listener, to reload the menu world
         resourceManager.registerReloadListener((ResourceManagerReloadListener) resourceManager -> {
-            List<String> newPacks = resourceManager.listPacks().map(PackResources::packId).toList();
+            List<String> newPacks = resourceManager.listPacks().map(PackResources::getName).toList();
             if ((resourcepacks == null || !resourcepacks.equals(newPacks)) &&
                 ClientDataHolderVR.getInstance().menuWorldRenderer != null
                 && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
@@ -332,7 +332,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         }
 
         // set initial resourcepacks
-        resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
+        resourcepacks = resourceManager.listPacks().map(PackResources::getName).toList();
 
         if (OptifineHelper.isOptifineLoaded() && ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
             // with optifine this texture somehow fails to load, so manually reload it
@@ -730,7 +730,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
         if (this.overlay != null) {
             RenderSystem.clear(256, ON_OSX);
-            Matrix4f matrix4f = new Matrix4f().setOrtho(
+            Matrix4f matrix4f = Matrix4f.orthographic(
                     0, (float) (this.window.getScreenWidth() / this.window.getGuiScale()),
                     (float) (this.window.getScreenHeight() / this.window.getGuiScale()), 0, 1000.0F, 3000.0F);
             RenderSystem.setProjectionMatrix(matrix4f);
@@ -1146,7 +1146,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     private void drawNotifyMirror() {
         if (System.currentTimeMillis() < this.mirroNotifyStart + this.mirroNotifyLen) {
             RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
-            Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float) this.window.getScreenWidth(),
+            Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float) this.window.getScreenWidth(),
                     (float) this.window.getScreenHeight(), 0.0F, 1000.0F, 3000.0F);
             RenderSystem.setProjectionMatrix(matrix4f);
             RenderSystem.getModelViewStack().pushPose();

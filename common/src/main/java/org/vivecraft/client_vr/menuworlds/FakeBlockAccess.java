@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.core.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
@@ -357,16 +356,5 @@ public class FakeBlockAccess implements LevelReader {
 	@Override
 	public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
 		return null; // don't need this
-	}
-
-
-	@Override
-	public RegistryAccess registryAccess() {
-		return null;
-	}
-
-	@Override
-	public FeatureFlagSet enabledFeatures() {
-		return null;
 	}
 }

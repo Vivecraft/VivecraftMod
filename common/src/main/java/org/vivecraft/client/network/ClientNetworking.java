@@ -6,7 +6,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
@@ -246,7 +246,7 @@ public class ClientNetworking {
 
                     while (buffer.readableBytes() > 0) {
                         String s12 = buffer.readUtf(16384);
-                        Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s12));
+                        Block block = Registry.BLOCK.get(new ResourceLocation(s12));
 
                         // if the block is not there AIR is returned
                         if (block != Blocks.AIR) {

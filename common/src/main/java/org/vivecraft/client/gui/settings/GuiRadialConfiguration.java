@@ -65,46 +65,34 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
 
         if (this.isselectmode)
         {
-            this.addRenderableWidget(new Button.Builder( Component.translatable("gui.cancel"),  (p) ->
-                {
-                    this.isselectmode = false;
-                    this.reinit = true;
-                    this.visibleList = null;
-                })
-                .size( 150,  20)
-                .pos(this.width / 2 - 155,  this.height - 25)
-                .build());
-            this.addRenderableWidget(new Button.Builder( Component.translatable("vivecraft.gui.clear"),  (p) ->
-                {
-                    this.setKey((KeyMapping)null);
-                })
-                .size( 150,  20)
-                .pos(this.width / 2 - 155,  25)
-                .build());
+            this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 25, 150, 20, Component.translatable("gui.cancel"), (p) ->
+            {
+                this.isselectmode = false;
+                this.reinit = true;
+                this.visibleList = null;
+            }));
+            this.addRenderableWidget(new Button(this.width / 2 - 155, 25, 150, 20, Component.translatable("vivecraft.gui.clear"), (p) ->
+            {
+                this.setKey((KeyMapping)null);
+            }));
         }
         else
         {
             if (this.isShift)
             {
-                this.addRenderableWidget(new Button.Builder( Component.translatable("vivecraft.gui.radialmenu.mainset"),  (p) ->
-                    {
-                        this.isShift = !this.isShift;
-                        this.reinit = true;
-                    })
-                    .size( 150,  20)
-                    .pos(this.width / 2 + 2,  30)
-                    .build());
+                this.addRenderableWidget(new Button(this.width / 2 + 2, 30, 150, 20, Component.translatable("vivecraft.gui.radialmenu.mainset"), (p) ->
+                {
+                    this.isShift = !this.isShift;
+                    this.reinit = true;
+                }));
             }
             else
             {
-                this.addRenderableWidget(new Button.Builder( Component.translatable("vivecraft.gui.radialmenu.alternateset"),  (p) ->
-                    {
-                        this.isShift = !this.isShift;
-                        this.reinit = true;
-                    })
-                    .size( 150,  20)
-                    .pos(this.width / 2 + 2,  30)
-                    .build());
+                this.addRenderableWidget(new Button(this.width / 2 + 2, 30, 150, 20, Component.translatable("vivecraft.gui.radialmenu.alternateset"), (p) ->
+                {
+                    this.isShift = !this.isShift;
+                    this.reinit = true;
+                }));
             }
 
             super.init(options, false);
@@ -187,16 +175,13 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
                 }
 
                 int l1 = k1;
-                this.addRenderableWidget(new Button.Builder(  Component.translatable(s),  (p) ->
-                    {
-                        this.selectedIndex = l1;
-                        this.isselectmode = true;
-                        this.reinit = true;
-                        this.visibleList = this.list;
-                    })
-                    .size( i2,  20)
-                    .pos(i1 + j2 - i2 / 2,  j1 + k2)
-                    .build());
+                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2, i2, 20,  Component.translatable(s), (p) ->
+                {
+                    this.selectedIndex = l1;
+                    this.isselectmode = true;
+                    this.reinit = true;
+                    this.visibleList = this.list;
+                }));
                 super.addDefaultButtons();
             }
         }

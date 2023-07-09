@@ -29,31 +29,31 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
+    modCompileOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.5.2+1.19.3"
+    modCompileOnly "maven.modrinth:iris:1.5.2+1.19.2"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre9' //temp iris
 
     // for REI compat
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:10.0.620"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:9.1.619"
 
     // for Pehkui compat
     modRuntimeOnly("com.github.Virtuoel:Pehkui:3.7.1", { exclude group: "net.fabricmc.fabric-api" })
 
     // other mods
     // modRuntimeOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
-    modCompileOnly "maven.modrinth:lithium:mc1.19.3-0.11.1"
-    modCompileOnly "maven.modrinth:indium:1.0.14+mc1.19.3"
+    modCompileOnly "maven.modrinth:lithium:mc1.19.2-0.11.1"
+    modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
 
     /*
     // for immersive portals compat
-    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v2.5.2-mc1.19.3'){ //temp immersiveportals
+    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v2.3.2-mc1.19.2'){ //temp immersiveportals
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v2.5.2-mc1.19.3'){ //temp immersiveportals
+    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v2.3.2-mc1.19.2'){ //temp immersiveportals
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }

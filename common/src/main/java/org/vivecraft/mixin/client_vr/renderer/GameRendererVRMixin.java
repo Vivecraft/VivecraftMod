@@ -6,12 +6,10 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-import com.mojang.math.Axis;
 import net.minecraft.client.multiplayer.ClientLevel;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -281,7 +279,7 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "getProjectionMatrix(D)Lorg/joml/Matrix4f;", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "getProjectionMatrix(D)Lcom/mojang/math/Matrix4f;", cancellable = true)
     public void projection(double d, CallbackInfoReturnable<Matrix4f> info) {
         if (!VRState.vrRunning) {
             return;
@@ -295,32 +293,32 @@ public abstract class GameRendererVRMixin
         } else if (GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.THIRD) {
             if (GameRendererVRMixin.DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
                 posestack.mulPoseMatrix(
-                        new Matrix4f().setPerspective(GameRendererVRMixin.DATA_HOLDER.vrSettings.mixedRealityFov * 0.01745329238474369F,
+                        Matrix4f.perspective((double) GameRendererVRMixin.DATA_HOLDER.vrSettings.mixedRealityFov,
                                 GameRendererVRMixin.DATA_HOLDER.vrSettings.mixedRealityAspectRatio, this.minClipDistance,
                                 this.clipDistance));
             } else {
                 posestack.mulPoseMatrix(
-                        new Matrix4f().setPerspective(GameRendererVRMixin.DATA_HOLDER.vrSettings.mixedRealityFov * 0.01745329238474369F,
+                        Matrix4f.perspective((double) GameRendererVRMixin.DATA_HOLDER.vrSettings.mixedRealityFov,
                                 (float) this.minecraft.getWindow().getScreenWidth()
                                         / (float) this.minecraft.getWindow().getScreenHeight(),
                                 this.minClipDistance, this.clipDistance));
             }
             this.thirdPassProjectionMatrix = new Matrix4f(posestack.last().pose());
         } else if (GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.CAMERA) {
-            posestack.mulPoseMatrix(new Matrix4f().setPerspective(GameRendererVRMixin.DATA_HOLDER.vrSettings.handCameraFov * 0.01745329238474369F,
+            posestack.mulPoseMatrix(Matrix4f.perspective((double) GameRendererVRMixin.DATA_HOLDER.vrSettings.handCameraFov,
                     (float) GameRendererVRMixin.DATA_HOLDER.vrRenderer.cameraFramebuffer.viewWidth
                             / (float) GameRendererVRMixin.DATA_HOLDER.vrRenderer.cameraFramebuffer.viewHeight,
                     this.minClipDistance, this.clipDistance));
         } else if (GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.SCOPEL
                 || GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.SCOPER) {
-            posestack.mulPoseMatrix(new Matrix4f().setPerspective(70f / 8f * 0.01745329238474369F, 1.0F, 0.05F, this.clipDistance));
+            posestack.mulPoseMatrix(Matrix4f.perspective(70f / 8f, 1.0F, 0.05F, this.clipDistance));
 
         } else {
             if (this.zoom != 1.0F) {
                 posestack.translate((double) this.zoomX, (double) (-this.zoomY), 0.0D);
                 posestack.scale(this.zoom, this.zoom, 1.0F);
             }
-            posestack.mulPoseMatrix(new Matrix4f().setPerspective((float) d * 0.01745329238474369F, (float) this.minecraft.getWindow().getScreenWidth()
+            posestack.mulPoseMatrix(Matrix4f.perspective((float) d, (float) this.minecraft.getWindow().getScreenWidth()
                     / (float) this.minecraft.getWindow().getScreenHeight(), 0.05F, this.clipDistance));
         }
         info.setReturnValue(posestack.last().pose());
@@ -461,8 +459,8 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"))
-    private void noTranslateItem(PoseStack poseStack, float x, float y, float z) {
+    @Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(DDD)V"))
+    private void noTranslateItem(PoseStack poseStack, double x, double y, double z) {
         if (RenderPassType.isVanilla()) {
             poseStack.translate(x, y, z);
         }
@@ -486,8 +484,8 @@ public abstract class GameRendererVRMixin
             applyVRModelView(ClientDataHolderVR.getInstance().currentPass, posestack);
             applystereo(ClientDataHolderVR.getInstance().currentPass, posestack);
             posestack.scale(sinN, sinN, sinN);
-            posestack.mulPose(Axis.YP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getYaw()));
-            posestack.mulPose(Axis.XP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPitch()));
+            posestack.mulPose(Vector3f.YP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getYaw()));
+            posestack.mulPose(Vector3f.XP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPitch()));
         }
     }
 
@@ -705,7 +703,7 @@ public abstract class GameRendererVRMixin
             } else {
                 this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(this.mainCamera, partialTicks, true)));
                 PoseStack posestack = new PoseStack();
-                posestack.last().pose().identity();
+                posestack.last().pose().setIdentity();
                 this.applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, posestack);
                 this.renderVRHand_Main(posestack, partialTicks);
             }
@@ -720,7 +718,7 @@ public abstract class GameRendererVRMixin
             } else {
                 this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(this.mainCamera, partialTicks, true)));
                 PoseStack posestack1 = new PoseStack();
-                posestack1.last().pose().identity();
+                posestack1.last().pose().setIdentity();
                 this.applyVRModelView(GameRendererVRMixin.DATA_HOLDER.currentPass, posestack1);
                 this.renderVRHand_Offhand(partialTicks, true, posestack1);
             }
@@ -831,7 +829,7 @@ public abstract class GameRendererVRMixin
     public void applyVRModelView(RenderPass currentPass, PoseStack poseStack) {
         Matrix4f modelView = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(currentPass)
                 .getMatrix().transposed().toMCMatrix();
-        poseStack.last().pose().mul(modelView);
+        poseStack.last().pose().multiply(modelView);
         poseStack.last().normal().mul(new Matrix3f(modelView));
     }
 
@@ -1308,7 +1306,7 @@ public abstract class GameRendererVRMixin
                                 (GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin.z - eye.z));
 
                         // remove world rotation or the room doesn't align with the screen
-                        pMatrix.mulPose(Axis.YN.rotation(-GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
+                        pMatrix.mulPose(Vector3f.YN.rotation(-GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.rotation_radians));
 
                         //System.out.println(eye + " eye");
                         //System.out.println(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin + " world");
@@ -1548,9 +1546,9 @@ public abstract class GameRendererVRMixin
         int i = 4;
         float f = 2.5F;
         float f1 = 1.3F;
-        Vector2f afloat = GameRendererVRMixin.DATA_HOLDER.vr.getPlayAreaSize();
+        float[] afloat = GameRendererVRMixin.DATA_HOLDER.vr.getPlayAreaSize();
         if (afloat == null)
-            afloat = new Vector2f(2, 2);
+            afloat = new float[]{2, 2};
 
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
@@ -1563,8 +1561,8 @@ public abstract class GameRendererVRMixin
         RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
         RenderSystem.setShaderColor(1, 1, 1, 1);
         pMatrixStack.pushPose();
-        float f2 = afloat.x + f1;
-        float f3 = afloat.y + f1;
+        float f2 = afloat[0] + f1;
+        float f3 = afloat[1] + f1;
         pMatrixStack.translate(-f2 / 2.0F, 0.0F, -f3 / 2.0F);
 
         Matrix4f matrix4f = pMatrixStack.last().pose();
@@ -1631,11 +1629,11 @@ public abstract class GameRendererVRMixin
         DATA_HOLDER.menuWorldRenderer.updateLightmap();
         DATA_HOLDER.menuWorldRenderer.render(poseStack);
 
-        Vector2f area = DATA_HOLDER.vr.getPlayAreaSize();
+        float[] area = DATA_HOLDER.vr.getPlayAreaSize();
         if (area != null) {
             poseStack.pushPose();
-            float width = area.x;//(float)Math.ceil(area.x);
-            float length = area.y;//(float)Math.ceil(area.y);
+            float width = area[0];//(float)Math.ceil(area.x);
+            float length = area[1];//(float)Math.ceil(area.y);
 
             RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
             RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
@@ -2144,11 +2142,11 @@ public abstract class GameRendererVRMixin
 
         // orthographic matrix, (-1, -1) to (1, 1), near = 0.0, far 2.0
         Matrix4f mat = new Matrix4f();
-        mat.m00(1.0F);
-        mat.m11(1.0F);
-        mat.m22(-1.0F);
-        mat.m33(1.0F);
-        mat.m32(-1.0F);
+        mat.m00 = 1.0F;
+        mat.m11 = 1.0F;
+        mat.m22 = -1.0F;
+        mat.m33 = 1.0F;
+        mat.m23 = -1.0F;
 
         RenderSystem.depthFunc(GL11.GL_ALWAYS);
         RenderSystem.depthMask(true);
@@ -2425,7 +2423,7 @@ public abstract class GameRendererVRMixin
 //		}
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, textureatlassprite.atlasLocation());
+        RenderSystem.setShaderTexture(0, textureatlassprite.atlas().location());
         float f = textureatlassprite.getU0();
         float f1 = textureatlassprite.getU1();
         float f2 = (f + f1) / 2.0F;
@@ -2444,7 +2442,7 @@ public abstract class GameRendererVRMixin
 
         for (int i = 0; i < 4; ++i) {
             posestack.pushPose();
-            posestack.mulPose(Axis.YP.rotationDegrees(
+            posestack.mulPose(Vector3f.YP.rotationDegrees(
                     (float) i * 90.0F - GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.getBodyYaw()));
             posestack.translate(0.0D, (double) (-f13), 0.0D);
             Matrix4f matrix4f = posestack.last().pose();

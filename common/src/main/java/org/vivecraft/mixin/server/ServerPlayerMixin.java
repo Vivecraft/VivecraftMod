@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.server;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -49,8 +50,8 @@ public abstract class ServerPlayerMixin extends Player {
 	@Unique
 	private Component tabListDisplayName = null;
 
-	public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
-		super(level, blockPos, f, gameProfile);
+	public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile, ProfilePublicKey profilePublicKey) {
+		super(level, blockPos, f, gameProfile, profilePublicKey);
 	}
 
 	@Inject(at = @At("TAIL"), method = "initInventoryMenu")

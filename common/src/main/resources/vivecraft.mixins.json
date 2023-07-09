@@ -35,7 +35,7 @@
     "client_vr.gui.screens.SoundOptionsScreenVRMixin",
     "client_vr.gui.screens.WinScreenVRMixin",
     "client_vr.gui.screens.inventory.AbstractContainerScreenVRMixin",
-    "client_vr.gui.screens.inventory.AbstractSignEditScreenVRMixin",
+    "client_vr.gui.screens.inventory.SignEditScreenVRMixin",
     "client_vr.gui.screens.inventory.BookEditScreenVRMixin",
     "client_vr.gui.screens.inventory.CreativeModeInventoryScreenVRMixin",
     "client_vr.multiplayer.ClientPacketListenerVRMixin",
@@ -63,10 +63,7 @@
     "client_vr.world.ItemVRMixin",
     "client_vr.world.PotionItemVRMixin",
     "client_vr.world.entity.projectile.FireworkRocketEntityVRMixin",
-    "client_vr.world.entity.player.PlayerVRMixin",
-    "client_vr.world.level.block.DoorBlockVRMixin",
-    "client_vr.world.level.block.FenceGateBlockVRMixin",
-    "client_vr.world.level.block.TrapDoorBlockVRMixin"
+    "client_vr.world.entity.player.PlayerVRMixin"
   ],
   "minVersion": "0.8.4",
   "mixins": [

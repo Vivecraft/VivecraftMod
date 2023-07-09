@@ -12,13 +12,13 @@ public interface GuiVROption {
     // implement those with a cast to Abstract widget, since pre 1.19.4 those methods are there
     default int getY() {
         if (this instanceof AbstractWidget widget) {
-            return widget.getY();
+            return widget.y;
         }
         return 0;
     }
     default int getX() {
         if (this instanceof AbstractWidget widget) {
-            return widget.getX();
+            return widget.x;
         }
         return 0;
     }

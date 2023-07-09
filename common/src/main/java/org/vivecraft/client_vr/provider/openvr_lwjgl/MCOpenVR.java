@@ -11,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector2f;
 import org.lwjgl.openvr.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -198,13 +197,13 @@ public class MCOpenVR extends MCVR {
         return "OpenVR_LWJGL";
     }
 
-    public Vector2f getPlayAreaSize() {
+    public float[] getPlayAreaSize() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (OpenVR.VRChaperone != null && OpenVR.VRChaperone.GetPlayAreaSize != 0) {
                 FloatBuffer pSizeZ = stack.callocFloat(1);
                 FloatBuffer pSizeX = stack.callocFloat(1);
                 boolean b0 = VRChaperone.VRChaperone_GetPlayAreaSize(pSizeX, pSizeZ);
-                return b0 ? new Vector2f(pSizeX.get(0) * this.dh.vrSettings.walkMultiplier, pSizeZ.get(0) * this.dh.vrSettings.walkMultiplier) : null;
+                return b0 ? new float[]{pSizeX.get(0) * this.dh.vrSettings.walkMultiplier, pSizeZ.get(0) * this.dh.vrSettings.walkMultiplier} : null;
             } else {
                 return null;
             }

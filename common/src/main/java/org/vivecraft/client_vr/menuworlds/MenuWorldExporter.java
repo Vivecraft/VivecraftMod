@@ -19,6 +19,7 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import net.minecraft.core.Registry;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import com.mojang.datafixers.DataFixer;
@@ -30,8 +31,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtOps;
@@ -397,7 +396,7 @@ public class MenuWorldExporter {
 			for (int i = 0; i < size; i++) {
 				CompoundTag tag = CompoundTag.TYPE.load(dis, 0, NbtAccounter.UNLIMITED);
 				tag = (CompoundTag)dataFixer.update(References.BLOCK_STATE, new Dynamic<>(NbtOps.INSTANCE, tag), dataVersion, SharedConstants.getCurrentVersion().getDataVersion().getVersion()).getValue();
-				this.paletteMap.add(NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag));
+				this.paletteMap.add(NbtUtils.readBlockState(tag));
 			}
 		}
 
@@ -416,7 +415,7 @@ public class MenuWorldExporter {
 		Biome getBiome(int id);
 	}
 
-	private static final BiomeGenerationSettings dummyGenerationSettings = new BiomeGenerationSettings.PlainBuilder().build();
+	private static final BiomeGenerationSettings dummyGenerationSettings = new BiomeGenerationSettings.Builder().build();
 	private static final MobSpawnSettings dummyMobSpawnSettings = new MobSpawnSettings.Builder().build();
 
 	private static class PaletteBiomeMapper implements BiomeMapper {
@@ -467,7 +466,7 @@ public class MenuWorldExporter {
 				decodeEnum(BiomeSpecialEffects.GrassColorModifier.class, dis.readUTF()).ifPresent(effectsBuilder::grassColorModifier);
 
 				if (dis.readBoolean()) {
-					ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation(dis.readUTF()));
+					ParticleType<?> particleType = Registry.PARTICLE_TYPE.get(new ResourceLocation(dis.readUTF()));
 					float probability = dis.readFloat();
 					if (particleType instanceof ParticleOptions)
 						effectsBuilder.ambientParticle(new AmbientParticleSettings((ParticleOptions)particleType, probability));
@@ -484,7 +483,7 @@ public class MenuWorldExporter {
 			for (int i = 0; i < this.paletteMap.size(); i++) {
 				Biome biome = this.paletteMap.byId(i);
 
-				dos.writeUTF(registryAccess.registryOrThrow(Registries.BIOME).getKey(biome).toString());
+				dos.writeUTF(registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(biome).toString());
 
 				Biome.ClimateSettings climateSettings = Xplat.getBiomeClimateSettings(biome);
 
@@ -513,7 +512,7 @@ public class MenuWorldExporter {
 				dos.writeBoolean(specialEffects.getAmbientParticleSettings().isPresent());
 				if (specialEffects.getAmbientParticleSettings().isPresent()) {
 					AmbientParticleSettings ambientParticleSettings = specialEffects.getAmbientParticleSettings().get();
-					dos.writeUTF(BuiltInRegistries.PARTICLE_TYPE.getKey(ambientParticleSettings.getOptions().getType()).toString());
+					dos.writeUTF(Registry.PARTICLE_TYPE.getKey(ambientParticleSettings.getOptions().getType()).toString());
 					dos.writeFloat(ambientParticleSettings.probability);
 				}
 			}
@@ -678,13 +677,13 @@ public class MenuWorldExporter {
 			// bamboo_jungle_hills
 			map.put(169, new Biome.BiomeBuilder().precipitation(Biome.Precipitation.RAIN).temperature(0.950000f).downfall(0.900000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(12638463).waterColor(4159204).waterFogColor(329011).skyColor(7842047).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
 			// soul_sand_valley
-			map.put(170, new Biome.BiomeBuilder().precipitation(Biome.Precipitation.NONE).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(1787717).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions)BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation("minecraft:ash")), 0.006250f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
+			map.put(170, new Biome.BiomeBuilder().precipitation(Biome.Precipitation.NONE).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(1787717).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions)Registry.PARTICLE_TYPE.get(new ResourceLocation("minecraft:ash")), 0.006250f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
 			// crimson_forest
-			map.put(171, new Biome.BiomeBuilder().precipitation(Biome.Precipitation.NONE).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(3343107).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions)BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation("minecraft:crimson_spore")), 0.025000f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
+			map.put(171, new Biome.BiomeBuilder().precipitation(Biome.Precipitation.NONE).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(3343107).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions)Registry.PARTICLE_TYPE.get(new ResourceLocation("minecraft:crimson_spore")), 0.025000f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
 			// warped_forest
-			map.put(172, new Biome.BiomeBuilder().precipitation(Biome.Precipitation.NONE).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(1705242).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions)BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation("minecraft:warped_spore")), 0.014280f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
+			map.put(172, new Biome.BiomeBuilder().precipitation(Biome.Precipitation.NONE).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(1705242).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions)Registry.PARTICLE_TYPE.get(new ResourceLocation("minecraft:warped_spore")), 0.014280f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
 			// basalt_deltas
-			map.put(173, new Biome.BiomeBuilder().precipitation(Biome.Precipitation.NONE).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(6840176).waterColor(4159204).waterFogColor(4341314).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions)BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation("minecraft:white_ash")), 0.118093f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
+			map.put(173, new Biome.BiomeBuilder().precipitation(Biome.Precipitation.NONE).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(6840176).waterColor(4159204).waterFogColor(4341314).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions)Registry.PARTICLE_TYPE.get(new ResourceLocation("minecraft:white_ash")), 0.118093f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
 		}
 
 		private LegacyBiomeMapper() {

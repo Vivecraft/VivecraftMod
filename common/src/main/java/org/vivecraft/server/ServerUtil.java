@@ -3,7 +3,7 @@ package org.vivecraft.server;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.*;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.vivecraft.client.utils.UpdateChecker;
@@ -140,7 +140,7 @@ public class ServerUtil {
                         Commands.literal("add").then(
                             Commands.argument("block", StringArgumentType.greedyString())
                                 .suggests((context, builder) -> {
-                                    for (var block : BuiltInRegistries.BLOCK.keySet()) {
+                                    for (var block : Registry.BLOCK.keySet()) {
                                         builder.suggest(block.toString());
                                     }
                                     return builder.buildFuture();

@@ -1,6 +1,8 @@
 package org.vivecraft.mixin.client_vr.player;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -55,6 +57,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Unique
     private int movementTeleportTimer;
     @Unique
+    public String lastMsg = null;
+    @Unique
     private boolean teleported;
     @Unique
     private double additionX;
@@ -74,8 +78,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Shadow
     public Input input;
 
-    public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile) {
-        super(clientLevel, gameProfile);
+    public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile, ProfilePublicKey profilePublicKey) {
+        super(clientLevel, gameProfile, profilePublicKey);
     }
 
     @Shadow
@@ -135,6 +139,11 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         if (!this.teleported) {
             instance.send(packet);
         }
+    }
+
+    @Inject(at = @At("TAIL"), method = "chatSigned")
+    public void chatMsg(String string, Component component, CallbackInfo ci) {
+        this.lastMsg = string;
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/LocalPlayer;lastOnGround:Z", shift = At.Shift.AFTER, ordinal = 1), method = "sendPosition")
@@ -260,6 +269,10 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             return;
         }
         ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity((LocalPlayer) (Object) this, false, false);
+        if (!this.initFromServer) {
+            this.moveTo(pX, p_19892_, pY, p_19894_, pZ);
+            this.initFromServer = true;
+        }
     }
 
     @Override
@@ -501,6 +514,16 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         if (!this.isSilent() && !block.defaultBlockState().getMaterial().isLiquid()) {
             this.level.playSound((LocalPlayer) null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
         }
+    }
+
+    @Override
+    public String getLastMsg() {
+        return lastMsg;
+    }
+
+    @Override
+    public void setLastMsg(String string) {
+        this.lastMsg = string;
     }
 
     @Override

@@ -17,7 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -128,7 +128,7 @@ public class InteractTracker extends Tracker
             this.rightClickable = new HashSet<>();
 
             String name = Xplat.getUseMethodName();
-            for (Object object : BuiltInRegistries.BLOCK)
+            for (Object object : Registry.BLOCK)
             {
                 Class<?> oclass = object.getClass();
 
