@@ -198,14 +198,14 @@ public class MenuWorldRenderer {
 			cloudHeight += OptifineHelper.getCloudHeight() * 128.0;
 		}
 
-		if (blockAccess.getGround()+blockAccess.getMinBuildHeight() < cloudHeight) {
+		if (eyePosition.y+blockAccess.getGround()+blockAccess.getMinBuildHeight() < cloudHeight) {
 			renderClouds(poseStack, eyePosition.x, eyePosition.y+blockAccess.getGround()+blockAccess.getMinBuildHeight(), eyePosition.z);
 		}
 
 		renderChunkLayer(RenderType.translucent(), modelView, projection);
 		renderChunkLayer(RenderType.tripwire(), modelView, projection);
 
-		if (blockAccess.getGround()+blockAccess.getMinBuildHeight() >= cloudHeight) {
+		if (eyePosition.y+blockAccess.getGround()+blockAccess.getMinBuildHeight() >= cloudHeight) {
 			renderClouds(poseStack, eyePosition.x, eyePosition.y+blockAccess.getGround()+blockAccess.getMinBuildHeight(), eyePosition.z);
 		}
 
