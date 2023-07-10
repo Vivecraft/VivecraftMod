@@ -366,9 +366,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         if (VRState.vrRunning != vrActive && (ClientNetworking.serverAllowsVrSwitching || player == null)) {
             VRState.vrRunning = vrActive;
             if (vrActive) {
-                //TODO
                 if (player != null) {
-                    ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(player.position().x, player.position().y, player.position().z, true);
+                    ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(player, false, false);
                 }
                 // release mouse when switching to standing
                 if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
