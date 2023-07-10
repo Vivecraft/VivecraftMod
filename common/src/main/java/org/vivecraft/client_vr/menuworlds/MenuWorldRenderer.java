@@ -620,9 +620,11 @@ public class MenuWorldRenderer {
 			{
 				poseStack.pushPose();
 				switch (i) {
-					case 1, 4 -> poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
-					case 2, 5 -> poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
+					case 1 -> poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
+					case 2 -> poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
 					case 3 -> poseStack.mulPose(Axis.XP.rotationDegrees(180.0f));
+					case 4 -> poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
+					case 5 -> poseStack.mulPose(Axis.ZP.rotationDegrees(-90.0f));
 				}
 
 				Matrix4f modelView = poseStack.last().pose();
