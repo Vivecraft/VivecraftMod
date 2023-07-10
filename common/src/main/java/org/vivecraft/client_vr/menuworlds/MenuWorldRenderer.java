@@ -192,10 +192,22 @@ public class MenuWorldRenderer {
 		renderChunkLayer(RenderType.cutout(), modelView, projection);
 
 		RenderSystem.enableBlend();
+
+		float cloudHeight = this.dimensionInfo.getCloudHeight();
+		if (OptifineHelper.isOptifineLoaded()) {
+			cloudHeight += OptifineHelper.getCloudHeight() * 128.0;
+		}
+
+		if (blockAccess.getGround()+blockAccess.getMinBuildHeight() < cloudHeight) {
+			renderClouds(poseStack, eyePosition.x, eyePosition.y+blockAccess.getGround()+blockAccess.getMinBuildHeight(), eyePosition.z);
+		}
+
 		renderChunkLayer(RenderType.translucent(), modelView, projection);
 		renderChunkLayer(RenderType.tripwire(), modelView, projection);
 
-		renderClouds(poseStack, eyePosition.x, eyePosition.y+blockAccess.getGround()+blockAccess.getMinBuildHeight(), eyePosition.z);
+		if (blockAccess.getGround()+blockAccess.getMinBuildHeight() >= cloudHeight) {
+			renderClouds(poseStack, eyePosition.x, eyePosition.y+blockAccess.getGround()+blockAccess.getMinBuildHeight(), eyePosition.z);
+		}
 
 		RenderSystem.depthMask(false);
 		renderSnowAndRain(poseStack, eyePosition.x, 0, eyePosition.z);
