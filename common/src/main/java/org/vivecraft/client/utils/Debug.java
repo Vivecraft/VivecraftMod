@@ -188,6 +188,7 @@ public class Debug
             double d1 = player.yOld + (player.getY() - player.yOld) * (double)partialTicks;
             double d2 = player.zOld + (player.getZ() - player.zOld) * (double)partialTicks;
            // GlStateManager.lineWidth(5.0F);
+            RenderSystem.disableTexture();
             //GlStateManager._disableLighting();
             RenderSystem.depthMask(false);
             RenderSystem.disableDepthTest();
@@ -205,6 +206,7 @@ public class Debug
 
             tesselator.end();
             RenderSystem.depthMask(true);
+            RenderSystem.enableTexture();
             //GlStateManager._enableLighting();
             RenderSystem.enableDepthTest();
 

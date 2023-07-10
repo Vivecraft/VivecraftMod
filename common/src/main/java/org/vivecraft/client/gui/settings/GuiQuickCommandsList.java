@@ -1,6 +1,7 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -33,6 +34,15 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
     protected void renderSelection(PoseStack poseStack, int i, int j, int k, int l, int m) {
     }
 
+    @Override
+    public boolean mouseClicked(double d, double e, int i) {
+        GuiEventListener focused = this.getFocused();
+        if (focused != null) {
+            focused.changeFocus(false);
+        }
+        return super.mouseClicked(d, e, i);
+    }
+
     public class CommandEntry extends Entry<CommandEntry>
     {
         private final Button btnDelete;
@@ -45,7 +55,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
             this.btnDelete = new Button.Builder(  Component.literal("X"),  (p) ->
                 {
                     this.txt.setValue("");
-                    this.txt.setFocused(true);
+                    this.txt.changeFocus(true);
                 })
                 .size( 18,  18)
                 .pos(0,  0)
@@ -53,8 +63,9 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         }
 
         @Override
-        public void setFocused(boolean bl) {
-            txt.setFocused(bl);
+        public boolean changeFocus(boolean bl) {
+            txt.setFocus(bl);
+            return bl;
         }
 
         public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)

@@ -113,7 +113,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         }
 	}
 
-    @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z"), ordinal = 2, method = "sendPosition")
+    @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z"), ordinal = 1, method = "sendPosition")
     private boolean directTeleport(boolean updateRotation) {
         if (this.teleported) {
             updateRotation = true;
@@ -190,9 +190,9 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 super.move(pType, pPos);
 
                 if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
-                    this.setMaxUpStep(this.getBlockJumpFactor() == 1.0F ? 1.0F : 0.6F);
+                    this.maxUpStep = this.getBlockJumpFactor() == 1.0F ? 1.0F : 0.6F;
                 } else {
-                    this.setMaxUpStep(0.6F);
+                    this.maxUpStep = 0.6F;
                     this.updateAutoJump((float) (this.getX() - d2), (float) (this.getZ() - d3));
                 }
 

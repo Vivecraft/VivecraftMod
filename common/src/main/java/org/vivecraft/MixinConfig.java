@@ -9,6 +9,7 @@ import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
 
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_11;
+import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_8;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_9;
 import org.vivecraft.mod_compat_vr.sodium.mixin.RenderSectionManagerVRMixin;
 
@@ -57,7 +58,11 @@ public class MixinConfig implements IMixinConfigPlugin {
 
         String neededClass = "";
         // apply iris sodium version specific mixins only when the right class is there
-        if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_9.class.getName())) {
+        if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_8.class.getName())) {
+            neededClass = "me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType";
+        }
+
+        else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_9.class.getName())) {
             neededClass = "me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType";
         }
         else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_11.class.getName())) {

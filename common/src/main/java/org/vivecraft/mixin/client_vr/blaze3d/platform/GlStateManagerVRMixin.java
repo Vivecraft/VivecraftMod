@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.*;
+import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 
 import static com.mojang.blaze3d.platform.GlStateManager.BLEND;
 import static com.mojang.blaze3d.platform.GlStateManager.glBlendFuncSeparate;
@@ -19,11 +20,10 @@ public class GlStateManagerVRMixin {
     }
 
     //Change the limit of textures to 32
-    // This doesn't exist anymore
-    /*@ModifyConstant(constant = @Constant(intValue = 12),method = "_getTextureId")
+    @ModifyConstant(constant = @Constant(intValue = 12),method = "_getTextureId")
     private static int properId(int i) {
         return RenderSystemAccessor.getShaderTextures().length;
-    }*/
+    }
 
     /**
      * @author

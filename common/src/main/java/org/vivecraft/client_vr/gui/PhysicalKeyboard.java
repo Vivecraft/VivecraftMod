@@ -505,6 +505,7 @@ public class PhysicalKeyboard
         poseStack.pushPose();
         Vector3f center = this.getCenterPos();
         poseStack.translate(-center.x, -center.y, -center.z);
+        RenderSystem.disableTexture();
         RenderSystem.disableCull();
         RenderSystem.enableBlend();
 
@@ -574,6 +575,7 @@ public class PhysicalKeyboard
         tesselator.end();
 
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
+        RenderSystem.enableTexture();
         //GlStateManager._disableLighting();
 
         // Start building vertices for text
@@ -585,7 +587,7 @@ public class PhysicalKeyboard
             poseStack.pushPose();
             poseStack.translate((double)(label.getB()).x, (double)(label.getB()).y, (double)(label.getB()).z);
             poseStack.scale(textScale, textScale, 1.0F);
-            font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack.last().pose(), multibuffersource$buffersource, Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional());
+            font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack.last().pose(), multibuffersource$buffersource, false, 0, 15728880, font.isBidirectional());
             poseStack.popPose();
         }
 
@@ -595,6 +597,7 @@ public class PhysicalKeyboard
 
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
+        RenderSystem.enableTexture();
         RenderSystem.enableCull();
         RenderSystem.defaultBlendFunc();
         poseStack.popPose();

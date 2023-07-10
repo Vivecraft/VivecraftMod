@@ -142,6 +142,7 @@ public abstract class VRRenderer {
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.depthFunc(GL11.GL_ALWAYS);
+        RenderSystem.disableTexture();
         RenderSystem.disableCull();
 
         RenderSystem.setShaderColor(0F, 0F, 0F, 1.0F);
@@ -172,6 +173,7 @@ public abstract class VRRenderer {
         RenderSystem.enableDepthTest();
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.enableTexture();
         RenderSystem.enableCull();
         GlStateManager._glUseProgram(s);
         RenderSystem.stencilFunc(GL11.GL_NOTEQUAL, 255, 1);

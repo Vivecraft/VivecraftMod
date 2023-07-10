@@ -243,7 +243,7 @@ public class TeleportTracker extends Tracker
             }
 
             this.doTeleportCallback();
-            ((PlayerExtension) this.mc.player).stepSound(BlockPos.containing(vec3), vec3);
+            ((PlayerExtension) this.mc.player).stepSound(new BlockPos(vec3), vec3);
         }
     }
 
@@ -307,7 +307,7 @@ public class TeleportTracker extends Tracker
             }
             else
             {
-                flag = !mc.level.getFluidState(BlockPos.containing(vec3)).isEmpty();
+                flag = !mc.level.getFluidState(new BlockPos(vec3)).isEmpty();
             }
 
             BlockHitResult blockhitresult = mc.level.clip(new ClipContext(vec34, vec35, ClipContext.Block.COLLIDER, flag ? ClipContext.Fluid.ANY : ClipContext.Fluid.ANY, mc.player));

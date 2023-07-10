@@ -128,7 +128,7 @@ public class VRWidgetHelper
         poseStack.translate(offsetX, offsetY, offsetZ);
         RenderSystem.applyModelViewMatrix();
 
-        BlockPos blockpos = BlockPos.containing(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
+        BlockPos blockpos = new BlockPos(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
         int i = Utils.getCombinedLightWithMin(minecraft.level, blockpos, 0);
 
         RenderSystem.enableDepthTest();

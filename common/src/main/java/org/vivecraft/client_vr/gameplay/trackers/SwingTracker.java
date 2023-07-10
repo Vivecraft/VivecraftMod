@@ -15,8 +15,6 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -111,7 +109,7 @@ public class SwingTracker extends Tracker
 
     public static boolean isTool(Item item)
     {
-        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem || item instanceof BrushItem || item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
+        return item instanceof DiggerItem || item instanceof ArrowItem || item instanceof FishingRodItem || item instanceof FoodOnAStickItem || item instanceof ShearsItem || item == Items.BONE || item == Items.BLAZE_ROD || item == Items.BAMBOO || item == Items.TORCH || item == Items.REDSTONE_TORCH || item == Items.STICK || item == Items.DEBUG_STICK || item instanceof FlintAndSteelItem || item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
     }
 
     public void doProcess(LocalPlayer player)
@@ -231,7 +229,7 @@ public class SwingTracker extends Tracker
 
                 if (!this.dh.climbTracker.isClimbeyClimb() || (i != 0 || !VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT)) && flag && (i != 1 || !VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.LEFT)) && flag)
                 {
-                    BlockPos blockpos = BlockPos.containing(this.miningPoint[i]);
+                    BlockPos blockpos = new BlockPos(this.miningPoint[i]);
                     BlockState blockstate = this.mc.level.getBlockState(blockpos);
                     BlockHitResult blockhitresult1 = this.mc.level.clip(new ClipContext(this.lastWeaponEndAir[i], this.miningPoint[i], ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.mc.player));
 
@@ -260,12 +258,6 @@ public class SwingTracker extends Tracker
                                         // some scythes just need to be used
                                         this.mc.gameMode.useItem(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                                 }
-                            }
-                            else if ((item instanceof BrushItem /*|| itemstack.is(ItemTags.VIVECRAFT_BRUSHES*/))
-                            {
-                                ((BrushItem)item).spawnDustParticles(player.level, blockhitresult1, blockstate, player.getViewVector(0.0F));
-                                player.level.playSound(player, blockhitresult1.getBlockPos(), SoundEvents.BRUSH_BRUSHING, SoundSource.PLAYERS);
-                                this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1);
                             }
                             else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS))
                             {

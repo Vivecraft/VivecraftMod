@@ -15,6 +15,7 @@ import net.minecraft.client.*;
 import net.minecraft.client.Timer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
@@ -287,6 +288,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
     @Shadow public abstract IntegratedServer getSingleplayerServer();
 
+    @Shadow @Final private ToastComponent toast;
     @Unique private List<String> resourcepacks;
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
@@ -466,6 +468,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
         FogRenderer.setupNoFog();
 //		this.profiler.push("display");
+        RenderSystem.enableTexture();
         RenderSystem.enableCull();
 //		this.profiler.pop();
 
@@ -505,19 +508,17 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         this.gameRenderer.render(f, currentNanoTime, false);
         // draw cursor
         if (Minecraft.getInstance().screen != null) {
-            PoseStack poseStack = RenderSystem.getModelViewStack();
-            poseStack.pushPose();
-            poseStack.setIdentity();
-            poseStack.translate(0.0f, 0.0f, -2000.0f);
-            RenderSystem.applyModelViewMatrix();
-
             int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
             int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
             ((GuiExtension) Minecraft.getInstance().gui).drawMouseMenuQuad(x, y);
-
-            poseStack.popPose();
-            RenderSystem.applyModelViewMatrix();
         }
+        // pre 1.19.4 toasts are not drawn in GameRenderer::render
+        if (!this.noRender) {
+            this.profiler.push("toasts");
+            this.toast.render(new PoseStack());
+            this.profiler.pop();
+        }
+
         // draw debug pie
         drawProfiler();
 
@@ -1198,6 +1199,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     private void renderSingleView(RenderPass eye, float nano, boolean renderworld) {
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
         RenderSystem.clear(16384, ON_OSX);
+        RenderSystem.enableTexture();
         RenderSystem.enableDepthTest();
         this.profiler.push("updateCameraAndRender");
         this.gameRenderer.render(nano, currentNanoTime, renderworld);

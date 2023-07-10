@@ -474,7 +474,7 @@ public class MenuWorldRenderer {
 			RenderSystem.setShader(GameRenderer::getPositionShader);
 			fogRenderer.setupFog(FogRenderer.FogMode.FOG_SKY);
 			ShaderInstance skyShader = RenderSystem.getShader();
-			//RenderSystem.disableTexture();
+			RenderSystem.disableTexture();
 
 			Vec3 skyColor = this.getSkyColor(position);
 
@@ -503,7 +503,7 @@ public class MenuWorldRenderer {
 
 			if (sunriseColor != null && (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()))
 			{
-				//RenderSystem.disableTexture();
+				RenderSystem.disableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionColorShader);
 				RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 				poseStack.pushPose();
@@ -534,7 +534,7 @@ public class MenuWorldRenderer {
 				poseStack.popPose();
 			}
 
-			//RenderSystem.enableTexture();
+			RenderSystem.enableTexture();
 
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 			poseStack.pushPose();
@@ -583,7 +583,7 @@ public class MenuWorldRenderer {
 				BufferUploader.drawWithShader(bufferBuilder.end());
 			}
 
-			//GlStateManager.disableTexture();
+			RenderSystem.disableTexture();
 
 			float starBrightness = this.getStarBrightness() * f10;
 
@@ -602,7 +602,7 @@ public class MenuWorldRenderer {
 			RenderSystem.defaultBlendFunc();
 
 			poseStack.popPose();
-			//RenderSystem.disableTexture();
+			RenderSystem.disableTexture();
 
 			double horizonDistance = position.y - this.blockAccess.getHorizon();
 
@@ -877,7 +877,7 @@ public class MenuWorldRenderer {
 				double s = (double)this.rainSizeZ[q] * 0.5;
 				mutableBlockPos.set(rainX, inY, rainZ);
 				Biome biome = blockAccess.getBiome(mutableBlockPos).value();
-				if (!biome.hasPrecipitation()) continue;
+				if (biome.getPrecipitation() == Biome.Precipitation.NONE) continue;
 
 				int blockingHeight = blockAccess.getHeightBlocking(rainX, rainZ);
 				int lower = Math.max(yFloor - rainDistance, blockingHeight);
@@ -891,10 +891,6 @@ public class MenuWorldRenderer {
 
 				RandomSource randomSource = RandomSource.create(rainX * rainX * 3121L + rainX * 45238971L ^ rainZ * rainZ * 418711L + rainZ * 13761L);
 				mutableBlockPos.setY(lower);
-				Biome.Precipitation precipitation = biome.getPrecipitationAt(mutableBlockPos);
-				if (precipitation == Biome.Precipitation.NONE) {
-					continue;
-				}
 
 				mutableBlockPos.setY(rainY);
 
@@ -908,7 +904,7 @@ public class MenuWorldRenderer {
 				int skyLight = blockAccess.getBrightness(LightLayer.SKY, mutableBlockPos) << 4;
 				int blockLight = blockAccess.getBrightness(LightLayer.BLOCK, mutableBlockPos) << 4;
 
-				if (precipitation == Biome.Precipitation.RAIN) {
+				if (biome.warmEnoughToRain(mutableBlockPos)) {
 					if (count != 0) {
 						if (count >= 0) {
 							tesselator.end();
@@ -921,7 +917,7 @@ public class MenuWorldRenderer {
 					blend = ((1.0f - distance * distance) * 0.5f + 0.5f);
 					int x = this.ticks + rainX * rainX * 3121 + rainX * 45238971 + rainZ * rainZ * 418711 + rainZ * 13761 & 0x1F;
 					yOffset = -((float)x + mc.getFrameTime()) / 32.0f * (3.0f + randomSource.nextFloat());
-				} else if (precipitation == Biome.Precipitation.SNOW) {
+				} else {
 					if (count != 1) {
 						if (count >= 0) {
 							tesselator.end();
@@ -940,8 +936,6 @@ public class MenuWorldRenderer {
 					//snow is brighter
 					skyLight = (skyLight * 3 + 240) / 4;
 					blockLight = (blockLight * 3 + 240) / 4;
-				} else {
-					continue;
 				}
 				bufferBuilder
 					.vertex(localX - r, (double)upper - inY, localZ - s)
@@ -1357,7 +1351,7 @@ public class MenuWorldRenderer {
 			return false;
 
 		Vec3 pos = getEyePos();
-		BlockPos blockpos = BlockPos.containing(pos);
+		BlockPos blockpos = new BlockPos(pos);
 		FluidState fluidstate = this.blockAccess.getFluidState(blockpos);
 		return isFluidTagged(fluidstate, tagIn) && pos.y < (double)((float)blockpos.getY() + fluidstate.getAmount() + 0.11111111F);
 	}
@@ -1555,7 +1549,7 @@ public class MenuWorldRenderer {
 
 		private void updateWaterFog(LevelReader levelIn) {
 			long currentTime = Util.getMillis();
-			int waterFogColor = levelIn.getBiome(BlockPos.containing(this.menuWorldRenderer.getEyePos())).value().getWaterFogColor();
+			int waterFogColor = levelIn.getBiome(new BlockPos(this.menuWorldRenderer.getEyePos())).value().getWaterFogColor();
 
 			if (this.biomeChangedTime < 0L) {
 				targetBiomeFog = waterFogColor;
@@ -1601,7 +1595,7 @@ public class MenuWorldRenderer {
 				fogStart = -8.0f;
 				fogEnd = 96.0f;
 
-				Holder<Biome> holder = menuWorldRenderer.blockAccess.getBiome(BlockPos.containing(menuWorldRenderer.getEyePos()));
+				Holder<Biome> holder = menuWorldRenderer.blockAccess.getBiome(new BlockPos(menuWorldRenderer.getEyePos()));
 				if (holder.is(BiomeTags.HAS_CLOSER_WATER_FOG)) {
 					fogEnd *= 0.85f;
 				}
@@ -1633,7 +1627,7 @@ public class MenuWorldRenderer {
 				fogType = FogType.WATER;
 			} else if(menuWorldRenderer.areEyesInFluid(FluidTags.LAVA)){
 				fogType = FogType.LAVA;
-			} else if(menuWorldRenderer.blockAccess.getBlockState(BlockPos.containing(menuWorldRenderer.getEyePos())).is(Blocks.POWDER_SNOW)){
+			} else if(menuWorldRenderer.blockAccess.getBlockState(new BlockPos(menuWorldRenderer.getEyePos())).is(Blocks.POWDER_SNOW)){
 				fogType = FogType.POWDER_SNOW;
 			}
 			return fogType;

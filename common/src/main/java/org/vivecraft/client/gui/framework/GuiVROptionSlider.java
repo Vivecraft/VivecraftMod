@@ -1,7 +1,5 @@
 package org.vivecraft.client.gui.framework;
 
-import net.minecraft.client.InputType;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -41,11 +39,8 @@ public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROpti
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         double d0 = this.enumOptions.denormalizeValue((float)this.value);
         dataholder.vrSettings.setOptionFloatValue(this.enumOptions, (float)d0);
-        // with that keyboard changes don't work, if there are fewer options than pixels
-        InputType inputType = Minecraft.getInstance().getLastInputType();
-        if (inputType == InputType.MOUSE) {
-            this.value = this.enumOptions.normalizeValue((float)d0);
-        }
+        // TODO check if that works right on 1.19.2
+        this.value = this.enumOptions.normalizeValue((float)d0);
     }
 
     @Override

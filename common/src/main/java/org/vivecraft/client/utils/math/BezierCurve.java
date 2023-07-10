@@ -84,6 +84,7 @@ public class BezierCurve
         double d0 = player.xOld + (player.getX() - player.xOld) * (double)partialTicks;
         double d1 = player.yOld + (player.getY() - player.yOld) * (double)partialTicks;
         double d2 = player.zOld + (player.getZ() - player.zOld) * (double)partialTicks;
+        RenderSystem.disableTexture();
         //GlStateManager._disableLighting();
         RenderSystem.depthMask(false);
         Tesselator tesselator = Tesselator.getInstance();
@@ -98,6 +99,7 @@ public class BezierCurve
 
         tesselator.end();
         //GlStateManager._enableLighting();
+        RenderSystem.enableTexture();
         RenderSystem.depthMask(true);
     }
 
