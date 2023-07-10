@@ -1343,7 +1343,8 @@ public abstract class GameRendererVRMixin
                             RenderSystem.disableBlend();
                         }
                     } else {
-                        RenderSystem.disableBlend();
+                        // enable blend for overlay transition in menuworld to not be jarring
+                        RenderSystem.enableBlend();
                     }
 
                     if (depthAlways) {
