@@ -42,7 +42,7 @@ public class KeyboardInputVRMixin extends Input {
     }
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
-    public void tick(boolean isSneaking, float sneakSpeed, CallbackInfo ci) {
+    public void tick(boolean isSneaking, CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
         }
@@ -179,8 +179,8 @@ public class KeyboardInputVRMixin extends Input {
         this.shiftKeyDown = (dataholder.sneakTracker.sneakCounter > 0 || dataholder.sneakTracker.sneakOverride || this.options.keyShift.isDown()) && minecraft.screen == null;
 
         if (isSneaking) {
-            this.leftImpulse = (float) ((double) this.leftImpulse * sneakSpeed);
-            this.forwardImpulse = (float) ((double) this.forwardImpulse * sneakSpeed);
+            this.leftImpulse *= 0.3F;
+            this.forwardImpulse *= 0.3F;
         }
     }
 }

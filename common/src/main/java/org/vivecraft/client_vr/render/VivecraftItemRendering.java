@@ -89,10 +89,6 @@ public class VivecraftItemRendering
                     }
                 }
             }
-            else if (pStack.getUseAnimation() == UseAnim.TOOT_HORN)
-            {
-                rendertype = VivecraftItemTransformType.Horn;
-            }
             else if (item instanceof SwordItem || pStack.is(ItemTags.VIVECRAFT_SWORDS))
             {
                 rendertype = VivecraftItemTransformType.Sword;

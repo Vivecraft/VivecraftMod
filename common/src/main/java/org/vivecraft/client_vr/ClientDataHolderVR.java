@@ -10,6 +10,9 @@ import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ClientDataHolderVR {
 
     public static boolean kiosk;
@@ -19,6 +22,7 @@ public class ClientDataHolderVR {
     public static boolean viewonly;
     public static ModelResourceLocation thirdPersonCameraModel = new ModelResourceLocation("vivecraft:camcorder");
     public static ModelResourceLocation thirdPersonCameraDisplayModel = new ModelResourceLocation("vivecraft:camcorder_display");
+    public static List<String> hrtfList = new ArrayList<>();
     private static ClientDataHolderVR INSTANCE;
 
     public VRPlayer vrPlayer;

@@ -7,9 +7,10 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.phys.Vec2;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ScreenUtils;
@@ -36,14 +37,14 @@ public abstract class GuiVROptionsBase extends Screen
 
     public GuiVROptionsBase(Screen lastScreen)
     {
-        super(Component.literal(""));
+        super(new TextComponent(""));
         this.lastScreen = lastScreen;
         this.settings = ClientDataHolderVR.getInstance().vrSettings;
     }
 
     protected void addDefaultButtons()
     {
-        this.addRenderableWidget(this.btnDone = new Button(this.width / 2 + 5, this.height - 30, 150, 20, Component.translatable("gui.back"), (p) ->
+        this.addRenderableWidget(this.btnDone = new Button(this.width / 2 + 5, this.height - 30, 150, 20, new TranslatableComponent("gui.back"), (p) ->
         {
             if (!this.onDoneClicked())
             {
@@ -51,7 +52,7 @@ public abstract class GuiVROptionsBase extends Screen
                 this.minecraft.setScreen(this.lastScreen);
             }
         }));
-        this.addRenderableWidget(this.btnDefaults = new Button(this.width / 2 - 155, this.height - 30, 150, 20, Component.translatable("vivecraft.gui.loaddefaults"), (p) ->
+        this.addRenderableWidget(this.btnDefaults = new Button(this.width / 2 - 155, this.height - 30, 150, 20, new TranslatableComponent("vivecraft.gui.loaddefaults"), (p) ->
         {
             this.loadDefaults();
             this.dataholder.vrSettings.saveOptions();
@@ -95,7 +96,7 @@ public abstract class GuiVROptionsBase extends Screen
                     if (vroptionlayout.getCustomHandler() == null || !vroptionlayout.getCustomHandler().apply((GuiVROptionButton)p, new Vec2(0.0F, 0.0F)))
                     {
                         this.settings.setOptionValue(((GuiVROptionButton)p).getOption());
-                        p.setMessage(Component.literal(vroptionlayout.getButtonText()));
+                        p.setMessage(new TextComponent(vroptionlayout.getButtonText()));
                     }
                 }));
             }
@@ -224,7 +225,7 @@ public abstract class GuiVROptionsBase extends Screen
             this.visibleList.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
         }
 
-        drawCenteredString(pMatrixStack, this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 16777215);
+        drawCenteredString(pMatrixStack, this.font, new TranslatableComponent(this.vrTitle), this.width / 2, 15, 16777215);
 
         if (this.btnDefaults != null)
         {
@@ -339,9 +340,9 @@ public abstract class GuiVROptionsBase extends Screen
 
                         // if tooltip is not too low, draw below button, else above
                         if (guiHover.getY() + guiHover.getHeight() + formattedText.size() * (font.lineHeight + 1) + 14 < this.height) {
-                            renderTooltip(pMatrixStack, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.getY() + guiHover.getHeight() + 14);
+                            renderTooltip(pMatrixStack, font.split(new TextComponent(tooltip), 308), this.width / 2 - 166, guiHover.getY() + guiHover.getHeight() + 14);
                         } else {
-                            renderTooltip(pMatrixStack, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.getY() - formattedText.size() * (font.lineHeight + 1) + 9);
+                            renderTooltip(pMatrixStack, font.split(new TextComponent(tooltip), 308), this.width / 2 - 166, guiHover.getY() - formattedText.size() * (font.lineHeight + 1) + 9);
                         }
                     }
                 }

@@ -83,20 +83,11 @@ public class ClientPacketListenerVRMixin {
     public void cleanup(CallbackInfo ci) {
         ClientNetworking.needsReset = true;
     }
-    @Inject(at = @At("TAIL"), method = "handlePlayerChat")
-    public void chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "handleChat")
+    public void chat(ClientboundChatPacket clientboundChatPacket, CallbackInfo ci) {
         String lastMsg = ((PlayerExtension)minecraft.player).getLastMsg();
         ((PlayerExtension)minecraft.player).setLastMsg(null);
-        if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundPlayerChatPacket.message().signedHeader().sender() == minecraft.player.getUUID())) {
-            triggerHapticSound();
-        }
-    }
-
-    @Inject(at = @At("TAIL"), method = "handleSystemChat")
-    public void chatSystem(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
-        String lastMsg = ((PlayerExtension)minecraft.player).getLastMsg();
-        ((PlayerExtension)minecraft.player).setLastMsg(null);
-        if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundSystemChatPacket.content().getString().contains(lastMsg))) {
+        if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || !clientboundChatPacket.getMessage().getString().contains(lastMsg))) {
             triggerHapticSound();
         }
     }

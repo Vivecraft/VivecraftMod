@@ -2,9 +2,11 @@ package org.vivecraft.server;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.*;
+import net.minecraft.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.server.config.ConfigBuilder;
@@ -37,14 +39,14 @@ public class ServerUtil {
                     // kick non VR players
                     if (!isOpAndAllowed && ServerConfig.vr_only.get()
                         && (vivePlayer == null || !vivePlayer.isVR())) {
-                        serverPlayer.connection.disconnect(Component.literal(ServerConfig.messagesKickVROnly.get()));
+                        serverPlayer.connection.disconnect(new TextComponent(ServerConfig.messagesKickVROnly.get()));
                         return;
                     }
 
                     // kick non vivecraft players
                     if (!isOpAndAllowed && ServerConfig.vive_only.get()
                         && (vivePlayer == null)) {
-                        serverPlayer.connection.disconnect(Component.literal(ServerConfig.messagesKickViveOnly.get()));
+                        serverPlayer.connection.disconnect(new TextComponent(ServerConfig.messagesKickViveOnly.get()));
                         return;
                     }
 
@@ -63,7 +65,7 @@ public class ServerUtil {
                         }
                         // actually send the message, if there is one set
                         if (!message.isEmpty()) {
-                            serverPlayer.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(serverPlayer.getName().getString())), false);
+                            serverPlayer.server.getPlayerList().broadcastMessage(new TextComponent(message.formatted(serverPlayer.getName().getString())), ChatType.SYSTEM, Util.NIL_UUID);
                         }
                     }
                 }
@@ -78,7 +80,7 @@ public class ServerUtil {
                 // check for update on not the main thread
                 scheduler.schedule(() -> {
                     if (UpdateChecker.checkForUpdates()) {
-                        serverPlayer.sendSystemMessage(Component.literal("Vivecraft update available: §a" + UpdateChecker.newestVersion));
+                        serverPlayer.sendMessage(new TextComponent("Vivecraft update available: §a" + UpdateChecker.newestVersion), Util.NIL_UUID);
                     }
                 }, 0, TimeUnit.MILLISECONDS);
             }
@@ -89,7 +91,7 @@ public class ServerUtil {
             .requires(source -> source.hasPermission(4)).then(
                 Commands.literal("reload").executes(context -> {
                     ServerConfig.init((action, path, incorrectValue, correctedValue) -> context.getSource()
-                        .sendSystemMessage(Component.literal("Corrected §a[" + String.join("§r.§a", path) + "]§r: was '(" + incorrectValue.getClass().getSimpleName() + ")" + incorrectValue + "', is now '(" + correctedValue.getClass().getSimpleName() + ")" + correctedValue + "'")));
+                        .sendSuccess(new TextComponent("Corrected §a[" + String.join("§r.§a", path) + "]§r: was '(" + incorrectValue.getClass().getSimpleName() + ")" + incorrectValue + "', is now '(" + correctedValue.getClass().getSimpleName() + ")" + correctedValue + "'"), true));
                     return 1;
                 })
             )
@@ -123,7 +125,7 @@ public class ServerUtil {
                                     try {
                                         Object newValue = context.getArgument(argumentName, clazz);
                                         setting.set(newValue);
-                                        context.getSource().sendSystemMessage(Component.literal("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"));
+                                        context.getSource().sendSuccess(new TextComponent("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"), true);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -150,8 +152,8 @@ public class ServerUtil {
                                     List list = listConfig.get();
                                     list.add(newValue);
                                     listConfig.set(list);
-                                    context.getSource().sendSystemMessage(Component.literal("added '" + newValue + "' to §a[" + setting.getPath() + "]§r"));
-                                    context.getSource().sendSystemMessage(Component.literal("is now '" + setting.get()));
+                                    context.getSource().sendSuccess(new TextComponent("added '" + newValue + "' to §a[" + setting.getPath() + "]§r"), true);
+                                    context.getSource().sendSuccess(new TextComponent("is now '" + setting.get()), true);
                                     return 1;
                                 })
                         )
@@ -173,8 +175,8 @@ public class ServerUtil {
                                     List<? extends String> list = listConfig.get();
                                     list.remove(newValue);
                                     listConfig.set(list);
-                                    context.getSource().sendSystemMessage(Component.literal("removed '" + newValue + "' from §a[" + setting.getPath() + "]§r"));
-                                    context.getSource().sendSystemMessage(Component.literal("is now '" + setting.get()));
+                                    context.getSource().sendSuccess(new TextComponent("removed '" + newValue + "' from §a[" + setting.getPath() + "]§r"), true);
+                                    context.getSource().sendSuccess(new TextComponent("is now '" + setting.get()), true);
                                     return 1;
                                 })
                         )
@@ -187,7 +189,7 @@ public class ServerUtil {
                     Commands.literal("reset")
                         .executes(context -> {
                             Object newValue = setting.reset();
-                            context.getSource().sendSystemMessage(Component.literal("reset §a[" + setting.getPath() + "]§r to '" + newValue + "'"));
+                            context.getSource().sendSuccess(new TextComponent("reset §a[" + setting.getPath() + "]§r to '" + newValue + "'"), true);
                             return 1;
                         })
                 )
@@ -196,7 +198,7 @@ public class ServerUtil {
                 .requires(source -> source.hasPermission(4)).then(
                     Commands.literal(setting.getPath())
                         .executes(context -> {
-                            context.getSource().sendSystemMessage(Component.literal("§a[" + setting.getPath() + "]§r is set to '" + setting.get() + "'"));
+                            context.getSource().sendSuccess(new TextComponent("§a[" + setting.getPath() + "]§r is set to '" + setting.get() + "'"), true);
                             return 1;
                         })
                 ));

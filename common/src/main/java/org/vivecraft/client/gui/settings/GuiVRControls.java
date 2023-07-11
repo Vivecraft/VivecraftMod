@@ -7,7 +7,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class GuiVRControls extends GuiVROptionsBase
 {
@@ -44,8 +44,8 @@ public class GuiVRControls extends GuiVROptionsBase
         int middle = 240 / 2 - this.minecraft.font.lineHeight / 2 - 24;
         int lineHeight = this.minecraft.font.lineHeight + 3;
 
-        drawCenteredString(pMatrixStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 16777215);
-        drawCenteredString(pMatrixStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.2"), this.width / 2, middle, 16777215);
-        drawCenteredString(pMatrixStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 16777215);
+        drawCenteredString(pMatrixStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 16777215);
+        drawCenteredString(pMatrixStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.controls.2"), this.width / 2, middle, 16777215);
+        drawCenteredString(pMatrixStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 16777215);
     }
 }

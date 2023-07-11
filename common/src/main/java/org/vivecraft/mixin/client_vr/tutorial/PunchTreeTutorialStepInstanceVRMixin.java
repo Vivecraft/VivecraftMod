@@ -2,6 +2,7 @@ package org.vivecraft.mixin.client_vr.tutorial;
 
 import net.minecraft.client.tutorial.PunchTreeTutorialStepInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -16,7 +17,7 @@ public class PunchTreeTutorialStepInstanceVRMixin {
             return component;
         }
         if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
-            return Component.translatable("tutorial.find_tree.description");
+            return new TranslatableComponent("tutorial.find_tree.description");
         }
         return component;
     }

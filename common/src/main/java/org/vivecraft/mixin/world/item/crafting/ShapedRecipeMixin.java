@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -47,7 +47,7 @@ public class ShapedRecipeMixin {
                 throw new JsonSyntaxException("Invalid output count: " + i);
             } else {
                 ItemStack itemStack = new ItemStack(vanillaItem, i);
-                itemStack.setHoverName(Component.translatable(jsonObject.get("name").getAsString()));
+                itemStack.setHoverName(new TranslatableComponent(jsonObject.get("name").getAsString()));
                 itemStack.getOrCreateTag().putBoolean("Unbreakable", GsonHelper.getAsBoolean(jsonObject, "unbreakable", false));
                 itemStack.getOrCreateTag().putInt("HideFlags", GsonHelper.getAsInt(jsonObject, "hideflags", 0));
                 return itemStack;

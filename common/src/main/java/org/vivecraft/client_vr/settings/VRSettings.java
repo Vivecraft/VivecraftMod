@@ -1367,17 +1367,17 @@ public class VRSettings
         MONO_FOV(true, false, 1, 179, 1, 0) { // Undistorted FOV
             @Override
             String getDisplayString(String prefix, Object value) {
-                return prefix + String.format("%.0f" + DEGREE, (float)Minecraft.getInstance().options.fov().get());
+                return prefix + String.format("%.0f" + DEGREE, Minecraft.getInstance().options.fov);
             }
 
             @Override
             Float getOptionFloatValue(float value) {
-                return (float)Minecraft.getInstance().options.fov().get();
+                return (float)Minecraft.getInstance().options.fov;
             }
 
             @Override
             Float setOptionFloatValue(float value) {
-                Minecraft.getInstance().options.fov().set((int) value);
+                Minecraft.getInstance().options.fov = value;
                 return 0f;
             }
         },
@@ -1518,10 +1518,30 @@ public class VRSettings
             }
         },
         HRTF_SELECTION(false, false) { // HRTF
-            // this is now handled by vanilla
+            @Override
+            String getDisplayString(String prefix, Object value) {
+                int i = (int)value;
+                if (i == -1)
+                    return prefix + I18n.get("options.off");
+                else if (i == 0)
+                    return prefix + I18n.get("vivecraft.options.default");
+                else if (i <= ClientDataHolderVR.hrtfList.size())
+                    return prefix + ClientDataHolderVR.hrtfList.get(i - 1);
+                return prefix;
+            }
+
             @Override
             Object setOptionValue(Object value) {
-                return value;
+                int i = (int)value;
+                if (++i > ClientDataHolderVR.hrtfList.size())
+                    i = -1;
+                return i;
+            }
+
+            @Override
+            void onOptionChange() {
+                // Reload the sound engine to get the new HRTF
+                Minecraft.getInstance().getSoundManager().reload();
             }
         },
         RELOAD_EXTERNAL_CAMERA(false, false) { // Reload External Camera

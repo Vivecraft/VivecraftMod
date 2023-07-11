@@ -1,4 +1,4 @@
-package org.vivecraft.fabric.mixin.world.level.biome;
+package org.vivecraft.mixin.client_vr.world.level.biome;
 
 import net.minecraft.world.level.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;

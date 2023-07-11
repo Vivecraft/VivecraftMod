@@ -11,6 +11,8 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,8 +41,8 @@ public class SoundOptionsScreenVRMixin extends Screen {
             .withValues(false, true)
             .withInitialValue(ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0)
             .withTooltip(obj ->
-                minecraft.font.split(Component.translatable("vivecraft.options.HRTF_SELECTION.tooltip"), 200))
-            .create(this.width / 2 - 155 + 160, this.height / 6 - 12 + 22 * 5, 150, 20, Component.translatable("vivecraft.options.HRTF_SELECTION"), (cycleButton, newValue) -> {
+                minecraft.font.split(new TextComponent("vivecraft.options.HRTF_SELECTION.tooltip"), 200))
+            .create(this.width / 2 - 155 + 160, this.height / 6 - 12 + 22 * 5, 150, 20, new TranslatableComponent("vivecraft.options.HRTF_SELECTION"), (cycleButton, newValue) -> {
                 ClientDataHolderVR.getInstance().vrSettings.hrtfSelection = (boolean)newValue ? 0 : -1;
                 ClientDataHolderVR.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.HRTF_SELECTION);
                 ClientDataHolderVR.getInstance().vrSettings.saveOptions();

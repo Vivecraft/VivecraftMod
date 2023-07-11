@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsList.CommandEntry>
 {
@@ -23,15 +24,13 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         String s = null;
         int i = 0;
 
+        setRenderSelection(false);
+
         for (String s1 : astring)
         {
             this.minecraft.font.width(s1);
             this.addEntry(new CommandEntry(s1, this));
         }
-    }
-
-    @Override
-    protected void renderSelection(PoseStack poseStack, int i, int j, int k, int l, int m) {
     }
 
     @Override
@@ -50,9 +49,9 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
 
         private CommandEntry(String command, GuiQuickCommandsList parent)
         {
-            this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, Component.literal(""));
+            this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, new TextComponent(""));
             this.txt.setValue(command);
-            this.btnDelete = new Button(0, 0, 18, 18,  Component.literal("X"), (p) ->
+            this.btnDelete = new Button(0, 0, 18, 18,  new TextComponent("X"), (p) ->
             {
                 this.txt.setValue("");
                 this.txt.changeFocus(true);

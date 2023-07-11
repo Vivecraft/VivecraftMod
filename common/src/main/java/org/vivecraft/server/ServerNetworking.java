@@ -2,8 +2,9 @@ package org.vivecraft.server;
 
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
@@ -67,7 +68,7 @@ public class ServerNetworking {
                         }
                     } else {
                         // unsupported version, send notification, and disregard
-                        listener.player.sendSystemMessage(Component.literal("Unsupported vivecraft version, VR features will not work"));
+                        listener.player.sendMessage(new TextComponent("Unsupported vivecraft version, VR features will not work"), Util.NIL_UUID);
                         if (ServerConfig.debug.get()) {
                             LOGGER.info("{} networking not supported. client range [{},{}], server range [{},{}]",
                                 listener.player.getName().getString(),

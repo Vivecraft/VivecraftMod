@@ -1,5 +1,7 @@
 package org.vivecraft.mixin.client_vr.multiplayer;
 
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.level.Level;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -19,7 +21,7 @@ import org.vivecraft.client_vr.VRState;
 public class MultiPlayerGameModeVRMixin {
 
     @Inject(at = @At("HEAD"), method = "useItem")
-    public void overrideUse(Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
+    public void overrideUse(Player player, Level level, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
         if (VRState.vrRunning) {
             ClientNetworking.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, interactionHand.ordinal()));
         }
@@ -33,7 +35,7 @@ public class MultiPlayerGameModeVRMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "useItemOn")
-    public void overrideUseOn(LocalPlayer localPlayer, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
+    public void overrideUseOn(LocalPlayer localPlayer, ClientLevel clientLevel, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
         if (VRState.vrRunning) {
             ClientNetworking.overrideLook(localPlayer, blockHitResult.getLocation().subtract(localPlayer.getEyePosition(1.0F)).normalize());
         }

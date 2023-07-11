@@ -8,7 +8,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -226,10 +226,10 @@ public class ClientNetworking {
                         && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
                         || (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()))) {
                     ClientNetworking.displayedChatMessage = true;
-                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
+                    mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.serverplugin", s11));
                 }
                 if (VRState.vrEnabled && dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
-                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibrateheight"));
+                    mc.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.calibrateheight"));
                 }
             }
             case IS_VR_ACTIVE -> {
@@ -313,7 +313,7 @@ public class ClientNetworking {
                 ClientNetworking.serverAllowsVrSwitching = buffer.readBoolean();
                 if (VRState.vrInitialized) {
                     if (!ClientNetworking.serverAllowsVrSwitching) {
-                        Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
+                        Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.novrhotswitching"));
                     }
                     dataholder.vrPlayer.vrSwitchWarning = false;
                 }

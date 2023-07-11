@@ -14,6 +14,7 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -322,11 +323,11 @@ public class InteractTracker extends Tracker
                 }
                 else if (this.inBlockHit[i] != null)
                 {
-                    flag = this.mc.gameMode.useItemOn(this.mc.player, interactionhand, this.inBlockHit[i]).consumesAction();
+                    flag = this.mc.gameMode.useItemOn(this.mc.player, (ClientLevel) this.mc.player.level, interactionhand, this.inBlockHit[i]).consumesAction();
                 }
                 else if (this.bukkit[i])
                 {
-                    flag = this.mc.gameMode.useItem(this.mc.player, interactionhand).consumesAction();
+                    flag = this.mc.gameMode.useItem(this.mc.player, this.mc.player.level, interactionhand).consumesAction();
                 }
 
                 if (flag)

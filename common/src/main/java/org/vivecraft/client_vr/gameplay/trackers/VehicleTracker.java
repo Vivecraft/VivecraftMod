@@ -72,7 +72,7 @@ public class VehicleTracker extends Tracker
             {
                 Mob mob = (Mob)entity;
 
-                if (mob.isControlledByLocalInstance())
+                if (mob.canBeControlledByRider())
                 {
                     int i = (player.getMainHandItem().getItem() instanceof FoodOnAStickItem || player.getMainHandItem().is(ItemTags.VIVECRAFT_FOOD_STICKS)) ? 0 : 1;
                     VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_world_pre.getController(i);
@@ -118,7 +118,7 @@ public class VehicleTracker extends Tracker
                 {
                     AbstractHorse abstracthorse = (AbstractHorse)entity;
 
-                    if (abstracthorse.isControlledByLocalInstance() && abstracthorse.isSaddled())
+                    if (abstracthorse.canBeControlledByRider() && abstracthorse.isSaddled())
                     {
                         return;
                     }
@@ -129,7 +129,7 @@ public class VehicleTracker extends Tracker
                 {
                     Mob mob = (Mob)entity;
 
-                    if (mob.isControlledByLocalInstance())
+                    if (mob.canBeControlledByRider())
                     {
                         return;
                     }

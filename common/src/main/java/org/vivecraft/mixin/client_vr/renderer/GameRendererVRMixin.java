@@ -275,7 +275,7 @@ public abstract class GameRendererVRMixin
     @Inject(at = @At("HEAD"), method = "getFov(Lnet/minecraft/client/Camera;FZ)D", cancellable = true)
     public void fov(Camera camera, float f, boolean bl, CallbackInfoReturnable<Double> info) {
         if (this.minecraft.level == null || isInMenuRoom()) { // Vivecraft: using this on the main menu
-            info.setReturnValue(Double.valueOf(this.minecraft.options.fov().get()));
+            info.setReturnValue(this.minecraft.options.fov);
         }
     }
 
@@ -347,7 +347,7 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
     public void matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
-        this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov().get()));
+        this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov));
         RenderSystem.getModelViewStack().setIdentity();
         RenderSystem.applyModelViewMatrix();
     }
@@ -537,7 +537,7 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @ModifyVariable(at = @At(value = "STORE", ordinal = 1), ordinal = 3, method = "renderLevel")
+    @ModifyVariable(at = @At(value = "STORE", ordinal = 1), ordinal = 2, method = "renderLevel")
     public float reduceNauseaAffect(float oldVal) {
         if (!RenderPassType.isVanilla()) {
             // scales down the effect from (1,0.65) to (1,0.9)
@@ -683,7 +683,8 @@ public abstract class GameRendererVRMixin
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         tesselator.getBuilder().begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
         this.renderBox(tesselator, vec3, vec33, -0.02F, 0.02F, -0.0125F, 0.0125F, vec32, vec3i, b0, poseStack);
-        BufferUploader.drawWithShader(tesselator.getBuilder().end());
+        tesselator.getBuilder().end();
+        BufferUploader.end(tesselator.getBuilder());
         poseStack.popPose();
         RenderSystem.depthFunc(515);
     }
@@ -1602,7 +1603,8 @@ public abstract class GameRendererVRMixin
         bufferbuilder.vertex(matrix4f, f2, f, f3).uv(i * f2, i * f).color(r, g, b, a).normal(0, 0, -1).endVertex();
         bufferbuilder.vertex(matrix4f, f2, 0, f3).uv(i * f2, 0).color(r, g, b, a).normal(0, 0, -1).endVertex();
 
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
         pMatrixStack.popPose();
 
     }
@@ -1668,7 +1670,8 @@ public abstract class GameRendererVRMixin
                 .color(1f,1f,1f,1f)
                 .normal(0, 1, 0).endVertex();
 
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            bufferbuilder.end();
+            BufferUploader.end(bufferbuilder);
 
             RenderSystem.setShaderColor(1.0f,1.0f,1.0f,1.0f);
             poseStack.popPose();
@@ -1813,7 +1816,8 @@ public abstract class GameRendererVRMixin
                 .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
         bufferbuilder.vertex((double) (-(size / 2.0F)), (double) (size * f / 2.0F), 0.0D).uv(0.0F, 1.0F)
                 .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
     }
 
     public void drawSizedQuad(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
@@ -1826,7 +1830,8 @@ public abstract class GameRendererVRMixin
         bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F).endVertex();
         bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F).endVertex();
         bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
@@ -1855,7 +1860,8 @@ public abstract class GameRendererVRMixin
                 .uv(1.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
         bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
                 .uv(0.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
         this.lightTexture.turnOffLightLayer();
 
         // reset lights
@@ -1895,7 +1901,8 @@ public abstract class GameRendererVRMixin
                 .uv(1.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti).normal(0, 0, 1).endVertex();
         bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).color(color[0], color[1], color[2], color[3])
                 .uv(0.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti).normal(0, 0, 1).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
 
         this.lightTexture.turnOffLightLayer();
 
@@ -2311,7 +2318,8 @@ public abstract class GameRendererVRMixin
             bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).color(f2, f2, f2, 1.0F)
                     .uv(0.0F, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
 
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            bufferbuilder.end();
+            BufferUploader.end(bufferbuilder);
 
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();
@@ -2451,7 +2459,8 @@ public abstract class GameRendererVRMixin
             bufferbuilder.vertex(matrix4f, f12, 0.0F, -f12).uv(f7, f10).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
             bufferbuilder.vertex(matrix4f, f12, f13, -f12).uv(f7, f9).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
             bufferbuilder.vertex(matrix4f, -f12, f13, -f12).uv(f8, f9).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            bufferbuilder.end();
+            BufferUploader.end(bufferbuilder);
 
             posestack.popPose();
         }

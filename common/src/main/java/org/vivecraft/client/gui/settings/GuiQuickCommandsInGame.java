@@ -6,7 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class GuiQuickCommandsInGame extends Screen
 {
@@ -18,7 +19,7 @@ public class GuiQuickCommandsInGame extends Screen
 
     public GuiQuickCommandsInGame(Screen parent)
     {
-        super(Component.literal(""));
+        super(new TextComponent(""));
         this.parentScreen = parent;
     }
 
@@ -36,18 +37,14 @@ public class GuiQuickCommandsInGame extends Screen
         {
             i = j > 5 ? 1 : 0;
             String s = astring[j];
-            this.addRenderableWidget(new Button(this.width / 2 - 125 + 127 * i, 36 + (j - 6 * i) * 24, 125, 20, Component.translatable(s.toString()), (p) ->
+            this.addRenderableWidget(new Button(this.width / 2 - 125 + 127 * i, 36 + (j - 6 * i) * 24, 125, 20, new TranslatableComponent(s.toString()), (p) ->
             {
                 this.minecraft.setScreen((Screen)null);
-                if (p.getMessage().getString().startsWith("/")) {
-                    this.minecraft.player.commandSigned(p.getMessage().getString().substring(1), Component.empty());
-                } else {
-                    this.minecraft.player.chatSigned(p.getMessage().getString(), Component.empty());
-                }
+                this.minecraft.player.chat(p.getMessage().getString());
             }));
         }
 
-        this.addRenderableWidget(new Button(this.width / 2 - 50, this.height - 30 + b0, 100, 20, Component.translatable("Cancel"), (p) ->
+        this.addRenderableWidget(new Button(this.width / 2 - 50, this.height - 30 + b0, 100, 20, new TranslatableComponent("Cancel"), (p) ->
         {
             this.minecraft.setScreen(this.parentScreen);
         }));

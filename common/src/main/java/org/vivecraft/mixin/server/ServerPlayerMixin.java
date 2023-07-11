@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.server;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -24,9 +23,12 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.Util;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -42,7 +44,8 @@ import net.minecraft.world.phys.Vec3;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player {
 
-	@Shadow @Final public MinecraftServer server;
+	@Shadow @Final
+	public MinecraftServer server;
 	@Unique
 	private String language = "en_us";
 	@Unique
@@ -50,8 +53,8 @@ public abstract class ServerPlayerMixin extends Player {
 	@Unique
 	private Component tabListDisplayName = null;
 
-	public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile, ProfilePublicKey profilePublicKey) {
-		super(level, blockPos, f, gameProfile, profilePublicKey);
+	public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
+		super(level, blockPos, f, gameProfile);
 	}
 
 	@Inject(at = @At("TAIL"), method = "initInventoryMenu")
@@ -60,10 +63,10 @@ public abstract class ServerPlayerMixin extends Player {
 		if (ServerConfig.vrFun.get() && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
 			if (this.random.nextInt(2) == 1) {
-				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
+				itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(new TextComponent("EAT ME"));
 			} else {
 				itemstack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)
-						.setHoverName(Component.literal("DRINK ME"));
+						.setHoverName(new TextComponent("DRINK ME"));
 			}
 
 			itemstack.getTag().putInt("HideFlags", 32);
@@ -186,33 +189,33 @@ public abstract class ServerPlayerMixin extends Player {
 				|| (!thisVive.isVR() && otherVive.isVR() && otherVive.isSeated())) {
 				// nonvr vs Seated
 				if (!ServerConfig.pvpSEATEDVRvsNONVR.get()) {
-					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs seat"), false);
+					server.getPlayerList().broadcastMessage(new TextComponent("canceled non vs seat"), ChatType.SYSTEM, Util.NIL_UUID);
 					cir.setReturnValue(false);
 				}
 			} else if ((!otherVive.isVR() && thisVive.isVR() && !thisVive.isSeated())
 				|| (!thisVive.isVR() && otherVive.isVR() && !otherVive.isSeated())) {
 				// nonvr vs Standing
 				if (!ServerConfig.pvpVRvsNONVR.get()) {
-					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs stand"), false);
+					server.getPlayerList().broadcastMessage(new TextComponent("canceled non vs stand"), ChatType.SYSTEM, Util.NIL_UUID);
 					cir.setReturnValue(false);
 				}
 			} else if ((otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated())
 				|| (thisVive.isVR() && thisVive.isSeated() && otherVive.isVR() && !otherVive.isSeated())) {
 				// Standing vs Seated
 				if (!ServerConfig.pvpVRvsSEATEDVR.get()) {
-					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs stand"), false);
+					server.getPlayerList().broadcastMessage(new TextComponent("canceled seat vs stand"), ChatType.SYSTEM, Util.NIL_UUID);
 					cir.setReturnValue(false);
 				}
 			} else if (otherVive.isVR() && !otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated()) {
 				// Standing vs Standing
 				if (!ServerConfig.pvpVRvsVR.get()) {
-					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled stand vs stand"), false);
+					server.getPlayerList().broadcastMessage(new TextComponent("canceled stand vs stand"), ChatType.SYSTEM, Util.NIL_UUID);
 					cir.setReturnValue(false);
 				}
 			} else if (otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && thisVive.isSeated()){
 				// Seated vs Seated
 				if (!ServerConfig.pvpSEATEDVRvsSEATEDVR.get()) {
-					server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs seat"), false);
+					server.getPlayerList().broadcastMessage(new TextComponent("canceled seat vs seat"), ChatType.SYSTEM, Util.NIL_UUID);
 					cir.setReturnValue(false);
 				}
 			}

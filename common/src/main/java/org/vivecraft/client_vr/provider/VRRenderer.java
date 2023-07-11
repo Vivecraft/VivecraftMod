@@ -9,10 +9,10 @@ import com.mojang.math.Matrix4f;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43;
@@ -51,7 +51,7 @@ public abstract class VRRenderer {
     public RenderTarget fsaaFirstPassResultFBO;
     public RenderTarget fsaaLastPassResultFBO;
     protected float[][] hiddenMesheVertecies = new float[2][];
-    public ResourceKey<DimensionType> lastDimensionId = BuiltinDimensionTypes.OVERWORLD;
+    public ResourceKey<DimensionType> lastDimensionId = DimensionType.OVERWORLD_LOCATION;
     public int lastDisplayFBHeight = 0;
     public int lastDisplayFBWidth = 0;
     public boolean lastEnableVsync = true;
@@ -251,7 +251,8 @@ public abstract class VRRenderer {
             float f3 = (float) ((double) (width / 2) + Math.sin((double) f1) * (double) f);
             builder.vertex(f2, f3, 0.0F).endVertex();
         }
-        BufferUploader.drawWithShader(builder.end());
+        builder.end();
+        BufferUploader.end(builder);
     }
 
     private void drawMask() {
@@ -268,7 +269,8 @@ public abstract class VRRenderer {
         }
 
         RenderSystem.setShader(GameRenderer::getPositionShader);
-        BufferUploader.drawWithShader(builder.end());
+        builder.end();
+        BufferUploader.end(builder);
     }
 
     private void drawQuad() {
@@ -279,7 +281,8 @@ public abstract class VRRenderer {
         builder.vertex(1.0F, -1.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
         builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
         builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
-        BufferUploader.draw(builder.end());
+        builder.end();
+        BufferUploader._endInternal(builder);
     }
 
     public double getCurrentTimeSecs() {
@@ -374,9 +377,9 @@ public abstract class VRRenderer {
             this.reinitFrameBuffers("Window Handle Changed");
         }
 
-        if (this.lastEnableVsync != minecraft.options.enableVsync().get()) {
+        if (this.lastEnableVsync != minecraft.options.enableVsync) {
             this.reinitFrameBuffers("VSync Changed");
-            this.lastEnableVsync = minecraft.options.enableVsync().get();
+            this.lastEnableVsync = minecraft.options.enableVsync;
         }
 
         if (this.lastMirror != dataholder.vrSettings.displayMirrorMode) {
@@ -390,8 +393,8 @@ public abstract class VRRenderer {
         if ((framebufferMR == null || framebufferUndistorted == null) && ShadersHelper.isShaderActive()) {
             this.reinitFrameBuffers("Shaders on, but some buffers not initialized");
         }
-        if (Minecraft.getInstance().options.graphicsMode().get() != previousGraphics) {
-            previousGraphics = Minecraft.getInstance().options.graphicsMode().get();
+        if (Minecraft.getInstance().options.graphicsMode != previousGraphics) {
+            previousGraphics = Minecraft.getInstance().options.graphicsMode;
             ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
         }
 
@@ -401,11 +404,11 @@ public abstract class VRRenderer {
 
             if (GlUtil.getRenderer().toLowerCase().contains("intel")) //Optifine
             {
-                throw new RenderConfigException("Incompatible", Component.translatable("vivecraft.messages.intelgraphics", GlUtil.getRenderer()));
+                throw new RenderConfigException("Incompatible", new TranslatableComponent("vivecraft.messages.intelgraphics", GlUtil.getRenderer()));
             }
 
             if (!this.isInitialized()) {
-                throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), Component.literal(this.getinitError()));
+                throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), new TextComponent(this.getinitError()));
             }
 
             Tuple<Integer, Integer> tuple = this.getRenderTextureSizes();
@@ -418,7 +421,7 @@ public abstract class VRRenderer {
                 this.createRenderTexture(eyew, eyeh);
 
                 if (this.LeftEyeTextureId == -1) {
-                    throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), Component.literal(this.getLastError()));
+                    throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), new TextComponent(this.getLastError()));
                 }
 
                 dataholder.print("Provider supplied render texture IDs: " + this.LeftEyeTextureId + " " + this.RightEyeTextureId);

@@ -1,6 +1,9 @@
 package org.vivecraft.mixin.server;
 
+import net.minecraft.Util;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.PacketUtils;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,7 +76,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
         if (ServerConfig.messagesEnabled.get()) {
             String message = ServerConfig.messagesLeaveMessage.get();
             if (!message.isEmpty()) {
-                this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(this.player.getName().getString())), false);
+                this.server.getPlayerList().broadcastMessage(new TextComponent(message.formatted(this.player.getName().getString())), ChatType.SYSTEM, Util.NIL_UUID);
             }
         }
     }

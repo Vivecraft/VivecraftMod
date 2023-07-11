@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
-import net.minecraft.world.entity.vehicle.ContainerEntity;
+import net.minecraft.world.Container;
 import net.minecraft.world.phys.*;
 
 import org.vivecraft.client_vr.VRData;
@@ -388,7 +388,7 @@ public class GuiHandler
                 // and if the pointed at entity is the same that was last interacted with
                 boolean isEntityScreen = newScreen instanceof AbstractContainerScreen
                         && mc.hitResult instanceof EntityHitResult
-                        && ((EntityHitResult) mc.hitResult).getEntity() instanceof ContainerEntity;
+                        && ((EntityHitResult) mc.hitResult).getEntity() instanceof Container;
 
                 if (guiAppearOverBlockActive && (isBlockScreen || isEntityScreen) && dh.vrSettings.guiAppearOverBlock)
                 {

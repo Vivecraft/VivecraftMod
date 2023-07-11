@@ -32,7 +32,8 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -274,8 +275,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @Shadow
     public abstract RenderTarget getMainRenderTarget();
 
-    @Shadow private double gpuUtilization;
-
     @Shadow @Nullable public abstract ClientPacketListener getConnection();
 
     @Shadow @Final public LevelRenderer levelRenderer;
@@ -317,7 +316,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     // on first resource load finished
     @Inject(at = @At("HEAD"), method = {
         "method_24040", // fabric
-        "lambda$new$3"} // forge
+        "lambda$new$2"} // forge
         , remap = false)
     public void initVROnLaunch(CallbackInfo ci) {
         // init vr after resource loading
@@ -423,7 +422,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     }
 
     // the VR runtime handles the frame limit, no need to manually limit it 60fps
-    @ModifyConstant(constant = @Constant(longValue = 16), method = "doWorldLoad", expect = 0)
+    @ModifyConstant(constant = @Constant(longValue = 16), method = {
+        "doLoadLevel", // fabric
+        "doLoadLevel(Ljava/lang/String;Ljava/util/function/Function;Ljava/util/function/Function;ZLnet/minecraft/client/Minecraft$ExperimentalDialogType;Z)V" // forge
+    }, expect = 0)
     private long noWaitOnLevelLoadFabric(long constant) {
         if (VRState.vrRunning) {
             return 0L;
@@ -681,7 +683,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
             } catch (RenderConfigException renderConfigException) {
                 // TODO: could disabling VR here cause issues?
-                Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + ClientDataHolderVR.getInstance().vr.getName())));
+                Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", new TranslatableComponent("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + ClientDataHolderVR.getInstance().vr.getName())));
                 VRState.destroyVR(true);
                 return;
             } catch (Exception exception2) {
@@ -808,24 +810,14 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 //        }
 
         while(Util.getMillis() >= this.lastTime + 1000L) {
-            String string;
-            if (this.gpuUtilization > 0.0) {
-                string = " GPU: " + (this.gpuUtilization > 100.0 ? ChatFormatting.RED + "100%" : Math.round(this.gpuUtilization) + "%");
-            } else {
-                string = "";
-            }
-
             fps = this.frames;
             this.fpsString = String.format(
-                    Locale.ROOT,
-                    "%d fps T: %s%s%s%s B: %d%s",
-                    fps,
-                    k == 260 ? "inf" : k,
-                    this.options.enableVsync().get() ? " vsync" : "",
-                    this.options.graphicsMode().get(),
-                    this.options.cloudStatus().get() == CloudStatus.OFF ? "" : (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
-                    this.options.biomeBlendRadius().get(),
-                    string
+                "%d fps T: %s%s%s%s B: %d",
+                fps,
+                (double)this.options.framerateLimit == Option.FRAMERATE_LIMIT.getMaxValue() ? "inf" : this.options.framerateLimit,
+                this.options.enableVsync ? " vsync" : "",
+                this.options.graphicsMode, this.options.renderClouds == CloudStatus.OFF ? "" : (this.options.renderClouds == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
+                this.options.biomeBlendRadius
             );
             this.lastTime += 1000L;
             this.frames = 0;
@@ -930,10 +922,10 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 ClientDataHolderVR.getInstance().vrSettings.lastUpdate = UpdateChecker.newestVersion;
                 ClientDataHolderVR.getInstance().vrSettings.saveOptions();
                 ClientDataHolderVR.getInstance().showedUpdateNotification = true;
-                this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.updateAvailable", Component.literal(UpdateChecker.newestVersion).withStyle(ChatFormatting.ITALIC, ChatFormatting.GREEN))
+                this.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.updateAvailable", new TextComponent(UpdateChecker.newestVersion).withStyle(ChatFormatting.ITALIC, ChatFormatting.GREEN))
                         .withStyle(style -> style
                         .withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new UpdateScreen()))
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("vivecraft.messages.click")))));
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("vivecraft.messages.click")))));
             }
         }
 
@@ -944,7 +936,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
                 if (ClientDataHolderVR.getInstance().vrPlayer.teleportWarning) {
                     if(showMessage)
-                        this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.noserverplugin"));
+                        this.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.noserverplugin"));
                     ClientDataHolderVR.getInstance().vrPlayer.teleportWarning = false;
 
                     // allow vr switching on vanilla server
@@ -952,7 +944,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 }
                 if (ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning) {
                     if (showMessage)
-                        this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitchinglegacy"));
+                        this.gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.novrhotswitchinglegacy"));
                     ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning = false;
                 }
                 ClientNetworking.displayedChatWarning = true;
@@ -1035,12 +1027,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                         else
                         {
                             MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset, size, size, blockpos.getY(), file2);
-                            gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
+                            gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.menuworldexportclientwarning"));
                         }
 
                         if (error == null) {
-                            gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.1", size));
-                            gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
+                            gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.menuworldexportcomplete.1", size));
+                            gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
                         }
                         break;
                     }
@@ -1054,7 +1046,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 error = throwable;
             } finally {
                 if (error != null) {
-                    gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexporterror", error.getMessage()));
+                    gui.getChat().addMessage(new TranslatableComponent("vivecraft.messages.menuworldexporterror", error.getMessage()));
                 }
             }
         }

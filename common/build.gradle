@@ -14,32 +14,33 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
+    modCompileOnly "maven.modrinth:sodium:mc1.18.2-0.4.1"
     modCompileOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
     modCompileOnly "883067831485366304:1076634925077364786:sodium-fabric-mc1.19.3-0.4.10rev.c131708-dirty:jar"
-    modCompileOnly("maven.modrinth:rubidium:0.6.1")
+    modCompileOnly "maven.modrinth:rubidium:0.5.6"
+
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.5.2+1.19.2"
+    modCompileOnly "maven.modrinth:iris:1.5.2+1.18.2"
 
     // for REI compat
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:9.1.619"
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:8.3.618"
 
     // for Pehkui compat
     modApi("com.github.Virtuoel:Pehkui:3.7.7", { exclude group: "net.fabricmc.fabric-api" })
 
     // other mods
-    // modCompileOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
-    modCompileOnly "maven.modrinth:lithium:mc1.19.2-0.11.1"
-    modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
+    // modCompileOnly("com.simibubi.create:create-fabric-1.18.2:0.5.0.i-1016+1.18.2")
+    modCompileOnly "maven.modrinth:lithium:mc1.18.2-0.10.3"
+    modCompileOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
 
     /*
     // for immersive portals compat
-    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v2.3.2-mc1.19.2'){ //temp immersiveportals
+    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.11-1.18'){ //temp immersiveportals
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v2.3.2-mc1.19.2'){ //temp immersiveportals
+    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v1.4.11-1.18'){ //temp immersiveportals
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }

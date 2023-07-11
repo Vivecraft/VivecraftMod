@@ -13,6 +13,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import org.vivecraft.mixin.client_vr.world.level.biome.BiomeAccessor;
 
 import java.nio.file.Path;
 
@@ -70,10 +71,10 @@ public class XplatImpl {
     }
 
     public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
-        return biome.getModifiedClimateSettings();
+        return ((BiomeAccessor)(Object)biome).getClimateSettings();
     }
 
     public static BiomeSpecialEffects getBiomeEffects(Biome biome){
-        return biome.getModifiedSpecialEffects();
+        return biome.getSpecialEffects();
     }
 }

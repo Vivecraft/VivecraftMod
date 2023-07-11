@@ -97,5 +97,8 @@ accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData is
 accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
 accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
 accessible field net/minecraft/world/level/biome/AmbientParticleSettings probability F
+accessible field net/minecraft/world/level/biome/Biome$ClimateSettings temperatureModifier Lnet/minecraft/world/level/biome/Biome$TemperatureModifier;
 extendable class net/minecraft/world/level/material/FluidState
 accessible field net/minecraft/world/level/block/state/StateHolder propertiesCodec Lcom/mojang/serialization/MapCodec;
+accessible field net/minecraft/world/level/dimension/DimensionType ambientLight F
+accessible field net/minecraft/world/level/dimension/DimensionType fixedTime Ljava/util/OptionalLong;

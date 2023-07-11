@@ -14,7 +14,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
-import org.vivecraft.fabric.mixin.world.level.biome.BiomeAccessor;
+import org.vivecraft.mixin.client_vr.world.level.biome.BiomeAccessor;
 
 import java.nio.file.Path;
 

@@ -5,7 +5,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -230,8 +229,8 @@ public class TeleportTracker extends Tracker
 
             if (!this.dh.vrPlayer.isTeleportSupported())
             {
-                String s1 = "tp " + vec3.x + " " + vec3.y + " " + vec3.z;
-                this.mc.player.commandSigned(s1, Component.empty());
+                String s1 = "/tp " + vec3.x + " " + vec3.y + " " + vec3.z;
+                this.mc.player.chat(s1);
             }
             else
             {

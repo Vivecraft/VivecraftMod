@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[43,44)"
+loaderVersion = "[40,41)"
 #issueTrackerURL = ""
 license = "LGPLv3"
 
@@ -9,7 +9,7 @@ version = "${version}"
 displayName = "Vivecraft"
 logoFile="vivecraft_icon.png"
 authors = "fayer3, Ferri_Arnus, IMS, jrbudda, minecraft player"
-displayTest="IGNORE_SERVER_VERSION"
+displayTest="IGNORE_ALL_VERSION"
 description = '''
 The VR mod for any loader!
 '''
@@ -19,13 +19,13 @@ updateJSONURL = "https://api.modrinth.com/updates/vivecraft/forge_updates.json"
 [[dependencies.vivecraft]]
 modId = "forge"
 mandatory = true
-versionRange = "[43,44)"
+versionRange = "[40,41)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.vivecraft]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19.2]"
+versionRange = "[1.18.2]"
 ordering = "NONE"
 side = "BOTH"

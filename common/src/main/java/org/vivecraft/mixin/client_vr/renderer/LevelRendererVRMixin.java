@@ -2,6 +2,7 @@ package org.vivecraft.mixin.client_vr.renderer;
 
 import net.minecraft.server.packs.resources.ResourceManager;
 import com.mojang.math.Matrix4f;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -294,7 +295,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     @Inject(at = @At("HEAD"), method = "levelEvent")
-    public void shakeOnSound(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+    public void shakeOnSound(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
         boolean playerNearAndVR = VRState.vrRunning && this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
         if (playerNearAndVR) {
             switch (i) {

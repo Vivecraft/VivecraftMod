@@ -5,7 +5,8 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.vivecraft.client.gui.widgets.TextScrollWidget;
 import org.vivecraft.client.utils.UpdateChecker;
@@ -19,7 +20,7 @@ public class UpdateScreen extends Screen {
     private final Screen lastScreen;
 
     public UpdateScreen() {
-        super(Component.literal("New Update Available"));
+        super(new TextComponent("New Update Available"));
         lastScreen = Minecraft.getInstance().screen;
     }
 
@@ -30,7 +31,7 @@ public class UpdateScreen extends Screen {
         this.addRenderableWidget(new Button(
             this.width / 2 - 155, this.height - 56,
             150, 20,
-            Component.literal("Download from Modrinth"),
+            new TextComponent("Download from Modrinth"),
             (p) -> {
                 try {
                     Util.getPlatform().openUri(new URI("https://modrinth.com/mod/vivecraft"));
@@ -41,7 +42,7 @@ public class UpdateScreen extends Screen {
         this.addRenderableWidget(new Button(
             this.width / 2 + 5, this.height - 56,
             150, 20,
-            Component.literal("Download from Curseforge"),
+            new TextComponent("Download from Curseforge"),
             (p) -> {
                 try {
                     Util.getPlatform().openUri(new URI("https://www.curseforge.com/minecraft/mc-mods/vivecraft"));
@@ -52,7 +53,7 @@ public class UpdateScreen extends Screen {
         this.addRenderableWidget(new Button(
             this.width / 2 - 75, this.height - 32,
             150, 20,
-            Component.translatable("gui.back"),
+            new TranslatableComponent("gui.back"),
             (p) -> Minecraft.getInstance().setScreen(this.lastScreen)));
     }
 

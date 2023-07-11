@@ -5,6 +5,8 @@ import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -41,18 +43,18 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
     @Unique
     private void addCreativeItems(CreativeModeTab tab, NonNullList<ItemStack> list) {
         if (tab == CreativeModeTab.TAB_FOOD || tab == null) {
-            ItemStack itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
-            ItemStack itemstack1 = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER).setHoverName(Component.literal("DRINK ME"));
+            ItemStack itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(new TextComponent("EAT ME"));
+            ItemStack itemstack1 = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER).setHoverName(new TextComponent("DRINK ME"));
             itemstack1.getTag().putInt("HideFlags", 32);
             list.add(itemstack);
             list.add(itemstack1);
         }
 
         if (tab == CreativeModeTab.TAB_TOOLS || tab == null) {
-            ItemStack itemstack3 = (new ItemStack(Items.LEATHER_BOOTS)).setHoverName(Component.translatable("vivecraft.item.jumpboots"));
+            ItemStack itemstack3 = (new ItemStack(Items.LEATHER_BOOTS)).setHoverName(new TranslatableComponent("vivecraft.item.jumpboots"));
             itemstack3.getTag().putBoolean("Unbreakable", true);
             itemstack3.getTag().putInt("HideFlags", 4);
-            ItemStack itemstack4 = (new ItemStack(Items.SHEARS)).setHoverName(Component.translatable("vivecraft.item.climbclaws"));
+            ItemStack itemstack4 = (new ItemStack(Items.SHEARS)).setHoverName(new TranslatableComponent("vivecraft.item.climbclaws"));
             itemstack4.getTag().putBoolean("Unbreakable", true);
             itemstack4.getTag().putInt("HideFlags", 4);
             list.add(itemstack3);

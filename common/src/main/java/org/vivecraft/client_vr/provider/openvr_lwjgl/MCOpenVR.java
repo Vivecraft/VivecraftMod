@@ -8,8 +8,9 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.sun.jna.NativeLibrary;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.openvr.*;
 import org.lwjgl.system.MemoryStack;
@@ -459,12 +460,12 @@ public class MCOpenVR extends MCVR {
         Map<String, Object> map1 = new HashMap<>();
 
         for (VRInputAction vrinputaction1 : list1) {
-            MutableComponent component = Component.translatable(vrinputaction1.keyBinding.getCategory()).append(" - ").append(Component.translatable(vrinputaction1.keyBinding.getName()));
+            MutableComponent component = new TranslatableComponent(vrinputaction1.keyBinding.getCategory()).append(" - ").append(new TranslatableComponent(vrinputaction1.keyBinding.getName()));
             map1.put(vrinputaction1.name, component.getString());
         }
 
         for (VRInputActionSet vrinputactionset1 : VRInputActionSet.values()) {
-            MutableComponent component = Component.translatable(vrinputactionset1.localizedName);
+            MutableComponent component = new TranslatableComponent(vrinputactionset1.localizedName);
             map1.put(vrinputactionset1.name, component.getString());
         }
 
@@ -642,8 +643,8 @@ public class MCOpenVR extends MCVR {
                             if (l == 0L) {
                                 flag = true;
                             } else {
-                                var renderModelComponentState = RenderModelComponentState.calloc(stack);
-                                boolean b0 = VRRenderModels_GetComponentStateForDevicePath(renderModelName, componentName, l, RenderModelControllerModeState.calloc(stack), renderModelComponentState);
+                                var renderModelComponentState = RenderModelComponentState.callocStack(stack);
+                                boolean b0 = VRRenderModels_GetComponentStateForDevicePath(renderModelName, componentName, l, RenderModelControllerModeState.callocStack(stack), renderModelComponentState);
 
                                 if (!b0) {
                                     flag = true;
@@ -813,7 +814,7 @@ public class MCOpenVR extends MCVR {
                     String error = VRApplications_GetApplicationsErrorNameFromEnum(i) + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
                     System.out.println("Failed to install application manifest: " + error + file1.getAbsolutePath());
 
-                    throw new RenderConfigException("Failed to install application manifest", Component.empty().append(error).append(pathFormatted));
+                    throw new RenderConfigException("Failed to install application manifest", new TextComponent(error).append(pathFormatted));
                 }
 
                 System.out.println("Application manifest installed successfully");
@@ -989,7 +990,7 @@ public class MCOpenVR extends MCVR {
     }
 
     private void readPoseData(long actionHandle) {
-        int i = VRInput_GetPoseActionDataForNextFrame(actionHandle, 1, this.poseData, InputPoseActionData.SIZEOF, 0L);
+        int i = VRInput_GetPoseActionData(actionHandle, 1, 0F, this.poseData, InputPoseActionData.SIZEOF, 0L);
 
         if (i != 0) {
             throw new RuntimeException("Error reading pose data: " + getInputErrorName(i));
@@ -1060,7 +1061,7 @@ public class MCOpenVR extends MCVR {
             }
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
-                var hmdmatrix34 = HmdMatrix34.calloc(stack);
+                var hmdmatrix34 = HmdMatrix34.callocStack(stack);
                 OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(VRSystem_GetEyeToHeadTransform(0, hmdmatrix34), this.hmdPoseLeftEye);
                 OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(VRSystem_GetEyeToHeadTransform(1, hmdmatrix34), this.hmdPoseRightEye);
             }

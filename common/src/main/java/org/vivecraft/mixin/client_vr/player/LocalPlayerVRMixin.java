@@ -1,8 +1,6 @@
 package org.vivecraft.mixin.client_vr.player;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -78,8 +76,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Shadow
     public Input input;
 
-    public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile, ProfilePublicKey profilePublicKey) {
-        super(clientLevel, gameProfile, profilePublicKey);
+    public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile) {
+        super(clientLevel, gameProfile);
     }
 
     @Shadow
@@ -141,8 +139,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "chatSigned")
-    public void chatMsg(String string, Component component, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "chat")
+    public void chatMsg(String string, CallbackInfo ci) {
         this.lastMsg = string;
     }
 
@@ -151,13 +149,13 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         // clear teleport here, after all the packets would be sent
         this.teleported = false;
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
-            this.minecraft.options.autoJump().set(false);
+            this.minecraft.options.autoJump = false;
         }
     }
 
     @Override
     public void swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact) {
-        ((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).setSwingType(interact);
+        ((ItemInHandRendererExtension) this.minecraft.getItemInHandRenderer()).setSwingType(interact);
         this.swing(interactionhand);
     }
 

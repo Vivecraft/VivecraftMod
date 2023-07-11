@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Tuple;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.openvr.*;
@@ -70,9 +70,9 @@ public class OpenVRStereoRenderer extends VRRenderer {
     public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (eyeType == 0) {
-                return Utils.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(0, nearClip, farClip, HmdMatrix44.calloc(stack)));
+                return Utils.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(0, nearClip, farClip, HmdMatrix44.callocStack(stack)));
             } else {
-                return Utils.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(1, nearClip, farClip, HmdMatrix44.calloc(stack)));
+                return Utils.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(1, nearClip, farClip, HmdMatrix44.callocStack(stack)));
             }
         }
     }
@@ -116,7 +116,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
             VRCompositor_PostPresentHandoff();
 
             if (i + j > 0) {
-                throw new RenderConfigException("Compositor Error", Component.literal("Texture submission error: Left/Right " + getCompostiorError(i) + "/" + getCompostiorError(j)));
+                throw new RenderConfigException("Compositor Error", new TextComponent("Texture submission error: Left/Right " + getCompostiorError(i) + "/" + getCompostiorError(j)));
             }
         }
     }

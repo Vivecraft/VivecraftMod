@@ -7,6 +7,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class TextScrollWidget extends AbstractWidget {
     private final List<FormattedText> formattedText;
 
     public TextScrollWidget(int x, int y, int width, int height, String text) {
-        super(x, y, width, height, Component.literal(""));
+        super(x, y, width, height, new TextComponent(""));
 
         formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth*2, Style.EMPTY);
 
@@ -34,7 +35,7 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     public TextScrollWidget(int x, int y, int width, int height, Component text) {
-        super(x, y, width, height, Component.literal(""));
+        super(x, y, width, height, new TextComponent(""));
 
         formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth*2, Style.EMPTY);
         initScroll();

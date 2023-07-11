@@ -2,6 +2,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import java.util.List;
 
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.*;
 import org.vivecraft.client.VivecraftVRMod;
@@ -253,10 +254,10 @@ public class SwingTracker extends Tracker
                             {
                                 // don't try to break crops with hoes
                                 // actually use the item on the block
-                                boolean useSuccessful = this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing();
+                                boolean useSuccessful = this.mc.gameMode.useItemOn(player, (ClientLevel)player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1).shouldSwing();
                                 if (itemstack.is(ItemTags.VIVECRAFT_SCYTHES) && !useSuccessful) {
                                         // some scythes just need to be used
-                                        this.mc.gameMode.useItem(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+                                        this.mc.gameMode.useItem(player, player.level, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                                 }
                             }
                             else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS))

@@ -16,15 +16,15 @@ import net.minecraft.client.main.Main;
 @Mixin(Main.class)
 public class MainMixin {
 	
-	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V", remap = false), method = "run", locals = LocalCapture.CAPTURE_FAILHARD)
-	private static void options(String[] strings, boolean bl, CallbackInfo ci, OptionParser optionparser) {
+	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V"), method = "main", remap = false, locals = LocalCapture.CAPTURE_FAILHARD)
+	private static void options(String[] strings, CallbackInfo ci, OptionParser optionparser) {
 		optionparser.accepts("kiosk");
 		optionparser.accepts("viewonly");
 		optionparser.accepts("katvr");
 		optionparser.accepts("infinadeck");
 	}
 
-	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "run")
+	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;") , method = "main", remap = false)
 	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
 		new Thread(UpdateChecker::checkForUpdates).start();
 		OptionSet optionset = optionparser.parse(p_129642_);

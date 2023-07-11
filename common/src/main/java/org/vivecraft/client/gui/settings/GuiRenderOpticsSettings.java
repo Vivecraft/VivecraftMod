@@ -141,7 +141,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
     protected void loadDefaults()
     {
         super.loadDefaults();
-        this.minecraft.options.fov().set(70);
+        this.minecraft.options.fov = 70.0D;
         if (VRState.vrInitialized) {
             this.dataholder.vrRenderer.reinitFrameBuffers("Defaults Loaded");
         }

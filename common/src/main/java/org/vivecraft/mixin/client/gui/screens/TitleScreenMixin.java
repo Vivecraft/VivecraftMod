@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -44,13 +45,13 @@ public abstract class TitleScreenMixin extends Screen {
         vrModeButton = new Button(
             this.width / 2 + 104, this.height / 4 + 72,
             56, 20,
-            Component.translatable("vivecraft.gui.vr", getIcon() , VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF),
+            new TranslatableComponent("vivecraft.gui.vr", getIcon() , VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF),
             (button) -> {
                 showError = false;
                 VRState.vrEnabled = !VRState.vrEnabled;
                 ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
                 ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-                button.setMessage(Component.translatable("vivecraft.gui.vr", getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
+                button.setMessage(new TranslatableComponent("vivecraft.gui.vr", getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
             });
 
         this.addRenderableWidget(vrModeButton);
@@ -58,7 +59,7 @@ public abstract class TitleScreenMixin extends Screen {
         updateButton = new Button(
             this.width / 2 + 104, this.height / 4 + 96,
             56, 20,
-            Component.translatable("vivecraft.gui.update"),
+            new TranslatableComponent("vivecraft.gui.update"),
             (button) -> minecraft.setScreen(new UpdateScreen()));
 
         updateButton.visible = UpdateChecker.hasUpdate;
@@ -75,10 +76,10 @@ public abstract class TitleScreenMixin extends Screen {
         updateButton.visible = UpdateChecker.hasUpdate;
 
         if (vrModeButton.isMouseOver(i, j)) {
-            renderTooltip(poseStack, font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
+            renderTooltip(poseStack, font.split(new TranslatableComponent("vivecraft.options.VR_MODE.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
         }
         if (VRState.vrInitialized && !VRState.vrRunning) {
-            Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
+            Component hotswitchMessage = new TranslatableComponent("vivecraft.messages.vrhotswitchinginfo");
             renderTooltip(poseStack, font.split(hotswitchMessage, 280), width / 2 - 140 - 12, 17);
         }
     }

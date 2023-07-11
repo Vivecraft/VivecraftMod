@@ -5,7 +5,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,7 +23,7 @@ public abstract class OptionsScreenMixin extends Screen {
     private void reducePhysicsmodButtonSize(CallbackInfo ci) {
         for (GuiEventListener guiEventListener : children()) {
             if (guiEventListener instanceof Button button) {
-                if (button.getMessage().getContents() instanceof TranslatableContents contents && "physicsmod.menu.main.title".equals(contents.getKey())) {
+                if (button.getMessage() instanceof TranslatableComponent contents && "physicsmod.menu.main.title".equals(contents.getKey())) {
                     // physics mods button would collide with ours, so make it half size to the right
                     button.x = button.x + button.getWidth()/2 + 5;
                     button.setWidth(button.getWidth()/2 - 5);

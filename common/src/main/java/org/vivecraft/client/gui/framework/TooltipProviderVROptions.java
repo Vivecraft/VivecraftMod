@@ -10,7 +10,7 @@ package org.vivecraft.client.gui.framework;//package org.vivecraft.gui.framework
 //import net.minecraft.client.gui.screens.Screen;
 //import net.minecraft.network.chat.FormattedText;
 //import net.minecraft.network.chat.Style;
-//import net.minecraft.network.chat.Component;
+//import net.minecraft.network.chat.TextComponent;
 //import net.optifine.Lang;
 //import net.optifine.gui.TooltipProvider;
 //import org.vivecraft.settings.VRSettings;
@@ -75,8 +75,8 @@ package org.vivecraft.client.gui.framework;//package org.vivecraft.gui.framework
 //                        else
 //                        {
 //                            int i = s2.indexOf(s2.trim().charAt(0));
-//                            TextComponent textcomponent = i > 0 ? Component.literal(String.join("", Collections.nCopies(i, " "))) : null;
-//                            List<FormattedText> list1 = Utils.wrapText(Component.literal(s2), width, Minecraft.getInstance().font, textcomponent);
+//                            TextComponent textcomponent = i > 0 ? new TextComponent(String.join("", Collections.nCopies(i, " "))) : null;
+//                            List<FormattedText> list1 = Utils.wrapText(new TextComponent(s2), width, Minecraft.getInstance().font, textcomponent);
 //                            Style style = Style.EMPTY;
 //
 //                            for (FormattedText formattedtext : list1)

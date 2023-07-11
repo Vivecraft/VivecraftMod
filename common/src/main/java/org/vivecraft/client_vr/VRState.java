@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client.gui.screens.ErrorScreen;
@@ -25,7 +25,7 @@ public class VRState {
         }
         try {
             if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isAntialiasing()) {
-                throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblesettings").getString(), Component.translatable("vivecraft.messages.optifineaa"));
+                throw new RenderConfigException(new TranslatableComponent("vivecraft.messages.incompatiblesettings").getString(), new TranslatableComponent("vivecraft.messages.optifineaa"));
             }
 
             vrInitialized = true;
@@ -36,16 +36,16 @@ public class VRState {
                 dh.vr = new NullVR(Minecraft.getInstance(), dh);
             }
             if (!dh.vr.init()) {
-                throw new RenderConfigException("VR init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus + "\nVR provider: " + dh.vr.getName()));
+                throw new RenderConfigException("VR init Error", new TranslatableComponent("vivecraft.messages.rendersetupfailed", dh.vr.initStatus + "\nVR provider: " + dh.vr.getName()));
             }
 
             dh.vrRenderer = dh.vr.createVRRenderer();
-            dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
+            dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale;
             try {
                 dh.vrRenderer.setupRenderConfiguration();
                 RenderPassManager.setVanillaRenderPass();
             } catch(RenderConfigException renderConfigException) {
-                throw new RenderConfigException("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + dh.vr.getName()));
+                throw new RenderConfigException("VR Render Error", new TranslatableComponent("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + dh.vr.getName()));
             } catch(Exception e) {
                 e.printStackTrace();
             }
