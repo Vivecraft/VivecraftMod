@@ -49,7 +49,7 @@ public class VRSettings
     public static VRSettings inst;
     public JsonObject defaults = new JsonObject();
     public static final int UNKNOWN_VERSION = 0;
-    public static final String DEGREE  = "\u00b0";
+    public static final String DEGREE  = "°";
 
     public enum InertiaFactor implements OptionEnum<InertiaFactor> {
         NONE(1f / 0.01f),
@@ -812,7 +812,7 @@ public class VRSettings
                                 String value = Objects.requireNonNull(saveOption(name, Array.get(obj, i), mapping.getMiddle(), type.getComponentType(), mapping.getRight()));
                                 joiner.add(value);
                             }
-                            var5.println(name + ":" + joiner.toString());
+                            var5.println(name + ":" + joiner);
                         }
                     } else {
                         String value = Objects.requireNonNull(saveOption(name, obj, mapping.getMiddle(), type, mapping.getRight()));
@@ -977,7 +977,7 @@ public class VRSettings
     }
 
 
-    public static enum VrOptions
+    public enum VrOptions
     {
         DUMMY(false, true), // Dummy
         HUD_SCALE(true, false, 0.35f, 2.5f, 0.01f, -1), // Head HUD Size
@@ -1481,19 +1481,19 @@ public class VRSettings
         TELEPORT_DOWN_LIMIT(true, false, 0, 16, 1, 0) { // Down Limit
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + "OFF";
+                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", value) : prefix + LangHelper.get(LangHelper.OFF_KEY);
             }
         },
         TELEPORT_UP_LIMIT(true, false, 0, 4, 1, 0) { // Up Limit
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + "OFF";
+                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", value) : prefix + LangHelper.get(LangHelper.OFF_KEY);
             }
         },
         TELEPORT_HORIZ_LIMIT(true, false, 0, 32, 1, 0) { // Distance Limit
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + "OFF";
+                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", value) : prefix + LangHelper.get(LangHelper.OFF_KEY);
             }
         },
         ALLOW_STANDING_ORIGIN_OFFSET(false, true, LangHelper.YES_KEY, LangHelper.NO_KEY), // Allow Origin Offset
@@ -1545,16 +1545,9 @@ public class VRSettings
 
         public static VrOptions getEnumOptions(int par0)
         {
-            VrOptions[] aoptions = values();
-            int j = aoptions.length;
-
-            for (int k = 0; k < j; ++k)
-            {
-                VrOptions options = aoptions[k];
-
-                if (options.returnEnumOrdinal() == par0)
-                {
-                    return options;
+            for (VrOptions option : values()) {
+                if (option.returnEnumOrdinal() == par0) {
+                    return option;
                 }
             }
 
@@ -1652,6 +1645,10 @@ public class VRSettings
 
         public int getDecimalPlaces() {
             return decimalPlaces;
+        }
+
+        public String getTooltipString(String key){
+            return null;
         }
 
         public Pair<String, String> getBooleanLangKeys() {
@@ -1986,7 +1983,7 @@ public class VRSettings
 
             public boolean getBoolean() {
                 Object val = getValue();
-                return val instanceof Boolean ? (boolean)val : false;
+                return val instanceof Boolean bool && bool;
             }
 
             public int getInt() {

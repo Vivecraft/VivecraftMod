@@ -14,6 +14,7 @@ import net.minecraft.world.phys.Vec2;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ScreenUtils;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings.VrOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -319,30 +320,34 @@ public abstract class GuiVROptionsBase extends Screen
         }
         else
         {
-            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers) ? true : super.keyPressed(pKeyCode, pScanCode, pModifiers);
+            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers) || super.keyPressed(pKeyCode, pScanCode, pModifiers);
         }
     }
 
     public boolean charTyped(char pCodePoint, int pModifiers)
     {
-        return this.visibleList != null && this.visibleList.charTyped(pCodePoint, pModifiers) ? true : super.charTyped(pCodePoint, pModifiers);
+        return this.visibleList != null && this.visibleList.charTyped(pCodePoint, pModifiers) || super.charTyped(pCodePoint, pModifiers);
     }
 
     private void renderTooltip(PoseStack pMatrixStack, int pMouseX, int pMouseY) {
         AbstractWidget hover = null;
         // find active button
         for (GuiEventListener child: children()) {
-            if (child instanceof AbstractWidget && child.isMouseOver(pMouseX, pMouseY)) {
-                hover = (AbstractWidget) child;
+            if (child instanceof AbstractWidget renderable && renderable.isMouseOver(pMouseX, pMouseY)) {
+                hover = renderable;
             }
         }
         if (hover != null ) {
             if (hover instanceof GuiVROption guiHover) {
-                if (guiHover.getOption() != null) {
+                VrOptions option = guiHover.getOption();
+                if (option != null) {
                     String tooltipString = "vivecraft.options." + guiHover.getOption().name() + ".tooltip";
                     // check if it has a tooltip
-                    if (I18n.exists(tooltipString)) {
-                        String tooltip = I18n.get(tooltipString, (Object) null);
+                    String tooltip = option.getTooltipString(tooltipString);
+                    if (tooltip == null && I18n.exists(tooltipString)) {
+                        tooltip = I18n.get(tooltipString, (Object) null);
+                    }
+                    if (tooltip != null){
                         // add format reset at line ends
                         tooltip = tooltip.replace("\n", "§r\n");
 
