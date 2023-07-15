@@ -102,9 +102,6 @@ public class MenuWorldRenderer {
 	private final float[] rainSizeX = new float[1024];
 	private final float[] rainSizeZ = new float[1024];
 
-	// signals, that initial resource loading is done, and geometry baking can start
-	public static boolean canPrepare = false;
-
 	private Set<TextureAtlasSprite> animatedSprites = null;
 
 	public MenuWorldRenderer() {
@@ -130,10 +127,7 @@ public class MenuWorldRenderer {
 				loadRenderers();
 				VRSettings.logger.info("MenuWorlds: Loading world data...");
 				setWorld(MenuWorldExporter.loadWorld(inputStream));
-				if (canPrepare) {
-					// if it's possible to prepare, do it now
-					prepare();
-				}
+				prepare();
 				fastTime = new Random().nextInt(10) == 0;
 			} else {
 				VRSettings.logger.warn("Failed to load any main menu world, falling back to old menu room");
@@ -230,7 +224,7 @@ public class MenuWorldRenderer {
 	}
 
 	public void prepare() {
-		if (canPrepare && vertexBuffers == null) {
+		if (vertexBuffers == null) {
 			VRSettings.logger.info("MenuWorlds: Building geometry...");
 			boolean ao = mc.options.ambientOcclusion().get();
 			mc.options.ambientOcclusion().set(true);

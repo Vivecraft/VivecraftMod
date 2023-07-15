@@ -472,7 +472,7 @@ public class MCOpenVR extends MCVR {
         map1.put(ACTION_EXTERNAL_CAMERA, "External Camera");
         map1.put(ACTION_LEFT_HAPTIC, "Left Hand Haptic");
         map1.put(ACTION_RIGHT_HAPTIC, "Right Hand Haptic");
-        map1.put("languageag", "en_US");
+        map1.put("language_tag", "en_US");
         map.put("localization", ImmutableList.<Map<String, Object>>builder().add(map1).build());
         List<Map<String, Object>> list3 = new ArrayList<>();
         list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_controller").put("binding_url", "vive_defaults.json").build());

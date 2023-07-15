@@ -308,7 +308,16 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 }
             }
         });
+        return overlay;
+    }
 
+    // on first resource load finished
+    @Inject(at = @At("HEAD"), method = {
+        "method_24040", // fabric
+        "lambda$new$3"} // forge
+        , remap = false)
+    public void initVROnLaunch(CallbackInfo ci) {
+        // init vr after resource loading
         try {
             VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
             if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled) {
@@ -319,27 +328,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-        return overlay;
-    }
-
-    // on first resource load finished
-    @Inject(at = @At("HEAD"), method = {
-        "method_24040", // fabric
-        "lambda$new$3"} // forge
-        , remap = false, expect = 0)
-    public void initMenuworldOnLaunch(CallbackInfo ci) {
-        // tell the MenuWorldRenderer that it is safe to prepare now
-        MenuWorldRenderer.canPrepare =  true;
 
         // set initial resourcepacks
         resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
-
-        // if a world is already loaded, prepare it
-        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null
-            && ClientDataHolderVR.getInstance().menuWorldRenderer.getLevel() != null)
-        {
-            ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
-        }
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
