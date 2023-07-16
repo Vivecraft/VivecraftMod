@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
@@ -460,7 +461,7 @@ public abstract class MCVR
 
     protected KeyMapping findKeyBinding(String name)
     {
-        return Arrays.stream(this.mc.options.keyMappings).filter((kb) ->
+        return Stream.concat(Arrays.stream(this.mc.options.keyMappings), mod.getHiddenKeyBindings().stream()).filter((kb) ->
         {
             return name.equals(kb.getName());
         }).findFirst().orElse((KeyMapping)null);
@@ -1157,7 +1158,8 @@ public abstract class MCVR
     {
         Map<String, ActionParams> map = this.getSpecialActionParams();
 
-        for (KeyMapping keymapping : this.mc.options.keyMappings)
+        // iterate over all minecraft keys, and our hidden keys
+        for (KeyMapping keymapping : Stream.concat(Arrays.stream(this.mc.options.keyMappings), mod.getHiddenKeyBindings().stream()).toList())
         {
             ActionParams actionparams = map.getOrDefault(keymapping.getName(), new ActionParams("optional", "boolean", (VRInputActionSet)null));
             VRInputAction vrinputaction = new VRInputAction(keymapping, actionparams.requirement, actionparams.type, actionparams.actionSetOverride);
@@ -1238,7 +1240,7 @@ public abstract class MCVR
                         {
                             System.out.println("Unknown key binding: " + astring[0]);
                         }
-                        else if (mod.getKeyBindings().contains(keymapping))
+                        else if (mod.getAllKeyBindings().contains(keymapping))
                         {
                             System.out.println("NO! Don't touch Vivecraft bindings!");
                         }
