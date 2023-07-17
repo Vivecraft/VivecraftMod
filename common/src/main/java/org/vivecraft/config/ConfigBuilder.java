@@ -1,8 +1,13 @@
-package org.vivecraft.server.config;
+package org.vivecraft.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import com.electronwill.nightconfig.core.EnumGetMethod;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
+import org.joml.Vector3d;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -48,6 +53,12 @@ public class ConfigBuilder {
         return this;
     }
 
+    private void addDefaultValueComment(List<String> path, String defaultValue) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+                + new Formatter(Locale.US).format("default: %.2s", defaultValue));
+    }
+
     private void addDefaultValueComment(List<String> path, int defaultValue, int min, int max) {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
@@ -58,6 +69,12 @@ public class ConfigBuilder {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
             + new Formatter(Locale.US).format("default: %.2f, min: %.2f, max: %.2f", defaultValue, min, max));
+    }
+
+    private <T extends Enum<T>> void addDefaultValueComment(List<String> path, T defaultValue) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+                + new Formatter(Locale.US).format("default: %.2s", defaultValue.name()));
     }
 
     /**
@@ -172,7 +189,7 @@ public class ConfigBuilder {
         stack.removeLast();
         addDefaultValueComment(path, defaultValue, min, max);
 
-        DoubleValue value = new DoubleValue(config, path, defaultValue);
+        DoubleValue value = new DoubleValue(config, path, defaultValue, min, max);
         configValues.add(value);
         return value;
     }
@@ -186,7 +203,29 @@ public class ConfigBuilder {
         stack.removeLast();
         addDefaultValueComment(path, defaultValue, min, max);
 
-        IntValue value = new IntValue(config, path, defaultValue);
+        IntValue value = new IntValue(config, path, defaultValue, min, max);
+        configValues.add(value);
+        return value;
+    }
+
+    public <T extends Enum<T>> EnumValue<T> define(T defaultValue) {
+        List<String> path = stack.stream().toList();
+        spec.defineEnum(path, defaultValue, EnumGetMethod.NAME);
+        stack.removeLast();
+        addDefaultValueComment(path, defaultValue);
+
+        EnumValue<T> value = new EnumValue<>(config, path, defaultValue);
+        configValues.add(value);
+        return value;
+    }
+
+    public VectorValue define(Vector3d defaultValue) {
+        List<String> path = stack.stream().toList();
+        spec.define(path, defaultValue.toString());
+        stack.removeLast();
+        addDefaultValueComment(path, defaultValue.toString());
+
+        VectorValue value = new VectorValue(config, path, defaultValue);
         configValues.add(value);
         return value;
     }
@@ -195,9 +234,9 @@ public class ConfigBuilder {
     public static class ConfigValue<T> {
 
         // the config, this setting is part of
-        private final Config config;
-        private final List<String> path;
-        private final T defaultValue;
+        protected final Config config;
+        protected final List<String> path;
+        protected final T defaultValue;
         // cache te value to minimize config lookups
         private T cachedValue = null;
 
@@ -228,6 +267,10 @@ public class ConfigBuilder {
         public String getPath() {
             return String.join(".", path);
         }
+
+        public MutableComponent getName() {
+            return Component.translatable("vivecraft.options." + getPath());
+        }
     }
 
     public static class BooleanValue extends ConfigValue<Boolean>{
@@ -243,14 +286,84 @@ public class ConfigBuilder {
     }
 
     public static class IntValue extends ConfigValue<Integer>{
-        public IntValue(Config config, List<String> path, int defaultValue) {
+        public IntValue(Config config, List<String> path, int defaultValue, int min, int max) {
             super(config, path, defaultValue);
+            this.min = min;
+            this.max = max;
+        }
+
+        private final int min;
+        private final int max;
+        public double normalize() {
+            return Mth.clamp((this.get() - this.min) / (float)(this.max - this.min), 0.0D, 1.0D);
+        }
+
+        public void fromNormalised(double value) {
+            this.set(Mth.ceil(this.min + (this.max - this.min) * value));
+
         }
     }
 
     public static class DoubleValue extends ConfigValue<Double>{
-        public DoubleValue(Config config, List<String> path, double defaultValue) {
+        private final double min;
+        private final double max;
+
+        public DoubleValue(Config config, List<String> path, double defaultValue, double min, double max) {
             super(config, path, defaultValue);
+            this.min = min;
+            this.max = max;
+        }
+
+        public double normalize() {
+            return Mth.clamp((this.get() - this.min) / (this.max - this.min), 0.0d, 1.0d);
+        }
+
+        public void fromNormalised(double value) {
+            this.set(this.min + (this.max - this.min) * value);
+
+        }
+    }
+
+    public static class EnumValue<T extends Enum<T>> extends ConfigValue<T> {
+
+        public EnumValue(Config config, List<String> path, T defaultValue) {
+            super(config, path, defaultValue);
+        }
+
+        public void cycle() {
+            T[] enumConstants = (T[]) defaultValue.getClass().getEnumConstants();
+            int newIndex = this.get().ordinal() + 1;
+            if (enumConstants.length == newIndex) {
+                newIndex = 0;
+            }
+            this.set(enumConstants[newIndex]);
+        }
+    }
+
+    public static class VectorValue extends ConfigValue<Vector3d> {
+
+        private String cachedValue;
+
+        public VectorValue(Config config, List<String> path, Vector3d defaultValue) {
+            super(config, path, defaultValue);
+        }
+
+        public Vector3d get() {
+            if (cachedValue == null) {
+                cachedValue = this.config.get(path);
+            }
+            return new Vector3d(Arrays.stream(cachedValue.split(";-")).mapToDouble(Double::valueOf).toArray());
+        }
+
+        public void set(Vector3d newValue) {
+            cachedValue = newValue.toString();
+            config.set(path, newValue);
+        }
+
+        public Vector3d reset() {
+            config.set(path, defaultValue);
+            cachedValue = defaultValue.toString();
+            return defaultValue;
         }
     }
 }

@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.client.gui.screens.VROptionScreen;
 import org.vivecraft.client.gui.settings.GuiMainVRSettings;
 
 @Mixin(OptionsScreen.class)
@@ -47,7 +48,7 @@ public class OptionsScreenVRMixin extends Screen {
         rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
         {
             Minecraft.getInstance().options.save();
-            Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
+            Minecraft.getInstance().setScreen(new VROptionScreen(this));
         })
                 .build());
     }

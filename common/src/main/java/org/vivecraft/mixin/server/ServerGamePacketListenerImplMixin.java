@@ -18,7 +18,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerPlayerConnection;
-import org.vivecraft.server.config.ServerConfig;
+import org.vivecraft.config.ServerConfig;
 import org.vivecraft.server.ServerNetworking;
 
 import static org.vivecraft.common.network.CommonNetworkHelper.PacketDiscriminators.CLIMBING;
