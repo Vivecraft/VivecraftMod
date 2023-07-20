@@ -1,9 +1,5 @@
 package org.vivecraft.client.render;
 
-import java.util.List;
-
-import com.google.common.collect.ImmutableList;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.PlayerModel;
@@ -23,17 +19,12 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T>
     public ModelPart vrHMD;
     VRPlayersClient.RotInfo rotInfo;
     private boolean laying;
-    private final List<ModelPart> parts;
     
-    public VRPlayerModel(ModelPart p_170821_, boolean p_170822_)
+    public VRPlayerModel(ModelPart modelPart, boolean isSlim)
     {
-        super(p_170821_, p_170822_);
-        this.slim = p_170822_;
-        this.vrHMD = p_170821_.getChild("vrHMD");
-        this.parts = p_170821_.getAllParts().filter((p_170824_) ->
-        {
-            return !p_170824_.isEmpty();
-        }).collect(ImmutableList.toImmutableList());
+        super(modelPart, isSlim);
+        this.slim = isSlim;
+        this.vrHMD = modelPart.getChild("vrHMD");
     }
     
     public static MeshDefinition createMesh(CubeDeformation p_170826_, boolean p_170827_)
