@@ -1,11 +1,13 @@
 package org.vivecraft.client_vr.render;
 
+import net.minecraft.network.chat.Component;
+
 public class RenderConfigException extends Exception
 {
     public String title;
-    public String error;
+    public Component error;
 
-    public RenderConfigException(String title, String error)
+    public RenderConfigException(String title, Component error)
     {
         this.title = title;
         this.error = error;
@@ -13,6 +15,6 @@ public class RenderConfigException extends Exception
 
     public String toString()
     {
-        return this.error;
+        return this.error.getString();
     }
 }

@@ -23,6 +23,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.provider.*;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.TrackpadSwipeSampler;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
+import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jinfinadeck;
@@ -703,12 +704,12 @@ public class MCOpenVR extends MCVR {
         }
     }
 
-    public boolean postinit() {
+    public boolean postinit() throws RenderConfigException {
         this.initInputAndApplication();
         return this.inputInitialized;
     }
 
-    private void initInputAndApplication() {
+    private void initInputAndApplication() throws RenderConfigException {
         this.populateInputActions();
 
         if (OpenVR.VRInput != null) {
@@ -765,7 +766,7 @@ public class MCOpenVR extends MCVR {
         System.out.println("OpenVR Compositor initialized OK.");
     }
 
-    private void installApplicationManifest(boolean force) {
+    private void installApplicationManifest(boolean force) throws RenderConfigException {
         File file1 = new File("openvr/vivecraft.vrmanifest");
         Utils.loadAssetToFile("vivecraft.vrmanifest", file1, true);
         File file2 = new File("openvr/custom.vrmanifest");
@@ -794,8 +795,22 @@ public class MCOpenVR extends MCVR {
                 int i = VRApplications_AddApplicationManifest(file1.getAbsolutePath(), true);
 
                 if (i != 0) {
-                    System.out.println("Failed to install application manifest: " + VRApplications_GetApplicationsErrorNameFromEnum(i));
-                    return;
+                    // application needs to be installed, so abort
+                    String pathFormatted = "";
+                    boolean hasInvalidChars = false;
+                    for (char c : file1.getAbsolutePath().toCharArray()){
+                        if (c > 127) {
+                            hasInvalidChars = true;
+                            pathFormatted += "§c"+c+"§r";
+                        } else {
+                            pathFormatted += c;
+                        }
+                    }
+
+                    String error = VRApplications_GetApplicationsErrorNameFromEnum(i) + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
+                    System.out.println("Failed to install application manifest: " + error + file1.getAbsolutePath());
+
+                    throw new RenderConfigException("Failed to install application manifest", Component.empty().append(error).append(pathFormatted));
                 }
 
                 System.out.println("Application manifest installed successfully");

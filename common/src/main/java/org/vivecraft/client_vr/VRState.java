@@ -22,55 +22,57 @@ public class VRState {
         if (vrInitialized) {
             return;
         }
-        vrInitialized = true;
-        ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-        if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
-            dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
-        } else {
-            dh.vr = new NullVR(Minecraft.getInstance(), dh);
-        }
-        if (!dh.vr.init()) {
-            Minecraft.getInstance().setScreen(new ErrorScreen("VR init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus + "\nVR provider: " + dh.vr.getName())));
-            destroyVR(true);
-            return;
-        }
-
-        dh.vrRenderer = dh.vr.createVRRenderer();
-        dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
         try {
-            dh.vrRenderer.setupRenderConfiguration();
-            RenderPassManager.setVanillaRenderPass();
-        } catch(RenderConfigException renderConfigException) {
-            Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + dh.vr.getName())));
+            vrInitialized = true;
+            ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
+            if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
+                dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
+            } else {
+                dh.vr = new NullVR(Minecraft.getInstance(), dh);
+            }
+            if (!dh.vr.init()) {
+                throw new RenderConfigException("VR init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus + "\nVR provider: " + dh.vr.getName()));
+            }
+
+            dh.vrRenderer = dh.vr.createVRRenderer();
+            dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
+            try {
+                dh.vrRenderer.setupRenderConfiguration();
+                RenderPassManager.setVanillaRenderPass();
+            } catch(RenderConfigException renderConfigException) {
+                throw new RenderConfigException("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + dh.vr.getName()));
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+
+            dh.vrPlayer = new VRPlayer();
+            dh.vrPlayer.registerTracker(dh.backpackTracker);
+            dh.vrPlayer.registerTracker(dh.bowTracker);
+            dh.vrPlayer.registerTracker(dh.climbTracker);
+            dh.vrPlayer.registerTracker(dh.autoFood);
+            dh.vrPlayer.registerTracker(dh.jumpTracker);
+            dh.vrPlayer.registerTracker(dh.rowTracker);
+            dh.vrPlayer.registerTracker(dh.runTracker);
+            dh.vrPlayer.registerTracker(dh.sneakTracker);
+            dh.vrPlayer.registerTracker(dh.swimTracker);
+            dh.vrPlayer.registerTracker(dh.swingTracker);
+            dh.vrPlayer.registerTracker(dh.interactTracker);
+            dh.vrPlayer.registerTracker(dh.teleportTracker);
+            dh.vrPlayer.registerTracker(dh.horseTracker);
+            dh.vrPlayer.registerTracker(dh.vehicleTracker);
+            dh.vrPlayer.registerTracker(dh.crawlTracker);
+            dh.vrPlayer.registerTracker(dh.cameraTracker);
+
+            dh.vr.postinit();
+
+            dh.menuWorldRenderer = new MenuWorldRenderer();
+
+            dh.menuWorldRenderer.init();
+        } catch (RenderConfigException renderConfigException) {
+            Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
+            vrEnabled = false;
             destroyVR(true);
-            return;
-        } catch(Exception e) {
-            e.printStackTrace();
         }
-
-        dh.vrPlayer = new VRPlayer();
-        dh.vrPlayer.registerTracker(dh.backpackTracker);
-        dh.vrPlayer.registerTracker(dh.bowTracker);
-        dh.vrPlayer.registerTracker(dh.climbTracker);
-        dh.vrPlayer.registerTracker(dh.autoFood);
-        dh.vrPlayer.registerTracker(dh.jumpTracker);
-        dh.vrPlayer.registerTracker(dh.rowTracker);
-        dh.vrPlayer.registerTracker(dh.runTracker);
-        dh.vrPlayer.registerTracker(dh.sneakTracker);
-        dh.vrPlayer.registerTracker(dh.swimTracker);
-        dh.vrPlayer.registerTracker(dh.swingTracker);
-        dh.vrPlayer.registerTracker(dh.interactTracker);
-        dh.vrPlayer.registerTracker(dh.teleportTracker);
-        dh.vrPlayer.registerTracker(dh.horseTracker);
-        dh.vrPlayer.registerTracker(dh.vehicleTracker);
-        dh.vrPlayer.registerTracker(dh.crawlTracker);
-        dh.vrPlayer.registerTracker(dh.cameraTracker);
-
-        dh.vr.postinit();
-
-        dh.menuWorldRenderer = new MenuWorldRenderer();
-
-        dh.menuWorldRenderer.init();
     }
 
     public static void startVR() {

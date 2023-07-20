@@ -27,6 +27,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VivecraftMovementInput;
+import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -1315,7 +1316,7 @@ public abstract class MCVR
 
     public abstract boolean init();
 
-    public abstract boolean postinit();
+    public abstract boolean postinit() throws RenderConfigException;
 
     public abstract org.vivecraft.common.utils.math.Matrix4f getControllerComponentTransform(int var1, String var2);
 

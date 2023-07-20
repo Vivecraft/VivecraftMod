@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
@@ -36,7 +37,6 @@ import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.ShaderHelper;
 import org.vivecraft.client_vr.render.VRShaders;
-import org.vivecraft.client.utils.LangHelper;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -425,11 +425,11 @@ public abstract class VRRenderer {
 
             if (GlUtil.getRenderer().toLowerCase().contains("intel")) //Optifine
             {
-                throw new RenderConfigException("Incompatible", LangHelper.get("vivecraft.messages.intelgraphics", GlUtil.getRenderer()));
+                throw new RenderConfigException("Incompatible", Component.translatable("vivecraft.messages.intelgraphics", GlUtil.getRenderer()));
             }
 
             if (!this.isInitialized()) {
-                throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), LangHelper.get(this.getinitError()));
+                throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), Component.literal(this.getinitError()));
             }
 
             Tuple<Integer, Integer> tuple = this.getRenderTextureSizes();
@@ -442,7 +442,7 @@ public abstract class VRRenderer {
                 this.createRenderTexture(eyew, eyeh);
 
                 if (this.LeftEyeTextureId == -1) {
-                    throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), this.getLastError());
+                    throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), Component.literal(this.getLastError()));
                 }
 
                 dataholder.print("Provider supplied render texture IDs: " + this.LeftEyeTextureId + " " + this.RightEyeTextureId);
