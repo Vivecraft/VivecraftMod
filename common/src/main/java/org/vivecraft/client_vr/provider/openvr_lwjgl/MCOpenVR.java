@@ -375,7 +375,7 @@ public class MCOpenVR extends MCVR {
     }
 
     private boolean isError() {
-        return this.hmdErrorStore.get(0) != 0 || this.hmdErrorStoreBuf.get(0) != 0;
+        return this.hmdErrorStore.get(0) != EVRInitError_VRInitError_None || this.hmdErrorStoreBuf.get(0) != EVRInitError_VRInitError_None;
     }
 
     private void debugOut(int deviceindex) {
@@ -560,7 +560,7 @@ public class MCOpenVR extends MCVR {
     }
 
     private int getError() {
-        return this.hmdErrorStore.get(0) != 0 ? this.hmdErrorStore.get(0) : this.hmdErrorStoreBuf.get(0);
+        return this.hmdErrorStore.get(0) != EVRInitError_VRInitError_None ? this.hmdErrorStore.get(0) : this.hmdErrorStoreBuf.get(0);
     }
 
     long getHapticHandle(ControllerType hand) {
@@ -756,11 +756,11 @@ public class MCOpenVR extends MCVR {
         this.texBounds.uMin(0.0F);
         this.texBounds.vMax(1.0F);
         this.texBounds.vMin(0.0F);
-        this.texType0.eColorSpace(1);
-        this.texType0.eType(1);
+        this.texType0.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
+        this.texType0.eType(VR.ETextureType_TextureType_OpenGL);
         this.texType0.handle(-1);
-        this.texType1.eColorSpace(1);
-        this.texType1.eType(1);
+        this.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
+        this.texType1.eType(VR.ETextureType_TextureType_OpenGL);
         this.texType1.handle(-1);
         System.out.println("OpenVR Compositor initialized OK.");
     }
