@@ -396,6 +396,7 @@ public abstract class MCVR
 
     protected void processHotbar()
     {
+        int previousSlot = this.dh.interactTracker.hotbar;
         this.dh.interactTracker.hotbar = -1;
         if(mc.player == null) return;
         if(mc.player.getInventory() == null) return;
@@ -455,7 +456,7 @@ public abstract class MCVR
         }
         //all that maths for this.
         dh.interactTracker.hotbar = box;
-        if(box != dh.interactTracker.hotbar){
+        if(previousSlot != dh.interactTracker.hotbar){
             triggerHapticPulse(0, 750);
         }
     }
