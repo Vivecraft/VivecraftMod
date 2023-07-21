@@ -381,13 +381,10 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void setPos(double pX, double p_20211_, double pY) {
+        this.initFromServer = true;
         if (!VRState.vrRunning) {
             super.setPos(pX, p_20211_, pY);
             return;
-        }
-
-        if (!this.initFromServer) {
-            this.initFromServer = true;
         }
         double d0 = this.getX();
         double d1 = this.getY();
