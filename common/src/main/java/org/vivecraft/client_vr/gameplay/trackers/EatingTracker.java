@@ -116,32 +116,32 @@ public class EatingTracker extends Tracker
                 }
 
                 if (!this.eating[c])
-                        {
-                            //Minecraft.getInstance().physicalGuiManager.preClickAction();
+                {
+                    //Minecraft.getInstance().physicalGuiManager.preClickAction();
 
-                            if (this.mc.gameMode.useItem(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).consumesAction())
-                            {
+                    if (this.mc.gameMode.useItem(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).consumesAction())
+                    {
                         this.mc.gameRenderer.itemInHandRenderer.itemUsed(c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                         this.eating[c] = true;
-                                this.eatStart = Util.getMillis();
-                            }
-                        }
+                        this.eatStart = Util.getMillis();
+                    }
+                }
 
                 if (this.eating[c])
-                        {
-                            long k = (long)player.getUseItemRemainingTicks();
+                {
+                    long k = (long)player.getUseItemRemainingTicks();
 
                     if (k > 0L && k % 5L <= (long)crunchiness)
-                            {
-                        this.dh.vr.triggerHapticPulse(c, 700);
-                            }
-                        }
-
-                        if (Util.getMillis() - this.eatStart > (long)this.eattime)
-                        {
-                    this.eating[c] = false;
-                        }
+                    {
+                this.dh.vr.triggerHapticPulse(c, 700);
                     }
+                }
+
+                if (Util.getMillis() - this.eatStart > (long)this.eattime)
+                {
+                    this.eating[c] = false;
+                }
+            }
             else
             {
                 this.eating[c] = false;
