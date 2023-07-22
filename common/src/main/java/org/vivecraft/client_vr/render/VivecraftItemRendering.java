@@ -313,7 +313,7 @@ public class VivecraftItemRendering
 				if(reverse)k*=-1;
                 scale = (double)0.4F;
 
-				translateY += (double)0.21F;
+				translateY += (double)0.18F;
 				//    					
 				if (k==1)
                 {
