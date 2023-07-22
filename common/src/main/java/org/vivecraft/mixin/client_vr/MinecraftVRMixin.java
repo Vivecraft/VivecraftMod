@@ -925,6 +925,28 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             }
         }
 
+        // VR enabled only chat notifications
+        if (VRState.vrInitialized && this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
+            if (ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer == 0) {
+                boolean showMessage = !ClientNetworking.displayedChatWarning || ClientDataHolderVR.getInstance().vrSettings.showServerPluginMissingMessageAlways;
+
+                if (ClientDataHolderVR.getInstance().vrPlayer.teleportWarning) {
+                    if(showMessage)
+                        this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.noserverplugin"));
+                    ClientDataHolderVR.getInstance().vrPlayer.teleportWarning = false;
+
+                    // allow vr switching on vanilla server
+                    ClientNetworking.serverAllowsVrSwitching = true;
+                }
+                if (ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning) {
+                    if (showMessage)
+                        this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitchinglegacy"));
+                    ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning = false;
+                }
+                ClientNetworking.displayedChatWarning = true;
+            }
+        }
+
         if (VRState.vrRunning) {
 
             if (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
@@ -951,14 +973,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
             if (this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
                 ClientDataHolderVR.getInstance().vrPlayer.updateFreeMove();
-
-                // VR enabled only chat notifications
-                if (ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer == 0) {
-                    this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.noserverplugin"));
-                }
-                if (ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer == 0) {
-                    this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitchinglegacy"));
-                }
             }
             this.profiler.pop();
         }

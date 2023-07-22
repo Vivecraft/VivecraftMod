@@ -410,6 +410,8 @@ public class VRSettings
     public String lastUpdate = "";
     @SettingField(VrOptions.SHOW_PLUGIN)
     public ChatServerPluginMessage showServerPluginMessage = ChatServerPluginMessage.SERVER_ONLY;
+    @SettingField(VrOptions.SHOW_PLUGIN_MISSING)
+    public boolean showServerPluginMissingMessageAlways = true;
     @SettingField
     public boolean vrEnabled = false;
     @SettingField(VrOptions.VR_HOTSWITCH)
@@ -1095,6 +1097,7 @@ public class VRSettings
         },
         SHOW_UPDATES(false, true, "vivecraft.options.always", "vivecraft.options.once"),
         SHOW_PLUGIN(false, true),
+        SHOW_PLUGIN_MISSING(false, true, "vivecraft.options.always", "vivecraft.options.once"),
         AUTO_OPEN_KEYBOARD(false, true), // Always Open Keyboard
         RADIAL_MODE_HOLD(false, true, "vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
         PHYSICAL_KEYBOARD(false, true, "vivecraft.options.keyboard.physical", "vivecraft.options.keyboard.pointer"), // Keyboard Type
