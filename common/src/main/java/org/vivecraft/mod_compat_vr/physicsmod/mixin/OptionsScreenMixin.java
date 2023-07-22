@@ -27,6 +27,8 @@ public abstract class OptionsScreenMixin extends Screen {
                     // physics mods button would collide with ours, so make it half size to the right
                     button.setX(button.getX() + button.getWidth()/2 + 5);
                     button.setWidth(button.getWidth()/2 - 5);
+                    // move it up, so it aligns with ours
+                    button.setY(button.getY() - 6);
                 }
             }
         }
