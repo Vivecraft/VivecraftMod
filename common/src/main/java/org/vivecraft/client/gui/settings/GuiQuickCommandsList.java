@@ -1,13 +1,12 @@
 package org.vivecraft.client.gui.settings;
 
+import net.minecraft.client.gui.components.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
+import org.vivecraft.client_vr.ScreenUtils;
 
 public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsList.CommandEntry>
 {
@@ -31,6 +30,10 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         }
     }
 
+    @Override
+    protected void renderSelection(PoseStack poseStack, int i, int j, int k, int l, int m) {
+    }
+
     public class CommandEntry extends Entry<CommandEntry>
     {
         private final Button btnDelete;
@@ -40,7 +43,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         {
             this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, Component.literal(""));
             this.txt.setValue(command);
-            this.btnDelete = new Button.Builder(  Component.translatable("X"),  (p) ->
+            this.btnDelete = new Button.Builder(  Component.literal("X"),  (p) ->
                 {
                     this.txt.setValue("");
                     this.txt.setFocused(true);
@@ -48,6 +51,11 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
                 .size( 18,  18)
                 .pos(0,  0)
                 .build();
+        }
+
+        @Override
+        public void setFocused(boolean bl) {
+            txt.setFocused(bl);
         }
 
         public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)
@@ -64,13 +72,13 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
 
         public boolean mouseDragged(double pMouseX, double p_94741_, int pMouseY, double p_94743_, double pButton)
         {
-            if (this.btnDelete.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton))
+            if (this.btnDelete.isMouseOver(pMouseX, p_94741_) && this.btnDelete.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton))
             {
                 return true;
             }
             else
             {
-                return this.txt.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton) ? true : super.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton);
+                return (this.txt.isMouseOver(pMouseX, p_94741_) && this.txt.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton)) || super.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton);
             }
         }
 

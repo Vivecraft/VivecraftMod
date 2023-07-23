@@ -3,6 +3,7 @@ package org.vivecraft.client.gui.settings;
 import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionLayout;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -101,8 +102,10 @@ public class GuiMainVRSettings extends GuiVROptionsBase
     protected void loadDefaults()
     {
         super.loadDefaults();
-        MCVR.get().seatedRot = 0.0F;
-        MCVR.get().clearOffset();
+        if (VRState.vrInitialized) {
+            MCVR.get().seatedRot = 0.0F;
+            MCVR.get().clearOffset();
+        }
     }
 
     protected void resetOrigin()

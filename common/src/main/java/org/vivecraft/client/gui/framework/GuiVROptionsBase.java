@@ -56,11 +56,9 @@ public abstract class GuiVROptionsBase extends Screen
                 .build());
         this.addRenderableWidget(this.btnDefaults = new Button.Builder(Component.translatable("vivecraft.gui.loaddefaults"), (p) ->
                 {
-                    if (!this.onDoneClicked())
-                    {
-                        this.dataholder.vrSettings.saveOptions();
-                        this.minecraft.setScreen(this.lastScreen);
-                    }
+                    this.loadDefaults();
+                    this.dataholder.vrSettings.saveOptions();
+                    this.reinit = true;
                 })
                 .pos(this.width / 2 - 155, this.height - 30)
                 .size(150, 20)
@@ -259,7 +257,7 @@ public abstract class GuiVROptionsBase extends Screen
     public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)
     {
         boolean flag = super.mouseClicked(pMouseX, p_94738_, pMouseY);
-        AbstractWidget abstractwidget = ScreenUtils.getSelectedButton(this, (int)pMouseX, (int)p_94738_);
+        AbstractWidget abstractwidget = ScreenUtils.getSelectedButton((int)pMouseX, (int)p_94738_, ScreenUtils.getButtonList(this));
 
         if (abstractwidget != null)
         {
