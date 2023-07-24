@@ -133,6 +133,7 @@ public class ServerUtil {
                     )
                 ));
             } else {
+                ConfigBuilder.ConfigValue<List<? extends String>> listConfig = setting;
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
                     Commands.literal(setting.getPath()).then(
@@ -146,18 +147,21 @@ public class ServerUtil {
                                 })
                                 .executes(context -> {
                                     String newValue = context.getArgument("block", String.class);
+                                    List list = listConfig.get();
+                                    list.add(newValue);
+                                    listConfig.set(list);
                                     context.getSource().sendSystemMessage(Component.literal("added '" + newValue + "' to §a[" + setting.getPath() + "]§r"));
+                                    context.getSource().sendSystemMessage(Component.literal("is now '" + setting.get()));
                                     return 1;
                                 })
                         )
                     )
                 ));
-                ConfigBuilder.ConfigValue<List<? extends String>> listConfig = setting;
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
                     Commands.literal(setting.getPath()).then(
                         Commands.literal("remove").then(
-                            Commands.argument("block", StringArgumentType.string())
+                            Commands.argument("block", StringArgumentType.greedyString())
                                 .suggests((context, builder) -> {
                                     for (String block : listConfig.get()) {
                                         builder.suggest(block);
