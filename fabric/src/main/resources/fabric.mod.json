@@ -23,6 +23,9 @@
     ],
     "main": [
       "org.vivecraft.fabric.VivecraftMod"
+    ],
+    "modmenu": [
+      "org.vivecraft.client.fabric.VivecraftModMenuApiImpl"
     ]
   },
   "mixins": [
@@ -41,5 +44,13 @@
   },
   "suggests": {
     "another-mod": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/jYyyv7zhSW"
+      },
+      "update_checker": true
+    }
   }
 }

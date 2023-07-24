@@ -292,6 +292,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay initVivecraft(Overlay overlay) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.getMainRenderTarget());
+        VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
 
         // register a resource reload listener, to reload the menu world
         resourceManager.registerReloadListener((ResourceManagerReloadListener) resourceManager -> {
@@ -319,7 +320,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     public void initVROnLaunch(CallbackInfo ci) {
         // init vr after resource loading
         try {
-            VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
             if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled) {
                 VRState.vrEnabled = true;
                 VRState.vrRunning = true;

@@ -416,6 +416,12 @@ public class VRSettings
     public boolean vrEnabled = false;
     @SettingField(VrOptions.VR_HOTSWITCH)
     public boolean vrHotswitchingEnabled = true;
+    @SettingField
+    public boolean vrToggleButtonEnabled = true;
+    @SettingField
+    public boolean vrSettingsButtonEnabled = true;
+    @SettingField
+    public boolean vrSettingsButtonPositionLeft = true;
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.

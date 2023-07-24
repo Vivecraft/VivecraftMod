@@ -7,10 +7,12 @@ import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.gui.settings.GuiMainVRSettings;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
 @Mixin(OptionsScreen.class)
 public class OptionsScreenVRMixin extends Screen {
@@ -40,10 +42,24 @@ public class OptionsScreenVRMixin extends Screen {
     // place below FOV slider
     @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"),index = 1)
     private int makeSpacer1wide(int layoutElement) {
-        return 1;
+        return ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled ? 1 : 2;
     }
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void addVivecraftSettings(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+    private void addVivecraftSettingsLeft(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+        if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled && ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft) {
+            addVivecraftButton(rowHelper);
+        }
+    }
+
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void addVivecraftSettingsRight(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+        if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled && !ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft) {
+            addVivecraftButton(rowHelper);
+        }
+    }
+
+    @Unique
+    private void addVivecraftButton(GridLayout.RowHelper rowHelper) {
         rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
         {
             Minecraft.getInstance().options.save();

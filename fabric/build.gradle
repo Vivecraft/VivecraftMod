@@ -47,6 +47,10 @@ dependencies {
     modRuntimeOnly "maven.modrinth:lithium:mc1.19.4-0.11.1"
     modRuntimeOnly "maven.modrinth:indium:1.0.15+mc1.19.4"
 
+    //mod menu
+    modApi("com.terraformersmc:modmenu:6.3.1")
+    modRuntimeOnly("com.terraformersmc:modmenu:6.3.1")
+
     /*
     // for immersive portals compat
     modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v2.5.2-mc1.19.3'){ //temp immersiveportals

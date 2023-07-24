@@ -3,7 +3,10 @@ package org.vivecraft.server.config;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import net.minecraft.util.Mth;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -111,12 +114,12 @@ public class ConfigBuilder {
      * @param validator Predicate, that signals, what values are accepted
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
-    public <T> ConfigValue<List<? extends T>> defineList(List<? extends T> defaultValue, Predicate<Object> validator) {
+    public <T> ListValue<T> defineList(List<T> defaultValue, Predicate<Object> validator) {
         List<String> path = stack.stream().toList();
         spec.defineList(path, defaultValue, validator);
         stack.removeLast();
 
-        ConfigValue<List<? extends T>> value = new ConfigValue<>(config, path, defaultValue);
+        ListValue<T> value = new ListValue<>(config, path, defaultValue);
         configValues.add(value);
         return value;
     }
@@ -127,12 +130,12 @@ public class ConfigBuilder {
      * @param validValues Collection of values that are accepted
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
-    public <T> ConfigValue<T> defineInList(T defaultValue, Collection<? extends T> validValues) {
+    public <T> InListValue<T> defineInList(T defaultValue, Collection<? extends T> validValues) {
         List<String> path = stack.stream().toList();
         spec.defineInList(path, defaultValue, validValues);
         stack.removeLast();
 
-        ConfigValue<T> value = new ConfigValue<>(config, path, defaultValue);
+        InListValue<T> value = new InListValue<>(config, path, defaultValue, validValues);
         configValues.add(value);
         return value;
     }
@@ -172,7 +175,7 @@ public class ConfigBuilder {
         stack.removeLast();
         addDefaultValueComment(path, defaultValue, min, max);
 
-        DoubleValue value = new DoubleValue(config, path, defaultValue);
+        DoubleValue value = new DoubleValue(config, path, defaultValue, min, max);
         configValues.add(value);
         return value;
     }
@@ -186,7 +189,7 @@ public class ConfigBuilder {
         stack.removeLast();
         addDefaultValueComment(path, defaultValue, min, max);
 
-        IntValue value = new IntValue(config, path, defaultValue);
+        IntValue value = new IntValue(config, path, defaultValue, min, max);
         configValues.add(value);
         return value;
     }
@@ -195,13 +198,13 @@ public class ConfigBuilder {
     public static class ConfigValue<T> {
 
         // the config, this setting is part of
-        private final Config config;
+        private final CommentedConfig config;
         private final List<String> path;
         private final T defaultValue;
         // cache te value to minimize config lookups
         private T cachedValue = null;
 
-        public ConfigValue(Config config, List<String> path, T defaultValue) {
+        public ConfigValue(CommentedConfig config, List<String> path, T defaultValue) {
             this.config = config;
             this.path = path;
             this.defaultValue = defaultValue;
@@ -225,32 +228,111 @@ public class ConfigBuilder {
             return defaultValue;
         }
 
+        public boolean isDefault() {
+            return Objects.equals(get(),  defaultValue);
+        }
+        public String getComment() {
+            return config.getComment(path);
+        }
+
         public String getPath() {
             return String.join(".", path);
         }
     }
 
     public static class BooleanValue extends ConfigValue<Boolean>{
-        public BooleanValue(Config config, List<String> path, boolean defaultValue) {
+        public BooleanValue(CommentedConfig config, List<String> path, boolean defaultValue) {
             super(config, path, defaultValue);
         }
     }
 
     public static class StringValue extends ConfigValue<String>{
-        public StringValue(Config config, List<String> path, String defaultValue) {
+        public StringValue(CommentedConfig config, List<String> path, String defaultValue) {
             super(config, path, defaultValue);
         }
     }
 
-    public static class IntValue extends ConfigValue<Integer>{
-        public IntValue(Config config, List<String> path, int defaultValue) {
+    public static class ListValue<T> extends ConfigValue<List<T>>{
+        public ListValue(CommentedConfig config, List<String> path, List<T> defaultValue) {
             super(config, path, defaultValue);
         }
     }
 
-    public static class DoubleValue extends ConfigValue<Double>{
-        public DoubleValue(Config config, List<String> path, double defaultValue) {
+    public static class InListValue<T> extends ConfigValue<T>{
+        private final Collection<? extends T> validValues;
+        public InListValue(CommentedConfig config, List<String> path, T defaultValue, Collection<? extends T> validValues) {
             super(config, path, defaultValue);
+            this.validValues = validValues;
+        }
+
+        public Collection<? extends T> getValidValues(){
+            return validValues;
+        }
+    }
+
+    public interface NumberValue<E extends Number>{
+        E getMin();
+        E getMax();
+        E get();
+        E reset();
+        void set(E newValue);
+        double normalize();
+        void fromNormalized(double value);
+    }
+
+    public static class IntValue extends ConfigValue<Integer> implements NumberValue<Integer> {
+
+        private final int min;
+        private final int max;
+
+        public IntValue(CommentedConfig config, List<String> path, int defaultValue, int min, int max) {
+            super(config, path, defaultValue);
+            this.min = min;
+            this.max = max;
+        }
+
+        public Integer getMin() {
+            return min;
+        }
+
+        public Integer getMax() {
+            return max;
+        }
+
+        public double normalize() {
+            return Mth.clamp((this.get() - min) / (double) (max - min), 0.0D, 1.0D);
+        }
+
+        public void fromNormalized(double value) {
+            double newValue = this.getMin() + (this.getMax() - this.getMin()) * value;
+            this.set(Mth.floor(newValue + 0.5));
+        }
+    }
+
+    public static class DoubleValue extends ConfigValue<Double> implements NumberValue<Double> {
+
+        private final double min;
+        private final double max;
+        public DoubleValue(CommentedConfig config, List<String> path, double defaultValue, double min, double max) {
+            super(config, path, defaultValue);
+            this.min = min;
+            this.max = max;
+        }
+        public Double getMin() {
+            return min;
+        }
+        public Double getMax() {
+            return max;
+        }
+        public double normalize() {
+            return Mth.clamp((this.get() - min) / (max - min), 0.0D, 1.0D);
+        }
+
+        public void fromNormalized(double value) {
+            double newValue = this.getMin() + (this.getMax() - this.getMin()) * value;
+            BigDecimal bd = BigDecimal.valueOf(newValue);
+            bd = bd.setScale(2, RoundingMode.HALF_UP);
+            this.set(bd.doubleValue());
         }
     }
 }
