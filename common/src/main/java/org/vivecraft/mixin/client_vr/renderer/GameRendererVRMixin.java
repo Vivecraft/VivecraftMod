@@ -605,7 +605,7 @@ public abstract class GameRendererVRMixin
             livingentity.setYRot(vrdata$vrdevicepose.getYaw());
             livingentity.yHeadRot = livingentity.getYRot();
             livingentity.yHeadRotO = livingentity.getYRot();
-            livingentity.eyeHeight = 0;
+            livingentity.eyeHeight = 0.0001F;
         }
     }
 

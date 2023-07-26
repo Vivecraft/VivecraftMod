@@ -57,7 +57,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
                 serverplayer.setYRot((float)Math.toDegrees(Math.atan2(-dir.x, dir.z)));
                 serverplayer.xRotO = serverplayer.getXRot();
                 serverplayer.yRotO = serverplayer.yHeadRotO = serverplayer.yHeadRot = serverplayer.getYRot();
-                serverplayer.eyeHeight = 0;
+                serverplayer.eyeHeight = 0.0001F;
                 serverviveplayer.offset = position.subtract(pos);
                 System.out.println("AimFix " + pos.x + " " + pos.y + " " + pos.z + " " + (float)Math.toDegrees(Math.asin(-dir.y)) + " " + (float)Math.toDegrees(Math.atan2(-dir.x, dir.z)));
             }
