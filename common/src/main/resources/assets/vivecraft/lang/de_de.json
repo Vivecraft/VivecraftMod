@@ -411,6 +411,8 @@
     "vivecraft.messages.novrhotswitching": "Dieser Server hat den VR Modus wechsel deaktiviert. Sie können den Modus nur im Hauptmenü wechseln.",
     "vivecraft.messages.updateAvailable": "§a[Vivecraft]§r Update verfügbar: %s. Klicke für mehr Details.",
     "vivecraft.messages.click": "Klicke für mehr Details.",
+    "vivecraft.messages.incompatiblesettings": "Inkompatible Einstellungen",
+    "vivecraft.messages.optifineaa": "Optifines Antialiasing ist nicht compatible mit VR. Um VR zu nutzen, deaktiviere Antialiasing und starte das Spiel neu.",
 
     "vivecraft.gui.update": "§aⓘ§r Update",
     "vivecraft.gui.vr": "%s VR: %s",

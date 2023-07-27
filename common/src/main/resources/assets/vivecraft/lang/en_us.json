@@ -411,6 +411,8 @@
     "vivecraft.messages.novrhotswitching": "This Server has VR hot switching disabled, you can only change it in the main menu.",
     "vivecraft.messages.updateAvailable": "§a[Vivecraft]§r Update available: %s. click for more details.",
     "vivecraft.messages.click": "Click for more details.",
+    "vivecraft.messages.incompatiblesettings": "Incompatible Settings",
+    "vivecraft.messages.optifineaa": "Optifine antialiasing is not compatible with VR. To use VR disable antialiasing and restart the game.",
 
     "vivecraft.gui.update": "§aⓘ§r Update",
     "vivecraft.gui.vr": "%s VR: %s",

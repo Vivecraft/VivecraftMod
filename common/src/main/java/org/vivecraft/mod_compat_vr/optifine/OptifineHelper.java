@@ -23,6 +23,8 @@ public class OptifineHelper {
     private static Method optifineConfigIsSunMoonEnabledMethod;
     private static Method optifineConfigIsStarsEnabledMethod;
     private static Method optifineConfigIsCustomColorsMethod;
+    private static Method optifineConfigIsAntialiasingMethod;
+    private static Method optifineConfigIsAntialiasingConfiguredMethod;
 
     private static Class<?> smartAnimations;
     private static Method smartAnimationsSpriteRenderedMethod;
@@ -45,7 +47,7 @@ public class OptifineHelper {
             // check for optifine with a class search
             try {
                 Class.forName("net.optifine.Config");
-                VRSettings.logger.info("Vivecraft: Optifine not detected");
+                VRSettings.logger.info("Vivecraft: Optifine detected");
                 optifineLoaded = true;
             } catch (ClassNotFoundException ignore) {
                 VRSettings.logger.info("Vivecraft: Optifine not detected");
@@ -105,6 +107,16 @@ public class OptifineHelper {
     public static boolean isRenderRegions() {
         try {
             return (boolean)optifineConfigIsRenderRegionsMethod.invoke(optifineConfig);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean isAntialiasing() {
+        try {
+            return (boolean)optifineConfigIsAntialiasingMethod.invoke(optifineConfig)
+                || (boolean)optifineConfigIsAntialiasingConfiguredMethod.invoke(optifineConfig);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
@@ -209,6 +221,8 @@ public class OptifineHelper {
             optifineConfigIsSunMoonEnabledMethod = optifineConfig.getMethod("isSunMoonEnabled");
             optifineConfigIsStarsEnabledMethod = optifineConfig.getMethod("isStarsEnabled");
             optifineConfigIsCustomColorsMethod = optifineConfig.getMethod("isCustomColors");
+            optifineConfigIsAntialiasingMethod = optifineConfig.getMethod("isAntialiasing");
+            optifineConfigIsAntialiasingConfiguredMethod = optifineConfig.getMethod("isAntialiasingConfigured");
 
             smartAnimations = Class.forName("net.optifine.SmartAnimations");
             smartAnimationsSpriteRenderedMethod = smartAnimations.getMethod("spriteRendered", TextureAtlasSprite.class);

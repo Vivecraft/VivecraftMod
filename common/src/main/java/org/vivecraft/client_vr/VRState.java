@@ -11,6 +11,7 @@ import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 public class VRState {
 
@@ -23,6 +24,10 @@ public class VRState {
             return;
         }
         try {
+            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isAntialiasing()) {
+                throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblesettings").getString(), Component.translatable("vivecraft.messages.optifineaa"));
+            }
+
             vrInitialized = true;
             ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
             if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
@@ -69,9 +74,9 @@ public class VRState {
 
             dh.menuWorldRenderer.init();
         } catch (RenderConfigException renderConfigException) {
-            Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
             vrEnabled = false;
             destroyVR(true);
+            Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
         }
     }
 
