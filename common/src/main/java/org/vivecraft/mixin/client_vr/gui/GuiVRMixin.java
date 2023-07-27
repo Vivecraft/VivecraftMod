@@ -173,7 +173,7 @@ public abstract class GuiVRMixin implements GuiExtension {
             int y = this.minecraft.getWindow().getGuiScaledHeight() - 39;
 
             if (k == -1) {
-                guiGraphics.renderItemDecorations(this.minecraft.font, new ItemStack(Items.ELYTRA), x, y);
+                guiGraphics.renderFakeItem(new ItemStack(Items.ELYTRA), x, y);
                 mobeffect = null;
             }
             else if (k == -2) {
@@ -184,7 +184,7 @@ public abstract class GuiVRMixin implements GuiExtension {
                 else {
                     mobeffect = null;
                 }
-                guiGraphics.renderItemDecorations(this.minecraft.font, new ItemStack(Items.RABBIT_FOOT), x2, y);
+                guiGraphics.renderFakeItem(new ItemStack(Items.RABBIT_FOOT), x2, y);
             }
             if (mobeffect != null) {
                 TextureAtlasSprite textureatlassprite = this.minecraft.getMobEffectTextures().get(mobeffect);
