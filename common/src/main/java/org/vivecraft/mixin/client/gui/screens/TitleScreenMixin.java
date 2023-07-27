@@ -13,7 +13,6 @@ import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client.gui.screens.UpdateScreen;
-import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {

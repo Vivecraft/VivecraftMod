@@ -65,7 +65,6 @@ import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.extensions.*;
 import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
 import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
-import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 import org.vivecraft.client_vr.VRState;

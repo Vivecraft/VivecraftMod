@@ -1,6 +1,5 @@
 package org.vivecraft.mod_compat_vr.optifine;
 
-import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
