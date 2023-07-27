@@ -1,12 +1,12 @@
 #version 150 core
 
- uniform float texelWidthOffset;
- uniform float texelHeightOffset;
-uniform mat4 projection;
-uniform mat4 modelView;
+uniform float texelWidthOffset;
+uniform float texelHeightOffset;
+
 in vec3 Position;
 in vec2 UV0;
- out vec2 centerTextureCoordinate;
+
+out vec2 centerTextureCoordinate;
 out vec2 oneStepLeftTextureCoordinate;
 out vec2 twoStepsLeftTextureCoordinate;
 out vec2 threeStepsLeftTextureCoordinate;
@@ -18,7 +18,7 @@ out vec2 fourStepsRightTextureCoordinate;
 
  void main()
  {
-	 gl_Position = projection * modelView * vec4(Position, 1.0);
+	 gl_Position = vec4(Position, 1.0);
 
 	 vec2 firstOffset = vec2(texelWidthOffset, texelHeightOffset);
 	 vec2 secondOffset = vec2(2.0 * texelWidthOffset, 2.0 * texelHeightOffset);

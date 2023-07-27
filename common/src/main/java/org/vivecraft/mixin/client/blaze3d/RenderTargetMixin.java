@@ -30,8 +30,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Shadow
 	public int frameBufferId;
 	@Shadow
-	protected int depthBufferId;
-	@Shadow
 	public boolean useDepth;
 	@Shadow
 	public int width;
@@ -65,11 +63,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Overwrite
 	public void blitToScreen(int pWidth, int pHeight, boolean p_83960_) {
 		this.blitToScreen(0, pWidth, pHeight, 0, p_83960_, 0.0F, 0.0F, false);
-	}
-	
-	@Override
-	public int getDepthBufferId() {
-		return depthBufferId;
 	}
 
 	@Override
