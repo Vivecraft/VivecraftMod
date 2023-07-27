@@ -14,7 +14,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 
 public class MenuWorldDownloader {
 	private static final String baseUrl = "https://cache.techjargaming.com/vivecraft/115/";
-	public static final String customWorldFolder = "menuworlds/customV5";
+	public static final String customWorldFolder = "menuworlds/custom_119";
 
 	private static String lastWorld = "";
 	private static boolean init;
