@@ -205,12 +205,12 @@ public class FakeBlockAccess implements LevelReader {
 	@Override
 	public int getBrightness(LightLayer type, BlockPos pos) {
 		if (!checkCoords(pos))
-			return (type != LightLayer.SKY || !this.dimensionType.hasSkyLight()) && type != LightLayer.BLOCK ? 0 : type.surrounding;
+			return 0;
 
 		if (type == LightLayer.SKY)
 			return this.dimensionType.hasSkyLight() ? skylightmap[encodeCoords(pos)] : 0;
 		else
-			return type == LightLayer.BLOCK ? blocklightmap[encodeCoords(pos)] : type.surrounding;
+			return type == LightLayer.BLOCK ? blocklightmap[encodeCoords(pos)] : 0;
 	}
 
 	@Override

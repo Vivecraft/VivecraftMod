@@ -115,14 +115,14 @@ public abstract class GuiVRMixin implements GuiExtension {
     }
 
     @Inject(at = @At("HEAD"), method = "renderHotbar", cancellable = true)
-    public void notHotbarOnScreens(float f, PoseStack poseStack, CallbackInfo ci) {
+    public void notHotbarOnScreens(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning && minecraft.screen != null) {
             ci.cancel();
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2, shift = At.Shift.BEFORE), method = "renderHotbar")
-    public void renderVRHotbarLeft(float f, PoseStack poseStack, CallbackInfo ci) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 2, shift = At.Shift.BEFORE), method = "renderHotbar")
+    public void renderVRHotbarLeft(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9 && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)) {
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         }

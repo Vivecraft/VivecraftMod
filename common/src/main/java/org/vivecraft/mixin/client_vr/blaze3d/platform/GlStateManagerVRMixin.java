@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.*;
-import org.vivecraft.client.VivecraftVRMod;
 
 import static com.mojang.blaze3d.platform.GlStateManager.BLEND;
 import static com.mojang.blaze3d.platform.GlStateManager.glBlendFuncSeparate;

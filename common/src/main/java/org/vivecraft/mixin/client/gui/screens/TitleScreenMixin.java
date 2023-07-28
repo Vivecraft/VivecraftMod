@@ -1,6 +1,5 @@
 package org.vivecraft.mixin.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.*;
@@ -79,7 +78,7 @@ public abstract class TitleScreenMixin extends Screen {
         }
         if (VRState.vrInitialized && !VRState.vrRunning) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
-            renderTooltip(poseStack, font.split(hotswitchMessage, 280), width / 2 - 140 - 12, 17);
+            guiGraphics.renderTooltip(font, font.split(hotswitchMessage, 280), width / 2 - 140 - 12, 17);
         }
     }
 

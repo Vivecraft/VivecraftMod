@@ -295,8 +295,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     public void doDrag() {
         float friction = 0.91F;
 
-        if (this.onGround) {
-            friction = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.91F;
+        if (this.onGround()) {
+            friction = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.91F;
         }
         double xFactor = friction;
         double zFactor = friction;

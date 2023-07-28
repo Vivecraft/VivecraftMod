@@ -3,7 +3,6 @@ package org.vivecraft.client.gui.settings;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -31,7 +30,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
     }
 
     @Override
-    protected void renderSelection(PoseStack poseStack, int i, int j, int k, int l, int m) {
+    protected void renderSelection(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
     }
 
     public class CommandEntry extends Entry<CommandEntry>

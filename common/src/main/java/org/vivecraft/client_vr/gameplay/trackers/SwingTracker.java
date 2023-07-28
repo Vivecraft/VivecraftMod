@@ -2,9 +2,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import java.util.List;
 
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;

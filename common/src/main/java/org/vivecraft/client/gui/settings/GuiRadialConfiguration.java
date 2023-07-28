@@ -6,8 +6,6 @@ import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionLayout;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;

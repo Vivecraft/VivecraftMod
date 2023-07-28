@@ -322,7 +322,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     // on first resource load finished
     @Inject(at = @At("HEAD"), method = {
         "method_24040", // fabric
-        "lambda$new$3"} // forge
+        "lambda$new$4"} // forge
         , remap = false)
     public void initVROnLaunch(CallbackInfo ci) {
         // init vr after resource loading
@@ -1027,7 +1027,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
                         if (isLocalServer())
                         {
-                            final Level level = getSingleplayerServer().getLevel(player.level.dimension());
+                            final Level level = getSingleplayerServer().getLevel(player.level().dimension());
                             CompletableFuture<Throwable> completablefuture = getSingleplayerServer().submit(() -> {
                                 try
                                 {
