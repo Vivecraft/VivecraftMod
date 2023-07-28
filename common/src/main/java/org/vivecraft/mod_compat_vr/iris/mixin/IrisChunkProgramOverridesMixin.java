@@ -31,7 +31,7 @@ import java.util.EnumMap;
 @Mixin(IrisChunkProgramOverrides.class)
 public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverridesExtension {
 
-    @Shadow
+    @Shadow(remap = false)
     @Final
     private EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> programs;
 
