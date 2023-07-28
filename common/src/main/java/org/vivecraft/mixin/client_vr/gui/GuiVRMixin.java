@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.client_vr.gui;
 
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -80,6 +81,11 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
+    }
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getSleepTimer()I"), method = "render")
+    public int noSleepOverlay(LocalPlayer instance) {
+        return VRState.vrRunning ? 0 : instance.getSleepTimer();
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"), method = "render")

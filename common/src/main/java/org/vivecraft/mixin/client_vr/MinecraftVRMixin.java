@@ -1309,7 +1309,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 }
 
                 if (this.player.isSleeping() && (double) black < 0.8D) {
-                    black = 0.8F;
+                    black = 0.5F + 0.3F * this.player.getSleepTimer() * 0.01F;
                 }
 
                 if (ClientDataHolderVR.getInstance().vr.isWalkingAbout && (double) black < 0.8D) {
