@@ -78,7 +78,7 @@ public abstract class TitleScreenMixin extends Screen {
         }
         if (VRState.vrInitialized && !VRState.vrRunning) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
-            renderTooltip(poseStack, hotswitchMessage, width / 2 - font.width(hotswitchMessage) / 2, 20);
+            renderTooltip(poseStack, font.split(hotswitchMessage, 280), width / 2 - 140 - 12, 17);
         }
     }
 
