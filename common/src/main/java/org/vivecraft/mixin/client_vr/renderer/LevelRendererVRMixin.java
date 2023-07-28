@@ -164,6 +164,15 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"), method = "renderLevel")
+    public boolean noPlayerWhenSleeping(LivingEntity instance) {
+        if (!RenderPassType.isVanilla()) {
+            return false;
+        } else {
+            return instance.isSleeping();
+        }
+    }
+
     // TODO: could this mess with mods?
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", ordinal = 0), method = "renderLevel")
     public Entity captureEntityRestoreLoc(Entity entity, PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer) {
