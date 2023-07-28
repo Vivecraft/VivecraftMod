@@ -76,6 +76,10 @@ public abstract class TitleScreenMixin extends Screen {
         if (vrModeButton.isMouseOver(i, j)) {
             renderTooltip(poseStack, font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
         }
+        if (VRState.vrInitialized && !VRState.vrRunning) {
+            Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
+            renderTooltip(poseStack, hotswitchMessage, width / 2 - font.width(hotswitchMessage) / 2, 20);
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), method = "render")

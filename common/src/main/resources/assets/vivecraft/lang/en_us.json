@@ -409,6 +409,7 @@
     "vivecraft.messages.mode": "Mode:",
     "vivecraft.messages.novrhotswitchinglegacy": "Legacy Vivecraft server mod detected. This Server does not support VR hot switching, you can only change it in the main menu.",
     "vivecraft.messages.novrhotswitching": "This Server has VR hot switching disabled, you can only change it in the main menu.",
+    "vivecraft.messages.vrhotswitchinginfo": "VR Hotswitching enabled: Put on your headset to swtich to VR",
     "vivecraft.messages.updateAvailable": "§a[Vivecraft]§r Update available: %s. click for more details.",
     "vivecraft.messages.click": "Click for more details.",
     "vivecraft.messages.incompatiblesettings": "Incompatible Settings",
