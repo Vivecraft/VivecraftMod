@@ -66,6 +66,7 @@ import org.vivecraft.client_vr.extensions.*;
 import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
 import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -330,6 +331,16 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
         // set initial resourcepacks
         resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
+
+        if (OptifineHelper.isOptifineLoaded() && ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
+            // with optifine this texture somehow fails to load, so manually reload it
+            try {
+                textureManager.getTexture(Gui.GUI_ICONS_LOCATION).load(resourceManager);
+            } catch (IOException e) {
+                // if there was an error, just reload everything
+                reloadResourcePacks();
+            }
+        }
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
