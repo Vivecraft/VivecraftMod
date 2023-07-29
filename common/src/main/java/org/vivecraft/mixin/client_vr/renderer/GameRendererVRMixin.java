@@ -642,6 +642,7 @@ public abstract class GameRendererVRMixin
         SetupRenderingAtController(c, poseStack);
 
         if (this.minecraft.getOverlay() == null) {
+            this.minecraft.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
             RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
         }
 
