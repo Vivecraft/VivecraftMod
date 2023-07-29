@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[45]"
+loaderVersion = "[45,46)"
 #issueTrackerURL = ""
 license = "LGPLv3"
 
@@ -18,7 +18,7 @@ The VR mod for any loader!
 [[dependencies.vivecraft]]
 modId = "forge"
 mandatory = true
-versionRange = "[45]"
+versionRange = "[45,46)"
 ordering = "NONE"
 side = "BOTH"
 
