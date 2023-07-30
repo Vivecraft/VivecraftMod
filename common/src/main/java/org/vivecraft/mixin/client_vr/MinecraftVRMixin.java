@@ -378,6 +378,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             } else {
                 GuiHandler.guiPos_room = null;
                 GuiHandler.guiRotation_room = null;
+                GuiHandler.guiScale = 1.0F;
                 if (player != null) {
                     VRPlayersClient.getInstance().disableVR(player.getUUID());
                 }
