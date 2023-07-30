@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import javax.annotation.Nullable;
 
@@ -202,12 +203,19 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             double d = vec3.x();
             double e = vec3.y();
             double g = vec3.z();
+            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+                OptifineHelper.beginOutlineShader();
+            }
             for (int c = 0; c < 2; c++) {
                 if (ClientDataHolderVR.getInstance().interactTracker.isInteractActive(c) && (ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null || ClientDataHolderVR.getInstance().interactTracker.bukkit[c])) {
                     BlockPos blockpos = ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
                     BlockState blockstate = this.level.getBlockState(blockpos);
                     this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
                 }
+            }
+            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+                this.renderBuffers.bufferSource().endBatch(RenderType.lines());
+                OptifineHelper.endOutlineShader();
             }
             // reset outline color
             selR = selG = selB = 0f;

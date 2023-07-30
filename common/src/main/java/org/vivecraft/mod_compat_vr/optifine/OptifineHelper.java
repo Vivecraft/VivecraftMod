@@ -38,6 +38,10 @@ public class OptifineHelper {
     private static Method customColorsGetFogColorEndMethod;
     private static Method customColorsGetFogColorNetherMethod;
 
+    private static Class<?> optifineShadersRender;
+    private static Method beginOutlineMethod;
+    private static Method endOutlineMethod;
+
     private static Field optionsOfRenderRegions;
     private static Field optionsOfCloudHeight;
 
@@ -66,6 +70,22 @@ public class OptifineHelper {
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public static void beginOutlineShader() {
+        try {
+            beginOutlineMethod.invoke(optifineShadersRender);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void endOutlineShader() {
+        try {
+            endOutlineMethod.invoke(optifineShadersRender);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
@@ -235,6 +255,10 @@ public class OptifineHelper {
 
             customColorsGetUnderwaterColorMethod = customColors.getMethod("getUnderwaterColor", BlockAndTintGetter.class, double.class, double.class, double.class);
             customColorsGetUnderlavaColorMethod = customColors.getMethod("getUnderlavaColor", BlockAndTintGetter.class, double.class, double.class, double.class);
+
+            optifineShadersRender = Class.forName("net.optifine.shaders.ShadersRender");
+            beginOutlineMethod = optifineShadersRender.getMethod("beginOutline");
+            endOutlineMethod = optifineShadersRender.getMethod("endOutline");
 
             // private methods
             customColorsGetSkyColoEndMethod = customColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);
