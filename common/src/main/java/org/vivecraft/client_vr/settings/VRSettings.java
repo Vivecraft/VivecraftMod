@@ -203,6 +203,8 @@ public class VRSettings
     public int hrtfSelection = 0;
     @SettingField(VrOptions.RIGHT_CLICK_DELAY)
     public RightClickDelay rightclickDelay = RightClickDelay.VANILLA;
+    @SettingField(VrOptions.INGAME_BINDINGS_IN_GUI)
+    public boolean ingameBindingsInGui = false;
     @SettingField(VrOptions.THIRDPERSON_ITEMTRANSFORMS)
     public boolean thirdPersonItems = false;
     //
@@ -1528,6 +1530,7 @@ public class VRSettings
                 return I18n.get("vivecraft.options." + name());
             }
         },
+        INGAME_BINDINGS_IN_GUI(false, true),
         RIGHT_CLICK_DELAY(false, false); // Right Click Repeat
 //        ANISOTROPIC_FILTERING("options.anisotropicFiltering", true, false, 1.0F, 16.0F, 0.0F)
 //                {
