@@ -18,7 +18,7 @@ public class GuiVRControls extends GuiVROptionsBase
             new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
             new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
             new VROptionEntry(VRSettings.VrOptions.DUMMY),
-        new VROptionEntry(VRSettings.VrOptions.INGAME_BINDINGS_IN_GUI),
+            new VROptionEntry(VRSettings.VrOptions.INGAME_BINDINGS_IN_GUI),
             new VROptionEntry(VRSettings.VrOptions.REVERSE_HANDS),
             new VROptionEntry(VRSettings.VrOptions.RIGHT_CLICK_DELAY),
             new VROptionEntry(VRSettings.VrOptions.ALLOW_ADVANCED_BINDINGS),
