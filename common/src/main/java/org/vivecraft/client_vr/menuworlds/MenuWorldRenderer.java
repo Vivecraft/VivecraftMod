@@ -252,7 +252,7 @@ public class MenuWorldRenderer {
 				// disable liquid chunk wrapping
 				ClientDataHolderVR.getInstance().skipStupidGoddamnChunkBoundaryClipping = true;
 
-				if (!SodiumHelper.isLoaded() || SodiumHelper.hasIssuesWithParallelBlockBuilding()) {
+				if (!SodiumHelper.isLoaded() || !SodiumHelper.hasIssuesWithParallelBlockBuilding()) {
 					// generate the data in parallel
 					List<CompletableFuture<Pair<RenderType, BufferBuilder.RenderedBuffer>>> futures = new ArrayList<>();
 					for (RenderType layer : layers) {
