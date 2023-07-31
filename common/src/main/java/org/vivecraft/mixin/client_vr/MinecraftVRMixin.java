@@ -1252,7 +1252,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
             if (this.player != null && this.level != null) {
                 if (((GameRendererExtension) this.gameRenderer)
-                        .isInWater() != ((GameRendererExtension) this.gameRenderer).isInWater()) {
+                        .wasInWater() != ((GameRendererExtension) this.gameRenderer).isInWater()) {
                     ClientDataHolderVR.getInstance().watereffect = 2.3F;
                 } else {
                     if (((GameRendererExtension) this.gameRenderer).isInWater()) {
