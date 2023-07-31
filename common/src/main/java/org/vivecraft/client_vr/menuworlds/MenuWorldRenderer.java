@@ -249,80 +249,28 @@ public class MenuWorldRenderer {
 				vertexBuffers = new HashMap<>();
 				animatedSprites = new HashSet<>();
 
-				BlockRenderDispatcher blockRenderer = mc.getBlockRenderer();
-
-				List<CompletableFuture<Pair<RenderType,BufferBuilder.RenderedBuffer>>> futures = new ArrayList<>();
-
 				// disable liquid chunk wrapping
 				ClientDataHolderVR.getInstance().skipStupidGoddamnChunkBoundaryClipping = true;
 
-				int renderDistSquare = (renderDistance + 1) * (renderDistance + 1);
-
-				for (RenderType layer : layers) {
+				if (!SodiumHelper.isLoaded() || SodiumHelper.hasIssuesWithParallelBlockBuilding()) {
 					// generate the data in parallel
-					futures.add(CompletableFuture.supplyAsync(() -> {
-						PoseStack thisPose = new PoseStack();
-
-						BufferBuilder vertBuffer = new BufferBuilder(20 * 2097152);
-						vertBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-						RandomSource randomSource = RandomSource.create();
-						int c = 0;
-						for (int x = -blockAccess.getXSize()/2; x < blockAccess.getXSize()/2; x++) {
-							for (int y = (int)-blockAccess.getGround(); y < blockAccess.getYSize()-(int)blockAccess.getGround(); y++) {
-								// don't build unnecessary blocks in tall worlds
-								if (Mth.abs(y) > renderDistance + 1)
-									continue;
-								for (int z = -blockAccess.getZSize()/2; z < blockAccess.getZSize()/2; z++) {
-									// don't build unnecessary blocks in fog
-									if (Mth.lengthSquared(x, z) > renderDistSquare)
-										continue;
-
-									BlockPos pos = new BlockPos(x, y, z);
-									BlockState state = blockAccess.getBlockState(pos);
-									if (state != null) {
-										FluidState fluidState = state.getFluidState();
-										if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
-											for (var sprite : Xplat.getFluidTextures(blockAccess, pos, fluidState)){
-												if (sprite != null && sprite.contents().getUniqueFrames().sum() > 1) {
-													animatedSprites.add(sprite);
-												}
-											}
-											blockRenderer.renderLiquid(pos, blockAccess, vertBuffer, state, new FluidStateWrapper(fluidState));
-											c++;
-										}
-										if (state.getRenderShape() != RenderShape.INVISIBLE && ItemBlockRenderTypes.getChunkRenderType(state) == layer) {
-											for (var quad : mc.getModelManager().getBlockModelShaper().getBlockModel(state).getQuads(state, null, randomSource)){
-												if (quad.getSprite().contents().getUniqueFrames().sum() > 1) {
-													animatedSprites.add(quad.getSprite());
-												}
-											}
-											thisPose.pushPose();
-											thisPose.translate(pos.getX(), pos.getY(), pos.getZ());
-											blockRenderer.renderBatched(state, pos, blockAccess, thisPose, vertBuffer, true, randomSource);
-											c++;
-											thisPose.popPose();
-										}
-									}
-								}
-							}
+					List<CompletableFuture<Pair<RenderType, BufferBuilder.RenderedBuffer>>> futures = new ArrayList<>();
+					for (RenderType layer : layers) {
+						futures.add(CompletableFuture.supplyAsync(() -> buildGeometryLayer(layer), Util.backgroundExecutor()));
+					}
+					for (Future<Pair<RenderType, BufferBuilder.RenderedBuffer>> future : futures) {
+						try {
+							Pair<RenderType, BufferBuilder.RenderedBuffer> pair = future.get();
+							uploadGeometry(pair.getLeft(), pair.getRight());
+						} catch (ExecutionException | InterruptedException e) {
+							throw new RuntimeException(e);
 						}
-						VRSettings.logger.info("Built " + c + " blocks.");
-						if (layer == RenderType.translucent()) {
-							vertBuffer.setQuadSortOrigin(0, Mth.frac(blockAccess.getGround()), 0);
-						}
-						return Pair.of(layer,vertBuffer.end());
-					}, Util.backgroundExecutor()));
-				}
-				for (Future<Pair<RenderType,BufferBuilder.RenderedBuffer>> future : futures) {
-					try {
-						Pair<RenderType, BufferBuilder.RenderedBuffer> pair = future.get();
-						VertexBuffer buffer = new VertexBuffer();
-						buffer.bind();
-						buffer.upload(pair.getRight());
-						VertexBuffer.unbind();
-						vertexBuffers.put(pair.getLeft(), buffer);
-					} catch (ExecutionException | InterruptedException e) {
-						throw new RuntimeException(e);
+					}
+				} else {
+					// generate the data in series
+					for (RenderType layer : layers) {
+						Pair<RenderType, BufferBuilder.RenderedBuffer> pair = buildGeometryLayer(layer);
+						uploadGeometry(pair.getLeft(), pair.getRight());
 					}
 				}
 
@@ -337,6 +285,70 @@ public class MenuWorldRenderer {
 			}
 		}
 	}
+
+	private Pair<RenderType, BufferBuilder.RenderedBuffer> buildGeometryLayer(RenderType layer) {
+		PoseStack thisPose = new PoseStack();
+		int renderDistSquare = (renderDistance + 1) * (renderDistance + 1);
+		BlockRenderDispatcher blockRenderer = mc.getBlockRenderer();
+
+		BufferBuilder vertBuffer = new BufferBuilder(20 * 2097152);
+		vertBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+		RandomSource randomSource = RandomSource.create();
+		int c = 0;
+		for (int x = -blockAccess.getXSize() / 2; x < blockAccess.getXSize() / 2; x++) {
+			for (int y = (int) -blockAccess.getGround(); y < blockAccess.getYSize() - (int) blockAccess.getGround(); y++) {
+				// don't build unnecessary blocks in tall worlds
+				if (Mth.abs(y) > renderDistance + 1)
+					continue;
+				for (int z = -blockAccess.getZSize() / 2; z < blockAccess.getZSize() / 2; z++) {
+					// don't build unnecessary blocks in fog
+					if (Mth.lengthSquared(x, z) > renderDistSquare)
+						continue;
+
+					BlockPos pos = new BlockPos(x, y, z);
+					BlockState state = blockAccess.getBlockState(pos);
+					if (state != null) {
+						FluidState fluidState = state.getFluidState();
+						if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
+							for (var sprite : Xplat.getFluidTextures(blockAccess, pos, fluidState)) {
+								if (sprite != null && sprite.contents().getUniqueFrames().sum() > 1) {
+									animatedSprites.add(sprite);
+								}
+							}
+							blockRenderer.renderLiquid(pos, blockAccess, vertBuffer, state, new FluidStateWrapper(fluidState));
+							c++;
+						}
+						if (state.getRenderShape() != RenderShape.INVISIBLE && ItemBlockRenderTypes.getChunkRenderType(state) == layer) {
+							for (var quad : mc.getModelManager().getBlockModelShaper().getBlockModel(state).getQuads(state, null, randomSource)) {
+								if (quad.getSprite().contents().getUniqueFrames().sum() > 1) {
+									animatedSprites.add(quad.getSprite());
+								}
+							}
+							thisPose.pushPose();
+							thisPose.translate(pos.getX(), pos.getY(), pos.getZ());
+							blockRenderer.renderBatched(state, pos, blockAccess, thisPose, vertBuffer, true, randomSource);
+							c++;
+							thisPose.popPose();
+						}
+					}
+				}
+			}
+		}
+		VRSettings.logger.info("Built " + c + " blocks.");
+		if (layer == RenderType.translucent()) {
+			vertBuffer.setQuadSortOrigin(0, Mth.frac(blockAccess.getGround()), 0);
+		}
+		return Pair.of(layer, vertBuffer.end());
+	}
+
+	private void uploadGeometry(RenderType layer, BufferBuilder.RenderedBuffer renderedBuffer) {
+		VertexBuffer buffer = new VertexBuffer();
+		buffer.bind();
+		buffer.upload(renderedBuffer);
+		VertexBuffer.unbind();
+		vertexBuffers.put(layer, buffer);
+	}
+
 
 	public void destroy() {
 		if (vertexBuffers != null) {
