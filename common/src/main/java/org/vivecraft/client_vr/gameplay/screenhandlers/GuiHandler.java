@@ -459,6 +459,11 @@ public class GuiHandler
         {
   			//naughty mods!
             onScreenChanged((Screen)null, mc.screen, false);
+        } else if (mc.screen == null && guiPos_room != null)
+        {
+            //even naughtier mods!
+            // someone canceled the setScreen, so guiPos didn't get reset
+            onScreenChanged((Screen)null, null, false);
         }
 
         Vec3 guipos = guiPos_room;
