@@ -994,6 +994,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
         if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && level != null && player != null)
         {
+            Throwable error = null;
             try
             {
                 final BlockPos blockpos = player.blockPosition();
@@ -1015,7 +1016,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                         if (isLocalServer())
                         {
                             final Level level = getSingleplayerServer().getLevel(player.level.dimension());
-                            CompletableFuture<Void> completablefuture = getSingleplayerServer().submit(() -> {
+                            CompletableFuture<Throwable> completablefuture = getSingleplayerServer().submit(() -> {
                                 try
                                 {
                                     MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset, size, size, blockpos.getY(), file2);
@@ -1023,13 +1024,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                                 catch (Throwable throwable)
                                 {
                                     throwable.printStackTrace();
+                                    return throwable;
                                 }
+                                return null;
                             });
 
-                            while (!completablefuture.isDone())
-                            {
-                                Thread.sleep(10L);
-                            }
+                            error = completablefuture.get();
                         }
                         else
                         {
@@ -1037,17 +1037,24 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                             gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
                         }
 
-                        gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", size)));
-                        gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
+                        if (error == null) {
+                            gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.1", size));
+                            gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
+                        }
                         break;
                     }
 
                     ++i;
                 }
             }
-            catch (Exception exception)
+            catch (Throwable throwable)
             {
-                exception.printStackTrace();
+                throwable.printStackTrace();
+                error = throwable;
+            } finally {
+                if (error != null) {
+                    gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexporterror", error.getMessage()));
+                }
             }
         }
 

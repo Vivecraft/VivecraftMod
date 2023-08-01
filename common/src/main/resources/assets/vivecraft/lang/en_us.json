@@ -416,6 +416,7 @@
     "vivecraft.messages.click": "Click for more details.",
     "vivecraft.messages.incompatiblesettings": "Incompatible Settings",
     "vivecraft.messages.optifineaa": "Optifine antialiasing is not compatible with VR. To use VR disable antialiasing and restart the game.",
+    "vivecraft.messages.menuworldexporterror": "World export failed with error: %s",
 
     "vivecraft.gui.update": "§aⓘ§r Update",
     "vivecraft.gui.vr": "%s VR: %s",
