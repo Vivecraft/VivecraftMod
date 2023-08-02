@@ -2,6 +2,7 @@ package org.vivecraft.mod_compat_vr.optifine;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
@@ -38,12 +39,13 @@ public class OptifineHelper {
     private static Method customColorsGetFogColorEndMethod;
     private static Method customColorsGetFogColorNetherMethod;
 
-    private static Class<?> optifineShadersRender;
-    private static Method beginOutlineMethod;
-    private static Method endOutlineMethod;
+    private static Class<?> shadersRender;
+    private static Method shadersRenderBeginOutlineMethod;
+    private static Method shadersRenderEndOutlineMethod;
 
     private static Field optionsOfRenderRegions;
     private static Field optionsOfCloudHeight;
+    private static Field vertexRenderPositions;
 
     public static boolean isOptifineLoaded() {
         if (!checkedForOptifine) {
@@ -75,7 +77,7 @@ public class OptifineHelper {
 
     public static void beginOutlineShader() {
         try {
-            beginOutlineMethod.invoke(optifineShadersRender);
+            shadersRenderBeginOutlineMethod.invoke(shadersRender);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -83,7 +85,7 @@ public class OptifineHelper {
 
     public static void endOutlineShader() {
         try {
-            endOutlineMethod.invoke(optifineShadersRender);
+            shadersRenderEndOutlineMethod.invoke(shadersRender);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -232,6 +234,16 @@ public class OptifineHelper {
         }
     }
 
+    public static void copyRenderPositions(ModelPart.Vertex source, ModelPart.Vertex dest) {
+        if (vertexRenderPositions != null) {
+            try {
+                vertexRenderPositions.set(dest, vertexRenderPositions.get(source));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private static void init() {
         try {
             optifineConfig = Class.forName("net.optifine.Config");
@@ -256,9 +268,9 @@ public class OptifineHelper {
             customColorsGetUnderwaterColorMethod = customColors.getMethod("getUnderwaterColor", BlockAndTintGetter.class, double.class, double.class, double.class);
             customColorsGetUnderlavaColorMethod = customColors.getMethod("getUnderlavaColor", BlockAndTintGetter.class, double.class, double.class, double.class);
 
-            optifineShadersRender = Class.forName("net.optifine.shaders.ShadersRender");
-            beginOutlineMethod = optifineShadersRender.getMethod("beginOutline");
-            endOutlineMethod = optifineShadersRender.getMethod("endOutline");
+            shadersRender = Class.forName("net.optifine.shaders.ShadersRender");
+            shadersRenderBeginOutlineMethod = shadersRender.getMethod("beginOutline");
+            shadersRenderEndOutlineMethod = shadersRender.getMethod("endOutline");
 
             // private methods
             customColorsGetSkyColoEndMethod = customColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);
@@ -269,6 +281,13 @@ public class OptifineHelper {
             customColorsGetFogColorEndMethod.setAccessible(true);
             customColorsGetFogColorNetherMethod = customColors.getDeclaredMethod("getFogColorNether", Vec3.class);
             customColorsGetFogColorNetherMethod.setAccessible(true);
+
+            try {
+                vertexRenderPositions = ModelPart.Vertex.class.getField("renderPositions");
+            } catch (NoSuchFieldException e) {
+                // this version doesn't have the entity render improvements
+                vertexRenderPositions = null;
+            }
 
         } catch (ClassNotFoundException e) {
             VRSettings.logger.error("Optifine detected, but couldn't load class: {}", e.getMessage());
