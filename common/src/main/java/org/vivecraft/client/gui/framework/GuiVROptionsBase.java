@@ -261,11 +261,6 @@ public abstract class GuiVROptionsBase extends Screen
 
         if (abstractwidget != null)
         {
-            if (!(abstractwidget instanceof GuiVROptionSlider))
-            {
-                abstractwidget.playDownSound(this.minecraft.getSoundManager());
-            }
-
             if (pMouseY == 0)
             {
                 this.actionPerformed(abstractwidget);
