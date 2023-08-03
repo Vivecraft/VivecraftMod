@@ -54,10 +54,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client.Xevents;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -82,6 +81,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
 
 import java.nio.file.Path;
+import java.util.Calendar;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererVRMixin
@@ -94,8 +94,6 @@ public abstract class GameRendererVRMixin
     public Vec3 crossVec;
     @Unique
     public Matrix4f thirdPassProjectionMatrix = new Matrix4f();
-    @Unique
-    public boolean menuWorldFastTime;
     @Unique
     public boolean inwater;
     @Unique
@@ -608,7 +606,7 @@ public abstract class GameRendererVRMixin
             livingentity.setYRot(vrdata$vrdevicepose.getYaw());
             livingentity.yHeadRot = livingentity.getYRot();
             livingentity.yHeadRotO = livingentity.getYRot();
-            livingentity.eyeHeight = 0;
+            livingentity.eyeHeight = 0.0001F;
         }
     }
 
@@ -645,6 +643,7 @@ public abstract class GameRendererVRMixin
         SetupRenderingAtController(c, poseStack);
 
         if (this.minecraft.getOverlay() == null) {
+            this.minecraft.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
             RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
         }
 
@@ -669,11 +668,8 @@ public abstract class GameRendererVRMixin
         if (this.minecraft.level != null) {
             float f = (float) this.minecraft.level.getMaxLocalRawBrightness(
                     BlockPos.containing(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition()));
-            // int i = Config.isShaders() ? 8 : 4; TODO
-            int i = 4;
-            if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
-                i = IrisHelper.ShaderLight();
-            }
+
+            int i = ShadersHelper.ShaderLight();
 
             if (f < (float) i) {
                 f = (float) i;
@@ -804,11 +800,6 @@ public abstract class GameRendererVRMixin
     @Override
     public Vec3 getCrossVec() {
         return crossVec;
-    }
-
-    @Override
-    public void setMenuWorldFastTime(boolean b) {
-        this.menuWorldFastTime = b;
     }
 
     @Override
@@ -1223,11 +1214,7 @@ public abstract class GameRendererVRMixin
                     vec3 = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition();
                 }
 
-//				int i = Config.isShaders() ? 8 : 4; TODO
-                int i = 4;
-                if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
-                    i = IrisHelper.ShaderLight();
-                }
+                int i = ShadersHelper.ShaderLight();
                 int j = Utils.getCombinedLightWithMin(this.minecraft.level, BlockPos.containing(vec3), i);
                 this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
                         (float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
@@ -1318,18 +1305,17 @@ public abstract class GameRendererVRMixin
                         //System.out.println(eye + " eye");
                         //System.out.println(GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.origin + " world");
 
-//						if (GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer != null
-//								&& GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.isReady()) {
-//							try {
-//								//this.renderTechjarsAwesomeMainMenuRoom();
-//							} catch (Exception exception) {
-//								System.out.println("Error rendering main menu world, unloading to prevent more errors");
-//								exception.printStackTrace();
-//								GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.destroy();
-//							}
-//						} else {
-                        this.renderJrbuddasAwesomeMainMenuRoomNew(pMatrix);
-//						}
+						if (GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.isReady()) {
+							try {
+								this.renderTechjarsAwesomeMainMenuRoom(pMatrix);
+							} catch (Exception exception) {
+								System.out.println("Error rendering main menu world, unloading to prevent more errors");
+								exception.printStackTrace();
+								GameRendererVRMixin.DATA_HOLDER.menuWorldRenderer.destroy();
+							}
+						} else {
+                            this.renderJrbuddasAwesomeMainMenuRoomNew(pMatrix);
+						}
                         pMatrix.popPose();
                     }
 
@@ -1355,11 +1341,12 @@ public abstract class GameRendererVRMixin
                         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
                                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
                                 GlStateManager.SourceFactor.ONE_MINUS_DST_ALPHA, GlStateManager.DestFactor.ONE);
-                        if (GameRendererVRMixin.DATA_HOLDER.vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID && (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive()) {
+                        if (GameRendererVRMixin.DATA_HOLDER.vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID && ShadersHelper.isShaderActive()) {
                             RenderSystem.disableBlend();
                         }
                     } else {
-                        RenderSystem.disableBlend();
+                        // enable blend for overlay transition in menuworld to not be jarring
+                        RenderSystem.enableBlend();
                     }
 
                     if (depthAlways) {
@@ -1378,17 +1365,12 @@ public abstract class GameRendererVRMixin
                             vec31 = GameRendererVRMixin.DATA_HOLDER.vrPlayer.vrdata_world_render.hmd.getPosition();
                         }
 
-//						int i = Config.isShaders() ? 8 : 4; TODO
-                        int i = 4;
-                        if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
-                            i = IrisHelper.ShaderLight();
-                        }
+                        int i = ShadersHelper.ShaderLight();
                         int j = Utils.getCombinedLightWithMin(this.minecraft.level, BlockPos.containing(vec31), i);
                         this.drawSizedQuadWithLightmap((float) this.minecraft.getWindow().getGuiScaledWidth(),
                                 (float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, j, color,
                                 pMatrix.last().pose());
                     } else {
-                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
                         this.drawSizedQuad((float) this.minecraft.getWindow().getGuiScaledWidth(),
                                 (float) this.minecraft.getWindow().getGuiScaledHeight(), 1.5F, color,
                                 pMatrix.last().pose());
@@ -1564,7 +1546,8 @@ public abstract class GameRendererVRMixin
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.depthFunc(519);
-        RenderSystem.depthMask(true); //TODO temp fix
+        RenderSystem.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
@@ -1614,6 +1597,76 @@ public abstract class GameRendererVRMixin
         BufferUploader.drawWithShader(bufferbuilder.end());
         pMatrixStack.popPose();
 
+    }
+
+    private void renderTechjarsAwesomeMainMenuRoom(PoseStack poseStack) {
+        RenderSystem.setShaderColor(1f,1f,1f,1f);
+
+        RenderSystem.enableDepthTest();
+        //RenderSystem.enableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.enableCull();
+
+        poseStack.pushPose();
+
+        int tzOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
+        DATA_HOLDER.menuWorldRenderer.time = DATA_HOLDER.menuWorldRenderer.fastTime
+            ? (long)(DATA_HOLDER.menuWorldRenderer.ticks * 10L + 10 * minecraft.getFrameTime())
+            : (long)((System.currentTimeMillis() + tzOffset - 21600000) / 86400000D * 24000D);
+
+        DATA_HOLDER.menuWorldRenderer.fogRenderer.setupFogColor();
+        RenderSystem.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+
+        DATA_HOLDER.menuWorldRenderer.updateLightmap();
+        DATA_HOLDER.menuWorldRenderer.render(poseStack);
+
+        Vector2f area = DATA_HOLDER.vr.getPlayAreaSize();
+        if (area != null) {
+            poseStack.pushPose();
+            float width = area.x;//(float)Math.ceil(area.x);
+            float length = area.y;//(float)Math.ceil(area.y);
+
+            RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+            RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
+            float sun = DATA_HOLDER.menuWorldRenderer.getSkyDarken();
+            RenderSystem.setShaderColor(sun, sun, sun, 0.3f);
+
+
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.enableBlend();
+            Matrix4f matrix4f = poseStack.last().pose();
+            BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+            bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+            poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
+            bufferbuilder
+                .vertex(matrix4f, 0, 0.005f, 0)
+                .uv(0, 0)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+            bufferbuilder
+                .vertex(matrix4f, 0, 0.005f, length)
+                .uv(0, 4 * length)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+            bufferbuilder
+                .vertex(matrix4f, width, 0.005f, length)
+                .uv(4 * width, 4 * length)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+            bufferbuilder
+                .vertex(matrix4f, width, 0.005f, 0)
+                .uv(4 * width, 0)
+                .color(1f,1f,1f,1f)
+                .normal(0, 1, 0).endVertex();
+
+            BufferUploader.drawWithShader(bufferbuilder.end());
+
+            RenderSystem.setShaderColor(1.0f,1.0f,1.0f,1.0f);
+            poseStack.popPose();
+        }
+
+        poseStack.popPose();
+        RenderSystem.defaultBlendFunc();
     }
 
     public void renderVRFabulous(float partialTicks, LevelRenderer worldrendererin, boolean menuhandright,
@@ -1754,19 +1807,17 @@ public abstract class GameRendererVRMixin
     }
 
     public void drawSizedQuad(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(color[0], color[1], color[2], color[3]);
         float f = displayHeight / displayWidth;
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).uv(0.0F, 0.0F)
-                .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F)
-                .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F)
-                .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F)
-                .color(color[0], color[1], color[2], color[3]).normal(0.0F, 0.0F, 1.0F).endVertex();
+        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * f) / 2.0F), 0).uv(0.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * f) / 2.0F), 0).uv(1.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * f / 2.0F), 0).uv(1.0F, 1.0F).endVertex();
+        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * f / 2.0F), 0).uv(0.0F, 1.0F).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
     public void drawSizedQuadSolid(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
@@ -2236,17 +2287,17 @@ public abstract class GameRendererVRMixin
 
             BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 
-            RenderSystem.setShader(GameRenderer::getRendertypeCutoutShader);
-            bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.BLOCK);
+            RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
+            bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
             bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).color(f2, f2, f2, 1.0F)
-                    .uv(0.0F, 15.0F * f4).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+                    .uv(0.0F, 15.0F * f4).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).color(f2, f2, f2, 1.0F)
-                    .uv(15.0F * f3, 15.0F * f4).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+                    .uv(15.0F * f3, 15.0F * f4).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).color(f2, f2, f2, 1.0F)
-                    .uv(15.0F * f3, 0.0F).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+                    .uv(15.0F * f3, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).color(f2, f2, f2, 1.0F)
-                    .uv(0.0F, 0.0F).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
+                    .uv(0.0F, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(0.0F, 0.0F, 1.0F).endVertex();
 
             BufferUploader.drawWithShader(bufferbuilder.end());
 

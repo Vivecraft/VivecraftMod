@@ -46,6 +46,7 @@ public class ClientPacketListenerVRMixin {
             ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
             ClientNetworking.resetServerSettings();
             ClientNetworking.displayedChatMessage = false;
+            ClientNetworking.displayedChatWarning = false;
             ClientNetworking.needsReset = false;
         }
     }
@@ -57,8 +58,9 @@ public class ClientPacketListenerVRMixin {
 
         if (VRState.vrInitialized) {
             // set the timer, even if vr is currently not running
-            ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer = 200;
-            ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer = 200;
+            ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer = 200;
+            ClientDataHolderVR.getInstance().vrPlayer.teleportWarning = true;
+            ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning = false;
         }
     }
 
@@ -128,8 +130,9 @@ public class ClientPacketListenerVRMixin {
         ClientNetworking.sendVersionInfo();
         if (VRState.vrInitialized) {
             // set the timer, even if vr is currently not running
-            ClientDataHolderVR.getInstance().vrPlayer.teleportWarningTimer = 200;
-            ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarningTimer = 200;
+            ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer = 200;
+            ClientDataHolderVR.getInstance().vrPlayer.teleportWarning = true;
+            ClientDataHolderVR.getInstance().vrPlayer.vrSwitchWarning = false;
         }
     }
 

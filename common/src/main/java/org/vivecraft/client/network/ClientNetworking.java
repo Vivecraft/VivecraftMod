@@ -33,6 +33,7 @@ import java.util.UUID;
 public class ClientNetworking {
 
     public static boolean displayedChatMessage = false;
+    public static boolean displayedChatWarning = false;
     public static boolean serverWantsData = false;
     public static boolean serverAllowsClimbey = false;
     public static boolean serverSupportsDirectTeleport = false;
@@ -218,7 +219,8 @@ public class ClientNetworking {
                 String s11 = buffer.readUtf(1024);
                 VRServerPerms.INSTANCE.setTeleportSupported(true);
                 if (VRState.vrInitialized) {
-                    dataholder.vrPlayer.teleportWarningTimer = -1;
+                    dataholder.vrPlayer.teleportWarning = false;
+                    dataholder.vrPlayer.vrSwitchWarning = true;
                 }
                 if (!ClientNetworking.displayedChatMessage
                         && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
@@ -313,7 +315,7 @@ public class ClientNetworking {
                     if (!ClientNetworking.serverAllowsVrSwitching) {
                         Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
                     }
-                    dataholder.vrPlayer.vrSwitchWarningTimer = -1;
+                    dataholder.vrPlayer.vrSwitchWarning = false;
                 }
             }
         }

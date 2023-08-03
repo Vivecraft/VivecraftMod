@@ -16,7 +16,13 @@ public class VivecraftVRMod {
 
     public static VivecraftVRMod INSTANCE = new VivecraftVRMod();
 
-    Set<KeyMapping> keyBindingSet;
+    Set<KeyMapping> allKeyBindingSet;
+
+    // key binds that are settable by the user
+    Set<KeyMapping> userKeyBindingSet;
+
+    // key binds that are needed internally, but are not required to be set by the user
+    Set<KeyMapping> hiddenKeyBindingSet;
 
     protected Set<KeyMapping> vanillaBindingSet;
 
@@ -25,20 +31,20 @@ public class VivecraftVRMod {
     public final KeyMapping keyExportWorld = new KeyMapping("vivecraft.key.exportWorld", -1, "key.categories.misc");
     public final KeyMapping keyFreeMoveRotate = new KeyMapping("vivecraft.key.freeMoveRotate", -1, "key.categories.movement");
     public final KeyMapping keyFreeMoveStrafe = new KeyMapping("vivecraft.key.freeMoveStrafe", -1, "key.categories.movement");
-    public final KeyMapping keyHotbarNext = new KeyMapping("vivecraft.key.hotbarNext", 266, "key.categories.inventory");
-    public final KeyMapping keyHotbarPrev = new KeyMapping("vivecraft.key.hotbarPrev", 267, "key.categories.inventory");
+    public final KeyMapping keyHotbarNext = new KeyMapping("vivecraft.key.hotbarNext", -1, "key.categories.inventory");
+    public final KeyMapping keyHotbarPrev = new KeyMapping("vivecraft.key.hotbarPrev", -1, "key.categories.inventory");
     public final KeyMapping keyHotbarScroll = new KeyMapping("vivecraft.key.hotbarScroll", -1, "key.categories.inventory");
     public final KeyMapping keyHotbarSwipeX = new KeyMapping("vivecraft.key.hotbarSwipeX", -1, "key.categories.inventory");
     public final KeyMapping keyHotbarSwipeY = new KeyMapping("vivecraft.key.hotbarSwipeY", -1, "key.categories.inventory");
     public final KeyMapping keyMenuButton = new KeyMapping("vivecraft.key.ingameMenuButton", -1, "key.categories.ui");
     public final KeyMapping keyMoveThirdPersonCam = new KeyMapping("vivecraft.key.moveThirdPersonCam", -1, "key.categories.misc");
     public final KeyMapping keyQuickHandheldCam = new KeyMapping("vivecraft.key.quickHandheldCam", -1, "key.categories.misc");
-    public final KeyMapping keyQuickTorch = new KeyMapping("vivecraft.key.quickTorch", 260, "key.categories.gameplay");
+    public final KeyMapping keyQuickTorch = new KeyMapping("vivecraft.key.quickTorch", -1, "key.categories.gameplay");
     public final KeyMapping keyRadialMenu = new KeyMapping("vivecraft.key.radialMenu", -1, "key.categories.ui");
     public final KeyMapping keyRotateAxis = new KeyMapping("vivecraft.key.rotateAxis", -1, "key.categories.movement");
-    public final KeyMapping keyRotateFree = new KeyMapping("vivecraft.key.rotateFree", 268, "key.categories.movement");
-    public final KeyMapping keyRotateLeft = new KeyMapping("vivecraft.key.rotateLeft", 263, "key.categories.movement");
-    public final KeyMapping keyRotateRight = new KeyMapping("vivecraft.key.rotateRight", 262, "key.categories.movement");
+    public final KeyMapping keyRotateFree = new KeyMapping("vivecraft.key.rotateFree", -1, "key.categories.movement");
+    public final KeyMapping keyRotateLeft = new KeyMapping("vivecraft.key.rotateLeft", -1, "key.categories.movement");
+    public final KeyMapping keyRotateRight = new KeyMapping("vivecraft.key.rotateRight", -1, "key.categories.movement");
     public final KeyMapping keySwapMirrorView = new KeyMapping("vivecraft.key.swapMirrorView", -1, "key.categories.misc");
     public final KeyMapping keyTeleport = new KeyMapping("vivecraft.key.teleport", -1, "key.categories.movement");
     public final KeyMapping keyTeleportFallback = new KeyMapping("vivecraft.key.teleportFallback", -1, "key.categories.movement");
@@ -48,61 +54,82 @@ public class VivecraftVRMod {
     public final KeyMapping keyTogglePlayerList = new KeyMapping("vivecraft.key.togglePlayerList", -1, "key.categories.multiplayer");
     public final HandedKeyBinding keyTrackpadTouch = new HandedKeyBinding("vivecraft.key.trackpadTouch", -1, "key.categories.misc");
     public final HandedKeyBinding keyVRInteract = new HandedKeyBinding("vivecraft.key.vrInteract", -1, "key.categories.gameplay");
-    public final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout", 269, "key.categories.movement");
+    public final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout", -1, "key.categories.movement");
 
-    public Set<KeyMapping> getKeyBindings()
-    {
-        if (this.keyBindingSet == null)
+    private void setupKeybindingSets() {
+        if (this.userKeyBindingSet == null || hiddenKeyBindingSet == null)
         {
-            this.keyBindingSet = new LinkedHashSet<>();
-            this.keyBindingSet.add(this.keyRotateLeft);
-            this.keyBindingSet.add(this.keyRotateRight);
-            this.keyBindingSet.add(this.keyRotateAxis);
-            this.keyBindingSet.add(this.keyRotateFree);
-            this.keyBindingSet.add(this.keyWalkabout);
-            this.keyBindingSet.add(this.keyTeleport);
-            this.keyBindingSet.add(this.keyTeleportFallback);
-            this.keyBindingSet.add(this.keyFreeMoveRotate);
-            this.keyBindingSet.add(this.keyFreeMoveStrafe);
-            this.keyBindingSet.add(this.keyToggleMovement);
-            this.keyBindingSet.add(this.keyQuickTorch);
-            this.keyBindingSet.add(this.keyHotbarNext);
-            this.keyBindingSet.add(this.keyHotbarPrev);
-            this.keyBindingSet.add(this.keyHotbarScroll);
-            this.keyBindingSet.add(this.keyHotbarSwipeX);
-            this.keyBindingSet.add(this.keyHotbarSwipeY);
-            this.keyBindingSet.add(this.keyMenuButton);
-            this.keyBindingSet.add(this.keyRadialMenu);
-            this.keyBindingSet.add(this.keyVRInteract);
-            this.keyBindingSet.add(this.keySwapMirrorView);
-            this.keyBindingSet.add(this.keyExportWorld);
-            this.keyBindingSet.add(this.keyToggleKeyboard);
-            this.keyBindingSet.add(this.keyMoveThirdPersonCam);
-            this.keyBindingSet.add(this.keyTogglePlayerList);
-            this.keyBindingSet.add(this.keyToggleHandheldCam);
-            this.keyBindingSet.add(this.keyQuickHandheldCam);
-            this.keyBindingSet.add(this.keyTrackpadTouch);
-            this.keyBindingSet.add(GuiHandler.keyLeftClick);
-            this.keyBindingSet.add(GuiHandler.keyRightClick);
-            this.keyBindingSet.add(GuiHandler.keyMiddleClick);
-            this.keyBindingSet.add(GuiHandler.keyShift);
-            this.keyBindingSet.add(GuiHandler.keyCtrl);
-            this.keyBindingSet.add(GuiHandler.keyAlt);
-            this.keyBindingSet.add(GuiHandler.keyScrollUp);
-            this.keyBindingSet.add(GuiHandler.keyScrollDown);
-            this.keyBindingSet.add(GuiHandler.keyScrollAxis);
-            this.keyBindingSet.add(GuiHandler.keyKeyboardClick);
-            this.keyBindingSet.add(GuiHandler.keyKeyboardShift);
-            this.keyBindingSet.add(this.keyClimbeyGrab);
-            this.keyBindingSet.add(this.keyClimbeyJump);
-        }
+            this.userKeyBindingSet = new LinkedHashSet<>();
+            this.hiddenKeyBindingSet = new LinkedHashSet<>();
+            this.allKeyBindingSet = new LinkedHashSet<>();
 
-        return this.keyBindingSet;
+            this.userKeyBindingSet.add(this.keyRotateLeft);
+            this.userKeyBindingSet.add(this.keyRotateRight);
+            this.userKeyBindingSet.add(this.keyTeleport);
+            this.userKeyBindingSet.add(this.keyTeleportFallback);
+            this.userKeyBindingSet.add(this.keyToggleMovement);
+            this.userKeyBindingSet.add(this.keyQuickTorch);
+            this.userKeyBindingSet.add(this.keySwapMirrorView);
+            this.userKeyBindingSet.add(this.keyExportWorld);
+            this.userKeyBindingSet.add(this.keyMoveThirdPersonCam);
+            this.userKeyBindingSet.add(this.keyTogglePlayerList);
+            this.userKeyBindingSet.add(this.keyToggleHandheldCam);
+            this.userKeyBindingSet.add(this.keyQuickHandheldCam);
+
+            this.hiddenKeyBindingSet.add(GuiHandler.keyLeftClick);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyRightClick);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyMiddleClick);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyShift);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyCtrl);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyAlt);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyScrollUp);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyScrollDown);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyScrollAxis);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyKeyboardClick);
+            this.hiddenKeyBindingSet.add(GuiHandler.keyKeyboardShift);
+            this.hiddenKeyBindingSet.add(this.keyClimbeyGrab);
+            this.hiddenKeyBindingSet.add(this.keyClimbeyJump);
+            this.hiddenKeyBindingSet.add(this.keyMenuButton);
+            this.hiddenKeyBindingSet.add(this.keyRadialMenu);
+            this.hiddenKeyBindingSet.add(this.keyToggleKeyboard);
+            this.hiddenKeyBindingSet.add(this.keyHotbarSwipeX);
+            this.hiddenKeyBindingSet.add(this.keyHotbarSwipeY);
+            this.hiddenKeyBindingSet.add(this.keyTrackpadTouch);
+
+            this.hiddenKeyBindingSet.add(this.keyRotateAxis);
+            this.hiddenKeyBindingSet.add(this.keyRotateFree);
+            this.hiddenKeyBindingSet.add(this.keyFreeMoveRotate);
+            this.hiddenKeyBindingSet.add(this.keyFreeMoveStrafe);
+            this.hiddenKeyBindingSet.add(this.keyHotbarNext);
+            this.hiddenKeyBindingSet.add(this.keyHotbarPrev);
+            this.hiddenKeyBindingSet.add(this.keyHotbarScroll);
+            this.hiddenKeyBindingSet.add(this.keyVRInteract);
+            this.hiddenKeyBindingSet.add(this.keyWalkabout);
+
+            allKeyBindingSet.addAll(userKeyBindingSet);
+            allKeyBindingSet.addAll(hiddenKeyBindingSet);
+        }
+    }
+
+    public Set<KeyMapping> getUserKeyBindings()
+    {
+        setupKeybindingSets();
+        return this.userKeyBindingSet;
+    }
+
+    public Set<KeyMapping> getHiddenKeyBindings() {
+        setupKeybindingSets();
+        return hiddenKeyBindingSet;
+    }
+
+    public Set<KeyMapping> getAllKeyBindings() {
+        setupKeybindingSets();
+        return allKeyBindingSet;
     }
 
     public KeyMapping[] initializeBindings(KeyMapping[] keyBindings)
     {
-        for (KeyMapping keymapping : this.getKeyBindings())
+        for (KeyMapping keymapping : this.getUserKeyBindings())
         {
             keyBindings = ArrayUtils.add(keyBindings, keymapping);
         }
@@ -118,11 +145,13 @@ public class VivecraftVRMod {
     public void setVanillaBindings(KeyMapping[] bindings)
     {
         this.vanillaBindingSet = new HashSet<>(Arrays.asList(bindings));
+        // add hidden keys, since those are not in there
+        vanillaBindingSet.addAll(hiddenKeyBindingSet);
     }
 
     public boolean isSafeBinding(KeyMapping kb)
     {
-        return this.getKeyBindings().contains(kb) || kb == this.mc.options.keyChat || kb == this.mc.options.keyInventory;
+        return this.getAllKeyBindings().contains(kb) || kb == mc.options.keyChat || kb == mc.options.keyInventory;
     }
 
     public boolean isModBinding(KeyMapping kb)

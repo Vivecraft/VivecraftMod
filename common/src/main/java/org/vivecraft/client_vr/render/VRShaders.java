@@ -39,6 +39,16 @@ public class VRShaders
     public static AbstractUniform _Overlay_BlackAlpha;
     public static AbstractUniform _Overlay_eye;
 
+    public static ShaderInstance rendertypeEndPortalShaderVR;
+    public static ShaderInstance rendertypeEndGatewayShaderVR;
+
+    public static ShaderInstance getRendertypeEndPortalShaderVR(){
+        return rendertypeEndPortalShaderVR;
+    }
+    public static ShaderInstance getRendertypeEndGatewayShaderVR(){
+        return rendertypeEndGatewayShaderVR;
+    }
+
     private VRShaders()
     {
     }
@@ -88,5 +98,11 @@ public class VRShaders
             _Overlay_eye = fovReductionShader.safeGetUniform("eye");
             _Overlay_time = fovReductionShader.safeGetUniform("portaltime");
             _Overlay_BlackAlpha = fovReductionShader.safeGetUniform("blackalpha");
+    }
+
+    public static void setupPortalShaders() throws Exception
+    {
+        rendertypeEndPortalShaderVR = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "rendertype_end_portal_vr", DefaultVertexFormat.POSITION);
+        rendertypeEndGatewayShaderVR = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "rendertype_end_gateway_vr", DefaultVertexFormat.POSITION);
     }
 }

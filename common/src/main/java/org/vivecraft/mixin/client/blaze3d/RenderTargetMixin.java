@@ -11,7 +11,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
@@ -29,8 +28,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	private boolean useStencil = false;
 	@Shadow
 	public int frameBufferId;
-	@Shadow
-	protected int depthBufferId;
 	@Shadow
 	public boolean useDepth;
 	@Shadow
@@ -57,20 +54,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	private void _bindWrite(boolean b){};
 
 	@Shadow public abstract void unbindWrite();
-
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	public void blitToScreen(int pWidth, int pHeight, boolean p_83960_) {
-		this.blitToScreen(0, pWidth, pHeight, 0, p_83960_, 0.0F, 0.0F, false);
-	}
-	
-	@Override
-	public int getDepthBufferId() {
-		return depthBufferId;
-	}
 
 	@Override
 	public void setUseStencil(boolean useStencil){

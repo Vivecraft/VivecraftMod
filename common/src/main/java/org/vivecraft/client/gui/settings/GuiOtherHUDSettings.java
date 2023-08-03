@@ -23,7 +23,8 @@ public class GuiOtherHUDSettings extends GuiVROptionsBase
 
     static VRSettings.VrOptions[] messages = new VRSettings.VrOptions[] {
             VRSettings.VrOptions.SHOW_UPDATES,
-            VRSettings.VrOptions.SHOW_PLUGIN
+            VRSettings.VrOptions.SHOW_PLUGIN,
+            VRSettings.VrOptions.SHOW_PLUGIN_MISSING
     };
 
     public GuiOtherHUDSettings(Screen guiScreen)

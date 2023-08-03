@@ -4,6 +4,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
@@ -14,23 +15,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.Input;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -49,9 +44,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.Iterator;
-import java.util.stream.StreamSupport;
 
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements PlayerExtension {
@@ -79,8 +71,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     private final ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
     @Shadow
     private InteractionHand usingItemHand;
-    @Shadow
-    private int autoJumpTime;
     @Shadow
     public Input input;
 
@@ -233,117 +223,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         return d0;
     }
 
-//	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getYRot()F"), method = "updateAutoJump")
-//	public float yRot(LocalPlayer instance) {
-//		return DataHolder.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw();
-//	}
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;sin(F)F"), method = "updateAutoJump")
+    private float modifyAutoJumpSin(float original) {
+        return VRState.vrRunning ? ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw() * ((float) Math.PI / 180) : original;
+    }
 
-    @Inject(at = @At("HEAD"), method = "updateAutoJump", cancellable = true)
-    public void autostep1(float f, float g, CallbackInfo ci) {
-        if (!VRState.vrRunning) {
-            return;
-        }
-
-        float l;
-        if (!this.canAutoJump()) {
-            ci.cancel();
-            return;
-        }
-        Vec3 vec3 = this.position();
-        Vec3 vec32 = vec3.add(f, 0.0, g);
-        Vec3 vec33 = new Vec3(f, 0.0, g);
-        float h = this.getSpeed();
-        float i = (float) vec33.lengthSqr();
-        if (i <= 0.001f) {
-            Vec2 vec2 = this.input.getMoveVector();
-            float j = h * vec2.x;
-            float k = h * vec2.y;
-            l = Mth.sin(ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw() * ((float) Math.PI / 180));
-            float m = Mth.cos(ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw() * ((float) Math.PI / 180));
-            vec33 = new Vec3(j * m - k * l, vec33.y, k * m + j * l);
-            i = (float) vec33.lengthSqr();
-            if (i <= 0.001f) {
-                ci.cancel();
-                return;
-            }
-        }
-        float vec2 = Mth.invSqrt(i);
-        Vec3 j = vec33.scale(vec2);
-        Vec3 k = this.getForward();
-        l = (float) (k.x * j.x + k.z * j.z);
-        if (l < -0.15f) {
-            ci.cancel();
-            return;
-        }
-        CollisionContext m = CollisionContext.of(this);
-        BlockPos blockPos = BlockPos.containing(this.getX(), this.getBoundingBox().maxY, this.getZ());
-        BlockState blockState = this.level().getBlockState(blockPos);
-        if (!blockState.getCollisionShape(this.level(), blockPos, m).isEmpty()) {
-            ci.cancel();
-            return;
-        }
-        BlockState blockState2 = this.level().getBlockState(blockPos = blockPos.above());
-        if (!blockState2.getCollisionShape(this.level(), blockPos, m).isEmpty()) {
-            ci.cancel();
-            return;
-        }
-        float n = 7.0f;
-        float o = 1.2f;
-        if (this.hasEffect(MobEffects.JUMP)) {
-            o += (float) (this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.75f;
-        }
-        float p = Math.max(h * 7.0f, 1.0f / vec2);
-        Vec3 vec34 = vec3;
-        Vec3 vec35 = vec32.add(j.scale(p));
-        float q = this.getBbWidth();
-        float r = this.getBbHeight();
-        AABB aABB = new AABB(vec34, vec35.add(0.0, r, 0.0)).inflate(q, 0.0, q);
-        vec34 = vec34.add(0.0, 0.51f, 0.0);
-        vec35 = vec35.add(0.0, 0.51f, 0.0);
-        Vec3 vec36 = j.cross(new Vec3(0.0, 1.0, 0.0));
-        Vec3 vec37 = vec36.scale(q * 0.5f);
-        Vec3 vec38 = vec34.subtract(vec37);
-        Vec3 vec39 = vec35.subtract(vec37);
-        Vec3 vec310 = vec34.add(vec37);
-        Vec3 vec311 = vec35.add(vec37);
-        Iterable<VoxelShape> iterable = this.level().getCollisions(this, aABB);
-        Iterator iterator = StreamSupport.stream(iterable.spliterator(), false).flatMap(voxelShape -> voxelShape.toAabbs().stream()).iterator();
-        float s = Float.MIN_VALUE;
-        while (iterator.hasNext()) {
-            AABB aABB2 = (AABB) iterator.next();
-            if (!aABB2.intersects(vec38, vec39) && !aABB2.intersects(vec310, vec311)) continue;
-            s = (float) aABB2.maxY;
-            Vec3 vec312 = aABB2.getCenter();
-            BlockPos blockPos2 = BlockPos.containing(vec312);
-            int t = 1;
-            while ((float) t < p) {
-                BlockState blockState4;
-                BlockPos blockPos3 = blockPos2.above(t);
-                BlockState blockState3 = this.level().getBlockState(blockPos3);
-                VoxelShape voxelShape2 = blockState3.getCollisionShape(this.level(), blockPos3, m);
-                if (!voxelShape2.isEmpty() && (double) (s = (float) voxelShape2.max(Direction.Axis.Y) + (float) blockPos3.getY()) - this.getY() > (double) p) {
-                    ci.cancel();
-                    return;
-                }
-                if (t > 1 && !(blockState4 = this.level().getBlockState(blockPos = blockPos.above())).getCollisionShape(this.level(), blockPos, m).isEmpty()) {
-                    ci.cancel();
-                    return;
-                }
-                ++t;
-            }
-            break;
-        }
-        if (s == Float.MIN_VALUE) {
-            ci.cancel();
-            return;
-        }
-        float aABB2 = (float) ((double) s - this.getY());
-        if (aABB2 <= 0.5f || aABB2 > p) {
-            ci.cancel();
-            return;
-        }
-        this.autoJumpTime = 1;
-        ci.cancel();
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;cos(F)F"), method = "updateAutoJump")
+    private float modifyAutoJumpCos(float original) {
+        return VRState.vrRunning ? ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw() * ((float) Math.PI / 180) : original;
     }
 
     @Override
@@ -354,9 +241,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         }
         return super.eat(level, itemStack);
     }
-
-    @Shadow
-    protected abstract boolean canAutoJump();
 
     @Override
     public void moveTo(double pX, double p_20109_, double pY, float p_20111_, float pZ) {
@@ -380,13 +264,10 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void setPos(double pX, double p_20211_, double pY) {
+        this.initFromServer = true;
         if (!VRState.vrRunning) {
             super.setPos(pX, p_20211_, pY);
             return;
-        }
-
-        if (!this.initFromServer) {
-            this.initFromServer = true;
         }
         double d0 = this.getX();
         double d1 = this.getY();
@@ -412,23 +293,29 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     public void doDrag() {
-        float f = 0.91F;
-        if (this.onGround()) {
-            f = this.level().getBlockState(BlockPos.containing(this.getX(), this.getBoundingBox().minY - 1.0D, this.getZ())).getBlock().getFriction() * 0.91F;
+        float friction = 0.91F;
+
+        if (this.onGround) {
+            friction = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.91F;
         }
-        double d0 = (double) f;
-        double d1 = (double) f;
-        this.setDeltaMovement(this.getDeltaMovement().x / d0, this.getDeltaMovement().y, this.getDeltaMovement().z / d1);
-        double d2 = dataholder.vrSettings.inertiaFactor.getFactor();
-        double d3 = this.getBoundedAddition(this.additionX);
-        double d4 = (double) f * d3 / (double) (1.0F - f);
-        double d5 = d4 / ((double) f * (d4 + d3 * d2));
-        d0 = d0 * d5;
-        double d6 = this.getBoundedAddition(this.additionZ);
-        double d7 = (double) f * d6 / (double) (1.0F - f);
-        double d8 = d7 / ((double) f * (d7 + d6 * d2));
-        d1 = d1 * d8;
-        this.setDeltaMovement(this.getDeltaMovement().x * d0, this.getDeltaMovement().y, this.getDeltaMovement().z * d1);
+        double xFactor = friction;
+        double zFactor = friction;
+        // account for stock drag code we can't change in LivingEntity#travel
+        this.setDeltaMovement(this.getDeltaMovement().x / xFactor, this.getDeltaMovement().y, this.getDeltaMovement().z / zFactor);
+
+        double addFactor = dataholder.vrSettings.inertiaFactor.getFactor();
+
+        double boundedAdditionX = getBoundedAddition(additionX);
+        double targetLimitX = (friction * boundedAdditionX) / (1f - friction);
+        double multiFactorX = targetLimitX / (friction * (targetLimitX + (boundedAdditionX * addFactor)));
+        xFactor *= multiFactorX;
+
+        double boundedAdditionZ = getBoundedAddition(additionZ);
+        double targetLimitZ = (friction * boundedAdditionZ) / (1f - friction);
+        double multiFactorZ = targetLimitZ / (friction * (targetLimitZ + (boundedAdditionZ * addFactor)));
+        zFactor *= multiFactorZ;
+
+        this.setDeltaMovement(this.getDeltaMovement().x * xFactor, this.getDeltaMovement().y, this.getDeltaMovement().z * zFactor);
     }
 
     public double getBoundedAddition(double orig) {
@@ -466,14 +353,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 d2 = d2 * d3;
                 Vec3 vec3 = new Vec3(d1, 0.0D, d2);
                 VRPlayer vrplayer1 = this.dataholder.vrPlayer;
-                boolean flag = !this.isPassenger() && (this.getAbilities().flying || this.isSwimming());
+                boolean isFlyingOrSwimming = !this.isPassenger() && (this.getAbilities().flying || this.isSwimming());
 
                 if (ClientDataHolderVR.katvr) {
                     jkatvr.query();
                     d3 = (double) (jkatvr.getSpeed() * jkatvr.walkDirection() * this.dataholder.vrSettings.movementSpeedMultiplier);
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
-                    if (flag) {
+                    if (isFlyingOrSwimming) {
                         vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float) Math.PI / 180F));
                     }
 
@@ -483,7 +370,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                     d3 = (double) (jinfinadeck.getSpeed() * jinfinadeck.walkDirection() * this.dataholder.vrSettings.movementSpeedMultiplier);
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
-                    if (flag) {
+                    if (isFlyingOrSwimming) {
                         vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float) Math.PI / 180F));
                     }
 
@@ -494,13 +381,16 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                         j = 1;
                     }
 
-                    if (flag) {
+                    if (isFlyingOrSwimming) {
                         vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.getController(j).getPitch() * ((float) Math.PI / 180F));
                     }
 
                     vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.getController(j).getYaw() * ((float) Math.PI / 180F));
                 } else {
-                    if (flag) {
+
+                    VRSettings.FreeMove freeMoveType = !this.isPassenger() && this.getAbilities().flying && this.dataholder.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ? this.dataholder.vrSettings.vrFreeMoveFlyMode : this.dataholder.vrSettings.vrFreeMoveMode;
+
+                    if (isFlyingOrSwimming) {
                         switch (this.dataholder.vrSettings.vrFreeMoveMode) {
                             case CONTROLLER:
                                 vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.getController(1).getPitch() * ((float) Math.PI / 180F));

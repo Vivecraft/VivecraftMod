@@ -12,7 +12,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 @Mixin(SodiumWorldRenderer.class)
 public class SodiumWorldRendererVRMixin {
 
-    @ModifyVariable(at = @At("STORE"), ordinal = 1, method = "updateChunks")
+    @ModifyVariable(at = @At("STORE"), ordinal = 1, method = {"updateChunks", "setupTerrain"})
     public boolean RenderUpdate(boolean b) {
         // always update chunk graph in VR to prevent missing chunks
         return !RenderPassType.isVanilla() || b;

@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.provider.openvr_lwjgl;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -115,7 +116,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
             VRCompositor_PostPresentHandoff();
 
             if (i + j > 0) {
-                throw new RenderConfigException("Compositor Error", "Texture submission error: Left/Right " + getCompostiorError(i) + "/" + getCompostiorError(j));
+                throw new RenderConfigException("Compositor Error", Component.literal("Texture submission error: Left/Right " + getCompostiorError(i) + "/" + getCompostiorError(j)));
             }
         }
     }

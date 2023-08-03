@@ -56,8 +56,9 @@ public class VRPlayer
     public float worldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private float rawWorldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean teleportOverride = false;
-    public int teleportWarningTimer = -1;
-    public int vrSwitchWarningTimer = -1;
+    public boolean teleportWarning = false;
+    public boolean vrSwitchWarning = false;
+    public int chatWarningTimer = -1;
     public Vec3 roomOrigin = new Vec3(0.0D, 0.0D, 0.0D);
     private boolean isFreeMoveCurrent = true;
     public double wfMode = 0.0D;
@@ -605,9 +606,10 @@ public class VRPlayer
     	else  if (entity.isSprinting() && (entity.input.jumping || mc.options.keyJump.isDown()) || entity.isFallFlying() || entity.isSwimming() && entity.zza > 0.0F)
             {
     		//Server-side movement
-    		VRSettings vrsettings = this.dh.vrSettings;
+            VRSettings.FreeMove freeMoveType = entity.isFallFlying() && this.dh.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ? this.dh.vrSettings.vrFreeMoveFlyMode : this.dh.vrSettings.vrFreeMoveMode;
 
-    		if (this.dh.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.CONTROLLER)
+
+    		if (freeMoveType == VRSettings.FreeMove.CONTROLLER)
                 {
                     entity.setYRot(data.getController(1).getYaw());
                     entity.setYHeadRot(entity.getYRot());

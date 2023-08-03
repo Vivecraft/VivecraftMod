@@ -46,6 +46,7 @@ dependencies {
 
     // needed dependencies
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+    compileOnly('com.electronwill.night-config:toml:3.6.6')
 
     //LaunchPopup
     implementation 'com.github.fayer3:LaunchPopup:master-SNAPSHOT'

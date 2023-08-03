@@ -206,6 +206,11 @@ public class Utils
 
     public static void wordWrap(String in, int length, ArrayList<String> wrapped)
     {
+        // can't wrap with length 0, so return the original string
+        if (length == 0) {
+            wrapped.add(in);
+            return;
+        }
         String s = "\n";
         boolean flag = false;
         in = in.replace("\r", "");

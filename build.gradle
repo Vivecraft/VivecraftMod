@@ -69,46 +69,87 @@ allprojects {
 
         maven { url = 'https://mvnrepository.com/' }
         maven { url 'https://jitpack.io' }
-        maven {
-            name = "Modrinth"
-            url = "https://api.modrinth.com/maven"
-            content {
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Modrinth"
+                    url = "https://api.modrinth.com/maven"
+                }
+            }
+            filter {
                 includeGroup "maven.modrinth"
             }
         }
 
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Ladysnake Mods"
+                    url = "https://maven.ladysnake.org/releases"
+                }
+            }
+            filter {
+                includeGroup 'io.github.ladysnake'
+                includeGroup 'org.ladysnake'
+                includeGroupByRegex 'dev\\.onyxstudios.*'
+            }
+        }
+
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "fabricmc"
+                    url = "https://maven.fabricmc.net/"
+                }
+            }
+            filter {
+                includeGroup "net.fabricmc"
+                includeGroup "fabric-loom"
+            }
+        }
+
         maven { url = "https://hephaestus.dev/release" }
-        maven { url = "https://api.modrinth.com/maven" }
         maven { url = "https://cursemaven.com" }
         maven { url = "https://maven.parchmentmc.org" }
-        maven { url = "https://maven.fabricmc.net/" }
         maven { url = "https://maven.tterrag.com/" }
         maven { url = "https://storage.googleapis.com/devan-maven/" }
         maven { url = "https://maven.shedaniel.me/" }
         maven { url = "https://aperlambda.github.io/maven" }
-        maven { url = "https://ladysnake.jfrog.io/artifactory/mods" }
         maven { url = "https://maven.kotlindiscord.com/repository/terraformers/" }
         maven { url = "https://mvn.devos.one/releases/" }
         maven { url = "https://mvn.devos.one/snapshots/" }
         maven { url = "https://maven.terraformersmc.com/" }
         maven { url = "https://maven.cafeteria.dev/releases/" }
-        maven { url = "https://jitpack.io/" }
         maven { url = "https://maven.gegy.dev" }
         maven { url = "https://dvs1.progwml6.com/files/maven/" }
         maven { url = "https://modmaven.dev" }
-        maven {
-            url = "https://maven.jamieswhiteshirt.com/libs-release"
-            content {
-                includeGroup("com.jamieswhiteshirt")
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Ladysnake Mods"
+                    url = "https://maven.jamieswhiteshirt.com/libs-release"
+                }
+            }
+            filter {
+                includeGroup "com.jamieswhiteshirt"
             }
         }
-        ivy {
-            // to add mods from discord
-            url 'https://cdn.discordapp.com/attachments/'
-            patternLayout {
-                artifact '/[organisation]/[module]/[revision].[ext]'
+
+        exclusiveContent {
+            forRepository {
+                ivy {
+                    name = "Discord"
+                    url = "https://cdn.discordapp.com/attachments/"
+                    patternLayout {
+                        artifact '/[organisation]/[module]/[revision].[ext]'
+                    }
+                    metadataSources { artifact() }
+                }
             }
-            metadataSources { artifact() }
+            filter {
+                // discords are always just numbers
+                includeGroupByRegex "^\\d*\$"
+            }
         }
     }
 }

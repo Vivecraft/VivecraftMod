@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
@@ -26,6 +27,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VivecraftMovementInput;
+import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -394,6 +396,7 @@ public abstract class MCVR
 
     protected void processHotbar()
     {
+        int previousSlot = this.dh.interactTracker.hotbar;
         this.dh.interactTracker.hotbar = -1;
         if(mc.player == null) return;
         if(mc.player.getInventory() == null) return;
@@ -453,14 +456,14 @@ public abstract class MCVR
         }
         //all that maths for this.
         dh.interactTracker.hotbar = box;
-        if(box != dh.interactTracker.hotbar){
+        if(previousSlot != dh.interactTracker.hotbar){
             triggerHapticPulse(0, 750);
         }
     }
 
     protected KeyMapping findKeyBinding(String name)
     {
-        return Arrays.stream(this.mc.options.keyMappings).filter((kb) ->
+        return Stream.concat(Arrays.stream(this.mc.options.keyMappings), mod.getHiddenKeyBindings().stream()).filter((kb) ->
         {
             return name.equals(kb.getName());
         }).findFirst().orElse((KeyMapping)null);
@@ -1096,68 +1099,6 @@ public abstract class MCVR
                 KeyboardHandler.setOverlayShowing(false);
             }
 
-            if (mod.keyExportWorld.consumeClick() && this.mc.level != null && this.mc.player != null)
-            {
-//                try
-//                {
-//                    final BlockPos blockpos = this.mc.player.blockPosition();
-//                    int k = 320;
-//                    File file1 = new File("menuworlds/custom_114");
-//                    file1.mkdirs();
-//                    int i = 0;
-//
-//                    while (true)
-//                    {
-//                        final File file2 = new File(file1, "world" + i + ".mmw");
-//
-//                        if (!file2.exists())
-//                        {
-//                            System.out.println("Exporting world... area size: 320");
-//                            System.out.println("Saving to " + file2.getAbsolutePath());
-//
-//                            if (this.mc.isLocalServer())
-//                            {
-//                                final Level level = this.mc.getSingleplayerServer().getLevel(this.mc.player.level.dimension());
-//                                CompletableFuture<Void> completablefuture = this.mc.getSingleplayerServer().submit(new Runnable()
-//                                {
-//                                    public void run()
-//                                    {
-//                                        try
-//                                        {
-//                                            MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - 160, blockpos.getZ() - 160, 320, 320, blockpos.getY(), file2);
-//                                        }
-//                                        catch (IOException ioexception)
-//                                        {
-//                                            ioexception.printStackTrace();
-//                                        }
-//                                    }
-//                                });
-//
-//                                while (!completablefuture.isDone())
-//                                {
-//                                    Thread.sleep(10L);
-//                                }
-//                            }
-//                            else
-//                            {
-//                                MenuWorldExporter.saveAreaToFile(this.mc.level, blockpos.getX() - 160, blockpos.getZ() - 160, 320, 320, blockpos.getY(), file2);
-//                                this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
-//                            }
-//
-//                            this.mc.gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", 320)));
-//                            this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
-//                            break;
-//                        }
-//
-//                        ++i;
-//                    }
-//                }
-//                catch (Exception exception)
-//                {
-//                    exception.printStackTrace();
-//                }
-            }
-
             if (mod.keyTogglePlayerList.consumeClick())
             {
                 ((GuiExtension) this.mc.gui).setShowPlayerList(!((GuiExtension) this.mc.gui).getShowPlayerList());
@@ -1219,7 +1160,8 @@ public abstract class MCVR
     {
         Map<String, ActionParams> map = this.getSpecialActionParams();
 
-        for (KeyMapping keymapping : this.mc.options.keyMappings)
+        // iterate over all minecraft keys, and our hidden keys
+        for (KeyMapping keymapping : Stream.concat(Arrays.stream(this.mc.options.keyMappings), mod.getHiddenKeyBindings().stream()).toList())
         {
             ActionParams actionparams = map.getOrDefault(keymapping.getName(), new ActionParams("optional", "boolean", (VRInputActionSet)null));
             VRInputAction vrinputaction = new VRInputAction(keymapping, actionparams.requirement, actionparams.type, actionparams.actionSetOverride);
@@ -1300,7 +1242,7 @@ public abstract class MCVR
                         {
                             System.out.println("Unknown key binding: " + astring[0]);
                         }
-                        else if (mod.getKeyBindings().contains(keymapping))
+                        else if (mod.getAllKeyBindings().contains(keymapping))
                         {
                             System.out.println("NO! Don't touch Vivecraft bindings!");
                         }
@@ -1375,7 +1317,7 @@ public abstract class MCVR
 
     public abstract boolean init();
 
-    public abstract boolean postinit();
+    public abstract boolean postinit() throws RenderConfigException;
 
     public abstract org.vivecraft.common.utils.math.Matrix4f getControllerComponentTransform(int var1, String var2);
 

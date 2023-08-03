@@ -31,8 +31,6 @@ public interface GameRendererExtension {
 
 	Vec3 getCrossVec();
 
-	void setMenuWorldFastTime(boolean b);
-
 	void setupClipPlanes();
 
 	float getMinClipDistance();
@@ -53,7 +51,8 @@ public interface GameRendererExtension {
 
 	double getRveY();
 
-	void renderVrFast(float f, boolean b, boolean menuhandright, boolean menuHandleft, PoseStack poseStack);
+	void renderVrFast(float partialTicks, boolean secondpass, boolean menuhandright, boolean menuHandleft,
+					  PoseStack poseStack);
 
 	void renderVRFabulous(float f, LevelRenderer levelRenderer, boolean menuhandright, boolean menuHandleft, PoseStack poseStack);
 

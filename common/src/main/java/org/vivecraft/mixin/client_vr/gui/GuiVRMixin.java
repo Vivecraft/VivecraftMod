@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.client_vr.gui;
 
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -88,6 +89,11 @@ public abstract class GuiVRMixin implements GuiExtension {
         }
     }
 
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getSleepTimer()I"), method = "render")
+    public int noSleepOverlay(LocalPlayer instance) {
+        return VRState.vrRunning ? 0 : instance.getSleepTimer();
+    }
+
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"), method = "render")
     public boolean toggleableTabList(KeyMapping instance) {
         return instance.isDown() || showPlayerList;
@@ -95,7 +101,7 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 1, shift = At.Shift.AFTER), method = "renderHotbar")
     public void hotbarContext(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().interactTracker.hotbar) {
+        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().interactTracker.hotbar && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)) {
             int i = this.screenWidth / 2;
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
             guiGraphics.blit(WIDGETS_LOCATION, i - 91 - 1 + ClientDataHolderVR.getInstance().interactTracker.hotbar * 20, this.screenHeight - 22 - 1, 0, 22, 24, 22);
@@ -108,9 +114,16 @@ public abstract class GuiVRMixin implements GuiExtension {
         return !(!instance.isEmpty() || (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar));
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 2, shift = At.Shift.BEFORE), method = "renderHotbar")
-    public void renderVRHotbarLeft(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9) {
+    @Inject(at = @At("HEAD"), method = "renderHotbar", cancellable = true)
+    public void notHotbarOnScreens(float f, PoseStack poseStack, CallbackInfo ci) {
+        if (VRState.vrRunning && minecraft.screen != null) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", ordinal = 2, shift = At.Shift.BEFORE), method = "renderHotbar")
+    public void renderVRHotbarLeft(float f, PoseStack poseStack, CallbackInfo ci) {
+        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9 && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)) {
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         }
     }
@@ -124,7 +137,7 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 3, shift = At.Shift.BEFORE), method = "renderHotbar")
     public void renderVRHotbarRight(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9){
+        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9 && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)){
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         }
     }

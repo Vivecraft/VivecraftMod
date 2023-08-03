@@ -16,8 +16,6 @@ public interface RenderTargetExtension {
 
 	void blitToScreen(ShaderInstance instance, int i, int viewWidth, int viewHeight, int j, boolean b, float f, float g, boolean c);
 
-	int getDepthBufferId();
-
 	default void genMipMaps() {
 		GL30.glGenerateMipmap(3553);
 	}

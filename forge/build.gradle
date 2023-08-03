@@ -14,10 +14,12 @@ loom {
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
         mixinConfig "vivecraft.mixins.json"
-//        mixinConfig "vivecraft.sodium.mixins.json"
-//        mixinConfig "vivecraft.forge.sodium.mixins.json"
-//        mixinConfig "vivecraft.iris.mixins.json"
+        mixinConfig "vivecraft.sodium.mixins.json"
+        mixinConfig "vivecraft.forge.sodium.mixins.json"
+        mixinConfig "vivecraft.iris.mixins.json"
+        mixinConfig "vivecraft.physicsmod.mixins.json"
         mixinConfig "vivecraft.rei.mixins.json"
+        mixinConfig "vivecraft.optifine.mixins.json"
 
         mixinConfig "vivecraft.forge.mixins.json"
     }
@@ -46,13 +48,13 @@ dependencies {
     modRuntimeOnly("maven.modrinth:rubidium:0.6.5")
     modCompileOnly("maven.modrinth:oculus:1.19.4-1.5.2")
 
-    include(forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1"))
-
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
 
     // shadow the natives
+    bundle ("org.lwjgl:lwjgl-openvr:3.3.1") { transitive = false }
     bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
     bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
     bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }

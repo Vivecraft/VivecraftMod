@@ -459,6 +459,11 @@ public class GuiHandler
         {
   			//naughty mods!
             onScreenChanged((Screen)null, mc.screen, false);
+        } else if (mc.screen == null && guiPos_room != null)
+        {
+            //even naughtier mods!
+            // someone canceled the setScreen, so guiPos didn't get reset
+            onScreenChanged((Screen)null, null, false);
         }
 
         Vec3 guipos = guiPos_room;
@@ -571,6 +576,16 @@ public class GuiHandler
         }
 
         //GL11.glMultMatrixf(dh.vrPlayer.vrdata_world_render.getEye(currentPass).getMatrix().toFloatBuffer());
+
+        if (guipos == null) {
+            VRSettings.logger.error("guipos was null, how did that happen. vrRunning: {}", VRState.vrRunning);
+            new RuntimeException().printStackTrace();
+            guiPos_room = new Vec3(0,0,0);
+            guipos = VRPlayer.room_to_world_pos(guiPos_room, dh.vrPlayer.vrdata_world_render);
+            guiRotation_room = new Matrix4f();
+            guirot = new Matrix4f();
+            guiScale = 1.0F;
+        }
 
         Vec3 vec36 = guipos.subtract(vec3);
         pMatrixStack.translate(vec36.x, vec36.y, vec36.z);

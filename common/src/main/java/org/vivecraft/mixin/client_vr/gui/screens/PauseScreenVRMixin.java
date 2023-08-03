@@ -23,7 +23,7 @@ import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jkatvr;
 
-@Mixin(PauseScreen.class)
+@Mixin(value = PauseScreen.class, priority = 900)
 public abstract class PauseScreenVRMixin extends Screen {
 
     protected PauseScreenVRMixin(Component component) {

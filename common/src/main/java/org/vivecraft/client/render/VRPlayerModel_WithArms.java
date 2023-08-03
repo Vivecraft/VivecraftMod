@@ -1,7 +1,5 @@
 package org.vivecraft.client.render;
 
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -21,6 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import org.vivecraft.client.Xplat;
 
@@ -35,29 +34,47 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 	public ModelPart rightHand;
 	VRPlayersClient.RotInfo rotInfo;
 	private boolean laying;
-	private final List<ModelPart> parts;
 
-	public VRPlayerModel_WithArms(ModelPart p_170821_, boolean p_170822_)
+	public VRPlayerModel_WithArms(ModelPart modelPart, boolean isSlim)
 	{
-		super(p_170821_, p_170822_);
-		this.slim = p_170822_;
+		super(modelPart, isSlim);
+		this.slim = isSlim;
 		// use left/right arm as shoulders
-		this.leftShoulder = p_170821_.getChild("left_arm");
-		this.rightShoulder = p_170821_.getChild("right_arm");
-		this.leftShoulder_sleeve = p_170821_.getChild("leftShoulder_sleeve");
-		this.rightShoulder_sleeve = p_170821_.getChild("rightShoulder_sleeve");
-		this.rightHand = p_170821_.getChild("rightHand");
-		this.leftHand = p_170821_.getChild("leftHand");
+		this.leftShoulder = modelPart.getChild("left_arm");
+		this.rightShoulder = modelPart.getChild("right_arm");
+		this.leftShoulder_sleeve = modelPart.getChild("leftShoulder_sleeve");
+		this.rightShoulder_sleeve = modelPart.getChild("rightShoulder_sleeve");
+		this.rightHand = modelPart.getChild("rightHand");
+		this.leftHand = modelPart.getChild("leftHand");
 
-		this.parts = p_170821_.getAllParts().filter((p_170824_) ->
-		{
-			return !p_170824_.isEmpty();
-		}).collect(ImmutableList.toImmutableList());
+
+		//finger hax
+		// some mods remove the base parts
+		if (!leftShoulder.cubes.isEmpty()) {
+			copyUV(leftShoulder.cubes.get(0).polygons[1], leftHand.cubes.get(0).polygons[1]);
+			copyUV(leftShoulder.cubes.get(0).polygons[1], leftHand.cubes.get(0).polygons[0]);
+		}
+		if (!rightShoulder.cubes.isEmpty()) {
+			copyUV(rightShoulder.cubes.get(0).polygons[1], this.rightHand.cubes.get(0).polygons[1]);
+			copyUV(rightShoulder.cubes.get(0).polygons[1], this.rightHand.cubes.get(0).polygons[0]);
+		}
+
+		if (!rightSleeve.cubes.isEmpty()) {
+			copyUV(rightShoulder_sleeve.cubes.get(0).polygons[1], this.rightSleeve.cubes.get(0).polygons[1]);
+			copyUV(rightShoulder_sleeve.cubes.get(0).polygons[1], this.rightSleeve.cubes.get(0).polygons[0]);
+		}
+		if (!leftSleeve.cubes.isEmpty()) {
+			copyUV(leftShoulder_sleeve.cubes.get(0).polygons[1], leftSleeve.cubes.get(0).polygons[1]);
+			copyUV(leftShoulder_sleeve.cubes.get(0).polygons[1], leftSleeve.cubes.get(0).polygons[0]);
+		}
 	}
 
 	private void copyUV(Polygon source, Polygon dest) {
 		for (int i = 0; i < source.vertices.length; i++) {
 			dest.vertices[i] = new Vertex(dest.vertices[i].pos, source.vertices[i].u, source.vertices[i].v);
+			if (OptifineHelper.isOptifineLoaded()) {
+				OptifineHelper.copyRenderPositions(source.vertices[i], dest.vertices[i]);
+			}
 		}
 	}
 	
@@ -206,18 +223,6 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 		this.rightShoulder_sleeve.copyFrom(this.rightShoulder);
 		this.leftShoulder_sleeve.visible = this.leftSleeve.visible;
 		this.rightShoulder_sleeve.visible = this.rightSleeve.visible;
-		
-		int i = 3;
-		//finger hax
-		copyUV(rightShoulder.cubes.get(0).polygons[3], this.rightHand.cubes.get(0).polygons[3]);	
-		copyUV(leftShoulder.cubes.get(0).polygons[3], leftHand.cubes.get(0).polygons[3]);
-		copyUV(rightShoulder.cubes.get(0).polygons[3], this.rightHand.cubes.get(0).polygons[2]);	
-		copyUV(leftShoulder.cubes.get(0).polygons[3], leftHand.cubes.get(0).polygons[2]);
-		
-		copyUV(rightShoulder_sleeve.cubes.get(0).polygons[3], this.rightSleeve.cubes.get(0).polygons[3]);	
-		copyUV(leftShoulder_sleeve.cubes.get(0).polygons[3], leftSleeve.cubes.get(0).polygons[3]);
-		copyUV(rightShoulder_sleeve.cubes.get(0).polygons[3], this.rightSleeve.cubes.get(0).polygons[2]);	
-		copyUV(leftShoulder_sleeve.cubes.get(0).polygons[3], leftSleeve.cubes.get(0).polygons[2]);
 	}
 
 	public void setAllVisible(boolean pVisible)

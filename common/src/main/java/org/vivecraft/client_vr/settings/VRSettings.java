@@ -5,8 +5,7 @@
 package org.vivecraft.client_vr.settings;
 
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.OptionsExtension;
 import com.google.gson.JsonObject;
@@ -109,7 +108,8 @@ public class VRSettings
         CONTROLLER,
         HMD,
         RUN_IN_PLACE,
-        ROOM
+        ROOM,
+        AUTO // only for flying
     }
 
     public enum MenuWorld implements OptionEnum<MenuWorld> {
@@ -201,10 +201,10 @@ public class VRSettings
     public String keyboardKeysShift ="~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;\':\"ZXCVBNM,./?<>";
     @SettingField(VrOptions.HRTF_SELECTION)
     public int hrtfSelection = 0;
-    @SettingField
-    public boolean disableFun = false;
     @SettingField(VrOptions.RIGHT_CLICK_DELAY)
     public RightClickDelay rightclickDelay = RightClickDelay.VANILLA;
+    @SettingField(VrOptions.INGAME_BINDINGS_IN_GUI)
+    public boolean ingameBindingsInGui = false;
     @SettingField(VrOptions.THIRDPERSON_ITEMTRANSFORMS)
     public boolean thirdPersonItems = false;
     //
@@ -222,6 +222,8 @@ public class VRSettings
     public float movementSpeedMultiplier = 1.0f;   // VIVE - use full speed by default
     @SettingField(VrOptions.FREEMOVE_MODE)
     public FreeMove vrFreeMoveMode = FreeMove.CONTROLLER;
+    @SettingField(VrOptions.FREEMOVE_FLY_MODE)
+    public FreeMove vrFreeMoveFlyMode = FreeMove.AUTO;
     @SettingField(value = VrOptions.LIMIT_TELEPORT, config = "limitedTeleport")
     public boolean vrLimitedSurvivalTeleport = true;
 
@@ -410,6 +412,12 @@ public class VRSettings
     public String lastUpdate = "";
     @SettingField(VrOptions.SHOW_PLUGIN)
     public ChatServerPluginMessage showServerPluginMessage = ChatServerPluginMessage.SERVER_ONLY;
+    @SettingField(VrOptions.SHOW_PLUGIN_MISSING)
+    public boolean showServerPluginMissingMessageAlways = true;
+    @SettingField
+    public boolean vrEnabled = false;
+    @SettingField(VrOptions.VR_HOTSWITCH)
+    public boolean vrHotswitchingEnabled = true;
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
@@ -1091,6 +1099,7 @@ public class VRSettings
         },
         SHOW_UPDATES(false, true, "vivecraft.options.always", "vivecraft.options.once"),
         SHOW_PLUGIN(false, true),
+        SHOW_PLUGIN_MISSING(false, true, "vivecraft.options.always", "vivecraft.options.once"),
         AUTO_OPEN_KEYBOARD(false, true), // Always Open Keyboard
         RADIAL_MODE_HOLD(false, true, "vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
         PHYSICAL_KEYBOARD(false, true, "vivecraft.options.keyboard.physical", "vivecraft.options.keyboard.pointer"), // Keyboard Type
@@ -1126,7 +1135,7 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-                if (VRState.vrRunning && !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                if (VRState.vrRunning && !ShadersHelper.isShaderActive()) {
                     ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
                 }
             }
@@ -1288,9 +1297,11 @@ public class VRSettings
 
             @Override
             void onOptionChange() {
-                ClientDataHolderVR.getInstance().vrPlayer.roomScaleMovementDelay = 2;
-                ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(Minecraft.getInstance().player, false, true);
-                VRPlayer.get().preTick();
+                if (VRState.vrRunning) {
+                    ClientDataHolderVR.getInstance().vrPlayer.roomScaleMovementDelay = 2;
+                    ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity(Minecraft.getInstance().player, false, true);
+                    VRPlayer.get().preTick();
+                }
             }
         },
         WORLD_ROTATION(true, false, 0, 360, 30, 0) { // World Rotation
@@ -1341,6 +1352,7 @@ public class VRSettings
         },
         TOUCH_HOTBAR(false, true), // Touch Hotbar Enabled
         PLAY_MODE_SEATED(false, true, "vivecraft.options.seated", "vivecraft.options.standing"), // Play Mode
+        VR_HOTSWITCH(false, true),
         RENDER_SCALEFACTOR(true, false, 0.1f, 9f, 0.1f, 0) { // Resolution
             @Override
             String getDisplayString(String prefix, Object value) {
@@ -1414,6 +1426,26 @@ public class VRSettings
                     };
                 } catch (NumberFormatException ex) {
                     return null;
+                }
+            }
+            @Override
+            Object setOptionValue(Object value) {
+                if (value == FreeMove.ROOM) {
+                    // skip Auto
+                    return FreeMove.CONTROLLER;
+                }
+                return null;
+            }
+        },
+        FREEMOVE_FLY_MODE(false, true) {
+            @Override
+            Object setOptionValue(Object value) {
+                if (value == FreeMove.CONTROLLER) {
+                    return FreeMove.HMD;
+                } else if (value == FreeMove.AUTO) {
+                    return FreeMove.CONTROLLER;
+                } else {
+                    return FreeMove.AUTO;
                 }
             }
         },
@@ -1498,6 +1530,7 @@ public class VRSettings
                 return I18n.get("vivecraft.options." + name());
             }
         },
+        INGAME_BINDINGS_IN_GUI(false, true),
         RIGHT_CLICK_DELAY(false, false); // Right Click Repeat
 //        ANISOTROPIC_FILTERING("options.anisotropicFiltering", true, false, 1.0F, 16.0F, 0.0F)
 //                {

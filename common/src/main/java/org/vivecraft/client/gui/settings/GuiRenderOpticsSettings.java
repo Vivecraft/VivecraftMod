@@ -1,8 +1,7 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.GuiGraphics;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client.gui.framework.GuiVROption;
 import org.vivecraft.client.gui.framework.GuiVROptionsBase;
@@ -119,7 +118,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         }
 
         super.addDefaultButtons();
-        this.renderables.stream().filter((w) ->
+        this.children().stream().filter((w) ->
         {
             return w instanceof GuiVROption;
         }).forEach((w) ->
@@ -142,7 +141,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
     {
         super.loadDefaults();
         this.minecraft.options.fov().set(70);
-        this.dataholder.vrRenderer.reinitFrameBuffers("Defaults Loaded");
+        if (VRState.vrInitialized) {
+            this.dataholder.vrRenderer.reinitFrameBuffers("Defaults Loaded");
+        }
     }
 
     protected void actionPerformed(AbstractWidget widget)
@@ -152,7 +153,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
 
             if (VRState.vrRunning && (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroption.getId() == VRSettings.VrOptions.FSAA.ordinal() || guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal()))
             {
-                if (guivroption.getId() != VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || !((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive())) {
+                if (guivroption.getId() != VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || !ShadersHelper.isShaderActive()) {
                     this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
                 }
             }
