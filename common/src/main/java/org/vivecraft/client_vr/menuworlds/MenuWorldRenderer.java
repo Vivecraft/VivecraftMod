@@ -1296,14 +1296,16 @@ public class MenuWorldRenderer {
 						finalColor.lerp(vector3f4, nightVision);
 					}
 					*/
-					/* no darkness, no player
+
 					if (!dimensionInfo.forceBrightLightmap()) {
+						/* no darkness, no player
 						if (effectiveDarknessScale > 0.0f) {
 							finalColor.add(-effectiveDarknessScale, -effectiveDarknessScale, -effectiveDarknessScale);
 						}
+						 */
 						finalColor.set(Mth.clamp(finalColor.x, 0.0f, 1.0f), Mth.clamp(finalColor.y, 0.0f, 1.0f), Mth.clamp(finalColor.z, 0.0f, 1.0f));
 					}
-					*/
+
 					float gamma = this.mc.options.gamma().get().floatValue();
 					Vector3f vector3f5 = new Vector3f(this.notGamma(finalColor.x), this.notGamma(finalColor.y), this.notGamma(finalColor.z));
 					finalColor.lerp(vector3f5, Math.max(0.0f, gamma /*- darknessGamma*/));
