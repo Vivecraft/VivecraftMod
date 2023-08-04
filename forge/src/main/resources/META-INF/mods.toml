@@ -13,6 +13,7 @@ displayTest="IGNORE_SERVER_VERSION"
 description = '''
 The VR mod for any loader!
 '''
+updateJSONURL = "https://api.modrinth.com/updates/vivecraft/forge_updates.json"
 #logoFile = ""
 
 [[dependencies.vivecraft]]
