@@ -284,6 +284,9 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At("HEAD"), method = "getProjectionMatrix(D)Lorg/joml/Matrix4f;", cancellable = true)
     public void projection(double d, CallbackInfoReturnable<Matrix4f> info) {
+        if (!VRState.vrRunning) {
+            return;
+        }
         PoseStack posestack = new PoseStack();
         setupClipPlanes();
         if (GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.LEFT) {
