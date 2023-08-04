@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.network.ClientNetworking;
 
@@ -8,6 +9,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.world.entity.Pose;
 import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
 public class CrawlTracker extends Tracker
 {
@@ -61,7 +63,11 @@ public class CrawlTracker extends Tracker
 
     public void doProcess(LocalPlayer player)
     {
-        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition((double)0.2F).y * (double)this.dh.vrPlayer.worldScale + (double)0.1F < (double)this.dh.vrSettings.crawlThreshold;
+        double scaleMultiplier = 1.0;
+        if (Xplat.isModLoaded("pehkui")) {
+            scaleMultiplier /= PehkuiHelper.getPlayerScale(player, mc.getFrameTime());
+        }
+        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition((double)0.2F).y * (double)this.dh.vrPlayer.worldScale * scaleMultiplier + (double)0.1F < (double)this.dh.vrSettings.crawlThreshold;
         this.updateState(player);
     }
 
