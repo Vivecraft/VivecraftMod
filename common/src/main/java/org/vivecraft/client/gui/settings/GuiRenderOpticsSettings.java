@@ -1,12 +1,13 @@
 package org.vivecraft.client.gui.settings;
 
-import net.minecraft.client.gui.GuiGraphics;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client.gui.framework.GuiVROption;
 import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
+
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -132,9 +133,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
         });
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks)
+    public void render(PoseStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks)
     {
-        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+        super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
     }
 
     protected void loadDefaults()

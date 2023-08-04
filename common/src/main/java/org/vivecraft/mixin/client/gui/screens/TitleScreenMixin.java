@@ -1,6 +1,6 @@
 package org.vivecraft.mixin.client.gui.screens;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.renderer.PanoramaRenderer;
@@ -70,15 +70,15 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     @Inject(at = @At("TAIL"), method = "render")
-    public void renderToolTip(GuiGraphics guiGraphics, int i, int j, float f, CallbackInfo ci) {
+    public void renderToolTip(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
         updateButton.visible = UpdateChecker.hasUpdate;
 
         if (vrModeButton.isMouseOver(i, j)) {
-            guiGraphics.renderTooltip(font, font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
+            renderTooltip(poseStack, font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
         }
         if (VRState.vrInitialized && !VRState.vrRunning) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
-            guiGraphics.renderTooltip(font, font.split(hotswitchMessage, 280), width / 2 - 140 - 12, 17);
+            renderTooltip(poseStack, font.split(hotswitchMessage, 280), width / 2 - 140 - 12, 17);
         }
     }
 

@@ -1,10 +1,11 @@
 package org.vivecraft.client.gui.framework;
 
-import net.minecraft.client.gui.GuiGraphics;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
+
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -40,7 +41,7 @@ public abstract class TwoHandedScreen extends Screen
         }
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks)
+    public void render(PoseStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks)
     {
         if (this.reinit)
         {
@@ -63,11 +64,11 @@ public abstract class TwoHandedScreen extends Screen
 
             if (flag)
             {
-                abstractwidget2.render(guiGraphics, (int)d0, (int)d1, pPartialTicks);
+                abstractwidget2.render(pMatrixStack, (int)d0, (int)d1, pPartialTicks);
             }
             else
             {
-                abstractwidget2.render(guiGraphics, (int)d2, (int)d3, pPartialTicks);
+                abstractwidget2.render(pMatrixStack, (int)d2, (int)d3, pPartialTicks);
             }
 
             if (flag)

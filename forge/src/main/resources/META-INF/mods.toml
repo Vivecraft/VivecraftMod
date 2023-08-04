@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[46,)"
+loaderVersion = "[45,46)"
 #issueTrackerURL = ""
 license = "LGPLv3"
 
@@ -19,13 +19,13 @@ updateJSONURL = "https://api.modrinth.com/updates/vivecraft/forge_updates.json"
 [[dependencies.vivecraft]]
 modId = "forge"
 mandatory = true
-versionRange = "[46,)"
+versionRange = "[45,46)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.vivecraft]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20,)"
+versionRange = "[1.19.4]"
 ordering = "NONE"
 side = "BOTH"

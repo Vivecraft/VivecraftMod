@@ -203,7 +203,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 VRPlayer.get().setRoomOrigin(VRPlayer.get().roomOrigin.x, this.getY() + this.getRoomYOffsetFromPose(),
                         VRPlayer.get().roomOrigin.z, false);
             } else {
-                this.setOnGround(true);
+                this.onGround = true;
             }
         } else {
             super.move(pType, pPos);
@@ -295,8 +295,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     public void doDrag() {
         float friction = 0.91F;
 
-        if (this.onGround()) {
-            friction = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.91F;
+        if (this.onGround) {
+            friction = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.91F;
         }
         double xFactor = friction;
         double zFactor = friction;
@@ -485,10 +485,10 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void stepSound(BlockPos blockforNoise, Vec3 soundPos) {
-        BlockState blockstate = this.level().getBlockState(blockforNoise);
+        BlockState blockstate = this.level.getBlockState(blockforNoise);
         Block block = blockstate.getBlock();
         SoundType soundtype = block.getSoundType(blockstate);
-        BlockState blockstate1 = this.level().getBlockState(blockforNoise.above());
+        BlockState blockstate1 = this.level.getBlockState(blockforNoise.above());
 
         if (blockstate1.getBlock() == Blocks.SNOW) {
             soundtype = Blocks.SNOW.getSoundType(blockstate1);
@@ -498,9 +498,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         float f1 = soundtype.getPitch();
         SoundEvent soundevent = soundtype.getStepSound();
 
-        // TODO: liquid is deprecated
-        if (!this.isSilent() && !block.defaultBlockState().liquid()) {
-            this.level().playSound((LocalPlayer) null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
+        if (!this.isSilent() && !block.defaultBlockState().getMaterial().isLiquid()) {
+            this.level.playSound((LocalPlayer) null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
         }
     }
 

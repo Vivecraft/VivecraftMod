@@ -1,6 +1,6 @@
 package org.vivecraft.client.gui.framework;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -215,7 +215,7 @@ public abstract class GuiVROptionsBase extends Screen
         this.init(avroptionentry, clear);
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks)
+    public void render(PoseStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks)
     {
         if (this.reinit)
         {
@@ -223,14 +223,14 @@ public abstract class GuiVROptionsBase extends Screen
             this.init();
         }
 
-        this.renderBackground(guiGraphics);
+        this.renderBackground(pMatrixStack);
 
         if (this.visibleList != null)
         {
-            this.visibleList.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+            this.visibleList.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
         }
 
-        guiGraphics.drawCenteredString(this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 16777215);
+        drawCenteredString(pMatrixStack, this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 16777215);
 
         if (this.btnDefaults != null)
         {
@@ -242,8 +242,8 @@ public abstract class GuiVROptionsBase extends Screen
             this.btnDone.visible = this.drawDefaultButtons;
         }
 
-        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
-        renderTooltip(guiGraphics, pMouseX, pMouseY);
+        super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+        renderTooltip(pMatrixStack, pMouseX, pMouseY);
     }
 
     protected void actionPerformed(AbstractWidget button)
@@ -321,7 +321,7 @@ public abstract class GuiVROptionsBase extends Screen
         return this.visibleList != null && this.visibleList.charTyped(pCodePoint, pModifiers) ? true : super.charTyped(pCodePoint, pModifiers);
     }
 
-    private void renderTooltip(GuiGraphics guiGraphics, int pMouseX, int pMouseY) {
+    private void renderTooltip(PoseStack pMatrixStack, int pMouseX, int pMouseY) {
         AbstractWidget hover = null;
         // find active button
         for (GuiEventListener child: children()) {
@@ -345,9 +345,9 @@ public abstract class GuiVROptionsBase extends Screen
 
                         // if tooltip is not too low, draw below button, else above
                         if (guiHover.getY() + guiHover.getHeight() + formattedText.size() * (font.lineHeight + 1) + 14 < this.height) {
-                            guiGraphics.renderTooltip(this.font, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.getY() + guiHover.getHeight() + 14);
+                            renderTooltip(pMatrixStack, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.getY() + guiHover.getHeight() + 14);
                         } else {
-                            guiGraphics.renderTooltip(this.font, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.getY() - formattedText.size() * (font.lineHeight + 1) + 9);
+                            renderTooltip(pMatrixStack, font.split(Component.literal(tooltip), 308), this.width / 2 - 166, guiHover.getY() - formattedText.size() * (font.lineHeight + 1) + 9);
                         }
                     }
                 }

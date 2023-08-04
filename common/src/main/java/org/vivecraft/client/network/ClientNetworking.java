@@ -197,7 +197,7 @@ public class ClientNetworking {
             capturedYaw = player.getYRot();
             float f = (float) Math.toDegrees(Math.asin(-view.y / view.length()));
             float f1 = (float) Math.toDegrees(Math.atan2(-view.x, view.z));
-            ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(f1, f, player.onGround()));
+            ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(f1, f, player.isOnGround()));
             overrideActive = true;
         }
     }
@@ -205,7 +205,7 @@ public class ClientNetworking {
     public static void restoreLook(Player player) {
         if (!serverWantsData) {
             if (overrideActive) {
-                ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(capturedYaw, capturedPitch, player.onGround()));
+                ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(capturedYaw, capturedPitch, player.isOnGround()));
                 overrideActive = false;
             }
         }

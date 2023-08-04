@@ -249,8 +249,7 @@ public class InteractTracker extends Tracker
                     this.active[j] = blockhitresult != null && (this.rightClickable.contains(blockstate.getBlock().getClass()) || this.rightClickable.contains(blockstate.getBlock().getClass().getSuperclass()));
                     this.bukkit[j] = false;
 
-                    // TODO: liquid is deprecated
-                    if (!this.active[j] && itemstack.getItem() == Items.BUCKET && blockstate.liquid())
+                    if (!this.active[j] && itemstack.getItem() == Items.BUCKET && blockstate.getMaterial().isLiquid())
                     {
                         this.active[j] = true;
                         this.bukkit[j] = true;

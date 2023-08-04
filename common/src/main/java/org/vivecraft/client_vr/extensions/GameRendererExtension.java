@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.extensions;
 
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Matrix4f;
@@ -41,7 +40,7 @@ public interface GameRendererExtension {
 
 	void renderDebugAxes(int i, int j, int k, float f);
 
-	void drawScreen(float f, Screen screen, GuiGraphics guiGraphics);
+	void drawScreen(float f, Screen screen, PoseStack poseStack);
 
 	Matrix4f getThirdPassProjectionMatrix();
 

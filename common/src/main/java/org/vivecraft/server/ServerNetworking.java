@@ -231,7 +231,7 @@ public class ServerNetworking {
     }
 
     public static Set<ServerPlayerConnection> getTrackingPlayers(Entity entity) {
-        var manager = entity.level().getChunkSource();
+        var manager = entity.level.getChunkSource();
         var storage = ((ServerChunkCache) manager).chunkMap;
         var playerTracker = ((ChunkMapAccessor) storage).getTrackedEntities().get(entity.getId());
         return playerTracker != null ? playerTracker.getPlayersTracking() : Collections.emptySet();

@@ -164,7 +164,6 @@ public class RowTracker extends Tracker
         Vec3 vec3 = this.getAttachmentPoint(paddle, boat);
         Vec3 vec31 = this.getArmToPaddleVector(paddle, boat).normalize();
         BlockPos blockpos = BlockPos.containing(vec3.add(vec31));
-        // TODO: liquid is deprecated
-        return boat.level().getBlockState(blockpos).liquid();
+        return boat.level.getBlockState(blockpos).getMaterial().isLiquid();
     }
 }
