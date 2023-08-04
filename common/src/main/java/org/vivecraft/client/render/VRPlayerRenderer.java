@@ -3,7 +3,6 @@ package org.vivecraft.client.render;
 import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.ModelPart;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;

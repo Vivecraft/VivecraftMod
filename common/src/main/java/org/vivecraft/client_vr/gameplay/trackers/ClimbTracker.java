@@ -7,7 +7,6 @@ import java.util.Random;
 import java.util.Set;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.util.Mth;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.BlockTags;
