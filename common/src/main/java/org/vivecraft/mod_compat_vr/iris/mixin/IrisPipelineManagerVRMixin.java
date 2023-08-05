@@ -1,11 +1,15 @@
 package org.vivecraft.mod_compat_vr.iris.mixin;
 
 import net.coderbot.iris.Iris;
+import net.coderbot.iris.pipeline.PipelineManager;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.DimensionId;
+import net.coderbot.iris.shaderpack.materialmap.NamespacedId;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Desc;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -31,7 +35,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     private WorldRenderingPipeline pipeline;
     @Shadow(remap = false)
     @Final
-    private Function<DimensionId, WorldRenderingPipeline> pipelineFactory;
+    private Function<Object, WorldRenderingPipeline> pipelineFactory;
 
     private ShadowRenderTargets shadowRenderTargets;
     public ShadowRenderTargets getShadowRenderTargets() {
@@ -42,13 +46,13 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
         shadowRenderTargets = targets;
     }
 
-    private final Map<DimensionId, Map<RenderPass, WorldRenderingPipeline>> vrPipelinesPerDimension = new HashMap<>();
+    private final Map<Object, Map<RenderPass, WorldRenderingPipeline>> vrPipelinesPerDimension = new HashMap<>();
     private WorldRenderingPipeline vanillaPipeline;
     private  Map<RenderPass, WorldRenderingPipeline> vrPipelinesCurrentDimension;
 
     private WorldRenderPass currentWorldRenderPass = null;
     @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.BEFORE), remap = false)
-    private void generateVanillaPipeline(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+    private void generateVanillaPipeline(CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         // this also runs on game startup, when the renderpassManager isn't initialized yet
         if (VRState.vrInitialized && RenderPassManager.INSTANCE != null) {
             currentWorldRenderPass = RenderPassManager.wrp;
@@ -57,8 +61,21 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
             ClientDataHolderVR.getInstance().currentPass = currentRenderPass;
         }
     }
-    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.AFTER), remap = false)
-    private void generateVRPipelines(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+
+    @Group(name = "generateVRPipelines", min = 1, max = 1)
+    @Inject(target = @Desc(value = "preparePipeline", owner = PipelineManager.class, ret = WorldRenderingPipeline.class, args = DimensionId.class), at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.AFTER), remap = false, expect = 0)
+    private void generateVRPipelines164(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+        generateVRPipelines(newDimension);
+    }
+
+    @Group(name = "generateVRPipelines", min = 1, max = 1)
+    @Inject(target = @Desc(value = "preparePipeline", owner = PipelineManager.class, ret = WorldRenderingPipeline.class, args = NamespacedId.class), at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.AFTER), remap = false, expect = 0)
+    private void generateVRPipelines165(NamespacedId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+        generateVRPipelines(newDimension);
+    }
+
+    @Unique
+    private void generateVRPipelines(Object newDimension) {
         if (VRState.vrInitialized) {
             vanillaPipeline = pipeline;
             if (!this.vrPipelinesPerDimension.containsKey(newDimension)) {
@@ -113,12 +130,27 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
         }
     }
 
-    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, cancellable = true)
-    private void returnCurrentVRPipeline(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+    @Group(name = "returnCurrentVRPipeline", min = 1, max = 1)
+    @Inject(target = @Desc(value = "preparePipeline", owner = PipelineManager.class, ret = WorldRenderingPipeline.class, args = DimensionId.class), at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, cancellable = true, expect = 0)
+    private void returnCurrentVRPipeline164(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         if (!RenderPassType.isVanilla()) {
-            pipeline = vrPipelinesPerDimension.get(newDimension).get(ClientDataHolderVR.getInstance().currentPass);
+            pipeline = getCurrentVRPipeline(newDimension);
             cir.setReturnValue(pipeline);
         }
+    }
+
+    @Group(name = "returnCurrentVRPipeline", min = 1, max = 1)
+    @Inject(target = @Desc(value = "preparePipeline", owner = PipelineManager.class, ret = WorldRenderingPipeline.class, args = NamespacedId.class), at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, cancellable = true, expect = 0)
+    private void returnCurrentVRPipeline165(NamespacedId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+        if (!RenderPassType.isVanilla()) {
+            pipeline = getCurrentVRPipeline(newDimension);
+            cir.setReturnValue(pipeline);
+        }
+    }
+
+    @Unique
+    private WorldRenderingPipeline getCurrentVRPipeline(Object key) {
+        return vrPipelinesPerDimension.get(key).get(ClientDataHolderVR.getInstance().currentPass);
     }
 
     @Inject(method = "destroyPipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V"), remap = false)

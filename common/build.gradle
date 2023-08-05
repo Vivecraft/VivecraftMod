@@ -19,7 +19,7 @@ dependencies {
     modCompileOnly("maven.modrinth:rubidium:0.6.4")
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.5.2+1.19.4"
+    modCompileOnly "maven.modrinth:iris:1.6.5+1.19.4"
 
     // for REI compat
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:11.0.597"
