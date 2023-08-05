@@ -21,7 +21,7 @@ dependencies {
 
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.5.2+1.18.2"
+    modCompileOnly "maven.modrinth:iris:1.6.5+1.18.2"
 
     // for REI compat
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:8.3.618"

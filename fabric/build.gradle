@@ -29,23 +29,24 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.18.2-0.4.1"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.18.2-0.4.1"
+    modRuntimeOnly 'org.joml:joml:1.10.2' //temp sodium
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.5.2+1.18.2"
+    modRuntimeOnly "maven.modrinth:iris:1.6.5+1.18.2"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
-    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre9' //temp iris
+    modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
     // for REI compat
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:8.3.618"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:8.3.618"
 
     // for Pehkui compat
-    modCompileOnly("com.github.Virtuoel:Pehkui:3.7.1", { exclude group: "net.fabricmc.fabric-api" })
+    modRuntimeOnly("com.github.Virtuoel:Pehkui:3.7.7", { exclude group: "net.fabricmc.fabric-api" })
 
     // other mods
     // modRuntimeOnly("com.simibubi.create:create-fabric-1.18.2:0.5.0.i-1016+1.18.2")
-    modCompileOnly "maven.modrinth:lithium:mc1.18.2-0.10.3"
-    modCompileOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
+    modRuntimeOnly "maven.modrinth:lithium:mc1.18.2-0.10.3"
+    modRuntimeOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
 
     /*
     // for immersive portals compat
