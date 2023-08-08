@@ -391,7 +391,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                     VRSettings.FreeMove freeMoveType = !this.isPassenger() && this.getAbilities().flying && this.dataholder.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ? this.dataholder.vrSettings.vrFreeMoveFlyMode : this.dataholder.vrSettings.vrFreeMoveMode;
 
                     if (isFlyingOrSwimming) {
-                        switch (this.dataholder.vrSettings.vrFreeMoveMode) {
+                        switch (freeMoveType) {
                             case CONTROLLER:
                                 vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.getController(1).getPitch() * ((float) Math.PI / 180F));
                                 break;
@@ -404,7 +404,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                     if (this.dataholder.jumpTracker.isjumping()) {
                         vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.hmd.getYaw() * ((float) Math.PI / 180F));
                     } else {
-                        switch (this.dataholder.vrSettings.vrFreeMoveMode) {
+                        switch (freeMoveType) {
                             case CONTROLLER:
                                 vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.getController(1).getYaw() * ((float) Math.PI / 180F));
                                 break;
