@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -148,7 +149,6 @@ public abstract class VRRenderer {
 
 
         RenderTarget fb = minecraft.getMainRenderTarget();
-        RenderSystem.viewport(0, 0, fb.viewWidth, fb.viewHeight);
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F), VertexSorting.ORTHOGRAPHIC_Z);
         RenderSystem.getModelViewStack().pushPose();
@@ -260,6 +260,8 @@ public abstract class VRRenderer {
 
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
+
+        mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/black.png"));
 
         for (int i = 0; i < verts.length; i += 2) {
             builder.vertex(verts[i] * dh.vrRenderer.renderScale, verts[i + 1] * dh.vrRenderer.renderScale, 0.0F).endVertex();
