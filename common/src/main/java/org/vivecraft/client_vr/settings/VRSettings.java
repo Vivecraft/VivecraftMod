@@ -1192,19 +1192,19 @@ public class VRSettings
         MIXED_REALITY_UNITY_LIKE(false, true, "vivecraft.options.unity", "vivecraft.options.sidebyside") { // Layout
             @Override
             void onOptionChange() {
-            	ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+            	ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_UNDISTORTED(false, true) { // Undistorted Pass
             @Override
             void onOptionChange() {
-            	ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+            	ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_ALPHA_MASK(false, true) { // Alpha Mask
             @Override
             void onOptionChange() {
-            	ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+            	ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_FOV(true, false, 0, 179, 1, 0) { // Third Person FOV

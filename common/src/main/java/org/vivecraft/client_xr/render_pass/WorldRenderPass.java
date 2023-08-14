@@ -40,6 +40,14 @@ public class WorldRenderPass implements AutoCloseable {
         return postchain;
     }
 
+    public void resize(int width, int height) {
+        target.resize(width, height, Minecraft.ON_OSX);
+        outlineChain.resize(width, height);
+        if (transparencyChain != null) {
+            transparencyChain.resize(width, height);
+        }
+    }
+
     @Override
     public void close() {
         this.target.destroyBuffers();
