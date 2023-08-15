@@ -21,8 +21,6 @@ import org.vivecraft.server.config.ServerConfig;
 
 import java.util.*;
 
-import static org.vivecraft.server.ServerVRPlayers.getVivePlayer;
-
 public class ServerNetworking {
 
     // temporarily stores the packets from legacy clients to assemble a complete VrPlayerState
@@ -32,7 +30,7 @@ public class ServerNetworking {
 
     public static void handlePacket(CommonNetworkHelper.PacketDiscriminators packetID, FriendlyByteBuf buffer, ServerGamePacketListenerImpl listener) {
         var playerEntity = listener.player;
-        ServerVivePlayer vivePlayer = getVivePlayer(playerEntity);
+        ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(playerEntity);
 
         if (vivePlayer == null && packetID != CommonNetworkHelper.PacketDiscriminators.VERSION) {
             return;

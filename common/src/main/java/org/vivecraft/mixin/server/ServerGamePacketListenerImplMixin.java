@@ -18,6 +18,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerPlayerConnection;
+import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.config.ServerConfig;
 import org.vivecraft.server.ServerNetworking;
 
@@ -76,5 +77,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
                 this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(this.player.getName().getString())), false);
             }
         }
+        // remove player from vivepalyer list, when they leave
+        ServerVRPlayers.getPlayersWithVivecraft(this.server).remove(this.player.getUUID());
     }
 }
