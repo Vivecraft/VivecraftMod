@@ -179,6 +179,7 @@ public class ServerNetworking {
 
             case CLIMBING:
                 playerEntity.fallDistance = 0.0F;
+                break;
             case ACTIVEHAND:
                 vivePlayer.activeHand = buffer.readByte();
 
