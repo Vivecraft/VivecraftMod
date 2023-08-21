@@ -1,12 +1,17 @@
 package org.vivecraft.client_vr;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import org.joml.Quaternionf;
+import org.vivecraft.api_beta.data.VRPose;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client.utils.Utils;
+import org.vivecraft.common.api_impl.data.VRDataImpl;
+import org.vivecraft.common.api_impl.data.VRPoseImpl;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Vector3;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.phys.Vec3;
 
 public class VRData {
     public VRDevicePose hmd;
@@ -157,7 +162,18 @@ public class VRData {
         return new Vec3(in.x * (double) factor, in.y * (double) factor, in.z * (double) factor);
     }
 
-    public class VRDevicePose {
+    public org.vivecraft.api_beta.data.VRData asVRData() {
+        return new VRDataImpl(
+            this.hmd.asVRPose(),
+            this.c0.asVRPose(),
+            this.c1.asVRPose(),
+            ClientDataHolderVR.getInstance().vrSettings.seated,
+            ClientDataHolderVR.getInstance().vrSettings.reverseHands
+        );
+    }
+
+    public class VRDevicePose
+    {
         final VRData data;
         final Vec3 pos;
         final Vec3 dir;
@@ -202,6 +218,17 @@ public class VRData {
         public Matrix4f getMatrix() {
             Matrix4f matrix4f = Matrix4f.rotationY(VRData.this.rotation_radians);
             return Matrix4f.multiply(matrix4f, this.matrix);
+        }
+
+        public VRPose asVRPose() {
+            Quaternionf quat = new Quaternionf();
+            quat.setFromUnnormalized(getMatrix().toMCMatrix());
+            return new VRPoseImpl(
+                    getPosition(),
+                    getDirection(),
+                    quat,
+                    getRoll()
+            );
         }
 
         public String toString() {

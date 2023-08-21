@@ -1,6 +1,8 @@
 package org.vivecraft.client.api_impl;
 
 import org.vivecraft.api_beta.client.VivecraftClientAPI;
+import org.vivecraft.api_beta.data.VRData;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
@@ -11,27 +13,63 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
     private ClientAPIImpl() {
     }
 
-    /**
-     * @return Whether VR support is initialized.
-     */
+    @Override
+    public VRData getPreTickRoomData() throws IllegalStateException {
+        if (!isVrActive()) {
+            throw new IllegalStateException();
+        }
+        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.asVRData();
+    }
+
+    @Override
+    public VRData getPostTickRoomData() throws IllegalStateException {
+        if (!isVrActive()) {
+            throw new IllegalStateException();
+        }
+        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.asVRData();
+    }
+
+    @Override
+    public VRData getPreTickWorldData() throws IllegalStateException {
+        if (!isVrActive()) {
+            throw new IllegalStateException();
+        }
+        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.asVRData();
+    }
+
+    @Override
+    public VRData getPostTickWorldData() throws IllegalStateException {
+        if (!isVrActive()) {
+            throw new IllegalStateException();
+        }
+        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_post.asVRData();
+    }
+
+    @Override
+    public VRData getWorldRenderData() throws IllegalStateException {
+        if (!isVrActive()) {
+            throw new IllegalStateException();
+        }
+        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.asVRData();
+    }
+
     @Override
     public boolean isVrInitialized() {
         return VRState.vrInitialized;
     }
 
-    /**
-     * @return Whether the client is actively in VR.
-     */
     @Override
     public boolean isVrActive() {
         return VRState.vrRunning;
     }
 
-    /**
-     * @return Whether the current render pass is a vanilla render pass.
-     */
     @Override
     public boolean isVanillaRenderPass() {
         return RenderPassType.isVanilla();
+    }
+
+    @Override
+    public float getWorldScale() {
+        return ClientDataHolderVR.getInstance().vrPlayer.worldScale;
     }
 }
