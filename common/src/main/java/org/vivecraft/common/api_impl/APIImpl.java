@@ -34,6 +34,6 @@ public final class APIImpl implements VivecraftAPI {
             return ServerVRPlayers.getVivePlayer(serverPlayer).asVRData();
         }
 
-        return VRPlayersClient.getInstance().getRotationsForPlayer(player.getUUID()).asVRData();
+        return VRPlayersClient.getInstance().getRotationsForPlayer(player.getUUID()).asVRData(player.position());
     }
 }
