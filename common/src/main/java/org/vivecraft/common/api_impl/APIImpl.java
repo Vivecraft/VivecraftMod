@@ -6,9 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.vivecraft.api_beta.VivecraftAPI;
 import org.vivecraft.api_beta.data.VRData;
 import org.vivecraft.client.VRPlayersClient;
-import org.vivecraft.client.api_impl.convert.VRDataClientVivePlayers;
 import org.vivecraft.server.ServerVRPlayers;
-import org.vivecraft.server.api_impl.convert.VRDataServerVivePlayer;
 
 public final class APIImpl implements VivecraftAPI {
 
@@ -33,9 +31,9 @@ public final class APIImpl implements VivecraftAPI {
             return null;
         }
         if (player instanceof ServerPlayer serverPlayer) {
-            return VRDataServerVivePlayer.fromServerVivePlayer(serverPlayer);
+            return ServerVRPlayers.getVivePlayer(serverPlayer).asVRData();
         }
 
-        return VRDataClientVivePlayers.fromClientVivePlayers(player);
+        return VRPlayersClient.getInstance().getRotationsForPlayer(player.getUUID()).asVRData();
     }
 }

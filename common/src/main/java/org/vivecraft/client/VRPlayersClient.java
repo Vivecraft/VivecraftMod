@@ -9,6 +9,8 @@ import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
+import org.vivecraft.common.api_impl.data.VRDataImpl;
+import org.vivecraft.common.api_impl.data.VRPoseImpl;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
@@ -259,6 +261,16 @@ public class VRPlayersClient {
 
             Vec3 vec31 = Utils.vecLerp(vec3, this.headRot, 0.5D);
             return Math.atan2(-vec31.x, vec31.z);
+        }
+
+        public org.vivecraft.api_beta.data.VRData asVRData() {
+            return new VRDataImpl(
+                    new VRPoseImpl(this.Headpos, this.headRot, this.headQuat.asJOMLQuaternion(), this.headQuat.toEuler().getRoll()),
+                    new VRPoseImpl(this.rightArmPos, this.rightArmRot, this.rightArmQuat.asJOMLQuaternion(), this.rightArmQuat.toEuler().getRoll()),
+                    new VRPoseImpl(this.leftArmPos, this.leftArmRot, this.leftArmQuat.asJOMLQuaternion(), this.leftArmQuat.toEuler().getRoll()),
+                    this.seated,
+                    this.reverse
+            );
         }
     }
 }

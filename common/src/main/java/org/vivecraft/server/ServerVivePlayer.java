@@ -3,6 +3,10 @@ package org.vivecraft.server;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.vivecraft.api_beta.data.VRData;
+import org.vivecraft.common.api_impl.data.VRDataImpl;
+import org.vivecraft.common.api_impl.data.VRPoseImpl;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.Pose;
 import org.vivecraft.common.network.VrPlayerState;
@@ -74,6 +78,13 @@ public class ServerVivePlayer {
         return 0;
     }
 
+    public Quaternionf getHMDQuaternion() {
+        if (this.vrPlayerState != null) {
+            return this.vrPlayerState.hmd().orientation().asJOMLQuaternion();
+        }
+        return null; // Should only return null if player isn't in VR.
+    }
+
     public Vec3 getControllerPos(int c, Player player, boolean realPosition) {
         if (this.vrPlayerState != null) {
 
@@ -106,6 +117,14 @@ public class ServerVivePlayer {
         return 0;
     }
 
+    public Quaternionf getControllerQuaternion(int c) {
+        if (this.vrPlayerState != null) {
+            Pose controllerPose = c == 0 ? this.vrPlayerState.controller0() : this.vrPlayerState.controller1();
+            return controllerPose.orientation().asJOMLQuaternion();
+        }
+        return null; // Should only return null if player isn't in VR.
+    }
+
     public boolean isVR() {
         return this.isVR;
     }
@@ -126,5 +145,18 @@ public class ServerVivePlayer {
             return false;
         }
         return this.vrPlayerState.reverseHands();
+    }
+
+    public VRData asVRData() {
+        if (this.vrPlayerState == null) {
+            return null;
+        }
+        return new VRDataImpl(
+                new VRPoseImpl(this.getHMDPos(player), this.getHMDDir(), this.getHMDQuaternion(), this.getHMDRollDeg()),
+                new VRPoseImpl(this.getControllerPos(0, player), this.getControllerDir(0), this.getControllerQuaternion(0), this.getControllerRollDeg(0)),
+                new VRPoseImpl(this.getControllerPos(1, player), this.getControllerDir(1), this.getControllerQuaternion(1), this.getControllerRollDeg(1)),
+                this.isSeated(),
+                this.usingReversedHands()
+        );
     }
 }
