@@ -1,17 +1,20 @@
 package org.vivecraft.common.api_impl.data;
 
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
 import org.vivecraft.api_beta.data.VRPose;
 
 public class VRPoseImpl implements VRPose {
 
     private final Vec3 pos;
     private final Vec3 rot;
+    private final Quaternionf quaternion;
     private final double rollDeg;
 
-    public VRPoseImpl(Vec3 pos, Vec3 rot, double rollDeg) {
+    public VRPoseImpl(Vec3 pos, Vec3 rot, Quaternionf quaternion, double rollDeg) {
         this.pos = pos;
         this.rot = rot;
+        this.quaternion = quaternion;
         this.rollDeg = rollDeg;
     }
 
@@ -38,6 +41,11 @@ public class VRPoseImpl implements VRPose {
     @Override
     public double getRollDeg() {
         return this.rollDeg;
+    }
+
+    @Override
+    public Quaternionf getQuaternion() {
+        return this.quaternion;
     }
 
     @Override

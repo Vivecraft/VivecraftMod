@@ -2,6 +2,7 @@ package org.vivecraft.api_beta.data;
 
 import com.google.common.annotations.Beta;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
 
 /**
  * Represents the pose data, such as position and rotation, for a given trackable object, such as the HMD or
@@ -63,4 +64,10 @@ public interface VRPose {
      */
     @Beta
     double getRollDeg();
+
+    /**
+     * @return The quaternion representing the rotation of the device.
+     */
+    @Beta
+    Quaternionf getQuaternion();
 }
