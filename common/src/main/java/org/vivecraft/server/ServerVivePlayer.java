@@ -4,6 +4,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.Pose;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.utils.math.Vector3;
 
@@ -66,6 +67,13 @@ public class ServerVivePlayer {
         return player.position().add(0.0D, 1.62D, 0.0D);
     }
 
+    public double getHMDRollDeg() {
+        if (this.vrPlayerState != null) {
+            return this.vrPlayerState.hmd().orientation().toEuler().getRoll();
+        }
+        return 0;
+    }
+
     public Vec3 getControllerPos(int c, Player player, boolean realPosition) {
         if (this.vrPlayerState != null) {
 
@@ -90,6 +98,14 @@ public class ServerVivePlayer {
         return getControllerPos(c, player, false);
     }
 
+    public double getControllerRollDeg(int c) {
+        if (this.vrPlayerState != null) {
+            Pose controllerPose = c == 0 ? this.vrPlayerState.controller0() : this.vrPlayerState.controller1();
+            return controllerPose.orientation().toEuler().getRoll();
+        }
+        return 0;
+    }
+
     public boolean isVR() {
         return this.isVR;
     }
@@ -103,5 +119,12 @@ public class ServerVivePlayer {
             return false;
         }
         return this.vrPlayerState.seated();
+    }
+
+    public boolean usingReversedHands() {
+        if (this.vrPlayerState == null) {
+            return false;
+        }
+        return this.vrPlayerState.reverseHands();
     }
 }
