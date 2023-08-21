@@ -265,11 +265,13 @@ public class VRPlayersClient {
             return Math.atan2(-vec31.x, vec31.z);
         }
 
-        public org.vivecraft.api_beta.data.VRData asVRData() {
+        public org.vivecraft.api_beta.data.VRData asVRData(Vec3 playerPos) {
+            // Have to add the player's position here, as the RotInfo positions are player relative, rather
+            // than the in-world position.
             return new VRDataImpl(
-                    new VRPoseImpl(this.Headpos, this.headRot, this.headQuat.asJOMLQuaternion(), this.headQuat.toEuler().getRoll()),
-                    new VRPoseImpl(this.rightArmPos, this.rightArmRot, this.rightArmQuat.asJOMLQuaternion(), this.rightArmQuat.toEuler().getRoll()),
-                    new VRPoseImpl(this.leftArmPos, this.leftArmRot, this.leftArmQuat.asJOMLQuaternion(), this.leftArmQuat.toEuler().getRoll()),
+                    new VRPoseImpl(this.Headpos.add(playerPos), this.headRot, this.headQuat.asJOMLQuaternion(), this.headQuat.toEuler().getRoll()),
+                    new VRPoseImpl(this.rightArmPos.add(playerPos), this.rightArmRot, this.rightArmQuat.asJOMLQuaternion(), this.rightArmQuat.toEuler().getRoll()),
+                    new VRPoseImpl(this.leftArmPos.add(playerPos), this.leftArmRot, this.leftArmQuat.asJOMLQuaternion(), this.leftArmQuat.toEuler().getRoll()),
                     this.seated,
                     this.reverse
             );
