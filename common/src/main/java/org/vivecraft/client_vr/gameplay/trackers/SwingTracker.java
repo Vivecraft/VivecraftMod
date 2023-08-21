@@ -22,6 +22,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -29,8 +32,6 @@ import org.vivecraft.client_vr.Vector3fHistory;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.BodyPart;
-import org.vivecraft.common.network.FBTMode;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.BlockTags;
 import org.vivecraft.data.ItemTags;
@@ -39,9 +40,9 @@ import org.vivecraft.mod_compat_vr.epicfight.EpicFightHelper;
 import java.util.Collections;
 import java.util.List;
 
-public class SwingTracker extends Tracker {
+public class SwingTracker implements Tracker {
     private static final int[] CONTROLLER_AND_FEET = new int[]{MCVR.MAIN_CONTROLLER, MCVR.OFFHAND_CONTROLLER, MCVR.RIGHT_FOOT_TRACKER, MCVR.LEFT_FOOT_TRACKER};
-    private static final BodyPart[] BODYPARTS = new BodyPart[]{BodyPart.MAIN_HAND, BodyPart.OFF_HAND, BodyPart.RIGHT_FOOT, BodyPart.LEFT_FOOT};
+    private static final VRBodyPart[] BODYPARTS = new VRBodyPart[]{VRBodyPart.MAIN_HAND, VRBodyPart.OFF_HAND, VRBodyPart.RIGHT_FOOT, VRBodyPart.LEFT_FOOT};
     private static final float SPEED_THRESH = 3.0F;
 
     private final Vec3[] lastWeaponEndAir = new Vec3[]{Vec3.ZERO, Vec3.ZERO, Vec3.ZERO, Vec3.ZERO};
@@ -55,8 +56,12 @@ public class SwingTracker extends Tracker {
     public boolean[] canAct = new boolean[4];
     public int disableSwing = 3;
 
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
+
     public SwingTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -236,7 +241,7 @@ public class SwingTracker extends Tracker {
                         !this.lastHitEntities[i].contains(entity)) // don't hit entities multiple times per swing
                     {
                         if (entityAct) {
-                            // Minecraft.getInstance().physicalGuiManager.preClickAction();
+                            // this.mc.physicalGuiManager.preClickAction();
 
                             if (!EpicFightHelper.isLoaded() || !EpicFightHelper.attack()) {
                                 ClientNetworking.sendActiveBodyPart(BODYPARTS[i], true);
@@ -412,14 +417,19 @@ public class SwingTracker extends Tracker {
         Profiler.get().pop();
     }
 
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
     private boolean getIsHittingBlock() {
         return this.mc.gameMode.isDestroying();
     }
 
     private void clearBlockHitDelay() {
         // TODO set destroyTicks to 1 to cancel multiple sound events per hit
-        // MCReflection.PlayerController_blockHitDelay.set(Minecraft.getInstance().gameMode, 0);
-        // Minecraft.getInstance().gameMode.blockBreakingCooldown = 1;
+        // MCReflection.PlayerController_blockHitDelay.set(this.mc.gameMode, 0);
+        // this.mc.gameMode.blockBreakingCooldown = 1;
     }
 
     /**

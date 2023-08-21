@@ -8,11 +8,12 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.common.utils.MathUtils;
 
-public class CameraTracker extends Tracker {
+public class CameraTracker implements Tracker {
     public static final ResourceLocation CAMERA_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft", "camera");
     public static final ResourceLocation CAMERA_DISPLAY_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft",
         "camera_display");
@@ -26,9 +27,12 @@ public class CameraTracker extends Tracker {
     private Vec3 startPosition;
     private Quaternionf startRotation;
     private boolean quickMode;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public CameraTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -75,15 +79,14 @@ public class CameraTracker extends Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_FRAME;
+    }
+
     public void reset(LocalPlayer player) {
         this.visible = false;
         this.quickMode = false;
         this.stopMoving();
-    }
-
-    @Override
-    public EntryPoint getEntryPoint() {
-        return EntryPoint.SPECIAL_ITEMS; // smoother camera movement
     }
 
     public boolean isVisible() {

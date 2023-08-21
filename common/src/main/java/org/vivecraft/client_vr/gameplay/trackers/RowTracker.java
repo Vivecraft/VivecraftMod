@@ -8,10 +8,11 @@ import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.utils.MathUtils;
 
-public class RowTracker extends Tracker {
+public class RowTracker implements Tracker {
     private static final double TRANSMISSION_EFFICIENCY = 0.9D;
 
     public double[] forces = new double[]{0.0D, 0.0D};
@@ -21,11 +22,14 @@ public class RowTracker extends Tracker {
 
     private final Vec3[] lastUWPs = new Vec3[2];
 
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
+
     public RowTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
-    @Override
     public boolean isActive(LocalPlayer player) {
         if (this.dh.vrSettings.seated) {
             return false;
@@ -81,6 +85,11 @@ public class RowTracker extends Tracker {
         }
 
         // TODO: Backwards paddlin'
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 
     public void doProcessFinaltransmithastofixthis(LocalPlayer player) {

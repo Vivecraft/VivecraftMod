@@ -36,6 +36,16 @@ public class MathUtils {
         return new Vector3f((float) (a.x - b.x), (float) (a.y - b.y), (float) (a.z - b.z));
     }
 
+    /**
+     * Converts a {@link Vector3fc} to a {@link Vec3}.
+     *
+     * @param v The original Vector3fc.
+     * @return The Vec3.
+     */
+    public static Vec3 toMcVec3(Vector3fc v) {
+        return new Vec3(v.x(), v.y(), v.z());
+    }
+
     public static double lerpMod(double from, double to, double percent, double mod) {
         return Math.abs(to - from) < mod / 2.0D ?
             from + (to - from) * percent :

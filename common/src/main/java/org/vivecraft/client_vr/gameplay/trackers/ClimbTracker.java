@@ -18,6 +18,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -30,7 +31,7 @@ import org.vivecraft.server.config.ClimbeyBlockmode;
 
 import java.util.*;
 
-public class ClimbTracker extends Tracker {
+public class ClimbTracker implements Tracker {
     public static final ResourceLocation CLAWS_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft",
         "climb_claws");
 
@@ -61,9 +62,12 @@ public class ClimbTracker extends Tracker {
     private final AABB fullBB = new AABB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
     private final Random rand = new Random();
     private boolean unsetFlag;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public ClimbTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isGrabbingLadder() {
@@ -659,6 +663,11 @@ public class ClimbTracker extends Tracker {
                 blockStateBelow.getValue(LadderBlock.FACING) == blockState.getValue(TrapDoorBlock.FACING);
         }
         return false;
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 
     private boolean allowed(BlockState bs) {

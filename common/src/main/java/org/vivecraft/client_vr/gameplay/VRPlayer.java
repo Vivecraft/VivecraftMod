@@ -23,7 +23,9 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.ScaleHelper;
@@ -35,15 +37,12 @@ import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.client_vr.gameplay.trackers.VehicleTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ItemTags;
-
-import java.util.ArrayList;
 
 public class VRPlayer {
     private final Minecraft mc = Minecraft.getInstance();
@@ -62,8 +61,6 @@ public class VRPlayer {
     public VRData vrdata_world_post;
     // interpolate here between post and pre
     public VRData vrdata_world_render;
-
-    private final ArrayList<Tracker> trackers = new ArrayList<>();
     public float worldScale = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private float rawWorldScale = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean teleportOverride = false;
@@ -79,10 +76,6 @@ public class VRPlayer {
     public int roomScaleMovementDelay = 0;
     private boolean initDone = false;
     public boolean onTick;
-
-    public void registerTracker(Tracker tracker) {
-        this.trackers.add(tracker);
-    }
 
     public VRPlayer() {
         this.vrdata_room_pre = new VRData(
@@ -240,6 +233,13 @@ public class VRPlayer {
         if (this.dh.vrSettings.seated && !MethodHolder.isInMenuRoom()) {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
         }
+
+        // Gather VRPose history if some API consumer wants it and we're in a non-paused world.
+        if (VRClientAPIImpl.INSTANCE.maxPoseHistorySize() > 0 && this.mc.level != null &&
+            (this.mc.getSingleplayerServer() == null || !this.mc.getSingleplayerServer().isPaused()))
+        {
+            VRClientAPIImpl.INSTANCE.addPoseToHistory(this.vrdata_world_pre.asVRPose());
+        }
     }
 
     public void postTick() {
@@ -303,11 +303,9 @@ public class VRPlayer {
             interpolatedWorldScale,
             interpolatedWorldRotation_Radians);
 
-        // handle special items
-        for (Tracker tracker : this.trackers) {
-            if (tracker.getEntryPoint() == Tracker.EntryPoint.SPECIAL_ITEMS) {
+        for (Tracker tracker : ClientDataHolderVR.getInstance().getTrackers()) {
+            if (tracker.tickType() == Tracker.TrackerTickType.PER_FRAME) {
                 tracker.idleTick(this.mc.player);
-
                 if (tracker.isActive(this.mc.player)) {
                     tracker.doProcess(this.mc.player);
                 } else {
@@ -402,11 +400,9 @@ public class VRPlayer {
         }
 
         this.doPlayerMoveInRoom(player);
-
-        for (Tracker tracker : this.trackers) {
-            if (tracker.getEntryPoint() == Tracker.EntryPoint.LIVING_UPDATE) {
+        for (Tracker tracker : this.dh.getTrackers()) {
+            if (tracker.tickType() == Tracker.TrackerTickType.PER_TICK) {
                 tracker.idleTick(player);
-
                 if (tracker.isActive(player)) {
                     tracker.doProcess(player);
                 } else {
@@ -434,10 +430,6 @@ public class VRPlayer {
                 }
             }
         }
-    }
-
-    public boolean isTrackerUsingItem(LocalPlayer player) {
-        return this.trackers.stream().anyMatch(tracker -> tracker.itemInUse(player));
     }
 
     public void doPlayerMoveInRoom(LocalPlayer player) {

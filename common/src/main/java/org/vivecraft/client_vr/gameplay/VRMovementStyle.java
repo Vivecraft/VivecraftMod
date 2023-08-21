@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import org.vivecraft.client.utils.ClientUtils;
+
 public class VRMovementStyle {
 
     private static final ResourceLocation BEAM_PNG = ResourceLocation.withDefaultNamespace(

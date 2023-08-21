@@ -7,11 +7,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.ItemInUseTracker;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.common.utils.MathUtils;
 
-public class EatingTracker extends Tracker {
+public class EatingTracker implements Tracker, ItemInUseTracker {
     private static final float MOUTH_TO_EYE_DISTANCE = 0.0F;
     private static final float THRESHOLD = 0.25F;
     private static final long EAT_TIME = 2100L;
@@ -19,8 +21,12 @@ public class EatingTracker extends Tracker {
     private final boolean[] eating = new boolean[2];
     private long eatStart;
 
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
+
     public EatingTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -123,5 +129,10 @@ public class EatingTracker extends Tracker {
                 this.eating[c] = false;
             }
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 }

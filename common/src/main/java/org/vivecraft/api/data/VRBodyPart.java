@@ -1,8 +1,8 @@
-package org.vivecraft.common.network;
+package org.vivecraft.api.data;
 
 import net.minecraft.world.InteractionHand;
 
-public enum BodyPart {
+public enum VRBodyPart {
     MAIN_HAND,
     OFF_HAND,
     RIGHT_FOOT,
@@ -17,7 +17,7 @@ public enum BodyPart {
     /**
      * @return the opposite limb
      */
-    public BodyPart opposite() {
+    public VRBodyPart opposite() {
         return switch (this) {
             case MAIN_HAND -> OFF_HAND;
             case OFF_HAND -> MAIN_HAND;
@@ -31,15 +31,23 @@ public enum BodyPart {
         };
     }
 
-    public static BodyPart fromInteractionHand(InteractionHand hand) {
+    /**
+     * Gets the corresponding VRBodyPart to the provided InteractionHand
+     *
+     * @param hand InteractionHand to convert
+     * @return VRBodyPart that corresponds to the given InteractionHand
+     */
+    public static VRBodyPart fromInteractionHand(InteractionHand hand) {
         return hand == InteractionHand.MAIN_HAND ? MAIN_HAND : OFF_HAND;
     }
 
     /**
-     * @param fbtMode FBT mode to check for
-     * @return if {@code this} limb is valid for the given FBT mode
+     * Whether this body part type is available in the provided full-body tracking mode.
+     *
+     * @param fbtMode The full-body tracking mode to check.
+     * @return Whether this body part has available data in the provided mode.
      */
-    public boolean isValid(FBTMode fbtMode) {
+    public boolean availableInMode(FBTMode fbtMode) {
         return switch (this) {
             case MAIN_HAND, OFF_HAND, HEAD -> true;
             case RIGHT_FOOT, LEFT_FOOT, WAIST -> fbtMode != FBTMode.ARMS_ONLY;
@@ -47,10 +55,16 @@ public enum BodyPart {
         };
     }
 
+    /**
+     * @return Whether this body part is a foot.
+     */
     public boolean isFoot() {
         return this == RIGHT_FOOT || this == LEFT_FOOT;
     }
 
+    /**
+     * @return Whether this body part is a hand.
+     */
     public boolean isHand() {
         return this == MAIN_HAND || this == OFF_HAND;
     }

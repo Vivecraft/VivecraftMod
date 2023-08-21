@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
+import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.gui.screens.FBTCalibrationScreen;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -23,7 +24,6 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.DeviceSource;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.common.network.FBTMode;
 import org.vivecraft.common.utils.MathUtils;
 
 import java.util.ArrayList;

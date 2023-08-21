@@ -9,13 +9,15 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.ItemInUseTracker;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.data.ItemTags;
 
-public class TelescopeTracker extends Tracker {
+public class TelescopeTracker implements Tracker, ItemInUseTracker {
     public static final ResourceLocation SCOPE_MODEL = ResourceLocation.fromNamespaceAndPath("vivecraft",
         "spyglass_in_hand");
     private static final float LENS_DIST_MAX = 0.05F;
@@ -25,8 +27,12 @@ public class TelescopeTracker extends Tracker {
 
     private final boolean[] viewing = new boolean[2];
 
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
+
     public TelescopeTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -63,6 +69,11 @@ public class TelescopeTracker extends Tracker {
                 this.viewing[c] = false;
             }
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 
     /**

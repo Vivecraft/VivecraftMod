@@ -12,6 +12,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.vivecraft.api.client.ItemInUseTracker;
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.ClientUtils;
@@ -21,11 +24,10 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.network.packet.c2s.DrawPayloadC2S;
 import org.vivecraft.common.utils.MathUtils;
 
-public class BowTracker extends Tracker {
+public class BowTracker implements Tracker, ItemInUseTracker {
     private static final long MAX_DRAW_MILLIS = 1100L;
     private static final double NOTCH_DOT_THRESHOLD = 20F;
 
@@ -44,8 +46,12 @@ public class BowTracker extends Tracker {
     private int hapCounter = 0;
     private int lastHapStep = 0;
 
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
+
     public BowTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public Vector3fc getAimVector() {
@@ -109,11 +115,6 @@ public class BowTracker extends Tracker {
     public void reset(LocalPlayer player) {
         this.isDrawing = false;
         this.canDraw = false;
-    }
-
-    @Override
-    public EntryPoint getEntryPoint() {
-        return EntryPoint.SPECIAL_ITEMS;
     }
 
     @Override
@@ -220,7 +221,7 @@ public class BowTracker extends Tracker {
                 this.dh.vr.triggerHapticPulse(arrowHand, 500);
                 this.dh.vr.triggerHapticPulse(bowHand, 3000);
                 ClientNetworking.sendServerPacket(new DrawPayloadC2S(this.getDrawPercent()));
-                ClientNetworking.sendActiveBodyPart(arrowHand == 0 ? BodyPart.MAIN_HAND : BodyPart.OFF_HAND, true);
+                ClientNetworking.sendActiveBodyPart(arrowHand == 0 ? VRBodyPart.MAIN_HAND : VRBodyPart.OFF_HAND, true);
 
                 this.mc.gameMode.releaseUsingItem(player);
 
@@ -286,5 +287,10 @@ public class BowTracker extends Tracker {
                 this.lastHapStep = 0;
             }
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_FRAME;
     }
 }

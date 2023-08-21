@@ -19,6 +19,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
@@ -33,7 +34,7 @@ import org.vivecraft.common.utils.MathUtils;
 
 import java.util.HashSet;
 
-public class InteractTracker extends Tracker {
+public class InteractTracker implements Tracker {
     // indicates when a hand has a bucket and is in a liquid
     public boolean[] bukkit = new boolean[2];
 
@@ -60,8 +61,12 @@ public class InteractTracker extends Tracker {
     // a set of blocks that can be interacted with
     private HashSet<Class<?>> rightClickable = null;
 
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
+
     public InteractTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     @Override
@@ -270,6 +275,11 @@ public class InteractTracker extends Tracker {
             // because some mods implement interfaces for mod compat, that don't need to be present and
             // those throw a NoClassDefFoundError
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 
     public boolean isInteractActive(int controller) {

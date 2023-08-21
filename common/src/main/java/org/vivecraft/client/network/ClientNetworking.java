@@ -12,6 +12,8 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.utils.ClientUtils;
@@ -22,9 +24,7 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.VRServerPerms;
-import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.network.CommonNetworkHelper;
-import org.vivecraft.common.network.FBTMode;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
@@ -60,7 +60,7 @@ public class ClientNetworking {
     public static float OVERRIDDEN_YAW;
     public static float OVERRIDDEN_PITCH;
     public static boolean OVERRIDE_ACTIVE;
-    public static BodyPart LAST_SENT_BODY_PART = BodyPart.MAIN_HAND;
+    public static VRBodyPart LAST_SENT_BODY_PART = VRBodyPart.MAIN_HAND;
     public static boolean IS_LAST_BODY_PART_AIM = false;
 
     public static boolean NEEDS_RESET = true;
@@ -76,7 +76,7 @@ public class ClientNetworking {
         SERVER_ALLOWS_VR_SWITCHING = false;
         SERVER_ALLOWS_DUAL_WIELDING = false;
         USED_NETWORK_VERSION = CommonNetworkHelper.NETWORK_VERSION_LEGACY;
-        LAST_SENT_BODY_PART = BodyPart.MAIN_HAND;
+        LAST_SENT_BODY_PART = VRBodyPart.MAIN_HAND;
         IS_LAST_BODY_PART_AIM = false;
 
         // clear VR player data
@@ -211,7 +211,7 @@ public class ClientNetworking {
      * resets the active hand to the main hand
      */
     public static void resetActiveBodyPart() {
-        sendActiveBodyPart(BodyPart.MAIN_HAND, false);
+        sendActiveBodyPart(VRBodyPart.MAIN_HAND, false);
     }
 
     /**
@@ -222,9 +222,9 @@ public class ClientNetworking {
      */
     public static void sendActiveHand(InteractionHand hand, boolean useForAim) {
         if (!useForAim && ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD) {
-            sendActiveBodyPart(BodyPart.HEAD, true);
+            sendActiveBodyPart(VRBodyPart.HEAD, true);
         } else {
-            sendActiveBodyPart(BodyPart.fromInteractionHand(hand), useForAim);
+            sendActiveBodyPart(VRBodyPart.fromInteractionHand(hand), useForAim);
         }
     }
 
@@ -234,15 +234,15 @@ public class ClientNetworking {
      * @param bodyPart  BodyPart to set active
      * @param useForAim if this bodyPart should be used to aim
      */
-    public static void sendActiveBodyPart(BodyPart bodyPart, boolean useForAim) {
+    public static void sendActiveBodyPart(VRBodyPart bodyPart, boolean useForAim) {
         if (SERVER_WANTS_DATA) {
-            if ((USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM && bodyPart == BodyPart.HEAD) ||
+            if ((USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM && bodyPart == VRBodyPart.HEAD) ||
                 (USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING &&
-                    !bodyPart.isValid(FBTMode.ARMS_ONLY)
+                    !bodyPart.availableInMode(FBTMode.ARMS_ONLY)
                 ))
             {
                 // old plugins only support main and offhand
-                bodyPart = BodyPart.MAIN_HAND;
+                bodyPart = VRBodyPart.MAIN_HAND;
             }
             // only send if the hand is different from last time, don't need to spam packets
             if (bodyPart != LAST_SENT_BODY_PART) {
