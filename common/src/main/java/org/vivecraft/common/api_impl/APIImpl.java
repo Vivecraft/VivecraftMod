@@ -1,10 +1,14 @@
-package org.vivecraft.common;
+package org.vivecraft.common.api_impl;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 import org.vivecraft.api_beta.VivecraftAPI;
+import org.vivecraft.api_beta.data.VRData;
 import org.vivecraft.client.VRPlayersClient;
+import org.vivecraft.client.api_impl.convert.VRDataClientVivePlayers;
 import org.vivecraft.server.ServerVRPlayers;
+import org.vivecraft.server.api_impl.convert.VRDataServerVivePlayer;
 
 public final class APIImpl implements VivecraftAPI {
 
@@ -20,5 +24,18 @@ public final class APIImpl implements VivecraftAPI {
         }
 
         return VRPlayersClient.getInstance().isVRPlayer(player);
+    }
+
+    @Nullable
+    @Override
+    public VRData getVRData(Player player) {
+        if (!isVRPlayer(player)) {
+            return null;
+        }
+        if (player instanceof ServerPlayer serverPlayer) {
+            return VRDataServerVivePlayer.fromServerVivePlayer(serverPlayer);
+        }
+
+        return VRDataClientVivePlayers.fromClientVivePlayers(player);
     }
 }
