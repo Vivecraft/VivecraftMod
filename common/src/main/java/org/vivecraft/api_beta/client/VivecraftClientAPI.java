@@ -58,6 +58,48 @@ public interface VivecraftClientAPI {
     VRData getWorldRenderData() throws IllegalStateException;
 
     /**
+     * Causes a haptic pulse (vibration/rumble) for the specified controller.
+     * This function silently fails if called for players not in VR or players who are in seated mode.
+     *
+     * @param controllerNum The controller number to trigger a haptic pulse. 0 is the primary controller, while 1 is
+     *                      the secondary controller.
+     * @param duration The duration of the haptic pulse in seconds.
+     * @param frequency The frequency of the haptic pulse in Hz. 160 is a safe bet for this number, with Vivecraft's codebase
+     *                  using anywhere from 160F for actions such as a bite on a fishing line, to 1000F for things such
+     *                  as a chat notification.
+     * @param amplitude The amplitude of the haptic pulse. This should be kept between 0F and 1F.
+     * @param delay An amount of time to delay until creating the haptic pulse. The majority of the time, one should use 0F here.
+     *
+     */
+    @Beta
+    void triggerHapticPulse(int controllerNum, float duration, float frequency, float amplitude, float delay);
+
+    /**
+     * Causes a haptic pulse (vibration/rumble) for the specified controller.
+     * This function silently fails if called for players not in VR or players who are in seated mode.
+     *
+     * @param controllerNum The controller number to trigger a haptic pulse. 0 is the primary controller, while 1 is
+     *                      the secondary controller.
+     * @param duration The duration of the haptic pulse in seconds.
+     */
+    @Beta
+    default void triggerHapticPulse(int controllerNum, float duration) {
+        triggerHapticPulse(controllerNum, duration, 160F, 1F, 0F);
+    }
+
+    /**
+     * @return Whether the client player is currently in seated mode.
+     */
+    @Beta
+    boolean isSeated();
+
+    /**
+     * @return Whether the client player is using reversed hands.
+     */
+    @Beta
+    boolean usingReversedHands();
+
+    /**
      * @return Whether VR support is initialized.
      */
     boolean isVrInitialized();
