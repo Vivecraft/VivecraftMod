@@ -27,6 +27,7 @@
   },
   "mixins": [
     "vivecraft.mixins.json",
+    "vivecraft.dynamicfps.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.fabric.sodium.mixins.json",
     "vivecraft.iris.mixins.json",
