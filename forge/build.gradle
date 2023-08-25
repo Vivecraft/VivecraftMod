@@ -76,21 +76,17 @@ shadowJar {
             project.configurations.shadowCommon,
             project.configurations.bundle
     ]
-    classifier "dev-shadow"
+    archiveClassifier.set("dev-shadow")
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
-}
-
-remapJar {
     archiveClassifier.set('forge')
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier.set("dev")
     manifest {
         attributes(
                 'Main-Class': "org.vivecraft.LaunchPopup"
