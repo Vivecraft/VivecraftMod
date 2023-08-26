@@ -2,6 +2,7 @@ package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import org.vivecraft.api_beta.client.Tracker;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.trackers.*;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
@@ -9,6 +10,9 @@ import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClientDataHolderVR {
 
@@ -57,10 +61,30 @@ public class ClientDataHolderVR {
     String mirrorNotifyText;
     boolean mirrorNotifyClear;
     long mirroNotifyLen;
+    ArrayList<Tracker> trackers = new ArrayList<>();
 
     // showed chat notifications
     public boolean showedUpdateNotification;
 
+    public boolean skipStupidGoddamnChunkBoundaryClipping;
+
+    private ClientDataHolderVR() {
+        addTracker(backpackTracker);
+        addTracker(bowTracker);
+        addTracker(swingTracker);
+        addTracker(autoFood);
+        addTracker(jumpTracker);
+        addTracker(sneakTracker);
+        addTracker(climbTracker);
+        addTracker(runTracker);
+        addTracker(rowTracker);
+        addTracker(teleportTracker);
+        addTracker(horseTracker);
+        addTracker(vehicleTracker);
+        addTracker(interactTracker);
+        addTracker(crawlTracker);
+        addTracker(cameraTracker);
+    }
 
     public static ClientDataHolderVR getInstance() {
         if (INSTANCE == null) {
@@ -77,5 +101,16 @@ public class ClientDataHolderVR {
     public void print(String string) {
         string = string.replace("\n", "\n[Minecrift] ");
         System.out.println("[Minecrift] " + string);
+    }
+
+    public void addTracker(Tracker tracker) {
+        if (trackers.contains(tracker)) {
+            throw new IllegalArgumentException("Tracker is already added and should not be added again!");
+        }
+        trackers.add(tracker);
+    }
+
+    public List<Tracker> getTrackers() {
+        return this.trackers;
     }
 }

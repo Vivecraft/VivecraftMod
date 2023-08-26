@@ -1,5 +1,6 @@
 package org.vivecraft.client.api_impl;
 
+import org.vivecraft.api_beta.client.Tracker;
 import org.vivecraft.api_beta.client.VivecraftClientAPI;
 import org.vivecraft.api_beta.data.VRData;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -101,5 +102,10 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
     @Override
     public float getWorldScale() {
         return ClientDataHolderVR.getInstance().vrPlayer.worldScale;
+    }
+
+    @Override
+    public void addTracker(Tracker tracker) {
+        ClientDataHolderVR.getInstance().addTracker(tracker);
     }
 }
