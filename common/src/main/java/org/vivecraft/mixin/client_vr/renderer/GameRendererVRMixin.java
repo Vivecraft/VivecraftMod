@@ -407,7 +407,7 @@ public abstract class GameRendererVRMixin
             shouldDrawScreen = false;
             return;
         }
-        if (!renderWorldIn || this.minecraft.level == null) {
+        if (!renderWorldIn || this.minecraft.level == null || isInMenuRoom()) {
             this.minecraft.getProfiler().push("MainMenu");
             GL11.glDisable(GL11.GL_STENCIL_TEST);
 
