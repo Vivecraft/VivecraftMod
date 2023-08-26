@@ -43,6 +43,10 @@ public class OptifineHelper {
     private static Method shadersRenderBeginOutlineMethod;
     private static Method shadersRenderEndOutlineMethod;
 
+    private static Class<?> shaders;
+    private static Method shadersBeginEntitiesMethod;
+    private static Method shadersEndEntitiesMethod;
+
     private static Field optionsOfRenderRegions;
     private static Field optionsOfCloudHeight;
     private static Field vertexRenderPositions;
@@ -86,6 +90,22 @@ public class OptifineHelper {
     public static void endOutlineShader() {
         try {
             shadersRenderEndOutlineMethod.invoke(shadersRender);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void beginEntities() {
+        try {
+            shadersBeginEntitiesMethod.invoke(shaders);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void endEntities() {
+        try {
+            shadersEndEntitiesMethod.invoke(shaders);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -271,6 +291,10 @@ public class OptifineHelper {
             shadersRender = Class.forName("net.optifine.shaders.ShadersRender");
             shadersRenderBeginOutlineMethod = shadersRender.getMethod("beginOutline");
             shadersRenderEndOutlineMethod = shadersRender.getMethod("endOutline");
+
+            shaders = Class.forName("net.optifine.shaders.Shaders");
+            shadersBeginEntitiesMethod = shaders.getMethod("beginEntities");
+            shadersEndEntitiesMethod = shaders.getMethod("endEntities");
 
             // private methods
             customColorsGetSkyColoEndMethod = customColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);

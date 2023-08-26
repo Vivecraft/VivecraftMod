@@ -79,6 +79,7 @@ import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.VRWidgetHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import java.nio.file.Path;
 import java.util.Calendar;
@@ -1008,13 +1009,10 @@ public abstract class GameRendererVRMixin
             itemstack = ItemStack.EMPTY;
         }
 
-        boolean flag = false;
-
-//		if (Config.isShaders()) { TODO
-//			Shaders.beginHand(matrix, flag);
-//		} else {
+        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+            OptifineHelper.beginEntities();
+        }
         matrix.pushPose();
-//		}
 
         this.lightTexture.turnOnLightLayer();
         MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
@@ -1025,11 +1023,10 @@ public abstract class GameRendererVRMixin
         multibuffersource$buffersource.endBatch();
         this.lightTexture.turnOffLightLayer();
 
-//		if (Config.isShaders()) { TODO
-//			Shaders.endHand(matrix);
-//		} else {
+        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+            OptifineHelper.endEntities();
+        }
         matrix.popPose();
-//		}
 
         matrix.popPose();
     }
@@ -1067,13 +1064,10 @@ public abstract class GameRendererVRMixin
             itemstack = this.minecraft.player.getMainHandItem();
         }
 
-        boolean flag2 = false;
-
-//		if (Config.isShaders()) { TODO
-//			Shaders.beginHand(matrix, flag2);
-//		} else {
+		if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+            OptifineHelper.beginEntities();
+		}
         matrix.pushPose();
-//		}
 
         this.lightTexture.turnOnLightLayer();
         MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
@@ -1084,11 +1078,10 @@ public abstract class GameRendererVRMixin
         multibuffersource$buffersource.endBatch();
         this.lightTexture.turnOffLightLayer();
 
-//		if (Config.isShaders()) { TODO
-//			Shaders.endHand(matrix);
-//		} else {
+        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+            OptifineHelper.endEntities();
+        }
         matrix.popPose();
-//		}
 
         matrix.popPose();
 
@@ -1128,6 +1121,7 @@ public abstract class GameRendererVRMixin
                     f = 0.0F;
                 }
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
+                this.minecraft.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
                 RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
                 this.renderFlatQuad(vec3.add(0.0D, 0.05001D, 0.0D), f, f, 0.0F, this.tpLimitedColor.getX(),
                         this.tpLimitedColor.getY(), this.tpLimitedColor.getZ(), 128, matrix);
@@ -1913,6 +1907,7 @@ public abstract class GameRendererVRMixin
             boolean flag = false;
             RenderSystem.enableCull();
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            this.minecraft.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
             RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
             Tesselator tesselator = Tesselator.getInstance();
             tesselator.getBuilder().begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
@@ -2359,6 +2354,7 @@ public abstract class GameRendererVRMixin
                             }
 
                             RenderSystem.setShader(GameRenderer::getPositionColorShader);
+                            this.minecraft.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
                             RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
                             this.renderFlatQuad(vec32, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
                                     0.0F, 0, 0, 0, 64, poseStack);
