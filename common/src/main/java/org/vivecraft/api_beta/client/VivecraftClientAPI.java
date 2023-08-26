@@ -120,4 +120,11 @@ public interface VivecraftClientAPI {
      */
     @Beta
     float getWorldScale();
+
+    /**
+     * Adds the tracker to the list of all trackers to be run for the local player.
+     * @param tracker Tracker to register.
+     */
+    @Beta
+    void addTracker(Tracker tracker);
 }
