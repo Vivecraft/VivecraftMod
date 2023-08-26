@@ -1,10 +1,13 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import org.vivecraft.api_beta.client.TrackerTickType;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
-public abstract class Tracker {
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+
+public abstract class Tracker implements org.vivecraft.api_beta.client.Tracker
+{
     public Minecraft mc;
     public ClientDataHolderVR dh;
 
@@ -25,6 +28,13 @@ public abstract class Tracker {
 
     public EntryPoint getEntryPoint() {
         return EntryPoint.LIVING_UPDATE;
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return getEntryPoint() == EntryPoint.LIVING_UPDATE ?
+               TrackerTickType.PER_TICK :
+               TrackerTickType.PER_FRAME;
     }
 
     public enum EntryPoint {
