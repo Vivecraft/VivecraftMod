@@ -129,7 +129,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         return updateRotation;
     }
 
-    // this seems to work without that as well, not sure if that is actually needed
+    // needed, or the server will spam 'moved too quickly'/'moved wrongly'
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"), method = "sendPosition", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z")))
     public void noMovePacketsOnTeleport(ClientPacketListener instance, Packet<?> packet) {
         if (!this.teleported) {

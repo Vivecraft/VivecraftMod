@@ -61,7 +61,7 @@ public class ServerNetworking {
                         && clientMinVersion <= CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION) {
                         vivePlayer.networkVersion = Math.min(clientMaxVersion, CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION);
                         if (ServerConfig.debug.get()) {
-                            LOGGER.info("{} networking supported, using version vivePlayer.networkVersion", listener.player.getName().getString());
+                            LOGGER.info("{} networking supported, using version {}", listener.player.getName().getString(), vivePlayer.networkVersion);
                         }
                     } else {
                         // unsupported version, send notification, and disregard
@@ -205,7 +205,8 @@ public class ServerNetworking {
                     playerData = new HashMap<>();
                     legacyDataMap.put(playerEntity.getUUID(), playerData);
                 }
-
+                // keep the buffer around
+                buffer.retain();
                 playerData.put(packetID, buffer);
 
                 if (playerData.size() == 3) {
@@ -223,6 +224,10 @@ public class ServerNetworking {
                             org.vivecraft.common.network.Pose.deserialize(controller0Data), // controller0 pose
                             controller1Data.readBoolean(), // reverseHands 1
                             org.vivecraft.common.network.Pose.deserialize(controller1Data)); // controller1 pose
+                    // release buffers
+                    headData.release();
+                    controller0Data.release();
+                    controller1Data.release();
                     legacyDataMap.remove(playerEntity.getUUID());
                 }
                 break;
