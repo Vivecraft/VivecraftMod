@@ -1,5 +1,11 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import java.util.Random;
+
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
+
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -7,21 +13,21 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
 
-import java.util.Random;
 
-public class EatingTracker extends Tracker {
+public class EatingTracker implements Tracker {
     float mouthtoEyeDistance = 0.0F;
     float threshold = 0.25F;
     public boolean[] eating = new boolean[2];
     int eattime = 2100;
     long eatStart;
     private final Random r = new Random();
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public EatingTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isEating() {
@@ -29,7 +35,7 @@ public class EatingTracker extends Tracker {
     }
 
     public boolean isActive(LocalPlayer p) {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated) {
+        if (this.dh.vrSettings.seated) {
             return false;
         } else if (p == null) {
             return false;
@@ -95,7 +101,6 @@ public class EatingTracker extends Tracker {
 
                 if (!this.eating[c]) {
                     //Minecraft.getInstance().physicalGuiManager.preClickAction();
-
                     if (this.mc.gameMode.useItem(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).consumesAction()) {
                         this.mc.gameRenderer.itemInHandRenderer.itemUsed(c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                         this.eating[c] = true;
@@ -118,5 +123,10 @@ public class EatingTracker extends Tracker {
                 this.eating[c] = false;
             }
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 }

@@ -1,41 +1,47 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.phys.Vec3;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.math.Quaternion;
 
-public class RowTracker extends Tracker {
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.phys.Vec3;
+
+public class RowTracker implements Tracker {
     Vec3[] lastUWPs = new Vec3[2];
     public double[] forces = new double[]{0.0D, 0.0D};
     double transmissionEfficiency = 0.9D;
     public float LOar;
     public float ROar;
     public float Foar;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public RowTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer p) {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated) {
+        if (this.dh.vrSettings.seated) {
             return false;
-        } else if (!ClientDataHolderVR.getInstance().vrSettings.realisticRowEnabled) {
+        }
+        else if (!this.dh.vrSettings.realisticRowEnabled) {
             return false;
         } else if (p != null && p.isAlive()) {
             if (this.mc.gameMode == null) {
                 return false;
-            } else if (Minecraft.getInstance().options.keyUp.isDown()) {
+            } else if (this.mc.options.keyUp.isDown()) {
                 return false;
             } else if (!(p.getVehicle() instanceof Boat)) {
                 return false;
             } else {
-                return !ClientDataHolderVR.getInstance().bowTracker.isNotched();
+                return !this.dh.bowTracker.isNotched();
             }
         } else {
             return false;
@@ -74,8 +80,13 @@ public class RowTracker extends Tracker {
         }
     }
 
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
     public void doProcessFinaltransmithastofixthis(LocalPlayer player) {
-        Boat boat = (Boat) player.getVehicle();
+        Boat boat = (Boat)player.getVehicle();
         Quaternion quaternion = (new Quaternion(boat.getXRot(), -(boat.getYRot() % 360.0F), 0.0F)).normalized();
 
         for (int i = 0; i <= 1; ++i) {

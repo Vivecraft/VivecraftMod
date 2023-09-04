@@ -1,5 +1,18 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import java.util.List;
+
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.*;
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.BlockTags;
+import org.vivecraft.client_vr.ItemTags;
+import org.vivecraft.client_vr.Vec3History;
+import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.settings.VRSettings;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -10,9 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -29,9 +40,9 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.bettercombat.BetterCombatHelper;
 import org.vivecraft.mod_compat_vr.epicfight.EpicFightHelper;
 
-import java.util.List;
 
-public class SwingTracker extends Tracker {
+public class SwingTracker implements Tracker
+{
     private final Vec3[] lastWeaponEndAir = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
     private final boolean[] lastWeaponSolid = new boolean[2];
     public Vec3[] miningPoint = new Vec3[2];
@@ -41,9 +52,12 @@ public class SwingTracker extends Tracker {
     public int disableSwing = 3;
     Vec3 forward = new Vec3(0.0D, 0.0D, -1.0D);
     double speedthresh = 3.0D;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public SwingTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer p) {
@@ -59,24 +73,21 @@ public class SwingTracker extends Tracker {
         } else if (p.isSleeping()) {
             return false;
         } else {
-            Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-
-            if (minecraft.screen != null) {
+            if (this.mc.screen != null) {
                 return false;
-            } else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF) {
+            } else if (this.dh.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF) {
                 return false;
-            } else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO) {
+            } else if (this.dh.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO) {
                 return !p.isCreative();
-            } else if (dataholder.vrSettings.seated) {
+            } else if (this.dh.vrSettings.seated) {
                 return false;
             } else {
-                if (dataholder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && p.zza > 0.0F) {
-                    return false; // don't hit things while RIPing.
+                if (this.dh.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && p.zza > 0.0F) {
+                    return false;
                 } else if (p.isBlocking()) {
                     return false; //don't hit things while blocking.
                 } else {
-                    return !dataholder.jumpTracker.isjumping();
+                    return !this.dh.jumpTracker.isjumping();
                 }
             }
         }
@@ -320,14 +331,19 @@ public class SwingTracker extends Tracker {
         this.mc.getProfiler().pop();
     }
 
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
     private boolean getIsHittingBlock() {
-        return Minecraft.getInstance().gameMode.isDestroying();
+        return this.mc.gameMode.isDestroying();
     }
 
     private void clearBlockHitDelay() {
         // TODO set destroyTicks to 1 to cancel multiple sound events per hit
-        //MCReflection.PlayerController_blockHitDelay.set(Minecraft.getInstance().gameMode, 0);
-        // Minecraft.getInstance().gameMode.blockBreakingCooldown = 1;
+        //MCReflection.PlayerController_blockHitDelay.set(this.mc.gameMode, 0);
+       // this.mc.gameMode.blockBreakingCooldown = 1;
     }
 
     public Vec3 constrain(Vec3 start, Vec3 end) {

@@ -1,23 +1,28 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.phys.Vec3;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-public class RunTracker extends Tracker {
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.phys.Vec3;
+
+public class RunTracker implements Tracker {
     private double direction = 0.0D;
     private double speed = 0.0D;
     private Vec3 movedir;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public RunTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer p) {
-        if (ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.seated) {
-            if (ClientDataHolderVR.getInstance().vrSettings.vrFreeMoveMode != VRSettings.FreeMove.RUN_IN_PLACE) {
+        if (this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.seated) {
+            if (this.dh.vrSettings.vrFreeMoveMode != VRSettings.FreeMove.RUN_IN_PLACE) {
                 return false;
             } else if (p != null && p.isAlive()) {
                 if (this.mc.gameMode == null) {
@@ -25,8 +30,9 @@ public class RunTracker extends Tracker {
                 } else if (p.onGround() || !p.isInWater() && !p.isInLava()) {
                     if (p.onClimbable()) {
                         return false;
-                    } else {
-                        return !ClientDataHolderVR.getInstance().bowTracker.isNotched();
+                    }
+                    else {
+                        return !this.dh.bowTracker.isNotched();
                     }
                 } else {
                     return false;
@@ -83,5 +89,10 @@ public class RunTracker extends Tracker {
                 this.speed = 1.3F;
             }
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 }

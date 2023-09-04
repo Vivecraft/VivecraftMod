@@ -1,5 +1,19 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import java.util.HashSet;
+
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client.Xplat;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
+import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.settings.VRHotkeys;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -20,20 +34,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.Xplat;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
-import org.vivecraft.client_vr.settings.VRHotkeys;
-import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.util.HashSet;
-
-public class InteractTracker extends Tracker {
+public class InteractTracker implements Tracker {
     public boolean[] bukkit = new boolean[2];
     public int hotbar = -1;
     // indicates if the bow can be drawn
@@ -47,9 +49,12 @@ public class InteractTracker extends Tracker {
     boolean[] active = new boolean[2];
     boolean[] wasactive = new boolean[2];
     private HashSet<Class> rightClickable = null;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public InteractTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer p) {
@@ -62,10 +67,7 @@ public class InteractTracker extends Tracker {
         } else if (p.isSleeping()) {
             return false;
         } else {
-            Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-
-            if (dataholder.vrSettings.seated) {
+            if (this.dh.vrSettings.seated) {
                 return false;
             } else {
                 return !(p.isBlocking() && this.hotbar < 0);
@@ -229,6 +231,11 @@ public class InteractTracker extends Tracker {
                 this.wasactive[j] = this.active[j];
             }
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 
     public boolean isInteractActive(int controller) {

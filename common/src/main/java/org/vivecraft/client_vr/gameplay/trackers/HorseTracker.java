@@ -1,16 +1,18 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client.utils.Utils;
+import org.vivecraft.common.utils.math.Quaternion;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.utils.math.Quaternion;
 
-public class HorseTracker extends Tracker {
+public class HorseTracker implements Tracker {
     double boostTrigger = 1.4D;
     double pullTrigger = 0.8D;
     int speedLevel = 0;
@@ -22,9 +24,12 @@ public class HorseTracker extends Tracker {
     double baseSpeed = 0.2D;
     Horse horse = null;
     ModelInfo info = new ModelInfo();
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public HorseTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer p) {
@@ -32,8 +37,6 @@ public class HorseTracker extends Tracker {
     }
 
     public void reset(LocalPlayer player) {
-        super.reset(player);
-
         if (this.horse != null) {
             this.horse.setNoAi(false);
         }
@@ -91,6 +94,11 @@ public class HorseTracker extends Tracker {
         this.horse.yHeadRot = f;
         Vec3 vec37 = quaternion.multiply(new Vec3(0.0D, 0.0D, (double) this.speedLevel * this.baseSpeed));
         this.horse.setDeltaMovement(vec37.x, this.horse.getDeltaMovement().y, vec37.z);
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 
     boolean boost() {
