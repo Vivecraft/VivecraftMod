@@ -1,18 +1,20 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client.utils.Utils;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
 
-public class CameraTracker extends Tracker {
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.world.phys.Vec3;
+
+public class CameraTracker implements Tracker {
     public static final ModelResourceLocation cameraModel = new ModelResourceLocation("vivecraft", "camera", "");
     public static final ModelResourceLocation cameraDisplayModel = new ModelResourceLocation("vivecraft", "camera_display", "");
     private boolean visible = false;
@@ -23,9 +25,12 @@ public class CameraTracker extends Tracker {
     private Vec3 startPosition;
     private Quaternion startRotation;
     private boolean quickMode;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public CameraTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer player) {
@@ -59,14 +64,15 @@ public class CameraTracker extends Tracker {
         }
     }
 
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
     public void reset(LocalPlayer player) {
         this.visible = false;
         this.quickMode = false;
         this.stopMoving();
-    }
-
-    public EntryPoint getEntryPoint() {
-        return EntryPoint.SPECIAL_ITEMS;
     }
 
     public boolean isVisible() {

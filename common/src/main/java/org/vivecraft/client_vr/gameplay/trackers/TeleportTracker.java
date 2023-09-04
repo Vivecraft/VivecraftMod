@@ -15,6 +15,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.Utils;
@@ -32,7 +33,7 @@ import org.vivecraft.common.utils.math.Vector3;
 
 import java.util.Random;
 
-public class TeleportTracker extends Tracker {
+public class TeleportTracker implements Tracker {
     private float teleportEnergy;
     private Vec3 movementTeleportDestination = new Vec3(0.0D, 0.0D, 0.0D);
     private Direction movementTeleportDestinationSideHit;
@@ -42,9 +43,12 @@ public class TeleportTracker extends Tracker {
     public int movementTeleportArcSteps = 0;
     public double lastTeleportArcDisplayOffset = 0.0D;
     public VRMovementStyle vrMovementStyle;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public TeleportTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
         this.vrMovementStyle = new VRMovementStyle(dh);
     }
 
@@ -203,6 +207,11 @@ public class TeleportTracker extends Tracker {
         }
     }
 
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
     public void updateTeleportDestinations(GameRenderer renderer, Minecraft mc, LocalPlayer player) {
         mc.getProfiler().push("updateTeleportDestinations");
 
@@ -297,20 +306,18 @@ public class TeleportTracker extends Tracker {
     }
 
     private void doTeleportCallback() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        dataholder.swingTracker.disableSwing = 3;
+        this.dh.swingTracker.disableSwing = 3;
 
         if (ClientNetworking.isLimitedSurvivalTeleport()) {
-            minecraft.player.causeFoodExhaustion((float) (this.movementTeleportDistance / 16.0D * (double) 1.2F));
+            this.mc.player.causeFoodExhaustion((float) (this.movementTeleportDistance / 16.0D * (double) 1.2F));
 
-            if (minecraft.gameMode.hasMissTime() && this.vrMovementStyle.arcAiming) {
+            if (this.mc.gameMode.hasMissTime() && this.vrMovementStyle.arcAiming) {
                 this.teleportEnergy = (float) ((double) this.teleportEnergy - this.movementTeleportDistance * 4.0D);
             }
         }
 
-        minecraft.player.fallDistance = 0.0F;
-        ((PlayerExtension) minecraft.player).vivecraft$setMovementTeleportTimer(-1);
+        this.mc.player.fallDistance = 0.0F;
+        ((PlayerExtension) this.mc.player).vivecraft$setMovementTeleportTimer(-1);
     }
 
     private boolean checkAndSetTeleportDestination(Minecraft mc, LocalPlayer player, Vec3 start, BlockHitResult collision, Vec3 reverseEpsilon) {

@@ -1,22 +1,27 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client.Xplat;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client.network.ClientNetworking;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.world.entity.Pose;
-import org.vivecraft.client.Xplat;
-import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
-public class CrawlTracker extends Tracker {
+public class CrawlTracker implements Tracker {
     private boolean wasCrawling;
     public boolean crawling;
     public boolean crawlsteresis;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public CrawlTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer player) {
@@ -52,9 +57,16 @@ public class CrawlTracker extends Tracker {
         this.updateState(player);
     }
 
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
     private void updateState(LocalPlayer player) {
-        if (this.crawling != this.wasCrawling) {
-            if (this.crawling) {
+        if (this.crawling != this.wasCrawling)
+        {
+            if (this.crawling)
+            {
                 player.setPose(Pose.SWIMMING);
                 this.crawlsteresis = true;
             }
