@@ -3,8 +3,8 @@ package org.vivecraft.common.api_impl;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
-import org.vivecraft.api_beta.VivecraftAPI;
-import org.vivecraft.api_beta.data.VRData;
+import org.vivecraft.api.VivecraftAPI;
+import org.vivecraft.api.data.VRData;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.server.ServerVRPlayers;
 

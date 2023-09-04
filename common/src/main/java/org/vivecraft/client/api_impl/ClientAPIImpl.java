@@ -1,8 +1,8 @@
 package org.vivecraft.client.api_impl;
 
-import org.vivecraft.api_beta.client.Tracker;
-import org.vivecraft.api_beta.client.VivecraftClientAPI;
-import org.vivecraft.api_beta.data.VRData;
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.client.VivecraftClientAPI;
+import org.vivecraft.api.data.VRData;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;

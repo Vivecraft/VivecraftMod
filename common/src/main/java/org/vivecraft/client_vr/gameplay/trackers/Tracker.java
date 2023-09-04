@@ -1,12 +1,12 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.api_beta.client.TrackerTickType;
+import org.vivecraft.api.client.TrackerTickType;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
-public abstract class Tracker implements org.vivecraft.api_beta.client.Tracker
+public abstract class Tracker implements org.vivecraft.api.client.Tracker
 {
     public Minecraft mc;
     public ClientDataHolderVR dh;
