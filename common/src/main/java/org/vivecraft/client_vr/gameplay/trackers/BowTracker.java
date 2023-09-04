@@ -1,5 +1,19 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import java.nio.ByteBuffer;
+
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
+import org.vivecraft.client.Xplat;
+import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
+import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.math.Vector3;
+
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -11,20 +25,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.Xplat;
-import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.CommonNetworkHelper;
-import org.vivecraft.common.utils.math.Vector3;
-import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
-import java.nio.ByteBuffer;
-
-public class BowTracker extends Tracker {
+public class BowTracker implements Tracker {
     private double lastcontrollersDist;
     private double lastcontrollersDot;
     private double controllersDist;
@@ -44,9 +46,12 @@ public class BowTracker extends Tracker {
     float tsNotch = 0.0F;
     int hapcounter = 0;
     int lasthapStep = 0;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public BowTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public Vec3 getAimVector() {
@@ -101,10 +106,6 @@ public class BowTracker extends Tracker {
 
     public void reset(LocalPlayer player) {
         this.isDrawing = false;
-    }
-
-    public EntryPoint getEntryPoint() {
-        return EntryPoint.SPECIAL_ITEMS;
     }
 
     public void doProcess(LocalPlayer player) {
@@ -176,7 +177,7 @@ public class BowTracker extends Tracker {
                 if (!this.isDrawing) {
                     ((PlayerExtension) player).vivecraft$setItemInUseClient(itemstack1, interactionhand);
                     ((PlayerExtension) player).vivecraft$setItemInUseCountClient(i);
-                    //Minecraft.getInstance().physicalGuiManager.preClickAction();
+                    //this.mc.physicalGuiManager.preClickAction();
                 }
             } else if ((float) Util.getMillis() - this.tsNotch > 500.0F) {
                 this.canDraw = false;
@@ -193,10 +194,10 @@ public class BowTracker extends Tracker {
                 this.dh.vr.triggerHapticPulse(0, 500);
                 this.dh.vr.triggerHapticPulse(1, 3000);
                 ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(this.getDrawPercent()).array());
-                Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
+                this.mc.getConnection().send(serverboundcustompayloadpacket);
                 this.mc.gameMode.releaseUsingItem(player);
                 serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(0.0F).array());
-                Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
+                this.mc.getConnection().send(serverboundcustompayloadpacket);
                 this.isDrawing = false;
             }
 
@@ -255,5 +256,10 @@ public class BowTracker extends Tracker {
                 this.lasthapStep = 0;
             }
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_FRAME;
     }
 }

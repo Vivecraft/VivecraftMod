@@ -1,5 +1,18 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import java.util.List;
+
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.*;
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.BlockTags;
+import org.vivecraft.client_vr.ItemTags;
+import org.vivecraft.client_vr.Vec3History;
+import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.settings.VRSettings;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -9,25 +22,16 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client_vr.BlockTags;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.ItemTags;
-import org.vivecraft.client_vr.Vec3History;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.util.List;
 
-public class SwingTracker extends Tracker {
+public class SwingTracker implements Tracker
+{
     private final Vec3[] lastWeaponEndAir = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
     private final boolean[] lastWeaponSolid = new boolean[2];
     public Vec3[] miningPoint = new Vec3[2];
@@ -37,9 +41,12 @@ public class SwingTracker extends Tracker {
     public int disableSwing = 3;
     Vec3 forward = new Vec3(0.0D, 0.0D, -1.0D);
     double speedthresh = 3.0D;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public SwingTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer p) {
@@ -55,26 +62,23 @@ public class SwingTracker extends Tracker {
         } else if (p.isSleeping()) {
             return false;
         } else {
-            Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-
-            if (minecraft.screen != null) {
+            if (this.mc.screen != null) {
                 return false;
-            } else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF) {
+            } else if (this.dh.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF) {
                 return false;
-            } else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO) {
+            } else if (this.dh.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO) {
                 return !p.isCreative();
-            } else if (dataholder.vrSettings.seated) {
+            } else if (this.dh.vrSettings.seated) {
                 return false;
             } else {
-                VRSettings vrsettings = dataholder.vrSettings;
+                VRSettings vrsettings = this.dh.vrSettings;
 
-                if (dataholder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && p.zza > 0.0F) {
+                if (this.dh.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && p.zza > 0.0F) {
                     return false;
                 } else if (p.isBlocking()) {
                     return false;
                 } else {
-                    return !dataholder.jumpTracker.isjumping();
+                    return !this.dh.jumpTracker.isjumping();
                 }
             }
         }
@@ -167,7 +171,7 @@ public class SwingTracker extends Tracker {
                 for (Entity entity : list) {
                     if (entity.isPickable() && entity != this.mc.getCameraEntity().getVehicle()) {
                         if (flag3) {
-                            //Minecraft.getInstance().physicalGuiManager.preClickAction();
+                            //this.mc.physicalGuiManager.preClickAction();
                             this.mc.gameMode.attack(player, entity);
                             this.dh.vr.triggerHapticPulse(i, 1000);
                             this.lastWeaponSolid[i] = true;
@@ -230,7 +234,7 @@ public class SwingTracker extends Tracker {
                                         }
                                     }
 
-                                    Minecraft.getInstance().gameMode.destroyDelay = 0;
+                                    this.mc.gameMode.destroyDelay = 0;
                                 }
 
                                 this.dh.vrPlayer.blockDust(blockhitresult1.getLocation().x, blockhitresult1.getLocation().y, blockhitresult1.getLocation().z, 3 * j, blockpos, blockstate, 0.6F, 1.0F);
@@ -249,13 +253,18 @@ public class SwingTracker extends Tracker {
         this.mc.getProfiler().pop();
     }
 
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
     private boolean getIsHittingBlock() {
-        return Minecraft.getInstance().gameMode.isDestroying();
+        return this.mc.gameMode.isDestroying();
     }
 
     private void clearBlockHitDelay() {
-        //MCReflection.PlayerController_blockHitDelay.set(Minecraft.getInstance().gameMode, 0);
-        // Minecraft.getInstance().gameMode.blockBreakingCooldown = 1;
+        //MCReflection.PlayerController_blockHitDelay.set(this.mc.gameMode, 0);
+       // this.mc.gameMode.blockBreakingCooldown = 1;
     }
 
     public Vec3 constrain(Vec3 start, Vec3 end) {
