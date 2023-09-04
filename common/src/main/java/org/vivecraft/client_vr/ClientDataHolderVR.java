@@ -2,7 +2,7 @@ package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import org.vivecraft.api_beta.client.Tracker;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.trackers.*;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;

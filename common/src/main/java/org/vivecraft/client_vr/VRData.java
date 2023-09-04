@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr;
 
 import org.joml.Quaternionf;
-import org.vivecraft.api_beta.data.VRPose;
+import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
@@ -162,7 +162,7 @@ public class VRData {
         return new Vec3(in.x * (double) factor, in.y * (double) factor, in.z * (double) factor);
     }
 
-    public org.vivecraft.api_beta.data.VRData asVRData() {
+    public org.vivecraft.api.data.VRData asVRData() {
         return new VRDataImpl(
             this.hmd.asVRPose(),
             this.c0.asVRPose(),

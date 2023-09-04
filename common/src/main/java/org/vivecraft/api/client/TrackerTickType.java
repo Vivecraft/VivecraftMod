@@ -1,4 +1,4 @@
-package org.vivecraft.api_beta.client;
+package org.vivecraft.api.client;
 
 
 /**

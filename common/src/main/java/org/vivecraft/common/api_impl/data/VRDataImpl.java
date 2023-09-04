@@ -1,7 +1,7 @@
 package org.vivecraft.common.api_impl.data;
 
-import org.vivecraft.api_beta.data.VRData;
-import org.vivecraft.api_beta.data.VRPose;
+import org.vivecraft.api.data.VRData;
+import org.vivecraft.api.data.VRPose;
 
 public class VRDataImpl implements VRData {
 
