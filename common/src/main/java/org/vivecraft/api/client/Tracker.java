@@ -41,4 +41,11 @@ public interface Tracker {
     default void idleTick(LocalPlayer player) {
 
     }
+
+    /**
+     * The timing type used for ticking trackers.
+     */
+    enum TrackerTickType {
+        PER_FRAME, PER_TICK
+    }
 }
