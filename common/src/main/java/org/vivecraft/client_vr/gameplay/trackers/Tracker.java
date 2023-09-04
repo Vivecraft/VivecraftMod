@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.api.client.TrackerTickType;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 import net.minecraft.client.Minecraft;

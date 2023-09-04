@@ -17,7 +17,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.Tracker;
-import org.vivecraft.api.client.TrackerTickType;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.VRServerPerms;
@@ -189,7 +188,7 @@ public class VRPlayer {
 
         for (Tracker tracker : ClientDataHolderVR.getInstance().getTrackers())
         {
-            if (tracker.tickType() == TrackerTickType.PER_FRAME)
+            if (tracker.tickType() == Tracker.TrackerTickType.PER_FRAME)
             {
                 tracker.idleTick(minecraft.player);
 
@@ -269,7 +268,7 @@ public class VRPlayer {
 
             for (Tracker tracker : dh.getTrackers())
             {
-                if (tracker.tickType() == TrackerTickType.PER_TICK)
+                if (tracker.tickType() == Tracker.TrackerTickType.PER_TICK)
                 {
                     tracker.idleTick(mc.player);
 
