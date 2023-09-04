@@ -1,7 +1,7 @@
-package org.vivecraft.api_beta.client;
+package org.vivecraft.api.client;
 
 import com.google.common.annotations.Beta;
-import org.vivecraft.api_beta.data.VRData;
+import org.vivecraft.api.data.VRData;
 import org.vivecraft.client.api_impl.ClientAPIImpl;
 
 public interface VivecraftClientAPI {
@@ -16,7 +16,6 @@ public interface VivecraftClientAPI {
      * @return Data representing the devices in the room pre-tick.
      * @throws IllegalStateException Thrown when the local player isn't in VR.
      */
-    @Beta
     VRData getPreTickRoomData() throws IllegalStateException;
 
     /**
@@ -24,7 +23,6 @@ public interface VivecraftClientAPI {
      * @return Data representing the devices in the room post-tick.
      * @throws IllegalStateException Thrown when the local player isn't in VR.
      */
-    @Beta
     VRData getPostTickRoomData() throws IllegalStateException;
 
     /**
@@ -34,7 +32,6 @@ public interface VivecraftClientAPI {
      * @return Data representing the devices in Minecraft space pre-tick.
      * @throws IllegalStateException Thrown when the local player isn't in VR.
      */
-    @Beta
     VRData getPreTickWorldData() throws IllegalStateException;
 
     /**
@@ -44,7 +41,6 @@ public interface VivecraftClientAPI {
      * @return Data representing the devices in Minecraft space post-tick.
      * @throws IllegalStateException Thrown when the local player isn't in VR.
      */
-    @Beta
     VRData getPostTickWorldData() throws IllegalStateException;
 
     /**
@@ -54,7 +50,6 @@ public interface VivecraftClientAPI {
      * @return Data representing the devices in Minecraft space post-tick interpolated for rendering.
      * @throws IllegalStateException Thrown when the local player isn't in VR.
      */
-    @Beta
     VRData getWorldRenderData() throws IllegalStateException;
 
     /**
@@ -71,7 +66,6 @@ public interface VivecraftClientAPI {
      * @param delay An amount of time to delay until creating the haptic pulse. The majority of the time, one should use 0F here.
      *
      */
-    @Beta
     void triggerHapticPulse(int controllerNum, float duration, float frequency, float amplitude, float delay);
 
     /**
@@ -82,7 +76,6 @@ public interface VivecraftClientAPI {
      *                      the secondary controller.
      * @param duration The duration of the haptic pulse in seconds.
      */
-    @Beta
     default void triggerHapticPulse(int controllerNum, float duration) {
         triggerHapticPulse(controllerNum, duration, 160F, 1F, 0F);
     }
@@ -90,13 +83,11 @@ public interface VivecraftClientAPI {
     /**
      * @return Whether the client player is currently in seated mode.
      */
-    @Beta
     boolean isSeated();
 
     /**
      * @return Whether the client player is using reversed hands.
      */
-    @Beta
     boolean usingReversedHands();
 
     /**
@@ -112,19 +103,16 @@ public interface VivecraftClientAPI {
     /**
      * @return Whether the current render pass is a vanilla render pass.
      */
-    @Beta
     boolean isVanillaRenderPass();
 
     /**
      * @return The currently active world scale.
      */
-    @Beta
     float getWorldScale();
 
     /**
      * Adds the tracker to the list of all trackers to be run for the local player.
      * @param tracker Tracker to register.
      */
-    @Beta
     void addTracker(Tracker tracker);
 }

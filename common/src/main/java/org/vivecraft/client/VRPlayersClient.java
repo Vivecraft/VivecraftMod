@@ -263,7 +263,7 @@ public class VRPlayersClient {
             return Math.atan2(-vec31.x, vec31.z);
         }
 
-        public org.vivecraft.api_beta.data.VRData asVRData(Vec3 playerPos) {
+        public org.vivecraft.api.data.VRData asVRData(Vec3 playerPos) {
             // Have to add the player's position here, as the RotInfo positions are player relative, rather
             // than the in-world position.
             return new VRDataImpl(

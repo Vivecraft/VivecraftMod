@@ -2,7 +2,7 @@ package org.vivecraft.common.api_impl.data;
 
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
-import org.vivecraft.api_beta.data.VRPose;
+import org.vivecraft.api.data.VRPose;
 
 public class VRPoseImpl implements VRPose {
 

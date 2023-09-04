@@ -1,13 +1,12 @@
-package org.vivecraft.api_beta;
+package org.vivecraft.api;
 
 import com.google.common.annotations.Beta;
 import net.minecraft.world.entity.player.Player;
-import org.vivecraft.api_beta.data.VRData;
+import org.vivecraft.api.data.VRData;
 import org.vivecraft.common.api_impl.APIImpl;
 
 import javax.annotation.Nullable;
 
-@Beta
 public interface VivecraftAPI {
 
     /**
@@ -23,7 +22,6 @@ public interface VivecraftAPI {
      * @param player The player to check the VR status of.
      * @return true if the player is in VR.
      */
-    @Beta
     boolean isVRPlayer(Player player);
 
     /**
@@ -32,7 +30,6 @@ public interface VivecraftAPI {
      * @param player Player to get the VR data of.
      * @return The VR data for a player, or null if the player isn't in VR or no data has been received for said player.
      */
-    @Beta
     @Nullable
     VRData getVRData(Player player);
 }
