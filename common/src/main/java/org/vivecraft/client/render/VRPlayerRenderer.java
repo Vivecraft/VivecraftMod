@@ -2,6 +2,7 @@ package org.vivecraft.client.render;
 
 import java.util.UUID;
 
+import net.minecraft.client.Minecraft;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -63,6 +64,14 @@ public class VRPlayerRenderer extends PlayerRenderer
         super.setModelProperties(pClientPlayer);
 
         this.getModel().crouching &= !pClientPlayer.isVisuallySwimming();
+
+        if (pClientPlayer == Minecraft.getInstance().player && this.getModel() instanceof VRPlayerModel_WithArms<?> armsModel && ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA && ClientDataHolderVR.getInstance().cameraTracker.isQuickMode() && ClientDataHolderVR.getInstance().grabScreenShot) {
+            // player hands block the camera, so disable them for the screenshot
+            armsModel.leftHand.visible = false;
+            armsModel.rightHand.visible = false;
+            armsModel.leftSleeve.visible = false;
+            armsModel.rightSleeve.visible = false;
+        }
     }
 
     @Override

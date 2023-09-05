@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(RenderSectionManager.class)
 public class RenderSectionManagerVRMixin {
 
-    @Shadow
+    @Shadow(remap = false)
     private ChunkRenderList chunkRenderList;
 
     @Inject(at = @At("HEAD"), method = "getVisibleChunkCount", cancellable = true, remap = false)

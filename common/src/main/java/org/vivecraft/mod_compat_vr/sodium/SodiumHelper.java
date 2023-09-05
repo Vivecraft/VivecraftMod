@@ -32,6 +32,15 @@ public class SodiumHelper {
         return Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium");
     }
 
+    public static boolean hasIssuesWithParallelBlockBuilding() {
+        try {
+            Class.forName("me.jellysquid.mods.sodium.client.render.immediate.model.BakedModelEncoder");
+            return true;
+        } catch (ClassNotFoundException ignored) {
+            return false;
+        }
+    }
+
     public static void markTextureAsActive(TextureAtlasSprite sprite){
         SpriteUtil.markSpriteActive(sprite);
     }

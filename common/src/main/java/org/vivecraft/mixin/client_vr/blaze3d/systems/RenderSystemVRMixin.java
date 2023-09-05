@@ -13,7 +13,7 @@ import static com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate;
 public class RenderSystemVRMixin {
 
     // do remap because of forge
-    @Inject(at = @At("HEAD"), method = "defaultBlendFunc", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "defaultBlendFunc", cancellable = true, remap = false)
     private static void defaultBlendFunc(CallbackInfo ci) {
         blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         ci.cancel();

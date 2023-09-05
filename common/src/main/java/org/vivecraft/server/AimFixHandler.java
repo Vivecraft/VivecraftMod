@@ -12,6 +12,7 @@ import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.server.config.ServerConfig;
 
 public class AimFixHandler extends ChannelInboundHandlerAdapter
 {
@@ -45,21 +46,24 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
 
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(serverplayer);
 
+            Vec3 aimPos = null;
             if (serverviveplayer != null) {
-                Vec3 pos = serverviveplayer.getControllerPos(0, serverplayer, true);
+                aimPos = serverviveplayer.getControllerPos(0, serverplayer, true);
                 Vec3 dir = serverviveplayer.getControllerDir(0);
 
-                serverplayer.setPosRaw(pos.x, pos.y, pos.z);
-                serverplayer.xo = pos.x;
-                serverplayer.yo = pos.y;
-                serverplayer.zo = pos.z;
+                serverplayer.setPosRaw(aimPos.x, aimPos.y, aimPos.z);
+                serverplayer.xo = aimPos.x;
+                serverplayer.yo = aimPos.y;
+                serverplayer.zo = aimPos.z;
                 serverplayer.setXRot((float)Math.toDegrees(Math.asin(-dir.y)));
                 serverplayer.setYRot((float)Math.toDegrees(Math.atan2(-dir.x, dir.z)));
                 serverplayer.xRotO = serverplayer.getXRot();
                 serverplayer.yRotO = serverplayer.yHeadRotO = serverplayer.yHeadRot = serverplayer.getYRot();
-                serverplayer.eyeHeight = 0;
-                serverviveplayer.offset = position.subtract(pos);
-                System.out.println("AimFix " + pos.x + " " + pos.y + " " + pos.z + " " + (float)Math.toDegrees(Math.asin(-dir.y)) + " " + (float)Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                serverplayer.eyeHeight = 0.0001F;
+                serverviveplayer.offset = position.subtract(aimPos);
+                if (ServerConfig.debug.get()) {
+                    System.out.println("AimFix " + aimPos.x + " " + aimPos.y + " " + aimPos.z + " " + (float) Math.toDegrees(Math.asin(-dir.y)) + " " + (float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                }
             }
 
             try {
@@ -76,6 +80,14 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
             }
             finally {
                 ReferenceCountUtil.release(msg);
+            }
+
+            // if the packed changed the player position, use that
+            if ((aimPos != null && !serverplayer.position().equals(aimPos)) || (aimPos == null && !serverplayer.position().equals(position))) {
+                position = serverplayer.position();
+                if (ServerConfig.debug.get()) {
+                    System.out.println("AimFix moved Player to " + position.x + " " + position.y + " " + position.z);
+                }
             }
 
             serverplayer.setPosRaw(position.x, position.y, position.z);

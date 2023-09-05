@@ -19,6 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import org.vivecraft.client.Xplat;
 
@@ -71,6 +72,9 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 	private void copyUV(Polygon source, Polygon dest) {
 		for (int i = 0; i < source.vertices.length; i++) {
 			dest.vertices[i] = new Vertex(dest.vertices[i].pos, source.vertices[i].u, source.vertices[i].v);
+			if (OptifineHelper.isOptifineLoaded()) {
+				OptifineHelper.copyRenderPositions(source.vertices[i], dest.vertices[i]);
+			}
 		}
 	}
 	

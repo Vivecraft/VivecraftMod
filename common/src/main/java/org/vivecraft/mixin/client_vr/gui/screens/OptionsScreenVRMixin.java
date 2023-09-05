@@ -40,7 +40,7 @@ public class OptionsScreenVRMixin extends Screen {
     */
 
     // place below FOV slider
-    @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"),index = 1)
+    @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"))
     private int makeSpacer1wide(int layoutElement) {
         return ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled ? 1 : 2;
     }
@@ -67,4 +67,13 @@ public class OptionsScreenVRMixin extends Screen {
         })
                 .build());
     }
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout;arrangeElements()V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void noBigButtonsPlease(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+        gridLayout.visitChildren(child -> {
+            if (child.getWidth() > 150 && child instanceof Button button) {
+                button.setWidth(150);
+            }
+        });
+    }
+
 }

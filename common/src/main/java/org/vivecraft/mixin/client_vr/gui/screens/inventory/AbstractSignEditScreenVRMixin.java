@@ -11,14 +11,14 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 @Mixin(AbstractSignEditScreen.class)
 public class AbstractSignEditScreenVRMixin {
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/SignBlockEntity;setEditable(Z)V", shift = At.Shift.AFTER), method = "init")
+    @Inject(at = @At("HEAD"), method = "init")
     public void showOverlay(CallbackInfo ci) {
         if(VRState.vrRunning) {
             KeyboardHandler.setOverlayShowing(true);
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/SignBlockEntity;setEditable(Z)V", shift = At.Shift.AFTER), method = "removed")
+    @Inject(at = @At("HEAD"), method = "removed")
     public void dontShowOverlay(CallbackInfo ci) {
         if(VRState.vrRunning) {
             KeyboardHandler.setOverlayShowing(false);

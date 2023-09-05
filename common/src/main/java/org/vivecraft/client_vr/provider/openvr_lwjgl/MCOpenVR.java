@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.sun.jna.NativeLibrary;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -531,6 +532,9 @@ public class MCOpenVR extends MCVR {
             arraylist.add(VRInputActionSet.CONTEXTUAL);
         } else {
             arraylist.add(VRInputActionSet.GUI);
+            if (ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui) {
+                arraylist.add(VRInputActionSet.INGAME);
+            }
         }
 
         if (KeyboardHandler.Showing || RadialHandler.isShowing()) {
@@ -889,7 +893,10 @@ public class MCOpenVR extends MCVR {
     }
 
     private void processInputAction(VRInputAction action) {
-        if (action.isActive() && action.isEnabledRaw()) {
+        if (action.isActive() && action.isEnabledRaw()
+            // try to prevent double left clicks
+            && (!ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui
+            || !(action.actionSet == VRInputActionSet.INGAME && action.keyBinding.key.getType() == InputConstants.Type.MOUSE && action.keyBinding.key.getValue() == 0 && mc.screen != null))) {
             if (action.isButtonChanged()) {
                 if (action.isButtonPressed() && action.isEnabled()) {
                     if (!this.ignorePressesNextFrame) {

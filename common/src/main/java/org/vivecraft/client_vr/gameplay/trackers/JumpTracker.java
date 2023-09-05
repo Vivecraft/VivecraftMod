@@ -58,7 +58,7 @@ public class JumpTracker extends Tracker
             {
                 return false;
             }
-            else if (!p.isInWater() && !p.isInLava() && p.isOnGround())
+            else if (!p.isInWater() && !p.isInLava() && p.onGround())
             {
                 return !p.isShiftKeyDown() && !p.isPassenger();
             }

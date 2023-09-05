@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client.main;
 
+import com.google.common.base.Stopwatch;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,7 +18,7 @@ import net.minecraft.client.main.Main;
 public class MainMixin {
 	
 	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V"), method = "main", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
-	private static void options(String[] strings, CallbackInfo ci, OptionParser optionparser) {
+	private static void options(String[] strings, CallbackInfo ci, Stopwatch stopwatch, Stopwatch stopwatch2, OptionParser optionparser) {
 		optionparser.accepts("kiosk");
 		optionparser.accepts("viewonly");
 		optionparser.accepts("katvr");

@@ -28,8 +28,11 @@ public class NoSodiumLevelRendererVRMixin {
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;needsFullRenderChunkUpdate:Z", ordinal = 1, shift = At.Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
     public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
-        this.needsFullRenderChunkUpdate = needsFullRenderChunkUpdate || VRState.vrRunning;
-        needsFrustumUpdate.set(true);
+        if (VRState.vrRunning) {
+            this.needsFullRenderChunkUpdate = true;
+            // if VR is on, always update the frustum, to fix flickering chunks between eyes
+            needsFrustumUpdate.set(true);
+        }
     }
 
     @ModifyConstant(method = "renderChunkLayer", constant = @Constant(intValue = 12))

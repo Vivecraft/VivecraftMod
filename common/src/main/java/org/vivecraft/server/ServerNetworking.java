@@ -21,8 +21,6 @@ import org.vivecraft.server.config.ServerConfig;
 
 import java.util.*;
 
-import static org.vivecraft.server.ServerVRPlayers.getVivePlayer;
-
 public class ServerNetworking {
 
     // temporarily stores the packets from legacy clients to assemble a complete VrPlayerState
@@ -32,7 +30,7 @@ public class ServerNetworking {
 
     public static void handlePacket(CommonNetworkHelper.PacketDiscriminators packetID, FriendlyByteBuf buffer, ServerGamePacketListenerImpl listener) {
         var playerEntity = listener.player;
-        ServerVivePlayer vivePlayer = getVivePlayer(playerEntity);
+        ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(playerEntity);
 
         if (vivePlayer == null && packetID != CommonNetworkHelper.PacketDiscriminators.VERSION) {
             return;
@@ -63,7 +61,7 @@ public class ServerNetworking {
                         && clientMinVersion <= CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION) {
                         vivePlayer.networkVersion = Math.min(clientMaxVersion, CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION);
                         if (ServerConfig.debug.get()) {
-                            LOGGER.info("{} networking supported, using version vivePlayer.networkVersion", listener.player.getName().getString());
+                            LOGGER.info("{} networking supported, using version {}", listener.player.getName().getString(), vivePlayer.networkVersion);
                         }
                     } else {
                         // unsupported version, send notification, and disregard
@@ -181,6 +179,7 @@ public class ServerNetworking {
 
             case CLIMBING:
                 playerEntity.fallDistance = 0.0F;
+                break;
             case ACTIVEHAND:
                 vivePlayer.activeHand = buffer.readByte();
 
@@ -206,7 +205,8 @@ public class ServerNetworking {
                     playerData = new HashMap<>();
                     legacyDataMap.put(playerEntity.getUUID(), playerData);
                 }
-
+                // keep the buffer around
+                buffer.retain();
                 playerData.put(packetID, buffer);
 
                 if (playerData.size() == 3) {
@@ -224,6 +224,10 @@ public class ServerNetworking {
                             org.vivecraft.common.network.Pose.deserialize(controller0Data), // controller0 pose
                             controller1Data.readBoolean(), // reverseHands 1
                             org.vivecraft.common.network.Pose.deserialize(controller1Data)); // controller1 pose
+                    // release buffers
+                    headData.release();
+                    controller0Data.release();
+                    controller1Data.release();
                     legacyDataMap.remove(playerEntity.getUUID());
                 }
                 break;
@@ -231,7 +235,7 @@ public class ServerNetworking {
     }
 
     public static Set<ServerPlayerConnection> getTrackingPlayers(Entity entity) {
-        var manager = entity.level.getChunkSource();
+        var manager = entity.level().getChunkSource();
         var storage = ((ServerChunkCache) manager).chunkMap;
         var playerTracker = ((ChunkMapAccessor) storage).getTrackedEntities().get(entity.getId());
         return playerTracker != null ? playerTracker.getPlayersTracking() : Collections.emptySet();

@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Axis;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -78,6 +79,7 @@ import org.vivecraft.client_vr.render.XRCamera;
 import org.vivecraft.client_vr.render.VRWidgetHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import java.nio.file.Path;
 import java.util.Calendar;
@@ -283,6 +285,9 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At("HEAD"), method = "getProjectionMatrix(D)Lorg/joml/Matrix4f;", cancellable = true)
     public void projection(double d, CallbackInfoReturnable<Matrix4f> info) {
+        if (!VRState.vrRunning) {
+            return;
+        }
         PoseStack posestack = new PoseStack();
         setupClipPlanes();
         if (GameRendererVRMixin.DATA_HOLDER.currentPass == RenderPass.LEFT) {
@@ -402,7 +407,7 @@ public abstract class GameRendererVRMixin
             shouldDrawScreen = false;
             return;
         }
-        if (!renderWorldIn || this.minecraft.level == null) {
+        if (!renderWorldIn || this.minecraft.level == null || isInMenuRoom()) {
             this.minecraft.getProfiler().push("MainMenu");
             GL11.glDisable(GL11.GL_STENCIL_TEST);
 
@@ -444,15 +449,15 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "render(FJZ)V")
-    private void noGUIwithViewOnly(Gui instance, PoseStack poseStack, float f) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V"), method = "render(FJZ)V")
+    private void noGUIwithViewOnly(Gui instance, GuiGraphics guiGraphics, float f) {
         if (RenderPassType.isVanilla() || !ClientDataHolderVR.viewonly) {
-            instance.render(poseStack, f);
+            instance.render(guiGraphics, f);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "renderConfusionOverlay", cancellable = true)
-    private void noConfusionOverlayOnGUI(float f, CallbackInfo ci) {
+    private void noConfusionOverlayOnGUI(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
         if (DATA_HOLDER.currentPass == RenderPass.GUI) {
             ci.cancel();
         }
@@ -605,7 +610,7 @@ public abstract class GameRendererVRMixin
             livingentity.setYRot(vrdata$vrdevicepose.getYaw());
             livingentity.yHeadRot = livingentity.getYRot();
             livingentity.yHeadRotO = livingentity.getYRot();
-            livingentity.eyeHeight = 0;
+            livingentity.eyeHeight = 0.0001F;
         }
     }
 
@@ -642,6 +647,7 @@ public abstract class GameRendererVRMixin
         SetupRenderingAtController(c, poseStack);
 
         if (this.minecraft.getOverlay() == null) {
+            this.minecraft.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
             RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
         }
 
@@ -923,7 +929,7 @@ public abstract class GameRendererVRMixin
     }
 
     @Override
-    public void drawScreen(float f, Screen screen, PoseStack poseStack) {
+    public void drawScreen(float f, Screen screen, GuiGraphics guiGraphics) {
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
         posestack.setIdentity();
@@ -932,7 +938,7 @@ public abstract class GameRendererVRMixin
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ONE);
-        screen.render(poseStack, 0, 0, f);
+        screen.render(guiGraphics, 0, 0, f);
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ONE);
@@ -1003,13 +1009,10 @@ public abstract class GameRendererVRMixin
             itemstack = ItemStack.EMPTY;
         }
 
-        boolean flag = false;
-
-//		if (Config.isShaders()) { TODO
-//			Shaders.beginHand(matrix, flag);
-//		} else {
+        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+            OptifineHelper.beginEntities();
+        }
         matrix.pushPose();
-//		}
 
         this.lightTexture.turnOnLightLayer();
         MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
@@ -1020,11 +1023,10 @@ public abstract class GameRendererVRMixin
         multibuffersource$buffersource.endBatch();
         this.lightTexture.turnOffLightLayer();
 
-//		if (Config.isShaders()) { TODO
-//			Shaders.endHand(matrix);
-//		} else {
+        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+            OptifineHelper.endEntities();
+        }
         matrix.popPose();
-//		}
 
         matrix.popPose();
     }
@@ -1062,13 +1064,10 @@ public abstract class GameRendererVRMixin
             itemstack = this.minecraft.player.getMainHandItem();
         }
 
-        boolean flag2 = false;
-
-//		if (Config.isShaders()) { TODO
-//			Shaders.beginHand(matrix, flag2);
-//		} else {
+		if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+            OptifineHelper.beginEntities();
+		}
         matrix.pushPose();
-//		}
 
         this.lightTexture.turnOnLightLayer();
         MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
@@ -1079,11 +1078,10 @@ public abstract class GameRendererVRMixin
         multibuffersource$buffersource.endBatch();
         this.lightTexture.turnOffLightLayer();
 
-//		if (Config.isShaders()) { TODO
-//			Shaders.endHand(matrix);
-//		} else {
+        if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+            OptifineHelper.endEntities();
+        }
         matrix.popPose();
-//		}
 
         matrix.popPose();
 
@@ -1123,6 +1121,7 @@ public abstract class GameRendererVRMixin
                     f = 0.0F;
                 }
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
+                this.minecraft.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
                 RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
                 this.renderFlatQuad(vec3.add(0.0D, 0.05001D, 0.0D), f, f, 0.0F, this.tpLimitedColor.getX(),
                         this.tpLimitedColor.getY(), this.tpLimitedColor.getZ(), 128, matrix);
@@ -1908,6 +1907,7 @@ public abstract class GameRendererVRMixin
             boolean flag = false;
             RenderSystem.enableCull();
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            this.minecraft.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
             RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
             Tesselator tesselator = Tesselator.getInstance();
             tesselator.getBuilder().begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
@@ -2279,7 +2279,7 @@ public abstract class GameRendererVRMixin
                 f2 = 0.5F;
             }
 
-            RenderSystem.setShaderTexture(0, Screen.GUI_ICONS_LOCATION);
+            RenderSystem.setShaderTexture(0, Gui.GUI_ICONS_LOCATION);
             float f3 = 0.00390625F;
             float f4 = 0.00390625F;
 
@@ -2354,6 +2354,7 @@ public abstract class GameRendererVRMixin
                             }
 
                             RenderSystem.setShader(GameRenderer::getPositionColorShader);
+                            this.minecraft.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
                             RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
                             this.renderFlatQuad(vec32, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
                                     0.0F, 0, 0, 0, 64, poseStack);

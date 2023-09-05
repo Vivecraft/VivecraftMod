@@ -14,6 +14,7 @@ loom {
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
         mixinConfig "vivecraft.mixins.json"
+        mixinConfig "vivecraft.dynamicfps.mixins.json"
         mixinConfig "vivecraft.sodium.mixins.json"
         mixinConfig "vivecraft.forge.sodium.mixins.json"
         mixinConfig "vivecraft.iris.mixins.json"
@@ -45,8 +46,8 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    modRuntimeOnly("maven.modrinth:rubidium:0.6.4")
-    modRuntimeOnly("maven.modrinth:oculus:1.19.4-1.5.2")
+    modRuntimeOnly("maven.modrinth:rubidium:0.6.5")
+    modRuntimeOnly("maven.modrinth:oculus:1.20-1.6.4")
 
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
@@ -76,21 +77,17 @@ shadowJar {
             project.configurations.shadowCommon,
             project.configurations.bundle
     ]
-    classifier "dev-shadow"
+    archiveClassifier.set("dev-shadow")
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
-}
-
-remapJar {
     archiveClassifier.set('forge')
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier.set("dev")
     manifest {
         attributes(
                 'Main-Class': "org.vivecraft.LaunchPopup"

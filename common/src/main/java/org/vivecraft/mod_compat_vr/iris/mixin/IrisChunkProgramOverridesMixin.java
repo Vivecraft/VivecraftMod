@@ -7,10 +7,7 @@ import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkShaderInte
 import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisTerrainPass;
 import net.coderbot.iris.pipeline.SodiumTerrainPipeline;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -28,10 +25,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.EnumMap;
 
+@Pseudo
 @Mixin(IrisChunkProgramOverrides.class)
 public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverridesExtension {
 
-    @Shadow
+    @Shadow(remap = false)
     @Final
     private EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> programs;
 

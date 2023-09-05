@@ -11,7 +11,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
@@ -29,8 +28,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	private boolean useStencil = false;
 	@Shadow
 	public int frameBufferId;
-	@Shadow
-	protected int depthBufferId;
 	@Shadow
 	public boolean useDepth;
 	@Shadow
@@ -57,20 +54,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	private void _bindWrite(boolean b){};
 
 	@Shadow public abstract void unbindWrite();
-
-	/**
-	 * @author
-	 * @reason
-	 */
-	@Overwrite
-	public void blitToScreen(int pWidth, int pHeight, boolean p_83960_) {
-		this.blitToScreen(0, pWidth, pHeight, 0, p_83960_, 0.0F, 0.0F, false);
-	}
-	
-	@Override
-	public int getDepthBufferId() {
-		return depthBufferId;
-	}
 
 	@Override
 	public void setUseStencil(boolean useStencil){
@@ -243,7 +226,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 			}
 		}
 		Matrix4f matrix4f = new Matrix4f().setOrtho(0, width, height, 0,1000.0f, 3000.0f);
-		RenderSystem.setProjectionMatrix(matrix4f);
+		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 		if (instance.MODEL_VIEW_MATRIX != null) {
 			instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0f, 0.0f, -2000.0f));
 		}
@@ -328,7 +311,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 				}
 			}
 			Matrix4f matrix4f = new Matrix4f().setOrtho(0, (float) width, (float) (height), 0, 1000.0F, 3000.0F);
-			RenderSystem.setProjectionMatrix(matrix4f);
+			RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 
 			if (instance.MODEL_VIEW_MATRIX != null) {
 				instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0F, 0.0F, -2000.0F));

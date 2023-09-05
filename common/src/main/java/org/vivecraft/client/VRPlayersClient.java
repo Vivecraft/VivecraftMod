@@ -144,7 +144,7 @@ public class VRPlayersClient {
                         }
 
                         vec3 = vec3.scale(0.1F);
-                        Vec3 vec31 = playermodelcontroller$rotinfo != null && player == this.mc.player ? playermodelcontroller$rotinfo.Headpos : player.getEyePosition(1.0F);
+                        Vec3 vec31 = playermodelcontroller$rotinfo != null && player == this.mc.player ? playermodelcontroller$rotinfo.Headpos.add(player.position())  : player.getEyePosition(1.0F);
                         Particle particle = this.mc.particleEngine.createParticle(ParticleTypes.FIREWORK, vec31.x + (player.isShiftKeyDown() ? -vec3.x * 3.0D : 0.0D) + ((double) this.rand.nextFloat() - 0.5D) * (double) 0.02F, vec31.y - (double) (player.isShiftKeyDown() ? 1.0F : 0.8F) + ((double) this.rand.nextFloat() - 0.5D) * (double) 0.02F, vec31.z + (player.isShiftKeyDown() ? -vec3.z * 3.0D : 0.0D) + ((double) this.rand.nextFloat() - 0.5D) * (double) 0.02F, -vec3.x + ((double) this.rand.nextFloat() - 0.5D) * (double) 0.01F, ((double) this.rand.nextFloat() - (double) 0.05F) * (double) 0.05F, -vec3.z + ((double) this.rand.nextFloat() - 0.5D) * (double) 0.01F);
 
                         if (particle != null) {

@@ -73,6 +73,7 @@ public class ServerConfig {
         config = CommentedFileConfig
                 .builder(Xplat.getConfigPath("vivecraft-server-config.toml"))
                 .autosave()
+                .sync()
                 .concurrent()
                 .build();
 

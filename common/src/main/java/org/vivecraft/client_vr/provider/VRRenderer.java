@@ -4,16 +4,13 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -25,14 +22,12 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
-import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
-import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.ShaderHelper;
@@ -154,9 +149,8 @@ public abstract class VRRenderer {
 
 
         RenderTarget fb = minecraft.getMainRenderTarget();
-        RenderSystem.viewport(0, 0, fb.viewWidth, fb.viewHeight);
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F));
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F), VertexSorting.ORTHOGRAPHIC_Z);
         RenderSystem.getModelViewStack().pushPose();
         RenderSystem.getModelViewStack().setIdentity();
         if (inverse) //draw on far clip
@@ -189,77 +183,57 @@ public abstract class VRRenderer {
     FloatBuffer buffer = MemoryUtil.memAllocFloat(16);
     FloatBuffer buffer2 = MemoryUtil.memAllocFloat(16);
 
-    public void doFSAA(RenderPass eye, boolean hasShaders) {
+    public void doFSAA(boolean hasShaders) {
         if (this.fsaaFirstPassResultFBO == null) {
             this.reinitFrameBuffers("FSAA Setting Changed");
         } else {
             RenderSystem.disableBlend();
-            RenderSystem.backupProjectionMatrix();
-            Matrix4f matrix4f = new Matrix4f();
-            matrix4f.identity();
-            RenderSystem.setProjectionMatrix(matrix4f);
-            RenderSystem.getModelViewStack().pushPose();
-            RenderSystem.getModelViewStack().translate(0, 0, -0.7F);
-            RenderSystem.applyModelViewMatrix();
-            this.fsaaFirstPassResultFBO.clear(Minecraft.ON_OSX);
-            this.fsaaFirstPassResultFBO.bindWrite(false);
+            // set to always, so that we can skip the clear
+            RenderSystem.depthFunc(GL43.GL_ALWAYS);
+
+            // first pass
+            this.fsaaFirstPassResultFBO.bindWrite(true);
+
             RenderSystem.setShaderTexture(0, framebufferVrRender.getColorTextureId());
             RenderSystem.setShaderTexture(1, framebufferVrRender.getDepthTextureId());
 
-            RenderSystem.activeTexture(33985);
+            RenderSystem.activeTexture(GL43.GL_TEXTURE1);
             this.framebufferVrRender.bindRead();
-            RenderSystem.activeTexture(33986);
-            RenderSystem.bindTexture(((RenderTargetExtension) this.framebufferVrRender).getDepthBufferId());
+            RenderSystem.activeTexture(GL43.GL_TEXTURE2);
+            RenderSystem.bindTexture(framebufferVrRender.getDepthTextureId());
+            RenderSystem.activeTexture(GL43.GL_TEXTURE0);
 
-            RenderSystem.activeTexture(33984);
-            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.clearDepth(1.0D);
-            this.fsaaFirstPassResultFBO.bindRead();
-            RenderSystem.clear(16640, Minecraft.ON_OSX);
-            RenderSystem.viewport(0, 0, this.fsaaFirstPassResultFBO.viewWidth, this.fsaaFirstPassResultFBO.viewHeight);
+            VRShaders.lanczosShader.setSampler("Sampler0", RenderSystem.getShaderTexture(0));
+            VRShaders.lanczosShader.setSampler("Sampler1", RenderSystem.getShaderTexture(1));
             VRShaders._Lanczos_texelWidthOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaFirstPassResultFBO.viewWidth));
             VRShaders._Lanczos_texelHeightOffsetUniform.set(0.0F);
-            VRShaders._Lanczos_modelViewUniform.set(RenderSystem.getModelViewMatrix());
-            VRShaders._Lanczos_projectionUniform.set(RenderSystem.getProjectionMatrix());
-            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
-                int l = RenderSystem.getShaderTexture(k);
-                VRShaders.lanczosShader.setSampler("Sampler" + k, l);
-            }
             VRShaders.lanczosShader.apply();
-            RenderSystem.clear(16384, Minecraft.ON_OSX);
-            this.drawQuad();
-            this.fsaaLastPassResultFBO.clear(Minecraft.ON_OSX);
-            this.fsaaLastPassResultFBO.bindWrite(false);
-            RenderSystem.activeTexture(33985);
-            this.fsaaFirstPassResultFBO.bindRead();
-            RenderSystem.setShaderTexture(0, this.fsaaFirstPassResultFBO.getColorTextureId());
-            RenderSystem.activeTexture(33986);
-            RenderSystem.setShaderTexture(1, this.fsaaFirstPassResultFBO.getDepthTextureId());
-            RenderSystem.bindTexture(((RenderTargetExtension) this.fsaaFirstPassResultFBO).getDepthBufferId());
 
-            RenderSystem.activeTexture(33984);
-            this.checkGLError("posttex");
-            RenderSystem.viewport(0, 0, this.fsaaLastPassResultFBO.viewWidth, this.fsaaLastPassResultFBO.viewHeight);
-            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.clearDepth(1.0D);
-            RenderSystem.clear(16640, Minecraft.ON_OSX);
-            this.checkGLError("postclear");
-            RenderSystem.activeTexture(33984);
-            this.checkGLError("postact");
-            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
-                int l = RenderSystem.getShaderTexture(k);
-                VRShaders.lanczosShader.setSampler("Sampler" + k, l);
-            }
-            VRShaders._Lanczos_texelWidthOffsetUniform.set(0.0F);
-            VRShaders._Lanczos_texelHeightOffsetUniform.set(1.0F / (3.0F * (float) this.framebufferEye0.viewHeight));
-            VRShaders.lanczosShader.apply();
             this.drawQuad();
-            this.checkGLError("postdraw");
-            RenderSystem.restoreProjectionMatrix();
-            RenderSystem.getModelViewStack().popPose();
+
+            // second pass
+            this.fsaaLastPassResultFBO.bindWrite(true);
+            RenderSystem.setShaderTexture(0, this.fsaaFirstPassResultFBO.getColorTextureId());
+            RenderSystem.setShaderTexture(1, this.fsaaFirstPassResultFBO.getDepthTextureId());
+
+            RenderSystem.activeTexture(GL43.GL_TEXTURE1);
+            this.fsaaFirstPassResultFBO.bindRead();
+            RenderSystem.activeTexture(GL43.GL_TEXTURE2);
+            RenderSystem.bindTexture(fsaaFirstPassResultFBO.getDepthTextureId());
+            RenderSystem.activeTexture(GL43.GL_TEXTURE0);
+
+            VRShaders.lanczosShader.setSampler("Sampler0", RenderSystem.getShaderTexture(0));
+            VRShaders.lanczosShader.setSampler("Sampler1", RenderSystem.getShaderTexture(1));
+            VRShaders._Lanczos_texelWidthOffsetUniform.set(0.0F);
+            VRShaders._Lanczos_texelHeightOffsetUniform.set(1.0F / (3.0F * (float) this.fsaaLastPassResultFBO.viewHeight));
+            VRShaders.lanczosShader.apply();
+
+            this.drawQuad();
+
             // Clean up time
             VRShaders.lanczosShader.clear();
             Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
+            RenderSystem.depthFunc(GL43.GL_LEQUAL);
         }
     }
 
@@ -287,6 +261,8 @@ public abstract class VRRenderer {
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
 
+        mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/black.png"));
+
         for (int i = 0; i < verts.length; i += 2) {
             builder.vertex(verts[i] * dh.vrRenderer.renderScale, verts[i + 1] * dh.vrRenderer.renderScale, 0.0F).endVertex();
         }
@@ -296,7 +272,7 @@ public abstract class VRRenderer {
     }
 
     private void drawQuad() {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        //RenderSystem.setShader(GameRenderer::getPositionTexShader);
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         builder.vertex(-1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).endVertex();

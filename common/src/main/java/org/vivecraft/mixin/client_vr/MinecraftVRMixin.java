@@ -9,12 +9,14 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.*;
 import net.minecraft.client.Timer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,6 +27,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
@@ -65,8 +68,8 @@ import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.extensions.*;
 import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
 import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
-import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -243,10 +246,14 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     private static int fps;
 
     @Shadow
+    @Final
+    private RenderBuffers renderBuffers;
+
+    @Shadow
     public abstract Entity getCameraEntity();
 
     @Shadow
-    protected abstract void renderFpsMeter(PoseStack poseStack, ProfileResults fpsPieResults2);
+    protected abstract void renderFpsMeter(GuiGraphics guiGraphics, ProfileResults profileResults);
 
     @Shadow
     public abstract boolean hasSingleplayerServer();
@@ -315,7 +322,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     // on first resource load finished
     @Inject(at = @At("HEAD"), method = {
         "method_24040", // fabric
-        "lambda$new$3"} // forge
+        "lambda$new$4"} // forge
         , remap = false)
     public void initVROnLaunch(CallbackInfo ci) {
         // init vr after resource loading
@@ -331,6 +338,16 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
         // set initial resourcepacks
         resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
+
+        if (OptifineHelper.isOptifineLoaded() && ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
+            // with optifine this texture somehow fails to load, so manually reload it
+            try {
+                textureManager.getTexture(Gui.GUI_ICONS_LOCATION).load(resourceManager);
+            } catch (IOException e) {
+                // if there was an error, just reload everything
+                reloadResourcePacks();
+            }
+        }
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;", shift = Shift.BEFORE), method = "destroy()V")
@@ -368,6 +385,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             } else {
                 GuiHandler.guiPos_room = null;
                 GuiHandler.guiRotation_room = null;
+                GuiHandler.guiScale = 1.0F;
                 if (player != null) {
                     VRPlayersClient.getInstance().disableVR(player.getUUID());
                 }
@@ -520,13 +538,15 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         mainRenderTarget.unbindRead();
 
         this.profiler.popPush("2D Keyboard");
+        GuiGraphics guiGraphics = new GuiGraphics((Minecraft) (Object)this, renderBuffers.bufferSource());
         if (KeyboardHandler.Showing
                 && !ClientDataHolderVR.getInstance().vrSettings.physicalKeyboard) {
             this.mainRenderTarget = KeyboardHandler.Framebuffer;
             this.mainRenderTarget.clear(Minecraft.ON_OSX);
             this.mainRenderTarget.bindWrite(true);
             ((GameRendererExtension) this.gameRenderer).drawScreen(f,
-                    KeyboardHandler.UI, new PoseStack());
+                    KeyboardHandler.UI, guiGraphics);
+            guiGraphics.flush();
         }
         //
 
@@ -547,7 +567,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             this.mainRenderTarget = RadialHandler.Framebuffer;
             this.mainRenderTarget.clear(Minecraft.ON_OSX);
             this.mainRenderTarget.bindWrite(true);
-            ((GameRendererExtension) this.gameRenderer).drawScreen(f, RadialHandler.UI, new PoseStack());
+            ((GameRendererExtension) this.gameRenderer).drawScreen(f, RadialHandler.UI, guiGraphics);
+            guiGraphics.flush();
         }
 
         this.profiler.pop();
@@ -716,16 +737,16 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
         this.screen = null;
         RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
 
-        if (this.overlay != null) {
+        /*if (this.overlay != null) {
             RenderSystem.clear(256, ON_OSX);
             Matrix4f matrix4f = new Matrix4f().setOrtho(
                     0, (float) (this.window.getScreenWidth() / this.window.getGuiScale()),
                     (float) (this.window.getScreenHeight() / this.window.getGuiScale()), 0, 1000.0F, 3000.0F);
-            RenderSystem.setProjectionMatrix(matrix4f);
+            RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
             PoseStack p = new PoseStack();
             p.translate(0, 0, -2000);
             this.overlay.render(p, 0, 0, 0.0F);
-        } else {
+        } else */{
             if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_Q)) {
                 System.out.println("Resetting VR status!");
                 Path file = Xplat.getConfigPath("vivecraft-config.properties");
@@ -836,7 +857,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
     public void drawProfiler() {
         if (this.fpsPieResults != null) {
             this.profiler.push("fpsPie");
-            this.renderFpsMeter(new PoseStack(), this.fpsPieResults);
+            GuiGraphics guiGraphics = new GuiGraphics((Minecraft)(Object) this, renderBuffers.bufferSource());
+            this.renderFpsMeter(guiGraphics, this.fpsPieResults);
+            guiGraphics.flush();
             this.profiler.pop();
         }
     }
@@ -983,6 +1006,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
         if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && level != null && player != null)
         {
+            Throwable error = null;
             try
             {
                 final BlockPos blockpos = player.blockPosition();
@@ -1003,8 +1027,8 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
                         if (isLocalServer())
                         {
-                            final Level level = getSingleplayerServer().getLevel(player.level.dimension());
-                            CompletableFuture<Void> completablefuture = getSingleplayerServer().submit(() -> {
+                            final Level level = getSingleplayerServer().getLevel(player.level().dimension());
+                            CompletableFuture<Throwable> completablefuture = getSingleplayerServer().submit(() -> {
                                 try
                                 {
                                     MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset, size, size, blockpos.getY(), file2);
@@ -1012,13 +1036,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                                 catch (Throwable throwable)
                                 {
                                     throwable.printStackTrace();
+                                    return throwable;
                                 }
+                                return null;
                             });
 
-                            while (!completablefuture.isDone())
-                            {
-                                Thread.sleep(10L);
-                            }
+                            error = completablefuture.get();
                         }
                         else
                         {
@@ -1026,17 +1049,24 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                             gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportclientwarning"));
                         }
 
-                        gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.menuworldexportcomplete.1", size)));
-                        gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
+                        if (error == null) {
+                            gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.1", size));
+                            gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", file2.getAbsolutePath()));
+                        }
                         break;
                     }
 
                     ++i;
                 }
             }
-            catch (Exception exception)
+            catch (Throwable throwable)
             {
-                exception.printStackTrace();
+                throwable.printStackTrace();
+                error = throwable;
+            } finally {
+                if (error != null) {
+                    gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexporterror", error.getMessage()));
+                }
             }
         }
 
@@ -1129,7 +1159,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
             Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float) this.window.getScreenWidth(),
                     (float) this.window.getScreenHeight(), 0.0F, 1000.0F, 3000.0F);
-            RenderSystem.setProjectionMatrix(matrix4f);
+            RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().setIdentity();
             RenderSystem.getModelViewStack().translate(0, 0, -2000);
@@ -1153,10 +1183,12 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             int j = 1;
             int k = 12;
 
+            GuiGraphics guiGraphics = new GuiGraphics((Minecraft)(Object) this, renderBuffers.bufferSource());
             for (String s : arraylist) {
-                this.font.draw(p, s, 1.0F, (float) j, 16777215);
+                guiGraphics.drawString(this.font, s, 1, j, 16777215);
                 j += 12;
             }
+            guiGraphics.flush();
             RenderSystem.getModelViewStack().popPose();
         }
     }
@@ -1201,7 +1233,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 RenderSystem.clear(16384, ON_OSX);
                 this.profiler.push("fsaa");
                 // DataHolder.getInstance().vrRenderer.doFSAA(Config.isShaders()); TODO
-                ClientDataHolderVR.getInstance().vrRenderer.doFSAA(eye, false);
+                ClientDataHolderVR.getInstance().vrRenderer.doFSAA(false);
                 rendertarget = ClientDataHolderVR.getInstance().vrRenderer.fsaaLastPassResultFBO;
                 this.checkGLError("fsaa " + eye.name());
                 this.profiler.pop();
@@ -1241,7 +1273,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
 
             if (this.player != null && this.level != null) {
                 if (((GameRendererExtension) this.gameRenderer)
-                        .isInWater() != ((GameRendererExtension) this.gameRenderer).isInWater()) {
+                        .wasInWater() != ((GameRendererExtension) this.gameRenderer).isInWater()) {
                     ClientDataHolderVR.getInstance().watereffect = 2.3F;
                 } else {
                     if (((GameRendererExtension) this.gameRenderer).isInWater()) {
@@ -1310,7 +1342,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 }
 
                 if (this.player.isSleeping() && (double) black < 0.8D) {
-                    black = 0.8F;
+                    black = 0.5F + 0.3F * this.player.getSleepTimer() * 0.01F;
                 }
 
                 if (ClientDataHolderVR.getInstance().vr.isWalkingAbout && (double) black < 0.8D) {

@@ -262,6 +262,6 @@ public class VehicleTracker extends Tracker
 
     public boolean canRoomscaleDismount(LocalPlayer player)
     {
-        return player.zza == 0.0F && player.xxa == 0.0F && player.isPassenger() && player.getVehicle().isOnGround() && this.dismountCooldown == 0;
+        return player.zza == 0.0F && player.xxa == 0.0F && player.isPassenger() && player.getVehicle().onGround() && this.dismountCooldown == 0;
     }
 }

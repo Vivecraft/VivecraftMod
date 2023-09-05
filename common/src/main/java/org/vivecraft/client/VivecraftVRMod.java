@@ -10,6 +10,8 @@ import java.util.*;
 
 public class VivecraftVRMod {
 
+    public static final boolean compiledWithForge = true;
+
     private static final Minecraft mc = Minecraft.getInstance();
 
     public static VivecraftVRMod INSTANCE = new VivecraftVRMod();

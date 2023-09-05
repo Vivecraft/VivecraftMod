@@ -65,6 +65,13 @@ public class MixinConfig implements IMixinConfigPlugin {
         }
         else if (mixinClassName.equals(RenderSectionManagerVRMixin.class.getName())) {
             neededClass = "me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList";
+            try {
+                MixinService.getService().getBytecodeProvider().getClassNode(neededClass);
+                ClassNode node = MixinService.getService().getBytecodeProvider().getClassNode(targetClassName);
+                return node.fields.stream().anyMatch(field -> field.name.equals("chunkRenderList"));
+            } catch (ClassNotFoundException | IOException e) {
+                return false;
+            }
         }
 
         if (!neededClass.isEmpty()) {

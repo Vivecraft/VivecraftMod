@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import javax.annotation.Nullable;
 
@@ -140,10 +141,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"), method = "renderLevel")
-    public int oneLightingUpdates(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"), method = "renderLevel")
+    public int oneLightingUpdates(LevelLightEngine instance) {
         if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
-            instance.runUpdates(i, bl, bl2);
+            instance.runLightUpdates();
         }
         if (!RenderPassType.isVanilla()) {
             this.setShaderGroup();
@@ -161,6 +162,15 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         if (!RenderPassType.isVanilla()) {
             this.minecraft.getProfiler().popPush("stencil");
             ((GameRendererExtension) gameRenderer).drawEyeStencil(false);
+        }
+    }
+
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"), method = "renderLevel")
+    public boolean noPlayerWhenSleeping(LivingEntity instance) {
+        if (!RenderPassType.isVanilla()) {
+            return false;
+        } else {
+            return instance.isSleeping();
         }
     }
 
@@ -193,12 +203,19 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             double d = vec3.x();
             double e = vec3.y();
             double g = vec3.z();
+            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+                OptifineHelper.beginOutlineShader();
+            }
             for (int c = 0; c < 2; c++) {
                 if (ClientDataHolderVR.getInstance().interactTracker.isInteractActive(c) && (ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null || ClientDataHolderVR.getInstance().interactTracker.bukkit[c])) {
                     BlockPos blockpos = ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c] != null ? ClientDataHolderVR.getInstance().interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
                     BlockState blockstate = this.level.getBlockState(blockpos);
                     this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), d, e, g, blockpos, blockstate);
                 }
+            }
+            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+                this.renderBuffers.bufferSource().endBatch(RenderType.lines());
+                OptifineHelper.endOutlineShader();
             }
             // reset outline color
             selR = selG = selB = 0f;
@@ -223,7 +240,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         guiRendered = false;
     }
 
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;transparencyChain:Lnet/minecraft/client/renderer/PostChain;", ordinal = 0, shift = Shift.BEFORE), method = "renderLevel")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = Shift.AFTER), method = "renderLevel")
     public void renderVrStuffPart1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;

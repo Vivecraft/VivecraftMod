@@ -11,6 +11,7 @@ import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 public class VRState {
 
@@ -23,6 +24,10 @@ public class VRState {
             return;
         }
         try {
+            if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isAntialiasing()) {
+                throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblesettings").getString(), Component.translatable("vivecraft.messages.optifineaa"));
+            }
+
             vrInitialized = true;
             ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
             if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
@@ -40,7 +45,7 @@ public class VRState {
                 dh.vrRenderer.setupRenderConfiguration();
                 RenderPassManager.setVanillaRenderPass();
             } catch(RenderConfigException renderConfigException) {
-                throw new RenderConfigException("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error + "\nVR provider: " + dh.vr.getName()));
+                throw new RenderConfigException("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error.getString() + "\nVR provider: " + dh.vr.getName()));
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -69,9 +74,9 @@ public class VRState {
 
             dh.menuWorldRenderer.init();
         } catch (RenderConfigException renderConfigException) {
-            Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
             vrEnabled = false;
             destroyVR(true);
+            Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
         }
     }
 

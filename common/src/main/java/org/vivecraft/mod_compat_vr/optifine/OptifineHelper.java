@@ -1,8 +1,8 @@
 package org.vivecraft.mod_compat_vr.optifine;
 
-import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
@@ -24,6 +24,8 @@ public class OptifineHelper {
     private static Method optifineConfigIsSunMoonEnabledMethod;
     private static Method optifineConfigIsStarsEnabledMethod;
     private static Method optifineConfigIsCustomColorsMethod;
+    private static Method optifineConfigIsAntialiasingMethod;
+    private static Method optifineConfigIsAntialiasingConfiguredMethod;
 
     private static Class<?> smartAnimations;
     private static Method smartAnimationsSpriteRenderedMethod;
@@ -37,8 +39,17 @@ public class OptifineHelper {
     private static Method customColorsGetFogColorEndMethod;
     private static Method customColorsGetFogColorNetherMethod;
 
+    private static Class<?> shadersRender;
+    private static Method shadersRenderBeginOutlineMethod;
+    private static Method shadersRenderEndOutlineMethod;
+
+    private static Class<?> shaders;
+    private static Method shadersBeginEntitiesMethod;
+    private static Method shadersEndEntitiesMethod;
+
     private static Field optionsOfRenderRegions;
     private static Field optionsOfCloudHeight;
+    private static Field vertexRenderPositions;
 
     public static boolean isOptifineLoaded() {
         if (!checkedForOptifine) {
@@ -46,7 +57,7 @@ public class OptifineHelper {
             // check for optifine with a class search
             try {
                 Class.forName("net.optifine.Config");
-                VRSettings.logger.info("Vivecraft: Optifine not detected");
+                VRSettings.logger.info("Vivecraft: Optifine detected");
                 optifineLoaded = true;
             } catch (ClassNotFoundException ignore) {
                 VRSettings.logger.info("Vivecraft: Optifine not detected");
@@ -65,6 +76,38 @@ public class OptifineHelper {
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public static void beginOutlineShader() {
+        try {
+            shadersRenderBeginOutlineMethod.invoke(shadersRender);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void endOutlineShader() {
+        try {
+            shadersRenderEndOutlineMethod.invoke(shadersRender);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void beginEntities() {
+        try {
+            shadersBeginEntitiesMethod.invoke(shaders);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void endEntities() {
+        try {
+            shadersEndEntitiesMethod.invoke(shaders);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
@@ -106,6 +149,16 @@ public class OptifineHelper {
     public static boolean isRenderRegions() {
         try {
             return (boolean)optifineConfigIsRenderRegionsMethod.invoke(optifineConfig);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean isAntialiasing() {
+        try {
+            return (boolean)optifineConfigIsAntialiasingMethod.invoke(optifineConfig)
+                || (boolean)optifineConfigIsAntialiasingConfiguredMethod.invoke(optifineConfig);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
@@ -201,6 +254,16 @@ public class OptifineHelper {
         }
     }
 
+    public static void copyRenderPositions(ModelPart.Vertex source, ModelPart.Vertex dest) {
+        if (vertexRenderPositions != null) {
+            try {
+                vertexRenderPositions.set(dest, vertexRenderPositions.get(source));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private static void init() {
         try {
             optifineConfig = Class.forName("net.optifine.Config");
@@ -210,6 +273,8 @@ public class OptifineHelper {
             optifineConfigIsSunMoonEnabledMethod = optifineConfig.getMethod("isSunMoonEnabled");
             optifineConfigIsStarsEnabledMethod = optifineConfig.getMethod("isStarsEnabled");
             optifineConfigIsCustomColorsMethod = optifineConfig.getMethod("isCustomColors");
+            optifineConfigIsAntialiasingMethod = optifineConfig.getMethod("isAntialiasing");
+            optifineConfigIsAntialiasingConfiguredMethod = optifineConfig.getMethod("isAntialiasingConfigured");
 
             smartAnimations = Class.forName("net.optifine.SmartAnimations");
             smartAnimationsSpriteRenderedMethod = smartAnimations.getMethod("spriteRendered", TextureAtlasSprite.class);
@@ -223,6 +288,14 @@ public class OptifineHelper {
             customColorsGetUnderwaterColorMethod = customColors.getMethod("getUnderwaterColor", BlockAndTintGetter.class, double.class, double.class, double.class);
             customColorsGetUnderlavaColorMethod = customColors.getMethod("getUnderlavaColor", BlockAndTintGetter.class, double.class, double.class, double.class);
 
+            shadersRender = Class.forName("net.optifine.shaders.ShadersRender");
+            shadersRenderBeginOutlineMethod = shadersRender.getMethod("beginOutline");
+            shadersRenderEndOutlineMethod = shadersRender.getMethod("endOutline");
+
+            shaders = Class.forName("net.optifine.shaders.Shaders");
+            shadersBeginEntitiesMethod = shaders.getMethod("beginEntities");
+            shadersEndEntitiesMethod = shaders.getMethod("endEntities");
+
             // private methods
             customColorsGetSkyColoEndMethod = customColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);
             customColorsGetSkyColoEndMethod.setAccessible(true);
@@ -232,6 +305,13 @@ public class OptifineHelper {
             customColorsGetFogColorEndMethod.setAccessible(true);
             customColorsGetFogColorNetherMethod = customColors.getDeclaredMethod("getFogColorNether", Vec3.class);
             customColorsGetFogColorNetherMethod.setAccessible(true);
+
+            try {
+                vertexRenderPositions = ModelPart.Vertex.class.getField("renderPositions");
+            } catch (NoSuchFieldException e) {
+                // this version doesn't have the entity render improvements
+                vertexRenderPositions = null;
+            }
 
         } catch (ClassNotFoundException e) {
             VRSettings.logger.error("Optifine detected, but couldn't load class: {}", e.getMessage());
