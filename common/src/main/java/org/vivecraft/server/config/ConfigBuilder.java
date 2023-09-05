@@ -1,12 +1,9 @@
 package org.vivecraft.server.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import net.minecraft.util.Mth;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -270,69 +267,53 @@ public class ConfigBuilder {
         }
     }
 
-    public interface NumberValue<E extends Number>{
-        E getMin();
-        E getMax();
-        E get();
-        E reset();
-        void set(E newValue);
-        double normalize();
-        void fromNormalized(double value);
-    }
+    public static abstract class NumberValue<E extends Number> extends ConfigValue<E>{
 
-    public static class IntValue extends ConfigValue<Integer> implements NumberValue<Integer> {
+        private final E min;
+        private final E max;
 
-        private final int min;
-        private final int max;
-
-        public IntValue(CommentedConfig config, List<String> path, int defaultValue, int min, int max) {
+        public NumberValue(CommentedConfig config, List<String> path, E defaultValue, E min, E max) {
             super(config, path, defaultValue);
             this.min = min;
             this.max = max;
         }
 
-        public Integer getMin() {
+        public E getMin(){
             return min;
         }
-
-        public Integer getMax() {
+        public E getMax(){
             return max;
         }
-
         public double normalize() {
-            return Mth.clamp((this.get() - min) / (double) (max - min), 0.0D, 1.0D);
+            return Mth.clamp((this.get().doubleValue() - min.doubleValue()) / (max.doubleValue() - min.doubleValue()), 0.0D, 1.0D);
         }
 
+        abstract public void fromNormalized(double value);
+    }
+
+    public static class IntValue extends NumberValue<Integer> {
+
+        public IntValue(CommentedConfig config, List<String> path, int defaultValue, int min, int max) {
+            super(config, path, defaultValue, min, max);
+        }
+
+        @Override
         public void fromNormalized(double value) {
             double newValue = this.getMin() + (this.getMax() - this.getMin()) * value;
             this.set(Mth.floor(newValue + 0.5));
         }
     }
 
-    public static class DoubleValue extends ConfigValue<Double> implements NumberValue<Double> {
+    public static class DoubleValue extends NumberValue<Double> {
 
-        private final double min;
-        private final double max;
         public DoubleValue(CommentedConfig config, List<String> path, double defaultValue, double min, double max) {
-            super(config, path, defaultValue);
-            this.min = min;
-            this.max = max;
-        }
-        public Double getMin() {
-            return min;
-        }
-        public Double getMax() {
-            return max;
-        }
-        public double normalize() {
-            return Mth.clamp((this.get() - min) / (max - min), 0.0D, 1.0D);
+            super(config, path, defaultValue, min, max);
         }
 
+        @Override
         public void fromNormalized(double value) {
             double newValue = this.getMin() + (this.getMax() - this.getMin()) * value;
-            BigDecimal bd = BigDecimal.valueOf(newValue);
-            bd = bd.setScale(2, RoundingMode.HALF_UP);
-            this.set(bd.doubleValue());
+            this.set(Math.round(newValue * 100.0) / 100.0);
         }
     }
 }
