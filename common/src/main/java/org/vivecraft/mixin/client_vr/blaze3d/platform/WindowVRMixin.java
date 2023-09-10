@@ -70,9 +70,9 @@ public abstract class WindowVRMixin {
 	}
 
 	@Inject(method = "onResize", at = @At("HEAD"))
-	private void reinitFrameBuffers(long l, int i, int j, CallbackInfo ci){
+	private void resizeFrameBuffers(long l, int i, int j, CallbackInfo ci){
 		if (VRState.vrEnabled) {
-			ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Main Window Resized");
+			ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("Main Window Resized");
 		}
 	}
 

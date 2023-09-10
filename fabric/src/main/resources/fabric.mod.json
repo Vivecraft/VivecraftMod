@@ -33,6 +33,7 @@
     "vivecraft.iris.mixins.json",
     "vivecraft.physicsmod.mixins.json",
     "vivecraft.rei.mixins.json",
+    "vivecraft.resolutioncontrol.mixins.json",
     "vivecraft.fabric.mixins.json"
   ],
   "depends": {

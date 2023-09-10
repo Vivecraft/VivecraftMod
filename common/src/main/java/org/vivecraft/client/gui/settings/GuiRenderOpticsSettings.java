@@ -153,7 +153,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
 
             if (VRState.vrRunning && (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroption.getId() == VRSettings.VrOptions.FSAA.ordinal() || guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal()))
             {
-                if (guivroption.getId() != VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || !ShadersHelper.isShaderActive()) {
+                if (guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal() || (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() && ShadersHelper.isShaderActive())) {
+                    this.dataholder.vrRenderer.resizeFrameBuffers("Render Setting Changed");
+                } else {
                     this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
                 }
             }
@@ -171,7 +173,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase
             this.prevRenderScaleFactor = this.settings.renderScaleFactor;
             this.prevHandCameraResScale = this.settings.handCameraResScale;
             if (VRState.vrRunning) {
-                this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
+                this.dataholder.vrRenderer.resizeFrameBuffers("Render Setting Changed");
             }
         }
 

@@ -50,6 +50,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
 
 public abstract class MCVR
 {
@@ -1041,7 +1042,12 @@ public abstract class MCVR
                     this.dh.vrSettings.displayMirrorMode = VRSettings.MirrorMode.THIRD_PERSON;
                 }
 
-                this.dh.vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
+                if (!ShadersHelper.isShaderActive()) {
+                    this.dh.vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
+                } else {
+                    // in case if the last third person mirror was mixed reality
+                    this.dh.vrRenderer.resizeFrameBuffers("Mirror Setting Changed");
+                }
             }
 
             if (mod.keyToggleKeyboard.consumeClick())

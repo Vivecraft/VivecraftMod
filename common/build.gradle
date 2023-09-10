@@ -32,6 +32,7 @@ dependencies {
     // modCompileOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
     modCompileOnly "maven.modrinth:lithium:mc1.20.1-0.11.2"
     modCompileOnly "maven.modrinth:indium:1.0.21+mc1.20.1"
+    modCompileOnly "maven.modrinth:resolution-control-plus:1.20-3.0.0"
 
     /*
     // for immersive portals compat
