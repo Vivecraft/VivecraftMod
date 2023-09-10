@@ -7,7 +7,6 @@ import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.server.config.ConfigBuilder;
 
 import java.util.*;
 

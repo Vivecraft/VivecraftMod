@@ -1,13 +1,13 @@
 package org.vivecraft.client.gui.widgets;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -125,8 +125,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            Minecraft.getInstance().font.draw(poseStack, this.name, (float)(Minecraft.getInstance().screen.width / 2 - this.width / 2), (float)(j + m - Minecraft.getInstance().font.lineHeight - 1), 0xFFFFFF);
+        public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            guiGraphics.drawString(Minecraft.getInstance().font, this.name, Minecraft.getInstance().screen.width / 2 - this.width / 2, j + m - Minecraft.getInstance().font.lineHeight - 1, 0xFFFFFF);
         }
 
         @Override
@@ -170,12 +170,12 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            super.render(poseStack, i, j, k, l, m, n, o, bl, f);
+        public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            super.render(guiGraphics, i, j, k, l, m, n, o, bl, f);
             this.resetButton.setX(k + 230);
             this.resetButton.setY(j);
             this.resetButton.active = canReset.getAsBoolean();
-            this.resetButton.render(poseStack, n, o, f);
+            this.resetButton.render(guiGraphics, n, o, f);
         }
 
         @Override
@@ -200,11 +200,11 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            Minecraft.getInstance().font.draw(poseStack, this.name, (float)(k + 90 - 140), (float)(j + m / 2 - Minecraft.getInstance().font.lineHeight / 2), 0xFFFFFF);
+        public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            guiGraphics.drawString(Minecraft.getInstance().font, this.name, k + 90 - 140, j + m / 2 - Minecraft.getInstance().font.lineHeight / 2, 0xFFFFFF);
             this.valueWidget.setX(k + 105);
             this.valueWidget.setY(j);
-            this.valueWidget.render(poseStack, n, o, f);
+            this.valueWidget.render(guiGraphics, n, o, f);
         }
 
         @Override

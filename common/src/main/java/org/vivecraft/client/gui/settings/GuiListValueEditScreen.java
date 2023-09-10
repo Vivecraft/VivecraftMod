@@ -1,8 +1,8 @@
 package org.vivecraft.client.gui.settings;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -93,13 +93,13 @@ public class GuiListValueEditScreen extends GuiListScreen {
         }
 
         @Override
-        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+        public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
             this.valueWidget.setX(k + -50);
             this.valueWidget.setY(j);
-            this.valueWidget.render(poseStack, n, o, f);
+            this.valueWidget.render(guiGraphics, n, o, f);
             this.deleteButton.setX(k + 230);
             this.deleteButton.setY(j);
-            this.deleteButton.render(poseStack, n, o, f);
+            this.deleteButton.render(guiGraphics, n, o, f);
         }
 
         @Override
