@@ -2,7 +2,12 @@ package org.vivecraft.server.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.*;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
+import org.vivecraft.client.gui.widgets.SettingsList;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -229,11 +234,20 @@ public class ConfigBuilder {
             return Objects.equals(get(),  defaultValue);
         }
         public String getComment() {
-            return config.getComment(path);
+            String comment = config.getComment(path);
+            return comment != null ? comment : "";
         }
 
         public String getPath() {
             return String.join(".", path);
+        }
+
+        public AbstractWidget getWidget(int width, int height) {
+            return Button
+                .builder(Component.literal("" + get()), button -> {})
+                .bounds(0, 0, width, height)
+                .tooltip(Tooltip.create(Component.literal(getComment())))
+                .build();
         }
     }
 
@@ -241,17 +255,62 @@ public class ConfigBuilder {
         public BooleanValue(CommentedConfig config, List<String> path, boolean defaultValue) {
             super(config, path, defaultValue);
         }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            return CycleButton
+                .onOffBuilder(get())
+                .displayOnlyValue()
+                .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
+                .create(0, 0,  width, height, Component.empty(), (button, bool) -> set(bool));
+        }
     }
 
     public static class StringValue extends ConfigValue<String>{
         public StringValue(CommentedConfig config, List<String> path, String defaultValue) {
             super(config, path, defaultValue);
         }
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, width - 1, height, Component.literal(get())) {
+                @Override
+                public boolean charTyped(char c, int i) {
+                    boolean ret = super.charTyped(c, i);
+                    set(this.getValue());
+                    return ret;
+                }
+
+                @Override
+                public boolean keyPressed(int i, int j, int k) {
+                    boolean ret = super.keyPressed(i, j, k);
+                    set(this.getValue());
+                    return ret;
+                }
+            };
+            box.setMaxLength(1000);
+            box.setValue(get());
+            box.setTooltip(Tooltip.create(Component.literal(getComment())));
+            return box;
+        }
     }
 
     public static class ListValue<T> extends ConfigValue<List<T>>{
         public ListValue(CommentedConfig config, List<String> path, List<T> defaultValue) {
             super(config, path, defaultValue);
+        }
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            // TODO handle other types than String
+            return Button
+                .builder(
+                    Component.translatable("vivecraft.options.editlist"),
+                    button -> Minecraft.getInstance()
+                        .setScreen(
+                            new GuiListValueEditScreen(Component.literal(getPath().substring(getPath().lastIndexOf("."))), Minecraft.getInstance().screen, (ListValue<String>) this)
+                        ))
+                .size(width, height)
+                .tooltip(Tooltip.create(Component.literal(getComment())))
+                .build();
         }
     }
 
@@ -264,6 +323,18 @@ public class ConfigBuilder {
 
         public Collection<? extends T> getValidValues(){
             return validValues;
+        }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            return CycleButton
+                .builder((newValue) -> Component.literal("" + newValue))
+                .withInitialValue(get())
+                // toArray is needed here, because the button uses Objects, and the collection is of other types
+                .withValues(getValidValues().toArray())
+                .displayOnlyValue()
+                .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
+                .create(0, 0, width, height, Component.empty(), (button, newValue) -> set((T) newValue));
         }
     }
 
@@ -289,6 +360,22 @@ public class ConfigBuilder {
         }
 
         abstract public void fromNormalized(double value);
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+             AbstractSliderButton widget = new AbstractSliderButton(0, 0,SettingsList.ResettableEntry.valueButtonWidth, 20, Component.literal("" + get()), normalize()) {
+                @Override
+                protected void updateMessage() {
+                    setMessage(Component.literal("" + get()));
+                }
+                @Override
+                protected void applyValue() {
+                    fromNormalized(value);
+                }
+            };
+            widget.setTooltip(Tooltip.create(Component.literal(getComment())));
+            return widget;
+        }
     }
 
     public static class IntValue extends NumberValue<Integer> {

@@ -17,7 +17,6 @@ import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
-import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
 import org.vivecraft.server.config.ConfigBuilder;
 
 public class SettingsList extends ContainerObjectSelectionList<SettingsList.BaseEntry> {
@@ -47,74 +46,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     }
 
     public static BaseEntry ConfigToEntry(ConfigBuilder.ConfigValue configValue, Component name) {
-        AbstractWidget widget;
-        if (configValue instanceof ConfigBuilder.NumberValue<?> numberValue) {
-            widget = new AbstractSliderButton(0, 0, ResettableEntry.valueButtonWidth, 20, Component.literal("" + numberValue.get()), numberValue.normalize()) {
-                @Override
-                protected void updateMessage() {
-                    setMessage(Component.literal("" + numberValue.get()));
-                }
-
-                @Override
-                protected void applyValue() {
-                    numberValue.fromNormalized(value);
-                }
-            };
-        } else if (configValue instanceof ConfigBuilder.StringValue stringValue) {
-            EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, ResettableEntry.valueButtonWidth - 1, 20, Component.literal(stringValue.get())) {
-                @Override
-                public boolean charTyped(char c, int i) {
-                    boolean ret = super.charTyped(c, i);
-                    stringValue.set(this.getValue());
-                    return ret;
-                }
-
-                @Override
-                public boolean keyPressed(int i, int j, int k) {
-                    boolean ret = super.keyPressed(i, j, k);
-                    stringValue.set(this.getValue());
-                    return ret;
-                }
-            };
-            box.setMaxLength(1000);
-            box.setValue(stringValue.get());
-            widget = box;
-        } else if (configValue instanceof ConfigBuilder.BooleanValue booleanValue) {
-            widget = CycleButton
-                .onOffBuilder(booleanValue.get())
-                .displayOnlyValue()
-                .withTooltip((bool) -> configValue.getComment() != null ? Tooltip.create(Component.literal(configValue.getComment())) : null)
-                .create(0, 0, ResettableEntry.valueButtonWidth, 20, Component.empty(), (button, bool) -> booleanValue.set(bool));
-        } else if (configValue instanceof ConfigBuilder.InListValue inListValue) {
-            widget = CycleButton.builder((newValue) -> Component.literal("" + newValue))
-                .withValues(inListValue.getValidValues())
-                .displayOnlyValue()
-                .withTooltip((bool) -> configValue.getComment() != null ? Tooltip.create(Component.literal(configValue.getComment())) : null)
-                .create(0, 0, ResettableEntry.valueButtonWidth, 20, Component.empty(), (button, newValue) -> inListValue.set(newValue));
-        } else if (configValue instanceof ConfigBuilder.ListValue listValue) {
-            widget = Button.builder(Component.translatable("vivecraft.options.editlist"), button -> Minecraft.getInstance().setScreen(new GuiListValueEditScreen(name, Minecraft.getInstance().screen, listValue))).size(ResettableEntry.valueButtonWidth, 20).build();
-        } else {
-            widget = Button.builder(Component.literal("" + configValue.get()), button -> {
-                configValue.reset();
-            }).bounds(0, 0, ResettableEntry.valueButtonWidth, 20).build();
-        }
-        if (configValue.getComment() != null) {
-            widget.setTooltip(Tooltip.create(Component.literal(configValue.getComment())));
-        }
-
-        return new ResettableEntry(name, widget, button -> {
-            configValue.reset();
-            if (!(configValue instanceof ConfigBuilder.ListValue)) {
-                widget.setMessage(Component.literal("" + configValue.get()));
-                if (widget instanceof AbstractSliderButton slider) {
-                    slider.onClick(widget.getX() + 4 + (widget.getWidth() - 8) * ((ConfigBuilder.NumberValue<?>) configValue).normalize(), 0.0);
-                } else if (widget instanceof CycleButton cycle) {
-                    cycle.setValue(configValue.get());
-                } else if (widget instanceof EditBox box) {
-                    box.setValue((String) configValue.get());
-                }
-            }
-        }, () -> !configValue.isDefault());
+        AbstractWidget widget = configValue.getWidget(ResettableEntry.valueButtonWidth, 20);
+        return new ResettableEntry(name, widget, configValue);
     }
 
     public static class CategoryEntry extends BaseEntry {
@@ -161,11 +94,15 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         private final BooleanSupplier canReset;
 
         public static final int valueButtonWidth = 125;
-        public ResettableEntry(Component name, AbstractWidget valueWidget, Button.OnPress resetAction, BooleanSupplier canReset) {
+        public ResettableEntry(Component name, AbstractWidget valueWidget, ConfigBuilder.ConfigValue configValue) {
             super(name, valueWidget);
 
-            this.canReset = canReset;
-            this.resetButton = Button.builder(Component.literal("X"), resetAction).tooltip(Tooltip.create(Component.translatable("controls.reset")))
+            this.canReset = () -> !configValue.isDefault();
+            this.resetButton = Button.builder(Component.literal("X"), button -> {
+                    configValue.reset();
+                    this.valueWidget = configValue.getWidget(valueWidget.getWidth(), valueWidget.getHeight());
+                })
+                .tooltip(Tooltip.create(Component.translatable("controls.reset")))
                 .bounds(0, 0, 20, 20).build();
         }
 
@@ -190,7 +127,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     }
 
     public static class WidgetEntry extends BaseEntry {
-        protected final AbstractWidget valueWidget;
+        protected AbstractWidget valueWidget;
 
         public static final int valueButtonWidth = 145;
 
