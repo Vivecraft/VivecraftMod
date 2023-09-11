@@ -1,6 +1,7 @@
 package org.vivecraft.api.client;
 
 import net.minecraft.world.InteractionHand;
+import org.vivecraft.api.client.data.VRPoseHistory;
 import org.vivecraft.api.data.VRData;
 import org.vivecraft.client.api_impl.ClientAPIImpl;
 

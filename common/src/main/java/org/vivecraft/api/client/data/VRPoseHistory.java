@@ -1,4 +1,4 @@
-package org.vivecraft.api.client;
+package org.vivecraft.api.client.data;
 
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.data.VRPose;

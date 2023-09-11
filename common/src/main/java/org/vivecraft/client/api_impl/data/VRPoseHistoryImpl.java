@@ -1,7 +1,7 @@
 package org.vivecraft.client.api_impl.data;
 
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.api.client.VRPoseHistory;
+import org.vivecraft.api.client.data.VRPoseHistory;
 import org.vivecraft.api.data.VRPose;
 
 import java.util.ArrayList;
