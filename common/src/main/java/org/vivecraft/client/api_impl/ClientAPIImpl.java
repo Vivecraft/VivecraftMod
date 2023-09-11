@@ -2,10 +2,9 @@ package org.vivecraft.client.api_impl;
 
 import org.jetbrains.annotations.Nullable;
 import org.vivecraft.api.client.Tracker;
-import org.vivecraft.api.client.VRPoseHistory;
+import org.vivecraft.api.client.data.VRPoseHistory;
 import org.vivecraft.api.client.VivecraftClientAPI;
 import org.vivecraft.api.data.VRData;
-import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.api_impl.data.VRPoseHistoryImpl;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
