@@ -2,6 +2,12 @@ package org.vivecraft.api.client;
 
 import net.minecraft.client.player.LocalPlayer;
 
+/**
+ * A tracker is an object that is run for the local player during the game tick or before rendering a frame.
+ * Using trackers are one of the cleanest ways to interact with Vivecraft's data; it's how Vivecraft itself does.
+ * Trackers should generally use {@link VivecraftClientAPI#getPreTickWorldData()}, and are only run for
+ * the local player if they are in VR.
+ */
 public interface Tracker {
 
     /**
@@ -19,8 +25,8 @@ public interface Tracker {
 
     /**
      * The ticking type for this tracker.
-     * If this is PER_FRAME, the tracker is called once with the local player per frame.
-     * If this is PER_TICK, the tracker is called once with the local player per game tick.
+     * If this is PER_FRAME, the tracker is called once with the local player per frame before the frame is rendered.
+     * If this is PER_TICK, the tracker is called once with the local player per game tick during the tick.
      * @return The ticking type this tracker should use.
      */
     TrackerTickType tickType();

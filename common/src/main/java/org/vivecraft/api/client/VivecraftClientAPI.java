@@ -1,8 +1,10 @@
 package org.vivecraft.api.client;
 
-import com.google.common.annotations.Beta;
+import net.minecraft.world.InteractionHand;
 import org.vivecraft.api.data.VRData;
 import org.vivecraft.client.api_impl.ClientAPIImpl;
+
+import javax.annotation.Nullable;
 
 public interface VivecraftClientAPI {
 
@@ -11,8 +13,15 @@ public interface VivecraftClientAPI {
     }
 
     /**
-     * Gets data representing the devices as they exist in the room before the game tick. This is effectively
-     * the latest polling data from the VR devices.
+     * Adds the tracker to the list of all trackers to be run for the local player. See the documentation for
+     * {@link Tracker} for more information on what a tracker is.
+     * @param tracker Tracker to register.
+     */
+    void addTracker(Tracker tracker);
+
+    /**
+     * Gets data representing the devices as they exist in the room before the game tick.
+     * Note that this data is gathered BEFORE mod loaders' pre-tick events.
      * @return Data representing the devices in the room pre-tick.
      * @throws IllegalStateException Thrown when the local player isn't in VR.
      */
@@ -20,6 +29,7 @@ public interface VivecraftClientAPI {
 
     /**
      * Gets data representing the devices as they exist in the room after the game tick.
+     * Note that this data is gathered AFTER mod loaders' post-tick events.
      * @return Data representing the devices in the room post-tick.
      * @throws IllegalStateException Thrown when the local player isn't in VR.
      */
@@ -28,7 +38,9 @@ public interface VivecraftClientAPI {
     /**
      * Gets data representing the devices as they exist in Minecraft coordinates before the game tick.
      * This is the same as {@link #getPreTickRoomData()} with translation to Minecraft's coordinates as of the last
-     * tick.
+     * tick, and is the main data source used by Vivecraft. If you're unsure which {@link VRData} method to use, you
+     * likely want to use this one.
+     * Note that this data is gathered BEFORE mod loaders' pre-tick events.
      * @return Data representing the devices in Minecraft space pre-tick.
      * @throws IllegalStateException Thrown when the local player isn't in VR.
      */
@@ -37,7 +49,7 @@ public interface VivecraftClientAPI {
     /**
      * Gets data representing the devices as they exist in Minecraft coordinates after the game tick.
      * This is the data sent to the server, and also used to calculate the data in {@link #getWorldRenderData()}.
-     * If you're unsure which {@link VRData} method to use, you likely want to use this one.
+     * Note that this data is gathered AFTER mod loaders' post-tick events.
      * @return Data representing the devices in Minecraft space post-tick.
      * @throws IllegalStateException Thrown when the local player isn't in VR.
      */
@@ -111,8 +123,50 @@ public interface VivecraftClientAPI {
     float getWorldScale();
 
     /**
-     * Adds the tracker to the list of all trackers to be run for the local player.
-     * @param tracker Tracker to register.
+     * Returns the history of VR poses for the player for the HMD. Will return null if the player isn't
+     * in VR.
+     * @return The historical VR data for the player's HMD, or null if the player isn't in VR.
      */
-    void addTracker(Tracker tracker);
+    @Nullable
+    VRPoseHistory getHistoricalVRHMDPoses();
+
+    /**
+     * Returns the history of VR poses for the player for a controller. Will return null if the player isn't
+     * in VR.
+     * @param controller The controller number to get, with 0 being the primary controller.
+     * @return The historical VR data for the player's controller, or null if the player isn't in VR.
+     */
+    @Nullable
+    VRPoseHistory getHistoricalVRControllerPoses(int controller);
+
+    /**
+     * Returns the history of VR poses for the player for a controller. Will return null if the player isn't
+     * in VR.
+     * @param hand The hand to get controller history for.
+     * @return The historical VR data for the player's controller, or null if the player isn't in VR.
+     */
+    @Nullable
+    default VRPoseHistory getHistoricalVRControllerData(InteractionHand hand) {
+        return getHistoricalVRControllerPoses(hand.ordinal());
+    }
+
+    /**
+     * Returns the history of VR poses for the player for the primary controller. Will return null if the
+     * player isn't in VR.
+     * @return The historical VR data for the player's primary controller, or null if the player isn't in VR.
+     */
+    @Nullable
+    default VRPoseHistory getHistoricalVRController0Data() {
+        return getHistoricalVRControllerPoses(0);
+    }
+
+    /**
+     * Returns the history of VR poses for the player for the secondary controller. Will return null if the
+     * player isn't in VR.
+     * @return The historical VR data for the player's secondary controller, or null if the player isn't in VR.
+     */
+    @Nullable
+    default VRPoseHistory getHistoricalVRController1Data() {
+        return getHistoricalVRControllerPoses(1);
+    }
 }

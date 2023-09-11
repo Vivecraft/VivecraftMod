@@ -18,6 +18,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.api_impl.ClientAPIImpl;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
@@ -146,6 +147,8 @@ public class VRPlayer {
         if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom()) {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
         }
+
+        ClientAPIImpl.INSTANCE.addPosesToHistory(this.vrdata_world_pre.asVRData());
     }
 
     public void postTick() {

@@ -17,7 +17,7 @@ public interface VRData {
     /**
      * Gets the pose data for a given controller.
      *
-     * @param controller The controller number to get.
+     * @param controller The controller number to get, with 0 being the primary controller.
      * @return The specified controller's pose data.
      */
     VRPose getController(int controller);

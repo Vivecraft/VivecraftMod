@@ -66,7 +66,7 @@ public class CameraTracker implements Tracker {
 
     @Override
     public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
+        return TrackerTickType.PER_FRAME;
     }
 
     public void reset(LocalPlayer player) {
