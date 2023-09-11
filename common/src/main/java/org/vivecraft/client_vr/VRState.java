@@ -5,9 +5,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.client.api_impl.ClientAPIImpl;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
@@ -124,6 +125,7 @@ public class VRState {
             dh.vrSettings.vrEnabled = false;
             dh.vrSettings.saveOptions();
         }
+        ClientAPIImpl.INSTANCE.clearHistories();
     }
 
     public static void pauseVR() {

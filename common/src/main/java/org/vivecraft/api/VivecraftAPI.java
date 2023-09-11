@@ -1,6 +1,5 @@
 package org.vivecraft.api;
 
-import com.google.common.annotations.Beta;
 import net.minecraft.world.entity.player.Player;
 import org.vivecraft.api.data.VRData;
 import org.vivecraft.common.api_impl.APIImpl;

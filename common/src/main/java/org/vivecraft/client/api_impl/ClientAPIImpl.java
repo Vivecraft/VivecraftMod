@@ -1,8 +1,12 @@
 package org.vivecraft.client.api_impl;
 
+import org.jetbrains.annotations.Nullable;
 import org.vivecraft.api.client.Tracker;
+import org.vivecraft.api.client.VRPoseHistory;
 import org.vivecraft.api.client.VivecraftClientAPI;
 import org.vivecraft.api.data.VRData;
+import org.vivecraft.api.data.VRPose;
+import org.vivecraft.client.api_impl.data.VRPoseHistoryImpl;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.ControllerType;
@@ -12,7 +16,23 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
 
     public static final ClientAPIImpl INSTANCE = new ClientAPIImpl();
 
+    private final VRPoseHistoryImpl hmdHistory = new VRPoseHistoryImpl();
+    private VRPoseHistoryImpl c0History = new VRPoseHistoryImpl();
+    private VRPoseHistoryImpl c1History = new VRPoseHistoryImpl();
+
     private ClientAPIImpl() {
+    }
+
+    public void clearHistories() {
+        this.hmdHistory.clear();
+        this.c0History.clear();
+        this.c1History.clear();
+    }
+
+    public void addPosesToHistory(VRData data) {
+        this.hmdHistory.addPose(data.getHMD());
+        this.c0History.addPose(data.getController0());
+        this.c1History.addPose(data.getController1());
     }
 
     @Override
@@ -107,5 +127,25 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
     @Override
     public void addTracker(Tracker tracker) {
         ClientDataHolderVR.getInstance().addTracker(tracker);
+    }
+
+    @Nullable
+    @Override
+    public VRPoseHistory getHistoricalVRHMDPoses() {
+        if (!isVrActive()) {
+            return null;
+        }
+        return this.hmdHistory;
+    }
+
+    @Nullable
+    @Override
+    public VRPoseHistory getHistoricalVRControllerPoses(int controller) {
+        if (controller != 0 && controller != 1) {
+            throw new IllegalArgumentException("Historical VR controller data only available for controllers 0 and 1.");
+        } else if (!isVrActive()) {
+            return null;
+        }
+        return controller == 0 ? this.c0History : this.c1History;
     }
 }
