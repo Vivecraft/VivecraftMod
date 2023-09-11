@@ -58,7 +58,7 @@ public class ClientConfig {
     public static ConfigBuilder.BooleanValue vrTouchHotbar;
     public static ConfigBuilder.BooleanValue guiAppearOverBlock;
     public static ConfigBuilder.BooleanValue physicalGuiEnabled;
-    public static ConfigBuilder.EnumValue<VRSettings.InertiaFactor> inertiaFactor;
+    public static ConfigBuilder.EnumValue<VRSettings.InertiaFactor> inertiaFactor; //TODO just use a number?
     public static ConfigBuilder.BooleanValue vehicleRotation;
 
     //Display
@@ -72,6 +72,7 @@ public class ClientConfig {
     public static ConfigBuilder.EnumValue<VRSettings.ShaderGUIRender> shaderGUIRender;
     public static ConfigBuilder.BooleanValue hideGUI;
     public static ConfigBuilder.DoubleValue crosshairScale;
+    public static ConfigBuilder.DoubleValue renderScaleFactor;
 
 
     //HUD
@@ -138,10 +139,8 @@ public class ClientConfig {
     public static ConfigBuilder.BooleanValue displayMirrorLeftEye;
     public static ConfigBuilder.BooleanValue disableFun;
     public static ConfigBuilder.EnumValue<VRSettings.MenuWorld> menuWorldSelection;
-    public static ConfigBuilder.DoubleValue renderScaleFactor;
     public static ConfigBuilder.BooleanValue insideBlockSolidColor;
     public static ConfigBuilder.EnumValue<VRSettings.RenderPointerElement> renderBlockOutlineMode;
-
 
 
     //Radial
@@ -223,25 +222,25 @@ public class ClientConfig {
         builder = new ConfigBuilder(config, new ConfigSpec());
 
         builder
-                .push("Keyboard");
+                .push("keyboard");
         physicalKeyboard = builder
-                .push("Physical")
+                .push("physical")
                 .comment("Enables the Physical Keyboard")
                 .define(true);
         autoOpenKeyboard = builder
-                .push("Open")
+                .push("open")
                 .comment("Automatically open the keyboard")
                 .define(false);
         alwaysSimulateKeyboard = builder
-                .push("Simulate")
+                .push("simulate")
                 .comment("Always simulate the Keyboard")
                 .define(false);
         keyboardKeys = builder
-                .push("Keys")
+                .push("keys")
                 .comment("Keyboard key Layout")
                 .define("`1234567890-=qwertyuiop[]\\asdfghjkl;':\"zxcvbnm,./?<>");
         keyboardKeysShift = builder
-                .push("ShiftKeys")
+                .push("shiftkeys")
                 .comment("Keyboard key Layout for shift")
                 .define("~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;':\\\"ZXCVBNM,./?<>");
         physicalKeyboardScale = builder
@@ -249,7 +248,7 @@ public class ClientConfig {
                 .comment("The scale for the Physical Keyboard")
                 .defineInRange(1.0d, 0.75d, 1.5d);
         physicalKeyboardTheme = builder
-                .push("Theme")
+                .push("theme")
                 .comment("Keyboard theme used for the Physical Keyboard")
                 .define(PhysicalKeyboard.KeyboardTheme.DEFAULT);
         builder.pop();
@@ -264,6 +263,22 @@ public class ClientConfig {
                 .push("sneakthreshold")
                 .comment("Threshold for when the player starts sneaking")
                 .defineInRange(0.4, 0, 2); //2 should be enough range
+        realisticJumpEnabled = builder
+                .push("jump")
+                .comment("Enable room scale jumping")
+                .define(true);
+        jumpThreshold = builder
+                .push("jumpthreshhold")
+                .comment("Threshhold for automatically jumping")
+                .defineInRange(0.05d, 0d, 2d); //2 should be enough
+        autoSprint = builder
+                .push("sprint")
+                .comment("Automatically sprint")
+                .define(true);
+        autoSprintThreshold = builder
+                .push("sprintthreshhold")
+                .comment("Threshhold for automatically sprinting")
+                .defineInRange(0.9d, 0.5d, 1d);
         allowCrawling = builder
                 .push("crawl")
                 .comment("Enable room scale crawling")
@@ -288,14 +303,6 @@ public class ClientConfig {
                 .push("gui")
                 .comment("Allow interactions by touching the gui")
                 .define(true);
-        realisticJumpEnabled = builder
-                .push("jump")
-                .comment("Enable room scale jumping")
-                .define(true);
-        jumpThreshold = builder
-                .push("jumpthreshhold")
-                .comment("Threshhold for automatically jumping")
-                .defineInRange(0.05d, 0d, 2d); //2 should be enough
         realisticRowEnabled = builder
                 .push("row")
                 .comment("Enable room scale rowing")
@@ -308,18 +315,6 @@ public class ClientConfig {
                 .push("swimming")
                 .comment("Enable room scale swimming")
                 .define(true);
-        autoSprint = builder
-                .push("sprint")
-                .comment("Automatically sprint")
-                .define(true);
-        autoSprintThreshold = builder
-                .push("sprintthreshhold")
-                .comment("Threshhold for automatically sprinting")
-                .defineInRange(0.9d, 0.5d, 1d);
-        insideBlockSolidColor = builder
-                .push("insideblock")
-                .comment("If the the inside of a block should be solid black")
-                .define(false);
         guiAppearOverBlock = builder
                 .push("guiblock")
                 .comment("Places the gui over the accessed block")
@@ -332,14 +327,6 @@ public class ClientConfig {
                 .push("walkspeed")
                 .comment("Walk Speed modifier")
                 .defineInRange(1.0d, 1d, 10d);
-        menuAlwaysFollowFace = builder
-                .push("followface")
-                .comment("Makes the menu follow the players head")
-                .define(false);
-        vrHudLockMode = builder
-                .push("hudlock")
-                .comment("Determines where the hotbar is locked")
-                .define(VRSettings.HUDLock.HEAD);
         backpackSwitching = builder
                 .push("backpack")
                 .comment("Enables backpack switching")
@@ -347,6 +334,14 @@ public class ClientConfig {
         walkUpBlocks = builder
                 .push("walkup")
                 .comment("Enable auto step up")
+                .define(true);
+        inertiaFactor = builder
+                .push("inertia")
+                .comment("The inertia")
+                .define(VRSettings.InertiaFactor.NORMAL);
+        vehicleRotation = builder
+                .push("vehicleRotation")
+                .comment("Rotate vehicles")
                 .define(true);
         builder.pop();
 
@@ -360,26 +355,30 @@ public class ClientConfig {
                 .push("hmd")
                 .comment("")
                 .define(false);
-        seatedFreeMove = builder
-                .push("freemove")
-                .comment("Allow free move while playing as seated")
-                .define(true);
         seatedHudAltMode = builder
                 .push("altmode")
                 .comment("Enables the alternative HUD position when playing as seated")
                 .define(false);
+        seatedFreeMove = builder
+                .push("freemove")
+                .comment("Allow free move while playing as seated")
+                .define(true);
+        vrFreeMoveMode = builder
+                .push("vrFreeMoveMode")
+                .comment("Movement mode when using free move")
+                .define(VRSettings.FreeMove.CONTROLLER);
+        vrFreeMoveFlyMode = builder
+                .push("vrFreeMoveFlyMode")
+                .comment("Movement mode when flying in free move")
+                .define(VRSettings.FreeMove.AUTO);
         builder.pop();
 
         builder
-                .push("display");
-        useCrosshairOcclusion = builder
-                .push("crosshairocclusion")
-                .comment("Occludes the crosshair")
-                .define(true);
-        displayMirrorMode = builder
-                .push("mirror")
-                .comment("Mirror mode")
-                .define(VRSettings.MirrorMode.SINGLE);
+                .push("hud");
+        vrHudLockMode = builder
+                .push("hudlock")
+                .comment("Determines where the hotbar is locked")
+                .define(VRSettings.HUDLock.HEAD);
         lowHealthIndicator = builder
                 .push("health")
                 .comment("Enables the flashing of red on screen when on low health")
@@ -404,6 +403,10 @@ public class ClientConfig {
                 .push("hudopacity")
                 .comment("The opacity of the hud")
                 .defineInRange(1.0d, 0.15d, 1.0d);
+        hudOcclusion = builder
+                .push("hudOcclusion")
+                .comment("Should the hud use occlusion")
+                .define(true);
         stencilOn = builder
                 .push("stencil")
                 .comment("Enables the eye stencil")
@@ -412,10 +415,18 @@ public class ClientConfig {
                 .push("hmdhead")
                 .comment("The distance between the head and the hmd")
                 .defineInRange(0.10d, 0d, 1.0d);
-        useFsaa = builder
-                .push("fsaa")
-                .comment("Enable FSAA")
-                .define(false);
+        builder.pop();
+
+        builder
+                .push("display");
+        useCrosshairOcclusion = builder
+                .push("crosshairocclusion")
+                .comment("Occludes the crosshair")
+                .define(true);
+        displayMirrorMode = builder
+                .push("mirror")
+                .comment("Mirror mode")
+                .define(VRSettings.MirrorMode.SINGLE);
         renderScaleFactor = builder
                 .push("scale")
                 .comment("The scale used to render")
@@ -424,42 +435,70 @@ public class ClientConfig {
                 .push("shaders")
                 .comment("Changes how shaders are applied on GUI's")
                 .define(VRSettings.ShaderGUIRender.AFTER_SHADER);
-        displayMirrorLeftEye = builder
-                .push("lefteye")
-                .comment("Use the left eye instead of the right eye for the mirror")
-                .define(false);
         hideGUI = builder //TODO remove as it is a dummy storage field
                 .push("hide")
                 .comment("Hides the gui")
                 .define(false);
+        menuAlwaysFollowFace = builder
+                .push("followface")
+                .comment("Makes the menu follow the players head")
+                .define(false);
+        menuCrosshairScale = builder
+                .push("menuCrosshairScale")
+                .comment("The scale for the crosshair in the menus")
+                .defineInRange(1.0d, 0.25d, 2.5d);
+        crosshairScalesWithDistance = builder
+                .push("crosshairScalesWithDistance")
+                .comment("Scale for the crosshair with distance")
+                .define(false);
+        menuBackground = builder
+                .push("menuBackground")
+                .comment("Use a background in menus")
+                .define(false);
+        renderInGameCrosshairMode = builder
+                .push("renderInGameCrosshairMode")
+                .comment("The style of the crosshair")
+                .define(VRSettings.RenderPointerElement.ALWAYS);
+        crosshairScale = builder
+                .push("crosshairScale")
+                .comment("The scale of the crosshair")
+                .defineInRange(1.0d, 0.25d, 1.0d);
         builder.pop();
 
         builder
-                .push("test");
+                .push("general");
         vrHotswitchingEnabled = builder
                 .push("hotswitch")
                 .comment("")
                 .define(true);
-
         worldScale = builder
                 .push("worldscale")
                 .comment("")
                 .defineInRange(1,0, 29);
-
         worldRotation = builder
                 .push("worldrotation")
                 .comment("")
                 .defineInRange(0,0, 360);
+        useFsaa = builder
+                .push("fsaa")
+                .comment("Enable FSAA")
+                .define(false);
+        insideBlockSolidColor = builder
+                .push("insideblock")
+                .comment("If the the inside of a block should be solid black")
+                .define(false);
+        displayMirrorLeftEye = builder
+                .push("lefteye")
+                .comment("Use the left eye instead of the right eye for the mirror")
+                .define(false);
         builder.pop();
 
         builder
                 .push("camera");
-
         handCameraResScale = builder
                 .push("resolution")
                 .comment("")
                 .defineInRange(1.0d, 0.5d, 3.0d);
-
         handCameraFov = builder
                 .push("fov")
                 .comment("")
