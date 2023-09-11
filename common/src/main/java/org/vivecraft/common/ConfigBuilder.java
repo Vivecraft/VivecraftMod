@@ -1,7 +1,8 @@
-package org.vivecraft.server.config;
+package org.vivecraft.common;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import com.electronwill.nightconfig.core.EnumGetMethod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
@@ -64,6 +65,13 @@ public class ConfigBuilder {
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
             + new Formatter(Locale.US).format("default: %.2f, min: %.2f, max: %.2f", defaultValue, min, max));
     }
+
+    private <T extends Enum<T>> void addDefaultValueComment(List<String> path, T defaultValue) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+                + new Formatter(Locale.US).format("default: %.2s", defaultValue.name()));
+    }
+
 
     /**
      * corrects the attached config, with the built spec
@@ -168,6 +176,17 @@ public class ConfigBuilder {
         return value;
     }
 
+    public <T extends Enum<T>> EnumValue<T> define(T defaultValue) {
+        List<String> path = stack.stream().toList();
+        spec.defineEnum(path, defaultValue, EnumGetMethod.NAME);
+        stack.removeLast();
+        addDefaultValueComment(path, defaultValue);
+
+        EnumValue<T> value = new EnumValue<>(config, path, defaultValue);
+        configValues.add(value);
+        return value;
+    }
+
     /**
      *  same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
      */
@@ -202,7 +221,7 @@ public class ConfigBuilder {
         // the config, this setting is part of
         private final CommentedConfig config;
         private final List<String> path;
-        private final T defaultValue;
+        protected final T defaultValue;
         // cache te value to minimize config lookups
         private T cachedValue = null;
 
@@ -401,6 +420,34 @@ public class ConfigBuilder {
         public void fromNormalized(double value) {
             double newValue = this.getMin() + (this.getMax() - this.getMin()) * value;
             this.set(Math.round(newValue * 100.0) / 100.0);
+        }
+    }
+
+    public static class EnumValue<T extends Enum<T>> extends ConfigValue<T> {
+
+        public EnumValue(CommentedConfig config, List<String> path, T defaultValue) {
+            super(config, path, defaultValue);
+        }
+
+        public void cycle() {
+            T[] enumConstants = defaultValue.getDeclaringClass().getEnumConstants();
+            int newIndex = this.get().ordinal() + 1;
+            if (enumConstants.length == newIndex) {
+                newIndex = 0;
+            }
+            this.set(enumConstants[newIndex]);
+        }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            return CycleButton
+                    .builder((newValue) -> Component.literal("" + newValue))
+                    .withInitialValue(get())
+                    // toArray is needed here, because the button uses Objects, and the collection is of other types
+                    .withValues(defaultValue.getDeclaringClass().getEnumConstants())
+                    .displayOnlyValue()
+                    .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
+                    .create(0, 0, width, height, Component.empty(), (button, newValue) -> set((T) newValue));
         }
     }
 }

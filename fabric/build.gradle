@@ -48,8 +48,8 @@ dependencies {
     modCompileOnly "maven.modrinth:indium:1.0.21+mc1.20.1"
 
     //mod menu
-    modApi("com.terraformersmc:modmenu:6.3.1")
-    modRuntimeOnly("com.terraformersmc:modmenu:6.3.1")
+    modApi("com.terraformersmc:modmenu:7.2.2")
+    modRuntimeOnly("com.terraformersmc:modmenu:7.2.2")
 
     /*
     // for immersive portals compat

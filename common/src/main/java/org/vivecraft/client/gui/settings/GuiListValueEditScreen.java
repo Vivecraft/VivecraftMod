@@ -12,7 +12,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.widgets.SettingsList;
-import org.vivecraft.server.config.ConfigBuilder;
+import org.vivecraft.common.ConfigBuilder;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
