@@ -425,6 +425,7 @@
     "vivecraft.messages.incompatiblesettings": "Inkompatible Einstellungen",
     "vivecraft.messages.optifineaa": "Optifines Antialiasing ist nicht compatible mit VR. Um VR zu nutzen, deaktiviere Antialiasing und starte das Spiel neu.",
     "vivecraft.messages.menuworldexporterror": "Weltexport fehlgeschlagen mit folgendem Fehler: %s",
+    "vivecraft.message.kofi": "Unterstütze uns auf Ko-Fi",
 
     "vivecraft.gui.update": "§aⓘ§r Update",
     "vivecraft.gui.vr": "%s VR: %s",

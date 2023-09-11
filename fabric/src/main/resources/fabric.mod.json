@@ -46,10 +46,16 @@
   "suggests": {
     "another-mod": "*"
   },
+  "contact": {
+    "homepage": "https://modrinth.com/mod/vivecraft",
+    "issues": "https://github.com/Vivecraft/VivecraftMod/issues",
+    "sources": "https://github.com/Vivecraft/VivecraftMod"
+  },
   "custom": {
     "modmenu": {
       "links": {
-        "modmenu.discord": "https://discord.gg/jYyyv7zhSW"
+        "modmenu.discord": "https://discord.gg/jYyyv7zhSW",
+        "vivecraft.message.kofi": "https://ko-fi.com/vivecraft"
       },
       "update_checker": true
     }
