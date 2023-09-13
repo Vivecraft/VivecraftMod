@@ -65,7 +65,7 @@ public class GuiArrayValueEditScreen<T> extends GuiListScreen{
             box.setMaxLength(1000);
             box.setValue(item + "");
             int index = i++;
-            entries.add(new ArrayResetEntry(Component.empty(), box, () -> !fromString.apply(box.getValue()).equals(arrayValue.getDefault()[index]), button -> {elements[index] = arrayValue.get()[index];reinit = true;}));
+            entries.add(new ArrayResetEntry(Component.empty(), box, () -> !fromString.apply(box.getValue()).equals(arrayValue.getDefault()[index]), button -> {elements[index] = arrayValue.getDefault()[index];reinit = true;}));
         }
         return entries;
     }

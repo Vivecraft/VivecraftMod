@@ -250,9 +250,6 @@ public class ConfigBuilder {
 
     public <T> ArrayValue<T> define(T[] defaultValue, Class<T> clazz, Function<String, T> fromString) {
         List<String> path = stack.stream().toList();
-        stack.add("size");
-        spec.define(stack.stream().toList(), defaultValue.length);
-        stack.removeLast();
         for (int i = 0; i< defaultValue.length; i++) {
             stack.add(i + "");
             spec.define(stack.stream().toList(), defaultValue[i]);
@@ -655,10 +652,9 @@ public class ConfigBuilder {
         public T[] get() {
             if (cachedValue == null) {
                 List<String> path2 = new ArrayList<>(path);
-                path2.add("size");
-                int size = config.get(path2);
-                T[] array = (T[]) Array.newInstance(clazz, size);
-                for (int i = 0; i < size; i++) {
+                path2.add("0");
+                T[] array = (T[]) Array.newInstance(clazz, defaultValue.length);
+                for (int i = 0; i < defaultValue.length; i++) {
                     path2.set(path.size(), i + "");
                     T value = config.get(path2);
                     array[i] = value;
@@ -672,8 +668,7 @@ public class ConfigBuilder {
         public void set(T[] newValue) {
             cachedValue = newValue;
             List<String> path2 = new ArrayList<>(path);
-            path2.add("size");
-            config.set(path2, newValue.length);
+            path2.add("0");
             for (int i = 0; i< newValue.length; i++) {
                 path2.set(path.size(), i + "");
                 config.set(path2, newValue[i]);
@@ -683,7 +678,7 @@ public class ConfigBuilder {
         @Override
         public T[] reset() {
             List<String> path2 = new ArrayList<>(path);
-            path2.add("size");
+            path2.add("0");
             config.set(path2, defaultValue.length);
             for (int i = 0; i< defaultValue.length; i++) {
                 path2.set(path.size(), i + "");
