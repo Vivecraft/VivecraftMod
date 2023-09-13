@@ -5,10 +5,12 @@ import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import org.joml.Quaterniond;
+import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.ConfigBuilder;
+import org.vivecraft.common.utils.math.Angle;
 import org.vivecraft.common.utils.math.Quaternion;
 
 import java.util.List;
@@ -95,6 +97,7 @@ public class ClientConfig {
     public static ConfigBuilder.IntValue handCameraFov;
     public static ConfigBuilder.VectorValue vrFixedCampos;
     public static ConfigBuilder.QuatValue vrFixedCamrot;
+    public static ConfigBuilder.EnumValue<Angle.Order> externalCameraAngleOrder;
 
     //Update
     public static ConfigBuilder.BooleanValue firstRun;
@@ -136,9 +139,11 @@ public class ClientConfig {
     public static ConfigBuilder.DoubleValue manualCalibration;
     public static ConfigBuilder.EnumValue<VRSettings.RightClickDelay> rightclickDelay;
     public static ConfigBuilder.BooleanValue thirdPersonItems;
+    public static ConfigBuilder.BooleanValue bcbOn; //TODO rename shadow
     public static ConfigBuilder.BooleanValue allowAdvancedBindings;
     public static ConfigBuilder.DoubleValue xSensitivity;
     public static ConfigBuilder.DoubleValue ySensitivity;
+    public static ConfigBuilder.DoubleValue keyholeX;
     public static ConfigBuilder.BooleanValue useFsaa;
     public static ConfigBuilder.BooleanValue displayMirrorLeftEye;
     public static ConfigBuilder.BooleanValue disableFun;
@@ -172,13 +177,10 @@ public class ClientConfig {
     public static ConfigBuilder.StringValue QUICKCOMMAND_8;
     public static ConfigBuilder.StringValue QUICKCOMMAND_9;
 
-    //Misc
-    public static ConfigBuilder.DoubleValue monoFOV;
-    public static ConfigBuilder.BooleanValue bcbOn;
+    //FOV
+    public static ConfigBuilder.DoubleValue monoFOV; //TODO Dummy
     public static ConfigBuilder.DoubleValue fovReductionMin;
-    public static ConfigBuilder.StringValue externalCameraAngleOrder;
-    public static ConfigBuilder.DoubleValue keyholeX;
-    public static ConfigBuilder.DoubleValue fovRedutioncOffset;
+    public static ConfigBuilder.DoubleValue fovRedutioncOffset; //TODO typo
     public static ConfigBuilder.BooleanValue fovReduction;
 
     private static CommentedFileConfig config;
@@ -268,6 +270,10 @@ public class ClientConfig {
                 .push("thirdPersonItems")
                 .comment("")
                 .define(false);
+        bcbOn = builder
+                .push("bcbOn")
+                .comment("")
+                .define(true);
         allowAdvancedBindings = builder
                 .push("allowAdvancedBindings")
                 .comment("")
@@ -280,6 +286,10 @@ public class ClientConfig {
                 .push("ySensitivity")
                 .comment("")
                 .defineInRange(1d, 0.1d, 5d);
+        keyholeX = builder
+                .push("keyholeX")
+                .comment("")
+                .defineInRange(15d, 0d, 40d);
         useFsaa = builder
                 .push("fsaa")
                 .comment("Enable FSAA")
@@ -550,6 +560,25 @@ public class ClientConfig {
                 .defineInRange(0.10d, 0d, 1.0d);
         builder.pop();
 
+        builder.push("fov");
+        monoFOV = builder
+                .push("monoFOV")
+                .comment("")
+                .defineInRange(0.0d, 0d, 1.0d);
+        fovReduction = builder
+                .push("fovReduction")
+                .comment("")
+                .define(false);
+        fovReductionMin = builder
+                .push("fovReductionMin")
+                .comment("")
+                .defineInRange(0.25d, 0.1d, 0.7d);
+        fovRedutioncOffset = builder
+                .push("fovReductionOffset")
+                .comment("")
+                .defineInRange(0.1f,0d, 0.3d);
+        builder.pop();
+
         builder.push("camera");
         handCameraResScale = builder
                 .push("resolution")
@@ -566,7 +595,11 @@ public class ClientConfig {
         vrFixedCamrot = builder
                 .push("vrFixedCamrot")
                 .comment("")
-                .define(new Quaterniond(.962d, .125d, .239d, .041d));
+                .define(new Quaternionf(.962d, .125d, .239d, .041d));
+        externalCameraAngleOrder = builder
+                .push("externalCameraAngleOrder")
+                .comment("")
+                .define(Angle.Order.XYZ);
         builder.pop();
 
         builder.push("update");

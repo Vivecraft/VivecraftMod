@@ -9,6 +9,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Quaterniond;
+import org.joml.Quaternionf;
 import org.vivecraft.common.ConfigBuilder;
 
 import java.util.function.Consumer;
@@ -22,11 +23,11 @@ public class QuadWidget extends AbstractWidget {
 
     public QuadWidget(int i, int j, int k, int l, Component component, ConfigBuilder.QuatValue value) {
         super(i, j, k, l, component);
-        Quaterniond quaterniond = value.get();
-        this.xBox = new NumberEditBox(Minecraft.getInstance().font, i , j, (k-4) / 4, l , Component.literal(quaterniond.x +""), quaterniond.x, d -> value.set(new Quaterniond(d, quaterniond.y, quaterniond.z, quaterniond.w)));
-        this.yBox = new NumberEditBox(Minecraft.getInstance().font, i + ((k - 4) / 4) + 1, j, (k-4) / 4, l , Component.literal(quaterniond.y +""), quaterniond.y, d -> value.set(new Quaterniond(quaterniond.x, d, quaterniond.z, quaterniond.w)));
-        this.zBox = new NumberEditBox(Minecraft.getInstance().font, i + ((k-4) / 4)*2 + 2, j, (k-4) / 4, l , Component.literal(quaterniond.z +""), quaterniond.z, d -> value.set(new Quaterniond(quaterniond.x, quaterniond.y, d, quaterniond.w)));
-        this.wBox = new NumberEditBox(Minecraft.getInstance().font, i + ((k-4) / 4)*3 + 3, j, (k-4) / 4, l , Component.literal(quaterniond.w +""), quaterniond.w, d -> value.set(new Quaterniond(quaterniond.x, quaterniond.y, quaterniond.z, d)));
+        Quaternionf quaternionf = value.get();
+        this.xBox = new NumberEditBox(Minecraft.getInstance().font, i , j, (k-4) / 4, l , Component.literal(quaternionf.x +""), quaternionf.x, d -> value.set(new Quaternionf(d, quaternionf.y, quaternionf.z, quaternionf.w)));
+        this.yBox = new NumberEditBox(Minecraft.getInstance().font, i + ((k - 4) / 4) + 1, j, (k-4) / 4, l , Component.literal(quaternionf.y +""), quaternionf.y, d -> value.set(new Quaternionf(quaternionf.x, d, quaternionf.z, quaternionf.w)));
+        this.zBox = new NumberEditBox(Minecraft.getInstance().font, i + ((k-4) / 4)*2 + 2, j, (k-4) / 4, l , Component.literal(quaternionf.z +""), quaternionf.z, d -> value.set(new Quaternionf(quaternionf.x, quaternionf.y, d, quaternionf.w)));
+        this.wBox = new NumberEditBox(Minecraft.getInstance().font, i + ((k-4) / 4)*3 + 3, j, (k-4) / 4, l , Component.literal(quaternionf.w +""), quaternionf.w, d -> value.set(new Quaternionf(quaternionf.x, quaternionf.y, quaternionf.z, d)));
 
     }
 
@@ -146,12 +147,12 @@ public class QuadWidget extends AbstractWidget {
 
     public static class NumberEditBox extends EditBox {
 
-        private final Consumer<Double> doubleConsumer;
+        private final Consumer<Float> floatConsumer;
 
-        public NumberEditBox(Font font, int i, int j, int k, int l, Component component, double doubleValue, Consumer<Double> doubleConsumer) {
+        public NumberEditBox(Font font, int i, int j, int k, int l, Component component, float floatValue, Consumer<Float> floatConsumer) {
             super(font, i, j, k, l, component);
-            this.doubleConsumer = doubleConsumer;
-            this.setValue(doubleValue + "");
+            this.floatConsumer = floatConsumer;
+            this.setValue(floatValue + "");
         }
 
         @Override
@@ -160,14 +161,14 @@ public class QuadWidget extends AbstractWidget {
                 return false;
             }
             boolean ret = super.charTyped(c, i);
-            doubleConsumer.accept(Double.valueOf(this.getValue()));
+            floatConsumer.accept(Float.valueOf(this.getValue()));
             return ret;
         }
 
         @Override
         public boolean keyPressed(int i, int j, int k) {
             boolean ret = super.keyPressed(i, j, k);
-            doubleConsumer.accept(Double.valueOf(this.getValue()));
+            floatConsumer.accept(Float.valueOf(this.getValue()));
             return ret;
         }
     }

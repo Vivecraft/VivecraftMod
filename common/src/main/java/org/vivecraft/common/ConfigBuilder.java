@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.joml.Quaterniond;
+import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
 import org.vivecraft.client.gui.widgets.QuadWidget;
@@ -76,7 +77,7 @@ public class ConfigBuilder {
                 + new Formatter(Locale.US).format("default: %s", defaultValue.name()));
     }
 
-    private void addDefaultValueComment(List<String> path, Quaterniond defaultValue) {
+    private void addDefaultValueComment(List<String> path, Quaternionf defaultValue) {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
                 +"x: %.2f, y %.2f, z: %.2f, w: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z, defaultValue.w));
@@ -202,7 +203,7 @@ public class ConfigBuilder {
         return value;
     }
 
-    public QuatValue define(Quaterniond defaultValue) {
+    public QuatValue define(Quaternionf defaultValue) {
         List<String> path = stack.stream().toList();
         stack.add("x");
         spec.define(stack.stream().toList(), defaultValue.x);
@@ -507,14 +508,14 @@ public class ConfigBuilder {
         }
     }
 
-    public static class QuatValue extends ConfigValue<Quaterniond> {
+    public static class QuatValue extends ConfigValue<Quaternionf> {
 
-        public QuatValue(CommentedConfig config, List<String> path, Quaterniond defaultValue) {
+        public QuatValue(CommentedConfig config, List<String> path, Quaternionf defaultValue) {
             super(config, path, defaultValue);
         }
 
         @Override
-        public Quaterniond get() {
+        public Quaternionf get() {
             if (cachedValue == null) {
                 List<String> path2 = new ArrayList<>(path);
                 path2.add("x");
@@ -525,13 +526,13 @@ public class ConfigBuilder {
                 double z = config.get(path2);
                 path2.set(path.size(), "w");
                 double w = config.get(path2);
-                cachedValue = new Quaterniond(x, y, z, w);
+                cachedValue = new Quaternionf(x, y, z, w);
             }
-            return new Quaterniond(cachedValue);
+            return new Quaternionf(cachedValue);
         }
 
         @Override
-        public void set(Quaterniond newValue) {
+        public void set(Quaternionf newValue) {
             cachedValue = newValue;
             List<String> path2 = new ArrayList<>(path);
             path2.add("x");
@@ -545,7 +546,7 @@ public class ConfigBuilder {
         }
 
         @Override
-        public Quaterniond reset() {
+        public Quaternionf reset() {
             List<String> path2 = new ArrayList<>(path);
             path2.add("x");
             config.set(path2, defaultValue.x);
