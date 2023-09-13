@@ -11,12 +11,15 @@ import org.joml.Quaterniond;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.vivecraft.client.gui.settings.GuiArrayValueEditScreen;
 import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
 import org.vivecraft.client.gui.widgets.QuadWidget;
 import org.vivecraft.client.gui.widgets.SettingsList;
 import org.vivecraft.client.gui.widgets.VectorWidget;
 
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ConfigBuilder {
@@ -243,6 +246,24 @@ public class ConfigBuilder {
         VectorValue value = new VectorValue(config, path, defaultValue);
         configValues.add(value);
         return value;
+    }
+
+    public <T> ArrayValue<T> define(T[] defaultValue, Class<T> clazz, Function<String, T> fromString) {
+        List<String> path = stack.stream().toList();
+        stack.add("size");
+        spec.define(stack.stream().toList(), defaultValue.length);
+        stack.removeLast();
+        for (int i = 0; i< defaultValue.length; i++) {
+            stack.add(i + "");
+            spec.define(stack.stream().toList(), defaultValue[i]);
+            stack.removeLast();
+        }
+        stack.removeLast();
+
+        ArrayValue value = new ArrayValue<>(config, path, defaultValue, clazz, fromString);
+        configValues.add(value);
+        return value;
+
     }
 
     /**
@@ -616,6 +637,78 @@ public class ConfigBuilder {
         @Override
         public AbstractWidget getWidget(int width, int height) {
             return new VectorWidget(0,0, width, height, Component.literal(get().toString()), this);
+        }
+    }
+
+    public static class ArrayValue<T> extends ConfigValue<T[]> {
+
+        private final Class<T> clazz;
+        private final Function<String, T> fromString;
+
+        public ArrayValue(CommentedConfig config, List<String> path, T[] defaultValue, Class<T> clazz, Function<String, T> fromString) {
+            super(config, path, defaultValue);
+            this.clazz = clazz;
+            this.fromString = fromString;
+        }
+
+        @Override
+        public T[] get() {
+            if (cachedValue == null) {
+                List<String> path2 = new ArrayList<>(path);
+                path2.add("size");
+                int size = config.get(path2);
+                T[] array = (T[]) Array.newInstance(clazz, size);
+                for (int i = 0; i < size; i++) {
+                    path2.set(path.size(), i + "");
+                    T value = config.get(path2);
+                    array[i] = value;
+                }
+                cachedValue = array;
+            }
+            return cachedValue;
+        }
+
+        @Override
+        public void set(T[] newValue) {
+            cachedValue = newValue;
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("size");
+            config.set(path2, newValue.length);
+            for (int i = 0; i< newValue.length; i++) {
+                path2.set(path.size(), i + "");
+                config.set(path2, newValue[i]);
+            }
+        }
+
+        @Override
+        public T[] reset() {
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("size");
+            config.set(path2, defaultValue.length);
+            for (int i = 0; i< defaultValue.length; i++) {
+                path2.set(path.size(), i + "");
+                config.set(path2, defaultValue[i]);
+            }
+            cachedValue = defaultValue;
+            return defaultValue;
+        }
+
+        public T[] getDefault() {
+            return defaultValue;
+        }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            return Button
+                    .builder(
+                            Component.translatable("vivecraft.options.editarray"),
+                            button -> Minecraft.getInstance()
+                                    .setScreen(
+                                            new GuiArrayValueEditScreen<>(Component.literal(getPath().substring(getPath().lastIndexOf("."))), Minecraft.getInstance().screen, this, fromString)
+                                    ))
+                    .size(width, height)
+                    .tooltip(Tooltip.create(Component.literal(getComment())))
+                    .build();
         }
     }
 }

@@ -4,15 +4,12 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import org.joml.Quaterniond;
 import org.joml.Quaternionf;
-import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.ConfigBuilder;
 import org.vivecraft.common.utils.math.Angle;
-import org.vivecraft.common.utils.math.Quaternion;
 
 import java.util.List;
 
@@ -156,36 +153,11 @@ public class ClientConfig {
 
     //Radial
     public static ConfigBuilder.BooleanValue radialModeHold;
-    public static ConfigBuilder.StringValue RADIAL_1;
-    public static ConfigBuilder.StringValue RADIAL_2;
-    public static ConfigBuilder.StringValue RADIAL_3;
-    public static ConfigBuilder.StringValue RADIAL_4;
-    public static ConfigBuilder.StringValue RADIAL_5;
-    public static ConfigBuilder.StringValue RADIAL_6;
-    public static ConfigBuilder.StringValue RADIAL_7;
-    public static ConfigBuilder.StringValue RADIAL_8;
-    public static ConfigBuilder.StringValue RADIAL_ALT_1;
-    public static ConfigBuilder.StringValue RADIAL_ALT_2;
-    public static ConfigBuilder.StringValue RADIAL_ALT_3;
-    public static ConfigBuilder.StringValue RADIAL_ALT_4;
-    public static ConfigBuilder.StringValue RADIAL_ALT_5;
-    public static ConfigBuilder.StringValue RADIAL_ALT_6;
-    public static ConfigBuilder.StringValue RADIAL_ALT_7;
-    public static ConfigBuilder.StringValue RADIAL_ALT_8;
+    public static ConfigBuilder.ArrayValue<String> main;
+    public static ConfigBuilder.ArrayValue<String> alt;
 
     //QuickCommand
-    public static ConfigBuilder.StringValue QUICKCOMMAND_0;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_1;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_2;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_3;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_4;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_5;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_6;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_7;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_8;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_9;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_10;
-    public static ConfigBuilder.StringValue QUICKCOMMAND_11;
+    public static ConfigBuilder.ArrayValue<String> commands;
 
     //FOV
     public static ConfigBuilder.DoubleValue monoFOV; //TODO Dummy
@@ -663,96 +635,69 @@ public class ClientConfig {
                 .push("radialModeHold")
                 .comment("")
                 .define(false);
-        RADIAL_1 = builder
-                .push("radial1")
-                .define("key.drop");
-        RADIAL_2 = builder
-                .push("radial2")
-                .define("key.chat");
-        RADIAL_3 = builder
-                .push("radial3")
-                .define("vivecraft.key.rotateRight");
-        RADIAL_4 = builder
-                .push("radial4")
-                .define("key.pickItem");
-        RADIAL_5 = builder
-                .push("radial5")
-                .define("vivecraft.key.toggleHandheldCam");
-        RADIAL_6 = builder
-                .push("radial6")
-                .define("vivecraft.key.togglePlayerList");
-        RADIAL_7 = builder
-                .push("radial7")
-                .define("vivecraft.key.rotateLeft");
-        RADIAL_8 = builder
-                .push("radial8")
-                .define("vivecraft.key.quickTorch");
-        RADIAL_ALT_1 = builder
-                .push("radialalt1")
-                .define("");
-        RADIAL_ALT_2 = builder
-                .push("radialalt2")
-                .define("");
-        RADIAL_ALT_3 = builder
-                .push("radialalt3")
-                .define("");
-        RADIAL_ALT_4 = builder
-                .push("radialalt4")
-                .define("");
-        RADIAL_ALT_5 = builder
-                .push("radialalt5")
-                .define("");
-        RADIAL_ALT_6 = builder
-                .push("radialalt6")
-                .define("");
-        RADIAL_ALT_7 = builder
-                .push("radialalt7")
-                .define("");
-        RADIAL_ALT_8 = builder
-                .push("radialalt8")
-                .define("");
+        main = builder
+                .push("main")
+                .define(getRadialItemsDefault(), String.class, s -> s);
+        alt = builder
+                .push("alt")
+                .define(getRadialItemsAltDefault(), String.class, s -> s);
         builder.pop();
 
         builder.push("quickcommands");
-        QUICKCOMMAND_0 = builder
-                .push("command0")
-                .define("/gamemode survival");
-        QUICKCOMMAND_1 = builder
-                .push("command1")
-                .define("/gamemode creative");
-        QUICKCOMMAND_2 = builder
-                .push("command2")
-                .define("/help");
-        QUICKCOMMAND_3 = builder
-                .push("command3")
-                .define("/home");
-        QUICKCOMMAND_4 = builder
-                .push("command4")
-                .define("/sethome");
-        QUICKCOMMAND_5 = builder
-                .push("command5")
-                .define("/spawn");
-        QUICKCOMMAND_6 = builder
-                .push("command6")
-                .define("hi!");
-        QUICKCOMMAND_7 = builder
-                .push("command7")
-                .define("bye!");
-        QUICKCOMMAND_8 = builder
-                .push("command8")
-                .define("follow me!");
-        QUICKCOMMAND_9 = builder
-                .push("command9")
-                .define("take this!");
-        QUICKCOMMAND_10 = builder
-                .push("command10")
-                .define("thank you!");
-        QUICKCOMMAND_11 = builder
-                .push("command11")
-                .define("praise the sun!");
+        commands = builder
+                .push("commands")
+                .define(getQuickCommandsDefaults(), String.class, s -> s);
         builder.pop();
 
         builder.correct(listener);
+
+    }
+
+    public static String[] getRadialItemsDefault(){
+        String[] out = new String[8];
+        out[0] = "key.drop";
+        out[1] = "key.chat";
+        out[2] = "vivecraft.key.rotateRight";
+        out[3] = "key.pickItem";
+        out[4] = "vivecraft.key.toggleHandheldCam";
+        out[5] = "vivecraft.key.togglePlayerList";
+        out[6] = "vivecraft.key.rotateLeft";
+        out[7] = "vivecraft.key.quickTorch";
+
+        return out;
+    }
+
+    public static String[] getRadialItemsAltDefault(){
+        String[] out = new String[8];
+        out[0] = "";
+        out[1] = "";
+        out[2] = "";
+        out[3] = "";
+        out[4] = "";
+        out[5] = "";
+        out[6] = "";
+        out[7] = "";
+
+        return out;
+    }
+
+    public static String[] getQuickCommandsDefaults(){
+
+        String[] out = new String[12];
+        out[0] = "/gamemode survival";
+        out[1] = "/gamemode creative";
+        out[2] = "/help";
+        out[3] = "/home";
+        out[4] = "/sethome";
+        out[5] = "/spawn";
+        out[6] = "hi!";
+        out[7] = "bye!";
+        out[8] = "follow me!";
+        out[9] = "take this!";
+        out[10] = "thank you!";
+        out[11] = "praise the sun!";
+
+        return out;
 
     }
 }
