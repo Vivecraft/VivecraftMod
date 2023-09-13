@@ -7,8 +7,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.joml.Quaterniond;
+import org.joml.Vector3d;
 import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
+import org.vivecraft.client.gui.widgets.QuadWidget;
 import org.vivecraft.client.gui.widgets.SettingsList;
+import org.vivecraft.client.gui.widgets.VectorWidget;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -69,9 +73,20 @@ public class ConfigBuilder {
     private <T extends Enum<T>> void addDefaultValueComment(List<String> path, T defaultValue) {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
-                + new Formatter(Locale.US).format("default: %.2s", defaultValue.name()));
+                + new Formatter(Locale.US).format("default: %s", defaultValue.name()));
     }
 
+    private void addDefaultValueComment(List<String> path, Quaterniond defaultValue) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+                +"x: %.2f, y %.2f, z: %.2f, w: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z, defaultValue.w));
+    }
+
+    private void addDefaultValueComment(List<String> path, Vector3d defaultValue) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+                +"x: %.2f, y: %.2f, z: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z));
+    }
 
     /**
      * corrects the attached config, with the built spec
@@ -187,6 +202,47 @@ public class ConfigBuilder {
         return value;
     }
 
+    public QuatValue define(Quaterniond defaultValue) {
+        List<String> path = stack.stream().toList();
+        stack.add("x");
+        spec.define(stack.stream().toList(), defaultValue.x);
+        stack.removeLast();
+        stack.add("y");
+        spec.define(stack.stream().toList(), defaultValue.y);
+        stack.removeLast();
+        stack.add("z");
+        spec.define(stack.stream().toList(), defaultValue.z);
+        stack.removeLast();
+        stack.add("w");
+        spec.define(stack.stream().toList(), defaultValue.w);
+        stack.removeLast();
+        stack.removeLast();
+
+        addDefaultValueComment(path, defaultValue);
+        QuatValue value = new QuatValue(config, path, defaultValue);
+        configValues.add(value);
+        return value;
+    }
+
+    public VectorValue define(Vector3d defaultValue) {
+        List<String> path = stack.stream().toList();
+        stack.add("x");
+        spec.define(stack.stream().toList(), defaultValue.x);
+        stack.removeLast();
+        stack.add("y");
+        spec.define(stack.stream().toList(), defaultValue.y);
+        stack.removeLast();
+        stack.add("z");
+        spec.define(stack.stream().toList(), defaultValue.z);
+        stack.removeLast();
+        stack.removeLast();
+
+        addDefaultValueComment(path, defaultValue);
+        VectorValue value = new VectorValue(config, path, defaultValue);
+        configValues.add(value);
+        return value;
+    }
+
     /**
      *  same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
      */
@@ -219,11 +275,11 @@ public class ConfigBuilder {
     public static class ConfigValue<T> {
 
         // the config, this setting is part of
-        private final CommentedConfig config;
-        private final List<String> path;
+        protected final CommentedConfig config;
+        protected final List<String> path;
         protected final T defaultValue;
         // cache te value to minimize config lookups
-        private T cachedValue = null;
+        protected T cachedValue = null;
 
         public ConfigValue(CommentedConfig config, List<String> path, T defaultValue) {
             this.config = config;
@@ -448,6 +504,116 @@ public class ConfigBuilder {
                     .displayOnlyValue()
                     .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
                     .create(0, 0, width, height, Component.empty(), (button, newValue) -> set((T) newValue));
+        }
+    }
+
+    public static class QuatValue extends ConfigValue<Quaterniond> {
+
+        public QuatValue(CommentedConfig config, List<String> path, Quaterniond defaultValue) {
+            super(config, path, defaultValue);
+        }
+
+        @Override
+        public Quaterniond get() {
+            if (cachedValue == null) {
+                List<String> path2 = new ArrayList<>(path);
+                path2.add("x");
+                double x = config.get(path2);
+                path2.set(path.size(), "y");
+                double y = config.get(path2);
+                path2.set(path.size(), "z");
+                double z = config.get(path2);
+                path2.set(path.size(), "w");
+                double w = config.get(path2);
+                cachedValue = new Quaterniond(x, y, z, w);
+            }
+            return new Quaterniond(cachedValue);
+        }
+
+        @Override
+        public void set(Quaterniond newValue) {
+            cachedValue = newValue;
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("x");
+            config.set(path2, newValue.x);
+            path2.set(path.size(), "y");
+            config.set(path2, newValue.y);
+            path2.set(path.size(), "z");
+            config.set(path2, newValue.z);
+            path2.set(path.size(), "w");
+            config.set(path2, newValue.w);
+        }
+
+        @Override
+        public Quaterniond reset() {
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("x");
+            config.set(path2, defaultValue.x);
+            path2.set(path.size(), "y");
+            config.set(path2, defaultValue.y);
+            path2.set(path.size(), "z");
+            config.set(path2, defaultValue.z);
+            path2.set(path.size(), "w");
+            config.set(path2, defaultValue.w);
+            cachedValue = defaultValue;
+            return defaultValue;
+        }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            return new QuadWidget(0,0, width, height, Component.literal(get().toString()), this);
+        }
+    }
+
+    public class VectorValue extends ConfigValue<Vector3d> {
+
+        public VectorValue(CommentedConfig config, List<String> path, Vector3d defaultValue) {
+            super(config, path, defaultValue);
+        }
+
+        @Override
+        public Vector3d get() {
+            if (cachedValue == null) {
+                List<String> path2 = new ArrayList<>(path);
+                path2.add("x");
+                double x = config.get(path2);
+                path2.set(path.size(), "y");
+                double y = config.get(path2);
+                path2.set(path.size(), "z");
+                double z = config.get(path2);
+                cachedValue = new Vector3d(x, y, z);
+            }
+            return new Vector3d(cachedValue);
+        }
+
+        @Override
+        public void set(Vector3d newValue) {
+            cachedValue = newValue;
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("x");
+            config.set(path2, newValue.x);
+            path2.set(path.size(), "y");
+            config.set(path2, newValue.y);
+            path2.set(path.size(), "z");
+            config.set(path2, newValue.z);
+        }
+
+        @Override
+        public Vector3d reset() {
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("x");
+            config.set(path2, defaultValue.x);
+            path2.set(path.size(), "y");
+            config.set(path2, defaultValue.y);
+            path2.set(path.size(), "z");
+            config.set(path2, defaultValue.z);
+            cachedValue = defaultValue;
+            return defaultValue;
+        }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            return new VectorWidget(0,0, width, height, Component.literal(get().toString()), this);
         }
     }
 }
