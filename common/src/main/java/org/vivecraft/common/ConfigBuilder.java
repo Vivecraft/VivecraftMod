@@ -210,16 +210,16 @@ public class ConfigBuilder {
     public QuatValue define(Quaternionf defaultValue) {
         List<String> path = stack.stream().toList();
         stack.add("x");
-        spec.define(stack.stream().toList(), defaultValue.x);
+        spec.define(stack.stream().toList(), (double) defaultValue.x);
         stack.removeLast();
         stack.add("y");
-        spec.define(stack.stream().toList(), defaultValue.y);
+        spec.define(stack.stream().toList(), (double) defaultValue.y);
         stack.removeLast();
         stack.add("z");
-        spec.define(stack.stream().toList(), defaultValue.z);
+        spec.define(stack.stream().toList(), (double) defaultValue.z);
         stack.removeLast();
         stack.add("w");
-        spec.define(stack.stream().toList(), defaultValue.w);
+        spec.define(stack.stream().toList(), (double) defaultValue.w);
         stack.removeLast();
         stack.removeLast();
 
@@ -232,13 +232,13 @@ public class ConfigBuilder {
     public VectorValue define(Vector3f defaultValue) {
         List<String> path = stack.stream().toList();
         stack.add("x");
-        spec.define(stack.stream().toList(), defaultValue.x);
+        spec.define(stack.stream().toList(), (double) defaultValue.x);
         stack.removeLast();
         stack.add("y");
-        spec.define(stack.stream().toList(), defaultValue.y);
+        spec.define(stack.stream().toList(), (double) defaultValue.y);
         stack.removeLast();
         stack.add("z");
-        spec.define(stack.stream().toList(), defaultValue.z);
+        spec.define(stack.stream().toList(), (double) defaultValue.z);
         stack.removeLast();
         stack.removeLast();
 
@@ -538,13 +538,13 @@ public class ConfigBuilder {
             if (cachedValue == null) {
                 List<String> path2 = new ArrayList<>(path);
                 path2.add("x");
-                float x = config.get(path2);
+                double x = config.get(path2);
                 path2.set(path.size(), "y");
-                float y = config.get(path2);
+                double y = config.get(path2);
                 path2.set(path.size(), "z");
-                float z = config.get(path2);
+                double z = config.get(path2);
                 path2.set(path.size(), "w");
-                float w = config.get(path2);
+                double w = config.get(path2);
                 cachedValue = new Quaternionf(x, y, z, w);
             }
             return new Quaternionf(cachedValue);
@@ -555,26 +555,26 @@ public class ConfigBuilder {
             cachedValue = newValue;
             List<String> path2 = new ArrayList<>(path);
             path2.add("x");
-            config.set(path2, newValue.x);
+            config.set(path2, (double) newValue.x);
             path2.set(path.size(), "y");
-            config.set(path2, newValue.y);
+            config.set(path2, (double) newValue.y);
             path2.set(path.size(), "z");
-            config.set(path2, newValue.z);
+            config.set(path2, (double) newValue.z);
             path2.set(path.size(), "w");
-            config.set(path2, newValue.w);
+            config.set(path2, (double) newValue.w);
         }
 
         @Override
         public Quaternionf reset() {
             List<String> path2 = new ArrayList<>(path);
             path2.add("x");
-            config.set(path2, defaultValue.x);
+            config.set(path2, (double) defaultValue.x);
             path2.set(path.size(), "y");
-            config.set(path2, defaultValue.y);
+            config.set(path2, (double) defaultValue.y);
             path2.set(path.size(), "z");
-            config.set(path2, defaultValue.z);
+            config.set(path2, (double) defaultValue.z);
             path2.set(path.size(), "w");
-            config.set(path2, defaultValue.w);
+            config.set(path2, (double) defaultValue.w);
             cachedValue = defaultValue;
             return defaultValue;
         }
@@ -596,12 +596,12 @@ public class ConfigBuilder {
             if (cachedValue == null) {
                 List<String> path2 = new ArrayList<>(path);
                 path2.add("x");
-                float x = config.get(path2);
+                double x = config.get(path2);
                 path2.set(path.size(), "y");
-                float y = config.get(path2);
+                double y = config.get(path2);
                 path2.set(path.size(), "z");
-                float z = config.get(path2);
-                cachedValue = new Vector3f(x, y, z);
+                double z = config.get(path2);
+                cachedValue = new Vector3f((float) x, (float) y, (float) z);
             }
             return new Vector3f(cachedValue);
         }
@@ -611,22 +611,22 @@ public class ConfigBuilder {
             cachedValue = newValue;
             List<String> path2 = new ArrayList<>(path);
             path2.add("x");
-            config.set(path2, newValue.x);
+            config.set(path2, (double) newValue.x);
             path2.set(path.size(), "y");
-            config.set(path2, newValue.y);
+            config.set(path2, (double) newValue.y);
             path2.set(path.size(), "z");
-            config.set(path2, newValue.z);
+            config.set(path2, (double) newValue.z);
         }
 
         @Override
         public Vector3f reset() {
             List<String> path2 = new ArrayList<>(path);
             path2.add("x");
-            config.set(path2, defaultValue.x);
+            config.set(path2, (double) defaultValue.x);
             path2.set(path.size(), "y");
-            config.set(path2, defaultValue.y);
+            config.set(path2, (double) defaultValue.y);
             path2.set(path.size(), "z");
-            config.set(path2, defaultValue.z);
+            config.set(path2, (double) defaultValue.z);
             cachedValue = defaultValue;
             return defaultValue;
         }

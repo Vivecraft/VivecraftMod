@@ -243,7 +243,7 @@ public class ClientConfig {
         manualCalibration = builder
                 .push("manualCalibration")
                 .comment("")
-                .defineInRange(-1d, 0d, 5d); //TODO check
+                .defineInRange(-1.0d, -1.0d, 5.0d); //TODO check
         rightclickDelay = builder
                 .push("rightclickDelay")
                 .comment("")
