@@ -14,7 +14,7 @@ public class GlStateManagerVRMixin {
 
     //Change the limit of textures to 32
     @ModifyArg(at = @At(value = "INVOKE", target = "Ljava/util/stream/IntStream;range(II)Ljava/util/stream/IntStream;"), index = 1, method = "<clinit>")
-    private static int size(int i) {
+    private static int vivecraft$size(int i) {
         return 32;
     }
 

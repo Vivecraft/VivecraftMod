@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.mojang.math.Axis;
+import org.spongepowered.asm.mixin.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -23,9 +24,6 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.*;
 import org.apache.commons.lang3.tuple.Triple;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemInHandRenderer;
@@ -33,7 +31,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -49,12 +46,11 @@ import org.vivecraft.client_vr.VRState;
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {
 
 	@Unique
-	private VRFirstPersonArmSwing swingType = VRFirstPersonArmSwing.Attack;
+	private VRFirstPersonArmSwing vivecraft$swingType = VRFirstPersonArmSwing.Attack;
 
 	@Final
 	@Shadow
 	private Minecraft minecraft;
-	ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 	@Final
 	@Shadow
 	private EntityRenderDispatcher entityRenderDispatcher;
@@ -71,7 +67,8 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 	private float offHandHeight;
 
 	@Override
-	public Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 in, double dist) {
+	@Unique
+	public Triple<Float, BlockState, BlockPos> vivecraft$getNearOpaqueBlock(Vec3 in, double dist) {
 		if (this.minecraft.level == null) {
 			return null;
 		} else {
@@ -87,25 +84,26 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderPlayerArm", cancellable = true)
-	public void overrideArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm, CallbackInfo ci) {
+	public void vivecraft$overrideArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm, CallbackInfo ci) {
 		if (!VRState.vrRunning) {
 			return;
 		}
-		vrPlayerArm(poseStack, multiBufferSource, i, f, g, humanoidArm);
+		vivecraft$vrPlayerArm(poseStack, multiBufferSource, i, f, g, humanoidArm);
 		ci.cancel();
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderArmWithItem", cancellable = true)
-	public void overrideArmItem(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j, CallbackInfo ci) {
+	public void vivecraft$overrideArmItem(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j, CallbackInfo ci) {
 		if (!VRState.vrRunning) {
 			return;
 		}
-		this.vrRenderArmWithItem(abstractClientPlayer, f, g, interactionHand, h, itemStack, i, poseStack, multiBufferSource, j);
+		this.vivecraft$vrRenderArmWithItem(abstractClientPlayer, f, g, interactionHand, h, itemStack, i, poseStack, multiBufferSource, j);
 		ci.cancel();
 	}
 
 	@Override
-	public boolean isInsideOpaqueBlock(Vec3 in) {
+	@Unique
+	public boolean vivecraft$isInsideOpaqueBlock(Vec3 in) {
 		if (this.minecraft.level == null) {
 			return false;
 		} else {
@@ -114,10 +112,12 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 		}
 	}
 
-	public void vrRenderArmWithItem(AbstractClientPlayer pPlayer, float pPartialTicks, float pPitch, InteractionHand pHand, float pSwingProgress, ItemStack pStack, float pEquippedProgress, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight) {
+	@Unique
+	private void vivecraft$vrRenderArmWithItem(AbstractClientPlayer pPlayer, float pPartialTicks, float pPitch, InteractionHand pHand, float pSwingProgress, ItemStack pStack, float pEquippedProgress, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight) {
 		boolean mainHand = pHand == InteractionHand.MAIN_HAND;
+		ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 		HumanoidArm humanoidarm = mainHand ? pPlayer.getMainArm() : pPlayer.getMainArm().getOpposite();
-		pEquippedProgress = this.getEquipProgress(pHand, pPartialTicks);
+		pEquippedProgress = this.vivecraft$getEquipProgress(pHand, pPartialTicks);
 		pMatrixStack.pushPose();
 		boolean renderArm = true;
 		
@@ -151,7 +151,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 			pMatrixStack.pushPose();        
 
 			if (pPlayer.swingingArm == pHand)
-				this.transformFirstPersonVR(pMatrixStack, humanoidarm, pSwingProgress);
+				this.vivecraft$transformFirstPersonVR(pMatrixStack, humanoidarm, pSwingProgress);
 
 			VivecraftItemRendering.VivecraftItemTransformType rendertype = VivecraftItemRendering.getTransformType(pStack, pPlayer, itemRenderer);
 
@@ -192,7 +192,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 				pMatrixStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 				pMatrixStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 				pMatrixStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
-				((GameRendererExtension)this.minecraft.gameRenderer).DrawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
+				((GameRendererExtension)this.minecraft.gameRenderer).vivecraft$DrawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
 				pMatrixStack.popPose();
 			}
 			else
@@ -216,26 +216,26 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 	@Shadow
 	protected abstract void renderPlayerArm(PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, float pEquippedProgress, float pSwingProgress, HumanoidArm humanoidarm);
 
-
-	public float getEquipProgress(InteractionHand hand, float partialTicks) {
+	@Unique
+	private float vivecraft$getEquipProgress(InteractionHand hand, float partialTicks) {
 		return hand == InteractionHand.MAIN_HAND ? 1.0F - (this.oMainHandHeight + (this.mainHandHeight - this.oMainHandHeight) * partialTicks) : 1.0F - (this.oOffHandHeight + (this.offHandHeight - this.oOffHandHeight) * partialTicks);
 	}
 
-
-	public void vrPlayerArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm) {
+	@Unique
+	private void vivecraft$vrPlayerArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm) {
 		boolean flag = humanoidArm != HumanoidArm.LEFT;
 		float h = flag ? 1.0F : -1.0F;
 		AbstractClientPlayer abstractclientplayer = this.minecraft.player;
 		RenderSystem.setShaderTexture(0, abstractclientplayer.getSkinTextureLocation());
-		VRArmRenderer vrarmrenderer = ((EntityRenderDispatcherVRExtension)entityRenderDispatcher).getArmSkinMap().get(abstractclientplayer.getModelName());
+		VRArmRenderer vrarmrenderer = ((EntityRenderDispatcherVRExtension)entityRenderDispatcher).vivecraft$getArmSkinMap().get(abstractclientplayer.getModelName());
 		poseStack.pushPose();
 
 		if (abstractclientplayer.swingingArm == InteractionHand.MAIN_HAND && flag) {
-			this.transformFirstPersonVR(poseStack, humanoidArm, g);
+			this.vivecraft$transformFirstPersonVR(poseStack, humanoidArm, g);
 		}
 
 		if (abstractclientplayer.swingingArm == InteractionHand.OFF_HAND && !flag) {
-			this.transformFirstPersonVR(poseStack, humanoidArm, g);
+			this.vivecraft$transformFirstPersonVR(poseStack, humanoidArm, g);
 		}
 
 		poseStack.scale(0.4f, 0.4F, 0.4F);
@@ -265,13 +265,15 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 	}
 
 	@Override
-	public void setSwingType(VRFirstPersonArmSwing interact) {
-		this.swingType = interact;
+	@Unique
+	public void vivecraft$setSwingType(VRFirstPersonArmSwing interact) {
+		this.vivecraft$swingType = interact;
 	}
 
-	private void transformFirstPersonVR(PoseStack matrixStackIn, HumanoidArm hand, float swingProgress) {
+	@Unique
+	private void vivecraft$transformFirstPersonVR(PoseStack matrixStackIn, HumanoidArm hand, float swingProgress) {
 		if (swingProgress != 0.0F) {
-			switch (this.swingType) {
+			switch (this.vivecraft$swingType) {
 				case Attack:
 					float f2 = Mth.sin((float)((double)(swingProgress * 3.0F) * Math.PI));
 					if ((double)swingProgress > 0.5D)

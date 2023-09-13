@@ -34,7 +34,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 public abstract class GuiVRMixin implements GuiExtension {
 
     @Unique
-    public boolean showPlayerList;
+    public boolean vivecraft$showPlayerList;
     @Shadow
     private int screenWidth;
     @Shadow
@@ -54,7 +54,7 @@ public abstract class GuiVRMixin implements GuiExtension {
     protected abstract Player getCameraPlayer();
 
     @Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
-    void cancelRenderVignette(GuiGraphics guiGraphics, Entity entity, CallbackInfo ci) {
+    void vivecraft$cancelRenderVignette(GuiGraphics guiGraphics, Entity entity, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             RenderSystem.enableDepthTest();
             ci.cancel();
@@ -62,45 +62,45 @@ public abstract class GuiVRMixin implements GuiExtension {
     }
 
     @Inject(method = "renderTextureOverlay", at = @At("HEAD"), cancellable = true)
-    void cancelRenderOverlay(GuiGraphics guiGraphics, ResourceLocation resourceLocation, float f, CallbackInfo ci) {
+    public void vivecraft$cancelRenderOverlay(GuiGraphics guiGraphics, ResourceLocation resourceLocation, float f, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
-    void cancelRenderPortalOverlay(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
+    public void vivecraft$cancelRenderPortalOverlay(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
     @Inject(at = @At("HEAD"), method = "renderSpyglassOverlay", cancellable = true)
-    public void cancelRenderSpyglassOverlay(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
+    public void vivecraft$cancelRenderSpyglassOverlay(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
     @Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)
-    public void cancelRenderCrosshair(GuiGraphics guiGraphics, CallbackInfo ci) {
+    public void vivecraft$cancelRenderCrosshair(GuiGraphics guiGraphics, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getSleepTimer()I"), method = "render")
-    public int noSleepOverlay(LocalPlayer instance) {
+    public int vivecraft$noSleepOverlay(LocalPlayer instance) {
         return VRState.vrRunning ? 0 : instance.getSleepTimer();
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"), method = "render")
-    public boolean toggleableTabList(KeyMapping instance) {
-        return instance.isDown() || showPlayerList;
+    public boolean vivecraft$toggleableTabList(KeyMapping instance) {
+        return instance.isDown() || vivecraft$showPlayerList;
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 1, shift = At.Shift.AFTER), method = "renderHotbar")
-    public void hotbarContext(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
+    public void vivecraft$hotbarContext(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().interactTracker.hotbar && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)) {
             int i = this.screenWidth / 2;
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
@@ -110,40 +110,40 @@ public abstract class GuiVRMixin implements GuiExtension {
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0), method = "renderHotbar")
-    public boolean slotSwap(ItemStack instance) {
+    public boolean vivecraft$slotSwap(ItemStack instance) {
         return !(!instance.isEmpty() || (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar));
     }
 
     @Inject(at = @At("HEAD"), method = "renderHotbar", cancellable = true)
-    public void notHotbarOnScreens(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
+    public void vivecraft$notHotbarOnScreens(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning && minecraft.screen != null) {
             ci.cancel();
         }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 2, shift = At.Shift.BEFORE), method = "renderHotbar")
-    public void renderVRHotbarLeft(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
+    public void vivecraft$renderVRHotbarLeft(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9 && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)) {
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 2, shift = At.Shift.AFTER), method = "renderHotbar")
-    public void renderVRHotbarLeftReset(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
+    public void vivecraft$renderVRHotbarLeftReset(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9) {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 3, shift = At.Shift.BEFORE), method = "renderHotbar")
-    public void renderVRHotbarRight(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
+    public void vivecraft$renderVRHotbarRight(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9 && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)){
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 3, shift = At.Shift.AFTER), method = "renderHotbar")
-    public void renderVRHotbarRightReset(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
+    public void vivecraft$renderVRHotbarRightReset(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9){
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
@@ -151,13 +151,14 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     // do remap because of forge
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V"), method = "renderHotbar")
-    public void renderVive(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
+    public void vivecraft$renderVive(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning) {
-            this.renderViveHudIcons(guiGraphics);
+            this.vivecraft$renderViveHudIcons(guiGraphics);
         }
     }
 
-    private void renderViveHudIcons(GuiGraphics guiGraphics) {
+    @Unique
+    private void vivecraft$renderViveHudIcons(GuiGraphics guiGraphics) {
         if (this.minecraft.getCameraEntity() instanceof Player) {
             Player player = (Player)this.minecraft.getCameraEntity();
             int k = 0;
@@ -208,17 +209,20 @@ public abstract class GuiVRMixin implements GuiExtension {
     }
 
     @Override
-    public boolean getShowPlayerList() {
-        return this.showPlayerList;
+    @Unique
+    public boolean vivecraft$getShowPlayerList() {
+        return this.vivecraft$showPlayerList;
     }
 
     @Override
-    public void setShowPlayerList(boolean showPlayerList) {
-        this.showPlayerList = showPlayerList;
+    @Unique
+    public void vivecraft$setShowPlayerList(boolean showPlayerList) {
+        this.vivecraft$showPlayerList = showPlayerList;
     }
 
     @Override
-    public void drawMouseMenuQuad(int mouseX, int mouseY) {
+    @Unique
+    public void vivecraft$drawMouseMenuQuad(int mouseX, int mouseY) {
         RenderSystem.enableBlend();
         RenderSystem.disableDepthTest();
         //uhhhh //RenderSystem.disableLighting();
@@ -227,12 +231,13 @@ public abstract class GuiVRMixin implements GuiExtension {
         RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
         float f = 16.0F * ClientDataHolderVR.getInstance().vrSettings.menuCrosshairScale;
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-        this.drawCentredTexturedModalRect(mouseX, mouseY, f, f, 0, 0, 15, 15);
+        this.vivecraft$drawCentredTexturedModalRect(mouseX, mouseY, f, f, 0, 0, 15, 15);
         RenderSystem.disableBlend();
         RenderSystem.defaultBlendFunc();
     }
 
-    public void drawCentredTexturedModalRect(int centreX, int centreY, float width, float height, int u, int v, int texWidth, int texHeight) {
+    @Unique
+    public void vivecraft$drawCentredTexturedModalRect(int centreX, int centreY, float width, float height, int u, int v, int texWidth, int texHeight) {
         float f = 0.00390625F;
         float f1 = 0.00390625F;
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();

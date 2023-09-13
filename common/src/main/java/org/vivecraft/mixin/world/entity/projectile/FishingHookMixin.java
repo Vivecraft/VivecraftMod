@@ -26,40 +26,40 @@ public abstract class FishingHookMixin extends Entity {
 	}
 
 	@Unique
-	private ServerVivePlayer serverviveplayer = null;
+	private ServerVivePlayer vivecraft$serverviveplayer = null;
 	@Unique
-	private Vec3 controllerDir = null;
+	private Vec3 vivecraft$controllerDir = null;
 	@Unique
-	private Vec3 controllerPos = null;
+	private Vec3 vivecraft$controllerPos = null;
 
 	@ModifyVariable(at = @At(value = "STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 0)
-	private float modifyXrot(float xRot, Player player) {
-		serverviveplayer = ServerVRPlayers.getVivePlayer((ServerPlayer) player);
-		if (serverviveplayer != null && serverviveplayer.isVR()) {
-			controllerDir = serverviveplayer.getControllerDir(serverviveplayer.activeHand);
-			controllerPos = serverviveplayer.getControllerPos(serverviveplayer.activeHand, player);
-			return -((float) Math.toDegrees(Math.asin(controllerDir.y / controllerDir.length())));
+	private float vivecraft$modifyXrot(float xRot, Player player) {
+		vivecraft$serverviveplayer = ServerVRPlayers.getVivePlayer((ServerPlayer) player);
+		if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
+			vivecraft$controllerDir = vivecraft$serverviveplayer.getControllerDir(vivecraft$serverviveplayer.activeHand);
+			vivecraft$controllerPos = vivecraft$serverviveplayer.getControllerPos(vivecraft$serverviveplayer.activeHand, player);
+			return -((float) Math.toDegrees(Math.asin(vivecraft$controllerDir.y / vivecraft$controllerDir.length())));
 		}
 		return xRot;
 	}
 	@ModifyVariable(at = @At(value = "STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 1)
-	private float modifyYrot(float yRot) {
-		if (serverviveplayer != null && serverviveplayer.isVR()) {
-			return (float) Math.toDegrees(Math.atan2(-controllerDir.x, controllerDir.z));
+	private float vivecraft$modifyYrot(float yRot) {
+		if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
+			return (float) Math.toDegrees(Math.atan2(-vivecraft$controllerDir.x, vivecraft$controllerDir.z));
 		}
 		return yRot;
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;moveTo(DDDFF)V"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V")
-	private void modifyMoveTo(FishingHook instance, double x, double y, double z, float yRot, float xRot) {
-		if (serverviveplayer != null && serverviveplayer.isVR()) {
-			instance.moveTo(controllerPos.x + controllerDir.x * (double)0.6F, controllerPos.y + controllerDir.y * (double)0.6F, controllerPos.z + controllerDir.z * (double)0.6F, yRot, xRot);
-			controllerDir = null;
-			controllerPos = null;
+	private void vivecraft$modifyMoveTo(FishingHook instance, double x, double y, double z, float yRot, float xRot) {
+		if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
+			instance.moveTo(vivecraft$controllerPos.x + vivecraft$controllerDir.x * (double)0.6F, vivecraft$controllerPos.y + vivecraft$controllerDir.y * (double)0.6F, vivecraft$controllerPos.z + vivecraft$controllerDir.z * (double)0.6F, yRot, xRot);
+			vivecraft$controllerDir = null;
+			vivecraft$controllerPos = null;
 		} else {
 			this.moveTo(x, y, z, yRot, xRot);
 		}
 
-		serverviveplayer = null;
+		vivecraft$serverviveplayer = null;
 	}
 }

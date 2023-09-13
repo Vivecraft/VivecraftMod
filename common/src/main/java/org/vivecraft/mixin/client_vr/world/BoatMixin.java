@@ -36,24 +36,22 @@ public abstract class BoatMixin extends Entity {
 		super(entityType, level);
 	}
 
-
-
 	@ModifyConstant(constant = @Constant(floatValue = 1F, ordinal = 0), method = "controlBoat()V")
-	public float inputLeft(float f) {
+	public float vivecraft$inputLeft(float f) {
 		 Minecraft minecraft = Minecraft.getInstance();
 		 float f1 = minecraft.player.input.leftImpulse;
 		 return f1;
 	}
 
 	@ModifyConstant(constant = @Constant(floatValue = 1F, ordinal = 1), method = "controlBoat()V")
-	public float inputRight(float f) {
+	public float vivecraft$inputRight(float f) {
 		 Minecraft minecraft = Minecraft.getInstance();
 		 float f1 = minecraft.player.input.leftImpulse;
 		 return -f1;
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/Boat;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.BEFORE), method = "controlBoat", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-	public void roomscaleRowing(CallbackInfo ci, float f) {
+	public void vivecraft$roomscaleRowing(CallbackInfo ci, float f) {
 		if (!VRState.vrRunning) {
 			return;
 		}

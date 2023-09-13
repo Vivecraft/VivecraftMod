@@ -22,20 +22,20 @@ public class MouseHandlerVRMixin {
 
     // TODO, this seems unnecessary, and wrong
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseScrolled(DDD)Z", shift = At.Shift.BEFORE), method = "onScroll", cancellable = true)
-    public void cancelScroll(long g, double h, double f, CallbackInfo ci) {
+    public void vivecraft$cancelScroll(long g, double h, double f, CallbackInfo ci) {
         if (this.minecraft.screen.mouseScrolled(g, h, f)) {
             ci.cancel();
         }
     }
 
     @Redirect(method = "onPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
-    private boolean checkNull(LocalPlayer instance) {
+    private boolean vivecraft$checkNull(LocalPlayer instance) {
         return instance != null && instance.isSpectator();
     }
 
 
     @Inject(at = @At("HEAD"), method = "turnPlayer", cancellable = true)
-    public void noTurnStanding(CallbackInfo ci) {
+    public void vivecraft$noTurnStanding(CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
         }
@@ -53,7 +53,7 @@ public class MouseHandlerVRMixin {
 
     // cancel after tutorial call
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/Tutorial;onMouse(DD)V", shift = At.Shift.AFTER), method = "turnPlayer", cancellable = true)
-    public void noTurnSeated(CallbackInfo ci) {
+    public void vivecraft$noTurnSeated(CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
         }
@@ -62,7 +62,7 @@ public class MouseHandlerVRMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "grabMouse", cancellable = true)
-    public void seated(CallbackInfo ci) {
+    public void vivecraft$seated(CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
         }
@@ -74,7 +74,7 @@ public class MouseHandlerVRMixin {
     }
 
     @Inject(at = @At(value = "HEAD"), method = "releaseMouse", cancellable = true)
-    public void grabMouse(CallbackInfo ci) {
+    public void vivecraft$grabMouse(CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
         }

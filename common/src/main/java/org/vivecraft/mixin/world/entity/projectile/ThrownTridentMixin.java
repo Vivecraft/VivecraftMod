@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 public class ThrownTridentMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getEyePosition()Lnet/minecraft/world/phys/Vec3;"), method = "tick()V")
-    public Vec3 tick(Entity entity) {
+    public Vec3 vivecraft$tick(Entity entity) {
         Vec3 vec3 = entity.getEyePosition();
         if (entity instanceof ServerPlayer player) {
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);

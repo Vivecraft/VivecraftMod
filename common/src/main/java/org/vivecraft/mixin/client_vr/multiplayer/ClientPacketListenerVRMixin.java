@@ -41,7 +41,7 @@ public class ClientPacketListenerVRMixin {
     private Minecraft minecraft;
 
     @Inject(at = @At("TAIL"), method = "<init>")
-    public void init(Minecraft minecraft, Screen screen, Connection connection, ServerData serverData, GameProfile gameProfile, WorldSessionTelemetryManager worldSessionTelemetryManager, CallbackInfo ci) {
+    public void vivecraft$init(Minecraft minecraft, Screen screen, Connection connection, ServerData serverData, GameProfile gameProfile, WorldSessionTelemetryManager worldSessionTelemetryManager, CallbackInfo ci) {
         if (ClientNetworking.needsReset) {
             ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
             ClientNetworking.resetServerSettings();
@@ -52,7 +52,7 @@ public class ClientPacketListenerVRMixin {
     }
 
     @Inject(at = @At("TAIL"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
-    public void login(ClientboundLoginPacket p_105030_, CallbackInfo callback) {
+    public void vivecraft$login(ClientboundLoginPacket p_105030_, CallbackInfo callback) {
         VRPlayersClient.clear();
         ClientNetworking.sendVersionInfo();
 
@@ -64,14 +64,8 @@ public class ClientPacketListenerVRMixin {
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/telemetry/WorldSessionTelemetryManager;onPlayerInfoReceived(Lnet/minecraft/world/level/GameType;Z)V"), method = "handleLogin(Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;)V")
-    public void noTelemetry(WorldSessionTelemetryManager instance, GameType gameType, boolean bl) {
-        // TODO, should we still cancel that in NONVR?
-        return;
-    }
-
     @Inject(at = @At("TAIL"), method = "onDisconnect")
-    public void disconnect(Component component, CallbackInfo ci) {
+    public void vivecraft$disconnect(Component component, CallbackInfo ci) {
         VRServerPerms.INSTANCE.setTeleportSupported(false);
         if (VRState.vrInitialized) {
             ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
@@ -80,38 +74,38 @@ public class ClientPacketListenerVRMixin {
     }
 
     @Inject(at = @At("TAIL"), method = "close")
-    public void cleanup(CallbackInfo ci) {
+    public void vivecraft$cleanup(CallbackInfo ci) {
         ClientNetworking.needsReset = true;
     }
     @Unique String lastMsg = null;
     @Inject(at = @At("TAIL"), method = "sendChat")
-    public void chatMsg(String string, CallbackInfo ci) {
+    public void vivecraft$chatMsg(String string, CallbackInfo ci) {
         this.lastMsg = string;
     }
 
     @Inject(at = @At("TAIL"), method = "sendCommand")
-    public void commandMsg(String string, CallbackInfo ci) {
+    public void vivecraft$commandMsg(String string, CallbackInfo ci) {
         this.lastMsg = string;
     }
 
     @Inject(at = @At("TAIL"), method = "handlePlayerChat")
-    public void chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
+    public void vivecraft$chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
         if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundPlayerChatPacket.sender() == minecraft.player.getUUID())) {
-            triggerHapticSound();
+            vivecraft$triggerHapticSound();
         }
         lastMsg = null;
     }
 
     @Inject(at = @At("TAIL"), method = "handleSystemChat")
-    public void chatSystem(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
+    public void vivecraft$chatSystem(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
         if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundSystemChatPacket.content().getString().contains(lastMsg))) {
-            triggerHapticSound();
+            vivecraft$triggerHapticSound();
         }
         lastMsg = null;
     }
 
     @Unique
-    private void triggerHapticSound(){
+    private void vivecraft$triggerHapticSound(){
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         if (dataholder.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
             if ((dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) && !dataholder.vrSettings.seated) {
@@ -125,7 +119,7 @@ public class ClientPacketListenerVRMixin {
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;adjustPlayer(Lnet/minecraft/world/entity/player/Player;)V", shift = At.Shift.BEFORE), method = "handleRespawn")
-    public void readdInput2(ClientboundRespawnPacket clientboundRespawnPacket, CallbackInfo ci) {
+    public void vivecraft$readdInput2(ClientboundRespawnPacket clientboundRespawnPacket, CallbackInfo ci) {
         ClientNetworking.resetServerSettings();
         ClientNetworking.sendVersionInfo();
         if (VRState.vrInitialized) {
@@ -137,12 +131,12 @@ public class ClientPacketListenerVRMixin {
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 0, shift = At.Shift.AFTER), method = "handleRespawn(Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;)V")
-    public void respawn(ClientboundRespawnPacket packet, CallbackInfo callback) {
+    public void vivecraft$respawn(ClientboundRespawnPacket packet, CallbackInfo callback) {
         ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
     }
 
     @Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getData()Lnet/minecraft/network/FriendlyByteBuf;"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;)V", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-	public void handlepacket(ClientboundCustomPayloadPacket p_105004_, CallbackInfo info, ResourceLocation channelID, FriendlyByteBuf buffer) {
+	public void vivecraft$handlepacket(ClientboundCustomPayloadPacket p_105004_, CallbackInfo info, ResourceLocation channelID, FriendlyByteBuf buffer) {
         if (channelID.equals(CommonNetworkHelper.CHANNEL)) {
             var packetID = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
             ClientNetworking.handlePacket(packetID, buffer);
@@ -152,7 +146,7 @@ public class ClientPacketListenerVRMixin {
 	}
 
     @Inject(at = @At("HEAD"), method = "handleOpenScreen")
-    public void markScreenActive(ClientboundOpenScreenPacket clientboundOpenScreenPacket, CallbackInfo ci) {
+    public void vivecraft$markScreenActive(ClientboundOpenScreenPacket clientboundOpenScreenPacket, CallbackInfo ci) {
         GuiHandler.guiAppearOverBlockActive = true;
     }
 }

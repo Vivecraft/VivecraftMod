@@ -25,7 +25,7 @@ public class FabricGameRendererVRMixin {
         if (RenderPassType.isVanilla()) {
             s.mulPose(quaternion);
         } else {
-            ((GameRendererExtension) this).applyVRModelView(ClientDataHolderVR.getInstance().currentPass, s);
+            ((GameRendererExtension) this).vivecraft$applyVRModelView(ClientDataHolderVR.getInstance().currentPass, s);
         }
     }
 

@@ -24,6 +24,6 @@ public abstract class ForgeIngameGuiVRMixin{
 
     @Redirect(method = "renderPlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"))
     public boolean toggleableTabListForge(KeyMapping instance) {
-        return instance.isDown() || ((GuiExtension)this).getShowPlayerList();
+        return instance.isDown() || ((GuiExtension)this).vivecraft$getShowPlayerList();
     }
 }

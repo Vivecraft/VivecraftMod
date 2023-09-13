@@ -35,7 +35,7 @@ public class JumpTracker extends Tracker
 
     public boolean isClimbeyJumpEquipped()
     {
-        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) Minecraft.getInstance().player).isClimbeyJumpEquipped();
+        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) Minecraft.getInstance().player).vivecraft$isClimbeyJumpEquipped();
     }
 
     public boolean isActive(LocalPlayer p)

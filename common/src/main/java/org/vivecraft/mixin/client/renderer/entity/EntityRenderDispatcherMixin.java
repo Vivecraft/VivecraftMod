@@ -32,26 +32,28 @@ import org.vivecraft.common.utils.Utils;
 public abstract class EntityRenderDispatcherMixin implements ResourceManagerReloadListener, EntityRenderDispatcherExtension {
 
 	@Unique
-	private final Map<String, VRPlayerRenderer> skinMapVR = new HashMap<>();
+	private final Map<String, VRPlayerRenderer> vivecraft$skinMapVR = new HashMap<>();
 
-	public Map<String, VRPlayerRenderer> getSkinMapVR() {
-		return skinMapVR;
+	@Override
+	public Map<String, VRPlayerRenderer> vivecraft$getSkinMapVR() {
+		return vivecraft$skinMapVR;
 	}
 
 	@Unique
-	private final Map<String, VRPlayerRenderer> skinMapVRSeated = new HashMap<>();
+	private final Map<String, VRPlayerRenderer> vivecraft$skinMapVRSeated = new HashMap<>();
 
-	public Map<String, VRPlayerRenderer> getSkinMapVRSeated() {
-		return skinMapVRSeated;
+	@Override
+	public Map<String, VRPlayerRenderer> vivecraft$getSkinMapVRSeated() {
+		return vivecraft$skinMapVRSeated;
 	}
 	@Unique
-	private VRPlayerRenderer playerRendererVR;
+	private VRPlayerRenderer vivecraft$playerRendererVR;
 	@Unique
-	private VRPlayerRenderer playerRendererVRSeated;
+	private VRPlayerRenderer vivecraft$playerRendererVRSeated;
 
 
 	@Inject(at = @At("HEAD"), method = "renderHitbox")
-	private static void headHitbox(PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, float f, CallbackInfo ci) {
+	private static void vivecraft$headHitbox(PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, float f, CallbackInfo ci) {
 		AABB headBox;
 		if ((headBox = Utils.getEntityHeadHitbox(entity, 0.0)) != null) {
 			// raw head box
@@ -64,7 +66,7 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 	}
 
 	@Inject(at = @At("HEAD"), method = "getRenderer(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/client/renderer/entity/EntityRenderer;", cancellable = true)
-	public void renderer(Entity pEntity, CallbackInfoReturnable<EntityRenderer<AbstractClientPlayer>> info) {
+	public void vivecraft$renderer(Entity pEntity, CallbackInfoReturnable<EntityRenderer<AbstractClientPlayer>> info) {
 		if (pEntity instanceof AbstractClientPlayer) {
 			String s = ((AbstractClientPlayer) pEntity).getModelName();
 			VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(pEntity.getUUID());
@@ -72,15 +74,15 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 				VRPlayerRenderer vrplayerrenderer;
 				if (playermodelcontroller$rotinfo.seated) {
 
-					vrplayerrenderer = this.skinMapVRSeated.get(s);
+					vrplayerrenderer = this.vivecraft$skinMapVRSeated.get(s);
 
 					if (vrplayerrenderer == null) {
-						vrplayerrenderer = this.playerRendererVRSeated;
+						vrplayerrenderer = this.vivecraft$playerRendererVRSeated;
 					}
 				} else {
-					vrplayerrenderer = this.skinMapVR.get(s);
+					vrplayerrenderer = this.vivecraft$skinMapVR.get(s);
 					if (vrplayerrenderer == null) {
-						vrplayerrenderer = this.playerRendererVR;
+						vrplayerrenderer = this.vivecraft$playerRendererVR;
 					}
 				}
 
@@ -90,20 +92,20 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 	}
 
 	@Inject(at = @At(value = "HEAD"),method = "onResourceManagerReload")
-	public void reloadClear(ResourceManager resourceManager, CallbackInfo ci) {
-		skinMapVRSeated.clear();
-		skinMapVR.clear();
+	public void vivecraft$reloadClear(ResourceManager resourceManager, CallbackInfo ci) {
+		vivecraft$skinMapVRSeated.clear();
+		vivecraft$skinMapVR.clear();
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;", shift = Shift.AFTER),
 			method = "onResourceManagerReload", locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-	public void reload(ResourceManager p_174004_, CallbackInfo info, EntityRendererProvider.Context context) {
-		this.playerRendererVRSeated = new VRPlayerRenderer(context, false, true);
-		this.skinMapVRSeated.put("default", playerRendererVRSeated);
-		this.skinMapVRSeated.put("slim", new VRPlayerRenderer(context, true, true));
+	public void vivecraft$reload(ResourceManager p_174004_, CallbackInfo info, EntityRendererProvider.Context context) {
+		this.vivecraft$playerRendererVRSeated = new VRPlayerRenderer(context, false, true);
+		this.vivecraft$skinMapVRSeated.put("default", vivecraft$playerRendererVRSeated);
+		this.vivecraft$skinMapVRSeated.put("slim", new VRPlayerRenderer(context, true, true));
 
-		this.playerRendererVR = new VRPlayerRenderer(context, false, false);
-		this.skinMapVR.put("default", playerRendererVR);
-		this.skinMapVR.put("slim", new VRPlayerRenderer(context, true, false));
+		this.vivecraft$playerRendererVR = new VRPlayerRenderer(context, false, false);
+		this.vivecraft$skinMapVR.put("default", vivecraft$playerRendererVR);
+		this.vivecraft$skinMapVR.put("slim", new VRPlayerRenderer(context, true, false));
 	}
 }

@@ -23,7 +23,7 @@ public class SoundOptionsScreenVRMixin {
     @Shadow private OptionsList list;
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/OptionsList;addSmall([Lnet/minecraft/client/OptionInstance;)V", ordinal = 1, shift = At.Shift.AFTER))
-    private void addVivecraftSettings(CallbackInfo ci) {
+    private void vivecraft$addVivecraftSettings(CallbackInfo ci) {
         this.list.addSmall(OptionInstance.createBoolean(
             "vivecraft.options.HRTF_SELECTION",
             boolean_ -> Tooltip.create(Component.translatable("vivecraft.options.HRTF_SELECTION.tooltip")),

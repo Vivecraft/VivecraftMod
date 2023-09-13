@@ -8,7 +8,7 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 public class ContainerEventHandlerVRMixin {
 
 	/*@Inject(at = @At("HEAD"), method = "setInitialFocus(Lnet/minecraft/client/gui/components/events/GuiEventListener;)V")
-	public void focus(GuiEventListener pEventListener, CallbackInfo info) {
+	public void vivecraft$focus(GuiEventListener pEventListener, CallbackInfo info) {
 		if (!ClientDataHolder.getInstance().vrSettings.seated)
 		{
 			info.cancel();

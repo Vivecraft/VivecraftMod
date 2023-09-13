@@ -118,7 +118,7 @@ public class VRPlayer
         this.vrdata_world_pre = new VRData(this.roomOrigin, this.dh.vrSettings.walkMultiplier, this.worldScale, (float)Math.toRadians((double)this.dh.vrSettings.worldRotation));
         float f = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
 
-        if (((GameRendererExtension) this.mc.gameRenderer).isInMenuRoom())
+        if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom())
         {
             this.worldScale = 1.0F;
         }
@@ -164,7 +164,7 @@ public class VRPlayer
             }
         }
 
-        if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).isInMenuRoom())
+        if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom())
         {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
         }
@@ -267,7 +267,7 @@ public class VRPlayer
                     Vec3 vec3 = vrdata.getHeadPivot().subtract(vrdata.origin);
                     double d0 = player.getX() - vec3.x;
                     double d2 = player.getZ() - vec3.z;
-                    double d1 = player.getY() + ((PlayerExtension) player).getRoomYOffsetFromPose();
+                    double d1 = player.getY() + ((PlayerExtension) player).vivecraft$getRoomYOffsetFromPose();
                     this.setRoomOrigin(d0, d1, d2, reset);
                 }
             }
@@ -294,7 +294,7 @@ public class VRPlayer
 
     public void tick(LocalPlayer player, Minecraft mc, RandomSource rand)
     {
-        if (((PlayerExtension) player).getInitFromServer())
+        if (((PlayerExtension) player).vivecraft$getInitFromServer())
         {
             if (!this.initdone)
             {
@@ -412,7 +412,7 @@ public class VRPlayer
                                             player.fallDistance = 0.0F;
                                             this.getEstimatedTorsoPosition(d0, d1, d2);
                                         }
-                                        else if ((dataholder.vrSettings.walkUpBlocks && ((PlayerExtension) player).getMuhJumpFactor() == 1.0F || dataholder.climbTracker.isGrabbingLadder() && dataholder.vrSettings.realisticClimbEnabled) && player.fallDistance == 0.0F)
+                                        else if ((dataholder.vrSettings.walkUpBlocks && ((PlayerExtension) player).vivecraft$getMuhJumpFactor() == 1.0F || dataholder.climbTracker.isGrabbingLadder() && dataholder.vrSettings.realisticClimbEnabled) && player.fallDistance == 0.0F)
                                         {
                                             if (vec31 == null)
                                             {
@@ -453,7 +453,7 @@ public class VRPlayer
                                                         Vec3 vec33 = player.getLookAngle();
                                                         Vec3 vec34 = (new Vec3(vec33.x, 0.0D, vec33.z)).normalize();
                                                         player.fallDistance = 0.0F;
-                                                        ((PlayerExtension) minecraft.player).stepSound(BlockPos.containing(player.position()), player.position());
+                                                        ((PlayerExtension) minecraft.player).vivecraft$stepSound(BlockPos.containing(player.position()), player.position());
                                                         break;
                                                     }
                                                 }
@@ -529,9 +529,9 @@ public class VRPlayer
     {
         Vec3 vec3 = entity.getLookAngle();
 
-        if (((GameRendererExtension) this.mc.gameRenderer).getCrossVec() != null)
+        if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec() != null)
         {
-            vec3 = entity.getEyePosition(1.0F).subtract(((GameRendererExtension) this.mc.gameRenderer).getCrossVec()).normalize().reverse();
+            vec3 = entity.getEyePosition(1.0F).subtract(((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec()).normalize().reverse();
         }
 
         ItemStack itemstack;
@@ -622,9 +622,9 @@ public class VRPlayer
                     entity.setXRot(-data.hmd.getPitch());
                 }
             }
-    	else if (((GameRendererExtension)mc.gameRenderer).getCrossVec() != null){
+    	else if (((GameRendererExtension)mc.gameRenderer).vivecraft$getCrossVec() != null){
     		//Look AT the crosshair by default, most compatible with mods.
-    		Vec3 playerToCrosshair = entity.getEyePosition(1).subtract(((GameRendererExtension)mc.gameRenderer).getCrossVec()); //backwards
+    		Vec3 playerToCrosshair = entity.getEyePosition(1).subtract(((GameRendererExtension)mc.gameRenderer).vivecraft$getCrossVec()); //backwards
     		double what = playerToCrosshair.y/playerToCrosshair.length();
     		if(what > 1) what = 1;
     		if(what < -1) what = -1;

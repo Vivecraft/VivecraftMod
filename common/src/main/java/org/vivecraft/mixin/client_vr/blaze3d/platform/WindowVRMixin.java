@@ -15,7 +15,7 @@ public abstract class WindowVRMixin {
 
 	// TODO: check if that actually works like that with sodium extras adaptive sync
 	@ModifyVariable(method = "updateVsync", ordinal = 0, at = @At("HEAD"), argsOnly = true)
-	boolean overwriteVsync(boolean v) {
+	boolean vivecraft$overwriteVsync(boolean v) {
 		if (VRState.vrRunning) {
 			return false;
 		}
@@ -23,8 +23,8 @@ public abstract class WindowVRMixin {
 	}
 
 	@Inject(method = {/*"getScreenWidth", */"getWidth"}, at = @At("HEAD"), cancellable = true)
-	void getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
-		if (shouldOverrideSide()) {
+	void vivecraft$getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
+		if (vivecraft$shouldOverrideSide()) {
 //			if (mcxrGameRenderer.reloadingDepth > 0) {
 //				var swapchain = MCXRPlayClient.OPEN_XR_STATE.session.swapchain;
 //				cir.setReturnValue(swapchain.getRenderWidth());
@@ -36,8 +36,8 @@ public abstract class WindowVRMixin {
 	}
 
 	@Inject(method = {/*"getScreenHeight",*/ "getHeight"}, at = @At("HEAD"), cancellable = true)
-	void getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
-		if (shouldOverrideSide()) {
+	void vivecraft$getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
+		if (vivecraft$shouldOverrideSide()) {
 //			if (mcxrGameRenderer.reloadingDepth > 0) {
 //				var swapchain = MCXRPlayClient.OPEN_XR_STATE.session.swapchain;
 //				cir.setReturnValue(swapchain.getRenderHeight());
@@ -49,35 +49,35 @@ public abstract class WindowVRMixin {
 	}
 
 	@Inject(method = "getGuiScaledHeight", at = @At("HEAD"), cancellable = true)
-	void getScaledHeight(CallbackInfoReturnable<Integer> cir) {
-		if (shouldOverrideSide()) {
+	void vivecraft$getScaledHeight(CallbackInfoReturnable<Integer> cir) {
+		if (vivecraft$shouldOverrideSide()) {
 			cir.setReturnValue(GuiHandler.scaledHeight);
 		}
 	}
 
 	@Inject(method = "getGuiScaledWidth", at = @At("HEAD"), cancellable = true)
-	void getScaledWidth(CallbackInfoReturnable<Integer> cir) {
-		if (shouldOverrideSide()) {
+	void vivecraft$getScaledWidth(CallbackInfoReturnable<Integer> cir) {
+		if (vivecraft$shouldOverrideSide()) {
 			cir.setReturnValue(GuiHandler.scaledWidth);
 		}
 	}
 
 	@Inject(method = "getGuiScale", at = @At("HEAD"), cancellable = true)
-	void getScaleFactor(CallbackInfoReturnable<Double> cir) {
-		if (shouldOverrideSide()) {
+	void vivecraft$getScaleFactor(CallbackInfoReturnable<Double> cir) {
+		if (vivecraft$shouldOverrideSide()) {
 			cir.setReturnValue((double) GuiHandler.guiScaleFactor);
 		}
 	}
 
 	@Inject(method = "onResize", at = @At("HEAD"))
-	private void resizeFrameBuffers(long l, int i, int j, CallbackInfo ci){
+	private void vivecraft$resizeFrameBuffers(long l, int i, int j, CallbackInfo ci){
 		if (VRState.vrEnabled) {
 			ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("Main Window Resized");
 		}
 	}
 
 	@Unique
-	private boolean shouldOverrideSide() {
+	private boolean vivecraft$shouldOverrideSide() {
 		//MCXR:         return mcxrGameRenderer.overrideWindowSize || (mcxrGameRenderer.isXrMode() && mcxrGameRenderer.reloadingDepth > 0);
 		return VRState.vrRunning;
 	}

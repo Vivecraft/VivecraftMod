@@ -18,17 +18,17 @@ import org.vivecraft.server.ServerVivePlayer;
 public class ProjectileMixin {
 
 	@Unique
-	private Vec3 controllerDir;
+	private Vec3 vivecraft$controllerDir;
 
 	@ModifyVariable(method = "shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V",
 			at = @At("HEAD"), ordinal = 3, argsOnly = true)
-	public float pVelocity(float pVelocity, Entity pProjectile) {
+	public float vivecraft$pVelocity(float pVelocity, Entity pProjectile) {
 		if (pProjectile instanceof ServerPlayer player) {
 			ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);
 			if (serverVivePlayer != null && serverVivePlayer.isVR()) {
-				this.controllerDir = serverVivePlayer.getControllerDir(serverVivePlayer.activeHand);
+				this.vivecraft$controllerDir = serverVivePlayer.getControllerDir(serverVivePlayer.activeHand);
 				if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !serverVivePlayer.isSeated() && serverVivePlayer.getDraw() > 0.0F){
-					this.controllerDir = serverVivePlayer.getControllerPos(1, (Player) pProjectile).subtract(serverVivePlayer.getControllerPos(0, (Player) pProjectile)).normalize();
+					this.vivecraft$controllerDir = serverVivePlayer.getControllerPos(1, (Player) pProjectile).subtract(serverVivePlayer.getControllerPos(0, (Player) pProjectile)).normalize();
 				}
 			}
 		}
@@ -37,19 +37,19 @@ public class ProjectileMixin {
 
 	@ModifyVariable(method = "shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V",
 			at = @At("HEAD"), ordinal = 0, argsOnly = true)
-	public float pX(float pXIn, Entity pProjectile) {
-		if (this.controllerDir != null) {
-			return -((float) Math.toDegrees(Math.asin(this.controllerDir.y / this.controllerDir.length())));
+	public float vivecraft$pX(float pXIn, Entity pProjectile) {
+		if (this.vivecraft$controllerDir != null) {
+			return -((float) Math.toDegrees(Math.asin(this.vivecraft$controllerDir.y / this.vivecraft$controllerDir.length())));
 		}
 		return pXIn;
 	}
 
 	@ModifyVariable(method = "shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V",
 			at = @At("HEAD"), ordinal = 1, argsOnly = true)
-	public float pY(float pYIn, Entity pProjectile) {
-		if (this.controllerDir != null) {
-			float toRet = (float) Math.toDegrees(Math.atan2(-this.controllerDir.x, this.controllerDir.z));
-			this.controllerDir = null;
+	public float vivecraft$pY(float pYIn, Entity pProjectile) {
+		if (this.vivecraft$controllerDir != null) {
+			float toRet = (float) Math.toDegrees(Math.atan2(-this.vivecraft$controllerDir.x, this.vivecraft$controllerDir.z));
+			this.vivecraft$controllerDir = null;
 			return toRet;
 		}
 		return pYIn;

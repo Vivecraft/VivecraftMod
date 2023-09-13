@@ -49,17 +49,17 @@ import net.minecraft.world.phys.Vec3;
 public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements PlayerExtension {
 
     @Unique
-    private Vec3 moveMulIn = Vec3.ZERO;
+    private Vec3 vivecraft$moveMulIn = Vec3.ZERO;
     @Unique
-    private boolean initFromServer;
+    private boolean vivecraft$initFromServer;
     @Unique
-    private int movementTeleportTimer;
+    private int vivecraft$movementTeleportTimer;
     @Unique
-    private boolean teleported;
+    private boolean vivecraft$teleported;
     @Unique
-    private double additionX;
+    private double vivecraft$additionX;
     @Unique
-    private double additionZ;
+    private double vivecraft$additionZ;
     @Final
     @Shadow
     protected Minecraft minecraft;
@@ -68,7 +68,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Shadow
     @Final
     public ClientPacketListener connection;
-    private final ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+    @Unique
+    private final ClientDataHolderVR vivecraft$dataholder = ClientDataHolderVR.getInstance();
     @Shadow
     private InteractionHand usingItemHand;
     @Shadow
@@ -85,28 +86,28 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     public abstract void swing(InteractionHand interactionHand);
 
     @Inject(at = @At("TAIL"), method = "startRiding")
-    public void startRidingTracker(Entity entity, boolean bl, CallbackInfoReturnable<Boolean> cir) {
+    public void vivecraft$startRidingTracker(Entity entity, boolean bl, CallbackInfoReturnable<Boolean> cir) {
         if (VRState.vrInitialized) {
             ClientDataHolderVR.getInstance().vehicleTracker.onStartRiding(entity, (LocalPlayer) (Object) this);
         }
     }
 
     @Inject(at = @At("TAIL"), method = "removeVehicle")
-    public void stopRidingTracker(CallbackInfo ci) {
+    public void vivecraft$stopRidingTracker(CallbackInfo ci) {
         if (VRState.vrInitialized) {
             ClientDataHolderVR.getInstance().vehicleTracker.onStopRiding((LocalPlayer) (Object) this);
         }
     }
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.BEFORE), method = "tick")
-	public void overrideLookPre(CallbackInfo ci) {
+	public void vivecraft$overrideLookPre(CallbackInfo ci) {
         if (VRState.vrRunning) {
             ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
         }
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.AFTER), method = "tick")
-	public void overridePose(CallbackInfo ci) {
+	public void vivecraft$overridePose(CallbackInfo ci) {
         if (VRState.vrRunning) {
             ClientNetworking.overridePose((LocalPlayer) (Object) this);
             ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
@@ -114,8 +115,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 	}
 
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z"), ordinal = 2, method = "sendPosition")
-    private boolean directTeleport(boolean updateRotation) {
-        if (this.teleported) {
+    private boolean vivecraft$directTeleport(boolean updateRotation) {
+        if (this.vivecraft$teleported) {
             updateRotation = true;
             ByteBuf bytebuf = Unpooled.buffer();
             bytebuf.writeFloat((float) this.getX());
@@ -131,41 +132,42 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     // needed, or the server will spam 'moved too quickly'/'moved wrongly'
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"), method = "sendPosition", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z")))
-    public void noMovePacketsOnTeleport(ClientPacketListener instance, Packet<?> packet) {
-        if (!this.teleported) {
+    public void vivecraft$noMovePacketsOnTeleport(ClientPacketListener instance, Packet<?> packet) {
+        if (!this.vivecraft$teleported) {
             instance.send(packet);
         }
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/LocalPlayer;lastOnGround:Z", shift = At.Shift.AFTER, ordinal = 1), method = "sendPosition")
-    public void walkUp(CallbackInfo ci) {
+    public void vivecraft$walkUp(CallbackInfo ci) {
         // clear teleport here, after all the packets would be sent
-        this.teleported = false;
+        this.vivecraft$teleported = false;
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
             this.minecraft.options.autoJump().set(false);
         }
     }
 
     @Override
-    public void swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact) {
-        ((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).setSwingType(interact);
+    @Unique
+    public void vivecraft$swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact) {
+        ((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).vivecraft$setSwingType(interact);
         this.swing(interactionhand);
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;aiStep()V"), method = "aiStep")
-    public void ai(CallbackInfo ci) {
+    public void vivecraft$ai(CallbackInfo ci) {
         if (VRState.vrRunning) {
-            this.dataholder.vrPlayer.tick((LocalPlayer) (Object) this, this.minecraft, this.random);
+            this.vivecraft$dataholder.vrPlayer.tick((LocalPlayer) (Object) this, this.minecraft, this.random);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V", cancellable = true)
-    public void overwriteMove(MoverType pType, Vec3 pPos, CallbackInfo info) {
+    public void vivecraft$overwriteMove(MoverType pType, Vec3 pPos, CallbackInfo info) {
         if (!VRState.vrRunning) {
             return;
         }
 
-        this.moveMulIn = this.stuckSpeedMultiplier;
+        this.vivecraft$moveMulIn = this.stuckSpeedMultiplier;
 
         if (pPos.length() != 0.0D && !this.isPassenger()) {
             boolean flag = VRPlayer.get().getFreeMove();
@@ -196,11 +198,11 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                     this.updateAutoJump((float) (this.getX() - d2), (float) (this.getZ() - d3));
                 }
 
-                double d4 = this.getY() + this.getRoomYOffsetFromPose();
+                double d4 = this.getY() + this.vivecraft$getRoomYOffsetFromPose();
                 VRPlayer.get().setRoomOrigin(this.getX() + d0, d4, this.getZ() + d1, false);
             } else if (flag1) {
                 super.move(pType, new Vec3(0.0D, pPos.y, 0.0D));
-                VRPlayer.get().setRoomOrigin(VRPlayer.get().roomOrigin.x, this.getY() + this.getRoomYOffsetFromPose(),
+                VRPlayer.get().setRoomOrigin(VRPlayer.get().roomOrigin.x, this.getY() + this.vivecraft$getRoomYOffsetFromPose(),
                         VRPlayer.get().roomOrigin.z, false);
             } else {
                 this.setOnGround(true);
@@ -212,7 +214,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @Override
-    public double getRoomYOffsetFromPose() {
+    @Unique
+    public double vivecraft$getRoomYOffsetFromPose() {
         double d0 = 0.0D;
 
         if (this.getPose() == Pose.FALL_FLYING || this.getPose() == Pose.SPIN_ATTACK
@@ -224,12 +227,12 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;sin(F)F"), method = "updateAutoJump")
-    private float modifyAutoJumpSin(float original) {
+    private float vivecraft$modifyAutoJumpSin(float original) {
         return VRState.vrRunning ? ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw() * ((float) Math.PI / 180) : original;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;cos(F)F"), method = "updateAutoJump")
-    private float modifyAutoJumpCos(float original) {
+    private float vivecraft$modifyAutoJumpCos(float original) {
         return VRState.vrRunning ? ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw() * ((float) Math.PI / 180) : original;
     }
 
@@ -248,7 +251,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         if (!VRState.vrRunning) {
             return;
         }
-        if (this.initFromServer) {
+        if (this.vivecraft$initFromServer) {
             ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity((LocalPlayer) (Object) this, false, false);
         }
     }
@@ -264,7 +267,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void setPos(double pX, double p_20211_, double pY) {
-        this.initFromServer = true;
+        this.vivecraft$initFromServer = true;
         if (!VRState.vrRunning) {
             super.setPos(pX, p_20211_, pY);
             return;
@@ -292,7 +295,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         }
     }
 
-    public void doDrag() {
+    public void vivecraft$doDrag() {
         float friction = 0.91F;
 
         if (this.onGround()) {
@@ -303,14 +306,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         // account for stock drag code we can't change in LivingEntity#travel
         this.setDeltaMovement(this.getDeltaMovement().x / xFactor, this.getDeltaMovement().y, this.getDeltaMovement().z / zFactor);
 
-        double addFactor = dataholder.vrSettings.inertiaFactor.getFactor();
+        double addFactor = vivecraft$dataholder.vrSettings.inertiaFactor.getFactor();
 
-        double boundedAdditionX = getBoundedAddition(additionX);
+        double boundedAdditionX = vivecraft$getBoundedAddition(vivecraft$additionX);
         double targetLimitX = (friction * boundedAdditionX) / (1f - friction);
         double multiFactorX = targetLimitX / (friction * (targetLimitX + (boundedAdditionX * addFactor)));
         xFactor *= multiFactorX;
 
-        double boundedAdditionZ = getBoundedAddition(additionZ);
+        double boundedAdditionZ = vivecraft$getBoundedAddition(vivecraft$additionZ);
         double targetLimitZ = (friction * boundedAdditionZ) / (1f - friction);
         double multiFactorZ = targetLimitZ / (friction * (targetLimitZ + (boundedAdditionZ * addFactor)));
         zFactor *= multiFactorZ;
@@ -318,7 +321,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         this.setDeltaMovement(this.getDeltaMovement().x * xFactor, this.getDeltaMovement().y, this.getDeltaMovement().z * zFactor);
     }
 
-    public double getBoundedAddition(double orig) {
+    public double vivecraft$getBoundedAddition(double orig) {
         return orig >= -1.0E-6D && orig <= 1.0E-6D ? 1.0E-6D : orig;
     }
 
@@ -332,7 +335,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         double d0 = pRelative.y;
         double d1 = pRelative.x;
         double d2 = pRelative.z;
-        VRPlayer vrplayer = this.dataholder.vrPlayer;
+        VRPlayer vrplayer = this.vivecraft$dataholder.vrPlayer;
 
         if (vrplayer.getFreeMove()) {
             double d3 = d1 * d1 + d2 * d2;
@@ -352,32 +355,32 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 d1 = d1 * d3;
                 d2 = d2 * d3;
                 Vec3 vec3 = new Vec3(d1, 0.0D, d2);
-                VRPlayer vrplayer1 = this.dataholder.vrPlayer;
+                VRPlayer vrplayer1 = this.vivecraft$dataholder.vrPlayer;
                 boolean isFlyingOrSwimming = !this.isPassenger() && (this.getAbilities().flying || this.isSwimming());
 
                 if (ClientDataHolderVR.katvr) {
                     jkatvr.query();
-                    d3 = (double) (jkatvr.getSpeed() * jkatvr.walkDirection() * this.dataholder.vrSettings.movementSpeedMultiplier);
+                    d3 = (double) (jkatvr.getSpeed() * jkatvr.walkDirection() * this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier);
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
                     if (isFlyingOrSwimming) {
                         vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float) Math.PI / 180F));
                     }
 
-                    vec3 = vec3.yRot(-jkatvr.getYaw() * ((float) Math.PI / 180F) + this.dataholder.vrPlayer.vrdata_world_pre.rotation_radians);
+                    vec3 = vec3.yRot(-jkatvr.getYaw() * ((float) Math.PI / 180F) + this.vivecraft$dataholder.vrPlayer.vrdata_world_pre.rotation_radians);
                 } else if (ClientDataHolderVR.infinadeck) {
                     jinfinadeck.query();
-                    d3 = (double) (jinfinadeck.getSpeed() * jinfinadeck.walkDirection() * this.dataholder.vrSettings.movementSpeedMultiplier);
+                    d3 = (double) (jinfinadeck.getSpeed() * jinfinadeck.walkDirection() * this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier);
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
                     if (isFlyingOrSwimming) {
                         vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float) Math.PI / 180F));
                     }
 
-                    vec3 = vec3.yRot(-jinfinadeck.getYaw() * ((float) Math.PI / 180F) + this.dataholder.vrPlayer.vrdata_world_pre.rotation_radians);
-                } else if (this.dataholder.vrSettings.seated) {
+                    vec3 = vec3.yRot(-jinfinadeck.getYaw() * ((float) Math.PI / 180F) + this.vivecraft$dataholder.vrPlayer.vrdata_world_pre.rotation_radians);
+                } else if (this.vivecraft$dataholder.vrSettings.seated) {
                     int j = 0;
-                    if (this.dataholder.vrSettings.seatedUseHMD) {
+                    if (this.vivecraft$dataholder.vrSettings.seatedUseHMD) {
                         j = 1;
                     }
 
@@ -388,7 +391,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                     vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.getController(j).getYaw() * ((float) Math.PI / 180F));
                 } else {
 
-                    VRSettings.FreeMove freeMoveType = !this.isPassenger() && this.getAbilities().flying && this.dataholder.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ? this.dataholder.vrSettings.vrFreeMoveFlyMode : this.dataholder.vrSettings.vrFreeMoveMode;
+                    VRSettings.FreeMove freeMoveType = !this.isPassenger() && this.getAbilities().flying && this.vivecraft$dataholder.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ? this.vivecraft$dataholder.vrSettings.vrFreeMoveFlyMode : this.vivecraft$dataholder.vrSettings.vrFreeMoveMode;
 
                     if (isFlyingOrSwimming) {
                         switch (freeMoveType) {
@@ -401,7 +404,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                                 vec3 = vec3.xRot(vrplayer1.vrdata_world_pre.hmd.getPitch() * ((float) Math.PI / 180F));
                         }
                     }
-                    if (this.dataholder.jumpTracker.isjumping()) {
+                    if (this.vivecraft$dataholder.jumpTracker.isjumping()) {
                         vec3 = vec3.yRot(-vrplayer1.vrdata_world_pre.hmd.getYaw() * ((float) Math.PI / 180F));
                     } else {
                         switch (freeMoveType) {
@@ -414,11 +417,11 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                                 break;
 
                             case RUN_IN_PLACE:
-                                vec3 = vec3.yRot((float) (-this.dataholder.runTracker.getYaw() * (double) ((float) Math.PI / 180F)));
-                                vec3 = vec3.scale(this.dataholder.runTracker.getSpeed());
+                                vec3 = vec3.yRot((float) (-this.vivecraft$dataholder.runTracker.getYaw() * (double) ((float) Math.PI / 180F)));
+                                vec3 = vec3.scale(this.vivecraft$dataholder.runTracker.getSpeed());
 
                             case ROOM:
-                                vec3 = vec3.yRot((180.0F + this.dataholder.vrSettings.worldRotation) * ((float) Math.PI / 180F));
+                                vec3 = vec3.yRot((180.0F + this.vivecraft$dataholder.vrSettings.worldRotation) * ((float) Math.PI / 180F));
                         }
                     }
                 }
@@ -428,7 +431,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 d5 = vec3.z;
 
                 if (!this.getAbilities().flying && !this.wasTouchingWater) {
-                    d7 = this.dataholder.vrSettings.inertiaFactor.getFactor();
+                    d7 = this.vivecraft$dataholder.vrSettings.inertiaFactor.getFactor();
                 }
 
                 float f = 1.0F;
@@ -438,12 +441,12 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 }
 
                 this.setDeltaMovement(this.getDeltaMovement().x + d4 * d7, this.getDeltaMovement().y + d6 * (double) f, this.getDeltaMovement().z + d5 * d7);
-                this.additionX = d4;
-                this.additionZ = d5;
+                this.vivecraft$additionX = d4;
+                this.vivecraft$additionZ = d5;
             }
 
             if (!this.getAbilities().flying && !this.wasTouchingWater) {
-                this.doDrag();
+                this.vivecraft$doDrag();
             }
         }
     }
@@ -459,32 +462,38 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @Override
-    public boolean getInitFromServer() {
-        return this.initFromServer;
+    @Unique
+    public boolean vivecraft$getInitFromServer() {
+        return this.vivecraft$initFromServer;
     }
 
     @Override
-    public void setMovementTeleportTimer(int value) {
-        this.movementTeleportTimer = value;
+    @Unique
+    public void vivecraft$setMovementTeleportTimer(int value) {
+        this.vivecraft$movementTeleportTimer = value;
     }
 
     @Override
-    public int getMovementTeleportTimer() {
-        return movementTeleportTimer;
+    @Unique
+    public int vivecraft$getMovementTeleportTimer() {
+        return vivecraft$movementTeleportTimer;
     }
 
     @Override
-    public float getMuhSpeedFactor() {
-        return this.moveMulIn.lengthSqr() > 0.0D ? (float) ((double) this.getBlockSpeedFactor() * (this.moveMulIn.x + this.moveMulIn.z) / 2.0D) : this.getBlockSpeedFactor();
+    @Unique
+    public float vivecraft$getMuhSpeedFactor() {
+        return this.vivecraft$moveMulIn.lengthSqr() > 0.0D ? (float) ((double) this.getBlockSpeedFactor() * (this.vivecraft$moveMulIn.x + this.vivecraft$moveMulIn.z) / 2.0D) : this.getBlockSpeedFactor();
     }
 
     @Override
-    public float getMuhJumpFactor() {
-        return this.moveMulIn.lengthSqr() > 0.0D ? (float) ((double) this.getBlockJumpFactor() * this.moveMulIn.y) : this.getBlockJumpFactor();
+    @Unique
+    public float vivecraft$getMuhJumpFactor() {
+        return this.vivecraft$moveMulIn.lengthSqr() > 0.0D ? (float) ((double) this.getBlockJumpFactor() * this.vivecraft$moveMulIn.y) : this.getBlockJumpFactor();
     }
 
     @Override
-    public void stepSound(BlockPos blockforNoise, Vec3 soundPos) {
+    @Unique
+    public void vivecraft$stepSound(BlockPos blockforNoise, Vec3 soundPos) {
         BlockState blockstate = this.level().getBlockState(blockforNoise);
         Block block = blockstate.getBlock();
         SoundType soundtype = block.getSoundType(blockstate);
@@ -505,12 +514,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @Override
-    public boolean isClimbeyJumpEquipped() {
+    @Unique
+    public boolean vivecraft$isClimbeyJumpEquipped() {
         return this.getItemBySlot(EquipmentSlot.FEET) != null && ClientDataHolderVR.getInstance().jumpTracker.isBoots(this.getItemBySlot(EquipmentSlot.FEET));
     }
 
     @Override
-    public boolean isClimbeyClimbEquipped() {
+    @Unique
+    public boolean vivecraft$isClimbeyClimbEquipped() {
         if (this.getMainHandItem() != null && ClientDataHolderVR.getInstance().climbTracker.isClaws(this.getMainHandItem())) {
             return true;
         } else {
@@ -524,7 +535,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         super.releaseUsingItem();
     }
     @Override
-    public void setItemInUseClient(ItemStack item, InteractionHand hand) {
+    @Unique
+    public void vivecraft$setItemInUseClient(ItemStack item, InteractionHand hand) {
         this.useItem = item;
 
         if (item != ItemStack.EMPTY) {
@@ -537,12 +549,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @Override
-    public void setTeleported(boolean teleported) {
-        this.teleported = teleported;
+    @Unique
+    public void vivecraft$setTeleported(boolean teleported) {
+        this.vivecraft$teleported = teleported;
     }
 
     @Override
-    public void setItemInUseCountClient(int count) {
+    @Unique
+    public void vivecraft$setItemInUseCountClient(int count) {
         this.useItemRemaining = count;
     }
 }

@@ -14,7 +14,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 public class MobRendererVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getRopeHoldPosition(F)Lnet/minecraft/world/phys/Vec3;"), method = "renderLeash")
-    public Vec3 leash(Entity instance, float f) {
+    public Vec3 vivecraft$leash(Entity instance, float f) {
         if (!RenderPassType.isVanilla() && instance == Minecraft.getInstance().player) {
             return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(0).getPosition();
         }

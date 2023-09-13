@@ -111,16 +111,16 @@ public class TeleportTracker extends Tracker
 
             if (this.vrMovementStyle.teleportOnRelease)
             {
-                if (((PlayerExtension) player).getMovementTeleportTimer() == 0)
+                if (((PlayerExtension) player).vivecraft$getMovementTeleportTimer() == 0)
                 {
                     String playCustomTeleportSound = this.vrMovementStyle.startTeleportingSound;
                 }
 
-                ((PlayerExtension) player).setMovementTeleportTimer(((PlayerExtension) player).getMovementTeleportTimer() +1);
+                ((PlayerExtension) player).vivecraft$setMovementTeleportTimer(((PlayerExtension) player).vivecraft$getMovementTeleportTimer() +1);
 
-                if (((PlayerExtension) player).getMovementTeleportTimer() > 0)
+                if (((PlayerExtension) player).vivecraft$getMovementTeleportTimer() > 0)
                 {
-                    this.movementTeleportProgress = (double)((float)((PlayerExtension) player).getMovementTeleportTimer() / 1.0F);
+                    this.movementTeleportProgress = (double)((float)((PlayerExtension) player).vivecraft$getMovementTeleportTimer() / 1.0F);
 
                     if (this.movementTeleportProgress >= 1.0D)
                     {
@@ -151,18 +151,18 @@ public class TeleportTracker extends Tracker
                     }
                 }
             }
-            else if (((PlayerExtension) player).getMovementTeleportTimer() >= 0 && (vec3.x != 0.0D || vec3.y != 0.0D || vec3.z != 0.0D))
+            else if (((PlayerExtension) player).vivecraft$getMovementTeleportTimer() >= 0 && (vec3.x != 0.0D || vec3.y != 0.0D || vec3.z != 0.0D))
             {
-                if (((PlayerExtension) player).getMovementTeleportTimer() == 0)
+                if (((PlayerExtension) player).vivecraft$getMovementTeleportTimer() == 0)
                 {
                 }
 
-                ((PlayerExtension) player).setMovementTeleportTimer(((PlayerExtension) player).getMovementTeleportTimer() + 1);
+                ((PlayerExtension) player).vivecraft$setMovementTeleportTimer(((PlayerExtension) player).vivecraft$getMovementTeleportTimer() + 1);
                 Vec3 vec39 = player.position();
                 double d6 = vec3.distanceTo(vec39);
-                double d7 = (double)((PlayerExtension) player).getMovementTeleportTimer() * 1.0D / (d6 + 3.0D);
+                double d7 = (double)((PlayerExtension) player).vivecraft$getMovementTeleportTimer() * 1.0D / (d6 + 3.0D);
 
-                if (((PlayerExtension) player).getMovementTeleportTimer() > 0)
+                if (((PlayerExtension) player).vivecraft$getMovementTeleportTimer() > 0)
                 {
                     this.movementTeleportProgress = d7;
 
@@ -208,7 +208,7 @@ public class TeleportTracker extends Tracker
                 flag = true;
             }
 
-            ((PlayerExtension) player).setMovementTeleportTimer(0);
+            ((PlayerExtension) player).vivecraft$setMovementTeleportTimer(0);
             this.movementTeleportProgress = 0.0D;
         }
 
@@ -236,14 +236,14 @@ public class TeleportTracker extends Tracker
             {
                 if (ClientNetworking.serverSupportsDirectTeleport)
                 {
-                	((PlayerExtension) player).setTeleported(true);
+                	((PlayerExtension) player).vivecraft$setTeleported(true);
                 }
 
                 player.moveTo(vec3.x, vec3.y, vec3.z);
             }
 
             this.doTeleportCallback();
-            ((PlayerExtension) this.mc.player).stepSound(BlockPos.containing(vec3), vec3);
+            ((PlayerExtension) this.mc.player).vivecraft$stepSound(BlockPos.containing(vec3), vec3);
         }
     }
 
@@ -272,7 +272,7 @@ public class TeleportTracker extends Tracker
 
         if (dh.vrSettings.seated)
         {
-            vec3 = ((GameRendererExtension) mc.gameRenderer).getControllerRenderPos(0);
+            vec3 = ((GameRendererExtension) mc.gameRenderer).vivecraft$getControllerRenderPos(0);
             vec31 = dh.vrPlayer.vrdata_world_render.getController(0).getDirection();
             matrix4f = dh.vr.getAimRotation(0);
         }
@@ -303,7 +303,7 @@ public class TeleportTracker extends Tracker
 
             if (dh.vrSettings.seated)
             {
-                flag = ((GameRendererExtension) mc.gameRenderer).isInWater();
+                flag = ((GameRendererExtension) mc.gameRenderer).vivecraft$isInWater();
             }
             else
             {
@@ -336,11 +336,11 @@ public class TeleportTracker extends Tracker
                     {
                         flag1 = false;
                     }
-                    else if (ClientNetworking.getTeleportUpLimit() > 0 && -d0 > (double) ClientNetworking.getTeleportUpLimit() * (double)((PlayerExtension) player).getMuhJumpFactor() + 0.2D)
+                    else if (ClientNetworking.getTeleportUpLimit() > 0 && -d0 > (double) ClientNetworking.getTeleportUpLimit() * (double)((PlayerExtension) player).vivecraft$getMuhJumpFactor() + 0.2D)
                     {
                         flag1 = false;
                     }
-                    else if (ClientNetworking.getTeleportHorizLimit() > 0 && d1 > (double) ClientNetworking.getTeleportHorizLimit() * (double)((PlayerExtension) player).getMuhSpeedFactor() + 0.2D)
+                    else if (ClientNetworking.getTeleportHorizLimit() > 0 && d1 > (double) ClientNetworking.getTeleportHorizLimit() * (double)((PlayerExtension) player).vivecraft$getMuhSpeedFactor() + 0.2D)
                     {
                         flag1 = false;
                     }
@@ -379,7 +379,7 @@ public class TeleportTracker extends Tracker
         }
 
         minecraft.player.fallDistance = 0.0F;
-        ((PlayerExtension) minecraft.player).setMovementTeleportTimer(-1);
+        ((PlayerExtension) minecraft.player).vivecraft$setMovementTeleportTimer(-1);
     }
 
     private boolean checkAndSetTeleportDestination(Minecraft mc, LocalPlayer player, Vec3 start, BlockHitResult collision, Vec3 reverseEpsilon)

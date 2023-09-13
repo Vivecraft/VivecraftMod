@@ -7,7 +7,6 @@ package org.vivecraft.client_vr.settings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.OptionsExtension;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
@@ -1709,7 +1708,6 @@ public class VRSettings
 
     public static synchronized void resetAll( Minecraft mc )
     {
-    	((OptionsExtension) mc.options).resetSettings();
         ClientDataHolderVR.getInstance().vrSettings.resetSettings();
     }
 

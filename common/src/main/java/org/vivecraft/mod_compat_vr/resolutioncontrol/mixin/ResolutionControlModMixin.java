@@ -17,7 +17,7 @@ import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 public class ResolutionControlModMixin {
 
     @Inject(at = @At("HEAD"), method = "setShouldScale", remap = false, cancellable = true)
-    private void dontResizeGUI(boolean shouldScale, CallbackInfo ci) {
+    private void vivecraft$dontResizeGUI(boolean shouldScale, CallbackInfo ci) {
         // we handle the resize ourselves
         if (!RenderPassType.isVanilla()) {
             ci.cancel();
@@ -25,21 +25,21 @@ public class ResolutionControlModMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "updateFramebufferSize", remap = false)
-    private void resizeVRBuffers(CallbackInfo ci) {
+    private void vivecraft$resizeVRBuffers(CallbackInfo ci) {
         if (VRState.vrRunning) {
             ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("");
         }
     }
 
     @Inject(at = @At("HEAD"), method = "getCurrentWidth", remap = false, cancellable = true)
-    public void  getVRWidth(CallbackInfoReturnable<Integer> cir) {
+    public void vivecraft$getVRWidth(CallbackInfoReturnable<Integer> cir) {
         if (VRState.vrRunning) {
             cir.setReturnValue(WorldRenderPass.stereoXR.target.width);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "getCurrentHeight", remap = false, cancellable = true)
-    public void  getVRHeight(CallbackInfoReturnable<Integer> cir) {
+    public void vivecraft$getVRHeight(CallbackInfoReturnable<Integer> cir) {
         if (VRState.vrRunning) {
             cir.setReturnValue(WorldRenderPass.stereoXR.target.height);
         }

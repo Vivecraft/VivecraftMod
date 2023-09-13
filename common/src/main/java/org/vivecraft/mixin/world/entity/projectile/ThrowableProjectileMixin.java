@@ -26,7 +26,7 @@ public abstract class ThrowableProjectileMixin extends Entity {
     }
 
     @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V")
-    public void init(EntityType<? extends ThrowableProjectile> p_37462_, LivingEntity p_37463_, Level p_37464_, CallbackInfo info) {
+    public void vivecraft$init(EntityType<? extends ThrowableProjectile> p_37462_, LivingEntity p_37463_, Level p_37464_, CallbackInfo info) {
         if (p_37463_ instanceof ServerPlayer player) {
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);
             if (serverviveplayer != null && serverviveplayer.isVR()) {

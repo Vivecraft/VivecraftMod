@@ -41,7 +41,7 @@ public abstract class AbstractArrowMixin extends Entity {
 	private double baseDamage;
 
 	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V")
-	public void pickup(EntityType<? extends AbstractArrow> p_36717_, LivingEntity p_36718_, Level p_36719_, CallbackInfo info) {
+	public void vivecraft$pickup(EntityType<? extends AbstractArrow> p_36717_, LivingEntity p_36718_, Level p_36719_, CallbackInfo info) {
 		if (p_36718_ instanceof ServerPlayer player) {
 			ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);
 			if (serverviveplayer != null && serverviveplayer.isVR()) {
@@ -59,12 +59,12 @@ public abstract class AbstractArrowMixin extends Entity {
 	}
 
 	@Inject(at = @At("HEAD"), method = "onHitEntity")
-	public void damageMultiplier(EntityHitResult entityHitResult, CallbackInfo ci) {
+	public void vivecraft$damageMultiplier(EntityHitResult entityHitResult, CallbackInfo ci) {
 		if (((Projectile)(Object)this).getOwner() instanceof ServerPlayer owner) {
 			ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(owner);
 			Vec3 hitpos;
 			double multiplier = 1.0;
-			if ((hitpos = isHeadshot(entityHitResult)) != null) {
+			if ((hitpos = vivecraft$isHeadshot(entityHitResult)) != null) {
 				if (serverVivePlayer != null && serverVivePlayer.isVR()) {
 					if (serverVivePlayer.isSeated()) {
 						multiplier = ServerConfig.bowSeatedHeadshotMultiplier.get();
@@ -108,7 +108,7 @@ public abstract class AbstractArrowMixin extends Entity {
 
 	@Unique
 	// checks if the hit was a headshot, and returns the hit position, if it was, null otherwise
-	private Vec3 isHeadshot(EntityHitResult hit) {
+	private Vec3 vivecraft$isHeadshot(EntityHitResult hit) {
 		AABB headBox;
 		if ((headBox = Utils.getEntityHeadHitbox(hit.getEntity(), 0.3)) != null) {
 			Vec3 originalHitpos = hit.getEntity()

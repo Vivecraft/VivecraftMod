@@ -6,7 +6,7 @@ import java.util.Map;
 
 public interface EntityRenderDispatcherExtension {
 
-    Map<String, VRPlayerRenderer> getSkinMapVR();
+    Map<String, VRPlayerRenderer> vivecraft$getSkinMapVR();
 
-    Map<String, VRPlayerRenderer> getSkinMapVRSeated();
+    Map<String, VRPlayerRenderer> vivecraft$getSkinMapVRSeated();
 }

@@ -42,20 +42,14 @@ import net.minecraft.world.phys.Vec3;
 public abstract class ServerPlayerMixin extends Player {
 
 	@Shadow @Final public MinecraftServer server;
-	@Unique
-	private String language = "en_us";
-	@Unique
-	private boolean hasTabListName = false;
-	@Unique
-	private Component tabListDisplayName = null;
 
 	public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
 		super(level, blockPos, f, gameProfile);
 	}
 
 	@Inject(at = @At("TAIL"), method = "initInventoryMenu")
-	public void menu(CallbackInfo ci) {
-		ServerVivePlayer serverviveplayer = getVivePlayer();
+	public void vivecraft$menu(CallbackInfo ci) {
+		ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
 		if (ServerConfig.vrFun.get() && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
 			ItemStack itemstack;
 			if (this.random.nextInt(2) == 1) {
@@ -74,13 +68,13 @@ public abstract class ServerPlayerMixin extends Player {
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;tick()V", shift = Shift.AFTER), method = "doTick()V")
-	public void tick(CallbackInfo info) {
+	public void vivecraft$tick(CallbackInfo info) {
 		ServerVRPlayers.overridePose((ServerPlayer) (Object)this);
 	}
 
-	@Unique
+	@Override
 	public void sweepAttack() {
-		ServerVivePlayer serverviveplayer = getVivePlayer();
+		ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
 
 		if (serverviveplayer != null && serverviveplayer.isVR()) {
 			Vec3 vec3 = serverviveplayer.getControllerDir(0);
@@ -98,7 +92,8 @@ public abstract class ServerPlayerMixin extends Player {
 		}
 	}
 
-	@Unique
+	// TODO: this is not needed
+	@Override
 	protected void triggerItemUseEffects(ItemStack pStack, int pCount) {
 		if (!pStack.isEmpty() && this.isUsingItem()) {
 			if (pStack.getUseAnimation() == UseAnim.DRINK) {
@@ -106,16 +101,17 @@ public abstract class ServerPlayerMixin extends Player {
 			}
 
 			if (pStack.getUseAnimation() == UseAnim.EAT) {
-				this.addItemParticles(pStack, pCount);
+				this.vivecraft$addItemParticles(pStack, pCount);
 				this.playSound(this.getEatingSound(pStack), 0.5F + 0.5F * (float) this.random.nextInt(2),
 						(this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 			}
 		}
 	}
 
+	 // TODO: this should override "spawnItemParticles", or inject into LivingEntity
 	@Unique
-	private void addItemParticles(ItemStack stack, int count) {
-		ServerVivePlayer serverviveplayer = getVivePlayer();
+	private void vivecraft$addItemParticles(ItemStack stack, int count) {
+		ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
 		for (int i = 0; i < count; ++i) {
 			Vec3 vec3 = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
 			vec3 = vec3.xRot(-this.getXRot() * ((float) Math.PI / 180F));
@@ -141,9 +137,9 @@ public abstract class ServerPlayerMixin extends Player {
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z", shift = Shift.BEFORE), method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
 			locals = LocalCapture.CAPTURE_FAILHARD)
-	public void dropvive(ItemStack p_9085_, boolean dropAround, boolean includeName, CallbackInfoReturnable<ItemEntity> info,
+	public void vivecraft$dropvive(ItemStack p_9085_, boolean dropAround, boolean includeName, CallbackInfoReturnable<ItemEntity> info,
 			ItemEntity itementity) {
-		ServerVivePlayer serverviveplayer = getVivePlayer();
+		ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
 		if (serverviveplayer != null && serverviveplayer.isVR() && !dropAround) {
 			Vec3 vec3 = serverviveplayer.getControllerPos(0, this);
 			Vec3 vec31 = serverviveplayer.getControllerDir(0);
@@ -155,7 +151,7 @@ public abstract class ServerPlayerMixin extends Player {
 	}
 
 	@Inject(at = @At("HEAD"), method = "hurt", cancellable = true)
-	public void checkCanGetHurt(DamageSource damageSource, float f, CallbackInfoReturnable<Boolean> cir){
+	public void vivecraft$checkCanGetHurt(DamageSource damageSource, float f, CallbackInfoReturnable<Boolean> cir){
 		Entity entity = damageSource.getEntity();
 		ServerPlayer other = null;
 
@@ -170,7 +166,7 @@ public abstract class ServerPlayerMixin extends Player {
 			// both entities are players, so need to check
 
 			ServerVivePlayer otherVive = ServerVRPlayers.getVivePlayer(other);
-			ServerVivePlayer thisVive = getVivePlayer();
+			ServerVivePlayer thisVive = vivecraft$getVivePlayer();
 
 			// create new object, if they are null, simplifies the checks
 			if (otherVive == null) {
@@ -219,7 +215,7 @@ public abstract class ServerPlayerMixin extends Player {
 	}
 
 	@Unique
-	private ServerVivePlayer getVivePlayer() {
+	private ServerVivePlayer vivecraft$getVivePlayer() {
 		return ServerVRPlayers.getVivePlayer((ServerPlayer)(Object)this);
 	}
 }

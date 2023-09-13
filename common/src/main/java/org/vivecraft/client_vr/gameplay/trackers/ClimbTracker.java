@@ -152,7 +152,7 @@ public class ClimbTracker extends Tracker
 
     public boolean isClimbeyClimbEquipped()
     {
-        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) this.mc.player).isClimbeyClimbEquipped();
+        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) this.mc.player).vivecraft$isClimbeyClimbEquipped();
     }
 
     private boolean canstand(BlockPos bp, LocalPlayer p)
@@ -467,7 +467,7 @@ public class ClimbTracker extends Tracker
                     }
 
                     this.dh.vr.triggerHapticPulse(i, 2000);
-                    ((PlayerExtension) this.mc.player).stepSound(blockpos, this.latchStart[i]);
+                    ((PlayerExtension) this.mc.player).vivecraft$stepSound(blockpos, this.latchStart[i]);
 
                     if (!flag3)
                     {

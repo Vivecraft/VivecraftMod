@@ -20,7 +20,7 @@ public abstract class OptionsScreenMixin extends Screen {
     }
 
     @Inject(at = @At("TAIL"), method = "init")
-    private void reducePhysicsmodButtonSize(CallbackInfo ci) {
+    private void vivecraft$reducePhysicsmodButtonSize(CallbackInfo ci) {
         for (GuiEventListener guiEventListener : children()) {
             if (guiEventListener instanceof Button button) {
                 if (button.getMessage().getContents() instanceof TranslatableContents contents && "physicsmod.menu.main.title".equals(contents.getKey())) {

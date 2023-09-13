@@ -43,7 +43,7 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
         // check if the layer gets added from the PlayerRenderer, we don't want to copy, if we add it to the VRPlayerRenderer
         // also check that the VRPlayerRenderers were created, this method also gets called in the constructor,
         // those default Layers already are added to the VRPlayerRenderer there
-        if ((Object)this.getClass() == PlayerRenderer.class && !((EntityRenderDispatcherExtension) Minecraft.getInstance().getEntityRenderDispatcher()).getSkinMapVRSeated().isEmpty()) {
+        if ((Object)this.getClass() == PlayerRenderer.class && !((EntityRenderDispatcherExtension) Minecraft.getInstance().getEntityRenderDispatcher()).vivecraft$getSkinMapVRSeated().isEmpty()) {
 
             // try to find a suitable constructor, so we can create a new Object without issues
             Constructor<?> constructor = null;
@@ -73,20 +73,20 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
             if (constructor == null) {
                 // do a hacky clone, and replace parent
                 if (((PlayerModel<?>) model).slim) {
-                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).getSkinMapVRSeated().get("slim"));
-                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).getSkinMapVR().get("slim"));
+                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("slim"));
+                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("slim"));
                 } else {
-                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).getSkinMapVRSeated().get("default"));
-                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).getSkinMapVR().get("default"));
+                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("default"));
+                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("default"));
                 }
             } else {
                 // make a new instance with the vr model as parent
                 if (((PlayerModel<?>) model).slim) {
-                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>)((EntityRenderDispatcherExtension) entityRenderDispatcher).getSkinMapVRSeated().get("slim"));
-                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>)((EntityRenderDispatcherExtension) entityRenderDispatcher).getSkinMapVR().get("slim"));
+                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>)((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("slim"));
+                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>)((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("slim"));
                 } else {
-                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>)((EntityRenderDispatcherExtension) entityRenderDispatcher).getSkinMapVRSeated().get("default"));
-                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>)((EntityRenderDispatcherExtension) entityRenderDispatcher).getSkinMapVR().get("default"));
+                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>)((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("default"));
+                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>)((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("default"));
                 }
             }
         }

@@ -27,7 +27,7 @@ public class NoSodiumLevelRendererVRMixin {
     private AtomicBoolean needsFrustumUpdate;
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;needsFullRenderChunkUpdate:Z", ordinal = 1, shift = At.Shift.AFTER), method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V")
-    public void alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
+    public void vivecraft$alwaysUpdateCull(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo info) {
         if (VRState.vrRunning) {
             this.needsFullRenderChunkUpdate = true;
             // if VR is on, always update the frustum, to fix flickering chunks between eyes
@@ -36,7 +36,7 @@ public class NoSodiumLevelRendererVRMixin {
     }
 
     @ModifyConstant(method = "renderChunkLayer", constant = @Constant(intValue = 12))
-    public int moreTextures(int constant) {
+    public int vivecraft$moreTextures(int constant) {
         return RenderSystemAccessor.getShaderTextures().length;
     }
 }

@@ -18,7 +18,7 @@ import net.minecraft.client.main.Main;
 public class MainMixin {
 	
 	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V"), method = "main", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
-	private static void options(String[] strings, CallbackInfo ci, Stopwatch stopwatch, Stopwatch stopwatch2, OptionParser optionparser) {
+	private static void vivecraft$options(String[] strings, CallbackInfo ci, Stopwatch stopwatch, Stopwatch stopwatch2, OptionParser optionparser) {
 		optionparser.accepts("kiosk");
 		optionparser.accepts("viewonly");
 		optionparser.accepts("katvr");
@@ -26,7 +26,7 @@ public class MainMixin {
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "main", remap = false)
-	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
+	private static OptionSet vivecraft$kiosk(OptionParser optionparser, String[] p_129642_) {
 		new Thread(UpdateChecker::checkForUpdates).start();
 		OptionSet optionset = optionparser.parse(p_129642_);
 		ClientDataHolderVR.kiosk = optionset.has("kiosk");

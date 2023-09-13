@@ -21,15 +21,14 @@ import org.vivecraft.client.extensions.RenderTargetExtension;
 public abstract class RenderTargetMixin implements RenderTargetExtension {
 
 	@Unique
-	private int texid = -1;
+	private int vivecraft$texid = -1;
 	@Unique
-	private boolean linearFilter;
+	private boolean vivecraft$linearFilter;
 	@Unique
-	private boolean useStencil = false;
+	private boolean vivecraft$useStencil = false;
+
 	@Shadow
 	public int frameBufferId;
-	@Shadow
-	public boolean useDepth;
 	@Shadow
 	public int width;
 	@Shadow
@@ -41,52 +40,26 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 	@Shadow
 	protected int colorTextureId;
 	@Shadow
-	public abstract void unbindRead();
-	@Shadow
-	public abstract void bindRead();
-	@Shadow
 	public abstract void clear(boolean onMacIn);
-	@Shadow
-	public abstract void checkStatus();
-	@Shadow
-	public abstract void setFilterMode(int i);
-	@Shadow
-	private void _bindWrite(boolean b){};
-
-	@Shadow public abstract void unbindWrite();
 
 	@Override
-	public void setUseStencil(boolean useStencil){
-		this.useStencil = useStencil;
+	public void vivecraft$setUseStencil(boolean useStencil){
+		this.vivecraft$useStencil = useStencil;
 	}
 
 	@Override
-	public boolean getUseStencil(){
-		return useStencil;
+	public boolean vivecraft$getUseStencil(){
+		return vivecraft$useStencil;
 	}
 
 	@Override
-	public void clearWithColor(float r, float g, float b, float a, boolean isMac) {
-		RenderSystem.assertOnRenderThreadOrInit();
-		this._bindWrite(true);
-		RenderSystem.clearColor(r, g, b, a);
-		int i = 16384;
-		if (this.useDepth) {
-			RenderSystem.clearDepth(1.0);
-			i |= 0x100;
-		}
-		RenderSystem.clear(i, isMac);
-		this.unbindWrite();
+	public void vivecraft$setTextid(int texid){
+		this.vivecraft$texid = texid;
 	}
 
 	@Override
-	public void setTextid(int texid){
-		this.texid = texid;
-	}
-
-	@Override
-	public void isLinearFilter(boolean linearFilter){
-		this.linearFilter = linearFilter;
+	public void vivecraft$isLinearFilter(boolean linearFilter){
+		this.vivecraft$linearFilter = linearFilter;
 	}
 
 	@Override
@@ -98,116 +71,53 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		stringbuilder.append("Tex ID: " + this.colorTextureId).append("\n");
 		return stringbuilder.toString();
 	}
-	
-
-//	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I"), method = "createBuffers(IIZ)V")
-//	public int buffer() {
-//		if (this.texid == -1) {
-//			return this.colorTextureId = TextureUtil.generateTextureId();
-//		} else {
-//			return this.colorTextureId = this.texid;
-//		}
-//	}
-	
-//	/**
-//	 * @author
-//	 * @reason
-//	 */
-//	@Overwrite
-//	public void createBuffers(int i, int j, boolean bl) {
-//		RenderSystem.assertOnGameThreadOrInit();
-//		int k = RenderSystem.maxSupportedTextureSize();
-//		if (i > 0 && i <= k && j > 0 && j <= k) {
-//			this.viewWidth = i;
-//			this.viewHeight = j;
-//			this.width = i;
-//			this.height = j;
-//			this.frameBufferId = GlStateManager.glGenFramebuffers();
-//			if (this.texid == -1) {
-//				this.colorTextureId = TextureUtil.generateTextureId();
-//			} else {
-//				this.colorTextureId = this.texid;
-//			}
-//			if (this.useDepth) {
-//				this.depthBufferId = TextureUtil.generateTextureId();
-//				GlStateManager._bindTexture(this.depthBufferId);
-//				GlStateManager._texParameter(3553, 10241, linearFilter ? GL11.GL_LINEAR : 9728);
-//				GlStateManager._texParameter(3553, 10240, linearFilter ? GL11.GL_LINEAR : 9728);
-//				GlStateManager._texParameter(3553, 34892, 0);
-//				GlStateManager._texParameter(3553, 10242, 33071);
-//				GlStateManager._texParameter(3553, 10243, 33071);
-//              GlStateManager._texImage2D(3553, 0, 36013, this.width, this.height, 0, 34041, 36269, null);
-// 			}
-//			if (linearFilter)
-//				this.setFilterMode(GL11.GL_LINEAR);
-//			else
-//				this.setFilterMode(9728);
-//			GlStateManager._bindTexture(this.colorTextureId);
-//			GlStateManager._texParameter(3553, 10242, 33071);
-//			GlStateManager._texParameter(3553, 10243, 33071);
-//			GlStateManager._texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, (IntBuffer)null);
-//			GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
-//			GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
-//			if (this.useDepth) {
-//				GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, 36096, 3553, this.depthBufferId, 0);
-//              GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, 36128, 3553, this.depthBufferId, 0);
-//			}
-//
-//			this.checkStatus();
-//			this.clear(bl);
-//			this.unbindRead();
-//		} else {
-//			throw new IllegalArgumentException("Window " + i + "x" + j + " size out of bounds (max. size: " + k + ")");
-//		}
-//	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I", ordinal = 0), method = "createBuffers")
-	public int genTextureId() {
-		if (this.texid == -1) {
+	public int vivecraft$genTextureId() {
+		if (this.vivecraft$texid == -1) {
 			return TextureUtil.generateTextureId();
 		} else {
-			return this.texid;
+			return this.vivecraft$texid;
 		}
 	}
 
 	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 2)
-	public int modifyTexImage2DInternalformat(int internalformat) {
-		return useStencil ? GL30.GL_DEPTH32F_STENCIL8 : internalformat;
+	public int vivecraft$modifyTexImage2DInternalformat(int internalformat) {
+		return vivecraft$useStencil ? GL30.GL_DEPTH32F_STENCIL8 : internalformat;
 	}
 	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 6)
-	public int modifyTexImage2DFormat(int format) {
-		return useStencil ? GL30.GL_DEPTH_STENCIL : format;
+	public int vivecraft$modifyTexImage2DFormat(int format) {
+		return vivecraft$useStencil ? GL30.GL_DEPTH_STENCIL : format;
 	}
 	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 7)
-	public int modifyTexImage2DType(int type) {
-		return useStencil ? GL30.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
+	public int vivecraft$modifyTexImage2DType(int type) {
+		return vivecraft$useStencil ? GL30.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
 	}
 
 	@ModifyConstant(method = "createBuffers", constant = @Constant(intValue = 9728))
-	public int changeTextPar(int i) {
-		return linearFilter ? GL11.GL_LINEAR : i;
+	public int vivecraft$changeTextPar(int i) {
+		return vivecraft$linearFilter ? GL11.GL_LINEAR : i;
 	}
 
 	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", ordinal = 1), method = "createBuffers", index = 1)
-	public int modifyGlFramebufferTexture2DAttachment(int attachment) {
-		return useStencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
+	public int vivecraft$modifyGlFramebufferTexture2DAttachment(int attachment) {
+		return vivecraft$useStencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
 	}
 
-	public void blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor,
-			float yCropFactor, boolean keepAspect) {
+	public void vivecraft$blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect) {
 		RenderSystem.assertOnGameThreadOrInit();
 		if (!RenderSystem.isInInitPhase()) {
 			RenderSystem.recordRenderCall(() -> {
-				this._blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
+				this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
 			});
 		} else {
-			this._blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
+			this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
 		}
 
 	}
 
 	@Override
-	public void blitFovReduction(ShaderInstance instance, int width, int height) {
+	public void vivecraft$blitFovReduction(ShaderInstance instance, int width, int height) {
 		RenderSystem.assertOnRenderThread();
 		RenderSystem.colorMask(true, true, true, false);
 		RenderSystem.disableDepthTest();
@@ -260,8 +170,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 		RenderSystem.colorMask(true, true, true, true);
 	}
 
-	private void _blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean bl, float xCropFactor,
-			float yCropFactor, boolean keepAspect) {
+	@Unique
+	private void vivecraft$_blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean bl, float xCropFactor, float yCropFactor, boolean keepAspect) {
 		RenderSystem.assertOnGameThreadOrInit();
 		RenderSystem.colorMask(true, true, true, false);
 		RenderSystem.disableDepthTest();

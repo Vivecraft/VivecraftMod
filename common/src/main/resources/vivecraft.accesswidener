@@ -68,9 +68,6 @@ accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/St
 # to disable destroy delay, on roomscale hitting
 accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
 
-# needed to mixin into it
-accessible class net/minecraft/world/entity/monster/EnderMan$EndermanFreezeWhenLookedAt
-
 # for correct vr rendering
 accessible field net/minecraft/world/entity/Entity eyeHeight F
 

@@ -21,7 +21,7 @@ public class OptionsScreenVRMixin extends Screen {
     // replace FOV slider
     /*
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;createButton(Lnet/minecraft/client/Options;III)Lnet/minecraft/client/gui/components/AbstractWidget;"))
-    private AbstractWidget addVivecraftSettings(OptionInstance option, Options options, int i, int j, int k) {
+    private AbstractWidget vivecraft$addVivecraftSettings(OptionInstance option, Options options, int i, int j, int k) {
         if (option == options.fov()) {
             return new Button.Builder( Component.translatable("vivecraft.options.screen.main.button"),  (p) ->
                 {
@@ -39,11 +39,12 @@ public class OptionsScreenVRMixin extends Screen {
 
     // place below FOV slider
     @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"))
-    private int makeSpacer1wide(int layoutElement) {
+    private int vivecraft$makeSpacer1wide(int layoutElement) {
         return 1;
     }
+
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void addVivecraftSettings(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+    private void vivecraft$addVivecraftSettings(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
         rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
         {
             Minecraft.getInstance().options.save();
@@ -52,7 +53,7 @@ public class OptionsScreenVRMixin extends Screen {
                 .build());
     }
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout;arrangeElements()V"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void noBigButtonsPlease(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+    private void vivecraft$noBigButtonsPlease(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
         gridLayout.visitChildren(child -> {
             if (child.getWidth() > 150 && child instanceof Button button) {
                 button.setWidth(150);

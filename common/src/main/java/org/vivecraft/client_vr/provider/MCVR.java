@@ -1107,7 +1107,7 @@ public abstract class MCVR
 
             if (mod.keyTogglePlayerList.consumeClick())
             {
-                ((GuiExtension) this.mc.gui).setShowPlayerList(!((GuiExtension) this.mc.gui).getShowPlayerList());
+                ((GuiExtension) this.mc.gui).vivecraft$setShowPlayerList(!((GuiExtension) this.mc.gui).vivecraft$getShowPlayerList());
             }
 
             if (mod.keyToggleHandheldCam.consumeClick() && this.mc.player != null)

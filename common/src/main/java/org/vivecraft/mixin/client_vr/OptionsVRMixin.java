@@ -14,7 +14,7 @@ public abstract class OptionsVRMixin {
     public KeyMapping[] keyMappings;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;load()V"))
-    void processOptionsMixin(Options instance) {
+    void vivecraft$processOptionsMixin(Options instance) {
         this.keyMappings = VivecraftVRMod.INSTANCE.initializeBindings(this.keyMappings);
         instance.load();
     }

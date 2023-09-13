@@ -27,7 +27,7 @@ public class MovementTutorialStepInstanceVRMixin {
     @Shadow private boolean moved;
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 0), index = 1, method = "tick")
-    private Component alterMovementTitle(Component title) {
+    private Component vivecraft$alterMovementTitle(Component title) {
         if (!VRState.vrRunning) {
             return title;
         }
@@ -97,7 +97,7 @@ public class MovementTutorialStepInstanceVRMixin {
         return title;
     }
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 0), index = 2, method = "tick")
-    private Component alterMovementDescription(Component description) {
+    private Component vivecraft$alterMovementDescription(Component description) {
         if (!VRState.vrRunning) {
             return description;
         }
@@ -109,7 +109,7 @@ public class MovementTutorialStepInstanceVRMixin {
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 1), index = 2, method = "tick")
-    private Component alterLookDescription(Component title) {
+    private Component vivecraft$alterLookDescription(Component title) {
         if (!VRState.vrRunning) {
             return title;
         }
@@ -121,12 +121,12 @@ public class MovementTutorialStepInstanceVRMixin {
     }
 
     @Inject(at = @At("TAIL"), method = "onInput")
-    private void addTeleport(Input input, CallbackInfo ci) {
+    private void vivecraft$addTeleport(Input input, CallbackInfo ci) {
         moved |= VivecraftVRMod.INSTANCE.keyTeleport.isDown();
     }
 
     @Inject(at = @At("HEAD"), method = "onMouse", cancellable = true)
-    private void onlyAfterMove(double d, double e, CallbackInfo ci) {
+    private void vivecraft$onlyAfterMove(double d, double e, CallbackInfo ci) {
         if (moveCompleted == -1) {
             ci.cancel();
         }

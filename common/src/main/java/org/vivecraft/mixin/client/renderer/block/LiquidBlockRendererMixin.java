@@ -10,17 +10,12 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 @Mixin(LiquidBlockRenderer.class)
 public class LiquidBlockRendererMixin {
 	
-	//TODO a bit hacky, when does it happen?
+	// needed for menuworlds water rendering
 	@ModifyConstant(method = "tesselate", constant = @Constant(intValue = 15))
-	public int chunckClipping(int i) {
+	public int vivecraft$chunkClipping(int i) {
 		// -1 is 0xFFFF FFFF
 		// so no change
 		return ClientDataHolderVR.getInstance().skipStupidGoddamnChunkBoundaryClipping ? -1 : 15;
 	}
 
-//	//TODO not found?
-//	@Redirect(at = @At(value = "INVOKE", target = ""))
-//	public boolean skip() {
-//		return true;
-//	}
 }

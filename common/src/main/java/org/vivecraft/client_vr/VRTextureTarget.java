@@ -12,9 +12,9 @@ public class VRTextureTarget extends RenderTarget {
         super(usedepth);
         this.name = name;
         RenderSystem.assertOnGameThreadOrInit();
-        ((RenderTargetExtension) this).setTextid(texid);
-        ((RenderTargetExtension) this).isLinearFilter(linearFilter);
-        ((RenderTargetExtension) this).setUseStencil(useStencil);
+        ((RenderTargetExtension) this).vivecraft$setTextid(texid);
+        ((RenderTargetExtension) this).vivecraft$isLinearFilter(linearFilter);
+        ((RenderTargetExtension) this).vivecraft$setUseStencil(useStencil);
         this.resize(width, height, onMac);
         if (useStencil) {
             Xplat.enableRenderTargetStencil(this);

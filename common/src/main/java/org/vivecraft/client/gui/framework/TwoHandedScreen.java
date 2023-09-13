@@ -101,7 +101,7 @@ public abstract class TwoHandedScreen extends Screen
             this.lastHoveredButtonId2 = abstractwidget1;
         }
 
-        ((GuiExtension) this.minecraft.gui).drawMouseMenuQuad((int)d0, (int)d1);
-        ((GuiExtension) this.minecraft.gui).drawMouseMenuQuad((int)d2, (int)d3);
+        ((GuiExtension) this.minecraft.gui).vivecraft$drawMouseMenuQuad((int)d0, (int)d1);
+        ((GuiExtension) this.minecraft.gui).vivecraft$drawMouseMenuQuad((int)d2, (int)d3);
     }
 }

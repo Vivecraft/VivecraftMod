@@ -21,45 +21,45 @@ public abstract class FishingHookRendererVRMixin extends EntityRenderer<FishingH
         super(context);
     }
 
-    private Vec3 CachedHandPos;
+    private Vec3 vivecraft$CachedHandPos;
 
     @ModifyVariable(at = @At(value = "LOAD"),
             method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", index = 25)
-    private double fishingLineStartX(double value, FishingHook fishingHook) {
+    private double vivecraft$fishingLineStartX(double value, FishingHook fishingHook) {
         if (!RenderPassType.isVanilla() && (this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
             int j = 1;
             if (fishingHook.getPlayerOwner().getMainHandItem().getItem() instanceof FishingRodItem) {
                 j = 0;
             }
-            Vec3 vec31 = ((GameRendererExtension) Minecraft.getInstance().gameRenderer).getControllerRenderPos(j);
+            Vec3 vec31 = ((GameRendererExtension) Minecraft.getInstance().gameRenderer).vivecraft$getControllerRenderPos(j);
             Vec3 vec32 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getHand(j).getDirection();
-            CachedHandPos = vec31.add(vec32.scale(0.47 * ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.worldScale));
-            return CachedHandPos.x;
+            vivecraft$CachedHandPos = vec31.add(vec32.scale(0.47 * ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.worldScale));
+            return vivecraft$CachedHandPos.x;
         } else {
             return value;
         }
     }
     @ModifyVariable(at = @At(value = "LOAD"),
             method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", index = 27)
-    private double fishingLineStartY(double value, FishingHook fishingHook) {
+    private double vivecraft$fishingLineStartY(double value, FishingHook fishingHook) {
         if (!RenderPassType.isVanilla() && (this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
-            return CachedHandPos.y;
+            return vivecraft$CachedHandPos.y;
         } else {
             return value;
         }
     }
     @ModifyVariable(at = @At(value = "LOAD"),
             method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", index = 29)
-    private double fishingLineStartZ(double value, FishingHook fishingHook) {
+    private double vivecraft$fishingLineStartZ(double value, FishingHook fishingHook) {
         if (!RenderPassType.isVanilla() && (this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
-            return CachedHandPos.z;
+            return vivecraft$CachedHandPos.z;
         } else {
             return value;
         }
     }
     @ModifyVariable(at = @At(value = "LOAD"),
             method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", index = 31)
-    private float fishingLineStartOffset(float value, FishingHook fishingHook) {
+    private float vivecraft$fishingLineStartOffset(float value, FishingHook fishingHook) {
         if (!RenderPassType.isVanilla() && (this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == Minecraft.getInstance().player) {
             return 0.0F;
         } else {
