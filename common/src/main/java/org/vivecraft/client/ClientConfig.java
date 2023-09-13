@@ -164,7 +164,14 @@ public class ClientConfig {
     public static ConfigBuilder.StringValue RADIAL_6;
     public static ConfigBuilder.StringValue RADIAL_7;
     public static ConfigBuilder.StringValue RADIAL_8;
-    public static ConfigBuilder.StringValue RADIAL_9;
+    public static ConfigBuilder.StringValue RADIAL_ALT_1;
+    public static ConfigBuilder.StringValue RADIAL_ALT_2;
+    public static ConfigBuilder.StringValue RADIAL_ALT_3;
+    public static ConfigBuilder.StringValue RADIAL_ALT_4;
+    public static ConfigBuilder.StringValue RADIAL_ALT_5;
+    public static ConfigBuilder.StringValue RADIAL_ALT_6;
+    public static ConfigBuilder.StringValue RADIAL_ALT_7;
+    public static ConfigBuilder.StringValue RADIAL_ALT_8;
 
     //QuickCommand
     public static ConfigBuilder.StringValue QUICKCOMMAND_0;
@@ -177,6 +184,8 @@ public class ClientConfig {
     public static ConfigBuilder.StringValue QUICKCOMMAND_7;
     public static ConfigBuilder.StringValue QUICKCOMMAND_8;
     public static ConfigBuilder.StringValue QUICKCOMMAND_9;
+    public static ConfigBuilder.StringValue QUICKCOMMAND_10;
+    public static ConfigBuilder.StringValue QUICKCOMMAND_11;
 
     //FOV
     public static ConfigBuilder.DoubleValue monoFOV; //TODO Dummy
@@ -647,6 +656,100 @@ public class ClientConfig {
                 .push("teleportLimitHoriz")
                 .comment("Limit for side teleportation")
                 .defineInRange(16,0, 32);
+        builder.pop();
+
+        builder.push("radial");
+        radialModeHold = builder
+                .push("radialModeHold")
+                .comment("")
+                .define(false);
+        RADIAL_1 = builder
+                .push("radial1")
+                .define("key.drop");
+        RADIAL_2 = builder
+                .push("radial2")
+                .define("key.chat");
+        RADIAL_3 = builder
+                .push("radial3")
+                .define("vivecraft.key.rotateRight");
+        RADIAL_4 = builder
+                .push("radial4")
+                .define("key.pickItem");
+        RADIAL_5 = builder
+                .push("radial5")
+                .define("vivecraft.key.toggleHandheldCam");
+        RADIAL_6 = builder
+                .push("radial6")
+                .define("vivecraft.key.togglePlayerList");
+        RADIAL_7 = builder
+                .push("radial7")
+                .define("vivecraft.key.rotateLeft");
+        RADIAL_8 = builder
+                .push("radial8")
+                .define("vivecraft.key.quickTorch");
+        RADIAL_ALT_1 = builder
+                .push("radialalt1")
+                .define("");
+        RADIAL_ALT_2 = builder
+                .push("radialalt2")
+                .define("");
+        RADIAL_ALT_3 = builder
+                .push("radialalt3")
+                .define("");
+        RADIAL_ALT_4 = builder
+                .push("radialalt4")
+                .define("");
+        RADIAL_ALT_5 = builder
+                .push("radialalt5")
+                .define("");
+        RADIAL_ALT_6 = builder
+                .push("radialalt6")
+                .define("");
+        RADIAL_ALT_7 = builder
+                .push("radialalt7")
+                .define("");
+        RADIAL_ALT_8 = builder
+                .push("radialalt8")
+                .define("");
+        builder.pop();
+
+        builder.push("quickcommands");
+        QUICKCOMMAND_0 = builder
+                .push("command0")
+                .define("/gamemode survival");
+        QUICKCOMMAND_1 = builder
+                .push("command1")
+                .define("/gamemode creative");
+        QUICKCOMMAND_2 = builder
+                .push("command2")
+                .define("/help");
+        QUICKCOMMAND_3 = builder
+                .push("command3")
+                .define("/home");
+        QUICKCOMMAND_4 = builder
+                .push("command4")
+                .define("/sethome");
+        QUICKCOMMAND_5 = builder
+                .push("command5")
+                .define("/spawn");
+        QUICKCOMMAND_6 = builder
+                .push("command6")
+                .define("hi!");
+        QUICKCOMMAND_7 = builder
+                .push("command7")
+                .define("bye!");
+        QUICKCOMMAND_8 = builder
+                .push("command8")
+                .define("follow me!");
+        QUICKCOMMAND_9 = builder
+                .push("command9")
+                .define("take this!");
+        QUICKCOMMAND_10 = builder
+                .push("command10")
+                .define("thank you!");
+        QUICKCOMMAND_11 = builder
+                .push("command11")
+                .define("praise the sun!");
         builder.pop();
 
         builder.correct(listener);
