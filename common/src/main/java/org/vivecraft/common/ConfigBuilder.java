@@ -10,6 +10,7 @@ import net.minecraft.util.Mth;
 import org.joml.Quaterniond;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
 import org.vivecraft.client.gui.widgets.QuadWidget;
 import org.vivecraft.client.gui.widgets.SettingsList;
@@ -83,7 +84,7 @@ public class ConfigBuilder {
                 +"x: %.2f, y %.2f, z: %.2f, w: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z, defaultValue.w));
     }
 
-    private void addDefaultValueComment(List<String> path, Vector3d defaultValue) {
+    private void addDefaultValueComment(List<String> path, Vector3f defaultValue) {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
                 +"x: %.2f, y: %.2f, z: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z));
@@ -225,7 +226,7 @@ public class ConfigBuilder {
         return value;
     }
 
-    public VectorValue define(Vector3d defaultValue) {
+    public VectorValue define(Vector3f defaultValue) {
         List<String> path = stack.stream().toList();
         stack.add("x");
         spec.define(stack.stream().toList(), defaultValue.x);
@@ -519,13 +520,13 @@ public class ConfigBuilder {
             if (cachedValue == null) {
                 List<String> path2 = new ArrayList<>(path);
                 path2.add("x");
-                double x = config.get(path2);
+                float x = config.get(path2);
                 path2.set(path.size(), "y");
-                double y = config.get(path2);
+                float y = config.get(path2);
                 path2.set(path.size(), "z");
-                double z = config.get(path2);
+                float z = config.get(path2);
                 path2.set(path.size(), "w");
-                double w = config.get(path2);
+                float w = config.get(path2);
                 cachedValue = new Quaternionf(x, y, z, w);
             }
             return new Quaternionf(cachedValue);
@@ -566,29 +567,29 @@ public class ConfigBuilder {
         }
     }
 
-    public class VectorValue extends ConfigValue<Vector3d> {
+    public class VectorValue extends ConfigValue<Vector3f> {
 
-        public VectorValue(CommentedConfig config, List<String> path, Vector3d defaultValue) {
+        public VectorValue(CommentedConfig config, List<String> path, Vector3f defaultValue) {
             super(config, path, defaultValue);
         }
 
         @Override
-        public Vector3d get() {
+        public Vector3f get() {
             if (cachedValue == null) {
                 List<String> path2 = new ArrayList<>(path);
                 path2.add("x");
-                double x = config.get(path2);
+                float x = config.get(path2);
                 path2.set(path.size(), "y");
-                double y = config.get(path2);
+                float y = config.get(path2);
                 path2.set(path.size(), "z");
-                double z = config.get(path2);
-                cachedValue = new Vector3d(x, y, z);
+                float z = config.get(path2);
+                cachedValue = new Vector3f(x, y, z);
             }
-            return new Vector3d(cachedValue);
+            return new Vector3f(cachedValue);
         }
 
         @Override
-        public void set(Vector3d newValue) {
+        public void set(Vector3f newValue) {
             cachedValue = newValue;
             List<String> path2 = new ArrayList<>(path);
             path2.add("x");
@@ -600,7 +601,7 @@ public class ConfigBuilder {
         }
 
         @Override
-        public Vector3d reset() {
+        public Vector3f reset() {
             List<String> path2 = new ArrayList<>(path);
             path2.add("x");
             config.set(path2, defaultValue.x);

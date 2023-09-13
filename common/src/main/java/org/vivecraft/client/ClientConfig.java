@@ -7,6 +7,7 @@ import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import org.joml.Quaterniond;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.ConfigBuilder;
@@ -245,7 +246,7 @@ public class ClientConfig {
         originOffset = builder
                 .push("originOffset")
                 .comment("")
-                .define(new Vector3d( 0d, 0d, 0d));
+                .define(new Vector3f( 0f, 0f, 0f));
         forceHardwareDetection = builder
                 .push("forceHardwareDetection")
                 .comment("0 = off, 1 = vive, 2 = oculus") //TODO enum?
@@ -576,7 +577,7 @@ public class ClientConfig {
         fovRedutioncOffset = builder
                 .push("fovReductionOffset")
                 .comment("")
-                .defineInRange(0.1f,0d, 0.3d);
+                .defineInRange(0.1d,0d, 0.3d);
         builder.pop();
 
         builder.push("camera");
@@ -591,11 +592,11 @@ public class ClientConfig {
         vrFixedCampos = builder
                 .push("vrFixedCampos")
                 .comment("")
-                .define(new Vector3d(-1.0d, 2.4d, 2.7d));
+                .define(new Vector3f(-1.0f, 2.4f, 2.7f));
         vrFixedCamrot = builder
                 .push("vrFixedCamrot")
                 .comment("")
-                .define(new Quaternionf(.962d, .125d, .239d, .041d));
+                .define(new Quaternionf(.962f, .125f, .239f, .041f));
         externalCameraAngleOrder = builder
                 .push("externalCameraAngleOrder")
                 .comment("")

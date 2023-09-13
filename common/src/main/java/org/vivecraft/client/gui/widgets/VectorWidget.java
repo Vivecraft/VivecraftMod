@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.vivecraft.common.ConfigBuilder;
 
 public class VectorWidget extends AbstractWidget {
@@ -17,10 +18,10 @@ public class VectorWidget extends AbstractWidget {
 
     public VectorWidget(int i, int j, int k, int l, Component component, ConfigBuilder.VectorValue value) {
         super(i, j, k, l, component);
-        Vector3d vector = value.get();
-        this.xBox = new QuadWidget.NumberEditBox(Minecraft.getInstance().font, i , j, (k-3) / 3, l , Component.literal(vector.x +""), vector.x, d -> value.set(new Vector3d(d, vector.y, vector.z)));
-        this.yBox = new QuadWidget.NumberEditBox(Minecraft.getInstance().font, i + ((k - 3) / 3) + 1, j, (k-3) / 3, l , Component.literal(vector.y +""), vector.y, d -> value.set(new Vector3d(vector.x, d, vector.z)));
-        this.zBox = new QuadWidget.NumberEditBox(Minecraft.getInstance().font, i + ((k-3) / 3)*2 + 2, j, (k-4) / 3, l , Component.literal(vector.z +""), vector.z, d -> value.set(new Vector3d(vector.x, vector.y, d)));
+        Vector3f vector = value.get();
+        this.xBox = new QuadWidget.NumberEditBox(Minecraft.getInstance().font, i , j, (k-3) / 3, l , Component.literal(vector.x +""), vector.x, d -> value.set(new Vector3f(d, vector.y, vector.z)));
+        this.yBox = new QuadWidget.NumberEditBox(Minecraft.getInstance().font, i + ((k - 3) / 3) + 1, j, (k-3) / 3, l , Component.literal(vector.y +""), vector.y, d -> value.set(new Vector3f(vector.x, d, vector.z)));
+        this.zBox = new QuadWidget.NumberEditBox(Minecraft.getInstance().font, i + ((k-3) / 3)*2 + 2, j, (k-4) / 3, l , Component.literal(vector.z +""), vector.z, d -> value.set(new Vector3f(vector.x, vector.y, d)));
     }
 
     @Override
