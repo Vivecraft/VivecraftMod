@@ -326,6 +326,9 @@ public class ConfigBuilder {
         }
 
         public boolean isDefault() {
+            if (get() instanceof Object[]) {
+                return Arrays.equals((Object[]) get(), (Object[]) defaultValue);
+            }
             return Objects.equals(get(),  defaultValue);
         }
         public String getComment() {
@@ -505,25 +508,23 @@ public class ConfigBuilder {
             super(config, path, defaultValue);
         }
 
-        public void cycle() {
-            T[] enumConstants = defaultValue.getDeclaringClass().getEnumConstants();
-            int newIndex = this.get().ordinal() + 1;
-            if (enumConstants.length == newIndex) {
-                newIndex = 0;
+        @Override
+        public T get() {
+            if (cachedValue == null) {
+                cachedValue = config.getEnumOrElse(path, defaultValue);
             }
-            this.set(enumConstants[newIndex]);
+            return cachedValue;
         }
 
         @Override
         public AbstractWidget getWidget(int width, int height) {
             return CycleButton
-                    .builder((newValue) -> Component.literal("" + newValue))
+                    .<T>builder(newValue -> Component.literal(newValue.toString()))
                     .withInitialValue(get())
-                    // toArray is needed here, because the button uses Objects, and the collection is of other types
                     .withValues(defaultValue.getDeclaringClass().getEnumConstants())
                     .displayOnlyValue()
                     .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
-                    .create(0, 0, width, height, Component.empty(), (button, newValue) -> set((T) newValue));
+                    .create(0, 0, width, height, Component.empty(), (button, newValue) -> set(newValue));
         }
     }
 

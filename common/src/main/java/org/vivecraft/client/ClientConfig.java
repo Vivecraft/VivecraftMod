@@ -25,16 +25,11 @@ public class ClientConfig {
     public static ConfigBuilder.EnumValue<PhysicalKeyboard.KeyboardTheme> physicalKeyboardTheme;
 
     //MR
-    public static ConfigBuilder.DoubleValue mrMovingCamOffsetZ;
-    public static ConfigBuilder.DoubleValue mrMovingCamOffsetY;
-    public static ConfigBuilder.DoubleValue mrMovingCamOffsetX;
+    public static ConfigBuilder.VectorValue mrMovingCamOffset;
+    public static ConfigBuilder.QuatValue mrMovingCamOffsetRot;
     public static ConfigBuilder.StringValue mixedRealityKeyColor;
     public static ConfigBuilder.BooleanValue mixedRealityAlphaMask;
-    public static ConfigBuilder.DoubleValue mixedRealityFov;
-    public static ConfigBuilder.DoubleValue mrMovingCamOffsetRotW;
-    public static ConfigBuilder.DoubleValue mrMovingCamOffsetRotZ;
-    public static ConfigBuilder.DoubleValue mrMovingCamOffsetRotY;
-    public static ConfigBuilder.DoubleValue mrMovingCamOffsetRotX;
+    public static ConfigBuilder.IntValue mixedRealityFov;
     public static ConfigBuilder.BooleanValue mixedRealityRenderCameraModel;
     public static ConfigBuilder.BooleanValue mixedRealityUndistorted;
     public static ConfigBuilder.BooleanValue mixedRealityUnityLike;
@@ -288,6 +283,10 @@ public class ClientConfig {
                 .push("insideblock")
                 .comment("If the the inside of a block should be solid black")
                 .define(false);
+        renderBlockOutlineMode = builder
+                .push("renderBlockOutlineMode")
+                .comment("")
+                .define(VRSettings.RenderPointerElement.ALWAYS);
         displayMirrorLeftEye = builder
                 .push("lefteye")
                 .comment("Use the left eye instead of the right eye for the mirror")
@@ -647,6 +646,45 @@ public class ClientConfig {
         commands = builder
                 .push("commands")
                 .define(getQuickCommandsDefaults(), String.class, s -> s);
+        builder.pop();
+
+        builder.push("mixedReality");
+        mrMovingCamOffset = builder
+                .push("mrMovingCamOffset")
+                .comment("")
+                .define(new Vector3f(0f, 0f, 0f));
+        mrMovingCamOffsetRot = builder
+                .push("mrMovingCamOffsetRot")
+                .comment("")
+                .define(new Quaternionf());
+        mixedRealityKeyColor = builder
+                .push("mixedRealityKeyColor")
+                .comment("")
+                .define("#000000");
+        mixedRealityAlphaMask = builder
+                .push("mixedRealityAlphaMask")
+                .comment("")
+                .define(false);
+        mixedRealityFov = builder
+                .push("mixedRealityFov")
+                .comment("")
+                .defineInRange(40, 0, 179);
+        mixedRealityRenderCameraModel = builder
+                .push("mixedRealityRenderCameraModel")
+                .comment("")
+                .define(true);
+        mixedRealityUndistorted = builder
+                .push("mixedRealityUndistorted")
+                .comment("")
+                .define(true);
+        mixedRealityUnityLike = builder
+                .push("mixedRealityUnityLike")
+                .comment("")
+                .define(true);
+        mixedRealityRenderHands = builder
+                .push("mixedRealityRenderHands")
+                .comment("")
+                .define(false);
         builder.pop();
 
         builder.correct(listener);
