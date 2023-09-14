@@ -513,9 +513,9 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             poseStack.translate(0.0f, 0.0f, -2000.0f);
             RenderSystem.applyModelViewMatrix();
 
-            int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
-            int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
-            ((GuiExtension) Minecraft.getInstance().gui).vivecraft$drawMouseMenuQuad(x, y);
+            int x = (int) (mouseHandler.xpos() * (double) window.getGuiScaledWidth() / (double) window.getScreenWidth());
+            int y = (int) (mouseHandler.ypos() * (double) window.getGuiScaledHeight() / (double) window.getScreenHeight());
+            ((GuiExtension) gui).vivecraft$drawMouseMenuQuad(x, y);
 
             poseStack.popPose();
             RenderSystem.applyModelViewMatrix();

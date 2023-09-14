@@ -23,8 +23,6 @@ public class RadialHandler
     public static GuiRadial UI = new GuiRadial();
     public static Vec3 Pos_room = new Vec3(0.0D, 0.0D, 0.0D);
     public static Matrix4f Rotation_room = new Matrix4f();
-    private static boolean lpl;
-    private static boolean lps;
     private static boolean PointedL;
     private static boolean PointedR;
     public static RenderTarget Framebuffer = null;
@@ -51,9 +49,7 @@ public class RadialHandler
 
             if (showingState)
             {
-                int j = mc.getWindow().getGuiScaledWidth();
-                int k = mc.getWindow().getGuiScaledHeight();
-                UI.init(Minecraft.getInstance(), j, k);
+                UI.init(Minecraft.getInstance(), GuiHandler.scaledWidth, GuiHandler.scaledHeight);
                 Showing = true;
                 activecontroller = controller;
                 orientOverlay(activecontroller);
@@ -88,14 +84,14 @@ public class RadialHandler
                     {
                         if (UI.cursorX2 == -1.0F)
                         {
-                            UI.cursorX2 = (float)((int)(f * (float)mc.getWindow().getScreenWidth()));
-                            UI.cursorY2 = (float)((int)(f1 * (float)mc.getWindow().getScreenHeight()));
+                            UI.cursorX2 = (float)((int)(f * GuiHandler.guiWidth));
+                            UI.cursorY2 = (float)((int)(f1 * GuiHandler.guiHeight));
                             PointedR = true;
                         }
                         else
                         {
-                            float f2 = (float)((int)(f * (float)mc.getWindow().getScreenWidth()));
-                            float f3 = (float)((int)(f1 * (float)mc.getWindow().getScreenHeight()));
+                            float f2 = (float)((int)(f * GuiHandler.guiWidth));
+                            float f3 = (float)((int)(f1 * GuiHandler.guiHeight));
                             UI.cursorX2 = UI.cursorX2 * 0.7F + f2 * 0.3F;
                             UI.cursorY2 = UI.cursorY2 * 0.7F + f3 * 0.3F;
                             PointedR = true;
@@ -115,14 +111,14 @@ public class RadialHandler
                     {
                         if (UI.cursorX1 == -1.0F)
                         {
-                            UI.cursorX1 = (float)((int)(f * (float)mc.getWindow().getScreenWidth()));
-                            UI.cursorY1 = (float)((int)(f1 * (float)mc.getWindow().getScreenHeight()));
+                            UI.cursorX1 = (float)((int)(f * GuiHandler.guiWidth));
+                            UI.cursorY1 = (float)((int)(f1 * GuiHandler.guiHeight));
                             PointedL = true;
                         }
                         else
                         {
-                            float f4 = (float)((int)(f * (float)mc.getWindow().getScreenWidth()));
-                            float f5 = (float)((int)(f1 * (float)mc.getWindow().getScreenHeight()));
+                            float f4 = (float)((int)(f * GuiHandler.guiWidth));
+                            float f5 = (float)((int)(f1 * GuiHandler.guiHeight));
                             UI.cursorX1 = UI.cursorX1 * 0.7F + f4 * 0.3F;
                             UI.cursorY1 = UI.cursorY1 * 0.7F + f5 * 0.3F;
                             PointedL = true;
@@ -203,10 +199,10 @@ public class RadialHandler
                 lastPressedShiftR = false;
             }
 
-            double d0 = (double)Math.min(Math.max((int)UI.cursorX1, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledWidth() / (double)mc.getWindow().getScreenWidth();
-            double d1 = (double)Math.min(Math.max((int)UI.cursorY1, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledHeight() / (double)mc.getWindow().getScreenHeight();
-            double d2 = (double)Math.min(Math.max((int)UI.cursorX2, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledWidth() / (double)mc.getWindow().getScreenWidth();
-            double d3 = (double)Math.min(Math.max((int)UI.cursorY2, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledHeight() / (double)mc.getWindow().getScreenHeight();
+            double d0 = (double)Math.min(Math.max((int)UI.cursorX1, 0), GuiHandler.guiWidth) * (double)UI.width / (double)GuiHandler.guiWidth;
+            double d1 = (double)Math.min(Math.max((int)UI.cursorY1, 0), GuiHandler.guiHeight) * (double)UI.height / (double)GuiHandler.guiHeight;
+            double d2 = (double)Math.min(Math.max((int)UI.cursorX2, 0), GuiHandler.guiWidth) * (double)UI.width / (double)GuiHandler.guiWidth;
+            double d3 = (double)Math.min(Math.max((int)UI.cursorY2, 0), GuiHandler.guiHeight) * (double)UI.height / (double)GuiHandler.guiHeight;
 
             if (dh.vrSettings.radialModeHold)
             {

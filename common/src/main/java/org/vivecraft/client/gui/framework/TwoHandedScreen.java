@@ -3,6 +3,7 @@ package org.vivecraft.client.gui.framework;
 import net.minecraft.client.gui.GuiGraphics;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GuiExtension;
+import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 
@@ -31,7 +32,6 @@ public abstract class TwoHandedScreen extends Screen
     {
         if (super.mouseClicked(pMouseX, p_94738_, pMouseY))
         {
-            double d0 = (double)Math.min(Math.max((int)this.cursorX2, 0), this.minecraft.getWindow().getScreenWidth()) * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
             return true;
         }
         else
@@ -48,10 +48,10 @@ public abstract class TwoHandedScreen extends Screen
             this.reinit = false;
         }
 
-        double d0 = (double)(this.cursorX1 * (float)this.width / (float)this.minecraft.getWindow().getGuiScaledWidth()) * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
-        double d1 = (double)(this.cursorY1 * (float)this.height / (float)this.minecraft.getWindow().getGuiScaledHeight()) * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
-        double d2 = (double)(this.cursorX2 * (float)this.width / (float)this.minecraft.getWindow().getGuiScaledWidth()) * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
-        double d3 = (double)(this.cursorY2 * (float)this.height / (float)this.minecraft.getWindow().getGuiScaledHeight()) * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
+        double d0 = (double)this.cursorX1 * (double)this.width / (double)GuiHandler.guiWidth;
+        double d1 = (double)this.cursorY1 * (double)this.height / (double)GuiHandler.guiHeight;
+        double d2 = (double)this.cursorX2 * (double)this.width / (double)GuiHandler.guiWidth;
+        double d3 = (double)this.cursorY2 * (double)this.height / (double)GuiHandler.guiHeight;
         AbstractWidget abstractwidget = null;
         AbstractWidget abstractwidget1 = null;
 
