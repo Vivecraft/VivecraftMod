@@ -21,7 +21,8 @@ public interface VRPoseHistory {
     int MAX_TICKS_BACK = 20;
 
     /**
-     * @return The amount of ticks worth of history being held.
+     * @return The amount of ticks worth of history being held. The number returned by this methodwill never be higher
+     * than {@link VRPoseHistory#MAX_TICKS_BACK}, however can be lower than it.
      */
     int ticksOfHistory();
 
