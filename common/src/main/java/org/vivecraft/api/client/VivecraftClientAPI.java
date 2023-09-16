@@ -71,7 +71,9 @@ public interface VivecraftClientAPI {
      *
      * @param controllerNum The controller number to trigger a haptic pulse. 0 is the primary controller, while 1 is
      *                      the secondary controller.
-     * @param duration The duration of the haptic pulse in seconds.
+     * @param duration The duration of the haptic pulse in seconds. Note that this number is passed to the
+     *                 underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
+     *                 very short pulses.
      * @param frequency The frequency of the haptic pulse in Hz. 160 is a safe bet for this number, with Vivecraft's codebase
      *                  using anywhere from 160F for actions such as a bite on a fishing line, to 1000F for things such
      *                  as a chat notification.
@@ -87,7 +89,9 @@ public interface VivecraftClientAPI {
      *
      * @param controllerNum The controller number to trigger a haptic pulse. 0 is the primary controller, while 1 is
      *                      the secondary controller.
-     * @param duration The duration of the haptic pulse in seconds.
+     * @param duration The duration of the haptic pulse in seconds. Note that this number is passed to the
+     *                 underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
+     *                 very short pulses.
      */
     default void triggerHapticPulse(int controllerNum, float duration) {
         triggerHapticPulse(controllerNum, duration, 160F, 1F, 0F);
@@ -147,7 +151,7 @@ public interface VivecraftClientAPI {
      * @return The historical VR data for the player's controller, or null if the player isn't in VR.
      */
     @Nullable
-    default VRPoseHistory getHistoricalVRControllerData(InteractionHand hand) {
+    default VRPoseHistory getHistoricalVRControllerPoses(InteractionHand hand) {
         return getHistoricalVRControllerPoses(hand.ordinal());
     }
 
@@ -157,7 +161,7 @@ public interface VivecraftClientAPI {
      * @return The historical VR data for the player's primary controller, or null if the player isn't in VR.
      */
     @Nullable
-    default VRPoseHistory getHistoricalVRController0Data() {
+    default VRPoseHistory getHistoricalVRController0Poses() {
         return getHistoricalVRControllerPoses(0);
     }
 
@@ -167,7 +171,7 @@ public interface VivecraftClientAPI {
      * @return The historical VR data for the player's secondary controller, or null if the player isn't in VR.
      */
     @Nullable
-    default VRPoseHistory getHistoricalVRController1Data() {
+    default VRPoseHistory getHistoricalVRController1Poses() {
         return getHistoricalVRControllerPoses(1);
     }
 }
