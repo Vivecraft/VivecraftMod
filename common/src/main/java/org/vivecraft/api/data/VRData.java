@@ -5,7 +5,8 @@ import net.minecraft.world.InteractionHand;
 
 /**
  * Represents all VR data associated with a given player, mainly the pose of the HMD and both controllers
- * of the player.
+ * of the player. If the player is in seated mode, controller 1 carries the HMD's data, and controller 0 is
+ * based on the direction being looked at via the mouse pointer.
  */
 public interface VRData {
 
