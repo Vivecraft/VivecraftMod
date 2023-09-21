@@ -39,7 +39,6 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.FrameTimer;
-import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
@@ -47,7 +46,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -70,7 +68,7 @@ import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
 import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
 import org.vivecraft.client_vr.render.*;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.mod_compat_vr.iris.IrisHelper;
+import org.vivecraft.client_vr.render.helpers.VRPassHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 import org.vivecraft.client_vr.VRState;
@@ -596,7 +594,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
                 this.profiler.push("setup");
                 this.mainRenderTarget.bindWrite(true);
                 this.profiler.pop();
-                this.vivecraft$renderSingleView(renderpass, f, bl);
+                VRPassHelper.renderSingleView(renderpass, f, vivecraft$currentNanoTime, bl);
                 this.profiler.pop();
 
                 if (ClientDataHolderVR.getInstance().grabScreenShot) {
@@ -1206,191 +1204,6 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             System.err.println(string);
         }
 
-    }
-
-    @Unique
-    private void vivecraft$renderSingleView(RenderPass eye, float nano, boolean renderworld) {
-        RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
-        RenderSystem.clear(16384, ON_OSX);
-        RenderSystem.enableDepthTest();
-        this.profiler.push("updateCameraAndRender");
-        this.gameRenderer.render(nano, vivecraft$currentNanoTime, renderworld);
-        this.profiler.pop();
-        this.vivecraft$checkGLError("post game render " + eye.name());
-
-        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT
-                || ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT) {
-            this.profiler.push("postprocesseye");
-            RenderTarget rendertarget = this.mainRenderTarget;
-
-            if (ClientDataHolderVR.getInstance().vrSettings.useFsaa) {
-                RenderSystem.clearColor(RenderSystem.getShaderFogColor()[0], RenderSystem.getShaderFogColor()[1], RenderSystem.getShaderFogColor()[2], RenderSystem.getShaderFogColor()[3]);
-                if (eye == RenderPass.LEFT) {
-                    ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0.bindWrite(true);
-                } else {
-                    ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1.bindWrite(true);
-                }
-                RenderSystem.clear(16384, ON_OSX);
-                this.profiler.push("fsaa");
-                // DataHolder.getInstance().vrRenderer.doFSAA(Config.isShaders()); TODO
-                ClientDataHolderVR.getInstance().vrRenderer.doFSAA(false);
-                rendertarget = ClientDataHolderVR.getInstance().vrRenderer.fsaaLastPassResultFBO;
-                this.vivecraft$checkGLError("fsaa " + eye.name());
-                this.profiler.pop();
-            }
-
-            if (eye == RenderPass.LEFT) {
-                ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0.bindWrite(true);
-            } else {
-                ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1.bindWrite(true);
-            }
-
-            if (ClientDataHolderVR.getInstance().vrSettings.useFOVReduction
-                    && ClientDataHolderVR.getInstance().vrPlayer.getFreeMove()) {
-                if (this.player != null && (Math.abs(this.player.zza) > 0.0F || Math.abs(this.player.xxa) > 0.0F)) {
-                    this.vivecraft$fov = (float) ((double) this.vivecraft$fov - 0.05D);
-
-                    if (this.vivecraft$fov < ClientDataHolderVR.getInstance().vrSettings.fovReductionMin) {
-                        this.vivecraft$fov = ClientDataHolderVR.getInstance().vrSettings.fovReductionMin;
-                    }
-                } else {
-                    this.vivecraft$fov = (float) ((double) this.vivecraft$fov + 0.01D);
-
-                    if ((double) this.vivecraft$fov > 0.8D) {
-                        this.vivecraft$fov = 0.8F;
-                    }
-                }
-            } else {
-                this.vivecraft$fov = 1.0F;
-            }
-
-            VRShaders._FOVReduction_OffsetUniform.set(
-                    ClientDataHolderVR.getInstance().vrSettings.fovRedutioncOffset);
-            float red = 0.0F;
-            float black = 0.0F;
-            float blue = 0.0F;
-            float time = (float) Util.getMillis() / 1000.0F;
-
-            if (this.player != null && this.level != null) {
-                if (((GameRendererExtension) this.gameRenderer)
-                        .vivecraft$wasInWater() != ((GameRendererExtension) this.gameRenderer).vivecraft$isInWater()) {
-                    ClientDataHolderVR.getInstance().watereffect = 2.3F;
-                } else {
-                    if (((GameRendererExtension) this.gameRenderer).vivecraft$isInWater()) {
-                        ClientDataHolderVR.getInstance().watereffect -= 0.008333334F;
-                    } else {
-                        ClientDataHolderVR.getInstance().watereffect -= 0.016666668F;
-                    }
-
-                    if (ClientDataHolderVR.getInstance().watereffect < 0.0F) {
-                        ClientDataHolderVR.getInstance().watereffect = 0.0F;
-                    }
-                }
-
-                ((GameRendererExtension) this.gameRenderer)
-                        .vivecraft$setWasInWater(((GameRendererExtension) this.gameRenderer).vivecraft$isInWater());
-
-                if (Xplat
-                        .isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
-                    if (!IrisHelper.hasWaterEffect()) {
-                        ClientDataHolderVR.getInstance().watereffect = 0.0F;
-                    }
-                }
-
-                if (((GameRendererExtension) this.gameRenderer).vivecraft$isInPortal()) {
-                    ClientDataHolderVR.getInstance().portaleffect = 1.0F;
-                } else {
-                    ClientDataHolderVR.getInstance().portaleffect -= 0.016666668F;
-
-                    if (ClientDataHolderVR.getInstance().portaleffect < 0.0F) {
-                        ClientDataHolderVR.getInstance().portaleffect = 0.0F;
-                    }
-                }
-
-                ItemStack itemstack = this.player.getInventory().getArmor(3);
-
-                if (itemstack.getItem() == Blocks.CARVED_PUMPKIN.asItem()
-                        && (!itemstack.hasTag() || itemstack.getTag().getInt("CustomModelData") == 0)) {
-                    ClientDataHolderVR.getInstance().pumpkineffect = 1.0F;
-                } else {
-                    ClientDataHolderVR.getInstance().pumpkineffect = 0.0F;
-                }
-
-                float hurtTimer = (float) this.player.hurtTime - nano;
-                float healthpercent = 1.0F - this.player.getHealth() / this.player.getMaxHealth();
-                healthpercent = (healthpercent - 0.5F) * 0.75F;
-
-                if (hurtTimer > 0.0F) { // hurt flash
-                    hurtTimer = hurtTimer / (float) this.player.hurtDuration;
-                    hurtTimer = healthpercent
-                            + Mth.sin(hurtTimer * hurtTimer * hurtTimer * hurtTimer * (float) Math.PI) * 0.5F;
-                    red = hurtTimer;
-                } else if (ClientDataHolderVR.getInstance().vrSettings.low_health_indicator) { // red due to low health
-                    red = (float) ((double) healthpercent
-                            * Math.abs(Math.sin((double) (2.5F * time) / ((double) (1.0F - healthpercent) + 0.1D))));
-
-                    if (this.player.isCreative()) {
-                        red = 0.0F;
-                    }
-                }
-
-                float freeze = this.player.getPercentFrozen();
-                if (freeze > 0) {
-                    blue = red;
-                    blue = Math.max(freeze / 2, blue);
-                    red = 0;
-                }
-
-                if (this.player.isSleeping() && (double) black < 0.8D) {
-                    black = 0.5F + 0.3F * this.player.getSleepTimer() * 0.01F;
-                }
-
-                if (ClientDataHolderVR.getInstance().vr.isWalkingAbout && (double) black < 0.8D) {
-                    black = 0.5F;
-                }
-            } else {
-                ClientDataHolderVR.getInstance().watereffect = 0.0F;
-                ClientDataHolderVR.getInstance().portaleffect = 0.0F;
-                ClientDataHolderVR.getInstance().pumpkineffect = 0.0F;
-            }
-
-            if (ClientDataHolderVR.getInstance().pumpkineffect > 0.0F) {
-                VRShaders._FOVReduction_RadiusUniform.set(0.3F);
-                VRShaders._FOVReduction_BorderUniform.set(0.0F);
-            } else {
-                VRShaders._FOVReduction_RadiusUniform.set(this.vivecraft$fov);
-                VRShaders._FOVReduction_BorderUniform.set(0.06F);
-            }
-
-            VRShaders._Overlay_HealthAlpha.set(red);
-            VRShaders._Overlay_FreezeAlpha.set(blue);
-            VRShaders._Overlay_BlackAlpha.set(black);
-            VRShaders._Overlay_time.set(time);
-            VRShaders._Overlay_waterAmplitude.set(ClientDataHolderVR.getInstance().watereffect);
-            VRShaders._Overlay_portalAmplitutde.set(ClientDataHolderVR.getInstance().portaleffect);
-            VRShaders._Overlay_pumpkinAmplitutde.set(
-                    ClientDataHolderVR.getInstance().pumpkineffect);
-            RenderPass renderpass = ClientDataHolderVR.getInstance().currentPass;
-
-            VRShaders._Overlay_eye.set(
-                    ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT ? 1 : -1);
-            ((RenderTargetExtension) rendertarget).vivecraft$blitFovReduction(VRShaders.fovReductionShader, ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0.viewWidth,
-                    ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0.viewHeight);
-            GlStateManager._glUseProgram(0);
-            this.vivecraft$checkGLError("post overlay" + eye);
-            this.profiler.pop();
-        }
-
-        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
-            this.profiler.push("cameracopy");
-            ClientDataHolderVR.getInstance().vrRenderer.cameraFramebuffer.bindWrite(true);
-            RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
-            RenderSystem.clear(16640, ON_OSX);
-            ((RenderTargetExtension) ClientDataHolderVR.getInstance().vrRenderer.cameraRenderFramebuffer).vivecraft$blitToScreen(0,
-                    ClientDataHolderVR.getInstance().vrRenderer.cameraFramebuffer.viewWidth,
-                    ClientDataHolderVR.getInstance().vrRenderer.cameraFramebuffer.viewHeight, 0, true, 0.0F, 0.0F, false);
-            this.profiler.pop();
-        }
     }
 
     @Unique
