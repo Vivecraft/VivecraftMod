@@ -4,9 +4,9 @@ import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ItemPickupParticle;
 import net.minecraft.util.Mth;
@@ -34,7 +34,7 @@ public class ItemPickupParticleVRMixin {
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 0), method = "render")
     public double vivecraft$updateX(double d, double e, double f) {
         if (VRState.vrRunning && target == vivecraft$mc.player) {
-            vivecraft$playerPos = ((GameRendererExtension) vivecraft$mc.gameRenderer).vivecraft$getControllerRenderPos(0);
+            vivecraft$playerPos = RenderHelper.getControllerRenderPos(0);
             e = f = vivecraft$playerPos.x;
         }
 

@@ -65,6 +65,9 @@ accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWith
 # to create custom END shader
 accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
 
+# to render item activation outside of gamerenderer
+accessible method net/minecraft/client/renderer/GameRenderer renderItemActivationAnimation (IIF)V
+
 # to disable destroy delay, on roomscale hitting
 accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
 

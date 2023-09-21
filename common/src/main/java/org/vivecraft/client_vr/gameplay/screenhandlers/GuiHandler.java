@@ -27,6 +27,7 @@ import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.OpenVRUtil;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.math.Matrix4f;
@@ -496,7 +497,7 @@ public class GuiHandler
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY(((float)Math.PI / 10F) * (float)i));
                         scale = 0.58823526F;
                         guilocal = new Vec3(guilocal.x, 0.32D * (double)dh.vrPlayer.vrdata_world_render.worldScale, guilocal.z);
-                        guipos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getControllerRenderPos(1);
+                        guipos = RenderHelper.getControllerRenderPos(1);
                         dh.vr.hudPopup = true;
                     }
                     else if (dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST)
@@ -506,7 +507,7 @@ public class GuiHandler
                         guirot = Matrix4f.multiply(matrix4f8, matrix4f6);
                         guirot = Matrix4f.multiply(guirot, Utils.rotationZMatrix(((float)Math.PI / 2F) * (float)i));
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY(0.9424779F * (float)i));
-                        guipos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getControllerRenderPos(1);
+                        guipos = RenderHelper.getControllerRenderPos(1);
                         dh.vr.hudPopup = true;
                         boolean flag = mc.player.getModelName().equals("slim");
                         scale = 0.4F;

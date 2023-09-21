@@ -68,6 +68,8 @@ import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.extensions.*;
 import org.vivecraft.client_vr.menuworlds.MenuWorldDownloader;
 import org.vivecraft.client_vr.menuworlds.MenuWorldExporter;
+import org.vivecraft.client_vr.render.*;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
@@ -85,10 +87,6 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client.VRPlayersClient;
-import org.vivecraft.client_vr.render.RenderConfigException;
-import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
-import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.LangHelper;
@@ -539,8 +537,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             this.mainRenderTarget = KeyboardHandler.Framebuffer;
             this.mainRenderTarget.clear(Minecraft.ON_OSX);
             this.mainRenderTarget.bindWrite(true);
-            ((GameRendererExtension) this.gameRenderer).vivecraft$drawScreen(f,
-                    KeyboardHandler.UI, guiGraphics);
+            RenderHelper.drawScreen(f, KeyboardHandler.UI, guiGraphics);
             guiGraphics.flush();
         }
         //
@@ -562,7 +559,7 @@ public abstract class MinecraftVRMixin extends ReentrantBlockableEventLoop<Runna
             this.mainRenderTarget = RadialHandler.Framebuffer;
             this.mainRenderTarget.clear(Minecraft.ON_OSX);
             this.mainRenderTarget.bindWrite(true);
-            ((GameRendererExtension) this.gameRenderer).vivecraft$drawScreen(f, RadialHandler.UI, guiGraphics);
+            RenderHelper.drawScreen(f, RadialHandler.UI, guiGraphics);
             guiGraphics.flush();
         }
 

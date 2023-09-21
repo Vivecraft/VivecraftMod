@@ -10,7 +10,7 @@ import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(FishingHookRenderer.class)
@@ -31,7 +31,7 @@ public abstract class FishingHookRendererVRMixin extends EntityRenderer<FishingH
             if (fishingHook.getPlayerOwner().getMainHandItem().getItem() instanceof FishingRodItem) {
                 j = 0;
             }
-            Vec3 vec31 = ((GameRendererExtension) Minecraft.getInstance().gameRenderer).vivecraft$getControllerRenderPos(j);
+            Vec3 vec31 = RenderHelper.getControllerRenderPos(j);
             Vec3 vec32 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getHand(j).getDirection();
             vivecraft$CachedHandPos = vec31.add(vec32.scale(0.47 * ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.worldScale));
             return vivecraft$CachedHandPos.x;

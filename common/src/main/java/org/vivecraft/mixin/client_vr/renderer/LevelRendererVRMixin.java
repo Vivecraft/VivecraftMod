@@ -5,6 +5,7 @@ import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
@@ -160,7 +161,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     public void vivecraft$stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
         if (!RenderPassType.isVanilla()) {
             this.minecraft.getProfiler().popPush("stencil");
-            ((GameRendererExtension) gameRenderer).vivecraft$drawEyeStencil(false);
+            VREffectsHelper.drawEyeStencil(false);
         }
     }
 
@@ -248,12 +249,12 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         vivecraft$menuhandright = vivecraft$menuHandleft || ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar;
 
         if (transparencyChain != null) {
-            ((GameRendererExtension) gameRenderer).vivecraft$renderVRFabulous(f, (LevelRenderer) (Object) this, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+            VREffectsHelper.renderVRFabulous(f, (LevelRenderer) (Object) this, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
         } else {
-            ((GameRendererExtension) gameRenderer).vivecraft$renderVrFast(f, false, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+            VREffectsHelper.renderVrFast(f, false, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
             if (ShadersHelper.isShaderActive() && ClientDataHolderVR.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID) {
                 // shaders active, and render gui before translucents
-                ((GameRendererExtension) gameRenderer).vivecraft$renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+                VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
                 vivecraft$guiRendered = true;
             }
         }
@@ -268,7 +269,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
         if (transparencyChain == null && (!ShadersHelper.isShaderActive() || ClientDataHolderVR.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.AFTER_TRANSLUCENT)) {
             // no shaders, or shaders, and gui after translucents
-            ((GameRendererExtension) gameRenderer).vivecraft$renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+            VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
             vivecraft$guiRendered = true;
         }
     }
@@ -282,7 +283,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
 
         if (!vivecraft$guiRendered && transparencyChain == null) {
-            ((GameRendererExtension) gameRenderer).vivecraft$renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+            VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
             vivecraft$guiRendered = true;
         }
     }

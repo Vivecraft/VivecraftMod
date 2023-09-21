@@ -7,7 +7,6 @@ import com.mojang.math.Axis;
 import org.spongepowered.asm.mixin.*;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -23,14 +22,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.*;
-import org.apache.commons.lang3.tuple.Triple;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -40,6 +35,7 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRArmRenderer;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.VivecraftItemRendering;
+import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.VRState;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
@@ -66,23 +62,6 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 	@Shadow
 	private float offHandHeight;
 
-	@Override
-	@Unique
-	public Triple<Float, BlockState, BlockPos> vivecraft$getNearOpaqueBlock(Vec3 in, double dist) {
-		if (this.minecraft.level == null) {
-			return null;
-		} else {
-			AABB aabb = new AABB(in.subtract(dist, dist, dist), in.add(dist, dist, dist));
-			Stream<BlockPos> stream = BlockPos.betweenClosedStream(aabb).filter((bp) -> {
-				return this.minecraft.level.getBlockState(bp).isViewBlocking(this.minecraft.level, bp);
-			});
-			Optional<BlockPos> optional = stream.findFirst();
-			return optional.isPresent()
-					? Triple.of(1.0F, this.minecraft.level.getBlockState(optional.get()), optional.get())
-					: null;
-		}
-	}
-
 	@Inject(at = @At("HEAD"), method = "renderPlayerArm", cancellable = true)
 	public void vivecraft$overrideArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm, CallbackInfo ci) {
 		if (!VRState.vrRunning) {
@@ -99,17 +78,6 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 		}
 		this.vivecraft$vrRenderArmWithItem(abstractClientPlayer, f, g, interactionHand, h, itemStack, i, poseStack, multiBufferSource, j);
 		ci.cancel();
-	}
-
-	@Override
-	@Unique
-	public boolean vivecraft$isInsideOpaqueBlock(Vec3 in) {
-		if (this.minecraft.level == null) {
-			return false;
-		} else {
-			BlockPos blockpos = BlockPos.containing(in);
-			return this.minecraft.level.getBlockState(blockpos).isSolidRender(this.minecraft.level, blockpos);
-		}
 	}
 
 	@Unique
@@ -192,7 +160,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 				pMatrixStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 				pMatrixStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 				pMatrixStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
-				((GameRendererExtension)this.minecraft.gameRenderer).vivecraft$DrawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
+				VREffectsHelper.drawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
 				pMatrixStack.popPose();
 			}
 			else

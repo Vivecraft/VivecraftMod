@@ -8,10 +8,5 @@ import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 public interface ItemInHandRendererExtension {
-
-	Triple<Float, BlockState, BlockPos> vivecraft$getNearOpaqueBlock(Vec3 position, double minClipDistance);
-
-	boolean vivecraft$isInsideOpaqueBlock(Vec3 vec31);
-
 	void vivecraft$setSwingType(VRFirstPersonArmSwing interact);
 }

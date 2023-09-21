@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr.render;
+package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -24,6 +24,7 @@ import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
+import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client.utils.Utils;
@@ -85,7 +86,7 @@ public class VRWidgetHelper
 
             renderVRCameraWidget(-0.5F, -0.25F, -0.22F, f, RenderPass.CAMERA, CameraTracker.cameraModel, CameraTracker.cameraDisplayModel, () ->
             {
-                if (((ItemInHandRendererExtension) minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).vivecraft$getNearOpaqueBlock(dataholder.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), (double)((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance()) == null)
+                if (VREffectsHelper.getNearOpaqueBlock(dataholder.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance()) == null)
                 {
                 	dataholder.vrRenderer.cameraFramebuffer.bindRead();
                     RenderSystem.setShaderTexture(0, dataholder.vrRenderer.cameraFramebuffer.getColorTextureId());
@@ -107,7 +108,7 @@ public class VRWidgetHelper
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
         poseStack.setIdentity();
-        ((GameRendererExtension) minecraft.gameRenderer).vivecraft$applyVRModelView(dataholder.currentPass, poseStack);
+        RenderHelper.applyVRModelView(dataholder.currentPass, poseStack);
 
         Vec3 vec3 = dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
         Vec3 vec31 = dataholder.vrPlayer.vrdata_world_render.getEye(dataholder.currentPass).getPosition();
@@ -121,7 +122,7 @@ public class VRWidgetHelper
         if (debug)
         {
         	MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
-            ((GameRendererExtension) minecraft.gameRenderer).vivecraft$renderDebugAxes(0, 0, 0, 0.08F);
+            RenderHelper.renderDebugAxes(0, 0, 0, 0.08F);
             MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
         }
 

@@ -24,6 +24,7 @@ import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.OpenVRUtil;
 import org.vivecraft.client_vr.gameplay.VRMovementStyle;
 import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.common.utils.math.Angle;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Quaternion;
@@ -272,7 +273,7 @@ public class TeleportTracker extends Tracker
 
         if (dh.vrSettings.seated)
         {
-            vec3 = ((GameRendererExtension) mc.gameRenderer).vivecraft$getControllerRenderPos(0);
+            vec3 = RenderHelper.getControllerRenderPos(0);
             vec31 = dh.vrPlayer.vrdata_world_render.getController(0).getDirection();
             matrix4f = dh.vr.getAimRotation(0);
         }
