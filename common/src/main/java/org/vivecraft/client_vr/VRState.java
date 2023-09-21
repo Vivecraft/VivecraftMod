@@ -103,8 +103,8 @@ public class VRState {
         vrInitialized = false;
         vrRunning = false;
         if (disableVRSetting) {
-            ClientDataHolderVR.getInstance().vrSettings.vrEnabled = false;
-            ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+            dh.vrSettings.vrEnabled = false;
+            dh.vrSettings.saveOptions();
         }
     }
 
