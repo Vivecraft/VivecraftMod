@@ -824,9 +824,11 @@ public class VREffectsHelper {
                         MethodHolder.rotateDeg(poseStack,
                             -dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F,
                             1.0F, 0.0F);
-                        MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
+                        MethodHolder.rotateDeg(poseStack, 90.0F, 1.0F, 0.0F, 0.0F);
                     }
-                    case WEST, EAST -> MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
+                    case WEST -> MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
+                    case EAST -> MethodHolder.rotateDeg(poseStack, -90.0F, 0.0F, 1.0F, 0.0F);
+                    case SOUTH -> MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
                 }
             } else {
                 MethodHolder.rotateDeg(poseStack,
@@ -846,7 +848,6 @@ public class VREffectsHelper {
             poseStack.scale(scale, scale, scale);
             RenderSystem.depthMask(true);
             RenderSystem.enableDepthTest();
-            RenderSystem.disableCull();
 
             if (depthAlways) {
                 RenderSystem.depthFunc(GL11C.GL_ALWAYS);
@@ -887,7 +888,6 @@ public class VREffectsHelper {
 
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();
-            RenderSystem.enableCull();
             RenderSystem.depthFunc(GL11C.GL_LEQUAL);
             poseStack.popPose();
             mc.getProfiler().pop();
