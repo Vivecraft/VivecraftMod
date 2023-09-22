@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -45,8 +46,11 @@ import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VRArmHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 @Mixin(GameRenderer.class)
@@ -164,6 +168,33 @@ public abstract class GameRendererVRMixin
             return instance.level;
         }
         return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render == null ? null : instance.level;
+    }
+
+    @Inject(at = @At("HEAD"), method = {"shutdownEffect", "checkEntityPostEffect", "cycleEffect", "loadEffect"})
+    public void vivecraft$shutdownEffect(CallbackInfo ci) {
+        if (VRState.vrInitialized) {
+            RenderPassManager.setVanillaRenderPass();
+            if (WorldRenderPass.stereoXR != null && WorldRenderPass.stereoXR.postEffect != null) {
+                WorldRenderPass.stereoXR.postEffect.close();
+                WorldRenderPass.stereoXR.postEffect = null;
+            }
+            if (WorldRenderPass.center != null && WorldRenderPass.center.postEffect != null) {
+                WorldRenderPass.center.postEffect.close();
+                WorldRenderPass.center.postEffect = null;
+            }
+        }
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;resize(II)V", shift = Shift.AFTER), method = "loadEffect")
+    public void vivecraft$loadEffect(ResourceLocation resourceLocation, CallbackInfo ci) throws IOException {
+        if (VRState.vrInitialized) {
+            if (WorldRenderPass.stereoXR != null) {
+                WorldRenderPass.stereoXR.postEffect = WorldRenderPass.createPostChain(resourceLocation, WorldRenderPass.stereoXR.target);
+            }
+            if (WorldRenderPass.center != null) {
+                WorldRenderPass.center.postEffect = WorldRenderPass.createPostChain(resourceLocation, WorldRenderPass.center.target);
+            }
+        }
     }
 
     @ModifyVariable(at = @At("STORE"), method = "pick(F)V", ordinal = 0)

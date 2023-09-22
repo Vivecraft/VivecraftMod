@@ -68,6 +68,9 @@ accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/St
 # to render item activation outside of gamerenderer
 accessible method net/minecraft/client/renderer/GameRenderer renderItemActivationAnimation (IIF)V
 
+# tohave differnt postEffects per pass
+accessible field net/minecraft/client/renderer/GameRenderer postEffect Lnet/minecraft/client/renderer/PostChain;
+
 # to disable destroy delay, on roomscale hitting
 accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
 

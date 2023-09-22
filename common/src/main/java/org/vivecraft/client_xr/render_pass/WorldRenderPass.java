@@ -23,6 +23,7 @@ public class WorldRenderPass implements AutoCloseable {
     public final VRTextureTarget target;
     public final PostChain transparencyChain;
     public final PostChain outlineChain;
+    public PostChain postEffect = null;
 
     public WorldRenderPass(VRTextureTarget target) throws IOException {
         this.target = target;
@@ -34,7 +35,7 @@ public class WorldRenderPass implements AutoCloseable {
         this.outlineChain = createPostChain(new ResourceLocation("shaders/post/entity_outline.json"), this.target);
     }
 
-    private static PostChain createPostChain(ResourceLocation resourceLocation, RenderTarget target) throws IOException {
+    public static PostChain createPostChain(ResourceLocation resourceLocation, RenderTarget target) throws IOException {
         PostChain postchain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), target, resourceLocation);
         postchain.resize(target.viewWidth, target.viewHeight);
         return postchain;
@@ -45,6 +46,9 @@ public class WorldRenderPass implements AutoCloseable {
         outlineChain.resize(width, height);
         if (transparencyChain != null) {
             transparencyChain.resize(width, height);
+        }
+        if (postEffect != null) {
+            postEffect.resize(width, height);
         }
     }
 
