@@ -330,6 +330,16 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
+    @Inject(at = @At(value = "CONSTANT", args = "stringValue=render"), method = "runTick")
+    public void vivecraft$preRender(CallbackInfo ci) {
+        if (VRState.vrRunning) {
+            this.profiler.push("preRender");
+            ClientDataHolderVR.getInstance().vrPlayer.preRender(this.pause ? this.pausePartialTick : this.timer.partialTick);
+            VRHotkeys.updateMovingThirdPersonCam();
+            this.profiler.pop();
+        }
+    }
+
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V"), method = "runTick")
     public boolean vivecraft$setupRenderGUI(boolean renderLevel) {
         if (VRState.vrRunning) {
@@ -364,15 +374,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             return false;
         } else {
             return renderLevel;
-        }
-    }
-
-    @Inject(at = @At(value = "CONSTANT", args = "stringValue=render"), method = "runTick")
-    public void vivecraft$preRender(CallbackInfo ci) {
-        if (VRState.vrRunning) {
-            this.profiler.push("preRender");
-            ClientDataHolderVR.getInstance().vrPlayer.preRender(this.pause ? this.pausePartialTick : this.timer.partialTick);
-            this.profiler.pop();
         }
     }
 
