@@ -28,7 +28,7 @@ public abstract class EndermanMixin extends Monster {
     }
 
     @Inject(at = @At("HEAD"), method = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z", cancellable = true)
-    public void vivecraft$lookAtVR(Player player, CallbackInfoReturnable<Boolean> cir){
+    public void vivecraft$lookAtVR(Player player, CallbackInfoReturnable<Boolean> cir) {
         if (ServerVRPlayers.isVRPlayer((ServerPlayer) player)) {
             cir.setReturnValue(vivecraft$shouldEndermanAttackVRPlayer((EnderMan) (Object) this, (ServerPlayer) player));
         }
@@ -55,5 +55,4 @@ public abstract class EndermanMixin extends Monster {
         Vec3 entityEyePos = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
         return entity.level().clip(new ClipContext(playerEyePos, entityEyePos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS;
     }
-
 }

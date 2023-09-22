@@ -31,5 +31,4 @@ public class EndermanFreezeWhenLookedAtMixin {
             ci.cancel();
         }
     }
-
 }

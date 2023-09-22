@@ -13,9 +13,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
+import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
-import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.server.config.ServerConfig;
 
@@ -101,16 +101,16 @@ public class ServerNetworking {
                 if (ServerConfig.teleportLimitedSurvival.get()) {
                     FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
                     byteBuf.writeUtf("limitedTeleport");
-                    byteBuf.writeUtf(""+true);
+                    byteBuf.writeUtf("" + true);
 
                     byteBuf.writeUtf("teleportLimitUp");
-                    byteBuf.writeUtf(""+ ServerConfig.teleportUpLimit.get());
+                    byteBuf.writeUtf("" + ServerConfig.teleportUpLimit.get());
 
                     byteBuf.writeUtf("teleportLimitDown");
-                    byteBuf.writeUtf(""+ ServerConfig.teleportDownLimit.get());
+                    byteBuf.writeUtf("" + ServerConfig.teleportDownLimit.get());
 
                     byteBuf.writeUtf("teleportLimitHoriz");
-                    byteBuf.writeUtf(""+ ServerConfig.teleportHorizontalLimit.get());
+                    byteBuf.writeUtf("" + ServerConfig.teleportHorizontalLimit.get());
 
                     listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, byteBuf.readByteArray()));
                 }
@@ -118,10 +118,10 @@ public class ServerNetworking {
                 if (ServerConfig.worldscaleLimited.get()) {
                     FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
                     byteBuf.writeUtf("worldScale.min");
-                    byteBuf.writeUtf(""+ ServerConfig.worldscaleMin.get());
+                    byteBuf.writeUtf("" + ServerConfig.worldscaleMin.get());
 
                     byteBuf.writeUtf("worldScale.max");
-                    byteBuf.writeUtf(""+ ServerConfig.worldscaleMax.get());
+                    byteBuf.writeUtf("" + ServerConfig.worldscaleMax.get());
 
                     listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, byteBuf.readByteArray()));
                 }
@@ -131,9 +131,9 @@ public class ServerNetworking {
                 }
 
                 // send if hotswitching is allowed
-                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VR_SWITCHING, new byte[]{(byte)(ServerConfig.vrSwitchingEnabled.get() && !ServerConfig.vr_only.get() ? 1 : 0)}));
+                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VR_SWITCHING, new byte[]{(byte) (ServerConfig.vrSwitchingEnabled.get() && !ServerConfig.vr_only.get() ? 1 : 0)}));
 
-                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.NETWORK_VERSION, new byte[]{(byte)vivePlayer.networkVersion}));
+                listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.NETWORK_VERSION, new byte[]{(byte) vivePlayer.networkVersion}));
 
                 break;
             case IS_VR_ACTIVE:
@@ -218,12 +218,12 @@ public class ServerNetworking {
                     headData.resetReaderIndex().readByte();
 
                     vivePlayer.vrPlayerState = new VrPlayerState(
-                            headData.readBoolean(), // isSeated
-                            org.vivecraft.common.network.Pose.deserialize(headData), // head pose
-                            controller0Data.readBoolean(), // reverseHands 0
-                            org.vivecraft.common.network.Pose.deserialize(controller0Data), // controller0 pose
-                            controller1Data.readBoolean(), // reverseHands 1
-                            org.vivecraft.common.network.Pose.deserialize(controller1Data)); // controller1 pose
+                        headData.readBoolean(), // isSeated
+                        org.vivecraft.common.network.Pose.deserialize(headData), // head pose
+                        controller0Data.readBoolean(), // reverseHands 0
+                        org.vivecraft.common.network.Pose.deserialize(controller0Data), // controller0 pose
+                        controller1Data.readBoolean(), // reverseHands 1
+                        org.vivecraft.common.network.Pose.deserialize(controller1Data)); // controller1 pose
                     // release buffers
                     headData.release();
                     controller0Data.release();

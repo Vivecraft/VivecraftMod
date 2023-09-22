@@ -1,5 +1,7 @@
 {
     "variants": {
-        "": { "model": "vivecraft:camcorder_display" }
+        "": {
+            "model": "vivecraft:camcorder_display"
+        }
     }
 }

@@ -13,15 +13,15 @@ public class AbstractSignEditScreenVRMixin {
 
     @Inject(at = @At("HEAD"), method = "init")
     public void vivecraft$showOverlay(CallbackInfo ci) {
-        if(VRState.vrRunning) {
+        if (VRState.vrRunning) {
             KeyboardHandler.setOverlayShowing(true);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "removed")
     public void vivecraft$dontShowOverlay(CallbackInfo ci) {
-        if(VRState.vrRunning) {
+        if (VRState.vrRunning) {
             KeyboardHandler.setOverlayShowing(false);
-    }
+        }
     }
 }

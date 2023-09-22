@@ -121,7 +121,7 @@
     "vivecraft.options.ALLOW_CRAWLING": "Raumskala Krabbeln",
     "vivecraft.options.LIMIT_TELEPORT": "Limitiere im Überlebensmodus",
     "vivecraft.options.REVERSE_HANDS": "Hände vertauschen",
-    "vivecraft.options.THIRDPERSON_ITEMTRANSFORMS":"Rohe Gegenstand Position",
+    "vivecraft.options.THIRDPERSON_ITEMTRANSFORMS": "Rohe Gegenstand Position",
     "vivecraft.options.STENCIL_ON": "Augenschablone nutzen",
     "vivecraft.options.BCB_ON": "Körperposition Anzeigen",
     "vivecraft.options.WORLD_SCALE": "Welt Skalierung",
@@ -421,12 +421,12 @@
     "vivecraft.gui.update": "§aⓘ§r Update",
     "vivecraft.gui.vr": "%s VR: %s",
 
-    "vivecraft.toasts.move1":"Laufe mit %s",
-    "vivecraft.toasts.move2":"Laufe mit %s und %s",
-    "vivecraft.toasts.move3":"Laufe mit %s, %s und %s",
-    "vivecraft.toasts.move4":"Laufe mit %s, %s, %s und %s",
-    "vivecraft.toasts.point_controller":"Zeige mit deinem %s",
-    "vivecraft.toasts.point_controller.left":"linken Controller",
-    "vivecraft.toasts.point_controller.right":"rechten Controller",
-    "vivecraft.toasts.teleport":"Teleportiere mit %s"
+    "vivecraft.toasts.move1": "Laufe mit %s",
+    "vivecraft.toasts.move2": "Laufe mit %s und %s",
+    "vivecraft.toasts.move3": "Laufe mit %s, %s und %s",
+    "vivecraft.toasts.move4": "Laufe mit %s, %s, %s und %s",
+    "vivecraft.toasts.point_controller": "Zeige mit deinem %s",
+    "vivecraft.toasts.point_controller.left": "linken Controller",
+    "vivecraft.toasts.point_controller.right": "rechten Controller",
+    "vivecraft.toasts.teleport": "Teleportiere mit %s"
 }

@@ -474,9 +474,9 @@ public class VREffectsHelper {
         TextureAtlasSprite fireSprite = ModelBakery.FIRE_1.sprite();
         RenderSystem.enableDepthTest();
 
-		if (OptifineHelper.isOptifineLoaded()) {
+        if (OptifineHelper.isOptifineLoaded()) {
             OptifineHelper.markTextureAsActive(fireSprite);
-		}
+        }
 
         // code adapted from net.minecraft.client.renderer.ScreenEffectRenderer.renderFire
 
@@ -585,7 +585,7 @@ public class VREffectsHelper {
             if (mc.screen == null) {
                 color[3] = dataHolder.vrSettings.hudOpacity;
             }
-            if (noFog || mc.screen != null){
+            if (noFog || mc.screen != null) {
                 // disable fog for menus
                 RenderSystem.setShaderFogStart(Float.MAX_VALUE);
             }
@@ -779,7 +779,7 @@ public class VREffectsHelper {
             || VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT)) {
             return false;
         } else if (dataHolder.teleportTracker.isAiming()) {
-                return false;
+            return false;
         } else if (dataHolder.climbTracker.isGrabbingLadder(0)) {
             return false;
         } else if (dataHolder.vrPlayer.worldScale > 15.0F) {
@@ -826,7 +826,7 @@ public class VREffectsHelper {
                             1.0F, 0.0F);
                         MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
                     }
-                    case WEST,EAST -> MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
+                    case WEST, EAST -> MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
                 }
             } else {
                 MethodHolder.rotateDeg(poseStack,

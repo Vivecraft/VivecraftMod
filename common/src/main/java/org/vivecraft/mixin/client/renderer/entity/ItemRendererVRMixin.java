@@ -1,7 +1,5 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -19,8 +17,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
@@ -41,8 +41,7 @@ public class ItemRendererVRMixin {
 
         if (localplayer != null && ClientDataHolderVR.isfphand) {
             this.vivecraft$fade = SwingTracker.getItemFade(localplayer, itemStack);
-        }
-        else {
+        } else {
             this.vivecraft$fade = this.vivecraft$manualFade;
         }
     }
@@ -60,11 +59,9 @@ public class ItemRendererVRMixin {
     public int vivecraft$specialItems(int color, PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack) {
         if (ClientDataHolderVR.getInstance().jumpTracker.isBoots(itemStack)) {
             return this.vivecraft$makeColor(1, 0, 255, 0);
-        }
-        else if (ClientDataHolderVR.getInstance().climbTracker.isClaws(itemStack)) {
+        } else if (ClientDataHolderVR.getInstance().climbTracker.isClaws(itemStack)) {
             return this.vivecraft$makeColor(1, 130, 0, 75);
-        }
-        else if (TelescopeTracker.isLegacyTelescope(itemStack)) {
+        } else if (TelescopeTracker.isLegacyTelescope(itemStack)) {
             return this.vivecraft$makeColor(1, 190, 110, 135);
         }
         return color;
@@ -74,5 +71,4 @@ public class ItemRendererVRMixin {
     private int vivecraft$makeColor(int a, int r, int g, int b) {
         return a << 24 | r << 16 | g << 8 | b;
     }
-
 }

@@ -74,13 +74,13 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
     }
 
     @Redirect(method = "getProgramOverride", at = @At(value = "INVOKE", target = "Ljava/util/EnumMap;get(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
-    public Object vivecraft$getVRPipelineShaders(EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> instance, Object key){
+    public Object vivecraft$getVRPipelineShaders(EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> instance, Object key) {
         // return shader of the current RenderPass
-        return !RenderPassType.isVanilla() ? vivecraft$pipelinePrograms.get(ClientDataHolderVR.getInstance().currentPass).get((IrisTerrainPass)key) : instance.get((IrisTerrainPass)key);
+        return !RenderPassType.isVanilla() ? vivecraft$pipelinePrograms.get(ClientDataHolderVR.getInstance().currentPass).get((IrisTerrainPass) key) : instance.get((IrisTerrainPass) key);
     }
 
     @Inject(method = "deleteShaders", at = @At("HEAD"), remap = false)
-    public void vivecraft$deleteVRPipelineShaders(CallbackInfo ci){
+    public void vivecraft$deleteVRPipelineShaders(CallbackInfo ci) {
         if (VRState.vrInitialized) {
             for (EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> map : vivecraft$pipelinePrograms.values()) {
                 for (GlProgram<?> program : map.values()) {

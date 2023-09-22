@@ -1,49 +1,50 @@
 package org.vivecraft.mixin.client_vr.player;
 
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.world.level.Level;
-import org.spongepowered.asm.mixin.injection.*;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.CommonNetworkHelper;
-import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
-import org.vivecraft.client_vr.extensions.PlayerExtension;
+import com.mojang.authlib.GameProfile;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.Input;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.asm.mixin.*;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jinfinadeck;
 import org.vivecraft.client_vr.utils.external.jkatvr;
-
-import com.mojang.authlib.GameProfile;
-
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
-import net.minecraft.world.phys.Vec3;
+import org.vivecraft.common.network.CommonNetworkHelper;
 
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements PlayerExtension {
@@ -99,20 +100,20 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         }
     }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.BEFORE), method = "tick")
-	public void vivecraft$overrideLookPre(CallbackInfo ci) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.BEFORE), method = "tick")
+    public void vivecraft$overrideLookPre(CallbackInfo ci) {
         if (VRState.vrRunning) {
             ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
         }
-	}
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.AFTER), method = "tick")
-	public void vivecraft$overridePose(CallbackInfo ci) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.AFTER), method = "tick")
+    public void vivecraft$overridePose(CallbackInfo ci) {
         if (VRState.vrRunning) {
             ClientNetworking.overridePose((LocalPlayer) (Object) this);
             ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
         }
-	}
+    }
 
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isPassenger()Z"), ordinal = 2, method = "sendPosition")
     private boolean vivecraft$directTeleport(boolean updateRotation) {
@@ -172,19 +173,19 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         if (pPos.length() != 0.0D && !this.isPassenger()) {
             boolean flag = VRPlayer.get().getFreeMove();
             boolean flag1 = flag || ClientDataHolderVR.getInstance().vrSettings.simulateFalling && !this.onClimbable()
-                    && !this.isShiftKeyDown();
+                && !this.isShiftKeyDown();
 
             if (ClientDataHolderVR.getInstance().climbTracker.isActive((LocalPlayer) (Object) this)
-                    && (flag || ClientDataHolderVR.getInstance().climbTracker.isGrabbingLadder())) {
+                && (flag || ClientDataHolderVR.getInstance().climbTracker.isGrabbingLadder())) {
                 flag1 = true;
             }
 
             Vec3 vec3 = VRPlayer.get().roomOrigin;
 
             if ((ClientDataHolderVR.getInstance().climbTracker.isGrabbingLadder() || flag
-                    || ClientDataHolderVR.getInstance().swimTracker.isActive((LocalPlayer) (Object) this))
-                    && (this.zza != 0.0F || this.isFallFlying() || Math.abs(this.getDeltaMovement().x) > 0.01D
-                    || Math.abs(this.getDeltaMovement().z) > 0.01D)) {
+                || ClientDataHolderVR.getInstance().swimTracker.isActive((LocalPlayer) (Object) this))
+                && (this.zza != 0.0F || this.isFallFlying() || Math.abs(this.getDeltaMovement().x) > 0.01D
+                || Math.abs(this.getDeltaMovement().z) > 0.01D)) {
                 double d0 = vec3.x - this.getX();
                 double d1 = vec3.z - this.getZ();
                 double d2 = this.getX();
@@ -203,7 +204,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             } else if (flag1) {
                 super.move(pType, new Vec3(0.0D, pPos.y, 0.0D));
                 VRPlayer.get().setRoomOrigin(VRPlayer.get().roomOrigin.x, this.getY() + this.vivecraft$getRoomYOffsetFromPose(),
-                        VRPlayer.get().roomOrigin.z, false);
+                    VRPlayer.get().roomOrigin.z, false);
             } else {
                 this.setOnGround(true);
             }
@@ -219,7 +220,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         double d0 = 0.0D;
 
         if (this.getPose() == Pose.FALL_FLYING || this.getPose() == Pose.SPIN_ATTACK
-                || this.getPose() == Pose.SWIMMING && !ClientDataHolderVR.getInstance().crawlTracker.crawlsteresis) {
+            || this.getPose() == Pose.SWIMMING && !ClientDataHolderVR.getInstance().crawlTracker.crawlsteresis) {
             d0 = -1.2D;
         }
 
@@ -291,7 +292,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         } else {
             Vec3 vec31 = ClientDataHolderVR.getInstance().vrPlayer.roomOrigin;
             VRPlayer.get().setRoomOrigin(vec31.x + (d3 - d0), vec31.y + (d4 - d1), vec31.z + (d5 - d2),
-                    pX + p_20211_ + pY == 0.0D);
+                pX + p_20211_ + pY == 0.0D);
         }
     }
 
@@ -534,6 +535,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         ClientNetworking.sendActiveHand((byte) this.getUsedItemHand().ordinal());
         super.releaseUsingItem();
     }
+
     @Override
     @Unique
     public void vivecraft$setItemInUseClient(ItemStack item, InteractionHand hand) {

@@ -421,12 +421,12 @@
     "vivecraft.gui.update": "§aⓘ§r Update",
     "vivecraft.gui.vr": "%s VR: %s",
 
-    "vivecraft.toasts.move1":"Move with %s",
-    "vivecraft.toasts.move2":"Move with %s and %s",
-    "vivecraft.toasts.move3":"Move with %s, %s and %s",
-    "vivecraft.toasts.move4":"Move with %s, %s, %s and %s",
-    "vivecraft.toasts.point_controller":"Point with your %s",
-    "vivecraft.toasts.point_controller.left":"left Controller",
-    "vivecraft.toasts.point_controller.right":"right Controller",
-    "vivecraft.toasts.teleport":"Teleport with %s"
+    "vivecraft.toasts.move1": "Move with %s",
+    "vivecraft.toasts.move2": "Move with %s and %s",
+    "vivecraft.toasts.move3": "Move with %s, %s and %s",
+    "vivecraft.toasts.move4": "Move with %s, %s, %s and %s",
+    "vivecraft.toasts.point_controller": "Point with your %s",
+    "vivecraft.toasts.point_controller.left": "left Controller",
+    "vivecraft.toasts.point_controller.right": "right Controller",
+    "vivecraft.toasts.teleport": "Teleport with %s"
 }

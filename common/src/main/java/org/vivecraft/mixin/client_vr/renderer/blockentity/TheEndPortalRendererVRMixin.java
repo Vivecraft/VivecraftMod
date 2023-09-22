@@ -38,9 +38,10 @@ public class TheEndPortalRendererVRMixin {
                     .createCompositeState(false));
 
     @Inject(at = @At("HEAD"), method = "renderType", cancellable = true)
-    private void vivecraft$differentShaderInVR(CallbackInfoReturnable<RenderType> cir){
-        if (!RenderPassType.isVanilla()){
-            cir.setReturnValue(vivecraft$END_PORTAL_VR);;
+    private void vivecraft$differentShaderInVR(CallbackInfoReturnable<RenderType> cir) {
+        if (!RenderPassType.isVanilla()) {
+            cir.setReturnValue(vivecraft$END_PORTAL_VR);
+            ;
         }
     }
 }

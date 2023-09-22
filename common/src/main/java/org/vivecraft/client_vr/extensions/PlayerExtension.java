@@ -1,32 +1,36 @@
 package org.vivecraft.client_vr.extensions;
 
-import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 public interface PlayerExtension {
 
-	int vivecraft$getMovementTeleportTimer();
-	void vivecraft$setMovementTeleportTimer(int value);
+    int vivecraft$getMovementTeleportTimer();
 
-	void vivecraft$setTeleported(boolean teleported);
+    void vivecraft$setMovementTeleportTimer(int value);
 
-	void vivecraft$setItemInUseClient(ItemStack itemstack1, InteractionHand interactionhand);
+    void vivecraft$setTeleported(boolean teleported);
 
-	void vivecraft$setItemInUseCountClient(int i);
+    void vivecraft$setItemInUseClient(ItemStack itemstack1, InteractionHand interactionhand);
 
-	boolean vivecraft$isClimbeyClimbEquipped();
+    void vivecraft$setItemInUseCountClient(int i);
 
-	void vivecraft$stepSound(BlockPos blockpos, Vec3 vec3);
+    boolean vivecraft$isClimbeyClimbEquipped();
 
-	void vivecraft$swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact);
+    void vivecraft$stepSound(BlockPos blockpos, Vec3 vec3);
 
-	boolean vivecraft$isClimbeyJumpEquipped();
-	float vivecraft$getMuhJumpFactor();
-	float vivecraft$getMuhSpeedFactor();
-	double vivecraft$getRoomYOffsetFromPose();
-	boolean vivecraft$getInitFromServer();
+    void vivecraft$swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact);
+
+    boolean vivecraft$isClimbeyJumpEquipped();
+
+    float vivecraft$getMuhJumpFactor();
+
+    float vivecraft$getMuhSpeedFactor();
+
+    double vivecraft$getRoomYOffsetFromPose();
+
+    boolean vivecraft$getInitFromServer();
 }

@@ -60,7 +60,7 @@ public class VRPassHelper {
             if (dataHolder.vrSettings.useFOVReduction
                 && dataHolder.vrPlayer.getFreeMove()) {
                 if (mc.player != null && (Math.abs(mc.player.zza) > 0.0F || Math.abs(mc.player.xxa) > 0.0F)) {
-                    fovReduction =  fovReduction - 0.05F;
+                    fovReduction = fovReduction - 0.05F;
 
                     if (fovReduction < dataHolder.vrSettings.fovReductionMin) {
                         fovReduction = dataHolder.vrSettings.fovReductionMin;
@@ -203,6 +203,5 @@ public class VRPassHelper {
         if (GlStateManager._getError() != 0) {
             System.err.println(string);
         }
-
     }
 }

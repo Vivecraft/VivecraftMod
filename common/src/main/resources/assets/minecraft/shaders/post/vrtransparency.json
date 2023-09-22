@@ -6,9 +6,9 @@
         "particles",
         "clouds",
         "weather",
-		"vroccluded",
-		"vrunoccluded",
-		"vrhands",
+        "vroccluded",
+        "vrunoccluded",
+        "vrhands",
         "final"
     ],
     "passes": [

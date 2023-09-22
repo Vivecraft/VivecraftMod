@@ -1,22 +1,22 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "E E",
-    "S S"
-  ],
-  "key": {
-    "E": {
-      "item": "minecraft:spider_eye"
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "E E",
+        "S S"
+    ],
+    "key": {
+        "E": {
+            "item": "minecraft:spider_eye"
+        },
+        "S": {
+            "item": "minecraft:shears"
+        }
     },
-    "S": {
-      "item": "minecraft:shears"
+    "result": {
+        "item": "vivecraft:climbclaws",
+        "vanillaitem": "minecraft:shears",
+        "name": "vivecraft.item.climbclaws",
+        "hideflags": 4,
+        "unbreakable": true
     }
-  },
-  "result": {
-    "item": "vivecraft:climbclaws",
-    "vanillaitem": "minecraft:shears",
-    "name": "vivecraft.item.climbclaws",
-    "hideflags": 4,
-    "unbreakable": true
-  }
 }

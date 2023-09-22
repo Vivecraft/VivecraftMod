@@ -11,7 +11,6 @@ public class ResolutionControlHelper {
     }
 
     public static float getCurrentScaleFactor() {
-        return Config.getInstance().enableDynamicResolution ? (float)DynamicResolutionHandler.INSTANCE.getCurrentScale() : Config.getInstance().scaleFactor;
+        return Config.getInstance().enableDynamicResolution ? (float) DynamicResolutionHandler.INSTANCE.getCurrentScale() : Config.getInstance().scaleFactor;
     }
-
 }

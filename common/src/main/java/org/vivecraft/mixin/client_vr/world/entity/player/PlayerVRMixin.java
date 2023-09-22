@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Player.class)
 public class PlayerVRMixin {
-    
+
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/AABB;move(DDD)Lnet/minecraft/world/phys/AABB;"), method = "maybeBackOffFromEdge")
     private AABB vivecraft$moveSidewaysExtendDown(AABB instance, double x, double y, double z) {
         // this is to fix an issue with a maxStepUp size of 1 and trapdoors

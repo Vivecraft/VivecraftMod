@@ -1,47 +1,47 @@
 {
-  "schemaVersion": 1,
-  "id": "vivecraft",
-  "version": "${version}",
+    "schemaVersion": 1,
+    "id": "vivecraft",
+    "version": "${version}",
 
-  "name": "Vivecraft",
-  "description": "The VR mod for any loader!",
-  "icon": "vivecraft_icon.png",
-  "authors": [
-    "fayer3",
-    "Ferri_Arnus",
-    "IMS",
-    "jrbudda",
-    "minecraft player"
-  ],
-
-  "license": "LGPLv3",
-
-  "environment": "*",
-  "entrypoints": {
-    "mm:early_risers": [
-      "org.vivecraft.VivecraftEarlyEntryForOptifabric"
+    "name": "Vivecraft",
+    "description": "The VR mod for any loader!",
+    "icon": "vivecraft_icon.png",
+    "authors": [
+        "fayer3",
+        "Ferri_Arnus",
+        "IMS",
+        "jrbudda",
+        "minecraft player"
     ],
-    "main": [
-      "org.vivecraft.fabric.VivecraftMod"
-    ]
-  },
-  "mixins": [
-    "vivecraft.mixins.json",
-    "vivecraft.dynamicfps.mixins.json",
-    "vivecraft.sodium.mixins.json",
-    "vivecraft.fabric.sodium.mixins.json",
-    "vivecraft.iris.mixins.json",
-    "vivecraft.physicsmod.mixins.json",
-    "vivecraft.rei.mixins.json",
-    "vivecraft.resolutioncontrol.mixins.json",
-    "vivecraft.fabric.mixins.json"
-  ],
-  "depends": {
-    "fabricloader": ">=0.14.14",
-    "minecraft": ["1.20", "1.20.1"],
-    "java": ">=17"
-  },
-  "suggests": {
-    "another-mod": "*"
-  }
+
+    "license": "LGPLv3",
+
+    "environment": "*",
+    "entrypoints": {
+        "mm:early_risers": [
+            "org.vivecraft.VivecraftEarlyEntryForOptifabric"
+        ],
+        "main": [
+            "org.vivecraft.fabric.VivecraftMod"
+        ]
+    },
+    "mixins": [
+        "vivecraft.mixins.json",
+        "vivecraft.dynamicfps.mixins.json",
+        "vivecraft.sodium.mixins.json",
+        "vivecraft.fabric.sodium.mixins.json",
+        "vivecraft.iris.mixins.json",
+        "vivecraft.physicsmod.mixins.json",
+        "vivecraft.rei.mixins.json",
+        "vivecraft.resolutioncontrol.mixins.json",
+        "vivecraft.fabric.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=0.14.14",
+        "minecraft": ["1.20", "1.20.1"],
+        "java": ">=17"
+    },
+    "suggests": {
+        "another-mod": "*"
+    }
 }

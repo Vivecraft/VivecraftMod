@@ -56,10 +56,10 @@ dependencies {
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
 
     // shadow the natives
-    bundle ("org.lwjgl:lwjgl-openvr:3.3.1") { transitive = false }
-    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
-    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
-    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.1") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }
 }
 
 processResources {
@@ -75,8 +75,8 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [
-            project.configurations.shadowCommon,
-            project.configurations.bundle
+        project.configurations.shadowCommon,
+        project.configurations.bundle
     ]
     archiveClassifier.set("dev-shadow")
 }
@@ -91,7 +91,7 @@ jar {
     archiveClassifier.set("dev")
     manifest {
         attributes(
-                'Main-Class': "org.vivecraft.LaunchPopup"
+            'Main-Class': "org.vivecraft.LaunchPopup"
         )
     }
 }

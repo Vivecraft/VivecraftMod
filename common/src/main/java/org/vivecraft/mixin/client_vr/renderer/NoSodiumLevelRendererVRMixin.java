@@ -1,11 +1,9 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
-import org.spongepowered.asm.mixin.Final;
-import org.vivecraft.client_vr.VRState;
-import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client_vr.VRState;
+import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

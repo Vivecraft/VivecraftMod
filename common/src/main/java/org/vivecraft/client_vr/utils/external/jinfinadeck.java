@@ -7,8 +7,7 @@ import com.sun.jna.ptr.DoubleByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
 
-public class jinfinadeck implements Library
-{
+public class jinfinadeck implements Library {
     public static final String INFINADECK_LIBRARY_NAME = "InfinadeckAPI.dll";
     public static final NativeLibrary INFINADECK_NATIVE_LIB = NativeLibrary.getInstance("InfinadeckAPI.dll");
     static float yaw;
@@ -37,71 +36,57 @@ public class jinfinadeck implements Library
 
     public static native double GetFloorSpeedMagnitude();
 
-    public static boolean InitConnection()
-    {
+    public static boolean InitConnection() {
         IntByReference intbyreference = new IntByReference();
         InitInternal(intbyreference, false);
 
-        if (intbyreference.getValue() != 0)
-        {
+        if (intbyreference.getValue() != 0) {
             InitInternal(intbyreference, true);
         }
 
         return intbyreference.getValue() == 0;
     }
 
-    public static void Destroy()
-    {
+    public static void Destroy() {
         DeInitInternal();
     }
 
-    public static void query()
-    {
-        try
-        {
-            if (CheckConnection())
-            {
+    public static void query() {
+        try {
+            if (CheckConnection()) {
             }
 
-            yaw = (float)GetFloorSpeedAngle();
+            yaw = (float) GetFloorSpeedAngle();
             power = GetFloorSpeedMagnitude();
             direction = 1;
             ismoving = GetTreadmillRunState();
             yaw *= 57.296F;
-        }
-        catch (Exception exception)
-        {
+        } catch (Exception exception) {
             System.out.println("Infinadeck Error: " + exception.getMessage());
         }
     }
 
-    public static float getYaw()
-    {
+    public static float getYaw() {
         return yaw - yawOffset;
     }
 
-    public static boolean isMoving()
-    {
+    public static boolean isMoving() {
         return true;
     }
 
-    public static void resetYaw(float offsetDegrees)
-    {
+    public static void resetYaw(float offsetDegrees) {
         yawOffset = offsetDegrees + yaw;
     }
 
-    public static float walkDirection()
-    {
-        return (float)direction;
+    public static float walkDirection() {
+        return (float) direction;
     }
 
-    public static float getSpeed()
-    {
-        return (float)(power / (double)maxpower * (double)(walkDirection() == 1.0F ? mag : bmag));
+    public static float getSpeed() {
+        return (float) (power / (double) maxpower * (double) (walkDirection() == 1.0F ? mag : bmag));
     }
 
-    static
-    {
+    static {
         Native.register(jinfinadeck.class, INFINADECK_NATIVE_LIB);
     }
 }

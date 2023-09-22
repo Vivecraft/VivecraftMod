@@ -10,22 +10,16 @@ import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderPass;
 
-public class NullVRStereoRenderer extends VRRenderer
-{
-    public NullVRStereoRenderer(MCVR vr)
-    {
+public class NullVRStereoRenderer extends VRRenderer {
+    public NullVRStereoRenderer(MCVR vr) {
         super(vr);
     }
 
     @Override
-    public Tuple<Integer, Integer> getRenderTextureSizes()
-    {
-        if (this.resolution != null)
-        {
+    public Tuple<Integer, Integer> getRenderTextureSizes() {
+        if (this.resolution != null) {
             return this.resolution;
-        }
-        else
-        {
+        } else {
             this.resolution = new Tuple<>(2048, 2048);
             System.out.println("NullVR Render Res " + this.resolution.getA() + " x " + this.resolution.getB());
             this.ss = -1.0F;
@@ -36,20 +30,17 @@ public class NullVRStereoRenderer extends VRRenderer
     }
 
     @Override
-    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip)
-    {
+    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
         return new Matrix4f().setPerspective(90.0F, 1.0F, nearClip, farClip);
     }
 
     @Override
-    public String getLastError()
-    {
+    public String getLastError() {
         return "";
     }
 
     @Override
-    public void createRenderTexture(int lwidth, int lheight)
-    {
+    public void createRenderTexture(int lwidth, int lheight) {
         this.LeftEyeTextureId = GlStateManager._genTexture();
         int i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
         RenderSystem.bindTexture(this.LeftEyeTextureId);
@@ -68,38 +59,32 @@ public class NullVRStereoRenderer extends VRRenderer
     }
 
     @Override
-    public void endFrame()
-    {
+    public void endFrame() {
     }
 
     @Override
-    public boolean providesStencilMask()
-    {
+    public boolean providesStencilMask() {
         return false;
     }
 
 
     @Override
-    public float[] getStencilMask(RenderPass eye)
-    {
+    public float[] getStencilMask(RenderPass eye) {
         return null;
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return "NullVR";
     }
 
     @Override
-    public boolean isInitialized()
-    {
+    public boolean isInitialized() {
         return this.vr.initSuccess;
     }
 
     @Override
-    public String getinitError()
-    {
+    public String getinitError() {
         return this.vr.initStatus;
     }
 

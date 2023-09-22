@@ -33,9 +33,9 @@ public class UpdateScreen extends Screen {
             } catch (URISyntaxException ignored) {
             }
         })
-                .pos(this.width / 2 - 155, this.height - 56)
-                .size(150, 20)
-                .build());
+            .pos(this.width / 2 - 155, this.height - 56)
+            .size(150, 20)
+            .build());
 
         this.addRenderableWidget(new Button.Builder(Component.literal("Download from Curseforge"), (p) -> {
             try {
@@ -43,15 +43,15 @@ public class UpdateScreen extends Screen {
             } catch (URISyntaxException ignored) {
             }
         })
-                .pos(this.width / 2 + 5, this.height - 56)
-                .size(150, 20)
-                .build());
+            .pos(this.width / 2 + 5, this.height - 56)
+            .size(150, 20)
+            .build());
 
         this.addRenderableWidget(new Button.Builder(Component.translatable("gui.back"), (p) ->
-                Minecraft.getInstance().setScreen(this.lastScreen))
-                .pos(this.width / 2 - 75, this.height - 32)
-                .size(150, 20)
-                .build());
+            Minecraft.getInstance().setScreen(this.lastScreen))
+            .pos(this.width / 2 - 75, this.height - 32)
+            .size(150, 20)
+            .build());
     }
 
     @Override

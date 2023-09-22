@@ -1,17 +1,14 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
-public abstract class Tracker
-{
+public abstract class Tracker {
     public Minecraft mc;
     public ClientDataHolderVR dh;
 
-    public Tracker(Minecraft mc, ClientDataHolderVR dh)
-    {
+    public Tracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;
         this.dh = dh;
     }
@@ -20,21 +17,17 @@ public abstract class Tracker
 
     public abstract void doProcess(LocalPlayer var1);
 
-    public void reset(LocalPlayer player)
-    {
+    public void reset(LocalPlayer player) {
     }
 
-    public void idleTick(LocalPlayer player)
-    {
+    public void idleTick(LocalPlayer player) {
     }
 
-    public EntryPoint getEntryPoint()
-    {
+    public EntryPoint getEntryPoint() {
         return EntryPoint.LIVING_UPDATE;
     }
 
-    public static enum EntryPoint
-    {
+    public static enum EntryPoint {
         LIVING_UPDATE,
         SPECIAL_ITEMS;
     }

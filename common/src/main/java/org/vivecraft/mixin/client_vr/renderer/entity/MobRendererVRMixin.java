@@ -1,6 +1,5 @@
 package org.vivecraft.mixin.client_vr.renderer.entity;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.world.entity.Entity;
@@ -8,6 +7,7 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(MobRenderer.class)

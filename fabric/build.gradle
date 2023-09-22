@@ -101,7 +101,7 @@ jar {
     archiveClassifier.set("dev")
     manifest {
         attributes(
-                'Main-Class': "org.vivecraft.LaunchPopup"
+            'Main-Class': "org.vivecraft.LaunchPopup"
         )
     }
 }

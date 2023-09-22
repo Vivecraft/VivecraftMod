@@ -1,21 +1,24 @@
 package org.vivecraft.mixin.client_vr;
 
-import net.minecraft.client.player.LocalPlayer;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
+import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.provider.MCVR;
 
 @Mixin(MouseHandler.class)
 public class MouseHandlerVRMixin {
 
-    @Shadow private boolean mouseGrabbed;
+    @Shadow
+    private boolean mouseGrabbed;
     @Final
     @Shadow
     private Minecraft minecraft;
@@ -46,7 +49,7 @@ public class MouseHandlerVRMixin {
             // this.minecraft.getTutorial().onMouse(1.0 - MCVR.get().hmdHistory.averagePosition(0.2).subtract(MCVR.get().hmdPivotHistory.averagePosition(0.2)).normalize().dot(MCVR.get().hmdHistory.averagePosition(1.0).subtract(MCVR.get().hmdPivotHistory.averagePosition(1.0)).normalize()),0);
             // controller movement
             int mainController = ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0;
-            this.minecraft.getTutorial().onMouse(1.0 - MCVR.get().controllerForwardHistory[mainController].averagePosition(0.2).normalize().dot(MCVR.get().controllerForwardHistory[mainController].averagePosition(1.0).normalize()),0);
+            this.minecraft.getTutorial().onMouse(1.0 - MCVR.get().controllerForwardHistory[mainController].averagePosition(0.2).normalize().dot(MCVR.get().controllerForwardHistory[mainController].averagePosition(1.0).normalize()), 0);
             ci.cancel();
         }
     }

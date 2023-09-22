@@ -19,5 +19,4 @@ public class IrisRenderSystemVRMixin {
             cir.setReturnValue(false);
         }
     }
-
 }

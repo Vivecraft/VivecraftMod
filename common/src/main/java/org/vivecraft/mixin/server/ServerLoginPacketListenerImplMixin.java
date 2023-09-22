@@ -16,5 +16,4 @@ public class ServerLoginPacketListenerImplMixin {
         ServerUtil.scheduleWelcomeMessageOrKick(serverPlayer);
         ServerUtil.sendUpdateNotificationIfOP(serverPlayer);
     }
-
 }

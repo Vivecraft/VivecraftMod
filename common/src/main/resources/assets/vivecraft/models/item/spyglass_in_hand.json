@@ -7,23 +7,56 @@
             "from": [7, 8.5, 7],
             "to": [9, 13.5, 9],
             "faces": {
-                "north": {"uv": [0, 2, 2, 7], "texture": "#spyglass"},
-                "east": {"uv": [0, 2, 2, 7], "texture": "#spyglass"},
-                "south": {"uv": [0, 2, 2, 7], "texture": "#spyglass"},
-                "west": {"uv": [0, 2, 2, 7], "texture": "#spyglass"},
-                "up": {"uv": [0, 0, 2, 2], "texture": "#spyglass"}
+                "north": {
+                    "uv": [0, 2, 2, 7],
+                    "texture": "#spyglass"
+                },
+                "east": {
+                    "uv": [0, 2, 2, 7],
+                    "texture": "#spyglass"
+                },
+                "south": {
+                    "uv": [0, 2, 2, 7],
+                    "texture": "#spyglass"
+                },
+                "west": {
+                    "uv": [0, 2, 2, 7],
+                    "texture": "#spyglass"
+                },
+                "up": {
+                    "uv": [0, 0, 2, 2],
+                    "texture": "#spyglass"
+                }
             }
         },
         {
             "from": [6.9, 2.4, 6.9],
             "to": [9.1, 8.6, 9.1],
             "faces": {
-                "north": {"uv": [0, 7, 2, 13], "texture": "#spyglass"},
-                "east": {"uv": [0, 7, 2, 13], "texture": "#spyglass"},
-                "south": {"uv": [0, 7, 2, 13], "texture": "#spyglass"},
-                "west": {"uv": [0, 7, 2, 13], "texture": "#spyglass"},
-                "up": {"uv": [0, 5, 2, 7], "texture": "#spyglass"},
-                "down": {"uv": [0, 13, 2, 15], "texture": "#spyglass"}
+                "north": {
+                    "uv": [0, 7, 2, 13],
+                    "texture": "#spyglass"
+                },
+                "east": {
+                    "uv": [0, 7, 2, 13],
+                    "texture": "#spyglass"
+                },
+                "south": {
+                    "uv": [0, 7, 2, 13],
+                    "texture": "#spyglass"
+                },
+                "west": {
+                    "uv": [0, 7, 2, 13],
+                    "texture": "#spyglass"
+                },
+                "up": {
+                    "uv": [0, 5, 2, 7],
+                    "texture": "#spyglass"
+                },
+                "down": {
+                    "uv": [0, 13, 2, 15],
+                    "texture": "#spyglass"
+                }
             }
         }
     ],

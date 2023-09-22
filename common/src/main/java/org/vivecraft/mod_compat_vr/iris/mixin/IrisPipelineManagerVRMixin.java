@@ -30,7 +30,9 @@ import java.util.function.Function;
 public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Shadow(remap = false)
-    private void resetTextureState(){}
+    private void resetTextureState() {
+    }
+
     @Shadow(remap = false)
     private WorldRenderingPipeline pipeline;
     @Shadow(remap = false)
@@ -39,6 +41,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Unique
     private ShadowRenderTargets vivecraft$shadowRenderTargets;
+
     @Override
     @Unique
     public ShadowRenderTargets vivecraft$getShadowRenderTargets() {
@@ -56,10 +59,11 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     @Unique
     private WorldRenderingPipeline vivecraft$vanillaPipeline;
     @Unique
-    private  Map<RenderPass, WorldRenderingPipeline> vivecraft$vrPipelinesCurrentDimension;
+    private Map<RenderPass, WorldRenderingPipeline> vivecraft$vrPipelinesCurrentDimension;
 
     @Unique
     private WorldRenderPass vivecraft$currentWorldRenderPass = null;
+
     @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.BEFORE), remap = false)
     private void vivecraft$generateVanillaPipeline(CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         // this also runs on game startup, when the renderpassManager isn't initialized yet
@@ -181,13 +185,13 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Override
     @Unique
-    public WorldRenderingPipeline vivecraft$getVRPipeline(RenderPass pass){
+    public WorldRenderingPipeline vivecraft$getVRPipeline(RenderPass pass) {
         return vivecraft$vrPipelinesCurrentDimension.get(pass);
     }
 
     @Override
     @Unique
-    public WorldRenderingPipeline vivecraft$getVanillaPipeline(){
+    public WorldRenderingPipeline vivecraft$getVanillaPipeline() {
         return vivecraft$vanillaPipeline;
     }
 }

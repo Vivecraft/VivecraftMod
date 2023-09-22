@@ -1,19 +1,22 @@
 package org.vivecraft.mixin.client.gui.screens;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.*;
-import net.minecraft.client.gui.screens.*;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client.gui.screens.UpdateScreen;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
@@ -42,7 +45,7 @@ public abstract class TitleScreenMixin extends Screen {
     @Unique
     private void vivecraft$addVRModeButton() {
 
-        vivecraft$vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", vivecraft$getIcon() , VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
+        vivecraft$vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", vivecraft$getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
             vivecraft$showError = false;
             VRState.vrEnabled = !VRState.vrEnabled;
             ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
@@ -50,16 +53,16 @@ public abstract class TitleScreenMixin extends Screen {
 
             button.setMessage(Component.translatable("vivecraft.gui.vr", vivecraft$getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
         })
-                .size(56, 20)
-                .pos(this.width / 2 + 104, this.height / 4 + 72)
-                .build();
+            .size(56, 20)
+            .pos(this.width / 2 + 104, this.height / 4 + 72)
+            .build();
 
         this.addRenderableWidget(vivecraft$vrModeButton);
 
         vivecraft$updateButton = new Button.Builder(Component.translatable("vivecraft.gui.update"), (button) -> minecraft.setScreen(new UpdateScreen()))
-                .size(56, 20)
-                .pos(this.width / 2 + 104, this.height / 4 + 96)
-                .build();
+            .size(56, 20)
+            .pos(this.width / 2 + 104, this.height / 4 + 96)
+            .build();
 
         vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
@@ -85,8 +88,8 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), method = "render")
-    public void vivecraft$maybeNoPanorama(PanoramaRenderer instance, float f, float g){
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()){
+    public void vivecraft$maybeNoPanorama(PanoramaRenderer instance, float f, float g) {
+        if (VRState.vrRunning && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
             return;
         }
         instance.render(f, g);

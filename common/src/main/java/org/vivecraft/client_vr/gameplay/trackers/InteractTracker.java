@@ -1,18 +1,5 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import java.util.HashSet;
-
-import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client.Xplat;
-import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.settings.VRHotkeys;
-import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -33,9 +20,20 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.Xplat;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
+import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
+import org.vivecraft.client_vr.settings.VRHotkeys;
+import org.vivecraft.client_vr.settings.VRSettings;
 
-public class InteractTracker extends Tracker
-{
+import java.util.HashSet;
+
+public class InteractTracker extends Tracker {
     public boolean[] bukkit = new boolean[2];
     public int hotbar = -1;
     public BlockHitResult[] inBlockHit = new BlockHitResult[2];
@@ -48,66 +46,45 @@ public class InteractTracker extends Tracker
     boolean[] wasactive = new boolean[2];
     private HashSet<Class> rightClickable = null;
 
-    public InteractTracker(Minecraft mc, ClientDataHolderVR dh)
-    {
+    public InteractTracker(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh);
     }
 
-    public boolean isActive(LocalPlayer p)
-    {
-        if (this.mc.gameMode == null)
-        {
+    public boolean isActive(LocalPlayer p) {
+        if (this.mc.gameMode == null) {
             return false;
-        }
-        else if (p == null)
-        {
+        } else if (p == null) {
             return false;
-        }
-        else if (!p.isAlive())
-        {
+        } else if (!p.isAlive()) {
             return false;
-        }
-        else if (p.isSleeping())
-        {
+        } else if (p.isSleeping()) {
             return false;
-        }
-        else
-        {
+        } else {
             Minecraft minecraft = Minecraft.getInstance();
             ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
-            if (dataholder.vrSettings.seated)
-            {
+            if (dataholder.vrSettings.seated) {
                 return false;
-            }
-            else if (p.isBlocking() && this.hotbar < 0)
-            {
+            } else if (p.isBlocking() && this.hotbar < 0) {
                 return false;
-            }
-            else
-            {
+            } else {
                 return !dataholder.bowTracker.isNotched();
             }
         }
     }
 
-    public void reset(LocalPlayer player)
-    {
-        for (int i = 0; i < 2; ++i)
-        {
+    public void reset(LocalPlayer player) {
+        for (int i = 0; i < 2; ++i) {
             this.reset(player, i);
         }
     }
 
-    private void reset(LocalPlayer player, int c)
-    {
-        if (this.inCamera[c] && VRHotkeys.isMovingThirdPersonCam() && VRHotkeys.getMovingThirdPersonCamTriggerer() == VRHotkeys.Triggerer.INTERACTION && VRHotkeys.getMovingThirdPersonCamController() == c)
-        {
+    private void reset(LocalPlayer player, int c) {
+        if (this.inCamera[c] && VRHotkeys.isMovingThirdPersonCam() && VRHotkeys.getMovingThirdPersonCamTriggerer() == VRHotkeys.Triggerer.INTERACTION && VRHotkeys.getMovingThirdPersonCamController() == c) {
             VRHotkeys.stopMovingThirdPersonCam();
         }
 
-        if (this.inHandheldCamera[c] && this.dh.cameraTracker.isMoving() && this.dh.cameraTracker.getMovingController() == c && !this.dh.cameraTracker.isQuickMode())
-        {
+        if (this.inHandheldCamera[c] && this.dh.cameraTracker.isMoving() && this.dh.cameraTracker.getMovingController() == c && !this.dh.cameraTracker.isQuickMode()) {
             this.dh.cameraTracker.stopMoving();
         }
 
@@ -121,49 +98,40 @@ public class InteractTracker extends Tracker
         this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract).setEnabled(ControllerType.values()[c], false);
     }
 
-    public void doProcess(LocalPlayer player)
-    {
-        if (this.rightClickable == null)
-        {
+    public void doProcess(LocalPlayer player) {
+        if (this.rightClickable == null) {
             this.rightClickable = new HashSet<>();
 
             String name = Xplat.getUseMethodName();
-            for (Object object : BuiltInRegistries.BLOCK)
-            {
+            for (Object object : BuiltInRegistries.BLOCK) {
                 Class<?> oclass = object.getClass();
 
-                try
-                {
+                try {
                     if (oclass.getMethod(name,
-                            BlockState.class,
-                            net.minecraft.world.level.Level.class,
-                            BlockPos.class,
-                            net.minecraft.world.entity.player.Player.class,
-                            InteractionHand.class,
-                            BlockHitResult.class).getDeclaringClass() == oclass) {
+                        BlockState.class,
+                        net.minecraft.world.level.Level.class,
+                        BlockPos.class,
+                        net.minecraft.world.entity.player.Player.class,
+                        InteractionHand.class,
+                        BlockHitResult.class).getDeclaringClass() == oclass) {
                         this.rightClickable.add(oclass);
                     }
-                }
-                catch (Throwable throwable1)
-                {
+                } catch (Throwable throwable1) {
                 }
 
                 oclass = oclass.getSuperclass();
 
-                try
-                {
+                try {
                     if (oclass.getMethod(name,
-                            BlockState.class,
-                            net.minecraft.world.level.Level.class,
-                            BlockPos.class,
-                            net.minecraft.world.entity.player.Player.class,
-                            InteractionHand.class,
-                            BlockHitResult.class).getDeclaringClass() == oclass) {
+                        BlockState.class,
+                        net.minecraft.world.level.Level.class,
+                        BlockPos.class,
+                        net.minecraft.world.entity.player.Player.class,
+                        InteractionHand.class,
+                        BlockHitResult.class).getDeclaringClass() == oclass) {
                         this.rightClickable.add(oclass);
                     }
-                }
-                catch (Throwable throwable)
-                {
+                } catch (Throwable throwable) {
                 }
             }
 
@@ -174,14 +142,11 @@ public class InteractTracker extends Tracker
 
         Vec3 vec34 = new Vec3(0.0D, 0.0D, -1.0D);
 
-        for (int j = 0; j < 2; ++j)
-        {
-            if (!this.inCamera[j] && !this.inHandheldCamera[j] || !VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.values()[j]))
-            {
+        for (int j = 0; j < 2; ++j) {
+            if (!this.inCamera[j] && !this.inHandheldCamera[j] || !VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.values()[j])) {
                 this.reset(player, j);
 
-                if (j == 0 && this.hotbar >= 0)
-                {
+                if (j == 0 && this.hotbar >= 0) {
                     this.active[j] = true;
                 }
 
@@ -191,35 +156,30 @@ public class InteractTracker extends Tracker
                 ItemStack itemstack = player.getItemInHand(j == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                 Item item = null;
 
-                if (!this.active[j] && (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) && this.dh.vrSettings.mixedRealityRenderCameraModel)
-                {
+                if (!this.active[j] && (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) && this.dh.vrSettings.mixedRealityRenderCameraModel) {
                     VRData.VRDevicePose vrdata$vrdevicepose = this.dh.vrPlayer.vrdata_world_pre.getEye(RenderPass.THIRD);
                     Vec3 vec32 = vrdata$vrdevicepose.getPosition();
-                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double)0.15F * this.dh.vrPlayer.vrdata_world_pre.worldScale));
-                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, -1.0D, 0.0D)).scale((double)0.05F * this.dh.vrPlayer.vrdata_world_pre.worldScale));
+                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double) 0.15F * this.dh.vrPlayer.vrdata_world_pre.worldScale));
+                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, -1.0D, 0.0D)).scale((double) 0.05F * this.dh.vrPlayer.vrdata_world_pre.worldScale));
 
-                    if (vec3.distanceTo(vec32) < (double)0.15F * this.dh.vrPlayer.vrdata_world_pre.worldScale)
-                    {
+                    if (vec3.distanceTo(vec32) < (double) 0.15F * this.dh.vrPlayer.vrdata_world_pre.worldScale) {
                         this.inCamera[j] = true;
                         this.active[j] = true;
                     }
                 }
 
-                if (!this.active[j] && this.dh.cameraTracker.isVisible() && !this.dh.cameraTracker.isQuickMode())
-                {
+                if (!this.active[j] && this.dh.cameraTracker.isVisible() && !this.dh.cameraTracker.isQuickMode()) {
                     VRData.VRDevicePose vrdata$vrdevicepose1 = this.dh.vrPlayer.vrdata_world_pre.getEye(RenderPass.CAMERA);
                     Vec3 vec36 = vrdata$vrdevicepose1.getPosition();
-                    vec36 = vec36.subtract(vrdata$vrdevicepose1.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double)0.08F * this.dh.vrPlayer.vrdata_world_pre.worldScale));
+                    vec36 = vec36.subtract(vrdata$vrdevicepose1.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double) 0.08F * this.dh.vrPlayer.vrdata_world_pre.worldScale));
 
-                    if (vec3.distanceTo(vec36) < (double)0.11F * this.dh.vrPlayer.vrdata_world_pre.worldScale)
-                    {
+                    if (vec3.distanceTo(vec36) < (double) 0.11F * this.dh.vrPlayer.vrdata_world_pre.worldScale) {
                         this.inHandheldCamera[j] = true;
                         this.active[j] = true;
                     }
                 }
 
-                if (!this.active[j])
-                {
+                if (!this.active[j]) {
                     int k = Mth.floor(vec3.x);
                     int l = Mth.floor(vec3.y);
                     int i = Mth.floor(vec3.z);
@@ -230,16 +190,14 @@ public class InteractTracker extends Tracker
                         return !e.isSpectator() && e.isPickable() && e != this.mc.getCameraEntity().getVehicle();
                     }, 0.0D);
 
-                    if (this.inEntityHit[j] != null)
-                    {
+                    if (this.inEntityHit[j] != null) {
                         Entity entity = this.inEntityHit[j].getEntity();
                         this.inEntity[j] = entity;
                         this.active[j] = true;
                     }
                 }
 
-                if (!this.active[j])
-                {
+                if (!this.active[j]) {
                     BlockPos blockpos = null;
                     blockpos = BlockPos.containing(vec3);
                     BlockState blockstate = this.mc.level.getBlockState(blockpos);
@@ -250,15 +208,13 @@ public class InteractTracker extends Tracker
                     this.bukkit[j] = false;
 
                     // TODO: liquid is deprecated
-                    if (!this.active[j] && itemstack.getItem() == Items.BUCKET && blockstate.liquid())
-                    {
+                    if (!this.active[j] && itemstack.getItem() == Items.BUCKET && blockstate.liquid()) {
                         this.active[j] = true;
                         this.bukkit[j] = true;
                     }
                 }
 
-                if (!this.wasactive[j] && this.active[j])
-                {
+                if (!this.wasactive[j] && this.active[j]) {
                     this.dh.vr.triggerHapticPulse(j, 250);
                 }
 
@@ -268,70 +224,49 @@ public class InteractTracker extends Tracker
         }
     }
 
-    public boolean isInteractActive(int controller)
-    {
+    public boolean isInteractActive(int controller) {
         return this.active[controller];
     }
 
-    public boolean isInCamera()
-    {
+    public boolean isInCamera() {
         return this.inCamera[0] || this.inCamera[1];
     }
 
-    public boolean isInHandheldCamera()
-    {
+    public boolean isInHandheldCamera() {
         return this.inHandheldCamera[0] || this.inHandheldCamera[1];
     }
 
-    public void processBindings()
-    {
-        for (int i = 0; i < 2; ++i)
-        {
-            if (VivecraftVRMod.INSTANCE.keyVRInteract.consumeClick(ControllerType.values()[i]) && this.active[i])
-            {
+    public void processBindings() {
+        for (int i = 0; i < 2; ++i) {
+            if (VivecraftVRMod.INSTANCE.keyVRInteract.consumeClick(ControllerType.values()[i]) && this.active[i]) {
                 InteractionHand interactionhand = InteractionHand.values()[i];
                 boolean flag = false;
 
-                if (this.hotbar >= 0 && this.hotbar < 9 && this.mc.player.getInventory().selected != this.hotbar && interactionhand == InteractionHand.MAIN_HAND)
-                {
+                if (this.hotbar >= 0 && this.hotbar < 9 && this.mc.player.getInventory().selected != this.hotbar && interactionhand == InteractionHand.MAIN_HAND) {
                     this.mc.player.getInventory().selected = this.hotbar;
                     flag = true;
-                }
-                else if (this.hotbar == 9 && interactionhand == InteractionHand.MAIN_HAND)
-                {
+                } else if (this.hotbar == 9 && interactionhand == InteractionHand.MAIN_HAND) {
                     this.mc.player.connection.send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ZERO, Direction.DOWN));
                     flag = true;
-                }
-                else if (this.inCamera[i])
-                {
+                } else if (this.inCamera[i]) {
                     VRHotkeys.startMovingThirdPersonCam(i, VRHotkeys.Triggerer.INTERACTION);
                     flag = true;
-                }
-                else if (this.inHandheldCamera[i])
-                {
+                } else if (this.inHandheldCamera[i]) {
                     this.dh.cameraTracker.startMoving(i);
                     flag = true;
-                }
-                else if (this.inEntityHit[i] != null)
-                {
+                } else if (this.inEntityHit[i] != null) {
                     flag = true;
 
-                    if (!this.mc.gameMode.interactAt(this.mc.player, this.inEntity[i], this.inEntityHit[i], interactionhand).consumesAction() && !this.mc.gameMode.interact(this.mc.player, this.inEntity[i], interactionhand).consumesAction())
-                    {
+                    if (!this.mc.gameMode.interactAt(this.mc.player, this.inEntity[i], this.inEntityHit[i], interactionhand).consumesAction() && !this.mc.gameMode.interact(this.mc.player, this.inEntity[i], interactionhand).consumesAction()) {
                         flag = false;
                     }
-                }
-                else if (this.inBlockHit[i] != null)
-                {
+                } else if (this.inBlockHit[i] != null) {
                     flag = this.mc.gameMode.useItemOn(this.mc.player, interactionhand, this.inBlockHit[i]).consumesAction();
-                }
-                else if (this.bukkit[i])
-                {
+                } else if (this.bukkit[i]) {
                     flag = this.mc.gameMode.useItem(this.mc.player, interactionhand).consumesAction();
                 }
 
-                if (flag)
-                {
+                if (flag) {
                     ((PlayerExtension) this.mc.player).vivecraft$swingArm(interactionhand, VRFirstPersonArmSwing.Interact);
                     this.dh.vr.triggerHapticPulse(i, 750);
                 }

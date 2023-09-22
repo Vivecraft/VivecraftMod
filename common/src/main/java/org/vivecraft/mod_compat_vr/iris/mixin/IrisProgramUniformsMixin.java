@@ -39,9 +39,9 @@ public class IrisProgramUniformsMixin {
     // restore actual frame counter, so stuff doesn't get messed up
     @ModifyVariable(method = "update", at = @At(value = "LOAD", ordinal = 1), remap = false)
     private int vivecraft$restoreFrame(int currentFrame) {
-        if (!RenderPassType.isVanilla()){
+        if (!RenderPassType.isVanilla()) {
             return vivecraft$actualFrame;
-        }else {
+        } else {
             return currentFrame;
         }
         //return !RenderPassType.isVanilla() ? actualFrame : currentFrame;

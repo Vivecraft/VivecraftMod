@@ -4,9 +4,6 @@
  */
 package org.vivecraft.client_vr.settings;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.mod_compat_vr.ShadersHelper;
-import org.vivecraft.client_vr.VRState;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
@@ -19,16 +16,19 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.vivecraft.client_vr.settings.profile.ProfileManager;
-import org.vivecraft.client_vr.settings.profile.ProfileReader;
-import org.vivecraft.client_vr.settings.profile.ProfileWriter;
+import org.vivecraft.client.utils.LangHelper;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
-import org.vivecraft.client.utils.LangHelper;
+import org.vivecraft.client_vr.settings.profile.ProfileManager;
+import org.vivecraft.client_vr.settings.profile.ProfileReader;
+import org.vivecraft.client_vr.settings.profile.ProfileWriter;
 import org.vivecraft.common.utils.math.Angle;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
 
 import java.awt.*;
 import java.io.File;
@@ -41,14 +41,13 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class VRSettings
-{
+public class VRSettings {
     public static final int VERSION = 2;
     public static final Logger logger = LogManager.getLogger();
     public static VRSettings inst;
     public JsonObject defaults = new JsonObject();
     public static final int UNKNOWN_VERSION = 0;
-    public static final String DEGREE  = "\u00b0";
+    public static final String DEGREE = "\u00b0";
 
     public enum InertiaFactor implements OptionEnum<InertiaFactor> {
         NONE(1f / 0.01f),
@@ -125,10 +124,10 @@ public class VRSettings
     }
 
     public enum RightClickDelay implements OptionEnum<RightClickDelay> {
-    	VANILLA,
-    	SLOW,
-    	SLOWER,
-    	SLOWEST
+        VANILLA,
+        SLOW,
+        SLOWER,
+        SLOWEST
     }
 
     public enum ShaderGUIRender implements OptionEnum<ShaderGUIRender> {
@@ -147,7 +146,7 @@ public class VRSettings
         SERVER_ONLY,
         NEVER
     }
-    
+
     @SettingField
     public int version = UNKNOWN_VERSION;
 
@@ -179,25 +178,25 @@ public class VRSettings
     @SettingField(value = VrOptions.WORLD_ROTATION_INCREMENT, config = "vrWorldRotationIncrement")
     public float worldRotationIncrement = 45f;
     @SettingField(VrOptions.X_SENSITIVITY)
-    public float xSensitivity=1f;
+    public float xSensitivity = 1f;
     @SettingField(VrOptions.Y_SENSITIVITY)
-    public float ySensitivity=1f;
+    public float ySensitivity = 1f;
     @SettingField(VrOptions.KEYHOLE)
-    public float keyholeX=15;
+    public float keyholeX = 15;
     @SettingField
-    public double headToHmdLength=0.10f;
+    public double headToHmdLength = 0.10f;
     @SettingField
-    public float autoCalibration=-1;
+    public float autoCalibration = -1;
     @SettingField
-    public float manualCalibration=-1;
+    public float manualCalibration = -1;
     @SettingField
     public boolean alwaysSimulateKeyboard = false;
     @SettingField(VrOptions.BOW_MODE)
     public BowMode bowMode = BowMode.ON;
     @SettingField
-    public String keyboardKeys =  "`1234567890-=qwertyuiop[]\\asdfghjkl;\':\"zxcvbnm,./?<>";
+    public String keyboardKeys = "`1234567890-=qwertyuiop[]\\asdfghjkl;\':\"zxcvbnm,./?<>";
     @SettingField
-    public String keyboardKeysShift ="~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;\':\"ZXCVBNM,./?<>";
+    public String keyboardKeysShift = "~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;\':\"ZXCVBNM,./?<>";
     @SettingField(VrOptions.HRTF_SELECTION)
     public int hrtfSelection = 0;
     @SettingField(VrOptions.RIGHT_CLICK_DELAY)
@@ -238,27 +237,27 @@ public class VRSettings
     @SettingField(value = VrOptions.SEATED_HMD, config = "seatedhmd")
     public boolean seatedUseHMD = false;
     @SettingField
-    public float jumpThreshold=0.05f;
+    public float jumpThreshold = 0.05f;
     @SettingField
-    public float sneakThreshold=0.4f;
+    public float sneakThreshold = 0.4f;
     @SettingField
     public float crawlThreshold = 0.82f;
     @SettingField(VrOptions.REALISTIC_JUMP)
-    public boolean realisticJumpEnabled=true;
+    public boolean realisticJumpEnabled = true;
     @SettingField(VrOptions.REALISTIC_SNEAK)
-    public boolean realisticSneakEnabled=true;
+    public boolean realisticSneakEnabled = true;
     @SettingField(VrOptions.REALISTIC_CLIMB)
-    public boolean realisticClimbEnabled=true;
+    public boolean realisticClimbEnabled = true;
     @SettingField(VrOptions.REALISTIC_SWIM)
-    public boolean realisticSwimEnabled=true;
+    public boolean realisticSwimEnabled = true;
     @SettingField(VrOptions.REALISTIC_ROW)
-    public boolean realisticRowEnabled=true;
+    public boolean realisticRowEnabled = true;
     @SettingField(VrOptions.BACKPACK_SWITCH)
     public boolean backpackSwitching = true;
     @SettingField(VrOptions.PHYSICAL_GUI)
     public boolean physicalGuiEnabled = false;
     @SettingField(VrOptions.WALK_MULTIPLIER)
-    public float walkMultiplier=1;
+    public float walkMultiplier = 1;
     @SettingField(VrOptions.ALLOW_CRAWLING)
     public boolean allowCrawling = true;
     @SettingField(value = VrOptions.BCB_ON, config = "bcbOn")
@@ -302,7 +301,7 @@ public class VRSettings
     public MirrorMode displayMirrorMode = MirrorMode.CROPPED;
     @SettingField(VrOptions.MIRROR_EYE)
     public boolean displayMirrorLeftEye = false;
-    public boolean shouldRenderSelf=false;
+    public boolean shouldRenderSelf = false;
     @SettingField(VrOptions.MENU_WORLD_SELECTION)
     public MenuWorld menuWorldSelection = MenuWorld.BOTH;
     //
@@ -328,7 +327,7 @@ public class VRSettings
     @SettingField
     public float vrFixedCamposZ = 2.7f;
     @SettingField(config = "vrFixedCamrot", separate = true)
-    public Quaternion vrFixedCamrotQuat =new Quaternion(.962f, .125f, .239f, .041f);
+    public Quaternion vrFixedCamrotQuat = new Quaternion(.962f, .125f, .239f, .041f);
     @SettingField
     public float mrMovingCamOffsetX = 0;
     @SettingField
@@ -378,7 +377,7 @@ public class VRSettings
     @SettingField(VrOptions.RENDER_MENU_BACKGROUND)
     public boolean menuBackground = false;
     @SettingField(VrOptions.MENU_CROSSHAIR_SCALE)
-    public float   menuCrosshairScale = 1f;
+    public float menuCrosshairScale = 1f;
     @SettingField(VrOptions.CROSSHAIR_OCCLUSION)
     public boolean useCrosshairOcclusion = true;
     @SettingField(VrOptions.SEATED_HUD_XHAIR)
@@ -421,12 +420,14 @@ public class VRSettings
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
      */
-    @SettingField(VrOptions.HUD_HIDE) @Deprecated
+    @SettingField(VrOptions.HUD_HIDE)
+    @Deprecated
     public boolean hideGUI;
     /**
      * This isn't actually used, it's only a dummy field to set the value in vanilla Options.
      */
-    @SettingField(VrOptions.MONO_FOV) @Deprecated
+    @SettingField(VrOptions.MONO_FOV)
+    @Deprecated
     public float monoFOV;
     //
 
@@ -440,8 +441,7 @@ public class VRSettings
 
     private Minecraft mc;
 
-    public VRSettings( Minecraft minecraft, File dataDir )
-    {
+    public VRSettings(Minecraft minecraft, File dataDir) {
         // Need to do this in the instance because array sizes aren't known until instantiation
         initializeFieldInfo();
 
@@ -466,12 +466,15 @@ public class VRSettings
         try {
             for (Field field : VRSettings.class.getFields()) {
                 SettingField ann = field.getAnnotation(SettingField.class);
-                if (ann == null) continue;
+                if (ann == null) {
+                    continue;
+                }
 
                 String config = ann.config().isEmpty() ? field.getName() : ann.config();
                 if (ann.value() != VrOptions.DUMMY) {
-                    if (fieldEnumMap.containsKey(ann.value()))
+                    if (fieldEnumMap.containsKey(ann.value())) {
                         throw new RuntimeException("duplicate enum in setting field: " + field.getName());
+                    }
                     fieldEnumMap.put(ann.value(), Triple.of(field, config, ann.separate()));
                 }
 
@@ -496,8 +499,12 @@ public class VRSettings
         // First try to convert the option from a legacy value
         Object obj = option.convertOption(value);
         // If that got nothing, try the custom handler
-        if (obj == null) obj = option.loadOption(value);
-        if (obj != null) return obj;
+        if (obj == null) {
+            obj = option.loadOption(value);
+        }
+        if (obj != null) {
+            return obj;
+        }
 
         // Generic handlers
         if (type == String.class) {
@@ -516,7 +523,7 @@ public class VRSettings
             Method m = type.getMethod("valueOf", String.class);
             return m.invoke(null, value);
         } else if (Quaternion.class.isAssignableFrom(type)) {
-            Quaternion quat = ((Quaternion)currentValue).copy();
+            Quaternion quat = ((Quaternion) currentValue).copy();
             if (separate) {
                 float f = Float.parseFloat(value);
                 switch (name.charAt(name.length() - 1)) {
@@ -534,7 +541,7 @@ public class VRSettings
             }
             return quat;
         } else if (Vector3.class.isAssignableFrom(type)) {
-            Vector3 vec = ((Vector3)currentValue).copy();
+            Vector3 vec = ((Vector3) currentValue).copy();
             if (separate) {
                 float f = Float.parseFloat(value);
                 switch (name.charAt(name.length() - 1)) {
@@ -559,17 +566,19 @@ public class VRSettings
     private String saveOption(String name, Object obj, VrOptions option, Class<?> type, boolean separate) {
         // Try the custom handler first
         String value = option.saveOption(obj);
-        if (value != null) return value;
+        if (value != null) {
+            return value;
+        }
 
         // Generic handlers
         if (type == String.class) {
-            return (String)obj;
+            return (String) obj;
         } else if (type == Boolean.TYPE || type == Integer.TYPE || type == Long.TYPE || type == Float.TYPE || type == Double.TYPE) {
             return obj.toString();
         } else if (type.isEnum()) {
-            return ((Enum<?>)obj).name();
+            return ((Enum<?>) obj).name();
         } else if (Quaternion.class.isAssignableFrom(type)) {
-            Quaternion quat = (Quaternion)obj;
+            Quaternion quat = (Quaternion) obj;
             if (separate) {
                 return Float.toString(switch (name.charAt(name.length() - 1)) {
                     case 'W' -> quat.w;
@@ -582,7 +591,7 @@ public class VRSettings
                 return quat.w + "," + quat.x + "," + quat.y + "," + quat.z;
             }
         } else if (Vector3.class.isAssignableFrom(type)) {
-            Vector3 vec = (Vector3)obj;
+            Vector3 vec = (Vector3) obj;
             if (separate) {
                 return Float.toString(switch (name.charAt(name.length() - 1)) {
                     case 'X' -> vec.x;
@@ -601,11 +610,15 @@ public class VRSettings
     }
 
     private Object loadDefault(String name, String value, VrOptions option, Class<?> type, boolean separate, Map<String, String> profileSet) throws ReflectiveOperationException {
-        if (value == null) value = profileSet.get(name);
+        if (value == null) {
+            value = profileSet.get(name);
+        }
 
         // Try the custom handler first
         Object obj = option.loadOption(value);
-        if (obj != null) return obj;
+        if (obj != null) {
+            return obj;
+        }
 
         // Generic handlers
         if (type == String.class) {
@@ -671,11 +684,15 @@ public class VRSettings
     }
 
     public void loadDefault(VrOptions option) {
-        if (this.defaults == null) return; // how
+        if (this.defaults == null) {
+            return; // how
+        }
 
         try {
             var mapping = fieldEnumMap.get(option);
-            if (mapping == null) return;
+            if (mapping == null) {
+                return;
+            }
             Field field = mapping.getLeft();
             Class<?> type = field.getType();
             String name = mapping.getMiddle();
@@ -708,35 +725,31 @@ public class VRSettings
         }
     }
 
-    public void loadOptions()
-    {
+    public void loadOptions() {
         loadOptions(null);
     }
 
-    public void loadDefaults()
-    {
+    public void loadDefaults() {
         loadOptions(this.defaults);
     }
 
-    public void loadOptions(JsonObject theProfiles)
-    {
+    public void loadOptions(JsonObject theProfiles) {
         // Load Minecrift options
-        try
-        {
+        try {
             ProfileReader optionsVRReader = new ProfileReader(ProfileManager.PROFILE_SET_VR, theProfiles);
 
             String var2 = "";
 
-            while ((var2 = optionsVRReader.readLine()) != null)
-            {
-                try
-                {
+            while ((var2 = optionsVRReader.readLine()) != null) {
+                try {
                     String[] optionTokens = var2.split(":", 2);
                     String name = optionTokens[0];
                     String value = optionTokens.length > 1 ? optionTokens[1] : "";
 
                     var mapping = fieldConfigMap.get(name);
-                    if (mapping == null) continue;
+                    if (mapping == null) {
+                        continue;
+                    }
 
                     Field field = mapping.getLeft();
                     Class<?> type = field.getType();
@@ -758,9 +771,7 @@ public class VRSettings
                         Object obj = Objects.requireNonNull(loadOption(name, value, currentValue, mapping.getMiddle(), type, mapping.getRight()));
                         field.set(this, obj);
                     }
-                }
-                catch (Exception var7)
-                {
+                } catch (Exception var7) {
                     logger.warn("Skipping bad VR option: " + var2);
                     var7.printStackTrace();
                 }
@@ -768,32 +779,27 @@ public class VRSettings
 
             preservedSettingMap = optionsVRReader.getData();
             optionsVRReader.close();
-        }
-        catch (Exception var8)
-        {
+        } catch (Exception var8) {
             logger.warn("Failed to load VR options!");
             var8.printStackTrace();
         }
     }
 
-    public void saveOptions()
-    {
+    public void saveOptions() {
         saveOptions(null); // Use null for current profile
     }
 
-    private void storeDefaults()
-    {
+    private void storeDefaults() {
         saveOptions(this.defaults);
     }
 
-    private void saveOptions(JsonObject theProfiles)
-    {
+    private void saveOptions(JsonObject theProfiles) {
         // Save Minecrift settings
-        try
-        {
+        try {
             ProfileWriter var5 = new ProfileWriter(ProfileManager.PROFILE_SET_VR, theProfiles);
-            if (preservedSettingMap != null)
+            if (preservedSettingMap != null) {
                 var5.setData(preservedSettingMap);
+            }
 
             for (var entry : fieldConfigMap.entrySet()) {
                 String name = entry.getKey();
@@ -828,22 +834,18 @@ public class VRSettings
             }
 
             var5.close();
-        }
-        catch (Exception var3)
-        {
+        } catch (Exception var3) {
             logger.warn("Failed to save VR options: " + var3.getMessage());
             var3.printStackTrace();
         }
     }
 
-    public void resetSettings()
-    {
+    public void resetSettings() {
         // Get the Minecrift defaults
         loadDefaults();
     }
 
-    public String getButtonDisplayString( VrOptions par1EnumOptions )
-    {
+    public String getButtonDisplayString(VrOptions par1EnumOptions) {
         String var2 = I18n.get("vivecraft.options." + par1EnumOptions.name());
 
         String var3 = var2 + ": ";
@@ -852,28 +854,31 @@ public class VRSettings
 
         try {
             var mapping = fieldEnumMap.get(par1EnumOptions);
-            if (mapping == null) return var2;
+            if (mapping == null) {
+                return var2;
+            }
             Field field = mapping.getLeft();
             Class<?> type = field.getType();
 
             Object obj = field.get(this);
-            if (overrides.hasSetting(par1EnumOptions))
+            if (overrides.hasSetting(par1EnumOptions)) {
                 obj = this.overrides.getSetting(par1EnumOptions).getValue();
+            }
 
             String str = par1EnumOptions.getDisplayString(var4, obj);
             if (str != null) {
                 return str;
             } else if (type == Boolean.TYPE) {
                 var langKeys = par1EnumOptions.getBooleanLangKeys();
-                return (boolean)obj ? var4 + I18n.get(langKeys.getLeft()) : var4 + I18n.get(langKeys.getRight());
+                return (boolean) obj ? var4 + I18n.get(langKeys.getLeft()) : var4 + I18n.get(langKeys.getRight());
             } else if (type == Float.TYPE || type == Double.TYPE) {
                 if (par1EnumOptions.getDecimalPlaces() < 0) {
-                    return var4 + Math.round(((Number)obj).floatValue() * 100) + "%";
+                    return var4 + Math.round(((Number) obj).floatValue() * 100) + "%";
                 } else {
-                    return var4 + String.format("%." + par1EnumOptions.getDecimalPlaces() + "f", ((Number)obj).floatValue());
+                    return var4 + String.format("%." + par1EnumOptions.getDecimalPlaces() + "f", ((Number) obj).floatValue());
                 }
             } else if (OptionEnum.class.isAssignableFrom(type)) {
-                return var4 + I18n.get(((OptionEnum<?>)obj).getLangKey());
+                return var4 + I18n.get(((OptionEnum<?>) obj).getLangKey());
             } else {
                 return var4 + obj.toString();
             }
@@ -885,16 +890,18 @@ public class VRSettings
         return var2;
     }
 
-    public float getOptionFloatValue(VrOptions par1EnumOptions)
-    {
+    public float getOptionFloatValue(VrOptions par1EnumOptions) {
         try {
             var mapping = fieldEnumMap.get(par1EnumOptions);
-            if (mapping == null) return 0;
+            if (mapping == null) {
+                return 0;
+            }
             Field field = mapping.getLeft();
 
-            float value = ((Number)field.get(this)).floatValue();
-            if (overrides.hasSetting(par1EnumOptions))
+            float value = ((Number) field.get(this)).floatValue();
+            if (overrides.hasSetting(par1EnumOptions)) {
                 value = overrides.getSetting(par1EnumOptions).getFloat();
+            }
 
             return Objects.requireNonNullElse(par1EnumOptions.getOptionFloatValue(value), value);
         } catch (Exception ex) {
@@ -904,14 +911,16 @@ public class VRSettings
 
         return 0.0f;
     }
+
     /**
      * For non-float options. Toggles the option on/off, or cycles through the list i.e. render distances.
      */
-    public void setOptionValue(VrOptions par1EnumOptions)
-    {
+    public void setOptionValue(VrOptions par1EnumOptions) {
         try {
             var mapping = fieldEnumMap.get(par1EnumOptions);
-            if (mapping == null) return;
+            if (mapping == null) {
+                return;
+            }
             Field field = mapping.getLeft();
             Class<?> type = field.getType();
 
@@ -919,9 +928,9 @@ public class VRSettings
             if (obj != null) {
                 field.set(this, obj);
             } else if (type == Boolean.TYPE) {
-                field.set(this, !(boolean)field.get(this));
+                field.set(this, !(boolean) field.get(this));
             } else if (OptionEnum.class.isAssignableFrom(type)) {
-                field.set(this, ((OptionEnum<?>)field.get(this)).getNext());
+                field.set(this, ((OptionEnum<?>) field.get(this)).getNext());
             } else {
                 logger.warn("Don't know how to set VR option " + mapping.getMiddle() + " with type " + type.getSimpleName());
                 return;
@@ -935,22 +944,24 @@ public class VRSettings
         }
     }
 
-    public void setOptionFloatValue(VrOptions par1EnumOptions, float par2)
-    {
+    public void setOptionFloatValue(VrOptions par1EnumOptions, float par2) {
         try {
             var mapping = fieldEnumMap.get(par1EnumOptions);
-            if (mapping == null) return;
+            if (mapping == null) {
+                return;
+            }
             Field field = mapping.getLeft();
             Class<?> type = field.getType();
 
             float f = Objects.requireNonNullElse(par1EnumOptions.setOptionFloatValue(par2), par2);
-            if (overrides.hasSetting(par1EnumOptions))
+            if (overrides.hasSetting(par1EnumOptions)) {
                 f = Mth.clamp(f, overrides.getSetting(par1EnumOptions).getValueMin(), overrides.getSetting(par1EnumOptions).getValueMax());
+            }
 
             if (type == Integer.TYPE) {
-                field.set(this, (int)f);
+                field.set(this, (int) f);
             } else if (type == Long.TYPE) {
-                field.set(this, (long)f);
+                field.set(this, (long) f);
             } else {
                 field.set(this, f);
             }
@@ -966,13 +977,11 @@ public class VRSettings
     /**
      * Parses a string into a float.
      */
-    private float parseFloat(String par1Str)
-    {
+    private float parseFloat(String par1Str) {
         return par1Str.equals("true") ? 1.0F : (par1Str.equals("false") ? 0.0F : Float.parseFloat(par1Str));
     }
 
-    public float getHeadTrackSensitivity()
-    {
+    public float getHeadTrackSensitivity() {
         //if (this.useQuaternions)
         return 1.0f;
 
@@ -980,17 +989,18 @@ public class VRSettings
     }
 
 
-    public static enum VrOptions
-    {
+    public static enum VrOptions {
         DUMMY(false, true), // Dummy
         HUD_SCALE(true, false, 0.35f, 2.5f, 0.01f, -1), // Head HUD Size
         HUD_DISTANCE(true, false, 0.25f, 5.0f, 0.01f, 2) { // Head HUD Distance
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return prefix + String.format("%.2f", (float)value) + "m";
+                return prefix + String.format("%.2f", (float) value) + "m";
             }
         },
         HUD_LOCK_TO(false, true) { // HUD Orientation Lock
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1003,14 +1013,17 @@ public class VRSettings
             }
         },
         HUD_OPACITY(true, false, 0.15f, 1.0f, 0.05f, -1) { // HUD Opacity
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                if ((float)value > 0.99)
+                if ((float) value > 0.99) {
                     return prefix + I18n.get("vivecraft.options.opaque");
+                }
                 return null;
             }
         },
         HUD_HIDE(false, true) { // Hide HUD (F1)
+
             @Override
             Object loadOption(String value) {
                 Minecraft.getInstance().options.hideGui = value.equals("true");
@@ -1040,6 +1053,7 @@ public class VRSettings
         CROSSHAIR_SCALE(true, false, 0.25f, 1.0f, 0.01f, -1), // Crosshair Size
         MENU_CROSSHAIR_SCALE(true, false, 0.25f, 2.5f, 0.05f, -1), // Menu Crosshair Size
         RENDER_CROSSHAIR_MODE(false, true) { // Show Crosshair
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1052,6 +1066,7 @@ public class VRSettings
             }
         },
         CHAT_NOTIFICATIONS(false, true) { // Chat Notifications
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1064,10 +1079,11 @@ public class VRSettings
             }
         },
         CHAT_NOTIFICATION_SOUND(false, true) { // Notification Sound
+
             @Override
             String getDisplayString(String prefix, Object value) {
                 try {
-                    SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation((String)value));
+                    SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation((String) value));
                     return I18n.get(se.getLocation().getPath());
                 } catch (Exception e) {
                     return "error";
@@ -1076,15 +1092,17 @@ public class VRSettings
 
             @Override
             Object setOptionValue(Object value) {
-                SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation((String)value));
+                SoundEvent se = BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation((String) value));
                 int i = BuiltInRegistries.SOUND_EVENT.getId(se);
-                if (++i >= BuiltInRegistries.SOUND_EVENT.keySet().size())
+                if (++i >= BuiltInRegistries.SOUND_EVENT.keySet().size()) {
                     i = 0;
+                }
                 return BuiltInRegistries.SOUND_EVENT.byId(i).getLocation().getPath();
             }
         },
         CROSSHAIR_SCALES_WITH_DISTANCE(false, true), // Crosshair Scaling
         RENDER_BLOCK_OUTLINE_MODE(false, true) { // Show Block Outline
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1103,6 +1121,7 @@ public class VRSettings
         RADIAL_MODE_HOLD(false, true, "vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
         PHYSICAL_KEYBOARD(false, true, "vivecraft.options.keyboard.physical", "vivecraft.options.keyboard.pointer"), // Keyboard Type
         PHYSICAL_KEYBOARD_SCALE(true, false, 0.75f, 1.5f, 0.01f, -1) { // Keyboard Size
+
             @Override
             void onOptionChange() {
                 KeyboardHandler.physicalKeyboard.setScale(ClientDataHolderVR.getInstance().vrSettings.physicalKeyboardScale);
@@ -1115,6 +1134,7 @@ public class VRSettings
         FSAA(false, true), // Lanczos Scaler
         LOW_HEALTH_INDICATOR(false, true), // red low health pulse
         MIRROR_DISPLAY(false, true) { // Desktop Mirror
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1142,9 +1162,10 @@ public class VRSettings
             @Override
             Object setOptionValue(Object value) {
                 // TODO: remove this method after fixing mixed reality... again
-                MirrorMode mode = ((MirrorMode)value).getNext();
-                if (mode == MirrorMode.MIXED_REALITY)
+                MirrorMode mode = ((MirrorMode) value).getNext();
+                if (mode == MirrorMode.MIXED_REALITY) {
                     mode = mode.getNext();
+                }
                 return mode;
             }
         },
@@ -1164,7 +1185,7 @@ public class VRSettings
 
             @Override
             String getDisplayString(String prefix, Object value) {
-                Color color = (Color)value;
+                Color color = (Color) value;
                 var p = colors.stream().filter(c -> c.getLeft().equals(color)).findFirst().orElse(null);
                 return p != null ? prefix + I18n.get(p.getRight()) : prefix + color.getRed() + " " + color.getGreen() + " " + color.getBlue();
             }
@@ -1177,45 +1198,50 @@ public class VRSettings
 
             @Override
             String saveOption(Object value) {
-                Color color = (Color)value;
+                Color color = (Color) value;
                 return color.getRed() + "," + color.getGreen() + "," + color.getBlue();
             }
 
             @Override
             Object setOptionValue(Object value) {
-                int index = IntStream.range(0, colors.size()).filter(i -> colors.get(i).getLeft().equals((Color)value)).findFirst().orElse(-1);
+                int index = IntStream.range(0, colors.size()).filter(i -> colors.get(i).getLeft().equals((Color) value)).findFirst().orElse(-1);
                 return index == -1 || index == colors.size() - 1 ? colors.get(0).getLeft() : colors.get(index + 1).getLeft();
             }
         },
         MIXED_REALITY_RENDER_HANDS(false, true), // Show Hands
         MIXED_REALITY_UNITY_LIKE(false, true, "vivecraft.options.unity", "vivecraft.options.sidebyside") { // Layout
+
             @Override
             void onOptionChange() {
-            	ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("MR Setting Changed");
+                ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_UNDISTORTED(false, true) { // Undistorted Pass
+
             @Override
             void onOptionChange() {
-            	ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("MR Setting Changed");
+                ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_ALPHA_MASK(false, true) { // Alpha Mask
+
             @Override
             void onOptionChange() {
-            	ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("MR Setting Changed");
+                ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_FOV(true, false, 0, 179, 1, 0) { // Third Person FOV
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return prefix + String.format("%.0f" + DEGREE, (float)value);
+                return prefix + String.format("%.0f" + DEGREE, (float) value);
             }
         },
         WALK_UP_BLOCKS(false, true), // Walk up blocks
         //Movement/aiming controls
         MOVEMENT_MULTIPLIER(true, false, 0.15f, 1.3f, 0.01f, 2), // Move. Speed Multiplier
         INERTIA_FACTOR(false, true) { // Player Inertia
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1230,6 +1256,7 @@ public class VRSettings
         // VIVE START - new options
         SIMULATE_FALLING(false, true), // Simulate falling
         WEAPON_COLLISION(false, true) { // Weapon collision
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1249,49 +1276,97 @@ public class VRSettings
         STENCIL_ON(false, true), // Use Eye Stencil
         BCB_ON(false, true), // Show Body Position
         WORLD_SCALE(true, false, 0, 29, 1, 2) { // World Scale
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return prefix + String.format("%.2f", (float)value) + "x";
+                return prefix + String.format("%.2f", (float) value) + "x";
             }
 
             @Override
             Float getOptionFloatValue(float value) {
-                if (value == 0.1f) return 0f;
-                if (value == 0.25f) return 1f;
-                if (value >= 0.5f && value <= 2.0f) return (value / 0.1f) - 3f;
-                if (value == 3) return 18f;
-                if (value == 4) return 19f;
-                if (value == 6) return 20f;
-                if (value == 8) return 21f;
-                if (value == 10) return 22f;
-                if (value == 12) return 23f;
-                if (value == 16) return 24f;
-                if (value == 20) return 25f;
-                if (value == 30) return 26f;
-                if (value == 50) return 27f;
-                if (value == 75) return 28f;
-                if (value == 100) return 29f;
+                if (value == 0.1f) {
+                    return 0f;
+                }
+                if (value == 0.25f) {
+                    return 1f;
+                }
+                if (value >= 0.5f && value <= 2.0f) {
+                    return (value / 0.1f) - 3f;
+                }
+                if (value == 3) {
+                    return 18f;
+                }
+                if (value == 4) {
+                    return 19f;
+                }
+                if (value == 6) {
+                    return 20f;
+                }
+                if (value == 8) {
+                    return 21f;
+                }
+                if (value == 10) {
+                    return 22f;
+                }
+                if (value == 12) {
+                    return 23f;
+                }
+                if (value == 16) {
+                    return 24f;
+                }
+                if (value == 20) {
+                    return 25f;
+                }
+                if (value == 30) {
+                    return 26f;
+                }
+                if (value == 50) {
+                    return 27f;
+                }
+                if (value == 75) {
+                    return 28f;
+                }
+                if (value == 100) {
+                    return 29f;
+                }
                 return 7f;
             }
 
             @Override
             Float setOptionFloatValue(float value) {
-                if (value == 0) return 0.1f;
-                else if (value == 1) return 0.25f;
-                else if (value >= 2 && value <= 17) return value * 0.1f + 0.3f;
-                else if (value == 18) return 3f;
-                else if (value == 19) return 4f;
-                else if (value == 20) return 6f;
-                else if (value == 21) return 8f;
-                else if (value == 22) return 10f;
-                else if (value == 23) return 12f;
-                else if (value == 24) return 16f;
-                else if (value == 25) return 20f;
-                else if (value == 26) return 30f;
-                else if (value == 27) return 50f;
-                else if (value == 28) return 75f;
-                else if (value == 29) return 100f;
-                else return 1f;
+                if (value == 0) {
+                    return 0.1f;
+                } else if (value == 1) {
+                    return 0.25f;
+                } else if (value >= 2 && value <= 17) {
+                    return value * 0.1f + 0.3f;
+                } else if (value == 18) {
+                    return 3f;
+                } else if (value == 19) {
+                    return 4f;
+                } else if (value == 20) {
+                    return 6f;
+                } else if (value == 21) {
+                    return 8f;
+                } else if (value == 22) {
+                    return 10f;
+                } else if (value == 23) {
+                    return 12f;
+                } else if (value == 24) {
+                    return 16f;
+                } else if (value == 25) {
+                    return 20f;
+                } else if (value == 26) {
+                    return 30f;
+                } else if (value == 27) {
+                    return 50f;
+                } else if (value == 28) {
+                    return 75f;
+                } else if (value == 29) {
+                    return 100f;
+                } else {
+                    return 1f;
+                }
             }
 
             @Override
@@ -1304,9 +1379,10 @@ public class VRSettings
             }
         },
         WORLD_ROTATION(true, false, 0, 360, 30, 0) { // World Rotation
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return prefix + String.format("%.0f" + DEGREE, (float)value);
+                return prefix + String.format("%.0f" + DEGREE, (float) value);
             }
 
             @Override
@@ -1315,44 +1391,71 @@ public class VRSettings
             }
         },
         WORLD_ROTATION_INCREMENT(true, false, -1, 4, 1, 0) { // Rotation Increment
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                if ((float)value == 0)
+                if ((float) value == 0) {
                     return prefix + I18n.get("vivecraft.options.smooth");
-                return prefix + String.format("%.0f" + DEGREE, (float)value);
+                }
+                return prefix + String.format("%.0f" + DEGREE, (float) value);
             }
 
             @Override
             Float getOptionFloatValue(float value) {
-                if (value == 0) return -1f;
-                if (value == 10f) return 0f;
-                if (value == 36f) return 1f;
-                if (value == 45f) return 2f;
-                if (value == 90f) return 3f;
-                if (value == 180f) return 4f;
+                if (value == 0) {
+                    return -1f;
+                }
+                if (value == 10f) {
+                    return 0f;
+                }
+                if (value == 36f) {
+                    return 1f;
+                }
+                if (value == 45f) {
+                    return 2f;
+                }
+                if (value == 90f) {
+                    return 3f;
+                }
+                if (value == 180f) {
+                    return 4f;
+                }
                 return 2f;
             }
 
             @Override
             Float setOptionFloatValue(float value) {
-                if (value == -1f) return 0f;
-                if (value == 0f) return 10f;
-                if (value == 1f) return 36f;
-                if (value == 2f) return 45f;
-                if (value == 3f) return 90f;
-                if (value == 4f) return 180f;
+                if (value == -1f) {
+                    return 0f;
+                }
+                if (value == 0f) {
+                    return 10f;
+                }
+                if (value == 1f) {
+                    return 36f;
+                }
+                if (value == 2f) {
+                    return 45f;
+                }
+                if (value == 3f) {
+                    return 90f;
+                }
+                if (value == 4f) {
+                    return 180f;
+                }
                 return 45f;
             }
 
             @Override
             void onOptionChange() {
-            	ClientDataHolderVR.getInstance().vrSettings.worldRotation = 0;
+                ClientDataHolderVR.getInstance().vrSettings.worldRotation = 0;
             }
         },
         TOUCH_HOTBAR(false, true), // Touch Hotbar Enabled
         PLAY_MODE_SEATED(false, true, "vivecraft.options.seated", "vivecraft.options.standing"), // Play Mode
         VR_HOTSWITCH(false, true),
         RENDER_SCALEFACTOR(true, false, 0.1f, 9f, 0.1f, 0) { // Resolution
+
             @Override
             String getDisplayString(String prefix, Object value) {
                 if (VRState.vrEnabled) {
@@ -1364,14 +1467,15 @@ public class VRSettings
             }
         },
         MONO_FOV(true, false, 1, 179, 1, 0) { // Undistorted FOV
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return prefix + String.format("%.0f" + DEGREE, (float)Minecraft.getInstance().options.fov().get());
+                return prefix + String.format("%.0f" + DEGREE, (float) Minecraft.getInstance().options.fov().get());
             }
 
             @Override
             Float getOptionFloatValue(float value) {
-                return (float)Minecraft.getInstance().options.fov().get();
+                return (float) Minecraft.getInstance().options.fov().get();
             }
 
             @Override
@@ -1381,19 +1485,21 @@ public class VRSettings
             }
         },
         HANDHELD_CAMERA_FOV(true, false, 1, 179, 1, 0) { // Camera FOV
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return prefix + String.format("%.0f" + DEGREE, (float)value);
+                return prefix + String.format("%.0f" + DEGREE, (float) value);
             }
         },
         HANDHELD_CAMERA_RENDER_SCALE(true, false, 0.5f, 3.0f, 0.25f, 0) { // Camera Resolution
+
             @Override
             String getDisplayString(String prefix, Object value) {
 //                if (Config.isShaders()) { //optifine
 //                    RenderTarget camfb = Minecraft.getInstance().vrRenderer.cameraFramebuffer;
 //                    return prefix + camfb.viewWidth + "x" + camfb.viewHeight;
 //                } else {
-                    return prefix + Math.round(1920 * (float)value) + "x" + Math.round(1080 * (float)value);
+                return prefix + Math.round(1920 * (float) value) + "x" + Math.round(1080 * (float) value);
 //                }
             }
         },
@@ -1402,6 +1508,7 @@ public class VRSettings
         REALISTIC_JUMP(false, true), // Roomscale Jumping
         REALISTIC_SNEAK(false, true), // Roomscale Sneaking
         PHYSICAL_GUI(false, true) { // Physical GUIs
+
             @Override
             Object loadOption(String value) {
                 // TODO: fix physical GUI... someday
@@ -1413,6 +1520,7 @@ public class VRSettings
         REALISTIC_ROW(false, true), // Roomscale Rowing
         WALK_MULTIPLIER(true, false, 1f, 10f, 0.1f, 1), // Walking Multiplier
         FREEMOVE_MODE(false, true) { // Free Move Type
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1427,6 +1535,7 @@ public class VRSettings
                     return null;
                 }
             }
+
             @Override
             Object setOptionValue(Object value) {
                 if (value == FreeMove.ROOM) {
@@ -1454,9 +1563,10 @@ public class VRSettings
         X_SENSITIVITY(true, false, 0.1f, 5f, 0.01f, 2), // Rotation Speed
         Y_SENSITIVITY(true, false, 0.1f, 5f, 0.01f, 2), // Y Sensitivity
         KEYHOLE(true, false, 0f, 40f, 5f, 0) { // Keyhole
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return prefix + String.format("%.0f" + DEGREE, (float)value);
+                return prefix + String.format("%.0f" + DEGREE, (float) value);
             }
         },
         FOV_REDUCTION(false, true), // FOV Comfort Reduction
@@ -1471,6 +1581,7 @@ public class VRSettings
         AUTO_SPRINT_THRESHOLD(true, false, 0.5f, 1f, 0.01f, 2), // Auto-sprint Threshold
         THIRDPERSON_ITEMTRANSFORMS(false, true), // 3rd person items
         BOW_MODE(false, true) { // Roomscale Bow Mode
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1483,21 +1594,24 @@ public class VRSettings
             }
         },
         TELEPORT_DOWN_LIMIT(true, false, 0, 16, 1, 0) { // Down Limit
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + "OFF";
+                return (int) value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int) value) : prefix + "OFF";
             }
         },
         TELEPORT_UP_LIMIT(true, false, 0, 4, 1, 0) { // Up Limit
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + "OFF";
+                return (int) value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int) value) : prefix + "OFF";
             }
         },
         TELEPORT_HORIZ_LIMIT(true, false, 0, 32, 1, 0) { // Distance Limit
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int)value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int)value) : prefix + "OFF";
+                return (int) value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int) value) : prefix + "OFF";
             }
         },
         ALLOW_STANDING_ORIGIN_OFFSET(false, true, LangHelper.YES_KEY, LangHelper.NO_KEY), // Allow Origin Offset
@@ -1505,6 +1619,7 @@ public class VRSettings
         FORCE_STANDING_FREE_MOVE(false, true, LangHelper.YES_KEY, LangHelper.NO_KEY), // Force Free Move
         ALLOW_ADVANCED_BINDINGS(false, true, LangHelper.YES_KEY, LangHelper.NO_KEY), // Show Advanced Bindings
         MENU_WORLD_SELECTION(false, false) { // Worlds
+
             @Override
             Object convertOption(String value) {
                 // TODO: remove conversion in the future
@@ -1517,6 +1632,7 @@ public class VRSettings
             }
         },
         HRTF_SELECTION(false, false) { // HRTF
+
             // this is now handled by vanilla
             @Override
             Object setOptionValue(Object value) {
@@ -1524,6 +1640,7 @@ public class VRSettings
             }
         },
         RELOAD_EXTERNAL_CAMERA(false, false) { // Reload External Camera
+
             @Override
             String getDisplayString(String prefix, Object value) {
                 return I18n.get("vivecraft.options." + name());
@@ -1548,17 +1665,14 @@ public class VRSettings
         private final int decimalPlaces;
         private final Pair<String, String> booleanLangKeys;
 
-        public static VrOptions getEnumOptions(int par0)
-        {
+        public static VrOptions getEnumOptions(int par0) {
             VrOptions[] aoptions = values();
             int j = aoptions.length;
 
-            for (int k = 0; k < j; ++k)
-            {
+            for (int k = 0; k < j; ++k) {
                 VrOptions options = aoptions[k];
 
-                if (options.returnEnumOrdinal() == par0)
-                {
+                if (options.returnEnumOrdinal() == par0) {
                     return options;
                 }
             }
@@ -1566,18 +1680,15 @@ public class VRSettings
             return null;
         }
 
-        VrOptions(boolean isfloat, boolean isbool)
-        {
+        VrOptions(boolean isfloat, boolean isbool) {
             this(isfloat, isbool, 0.0F, 1.0F, 0.0F, 0);
         }
 
-        VrOptions(boolean isfloat, boolean isbool, String trueLangKey, String falseKangKey)
-        {
+        VrOptions(boolean isfloat, boolean isbool, String trueLangKey, String falseKangKey) {
             this(isfloat, isbool, 0.0F, 1.0F, 0.0F, 0, trueLangKey, falseKangKey);
         }
 
         /**
-         *
          * @param isfloat
          * @param isbool
          * @param min
@@ -1589,8 +1700,7 @@ public class VRSettings
             this(isfloat, isbool, min, max, step, decimalPlaces, LangHelper.ON_KEY, LangHelper.OFF_KEY);
         }
 
-        VrOptions(boolean isfloat, boolean isboolean, float min, float max, float step, int decimalPlaces, String trueLangKey, String falseKangKey)
-        {
+        VrOptions(boolean isfloat, boolean isboolean, float min, float max, float step, int decimalPlaces, String trueLangKey, String falseKangKey) {
             this.enumFloat = isfloat;
             this.enumBoolean = isboolean;
             this.valueMin = min;
@@ -1628,30 +1738,26 @@ public class VRSettings
             return null;
         }
 
-        void onOptionChange() {}
+        void onOptionChange() {
+        }
 
-        public boolean getEnumFloat()
-        {
+        public boolean getEnumFloat() {
             return this.enumFloat;
         }
 
-        public boolean getEnumBoolean()
-        {
+        public boolean getEnumBoolean() {
             return this.enumBoolean;
         }
 
-        public int returnEnumOrdinal()
-        {
+        public int returnEnumOrdinal() {
             return this.ordinal();
         }
 
-        public float getValueMax()
-        {
+        public float getValueMax() {
             return this.valueMax;
         }
 
-        public float getValueMin()
-        {
+        public float getValueMin() {
             return this.valueMin;
         }
 
@@ -1663,77 +1769,64 @@ public class VRSettings
             return booleanLangKeys;
         }
 
-        protected float snapToStep(float p_148264_1_)
-        {
-            if (this.valueStep > 0.0F)
-            {
-                p_148264_1_ = this.valueStep * (float)Math.round(p_148264_1_ / this.valueStep);
+        protected float snapToStep(float p_148264_1_) {
+            if (this.valueStep > 0.0F) {
+                p_148264_1_ = this.valueStep * (float) Math.round(p_148264_1_ / this.valueStep);
             }
 
             return p_148264_1_;
         }
 
-        public double normalizeValue(float value)
-        {
+        public double normalizeValue(float value) {
             return Mth.clamp((this.snapToStep(value) - this.valueMin) / (this.valueMax - this.valueMin), 0.0D, 1.0D);
         }
 
-        public double denormalizeValue(float value)
-        {
+        public double denormalizeValue(float value) {
             return this.snapToStep((float) (this.valueMin + (this.valueMax - this.valueMin) * Mth.clamp(value, 0.0D, 1.0D)));
         }
     }
 
-    public static synchronized void initSettings( Minecraft mc, File dataDir )
-    {
+    public static synchronized void initSettings(Minecraft mc, File dataDir) {
         ProfileManager.init(dataDir);
-        var vrSettings = new VRSettings( mc, dataDir );
+        var vrSettings = new VRSettings(mc, dataDir);
 
         vrSettings.saveOptions();
 
         ClientDataHolderVR.getInstance().vrSettings = vrSettings;
     }
 
-    public static synchronized void loadAll( Minecraft mc )
-    {
+    public static synchronized void loadAll(Minecraft mc) {
         mc.options.load();
         ClientDataHolderVR.getInstance().vrSettings.loadOptions();
     }
 
-    public static synchronized void saveAll( Minecraft mc )
-    {
+    public static synchronized void saveAll(Minecraft mc) {
         mc.options.save();
         ClientDataHolderVR.getInstance().vrSettings.saveOptions();
     }
 
-    public static synchronized void resetAll( Minecraft mc )
-    {
+    public static synchronized void resetAll(Minecraft mc) {
         ClientDataHolderVR.getInstance().vrSettings.resetSettings();
     }
 
-    public static synchronized String getCurrentProfile()
-    {
+    public static synchronized String getCurrentProfile() {
         return ProfileManager.getCurrentProfileName();
     }
 
-    public static synchronized boolean profileExists(String profile)
-    {
+    public static synchronized boolean profileExists(String profile) {
         return ProfileManager.profileExists(profile);
     }
 
-    public static synchronized SortedSet<String> getProfileList()
-    {
+    public static synchronized SortedSet<String> getProfileList() {
         return ProfileManager.getProfileList();
     }
 
-    public static synchronized boolean setCurrentProfile(String profile)
-    {
+    public static synchronized boolean setCurrentProfile(String profile) {
         StringBuilder error = new StringBuilder();
         return setCurrentProfile(profile, error);
     }
 
-    public static synchronized boolean setCurrentProfile(String profile, StringBuilder error)
-    {
+    public static synchronized boolean setCurrentProfile(String profile, StringBuilder error) {
         boolean result = true;
         Minecraft mc = Minecraft.getInstance();
 
@@ -1751,8 +1844,7 @@ public class VRSettings
         return result;
     }
 
-    public static synchronized boolean createProfile(String profile, boolean useDefaults, StringBuilder error)
-    {
+    public static synchronized boolean createProfile(String profile, boolean useDefaults, StringBuilder error) {
         boolean result = true;
         Minecraft mc = Minecraft.getInstance();
         String originalProfile = VRSettings.getCurrentProfile();
@@ -1761,8 +1853,9 @@ public class VRSettings
         VRSettings.saveAll(mc);
 
         // Create the new profile
-        if (!ProfileManager.createProfile(profile, error))
+        if (!ProfileManager.createProfile(profile, error)) {
             return false;
+        }
 
         // Set the new profile
         ProfileManager.setCurrentProfile(profile, error);
@@ -1784,22 +1877,21 @@ public class VRSettings
         return result;
     }
 
-    public static synchronized boolean deleteProfile(String profile)
-    {
+    public static synchronized boolean deleteProfile(String profile) {
         StringBuilder error = new StringBuilder();
         return deleteProfile(profile, error);
     }
 
-    public static synchronized boolean deleteProfile(String profile, StringBuilder error)
-    {
+    public static synchronized boolean deleteProfile(String profile, StringBuilder error) {
         Minecraft mc = Minecraft.getInstance();
 
         // Save settings in current profile
         VRSettings.saveAll(mc);
 
         // Nuke the profile data
-        if (!ProfileManager.deleteProfile(profile, error))
+        if (!ProfileManager.deleteProfile(profile, error)) {
             return false;
+        }
 
         // Load settings in case the selected profile has changed
         VRSettings.loadAll(mc);
@@ -1807,35 +1899,35 @@ public class VRSettings
         return true;
     }
 
-    public static synchronized boolean duplicateProfile(String originalProfile, String newProfile, StringBuilder error)
-    {
+    public static synchronized boolean duplicateProfile(String originalProfile, String newProfile, StringBuilder error) {
         Minecraft mc = Minecraft.getInstance();
 
         // Save settings in current profile
         VRSettings.saveAll(mc);
 
         // Duplicate the profile data
-        if (!ProfileManager.duplicateProfile(originalProfile, newProfile, error))
+        if (!ProfileManager.duplicateProfile(originalProfile, newProfile, error)) {
             return false;
+        }
 
         return true;
     }
 
-    public static synchronized boolean renameProfile(String originalProfile, String newProfile, StringBuilder error)
-    {
+    public static synchronized boolean renameProfile(String originalProfile, String newProfile, StringBuilder error) {
         Minecraft mc = Minecraft.getInstance();
 
         // Save settings in current profile
         VRSettings.saveAll(mc);
 
         // Rename the profile
-        if (!ProfileManager.renameProfile(originalProfile, newProfile, error))
+        if (!ProfileManager.renameProfile(originalProfile, newProfile, error)) {
             return false;
+        }
 
         return true;
     }
 
-    public String[] getQuickCommandsDefaults(){
+    public String[] getQuickCommandsDefaults() {
 
         String[] out = new String[12];
         out[0] = "/gamemode survival";
@@ -1852,10 +1944,9 @@ public class VRSettings
         out[11] = "praise the sun!";
 
         return out;
-
     }
 
-    public String[] getRadialItemsDefault(){
+    public String[] getRadialItemsDefault() {
         String[] out = new String[8];
         out[0] = "key.drop";
         out[1] = "key.chat";
@@ -1869,7 +1960,7 @@ public class VRSettings
         return out;
     }
 
-    public String[] getRadialItemsAltDefault(){
+    public String[] getRadialItemsAltDefault() {
         String[] out = new String[8];
         out[0] = "";
         out[1] = "";
@@ -1924,16 +2015,18 @@ public class VRSettings
 
         public Setting getSetting(VrOptions option) {
             Setting setting = optionMap.get(option);
-            if (setting == null)
+            if (setting == null) {
                 throw new IllegalArgumentException("setting not registered: " + option);
+            }
 
             return setting;
         }
 
         public Setting getSetting(String networkName) {
             Setting setting = networkNameMap.get(networkName);
-            if (setting == null)
+            if (setting == null) {
                 throw new IllegalArgumentException("setting not registered: " + networkName);
+            }
 
             return setting;
         }
@@ -1957,8 +2050,9 @@ public class VRSettings
             }
 
             private void checkFloat() {
-                if (!option.enumFloat)
+                if (!option.enumFloat) {
                     throw new IllegalArgumentException("not a float option: " + option);
+                }
             }
 
             public boolean isFloat() {
@@ -1975,32 +2069,34 @@ public class VRSettings
 
             public Object getValue() {
                 Object val;
-                if (valueSet)
+                if (valueSet) {
                     val = value;
-                else
+                } else {
                     val = originalValue.get();
+                }
 
-                if (val instanceof Integer)
-                    val = Mth.clamp(((Number)val).intValue(), (int)getValueMin(), (int)getValueMax());
-                else if (val instanceof Float)
-                    val = Mth.clamp(((Number)val).floatValue(), getValueMin(), getValueMax());
+                if (val instanceof Integer) {
+                    val = Mth.clamp(((Number) val).intValue(), (int) getValueMin(), (int) getValueMax());
+                } else if (val instanceof Float) {
+                    val = Mth.clamp(((Number) val).floatValue(), getValueMin(), getValueMax());
+                }
 
                 return val;
             }
 
             public boolean getBoolean() {
                 Object val = getValue();
-                return val instanceof Boolean ? (boolean)val : false;
+                return val instanceof Boolean ? (boolean) val : false;
             }
 
             public int getInt() {
                 Object val = getValue();
-                return val instanceof Number ? ((Number)val).intValue() : 0;
+                return val instanceof Number ? ((Number) val).intValue() : 0;
             }
 
             public float getFloat() {
                 Object val = getValue();
-                return val instanceof Number ? ((Number)val).floatValue() : 0;
+                return val instanceof Number ? ((Number) val).floatValue() : 0;
             }
 
             public String getString() {
@@ -2024,10 +2120,11 @@ public class VRSettings
 
             public float getValueMin() {
                 checkFloat();
-                if (valueMinSet)
+                if (valueMinSet) {
                     return valueMin;
-                else
+                } else {
                     return Float.MIN_VALUE;
+                }
             }
 
             public void setValueMin(float valueMin) {
@@ -2048,10 +2145,11 @@ public class VRSettings
 
             public float getValueMax() {
                 checkFloat();
-                if (valueMaxSet)
+                if (valueMaxSet) {
                     return valueMax;
-                else
+                } else {
                     return Float.MAX_VALUE;
+                }
             }
 
             public void setValueMax(float valueMax) {

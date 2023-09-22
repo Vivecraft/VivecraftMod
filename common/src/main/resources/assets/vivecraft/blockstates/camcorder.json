@@ -1,5 +1,7 @@
 {
     "variants": {
-        "": { "model": "vivecraft:camcorder" }
+        "": {
+            "model": "vivecraft:camcorder"
+        }
     }
 }

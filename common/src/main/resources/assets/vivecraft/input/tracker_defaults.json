@@ -1,23 +1,23 @@
 {
-  "alias_info" : {},
-  "app_key" : "org.jrbudda.vivecraft.steamvrinput",
-  "bindings": {
-    "/actions/mixedreality": {
-      "haptics": [
-      ],
-      "poses": [
-        {
-          "output": "/actions/mixedreality/in/externalcamera",
-          "path": "/user/camera/pose/raw"
+    "alias_info": {},
+    "app_key": "org.jrbudda.vivecraft.steamvrinput",
+    "bindings": {
+        "/actions/mixedreality": {
+            "haptics": [
+            ],
+            "poses": [
+                {
+                    "output": "/actions/mixedreality/in/externalcamera",
+                    "path": "/user/camera/pose/raw"
+                }
+            ],
+            "sources": [
+            ]
         }
-      ],
-      "sources": [
-      ]
-    }
-  },
-  "controller_type" : "vive_tracker_camera",
-  "description" : "",
-  "name" : "Tracker for Camera",
-  "options" : {},
-  "simulated_actions" : []
+    },
+    "controller_type": "vive_tracker_camera",
+    "description": "",
+    "name": "Tracker for Camera",
+    "options": {},
+    "simulated_actions": []
 }

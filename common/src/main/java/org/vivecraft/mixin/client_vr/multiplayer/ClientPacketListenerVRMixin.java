@@ -1,38 +1,36 @@
 package org.vivecraft.mixin.client_vr.multiplayer;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.*;
-import org.spongepowered.asm.mixin.Unique;
-import org.vivecraft.client.VRPlayersClient;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.common.network.CommonNetworkHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.common.VRServerPerms;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.VRServerPerms;
+import org.vivecraft.common.network.CommonNetworkHelper;
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerVRMixin {
@@ -77,7 +75,10 @@ public class ClientPacketListenerVRMixin {
     public void vivecraft$cleanup(CallbackInfo ci) {
         ClientNetworking.needsReset = true;
     }
-    @Unique String lastMsg = null;
+
+    @Unique
+    String lastMsg = null;
+
     @Inject(at = @At("TAIL"), method = "sendChat")
     public void vivecraft$chatMsg(String string, CallbackInfo ci) {
         this.lastMsg = string;
@@ -105,11 +106,12 @@ public class ClientPacketListenerVRMixin {
     }
 
     @Unique
-    private void vivecraft$triggerHapticSound(){
+    private void vivecraft$triggerHapticSound() {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         if (dataholder.vrSettings.chatNotifications != VRSettings.ChatNotifications.NONE) {
             if ((dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.HAPTIC || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) && !dataholder.vrSettings.seated) {
-                dataholder.vr.triggerHapticPulse(ControllerType.LEFT, 0.2F, 1000.0F, 1.0F);}
+                dataholder.vr.triggerHapticPulse(ControllerType.LEFT, 0.2F, 1000.0F, 1.0F);
+            }
 
             if (dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.SOUND || dataholder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH) {
                 Vec3 vec3 = dataholder.vrPlayer.vrdata_world_pre.getController(1).getPosition();
@@ -136,14 +138,14 @@ public class ClientPacketListenerVRMixin {
     }
 
     @Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getData()Lnet/minecraft/network/FriendlyByteBuf;"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;)V", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-	public void vivecraft$handlepacket(ClientboundCustomPayloadPacket p_105004_, CallbackInfo info, ResourceLocation channelID, FriendlyByteBuf buffer) {
+    public void vivecraft$handlepacket(ClientboundCustomPayloadPacket p_105004_, CallbackInfo info, ResourceLocation channelID, FriendlyByteBuf buffer) {
         if (channelID.equals(CommonNetworkHelper.CHANNEL)) {
             var packetID = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
             ClientNetworking.handlePacket(packetID, buffer);
             buffer.release();
             info.cancel();
         }
-	}
+    }
 
     @Inject(at = @At("HEAD"), method = "handleOpenScreen")
     public void vivecraft$markScreenActive(ClientboundOpenScreenPacket clientboundOpenScreenPacket, CallbackInfo ci) {

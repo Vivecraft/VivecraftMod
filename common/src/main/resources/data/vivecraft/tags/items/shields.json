@@ -1,10 +1,10 @@
 {
-  "replace": false,
-  "values": [
-    {
-      "id": "#forge:tools/shields",
-      "required": false
-    },
-    "minecraft:shield"
-  ]
+    "replace": false,
+    "values": [
+        {
+            "id": "#forge:tools/shields",
+            "required": false
+        },
+        "minecraft:shield"
+    ]
 }

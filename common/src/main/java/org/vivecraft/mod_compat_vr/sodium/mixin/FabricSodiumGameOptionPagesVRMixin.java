@@ -1,6 +1,5 @@
 package org.vivecraft.mod_compat_vr.sodium.mixin;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptionPages;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Options;
@@ -9,6 +8,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 
 @Pseudo

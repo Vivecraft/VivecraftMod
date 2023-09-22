@@ -293,6 +293,7 @@ public class RenderHelper {
         BufferUploader.drawWithShader(bufferbuilder.end());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
+
     public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int lighti, Matrix4f pMatrix) {
         drawSizedQuadWithLightmapCutout(displayWidth, displayHeight, size, lighti, new float[]{1, 1, 1, 1}, pMatrix);
     }
@@ -382,29 +383,29 @@ public class RenderHelper {
         Vec3 forward = start.subtract(end).normalize();
         Vec3 right = forward.cross(new Vec3(0.0D, 1.0D, 0.0D));
         Vec3 up = right.cross(forward);
-        
+
         Vec3 left = right.scale(minX);
         right = right.scale(maxX);
-        
+
         Vec3 down = up.scale(minY);
         up = up.scale(maxY);
-        
+
         Vec3 upNormal = up.normalize();
         Vec3 rightNormal = right.normalize();
-        
+
         Vec3 backRightBottom = start.add(right.x + down.x, right.y + down.y, right.z + down.z);
         Vec3 backRightTop = start.add(right.x + up.x, right.y + up.y, right.z + up.z);
         Vec3 backLeftBottom = start.add(left.x + down.x, left.y + down.y, left.z + down.z);
         Vec3 backLeftTop = start.add(left.x + up.x, left.y + up.y, left.z + up.z);
-        
+
         Vec3 frontRightBottom = end.add(right.x + down.x, right.y + down.y, right.z + down.z);
         Vec3 frontRightTop = end.add(right.x + up.x, right.y + up.y, right.z + up.z);
         Vec3 frontLeftBottom = end.add(left.x + down.x, left.y + down.y, left.z + down.z);
         Vec3 frontLeftTop = end.add(left.x + up.x, left.y + up.y, left.z + up.z);
-        
+
         BufferBuilder bufferbuilder = tes.getBuilder();
         Matrix4f mat = poseStack.last().pose();
-        
+
         addVertex(bufferbuilder, mat, backRightBottom, color, alpha, forward);
         addVertex(bufferbuilder, mat, backLeftBottom, color, alpha, forward);
         addVertex(bufferbuilder, mat, backLeftTop, color, alpha, forward);
@@ -438,11 +439,11 @@ public class RenderHelper {
         addVertex(bufferbuilder, mat, backRightBottom, color, alpha, upNormal);
         addVertex(bufferbuilder, mat, frontRightBottom, color, alpha, upNormal);
     }
-    
+
     private static void addVertex(BufferBuilder buff, Matrix4f mat, Vec3 pos, Vec3i color, int alpha, Vec3 normal) {
         buff.vertex(mat, (float) pos.x, (float) pos.y, (float) pos.z)
             .color(color.getX(), color.getY(), color.getZ(), alpha)
-            .normal((float)normal.x, (float)normal.y, (float)normal.z)
+            .normal((float) normal.x, (float) normal.y, (float) normal.z)
             .endVertex();
     }
 }

@@ -18,7 +18,8 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(FireworkRocketEntity.class)
 public class FireworkRocketEntityVRMixin {
 
-    @Shadow private @Nullable LivingEntity attachedToEntity;
+    @Shadow
+    private @Nullable LivingEntity attachedToEntity;
 
     @Unique
     private Vec3 vivecraft$handPos = null;

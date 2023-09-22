@@ -19,7 +19,7 @@ public class SodiumHelper {
         }
     }
 
-    public static void markTextureAsActive(TextureAtlasSprite sprite){
+    public static void markTextureAsActive(TextureAtlasSprite sprite) {
         SpriteUtil.markSpriteActive(sprite);
     }
 

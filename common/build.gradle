@@ -60,7 +60,7 @@ jar {
         configurations
             .runtimeClasspath
             .collect {
-                if(it.name.startsWith("LaunchPopup")) {
+                if (it.name.startsWith("LaunchPopup")) {
                     zipTree(it)
                 }
             }
