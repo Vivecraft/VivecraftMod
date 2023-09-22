@@ -68,10 +68,11 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 
     private void copyUV(Polygon source, Polygon dest) {
         for (int i = 0; i < source.vertices.length; i++) {
-            dest.vertices[i] = new Vertex(dest.vertices[i].pos, source.vertices[i].u, source.vertices[i].v);
+            Vertex newVertex = new Vertex(dest.vertices[i].pos, source.vertices[i].u, source.vertices[i].v);
             if (OptifineHelper.isOptifineLoaded()) {
-                OptifineHelper.copyRenderPositions(source.vertices[i], dest.vertices[i]);
+                OptifineHelper.copyRenderPositions(dest.vertices[i], newVertex);
             }
+            dest.vertices[i] = newVertex;
         }
     }
 
