@@ -177,22 +177,20 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
-    // TODO: could this mess with mods?
-    @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", ordinal = 0), method = "renderLevel")
-    public Entity vivecraft$captureEntityRestoreLoc(Entity entity, PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer) {
+    @Inject(at = @At("HEAD"), method = "renderEntity")
+    public void vivecraft$captureEntityRestoreLoc(Entity entity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, CallbackInfo ci) {
         this.vivecraft$capturedEntity = entity;
-        if (!RenderPassType.isVanilla() && vivecraft$capturedEntity == camera.getEntity()) {
-            ((GameRendererExtension) gameRenderer).vivecraft$restoreRVEPos((LivingEntity) vivecraft$capturedEntity);
+        if (!RenderPassType.isVanilla() && vivecraft$capturedEntity == minecraft.getCameraEntity()) {
+            ((GameRendererExtension) minecraft.gameRenderer).vivecraft$restoreRVEPos((LivingEntity) vivecraft$capturedEntity);
         }
         this.vivecraft$renderedEntity = vivecraft$capturedEntity;
-        return entity;
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", shift = Shift.AFTER), method = "renderLevel")
-    public void vivecraft$restoreLoc2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
-        if (!RenderPassType.isVanilla() && vivecraft$capturedEntity == camera.getEntity()) {
-            ((GameRendererExtension) gameRenderer).vivecraft$cacheRVEPos((LivingEntity) vivecraft$capturedEntity);
-            ((GameRendererExtension) gameRenderer).vivecraft$setupRVE();
+    @Inject(at = @At("TAIL"), method = "renderEntity")
+    public void vivecraft$restoreLoc2(Entity entity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, CallbackInfo ci) {
+        if (!RenderPassType.isVanilla() && vivecraft$capturedEntity == minecraft.getCameraEntity()) {
+            ((GameRendererExtension) minecraft.gameRenderer).vivecraft$cacheRVEPos((LivingEntity) vivecraft$capturedEntity);
+            ((GameRendererExtension) minecraft.gameRenderer).vivecraft$setupRVE();
         }
         this.vivecraft$renderedEntity = null;
     }
