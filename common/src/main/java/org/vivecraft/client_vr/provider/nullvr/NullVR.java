@@ -84,32 +84,39 @@ public class NullVR extends MCVR {
 
             this.mc.getProfiler().push("updatePose");
 
-            if (mc.screen == null) {
+            // don't permanently change the sensitivity
+            float xSens = this.dh.vrSettings.xSensitivity;
+            float xKey = this.dh.vrSettings.keyholeX;
 
-                // don't permanently change the sensitivity
-                float xSens = this.dh.vrSettings.xSensitivity;
-                float xKey = this.dh.vrSettings.keyholeX;
+            this.dh.vrSettings.xSensitivity = this.dh.vrSettings.ySensitivity * 1.636F * ((float) mc.getWindow().getScreenWidth() / (float) mc.getWindow().getScreenHeight());
+            this.dh.vrSettings.keyholeX = 1;
 
-                this.dh.vrSettings.xSensitivity = this.dh.vrSettings.ySensitivity * 1.636F * ((float) mc.getWindow().getScreenWidth() / (float) mc.getWindow().getScreenHeight());
-                this.dh.vrSettings.keyholeX = 1;
+            this.updateAim();
 
-                this.updateAim();
+            this.controllerPose[0].M[0][3] = 0.3F;
+            this.controllerPose[0].M[1][3] = 1.2F;
+            this.controllerPose[0].M[2][3] = -0.5F;
 
-                this.dh.vrSettings.xSensitivity = xSens;
-                this.dh.vrSettings.keyholeX = xKey;
+            this.controllerPose[1].M[0][3] = -0.3F;
+            this.controllerPose[1].M[1][3] = 1.2F;
+            this.controllerPose[1].M[2][3] = -0.5F;
+
+            this.dh.vrSettings.xSensitivity = xSens;
+            this.dh.vrSettings.keyholeX = xKey;
 
 
-                // point head in cursor direction
-                hmdRotation.M[0][0] = handRotation[0].M[0][0];
-                hmdRotation.M[0][1] = handRotation[0].M[0][1];
-                hmdRotation.M[0][2] = handRotation[0].M[0][2];
-                hmdRotation.M[1][0] = handRotation[0].M[1][0];
-                hmdRotation.M[1][1] = handRotation[0].M[1][1];
-                hmdRotation.M[1][2] = handRotation[0].M[1][2];
-                hmdRotation.M[2][0] = handRotation[0].M[2][0];
-                hmdRotation.M[2][1] = handRotation[0].M[2][1];
-                hmdRotation.M[2][2] = handRotation[0].M[2][2];
-            } else if (GuiHandler.guiRotation_room != null) {
+            // point head in cursor direction
+            hmdRotation.M[0][0] = handRotation[0].M[0][0];
+            hmdRotation.M[0][1] = handRotation[0].M[0][1];
+            hmdRotation.M[0][2] = handRotation[0].M[0][2];
+            hmdRotation.M[1][0] = handRotation[0].M[1][0];
+            hmdRotation.M[1][1] = handRotation[0].M[1][1];
+            hmdRotation.M[1][2] = handRotation[0].M[1][2];
+            hmdRotation.M[2][0] = handRotation[0].M[2][0];
+            hmdRotation.M[2][1] = handRotation[0].M[2][1];
+            hmdRotation.M[2][2] = handRotation[0].M[2][2];
+
+            if (GuiHandler.guiRotation_room != null) {
                 // look at screen, so that it's centered
                 hmdRotation.M[0][0] = GuiHandler.guiRotation_room.M[0][0];
                 hmdRotation.M[0][1] = GuiHandler.guiRotation_room.M[0][1];
