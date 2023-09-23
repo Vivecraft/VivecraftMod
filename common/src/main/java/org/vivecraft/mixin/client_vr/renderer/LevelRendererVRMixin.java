@@ -133,10 +133,18 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
+    @Inject(at = @At("HEAD"), method = "renderLevel")
+    public void vivecraft$setShaders(CallbackInfo ci) {
+        if (!RenderPassType.isVanilla()) {
+            this.vivecraft$setShaderGroup();
+        }
+    }
+
     /*
      * Start `renderLevel` lighting poll
      */
 
+    // TODO maybe move to the ClientLevel
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;pollLightUpdates()V"), method = "renderLevel")
     public void vivecraft$onePollLightUpdates(ClientLevel instance) {
         if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
@@ -144,15 +152,14 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
+    // TODO maybe move to the LevelLightEngine
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"), method = "renderLevel")
     public int vivecraft$oneLightingUpdates(LevelLightEngine instance) {
         if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
-            instance.runLightUpdates();
+            return instance.runLightUpdates();
+        } else {
+            return 0;
         }
-        if (!RenderPassType.isVanilla()) {
-            this.vivecraft$setShaderGroup();
-        }
-        return 0;
     }
 
     /*
