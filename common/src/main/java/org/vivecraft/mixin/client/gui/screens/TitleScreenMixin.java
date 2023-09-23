@@ -26,8 +26,6 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     @Unique
-    private boolean vivecraft$showError = false;
-    @Unique
     private Button vivecraft$vrModeButton;
     @Unique
     private Button vivecraft$updateButton;
@@ -45,13 +43,12 @@ public abstract class TitleScreenMixin extends Screen {
     @Unique
     private void vivecraft$addVRModeButton() {
 
-        vivecraft$vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", vivecraft$getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
-            vivecraft$showError = false;
+        vivecraft$vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
             VRState.vrEnabled = !VRState.vrEnabled;
             ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
             ClientDataHolderVR.getInstance().vrSettings.saveOptions();
 
-            button.setMessage(Component.translatable("vivecraft.gui.vr", vivecraft$getIcon(), VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
+            button.setMessage(Component.translatable("vivecraft.gui.vr", VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
         })
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 72)
@@ -68,11 +65,6 @@ public abstract class TitleScreenMixin extends Screen {
         vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
         this.addRenderableWidget(vivecraft$updateButton);
-    }
-
-    @Unique
-    private String vivecraft$getIcon() {
-        return (vivecraft$showError ? "§c\u26A0§r " : "");
     }
 
     @Inject(at = @At("TAIL"), method = "render")
