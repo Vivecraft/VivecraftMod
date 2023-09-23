@@ -45,8 +45,8 @@ public class ServerConfig {
     public static ConfigBuilder.BooleanValue pvpVRvsSEATEDVR;
 
     public static ConfigBuilder.BooleanValue climbeyEnabled;
-    public static ConfigBuilder.ConfigValue<String> climbeyBlockmode;
-    public static ConfigBuilder.ConfigValue<List<? extends String>> climbeyBlocklist;
+    public static ConfigBuilder.InListValue<String> climbeyBlockmode;
+    public static ConfigBuilder.ListValue<String> climbeyBlocklist;
 
     public static ConfigBuilder.BooleanValue crawlingEnabled;
 

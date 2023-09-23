@@ -23,6 +23,9 @@
         ],
         "main": [
             "org.vivecraft.fabric.VivecraftMod"
+        ],
+        "modmenu": [
+            "org.vivecraft.client.fabric.VivecraftModMenuApiImpl"
         ]
     },
     "mixins": [
@@ -33,7 +36,6 @@
         "vivecraft.iris.mixins.json",
         "vivecraft.physicsmod.mixins.json",
         "vivecraft.rei.mixins.json",
-        "vivecraft.resolutioncontrol.mixins.json",
         "vivecraft.fabric.mixins.json"
     ],
     "depends": {
@@ -43,5 +45,19 @@
     },
     "suggests": {
         "another-mod": "*"
+    },
+    "contact": {
+        "homepage": "https://modrinth.com/mod/vivecraft",
+        "issues": "https://github.com/Vivecraft/VivecraftMod/issues",
+        "sources": "https://github.com/Vivecraft/VivecraftMod"
+    },
+    "custom": {
+        "modmenu": {
+            "links": {
+                "modmenu.discord": "https://discord.gg/jYyyv7zhSW",
+                "vivecraft.message.kofi": "https://ko-fi.com/vivecraft"
+            },
+            "update_checker": true
+        }
     }
 }
