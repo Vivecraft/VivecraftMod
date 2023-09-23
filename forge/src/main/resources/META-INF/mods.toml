@@ -18,7 +18,7 @@ Support us on Ko-Fi: https://ko-fi.com/vivecraft
 
 Discord: https://discord.gg/jYyyv7zhSW
 '''
-updateJSONURL = "https://api.modrinth.com/updates/vivecraft/forge_updates.json"
+updateJSONURL = "https://raw.githubusercontent.com/Vivecraft/VivecraftMod/forge-versions/forge_updates.json"
 
 [[dependencies.vivecraft]]
 modId = "forge"
