@@ -54,7 +54,7 @@ public abstract class GuiVRMixin implements GuiExtension {
     protected abstract Player getCameraPlayer();
 
     @Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
-    void vivecraft$cancelRenderVignette(GuiGraphics guiGraphics, Entity entity, CallbackInfo ci) {
+    public void vivecraft$cancelRenderVignette(GuiGraphics guiGraphics, Entity entity, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             RenderSystem.enableDepthTest();
             ci.cancel();
