@@ -17,7 +17,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
@@ -35,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.Xevents;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
@@ -49,6 +49,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
+import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -450,7 +451,8 @@ public abstract class GameRendererVRMixin
             return;
         }
 
-        if (vivecraft$DATA_HOLDER.currentPass == RenderPass.LEFT) {
+        if (vivecraft$DATA_HOLDER.currentPass == RenderPass.LEFT
+            && !(Xplat.isModLoaded("immersive_portals") && ImmersivePortalsHelper.isRenderingPortal())) {
             this.pick(pPartialTicks);
 
             if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() != HitResult.Type.MISS) {
@@ -501,15 +503,16 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 1), method = "renderLevel")
-    public void vivecraft$noHandProfiler(ProfilerFiller instance, String s) {
-        GL11.glDisable(GL11.GL_STENCIL_TEST);
-        this.minecraft.getProfiler().popPush("ShadersEnd"); //TODO needed?
-    }
-
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"), method = "renderLevel")
     public boolean vivecraft$noHandsVR(GameRenderer instance) {
         return RenderPassType.isVanilla() && renderHand;
+    }
+
+    @Inject(at = @At("TAIL"), method = "renderLevel")
+    public void vivecraft$disableStencil(float f, long l, PoseStack poseStack, CallbackInfo ci) {
+        if (!RenderPassType.isVanilla()) {
+            VREffectsHelper.disableStencilTest();
+        }
     }
 
     @Inject(at = @At(value = "TAIL", shift = Shift.BEFORE), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")

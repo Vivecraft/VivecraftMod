@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
@@ -14,6 +15,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,6 +29,10 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.Xplat;
+import org.vivecraft.client.gui.VivecraftClickEvent;
+import org.vivecraft.client.gui.settings.GuiOtherHUDSettings;
+import org.vivecraft.client.gui.settings.GuiRenderOpticsSettings;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -41,6 +48,7 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
+import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import java.util.Calendar;
@@ -106,12 +114,41 @@ public class VREffectsHelper {
         }
     }
 
+    private static boolean wasStencilOn;
+
+    private static boolean showedStencilMessage = false;
+
     public static void drawEyeStencil(boolean flag1) {
-        if (dataHolder.currentPass != RenderPass.SCOPEL
-            && dataHolder.currentPass != RenderPass.SCOPER) {
-            if ((dataHolder.currentPass == RenderPass.LEFT
-                || dataHolder.currentPass == RenderPass.RIGHT)
-                && dataHolder.vrSettings.vrUseStencil) {
+        wasStencilOn = GL11C.glIsEnabled(GL11C.GL_STENCIL_TEST);
+
+        if (wasStencilOn && !showedStencilMessage && dataHolder.vrSettings.vrUseStencil && dataHolder.vrSettings.showChatMessageStencil) {
+            showedStencilMessage = true;
+            mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.stencil",
+                Component.translatable("vivecraft.messages.3options",
+                        Component.translatable("options.title"),
+                        Component.translatable("vivecraft.options.screen.main"),
+                        Component.translatable("vivecraft.options.screen.stereorendering"))
+                    .withStyle(style -> style.withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new GuiRenderOpticsSettings(null)))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("vivecraft.messages.openSettings")))
+                        .withColor(ChatFormatting.GREEN)
+                        .withItalic(true)),
+                Component.translatable("vivecraft.messages.3options",
+                        Component.translatable("options.title"),
+                        Component.translatable("vivecraft.options.screen.main"),
+                        Component.translatable("vivecraft.options.screen.guiother"))
+                    .withStyle(style -> style.withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new GuiOtherHUDSettings(null)))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("vivecraft.messages.openSettings")))
+                        .withColor(ChatFormatting.GREEN)
+                        .withItalic(true))
+            ));
+        }
+
+        // don't touch the stencil if we don't use it
+        // stencil only for left/right VR view
+        if ((dataHolder.currentPass == RenderPass.LEFT
+            || dataHolder.currentPass == RenderPass.RIGHT)
+            && dataHolder.vrSettings.vrUseStencil
+            && (!Xplat.isModLoaded("immersive_portals") || !ImmersivePortalsHelper.isRenderingPortal())) {
 //				net.optifine.shaders.Program program = Shaders.activeProgram;
 //
 //				if (shaders && Shaders.dfb != null) {
@@ -125,14 +162,15 @@ public class VREffectsHelper {
 //
 //					Shaders.useProgram(program);
 //				} else {
-                dataHolder.vrRenderer.doStencil(false);
+            dataHolder.vrRenderer.doStencil(false);
 //				}
-            } else {
-                GL11C.glDisable(GL11C.GL_STENCIL_TEST);
-            }
-        } else {
-            // No stencil for telescope
-            // GameRendererVRMixin.DATA_HOLDER.vrRenderer.doStencil(true);
+        }
+    }
+
+    public static void disableStencilTest() {
+        // if we did enable the stencil test, disable it
+        if (!wasStencilOn) {
+            GL11C.glDisable(GL11C.GL_STENCIL_TEST);
         }
     }
 

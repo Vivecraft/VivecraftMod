@@ -140,6 +140,8 @@ public class VRWidgetHelper {
         BufferBuilder bufferbuilder1 = tesselator.getBuilder();
         bufferbuilder1.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
+        // TODO lighting changes with head movement
+
         for (BakedQuad bakedquad : minecraft.getModelManager().getModel(displayModel).getQuads((BlockState) null, (Direction) null, random)) {
             if (displayFaceFunc.apply(bakedquad.getDirection()) != DisplayFace.NONE && bakedquad.getSprite().contents().name().equals(new ResourceLocation("vivecraft:transparent"))) {
                 int[] vertexList = bakedquad.getVertices();

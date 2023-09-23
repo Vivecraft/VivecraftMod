@@ -412,6 +412,8 @@ public class VRSettings {
     public ChatServerPluginMessage showServerPluginMessage = ChatServerPluginMessage.SERVER_ONLY;
     @SettingField(VrOptions.SHOW_PLUGIN_MISSING)
     public boolean showServerPluginMissingMessageAlways = true;
+    @SettingField(VrOptions.CHAT_MESSAGE_STENCIL)
+    public boolean showChatMessageStencil = true;
     @SettingField
     public boolean vrEnabled = false;
     @SettingField(VrOptions.VR_HOTSWITCH)
@@ -1117,6 +1119,7 @@ public class VRSettings {
         SHOW_UPDATES(false, true, "vivecraft.options.always", "vivecraft.options.once"),
         SHOW_PLUGIN(false, true),
         SHOW_PLUGIN_MISSING(false, true, "vivecraft.options.always", "vivecraft.options.once"),
+        CHAT_MESSAGE_STENCIL(false, true), // warning for other mod using stencil
         AUTO_OPEN_KEYBOARD(false, true), // Always Open Keyboard
         RADIAL_MODE_HOLD(false, true, "vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
         PHYSICAL_KEYBOARD(false, true, "vivecraft.options.keyboard.physical", "vivecraft.options.keyboard.pointer"), // Keyboard Type
