@@ -75,7 +75,7 @@ public class VREffectsHelper {
         } else {
             AABB aabb = new AABB(in.subtract(dist, dist, dist), in.add(dist, dist, dist));
             Stream<BlockPos> stream = BlockPos.betweenClosedStream(aabb).filter((bp) ->
-                mc.level.getBlockState(bp).isViewBlocking(mc.level, bp));
+                mc.level.getBlockState(bp).isSolidRender(mc.level, bp));
             Optional<BlockPos> optional = stream.findFirst();
             return optional.isPresent()
                    ? Triple.of(1.0F, mc.level.getBlockState(optional.get()), optional.get())
@@ -652,12 +652,12 @@ public class VREffectsHelper {
         RenderSystem.enableDepthTest();
 
         if (mc.level != null) {
-            if (isInsideOpaqueBlock(screenPos)) {
+            if (isInsideOpaqueBlock(screenPos) || ((GameRendererExtension) mc.gameRenderer).vivecraft$isInBlock() > 0.0F) {
                 screenPos = dataHolder.vrPlayer.vrdata_world_render.hmd.getPosition();
             }
 
             int minLight = ShadersHelper.ShaderLight();
-            int light = ((GameRendererExtension) mc.gameRenderer).vivecraft$isInBlock() > 0.0F ? minLight : Utils.getCombinedLightWithMin(mc.level, BlockPos.containing(screenPos), minLight);
+            int light = Utils.getCombinedLightWithMin(mc.level, BlockPos.containing(screenPos), minLight);
             RenderHelper.drawSizedQuadWithLightmapCutout((float) mc.getWindow().getGuiScaledWidth(),
                 (float) mc.getWindow().getGuiScaledHeight(), 1.5F, light, color,
                 poseStack.last().pose());

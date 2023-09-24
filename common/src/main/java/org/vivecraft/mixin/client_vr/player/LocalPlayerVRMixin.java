@@ -296,6 +296,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         }
     }
 
+    @Unique
     public void vivecraft$doDrag() {
         float friction = 0.91F;
 
@@ -322,6 +323,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         this.setDeltaMovement(this.getDeltaMovement().x * xFactor, this.getDeltaMovement().y, this.getDeltaMovement().z * zFactor);
     }
 
+    @Unique
     public double vivecraft$getBoundedAddition(double orig) {
         return orig >= -1.0E-6D && orig <= 1.0E-6D ? 1.0E-6D : orig;
     }
