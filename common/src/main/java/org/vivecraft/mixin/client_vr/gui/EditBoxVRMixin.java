@@ -1,30 +1,30 @@
 package org.vivecraft.mixin.client_vr.gui;
 
+import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
+
+import net.minecraft.network.chat.Component;
+
+import static org.vivecraft.client_vr.VRState.vrRunning;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.Component;
-import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-
-@Mixin(EditBox.class)
-public abstract class EditBoxVRMixin extends AbstractWidget{
+@Mixin(net.minecraft.client.gui.components.EditBox.class)
+public abstract class EditBoxVRMixin extends net.minecraft.client.gui.components.AbstractWidget {
 
 	@Shadow
 	private boolean canLoseFocus;
 
-	public EditBoxVRMixin(int p_93629_, int p_93630_, int p_93631_, int p_93632_, Component p_93633_) {
-		super(p_93629_, p_93630_, p_93631_, p_93632_, p_93633_);
+	public EditBoxVRMixin(int x, int y, int width, int height, Component message) {
+		super(x, y, width, height, message);
 	}
 
-	@Inject(at = @At(value = "HEAD"), method = "onClick")
+	@Inject(at = @At("HEAD"), method = "onClick")
 	public void openKeyboard(double d, double e, CallbackInfo ci) {
-		if (VRState.vrRunning) {
+		if (vrRunning) {
 			KeyboardHandler.setOverlayShowing(true);
 		}
 	}

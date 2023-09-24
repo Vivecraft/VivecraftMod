@@ -1,16 +1,17 @@
 package org.vivecraft.mod_compat_vr.optifine;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.ModelPart.Vertex;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.logger;
 
 public class OptifineHelper {
 
@@ -32,7 +33,7 @@ public class OptifineHelper {
 
     private static Class<?> customColors;
     private static Method customColorsGetSkyColorMethod;
-    private static Method customColorsGetSkyColoEndMethod;
+    private static Method customColorsGetSkyColorEndMethod;
     private static Method customColorsGetUnderwaterColorMethod;
     private static Method customColorsGetUnderlavaColorMethod;
     private static Method customColorsGetFogColorMethod;
@@ -57,10 +58,10 @@ public class OptifineHelper {
             // check for optifine with a class search
             try {
                 Class.forName("net.optifine.Config");
-                VRSettings.logger.info("Vivecraft: Optifine detected");
+                logger.info("Optifine detected");
                 optifineLoaded = true;
             } catch (ClassNotFoundException ignore) {
-                VRSettings.logger.info("Vivecraft: Optifine not detected");
+                logger.info("Optifine not detected");
                 optifineLoaded = false;
             }
             if (optifineLoaded) {
@@ -167,7 +168,7 @@ public class OptifineHelper {
 
     public static void setRenderRegions(boolean active) {
         try {
-            optionsOfRenderRegions.set(Minecraft.getInstance().options, active);
+            optionsOfRenderRegions.set(mc.options, active);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -184,7 +185,7 @@ public class OptifineHelper {
 
     public static Vec3 getCustomSkyColorEnd(Vec3 skyColor) {
         try {
-            return (Vec3)customColorsGetSkyColoEndMethod.invoke(customColors, skyColor);
+            return (Vec3)customColorsGetSkyColorEndMethod.invoke(customColors, skyColor);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return skyColor;
@@ -239,7 +240,7 @@ public class OptifineHelper {
 
     public static double getCloudHeight() {
         try {
-            return (double)optionsOfCloudHeight.get(Minecraft.getInstance().options);
+            return (double)optionsOfCloudHeight.get(mc.options);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             return 0;
@@ -254,7 +255,7 @@ public class OptifineHelper {
         }
     }
 
-    public static void copyRenderPositions(ModelPart.Vertex source, ModelPart.Vertex dest) {
+    public static void copyRenderPositions(Vertex source, Vertex dest) {
         if (vertexRenderPositions != null) {
             try {
                 vertexRenderPositions.set(dest, vertexRenderPositions.get(source));
@@ -297,8 +298,8 @@ public class OptifineHelper {
             shadersEndEntitiesMethod = shaders.getMethod("endEntities");
 
             // private methods
-            customColorsGetSkyColoEndMethod = customColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);
-            customColorsGetSkyColoEndMethod.setAccessible(true);
+            customColorsGetSkyColorEndMethod = customColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);
+            customColorsGetSkyColorEndMethod.setAccessible(true);
             customColorsGetFogColorMethod = customColors.getDeclaredMethod("getFogColor", Vec3.class, BlockAndTintGetter.class, double.class, double.class, double.class);
             customColorsGetFogColorMethod.setAccessible(true);
             customColorsGetFogColorEndMethod = customColors.getDeclaredMethod("getFogColorEnd", Vec3.class);
@@ -307,20 +308,20 @@ public class OptifineHelper {
             customColorsGetFogColorNetherMethod.setAccessible(true);
 
             try {
-                vertexRenderPositions = ModelPart.Vertex.class.getField("renderPositions");
+                vertexRenderPositions = Vertex.class.getField("renderPositions");
             } catch (NoSuchFieldException e) {
                 // this version doesn't have the entity render improvements
                 vertexRenderPositions = null;
             }
 
         } catch (ClassNotFoundException e) {
-            VRSettings.logger.error("Optifine detected, but couldn't load class: {}", e.getMessage());
+            logger.error("Optifine detected, but couldn't load class: {}", e.getMessage());
             optifineLoaded = false;
         } catch (NoSuchMethodException e) {
-            VRSettings.logger.error("Optifine detected, but couldn't load Method: {}", e.getMessage());
+            logger.error("Optifine detected, but couldn't load Method: {}", e.getMessage());
             optifineLoaded = false;
         } catch (NoSuchFieldException e) {
-            VRSettings.logger.error("Optifine detected, but couldn't load Field: {}", e.getMessage());
+            logger.error("Optifine detected, but couldn't load Field: {}", e.getMessage());
         }
     }
 

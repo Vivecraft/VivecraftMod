@@ -1,12 +1,14 @@
 package org.vivecraft.mod_compat_vr.iris.mixin;
 
+import org.vivecraft.client_xr.render_pass.RenderPassType;
+
+import static org.vivecraft.client_vr.VRState.dh;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Pseudo
 @Mixin(targets = {
@@ -18,7 +20,7 @@ public class IrisBeginFrameHack {
     // only update the timer on the first RenderPass, so that it counts the time from all RenderPasses
     @Inject(method = "beginFrame", at = @At("HEAD"), cancellable = true, remap = false)
     private void cancelShadows(CallbackInfo ci) {
-        if (!RenderPassType.isVanilla() && !ClientDataHolderVR.getInstance().isFirstPass) {
+        if (!RenderPassType.isVanilla() && !dh.isFirstPass) {
             ci.cancel();
         }
     }

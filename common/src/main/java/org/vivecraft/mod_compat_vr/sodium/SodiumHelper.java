@@ -1,11 +1,13 @@
 package org.vivecraft.mod_compat_vr.sodium;
 
+import org.vivecraft.client.Xplat;
+
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.lwjgl.opengl.GL32C;
-import org.vivecraft.client.Xplat;
+
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 public class SodiumHelper {
     static final LongArrayFIFOQueue fences = new LongArrayFIFOQueue();

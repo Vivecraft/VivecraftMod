@@ -1,19 +1,19 @@
 package org.vivecraft.client_vr.settings.profile;
 
+import com.google.gson.JsonObject;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.gson.JsonObject;
-
 public class ProfileReader
 {
     private String set;
     private String profile;
-    private Map<String, String> currentProfile = null;
-    private Iterator profileSettingsIt = null;
-    private JsonObject theProfiles = null;
+    private Map<String, String> currentProfile;
+    private Iterator profileSettingsIt;
+    private JsonObject theProfiles;
 
     public ProfileReader(String set)
     {

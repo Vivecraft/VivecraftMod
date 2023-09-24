@@ -1,19 +1,22 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.math.Axis;
-import net.minecraft.world.level.material.FogType;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRData;
-
-import net.minecraft.client.Camera;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.VRData.VRDevicePose;
+import org.vivecraft.client_vr.settings.VRSettings.MirrorMode;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
+import org.joml.Quaternionf;
 
-public class XRCamera extends Camera {
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.material.FogType;
+import net.minecraft.world.phys.Vec3;
+
+import static org.vivecraft.client_vr.VRState.dh;
+
+import static org.joml.Math.*;
+
+
+public class XRCamera extends net.minecraft.client.Camera {
     public void setup(BlockGetter pLevel, Entity pRenderViewEntity, boolean pThirdPerson, boolean pThirdPersonReverse, float pPartialTicks) {
         if (RenderPassType.isVanilla()) {
             super.setup(pLevel, pRenderViewEntity, pThirdPerson, pThirdPersonReverse, pPartialTicks);
@@ -22,10 +25,7 @@ public class XRCamera extends Camera {
         this.initialized = true;
         this.level = pLevel;
         this.entity = pRenderViewEntity;
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        RenderPass renderpass = dataholder.currentPass;
-
-        VRData.VRDevicePose eye = dataholder.vrPlayer.vrdata_world_render.getEye(renderpass);
+        VRDevicePose eye = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass);
         this.setPosition(eye.getPosition());
         this.xRot = -eye.getPitch();
         this.yRot = eye.getYaw();
@@ -35,8 +35,8 @@ public class XRCamera extends Camera {
         eye.getCustomVector(new Vec3(1.0D, 0.0D, 0.0D));
         this.getLeftVector().set((float) vec3.x, (float) vec3.y, (float) vec3.z);
         this.rotation().set(0.0F, 0.0F, 0.0F, 1.0F);
-        this.rotation().mul(Axis.YP.rotationDegrees(-this.yRot));
-        this.rotation().mul(Axis.XP.rotationDegrees(this.xRot));
+        this.rotation().mul(new Quaternionf().rotationY(toRadians(-this.yRot)));
+        this.rotation().mul(new Quaternionf().rotationX(toRadians(this.xRot)));
     }
 
     public void tick() {
@@ -47,11 +47,14 @@ public class XRCamera extends Camera {
 
     @Override
     public boolean isDetached() {
-        if (RenderPassType.isVanilla()) {
-            return super.isDetached();
-        }
-        boolean renderSelf = ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA;
-        return renderSelf || ClientDataHolderVR.getInstance().vrSettings.shouldRenderSelf;
+        return (RenderPassType.isVanilla() ?
+            super.isDetached() :
+            switch (dh.currentPass){
+                case THIRD -> dh.vrSettings.displayMirrorMode == MirrorMode.THIRD_PERSON;
+                case CAMERA -> true;
+                default -> dh.vrSettings.shouldRenderSelf;
+            }
+        );
     }
     
     // some mods call this, when querying the sunrise color in the menu world

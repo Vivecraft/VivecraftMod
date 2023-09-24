@@ -1,14 +1,18 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 
-import net.minecraft.client.KeyMapping;
-import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
+
+import net.minecraft.client.KeyMapping;
+
+import static org.vivecraft.client_vr.VRState.dh;
+
+import static org.joml.Math.*;
 
 public class VivecraftMovementInput
 {
     public static float getMovementAxisValue(KeyMapping keyBinding)
     {
-        VRInputAction vrinputaction = MCVR.get().getInputAction(keyBinding);
-        return Math.abs(vrinputaction.getAxis1DUseTracked());
+        VRInputAction vrinputaction = dh.vr.getInputAction(keyBinding);
+        return abs(vrinputaction.getAxis1DUseTracked());
     }
 }

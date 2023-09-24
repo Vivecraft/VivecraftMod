@@ -1,37 +1,43 @@
 package org.vivecraft.mixin.client_vr.gui;
 
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.GuiExtension;
-import com.mojang.blaze3d.platform.GlStateManager;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
+
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+
+import static org.vivecraft.client_vr.VRState.*;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_xr.render_pass.RenderPassType;
 
-@Mixin(Gui.class)
-public abstract class GuiVRMixin implements GuiExtension {
+@Mixin(net.minecraft.client.gui.Gui.class)
+public abstract class GuiVRMixin implements org.vivecraft.client_vr.extensions.GuiExtension {
 
     @Unique
     public boolean showPlayerList;
@@ -39,9 +45,6 @@ public abstract class GuiVRMixin implements GuiExtension {
     private int screenWidth;
     @Shadow
     private int screenHeight;
-    @Final
-    @Shadow
-    private Minecraft minecraft;
 
     @Final
     @Shadow
@@ -91,60 +94,60 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getSleepTimer()I"), method = "render")
     public int noSleepOverlay(LocalPlayer instance) {
-        return VRState.vrRunning ? 0 : instance.getSleepTimer();
+        return vrRunning ? 0 : instance.getSleepTimer();
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"), method = "render")
     public boolean toggleableTabList(KeyMapping instance) {
-        return instance.isDown() || showPlayerList;
+        return instance.isDown() || this.showPlayerList;
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 1, shift = At.Shift.AFTER), method = "renderHotbar")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 1, shift = Shift.AFTER), method = "renderHotbar")
     public void hotbarContext(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().interactTracker.hotbar && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)) {
+        if (vrRunning && dh.interactTracker.hotbar >= 0 && dh.interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != dh.interactTracker.hotbar && dh.interactTracker.isActive()) {
             int i = this.screenWidth / 2;
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
-            guiGraphics.blit(WIDGETS_LOCATION, i - 91 - 1 + ClientDataHolderVR.getInstance().interactTracker.hotbar * 20, this.screenHeight - 22 - 1, 0, 22, 24, 22);
+            guiGraphics.blit(WIDGETS_LOCATION, i - 91 - 1 + dh.interactTracker.hotbar * 20, this.screenHeight - 22 - 1, 0, 22, 24, 22);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0), method = "renderHotbar")
     public boolean slotSwap(ItemStack instance) {
-        return !(!instance.isEmpty() || (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar));
+        return !(!instance.isEmpty() || (vrRunning && dh.vrSettings.vrTouchHotbar));
     }
 
     @Inject(at = @At("HEAD"), method = "renderHotbar", cancellable = true)
     public void notHotbarOnScreens(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && minecraft.screen != null) {
+        if (vrRunning && mc.screen != null) {
             ci.cancel();
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 2, shift = At.Shift.BEFORE), method = "renderHotbar")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 2, shift = Shift.BEFORE), method = "renderHotbar")
     public void renderVRHotbarLeft(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9 && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)) {
+        if (vrRunning && dh.interactTracker.hotbar == 9 && dh.interactTracker.isActive()) {
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 2, shift = At.Shift.AFTER), method = "renderHotbar")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 2, shift = Shift.AFTER), method = "renderHotbar")
     public void renderVRHotbarLeftReset(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9) {
+        if (vrRunning && dh.interactTracker.hotbar == 9) {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 3, shift = At.Shift.BEFORE), method = "renderHotbar")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 3, shift = Shift.BEFORE), method = "renderHotbar")
     public void renderVRHotbarRight(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9 && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)){
+        if (vrRunning && dh.interactTracker.hotbar == 9 && dh.interactTracker.isActive()){
             RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 3, shift = At.Shift.AFTER), method = "renderHotbar")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", ordinal = 3, shift = Shift.AFTER), method = "renderHotbar")
     public void renderVRHotbarRightReset(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar == 9){
+        if (vrRunning && dh.interactTracker.hotbar == 9){
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
@@ -152,14 +155,15 @@ public abstract class GuiVRMixin implements GuiExtension {
     // do remap because of forge
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V"), method = "renderHotbar")
     public void renderVive(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning) {
+        if (vrRunning) {
             this.renderViveHudIcons(guiGraphics);
         }
     }
 
-    private void renderViveHudIcons(GuiGraphics guiGraphics) {
-        if (this.minecraft.getCameraEntity() instanceof Player) {
-            Player player = (Player)this.minecraft.getCameraEntity();
+    private void renderViveHudIcons(GuiGraphics guiGraphics)
+    {
+        if (mc.getCameraEntity() instanceof Player player)
+        {
             int k = 0;
             MobEffect mobeffect = null;
 
@@ -178,12 +182,12 @@ public abstract class GuiVRMixin implements GuiExtension {
             if (player.isFallFlying()) {
                 k = -1;
             }
-            if (ClientDataHolderVR.getInstance().crawlTracker.crawling) {
+            if (dh.crawlTracker.crawling) {
                 k = -2;
             }
 
-            int x = this.minecraft.getWindow().getGuiScaledWidth() / 2 - 109;
-            int y = this.minecraft.getWindow().getGuiScaledHeight() - 39;
+            int x = mc.getWindow().getGuiScaledWidth() / 2 - 109;
+            int y = mc.getWindow().getGuiScaledHeight() - 39;
 
             if (k == -1) {
                 guiGraphics.renderFakeItem(new ItemStack(Items.ELYTRA), x, y);
@@ -200,7 +204,7 @@ public abstract class GuiVRMixin implements GuiExtension {
                 guiGraphics.renderFakeItem(new ItemStack(Items.RABBIT_FOOT), x2, y);
             }
             if (mobeffect != null) {
-                TextureAtlasSprite textureatlassprite = this.minecraft.getMobEffectTextures().get(mobeffect);
+                TextureAtlasSprite textureatlassprite = mc.getMobEffectTextures().get(mobeffect);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 guiGraphics.blit(x, y, 0, 18, 18, textureatlassprite);
             }
@@ -225,8 +229,8 @@ public abstract class GuiVRMixin implements GuiExtension {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
-        float f = 16.0F * ClientDataHolderVR.getInstance().vrSettings.menuCrosshairScale;
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+        float f = 16.0F * dh.vrSettings.menuCrosshairScale;
+        RenderSystem.blendFuncSeparate(SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO, SourceFactor.ONE, DestFactor.ONE);
         this.drawCentredTexturedModalRect(mouseX, mouseY, f, f, 0, 0, 15, 15);
         RenderSystem.disableBlend();
         RenderSystem.defaultBlendFunc();
@@ -236,10 +240,10 @@ public abstract class GuiVRMixin implements GuiExtension {
         float f = 0.00390625F;
         float f1 = 0.00390625F;
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY + height / 2.0F), 0).uv((float)(u + 0) * f, (float)(v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY + height / 2.0F), 0).uv((float)(u + texWidth) * f, (float)(v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY - height / 2.0F), 0).uv((float)(u + texWidth) * f, (float)(v + 0) * f1).endVertex();bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY - height / 2.0F), 0).uv((float)(u + 0) * f, (float)(v + 0) * f1).endVertex();
+        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.vertex(centreX - width / 2.0F, centreY + height / 2.0F, 0).uv((u) * f, (v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex(centreX + width / 2.0F, centreY + height / 2.0F, 0).uv((u + texWidth) * f, (v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex(centreX + width / 2.0F, centreY - height / 2.0F, 0).uv((u + texWidth) * f, v * f1).endVertex();bufferbuilder.vertex(centreX - width / 2.0F, centreY - height / 2.0F, 0).uv(u * f, v * f1).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
     }
 }

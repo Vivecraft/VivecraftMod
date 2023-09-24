@@ -17,10 +17,7 @@ public class ServerVRPlayers {
             return false;
         }
         ServerVivePlayer serverviveplayer = getVivePlayer(player);
-        if (serverviveplayer == null) {
-            return false;
-        }
-        return serverviveplayer.isVR();
+        return serverviveplayer != null && serverviveplayer.isVR();
     }
 
     public static void overridePose(ServerPlayer player) {

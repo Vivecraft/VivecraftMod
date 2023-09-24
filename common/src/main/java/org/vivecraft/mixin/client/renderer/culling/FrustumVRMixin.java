@@ -1,13 +1,12 @@
 package org.vivecraft.mixin.client.renderer.culling;
 
-import org.vivecraft.client_vr.extensions.FrustumExtension;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(Frustum.class)
-public abstract class FrustumVRMixin implements FrustumExtension {
+@Mixin(net.minecraft.client.renderer.culling.Frustum.class)
+public abstract class FrustumVRMixin implements org.vivecraft.client_vr.extensions.FrustumExtension {
 
     @Shadow
     private double camX;

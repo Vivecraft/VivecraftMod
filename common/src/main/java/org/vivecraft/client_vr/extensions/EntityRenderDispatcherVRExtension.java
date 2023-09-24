@@ -1,7 +1,8 @@
 package org.vivecraft.client_vr.extensions;
 
-import org.joml.Quaternionf;
 import org.vivecraft.client_vr.render.VRArmRenderer;
+
+import org.joml.Quaternionf;
 
 import java.util.Map;
 

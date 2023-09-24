@@ -1,11 +1,17 @@
 package org.vivecraft.mod_compat_vr.iris.mixin;
 
+import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
+
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.ShadowRenderer;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.PackShadowDirectives;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
+
+import java.util.Objects;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -13,10 +19,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
-
-import java.util.Objects;
 
 @Pseudo
 @Mixin(NewWorldRenderingPipeline.class)

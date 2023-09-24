@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/vivecraft.common.iml" filepath="$PROJECT_DIR$/.idea/modules/common/vivecraft.common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/vivecraft.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/vivecraft.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/vivecraft.common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/vivecraft.common.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/vivecraft.fabric.main.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/vivecraft.fabric.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/vivecraft.fabric.test.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/vivecraft.fabric.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/forge/vivecraft.forge.main.iml" filepath="$PROJECT_DIR$/.idea/modules/forge/vivecraft.forge.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/forge/vivecraft.forge.test.iml" filepath="$PROJECT_DIR$/.idea/modules/forge/vivecraft.forge.test.iml" />
+    </modules>
+  </component>
+</project>

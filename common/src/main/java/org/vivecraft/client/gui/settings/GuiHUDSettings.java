@@ -1,67 +1,79 @@
 package org.vivecraft.client.gui.settings;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.VROptionEntry;
+import org.vivecraft.client.gui.framework.GuiVROption;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client.gui.framework.GuiVROption;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings.VrOptions;
 
-public class GuiHUDSettings extends GuiVROptionsBase
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.screens.Screen;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
+
+public class GuiHUDSettings extends org.vivecraft.client.gui.framework.GuiVROptionsBase
 {
-    private VROptionEntry[] hudOptions = new VROptionEntry[] {
-            new VROptionEntry(VRSettings.VrOptions.HUD_HIDE),
-            new VROptionEntry(VRSettings.VrOptions.HUD_LOCK_TO),
-            new VROptionEntry(VRSettings.VrOptions.HUD_SCALE),
-            new VROptionEntry(VRSettings.VrOptions.HUD_DISTANCE),
-            new VROptionEntry(VRSettings.VrOptions.HUD_OCCLUSION),
-            new VROptionEntry(VRSettings.VrOptions.HUD_OPACITY),
-            new VROptionEntry(VRSettings.VrOptions.RENDER_MENU_BACKGROUND),
-            new VROptionEntry(VRSettings.VrOptions.TOUCH_HOTBAR),
-            new VROptionEntry(VRSettings.VrOptions.AUTO_OPEN_KEYBOARD),
-            new VROptionEntry(VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE),
-            new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD, (button, mousePos) -> {
-                KeyboardHandler.setOverlayShowing(false);
-                return false;
-            }),
-            new VROptionEntry(VRSettings.VrOptions.GUI_APPEAR_OVER_BLOCK),
-            new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_SCALE),
-            new VROptionEntry("vivecraft.options.screen.menuworld.button", (button, mousePos) -> {
-                Minecraft.getInstance().setScreen(new GuiMenuWorldSettings(this));
-                return true;
-            }),
-            new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME),
-            new VROptionEntry(VRSettings.VrOptions.SHADER_GUI_RENDER)
-    };
+    public static String vrTitle = "vivecraft.options.screen.gui";
 
     public GuiHUDSettings(Screen guiScreen)
     {
         super(guiScreen);
     }
 
+    @Override
     public void init()
     {
-        this.vrTitle = "vivecraft.options.screen.gui";
-        super.init(this.hudOptions, true);
+        super.clearWidgets();
+        super.init(
+            VrOptions.HUD_HIDE,
+            VrOptions.HUD_LOCK_TO,
+            VrOptions.HUD_SCALE,
+            VrOptions.HUD_DISTANCE,
+            VrOptions.HUD_OCCLUSION,
+            VrOptions.HUD_OPACITY,
+            VrOptions.RENDER_MENU_BACKGROUND);
+        super.init(GuiTouchHotbarSettings.class);
+        super.init(
+            VrOptions.DUMMY,
+            VrOptions.MENU_ALWAYS_FOLLOW_FACE,
+            VrOptions.PLAYER_STATUS,
+            VrOptions.GUI_APPEAR_OVER_BLOCK,
+            switch (dh.vrSettings.playerStatus){
+                case BOTH, ENTITY -> { yield true; }
+                default -> { yield false; }
+            } ? VrOptions.ENTITY_STATUS : VrOptions.DUMMY
+        );
+        super.init(GuiMenuWorldSettings.class);
+        super.init(
+            VrOptions.DUMMY,
+            VrOptions.SHADER_GUI_RENDER
+        );
         super.addDefaultButtons();
     }
 
+    @Override
     protected void loadDefaults()
     {
         super.loadDefaults();
-        this.minecraft.options.hideGui = false;
+        mc.options.hideGui = false;
     }
 
-    protected void actionPerformed(AbstractWidget widget) {
-        if (widget instanceof GuiVROption button) {
-            if (button.getId() == VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME.ordinal()) {
-                KeyboardHandler.physicalKeyboard.init();
-            }
-            if (button.getId() == VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE.ordinal()) {
-                GuiHandler.onScreenChanged(Minecraft.getInstance().screen, Minecraft.getInstance().screen, false);
+    @Override
+    protected void actionPerformed(AbstractWidget widget)
+    {
+        if (widget instanceof GuiVROption guivroption)
+        {
+            switch(guivroption.getOption()){
+                case PLAYER_STATUS -> { this.reinit = true; }
+                case PHYSICAL_KEYBOARD_THEME -> { KeyboardHandler.physicalKeyboard.init(); }
+                case MENU_ALWAYS_FOLLOW_FACE ->
+                {
+                    GuiHandler.onScreenChanged(
+                        mc.screen,
+                        mc.screen,
+                        false
+                    );
+                }
             }
         }
     }

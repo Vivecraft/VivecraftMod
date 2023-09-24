@@ -1,37 +1,33 @@
 package org.vivecraft.client.gui.settings;
 
-import java.util.Arrays;
-
-import net.minecraft.client.gui.GuiGraphics;
 import org.apache.commons.lang3.ArrayUtils;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 
-public class GuiRadialItemsList extends ObjectSelectionList
+import java.util.Arrays;
+
+import static org.vivecraft.client_vr.VRState.mc;
+
+public class GuiRadialItemsList extends net.minecraft.client.gui.components.ObjectSelectionList
 {
     private final GuiRadialConfiguration parent;
-    private final Minecraft mc;
-    private Entry[] listEntries;
-    private int maxListLabelWidth = 0;
+    private final int maxListLabelWidth = 90;
 
-    public GuiRadialItemsList(GuiRadialConfiguration parent, Minecraft mc)
+    public GuiRadialItemsList(GuiRadialConfiguration parent)
     {
         super(mc, parent.width, parent.height, 63, parent.height - 32, 20);
         this.parent = parent;
-        this.mc = mc;
-        this.maxListLabelWidth = 90;
         this.buildList();
     }
 
     public void buildList()
     {
-        KeyMapping[] akeymapping = ArrayUtils.clone(this.mc.options.keyMappings);
-        Arrays.sort((Object[])akeymapping);
+        KeyMapping[] akeymapping = ArrayUtils.clone(mc.options.keyMappings);
+        Arrays.sort(akeymapping);
         String s = null;
 
         for (KeyMapping keymapping : akeymapping)
@@ -51,7 +47,7 @@ public class GuiRadialItemsList extends ObjectSelectionList
         }
     }
 
-    public class CategoryEntry extends Entry
+    public static class CategoryEntry extends Entry
     {
         private final String labelText;
         private final int labelWidth;
@@ -59,9 +55,10 @@ public class GuiRadialItemsList extends ObjectSelectionList
         public CategoryEntry(String name)
         {
             this.labelText = I18n.get(name);
-            this.labelWidth = GuiRadialItemsList.this.mc.font.width(this.labelText);
+            this.labelWidth = mc.font.width(this.labelText);
         }
 
+        @Override
         public void render(GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks)
         {
             guiGraphics.drawString(mc.font, this.labelText, (mc.screen.width / 2 - this.labelWidth / 2), (pTop + pHeight - 9 - 1), 6777215);
@@ -85,6 +82,7 @@ public class GuiRadialItemsList extends ObjectSelectionList
             this.parentScreen = parent;
         }
 
+        @Override
         public void render(GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks)
         {
             ChatFormatting chatformatting = ChatFormatting.WHITE;
@@ -97,6 +95,7 @@ public class GuiRadialItemsList extends ObjectSelectionList
             guiGraphics.drawString(mc.font, chatformatting + I18n.get(this.myKey.getName()), (mc.screen.width / 2 - GuiRadialItemsList.this.maxListLabelWidth / 2), (pTop + pHeight / 2 - 9 / 2), 16777215);
         }
 
+        @Override
         public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)
         {
             this.parentScreen.setKey(this.myKey);

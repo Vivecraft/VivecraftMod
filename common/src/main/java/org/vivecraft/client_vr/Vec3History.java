@@ -1,48 +1,58 @@
 package org.vivecraft.client_vr;
 
-import java.util.LinkedList;
-import java.util.ListIterator;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
+import org.joml.Vector3f;
+
 import net.minecraft.Util;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+import static java.util.stream.Stream.generate;
+
 public class Vec3History
 {
-    private int _capacity = 450;
-    private LinkedList<entry> _data = new LinkedList<>();
+    private final int _capacity = 450;
+    private final Deque<entry> _data = new ArrayDeque<>(_capacity);
+    {
+        _data.addAll(generate(entry::new).limit(_capacity).toList());
+    }
+
+    public void add(double x, double y, double z)
+    {
+        this._data.addFirst(this._data.removeLast().set(x, y, z));
+    }
+
+    public void add(Vector3dc in)
+    {
+        this.add(in.x(), in.y(), in.z());
+    }
 
     public void add(Vec3 in)
     {
-        this._data.add(new entry(in));
-
-        if (this._data.size() > this._capacity)
-        {
-            this._data.removeFirst();
-        }
+        this.add(in.x(), in.y(), in.z());
     }
 
-    public void clear()
+    public Vector3d latest(Vector3d dest)
     {
-        this._data.clear();
+        return dest.set((this._data.getFirst()).data);
     }
 
-    public Vec3 latest()
+    public Vector3f latest(Vector3f dest)
     {
-        return (this._data.getLast()).data;
+        return dest.set((this._data.getFirst()).data);
     }
 
     public double totalMovement(double seconds)
     {
         long i = Util.getMillis();
-        ListIterator<entry> listiterator = this._data.listIterator(this._data.size());
         entry vec3history$entry = null;
         double d0 = 0.0D;
-        int j = 0;
 
-        while (listiterator.hasPrevious())
+        for (entry vec3history$entry1: this._data)
         {
-            entry vec3history$entry1 = listiterator.previous();
-            ++j;
-
             if ((double)(i - vec3history$entry1.ts) > seconds * 1000.0D)
             {
                 break;
@@ -54,25 +64,21 @@ public class Vec3History
             }
             else
             {
-                d0 += vec3history$entry.data.distanceTo(vec3history$entry1.data);
+                d0 += vec3history$entry.data.distance(vec3history$entry1.data);
             }
         }
 
         return d0;
     }
 
-    public Vec3 netMovement(double seconds)
+    public Vector3d netMovement(double seconds, Vector3d dest)
     {
         long i = Util.getMillis();
-        ListIterator<entry> listiterator = this._data.listIterator(this._data.size());
         entry vec3history$entry = null;
         entry vec3history$entry1 = null;
-        double d0 = 0.0D;
 
-        while (listiterator.hasPrevious())
+        for (entry vec3history$entry2 : this._data)
         {
-            entry vec3history$entry2 = listiterator.previous();
-
             if ((double)(i - vec3history$entry2.ts) > seconds * 1000.0D)
             {
                 break;
@@ -88,21 +94,44 @@ public class Vec3History
             }
         }
 
-        return vec3history$entry != null && vec3history$entry1 != null ? vec3history$entry.data.subtract(vec3history$entry1.data) : new Vec3(0.0D, 0.0D, 0.0D);
+        return vec3history$entry != null && vec3history$entry1 != null ? vec3history$entry.data.sub(vec3history$entry1.data, dest) : dest.set(0);
+    }
+
+    public Vector3f netMovement(double seconds, Vector3f dest)
+    {
+        long i = Util.getMillis();
+        entry vec3history$entry = null;
+        entry vec3history$entry1 = null;
+
+        for (entry vec3history$entry2 : this._data)
+        {
+            if ((double)(i - vec3history$entry2.ts) > seconds * 1000.0D)
+            {
+                break;
+            }
+
+            if (vec3history$entry == null)
+            {
+                vec3history$entry = vec3history$entry2;
+            }
+            else
+            {
+                vec3history$entry1 = vec3history$entry2;
+            }
+        }
+
+        return vec3history$entry != null && vec3history$entry1 != null ? dest.set(vec3history$entry.data).sub((float)vec3history$entry1.data.x, (float)vec3history$entry1.data.y, (float)vec3history$entry1.data.z) : dest.set(0);
     }
 
     public double averageSpeed(double seconds)
     {
         long i = Util.getMillis();
-        ListIterator<entry> listiterator = this._data.listIterator(this._data.size());
         double d0 = 0.0D;
         entry vec3history$entry = null;
         int j = 0;
 
-        while (listiterator.hasPrevious())
+        for (entry vec3history$entry1 : this._data)
         {
-            entry vec3history$entry1 = listiterator.previous();
-
             if ((double)(i - vec3history$entry1.ts) > seconds * 1000.0D)
             {
                 break;
@@ -115,46 +144,63 @@ public class Vec3History
             else
             {
                 ++j;
-                double d1 = 0.001D * (double)(vec3history$entry.ts - vec3history$entry1.ts);
-                double d2 = vec3history$entry.data.subtract(vec3history$entry1.data).length();
+                double d1 = 0.001D * (vec3history$entry.ts - vec3history$entry1.ts);
+                double d2 = vec3history$entry.data.distance(vec3history$entry1.data);
                 d0 += d2 / d1;
             }
         }
 
-        return j == 0 ? d0 : d0 / (double)j;
+        return j == 0 ? d0 : d0 / j;
     }
 
-    public Vec3 averagePosition(double seconds)
+    public Vector3d averagePosition(double seconds, Vector3d dest)
     {
         long i = Util.getMillis();
-        ListIterator<entry> listiterator = this._data.listIterator(this._data.size());
-        Vec3 vec3 = new Vec3(0.0D, 0.0D, 0.0D);
-        int j;
-        entry vec3history$entry;
+        int j = 0;
 
-        for (j = 0; listiterator.hasPrevious(); vec3 = vec3.add(vec3history$entry.data))
+        for (entry vec3history$entry: this._data)
         {
-            vec3history$entry = listiterator.previous();
-
             if ((double)(i - vec3history$entry.ts) > seconds * 1000.0D)
             {
                 break;
             }
 
+            dest.add(vec3history$entry.data);
             ++j;
         }
 
-        return j == 0 ? vec3 : vec3.scale(1.0D / (double)j);
+        return j == 0 ? dest : dest.mul(1.0D / j);
     }
 
-    private class entry
+    public Vector3f averagePosition(double seconds, Vector3f dest)
+    {
+        long i = Util.getMillis();
+        int j = 0;
+
+        for (entry vec3history$entry: this._data)
+        {
+            if ((double)(i - vec3history$entry.ts) > seconds * 1000.0D)
+            {
+                break;
+            }
+
+            dest.add((float) vec3history$entry.data.x, (float) vec3history$entry.data.y, (float)vec3history$entry.data.z);
+            ++j;
+        }
+
+        return j == 0 ? dest : dest.mul(1.0F / j);
+    }
+
+    private static class entry
     {
         public long ts = Util.getMillis();
-        public Vec3 data;
+        public Vector3d data = new Vector3d();
 
-        public entry(Vec3 in)
+        public entry set(double x, double y, double z)
         {
-            this.data = in;
+            this.ts = Util.getMillis();
+            this.data.set(x, y, z);
+            return this;
         }
     }
 }

@@ -1,10 +1,13 @@
 package org.vivecraft.client.gui.framework;
 
+import org.vivecraft.client_vr.settings.VRSettings.VrOptions;
+
 import net.minecraft.client.gui.layouts.LayoutElement;
-import org.vivecraft.client_vr.settings.VRSettings;
+
+import javax.annotation.Nonnull;
 
 public interface GuiVROption extends LayoutElement {
-    int getId();
 
-    VRSettings.VrOptions getOption();
+    @Nonnull
+    VrOptions getOption();
 }

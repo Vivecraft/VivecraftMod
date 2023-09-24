@@ -1,16 +1,17 @@
 package org.vivecraft.mixin.client_vr.blaze3d.audio;
 
-import com.mojang.blaze3d.audio.Library;
 import org.slf4j.Logger;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.vrRunning;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
 
-@Mixin(Library.class)
+@Mixin(com.mojang.blaze3d.audio.Library.class)
 public class LibraryVRMixin {
     @Shadow
     @Final
@@ -18,10 +19,10 @@ public class LibraryVRMixin {
 
     @ModifyVariable(method = "init", at = @At("HEAD"), argsOnly = true)
     private boolean shouldDoHRTF(boolean vanillaHRTF) {
-        if (VRState.vrRunning) {
+        if (vrRunning) {
             // don't force HRTF in nonvr
-            LOGGER.info("enabling HRTF: {}", ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0);
-            return ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0;
+            LOGGER.info("enabling HRTF: {}", dh.vrSettings.hrtfSelection >= 0);
+            return dh.vrSettings.hrtfSelection >= 0;
         }
         return vanillaHRTF;
     }

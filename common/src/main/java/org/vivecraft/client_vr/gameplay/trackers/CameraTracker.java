@@ -1,17 +1,17 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.VRData.VRDevicePose;
 import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.common.utils.math.Matrix4f;
-import org.vivecraft.common.utils.math.Quaternion;
-import org.vivecraft.common.utils.math.Vector3;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.phys.Vec3;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class CameraTracker extends Tracker
 {
@@ -19,25 +19,21 @@ public class CameraTracker extends Tracker
     public static final ModelResourceLocation cameraDisplayModel = new ModelResourceLocation("vivecraft", "camera_display", "");
     private boolean visible = false;
     private Vec3 position = new Vec3(0.0D, 0.0D, 0.0D);
-    private Quaternion rotation = new Quaternion();
+    private Quaternionf rotation = new Quaternionf();
     private int startController;
-    private VRData.VRDevicePose startControllerPose;
+    private VRDevicePose startControllerPose;
     private Vec3 startPosition;
-    private Quaternion startRotation;
+    private Quaternionf startRotation;
     private boolean quickMode;
 
-    public CameraTracker(Minecraft mc, ClientDataHolderVR dh)
+    @Override
+    public boolean isActive()
     {
-        super(mc, dh);
-    }
-
-    public boolean isActive(LocalPlayer player)
-    {
-        if (this.mc.gameMode == null)
+        if (mc.gameMode == null)
         {
             return false;
         }
-        else if (this.dh.vrSettings.seated)
+        else if (dh.vrSettings.seated)
         {
             return false;
         }
@@ -47,38 +43,42 @@ public class CameraTracker extends Tracker
         }
     }
 
-    public void doProcess(LocalPlayer player)
+    @Override
+    public void doProcess()
     {
         if (this.startControllerPose != null)
         {
-            VRData.VRDevicePose vrdata$vrdevicepose = this.dh.vrPlayer.vrdata_world_render.getController(this.startController);
+            VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_world_render.getController(this.startController);
             Vec3 vec3 = this.startControllerPose.getPosition();
             Vec3 vec31 = vrdata$vrdevicepose.getPosition().subtract(vec3);
-            Matrix4f matrix4f = Matrix4f.multiply(vrdata$vrdevicepose.getMatrix(), this.startControllerPose.getMatrix().inverted());
-            Vector3 vector3 = new Vector3((float)this.startPosition.x - (float)vec3.x, (float)this.startPosition.y - (float)vec3.y, (float)this.startPosition.z - (float)vec3.z);
-            Vector3 vector31 = matrix4f.transform(vector3);
-            this.position = new Vec3(this.startPosition.x + (double)((float)vec31.x) + (double)(vector31.getX() - vector3.getX()), this.startPosition.y + (double)((float)vec31.y) + (double)(vector31.getY() - vector3.getY()), this.startPosition.z + (double)((float)vec31.z) + (double)(vector31.getZ() - vector3.getZ()));
-            this.rotation = this.startRotation.multiply(new Quaternion(Utils.convertOVRMatrix(matrix4f)));
+            Matrix4f matrix4f = vrdata$vrdevicepose.getMatrix().mul0(this.startControllerPose.getMatrix().invertAffine(), new Matrix4f());
+            Vector3f vector3 = new Vector3f((float)this.startPosition.x - (float)vec3.x, (float)this.startPosition.y - (float)vec3.y, (float)this.startPosition.z - (float)vec3.z);
+            Vector3f vector31 = vector3.mulProject(matrix4f, new Vector3f());
+            this.position = new Vec3(this.startPosition.x + (double)((float)vec31.x) + (double)(vector31.x - vector3.x), this.startPosition.y + (double)((float)vec31.y) + (double)(vector31.y - vector3.y), this.startPosition.z + (double)((float)vec31.z) + (double)(vector31.z - vector3.z));
+            this.rotation.setFromNormalized(matrix4f);
+            this.startRotation.mul(this.rotation, this.rotation);
         }
 
-        if (this.quickMode && !this.isMoving() && !this.dh.grabScreenShot)
+        if (this.quickMode && !this.isMoving() && !dh.grabScreenShot)
         {
             this.visible = false;
         }
 
-        if (this.dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().distanceTo(this.position) > (double)(this.mc.options.getEffectiveRenderDistance() * 12))
+        if (dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().distanceTo(this.position) > (double)(mc.options.getEffectiveRenderDistance() * 12))
         {
             this.visible = false;
         }
     }
 
-    public void reset(LocalPlayer player)
+    @Override
+    public void reset()
     {
         this.visible = false;
         this.quickMode = false;
         this.stopMoving();
     }
 
+    @Override
     public EntryPoint getEntryPoint()
     {
         return EntryPoint.SPECIAL_ITEMS;
@@ -104,12 +104,12 @@ public class CameraTracker extends Tracker
         this.position = position;
     }
 
-    public Quaternion getRotation()
+    public Quaternionf getRotation()
     {
         return this.rotation;
     }
 
-    public void setRotation(Quaternion rotation)
+    public void setRotation(Quaternionf rotation)
     {
         this.rotation = rotation;
     }
@@ -132,9 +132,9 @@ public class CameraTracker extends Tracker
     public void startMoving(int controller, boolean quickMode)
     {
         this.startController = controller;
-        this.startControllerPose = this.dh.vrPlayer.vrdata_world_pre.getController(controller);
+        this.startControllerPose = dh.vrPlayer.vrdata_world_pre.getController(controller);
         this.startPosition = this.position;
-        this.startRotation = this.rotation.copy();
+        this.startRotation = new Quaternionf(this.rotation);
         this.quickMode = quickMode;
     }
 

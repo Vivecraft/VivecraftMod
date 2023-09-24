@@ -1,7 +1,10 @@
 package org.vivecraft.client.render;
 
+import org.vivecraft.client.VRPlayersClient;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -11,7 +14,6 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import org.vivecraft.client.VRPlayersClient;
 
 public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
@@ -24,33 +26,17 @@ public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abst
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer entity, float f, float g, float h, float j, float k, float l) {
-        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player)entity).getUUID());
-        ResourceLocation hmd = null; //this.BLACK_HMD;
-        switch (rotinfo.hmd) {
-   	        case 0:
-    		    break;
-
-    	    case 1:
-    		    hmd = this.BLACK_HMD;
-    		    break;
-
-    	    case 2:
-                hmd = this.GOLD_HMD;
-    		    break;
-
-    	    case 3:
-    		    hmd = this.DIAMOND_HMD;
-    		    break;
-
-    	    case 4:
-                hmd =this.DIAMOND_HMD;
-    	}
-        if (hmd == null) {
-            return;
+        ResourceLocation hmd = switch (VRPlayersClient.getInstance().getRotationsForPlayer(((Player)entity).getUUID()).hmd) {
+            case 1 -> this.BLACK_HMD;
+            case 2 -> this.GOLD_HMD;
+            case 3, 4 -> this.DIAMOND_HMD;
+            default -> null;
+        };
+        if (hmd != null) {
+            poseStack.pushPose();
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(hmd));
+            ((VRPlayerModel)this.getParentModel()).renderHMDR(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
+            poseStack.popPose();
         }
-        poseStack.pushPose();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(hmd));
-        ((VRPlayerModel)this.getParentModel()).renderHMDR(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
-        poseStack.popPose();
     }
 }

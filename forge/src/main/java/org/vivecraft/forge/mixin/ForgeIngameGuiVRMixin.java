@@ -1,17 +1,20 @@
 package org.vivecraft.forge.mixin;
 
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.GuiGraphics;
+import org.vivecraft.client_vr.extensions.GuiExtension;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
+
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.GuiGraphics;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.client_vr.extensions.GuiExtension;
-import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(ForgeGui.class)
 public abstract class ForgeIngameGuiVRMixin{

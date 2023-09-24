@@ -1,22 +1,27 @@
 package org.vivecraft.client.fabric;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
+import org.vivecraft.fabric.mixin.world.level.biome.BiomeAccessor;
+
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
+
+import com.mojang.blaze3d.pipeline.RenderTarget;
+
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biome.ClimateSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
-import org.vivecraft.fabric.mixin.world.level.biome.BiomeAccessor;
 
 import java.nio.file.Path;
+
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class XplatImpl {
 
@@ -74,19 +79,19 @@ public class XplatImpl {
             // return vanilla textures
             if (fluidStateIn.is(FluidTags.LAVA)) {
                 return new TextureAtlasSprite[]{
-                    Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(Blocks.LAVA.defaultBlockState()).getParticleIcon(),
+                    mc.getModelManager().getBlockModelShaper().getBlockModel(Blocks.LAVA.defaultBlockState()).getParticleIcon(),
                     ModelBakery.LAVA_FLOW.sprite()
                 };
             } else {
                 return new TextureAtlasSprite[]{
-                    Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(Blocks.WATER.defaultBlockState()).getParticleIcon(),
+                    mc.getModelManager().getBlockModelShaper().getBlockModel(Blocks.WATER.defaultBlockState()).getParticleIcon(),
                     ModelBakery.WATER_FLOW.sprite()
                 };
             }
         }
     }
 
-    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
+    public static ClimateSettings getBiomeClimateSettings(Biome biome){
         return ((BiomeAccessor)(Object)biome).getClimateSettings();
     }
 

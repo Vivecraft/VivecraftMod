@@ -1,21 +1,25 @@
 package org.vivecraft.client.network;
 
+import org.vivecraft.client.VRPlayersClient;
+
+import org.apache.commons.io.IOUtils;
+
+import net.minecraft.world.entity.player.Player;
+
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.world.entity.player.Player;
-import org.apache.commons.io.IOUtils;
-import org.vivecraft.client.VRPlayersClient;
+import static org.vivecraft.common.utils.Utils.logger;
 
 public class PatreonReceiver
 {
     private static final Object lock = new Object();
-    private static List<Player> queuedPlayers = new LinkedList<>();
+    private static final List<Player> queuedPlayers = new ArrayList<>();
     private static Map<String, Integer> cache;
     private static boolean downloadStarted;
     private static boolean downloadFailed;
@@ -49,7 +53,7 @@ public class PatreonReceiver
                         }
                         catch (Exception exception1)
                         {
-                            System.out.println("error with donors txt " + exception1.getMessage());
+                            logger.error("error with donors txt {}", exception1.getMessage());
                         }
                     }
 
@@ -57,7 +61,7 @@ public class PatreonReceiver
                 }
                 catch (Exception exception1)
                 {
-                    System.out.println("Error parsing data: " + url + ", " + exception1.getClass().getName() + ": " + exception1.getMessage());
+                    logger.error("Error parsing data: {}, {}: {}", url, exception1.getClass().getName(), exception1.getMessage());
                     downloadFailed = true;
                 }
             }

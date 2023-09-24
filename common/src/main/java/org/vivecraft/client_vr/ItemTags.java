@@ -6,37 +6,37 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
 public class ItemTags {
-    public final static TagKey<Item> VIVECRAFT_ARROWS = tag("arrows");
+    public static final TagKey<Item> VIVECRAFT_ARROWS = tag("arrows");
 
-    public final static TagKey<Item> VIVECRAFT_BRUSHES = tag("brushes");
+    public static final TagKey<Item> VIVECRAFT_BRUSHES = tag("brushes");
 
-    public final static TagKey<Item> VIVECRAFT_COMPASSES = tag("compasses");
+    public static final TagKey<Item> VIVECRAFT_COMPASSES = tag("compasses");
 
-    public final static TagKey<Item> VIVECRAFT_CROSSBOWS = tag("crossbows");
+    public static final TagKey<Item> VIVECRAFT_CROSSBOWS = tag("crossbows");
 
-    public final static TagKey<Item> VIVECRAFT_FISHING_RODS = tag("fishing_rods");
+    public static final TagKey<Item> VIVECRAFT_FISHING_RODS = tag("fishing_rods");
 
-    public final static TagKey<Item> VIVECRAFT_FOOD_STICKS = tag("food_sticks");
+    public static final TagKey<Item> VIVECRAFT_FOOD_STICKS = tag("food_sticks");
 
-    public final static TagKey<Item> VIVECRAFT_HOES = tag("hoes");
+    public static final TagKey<Item> VIVECRAFT_HOES = tag("hoes");
 
-    public final static TagKey<Item> VIVECRAFT_MAPS = tag("maps");
+    public static final TagKey<Item> VIVECRAFT_MAPS = tag("maps");
 
-    public final static TagKey<Item> VIVECRAFT_SCYTHES = tag("scythes");
+    public static final TagKey<Item> VIVECRAFT_SCYTHES = tag("scythes");
 
-    public final static TagKey<Item> VIVECRAFT_SHIELDS = tag("shields");
+    public static final TagKey<Item> VIVECRAFT_SHIELDS = tag("shields");
 
-    public final static TagKey<Item> VIVECRAFT_SPEARS = tag("spears");
+    public static final TagKey<Item> VIVECRAFT_SPEARS = tag("spears");
 
-    public final static TagKey<Item> VIVECRAFT_SWORDS = tag("swords");
+    public static final TagKey<Item> VIVECRAFT_SWORDS = tag("swords");
 
-    public final static TagKey<Item> VIVECRAFT_TELESCOPE = tag("telescope");
+    public static final TagKey<Item> VIVECRAFT_TELESCOPE = tag("telescope");
 
-    public final static TagKey<Item> VIVECRAFT_THROW_ITEMS = tag("throw_items");
+    public static final TagKey<Item> VIVECRAFT_THROW_ITEMS = tag("throw_items");
 
-    public final static TagKey<Item> VIVECRAFT_TOOLS = tag("tools");
+    public static final TagKey<Item> VIVECRAFT_TOOLS = tag("tools");
 
-    private static TagKey<Item> tag(String name){
+    private static TagKey<Item> tag(final String name){
         return TagKey.create(Registries.ITEM, new ResourceLocation("vivecraft", name));
     }
 }

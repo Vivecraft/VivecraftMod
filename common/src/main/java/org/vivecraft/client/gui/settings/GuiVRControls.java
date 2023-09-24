@@ -1,50 +1,54 @@
 package org.vivecraft.client.gui.settings;
 
-import net.minecraft.client.gui.GuiGraphics;
-import org.vivecraft.client.gui.framework.VROptionEntry;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings.VrOptions;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-public class GuiVRControls extends GuiVROptionsBase
-{
-    private static VROptionEntry[] controlsSettings = new VROptionEntry[] {
-            new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
-            new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
-            new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
-            new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
-            new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
-            new VROptionEntry(VRSettings.VrOptions.DUMMY),
-            new VROptionEntry(VRSettings.VrOptions.INGAME_BINDINGS_IN_GUI),
-            new VROptionEntry(VRSettings.VrOptions.REVERSE_HANDS),
-            new VROptionEntry(VRSettings.VrOptions.RIGHT_CLICK_DELAY),
-            new VROptionEntry(VRSettings.VrOptions.ALLOW_ADVANCED_BINDINGS),
-            new VROptionEntry(VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS)
-    };
+import javax.annotation.Nonnull;
 
+import static org.vivecraft.client.gui.framework.VROptionPosition.POS_CENTER;
+import static org.vivecraft.client_vr.VRState.mc;
+
+public class GuiVRControls extends org.vivecraft.client.gui.framework.GuiVROptionsBase
+{
+    public static String vrTitle = "vivecraft.options.screen.controls";
     public GuiVRControls(Screen par1GuiScreen)
     {
         super(par1GuiScreen);
     }
 
+    @Override
     public void init()
     {
-        this.vrTitle = "vivecraft.options.screen.controls";
-        super.init(controlsSettings, true);
+        super.clearWidgets();
+        super.init(VrOptions.DUMMY, POS_CENTER);
+        super.init(VrOptions.DUMMY, POS_CENTER);
+        super.init(VrOptions.DUMMY, POS_CENTER);
+        super.init(VrOptions.DUMMY, POS_CENTER);
+        super.init(VrOptions.DUMMY, POS_CENTER);
+        super.init(VrOptions.DUMMY);
+        super.init(GuiVRSkeletalInput.class);
+        super.init(
+            VrOptions.REVERSE_HANDS,
+            VrOptions.RIGHT_CLICK_DELAY,
+            VrOptions.ALLOW_ADVANCED_BINDINGS,
+            VrOptions.THIRDPERSON_ITEMTRANSFORMS
+        );
         super.addDefaultButtons();
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks)
+    @Override
+    public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        int middle = 240 / 2 - this.minecraft.font.lineHeight / 2 - 24;
-        int lineHeight = this.minecraft.font.lineHeight + 3;
+        int middle = 240 / 2 - mc.font.lineHeight;
+        int lineHeight = mc.font.lineHeight + 3;
 
-        guiGraphics.drawCenteredString(this.minecraft.font, Component.translatable("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 16777215);
-        guiGraphics.drawCenteredString(this.minecraft.font, Component.translatable("vivecraft.messages.controls.2"), this.width / 2, middle, 16777215);
-        guiGraphics.drawCenteredString(this.minecraft.font, Component.translatable("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 16777215);
+        guiGraphics.drawCenteredString(mc.font, Component.translatable("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 16777215);
+        guiGraphics.drawCenteredString(mc.font, Component.translatable("vivecraft.messages.controls.2"), this.width / 2, middle, 16777215);
+        guiGraphics.drawCenteredString(mc.font, Component.translatable("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 16777215);
     }
 }

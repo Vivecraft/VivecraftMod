@@ -11,7 +11,16 @@ libs/
 
 .classpath
 .project
-.idea/
+.idea/*
+!.idea/compiler.xml
+!.idea/gradle.xml
+!.idea/jarRepositories.xml
+!.idea/misc.xml
+!.idea/modules.xml
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/modules/
+!.idea/scopes/
 classes/
 .metadata
 .vscode

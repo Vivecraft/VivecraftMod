@@ -1,17 +1,18 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import java.util.Random;
-
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.joml.Vector3d;
 
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Random;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.convertToVec3;
 
 public class EatingTracker extends Tracker
 {
@@ -22,43 +23,38 @@ public class EatingTracker extends Tracker
     long eatStart;
     private Random r = new Random();
 
-    public EatingTracker(Minecraft mc, ClientDataHolderVR dh)
-    {
-        super(mc, dh);
-    }
-
     public boolean isEating()
     {
         return this.eating[0] || this.eating[1];
     }
 
-    public boolean isActive(LocalPlayer p)
+    public boolean isActive()
     {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated)
+        if (dh.vrSettings.seated)
         {
             return false;
         }
-        else if (p == null)
+        else if (mc.player == null)
         {
             return false;
         }
-        else if (this.mc.gameMode == null)
+        else if (mc.gameMode == null)
         {
             return false;
         }
-        else if (!p.isAlive())
+        else if (!mc.player.isAlive())
         {
             return false;
         }
-        else if (p.isSleeping())
+        else if (mc.player.isSleeping())
         {
             return false;
         }
         else
         {
-            if (p.getMainHandItem() != null)
+            if (mc.player.getMainHandItem() != null)
             {
-                UseAnim useanim = p.getMainHandItem().getUseAnimation();
+                UseAnim useanim = mc.player.getMainHandItem().getUseAnimation();
 
                 if (useanim == UseAnim.EAT || useanim == UseAnim.DRINK || useanim == UseAnim.TOOT_HORN)
                 {
@@ -66,9 +62,9 @@ public class EatingTracker extends Tracker
                 }
             }
 
-            if (p.getOffhandItem() != null)
+            if (mc.player.getOffhandItem() != null)
             {
-                UseAnim useanim1 = p.getOffhandItem().getUseAnimation();
+                UseAnim useanim1 = mc.player.getOffhandItem().getUseAnimation();
 
                 if (useanim1 == UseAnim.EAT || useanim1 == UseAnim.DRINK || useanim1 == UseAnim.TOOT_HORN)
                 {
@@ -80,30 +76,31 @@ public class EatingTracker extends Tracker
         }
     }
 
-    public void reset(LocalPlayer player)
+    public void reset()
     {
         this.eating[0] = false;
         this.eating[1] = false;
     }
 
-    public void doProcess(LocalPlayer player)	{
-        VRPlayer vrplayer = this.dh.vrPlayer;
-        Vec3 hmdPos = vrplayer.vrdata_room_pre.hmd.getPosition();
-        Vec3 mouthPos = vrplayer.vrdata_room_pre.getController(0).getCustomVector(new Vec3(0.0D, (double)(-this.mouthtoEyeDistance), 0.0D)).add(hmdPos);
+    public void doProcess()
+    {
+        Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
+        Vec3 mouthPos = dh.vrPlayer.vrdata_room_pre.getController(0).getCustomVector(new Vec3(0.0D, (double)(-this.mouthtoEyeDistance), 0.0D)).add(hmdPos);
 
         for (int c = 0; c < 2; ++c)	{
 
-            Vec3 controllerPos = this.dh.vr.controllerHistory[c].averagePosition(0.333D).add(vrplayer.vrdata_room_pre.getController(c).getCustomVector(new Vec3(0.0D, 0.0D, -0.1D)));
-            controllerPos = controllerPos.add(this.dh.vrPlayer.vrdata_room_pre.getController(c).getDirection().scale(0.1D));
+            Vec3 controllerPos = convertToVec3(dh.vr.controllerHistory[c].averagePosition(0.333D, new Vector3d())).add(dh.vrPlayer.vrdata_room_pre.getController(c).getCustomVector(new Vec3(0.0D, 0.0D, -0.1D)));
+            controllerPos = controllerPos.add(dh.vrPlayer.vrdata_room_pre.getController(c).getDirection().scale(0.1D));
 
-            if (mouthPos.distanceTo(controllerPos) < (double)this.threshold)	{
-                ItemStack itemstack = c == 0 ? player.getMainHandItem() : player.getOffhandItem();
+            if (mouthPos.distanceTo(controllerPos) < (double)this.threshold)
+            {
+                ItemStack itemstack = c == 0 ? mc.player.getMainHandItem() : mc.player.getOffhandItem();
                 if (itemstack == ItemStack.EMPTY) continue;
 
                 int crunchiness = 0;
 
                 if (itemstack.getUseAnimation() == UseAnim.DRINK){//thats how liquid works.
-                    if(vrplayer.vrdata_room_pre.getController(c).getCustomVector(new Vec3(0,1,0)).y > 0) continue;
+                    if(dh.vrPlayer.vrdata_room_pre.getController(c).getCustomVector(new Vec3(0,1,0)).y > 0) continue;
                 }
                 else if (itemstack.getUseAnimation() == UseAnim.EAT) {
                     crunchiness = 2;
@@ -119,9 +116,9 @@ public class EatingTracker extends Tracker
                 {
                     //Minecraft.getInstance().physicalGuiManager.preClickAction();
 
-                    if (this.mc.gameMode.useItem(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).consumesAction())
+                    if (mc.gameMode.useItem(mc.player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).consumesAction())
                     {
-                        this.mc.gameRenderer.itemInHandRenderer.itemUsed(c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+                        mc.gameRenderer.itemInHandRenderer.itemUsed(c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                         this.eating[c] = true;
                         this.eatStart = Util.getMillis();
                     }
@@ -129,11 +126,11 @@ public class EatingTracker extends Tracker
 
                 if (this.eating[c])
                 {
-                    long k = (long)player.getUseItemRemainingTicks();
+                    long k = (long)mc.player.getUseItemRemainingTicks();
 
                     if (k > 0L && k % 5L <= (long)crunchiness)
                     {
-                this.dh.vr.triggerHapticPulse(c, 700);
+                dh.vr.triggerHapticPulse(c, 700);
                     }
                 }
 

@@ -1,11 +1,14 @@
 package org.vivecraft.client;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+
+import com.mojang.blaze3d.pipeline.RenderTarget;
+
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biome.ClimateSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.material.FluidState;
 
@@ -76,7 +79,7 @@ public interface Xplat {
     }
 
     @ExpectPlatform
-    static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
+    static ClimateSettings getBiomeClimateSettings(Biome biome){
         return null;
     }
 

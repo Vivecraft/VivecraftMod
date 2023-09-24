@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="jetbrains annotations" pattern="ext[Gradle: org.jetbrains:annotations:24.0.1]:org/intellij/lang/annotations//*||ext[Gradle: org.jetbrains:annotations:24.0.1]:org/jetbrains/annotations//*" />
+</component>

@@ -3,6 +3,7 @@ package org.vivecraft.server.config;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import com.electronwill.nightconfig.core.ConfigSpec.CorrectionListener;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -64,7 +65,7 @@ public class ConfigBuilder {
      * corrects the attached config, with the built spec
      * @param listener listener to send correction to
      */
-    public void correct(ConfigSpec.CorrectionListener listener) {
+    public void correct(CorrectionListener listener) {
         spec.correct(config, listener);
     }
 

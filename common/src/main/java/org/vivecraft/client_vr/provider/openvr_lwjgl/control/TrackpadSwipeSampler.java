@@ -3,8 +3,8 @@ package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
-import org.vivecraft.common.utils.lwjgl.Vector2f;
-import org.vivecraft.common.utils.math.Vector2;
+
+import org.joml.Vector2f;
 
 public class TrackpadSwipeSampler
 {
@@ -12,11 +12,11 @@ public class TrackpadSwipeSampler
     private static final int RIGHT = 1;
     private static final int DOWN = 2;
     private static final int LEFT = 3;
-    private Vector2f[] buffer = new Vector2f[5];
+    private final Vector2f[] buffer = new Vector2f[5];
     private int index;
     private long count;
-    private Vector2f accumulator = new Vector2f();
-    private int[] swiped = new int[4];
+    private final Vector2f accumulator = new Vector2f();
+    private final int[] swiped = new int[4];
     public float threshold = 0.5F;
 
     public TrackpadSwipeSampler()
@@ -27,13 +27,13 @@ public class TrackpadSwipeSampler
         }
     }
 
-    public void update(ControllerType hand, Vector2 position)
+    public void update(ControllerType hand, Vector2f position)
     {
-        MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).setCurrentHand(hand);
+        MCOpenVR.get().getInputAction(VivecraftVRMod.keyTrackpadTouch).setCurrentHand(hand);
 
-        if (MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).isButtonPressed())
+        if (MCOpenVR.get().getInputAction(VivecraftVRMod.keyTrackpadTouch).isButtonPressed())
         {
-            this.buffer[this.index].set(position.getX(), position.getY());
+            this.buffer[this.index].set(position.x(), position.y());
 
             if (++this.index >= this.buffer.length)
             {
@@ -52,7 +52,7 @@ public class TrackpadSwipeSampler
             this.count = 0L;
         }
 
-        if (this.count >= (long)this.buffer.length)
+        if (this.count >= this.buffer.length)
         {
             int i = (this.index + 1) % this.buffer.length;
             this.accumulator.x += this.buffer[i].x - this.buffer[this.index].x;

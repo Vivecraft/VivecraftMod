@@ -8,21 +8,23 @@ import java.net.URL;
 import java.nio.file.FileSystems;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
+import static org.vivecraft.common.utils.Utils.logger;
 
 public class LoaderUtils {
     public static URL ZipFileUrl;
     public static File vivecraftFile;
-    private static java.util.zip.ZipFile ZipFile;
+    private static ZipFile ZipFile;
     
     public static void init() {
-    	try {
-    		ZipFileUrl = getVivecraftZipLocation().toURL();
-    		vivecraftFile = toFile(ZipFileUrl.toURI());
-    		ZipFile = new java.util.zip.ZipFile(vivecraftFile);
-    	} catch (Exception e) {
-    		System.out.print("Error getting Vivecraft library: " + e.getLocalizedMessage());
-		}
+        try {
+            ZipFileUrl = getVivecraftZipLocation().toURL();
+            vivecraftFile = toFile(ZipFileUrl.toURI());
+            ZipFile = new ZipFile(vivecraftFile);
+        } catch (Exception e) {
+            logger.error("Error getting Vivecraft library: " + e.getLocalizedMessage());
+        }
     }
     
     public static URI getVivecraftZipLocation() throws URISyntaxException
@@ -33,7 +35,7 @@ public class LoaderUtils {
         }
         else
         {
-        	ZipFileUrl = LoaderUtils.class.getProtectionDomain().getCodeSource().getLocation();
+            ZipFileUrl = LoaderUtils.class.getProtectionDomain().getCodeSource().getLocation();
 
             if (ZipFileUrl == null)
             {
@@ -46,13 +48,13 @@ public class LoaderUtils {
         }
     }
 
-	public static java.util.zip.ZipFile getVivecraftZip() throws ZipException, URISyntaxException, IOException {
-		if (vivecraftFile == null) {
-			init();
-		}
-		return new java.util.zip.ZipFile(vivecraftFile);
-	}
-	
+    public static ZipFile getVivecraftZip() throws URISyntaxException, IOException {
+        if (vivecraftFile == null) {
+            init();
+        }
+        return new ZipFile(vivecraftFile);
+    }
+
     public static File toFile(URI uri)
     {
         if (!"union".equals(uri.getScheme()))
@@ -67,7 +69,7 @@ public class LoaderUtils {
 
                 if (s.contains("#"))
                 {
-                    s = s.substring(0, s.lastIndexOf("#"));
+                    s = s.substring(0, s.lastIndexOf('#'));
                 }
 
                 File file1 = new File(s);

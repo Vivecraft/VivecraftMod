@@ -1,8 +1,14 @@
 package org.vivecraft.mixin.client.main;
 
-import com.google.common.base.Stopwatch;
 import org.vivecraft.client.utils.UpdateChecker;
-import org.vivecraft.client_vr.ClientDataHolderVR;
+
+import com.google.common.base.Stopwatch;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.common.utils.Utils.logger;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -10,11 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import net.minecraft.client.main.Main;
-
-@Mixin(Main.class)
+@Mixin(net.minecraft.client.main.Main.class)
 public class MainMixin {
 	
 	@Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V"), method = "main", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
@@ -26,28 +28,28 @@ public class MainMixin {
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false) , method = "main", remap = false)
-	private static OptionSet kiosk(OptionParser optionparser, String[] p_129642_) {
+	private static OptionSet kiosk(OptionParser optionparser, String[] cmdOptions) {
 		new Thread(UpdateChecker::checkForUpdates).start();
-		OptionSet optionset = optionparser.parse(p_129642_);
-		ClientDataHolderVR.kiosk = optionset.has("kiosk");
+		OptionSet optionset = optionparser.parse(cmdOptions);
+		dh.kiosk = optionset.has("kiosk");
 		
-		if (ClientDataHolderVR.kiosk)
+		if (dh.kiosk)
 		{
-			System.out.println("Setting kiosk");
+			logger.info("Setting kiosk");
 		}
 		
-		if (ClientDataHolderVR.kiosk)
+		if (dh.kiosk)
 		{
-			ClientDataHolderVR.viewonly = optionset.has("viewonly");
+			dh.viewonly = optionset.has("viewonly");
 			
-			if (ClientDataHolderVR.viewonly)
+			if (dh.viewonly)
 			{
-				System.out.println("Setting viewonly");
+				logger.info("Setting viewonly");
 			}
 		}
 
-		ClientDataHolderVR.katvr = optionset.has("katvr");
-		ClientDataHolderVR.infinadeck = optionset.has("infinadeck");
+		dh.katvr = optionset.has("katvr");
+		dh.infinadeck = optionset.has("infinadeck");
 		return optionset;
 	}
 }

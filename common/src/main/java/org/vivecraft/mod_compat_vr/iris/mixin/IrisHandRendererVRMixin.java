@@ -1,16 +1,20 @@
 package org.vivecraft.mod_compat_vr.iris.mixin;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
+
 import net.coderbot.iris.pipeline.HandRenderer;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 //TODO Move rendering to here
 @Pseudo

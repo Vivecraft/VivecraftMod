@@ -1,7 +1,8 @@
 package org.vivecraft.mod_compat_vr.pehkui;
 
-import net.minecraft.world.entity.Entity;
 import virtuoel.pehkui.util.ScaleUtils;
+
+import net.minecraft.world.entity.Entity;
 
 public class PehkuiHelper {
     public static float getPlayerScale(Entity player, float tickDelta) {

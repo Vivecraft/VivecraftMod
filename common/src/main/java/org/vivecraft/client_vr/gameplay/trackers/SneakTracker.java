@@ -1,42 +1,39 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import org.joml.Vector3d;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class SneakTracker extends Tracker
 {
     public boolean sneakOverride = false;
     public int sneakCounter = 0;
 
-    public SneakTracker(Minecraft mc, ClientDataHolderVR dh)
+    @Override
+    public boolean isActive()
     {
-        super(mc, dh);
-    }
-
-    public boolean isActive(LocalPlayer p)
-    {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated)
+        if (dh.vrSettings.seated)
         {
             return false;
         }
-        else if (!ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling)
+        else if (!dh.vrPlayer.getFreeMove() && !dh.vrSettings.simulateFalling)
         {
             return false;
         }
-        else if (!ClientDataHolderVR.getInstance().vrSettings.realisticSneakEnabled)
+        else if (!dh.vrSettings.realisticSneakEnabled)
         {
             return false;
         }
-        else if (this.mc.gameMode == null)
+        else if (mc.gameMode == null)
         {
             return false;
         }
-        else if (p != null && p.isAlive() && p.onGround())
+        else if (mc.player != null && mc.player.isAlive() && mc.player.onGround())
         {
-            return !p.isPassenger();
+            return !mc.player.isPassenger();
         }
         else
         {
@@ -44,25 +41,20 @@ public class SneakTracker extends Tracker
         }
     }
 
-    public void reset(LocalPlayer player)
+    @Override
+    public void reset()
     {
         this.sneakOverride = false;
     }
 
-    public void doProcess(LocalPlayer player)
+    @Override
+    public void doProcess()
     {
-        if (!this.mc.isPaused() && this.dh.sneakTracker.sneakCounter > 0)
+        if (!mc.isPaused() && dh.sneakTracker.sneakCounter > 0)
         {
-            --this.dh.sneakTracker.sneakCounter;
+            --dh.sneakTracker.sneakCounter;
         }
 
-        if ((double) AutoCalibration.getPlayerHeight() - this.dh.vr.hmdPivotHistory.latest().y > (double)this.dh.vrSettings.sneakThreshold)
-        {
-            this.sneakOverride = true;
-        }
-        else
-        {
-            this.sneakOverride = false;
-        }
+        this.sneakOverride = (double)AutoCalibration.getPlayerHeight() - dh.vr.hmdPivotHistory.latest(new Vector3d()).y > (double)dh.vrSettings.sneakThreshold;
     }
 }

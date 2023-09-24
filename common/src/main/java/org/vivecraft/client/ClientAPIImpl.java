@@ -1,8 +1,10 @@
 package org.vivecraft.client;
 
 import org.vivecraft.api_beta.client.VivecraftClientAPI;
-import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+
+import static org.vivecraft.client_vr.VRState.vrInitialized;
+import static org.vivecraft.client_vr.VRState.vrRunning;
 
 public final class ClientAPIImpl implements VivecraftClientAPI {
 
@@ -13,12 +15,12 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
 
     @Override
     public boolean isVrInitialized() {
-        return VRState.vrInitialized;
+        return vrInitialized;
     }
 
     @Override
     public boolean isVrActive() {
-        return VRState.vrRunning;
+        return vrRunning;
     }
 
     @Override

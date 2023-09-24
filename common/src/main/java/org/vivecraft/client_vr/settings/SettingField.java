@@ -1,5 +1,7 @@
 package org.vivecraft.client_vr.settings;
 
+import org.vivecraft.client_vr.settings.VRSettings.VrOptions;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -9,12 +11,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface SettingField {
 	/**
-	 * The {@link VRSettings.VrOptions} that this field is associated with.
+	 * The {@link VrOptions} that this field is associated with.
 	 * If left as the default DUMMY, it will function as a hidden setting.
 	 *
 	 * @return option enum
 	 */
-	VRSettings.VrOptions value() default VRSettings.VrOptions.DUMMY;
+	VrOptions value() default VrOptions.DUMMY;
 
 	/**
 	 * String to save the option as in the config file, or empty to use the field name.

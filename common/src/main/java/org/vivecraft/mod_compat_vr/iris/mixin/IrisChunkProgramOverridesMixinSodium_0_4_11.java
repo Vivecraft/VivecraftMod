@@ -1,16 +1,18 @@
 package org.vivecraft.mod_compat_vr.iris.mixin;
 
+import org.vivecraft.mod_compat_vr.iris.extensions.IrisChunkProgramOverridesExtension;
+
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkProgramOverrides;
 import net.coderbot.iris.pipeline.SodiumTerrainPipeline;
+
+import java.lang.reflect.InvocationTargetException;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.mod_compat_vr.iris.extensions.IrisChunkProgramOverridesExtension;
-
-import java.lang.reflect.InvocationTargetException;
 
 @Pseudo
 @Mixin(IrisChunkProgramOverrides.class)

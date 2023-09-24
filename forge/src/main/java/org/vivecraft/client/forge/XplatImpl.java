@@ -1,18 +1,21 @@
 package org.vivecraft.client.forge;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+
+import com.mojang.blaze3d.pipeline.RenderTarget;
+
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biome.ClimateSettings;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
+import net.minecraft.world.level.material.FluidState;
 
 import java.nio.file.Path;
 
@@ -69,7 +72,7 @@ public class XplatImpl {
         return ForgeHooksClient.getFluidSprites(level, pos, fluidStateIn);
     }
 
-    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
+    public static ClimateSettings getBiomeClimateSettings(Biome biome){
         return biome.getModifiedClimateSettings();
     }
 

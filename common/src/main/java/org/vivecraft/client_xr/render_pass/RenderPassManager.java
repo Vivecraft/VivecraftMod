@@ -1,14 +1,16 @@
 package org.vivecraft.client_xr.render_pass;
 
-import com.mojang.blaze3d.pipeline.MainTarget;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.PostChain;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.RenderPass;
 
+import com.mojang.blaze3d.pipeline.MainTarget;
+
+import net.minecraft.client.renderer.PostChain;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
+
 public class RenderPassManager {
-    private static final Minecraft mc = Minecraft.getInstance();
 
     public static RenderPassManager INSTANCE;
 
@@ -29,14 +31,14 @@ public class RenderPassManager {
     }
 
     public static void setGUIRenderPass() {
-        ClientDataHolderVR.getInstance().currentPass = RenderPass.GUI;
+        dh.currentPass = RenderPass.GUI;
         RenderPassManager.wrp = null;
         renderPassType = RenderPassType.GUI_ONLY;
         mc.mainRenderTarget = GuiHandler.guiFramebuffer;
     }
 
     public static void setVanillaRenderPass() {
-        ClientDataHolderVR.getInstance().currentPass = null;
+        dh.currentPass = RenderPass.VANILLA;
         RenderPassManager.wrp = null;
         renderPassType = RenderPassType.VANILLA;
         mc.mainRenderTarget = INSTANCE.vanillaRenderTarget;

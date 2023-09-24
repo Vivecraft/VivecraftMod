@@ -1,7 +1,8 @@
 package org.vivecraft.api_beta.client;
 
-import com.google.common.annotations.Beta;
 import org.vivecraft.client.ClientAPIImpl;
+
+import com.google.common.annotations.Beta;
 
 public interface VivecraftClientAPI {
 

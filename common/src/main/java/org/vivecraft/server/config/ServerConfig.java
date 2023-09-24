@@ -1,74 +1,80 @@
 package org.vivecraft.server.config;
 
+import org.vivecraft.client.Xplat;
+import org.vivecraft.server.config.ConfigBuilder.*;
+
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import com.electronwill.nightconfig.core.ConfigSpec.CorrectionListener;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import org.vivecraft.client.Xplat;
-import org.vivecraft.server.config.ConfigBuilder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.vivecraft.common.utils.Utils.logger;
 
 public class ServerConfig {
 
     // config keys
-    public static ConfigBuilder.BooleanValue debug;
-    public static ConfigBuilder.BooleanValue checkForUpdate;
-    public static ConfigBuilder.BooleanValue vr_only;
-    public static ConfigBuilder.BooleanValue vive_only;
-    public static ConfigBuilder.BooleanValue allow_op;
-    public static ConfigBuilder.DoubleValue messageKickDelay;
-    public static ConfigBuilder.BooleanValue vrFun;
+    public static BooleanValue debug;
+    public static BooleanValue checkForUpdate;
+    public static BooleanValue vr_only;
+    public static BooleanValue vive_only;
+    public static BooleanValue allow_op;
+    public static DoubleValue messageKickDelay;
+    public static BooleanValue vrFun;
 
-    public static ConfigBuilder.BooleanValue messagesEnabled;
-    public static ConfigBuilder.StringValue messagesWelcomeVR;
-    public static ConfigBuilder.StringValue messagesWelcomeNonVR;
-    public static ConfigBuilder.StringValue messagesWelcomeSeated;
-    public static ConfigBuilder.StringValue messagesWelcomeVanilla;
-    public static ConfigBuilder.StringValue messagesLeaveMessage;
-    public static ConfigBuilder.StringValue messagesKickViveOnly;
-    public static ConfigBuilder.StringValue messagesKickVROnly;
+    public static BooleanValue messagesEnabled;
+    public static StringValue messagesWelcomeVR;
+    public static StringValue messagesWelcomeNonVR;
+    public static StringValue messagesWelcomeSeated;
+    public static StringValue messagesWelcomeVanilla;
+    public static StringValue messagesLeaveMessage;
+    public static StringValue messagesKickViveOnly;
+    public static StringValue messagesKickVROnly;
 
-    public static ConfigBuilder.DoubleValue creeperSwellDistance;
-    public static ConfigBuilder.DoubleValue bowStandingMultiplier;
-    public static ConfigBuilder.DoubleValue bowSeatedMultiplier;
-    public static ConfigBuilder.DoubleValue bowStandingHeadshotMultiplier;
-    public static ConfigBuilder.DoubleValue bowSeatedHeadshotMultiplier;
-    public static ConfigBuilder.DoubleValue bowVanillaHeadshotMultiplier;
+    public static DoubleValue creeperSwellDistance;
+    public static DoubleValue bowStandingMultiplier;
+    public static DoubleValue bowSeatedMultiplier;
+    public static DoubleValue bowStandingHeadshotMultiplier;
+    public static DoubleValue bowSeatedHeadshotMultiplier;
+    public static DoubleValue bowVanillaHeadshotMultiplier;
 
-    public static ConfigBuilder.BooleanValue pvpVRvsVR;
-    public static ConfigBuilder.BooleanValue pvpSEATEDVRvsSEATEDVR;
-    public static ConfigBuilder.BooleanValue pvpVRvsNONVR;
-    public static ConfigBuilder.BooleanValue pvpSEATEDVRvsNONVR;
-    public static ConfigBuilder.BooleanValue pvpVRvsSEATEDVR;
+    public static BooleanValue pvpVRvsVR;
+    public static BooleanValue pvpSEATEDVRvsSEATEDVR;
+    public static BooleanValue pvpVRvsNONVR;
+    public static BooleanValue pvpSEATEDVRvsNONVR;
+    public static BooleanValue pvpVRvsSEATEDVR;
 
-    public static ConfigBuilder.BooleanValue climbeyEnabled;
-    public static ConfigBuilder.ConfigValue<String> climbeyBlockmode;
-    public static ConfigBuilder.ConfigValue<List<? extends String>> climbeyBlocklist;
+    public static BooleanValue climbeyEnabled;
+    public static ConfigValue<String> climbeyBlockmode;
+    public static ConfigValue<List<? extends String>> climbeyBlocklist;
 
-    public static ConfigBuilder.BooleanValue crawlingEnabled;
+    public static BooleanValue crawlingEnabled;
 
-    public static ConfigBuilder.BooleanValue teleportEnabled;
-    public static ConfigBuilder.BooleanValue teleportLimitedSurvival;
-    public static ConfigBuilder.IntValue teleportUpLimit;
-    public static ConfigBuilder.IntValue teleportDownLimit;
-    public static ConfigBuilder.IntValue teleportHorizontalLimit;
+    public static BooleanValue teleportEnabled;
+    public static BooleanValue teleportLimitedSurvival;
+    public static IntValue teleportUpLimit;
+    public static IntValue teleportDownLimit;
+    public static IntValue teleportHorizontalLimit;
 
-    public static ConfigBuilder.BooleanValue worldscaleLimited;
-    public static ConfigBuilder.DoubleValue worldscaleMax;
-    public static ConfigBuilder.DoubleValue worldscaleMin;
+    public static BooleanValue worldscaleLimited;
+    public static DoubleValue worldscaleMax;
+    public static DoubleValue worldscaleMin;
 
-    public static ConfigBuilder.BooleanValue vrSwitchingEnabled;
+    public static BooleanValue vrSwitchingEnabled;
 
     private static CommentedFileConfig config;
     private static ConfigBuilder builder;
-    public static List<ConfigBuilder.ConfigValue> getConfigValues(){
+    public static List<ConfigValue> getConfigValues(){
         return builder.getConfigValues();
     }
 
-    public static void init(ConfigSpec.CorrectionListener listener){
+    public static void init(CorrectionListener listener){
         Config.setInsertionOrderPreserved(true);
         config = CommentedFileConfig
                 .builder(Xplat.getConfigPath("vivecraft-server-config.toml"))
@@ -82,7 +88,7 @@ public class ServerConfig {
         if (listener == null) {
             listener = (action, path, incorrectValue, correctedValue) -> {
                 if (incorrectValue != null) {
-                    System.out.println("Corrected " + String.join(".", path) + ": was " + incorrectValue + ", is now " + correctedValue);
+                    logger.warn("Corrected " + String.join(".", path) + ": was " + incorrectValue + ", is now " + correctedValue);
                 }
             };
         }
@@ -92,7 +98,7 @@ public class ServerConfig {
         config.save();
     }
 
-    private static void fixConfig(CommentedConfig config, ConfigSpec.CorrectionListener listener) {
+    private static void fixConfig(CommentedConfig config, CorrectionListener listener) {
 
         builder = new ConfigBuilder(config, new ConfigSpec());
 
@@ -238,7 +244,7 @@ public class ServerConfig {
         climbeyBlocklist = builder
             .push("blocklist")
             .comment("The list of block names for use with include/exclude block mode.")
-            .defineList(Arrays.asList("white_wool","dirt","grass_block"), (s) -> s instanceof String && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation((String) s)));
+            .defineList(Arrays.asList("white_wool","dirt","grass_block"), (s) -> s instanceof String str && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation(str)));
         // end climbey
         builder.pop();
 

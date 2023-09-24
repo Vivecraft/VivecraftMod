@@ -94,12 +94,12 @@
 //        if (eyeType == 0)
 //        {
 //            OVRUtil.ovrMatrix4f_Projection(this.mcovr.hmdDesc.DefaultEyeFov(0), nearClip, farClip, 0, this.projL);
-//            return OVRUtils.ovrMatrix4ToMatrix4f(this.projL).toMCMatrix();
+//            return OVRUtils.ovrMatrix4ToMatrix4f(this.projL).transpose();
 //        }
 //        else
 //        {
 //            OVRUtil.ovrMatrix4f_Projection(this.mcovr.hmdDesc.DefaultEyeFov(1), nearClip, farClip, 0, this.projR);
-//            return OVRUtils.ovrMatrix4ToMatrix4f(this.projR).toMCMatrix();
+//            return OVRUtils.ovrMatrix4ToMatrix4f(this.projR).transpose();
 //        }
 //    }
 //

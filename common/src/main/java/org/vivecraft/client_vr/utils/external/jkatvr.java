@@ -7,6 +7,8 @@ import com.sun.jna.ptr.DoubleByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
 
+import static org.vivecraft.common.utils.Utils.logger;
+
 public class jkatvr implements Library
 {
     public static final String KATVR_LIBRARY_NAME = "WalkerBase.dll";
@@ -40,7 +42,7 @@ public class jkatvr implements Library
         try
         {
             boolean flag = GetWalkerData(0, y, pow, m, is, fl);
-            yaw = (float)y.getValue();
+            yaw = y.getValue();
             power = pow.getValue();
             direction = -m.getValue();
             ismoving = is.getValue();
@@ -48,7 +50,7 @@ public class jkatvr implements Library
         }
         catch (Exception exception)
         {
-            System.out.println("KATVR Error: " + exception.getMessage());
+            logger.error("KATVR Error: {}", exception.getMessage());
         }
     }
 
@@ -69,12 +71,12 @@ public class jkatvr implements Library
 
     public static float walkDirection()
     {
-        return (float)direction;
+        return direction;
     }
 
-    public static float getSpeed()
+    public static double getSpeed()
     {
-        return (float)(power / (double)maxpower * (double)(walkDirection() == 1.0F ? mag : bmag));
+        return power / maxpower * (walkDirection() == 1.0F ? mag : bmag);
     }
 
     static

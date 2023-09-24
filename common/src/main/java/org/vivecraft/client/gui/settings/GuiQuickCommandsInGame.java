@@ -1,19 +1,16 @@
 package org.vivecraft.client.gui.settings;
 
-import net.minecraft.client.gui.GuiGraphics;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button.Builder;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
+
 public class GuiQuickCommandsInGame extends Screen
 {
-	protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-    private int field_146445_a;
-    private int field_146444_f;
-    private static final String __OBFID = "CL_00000703";
     protected final Screen parentScreen;
 
     public GuiQuickCommandsInGame(Screen parent)
@@ -22,43 +19,41 @@ public class GuiQuickCommandsInGame extends Screen
         this.parentScreen = parent;
     }
 
+    @Override
     public void init()
     {
         KeyMapping.releaseAll();
-        this.field_146445_a = 0;
         this.clearWidgets();
-        byte b0 = -16;
-        boolean flag = true;
-        String[] astring = this.dataholder.vrSettings.vrQuickCommands;
-        int i = 0;
+        String[] astring = dh.vrSettings.vrQuickCommands;
+        int i;
 
         for (int j = 0; j < astring.length; ++j)
         {
             i = j > 5 ? 1 : 0;
             String s = astring[j];
-            this.addRenderableWidget(new Button.Builder( Component.translatable(s.toString()),  (p) ->
+            this.addRenderableWidget(new Builder(Component.translatable(s),  (p) ->
                 {
-                    this.minecraft.setScreen((Screen)null);
+                    mc.setScreen(null);
                     if (p.getMessage().getString().startsWith("/")) {
-                        this.minecraft.player.connection.sendCommand(p.getMessage().getString().substring(1));
+                        mc.player.connection.sendCommand(p.getMessage().getString().substring(1));
                     } else {
-                        this.minecraft.player.connection.sendChat(p.getMessage().getString());
+                        mc.player.connection.sendChat(p.getMessage().getString());
                     }
                 })
-                .size( 125,  20)
-                .pos(this.width / 2 - 125 + 127 * i,  36 + (j - 6 * i) * 24)
-                .build());
+                .size(125, 20)
+                .pos(this.width / 2 - 125 + 127 * i, 36 + (j - 6 * i) * 24)
+                .build()
+            );
         }
 
-        this.addRenderableWidget(new Button.Builder( Component.translatable("Cancel"),  (p) ->
-            {
-                this.minecraft.setScreen(this.parentScreen);
-            })
-            .size( 100,  20)
-            .pos(this.width / 2 - 50,  this.height - 30 + b0)
-            .build());
+        this.addRenderableWidget(new Builder(Component.translatable("gui.cancel"),  (p) -> mc.setScreen(this.parentScreen))
+            .size(100, 20)
+            .pos(this.width / 2 - 50, this.height - 46)
+            .build()
+        );
     }
 
+    @Override
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks)
     {
         this.renderBackground(guiGraphics);

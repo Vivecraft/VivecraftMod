@@ -1,33 +1,36 @@
 package org.vivecraft.mod_compat_vr.iris.mixin;
 
+import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.client_xr.render_pass.WorldRenderPass;
+
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.PipelineManager;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.DimensionId;
 import net.coderbot.iris.shaderpack.materialmap.NamespacedId;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
-import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Desc;
-import org.spongepowered.asm.mixin.injection.Group;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.client_xr.render_pass.RenderPassManager;
-import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.client_xr.render_pass.WorldRenderPass;
-import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.vrInitialized;
+
+import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Desc;
+import org.spongepowered.asm.mixin.injection.Group;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 @Pseudo
 @Mixin(net.coderbot.iris.pipeline.PipelineManager.class)
-public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
+public class IrisPipelineManagerVRMixin implements org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension {
 
     @Shadow(remap = false)
     private void resetTextureState(){}
@@ -50,33 +53,33 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
     private WorldRenderingPipeline vanillaPipeline;
     private  Map<RenderPass, WorldRenderingPipeline> vrPipelinesCurrentDimension;
 
-    private WorldRenderPass currentWorldRenderPass = null;
-    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.BEFORE), remap = false)
+    private WorldRenderPass currentWorldRenderPass;
+    @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;", shift = Shift.BEFORE), remap = false)
     private void generateVanillaPipeline(CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         // this also runs on game startup, when the renderpassManager isn't initialized yet
-        if (VRState.vrInitialized && RenderPassManager.INSTANCE != null) {
+        if (vrInitialized && RenderPassManager.INSTANCE != null) {
             currentWorldRenderPass = RenderPassManager.wrp;
-            RenderPass currentRenderPass = ClientDataHolderVR.getInstance().currentPass;
+            RenderPass currentRenderPass = dh.currentPass;
             RenderPassManager.setVanillaRenderPass();
-            ClientDataHolderVR.getInstance().currentPass = currentRenderPass;
+            dh.currentPass = currentRenderPass;
         }
     }
 
     @Group(name = "generateVRPipelines", min = 1, max = 1)
-    @Inject(target = @Desc(value = "preparePipeline", owner = PipelineManager.class, ret = WorldRenderingPipeline.class, args = DimensionId.class), at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.AFTER), remap = false, expect = 0)
+    @Inject(target = @Desc(value = "preparePipeline", owner = PipelineManager.class, ret = WorldRenderingPipeline.class, args = DimensionId.class), at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = Shift.AFTER), remap = false, expect = 0)
     private void generateVRPipelines164(DimensionId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         generateVRPipelines(newDimension);
     }
 
     @Group(name = "generateVRPipelines", min = 1, max = 1)
-    @Inject(target = @Desc(value = "preparePipeline", owner = PipelineManager.class, ret = WorldRenderingPipeline.class, args = NamespacedId.class), at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.AFTER), remap = false, expect = 0)
+    @Inject(target = @Desc(value = "preparePipeline", owner = PipelineManager.class, ret = WorldRenderingPipeline.class, args = NamespacedId.class), at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", shift = Shift.AFTER), remap = false, expect = 0)
     private void generateVRPipelines165(NamespacedId newDimension, CallbackInfoReturnable<WorldRenderingPipeline> cir) {
         generateVRPipelines(newDimension);
     }
 
     @Unique
     private void generateVRPipelines(Object newDimension) {
-        if (VRState.vrInitialized) {
+        if (vrInitialized) {
             vanillaPipeline = pipeline;
             if (!this.vrPipelinesPerDimension.containsKey(newDimension)) {
                 vrPipelinesPerDimension.put(newDimension, new HashMap<>());
@@ -112,7 +115,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                 // set to currently needed renderpass again
                 if (currentWorldRenderPass != null) {
                     RenderPassManager.setWorldRenderPass(currentWorldRenderPass);
-                } else if (ClientDataHolderVR.getInstance().currentPass == RenderPass.GUI) {
+                } else if (dh.currentPass == RenderPass.GUI) {
                     RenderPassManager.setGUIRenderPass();
                 } else {
                     RenderPassManager.setVanillaRenderPass();
@@ -121,8 +124,8 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
             vrPipelinesCurrentDimension = vrPipelinesPerDimension.get(newDimension);
 
             if (!RenderPassType.isVanilla()) {
-                if (ClientDataHolderVR.getInstance().currentPass != null) {
-                    pipeline = vrPipelinesCurrentDimension.get(ClientDataHolderVR.getInstance().currentPass);
+                if (dh.currentPass != RenderPass.VANILLA) {
+                    pipeline = vrPipelinesCurrentDimension.get(dh.currentPass);
                 } else {
                     pipeline = vrPipelinesCurrentDimension.get(RenderPass.LEFT);
                 }
@@ -150,12 +153,12 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Unique
     private WorldRenderingPipeline getCurrentVRPipeline(Object key) {
-        return vrPipelinesPerDimension.get(key).get(ClientDataHolderVR.getInstance().currentPass);
+        return vrPipelinesPerDimension.get(key).get(dh.currentPass);
     }
 
     @Inject(method = "destroyPipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V"), remap = false)
     private void destroyVRPipelines(CallbackInfo ci) {
-        if (VRState.vrInitialized) {
+        if (vrInitialized) {
             vrPipelinesPerDimension.forEach((dimID, map) -> {
                 map.forEach((renderPass, pipeline) -> {
                     Iris.logger.info("Destroying VR pipeline {}", renderPass);

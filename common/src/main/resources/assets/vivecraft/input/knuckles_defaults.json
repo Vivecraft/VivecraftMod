@@ -1,7 +1,7 @@
 {
    "action_manifest_version" : 0,
    "alias_info" : {},
-   "app_key" : "org.jrbudda.vivecraft.steamvrinput",
+   "app_key" : "org.vivecraft.mcvr",
    "bindings" : {
       "/actions/contextual" : {
          "chords" : [
@@ -141,6 +141,16 @@
             {
                "output" : "/actions/global/in/righthand",
                "path" : "/user/hand/right/pose/raw"
+            }
+         ],
+         "skeleton" : [
+            {
+               "output": "/actions/global/in/lefthandbones",
+               "path": "/user/hand/left/input/skeleton/left"
+            },
+            {
+               "output": "/actions/global/in/righthandbones",
+               "path": "/user/hand/right/input/skeleton/right"
             }
          ],
          "sources" : [

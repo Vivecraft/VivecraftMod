@@ -1,24 +1,29 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
+import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.HandedKeyBinding;
+import org.vivecraft.client_vr.provider.InputSimulator;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
+
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+
+import net.minecraft.client.KeyMapping;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import static org.vivecraft.client_vr.VRState.dh;
 
-import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.HandedKeyBinding;
-import org.vivecraft.client_vr.provider.InputSimulator;
-import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
-import org.vivecraft.common.utils.math.Vector2;
-import org.vivecraft.common.utils.math.Vector3;
+import static org.joml.Math.*;
+import static org.lwjgl.openvr.VR.k_ulInvalidInputValueHandle;
 
-import com.mojang.blaze3d.platform.InputConstants;
-
-import net.minecraft.client.KeyMapping;
+import static com.mojang.blaze3d.platform.InputConstants.Key;
+import static com.mojang.blaze3d.platform.InputConstants.Type;
 
 public class VRInputAction
 {
@@ -28,12 +33,12 @@ public class VRInputAction
     public final String type;
     public final VRInputActionSet actionSet;
     private int priority = 0;
-    private boolean[] enabled = new boolean[ControllerType.values().length];
-    private List<KeyListener> listeners = new ArrayList<>();
+    private final boolean[] enabled = new boolean[ControllerType.values().length];
+    private final List<KeyListener> listeners = new ArrayList<>();
     private ControllerType currentHand = ControllerType.RIGHT;
     private boolean currentlyInUse;
     public long handle;
-    private boolean[] pressed = new boolean[ControllerType.values().length];
+    private final boolean[] pressed = new boolean[ControllerType.values().length];
     protected int[] unpressInTicks = new int[ControllerType.values().length];
     public DigitalData[] digitalData = new DigitalData[ControllerType.values().length];
     public AnalogData[] analogData = new AnalogData[ControllerType.values().length];
@@ -56,92 +61,67 @@ public class VRInputAction
 
     public boolean isButtonPressed()
     {
-        if (this.type.equals("boolean"))
+        if ("boolean".equals(this.type))
         {
             return this.digitalData().state;
         }
         else
         {
-            Vector3 vector3 = this.getAxis3D(false);
-            return Math.abs(vector3.getX()) > 0.5F || Math.abs(vector3.getY()) > 0.5F || Math.abs(vector3.getZ()) > 0.5F;
+            Vector3f vector3 = this.getAxis3D(false);
+            return abs(vector3.x()) > 0.5F || abs(vector3.y()) > 0.5F || abs(vector3.z()) > 0.5F;
         }
     }
 
     public boolean isButtonChanged()
     {
-        if (this.type.equals("boolean"))
+        if ("boolean".equals(this.type))
         {
             return this.digitalData().isChanged;
         }
         else
         {
-            Vector3 vector3 = this.getAxis3D(false);
-            Vector3 vector31 = this.getAxis3D(true);
-            return Math.abs(vector3.getX() - vector31.getX()) > 0.5F != Math.abs(vector3.getX()) > 0.5F || Math.abs(vector3.getY() - vector31.getY()) > 0.5F != Math.abs(vector3.getY()) > 0.5F || Math.abs(vector3.getZ() - vector31.getZ()) > 0.5F != Math.abs(vector3.getZ()) > 0.5F;
+            Vector3f vector3 = this.getAxis3D(false);
+            Vector3f vector31 = this.getAxis3D(true);
+            return abs(vector3.x() - vector31.x()) > 0.5F != abs(vector3.x()) > 0.5F || abs(vector3.y() - vector31.y()) > 0.5F != abs(vector3.y()) > 0.5F || abs(vector3.z() - vector31.z()) > 0.5F != abs(vector3.z()) > 0.5F;
         }
     }
 
     public float getAxis1D(boolean delta)
     {
-        String s = this.type;
 
-        switch (s)
-        {
-            case "boolean":
-                return this.digitalToAnalog(delta);
-
-            case "vector1":
-            case "vector2":
-            case "vector3":
-                return delta ? this.analogData().deltaX : this.analogData().x;
-
-            default:
-                return 0.0F;
-        }
+        return switch (this.type) {
+            case "boolean" -> this.digitalToAnalog(delta);
+            case "vector1", "vector2", "vector3" -> delta ? this.analogData().deltaX : this.analogData().x;
+            default -> 0.0F;
+        };
     }
 
-    public Vector2 getAxis2D(boolean delta)
+    public Vector2f getAxis2D(boolean delta)
     {
-        String s = this.type;
 
-        switch (s)
-        {
-            case "boolean":
-                return new Vector2(this.digitalToAnalog(delta), 0.0F);
-
-            case "vector1":
-                return delta ? new Vector2(this.analogData().deltaX, 0.0F) : new Vector2(this.analogData().x, 0.0F);
-
-            case "vector2":
-            case "vector3":
-                return delta ? new Vector2(this.analogData().deltaX, this.analogData().deltaY) : new Vector2(this.analogData().x, this.analogData().y);
-
-            default:
-                return new Vector2();
-        }
+        return switch (this.type) {
+            case "boolean" -> new Vector2f(this.digitalToAnalog(delta), 0.0F);
+            case "vector1" ->
+                delta ? new Vector2f(this.analogData().deltaX, 0.0F) : new Vector2f(this.analogData().x, 0.0F);
+            case "vector2", "vector3" ->
+                delta ? new Vector2f(this.analogData().deltaX, this.analogData().deltaY) : new Vector2f(this.analogData().x, this.analogData().y);
+            default -> new Vector2f();
+        };
     }
 
-    public Vector3 getAxis3D(boolean delta)
+    public Vector3f getAxis3D(boolean delta)
     {
-        String s = this.type;
 
-        switch (s)
-        {
-            case "boolean":
-                return new Vector3(this.digitalToAnalog(delta), 0.0F, 0.0F);
-
-            case "vector1":
-                return delta ? new Vector3(this.analogData().deltaX, 0.0F, 0.0F) : new Vector3(this.analogData().x, 0.0F, 0.0F);
-
-            case "vector2":
-                return delta ? new Vector3(this.analogData().deltaX, this.analogData().deltaY, 0.0F) : new Vector3(this.analogData().x, this.analogData().y, 0.0F);
-
-            case "vector3":
-                return delta ? new Vector3(this.analogData().deltaX, this.analogData().deltaY, this.analogData().deltaZ) : new Vector3(this.analogData().x, this.analogData().y, this.analogData().z);
-
-            default:
-                return new Vector3();
-        }
+        return switch (this.type) {
+            case "boolean" -> new Vector3f(this.digitalToAnalog(delta), 0.0F, 0.0F);
+            case "vector1" ->
+                delta ? new Vector3f(this.analogData().deltaX, 0.0F, 0.0F) : new Vector3f(this.analogData().x, 0.0F, 0.0F);
+            case "vector2" ->
+                delta ? new Vector3f(this.analogData().deltaX, this.analogData().deltaY, 0.0F) : new Vector3f(this.analogData().x, this.analogData().y, 0.0F);
+            case "vector3" ->
+                delta ? new Vector3f(this.analogData().deltaX, this.analogData().deltaY, this.analogData().deltaZ) : new Vector3f(this.analogData().x, this.analogData().y, this.analogData().z);
+            default -> new Vector3f();
+        };
     }
 
     public float getAxis1DUseTracked()
@@ -158,30 +138,30 @@ public class VRInputAction
         }
     }
 
-    public Vector2 getAxis2DUseTracked()
+    public Vector2f getAxis2DUseTracked()
     {
         if (!this.currentlyInUse && !this.isEnabled())
         {
-            return new Vector2();
+            return new Vector2f();
         }
         else
         {
-            Vector2 vector2 = this.getAxis2D(false);
-            this.currentlyInUse = vector2.getX() != 0.0F || vector2.getY() != 0.0F;
+            Vector2f vector2 = this.getAxis2D(false);
+            this.currentlyInUse = vector2.x() != 0.0F || vector2.y() != 0.0F;
             return vector2;
         }
     }
 
-    Vector3 getAxis3DUseTracked()
+    Vector3f getAxis3DUseTracked()
     {
         if (!this.currentlyInUse && !this.isEnabled())
         {
-            return new Vector3();
+            return new Vector3f();
         }
         else
         {
-            Vector3 vector3 = this.getAxis3D(false);
-            this.currentlyInUse = vector3.getX() != 0.0F || vector3.getY() != 0.0F || vector3.getZ() != 0.0F;
+            Vector3f vector3 = this.getAxis3D(false);
+            this.currentlyInUse = vector3.x() != 0.0F || vector3.y() != 0.0F || vector3.z() != 0.0F;
             return vector3;
         }
     }
@@ -207,21 +187,12 @@ public class VRInputAction
 
     public long getLastOrigin()
     {
-        String s = this.type;
 
-        switch (s)
-        {
-            case "boolean":
-                return this.digitalData().activeOrigin;
-
-            case "vector1":
-            case "vector2":
-            case "vector3":
-                return this.analogData().activeOrigin;
-
-            default:
-                return 0L;
-        }
+        return switch (this.type) {
+            case "boolean" -> this.digitalData().activeOrigin;
+            case "vector1", "vector2", "vector3" -> this.analogData().activeOrigin;
+            default -> k_ulInvalidInputValueHandle;
+        };
     }
 
     public ControllerType getCurrentHand()
@@ -273,14 +244,14 @@ public class VRInputAction
         {
             return false;
         }
-        else if (MCOpenVR.get() == null)
+        else if (dh.vr == null)
         {
             return false;
         }
         else
         {
             long i = this.getLastOrigin();
-            ControllerType controllertype = MCOpenVR.get().getOriginControllerType(i);
+            ControllerType controllertype = dh.vr.getOriginControllerType(i);
 
             if (controllertype == null && this.isHanded())
             {
@@ -288,16 +259,12 @@ public class VRInputAction
             }
             else
             {
-                for (VRInputAction vrinputaction : MCOpenVR.get().getInputActions())
+                for (VRInputAction vrinputaction : dh.vr.getInputActions())
                 {
-                    if (vrinputaction != this && vrinputaction.isEnabledRaw(controllertype) && vrinputaction.isActive() && vrinputaction.getPriority() > this.getPriority() && MCVR.get().getOrigins(vrinputaction).contains(i))
+                    if (vrinputaction != this && vrinputaction.isEnabledRaw(controllertype) && vrinputaction.isActive() && vrinputaction.getPriority() > this.getPriority() && dh.vr.getOrigins(vrinputaction).contains(i))
                     {
-                        if (vrinputaction.isHanded())
-                        {
-                            return !((HandedKeyBinding)vrinputaction.keyBinding).isPriorityOnController(controllertype);
-                        }
+                        return vrinputaction.isHanded() && !((HandedKeyBinding) vrinputaction.keyBinding).isPriorityOnController(controllertype);
 
-                        return false;
                     }
                 }
 
@@ -355,21 +322,12 @@ public class VRInputAction
 
     public boolean isActive()
     {
-        String s = this.type;
 
-        switch (s)
-        {
-            case "boolean":
-                return this.digitalData().isActive;
-
-            case "vector1":
-            case "vector2":
-            case "vector3":
-                return this.analogData().isActive;
-
-            default:
-                return false;
-        }
+        return switch (this.type) {
+            case "boolean" -> this.digitalData().isActive;
+            case "vector1", "vector2", "vector3" -> this.analogData().isActive;
+            default -> false;
+        };
     }
 
     public boolean isHanded()
@@ -422,7 +380,7 @@ public class VRInputAction
         }
         else if (this.unpressInTicks[0] > 0 && --this.unpressInTicks[0] == 0)
         {
-            this.unpressBindingImmediately((ControllerType)null);
+            this.unpressBindingImmediately(null);
         }
     }
 
@@ -453,7 +411,7 @@ public class VRInputAction
 
             this.pressed[0] = true;
 
-            if (this.notifyListeners(true, (ControllerType)null))
+            if (this.notifyListeners(true, null))
             {
                 return;
             }
@@ -526,7 +484,7 @@ public class VRInputAction
 
             this.pressed[0] = false;
 
-            if (this.notifyListeners(false, (ControllerType)null))
+            if (this.notifyListeners(false, null))
             {
                 return;
             }
@@ -546,17 +504,17 @@ public class VRInputAction
 
     private void pressKey()
     {
-        InputConstants.Key inputconstants$key = this.keyBinding.key;
+        Key inputconstants$key = this.keyBinding.key;
 
-        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
-            if (inputconstants$key.getType() == InputConstants.Type.KEYSYM)
+            if (inputconstants$key.getType() == Type.KEYSYM)
             {
                 InputSimulator.pressKey(inputconstants$key.getValue());
                 return;
             }
 
-            if (inputconstants$key.getType() == InputConstants.Type.MOUSE)
+            if (inputconstants$key.getType() == Type.MOUSE)
             {
                 InputSimulator.pressMouse(inputconstants$key.getValue());
                 return;
@@ -568,17 +526,17 @@ public class VRInputAction
 
     public void unpressKey()
     {
-        InputConstants.Key inputconstants$key = this.keyBinding.key;
+        Key inputconstants$key = this.keyBinding.key;
 
-        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
-            if (inputconstants$key.getType() == InputConstants.Type.KEYSYM)
+            if (inputconstants$key.getType() == Type.KEYSYM)
             {
                 InputSimulator.releaseKey(inputconstants$key.getValue());
                 return;
             }
 
-            if (inputconstants$key.getType() == InputConstants.Type.MOUSE)
+            if (inputconstants$key.getType() == Type.MOUSE)
             {
                 InputSimulator.releaseMouse(inputconstants$key.getValue());
                 return;
@@ -588,7 +546,7 @@ public class VRInputAction
         this.keyBinding.release();
     }
 
-    public class AnalogData
+    public static class AnalogData
     {
         public float x;
         public float y;
@@ -601,7 +559,7 @@ public class VRInputAction
         public long activeOrigin;
     }
 
-    public class DigitalData
+    public static class DigitalData
     {
         public boolean state;
         public boolean isChanged;

@@ -1,14 +1,19 @@
 package org.vivecraft.fabric.mixin;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
+
 import org.joml.Quaternionf;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.renderer.GameRenderer;
+
+import static org.vivecraft.client_vr.VRState.dh;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
-import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(GameRenderer.class)
 public class FabricGameRendererVRMixin {
@@ -25,7 +30,7 @@ public class FabricGameRendererVRMixin {
         if (RenderPassType.isVanilla()) {
             s.mulPose(quaternion);
         } else {
-            ((GameRendererExtension) this).applyVRModelView(ClientDataHolderVR.getInstance().currentPass, s);
+            ((GameRendererExtension) this).applyVRModelView(dh.currentPass, s);
         }
     }
 

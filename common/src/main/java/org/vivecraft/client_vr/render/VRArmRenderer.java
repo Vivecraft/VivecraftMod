@@ -1,26 +1,27 @@
 package org.vivecraft.client_vr.render;
 
-import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemStack;
 
+import static org.vivecraft.client_vr.VRState.dh;
+
 public class VRArmRenderer extends PlayerRenderer
 {
-    public VRArmRenderer(EntityRendererProvider.Context p_117733_, boolean p_117734_)
+    public VRArmRenderer(Context p_117733_, boolean p_117734_)
     {
         super(p_117733_, p_117734_);
     }
@@ -41,14 +42,14 @@ public class VRArmRenderer extends PlayerRenderer
         this.setModelProperties(playerIn);
         RenderSystem.enableBlend();
         RenderSystem.enableCull();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA);
         playermodel.attackTime = 0.0F;
         playermodel.crouching = false;
         playermodel.swimAmount = 0.0F;
         rendererArmIn.xRot = 0.0F;
         playermodel.leftSleeve.copyFrom(playermodel.leftArm);
         playermodel.rightSleeve.copyFrom(playermodel.rightArm);
-        float f = SwingTracker.getItemFade((LocalPlayer)playerIn, ItemStack.EMPTY);
+        float f = dh.swingTracker.getItemFade(ItemStack.EMPTY);
         rendererArmIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.entityTranslucent(playerIn.getSkinTextureLocation())), combinedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, f);
         rendererArmwearIn.xRot = 0.0F;
         rendererArmwearIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.entityTranslucent(playerIn.getSkinTextureLocation())), combinedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, f);

@@ -149,7 +149,7 @@
 //            }
 //            else
 //            {
-//                this.hmdPose.SetIdentity();
+//                this.hmdPose.identity();
 //                this.hmdPose.M[1][3] = 1.62F;
 //            }
 //

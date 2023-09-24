@@ -1,16 +1,19 @@
 package org.vivecraft.client_vr.menuworlds;
 
+import net.minecraft.SharedConstants;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-import net.minecraft.SharedConstants;
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.settings.VRSettings;
+import static org.vivecraft.client.utils.Utils.*;
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.common.utils.Utils.logger;
 
 public class MenuWorldDownloader {
 	private static final String baseUrl = "https://cache.techjargaming.com/vivecraft/115/";
@@ -31,31 +34,35 @@ public class MenuWorldDownloader {
 		File file = new File(path);
 		file.getParentFile().mkdirs();
 		if (file.exists()) {
-			String localSha1 = Utils.getFileChecksum(file, "SHA-1");
-			String remoteSha1 = Utils.httpReadLine(baseUrl + "checksum.php?file=" + path);
+			String localSha1 = getFileChecksum(file, "SHA-1");
+			String remoteSha1 = httpReadLine(baseUrl + "checksum.php?file=" + path);
 			if (localSha1.equals(remoteSha1)) {
-				VRSettings.logger.info("MenuWorlds: SHA-1 matches for " + path);
+				logger.info("MenuWorlds: SHA-1 matches for {}", path);
 				return;
 			}
 		}
-		VRSettings.logger.info("MenuWorlds: Downloading world " + path);
-		Utils.httpReadToFile(baseUrl + path, file, true);
+		logger.info("MenuWorlds: Downloading world {}", path);
+		httpReadToFile(baseUrl + path, file, true);
 	}
 	
 	public static InputStream getRandomWorld() throws IOException, NoSuchAlgorithmException {
 		init();
-		VRSettings settings = ClientDataHolderVR.getInstance().vrSettings;
-
 		try {
 			List<MenuWorldItem> worldList = new ArrayList<>();
-			if (settings.menuWorldSelection == VRSettings.MenuWorld.BOTH || settings.menuWorldSelection == VRSettings.MenuWorld.CUSTOM)
-				worldList.addAll(getCustomWorlds());
-			if (settings.menuWorldSelection == VRSettings.MenuWorld.BOTH || settings.menuWorldSelection == VRSettings.MenuWorld.OFFICIAL || worldList.size() == 0)
-				worldList.addAll(getOfficialWorlds());
 
-			// don't load the same world twice in a row
-			if (worldList.size() > 1)
-				worldList.removeIf(world -> lastWorld.equals(world.path) || (world.file != null && lastWorld.equals(world.file.getPath())));
+			if (
+				switch(dh.vrSettings.menuWorldSelection)
+				{
+					case CUSTOM -> worldList.addAll(getCustomWorlds()) || worldList.addAll(getOfficialWorlds());
+					case OFFICIAL -> worldList.addAll(getOfficialWorlds());
+					case BOTH -> worldList.addAll(getCustomWorlds()) && worldList.addAll(getOfficialWorlds());
+					default -> false;
+				}
+			)
+			{
+				// don't load the same world twice in a row
+				worldList.removeIf(world -> lastWorld.equals(world.path) || lastWorld.equals(world.file.getPath()));
+			}
 
 			if (worldList.size() == 0)
 				return getRandomWorldFallback();
@@ -73,11 +80,11 @@ public class MenuWorldDownloader {
 
 	private static InputStream getStreamForWorld(MenuWorldItem world) throws IOException, NoSuchAlgorithmException {
 		if (world.file != null) {
-			VRSettings.logger.info("MenuWorlds: Using world " + world.file.getName());
+			logger.info("MenuWorlds: Using world {}", world.file.getName());
 			return new FileInputStream(world.file);
 		} else if (world.path != null) {
 			downloadWorld(world.path);
-			VRSettings.logger.info("MenuWorlds: Using official world " + world.path);
+			logger.info("MenuWorlds: Using official world {}", world.path);
 			return new FileInputStream(world.path);
 		} else {
 			throw new IllegalArgumentException("File or path must be assigned");
@@ -93,14 +100,14 @@ public class MenuWorldDownloader {
 
 	private static List<MenuWorldItem> getOfficialWorlds() throws IOException {
 		List<MenuWorldItem> list = new ArrayList<>();
-		List<String> resultList = Utils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.VERSION_STRING);
+		List<String> resultList = httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.VERSION_STRING);
 		for (String str : resultList)
 			list.add(new MenuWorldItem("menuworlds/" + str, null));
 		return list;
 	}
 	
 	private static InputStream getRandomWorldFallback() throws IOException, NoSuchAlgorithmException {
-		VRSettings.logger.info("MenuWorlds: Couldn't find a world, trying random file from directory");
+		logger.info("MenuWorlds: Couldn't find a world, trying random file from directory");
 		File dir = new File("menuworlds");
 		if (dir.exists()) {
 			MenuWorldItem world = getRandomWorldFromList(getWorldsInDirectory(dir));

@@ -1,15 +1,17 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.network.ClientNetworking;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
-import net.minecraft.world.entity.Pose;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
+
+import org.joml.Vector3d;
+
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.world.entity.Pose;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class CrawlTracker extends Tracker
 {
@@ -17,18 +19,13 @@ public class CrawlTracker extends Tracker
     public boolean crawling;
     public boolean crawlsteresis;
 
-    public CrawlTracker(Minecraft mc, ClientDataHolderVR dh)
+    public boolean isActive()
     {
-        super(mc, dh);
-    }
-
-    public boolean isActive(LocalPlayer player)
-    {
-        if (this.dh.vrSettings.seated)
+        if (dh.vrSettings.seated)
         {
             return false;
         }
-        else if (!this.dh.vrSettings.allowCrawling)
+        else if (!dh.vrSettings.allowCrawling)
         {
             return false;
         }
@@ -36,48 +33,48 @@ public class CrawlTracker extends Tracker
         {
             return false;
         }
-        else if (!player.isAlive())
+        else if (!mc.player.isAlive())
         {
             return false;
         }
-        else if (player.isSpectator())
+        else if (mc.player.isSpectator())
         {
             return false;
         }
-        else if (player.isSleeping())
+        else if (mc.player.isSleeping())
         {
             return false;
         }
         else
         {
-            return !player.isPassenger();
+            return !mc.player.isPassenger();
         }
     }
 
-    public void reset(LocalPlayer player)
+    public void reset()
     {
         this.crawling = false;
         this.crawlsteresis = false;
-        this.updateState(player);
+        this.updateState();
     }
 
-    public void doProcess(LocalPlayer player)
+    public void doProcess()
     {
         double scaleMultiplier = 1.0;
         if (Xplat.isModLoaded("pehkui")) {
-            scaleMultiplier /= PehkuiHelper.getPlayerScale(player, mc.getFrameTime());
+            scaleMultiplier /= PehkuiHelper.getPlayerScale(mc.player, mc.getFrameTime());
         }
-        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition((double)0.2F).y * (double)this.dh.vrPlayer.worldScale * scaleMultiplier + (double)0.1F < (double)this.dh.vrSettings.crawlThreshold;
-        this.updateState(player);
+        this.crawling = dh.vr.hmdPivotHistory.averagePosition(0.2D, new Vector3d()).y * dh.vrPlayer.worldScale * scaleMultiplier + 0.1D < (double)dh.vrSettings.crawlThreshold;
+        this.updateState();
     }
 
-    private void updateState(LocalPlayer player)
+    private void updateState()
     {
         if (this.crawling != this.wasCrawling)
         {
             if (this.crawling)
             {
-                player.setPose(Pose.SWIMMING);
+                mc.player.setPose(Pose.SWIMMING);
                 this.crawlsteresis = true;
             }
 
@@ -85,16 +82,16 @@ public class CrawlTracker extends Tracker
             {
                 ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[] {(byte)(this.crawling ? 1 : 0)});
 
-                if (this.mc.getConnection() != null)
+                if (mc.getConnection() != null)
                 {
-                    this.mc.getConnection().send(serverboundcustompayloadpacket);
+                    mc.getConnection().send(serverboundcustompayloadpacket);
                 }
             }
 
             this.wasCrawling = this.crawling;
         }
 
-        if (!this.crawling && player.getPose() != Pose.SWIMMING)
+        if (!this.crawling && mc.player.getPose() != Pose.SWIMMING)
         {
             this.crawlsteresis = false;
         }

@@ -1,8 +1,8 @@
 package org.vivecraft.mixin.client.gui.components.events;
 
-import org.spongepowered.asm.mixin.Mixin;
-
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
+
+import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ContainerEventHandler.class)
 public class ContainerEventHandlerVRMixin {

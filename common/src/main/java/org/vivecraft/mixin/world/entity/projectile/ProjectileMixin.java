@@ -1,5 +1,8 @@
 package org.vivecraft.mixin.world.entity.projectile;
 
+import org.vivecraft.server.ServerVRPlayers;
+import org.vivecraft.server.ServerVivePlayer;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -7,12 +10,13 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.phys.Vec3;
+
+import static org.joml.Math.*;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.vivecraft.server.ServerVRPlayers;
-import org.vivecraft.server.ServerVivePlayer;
 
 @Mixin(Projectile.class)
 public class ProjectileMixin {
@@ -39,7 +43,7 @@ public class ProjectileMixin {
 			at = @At("HEAD"), ordinal = 0, argsOnly = true)
 	public float pX(float pXIn, Entity pProjectile) {
 		if (this.controllerDir != null) {
-			return -((float) Math.toDegrees(Math.asin(this.controllerDir.y / this.controllerDir.length())));
+			return -((float) toDegrees(asin(this.controllerDir.y / this.controllerDir.length())));
 		}
 		return pXIn;
 	}
@@ -48,7 +52,7 @@ public class ProjectileMixin {
 			at = @At("HEAD"), ordinal = 1, argsOnly = true)
 	public float pY(float pYIn, Entity pProjectile) {
 		if (this.controllerDir != null) {
-			float toRet = (float) Math.toDegrees(Math.atan2(-this.controllerDir.x, this.controllerDir.z));
+			float toRet = (float) toDegrees(atan2(-this.controllerDir.x, this.controllerDir.z));
 			this.controllerDir = null;
 			return toRet;
 		}

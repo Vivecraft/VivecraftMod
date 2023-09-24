@@ -1,18 +1,15 @@
 package org.vivecraft.client_vr.extensions;
 
-import net.minecraft.client.player.LocalPlayer;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 
 public interface PlayerExtension {
 
 	int getMovementTeleportTimer();
 	void setMovementTeleportTimer(int value);
-	void addMovementTeleportTimer(int value);
 	
 	boolean hasTeleported();
 	void setTeleported(boolean teleported);
@@ -23,7 +20,7 @@ public interface PlayerExtension {
 
 	boolean isClimbeyClimbEquipped();
 
-	void stepSound(BlockPos blockpos, Vec3 vec3);
+	void stepSound(BlockPos blockpos, double soundPosX, double soundPosY, double soundPosZ);
 
 	void swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact);
 
@@ -32,5 +29,4 @@ public interface PlayerExtension {
 	float getMuhSpeedFactor();
 	double getRoomYOffsetFromPose();
 	boolean getInitFromServer();
-	void updateSyncFields(LocalPlayer old);
 }

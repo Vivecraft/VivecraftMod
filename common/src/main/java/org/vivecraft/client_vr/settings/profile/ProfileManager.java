@@ -1,22 +1,12 @@
 package org.vivecraft.client_vr.settings.profile;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import com.google.gson.*;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static org.vivecraft.common.utils.Utils.logger;
 
 public class ProfileManager
 {
@@ -28,12 +18,12 @@ public class ProfileManager
     static final String KEY_PROFILES = "Profiles";
     static final String KEY_SELECTED_PROFILE = "selectedProfile";
     static String currentProfileName = "Default";
-    static File vrProfileCfgFile = null;
-    static JsonObject jsonConfigRoot = null;
-    static JsonObject profiles = null;
+    static File vrProfileCfgFile;
+    static JsonObject jsonConfigRoot;
+    static JsonObject profiles;
     static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     static boolean loaded = false;
-    public static final String[] DEFAULT_BINDINGS = new String[] {"key.playerlist:b:6:Button 6", "axis.updown:a:2:-:Y Rotation", "walk.forward:a:0:-:Y ", "gui.axis.leftright:a:3:-:X Rotation", "gui.axis.updown:a:2:-:Y Rotation", "key.sneak:b:9:Button 9", "gui.Left:px:-", "key.itemright:b:5:Button 5", "gui.Right:px:+", "key.left:a:1:-:X ", "gui.Select:b:0:Button 0", "key.aimcenter:b:8:Button 8", "key.pickItem:b:2:Button 2", "key.menu:b:7:Button 7", "key.attack:a:4:-:Z ", "gui.Up:py:-", "key.use:a:4:+:Z ", "axis.leftright:a:3:-:X Rotation", "gui.Down:py:+", "key.right:a:1:+:X ", "key.back:a:0:+:Y ", "key.inventory:b:3:Button 3", "key.jump:b:0:Button 0", "key.drop:b:1:Button 1", "gui.Back:b:1:Button 1", "key.itemleft:b:4:Button 4"};
+    public static final String[] DEFAULT_BINDINGS = {"key.playerlist:b:6:Button 6", "axis.updown:a:2:-:Y Rotation", "walk.forward:a:0:-:Y ", "gui.axis.leftright:a:3:-:X Rotation", "gui.axis.updown:a:2:-:Y Rotation", "key.sneak:b:9:Button 9", "gui.Left:px:-", "key.itemright:b:5:Button 5", "gui.Right:px:+", "key.left:a:1:-:X ", "gui.Select:b:0:Button 0", "key.aimcenter:b:8:Button 8", "key.pickItem:b:2:Button 2", "key.menu:b:7:Button 7", "key.attack:a:4:-:Z ", "gui.Up:py:-", "key.use:a:4:+:Z ", "axis.leftright:a:3:-:X Rotation", "gui.Down:py:+", "key.right:a:1:+:X ", "key.back:a:0:+:Y ", "key.inventory:b:3:Button 3", "key.jump:b:0:Button 0", "key.drop:b:1:Button 1", "gui.Back:b:1:Button 1", "key.itemleft:b:4:Button 4"};
 
     public static synchronized void init(File dataDir)
     {
@@ -50,7 +40,7 @@ public class ProfileManager
                 vrProfileCfgFile.createNewFile();
             }
 
-            InputStreamReader inputstreamreader = new InputStreamReader(new FileInputStream(vrProfileCfgFile), "UTF-8");
+            InputStreamReader inputstreamreader = new InputStreamReader(new FileInputStream(vrProfileCfgFile), StandardCharsets.UTF_8);
 
             try
             {
@@ -93,7 +83,7 @@ public class ProfileManager
         }
         catch (Exception exception1)
         {
-            System.out.println("FAILED to read VR profile settings!");
+            logger.error("FAILED to read VR profile settings!");
             exception1.printStackTrace();
             loaded = false;
         }
@@ -101,44 +91,37 @@ public class ProfileManager
 
     private static void validateProfiles() throws Exception
     {
-        for (Object object : profiles.keySet())
+        for (String s : profiles.keySet())
         {
-            String s = (String)object;
-            Object object1 = profiles.get(s);
-
-            if (object1 instanceof JsonObject)
+            if (profiles.get(s) instanceof JsonObject JsonObject)
             {
-                JsonObject JsonObject = (JsonObject)object1;
                 JsonObject JsonObject1 = null;
                 JsonObject JsonObject2 = null;
                 JsonObject JsonObject3 = null;
                 JsonObject JsonObject4 = null;
 
-                for (Object object2 : JsonObject.keySet())
+                for (String s1 : JsonObject.keySet())
                 {
-                    String s1 = (String)object2;
-                    Object object3 = JsonObject.get(s1);
-
-                    if (object3 instanceof JsonObject)
+                    if (JsonObject.get(s1) instanceof JsonObject jsonobject)
                     {
-                        if (s1.equals("Mc"))
+                        if ("Mc".equals(s1))
                         {
-                            JsonObject1 = (JsonObject)object3;
+                            JsonObject1 = jsonobject;
                         }
 
-                        if (s1.equals("Of"))
+                        if ("Of".equals(s1))
                         {
-                            JsonObject2 = (JsonObject)object3;
+                            JsonObject2 = jsonobject;
                         }
 
-                        if (s1.equals("Vr"))
+                        if ("Vr".equals(s1))
                         {
-                            JsonObject3 = (JsonObject)object3;
+                            JsonObject3 = jsonobject;
                         }
 
-                        if (s1.equals("Controller"))
+                        if ("Controller".equals(s1))
                         {
-                            JsonObject4 = (JsonObject)object3;
+                            JsonObject4 = jsonobject;
                         }
                     }
                 }
@@ -244,7 +227,7 @@ public class ProfileManager
             {
                 JsonObject JsonObject1 = JsonObject.get(set).getAsJsonObject();
 
-                for (String s : (Set<String>)JsonObject1.keySet())
+                for (String s : JsonObject1.keySet())
                 {
                     String s1 = JsonObject1.get(s).getAsString();
                     map.put(s, s1);
@@ -263,7 +246,7 @@ public class ProfileManager
         {
             JsonObject JsonObject = theProfile.get(set).getAsJsonObject();
 
-            for (String s : (Set<String>)JsonObject.keySet())
+            for (String s : JsonObject.keySet())
             {
                 String s1 = JsonObject.get(s).getAsString();
                 map.put(s, s1);
@@ -316,7 +299,7 @@ public class ProfileManager
     {
         try
         {
-            OutputStreamWriter outputstreamwriter = new OutputStreamWriter(new FileOutputStream(vrProfileCfgFile), "UTF-8");
+            OutputStreamWriter outputstreamwriter = new OutputStreamWriter(new FileOutputStream(vrProfileCfgFile), StandardCharsets.UTF_8);
             String s = gson.toJson(jsonConfigRoot);
             outputstreamwriter.write(s);
             outputstreamwriter.flush();
@@ -341,15 +324,7 @@ public class ProfileManager
 
     private static JsonObject getCurrentProfile()
     {
-        if (!profiles.has(currentProfileName))
-        {
-            return null;
-        }
-        else
-        {
-            Object object = profiles.get(currentProfileName);
-            return object != null && object instanceof JsonObject ? (JsonObject)object : null;
-        }
+        return (profiles.get(currentProfileName) instanceof JsonObject objectJSON) ? objectJSON : null;
     }
 
     public static synchronized String getCurrentProfileName()
@@ -361,7 +336,7 @@ public class ProfileManager
     {
         if (!profiles.has(profileName))
         {
-            error.append("Profile '" + profileName + "' not found.");
+            error.append("Profile '").append(profileName).append("' not found.");
             return false;
         }
         else
@@ -376,7 +351,7 @@ public class ProfileManager
     {
         if (profiles.has(profileName))
         {
-            error.append("Profile '" + profileName + "' already exists.");
+            error.append("Profile '").append(profileName).append("' already exists.");
             return false;
         }
         else
@@ -389,19 +364,19 @@ public class ProfileManager
 
     public static synchronized boolean renameProfile(String existingProfileName, String newProfileName, StringBuilder error)
     {
-        if (existingProfileName.equals("Default"))
+        if ("Default".equals(existingProfileName))
         {
             error.append("Cannot rename Default profile.");
             return false;
         }
         else if (!profiles.has(existingProfileName))
         {
-            error.append("Profile '" + existingProfileName + "' not found.");
+            error.append("Profile '").append(existingProfileName).append("' not found.");
             return false;
         }
         else if (profiles.has(newProfileName))
         {
-            error.append("Profile '" + newProfileName + "' already exists.");
+            error.append("Profile '").append(newProfileName).append("' already exists.");
             return false;
         }
         else
@@ -423,12 +398,12 @@ public class ProfileManager
     {
         if (!profiles.has(profileName))
         {
-            error.append("Profile '" + profileName + "' not found.");
+            error.append("Profile '").append(profileName).append("' not found.");
             return false;
         }
         else if (profiles.has(duplicateProfileName))
         {
-            error.append("Profile '" + duplicateProfileName + "' already exists.");
+            error.append("Profile '").append(duplicateProfileName).append("' already exists.");
             return false;
         }
         else
@@ -441,14 +416,14 @@ public class ProfileManager
 
     public static synchronized boolean deleteProfile(String profileName, StringBuilder error)
     {
-        if (profileName.equals("Default"))
+        if ("Default".equals(profileName))
         {
             error.append("Cannot delete Default profile.");
             return false;
         }
         else if (!profiles.has(profileName))
         {
-            error.append("Profile '" + profileName + "' not found.");
+            error.append("Profile '").append(profileName).append("' not found.");
             return false;
         }
         else

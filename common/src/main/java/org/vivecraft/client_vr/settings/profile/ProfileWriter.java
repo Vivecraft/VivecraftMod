@@ -1,15 +1,16 @@
 package org.vivecraft.client_vr.settings.profile;
 
+import com.google.gson.JsonObject;
+
 import java.util.HashMap;
 import java.util.Map;
-import com.google.gson.JsonObject;
 
 public class ProfileWriter
 {
     private String activeProfileName;
     private String set;
     private Map<String, String> data = new HashMap<>();
-    private JsonObject theProfile = null;
+    private JsonObject theProfile;
 
     public ProfileWriter(String set)
     {

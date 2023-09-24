@@ -1,10 +1,15 @@
 package org.vivecraft.client_vr.settings;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client.utils.LangHelper;
 
-import net.minecraft.client.Minecraft;
+import org.joml.Vector3d;
+
 import net.minecraft.network.chat.Component;
+
+import static org.vivecraft.client.utils.Utils.message;
+import static org.vivecraft.client_vr.VRState.dh;
+
+import static org.joml.Math.*;
 
 public class AutoCalibration
 {
@@ -12,32 +17,15 @@ public class AutoCalibration
 
     public static void calibrateManual()
     {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        dataholder.vrSettings.manualCalibration = (float)dataholder.vr.hmdPivotHistory.averagePosition(0.5D).y;
-        int i = (int)((float)((double)Math.round(100.0D * (double)getPlayerHeight() / (double)1.52F)));
-        minecraft.gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.heightset", i)));
-        dataholder.vrSettings.saveOptions();
+
+        dh.vrSettings.manualCalibration = (float)dh.vr.hmdPivotHistory.averagePosition(0.5D, new Vector3d()).y;
+        message(Component.literal(LangHelper.get("vivecraft.messages.heightset", round(100.0F * getPlayerHeight() / defaultHeight))));
+        dh.vrSettings.saveOptions();
     }
 
     public static float getPlayerHeight()
     {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        float f = 1.52F;
-
-        if (dataholder.vrSettings.seated)
-        {
-            return f;
-        }
-        else
-        {
-            if (dataholder.vrSettings.manualCalibration != -1.0F)
-            {
-                f = dataholder.vrSettings.manualCalibration;
-            }
-
-            return f;
-        }
+        return !dh.vrSettings.seated && dh.vrSettings.manualCalibration != -1.0F ?
+            dh.vrSettings.manualCalibration : defaultHeight;
     }
 }

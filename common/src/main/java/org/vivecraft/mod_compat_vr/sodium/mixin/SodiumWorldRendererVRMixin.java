@@ -1,11 +1,13 @@
 package org.vivecraft.mod_compat_vr.sodium.mixin;
 
+import org.vivecraft.client_xr.render_pass.RenderPassType;
+
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 
 @Pseudo

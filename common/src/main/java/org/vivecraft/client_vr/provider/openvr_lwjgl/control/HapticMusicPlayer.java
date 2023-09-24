@@ -1,21 +1,17 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 
+import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
+
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
-
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 
 public class HapticMusicPlayer
 {
-    private static Map<String, Music> map = new HashMap<>();
-
-    private HapticMusicPlayer()
-    {
-    }
+    private static final Map<String, Music> map = new HashMap<>();
 
     public static Music newMusic(String name)
     {
@@ -72,9 +68,8 @@ public class HapticMusicPlayer
 
             for (Object object : this.data)
             {
-                if (object instanceof Note)
+                if (object instanceof Note hapticmusicplayer$music$note)
                 {
-                    Note hapticmusicplayer$music$note = (Note)object;
 
                     if (hapticmusicplayer$music$note.controller != null)
                     {
@@ -86,15 +81,14 @@ public class HapticMusicPlayer
                         MCOpenVR.get().triggerHapticPulse(ControllerType.LEFT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
                     }
                 }
-                else if (object instanceof Delay)
+                else if (object instanceof Delay hapticmusicplayer$music$delay)
                 {
-                    Delay hapticmusicplayer$music$delay = (Delay)object;
                     f += hapticmusicplayer$music$delay.durationSeconds;
                 }
             }
         }
 
-        private class Delay
+        private static class Delay
         {
             final float durationSeconds;
 
@@ -104,7 +98,7 @@ public class HapticMusicPlayer
             }
         }
 
-        private class Note
+        private static class Note
         {
             final ControllerType controller;
             final float durationSeconds;
@@ -121,7 +115,7 @@ public class HapticMusicPlayer
         }
     }
 
-    public class MusicBuilder
+    public static class MusicBuilder
     {
         private Music music;
         private float tempo;

@@ -1,18 +1,24 @@
 package org.vivecraft.mixin.client_vr.gui.screens;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.layouts.GridLayout;
-import net.minecraft.client.gui.screens.OptionsScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.gui.settings.GuiMainVRSettings;
 
-@Mixin(OptionsScreen.class)
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Button.Builder;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.GridLayout.RowHelper;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+
+import static org.vivecraft.client_vr.VRState.mc;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+
+@Mixin(net.minecraft.client.gui.screens.OptionsScreen.class)
 public class OptionsScreenVRMixin extends Screen {
     protected OptionsScreenVRMixin(Component component) {
         super(component);
@@ -25,8 +31,8 @@ public class OptionsScreenVRMixin extends Screen {
         if (option == options.fov()) {
             return new Button.Builder( Component.translatable("vivecraft.options.screen.main.button"),  (p) ->
                 {
-                    Minecraft.getInstance().options.save();
-                    Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
+                    mc.options.save();
+                    mc.setScreen(new GuiMainVRSettings(this));
                 })
                 .size( k,  20)
                 .pos(i,  j)
@@ -43,11 +49,11 @@ public class OptionsScreenVRMixin extends Screen {
         return 1;
     }
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void addVivecraftSettings(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
-        rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
+    private void addVivecraftSettings(CallbackInfo ci, GridLayout gridLayout, RowHelper rowHelper) {
+        rowHelper.addChild(new Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
         {
-            Minecraft.getInstance().options.save();
-            Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
+            mc.options.save();
+            mc.setScreen(new GuiMainVRSettings(this));
         })
                 .build());
     }

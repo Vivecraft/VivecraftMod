@@ -1,9 +1,13 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL20C;
 
 import java.util.List;
+
+import static org.vivecraft.common.utils.Utils.logger;
+
+import static com.mojang.blaze3d.platform.GlStateManager.*;
 
 public class ShaderHelper
 {
@@ -13,7 +17,7 @@ public class ShaderHelper
 
         try
         {
-            i = GlStateManager.glCreateShader(shaderType);
+            i = glCreateShader(shaderType);
 
             if (i == 0)
             {
@@ -21,8 +25,8 @@ public class ShaderHelper
             }
             else
             {
-                GlStateManager.glShaderSource(i, List.of(shaderGLSL));
-                GlStateManager.glCompileShader(i);
+                glShaderSource(i, List.of(shaderGLSL));
+                glCompileShader(i);
 
                 String log = GL20C.glGetShaderInfoLog(i);
                 if (!log.isEmpty()) {
@@ -36,21 +40,21 @@ public class ShaderHelper
         }
         catch (Exception exception)
         {
-            GlStateManager.glDeleteShader(i);
+            glDeleteShader(i);
             throw exception;
         }
     }
 
     public static int checkGLError(String par1Str)
     {
-        int i = GL11.glGetError();
+        int i = GL11C.glGetError();
 
         if (i != 0)
         {
             String s = "";
-            System.out.println("########## GL ERROR ##########");
-            System.out.println("@ " + par1Str);
-            System.out.println(i + ": " + s);
+            logger.error("########## GL ERROR ##########");
+            logger.error("@ " + par1Str);
+            logger.error(i + ": " + s);
         }
 
         return i;
@@ -60,7 +64,7 @@ public class ShaderHelper
     {
         int i = 0;
         int j = 0;
-        int k = 0;
+        int k;
         label98:
         {
             byte b0;
@@ -80,50 +84,48 @@ public class ShaderHelper
             {
                 if (i == 0 || j == 0)
                 {
-                    return 0;
+                    b0 = 0;
                 }
             }
 
             return b0;
         }
-        k = GlStateManager.glCreateProgram();
+        k = glCreateProgram();
 
-        if (k == 0)
+        if (k != 0)
         {
-            return 0;
-        }
-        else
-        {
-            GlStateManager.glAttachShader(k, i);
-            GlStateManager.glAttachShader(k, j);
+            glAttachShader(k, i);
+            glAttachShader(k, j);
 
             if (doAttribs)
             {
-                GlStateManager._glBindAttribLocation(k, 0, "in_Position");
+                _glBindAttribLocation(k, 0, "in_Position");
                 checkGLError("@2");
-                GlStateManager._glBindAttribLocation(k, 1, "in_Color");
+                _glBindAttribLocation(k, 1, "in_Color");
                 checkGLError("@2a");
-                GlStateManager._glBindAttribLocation(k, 2, "in_TextureCoord");
+                _glBindAttribLocation(k, 2, "in_TextureCoord");
                 checkGLError("@3");
             }
 
-            GL43C.glLinkProgram(k);
+            GL20C.glLinkProgram(k);
             checkGLError("Link");
 
             String log = GL20C.glGetShaderInfoLog(i);
-            if (!log.isEmpty()) {
-                System.out.println("Shader compilation log: " + log);
-                return 0;
-            }
-            String log2 = GL20C.glGetShaderInfoLog(j);
-            if (!log2.isEmpty()) {
-                System.out.println("Shader compilation log: " + log2);
-                return 0;
+            if (!log.isEmpty())
+            {
+                logger.info("Shader compilation log: " + log);
+                k = 0;
             }
             else
+            {
+                String log2 = GL20C.glGetShaderInfoLog(j);
+                if (!log2.isEmpty())
                 {
-                    return k;
+                    logger.info("Shader compilation log: " + log2);
+                    k = 0;
                 }
             }
         }
+        return k;
+    }
 }

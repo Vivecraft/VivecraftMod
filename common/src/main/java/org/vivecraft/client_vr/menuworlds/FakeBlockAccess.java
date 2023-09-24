@@ -1,17 +1,12 @@
 package org.vivecraft.client_vr.menuworlds;
 
-import java.util.Collections;
-import java.util.List;
-import javax.annotation.Nullable;
-
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.core.*;
-import net.minecraft.util.Mth;
+import net.minecraft.core.BlockPos.MutableBlockPos;
+import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.ColorResolver;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -22,13 +17,21 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class FakeBlockAccess implements LevelReader {
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
+
+import static org.vivecraft.client_vr.VRState.mc;
+
+import static org.joml.Math.*;
+
+public class FakeBlockAccess implements net.minecraft.world.level.LevelReader {
 	private int version;
 	private long seed;
 	private DimensionType dimensionType;
@@ -79,7 +82,7 @@ public class FakeBlockAccess implements LevelReader {
 		// set the ground to the height of the center block
 		BlockPos pos = new BlockPos(0, (int)this.ground, 0);
 		BlockState standing = blocks[encodeCoords(pos)];
-		this.ground += Math.max(standing.getCollisionShape(this, pos).max(Direction.Axis.Y), 0.0);
+		this.ground += max(standing.getCollisionShape(this, pos).max(Axis.Y), 0.0);
 		this.effectiveGround = this.ground;
 	}
 	
@@ -175,7 +178,7 @@ public class FakeBlockAccess implements LevelReader {
 
 	@Override
 	public int getBlockTint(BlockPos blockPosIn, ColorResolver colorResolverIn) {
-		int i = Minecraft.getInstance().options.biomeBlendRadius().get();
+		int i = mc.options.biomeBlendRadius().get();
 
 		if (i == 0)
 		{
@@ -190,7 +193,7 @@ public class FakeBlockAccess implements LevelReader {
 			Cursor3D cursor3D = new Cursor3D(blockPosIn.getX() - i, blockPosIn.getY(), blockPosIn.getZ() - i, blockPosIn.getX() + i, blockPosIn.getY(), blockPosIn.getZ() + i);
 			int j1;
 
-			for (BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos(); cursor3D.advance(); i1 += j1 & 255)
+			for (MutableBlockPos blockpos$mutable = new MutableBlockPos(); cursor3D.advance(); i1 += j1 & 255)
 			{
 				blockpos$mutable.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
 				j1 = colorResolverIn.getColor(this.getBiome(blockpos$mutable).value(), (double)blockpos$mutable.getX(), (double)blockpos$mutable.getZ());
@@ -243,24 +246,12 @@ public class FakeBlockAccess implements LevelReader {
 			return flag ? 0.9F : 1.0F;
 		}
 		else {
-			switch (face) {
-				case DOWN:
-					return flag ? 0.9F : 0.5F;
-
-				case UP:
-					return flag ? 0.9F : 1.0F;
-
-				case NORTH:
-				case SOUTH:
-					return 0.8F;
-
-				case WEST:
-				case EAST:
-					return 0.6F;
-
-				default:
-					return 1.0F;
-			}
+			return switch (face) {
+				case DOWN -> flag ? 0.9F : 0.5F;
+				case UP -> flag ? 0.9F : 1.0F;
+				case NORTH, SOUTH -> 0.8F;
+				case WEST, EAST -> 0.6F;
+			};
 		}
 	}
 
@@ -275,8 +266,8 @@ public class FakeBlockAccess implements LevelReader {
 	}
 
 	@Override
-	public int getHeight(Heightmap.Types heightmapType, int x, int z) {
-		if (heightmapType == Heightmap.Types.MOTION_BLOCKING) {
+	public int getHeight(Types heightmapType, int x, int z) {
+		if (heightmapType == Types.MOTION_BLOCKING) {
 			return getHeightBlocking(x, z);
 		}
 		return 0; // �\_(?)_/�
@@ -287,7 +278,7 @@ public class FakeBlockAccess implements LevelReader {
 	}
 
 	@Override
-	public BlockPos getHeightmapPos(Heightmap.Types heightmapType, BlockPos pos) {
+	public BlockPos getHeightmapPos(Types heightmapType, BlockPos pos) {
 		return BlockPos.ZERO; // �\_(?)_/�
 	}
 
@@ -322,9 +313,9 @@ public class FakeBlockAccess implements LevelReader {
 		int yMoved = y + (int)effectiveGround/4;
 		int zMoved = z + zSize/8;
 		if (!checkCoords(x * 4, y * 4, z * 4)) {
-			xMoved = Mth.clamp(xMoved, 0, xSize / 4 - 1);
-			yMoved = Mth.clamp(yMoved, 0, (ySize-(int)effectiveGround) / 4 - 1);
-			zMoved = Mth.clamp(zMoved, 0, zSize / 4 - 1);
+			xMoved = clamp(0, xSize / 4 - 1, xMoved);
+			yMoved = clamp(0, (ySize-(int)effectiveGround) / 4 - 1, yMoved);
+			zMoved = clamp(0, zSize / 4 - 1, zMoved);
 		}
 		return Holder.direct(biomemap[(yMoved * (zSize / 4) + zMoved) * (xSize / 4) + xMoved]);
 	}

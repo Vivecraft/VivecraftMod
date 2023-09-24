@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <option name="defaultObfuscationEnv" value="named:intermediary" />
+        <option name="inMapFileNamedIntermediary" value="$USER_HOME$/.gradle/caches/fabric-loom/1.20.1/loom.mappings.1_20_1.layered+hash.1102277553-v2/mappings-srg.tiny" />
+        <option name="outMapFileNamedIntermediary" value="$PROJECT_DIR$/common/build/loom-cache/mixin-map-loom.mappings.1_20_1.layered+hash.1102277553-v2.main.tiny" />
+        <option name="outRefMapFile" value="$PROJECT_DIR$/common/build/classes/java/main/vivecraft-common-refmap.json" />
+        <option name="quiet" value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.github.llamalad7/mixinextras-common/0.2.0-rc.4/201fb1beb143f56ffe56fc442d95895ca8aa394/mixinextras-common-0.2.0-rc.4.jar" />
+        </processorPath>
+        <module name="vivecraft.common.main" />
+      </profile>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <option name="defaultObfuscationEnv" value="named:intermediary" />
+        <option name="inMapFileNamedIntermediary" value="$USER_HOME$/.gradle/caches/fabric-loom/1.20.1/loom.mappings.1_20_1.layered+hash.1102277553-v2/mappings.tiny" />
+        <option name="outMapFileNamedIntermediary" value="$PROJECT_DIR$/fabric/build/loom-cache/mixin-map-loom.mappings.1_20_1.layered+hash.1102277553-v2.main.tiny" />
+        <option name="outRefMapFile" value="$PROJECT_DIR$/fabric/build/classes/java/main/vivecraft-fabric-refmap.json" />
+        <option name="quiet" value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.github.llamalad7/mixinextras-fabric/0.2.0-rc.4/ae9b23c4a8bfce7e013427fda2d5dda68c9d7585/mixinextras-fabric-0.2.0-rc.4.jar" />
+        </processorPath>
+        <module name="vivecraft.fabric.main" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel target="17" />
+  </component>
+</project>

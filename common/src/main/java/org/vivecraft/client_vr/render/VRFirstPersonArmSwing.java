@@ -4,5 +4,5 @@ public enum VRFirstPersonArmSwing
 {
     Attack,
     Use,
-    Interact;
+    Interact
 }

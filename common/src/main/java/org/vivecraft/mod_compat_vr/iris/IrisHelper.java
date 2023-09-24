@@ -1,9 +1,10 @@
 package org.vivecraft.mod_compat_vr.iris;
 
+import org.vivecraft.client_xr.render_pass.RenderPassManager;
+
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.irisshaders.iris.api.v0.IrisApi;
-import org.vivecraft.client_xr.render_pass.RenderPassManager;
 
 import java.io.IOException;
 

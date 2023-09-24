@@ -1,29 +1,34 @@
 package org.vivecraft.mixin.client_vr.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.GuiGraphics;
+
+import static org.vivecraft.client_vr.VRState.vrRunning;
+
+import static com.mojang.blaze3d.platform.GlStateManager.BLEND;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.VRState;
 
-@Mixin(GuiGraphics.class)
+@Mixin(net.minecraft.client.gui.GuiGraphics.class)
 public class GuiComponentVRMixin {
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShader(Ljava/util/function/Supplier;)V", shift = At.Shift.AFTER), method = "innerBlit(Lnet/minecraft/resources/ResourceLocation;IIIIIFFFFFFFF)V")
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShader(Ljava/util/function/Supplier;)V", shift = Shift.AFTER), method = "innerBlit(Lnet/minecraft/resources/ResourceLocation;IIIIIFFFFFFFF)V")
     private void addBlend(CallbackInfo ci) {
-        if (VRState.vrRunning) {
+        if (vrRunning) {
             RenderSystem.enableBlend();
             // only change the alpha blending
-            RenderSystem.blendFuncSeparate(GlStateManager.BLEND.srcRgb, GlStateManager.BLEND.dstRgb, GlStateManager.SourceFactor.ONE.value, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value);
+            RenderSystem.blendFuncSeparate(BLEND.srcRgb, BLEND.dstRgb, SourceFactor.ONE.value, DestFactor.ONE_MINUS_SRC_ALPHA.value);
         }
     }
 
     @Inject(at = @At("TAIL"), method = "innerBlit(Lnet/minecraft/resources/ResourceLocation;IIIIIFFFFFFFF)V")
     private void stopBlend(CallbackInfo ci) {
-        if (VRState.vrRunning) {
+        if (vrRunning) {
             RenderSystem.disableBlend();
         }
     }

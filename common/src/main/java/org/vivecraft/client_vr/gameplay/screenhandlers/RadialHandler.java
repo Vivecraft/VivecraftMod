@@ -1,24 +1,25 @@
 package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.VRData.VRDevicePose;
 import org.vivecraft.client_vr.gui.GuiRadial;
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.common.utils.math.Matrix4f;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.client_vr.provider.ControllerType;
+
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
+
+import static org.joml.Math.*;
+
 public class RadialHandler
 {
-    public static Minecraft mc = Minecraft.getInstance();
-    public static ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
     private static boolean Showing = false;
     public static GuiRadial UI = new GuiRadial();
     public static Vec3 Pos_room = new Vec3(0.0D, 0.0D, 0.0D);
@@ -27,7 +28,7 @@ public class RadialHandler
     private static boolean lps;
     private static boolean PointedL;
     private static boolean PointedR;
-    public static RenderTarget Framebuffer = null;
+    public static RenderTarget Framebuffer;
     private static ControllerType activecontroller;
     private static boolean lastPressedClickL;
     private static boolean lastPressedClickR;
@@ -36,7 +37,7 @@ public class RadialHandler
 
     public static boolean setOverlayShowing(boolean showingState, ControllerType controller)
     {
-        if (ClientDataHolderVR.kiosk)
+        if (dh.kiosk)
         {
             return false;
         }
@@ -53,7 +54,7 @@ public class RadialHandler
             {
                 int j = mc.getWindow().getGuiScaledWidth();
                 int k = mc.getWindow().getGuiScaledHeight();
-                UI.init(Minecraft.getInstance(), j, k);
+                UI.init(mc, j, k);
                 Showing = true;
                 activecontroller = controller;
                 orientOverlay(activecontroller);
@@ -79,8 +80,8 @@ public class RadialHandler
             {
                 if (Rotation_room != null)
                 {
-                    Vec2 vec2 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, mc.screen, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(1));
-                    Vec2 vec21 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, mc.screen, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(0));
+                    Vec2 vec2 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(1));
+                    Vec2 vec21 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(0));
                     float f = vec21.x;
                     float f1 = vec21.y;
 
@@ -143,35 +144,28 @@ public class RadialHandler
     {
         if (isShowing())
         {
-            VRData.VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_room_pre.hmd;
+            VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_room_pre.hmd;
             float f = 2.0F;
-            int i = 0;
-
-            if (controller == ControllerType.LEFT)
-            {
-                i = 1;
-            }
+            int con = (controller == ControllerType.LEFT) ? 1 : 0;
 
             if (dh.vrSettings.radialModeHold)
             {
-                vrdata$vrdevicepose = dh.vrPlayer.vrdata_room_pre.getController(i);
+                vrdata$vrdevicepose = dh.vrPlayer.vrdata_room_pre.getController(con);
                 f = 1.2F;
             }
 
-            new Matrix4f();
             Vec3 vec3 = vrdata$vrdevicepose.getPosition();
-            Vec3 vec31 = new Vec3(0.0D, 0.0D, (double)(-f));
+            Vec3 vec31 = new Vec3(0.0D, 0.0D, -f);
             Vec3 vec32 = vrdata$vrdevicepose.getCustomVector(vec31);
             Pos_room = new Vec3(vec32.x / 2.0D + vec3.x, vec32.y / 2.0D + vec3.y, vec32.z / 2.0D + vec3.z);
-            Vector3 vector3 = new Vector3();
-            vector3.setX((float)(Pos_room.x - vec3.x));
-            vector3.setY((float)(Pos_room.y - vec3.y));
-            vector3.setZ((float)(Pos_room.z - vec3.z));
-            float f1 = (float)Math.asin((double)(vector3.getY() / vector3.length()));
-            float f2 = (float)((double)(float)Math.PI + Math.atan2((double)vector3.getX(), (double)vector3.getZ()));
-            Rotation_room = Matrix4f.rotationY(f2);
-            Matrix4f matrix4f = Utils.rotationXMatrix(f1);
-            Rotation_room = Matrix4f.multiply(Rotation_room, matrix4f);
+            Vector3f vector3 = new Vector3f(
+                (float)(Pos_room.x - vec3.x),
+                (float)(Pos_room.y - vec3.y),
+                (float)(Pos_room.z - vec3.z)
+            );
+            float f1 = asin(vector3.y / vector3.length());
+            float f2 = (float)PI + atan2(vector3.x, vector3.z);
+            Rotation_room.rotationY(f2).rotateX(f1);
         }
     }
 
@@ -203,10 +197,10 @@ public class RadialHandler
                 lastPressedShiftR = false;
             }
 
-            double d0 = (double)Math.min(Math.max((int)UI.cursorX1, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledWidth() / (double)mc.getWindow().getScreenWidth();
-            double d1 = (double)Math.min(Math.max((int)UI.cursorY1, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledHeight() / (double)mc.getWindow().getScreenHeight();
-            double d2 = (double)Math.min(Math.max((int)UI.cursorX2, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledWidth() / (double)mc.getWindow().getScreenWidth();
-            double d3 = (double)Math.min(Math.max((int)UI.cursorY2, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledHeight() / (double)mc.getWindow().getScreenHeight();
+            double d0 = (double)min(max((int)UI.cursorX1, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledWidth() / (double)mc.getWindow().getScreenWidth();
+            double d1 = (double)min(max((int)UI.cursorY1, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledHeight() / (double)mc.getWindow().getScreenHeight();
+            double d2 = (double)min(max((int)UI.cursorX2, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledWidth() / (double)mc.getWindow().getScreenWidth();
+            double d3 = (double)min(max((int)UI.cursorY2, 0), mc.getWindow().getScreenWidth()) * (double)mc.getWindow().getGuiScaledHeight() / (double)mc.getWindow().getScreenHeight();
 
             if (dh.vrSettings.radialModeHold)
             {
@@ -215,43 +209,43 @@ public class RadialHandler
                     return;
                 }
 
-                if (!VivecraftVRMod.INSTANCE.keyRadialMenu.isDown())
+                if (!VivecraftVRMod.keyRadialMenu.isDown())
                 {
                     if (activecontroller == ControllerType.LEFT)
                     {
-                        UI.mouseClicked((double)((int)d0), (double)((int)d1), 0);
+                        UI.mouseClicked(d0, d1, 0);
                     }
                     else
                     {
-                        UI.mouseClicked((double)((int)d2), (double)((int)d3), 0);
+                        UI.mouseClicked(d2, d3, 0);
                     }
 
-                    setOverlayShowing(false, (ControllerType)null);
+                    setOverlayShowing(false, null);
                 }
             }
             else
             {
                 if (PointedL && GuiHandler.keyKeyboardClick.consumeClick(ControllerType.LEFT))
                 {
-                    UI.mouseClicked((double)((int)d0), (double)((int)d1), 0);
+                    UI.mouseClicked(d0, d1, 0);
                     lastPressedClickL = true;
                 }
 
                 if (!GuiHandler.keyKeyboardClick.isDown(ControllerType.LEFT) && lastPressedClickL)
                 {
-                    UI.mouseReleased((double)((int)d0), (double)((int)d1), 0);
+                    UI.mouseReleased(d0, d1, 0);
                     lastPressedClickL = false;
                 }
 
                 if (PointedR && GuiHandler.keyKeyboardClick.consumeClick(ControllerType.RIGHT))
                 {
-                    UI.mouseClicked((double)((int)d2), (double)((int)d3), 0);
+                    UI.mouseClicked(d2, d3, 0);
                     lastPressedClickR = true;
                 }
 
                 if (!GuiHandler.keyKeyboardClick.isDown(ControllerType.RIGHT) && lastPressedClickR)
                 {
-                    UI.mouseReleased((double)((int)d2), (double)((int)d3), 0);
+                    UI.mouseReleased(d2, d3, 0);
                     lastPressedClickR = false;
                 }
             }

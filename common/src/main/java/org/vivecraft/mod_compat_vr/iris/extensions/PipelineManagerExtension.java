@@ -1,8 +1,9 @@
 package org.vivecraft.mod_compat_vr.iris.extensions;
 
+import org.vivecraft.client_vr.render.RenderPass;
+
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
-import org.vivecraft.client_vr.render.RenderPass;
 
 public interface PipelineManagerExtension {
 

@@ -1,7 +1,8 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 
-import net.minecraft.client.KeyMapping;
 import org.vivecraft.client.VivecraftVRMod;
+
+import net.minecraft.client.KeyMapping;
 
 public enum VRInputActionSet
 {
@@ -19,7 +20,7 @@ public enum VRInputActionSet
     public final String usage;
     public final boolean advanced;
 
-    private VRInputActionSet(String name, String localizedName, String usage, boolean advanced)
+    VRInputActionSet(String name, String localizedName, String usage, boolean advanced)
     {
         this.name = name;
         this.localizedName = localizedName;
@@ -27,23 +28,13 @@ public enum VRInputActionSet
         this.advanced = advanced;
     }
 
-    public static VRInputActionSet fromKeyBinding(KeyMapping keyBinding)
+    public static VRInputActionSet fromKeyBinding(KeyMapping keyMapping)
     {
-        String s = keyBinding.getCategory();
-
-        switch (s)
-        {
-            case "vivecraft.key.category.gui":
-                return GUI;
-
-            case "vivecraft.key.category.climbey":
-                return CONTEXTUAL;
-
-            case "vivecraft.key.category.keyboard":
-                return KEYBOARD;
-
-            default:
-                return VivecraftVRMod.INSTANCE.isModBinding(keyBinding) ? MOD : INGAME;
-        }
+        return switch (keyMapping.getCategory()) {
+            case "vivecraft.key.category.gui" -> GUI;
+            case "vivecraft.key.category.climbey" -> CONTEXTUAL;
+            case "vivecraft.key.category.keyboard" -> KEYBOARD;
+            default -> VivecraftVRMod.isModBinding(keyMapping) ? MOD : INGAME;
+        };
     }
 }
