@@ -1,5 +1,6 @@
 package org.vivecraft.api.client;
 
+import com.google.common.annotations.Beta;
 import net.minecraft.world.InteractionHand;
 import org.vivecraft.api.client.data.VRPoseHistory;
 import org.vivecraft.api.data.VRData;
@@ -120,6 +121,7 @@ public interface VivecraftClientAPI {
     /**
      * @return Whether the current render pass is a vanilla render pass.
      */
+    @Beta
     boolean isVanillaRenderPass();
 
     /**
