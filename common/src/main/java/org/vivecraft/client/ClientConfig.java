@@ -4,6 +4,7 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import net.minecraft.network.chat.Component;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
@@ -72,7 +73,6 @@ public class ClientConfig {
     public static ConfigBuilder.DoubleValue crosshairScale;
     public static ConfigBuilder.DoubleValue renderScaleFactor;
 
-
     //HUD
     public static ConfigBuilder.BooleanValue lowHealthIndicator;
     public static ConfigBuilder.DoubleValue hudDistance;
@@ -102,7 +102,7 @@ public class ClientConfig {
 
     //Teleport
     public static ConfigBuilder.BooleanValue limitedTeleport; //Server setting?
-    public static ConfigBuilder.IntValue teleportLimitDown;
+    public static ConfigBuilder.IntValue teleportLimitDown; //Vector?
     public static ConfigBuilder.IntValue teleportLimitHoriz;
     public static ConfigBuilder.IntValue teleportLimitUp;
 
@@ -120,7 +120,7 @@ public class ClientConfig {
     public static ConfigBuilder.BooleanValue vrHotswitchingEnabled;
     public static ConfigBuilder.BooleanValue vrEnabled;
     public static ConfigBuilder.IntValue worldRotation;
-    public static ConfigBuilder.DoubleValue vrWorldRotationIncrement;
+    public static ConfigBuilder.IntValue vrWorldRotationIncrement;
     public static ConfigBuilder.IntValue worldScale;
     public static ConfigBuilder.VectorValue originOffset;
     public static ConfigBuilder.IntValue version;
@@ -167,6 +167,173 @@ public class ClientConfig {
         return builder.getConfigValues();
     }
 
+    public static ConfigBuilder.ConfigValue<?>[] generalConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                vrEnabled,
+                vrHotswitchingEnabled,
+                version,
+                worldScale,
+                worldRotation,
+                vrWorldRotationIncrement,
+                allowStandingOriginOffset,
+                originOffset,
+                forceHardwareDetection,
+                stereoProviderPluginID,
+                reverseHands,
+                analogMovement,
+                manualCalibration,
+                rightclickDelay,
+                thirdPersonItems,
+                bcbOn,
+                allowAdvancedBindings,
+                xSensitivity,
+                ySensitivity,
+                keyholeX,
+                useFsaa,
+                displayMirrorLeftEye,
+                disableFun,
+                menuWorldSelection,
+                insideBlockSolidColor,
+                renderBlockOutlineMode,
+                hrtfSelection
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] keyboardConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                physicalKeyboard,
+                autoOpenKeyboard,
+                alwaysSimulateKeyboard,
+                keyboardKeys,
+                keyboardKeysShift,
+                physicalKeyboardScale,
+                physicalKeyboardTheme
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] mrConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                mrMovingCamOffset,
+                mrMovingCamOffsetRot,
+                mixedRealityKeyColor,
+                mixedRealityAlphaMask,
+                mixedRealityFov,
+                mixedRealityRenderCameraModel,
+                mixedRealityUndistorted,
+                mixedRealityUnityLike,
+                mixedRealityRenderHands
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] roomScaleConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                realisticSneakEnabled,
+                sneakThreshold,
+                realisticJumpEnabled,
+                jumpThreshold,
+                autoSprint,
+                autoSprintThreshold,
+                allowCrawling,
+                crawlThreshold,
+                realisticClimbEnabled,
+                realisticRowEnabled,
+                realisticSwimEnabled,
+                movementSpeedMultiplier,
+                walkMultiplier,
+                weaponCollision,
+                bowMode,
+                walkUpBlocks,
+                backpackSwitching,
+                vrTouchHotbar,
+                guiAppearOverBlock,
+                physicalGuiEnabled,
+                inertiaFactor,
+                vehicleRotation
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] displayConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                displayMirrorMode,
+                useCrosshairOcclusion,
+                menuCrosshairScale,
+                crosshairScalesWithDistance,
+                menuBackground,
+                menuAlwaysFollowFace,
+                renderInGameCrosshairMode,
+                shaderGUIRender,
+                hideGUI,
+                crosshairScale,
+                renderScaleFactor
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] hudConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                lowHealthIndicator,
+                hudDistance,
+                hudPitchOffset,
+                hudYawOffset,
+                stencilOn,
+                headHudScale,
+                headToHmdLength,
+                hudOcclusion,
+                hudOpacity,
+                vrHudLockMode
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] cameraConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                handCameraResScale,
+                handCameraFov,
+                vrFixedCampos,
+                vrFixedCamrot,
+                externalCameraAngleOrder
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] updateConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                firstRun,
+                lastUpdate,
+                alwaysShowUpdates,
+                chatNotifications,
+                showServerPluginMessage,
+                chatNotificationSound
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] teleportConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                limitedTeleport,
+                teleportLimitDown,
+                teleportLimitHoriz,
+                teleportLimitUp
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] seatedConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                seated,
+                seatedhmd,
+                seatedHudAltMode,
+                seatedFreeMove,
+                forceStandingFreeMove,
+                vrFreeMoveFlyMode,
+                vrFreeMoveMode
+        };
+    }
+
+    public static ConfigBuilder.ConfigValue<?>[] fovConfig() {
+        return new ConfigBuilder.ConfigValue<?>[]{
+                monoFOV,
+                fovReductionMin,
+                fovRedutioncOffset,
+                fovReduction
+        };
+    }
+
     public static void init(ConfigSpec.CorrectionListener listener){
         Config.setInsertionOrderPreserved(true);
         config = CommentedFileConfig
@@ -203,6 +370,10 @@ public class ClientConfig {
                 .push("hotswitch")
                 .comment("Allow hotswitch between VR and nonVR")
                 .define(true);
+        version = builder
+                .push("version")
+                .comment("Compatibility version used on servers")
+                .defineInRange(0, 0, 0);
         worldScale = builder
                 .push("worldscale")
                 .comment("")
@@ -214,7 +385,7 @@ public class ClientConfig {
         vrWorldRotationIncrement = builder
                 .push("vrWorldRotationIncrement")
                 .comment("")
-                .defineInRange(45d,-1d, 4d); //TODO Looks wrong?
+                .defineInRange(45,0, 180);
         allowStandingOriginOffset = builder
                 .push("allowStandingOriginOffset")
                 .comment("")
@@ -231,6 +402,10 @@ public class ClientConfig {
                 .push("stereoProviderPluginID")
                 .comment("")
                 .define(VRSettings.VRProvider.OPENVR);
+        reverseHands = builder
+                .push("reverseHands")
+                .comment("Change the main hand to left")
+                .define(false);
         analogMovement = builder
                 .push("analogMovement")
                 .comment("")
