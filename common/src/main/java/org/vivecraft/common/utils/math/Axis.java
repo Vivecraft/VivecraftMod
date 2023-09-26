@@ -1,7 +1,6 @@
 package org.vivecraft.common.utils.math;
 
-public enum Axis
-{
+public enum Axis {
     PITCH(1.0F, 0.0F, 0.0F),
     YAW(0.0F, 1.0F, 0.0F),
     ROLL(0.0F, 0.0F, 1.0F),
@@ -9,13 +8,11 @@ public enum Axis
 
     private Vector3 vector;
 
-    private Axis(float x, float y, float z)
-    {
+    private Axis(float x, float y, float z) {
         this.vector = new Vector3(x, y, z);
     }
 
-    public Vector3 getVector()
-    {
+    public Vector3 getVector() {
         return this.vector.copy();
     }
 }

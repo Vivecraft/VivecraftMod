@@ -21,7 +21,7 @@ public abstract class OptionsScreenMixin extends Screen {
     }
 
     @Inject(at = @At("TAIL"), method = "init")
-    private void reducePhysicsmodButtonSize(CallbackInfo ci) {
+    private void vivecraft$reducePhysicsmodButtonSize(CallbackInfo ci) {
         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
             for (GuiEventListener guiEventListener : children()) {
                 if (guiEventListener instanceof Button button) {

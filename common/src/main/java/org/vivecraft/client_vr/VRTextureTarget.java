@@ -8,13 +8,14 @@ import org.vivecraft.client.extensions.RenderTargetExtension;
 public class VRTextureTarget extends RenderTarget {
 
     private final String name;
+
     public VRTextureTarget(String name, int width, int height, boolean usedepth, boolean onMac, int texid, boolean depthtex, boolean linearFilter, boolean useStencil) {
         super(usedepth);
         this.name = name;
         RenderSystem.assertOnGameThreadOrInit();
-        ((RenderTargetExtension) this).setTextid(texid);
-        ((RenderTargetExtension) this).isLinearFilter(linearFilter);
-        ((RenderTargetExtension) this).setUseStencil(useStencil);
+        ((RenderTargetExtension) this).vivecraft$setTextid(texid);
+        ((RenderTargetExtension) this).vivecraft$isLinearFilter(linearFilter);
+        ((RenderTargetExtension) this).vivecraft$setUseStencil(useStencil);
         this.resize(width, height, onMac);
         if (useStencil) {
             Xplat.enableRenderTargetStencil(this);
@@ -34,5 +35,4 @@ public class VRTextureTarget extends RenderTarget {
         stringbuilder.append("Tex ID: " + this.colorTextureId).append("\n");
         return stringbuilder.toString();
     }
-
 }

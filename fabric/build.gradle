@@ -29,10 +29,10 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modRuntimeOnly "maven.modrinth:sodium:mc1.20.1-0.5.0"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.20.1-0.5.2"
 
     // for iris compat
-    modRuntimeOnly "maven.modrinth:iris:1.6.5+1.20.1"
+    modRuntimeOnly "maven.modrinth:iris:1.6.8+1.20.1"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
@@ -51,17 +51,20 @@ dependencies {
     modApi("com.terraformersmc:modmenu:7.2.2")
     modRuntimeOnly("com.terraformersmc:modmenu:7.2.2")
 
-    /*
     // for immersive portals compat
-    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v2.5.2-mc1.19.3'){ //temp immersiveportals
+    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v3.3.1-mc1.20.1') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v2.5.2-mc1.19.3'){ //temp immersiveportals
+    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v3.3.1-mc1.20.1') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    */
+    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:build:v3.3.1-mc1.20.1') {
+        exclude(group: "net.fabricmc.fabric-api")
+        transitive(false)
+    }
+    modRuntimeOnly("com.github.llamalad7.mixinextras:mixinextras-fabric:0.2.0-beta.9")
 
     // needed for resource loading
     include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
@@ -105,7 +108,7 @@ jar {
     archiveClassifier.set("dev")
     manifest {
         attributes(
-                'Main-Class': "org.vivecraft.LaunchPopup"
+            'Main-Class': "org.vivecraft.LaunchPopup"
         )
     }
 }

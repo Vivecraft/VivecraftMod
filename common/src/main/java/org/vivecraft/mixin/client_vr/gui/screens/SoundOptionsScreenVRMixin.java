@@ -20,23 +20,24 @@ import org.vivecraft.client_vr.settings.VRSettings;
 @Mixin(SoundOptionsScreen.class)
 public class SoundOptionsScreenVRMixin {
 
-    @Shadow private OptionsList list;
+    @Shadow
+    private OptionsList list;
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/OptionsList;addSmall([Lnet/minecraft/client/OptionInstance;)V", ordinal = 1, shift = At.Shift.AFTER))
-    private void addVivecraftSettings(CallbackInfo ci) {
+    private void vivecraft$addVivecraftSettings(CallbackInfo ci) {
         this.list.addSmall(OptionInstance.createBoolean(
-            "vivecraft.options.HRTF_SELECTION",
-            boolean_ -> Tooltip.create(Component.translatable("vivecraft.options.HRTF_SELECTION.tooltip")),
-            ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0,
-            boolean_ -> {
-                ClientDataHolderVR.getInstance().vrSettings.hrtfSelection = boolean_ ? 0 : -1;
-                ClientDataHolderVR.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.HRTF_SELECTION);
-                ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+                "vivecraft.options.HRTF_SELECTION",
+                boolean_ -> Tooltip.create(Component.translatable("vivecraft.options.HRTF_SELECTION.tooltip")),
+                ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0,
+                boolean_ -> {
+                    ClientDataHolderVR.getInstance().vrSettings.hrtfSelection = boolean_ ? 0 : -1;
+                    ClientDataHolderVR.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.HRTF_SELECTION);
+                    ClientDataHolderVR.getInstance().vrSettings.saveOptions();
 
-                SoundManager soundManager = Minecraft.getInstance().getSoundManager();
-                soundManager.reload();
-                soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            })
-            ,null);
+                    SoundManager soundManager = Minecraft.getInstance().getSoundManager();
+                    soundManager.reload();
+                    soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                })
+            , null);
     }
 }

@@ -22,7 +22,7 @@ public class SwellGoalMixin {
     private Creeper creeper;
 
     @Inject(at = @At("HEAD"), method = "canUse", cancellable = true)
-    public void vrSwellDistance(CallbackInfoReturnable<Boolean> cir) {
+    public void vivecraft$vrSwellDistance(CallbackInfoReturnable<Boolean> cir) {
         LivingEntity target = this.creeper.getTarget();
         if (target instanceof ServerPlayer player && ServerVRPlayers.isVRPlayer(player)) {
             ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);

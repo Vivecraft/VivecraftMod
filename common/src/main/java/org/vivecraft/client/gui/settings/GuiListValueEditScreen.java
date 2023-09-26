@@ -32,7 +32,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
     @Override
     protected void init() {
         clearWidgets();
-        double scrollAmount = list != null? list.getScrollAmount() : 0.0D;
+        double scrollAmount = list != null ? list.getScrollAmount() : 0.0D;
 
         this.list = new SettingsList(this, minecraft, getEntries());
         list.setScrollAmount(scrollAmount);
@@ -47,10 +47,9 @@ public class GuiListValueEditScreen extends GuiListScreen {
             .builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
             .bounds(this.width / 2 + 5, this.height - 27, 150, 20)
             .build());
-
     }
 
-    private List<String> getCurrentValues(){
+    private List<String> getCurrentValues() {
         return list.children().stream().map(entry -> {
             if (entry instanceof ListValueEntry listValueEntry) {
                 return listValueEntry.getString();
@@ -72,9 +71,16 @@ public class GuiListValueEditScreen extends GuiListScreen {
             box.setMaxLength(1000);
             box.setValue(item);
             int index = i++;
-            entries.add(new ListValueEntry(Component.empty(), box, button -> {elements.remove(index);reinit = true;}));
+            entries.add(new ListValueEntry(Component.empty(), box, button -> {
+                elements.remove(index);
+                reinit = true;
+            }));
         }
-        entries.add(new SettingsList.WidgetEntry(Component.translatable("vivecraft.options.addnew"), Button.builder(Component.literal("+"), button -> {elements = getCurrentValues();elements.add("");reinit = true;}).size(20, 20).build()));
+        entries.add(new SettingsList.WidgetEntry(Component.translatable("vivecraft.options.addnew"), Button.builder(Component.literal("+"), button -> {
+            elements = getCurrentValues();
+            elements.add("");
+            reinit = true;
+        }).size(20, 20).build()));
         return entries;
     }
 
@@ -113,8 +119,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
         }
 
         public String getString() {
-            return ((EditBox)valueWidget).getValue();
+            return ((EditBox) valueWidget).getValue();
         }
     }
-
 }

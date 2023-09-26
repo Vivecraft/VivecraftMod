@@ -16,7 +16,7 @@ import org.vivecraft.client_vr.VRState;
 public class TrapDoorBlockVRMixin {
 
     @Inject(at = @At("HEAD"), method = "playSound")
-    public void hapticFeedbackOnClose(Player player, Level level, BlockPos blockPos, boolean opening, CallbackInfo ci) {
+    public void vivecraft$hapticFeedbackOnClose(Player player, Level level, BlockPos blockPos, boolean opening, CallbackInfo ci) {
         if (VRState.vrRunning && !opening && Minecraft.getInstance().player != null && Minecraft.getInstance().player.isAlive() && Minecraft.getInstance().player.blockPosition().distSqr(blockPos) < 25.0D) {
             ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
         }

@@ -1,14 +1,13 @@
 package org.vivecraft.client.gui.widgets;
 
 import com.google.common.collect.ImmutableList;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.BooleanSupplier;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -18,6 +17,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.vivecraft.common.ConfigBuilder;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public class SettingsList extends ContainerObjectSelectionList<SettingsList.BaseEntry> {
     final Screen parent;
@@ -52,6 +55,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
     public static class CategoryEntry extends BaseEntry {
         private final int width;
+
         public CategoryEntry(Component name) {
             super(name);
             this.width = Minecraft.getInstance().font.width(this.name);
@@ -75,7 +79,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         @Override
         public List<? extends NarratableEntry> narratables() {
-            return ImmutableList.of(new NarratableEntry(){
+            return ImmutableList.of(new NarratableEntry() {
                 @Override
                 public NarratableEntry.NarrationPriority narrationPriority() {
                     return NarratableEntry.NarrationPriority.HOVERED;
@@ -94,6 +98,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         private final BooleanSupplier canReset;
 
         public static final int valueButtonWidth = 125;
+
         public ResettableEntry(Component name, AbstractWidget valueWidget, ConfigBuilder.ConfigValue configValue) {
             super(name, valueWidget);
 
@@ -158,10 +163,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     public static abstract class BaseEntry extends Entry<BaseEntry> {
 
         protected final Component name;
+
         public BaseEntry(Component name) {
             this.name = name;
         }
-
     }
 }
 

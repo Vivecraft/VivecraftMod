@@ -10,12 +10,12 @@ public interface RenderSystemAccessor {
 
     // needs remap because of forge
     @Accessor
-    public static int[] getShaderTextures(){
+    public static int[] getShaderTextures() {
         return null;
     }
 
     @Accessor
-    public static Vector3f[] getShaderLightDirections(){
+    public static Vector3f[] getShaderLightDirections() {
         return null;
     }
 }

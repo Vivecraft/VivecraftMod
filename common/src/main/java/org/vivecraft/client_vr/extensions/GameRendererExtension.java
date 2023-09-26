@@ -1,67 +1,51 @@
 package org.vivecraft.client_vr.extensions;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.world.entity.LivingEntity;
-import org.joml.Matrix4f;
-import org.vivecraft.client_vr.render.RenderPass;
-
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 public interface GameRendererExtension {
 
-	boolean wasInWater();
-	
-	void setWasInWater(boolean b);
+    boolean vivecraft$isInWater();
 
-	void cacheRVEPos(LivingEntity e);
+    boolean vivecraft$wasInWater();
 
-	boolean isInWater();
+    void vivecraft$setWasInWater(boolean b);
 
-	boolean isInMenuRoom();
+    boolean vivecraft$isOnFire();
 
-	boolean willBeInMenuRoom(Screen newScreen);
-	
-	boolean isInPortal();
+    boolean vivecraft$isInPortal();
 
-	Vec3 getControllerRenderPos(int i);
+    float vivecraft$isInBlock();
 
-	Vec3 getCrossVec();
+    void vivecraft$setupRVE();
 
-	void setupClipPlanes();
+    void vivecraft$cacheRVEPos(LivingEntity e);
 
-	float getMinClipDistance();
+    void vivecraft$restoreRVEPos(LivingEntity e);
 
-	float getClipDistance();
+    double vivecraft$getRveY();
 
-	void applyVRModelView(RenderPass currentPass, PoseStack poseStack);
+    Vec3 vivecraft$getRvePos(float partialTicks);
 
-	void renderDebugAxes(int i, int j, int k, float f);
+    boolean vivecraft$isInMenuRoom();
 
-	void drawScreen(float f, Screen screen, GuiGraphics guiGraphics);
+    boolean vivecraft$willBeInMenuRoom(Screen newScreen);
 
-	Matrix4f getThirdPassProjectionMatrix();
+    Vec3 vivecraft$getCrossVec();
 
-	void drawEyeStencil(boolean flag1);
+    void vivecraft$resetProjectionMatrix(float partialTicks);
 
-	float inBlock();
+    Matrix4f vivecraft$getThirdPassProjectionMatrix();
 
-	double getRveY();
+    void vivecraft$setupClipPlanes();
 
-	void renderVrFast(float partialTicks, boolean secondpass, boolean menuhandright, boolean menuHandleft,
-					  PoseStack poseStack);
+    float vivecraft$getMinClipDistance();
 
-	void renderVRFabulous(float f, LevelRenderer levelRenderer, boolean menuhandright, boolean menuHandleft, PoseStack poseStack);
+    float vivecraft$getClipDistance();
 
-	void restoreRVEPos(LivingEntity e);
+    void vivecraft$setShouldDrawScreen(boolean shouldDrawScreen);
 
-	void setupRVE();
-
-    void DrawScopeFB(PoseStack matrixStackIn, int i);
-
-	void setShouldDrawScreen(boolean shouldDrawScreen);
-	void setShouldDrawGui(boolean shouldDrawGui);
+    void vivecraft$setShouldDrawGui(boolean shouldDrawGui);
 }

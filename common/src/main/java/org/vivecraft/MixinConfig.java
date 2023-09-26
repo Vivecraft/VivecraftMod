@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
-
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_11;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_9;
 import org.vivecraft.mod_compat_vr.sodium.mixin.RenderSectionManagerVRMixin;
@@ -59,11 +58,9 @@ public class MixinConfig implements IMixinConfigPlugin {
         // apply iris sodium version specific mixins only when the right class is there
         if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_9.class.getName())) {
             neededClass = "me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType";
-        }
-        else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_11.class.getName())) {
+        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_11.class.getName())) {
             neededClass = "me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType";
-        }
-        else if (mixinClassName.equals(RenderSectionManagerVRMixin.class.getName())) {
+        } else if (mixinClassName.equals(RenderSectionManagerVRMixin.class.getName())) {
             neededClass = "me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList";
             try {
                 MixinService.getService().getBytecodeProvider().getClassNode(neededClass);

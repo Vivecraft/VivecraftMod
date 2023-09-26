@@ -11,7 +11,7 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(targets = "dynamicfps.DynamicFPSMod")
 public class DynamicFPSModVRMixin {
     @Inject(at = @At("HEAD"), method = "checkForRender()Z", remap = false, cancellable = true)
-    private static void alwaysRenderVR(CallbackInfoReturnable<Boolean> cir) {
+    private static void vivecraft$alwaysRenderVR(CallbackInfoReturnable<Boolean> cir) {
         if (VRState.vrRunning) {
             cir.setReturnValue(true);
         }

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public class ItemVRMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;canEat(Z)Z", shift = At.Shift.BEFORE), method = "use", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    private void alwaysAllowEasterEggEating(Level level, Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, ItemStack itemStack) {
+    private void vivecraft$alwaysAllowEasterEggEating(Level level, Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, ItemStack itemStack) {
         if (itemStack.getHoverName().getString().equals("EAT ME")) {
             player.startUsingItem(interactionHand);
             cir.setReturnValue(InteractionResultHolder.consume(itemStack));

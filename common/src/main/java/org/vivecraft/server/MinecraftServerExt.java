@@ -4,5 +4,5 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface MinecraftServerExt {
-    Map<UUID, ServerVivePlayer> getPlayersWithVivecraft();
+    Map<UUID, ServerVivePlayer> vivecraft$getPlayersWithVivecraft();
 }

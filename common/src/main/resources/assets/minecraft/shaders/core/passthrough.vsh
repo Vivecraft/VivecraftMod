@@ -7,6 +7,6 @@ in vec2 UV0;
 
 out vec2 texCoordinates;
 void main() {
-	gl_Position = projection * modelView * vec4(Position, 1.0);
-	texCoordinates = UV0;
+    gl_Position = projection * modelView * vec4(Position, 1.0);
+    texCoordinates = UV0;
 }

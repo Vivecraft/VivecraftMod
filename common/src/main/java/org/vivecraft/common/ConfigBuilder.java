@@ -29,13 +29,14 @@ public class ConfigBuilder {
     private final Deque<String> stack = new ArrayDeque<>();
     private final List<ConfigValue> configValues = new ArrayList<>();
 
-    public ConfigBuilder(CommentedConfig config, ConfigSpec spec){
+    public ConfigBuilder(CommentedConfig config, ConfigSpec spec) {
         this.config = config;
         this.spec = spec;
     }
 
     /**
      * pushes the given subPath to the path
+     *
      * @param subPath new sub path
      * @return this builder, for chaining commands
      */
@@ -46,6 +47,7 @@ public class ConfigBuilder {
 
     /**
      * pops the last sub path
+     *
      * @return this builder, for chaining commands
      */
     public ConfigBuilder pop() {
@@ -55,6 +57,7 @@ public class ConfigBuilder {
 
     /**
      * add a comment to the config
+     *
      * @param comment Text for the comment
      * @return this builder, for chaining commands
      */
@@ -66,7 +69,7 @@ public class ConfigBuilder {
     private void addDefaultValueComment(List<String> path, int defaultValue, int min, int max) {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
-            +"default: %d, min: %d, max: %d".formatted(defaultValue, min, max));
+            + "default: %d, min: %d, max: %d".formatted(defaultValue, min, max));
     }
 
     private void addDefaultValueComment(List<String> path, double defaultValue, double min, double max) {
@@ -95,6 +98,7 @@ public class ConfigBuilder {
 
     /**
      * corrects the attached config, with the built spec
+     *
      * @param listener listener to send correction to
      */
     public void correct(ConfigSpec.CorrectionListener listener) {
@@ -106,8 +110,10 @@ public class ConfigBuilder {
     }
 
     // general Settings
+
     /**
      * defines a setting with the current path, and pops the last path segment
+     *
      * @param defaultValue default value this setting should have
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
@@ -123,9 +129,10 @@ public class ConfigBuilder {
 
     /**
      * defines a setting with the current path, and pops the last path segment
+     *
      * @param defaultValue default value this setting should have
-     * @param min the minimum value, that  is valid for this setting
-     * @param max the maximum value, that  is valid for this setting
+     * @param min          the minimum value, that  is valid for this setting
+     * @param max          the maximum value, that  is valid for this setting
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
     public <T extends Comparable<? super T>> ConfigValue<T> defineInRange(T defaultValue, T min, T max) {
@@ -140,8 +147,9 @@ public class ConfigBuilder {
 
     /**
      * defines a setting with the current path, and pops the last path segment
+     *
      * @param defaultValue default value this setting should have
-     * @param validator Predicate, that signals, what values are accepted
+     * @param validator    Predicate, that signals, what values are accepted
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
     public <T> ListValue<T> defineList(List<T> defaultValue, Predicate<Object> validator) {
@@ -156,8 +164,9 @@ public class ConfigBuilder {
 
     /**
      * defines a setting with the current path, and pops the last path segment
+     *
      * @param defaultValue default value this setting should have
-     * @param validValues Collection of values that are accepted
+     * @param validValues  Collection of values that are accepted
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
     public <T> InListValue<T> defineInList(T defaultValue, Collection<? extends T> validValues) {
@@ -171,7 +180,7 @@ public class ConfigBuilder {
     }
 
     /**
-     *  same as {@link #define define(T defaultValue)} but returns a {@link BooleanValue}
+     * same as {@link #define define(T defaultValue)} but returns a {@link BooleanValue}
      */
     public BooleanValue define(boolean defaultValue) {
         List<String> path = stack.stream().toList();
@@ -184,7 +193,7 @@ public class ConfigBuilder {
     }
 
     /**
-     *  same as {@link #define define(T defaultValue)} but returns a {@link StringValue}
+     * same as {@link #define define(T defaultValue)} but returns a {@link StringValue}
      */
     public StringValue define(String defaultValue) {
         List<String> path = stack.stream().toList();
@@ -264,7 +273,7 @@ public class ConfigBuilder {
     }
 
     /**
-     *  same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
+     * same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
      */
     public DoubleValue defineInRange(double defaultValue, double min, double max) {
         List<String> path = stack.stream().toList();
@@ -278,7 +287,7 @@ public class ConfigBuilder {
     }
 
     /**
-     *  same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
+     * same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
      */
     public IntValue defineInRange(int defaultValue, int min, int max) {
         List<String> path = stack.stream().toList();
@@ -331,6 +340,7 @@ public class ConfigBuilder {
             }
             return Objects.equals(get(),  defaultValue);
         }
+
         public String getComment() {
             String comment = config.getComment(path);
             return comment != null ? comment : "";
@@ -342,14 +352,15 @@ public class ConfigBuilder {
 
         public AbstractWidget getWidget(int width, int height) {
             return Button
-                .builder(Component.literal("" + get()), button -> {})
+                .builder(Component.literal("" + get()), button -> {
+                })
                 .bounds(0, 0, width, height)
                 .tooltip(Tooltip.create(Component.literal(getComment())))
                 .build();
         }
     }
 
-    public static class BooleanValue extends ConfigValue<Boolean>{
+    public static class BooleanValue extends ConfigValue<Boolean> {
         public BooleanValue(CommentedConfig config, List<String> path, boolean defaultValue) {
             super(config, path, defaultValue);
         }
@@ -360,14 +371,15 @@ public class ConfigBuilder {
                 .onOffBuilder(get())
                 .displayOnlyValue()
                 .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
-                .create(0, 0,  width, height, Component.empty(), (button, bool) -> set(bool));
+                .create(0, 0, width, height, Component.empty(), (button, bool) -> set(bool));
         }
     }
 
-    public static class StringValue extends ConfigValue<String>{
+    public static class StringValue extends ConfigValue<String> {
         public StringValue(CommentedConfig config, List<String> path, String defaultValue) {
             super(config, path, defaultValue);
         }
+
         @Override
         public AbstractWidget getWidget(int width, int height) {
             EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, width - 1, height, Component.literal(get())) {
@@ -392,10 +404,11 @@ public class ConfigBuilder {
         }
     }
 
-    public static class ListValue<T> extends ConfigValue<List<T>>{
+    public static class ListValue<T> extends ConfigValue<List<T>> {
         public ListValue(CommentedConfig config, List<String> path, List<T> defaultValue) {
             super(config, path, defaultValue);
         }
+
         @Override
         public AbstractWidget getWidget(int width, int height) {
             // TODO handle other types than String
@@ -412,14 +425,15 @@ public class ConfigBuilder {
         }
     }
 
-    public static class InListValue<T> extends ConfigValue<T>{
+    public static class InListValue<T> extends ConfigValue<T> {
         private final Collection<? extends T> validValues;
+
         public InListValue(CommentedConfig config, List<String> path, T defaultValue, Collection<? extends T> validValues) {
             super(config, path, defaultValue);
             this.validValues = validValues;
         }
 
-        public Collection<? extends T> getValidValues(){
+        public Collection<? extends T> getValidValues() {
             return validValues;
         }
 
@@ -436,7 +450,7 @@ public class ConfigBuilder {
         }
     }
 
-    public static abstract class NumberValue<E extends Number> extends ConfigValue<E>{
+    public static abstract class NumberValue<E extends Number> extends ConfigValue<E> {
 
         private final E min;
         private final E max;
@@ -447,12 +461,14 @@ public class ConfigBuilder {
             this.max = max;
         }
 
-        public E getMin(){
+        public E getMin() {
             return min;
         }
-        public E getMax(){
+
+        public E getMax() {
             return max;
         }
+
         public double normalize() {
             return Mth.clamp((this.get().doubleValue() - min.doubleValue()) / (max.doubleValue() - min.doubleValue()), 0.0D, 1.0D);
         }
@@ -461,11 +477,12 @@ public class ConfigBuilder {
 
         @Override
         public AbstractWidget getWidget(int width, int height) {
-             AbstractSliderButton widget = new AbstractSliderButton(0, 0,SettingsList.ResettableEntry.valueButtonWidth, 20, Component.literal("" + get()), normalize()) {
+            AbstractSliderButton widget = new AbstractSliderButton(0, 0, SettingsList.ResettableEntry.valueButtonWidth, 20, Component.literal("" + get()), normalize()) {
                 @Override
                 protected void updateMessage() {
                     setMessage(Component.literal("" + get()));
                 }
+
                 @Override
                 protected void applyValue() {
                     fromNormalized(value);

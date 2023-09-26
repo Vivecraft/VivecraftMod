@@ -3,8 +3,8 @@ package org.vivecraft.client_vr;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client.gui.screens.ErrorScreen;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
@@ -44,9 +44,9 @@ public class VRState {
             try {
                 dh.vrRenderer.setupRenderConfiguration();
                 RenderPassManager.setVanillaRenderPass();
-            } catch(RenderConfigException renderConfigException) {
+            } catch (RenderConfigException renderConfigException) {
                 throw new RenderConfigException("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error.getString() + "\nVR provider: " + dh.vr.getName()));
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -103,8 +103,8 @@ public class VRState {
         vrInitialized = false;
         vrRunning = false;
         if (disableVRSetting) {
-            ClientDataHolderVR.getInstance().vrSettings.vrEnabled = false;
-            ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+            dh.vrSettings.vrEnabled = false;
+            dh.vrSettings.saveOptions();
         }
     }
 

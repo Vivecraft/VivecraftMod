@@ -3,15 +3,12 @@ package org.vivecraft.common.utils.lwjgl;
 import java.nio.FloatBuffer;
 
 @Deprecated
-public abstract class Vector
-{
-    protected Vector()
-    {
+public abstract class Vector {
+    protected Vector() {
     }
 
-    public final float length()
-    {
-        return (float)Math.sqrt(this.lengthSquared());
+    public final float length() {
+        return (float) Math.sqrt(this.lengthSquared());
     }
 
     public abstract float lengthSquared();
@@ -20,17 +17,13 @@ public abstract class Vector
 
     public abstract Vector negate();
 
-    public final Vector normalise()
-    {
+    public final Vector normalise() {
         float f = this.length();
 
-        if (f != 0.0F)
-        {
+        if (f != 0.0F) {
             float f1 = 1.0F / f;
             return this.scale(f1);
-        }
-        else
-        {
+        } else {
             throw new IllegalStateException("Zero length vector");
         }
     }

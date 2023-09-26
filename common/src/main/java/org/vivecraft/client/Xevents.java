@@ -32,5 +32,4 @@ public interface Xevents {
     public static void onRenderTickEnd(float f) {
 
     }
-
 }

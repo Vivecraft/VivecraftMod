@@ -11,7 +11,7 @@ import org.vivecraft.client_vr.VRState;
 public class DynamicFPSScreenVRMixin {
 
     @Inject(at = @At("HEAD"), method = "dynamicfps$rendersBackground", remap = false, cancellable = true, expect = 0)
-    public void  noOptimizeVR(CallbackInfoReturnable<Boolean> cir) {
+    public void vivecraft$noOptimizeVR(CallbackInfoReturnable<Boolean> cir) {
         // please don't stop rendering the world when a screen is open
         if (VRState.vrRunning) {
             cir.setReturnValue(false);

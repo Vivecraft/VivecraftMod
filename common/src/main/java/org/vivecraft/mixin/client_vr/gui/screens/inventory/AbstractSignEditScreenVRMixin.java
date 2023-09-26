@@ -12,16 +12,16 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 public class AbstractSignEditScreenVRMixin {
 
     @Inject(at = @At("HEAD"), method = "init")
-    public void showOverlay(CallbackInfo ci) {
-        if(VRState.vrRunning) {
+    public void vivecraft$showOverlay(CallbackInfo ci) {
+        if (VRState.vrRunning) {
             KeyboardHandler.setOverlayShowing(true);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "removed")
-    public void dontShowOverlay(CallbackInfo ci) {
-        if(VRState.vrRunning) {
+    public void vivecraft$dontShowOverlay(CallbackInfo ci) {
+        if (VRState.vrRunning) {
             KeyboardHandler.setOverlayShowing(false);
-    }
+        }
     }
 }

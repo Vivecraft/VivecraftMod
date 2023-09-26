@@ -802,10 +802,10 @@ public class MCOpenVR extends MCVR {
                     // application needs to be installed, so abort
                     String pathFormatted = "";
                     boolean hasInvalidChars = false;
-                    for (char c : file1.getAbsolutePath().toCharArray()){
+                    for (char c : file1.getAbsolutePath().toCharArray()) {
                         if (c > 127) {
                             hasInvalidChars = true;
-                            pathFormatted += "§c"+c+"§r";
+                            pathFormatted += "§c" + c + "§r";
                         } else {
                             pathFormatted += c;
                         }

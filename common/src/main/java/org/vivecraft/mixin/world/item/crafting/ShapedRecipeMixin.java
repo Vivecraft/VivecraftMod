@@ -11,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -19,26 +20,28 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(ShapedRecipe.class)
 public class ShapedRecipeMixin {
     @Inject(method = "itemFromJson", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/DefaultedRegistry;getOptional(Lnet/minecraft/resources/ResourceLocation;)Ljava/util/Optional;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    private static void getVivecraftVanillaItemInject(JsonObject jsonObject, CallbackInfoReturnable<Item> cir, String resourceLocation){
+    private static void vivecraft$getVivecraftVanillaItemInject(JsonObject jsonObject, CallbackInfoReturnable<Item> cir, String resourceLocation) {
         if (resourceLocation.startsWith("vivecraft")) {
-            cir.setReturnValue(getVivecraftVanillaItem(jsonObject, resourceLocation));
+            cir.setReturnValue(vivecraft$getVivecraftVanillaItem(jsonObject, resourceLocation));
         }
     }
 
-    private static Item getVivecraftVanillaItem(JsonObject jsonObject, String resourceLocation){
+    @Unique
+    private static Item vivecraft$getVivecraftVanillaItem(JsonObject jsonObject, String resourceLocation) {
         String vanillaItem = GsonHelper.getAsString(jsonObject, "vanillaitem");
         return BuiltInRegistries.ITEM.getOptional(new ResourceLocation(vanillaItem)).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + vanillaItem + "'"));
     }
 
     @Inject(method = "itemStackFromJson", at = @At("HEAD"), cancellable = true)
-    private static void customizeVanillaItemStackFabric(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir){
+    private static void vivecraft$customizeVanillaItemStackFabric(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir) {
         if (GsonHelper.getAsString(jsonObject, "item").startsWith("vivecraft")) {
-            Item vanillaItem = getVivecraftVanillaItem(jsonObject, GsonHelper.getAsString(jsonObject, "item"));
-            cir.setReturnValue(customizeVanillaItemStack(jsonObject, vanillaItem));
+            Item vanillaItem = vivecraft$getVivecraftVanillaItem(jsonObject, GsonHelper.getAsString(jsonObject, "item"));
+            cir.setReturnValue(vivecraft$customizeVanillaItemStack(jsonObject, vanillaItem));
         }
     }
 
-    private static ItemStack customizeVanillaItemStack(JsonObject jsonObject, Item vanillaItem){
+    @Unique
+    private static ItemStack vivecraft$customizeVanillaItemStack(JsonObject jsonObject, Item vanillaItem) {
         if (jsonObject.has("data")) {
             throw new JsonParseException("Disallowed data tag found");
         } else {
@@ -54,5 +57,4 @@ public class ShapedRecipeMixin {
             }
         }
     }
-
 }

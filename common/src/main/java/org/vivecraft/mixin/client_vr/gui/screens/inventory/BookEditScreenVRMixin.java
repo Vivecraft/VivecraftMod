@@ -12,7 +12,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 public class BookEditScreenVRMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/BookEditScreen;updateButtonVisibility()V", shift = At.Shift.BEFORE), method = "init")
-    public void overlay(CallbackInfo ci) {
+    public void vivecraft$overlay(CallbackInfo ci) {
         if (VRState.vrRunning) {
             KeyboardHandler.setOverlayShowing(true);
         }
