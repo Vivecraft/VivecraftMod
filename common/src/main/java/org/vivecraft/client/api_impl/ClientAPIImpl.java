@@ -8,6 +8,7 @@ import org.vivecraft.api.data.VRData;
 import org.vivecraft.client.api_impl.data.VRPoseHistoryImpl;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
@@ -146,5 +147,13 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
             return null;
         }
         return controller == 0 ? this.c0History : this.c1History;
+    }
+
+    @Override
+    public boolean setKeyboardState(boolean isNowOpen) {
+        if (isVrActive()) {
+            return KeyboardHandler.setOverlayShowing(isNowOpen);
+        }
+        return false;
     }
 }

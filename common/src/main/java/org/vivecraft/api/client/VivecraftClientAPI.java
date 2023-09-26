@@ -186,4 +186,32 @@ public interface VivecraftClientAPI {
     default VRPoseHistory getHistoricalVRController1Poses() {
         return getHistoricalVRControllerPoses(1);
     }
+
+    /**
+     * Opens or closes Vivecraft's keyboard. Will fail silently if the user isn't in VR or if the keyboard's new state
+     * is the same as the old.
+     *
+     * @param isNowOpen Whether the keyboard should now be open. If false, the keyboard will attempt to close.
+     * @return Whether the keyboard is currently showing after attempting to open/close it.
+     */
+    boolean setKeyboardState(boolean isNowOpen);
+
+    /**
+     * Opens Vivecraft's keyboard to allow VR users to easily input text. Will fail silently if the user isn't in VR or
+     * if the keyboard is already open.
+     *
+     * @return Whether the keyboard is currently showing after attempting to open it.
+     */
+    default boolean openKeyboard() {
+        return setKeyboardState(true);
+    }
+
+    /**
+     * Close Vivecraft's keyboard. Will fail silently if the user isn't in VR or if the keyboard is already closed.
+     *
+     * @return Whether the keyboard is currently showing after attempting to close it.
+     */
+    default boolean closeKeyboard() {
+        return setKeyboardState(false);
+    }
 }
