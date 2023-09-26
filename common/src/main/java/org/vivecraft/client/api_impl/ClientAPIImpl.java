@@ -84,11 +84,11 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
         }
         if (isVrActive() && !isSeated()) {
             ClientDataHolderVR.getInstance().vr.triggerHapticPulse(
-                    ControllerType.values()[controllerNum],
-                    duration,
-                    frequency,
-                    amplitude,
-                    delay
+                ControllerType.values()[controllerNum],
+                duration,
+                frequency,
+                amplitude,
+                delay
             );
         }
     }

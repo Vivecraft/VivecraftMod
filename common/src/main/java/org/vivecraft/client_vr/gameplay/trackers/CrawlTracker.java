@@ -63,10 +63,8 @@ public class CrawlTracker implements Tracker {
     }
 
     private void updateState(LocalPlayer player) {
-        if (this.crawling != this.wasCrawling)
-        {
-            if (this.crawling)
-            {
+        if (this.crawling != this.wasCrawling) {
+            if (this.crawling) {
                 player.setPose(Pose.SWIMMING);
                 this.crawlsteresis = true;
             }

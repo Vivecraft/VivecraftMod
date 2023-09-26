@@ -21,11 +21,9 @@ public class SneakTracker implements Tracker {
     public boolean isActive(LocalPlayer p) {
         if (this.dh.vrSettings.seated) {
             return false;
-        }
-        else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
+        } else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
             return false;
-        }
-        else if (!this.dh.vrSettings.realisticSneakEnabled) {
+        } else if (!this.dh.vrSettings.realisticSneakEnabled) {
             return false;
         } else if (this.mc.gameMode == null) {
             return false;

@@ -58,8 +58,7 @@ public class VRPlayer {
     boolean initdone = false;
     public boolean onTick;
 
-    public VRPlayer()
-    {
+    public VRPlayer() {
         this.vrdata_room_pre = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
         this.vrdata_room_post = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
         this.vrdata_world_post = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
@@ -189,10 +188,8 @@ public class VRPlayer {
         Vec3 vec3 = new Vec3(this.vrdata_world_pre.origin.x + (this.vrdata_world_post.origin.x - this.vrdata_world_pre.origin.x) * (double) par1, this.vrdata_world_pre.origin.y + (this.vrdata_world_post.origin.y - this.vrdata_world_pre.origin.y) * (double) par1, this.vrdata_world_pre.origin.z + (this.vrdata_world_post.origin.z - this.vrdata_world_pre.origin.z) * (double) par1);
         this.vrdata_world_render = new VRData(vec3, dataholder.vrSettings.walkMultiplier, f, f4);
 
-        for (Tracker tracker : ClientDataHolderVR.getInstance().getTrackers())
-        {
-            if (tracker.tickType() == Tracker.TrackerTickType.PER_FRAME)
-            {
+        for (Tracker tracker : ClientDataHolderVR.getInstance().getTrackers()) {
+            if (tracker.tickType() == Tracker.TrackerTickType.PER_FRAME) {
                 tracker.idleTick(minecraft.player);
 
                 if (tracker.isActive(minecraft.player)) {
@@ -269,10 +266,8 @@ public class VRPlayer {
 
             this.doPlayerMoveInRoom(player);
 
-            for (Tracker tracker : dh.getTrackers())
-            {
-                if (tracker.tickType() == Tracker.TrackerTickType.PER_TICK)
-                {
+            for (Tracker tracker : dh.getTrackers()) {
+                if (tracker.tickType() == Tracker.TrackerTickType.PER_TICK) {
                     tracker.idleTick(mc.player);
 
                     if (tracker.isActive(mc.player)) {

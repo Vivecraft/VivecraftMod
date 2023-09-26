@@ -30,8 +30,7 @@ public class RowTracker implements Tracker {
     public boolean isActive(LocalPlayer p) {
         if (this.dh.vrSettings.seated) {
             return false;
-        }
-        else if (!this.dh.vrSettings.realisticRowEnabled) {
+        } else if (!this.dh.vrSettings.realisticRowEnabled) {
             return false;
         } else if (p != null && p.isAlive()) {
             if (this.mc.gameMode == null) {
@@ -86,7 +85,7 @@ public class RowTracker implements Tracker {
     }
 
     public void doProcessFinaltransmithastofixthis(LocalPlayer player) {
-        Boat boat = (Boat)player.getVehicle();
+        Boat boat = (Boat) player.getVehicle();
         Quaternion quaternion = (new Quaternion(boat.getXRot(), -(boat.getYRot() % 360.0F), 0.0F)).normalized();
 
         for (int i = 0; i <= 1; ++i) {

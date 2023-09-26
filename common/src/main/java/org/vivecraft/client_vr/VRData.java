@@ -172,8 +172,7 @@ public class VRData {
         );
     }
 
-    public class VRDevicePose
-    {
+    public class VRDevicePose {
         final VRData data;
         final Vec3 pos;
         final Vec3 dir;
@@ -224,10 +223,10 @@ public class VRData {
             Quaternionf quat = new Quaternionf();
             quat.setFromUnnormalized(getMatrix().toMCMatrix());
             return new VRPoseImpl(
-                    getPosition(),
-                    getDirection(),
-                    quat,
-                    getRoll()
+                getPosition(),
+                getDirection(),
+                quat,
+                getRoll()
             );
         }
 

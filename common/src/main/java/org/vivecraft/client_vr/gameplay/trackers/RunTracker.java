@@ -30,8 +30,7 @@ public class RunTracker implements Tracker {
                 } else if (p.onGround() || !p.isInWater() && !p.isInLava()) {
                     if (p.onClimbable()) {
                         return false;
-                    }
-                    else {
+                    } else {
                         return !this.dh.bowTracker.isNotched();
                     }
                 } else {
