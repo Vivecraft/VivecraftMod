@@ -1,63 +1,63 @@
 {
-    "schemaVersion": 1,
-    "id": "vivecraft",
-    "version": "${version}",
+  "schemaVersion": 1,
+  "id": "vivecraft",
+  "version": "${version}",
 
-    "name": "Vivecraft",
-    "description": "The VR mod for any loader!",
-    "icon": "vivecraft_icon.png",
-    "authors": [
-        "fayer3",
-        "Ferri_Arnus",
-        "IMS",
-        "jrbudda",
-        "minecraft player"
+  "name": "Vivecraft",
+  "description": "The VR mod for any loader!",
+  "icon": "vivecraft_icon.png",
+  "authors": [
+    "fayer3",
+    "Ferri_Arnus",
+    "IMS",
+    "jrbudda",
+    "minecraft player"
+  ],
+
+  "license": "LGPLv3",
+
+  "environment": "*",
+  "entrypoints": {
+    "mm:early_risers": [
+      "org.vivecraft.VivecraftEarlyEntryForOptifabric"
     ],
-
-    "license": "LGPLv3",
-
-    "environment": "*",
-    "entrypoints": {
-        "mm:early_risers": [
-            "org.vivecraft.VivecraftEarlyEntryForOptifabric"
-        ],
-        "main": [
-            "org.vivecraft.fabric.VivecraftMod"
-        ],
-        "modmenu": [
-            "org.vivecraft.client.fabric.VivecraftModMenuApiImpl"
-        ]
-    },
-    "mixins": [
-        "vivecraft.mixins.json",
-        "vivecraft.dynamicfps.mixins.json",
-        "vivecraft.sodium.mixins.json",
-        "vivecraft.fabric.sodium.mixins.json",
-        "vivecraft.iris.mixins.json",
-        "vivecraft.physicsmod.mixins.json",
-        "vivecraft.rei.mixins.json",
-        "vivecraft.fabric.mixins.json"
+    "main": [
+      "org.vivecraft.fabric.VivecraftMod"
     ],
-    "depends": {
-        "fabricloader": ">=0.14.14",
-        "minecraft": ["1.20", "1.20.1"],
-        "java": ">=17"
-    },
-    "suggests": {
-        "another-mod": "*"
-    },
-    "contact": {
-        "homepage": "https://modrinth.com/mod/vivecraft",
-        "issues": "https://github.com/Vivecraft/VivecraftMod/issues",
-        "sources": "https://github.com/Vivecraft/VivecraftMod"
-    },
-    "custom": {
-        "modmenu": {
-            "links": {
-                "modmenu.discord": "https://discord.gg/jYyyv7zhSW",
-                "vivecraft.message.kofi": "https://ko-fi.com/vivecraft"
-            },
-            "update_checker": true
-        }
+    "modmenu": [
+      "org.vivecraft.client.fabric.VivecraftModMenuApiImpl"
+    ]
+  },
+  "mixins": [
+    "vivecraft.mixins.json",
+    "vivecraft.dynamicfps.mixins.json",
+    "vivecraft.sodium.mixins.json",
+    "vivecraft.fabric.sodium.mixins.json",
+    "vivecraft.iris.mixins.json",
+    "vivecraft.physicsmod.mixins.json",
+    "vivecraft.rei.mixins.json",
+    "vivecraft.fabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.14",
+    "minecraft": ["1.20", "1.20.1"],
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  },
+  "contact": {
+    "homepage": "https://modrinth.com/mod/vivecraft",
+    "issues": "https://github.com/Vivecraft/VivecraftMod/issues",
+    "sources": "https://github.com/Vivecraft/VivecraftMod"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/jYyyv7zhSW",
+        "vivecraft.message.kofi": "https://ko-fi.com/vivecraft"
+      },
+      "update_checker": true
     }
+  }
 }

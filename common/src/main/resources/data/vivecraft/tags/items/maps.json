@@ -1,6 +1,6 @@
 {
-    "replace": false,
-    "values": [
-        "minecraft:filled_map"
-    ]
+  "replace": false,
+  "values": [
+    "minecraft:filled_map"
+  ]
 }
