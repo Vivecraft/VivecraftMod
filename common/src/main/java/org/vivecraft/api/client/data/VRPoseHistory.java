@@ -28,6 +28,7 @@ public interface VRPoseHistory {
 
     /**
      * Gets a raw list of {@link VRPose} instances, with index 0 representing the least recent pose known.
+     *
      * @return The aforementioned list of {@link VRPose} instances.
      */
     List<VRPose> getAllHistoricalData() throws IllegalArgumentException;
@@ -35,19 +36,21 @@ public interface VRPoseHistory {
     /**
      * Gets the historical data ticksBack ticks back. This will throw an IllegalStateException if the data cannot
      * be retrieved due to not having enough history.
+     *
      * @param ticksBack Ticks back to retrieve data.
      * @return A {@link VRPose} instance from ticksBack ticks ago.
-     * @throws IllegalStateException If ticksBack references a tick that there is not yet data for.
+     * @throws IllegalStateException    If ticksBack references a tick that there is not yet data for.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than {@value #MAX_TICKS_BACK} or less than 0.
      */
-    VRPose getHistoricalData(int ticksBack) throws  IllegalArgumentException, IllegalStateException;
+    VRPose getHistoricalData(int ticksBack) throws IllegalArgumentException, IllegalStateException;
 
     /**
      * Gets the net movement between the most recent data in this instance and the oldest position that can be
      * retrieved, going no farther back than maxTicksBack.
+     *
      * @param maxTicksBack The maximum amount of ticks back to compare the most recent data with.
      * @return The aforementioned net movement. Note that this will return zero change on all axes if only zero ticks
-     *         can be looked back.
+     * can be looked back.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than {@value #MAX_TICKS_BACK} or less than 0.
      */
     Vec3 netMovement(int maxTicksBack) throws IllegalArgumentException;
@@ -55,9 +58,10 @@ public interface VRPoseHistory {
     /**
      * Gets the average velocity in blocks/tick between the most recent data in this instance and the oldest position
      * that can be retrieved, going no farther back than maxTicksBack.
+     *
      * @param maxTicksBack The maximum amount of ticks back to calculate velocity with.
      * @return The aforementioned average velocity on each axis. Note that this will return zero velocity on all axes
-     *         if only zero ticks can be looked back.
+     * if only zero ticks can be looked back.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than {@value #MAX_TICKS_BACK} or less than 0.
      */
     Vec3 averageVelocity(int maxTicksBack) throws IllegalArgumentException;
@@ -65,24 +69,26 @@ public interface VRPoseHistory {
     /**
      * Gets the average speed in blocks/tick between the most recent data in this instance and the oldest position
      * that can be retrieved, going no farther back than maxTicksBack.
+     *
      * @param maxTicksBack The maximum amount of ticks back to calculate speed with.
      * @return The aforementioned average speed on each axis. Note that this will return zero speed if only zero ticks
-     *         can be looked back.
+     * can be looked back.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than {@value #MAX_TICKS_BACK} or less than 0.
      */
     default double averageSpeed(int maxTicksBack) throws IllegalArgumentException {
         Vec3 averageVelocity = averageVelocity(maxTicksBack);
         return Math.sqrt(averageVelocity.x() * averageVelocity.x() +
-                         averageVelocity.y() * averageVelocity.y() +
-                         averageVelocity.z() * averageVelocity.z());
+            averageVelocity.y() * averageVelocity.y() +
+            averageVelocity.z() * averageVelocity.z());
     }
 
     /**
      * Gets the average position between the most recent data in this instance and the oldest position that can be
      * retrieved, going no farther back than maxTicksBack.
+     *
      * @param maxTicksBack The maximum amount of ticks back to calculate velocity with.
      * @return The aforementioned average position. Note that this will return the current position if only zero ticks
-     *         can be looked back.
+     * can be looked back.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than {@value #MAX_TICKS_BACK} or less than 0.
      */
     Vec3 averagePosition(int maxTicksBack) throws IllegalArgumentException;

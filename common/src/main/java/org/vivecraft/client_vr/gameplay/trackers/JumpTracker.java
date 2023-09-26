@@ -17,8 +17,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-public class JumpTracker implements Tracker
-{
+public class JumpTracker implements Tracker {
     public Vec3[] latchStart = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
     public Vec3[] latchStartOrigin = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
     public Vec3[] latchStartPlayer = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
@@ -43,8 +42,7 @@ public class JumpTracker implements Tracker
     public boolean isActive(LocalPlayer p) {
         if (this.dh.vrSettings.seated) {
             return false;
-        }
-        else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
+        } else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
             return false;
         } else if (this.dh.vrSettings.realisticJumpEnabled == VRSettings.RealisticJump.OFF) {
             return false;

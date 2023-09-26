@@ -42,7 +42,7 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
         checkTicksBack(ticksBack);
         if (this.dataQueue.size() <= ticksBack) {
             throw new IllegalStateException("Cannot retrieve data from " + ticksBack + " ticks ago, when there is " +
-                    "only data for up to " + (this.dataQueue.size() - 1) + " ticks ago.");
+                "only data for up to " + (this.dataQueue.size() - 1) + " ticks ago.");
         }
         return this.dataQueue.get(ticksBack);
     }
@@ -93,6 +93,7 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
 
     /**
      * Converts maxTicksBack to the actual maximum number of ticks we can go back.
+     *
      * @param maxTicksBack The maximum number of ticks to attempt to go back.
      * @return The actual number of ticks to go back by.
      */

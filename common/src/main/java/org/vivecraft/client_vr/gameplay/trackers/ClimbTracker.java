@@ -103,8 +103,7 @@ public class ClimbTracker implements Tracker {
     public boolean isActive(LocalPlayer p) {
         if (this.dh.vrSettings.seated) {
             return false;
-        }
-        else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
+        } else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
             return false;
         } else if (!this.dh.vrSettings.realisticClimbEnabled) {
             return false;

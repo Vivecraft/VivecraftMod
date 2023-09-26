@@ -29,9 +29,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-
-public class SwingTracker implements Tracker
-{
+public class SwingTracker implements Tracker {
     private final Vec3[] lastWeaponEndAir = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
     private final boolean[] lastWeaponSolid = new boolean[2];
     public Vec3[] miningPoint = new Vec3[2];
@@ -264,7 +262,7 @@ public class SwingTracker implements Tracker
 
     private void clearBlockHitDelay() {
         //MCReflection.PlayerController_blockHitDelay.set(this.mc.gameMode, 0);
-       // this.mc.gameMode.blockBreakingCooldown = 1;
+        // this.mc.gameMode.blockBreakingCooldown = 1;
     }
 
     public Vec3 constrain(Vec3 start, Vec3 end) {
