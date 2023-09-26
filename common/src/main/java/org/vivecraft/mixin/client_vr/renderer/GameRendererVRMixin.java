@@ -526,7 +526,8 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     public void vivecraft$setupRVE() {
-        if (this.vivecraft$cached) {
+        if (this.vivecraft$cached
+            && !(Xplat.isModLoaded("immersive_portals") && ImmersivePortalsHelper.isRenderingPortal())) {
             VRData.VRDevicePose vrdata$vrdevicepose = vivecraft$DATA_HOLDER.vrPlayer.vrdata_world_render
                 .getEye(vivecraft$DATA_HOLDER.currentPass);
             Vec3 vec3 = vrdata$vrdevicepose.getPosition();
@@ -550,7 +551,8 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     public void vivecraft$cacheRVEPos(LivingEntity e) {
-        if (this.minecraft.getCameraEntity() != null) {
+        if (this.minecraft.getCameraEntity() != null
+            && !(Xplat.isModLoaded("immersive_portals") && ImmersivePortalsHelper.isRenderingPortal())) {
             if (!this.vivecraft$cached) {
                 this.vivecraft$rveX = e.getX();
                 this.vivecraft$rveY = e.getY();
@@ -574,7 +576,8 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     public void vivecraft$restoreRVEPos(LivingEntity e) {
-        if (e != null) {
+        if (e != null
+            && !(Xplat.isModLoaded("immersive_portals") && ImmersivePortalsHelper.isRenderingPortal())) {
             e.setPosRaw(this.vivecraft$rveX, this.vivecraft$rveY, this.vivecraft$rveZ);
             e.xOld = this.vivecraft$rvelastX;
             e.yOld = this.vivecraft$rvelastY;
