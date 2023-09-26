@@ -26,6 +26,7 @@ public interface VivecraftAPI {
     /**
      * Returns the VR data for the given player. Will return null if the player isn't in VR,
      * or if being called from the client, and the client has yet to receive any data for the player.
+     *
      * @param player Player to get the VR data of.
      * @return The VR data for a player, or null if the player isn't in VR or no data has been received for said player.
      */

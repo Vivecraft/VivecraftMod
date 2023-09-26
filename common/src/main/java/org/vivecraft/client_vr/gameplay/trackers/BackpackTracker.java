@@ -18,35 +18,26 @@ public class BackpackTracker implements Tracker {
     protected Minecraft mc;
     protected ClientDataHolderVR dh;
 
-    public BackpackTracker(Minecraft mc, ClientDataHolderVR dh)
-    {
+    public BackpackTracker(Minecraft mc, ClientDataHolderVR dh) {
         this.mc = mc;
         this.dh = dh;
     }
 
-    public boolean isActive(LocalPlayer p)
-    {
+    public boolean isActive(LocalPlayer p) {
 
-        if (this.dh.vrSettings.seated)
-        {
+        if (this.dh.vrSettings.seated) {
             return false;
-        }
-        else if (!this.dh.vrSettings.backpackSwitching)
-        {
+        } else if (!this.dh.vrSettings.backpackSwitching) {
             return false;
         } else if (p == null) {
             return false;
-        }
-        else if (this.mc.gameMode == null)
-        {
+        } else if (this.mc.gameMode == null) {
             return false;
         } else if (!p.isAlive()) {
             return false;
         } else if (p.isSleeping()) {
             return false;
-        }
-        else
-        {
+        } else {
             return !this.dh.bowTracker.isDrawing;
         }
     }

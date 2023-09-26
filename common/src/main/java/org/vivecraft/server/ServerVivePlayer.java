@@ -152,11 +152,11 @@ public class ServerVivePlayer {
             return null;
         }
         return new VRDataImpl(
-                new VRPoseImpl(this.getHMDPos(player), this.getHMDDir(), this.getHMDQuaternion(), this.getHMDRollDeg()),
-                new VRPoseImpl(this.getControllerPos(0, player), this.getControllerDir(0), this.getControllerQuaternion(0), this.getControllerRollDeg(0)),
-                new VRPoseImpl(this.getControllerPos(1, player), this.getControllerDir(1), this.getControllerQuaternion(1), this.getControllerRollDeg(1)),
-                this.isSeated(),
-                this.usingReversedHands()
+            new VRPoseImpl(this.getHMDPos(player), this.getHMDDir(), this.getHMDQuaternion(), this.getHMDRollDeg()),
+            new VRPoseImpl(this.getControllerPos(0, player), this.getControllerDir(0), this.getControllerQuaternion(0), this.getControllerRollDeg(0)),
+            new VRPoseImpl(this.getControllerPos(1, player), this.getControllerDir(1), this.getControllerQuaternion(1), this.getControllerRollDeg(1)),
+            this.isSeated(),
+            this.usingReversedHands()
         );
     }
 }
