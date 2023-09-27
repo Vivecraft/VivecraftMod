@@ -71,13 +71,6 @@ public class ServerVivePlayer {
         return player.position().add(0.0D, 1.62D, 0.0D);
     }
 
-    public double getHMDRollDeg() {
-        if (this.vrPlayerState != null) {
-            return this.vrPlayerState.hmd().orientation().toEuler().getRoll();
-        }
-        return 0;
-    }
-
     public Quaternionf getHMDQuaternion() {
         if (this.vrPlayerState != null) {
             return this.vrPlayerState.hmd().orientation().asJOMLQuaternion();
@@ -107,14 +100,6 @@ public class ServerVivePlayer {
 
     public Vec3 getControllerPos(int c, Player player) {
         return getControllerPos(c, player, false);
-    }
-
-    public double getControllerRollDeg(int c) {
-        if (this.vrPlayerState != null) {
-            Pose controllerPose = c == 0 ? this.vrPlayerState.controller0() : this.vrPlayerState.controller1();
-            return controllerPose.orientation().toEuler().getRoll();
-        }
-        return 0;
     }
 
     public Quaternionf getControllerQuaternion(int c) {
@@ -152,9 +137,9 @@ public class ServerVivePlayer {
             return null;
         }
         return new VRDataImpl(
-            new VRPoseImpl(this.getHMDPos(player), this.getHMDDir(), this.getHMDQuaternion(), this.getHMDRollDeg()),
-            new VRPoseImpl(this.getControllerPos(0, player), this.getControllerDir(0), this.getControllerQuaternion(0), this.getControllerRollDeg(0)),
-            new VRPoseImpl(this.getControllerPos(1, player), this.getControllerDir(1), this.getControllerQuaternion(1), this.getControllerRollDeg(1)),
+            new VRPoseImpl(this.getHMDPos(player), this.getHMDDir(), this.getHMDQuaternion()),
+            new VRPoseImpl(this.getControllerPos(0, player), this.getControllerDir(0), this.getControllerQuaternion(0)),
+            new VRPoseImpl(this.getControllerPos(1, player), this.getControllerDir(1), this.getControllerQuaternion(1)),
             this.isSeated(),
             this.usingReversedHands()
         );

@@ -1,6 +1,5 @@
 package org.vivecraft.api.data;
 
-import com.google.common.annotations.Beta;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 
@@ -23,38 +22,17 @@ public interface VRPose {
     /**
      * @return The pitch of the device in radians.
      */
-    double getPitchRad();
+    double getPitch();
 
     /**
      * @return The yaw of the device in radians.
      */
-    double getYawRad();
+    double getYaw();
 
     /**
      * @return The roll of the device in radians.
      */
-    default double getRollRad() {
-        return Math.toRadians(getRollDeg());
-    }
-
-    /**
-     * @return The pitch of the device in degrees.
-     */
-    default double getPitchDeg() {
-        return Math.toDegrees(getPitchRad());
-    }
-
-    /**
-     * @return The yaw of the device in degrees.
-     */
-    default double getYawDeg() {
-        return Math.toDegrees(getYawRad());
-    }
-
-    /**
-     * @return The roll of the device in degrees.
-     */
-    double getRollDeg();
+    double getRoll();
 
     /**
      * @return The quaternion representing the rotation of the device.
