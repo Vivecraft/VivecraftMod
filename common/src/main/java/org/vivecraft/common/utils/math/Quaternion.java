@@ -1,62 +1,54 @@
 package org.vivecraft.common.utils.math;
 
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.common.utils.lwjgl.Matrix3f;
 import org.vivecraft.client.utils.Utils;
+import org.vivecraft.common.utils.lwjgl.Matrix3f;
 
 @Deprecated
-public class Quaternion
-{
+public class Quaternion {
     public float w;
     public float x;
     public float y;
     public float z;
 
-    public Quaternion()
-    {
+    public Quaternion() {
         this.w = 1.0F;
     }
 
-    public Quaternion(float w, float x, float y, float z)
-    {
+    public Quaternion(float w, float x, float y, float z) {
         this.w = w;
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public Quaternion(Quaternion other)
-    {
+    public Quaternion(Quaternion other) {
         this.w = other.w;
         this.x = other.x;
         this.y = other.y;
         this.z = other.z;
     }
 
-    public Quaternion(Vector3 vector, float rotation)
-    {
-        rotation = (float)Math.toRadians((double)rotation);
-        float f = (float)Math.sin((double)(rotation / 2.0F));
-        this.w = (float)Math.cos((double)(rotation / 2.0F));
+    public Quaternion(Vector3 vector, float rotation) {
+        rotation = (float) Math.toRadians(rotation);
+        float f = (float) Math.sin(rotation / 2.0F);
+        this.w = (float) Math.cos(rotation / 2.0F);
         this.x = vector.x * f;
         this.y = vector.y * f;
         this.z = vector.z * f;
     }
 
-    public Quaternion(Axis axis, float rotation)
-    {
+    public Quaternion(Axis axis, float rotation) {
         this(axis.getVector(), rotation);
     }
 
-    public Quaternion(float pitch, float yaw, float roll, Angle.Order order)
-    {
+    public Quaternion(float pitch, float yaw, float roll, Angle.Order order) {
         Quaternion quaternion = new Quaternion(new Vector3(1.0F, 0.0F, 0.0F), pitch);
         Quaternion quaternion1 = new Quaternion(new Vector3(0.0F, 1.0F, 0.0F), yaw);
         Quaternion quaternion2 = new Quaternion(new Vector3(0.0F, 0.0F, 1.0F), roll);
         Quaternion quaternion3 = null;
 
-        switch (order)
-        {
+        switch (order) {
             case XYZ:
                 quaternion3 = quaternion.multiply(quaternion1).multiply(quaternion2);
                 break;
@@ -87,69 +79,55 @@ public class Quaternion
         this.z = quaternion3.z;
     }
 
-    public Quaternion(float pitch, float yaw, float roll)
-    {
+    public Quaternion(float pitch, float yaw, float roll) {
         this(pitch, yaw, roll, Angle.Order.YXZ);
     }
 
-    public Quaternion(Angle angle)
-    {
+    public Quaternion(Angle angle) {
         this(angle.getPitch(), angle.getYaw(), angle.getRoll(), angle.getOrder());
     }
 
-    public Quaternion(Matrix3f matrix)
-    {
+    public Quaternion(Matrix3f matrix) {
         this(matrix.m00, matrix.m01, matrix.m02, matrix.m10, matrix.m11, matrix.m12, matrix.m20, matrix.m21, matrix.m22);
     }
 
-    public Quaternion(org.vivecraft.common.utils.lwjgl.Matrix4f matrix)
-    {
+    public Quaternion(org.vivecraft.common.utils.lwjgl.Matrix4f matrix) {
         this(matrix.m00, matrix.m01, matrix.m02, matrix.m10, matrix.m11, matrix.m12, matrix.m20, matrix.m21, matrix.m22);
     }
 
-    public Quaternion(Matrix4f matrix)
-    {
+    public Quaternion(Matrix4f matrix) {
         this(matrix.M[0][0], matrix.M[0][1], matrix.M[0][2], matrix.M[1][0], matrix.M[1][1], matrix.M[1][2], matrix.M[2][0], matrix.M[2][1], matrix.M[2][2]);
     }
 
-    private Quaternion(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
-    {
+    private Quaternion(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22) {
         float f1 = m00 + m11 + m22;
 
-        if ((double)f1 >= 0.0D)
-        {
-            float f = (float)Math.sqrt((double)f1 + 1.0D);
+        if ((double) f1 >= 0.0D) {
+            float f = (float) Math.sqrt((double) f1 + 1.0D);
             this.w = f * 0.5F;
             f = 0.5F / f;
             this.x = (m21 - m12) * f;
             this.y = (m02 - m20) * f;
             this.z = (m10 - m01) * f;
-        }
-        else
-        {
+        } else {
             float f2 = Math.max(Math.max(m00, m11), m22);
 
-            if (f2 == m00)
-            {
-                float f3 = (float)Math.sqrt((double)(m00 - (m11 + m22)) + 1.0D);
+            if (f2 == m00) {
+                float f3 = (float) Math.sqrt((double) (m00 - (m11 + m22)) + 1.0D);
                 this.x = f3 * 0.5F;
                 f3 = 0.5F / f3;
                 this.y = (m01 + m10) * f3;
                 this.z = (m20 + m02) * f3;
                 this.w = (m21 - m12) * f3;
-            }
-            else if (f2 == m11)
-            {
-                float f4 = (float)Math.sqrt((double)(m11 - (m22 + m00)) + 1.0D);
+            } else if (f2 == m11) {
+                float f4 = (float) Math.sqrt((double) (m11 - (m22 + m00)) + 1.0D);
                 this.y = f4 * 0.5F;
                 f4 = 0.5F / f4;
                 this.z = (m12 + m21) * f4;
                 this.x = (m01 + m10) * f4;
                 this.w = (m02 - m20) * f4;
-            }
-            else
-            {
-                float f5 = (float)Math.sqrt((double)(m22 - (m00 + m11)) + 1.0D);
+            } else {
+                float f5 = (float) Math.sqrt((double) (m22 - (m00 + m11)) + 1.0D);
                 this.z = f5 * 0.5F;
                 f5 = 0.5F / f5;
                 this.x = (m20 + m02) * f5;
@@ -159,72 +137,58 @@ public class Quaternion
         }
     }
 
-    public Quaternion copy()
-    {
+    public Quaternion copy() {
         return new Quaternion(this);
     }
 
-    public float getW()
-    {
+    public float getW() {
         return this.w;
     }
 
-    public void setW(float w)
-    {
+    public void setW(float w) {
         this.w = w;
     }
 
-    public float getX()
-    {
+    public float getX() {
         return this.x;
     }
 
-    public void setX(float x)
-    {
+    public void setX(float x) {
         this.x = x;
     }
 
-    public float getY()
-    {
+    public float getY() {
         return this.y;
     }
 
-    public void setY(float y)
-    {
+    public void setY(float y) {
         this.y = y;
     }
 
-    public float getZ()
-    {
+    public float getZ() {
         return this.z;
     }
 
-    public void setZ(float z)
-    {
+    public void setZ(float z) {
         this.z = z;
     }
 
-    public void set(Quaternion other)
-    {
+    public void set(Quaternion other) {
         this.w = other.w;
         this.x = other.x;
         this.y = other.y;
         this.z = other.z;
     }
 
-    public void normalize()
-    {
-        float f = (float)Math.sqrt((double)(this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z));
+    public void normalize() {
+        float f = (float) Math.sqrt(this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z);
 
-        if (f > 0.0F)
-        {
+        if (f > 0.0F) {
             this.w /= f;
             this.x /= f;
             this.y /= f;
             this.z /= f;
-        }
-        else
-        {
+        } else {
             this.w = 1.0F;
             this.x = 0.0F;
             this.y = 0.0F;
@@ -232,23 +196,19 @@ public class Quaternion
         }
     }
 
-    public Quaternion normalized()
-    {
-        float f4 = (float)Math.sqrt((double)(this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z));
+    public Quaternion normalized() {
+        float f4 = (float) Math.sqrt(this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z);
         float f;
         float f1;
         float f2;
         float f3;
 
-        if (f4 > 0.0F)
-        {
+        if (f4 > 0.0F) {
             f = this.w / f4;
             f1 = this.x / f4;
             f2 = this.y / f4;
             f3 = this.z / f4;
-        }
-        else
-        {
+        } else {
             f = 1.0F;
             f1 = 0.0F;
             f2 = 0.0F;
@@ -258,31 +218,25 @@ public class Quaternion
         return new Quaternion(f, f1, f2, f3);
     }
 
-    public Angle toEuler()
-    {
+    public Angle toEuler() {
         Angle angle = new Angle();
-        angle.setYaw((float)Math.toDegrees(Math.atan2((double)(2.0F * (this.x * this.z + this.w * this.y)), (double)(this.w * this.w - this.x * this.x - this.y * this.y + this.z * this.z))));
-        angle.setPitch((float)Math.toDegrees(Math.asin((double)(-2.0F * (this.y * this.z - this.w * this.x)))));
-        angle.setRoll((float)Math.toDegrees(Math.atan2((double)(2.0F * (this.x * this.y + this.w * this.z)), (double)(this.w * this.w - this.x * this.x + this.y * this.y - this.z * this.z))));
+        angle.setYaw((float) Math.toDegrees(Math.atan2(2.0F * (this.x * this.z + this.w * this.y), this.w * this.w - this.x * this.x - this.y * this.y + this.z * this.z)));
+        angle.setPitch((float) Math.toDegrees(Math.asin(-2.0F * (this.y * this.z - this.w * this.x))));
+        angle.setRoll((float) Math.toDegrees(Math.atan2(2.0F * (this.x * this.y + this.w * this.z), this.w * this.w - this.x * this.x + this.y * this.y - this.z * this.z)));
         return angle;
     }
 
-    public Quaternion rotate(Axis axis, float degrees, boolean local)
-    {
-        if (local)
-        {
+    public Quaternion rotate(Axis axis, float degrees, boolean local) {
+        if (local) {
             return this.multiply(new Quaternion(axis, degrees));
-        }
-        else
-        {
+        } else {
             org.vivecraft.common.utils.lwjgl.Matrix4f matrix4f = this.getMatrix();
-            matrix4f.rotate((float)Math.toRadians((double)degrees), Utils.convertVector(axis.getVector()));
+            matrix4f.rotate((float) Math.toRadians(degrees), Utils.convertVector(axis.getVector()));
             return new Quaternion(matrix4f);
         }
     }
 
-    public Quaternion multiply(Quaternion other)
-    {
+    public Quaternion multiply(Quaternion other) {
         float f = this.w * other.w - this.x * other.x - this.y * other.y - this.z * other.z;
         float f1 = this.w * other.x + other.w * this.x + this.y * other.z - this.z * other.y;
         float f2 = this.w * other.y + other.w * this.y - this.x * other.z + this.z * other.x;
@@ -290,8 +244,7 @@ public class Quaternion
         return new Quaternion(f, f1, f2, f3);
     }
 
-    public org.vivecraft.common.utils.lwjgl.Matrix4f getMatrix()
-    {
+    public org.vivecraft.common.utils.lwjgl.Matrix4f getMatrix() {
         org.vivecraft.common.utils.lwjgl.Matrix4f matrix4f = new org.vivecraft.common.utils.lwjgl.Matrix4f();
         float f = this.w * this.w;
         float f1 = this.x * this.x;
@@ -316,20 +269,17 @@ public class Quaternion
         return matrix4f;
     }
 
-    public Quaternion inverse()
-    {
+    public Quaternion inverse() {
         return new Quaternion(this.w, -this.x, -this.y, -this.z);
     }
 
-    public static Quaternion createFromToVector(Vector3 from, Vector3 to)
-    {
+    public static Quaternion createFromToVector(Vector3 from, Vector3 to) {
         Vector3 vector3 = from.cross(to);
-        float f = (float)(Math.sqrt(Math.pow((double)from.length(), 2.0D) * Math.pow((double)to.length(), 2.0D)) + (double)from.dot(to));
+        float f = (float) (Math.sqrt(Math.pow(from.length(), 2.0D) * Math.pow(to.length(), 2.0D)) + (double) from.dot(to));
         return (new Quaternion(f, vector3.x, vector3.y, vector3.z)).normalized();
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int i = 3;
         i = 23 * i + Float.floatToIntBits(this.w);
         i = 23 * i + Float.floatToIntBits(this.x);
@@ -337,41 +287,27 @@ public class Quaternion
         return 23 * i + Float.floatToIntBits(this.z);
     }
 
-    public boolean equals(Object obj)
-    {
-        if (obj == null)
-        {
+    public boolean equals(Object obj) {
+        if (obj == null) {
             return false;
-        }
-        else if (this.getClass() != obj.getClass())
-        {
+        } else if (this.getClass() != obj.getClass()) {
             return false;
-        }
-        else
-        {
-            Quaternion quaternion = (Quaternion)obj;
+        } else {
+            Quaternion quaternion = (Quaternion) obj;
 
-            if (Float.floatToIntBits(this.w) != Float.floatToIntBits(quaternion.w))
-            {
+            if (Float.floatToIntBits(this.w) != Float.floatToIntBits(quaternion.w)) {
                 return false;
-            }
-            else if (Float.floatToIntBits(this.x) != Float.floatToIntBits(quaternion.x))
-            {
+            } else if (Float.floatToIntBits(this.x) != Float.floatToIntBits(quaternion.x)) {
                 return false;
-            }
-            else if (Float.floatToIntBits(this.y) != Float.floatToIntBits(quaternion.y))
-            {
+            } else if (Float.floatToIntBits(this.y) != Float.floatToIntBits(quaternion.y)) {
                 return false;
-            }
-            else
-            {
+            } else {
                 return Float.floatToIntBits(this.z) == Float.floatToIntBits(quaternion.z);
             }
         }
     }
 
-    public Vector3 multiply(Vector3 vec)
-    {
+    public Vector3 multiply(Vector3 vec) {
         float f = this.x * 2.0F;
         float f1 = this.y * 2.0F;
         float f2 = this.z * 2.0F;
@@ -391,13 +327,11 @@ public class Quaternion
         return vector3;
     }
 
-    public Vec3 multiply(Vec3 vec)
-    {
+    public Vec3 multiply(Vec3 vec) {
         return this.multiply(new Vector3(vec)).toVector3d();
     }
 
-    public String toString()
-    {
+    public String toString() {
         return "Quaternion{w=" + this.w + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z + '}';
     }
 }

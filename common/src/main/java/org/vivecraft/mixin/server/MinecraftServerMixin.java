@@ -14,10 +14,11 @@ import java.util.UUID;
 public class MinecraftServerMixin implements MinecraftServerExt {
 
     @Unique
-    Map<UUID, ServerVivePlayer> playersWithVivecraft = new HashMap<>();
+    Map<UUID, ServerVivePlayer> vivecraft$playersWithVivecraft = new HashMap<>();
 
     @Override
-    public Map<UUID, ServerVivePlayer> getPlayersWithVivecraft() {
-        return this.playersWithVivecraft;
+    @Unique
+    public Map<UUID, ServerVivePlayer> vivecraft$getPlayersWithVivecraft() {
+        return this.vivecraft$playersWithVivecraft;
     }
 }

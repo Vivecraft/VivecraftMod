@@ -27,31 +27,30 @@ public class Utils {
             entity instanceof AbstractVillager ||
             entity instanceof SnowGolem ||
             entity instanceof Vex ||
-            entity instanceof Strider){
+            entity instanceof Strider) {
 
             Vec3 headpos = entity.getEyePosition();
-            double headsize = entity.getBbWidth()*0.5;
+            double headsize = entity.getBbWidth() * 0.5;
             if (((LivingEntity) entity).isBaby()) {
                 // babies have big heads
                 headsize *= 1.20;
             }
-            return new AABB(headpos.subtract(headsize,headsize-inflate,headsize), headpos.add(headsize,headsize+inflate,headsize)).inflate(inflate);
-
+            return new AABB(headpos.subtract(headsize, headsize - inflate, headsize), headpos.add(headsize, headsize + inflate, headsize)).inflate(inflate);
         } else if (!(entity instanceof EnderDragon) // no ender dragon, the code doesn't work for it
-            && entity instanceof LivingEntity livingEntity){
+            && entity instanceof LivingEntity livingEntity) {
 
             float yrot = -(livingEntity.yBodyRot) * 0.017453292F;
             // offset head in entity rotation
             Vec3 headpos = entity.getEyePosition()
                 .add(new Vec3(Mth.sin(yrot), 0, Mth.cos(yrot))
-                    .scale(livingEntity.getBbWidth()*0.5F));
+                    .scale(livingEntity.getBbWidth() * 0.5F));
 
-            double headsize = livingEntity.getBbWidth()*0.25;
+            double headsize = livingEntity.getBbWidth() * 0.25;
             if (livingEntity.isBaby()) {
                 // babies have big heads
                 headsize *= 1.5;
             }
-            return new AABB(headpos.subtract(headsize,headsize,headsize), headpos.add(headsize,headsize,headsize)).inflate(inflate*0.25).expandTowards(headpos.subtract(entity.position()).scale(inflate));
+            return new AABB(headpos.subtract(headsize, headsize, headsize), headpos.add(headsize, headsize, headsize)).inflate(inflate * 0.25).expandTowards(headpos.subtract(entity.position()).scale(inflate));
         }
         return null;
     }

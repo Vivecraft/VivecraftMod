@@ -14,17 +14,15 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.server.config.ServerConfig;
 
-public class AimFixHandler extends ChannelInboundHandlerAdapter
-{
+public class AimFixHandler extends ChannelInboundHandlerAdapter {
     private final Connection netManager;
 
-    public AimFixHandler(Connection netManager)
-    {
+    public AimFixHandler(Connection netManager) {
         this.netManager = netManager;
     }
 
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ServerPlayer serverplayer = ((ServerGamePacketListenerImpl)this.netManager.getPacketListener()).player;
+        ServerPlayer serverplayer = ((ServerGamePacketListenerImpl) this.netManager.getPacketListener()).player;
         boolean flag = msg instanceof ServerboundUseItemPacket || msg instanceof ServerboundUseItemOnPacket || msg instanceof ServerboundPlayerActionPacket;
 
         if (!ServerVRPlayers.isVRPlayer(serverplayer) || !flag || serverplayer.getServer() == null) {
@@ -55,8 +53,8 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
                 serverplayer.xo = aimPos.x;
                 serverplayer.yo = aimPos.y;
                 serverplayer.zo = aimPos.z;
-                serverplayer.setXRot((float)Math.toDegrees(Math.asin(-dir.y)));
-                serverplayer.setYRot((float)Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                serverplayer.setXRot((float) Math.toDegrees(Math.asin(-dir.y)));
+                serverplayer.setYRot((float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
                 serverplayer.xRotO = serverplayer.getXRot();
                 serverplayer.yRotO = serverplayer.yHeadRotO = serverplayer.yHeadRot = serverplayer.getYRot();
                 serverplayer.eyeHeight = 0.0001F;
@@ -67,18 +65,13 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
             }
 
             try {
-                if (this.netManager.isConnected())
-                {
-                    try
-                    {
-                        ((Packet)msg).handle(this.netManager.getPacketListener());
-                    }
-                    catch (RunningOnDifferentThreadException runningondifferentthreadexception)
-                    {
+                if (this.netManager.isConnected()) {
+                    try {
+                        ((Packet) msg).handle(this.netManager.getPacketListener());
+                    } catch (RunningOnDifferentThreadException runningondifferentthreadexception) {
                     }
                 }
-            }
-            finally {
+            } finally {
                 ReferenceCountUtil.release(msg);
             }
 
@@ -101,8 +94,9 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter
             serverplayer.yRotO = yRotO;
             serverplayer.yHeadRotO = yHeadRotO;
             serverplayer.eyeHeight = eyeHeight;
-            if (serverviveplayer != null)
+            if (serverviveplayer != null) {
                 serverviveplayer.offset = new Vec3(0.0D, 0.0D, 0.0D);
+            }
         });
     }
 }

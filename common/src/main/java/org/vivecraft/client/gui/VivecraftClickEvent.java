@@ -36,6 +36,4 @@ public class VivecraftClickEvent extends ClickEvent {
             return this.name;
         }
     }
-
-
 }

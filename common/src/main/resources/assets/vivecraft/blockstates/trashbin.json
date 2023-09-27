@@ -1,5 +1,7 @@
 {
-    "variants": {
-        "": { "model": "vivecraft:trashbin" }
+  "variants": {
+    "": {
+      "model": "vivecraft:trashbin"
     }
+  }
 }

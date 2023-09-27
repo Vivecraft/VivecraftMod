@@ -10,7 +10,7 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(ClientBrandRetriever.class)
 public class ClientBrandRetrieverVRMixin {
     @Inject(at = @At("RETURN"), method = "getClientModName", cancellable = true)
-    private static void vivecraftClientBrand(CallbackInfoReturnable<String> cir) {
+    private static void vivecraft$vivecraftClientBrand(CallbackInfoReturnable<String> cir) {
         if (VRState.vrEnabled) {
             cir.setReturnValue("vivecraft");
         }

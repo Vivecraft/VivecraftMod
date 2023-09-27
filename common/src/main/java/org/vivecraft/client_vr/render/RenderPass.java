@@ -1,7 +1,6 @@
 package org.vivecraft.client_vr.render;
 
-public enum RenderPass
-{
+public enum RenderPass {
     LEFT,
     RIGHT,
     CENTER,
@@ -9,5 +8,5 @@ public enum RenderPass
     GUI,
     SCOPER,
     SCOPEL,
-    CAMERA;
+    CAMERA
 }

@@ -17,7 +17,8 @@ import java.util.Map;
 
 @Mixin(ModelBakery.class)
 public abstract class FabricModelBakeryMixin {
-    @Shadow protected abstract void loadTopLevel(ModelResourceLocation modelResourceLocation);
+    @Shadow
+    protected abstract void loadTopLevel(ModelResourceLocation modelResourceLocation);
 
     @Inject(method = "<init>", at = @At(value = "CONSTANT", args = "stringValue=special"))
     private void loadModels(BlockColors blockColors, ProfilerFiller profilerFiller, Map map, Map map2, CallbackInfo ci) {

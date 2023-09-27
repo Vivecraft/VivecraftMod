@@ -33,6 +33,7 @@ public class XplatImpl {
     public static String getModloader() {
         return "forge";
     }
+
     public static String getModVersion() {
         if (isModLoadedSuccess()) {
             return FMLLoader.getLoadingModList().getModFileById("vivecraft").versionString();
@@ -48,32 +49,32 @@ public class XplatImpl {
         renderTarget.enableStencil();
         return true;
     }
-    
+
     public static Path getJarPath() {
         return FMLLoader.getLoadingModList().getModFileById("vivecraft").getFile().getSecureJar().getPath("/");
     }
 
     public static String getUseMethodName() {
         return ObfuscationReflectionHelper.findMethod(
-                net.minecraft.world.level.block.state.BlockBehaviour.class,
-                "m_6227_",
-                net.minecraft.world.level.block.state.BlockState.class,
-                net.minecraft.world.level.Level.class,
-                net.minecraft.core.BlockPos.class,
-                net.minecraft.world.entity.player.Player.class,
-                net.minecraft.world.InteractionHand.class,
-                net.minecraft.world.phys.BlockHitResult.class).getName();
+            net.minecraft.world.level.block.state.BlockBehaviour.class,
+            "m_6227_",
+            net.minecraft.world.level.block.state.BlockState.class,
+            net.minecraft.world.level.Level.class,
+            net.minecraft.core.BlockPos.class,
+            net.minecraft.world.entity.player.Player.class,
+            net.minecraft.world.InteractionHand.class,
+            net.minecraft.world.phys.BlockHitResult.class).getName();
     }
 
-    public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn){
+    public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn) {
         return ForgeHooksClient.getFluidSprites(level, pos, fluidStateIn);
     }
 
-    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
+    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
         return biome.getModifiedClimateSettings();
     }
 
-    public static BiomeSpecialEffects getBiomeEffects(Biome biome){
+    public static BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return biome.getModifiedSpecialEffects();
     }
 }

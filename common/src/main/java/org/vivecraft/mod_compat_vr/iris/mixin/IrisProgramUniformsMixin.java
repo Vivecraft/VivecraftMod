@@ -4,6 +4,7 @@ import net.coderbot.iris.gl.program.ProgramUniforms;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -16,29 +17,31 @@ public class IrisProgramUniformsMixin {
 
     @Shadow(remap = false)
     int lastFrame;
-    private RenderPass lastPass;
-    private int actualFrame;
+    @Unique
+    private RenderPass vivecraft$lastPass;
+    @Unique
+    private int vivecraft$actualFrame;
 
 
     // modify the frame counter on RenderPasChange, so perFrame Uniforms are recalculated
     @ModifyVariable(method = "update", at = @At(value = "STORE"), remap = false)
-    private int checkNewFrame(int currentFrame) {
+    private int vivecraft$checkNewFrame(int currentFrame) {
         if (!RenderPassType.isVanilla()) {
-            actualFrame = currentFrame;
-            if (lastFrame == currentFrame && lastPass != ClientDataHolderVR.getInstance().currentPass) {
+            vivecraft$actualFrame = currentFrame;
+            if (lastFrame == currentFrame && vivecraft$lastPass != ClientDataHolderVR.getInstance().currentPass) {
                 currentFrame--;
             }
-            lastPass = ClientDataHolderVR.getInstance().currentPass;
+            vivecraft$lastPass = ClientDataHolderVR.getInstance().currentPass;
         }
         return currentFrame;
     }
 
     // restore actual frame counter, so stuff doesn't get messed up
     @ModifyVariable(method = "update", at = @At(value = "LOAD", ordinal = 1), remap = false)
-    private int restoreFrame(int currentFrame) {
-        if (!RenderPassType.isVanilla()){
-            return actualFrame;
-        }else {
+    private int vivecraft$restoreFrame(int currentFrame) {
+        if (!RenderPassType.isVanilla()) {
+            return vivecraft$actualFrame;
+        } else {
             return currentFrame;
         }
         //return !RenderPassType.isVanilla() ? actualFrame : currentFrame;

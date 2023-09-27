@@ -14,7 +14,7 @@ import org.vivecraft.client_vr.provider.MCVR;
 @Mixin(OpenInventoryTutorialStep.class)
 public class OpenInventoryTutorialStepVRMixin {
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V"), index = 2, method = "tick")
-    private Component alterDescription(Component component) {
+    private Component vivecraft$alterDescription(Component component) {
         if (!VRState.vrRunning) {
             return component;
         }

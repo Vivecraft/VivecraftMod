@@ -1,12 +1,10 @@
 package org.vivecraft.client_vr.gameplay;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
-public class VRMovementStyle
-{
+public class VRMovementStyle {
     public String name;
     public boolean cameraSlide;
     public boolean airSparkles;
@@ -32,18 +30,15 @@ public class VRMovementStyle
     public ClientDataHolderVR dataholder;
     private static final ResourceLocation beamPng = new ResourceLocation("textures/entity/endercrystal/endercrystal_beam.png");
 
-    public VRMovementStyle(ClientDataHolderVR dataholder)
-    {
+    public VRMovementStyle(ClientDataHolderVR dataholder) {
         this.dataholder = dataholder;
         this.setStyle("Arc");
     }
 
-    public void setStyle(String requestedStyle)
-    {
+    public void setStyle(String requestedStyle) {
         boolean flag = true;
 
-        if (requestedStyle == "Minimal")
-        {
+        if (requestedStyle == "Minimal") {
             this.name = requestedStyle;
             this.cameraSlide = false;
             this.airSparkles = true;
@@ -54,9 +49,7 @@ public class VRMovementStyle
             this.endTeleportingSound = "mob.endermen.portal";
             this.teleportOnRelease = false;
             this.arcAiming = false;
-        }
-        else if (requestedStyle == "Beam")
-        {
+        } else if (requestedStyle == "Beam") {
             this.name = requestedStyle;
             this.cameraSlide = false;
             this.airSparkles = true;
@@ -77,9 +70,7 @@ public class VRMovementStyle
             this.endTeleportingSound = "mob.endermen.portal";
             this.teleportOnRelease = false;
             this.arcAiming = false;
-        }
-        else if (requestedStyle == "Tunnel")
-        {
+        } else if (requestedStyle == "Tunnel") {
             this.name = requestedStyle;
             this.cameraSlide = false;
             this.airSparkles = true;
@@ -100,9 +91,7 @@ public class VRMovementStyle
             this.endTeleportingSound = "mob.endermen.portal";
             this.teleportOnRelease = false;
             this.arcAiming = false;
-        }
-        else if (requestedStyle == "Grapple")
-        {
+        } else if (requestedStyle == "Grapple") {
             this.name = requestedStyle;
             this.cameraSlide = true;
             this.airSparkles = false;
@@ -124,9 +113,7 @@ public class VRMovementStyle
             this.endTeleportingSound = "mob.endermen.portal";
             this.teleportOnRelease = false;
             this.arcAiming = false;
-        }
-        else if (requestedStyle == "Arc")
-        {
+        } else if (requestedStyle == "Arc") {
             this.name = requestedStyle;
             this.cameraSlide = false;
             this.airSparkles = false;
@@ -146,16 +133,13 @@ public class VRMovementStyle
             this.endTeleportingSound = null;
             this.teleportOnRelease = true;
             this.arcAiming = true;
-        }
-        else
-        {
+        } else {
             flag = false;
             ClientDataHolderVR.getInstance().printChatMessage("Unknown teleport style requested: " + requestedStyle);
         }
 
-        if (flag && Minecraft.getInstance() != null && dataholder != null)
-        {
-        	dataholder.printChatMessage("Teleport style (RCTRL-M): " + this.name);
+        if (flag && Minecraft.getInstance() != null && dataholder != null) {
+            dataholder.printChatMessage("Teleport style (RCTRL-M): " + this.name);
         }
     }
 }

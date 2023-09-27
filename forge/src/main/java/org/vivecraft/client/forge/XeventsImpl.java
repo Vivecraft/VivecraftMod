@@ -29,5 +29,4 @@ public class XeventsImpl {
     public static void onRenderTickEnd(float f) {
         ForgeEventFactory.onRenderTickEnd(f);
     }
-
 }

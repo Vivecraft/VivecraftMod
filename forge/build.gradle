@@ -14,11 +14,13 @@ loom {
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
         mixinConfig "vivecraft.mixins.json"
+        mixinConfig "vivecraft.dynamicfps.mixins.json"
         mixinConfig "vivecraft.sodium.mixins.json"
         mixinConfig "vivecraft.forge.sodium.mixins.json"
         mixinConfig "vivecraft.iris.mixins.json"
         mixinConfig "vivecraft.physicsmod.mixins.json"
         mixinConfig "vivecraft.rei.mixins.json"
+        mixinConfig "vivecraft.resolutioncontrol.mixins.json"
         mixinConfig "vivecraft.optifine.mixins.json"
 
         mixinConfig "vivecraft.forge.mixins.json"
@@ -54,10 +56,10 @@ dependencies {
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
 
     // shadow the natives
-    bundle ("org.lwjgl:lwjgl-openvr:3.3.1") { transitive = false }
-    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
-    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
-    bundle ("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.1") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }
 }
 
 processResources {
@@ -73,27 +75,23 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [
-            project.configurations.shadowCommon,
-            project.configurations.bundle
+        project.configurations.shadowCommon,
+        project.configurations.bundle
     ]
-    classifier "dev-shadow"
+    archiveClassifier.set("dev-shadow")
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
-}
-
-remapJar {
     archiveClassifier.set('forge')
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier.set("dev")
     manifest {
         attributes(
-                'Main-Class': "org.vivecraft.LaunchPopup"
+            'Main-Class': "org.vivecraft.LaunchPopup"
         )
     }
 }

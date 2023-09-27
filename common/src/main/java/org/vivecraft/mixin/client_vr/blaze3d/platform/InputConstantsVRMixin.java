@@ -13,7 +13,7 @@ import org.vivecraft.client_vr.provider.InputSimulator;
 public class InputConstantsVRMixin {
 
     @Inject(at = @At("HEAD"), method = "isKeyDown", cancellable = true)
-    private static void keyDown(long l, int i, CallbackInfoReturnable<Boolean> cir){
-        cir.setReturnValue(GLFW.glfwGetKey(l,i) == 1 || (VRState.vrRunning && InputSimulator.isKeyDown(i))) ;
+    private static void vivecraft$keyDown(long l, int i, CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue(GLFW.glfwGetKey(l, i) == 1 || (VRState.vrRunning && InputSimulator.isKeyDown(i)));
     }
 }

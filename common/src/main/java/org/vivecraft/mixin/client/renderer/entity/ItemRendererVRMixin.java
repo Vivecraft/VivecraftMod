@@ -1,6 +1,5 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -18,13 +17,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
-import java.util.Iterator;
 import java.util.List;
 
 //TODO I don't think this does anything? Optifine
@@ -32,45 +31,44 @@ import java.util.List;
 public class ItemRendererVRMixin {
 
     @Unique
-    float fade = 1.0F;
+    float vivecraft$fade = 1.0F;
     @Unique
-    float manualFade = 1.0F;
+    float vivecraft$manualFade = 1.0F;
 
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V", shift = At.Shift.AFTER), method = "render")
     public void fade(ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel, CallbackInfo ci) {
         LocalPlayer localplayer = Minecraft.getInstance().player;
 
         if (localplayer != null && ClientDataHolderVR.isfphand) {
-            this.fade = SwingTracker.getItemFade(localplayer, itemStack);
-        }
-        else {
-            this.fade = this.manualFade;
+            this.vivecraft$fade = SwingTracker.getItemFade(localplayer, itemStack);
+        } else {
+            this.vivecraft$fade = this.vivecraft$manualFade;
         }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemBlockRenderTypes;getRenderType(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/client/renderer/RenderType;"), method = "render")
-    public RenderType rendertypeFade(ItemStack itemStack, boolean bl) {
-        if (ClientDataHolderVR.isfphand && this.fade < 1.0F) {
+    public RenderType vivecraft$rendertypeFade(ItemStack itemStack, boolean bl) {
+        if (ClientDataHolderVR.isfphand && this.vivecraft$fade < 1.0F) {
             return Sheets.translucentCullBlockSheet();
         }
         return ItemBlockRenderTypes.getRenderType(itemStack, bl);
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/VertexConsumer;putBulkData(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lnet/minecraft/client/renderer/block/model/BakedQuad;FFFII)V", shift = At.Shift.BY, by = -3), method = "renderQuadList", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void specialItems(PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack, int i, int j, CallbackInfo ci, boolean bl, PoseStack.Pose pose, Iterator var9, BakedQuad bakedQuad, int k, float f, float g, float h) {
+    // Color vivecraft items, this clashes with old sodium
+    @ModifyVariable(at = @At(value = "LOAD", ordinal = 0), ordinal = 2, method = "renderQuadList")
+    public int vivecraft$specialItems(int color, PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack) {
         if (ClientDataHolderVR.getInstance().jumpTracker.isBoots(itemStack)) {
-            k = this.makeColor(1, 0, 255, 0);
+            return this.vivecraft$makeColor(1, 0, 255, 0);
+        } else if (ClientDataHolderVR.getInstance().climbTracker.isClaws(itemStack)) {
+            return this.vivecraft$makeColor(1, 130, 0, 75);
+        } else if (TelescopeTracker.isLegacyTelescope(itemStack)) {
+            return this.vivecraft$makeColor(1, 190, 110, 135);
         }
-        else if (ClientDataHolderVR.getInstance().climbTracker.isClaws(itemStack)) {
-            k = this.makeColor(1, 130, 0, 75);
-        }
-        else if (TelescopeTracker.isLegacyTelescope(itemStack)) {
-            k = this.makeColor(1, 190, 110, 135);
-        }
+        return color;
     }
 
-    private int makeColor(int a, int r, int g, int b) {
+    @Unique
+    private int vivecraft$makeColor(int a, int r, int g, int b) {
         return a << 24 | r << 16 | g << 8 | b;
     }
-
 }
