@@ -225,8 +225,7 @@ public class VRData {
             return new VRPoseImpl(
                 getPosition(),
                 getDirection(),
-                quat,
-                getRoll()
+                quat
             );
         }
 
