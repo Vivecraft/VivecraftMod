@@ -35,42 +35,47 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
         this.c1History.addPose(data.getController1());
     }
 
+    @Nullable
     @Override
-    public VRData getPreTickRoomData() throws IllegalStateException {
+    public VRData getPreTickRoomData() {
         if (!isVrActive()) {
-            throw new IllegalStateException();
+            return null;
         }
         return ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.asVRData();
     }
 
+    @Nullable
     @Override
-    public VRData getPostTickRoomData() throws IllegalStateException {
+    public VRData getPostTickRoomData() {
         if (!isVrActive()) {
-            throw new IllegalStateException();
+            return null;
         }
         return ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.asVRData();
     }
 
+    @Nullable
     @Override
-    public VRData getPreTickWorldData() throws IllegalStateException {
+    public VRData getPreTickWorldData() {
         if (!isVrActive()) {
-            throw new IllegalStateException();
+            return null;
         }
         return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.asVRData();
     }
 
+    @Nullable
     @Override
-    public VRData getPostTickWorldData() throws IllegalStateException {
+    public VRData getPostTickWorldData() {
         if (!isVrActive()) {
-            throw new IllegalStateException();
+            return null;
         }
         return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_post.asVRData();
     }
 
+    @Nullable
     @Override
-    public VRData getWorldRenderData() throws IllegalStateException {
+    public VRData getWorldRenderData() {
         if (!isVrActive()) {
-            throw new IllegalStateException();
+            return null;
         }
         return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.asVRData();
     }

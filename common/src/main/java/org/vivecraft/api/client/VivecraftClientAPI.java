@@ -26,19 +26,19 @@ public interface VivecraftClientAPI {
      * Gets data representing the devices as they exist in the room before the game tick.
      * Note that this data is gathered BEFORE mod loaders' pre-tick events.
      *
-     * @return Data representing the devices in the room pre-tick.
-     * @throws IllegalStateException Thrown when the local player isn't in VR.
+     * @return Data representing the devices in the room pre-tick, or null if the local player isn't in VR.
      */
-    VRData getPreTickRoomData() throws IllegalStateException;
+    @Nullable
+    VRData getPreTickRoomData();
 
     /**
      * Gets data representing the devices as they exist in the room after the game tick.
      * Note that this data is gathered AFTER mod loaders' post-tick events.
      *
-     * @return Data representing the devices in the room post-tick.
-     * @throws IllegalStateException Thrown when the local player isn't in VR.
+     * @return Data representing the devices in the room post-tick, or null if the local player isn't in VR.
      */
-    VRData getPostTickRoomData() throws IllegalStateException;
+    @Nullable
+    VRData getPostTickRoomData();
 
     /**
      * Gets data representing the devices as they exist in Minecraft coordinates before the game tick.
@@ -47,30 +47,31 @@ public interface VivecraftClientAPI {
      * likely want to use this one.
      * Note that this data is gathered BEFORE mod loaders' pre-tick events.
      *
-     * @return Data representing the devices in Minecraft space pre-tick.
-     * @throws IllegalStateException Thrown when the local player isn't in VR.
+     * @return Data representing the devices in Minecraft space pre-tick, or null if the local player isn't in VR.
      */
-    VRData getPreTickWorldData() throws IllegalStateException;
+    @Nullable
+    VRData getPreTickWorldData();
 
     /**
      * Gets data representing the devices as they exist in Minecraft coordinates after the game tick.
      * This is the data sent to the server, and also used to calculate the data in {@link #getWorldRenderData()}.
      * Note that this data is gathered AFTER mod loaders' post-tick events.
      *
-     * @return Data representing the devices in Minecraft space post-tick.
-     * @throws IllegalStateException Thrown when the local player isn't in VR.
+     * @return Data representing the devices in Minecraft space post-tick, or null if the local player isn't in VR.
      */
-    VRData getPostTickWorldData() throws IllegalStateException;
+    @Nullable
+    VRData getPostTickWorldData();
 
     /**
      * Gets data representing the devices as they exist in Minecraft coordinates after the game tick interpolated for
      * rendering.
      * This is the same data as {@link #getPostTickWorldData()}, however it is interpolated for rendering.
      *
-     * @return Data representing the devices in Minecraft space post-tick interpolated for rendering.
-     * @throws IllegalStateException Thrown when the local player isn't in VR.
+     * @return Data representing the devices in Minecraft space post-tick interpolated for rendering, or null if the
+     * local player isn't in VR.
      */
-    VRData getWorldRenderData() throws IllegalStateException;
+    @Nullable
+    VRData getWorldRenderData();
 
     /**
      * Causes a haptic pulse (vibration/rumble) for the specified controller.
@@ -195,23 +196,4 @@ public interface VivecraftClientAPI {
      * @return Whether the keyboard is currently showing after attempting to open/close it.
      */
     boolean setKeyboardState(boolean isNowOpen);
-
-    /**
-     * Opens Vivecraft's keyboard to allow VR users to easily input text. Will fail silently if the user isn't in VR or
-     * if the keyboard is already open.
-     *
-     * @return Whether the keyboard is currently showing after attempting to open it.
-     */
-    default boolean openKeyboard() {
-        return setKeyboardState(true);
-    }
-
-    /**
-     * Close Vivecraft's keyboard. Will fail silently if the user isn't in VR or if the keyboard is already closed.
-     *
-     * @return Whether the keyboard is currently showing after attempting to close it.
-     */
-    default boolean closeKeyboard() {
-        return setKeyboardState(false);
-    }
 }
