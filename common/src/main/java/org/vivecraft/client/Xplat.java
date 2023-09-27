@@ -71,17 +71,17 @@ public interface Xplat {
     }
 
     @ExpectPlatform
-    static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn){
+    static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn) {
         return new TextureAtlasSprite[]{};
     }
 
     @ExpectPlatform
-    static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
+    static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
         return null;
     }
 
     @ExpectPlatform
-    static BiomeSpecialEffects getBiomeEffects(Biome biome){
+    static BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return null;
     }
 }

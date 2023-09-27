@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
-import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -26,6 +25,7 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.VRServerPerms;
+import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
 
 import java.util.UUID;
@@ -86,7 +86,7 @@ public class ClientNetworking {
             (CommonDataHolder.getInstance().versionIdentifier + (VRState.vrRunning ? " VR" : " NONVR")
                 + "\n" + CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION
                 + "\n" + CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION
-        ).getBytes(Charsets.UTF_8)));
+            ).getBytes(Charsets.UTF_8)));
     }
 
     public static void sendVRPlayerPositions(VRPlayer vrPlayer) {
@@ -223,8 +223,8 @@ public class ClientNetworking {
                     dataholder.vrPlayer.vrSwitchWarning = true;
                 }
                 if (!ClientNetworking.displayedChatMessage
-                        && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
-                        || (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()))) {
+                    && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
+                    || (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()))) {
                     ClientNetworking.displayedChatMessage = true;
                     mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
                 }

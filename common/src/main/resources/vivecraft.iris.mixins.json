@@ -6,9 +6,9 @@
   "client": [
     "IrisBeginFrameHack",
     "IrisChunkProgramOverridesMixin",
+    "IrisChunkProgramOverridesMixinSodium_0_4_11",
     "IrisChunkProgramOverridesMixinSodium_0_4_8",
     "IrisChunkProgramOverridesMixinSodium_0_4_9",
-    "IrisChunkProgramOverridesMixinSodium_0_4_11",
     "IrisHandRendererVRMixin",
     "IrisNewWorldRenderingPipelineVRMixin",
     "IrisPipelineManagerVRMixin",

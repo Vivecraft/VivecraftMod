@@ -18,34 +18,35 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(FireworkRocketEntity.class)
 public class FireworkRocketEntityVRMixin {
 
-    @Shadow private @Nullable LivingEntity attachedToEntity;
+    @Shadow
+    private @Nullable LivingEntity attachedToEntity;
 
     @Unique
-    private Vec3 handPos = null;
+    private Vec3 vivecraft$handPos = null;
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 1, method = "tick")
-    private double modifyX(double x) {
+    private double vivecraft$modifyX(double x) {
         if (attachedToEntity instanceof LocalPlayer localPlayer && attachedToEntity == Minecraft.getInstance().player && VRState.vrRunning) {
             var controller = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getHand(!localPlayer.getOffhandItem().is(Items.FIREWORK_ROCKET) && localPlayer.getMainHandItem().is(Items.FIREWORK_ROCKET) ? 0 : 1);
-            handPos = controller.getPosition().add(controller.getDirection().scale(0.25));
-            return handPos.x;
+            vivecraft$handPos = controller.getPosition().add(controller.getDirection().scale(0.25));
+            return vivecraft$handPos.x;
         }
         return x;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 2, method = "tick")
-    private double modifyY(double y) {
-        if (handPos != null) {
-            return handPos.y;
+    private double vivecraft$modifyY(double y) {
+        if (vivecraft$handPos != null) {
+            return vivecraft$handPos.y;
         }
         return y;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 3, method = "tick")
-    private double modifyZ(double z) {
-        if (handPos != null) {
-            z = handPos.z;
-            handPos = null;
+    private double vivecraft$modifyZ(double z) {
+        if (vivecraft$handPos != null) {
+            z = vivecraft$handPos.z;
+            vivecraft$handPos = null;
         }
         return z;
     }
@@ -53,7 +54,7 @@ public class FireworkRocketEntityVRMixin {
     /*
     // server offset, this is wrong somehow
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getHandHoldingItemAngle(Lnet/minecraft/world/item/Item;)Lnet/minecraft/world/phys/Vec3;"), method = "tick")
-    private Vec3 redirectHandOffset(LivingEntity instance, Item item){
+    private Vec3 vivecraft$redirectHandOffset(LivingEntity instance, Item item){
         if (instance instanceof ServerPlayer serverPlayer) {
             ServerVivePlayer vivePLayer = ServerVRPlayers.getVivePlayer(serverPlayer);
             if(vivePLayer != null && vivePLayer.isVR()) {

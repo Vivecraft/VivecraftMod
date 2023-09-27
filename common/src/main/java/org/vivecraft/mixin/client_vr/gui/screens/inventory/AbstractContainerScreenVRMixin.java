@@ -14,7 +14,7 @@ public class AbstractContainerScreenVRMixin {
     protected boolean isQuickCrafting;
 
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;isQuickCrafting:Z"), method = "mouseDragged")
-    public boolean shift(AbstractContainerScreen instance) {
+    public boolean vivecraft$shift(AbstractContainerScreen instance) {
         return this.isQuickCrafting && !Screen.hasShiftDown();
     }
 }

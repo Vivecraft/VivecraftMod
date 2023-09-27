@@ -43,6 +43,10 @@ public class OptifineHelper {
     private static Method shadersRenderBeginOutlineMethod;
     private static Method shadersRenderEndOutlineMethod;
 
+    private static Class<?> shaders;
+    private static Method shadersBeginEntitiesMethod;
+    private static Method shadersEndEntitiesMethod;
+
     private static Field optionsOfRenderRegions;
     private static Field optionsOfCloudHeight;
     private static Field vertexRenderPositions;
@@ -68,7 +72,7 @@ public class OptifineHelper {
 
     public static boolean isShaderActive() {
         try {
-            return (boolean)optifineConfigIsShadersMethod.invoke(optifineConfig);
+            return (boolean) optifineConfigIsShadersMethod.invoke(optifineConfig);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
@@ -91,9 +95,25 @@ public class OptifineHelper {
         }
     }
 
+    public static void beginEntities() {
+        try {
+            shadersBeginEntitiesMethod.invoke(shaders);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void endEntities() {
+        try {
+            shadersEndEntitiesMethod.invoke(shaders);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static boolean isSunMoonEnabled() {
         try {
-            return (boolean)optifineConfigIsSunMoonEnabledMethod.invoke(optifineConfig);
+            return (boolean) optifineConfigIsSunMoonEnabledMethod.invoke(optifineConfig);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
@@ -102,15 +122,16 @@ public class OptifineHelper {
 
     public static boolean isSkyEnabled() {
         try {
-            return (boolean)optifineConfigIsSkyEnabledMethod.invoke(optifineConfig);
+            return (boolean) optifineConfigIsSkyEnabledMethod.invoke(optifineConfig);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
         }
     }
+
     public static boolean isStarsEnabled() {
         try {
-            return (boolean)optifineConfigIsStarsEnabledMethod.invoke(optifineConfig);
+            return (boolean) optifineConfigIsStarsEnabledMethod.invoke(optifineConfig);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
@@ -119,7 +140,7 @@ public class OptifineHelper {
 
     public static boolean isCustomColors() {
         try {
-            return (boolean)optifineConfigIsCustomColorsMethod.invoke(optifineConfig);
+            return (boolean) optifineConfigIsCustomColorsMethod.invoke(optifineConfig);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
@@ -128,7 +149,7 @@ public class OptifineHelper {
 
     public static boolean isRenderRegions() {
         try {
-            return (boolean)optifineConfigIsRenderRegionsMethod.invoke(optifineConfig);
+            return (boolean) optifineConfigIsRenderRegionsMethod.invoke(optifineConfig);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
@@ -137,8 +158,8 @@ public class OptifineHelper {
 
     public static boolean isAntialiasing() {
         try {
-            return (boolean)optifineConfigIsAntialiasingMethod.invoke(optifineConfig)
-                || (boolean)optifineConfigIsAntialiasingConfiguredMethod.invoke(optifineConfig);
+            return (boolean) optifineConfigIsAntialiasingMethod.invoke(optifineConfig)
+                || (boolean) optifineConfigIsAntialiasingConfiguredMethod.invoke(optifineConfig);
         } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
             return false;
@@ -155,7 +176,7 @@ public class OptifineHelper {
 
     public static Vec3 getCustomSkyColor(Vec3 skyColor, BlockAndTintGetter blockAccess, double x, double y, double z) {
         try {
-            return (Vec3)customColorsGetSkyColorMethod.invoke(customColors, skyColor, blockAccess, x, y, z);
+            return (Vec3) customColorsGetSkyColorMethod.invoke(customColors, skyColor, blockAccess, x, y, z);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return skyColor;
@@ -164,7 +185,7 @@ public class OptifineHelper {
 
     public static Vec3 getCustomSkyColorEnd(Vec3 skyColor) {
         try {
-            return (Vec3)customColorsGetSkyColoEndMethod.invoke(customColors, skyColor);
+            return (Vec3) customColorsGetSkyColoEndMethod.invoke(customColors, skyColor);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return skyColor;
@@ -174,7 +195,7 @@ public class OptifineHelper {
 
     public static Vec3 getCustomUnderwaterColor(BlockAndTintGetter blockAccess, double x, double y, double z) {
         try {
-            return (Vec3)customColorsGetUnderwaterColorMethod.invoke(customColors, blockAccess, x, y, z);
+            return (Vec3) customColorsGetUnderwaterColorMethod.invoke(customColors, blockAccess, x, y, z);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return null;
@@ -183,7 +204,7 @@ public class OptifineHelper {
 
     public static Vec3 getCustomUnderlavaColor(BlockAndTintGetter blockAccess, double x, double y, double z) {
         try {
-            return (Vec3)customColorsGetUnderlavaColorMethod.invoke(customColors, blockAccess, x, y, z);
+            return (Vec3) customColorsGetUnderlavaColorMethod.invoke(customColors, blockAccess, x, y, z);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return null;
@@ -192,7 +213,7 @@ public class OptifineHelper {
 
     public static Vec3 getCustomFogColor(Vec3 fogColor, BlockAndTintGetter blockAccess, double x, double y, double z) {
         try {
-            return (Vec3)customColorsGetFogColorMethod.invoke(customColors, fogColor, blockAccess, x, y, z);
+            return (Vec3) customColorsGetFogColorMethod.invoke(customColors, fogColor, blockAccess, x, y, z);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return fogColor;
@@ -201,7 +222,7 @@ public class OptifineHelper {
 
     public static Vec3 getCustomFogColorEnd(Vec3 fogColor) {
         try {
-            return (Vec3)customColorsGetFogColorEndMethod.invoke(customColors, fogColor);
+            return (Vec3) customColorsGetFogColorEndMethod.invoke(customColors, fogColor);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return fogColor;
@@ -210,7 +231,7 @@ public class OptifineHelper {
 
     public static Vec3 getCustomFogColorNether(Vec3 fogColor) {
         try {
-            return (Vec3)customColorsGetFogColorNetherMethod.invoke(customColors, fogColor);
+            return (Vec3) customColorsGetFogColorNetherMethod.invoke(customColors, fogColor);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return fogColor;
@@ -219,7 +240,7 @@ public class OptifineHelper {
 
     public static double getCloudHeight() {
         try {
-            return (double)optionsOfCloudHeight.get(Minecraft.getInstance().options);
+            return (double) optionsOfCloudHeight.get(Minecraft.getInstance().options);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             return 0;
@@ -272,6 +293,10 @@ public class OptifineHelper {
             shadersRenderBeginOutlineMethod = shadersRender.getMethod("beginOutline");
             shadersRenderEndOutlineMethod = shadersRender.getMethod("endOutline");
 
+            shaders = Class.forName("net.optifine.shaders.Shaders");
+            shadersBeginEntitiesMethod = shaders.getMethod("beginEntities");
+            shadersEndEntitiesMethod = shaders.getMethod("endEntities");
+
             // private methods
             customColorsGetSkyColoEndMethod = customColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);
             customColorsGetSkyColoEndMethod.setAccessible(true);
@@ -288,7 +313,6 @@ public class OptifineHelper {
                 // this version doesn't have the entity render improvements
                 vertexRenderPositions = null;
             }
-
         } catch (ClassNotFoundException e) {
             VRSettings.logger.error("Optifine detected, but couldn't load class: {}", e.getMessage());
             optifineLoaded = false;
@@ -299,5 +323,4 @@ public class OptifineHelper {
             VRSettings.logger.error("Optifine detected, but couldn't load Field: {}", e.getMessage());
         }
     }
-
 }

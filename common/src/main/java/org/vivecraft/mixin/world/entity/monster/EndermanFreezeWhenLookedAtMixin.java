@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
-@Mixin(EnderMan.EndermanFreezeWhenLookedAt.class)
+@Mixin(targets = "net.minecraft.world.entity.monster.EnderMan$EndermanFreezeWhenLookedAt")
 public class EndermanFreezeWhenLookedAtMixin {
 
     @Shadow
@@ -24,12 +24,11 @@ public class EndermanFreezeWhenLookedAtMixin {
     private EnderMan enderman;
 
     @Inject(at = @At("HEAD"), method = "tick", cancellable = true)
-    public void vrTick(CallbackInfo ci) {
+    public void vivecraft$vrTick(CallbackInfo ci) {
         if (this.target instanceof ServerPlayer player && ServerVRPlayers.isVRPlayer(player)) {
             ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);
             this.enderman.getLookControl().setLookAt(data.getHMDPos(player));
             ci.cancel();
         }
     }
-
 }

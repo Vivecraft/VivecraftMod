@@ -34,7 +34,7 @@ public class SoundOptionsScreenVRMixin extends Screen {
     private AbstractWidget directionalAudioVRButton = null;
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/SoundOptionsScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 2, shift = At.Shift.BEFORE))
-    private void addVivecraftSettings(CallbackInfo ci) {
+    private void vivecraft$addVivecraftSettings(CallbackInfo ci) {
         directionalAudioVRButton = CycleButton.builder((bool) -> (boolean)bool ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF)
             .withValues(false, true)
             .withInitialValue(ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0)

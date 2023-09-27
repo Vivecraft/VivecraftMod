@@ -3,8 +3,7 @@ package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 import net.minecraft.client.KeyMapping;
 import org.vivecraft.client.VivecraftVRMod;
 
-public enum VRInputActionSet
-{
+public enum VRInputActionSet {
     INGAME("/actions/ingame", "vivecraft.actionset.ingame", "leftright", false),
     GUI("/actions/gui", "vivecraft.actionset.gui", "leftright", false),
     GLOBAL("/actions/global", "vivecraft.actionset.global", "leftright", false),
@@ -19,20 +18,17 @@ public enum VRInputActionSet
     public final String usage;
     public final boolean advanced;
 
-    private VRInputActionSet(String name, String localizedName, String usage, boolean advanced)
-    {
+    VRInputActionSet(String name, String localizedName, String usage, boolean advanced) {
         this.name = name;
         this.localizedName = localizedName;
         this.usage = usage;
         this.advanced = advanced;
     }
 
-    public static VRInputActionSet fromKeyBinding(KeyMapping keyBinding)
-    {
+    public static VRInputActionSet fromKeyBinding(KeyMapping keyBinding) {
         String s = keyBinding.getCategory();
 
-        switch (s)
-        {
+        switch (s) {
             case "vivecraft.key.category.gui":
                 return GUI;
 

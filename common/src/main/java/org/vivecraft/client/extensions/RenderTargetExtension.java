@@ -5,28 +5,23 @@ import org.lwjgl.opengl.GL30;
 
 public interface RenderTargetExtension {
 
-	String getName();
+    default void vivecraft$blitToScreen(int i, int viewWidth, int viewHeight, int j, boolean b, float f, float g, boolean c) {
+        vivecraft$blitToScreen(null, i, viewWidth, viewHeight, j, b, f, g, c);
+    }
 
-	void clearWithColor(float r, float g, float b, float a, boolean isMac);
+    void vivecraft$blitToScreen(ShaderInstance instance, int i, int viewWidth, int viewHeight, int j, boolean b, float f, float g, boolean c);
 
-	default void blitToScreen(int i, int viewWidth, int viewHeight, int j, boolean b, float f, float g, boolean c) {
-		blitToScreen(null, i, viewWidth, viewHeight, j, b, f, g, c);
-	}
+    default void vivecraft$genMipMaps() {
+        GL30.glGenerateMipmap(3553);
+    }
 
+    void vivecraft$setTextid(int texid);
 
-	void blitToScreen(ShaderInstance instance, int i, int viewWidth, int viewHeight, int j, boolean b, float f, float g, boolean c);
+    void vivecraft$setUseStencil(boolean useStencil);
 
-	default void genMipMaps() {
-		GL30.glGenerateMipmap(3553);
-	}
+    boolean vivecraft$getUseStencil();
 
-	void setTextid(int texid);
+    void vivecraft$isLinearFilter(boolean linearFilter);
 
-	void setUseStencil(boolean useStencil);
-
-	boolean getUseStencil();
-
-	void isLinearFilter(boolean linearFilter);
-
-	void blitFovReduction(ShaderInstance instance, int width, int height);
+    void vivecraft$blitFovReduction(ShaderInstance instance, int width, int height);
 }

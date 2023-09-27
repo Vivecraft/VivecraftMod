@@ -13,7 +13,7 @@ import org.vivecraft.client.gui.VivecraftClickEvent;
 public abstract class ScreenMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/ClickEvent;getAction()Lnet/minecraft/network/chat/ClickEvent$Action;", ordinal = 0), method = "handleComponentClicked(Lnet/minecraft/network/chat/Style;)Z", cancellable = true)
-    public void handleVivecraftClickEvents(Style style, CallbackInfoReturnable<Boolean> cir) {
+    public void vivecraft$handleVivecraftClickEvents(Style style, CallbackInfoReturnable<Boolean> cir) {
         if (style.getClickEvent() instanceof VivecraftClickEvent) {
             VivecraftClickEvent.VivecraftAction action = ((VivecraftClickEvent) style.getClickEvent()).getVivecraftAction();
             if (action == VivecraftClickEvent.VivecraftAction.OPEN_SCREEN) {
@@ -22,5 +22,4 @@ public abstract class ScreenMixin {
             }
         }
     }
-
 }

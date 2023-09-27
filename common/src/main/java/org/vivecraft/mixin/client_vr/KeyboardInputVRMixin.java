@@ -14,9 +14,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
-import org.vivecraft.client_vr.VRState;
 import org.vivecraft.common.utils.math.Vector2;
 
 import static org.vivecraft.client_vr.provider.openvr_lwjgl.control.VivecraftMovementInput.getMovementAxisValue;
@@ -28,12 +28,12 @@ public class KeyboardInputVRMixin extends Input {
     @Shadow
     private Options options;
     @Unique
-    private boolean autoSprintActive = false;
+    private boolean vivecraft$autoSprintActive = false;
     @Unique
-    private boolean movementSetByAnalog = false;
+    private boolean vivecraft$movementSetByAnalog = false;
 
     @Unique
-    private float axisToDigitalMovement(float value) {
+    private float vivecraft$axisToDigitalMovement(float value) {
         if (value > 0.5F) {
             return 1.0F;
         } else {
@@ -42,7 +42,7 @@ public class KeyboardInputVRMixin extends Input {
     }
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
-    public void tick(boolean isSneaking, float sneakSpeed, CallbackInfo ci) {
+    public void vivecraft$tick(boolean isSneaking, float sneakSpeed, CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
         }
@@ -103,7 +103,7 @@ public class KeyboardInputVRMixin extends Input {
                         this.leftImpulse -= getMovementAxisValue(this.options.keyRight);
                         this.leftImpulse += getMovementAxisValue(this.options.keyLeft);
                     } else {
-                        this.forwardImpulse = this.axisToDigitalMovement(vector21.getY());
+                        this.forwardImpulse = this.vivecraft$axisToDigitalMovement(vector21.getY());
                     }
                 } else if (dataholder.vrSettings.analogMovement) {
                     flag1 = true;
@@ -132,13 +132,13 @@ public class KeyboardInputVRMixin extends Input {
                     this.forwardImpulse = vector2.getY();
                     this.leftImpulse = -vector2.getX();
                 } else {
-                    this.forwardImpulse = this.axisToDigitalMovement(vector2.getY());
-                    this.leftImpulse = this.axisToDigitalMovement(-vector2.getX());
+                    this.forwardImpulse = this.vivecraft$axisToDigitalMovement(vector2.getY());
+                    this.leftImpulse = this.vivecraft$axisToDigitalMovement(-vector2.getX());
                 }
             }
 
             if (flag1) {
-                this.movementSetByAnalog = true;
+                this.vivecraft$movementSetByAnalog = true;
                 this.up = this.forwardImpulse > 0.0F;
                 this.down = this.forwardImpulse < 0.0F;
                 this.left = this.leftImpulse > 0.0F;
@@ -151,27 +151,27 @@ public class KeyboardInputVRMixin extends Input {
                 if (dataholder.vrSettings.autoSprint) {
                     if (f >= dataholder.vrSettings.autoSprintThreshold) {
                         minecraft.player.setSprinting(true);
-                        this.autoSprintActive = true;
+                        this.vivecraft$autoSprintActive = true;
                         this.forwardImpulse = 1.0F;
                     } else if (this.forwardImpulse > 0.0F && dataholder.vrSettings.analogMovement) {
-                        this.forwardImpulse = this.forwardImpulse / dataholder.vrSettings.autoSprintThreshold * 1.0F;
+                        this.forwardImpulse = this.forwardImpulse / dataholder.vrSettings.autoSprintThreshold;
                     }
                 }
             }
         }
 
-        if (!flag1 && this.movementSetByAnalog) {
+        if (!flag1 && this.vivecraft$movementSetByAnalog) {
             VRInputAction.setKeyBindState(this.options.keyUp, false);
             VRInputAction.setKeyBindState(this.options.keyDown, false);
             VRInputAction.setKeyBindState(this.options.keyLeft, false);
             VRInputAction.setKeyBindState(this.options.keyRight, false);
         }
 
-        this.movementSetByAnalog = flag1;
+        this.vivecraft$movementSetByAnalog = flag1;
 
-        if (this.autoSprintActive && f < dataholder.vrSettings.autoSprintThreshold) {
+        if (this.vivecraft$autoSprintActive && f < dataholder.vrSettings.autoSprintThreshold) {
             minecraft.player.setSprinting(false);
-            this.autoSprintActive = false;
+            this.vivecraft$autoSprintActive = false;
         }
 
         boolean flag2 = minecraft.screen == null && (dataholder.vrPlayer.getFreeMove() || dataholder.vrSettings.simulateFalling) && !climbing;

@@ -14,6 +14,7 @@ public class RenderPassManager {
 
     public final MainTarget vanillaRenderTarget;
     public PostChain vanillaOutlineChain;
+    public PostChain vanillaPostEffect;
     public PostChain vanillaTransparencyChain;
     public static RenderPassType renderPassType = RenderPassType.VANILLA;
     public static WorldRenderPass wrp;
@@ -26,6 +27,9 @@ public class RenderPassManager {
         RenderPassManager.wrp = wrp;
         renderPassType = RenderPassType.WORLD_ONLY;
         mc.mainRenderTarget = wrp.target;
+        if (mc.gameRenderer != null) {
+            mc.gameRenderer.postEffect = wrp.postEffect;
+        }
     }
 
     public static void setGUIRenderPass() {
@@ -40,5 +44,8 @@ public class RenderPassManager {
         RenderPassManager.wrp = null;
         renderPassType = RenderPassType.VANILLA;
         mc.mainRenderTarget = INSTANCE.vanillaRenderTarget;
+        if (mc.gameRenderer != null) {
+            mc.gameRenderer.postEffect = INSTANCE.vanillaPostEffect;
+        }
     }
 }

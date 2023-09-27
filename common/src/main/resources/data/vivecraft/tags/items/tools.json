@@ -75,7 +75,6 @@
     "minecraft:golden_pickaxe",
     "minecraft:netherite_pickaxe",
 
-
     {
       "id": "#tconstruct:modifiable",
       "required": false

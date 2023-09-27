@@ -19,7 +19,8 @@ import org.vivecraft.client_vr.provider.MCVR;
 @Mixin(FishingHook.class)
 public abstract class FishingHookVRMixin extends Entity {
 
-    @Shadow private boolean biting;
+    @Shadow
+    private boolean biting;
 
     @Shadow
     public abstract Player getPlayerOwner();
@@ -29,32 +30,31 @@ public abstract class FishingHookVRMixin extends Entity {
     }
 
     @Unique
-    private boolean wasBiting = false;
+    private boolean vivecraft$wasBiting = false;
     @Unique
-    private boolean wasNibble = false;
+    private boolean vivecraft$wasNibble = false;
 
     @Inject(at = @At(value = "HEAD"), method = "tick")
-    private void fishhookFeedback(CallbackInfo ci){
+    private void vivecraft$fishhookFeedback(CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
         }
         Player player = this.getPlayerOwner();
-        if (player != null && player.isLocalPlayer())
-        {
-            if (biting && !wasBiting) {
+        if (player != null && player.isLocalPlayer()) {
+            if (biting && !vivecraft$wasBiting) {
                 // bite, big feedback
                 MCVR.get().triggerHapticPulse(
-                        player.getMainHandItem().getItem() instanceof FishingRodItem ? ControllerType.RIGHT : ControllerType.LEFT,
-                        0.005F, 160.0F, 0.5F);
-            } else if (getDeltaMovement().y < -0.01 && !wasNibble) {
+                    player.getMainHandItem().getItem() instanceof FishingRodItem ? ControllerType.RIGHT : ControllerType.LEFT,
+                    0.005F, 160.0F, 0.5F);
+            } else if (getDeltaMovement().y < -0.01 && !vivecraft$wasNibble) {
                 // nibble, small feedback
                 MCVR.get().triggerHapticPulse(
-                        player.getMainHandItem().getItem() instanceof FishingRodItem ? ControllerType.RIGHT : ControllerType.LEFT,
-                        0.0005F, 160.0F, 0.05F);
-                wasNibble = true;
+                    player.getMainHandItem().getItem() instanceof FishingRodItem ? ControllerType.RIGHT : ControllerType.LEFT,
+                    0.0005F, 160.0F, 0.05F);
+                vivecraft$wasNibble = true;
             }
         }
-        wasBiting = biting;
-        wasNibble = wasNibble && getDeltaMovement().y < 0.0;
+        vivecraft$wasBiting = biting;
+        vivecraft$wasNibble = vivecraft$wasNibble && getDeltaMovement().y < 0.0;
     }
 }

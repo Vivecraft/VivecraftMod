@@ -1,26 +1,21 @@
 package org.vivecraft.client_vr.gui;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.framework.TwoHandedScreen;
 import org.vivecraft.client_vr.provider.InputSimulator;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.client.gui.components.Button;
-
-public class GuiKeyboard extends TwoHandedScreen
-{
+public class GuiKeyboard extends TwoHandedScreen {
     private boolean isShift = false;
 
-    public void init()
-    {
+    public void init() {
         String s = this.dataholder.vrSettings.keyboardKeys;
         String s1 = this.dataholder.vrSettings.keyboardKeysShift;
         this.clearWidgets();
 
-        if (this.isShift)
-        {
+        if (this.isShift) {
             s = s1;
         }
 
@@ -29,26 +24,20 @@ public class GuiKeyboard extends TwoHandedScreen
         int k = 32;
         int l = 2;
         int i1 = 25;
-        double d0 = (double)s.length() / (double)i;
+        double d0 = (double) s.length() / (double) i;
 
-        if (Math.floor(d0) == d0)
-        {
-            j = (int)d0;
-        }
-        else
-        {
-            j = (int)(d0 + 1.0D);
+        if (Math.floor(d0) == d0) {
+            j = (int) d0;
+        } else {
+            j = (int) (d0 + 1.0D);
         }
 
-        for (int j1 = 0; j1 < j; ++j1)
-        {
-            for (int k1 = 0; k1 < i; ++k1)
-            {
+        for (int j1 = 0; j1 < j; ++j1) {
+            for (int k1 = 0; k1 < i; ++k1) {
                 int l1 = j1 * i + k1;
                 char c0 = ' ';
 
-                if (l1 < s.length())
-                {
+                if (l1 < s.length()) {
                     c0 = s.charAt(l1);
                 }
 
@@ -132,19 +121,16 @@ public class GuiKeyboard extends TwoHandedScreen
         }));
     }
 
-    public void setShift(boolean shift)
-    {
-        if (shift != this.isShift)
-        {
+    public void setShift(boolean shift) {
+        if (shift != this.isShift) {
             this.isShift = shift;
             this.reinit = true;
         }
     }
 
-    public void render(PoseStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks)
-    {
-        this.renderBackground(pMatrixStack);
-        drawCenteredString(pMatrixStack, this.font, "Keyboard", this.width / 2, 2, 16777215);
-        super.render(pMatrixStack, 0, 0, pPartialTicks);
+    public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
+        this.renderBackground(poseStack);
+        drawCenteredString(poseStack, this.font, "Keyboard", this.width / 2, 2, 16777215);
+        super.render(poseStack, 0, 0, pPartialTicks);
     }
 }

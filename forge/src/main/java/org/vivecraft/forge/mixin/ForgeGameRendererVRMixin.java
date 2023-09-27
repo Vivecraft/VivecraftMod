@@ -4,12 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
+import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(GameRenderer.class)
@@ -41,8 +42,7 @@ public class ForgeGameRendererVRMixin {
         if (RenderPassType.isVanilla()) {
             s.mulPose(quaternion);
         } else {
-            ((GameRendererExtension) this).applyVRModelView(ClientDataHolderVR.getInstance().currentPass, s);
+            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, s);
         }
     }
-
 }
