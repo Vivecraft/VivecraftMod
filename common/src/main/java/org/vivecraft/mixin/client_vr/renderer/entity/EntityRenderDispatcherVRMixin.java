@@ -53,7 +53,7 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                 if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
                     vec3 = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
                 }
-                Vec3 vec31 = entity.position().add(0.0D, (double) (entity.getBbHeight() / 2.0F), 0.0D).subtract(vec3).normalize();
+                Vec3 vec31 = entity.position().add(0.0D, entity.getBbHeight() / 2.0F, 0.0D).subtract(vec3).normalize();
                 Quaternionf q = new Quaternionf();
                 q.mul(Axis.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
                 q.mul(Axis.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
@@ -84,7 +84,7 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                 if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
                     vec3 = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
                 }
-                Vec3 vec31 = entity.position().add(0.0D, (double) (entity.getBbHeight() + offset), 0.0D).subtract(vec3).normalize();
+                Vec3 vec31 = entity.position().add(0.0D, entity.getBbHeight() + offset, 0.0D).subtract(vec3).normalize();
                 Quaternionf q = new Quaternionf();
                 q.mul(Axis.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
                 q.mul(Axis.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));

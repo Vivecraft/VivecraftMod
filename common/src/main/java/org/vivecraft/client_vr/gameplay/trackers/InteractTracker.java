@@ -39,9 +39,9 @@ public class InteractTracker extends Tracker {
     public BlockHitResult[] inBlockHit = new BlockHitResult[2];
     BlockPos[] inBlockPos = new BlockPos[2];
     Entity[] inEntity = new Entity[2];
-    private EntityHitResult[] inEntityHit = new EntityHitResult[2];
-    private boolean[] inCamera = new boolean[2];
-    private boolean[] inHandheldCamera = new boolean[2];
+    private final EntityHitResult[] inEntityHit = new EntityHitResult[2];
+    private final boolean[] inCamera = new boolean[2];
+    private final boolean[] inHandheldCamera = new boolean[2];
     boolean[] active = new boolean[2];
     boolean[] wasactive = new boolean[2];
     private HashSet<Class> rightClickable = null;
@@ -255,11 +255,8 @@ public class InteractTracker extends Tracker {
                     this.dh.cameraTracker.startMoving(i);
                     flag = true;
                 } else if (this.inEntityHit[i] != null) {
-                    flag = true;
 
-                    if (!this.mc.gameMode.interactAt(this.mc.player, this.inEntity[i], this.inEntityHit[i], interactionhand).consumesAction() && !this.mc.gameMode.interact(this.mc.player, this.inEntity[i], interactionhand).consumesAction()) {
-                        flag = false;
-                    }
+                    flag = this.mc.gameMode.interactAt(this.mc.player, this.inEntity[i], this.inEntityHit[i], interactionhand).consumesAction() || this.mc.gameMode.interact(this.mc.player, this.inEntity[i], interactionhand).consumesAction();
                 } else if (this.inBlockHit[i] != null) {
                     flag = this.mc.gameMode.useItemOn(this.mc.player, interactionhand, this.inBlockHit[i]).consumesAction();
                 } else if (this.bukkit[i]) {

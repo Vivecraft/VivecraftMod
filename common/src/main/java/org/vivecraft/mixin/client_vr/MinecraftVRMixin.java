@@ -812,7 +812,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Unique
     public void vivecraft$notifyMirror(String text, boolean clear, int lengthMs) {
         this.vivecraft$mirroNotifyStart = System.currentTimeMillis();
-        this.vivecraft$mirroNotifyLen = (long) lengthMs;
+        this.vivecraft$mirroNotifyLen = lengthMs;
         this.vivecraft$mirrorNotifyText = text;
         this.vivecraft$mirrorNotifyClear = clear;
     }

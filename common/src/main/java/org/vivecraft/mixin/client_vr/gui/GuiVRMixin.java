@@ -159,8 +159,7 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Unique
     private void vivecraft$renderViveHudIcons(GuiGraphics guiGraphics) {
-        if (this.minecraft.getCameraEntity() instanceof Player) {
-            Player player = (Player) this.minecraft.getCameraEntity();
+        if (this.minecraft.getCameraEntity() instanceof Player player) {
             int k = 0;
             MobEffect mobeffect = null;
 
@@ -240,10 +239,10 @@ public abstract class GuiVRMixin implements GuiExtension {
         float f1 = 0.00390625F;
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex((double) ((float) centreX - width / 2.0F), (double) ((float) centreY + height / 2.0F), 0).uv((float) (u + 0) * f, (float) (v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double) ((float) centreX + width / 2.0F), (double) ((float) centreY + height / 2.0F), 0).uv((float) (u + texWidth) * f, (float) (v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double) ((float) centreX + width / 2.0F), (double) ((float) centreY - height / 2.0F), 0).uv((float) (u + texWidth) * f, (float) (v + 0) * f1).endVertex();
-        bufferbuilder.vertex((double) ((float) centreX - width / 2.0F), (double) ((float) centreY - height / 2.0F), 0).uv((float) (u + 0) * f, (float) (v + 0) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY + height / 2.0F, 0).uv((float) (u) * f, (float) (v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY + height / 2.0F, 0).uv((float) (u + texWidth) * f, (float) (v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY - height / 2.0F, 0).uv((float) (u + texWidth) * f, (float) (v) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY - height / 2.0F, 0).uv((float) (u) * f, (float) (v) * f1).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
     }
 }

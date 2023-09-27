@@ -245,12 +245,12 @@ public abstract class VRRenderer {
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         builder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
         int i = 32;
-        float f = (float) (width / 2);
-        builder.vertex((float) (width / 2), (float) (width / 2), 0.0F).endVertex();
+        float f = width / 2;
+        builder.vertex(width / 2, width / 2, 0.0F).endVertex();
         for (int j = 0; j < i + 1; ++j) {
             float f1 = (float) j / (float) i * (float) Math.PI * 2.0F;
-            float f2 = (float) ((double) (width / 2) + Math.cos((double) f1) * (double) f);
-            float f3 = (float) ((double) (width / 2) + Math.sin((double) f1) * (double) f);
+            float f2 = (float) ((double) (width / 2) + Math.cos(f1) * (double) f);
+            float f3 = (float) ((double) (width / 2) + Math.sin(f1) * (double) f);
             builder.vertex(f2, f3, 0.0F).endVertex();
         }
         BufferUploader.drawWithShader(builder.end());

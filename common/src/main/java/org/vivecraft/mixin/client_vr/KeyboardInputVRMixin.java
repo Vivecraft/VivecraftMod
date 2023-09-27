@@ -154,7 +154,7 @@ public class KeyboardInputVRMixin extends Input {
                         this.vivecraft$autoSprintActive = true;
                         this.forwardImpulse = 1.0F;
                     } else if (this.forwardImpulse > 0.0F && dataholder.vrSettings.analogMovement) {
-                        this.forwardImpulse = this.forwardImpulse / dataholder.vrSettings.autoSprintThreshold * 1.0F;
+                        this.forwardImpulse = this.forwardImpulse / dataholder.vrSettings.autoSprintThreshold;
                     }
                 }
             }

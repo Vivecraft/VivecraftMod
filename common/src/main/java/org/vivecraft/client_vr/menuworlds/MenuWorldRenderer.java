@@ -64,7 +64,7 @@ public class MenuWorldRenderer {
 
     private static final ResourceLocation SNOW_LOCATION = new ResourceLocation("textures/environment/snow.png");
 
-    private Minecraft mc;
+    private final Minecraft mc;
     private DimensionSpecialEffects dimensionInfo;
     private FakeBlockAccess blockAccess;
     private final DynamicTexture lightTexture;
@@ -86,7 +86,7 @@ public class MenuWorldRenderer {
     private int renderDistanceChunks;
     public MenuFogRenderer fogRenderer;
     public Set<TextureAtlasSprite> visibleTextures = new HashSet<>();
-    private Random rand;
+    private final Random rand;
     private boolean ready;
     private CloudStatus prevCloudsType;
     private int prevCloudX;
@@ -572,8 +572,8 @@ public class MenuWorldRenderer {
                 int moonPhase = this.getMoonPhase();
                 int l = moonPhase % 4;
                 int i1 = moonPhase / 4 % 2;
-                float u0 = (float) (l + 0) / 4.0F;
-                float v0 = (float) (i1 + 0) / 2.0F;
+                float u0 = (float) (l) / 4.0F;
+                float v0 = (float) (i1) / 2.0F;
                 float u1 = (float) (l + 1) / 4.0F;
                 float v1 = (float) (i1 + 1) / 2.0F;
                 bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
@@ -828,10 +828,10 @@ public class MenuWorldRenderer {
             int ab = 32;
             for (int af = -32; af < 32; af += 32) {
                 for (int ag = -32; ag < 32; ag += 32) {
-                    bufferBuilder.vertex(af + 0, z, ag + 32).uv((float) (af + 0) * 0.00390625f + l, (float) (ag + 32) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
+                    bufferBuilder.vertex(af, z, ag + 32).uv((float) (af) * 0.00390625f + l, (float) (ag + 32) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
                     bufferBuilder.vertex(af + 32, z, ag + 32).uv((float) (af + 32) * 0.00390625f + l, (float) (ag + 32) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                    bufferBuilder.vertex(af + 32, z, ag + 0).uv((float) (af + 32) * 0.00390625f + l, (float) (ag + 0) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                    bufferBuilder.vertex(af + 0, z, ag + 0).uv((float) (af + 0) * 0.00390625f + l, (float) (ag + 0) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
+                    bufferBuilder.vertex(af + 32, z, ag).uv((float) (af + 32) * 0.00390625f + l, (float) (ag) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
+                    bufferBuilder.vertex(af, z, ag).uv((float) (af) * 0.00390625f + l, (float) (ag) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
                 }
             }
         }

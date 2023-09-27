@@ -41,7 +41,6 @@ public class TheEndPortalRendererVRMixin {
     private void vivecraft$differentShaderInVR(CallbackInfoReturnable<RenderType> cir) {
         if (!RenderPassType.isVanilla()) {
             cir.setReturnValue(vivecraft$END_PORTAL_VR);
-            ;
         }
     }
 }

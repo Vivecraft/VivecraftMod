@@ -99,7 +99,7 @@ public class VRPlayer {
 
     public void preTick() {
         this.onTick = true;
-        this.vrdata_world_pre = new VRData(this.roomOrigin, this.dh.vrSettings.walkMultiplier, this.worldScale, (float) Math.toRadians((double) this.dh.vrSettings.worldRotation));
+        this.vrdata_world_pre = new VRData(this.roomOrigin, this.dh.vrSettings.walkMultiplier, this.worldScale, (float) Math.toRadians(this.dh.vrSettings.worldRotation));
         float f = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
 
         if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom()) {
@@ -162,10 +162,10 @@ public class VRPlayer {
         this.roomOrigin = this.roomOrigin.subtract(vec3);
         VRData vrdata2 = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
         float f = dataholder.vrSettings.worldRotation;
-        float f1 = (float) Math.toDegrees((double) this.vrdata_world_pre.rotation_radians);
+        float f1 = (float) Math.toDegrees(this.vrdata_world_pre.rotation_radians);
         this.rotateOriginAround(-f + f1, vrdata2.getHeadPivot());
         this.vrdata_room_post = new VRData(new Vec3(0.0D, 0.0D, 0.0D), dataholder.vrSettings.walkMultiplier, 1.0F, 0.0F);
-        this.vrdata_world_post = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float) Math.toRadians((double) dataholder.vrSettings.worldRotation));
+        this.vrdata_world_post = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float) Math.toRadians(dataholder.vrSettings.worldRotation));
         this.doPermanantLookOverride(minecraft.player, this.vrdata_world_post);
         ClientNetworking.sendVRPlayerPositions(this);
         this.onTick = false;
@@ -225,7 +225,7 @@ public class VRPlayer {
                     VRData vrdata = this.vrdata_world_pre;
 
                     if (instant) {
-                        vrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float) Math.toRadians((double) dataholder.vrSettings.worldRotation));
+                        vrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float) Math.toRadians(dataholder.vrSettings.worldRotation));
                     }
 
                     Vec3 vec3 = vrdata.getHeadPivot().subtract(vrdata.origin);
@@ -239,17 +239,17 @@ public class VRPlayer {
     }
 
     public float rotDiff_Degrees(float start, float end) {
-        double d0 = Math.toRadians((double) end);
-        double d1 = Math.toRadians((double) start);
+        double d0 = Math.toRadians(end);
+        double d1 = Math.toRadians(start);
         return (float) Math.toDegrees(Math.atan2(Math.sin(d0 - d1), Math.cos(d0 - d1)));
     }
 
     public void rotateOriginAround(float degrees, Vec3 o) {
         Vec3 vec3 = this.roomOrigin;
-        float f = (float) Math.toRadians((double) degrees);
+        float f = (float) Math.toRadians(degrees);
 
         if (f != 0.0F) {
-            this.setRoomOrigin(Math.cos((double) f) * (vec3.x - o.x) - Math.sin((double) f) * (vec3.z - o.z) + o.x, vec3.y, Math.sin((double) f) * (vec3.x - o.x) + Math.cos((double) f) * (vec3.z - o.z) + o.z, false);
+            this.setRoomOrigin(Math.cos(f) * (vec3.x - o.x) - Math.sin(f) * (vec3.z - o.z) + o.x, vec3.y, Math.sin(f) * (vec3.x - o.x) + Math.cos(f) * (vec3.z - o.z) + o.z, false);
         }
     }
 
@@ -284,15 +284,13 @@ public class VRPlayer {
             if (player.isPassenger()) {
                 Entity entity = mc.player.getVehicle();
 
-                if (entity instanceof AbstractHorse) {
-                    AbstractHorse abstracthorse = (AbstractHorse) entity;
+                if (entity instanceof AbstractHorse abstracthorse) {
 
                     if (abstracthorse.isControlledByLocalInstance() && abstracthorse.isSaddled() && !dh.horseTracker.isActive(mc.player)) {
                         abstracthorse.yBodyRot = this.vrdata_world_pre.getBodyYaw();
                         dh.vehicleTracker.rotationCooldown = 10;
                     }
-                } else if (entity instanceof Mob) {
-                    Mob mob = (Mob) entity;
+                } else if (entity instanceof Mob mob) {
 
                     if (mob.isControlledByLocalInstance()) {
                         mob.yBodyRot = this.vrdata_world_pre.getBodyYaw();
@@ -349,7 +347,7 @@ public class VRPlayer {
                                             }
 
                                             float f3 = player.getDimensions(player.getPose()).width * 0.45F;
-                                            double d3 = (double) (f - f3);
+                                            double d3 = f - f3;
                                             AABB aabb1 = new AABB(vec31.x - d3, aabb.minY, vec31.z - d3, vec31.x + d3, aabb.maxY, vec31.z + d3);
                                             boolean flag1 = !minecraft.level.noCollision(player, aabb1);
 
@@ -373,7 +371,7 @@ public class VRPlayer {
                                                         d1 = d1 + (double) (0.1F * (float) j);
                                                         player.setPosRaw(d0, d1, d2);
                                                         player.setBoundingBox(new AABB(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ));
-                                                        Vec3 vec32 = this.roomOrigin.add(d4, (double) (0.1F * (float) j), d5);
+                                                        Vec3 vec32 = this.roomOrigin.add(d4, 0.1F * (float) j, d5);
                                                         this.setRoomOrigin(vec32.x, vec32.y, vec32.z, false);
                                                         Vec3 vec33 = player.getLookAngle();
                                                         Vec3 vec34 = (new Vec3(vec33.x, 0.0D, vec33.z)).normalize();
@@ -452,11 +450,9 @@ public class VRPlayer {
             itemstack = c == 0 ? entity.getMainHandItem() : entity.getOffhandItem();
 
             if (!(itemstack.getItem() instanceof SnowballItem) && !(itemstack.getItem() instanceof EggItem) && !(itemstack.getItem() instanceof SpawnEggItem) && !(itemstack.getItem() instanceof PotionItem) && !(itemstack.getItem() instanceof BowItem) && !itemstack.is(ItemTags.VIVECRAFT_THROW_ITEMS)) {
-                if (!(itemstack.getItem() instanceof CrossbowItem)) {
+                if (!(itemstack.getItem() instanceof CrossbowItem crossbowitem)) {
                     break label54;
                 }
-
-                CrossbowItem crossbowitem = (CrossbowItem) itemstack.getItem();
 
                 if (!CrossbowItem.isCharged(itemstack)) {
                     break label54;

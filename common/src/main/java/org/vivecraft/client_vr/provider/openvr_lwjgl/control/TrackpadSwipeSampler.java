@@ -11,11 +11,11 @@ public class TrackpadSwipeSampler {
     private static final int RIGHT = 1;
     private static final int DOWN = 2;
     private static final int LEFT = 3;
-    private Vector2f[] buffer = new Vector2f[5];
+    private final Vector2f[] buffer = new Vector2f[5];
     private int index;
     private long count;
-    private Vector2f accumulator = new Vector2f();
-    private int[] swiped = new int[4];
+    private final Vector2f accumulator = new Vector2f();
+    private final int[] swiped = new int[4];
     public float threshold = 0.5F;
 
     public TrackpadSwipeSampler() {

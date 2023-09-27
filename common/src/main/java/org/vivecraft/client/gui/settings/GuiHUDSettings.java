@@ -11,7 +11,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiHUDSettings extends GuiVROptionsBase {
-    private VROptionEntry[] hudOptions = new VROptionEntry[]{
+    private final VROptionEntry[] hudOptions = new VROptionEntry[]{
         new VROptionEntry(VRSettings.VrOptions.HUD_HIDE),
         new VROptionEntry(VRSettings.VrOptions.HUD_LOCK_TO),
         new VROptionEntry(VRSettings.VrOptions.HUD_SCALE),

@@ -109,7 +109,7 @@ public class Vector4f extends Vector {
             f = 1.0F;
         }
 
-        return (float) Math.acos((double) f);
+        return (float) Math.acos(f);
     }
 
     public Vector load(FloatBuffer buf) {

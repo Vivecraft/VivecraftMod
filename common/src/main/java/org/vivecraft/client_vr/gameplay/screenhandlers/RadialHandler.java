@@ -125,15 +125,15 @@ public class RadialHandler {
 
             new Matrix4f();
             Vec3 vec3 = vrdata$vrdevicepose.getPosition();
-            Vec3 vec31 = new Vec3(0.0D, 0.0D, (double) (-f));
+            Vec3 vec31 = new Vec3(0.0D, 0.0D, -f);
             Vec3 vec32 = vrdata$vrdevicepose.getCustomVector(vec31);
             Pos_room = new Vec3(vec32.x / 2.0D + vec3.x, vec32.y / 2.0D + vec3.y, vec32.z / 2.0D + vec3.z);
             Vector3 vector3 = new Vector3();
             vector3.setX((float) (Pos_room.x - vec3.x));
             vector3.setY((float) (Pos_room.y - vec3.y));
             vector3.setZ((float) (Pos_room.z - vec3.z));
-            float f1 = (float) Math.asin((double) (vector3.getY() / vector3.length()));
-            float f2 = (float) ((double) (float) Math.PI + Math.atan2((double) vector3.getX(), (double) vector3.getZ()));
+            float f1 = (float) Math.asin(vector3.getY() / vector3.length());
+            float f2 = (float) ((double) (float) Math.PI + Math.atan2(vector3.getX(), vector3.getZ()));
             Rotation_room = Matrix4f.rotationY(f2);
             Matrix4f matrix4f = Utils.rotationXMatrix(f1);
             Rotation_room = Matrix4f.multiply(Rotation_room, matrix4f);
@@ -174,31 +174,31 @@ public class RadialHandler {
 
                 if (!VivecraftVRMod.INSTANCE.keyRadialMenu.isDown()) {
                     if (activecontroller == ControllerType.LEFT) {
-                        UI.mouseClicked((double) ((int) d0), (double) ((int) d1), 0);
+                        UI.mouseClicked((int) d0, (int) d1, 0);
                     } else {
-                        UI.mouseClicked((double) ((int) d2), (double) ((int) d3), 0);
+                        UI.mouseClicked((int) d2, (int) d3, 0);
                     }
 
-                    setOverlayShowing(false, (ControllerType) null);
+                    setOverlayShowing(false, null);
                 }
             } else {
                 if (PointedL && GuiHandler.keyKeyboardClick.consumeClick(ControllerType.LEFT)) {
-                    UI.mouseClicked((double) ((int) d0), (double) ((int) d1), 0);
+                    UI.mouseClicked((int) d0, (int) d1, 0);
                     lastPressedClickL = true;
                 }
 
                 if (!GuiHandler.keyKeyboardClick.isDown(ControllerType.LEFT) && lastPressedClickL) {
-                    UI.mouseReleased((double) ((int) d0), (double) ((int) d1), 0);
+                    UI.mouseReleased((int) d0, (int) d1, 0);
                     lastPressedClickL = false;
                 }
 
                 if (PointedR && GuiHandler.keyKeyboardClick.consumeClick(ControllerType.RIGHT)) {
-                    UI.mouseClicked((double) ((int) d2), (double) ((int) d3), 0);
+                    UI.mouseClicked((int) d2, (int) d3, 0);
                     lastPressedClickR = true;
                 }
 
                 if (!GuiHandler.keyKeyboardClick.isDown(ControllerType.RIGHT) && lastPressedClickR) {
-                    UI.mouseReleased((double) ((int) d2), (double) ((int) d3), 0);
+                    UI.mouseReleased((int) d2, (int) d3, 0);
                     lastPressedClickR = false;
                 }
             }

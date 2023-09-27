@@ -26,7 +26,7 @@ public class JumpTracker extends Tracker {
     }
 
     public boolean isClimbeyJump() {
-        return !this.isActive(Minecraft.getInstance().player) ? false : this.isClimbeyJumpEquipped();
+        return this.isActive(Minecraft.getInstance().player) && this.isClimbeyJumpEquipped();
     }
 
     public boolean isClimbeyJumpEquipped() {

@@ -25,7 +25,7 @@ public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abst
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer entity, float f, float g, float h, float j, float k, float l) {
-        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player) entity).getUUID());
+        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entity.getUUID());
         ResourceLocation hmd = null; //this.BLACK_HMD;
         switch (rotinfo.hmd) {
             case 0:

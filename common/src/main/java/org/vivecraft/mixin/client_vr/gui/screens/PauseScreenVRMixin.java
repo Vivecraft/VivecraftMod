@@ -81,7 +81,7 @@ public abstract class PauseScreenVRMixin extends Screen {
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.overlay"), (p) ->
         {
             this.minecraft.options.renderDebug = !this.minecraft.options.renderDebug;
-            this.minecraft.setScreen((Screen) null);
+            this.minecraft.setScreen(null);
         }).width(48).build());
 
         rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.profiler"), (p) ->
@@ -91,14 +91,14 @@ public abstract class PauseScreenVRMixin extends Screen {
             }
             this.minecraft.options.renderDebugCharts = !this.minecraft.options.renderDebugCharts;
             this.minecraft.options.renderDebug = this.minecraft.options.renderDebugCharts;
-            this.minecraft.setScreen((Screen) null);
+            this.minecraft.setScreen(null);
         }).width(48).pos(50, 0).build());
 
         rowHelper.addChild(gridWidgetOverlay_Profiler);
 
         rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.screenshot"), (p) ->
         {
-            this.minecraft.setScreen((Screen) null);
+            this.minecraft.setScreen(null);
             ClientDataHolderVR.getInstance().grabScreenShot = true;
         }).width(98).build());
 
@@ -107,7 +107,7 @@ public abstract class PauseScreenVRMixin extends Screen {
             {
                 AutoCalibration.calibrateManual();
                 ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-                this.minecraft.setScreen((Screen) null);
+                this.minecraft.setScreen(null);
             }).width(98).build());
         }
 
@@ -115,7 +115,7 @@ public abstract class PauseScreenVRMixin extends Screen {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.alignkatwalk"), (p) ->
             {
                 jkatvr.resetYaw(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.hmd.getYaw());
-                this.minecraft.setScreen((Screen) null);
+                this.minecraft.setScreen(null);
             }).width(98).build());
         }
 
