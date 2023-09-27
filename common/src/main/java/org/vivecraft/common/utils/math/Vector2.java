@@ -76,11 +76,11 @@ public class Vector2 {
     }
 
     public float angle(Vector2 other) {
-        return (float) Math.toDegrees(Math.atan2((double) (other.y - this.y), (double) (other.x - this.x)));
+        return (float) Math.toDegrees(Math.atan2(other.y - this.y, other.x - this.x));
     }
 
     public float length() {
-        return (float) Math.sqrt((double) (this.x * this.x + this.y * this.y));
+        return (float) Math.sqrt(this.x * this.x + this.y * this.y);
     }
 
     public float lengthSquared() {
@@ -108,7 +108,7 @@ public class Vector2 {
     }
 
     public static Vector2 direction(float angle) {
-        double d0 = Math.toRadians((double) angle);
+        double d0 = Math.toRadians(angle);
         return new Vector2((float) Math.cos(d0), (float) Math.sin(d0));
     }
 

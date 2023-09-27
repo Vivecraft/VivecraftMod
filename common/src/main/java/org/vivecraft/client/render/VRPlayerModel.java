@@ -35,15 +35,15 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
 
     public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
-        this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player) pEntity).getUUID());
-        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player) pEntity).getUUID());
+        this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(pEntity.getUUID());
+        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(pEntity.getUUID());
 
         if (rotinfo == null) {
             return; //how
         }
 
-        double d0 = (double) (-1.501F * rotinfo.heightScale);
-        float f = (float) Math.toRadians((double) pEntity.getYRot());
+        double d0 = -1.501F * rotinfo.heightScale;
+        float f = (float) Math.toRadians(pEntity.getYRot());
         float f1 = (float) Math.atan2(-rotinfo.headRot.x, -rotinfo.headRot.z);
         float f2 = (float) Math.asin(rotinfo.headRot.y / rotinfo.headRot.length());
         double d1 = rotinfo.getBodyYawRadians();

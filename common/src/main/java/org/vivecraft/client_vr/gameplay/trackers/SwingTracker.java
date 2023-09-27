@@ -28,8 +28,8 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import java.util.List;
 
 public class SwingTracker extends Tracker {
-    private Vec3[] lastWeaponEndAir = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
-    private boolean[] lastWeaponSolid = new boolean[2];
+    private final Vec3[] lastWeaponEndAir = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
+    private final boolean[] lastWeaponSolid = new boolean[2];
     public Vec3[] miningPoint = new Vec3[2];
     public Vec3[] attackingPoint = new Vec3[2];
     public Vec3History[] tipHistory = new Vec3History[]{new Vec3History(), new Vec3History()};
@@ -131,7 +131,7 @@ public class SwingTracker extends Tracker {
                 }
 
                 f = f * this.dh.vrPlayer.vrdata_world_pre.worldScale;
-                this.miningPoint[i] = vec3.add(vec31.scale((double) f));
+                this.miningPoint[i] = vec3.add(vec31.scale(f));
                 Vec3 vec32 = this.dh.vrPlayer.vrdata_room_pre.getController(i).getPosition().add(this.dh.vrPlayer.vrdata_room_pre.getHand(i).getCustomVector(this.forward).scale(0.3D));
                 this.tipHistory[i].add(vec32);
                 float f2 = (float) this.tipHistory[i].averageSpeed(0.33D);
@@ -148,7 +148,7 @@ public class SwingTracker extends Tracker {
                 }
 
                 this.attackingPoint[i] = this.constrain(vec3, this.miningPoint[i]);
-                Vec3 vec33 = vec3.add(vec31.scale((double) (f + f1)));
+                Vec3 vec33 = vec3.add(vec31.scale(f + f1));
                 vec33 = this.constrain(vec3, vec33);
                 AABB aabb = new AABB(vec3, this.attackingPoint[i]);
                 AABB aabb1 = new AABB(vec3, vec33);

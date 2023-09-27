@@ -109,15 +109,15 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 
     public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
-        this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player) pEntity).getUUID());
-        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player) pEntity).getUUID());
+        this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(pEntity.getUUID());
+        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(pEntity.getUUID());
 
         if (rotinfo == null) {
             return;
         }
 
-        double d0 = (double) (-1.501F * rotinfo.heightScale);
-        float f = (float) Math.toRadians((double) pEntity.getYRot());
+        double d0 = -1.501F * rotinfo.heightScale;
+        float f = (float) Math.toRadians(pEntity.getYRot());
         float f1 = (float) Math.atan2(-rotinfo.headRot.x, -rotinfo.headRot.z);
         float f2 = (float) Math.asin(rotinfo.headRot.y / rotinfo.headRot.length());
         float f3 = (float) Math.atan2(-rotinfo.leftArmRot.x, -rotinfo.leftArmRot.z);
@@ -150,7 +150,7 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         }
         vec3 = vec3.add(0.0D, d0, 0.0D);
         vec3 = vec3.yRot((float) (-Math.PI + d1));
-        vec3 = vec3.scale((double) (16.0F / rotinfo.heightScale));
+        vec3 = vec3.scale(16.0F / rotinfo.heightScale);
         this.leftHand.setPos((float) (-vec3.x), (float) (-vec3.y), (float) vec3.z);
         this.leftHand.xRot = (float) ((double) (-f4) + (Math.PI * 1.5D));
         this.leftHand.yRot = (float) (Math.PI - (double) f3 - d1);
@@ -168,15 +168,13 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
             this.leftShoulder.yRot = 0.0F;
         }
 
-        switch (this.leftArmPose) {
-            case THROW_SPEAR:
-                this.leftHand.xRot = (float) ((double) this.leftHand.xRot - (Math.PI / 2D));
-            default:
+        if (this.leftArmPose == ArmPose.THROW_SPEAR) {
+            this.leftHand.xRot = (float) ((double) this.leftHand.xRot - (Math.PI / 2D));
         }
 
         vec32 = vec32.add(0.0D, d0, 0.0D);
         vec32 = vec32.yRot((float) (-Math.PI + d1));
-        vec32 = vec32.scale((double) (16.0F / rotinfo.heightScale));
+        vec32 = vec32.scale(16.0F / rotinfo.heightScale);
         this.rightHand.setPos((float) (-vec32.x), -((float) vec32.y), (float) vec32.z);
         this.rightHand.xRot = (float) ((double) (-f6) + (Math.PI * 1.5D));
         this.rightHand.yRot = (float) (Math.PI - (double) f5 - d1);
@@ -193,10 +191,8 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
             this.rightShoulder.yRot = 0.0F;
         }
 
-        switch (this.rightArmPose) {
-            case THROW_SPEAR:
-                this.rightHand.xRot = (float) ((double) this.rightHand.xRot - (Math.PI / 2D));
-            default:
+        if (this.rightArmPose == ArmPose.THROW_SPEAR) {
+            this.rightHand.xRot = (float) ((double) this.rightHand.xRot - (Math.PI / 2D));
         }
 
         if (this.laying) {

@@ -27,7 +27,7 @@ public class GuiRadialItemsList extends ObjectSelectionList {
 
     public void buildList() {
         KeyMapping[] akeymapping = ArrayUtils.clone(this.mc.options.keyMappings);
-        Arrays.sort((Object[]) akeymapping);
+        Arrays.sort(akeymapping);
         String s = null;
 
         for (KeyMapping keymapping : akeymapping) {
@@ -66,7 +66,7 @@ public class GuiRadialItemsList extends ObjectSelectionList {
 
     public class MappingEntry extends Entry {
         private final KeyMapping myKey;
-        private GuiRadialConfiguration parentScreen;
+        private final GuiRadialConfiguration parentScreen;
 
         private MappingEntry(KeyMapping key, GuiRadialConfiguration parent) {
             this.myKey = key;

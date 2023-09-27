@@ -24,12 +24,12 @@ public class VRInputAction {
     public final String type;
     public final VRInputActionSet actionSet;
     private int priority = 0;
-    private boolean[] enabled = new boolean[ControllerType.values().length];
-    private List<KeyListener> listeners = new ArrayList<>();
+    private final boolean[] enabled = new boolean[ControllerType.values().length];
+    private final List<KeyListener> listeners = new ArrayList<>();
     private ControllerType currentHand = ControllerType.RIGHT;
     private boolean currentlyInUse;
     public long handle;
-    private boolean[] pressed = new boolean[ControllerType.values().length];
+    private final boolean[] pressed = new boolean[ControllerType.values().length];
     protected int[] unpressInTicks = new int[ControllerType.values().length];
     public DigitalData[] digitalData = new DigitalData[ControllerType.values().length];
     public AnalogData[] analogData = new AnalogData[ControllerType.values().length];
@@ -328,7 +328,7 @@ public class VRInputAction {
                 }
             }
         } else if (this.unpressInTicks[0] > 0 && --this.unpressInTicks[0] == 0) {
-            this.unpressBindingImmediately((ControllerType) null);
+            this.unpressBindingImmediately(null);
         }
     }
 
@@ -352,7 +352,7 @@ public class VRInputAction {
 
             this.pressed[0] = true;
 
-            if (this.notifyListeners(true, (ControllerType) null)) {
+            if (this.notifyListeners(true, null)) {
                 return;
             }
 
@@ -408,7 +408,7 @@ public class VRInputAction {
 
             this.pressed[0] = false;
 
-            if (this.notifyListeners(false, (ControllerType) null)) {
+            if (this.notifyListeners(false, null)) {
                 return;
             }
 

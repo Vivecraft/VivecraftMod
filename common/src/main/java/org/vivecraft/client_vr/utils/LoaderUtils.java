@@ -39,7 +39,7 @@ public class LoaderUtils {
         }
     }
 
-    public static java.util.zip.ZipFile getVivecraftZip() throws ZipException, URISyntaxException, IOException {
+    public static java.util.zip.ZipFile getVivecraftZip() throws URISyntaxException, IOException {
         if (vivecraftFile == null) {
             init();
         }

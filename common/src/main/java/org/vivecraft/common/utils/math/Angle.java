@@ -155,12 +155,12 @@ public class Angle {
         return "Angle{pitch=" + this.pitch + ", yaw=" + this.yaw + ", roll=" + this.roll + '}';
     }
 
-    public static enum Order {
+    public enum Order {
         XYZ,
         ZYX,
         YXZ,
         ZXY,
         YZX,
-        XZY;
+        XZY
     }
 }

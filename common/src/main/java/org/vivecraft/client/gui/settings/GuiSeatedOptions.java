@@ -6,7 +6,7 @@ import org.vivecraft.client.gui.framework.VROptionEntry;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiSeatedOptions extends GuiVROptionsBase {
-    private VROptionEntry[] seatedOptions = new VROptionEntry[]{
+    private final VROptionEntry[] seatedOptions = new VROptionEntry[]{
         new VROptionEntry(VRSettings.VrOptions.X_SENSITIVITY),
         new VROptionEntry(VRSettings.VrOptions.Y_SENSITIVITY),
         new VROptionEntry(VRSettings.VrOptions.KEYHOLE),

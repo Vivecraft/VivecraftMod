@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProfileWriter {
-    private String activeProfileName;
-    private String set;
+    private final String activeProfileName;
+    private final String set;
     private Map<String, String> data = new HashMap<>();
     private JsonObject theProfile = null;
 

@@ -13,7 +13,7 @@ public class GuiVROptionButton extends Button implements GuiVROption {
     private int id = -1;
 
     public GuiVROptionButton(int id, int x, int y, String text, OnPress action) {
-        this(id, x, y, (VRSettings.VrOptions) null, text, action);
+        this(id, x, y, null, text, action);
     }
 
     public GuiVROptionButton(int id, int x, int y, @Nullable VRSettings.VrOptions option, String text, OnPress action) {

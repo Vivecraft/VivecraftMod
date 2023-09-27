@@ -18,7 +18,7 @@ public enum VRInputActionSet {
     public final String usage;
     public final boolean advanced;
 
-    private VRInputActionSet(String name, String localizedName, String usage, boolean advanced) {
+    VRInputActionSet(String name, String localizedName, String usage, boolean advanced) {
         this.name = name;
         this.localizedName = localizedName;
         this.usage = usage;

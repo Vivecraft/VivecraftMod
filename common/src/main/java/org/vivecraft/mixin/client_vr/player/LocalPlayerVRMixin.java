@@ -239,7 +239,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public ItemStack eat(Level level, ItemStack itemStack) {
-        if (VRState.vrRunning && itemStack.isEdible() && ((LocalPlayer) (Object) this) == Minecraft.getInstance().player && itemStack.getHoverName().getString().equals("EAT ME")) {
+        if (VRState.vrRunning && itemStack.isEdible() && (Object) this == Minecraft.getInstance().player && itemStack.getHoverName().getString().equals("EAT ME")) {
             ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
             ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
         }
@@ -348,7 +348,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             double d7 = 1.0D;
 
             if (d3 >= (double) 1.0E-4F || ClientDataHolderVR.katvr) {
-                d3 = (double) Mth.sqrt((float) d3);
+                d3 = Mth.sqrt((float) d3);
 
                 if (d3 < 1.0D && !ClientDataHolderVR.katvr) {
                     d3 = 1.0D;
@@ -363,7 +363,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
                 if (ClientDataHolderVR.katvr) {
                     jkatvr.query();
-                    d3 = (double) (jkatvr.getSpeed() * jkatvr.walkDirection() * this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier);
+                    d3 = jkatvr.getSpeed() * jkatvr.walkDirection() * this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier;
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
                     if (isFlyingOrSwimming) {
@@ -373,7 +373,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                     vec3 = vec3.yRot(-jkatvr.getYaw() * ((float) Math.PI / 180F) + this.vivecraft$dataholder.vrPlayer.vrdata_world_pre.rotation_radians);
                 } else if (ClientDataHolderVR.infinadeck) {
                     jinfinadeck.query();
-                    d3 = (double) (jinfinadeck.getSpeed() * jinfinadeck.walkDirection() * this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier);
+                    d3 = jinfinadeck.getSpeed() * jinfinadeck.walkDirection() * this.vivecraft$dataholder.vrSettings.movementSpeedMultiplier;
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
                     if (isFlyingOrSwimming) {
@@ -512,7 +512,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
         // TODO: liquid is deprecated
         if (!this.isSilent() && !block.defaultBlockState().liquid()) {
-            this.level().playSound((LocalPlayer) null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
+            this.level().playSound(null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
         }
     }
 

@@ -130,7 +130,7 @@ public class VRWidgetHelper {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
-        minecraft.getBlockRenderer().getModelRenderer().renderModel((new PoseStack()).last(), bufferbuilder, (BlockState) null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
+        minecraft.getBlockRenderer().getModelRenderer().renderModel((new PoseStack()).last(), bufferbuilder, null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
         tesselator.end();
 
         RenderSystem.disableBlend();
@@ -142,7 +142,7 @@ public class VRWidgetHelper {
 
         // TODO lighting changes with head movement
 
-        for (BakedQuad bakedquad : minecraft.getModelManager().getModel(displayModel).getQuads((BlockState) null, (Direction) null, random)) {
+        for (BakedQuad bakedquad : minecraft.getModelManager().getModel(displayModel).getQuads(null, null, random)) {
             if (displayFaceFunc.apply(bakedquad.getDirection()) != DisplayFace.NONE && bakedquad.getSprite().contents().name().equals(new ResourceLocation("vivecraft:transparent"))) {
                 int[] vertexList = bakedquad.getVertices();
                 boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == DisplayFace.MIRROR;
@@ -195,9 +195,9 @@ public class VRWidgetHelper {
         RenderSystem.applyModelViewMatrix();
     }
 
-    public static enum DisplayFace {
+    public enum DisplayFace {
         NONE,
         NORMAL,
-        MIRROR;
+        MIRROR
     }
 }

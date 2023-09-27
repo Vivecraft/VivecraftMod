@@ -39,7 +39,7 @@ public class BowTracker extends Tracker {
     public long startDrawTime;
     private final double notchDotThreshold = 20.0D;
     private double maxDraw;
-    private long maxDrawMillis = 1100L;
+    private final long maxDrawMillis = 1100L;
     private Vec3 aim;
     float tsNotch = 0.0F;
     int hapcounter = 0;
@@ -74,7 +74,7 @@ public class BowTracker extends Tracker {
     }
 
     public static boolean isHoldingBow(LivingEntity e, InteractionHand hand) {
-        return ClientDataHolderVR.getInstance().vrSettings.seated ? false : isBow(e.getItemInHand(hand));
+        return !ClientDataHolderVR.getInstance().vrSettings.seated && isBow(e.getItemInHand(hand));
     }
 
     public static boolean isHoldingBowEither(LivingEntity e) {
@@ -142,7 +142,7 @@ public class BowTracker extends Tracker {
             Vector3 vector3 = new Vector3((float) vec34.x, (float) vec34.y, (float) vec34.z);
             Vec3 vec35 = vrdata.getHand(1).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
             Vector3 vector31 = new Vector3((float) vec35.x, (float) vec35.y, (float) vec35.z);
-            this.controllersDot = (180D / Math.PI) * Math.acos((double) vector31.dot(vector3));
+            this.controllersDot = (180D / Math.PI) * Math.acos(vector31.dot(vector3));
             this.pressed = this.mc.options.keyAttack.isDown();
             float f = 0.15F * vrdata.worldScale;
             boolean flag = isHoldingBow(player, InteractionHand.MAIN_HAND);
@@ -224,7 +224,7 @@ public class BowTracker extends Tracker {
 
                 int l = (int) ((float) itemstack1.getUseDuration() - this.getDrawPercent() * (float) this.maxDrawMillis);
                 ((PlayerExtension) player).vivecraft$setItemInUseClient(itemstack1, interactionhand);
-                double d1 = (double) this.getDrawPercent();
+                double d1 = this.getDrawPercent();
 
                 if (d1 >= 1.0D) {
                     ((PlayerExtension) player).vivecraft$setItemInUseCountClient(k);

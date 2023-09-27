@@ -26,11 +26,7 @@ public abstract class TwoHandedScreen extends Screen {
     }
 
     public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY) {
-        if (super.mouseClicked(pMouseX, p_94738_, pMouseY)) {
-            return true;
-        } else {
-            return false;
-        }
+        return super.mouseClicked(pMouseX, p_94738_, pMouseY);
     }
 
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {

@@ -29,10 +29,10 @@ import org.vivecraft.common.network.CommonNetworkHelper;
 import java.util.*;
 
 public class ClimbTracker extends Tracker {
-    private boolean[] latched = new boolean[2];
-    private boolean[] wasinblock = new boolean[2];
-    private boolean[] wasbutton = new boolean[2];
-    private boolean[] waslatched = new boolean[2];
+    private final boolean[] latched = new boolean[2];
+    private final boolean[] wasinblock = new boolean[2];
+    private final boolean[] wasbutton = new boolean[2];
+    private final boolean[] waslatched = new boolean[2];
     public Set<Block> blocklist = new HashSet<>();
     public byte serverblockmode = 0;
     private boolean gravityOverride = false;
@@ -46,13 +46,13 @@ public class ClimbTracker extends Tracker {
     AABB[] latchbox = new AABB[2];
     boolean[] inblock = new boolean[2];
     int[] meta = new int[2];
-    private AABB northbb = new AABB(0.1D, 0.0D, 0.9D, 0.9D, 1.0D, 1.1D);
-    private AABB southBB = new AABB(0.1D, 0.0D, -0.1D, 0.9D, 1.0D, 0.1D);
-    private AABB westBB = new AABB(0.9D, 0.0D, 0.1D, 1.1D, 1.0D, 0.9D);
-    private AABB eastBB = new AABB(-0.1D, 0.0D, 0.1D, 0.1D, 1.0D, 0.9D);
-    private AABB upBB = new AABB(0.0D, 0.9D, 0.0D, 1.0D, 1.1D, 1.0D);
-    private AABB fullBB = new AABB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
-    private Random rand = new Random();
+    private final AABB northbb = new AABB(0.1D, 0.0D, 0.9D, 0.9D, 1.0D, 1.1D);
+    private final AABB southBB = new AABB(0.1D, 0.0D, -0.1D, 0.9D, 1.0D, 0.1D);
+    private final AABB westBB = new AABB(0.9D, 0.0D, 0.1D, 1.1D, 1.0D, 0.9D);
+    private final AABB eastBB = new AABB(-0.1D, 0.0D, 0.1D, 0.1D, 1.0D, 0.9D);
+    private final AABB upBB = new AABB(0.0D, 0.9D, 0.0D, 1.0D, 1.1D, 1.0D);
+    private final AABB fullBB = new AABB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+    private final Random rand = new Random();
     boolean unsetflag;
 
     public ClimbTracker(Minecraft mc, ClientDataHolderVR dh) {
@@ -110,7 +110,7 @@ public class ClimbTracker extends Tracker {
     }
 
     public boolean isClimbeyClimb() {
-        return !this.isActive(this.mc.player) ? false : this.isClimbeyClimbEquipped();
+        return this.isActive(this.mc.player) && this.isClimbeyClimbEquipped();
     }
 
     public boolean isClimbeyClimbEquipped() {
@@ -215,7 +215,7 @@ public class ClimbTracker extends Tracker {
                     List<AABB> list = new ArrayList<>();
 
                     if (block instanceof LadderBlock) {
-                        switch ((Direction) blockstate.getValue(LadderBlock.FACING)) {
+                        switch (blockstate.getValue(LadderBlock.FACING)) {
                             case DOWN:
                                 flag4 = false;
                                 break;
@@ -471,12 +471,12 @@ public class ClimbTracker extends Tracker {
                     if (j != 2 && j != 3) {
                         if (j == 4 || j == 5) {
                             d0 = d8 - vec36.z;
-                            d10 = (double) ((float) blockpos2.getX() + 0.5F);
+                            d10 = (float) blockpos2.getX() + 0.5F;
                             d10 += (1.0 - Math.min(ClientDataHolderVR.getInstance().vrPlayer.worldScale, 1.0)) * (j == 4 ? 0.5 : -0.5);
                         }
                     } else {
                         d10 = d4 - vec36.x;
-                        d0 = (double) ((float) blockpos2.getZ() + 0.5F);
+                        d0 = (float) blockpos2.getZ() + 0.5F;
                         d0 += (1.0 - Math.min(ClientDataHolderVR.getInstance().vrPlayer.worldScale, 1.0)) * (j == 2 ? 0.5 : -0.5);
                     }
                 }
@@ -485,7 +485,7 @@ public class ClimbTracker extends Tracker {
                 double d1 = this.dh.vrPlayer.vrdata_room_pre.getController(this.latchStartController).getPosition().y;
 
                 if (!this.wantjump && this.latchbox[this.latchStartController] != null && d1 <= d12 / 2.0D && this.latchStart[this.latchStartController].y > this.latchbox[this.latchStartController].maxY * 0.8D + (double) blockpos2.getY()) {
-                    Vec3 vec32 = this.dh.vrPlayer.vrdata_world_pre.hmd.getDirection().scale((double) 0.1F);
+                    Vec3 vec32 = this.dh.vrPlayer.vrdata_world_pre.hmd.getDirection().scale(0.1F);
                     Vec3 vec33 = (new Vec3(vec32.x, 0.0D, vec32.z)).normalize().scale(0.1D);
                     boolean flag5 = this.mc.level.noCollision(player, player.getBoundingBox().move(vec33.x, this.latchbox[this.latchStartController].maxY + (double) blockpos2.getY() - player.getY(), vec33.z));
 
@@ -578,7 +578,7 @@ public class ClimbTracker extends Tracker {
                 this.wantjump = false;
                 Vec3 vec38 = player.position().subtract(vec36);
                 Vec3 vec39 = this.dh.vr.controllerHistory[this.latchStartController].netMovement(0.3D);
-                double d5 = this.dh.vr.controllerHistory[this.latchStartController].averageSpeed((double) 0.3F);
+                double d5 = this.dh.vr.controllerHistory[this.latchStartController].averageSpeed(0.3F);
                 vec39 = vec39.scale(0.66D * d5);
                 float f = 0.66F;
 

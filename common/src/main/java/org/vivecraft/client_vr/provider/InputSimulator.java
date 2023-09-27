@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class InputSimulator {
-    private static Set<Integer> pressedKeys = new HashSet<>();
+    private static final Set<Integer> pressedKeys = new HashSet<>();
 
     public static boolean isKeyDown(int key) {
         return pressedKeys.contains(key);

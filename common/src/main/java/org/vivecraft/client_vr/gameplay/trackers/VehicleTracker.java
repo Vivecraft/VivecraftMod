@@ -55,8 +55,7 @@ public class VehicleTracker extends Tracker {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         if (!(entity instanceof AbstractHorse) && !(entity instanceof Boat)) {
-            if (entity instanceof Mob) {
-                Mob mob = (Mob) entity;
+            if (entity instanceof Mob mob) {
 
                 if (mob.isControlledByLocalInstance()) {
                     int i = (player.getMainHandItem().getItem() instanceof FoodOnAStickItem || player.getMainHandItem().is(ItemTags.VIVECRAFT_FOOD_STICKS)) ? 0 : 1;
@@ -89,24 +88,22 @@ public class VehicleTracker extends Tracker {
 
             if (this.dh.vrSettings.vehicleRotation && this.mc.player.isPassenger() && this.rotationCooldown == 0) {
                 Entity entity = this.mc.player.getVehicle();
-                this.rotationTarget = (double) entity.getYRot();
+                this.rotationTarget = entity.getYRot();
 
-                if (entity instanceof AbstractHorse && !this.dh.horseTracker.isActive(this.mc.player)) {
-                    AbstractHorse abstracthorse = (AbstractHorse) entity;
+                if (entity instanceof AbstractHorse abstracthorse && !this.dh.horseTracker.isActive(this.mc.player)) {
 
                     if (abstracthorse.isControlledByLocalInstance() && abstracthorse.isSaddled()) {
                         return;
                     }
 
-                    this.rotationTarget = (double) abstracthorse.yBodyRot;
-                } else if (entity instanceof Mob) {
-                    Mob mob = (Mob) entity;
+                    this.rotationTarget = abstracthorse.yBodyRot;
+                } else if (entity instanceof Mob mob) {
 
                     if (mob.isControlledByLocalInstance()) {
                         return;
                     }
 
-                    this.rotationTarget = (double) mob.yBodyRot;
+                    this.rotationTarget = mob.yBodyRot;
                 }
 
                 boolean flag = true;
@@ -121,7 +118,7 @@ public class VehicleTracker extends Tracker {
                         this.minecartStupidityCounter = 3;
                     }
 
-                    this.rotationTarget = (double) this.getMinecartRenderYaw((Minecart) entity);
+                    this.rotationTarget = this.getMinecartRenderYaw((Minecart) entity);
 
                     if (this.minecartStupidityCounter > 0) {
                         this.vehicleInitialRotation = (float) this.rotationTarget;
@@ -181,7 +178,7 @@ public class VehicleTracker extends Tracker {
             }
 
             float f2 = dataholder.vrPlayer.rotDiff_Degrees(f1, f);
-            dataholder.vrSettings.worldRotation = (float) (Math.toDegrees((double) dataholder.vrPlayer.vrdata_world_pre.rotation_radians) + (double) f2);
+            dataholder.vrSettings.worldRotation = (float) (Math.toDegrees(dataholder.vrPlayer.vrdata_world_pre.rotation_radians) + (double) f2);
             dataholder.vrSettings.worldRotation %= 360.0F;
             dataholder.vr.seatedRot = dataholder.vrSettings.worldRotation;
         }

@@ -63,7 +63,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
                 .build());
             this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.clear"), (p) ->
             {
-                this.setKey((KeyMapping) null);
+                this.setKey(null);
             })
                 .size(150, 20)
                 .pos(this.width / 2 - 155, 25)

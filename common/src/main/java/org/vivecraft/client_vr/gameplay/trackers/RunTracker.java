@@ -71,7 +71,7 @@ public class RunTracker extends Tracker {
             this.speed = 0.0D;
         } else {
             Vec3 vec32 = this.dh.vrPlayer.vrdata_world_pre.getController(0).getDirection().add(this.dh.vrPlayer.vrdata_world_pre.getController(1).getDirection()).scale(0.5D);
-            this.direction = (double) ((float) Math.toDegrees(Math.atan2(-vec32.x, vec32.z)));
+            this.direction = (float) Math.toDegrees(Math.atan2(-vec32.x, vec32.z));
             double d2 = (d0 + d1) / 2.0D;
             this.speed = d2 * 1.0D * 1.3D;
 
@@ -80,7 +80,7 @@ public class RunTracker extends Tracker {
             }
 
             if (this.speed > 1.0D) {
-                this.speed = (double) 1.3F;
+                this.speed = 1.3F;
             }
         }
     }

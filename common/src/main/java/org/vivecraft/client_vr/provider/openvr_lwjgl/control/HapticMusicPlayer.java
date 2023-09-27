@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HapticMusicPlayer {
-    private static Map<String, Music> map = new HashMap<>();
+    private static final Map<String, Music> map = new HashMap<>();
 
     private HapticMusicPlayer() {
     }
@@ -35,7 +35,7 @@ public class HapticMusicPlayer {
 
     public static class Music {
         final String name;
-        private List<Object> data = new LinkedList<>();
+        private final List<Object> data = new LinkedList<>();
 
         private Music(String name) {
             this.name = name;
@@ -59,8 +59,7 @@ public class HapticMusicPlayer {
             float f = 0.0F;
 
             for (Object object : this.data) {
-                if (object instanceof Note) {
-                    Note hapticmusicplayer$music$note = (Note) object;
+                if (object instanceof Note hapticmusicplayer$music$note) {
 
                     if (hapticmusicplayer$music$note.controller != null) {
                         MCOpenVR.get().triggerHapticPulse(hapticmusicplayer$music$note.controller, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
@@ -68,8 +67,7 @@ public class HapticMusicPlayer {
                         MCOpenVR.get().triggerHapticPulse(ControllerType.RIGHT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
                         MCOpenVR.get().triggerHapticPulse(ControllerType.LEFT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
                     }
-                } else if (object instanceof Delay) {
-                    Delay hapticmusicplayer$music$delay = (Delay) object;
+                } else if (object instanceof Delay hapticmusicplayer$music$delay) {
                     f += hapticmusicplayer$music$delay.durationSeconds;
                 }
             }

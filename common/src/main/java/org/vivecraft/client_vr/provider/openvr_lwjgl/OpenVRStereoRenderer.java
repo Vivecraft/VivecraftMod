@@ -24,7 +24,7 @@ import static org.lwjgl.openvr.VRCompositor.VRCompositor_Submit;
 import static org.lwjgl.openvr.VRSystem.*;
 
 public class OpenVRStereoRenderer extends VRRenderer {
-    private HiddenAreaMesh[] hiddenMeshes = new HiddenAreaMesh[2];
+    private final HiddenAreaMesh[] hiddenMeshes = new HiddenAreaMesh[2];
     private final MCOpenVR openvr;
 
     public OpenVRStereoRenderer(MCVR vr) {

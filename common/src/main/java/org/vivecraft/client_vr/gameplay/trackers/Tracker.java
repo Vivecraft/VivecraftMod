@@ -27,8 +27,8 @@ public abstract class Tracker {
         return EntryPoint.LIVING_UPDATE;
     }
 
-    public static enum EntryPoint {
+    public enum EntryPoint {
         LIVING_UPDATE,
-        SPECIAL_ITEMS;
+        SPECIAL_ITEMS
     }
 }

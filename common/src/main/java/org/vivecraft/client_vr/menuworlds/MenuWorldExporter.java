@@ -348,7 +348,7 @@ public class MenuWorldExporter {
     }
 
     private static <T extends Enum & StringRepresentable> Optional<T> decodeEnum(Class<T> type, String input) {
-        return Arrays.stream(type.getEnumConstants()).filter(e -> input.equals(((StringRepresentable) e).getSerializedName())).findFirst();
+        return Arrays.stream(type.getEnumConstants()).filter(e -> input.equals(e.getSerializedName())).findFirst();
     }
 
     public static class Header {

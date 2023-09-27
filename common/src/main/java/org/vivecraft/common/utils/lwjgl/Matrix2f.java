@@ -165,10 +165,9 @@ public class Matrix2f extends Matrix {
     }
 
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append(this.m00).append(' ').append(this.m10).append(' ').append('\n');
-        stringbuilder.append(this.m01).append(' ').append(this.m11).append(' ').append('\n');
-        return stringbuilder.toString();
+        String stringbuilder = String.valueOf(this.m00) + ' ' + this.m10 + ' ' + '\n' +
+            this.m01 + ' ' + this.m11 + ' ' + '\n';
+        return stringbuilder;
     }
 
     public Matrix negate() {

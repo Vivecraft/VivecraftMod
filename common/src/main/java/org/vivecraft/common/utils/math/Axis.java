@@ -6,9 +6,9 @@ public enum Axis {
     ROLL(0.0F, 0.0F, 1.0F),
     UNKNOWN(0.0F, 0.0F, 0.0F);
 
-    private Vector3 vector;
+    private final Vector3 vector;
 
-    private Axis(float x, float y, float z) {
+    Axis(float x, float y, float z) {
         this.vector = new Vector3(x, y, z);
     }
 

@@ -70,7 +70,7 @@ public class Vector2f extends Vector {
             f = 1.0F;
         }
 
-        return (float) Math.acos((double) f);
+        return (float) Math.acos(f);
     }
 
     public static Vector2f add(Vector2f left, Vector2f right, Vector2f dest) {
@@ -110,13 +110,12 @@ public class Vector2f extends Vector {
     }
 
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder(64);
-        stringbuilder.append("Vector2f[");
-        stringbuilder.append(this.x);
-        stringbuilder.append(", ");
-        stringbuilder.append(this.y);
-        stringbuilder.append(']');
-        return stringbuilder.toString();
+        String stringbuilder = "Vector2f[" +
+            this.x +
+            ", " +
+            this.y +
+            ']';
+        return stringbuilder;
     }
 
     public final float getX() {

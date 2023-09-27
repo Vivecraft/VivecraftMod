@@ -8,7 +8,7 @@ import org.vivecraft.client.gui.framework.VROptionEntry;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiVRControls extends GuiVROptionsBase {
-    private static VROptionEntry[] controlsSettings = new VROptionEntry[]{
+    private static final VROptionEntry[] controlsSettings = new VROptionEntry[]{
         new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
         new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
         new VROptionEntry(VRSettings.VrOptions.DUMMY, true),

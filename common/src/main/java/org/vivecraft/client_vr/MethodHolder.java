@@ -17,7 +17,7 @@ public abstract class MethodHolder {
     public static void notifyMirror(String text, boolean clear, int lengthMs) {
         ClientDataHolderVR clientDataHolderVR = ClientDataHolderVR.getInstance();
         clientDataHolderVR.mirroNotifyStart = System.currentTimeMillis();
-        clientDataHolderVR.mirroNotifyLen = (long) lengthMs;
+        clientDataHolderVR.mirroNotifyLen = lengthMs;
         clientDataHolderVR.mirrorNotifyText = text;
         clientDataHolderVR.mirrorNotifyClear = clear;
     }

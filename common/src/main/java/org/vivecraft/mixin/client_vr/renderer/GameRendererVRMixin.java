@@ -268,7 +268,7 @@ public abstract class GameRendererVRMixin
             posestack.mulPoseMatrix(new Matrix4f().setPerspective(70f / 8f * 0.01745329238474369F, 1.0F, 0.05F, this.vivecraft$clipDistance));
         } else {
             if (this.zoom != 1.0F) {
-                posestack.translate((double) this.zoomX, (double) (-this.zoomY), 0.0D);
+                posestack.translate(this.zoomX, -this.zoomY, 0.0D);
                 posestack.scale(this.zoom, this.zoom, 1.0F);
             }
             posestack.mulPoseMatrix(new Matrix4f().setPerspective((float) d * 0.01745329238474369F, (float) this.minecraft.getWindow().getScreenWidth()

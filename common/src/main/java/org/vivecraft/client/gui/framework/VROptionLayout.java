@@ -100,14 +100,14 @@ public class VROptionLayout {
 
     public int getX(int screenWidth) {
         if (this._pos == Position.POS_LEFT) {
-            return screenWidth / 2 - 155 + 0;
+            return screenWidth / 2 - 155;
         } else {
             return this._pos == Position.POS_RIGHT ? screenWidth / 2 - 155 + 160 : screenWidth / 2 - 155 + 80;
         }
     }
 
     public int getY(int screenHeight) {
-        return (int) Math.ceil((double) ((float) (screenHeight / 6) + 21.0F * this._row - 10.0F));
+        return (int) Math.ceil((float) (screenHeight / 6) + 21.0F * this._row - 10.0F);
     }
 
     public String getButtonText() {
@@ -130,9 +130,9 @@ public class VROptionLayout {
         return this._e == null ? this._ordinal : this._e.returnEnumOrdinal();
     }
 
-    public static enum Position {
+    public enum Position {
         POS_LEFT,
         POS_CENTER,
-        POS_RIGHT;
+        POS_RIGHT
     }
 }

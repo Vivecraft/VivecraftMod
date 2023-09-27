@@ -48,11 +48,11 @@ import java.util.stream.Stream;
 
 public class PhysicalKeyboard {
     private final Minecraft mc = Minecraft.getInstance();
-    private ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
+    private final ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
     private boolean reinit;
     private boolean shift;
     private boolean shiftSticky;
-    private List<KeyButton> keys;
+    private final List<KeyButton> keys;
     private static final int ROWS = 4;
     private static final int COLUMNS = 13;
     private static final float SPACING = 0.0064F;
@@ -66,9 +66,9 @@ public class PhysicalKeyboard {
     private float keyHeight;
     private float keyWidthSpecial;
     private float scale = 1.0F;
-    private KeyButton[] pressedKey = new KeyButton[2];
-    private long[] pressTime = new long[2];
-    private long[] pressRepeatTime = new long[2];
+    private final KeyButton[] pressedKey = new KeyButton[2];
+    private final long[] pressTime = new long[2];
+    private final long[] pressRepeatTime = new long[2];
     private long shiftPressTime;
     private boolean lastPressedShift;
     private Supplier<String> easterEggText = () -> {
@@ -83,7 +83,7 @@ public class PhysicalKeyboard {
     };
     private int easterEggIndex = 0;
     private boolean easterEggActive;
-    private Map<Integer, RGBAColor> customTheme = new HashMap<>();
+    private final Map<Integer, RGBAColor> customTheme = new HashMap<>();
 
     public PhysicalKeyboard() {
         this.keys = new ArrayList<>();
@@ -228,7 +228,7 @@ public class PhysicalKeyboard {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_RIGHT);
             }
         });
-        this.addKey(new KeyButton(1011, "Cut", 1.0F * (this.keyWidthSpecial + this.spacing), -1.0F * (this.keyHeight + this.spacing), this.keyWidthSpecial, this.keyHeight) {
+        this.addKey(new KeyButton(1011, "Cut", (this.keyWidthSpecial + this.spacing), -1.0F * (this.keyHeight + this.spacing), this.keyWidthSpecial, this.keyHeight) {
             @Override
             public void onPressed() {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT_CONTROL);
@@ -509,7 +509,7 @@ public class PhysicalKeyboard {
         // Build all the text
         for (Tuple<String, Vector3f> label : labels) {
             poseStack.pushPose();
-            poseStack.translate((double) (label.getB()).x, (double) (label.getB()).y, (double) (label.getB()).z);
+            poseStack.translate((label.getB()).x, (label.getB()).y, (double) (label.getB()).z);
             poseStack.scale(textScale, textScale, 1.0F);
             font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack.last().pose(), multibuffersource$buffersource, Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional());
             poseStack.popPose();
@@ -575,7 +575,7 @@ public class PhysicalKeyboard {
         public KeyButton(int id, String label, float x, float y, float width, float height) {
             this.id = id;
             this.label = label;
-            this.boundingBox = new AABB((double) x, (double) y, 0.0D, (double) (x + width), (double) (y + height), 0.028D * (double) PhysicalKeyboard.this.scale);
+            this.boundingBox = new AABB(x, y, 0.0D, x + width, y + height, 0.028D * (double) PhysicalKeyboard.this.scale);
         }
 
         public AABB getRenderBoundingBox() {

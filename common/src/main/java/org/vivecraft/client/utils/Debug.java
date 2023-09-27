@@ -22,7 +22,7 @@ public class Debug {
     public static boolean isEnabled = true;
     static Polygon cross = new Polygon(6);
     static Polygon arrowHead = new Polygon(8);
-    private static DebugRendererManual renderer = new DebugRendererManual();
+    private static final DebugRendererManual renderer = new DebugRendererManual();
 
     public Debug(Vec3 root) {
         this.root = root;
