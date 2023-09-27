@@ -901,17 +901,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     }
 
     @Unique
-    public void drawProfiler() {
-        if (this.fpsPieResults != null) {
-            this.profiler.push("fpsPie");
-            GuiGraphics guiGraphics = new GuiGraphics((Minecraft) (Object) this, renderBuffers.bufferSource());
-            this.renderFpsMeter(guiGraphics, this.fpsPieResults);
-            guiGraphics.flush();
-            this.profiler.pop();
-        }
-    }
-
-    @Unique
     private void vivecraft$drawProfiler() {
         if (this.fpsPieResults != null) {
             this.profiler.push("fpsPie");
