@@ -12,7 +12,7 @@ public class Convert {
         float[] afloat = new float[float2Array.length * float2Array[0].length];
 
         for (int i = 0; i < float2Array.length; ++i) {
-            System.arraycopy(float2Array[i], 0, afloat, i * float2Array[0].length + 0, float2Array[0].length);
+            System.arraycopy(float2Array[i], 0, afloat, i * float2Array[0].length, float2Array[0].length);
         }
 
         return matrix(afloat);
