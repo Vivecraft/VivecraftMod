@@ -9,13 +9,11 @@ public class VRPoseImpl implements VRPose {
     private final Vec3 pos;
     private final Vec3 rot;
     private final Quaternionf quaternion;
-    private final double rollDeg;
 
-    public VRPoseImpl(Vec3 pos, Vec3 rot, Quaternionf quaternion, double rollDeg) {
+    public VRPoseImpl(Vec3 pos, Vec3 rot, Quaternionf quaternion) {
         this.pos = pos;
         this.rot = rot;
         this.quaternion = quaternion;
-        this.rollDeg = rollDeg;
     }
 
     @Override
@@ -29,18 +27,19 @@ public class VRPoseImpl implements VRPose {
     }
 
     @Override
-    public double getPitchRad() {
+    public double getPitch() {
         return Math.asin(this.rot.y / this.rot.length());
     }
 
     @Override
-    public double getYawRad() {
+    public double getYaw() {
         return Math.atan2(-this.rot.x, this.rot.z);
     }
 
     @Override
-    public double getRollDeg() {
-        return this.rollDeg;
+    public double getRoll() {
+        return -Math.atan2(2.0F * (quaternion.x * quaternion.y + quaternion.w * quaternion.z),
+            quaternion.w * quaternion.w - quaternion.x * quaternion.x + quaternion.y * quaternion.y - quaternion.z * quaternion.z);
     }
 
     @Override

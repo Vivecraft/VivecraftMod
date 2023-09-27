@@ -267,9 +267,9 @@ public class VRPlayersClient {
             // Have to add the player's position here, as the RotInfo positions are player relative, rather
             // than the in-world position.
             return new VRDataImpl(
-                new VRPoseImpl(this.Headpos.add(playerPos), this.headRot, this.headQuat.asJOMLQuaternion(), this.headQuat.toEuler().getRoll()),
-                new VRPoseImpl(this.rightArmPos.add(playerPos), this.rightArmRot, this.rightArmQuat.asJOMLQuaternion(), this.rightArmQuat.toEuler().getRoll()),
-                new VRPoseImpl(this.leftArmPos.add(playerPos), this.leftArmRot, this.leftArmQuat.asJOMLQuaternion(), this.leftArmQuat.toEuler().getRoll()),
+                new VRPoseImpl(this.Headpos.add(playerPos), this.headRot, this.headQuat.asJOMLQuaternion()),
+                new VRPoseImpl(this.rightArmPos.add(playerPos), this.rightArmRot, this.rightArmQuat.asJOMLQuaternion()),
+                new VRPoseImpl(this.leftArmPos.add(playerPos), this.leftArmRot, this.leftArmQuat.asJOMLQuaternion()),
                 this.seated,
                 this.reverse
             );
