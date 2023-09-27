@@ -31,9 +31,9 @@ public class GuiQuickCommandsInGame extends Screen {
         for (int j = 0; j < astring.length; ++j) {
             i = j > 5 ? 1 : 0;
             String s = astring[j];
-            this.addRenderableWidget(new Button.Builder(Component.translatable(s.toString()), (p) ->
+            this.addRenderableWidget(new Button.Builder(Component.translatable(s), (p) ->
             {
-                this.minecraft.setScreen((Screen) null);
+                this.minecraft.setScreen(null);
                 if (p.getMessage().getString().startsWith("/")) {
                     this.minecraft.player.connection.sendCommand(p.getMessage().getString().substring(1));
                 } else {

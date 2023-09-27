@@ -65,12 +65,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
     @Override
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append("\n");
-        stringbuilder.append("Size:   " + this.viewWidth + " x " + this.viewHeight).append("\n");
-        stringbuilder.append("FB ID:  " + this.frameBufferId).append("\n");
-        stringbuilder.append("Tex ID: " + this.colorTextureId).append("\n");
-        return stringbuilder.toString();
+        String stringbuilder = "\n" +
+            "Size:   " + this.viewWidth + " x " + this.viewHeight + "\n" +
+            "FB ID:  " + this.frameBufferId + "\n" +
+            "Tex ID: " + this.colorTextureId + "\n";
+        return stringbuilder;
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I", ordinal = 0), method = "createBuffers")
@@ -238,13 +237,13 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         Tesselator tesselator = RenderSystem.renderThreadTesselator();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
-        bufferbuilder.vertex((double) f4, (double) f3, 0.0D).uv(xCropFactor, yCropFactor).color(255, 255, 255, 255)
+        bufferbuilder.vertex(f4, f3, 0.0D).uv(xCropFactor, yCropFactor).color(255, 255, 255, 255)
             .endVertex();
-        bufferbuilder.vertex((double) f2, (double) f3, 0.0D).uv(f8 - xCropFactor, yCropFactor)
+        bufferbuilder.vertex(f2, f3, 0.0D).uv(f8 - xCropFactor, yCropFactor)
             .color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex((double) f2, (double) f5, 0.0D).uv(f8 - xCropFactor, f9 - yCropFactor)
+        bufferbuilder.vertex(f2, f5, 0.0D).uv(f8 - xCropFactor, f9 - yCropFactor)
             .color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex((double) f4, (double) f5, 0.0D).uv(xCropFactor, f9 - yCropFactor)
+        bufferbuilder.vertex(f4, f5, 0.0D).uv(xCropFactor, f9 - yCropFactor)
             .color(255, 255, 255, 255).endVertex();
         BufferUploader.draw(bufferbuilder.end());
         instance.clear();

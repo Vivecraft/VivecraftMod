@@ -221,15 +221,15 @@ public class Utils {
     }
 
     public static Vec3 convertToVector3d(Vector3 vector) {
-        return new Vec3((double) vector.getX(), (double) vector.getY(), (double) vector.getZ());
+        return new Vec3(vector.getX(), vector.getY(), vector.getZ());
     }
 
     public static Vec3 convertToVector3d(Vector3f vector) {
-        return new Vec3((double) vector.x, (double) vector.y, (double) vector.z);
+        return new Vec3(vector.x, vector.y, vector.z);
     }
 
     public static Vector3f transformVector(Matrix4f matrix, Vector3f vector, boolean point) {
-        Vector4f vector4f = Matrix4f.transform(matrix, new Vector4f(vector.x, vector.y, vector.z, point ? 1.0F : 0.0F), (Vector4f) null);
+        Vector4f vector4f = Matrix4f.transform(matrix, new Vector4f(vector.x, vector.y, vector.z, point ? 1.0F : 0.0F), null);
         return new Vector3f(vector4f.x, vector4f.y, vector4f.z);
     }
 
@@ -471,7 +471,7 @@ public class Utils {
         return new String(httpReadAll(url), StandardCharsets.UTF_8);
     }
 
-    public static void httpReadToFile(String url, File file, boolean writeWhenComplete) throws MalformedURLException, IOException {
+    public static void httpReadToFile(String url, File file, boolean writeWhenComplete) throws IOException {
         HttpURLConnection httpurlconnection = (HttpURLConnection) (new URL(url)).openConnection();
         httpurlconnection.setConnectTimeout(5000);
         httpurlconnection.setReadTimeout(20000);
@@ -532,7 +532,7 @@ public class Utils {
         return list;
     }
 
-    public static String getFileChecksum(File file, String algorithm) throws FileNotFoundException, IOException, NoSuchAlgorithmException {
+    public static String getFileChecksum(File file, String algorithm) throws IOException, NoSuchAlgorithmException {
         InputStream inputstream = new FileInputStream(file);
         byte[] abyte = new byte[(int) file.length()];
         inputstream.read(abyte);
@@ -550,13 +550,13 @@ public class Utils {
         return s;
     }
 
-    public static byte[] readFile(File file) throws FileNotFoundException, IOException {
+    public static byte[] readFile(File file) throws IOException {
         FileInputStream fileinputstream = new FileInputStream(file);
         return readFully(fileinputstream);
     }
 
-    public static String readFileString(File file) throws FileNotFoundException, IOException {
-        return new String(readFile(file), "UTF-8");
+    public static String readFileString(File file) throws IOException {
+        return new String(readFile(file), StandardCharsets.UTF_8);
     }
 
     public static byte[] readFully(InputStream in) throws IOException {
@@ -579,10 +579,10 @@ public class Utils {
         float f3 = alpha;
 
         if ((double) (1.0F - f1) > 0.1D) {
-            float f4 = (float) Math.acos((double) f1);
-            float f5 = 1.0F / (float) Math.sin((double) f4);
-            f2 = (float) Math.sin((double) ((1.0F - alpha) * f4)) * f5;
-            f3 = (float) Math.sin((double) (alpha * f4)) * f5;
+            float f4 = (float) Math.acos(f1);
+            float f5 = 1.0F / (float) Math.sin(f4);
+            f2 = (float) Math.sin((1.0F - alpha) * f4) * f5;
+            f3 = (float) Math.sin(alpha * f4) * f5;
         }
 
         if (f < 0.0F) {
@@ -628,7 +628,7 @@ public class Utils {
             try {
                 minecraft.level.addParticle(type, position.x + d0, position.y + d1, position.z + d2, d3, d4, d5);
             } catch (Throwable throwable) {
-                LogManager.getLogger().warn("Could not spawn particle effect {}", (Object) type);
+                LogManager.getLogger().warn("Could not spawn particle effect {}", type);
                 return;
             }
         }
@@ -668,7 +668,7 @@ public class Utils {
         {
             list.add(sameLine && linePrefix != null ? FormattedText.composite(linePrefix, lineText) : lineText);
         });
-        return (List<FormattedText>) (list.isEmpty() ? Lists.newArrayList(FormattedText.EMPTY) : list);
+        return list.isEmpty() ? Lists.newArrayList(FormattedText.EMPTY) : list;
     }
 
     public static List<ChatFormatting> styleToFormats(Style style) {
@@ -751,7 +751,7 @@ public class Utils {
     }
 
     public static Quaternion convertMatrix4ftoRotationQuat(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22) {
-        double d0 = (double) (m00 * m00 + m10 * m10 + m20 * m20);
+        double d0 = m00 * m00 + m10 * m10 + m20 * m20;
 
         if (d0 != 1.0D && d0 != 0.0D) {
             d0 = 1.0D / Math.sqrt(d0);
@@ -760,7 +760,7 @@ public class Utils {
             m20 = (float) ((double) m20 * d0);
         }
 
-        d0 = (double) (m01 * m01 + m11 * m11 + m21 * m21);
+        d0 = m01 * m01 + m11 * m11 + m21 * m21;
 
         if (d0 != 1.0D && d0 != 0.0D) {
             d0 = 1.0D / Math.sqrt(d0);
@@ -769,7 +769,7 @@ public class Utils {
             m21 = (float) ((double) m21 * d0);
         }
 
-        d0 = (double) (m02 * m02 + m12 * m12 + m22 * m22);
+        d0 = m02 * m02 + m12 * m12 + m22 * m22;
 
         if (d0 != 1.0D && d0 != 0.0D) {
             d0 = 1.0D / Math.sqrt(d0);
@@ -782,7 +782,7 @@ public class Utils {
         Quaternion quaternion = new Quaternion();
 
         if (f >= 0.0F) {
-            double d1 = Math.sqrt((double) (f + 1.0F));
+            double d1 = Math.sqrt(f + 1.0F);
             quaternion.w = (float) (0.5D * d1);
             d1 = 0.5D / d1;
             quaternion.x = (float) ((double) (m21 - m12) * d1);
@@ -815,14 +815,14 @@ public class Utils {
     }
 
     public static org.vivecraft.common.utils.math.Matrix4f rotationXMatrix(float angle) {
-        float f = (float) Math.sin((double) angle);
-        float f1 = (float) Math.cos((double) angle);
+        float f = (float) Math.sin(angle);
+        float f1 = (float) Math.cos(angle);
         return new org.vivecraft.common.utils.math.Matrix4f(1.0F, 0.0F, 0.0F, 0.0F, f1, -f, 0.0F, f, f1);
     }
 
     public static org.vivecraft.common.utils.math.Matrix4f rotationZMatrix(float angle) {
-        float f = (float) Math.sin((double) angle);
-        float f1 = (float) Math.cos((double) angle);
+        float f = (float) Math.sin(angle);
+        float f1 = (float) Math.cos(angle);
         return new org.vivecraft.common.utils.math.Matrix4f(f1, -f, 0.0F, f, f1, 0.0F, 0.0F, 0.0F, 1.0F);
     }
 

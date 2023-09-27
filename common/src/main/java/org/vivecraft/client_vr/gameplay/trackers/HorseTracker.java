@@ -87,7 +87,7 @@ public class HorseTracker extends Tracker {
             this.horse.setYRot((float) ((double) f + (d4 - d3) * this.turnspeed));
         }
 
-        this.horse.yBodyRot = (float) Utils.lerpMod((double) f1, (double) f, this.bodyturnspeed, 360.0D);
+        this.horse.yBodyRot = (float) Utils.lerpMod(f1, f, this.bodyturnspeed, 360.0D);
         this.horse.yHeadRot = f;
         Vec3 vec37 = quaternion.multiply(new Vec3(0.0D, 0.0D, (double) this.speedLevel * this.baseSpeed));
         this.horse.setDeltaMovement(vec37.x, this.horse.getDeltaMovement().y, vec37.z);

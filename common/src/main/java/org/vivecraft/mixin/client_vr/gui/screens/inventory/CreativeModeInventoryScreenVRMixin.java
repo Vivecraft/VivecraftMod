@@ -65,7 +65,7 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
     @Unique
     private void vivecraft$addCreativeSearch(String query, NonNullList<ItemStack> list) {
         NonNullList<ItemStack> nonnulllist = NonNullList.create();
-        vivecraft$addCreativeItems((CreativeModeTab) null, nonnulllist);
+        vivecraft$addCreativeItems(null, nonnulllist);
 
         for (ItemStack itemstack : nonnulllist) {
             if (query.isEmpty() || itemstack.getHoverName().toString().toLowerCase().contains(query.toLowerCase())) {

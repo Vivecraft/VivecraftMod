@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class PatreonReceiver {
     private static final Object lock = new Object();
-    private static List<Player> queuedPlayers = new LinkedList<>();
+    private static final List<Player> queuedPlayers = new LinkedList<>();
     private static Map<String, Integer> cache;
     private static boolean downloadStarted;
     private static boolean downloadFailed;

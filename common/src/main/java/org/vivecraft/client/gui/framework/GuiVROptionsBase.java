@@ -120,11 +120,10 @@ public abstract class GuiVROptionsBase extends Screen {
 
     protected void loadDefaults() {
         for (GuiEventListener child : this.children()) {
-            if (!(child instanceof GuiVROption)) {
+            if (!(child instanceof GuiVROption optionButton)) {
                 continue;
             }
 
-            GuiVROption optionButton = (GuiVROption) child;
             this.settings.loadDefault(optionButton.getOption());
         }
     }
@@ -152,10 +151,10 @@ public abstract class GuiVROptionsBase extends Screen {
 
             if (settings[j].option != null) {
                 if (settings[j].option != VRSettings.VrOptions.DUMMY) {
-                    arraylist.add(new VROptionLayout(settings[j].option, settings[j].customHandler, vroptionlayout$position, (float) Math.floor((double) ((float) i / 2.0F)), true, settings[j].title));
+                    arraylist.add(new VROptionLayout(settings[j].option, settings[j].customHandler, vroptionlayout$position, (float) Math.floor((float) i / 2.0F), true, settings[j].title));
                 }
             } else if (settings[j].customHandler != null) {
-                arraylist.add(new VROptionLayout(settings[j].customHandler, vroptionlayout$position, (float) Math.floor((double) ((float) i / 2.0F)), true, settings[j].title));
+                arraylist.add(new VROptionLayout(settings[j].customHandler, vroptionlayout$position, (float) Math.floor((float) i / 2.0F), true, settings[j].title));
             }
 
             if (settings[j].center) {
@@ -253,12 +252,12 @@ public abstract class GuiVROptionsBase extends Screen {
 
             return true;
         } else {
-            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers) ? true : super.keyPressed(pKeyCode, pScanCode, pModifiers);
+            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers) || super.keyPressed(pKeyCode, pScanCode, pModifiers);
         }
     }
 
     public boolean charTyped(char pCodePoint, int pModifiers) {
-        return this.visibleList != null && this.visibleList.charTyped(pCodePoint, pModifiers) ? true : super.charTyped(pCodePoint, pModifiers);
+        return this.visibleList != null && this.visibleList.charTyped(pCodePoint, pModifiers) || super.charTyped(pCodePoint, pModifiers);
     }
 
     private void renderTooltip(GuiGraphics guiGraphics, int pMouseX, int pMouseY) {

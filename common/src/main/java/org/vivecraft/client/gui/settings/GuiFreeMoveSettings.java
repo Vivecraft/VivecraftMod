@@ -7,7 +7,7 @@ import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiFreeMoveSettings extends GuiVROptionsBase {
-    private static VRSettings.VrOptions[] standingSettings = new VRSettings.VrOptions[]{
+    private static final VRSettings.VrOptions[] standingSettings = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.FREEMOVE_MODE,
         VRSettings.VrOptions.FREEMOVE_FLY_MODE,
         VRSettings.VrOptions.FOV_REDUCTION,
@@ -17,12 +17,12 @@ public class GuiFreeMoveSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.AUTO_SPRINT_THRESHOLD,
         VRSettings.VrOptions.ANALOG_MOVEMENT
     };
-    private static VRSettings.VrOptions[] seatedSettings = new VRSettings.VrOptions[]{
+    private static final VRSettings.VrOptions[] seatedSettings = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.SEATED_HMD,
         VRSettings.VrOptions.FOV_REDUCTION,
         VRSettings.VrOptions.INERTIA_FACTOR
     };
-    private static VRSettings.VrOptions[] fovRed = new VRSettings.VrOptions[]{
+    private static final VRSettings.VrOptions[] fovRed = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.FOV_REDUCTION_MIN,
         VRSettings.VrOptions.FOV_REDUCTION_OFFSET
     };

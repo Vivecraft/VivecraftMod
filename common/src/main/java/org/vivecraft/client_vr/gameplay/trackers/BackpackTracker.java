@@ -12,7 +12,7 @@ import org.vivecraft.client_vr.gameplay.VRPlayer;
 public class BackpackTracker extends Tracker {
     public boolean[] wasIn = new boolean[2];
     public int previousSlot = 0;
-    private Vec3 down = new Vec3(0.0D, -1.0D, 0.0D);
+    private final Vec3 down = new Vec3(0.0D, -1.0D, 0.0D);
 
     public BackpackTracker(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh);

@@ -213,7 +213,7 @@ public class VRPlayersClient {
 
     public boolean isTracked(UUID uuid) {
         this.debug = false;
-        return this.debug ? true : this.vivePlayers.containsKey(uuid);
+        return this.debug || this.vivePlayers.containsKey(uuid);
     }
 
     public static float getFacingYaw(RotInfo rotInfo) {

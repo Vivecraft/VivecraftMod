@@ -7,10 +7,10 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class SwimTracker extends Tracker {
     Vec3 motion = Vec3.ZERO;
-    double friction = (double) 0.9F;
+    double friction = 0.9F;
     double lastDist;
-    final double riseSpeed = (double) 0.005F;
-    double swimspeed = (double) 1.3F;
+    final double riseSpeed = 0.005F;
+    double swimspeed = 1.3F;
 
     public SwimTracker(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh);

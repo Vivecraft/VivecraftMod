@@ -112,7 +112,7 @@ public class RowTracker extends Tracker {
     }
 
     Vec3 getAttachmentPoint(int paddle, Boat boat) {
-        Vec3 vec3 = new Vec3((double) ((paddle == 0 ? 9.0F : -9.0F) / 16.0F), 0.625D, 0.1875D);
+        Vec3 vec3 = new Vec3((paddle == 0 ? 9.0F : -9.0F) / 16.0F, 0.625D, 0.1875D);
         Quaternion quaternion = (new Quaternion(boat.getXRot(), -(boat.getYRot() % 360.0F), 0.0F)).normalized();
         return boat.position().add(quaternion.multiply(vec3));
     }

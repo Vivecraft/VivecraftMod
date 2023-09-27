@@ -18,7 +18,7 @@ public class EatingTracker extends Tracker {
     public boolean[] eating = new boolean[2];
     int eattime = 2100;
     long eatStart;
-    private Random r = new Random();
+    private final Random r = new Random();
 
     public EatingTracker(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh);
@@ -51,9 +51,7 @@ public class EatingTracker extends Tracker {
             if (p.getOffhandItem() != null) {
                 UseAnim useanim1 = p.getOffhandItem().getUseAnimation();
 
-                if (useanim1 == UseAnim.EAT || useanim1 == UseAnim.DRINK || useanim1 == UseAnim.TOOT_HORN) {
-                    return true;
-                }
+                return useanim1 == UseAnim.EAT || useanim1 == UseAnim.DRINK || useanim1 == UseAnim.TOOT_HORN;
             }
 
             return false;
@@ -68,7 +66,7 @@ public class EatingTracker extends Tracker {
     public void doProcess(LocalPlayer player) {
         VRPlayer vrplayer = this.dh.vrPlayer;
         Vec3 hmdPos = vrplayer.vrdata_room_pre.hmd.getPosition();
-        Vec3 mouthPos = vrplayer.vrdata_room_pre.getController(0).getCustomVector(new Vec3(0.0D, (double) (-this.mouthtoEyeDistance), 0.0D)).add(hmdPos);
+        Vec3 mouthPos = vrplayer.vrdata_room_pre.getController(0).getCustomVector(new Vec3(0.0D, -this.mouthtoEyeDistance, 0.0D)).add(hmdPos);
 
         for (int c = 0; c < 2; ++c) {
 
@@ -106,7 +104,7 @@ public class EatingTracker extends Tracker {
                 }
 
                 if (this.eating[c]) {
-                    long k = (long) player.getUseItemRemainingTicks();
+                    long k = player.getUseItemRemainingTicks();
 
                     if (k > 0L && k % 5L <= (long) crunchiness) {
                         this.dh.vr.triggerHapticPulse(c, 700);

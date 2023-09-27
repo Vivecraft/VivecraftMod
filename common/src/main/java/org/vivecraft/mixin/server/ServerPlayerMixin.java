@@ -79,8 +79,8 @@ public abstract class ServerPlayerMixin extends Player {
         if (serverviveplayer != null && serverviveplayer.isVR()) {
             Vec3 vec3 = serverviveplayer.getControllerDir(0);
             float f = (float) Math.toDegrees(Math.atan2(vec3.x, -vec3.z));
-            double d0 = (double) (-Mth.sin(f * ((float) Math.PI / 180F)));
-            double d1 = (double) Mth.cos(f * ((float) Math.PI / 180F));
+            double d0 = -Mth.sin(f * ((float) Math.PI / 180F));
+            double d1 = Mth.cos(f * ((float) Math.PI / 180F));
             Vec3 vec31 = serverviveplayer.getControllerPos(0, this);
 
             if (this.level() instanceof ServerLevel) {

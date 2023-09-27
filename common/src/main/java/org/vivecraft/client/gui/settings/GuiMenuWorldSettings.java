@@ -6,7 +6,7 @@ import org.vivecraft.client.gui.framework.VROptionEntry;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiMenuWorldSettings extends GuiVROptionsBase {
-    private VROptionEntry[] miscSettings = new VROptionEntry[]{
+    private final VROptionEntry[] miscSettings = new VROptionEntry[]{
         new VROptionEntry(VRSettings.VrOptions.MENU_WORLD_SELECTION),
         new VROptionEntry("vivecraft.gui.menuworld.refresh", (button, mousePos) -> {
             if (this.dataholder.menuWorldRenderer != null && this.dataholder.menuWorldRenderer.getLevel() != null) {

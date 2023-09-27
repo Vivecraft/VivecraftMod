@@ -83,9 +83,7 @@ public class Matrix4f {
 
     Matrix4f(Matrix4f c) {
         for (int i = 0; i < 4; ++i) {
-            for (int j = 0; j < 4; ++j) {
-                this.M[i][j] = c.M[i][j];
-            }
+            System.arraycopy(c.M[i], 0, this.M[i], 0, 4);
         }
     }
 
@@ -167,8 +165,8 @@ public class Matrix4f {
     }
 
     public static Matrix4f rotationY(float angle) {
-        double d0 = Math.sin((double) angle);
-        double d1 = Math.cos((double) angle);
+        double d0 = Math.sin(angle);
+        double d1 = Math.cos(angle);
         return new Matrix4f((float) d1, 0.0F, (float) d0, 0.0F, 1.0F, 0.0F, -((float) d0), 0.0F, (float) d1);
     }
 
@@ -200,11 +198,10 @@ public class Matrix4f {
     }
 
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append(this.M[0][0]).append(' ').append(this.M[1][0]).append(' ').append(this.M[2][0]).append(' ').append(this.M[3][0]).append('\n');
-        stringbuilder.append(this.M[0][1]).append(' ').append(this.M[1][1]).append(' ').append(this.M[2][1]).append(' ').append(this.M[3][1]).append('\n');
-        stringbuilder.append(this.M[0][2]).append(' ').append(this.M[1][2]).append(' ').append(this.M[2][2]).append(' ').append(this.M[3][2]).append('\n');
-        stringbuilder.append(this.M[0][3]).append(' ').append(this.M[1][3]).append(' ').append(this.M[2][3]).append(' ').append(this.M[3][3]).append('\n');
-        return stringbuilder.toString();
+        String stringbuilder = String.valueOf(this.M[0][0]) + ' ' + this.M[1][0] + ' ' + this.M[2][0] + ' ' + this.M[3][0] + '\n' +
+            this.M[0][1] + ' ' + this.M[1][1] + ' ' + this.M[2][1] + ' ' + this.M[3][1] + '\n' +
+            this.M[0][2] + ' ' + this.M[1][2] + ' ' + this.M[2][2] + ' ' + this.M[3][2] + '\n' +
+            this.M[0][3] + ' ' + this.M[1][3] + ' ' + this.M[2][3] + ' ' + this.M[3][3] + '\n';
+        return stringbuilder;
     }
 }

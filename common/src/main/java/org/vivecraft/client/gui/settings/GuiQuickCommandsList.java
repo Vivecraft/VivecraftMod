@@ -57,7 +57,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
             if (this.btnDelete.mouseClicked(pMouseX, p_94738_, pMouseY)) {
                 return true;
             } else {
-                return this.txt.mouseClicked(pMouseX, p_94738_, pMouseY) ? true : super.mouseClicked(pMouseX, p_94738_, pMouseY);
+                return this.txt.mouseClicked(pMouseX, p_94738_, pMouseY) || super.mouseClicked(pMouseX, p_94738_, pMouseY);
             }
         }
 
@@ -73,7 +73,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
             if (this.btnDelete.mouseReleased(pMouseX, p_94754_, pMouseY)) {
                 return true;
             } else {
-                return this.txt.mouseReleased(pMouseX, p_94754_, pMouseY) ? true : super.mouseReleased(pMouseX, p_94754_, pMouseY);
+                return this.txt.mouseReleased(pMouseX, p_94754_, pMouseY) || super.mouseReleased(pMouseX, p_94754_, pMouseY);
             }
         }
 
@@ -81,7 +81,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
             if (this.btnDelete.mouseScrolled(pMouseX, p_94735_, pMouseY)) {
                 return true;
             } else {
-                return this.txt.mouseScrolled(pMouseX, p_94735_, pMouseY) ? true : super.mouseScrolled(pMouseX, p_94735_, pMouseY);
+                return this.txt.mouseScrolled(pMouseX, p_94735_, pMouseY) || super.mouseScrolled(pMouseX, p_94735_, pMouseY);
             }
         }
 

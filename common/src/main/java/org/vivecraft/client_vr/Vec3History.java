@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 
 public class Vec3History {
-    private int _capacity = 450;
-    private LinkedList<entry> _data = new LinkedList<>();
+    private final int _capacity = 450;
+    private final LinkedList<entry> _data = new LinkedList<>();
 
     public void add(Vec3 in) {
         this._data.add(new entry(in));

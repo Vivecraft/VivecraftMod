@@ -349,9 +349,9 @@ public class VRHotkeys {
         return (new File("ExternalCamera.cfg")).exists();
     }
 
-    public static enum Triggerer {
+    public enum Triggerer {
         BINDING,
         MENUBUTTON,
-        INTERACTION;
+        INTERACTION
     }
 }

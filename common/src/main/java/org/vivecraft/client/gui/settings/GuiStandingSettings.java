@@ -6,7 +6,7 @@ import org.vivecraft.client.gui.framework.VROptionEntry;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiStandingSettings extends GuiVROptionsBase {
-    private VROptionEntry[] locomotionSettings = new VROptionEntry[]{
+    private final VROptionEntry[] locomotionSettings = new VROptionEntry[]{
         new VROptionEntry(VRSettings.VrOptions.WALK_UP_BLOCKS),
         new VROptionEntry(VRSettings.VrOptions.VEHICLE_ROTATION),
         new VROptionEntry(VRSettings.VrOptions.WALK_MULTIPLIER),

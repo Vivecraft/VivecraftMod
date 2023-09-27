@@ -12,9 +12,7 @@ public class Convert {
         float[] afloat = new float[float2Array.length * float2Array[0].length];
 
         for (int i = 0; i < float2Array.length; ++i) {
-            for (int j = 0; j < float2Array[0].length; ++j) {
-                afloat[i * float2Array[0].length + j] = float2Array[i][j];
-            }
+            System.arraycopy(float2Array[i], 0, afloat, i * float2Array[0].length, float2Array[0].length);
         }
 
         return matrix(afloat);
@@ -48,7 +46,7 @@ public class Convert {
         boolean intFilled = false;
 
         public Matrix(float[] floatArray) {
-            this.dimension = (int) Math.sqrt((double) floatArray.length);
+            this.dimension = (int) Math.sqrt(floatArray.length);
 
             if (this.dimension * this.dimension != floatArray.length) {
                 throw new IllegalArgumentException("Input array has invalid length");
@@ -76,9 +74,9 @@ public class Convert {
             if (!this.doubleFilled) {
                 for (int i = 0; i < this.doubleArray.length; ++i) {
                     if (this.floatFilled) {
-                        this.doubleArray[i] = (double) this.floatArray[i];
+                        this.doubleArray[i] = this.floatArray[i];
                     } else if (this.intFilled) {
-                        this.doubleArray[i] = (double) this.intArray[i];
+                        this.doubleArray[i] = this.intArray[i];
                     }
                 }
 

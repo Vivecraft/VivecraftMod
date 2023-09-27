@@ -29,30 +29,30 @@ import java.util.Collections;
 import java.util.List;
 
 public class FakeBlockAccess implements LevelReader {
-    private int version;
-    private long seed;
-    private DimensionType dimensionType;
-    private boolean isFlat;
-    private BlockState[] blocks;
-    private byte[] skylightmap;
-    private byte[] blocklightmap;
-    private Biome[] biomemap;
+    private final int version;
+    private final long seed;
+    private final DimensionType dimensionType;
+    private final boolean isFlat;
+    private final BlockState[] blocks;
+    private final byte[] skylightmap;
+    private final byte[] blocklightmap;
+    private final Biome[] biomemap;
 
-    private short[][] heightmap;
-    private int xSize;
-    private int ySize;
-    private int zSize;
+    private final short[][] heightmap;
+    private final int xSize;
+    private final int ySize;
+    private final int zSize;
     private float ground;
 
     // same as ground, but includes an optional vertical view offset
     public float effectiveGround;
 
-    private float rotation;
-    private boolean rain;
-    private boolean thunder;
+    private final float rotation;
+    private final boolean rain;
+    private final boolean thunder;
 
-    private BiomeManager biomeManager;
-    private DimensionSpecialEffects dimensionInfo;
+    private final BiomeManager biomeManager;
+    private final DimensionSpecialEffects dimensionInfo;
 
     public FakeBlockAccess(int version, long seed, BlockState[] blocks, byte[] skylightmap, byte[] blocklightmap, Biome[] biomemap, short[][] heightmap, int xSize, int ySize, int zSize, int ground, DimensionType dimensionType, boolean isFlat, float rotation, boolean rain, boolean thunder) {
         this.version = version;
@@ -192,7 +192,7 @@ public class FakeBlockAccess implements LevelReader {
 
             for (BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos(); cursor3D.advance(); i1 += j1 & 255) {
                 blockpos$mutable.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
-                j1 = colorResolverIn.getColor(this.getBiome(blockpos$mutable).value(), (double) blockpos$mutable.getX(), (double) blockpos$mutable.getZ());
+                j1 = colorResolverIn.getColor(this.getBiome(blockpos$mutable).value(), blockpos$mutable.getX(), blockpos$mutable.getZ());
                 k += (j1 & 16711680) >> 16;
                 l += (j1 & 65280) >> 8;
             }

@@ -43,8 +43,8 @@ public class RGBAColor {
         if (saturation == 0.0F) {
             color.r = color.g = color.b = brightness;
         } else {
-            float f = (hue - (float) Math.floor((double) hue)) * 6.0F;
-            float f1 = f - (float) Math.floor((double) f);
+            float f = (hue - (float) Math.floor(hue)) * 6.0F;
+            float f1 = f - (float) Math.floor(f);
             float f2 = brightness * (1.0F - saturation);
             float f3 = brightness * (1.0F - saturation * f1);
             float f4 = brightness * (1.0F - saturation * (1.0F - f1));

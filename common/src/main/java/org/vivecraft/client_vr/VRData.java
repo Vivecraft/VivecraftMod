@@ -58,7 +58,7 @@ public class VRData {
         } else {
             VRSettings vrsettings = ClientDataHolderVR.getInstance().vrSettings;
             Matrix4f matrix4f3 = (new Matrix4f(vrsettings.vrFixedCamrotQuat)).transposed();
-            Vec3 vec32 = new Vec3((double) vrsettings.vrFixedCamposX, (double) vrsettings.vrFixedCamposY, (double) vrsettings.vrFixedCamposZ);
+            Vec3 vec32 = new Vec3(vrsettings.vrFixedCamposX, vrsettings.vrFixedCamposY, vrsettings.vrFixedCamposZ);
             Vec3 vec33 = matrix4f3.transform(Vector3.forward()).toVector3d();
             this.c2 = new VRDevicePose(this, matrix4f3, vec32.subtract(vec3).add(vec31), vec33);
         }
@@ -68,9 +68,9 @@ public class VRData {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
-        Vec3 vec3 = dataholder.vr.controllerHistory[c].averagePosition((double) lenSec);
-        Vec3 vec31 = dataholder.vr.controllerForwardHistory[c].averagePosition((double) lenSec);
-        Vec3 vec32 = dataholder.vr.controllerUpHistory[c].averagePosition((double) lenSec);
+        Vec3 vec3 = dataholder.vr.controllerHistory[c].averagePosition(lenSec);
+        Vec3 vec31 = dataholder.vr.controllerForwardHistory[c].averagePosition(lenSec);
+        Vec3 vec32 = dataholder.vr.controllerUpHistory[c].averagePosition(lenSec);
         Vec3 vec33 = vec31.cross(vec32);
         return new Matrix4f((float) vec33.x, (float) vec31.x, (float) vec32.x, (float) vec33.y, (float) vec31.y, (float) vec32.y, (float) vec33.z, (float) vec31.z, (float) vec32.z);
     }
@@ -171,7 +171,7 @@ public class VRData {
         }
 
         public Vec3 getPosition() {
-            Vec3 vec3 = this.pos.scale((double) VRData.this.worldScale);
+            Vec3 vec3 = this.pos.scale(VRData.this.worldScale);
             vec3 = vec3.yRot(this.data.rotation_radians);
             return vec3.add(this.data.origin.x, this.data.origin.y, this.data.origin.z);
         }
@@ -196,7 +196,7 @@ public class VRData {
         }
 
         public float getRoll() {
-            return (float) (-Math.toDegrees(Math.atan2((double) this.matrix.M[1][0], (double) this.matrix.M[1][1])));
+            return (float) (-Math.toDegrees(Math.atan2(this.matrix.M[1][0], this.matrix.M[1][1])));
         }
 
         public Matrix4f getMatrix() {

@@ -107,7 +107,7 @@ public class Vector3f extends Vector {
             f = 1.0F;
         }
 
-        return (float) Math.acos((double) f);
+        return (float) Math.acos(f);
     }
 
     public Vector load(FloatBuffer buf) {
@@ -132,15 +132,14 @@ public class Vector3f extends Vector {
     }
 
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder(64);
-        stringbuilder.append("Vector3f[");
-        stringbuilder.append(this.x);
-        stringbuilder.append(", ");
-        stringbuilder.append(this.y);
-        stringbuilder.append(", ");
-        stringbuilder.append(this.z);
-        stringbuilder.append(']');
-        return stringbuilder.toString();
+        String stringbuilder = "Vector3f[" +
+            this.x +
+            ", " +
+            this.y +
+            ", " +
+            this.z +
+            ']';
+        return stringbuilder;
     }
 
     public final float getX() {

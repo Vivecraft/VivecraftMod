@@ -87,11 +87,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
         HumanoidArm humanoidarm = mainHand ? pPlayer.getMainArm() : pPlayer.getMainArm().getOpposite();
         pEquippedProgress = this.vivecraft$getEquipProgress(pHand, pPartialTicks);
         pMatrixStack.pushPose();
-        boolean renderArm = true;
-
-        if (dh.currentPass == RenderPass.THIRD && !dh.vrSettings.mixedRealityRenderHands) {
-            renderArm = false;
-        }
+        boolean renderArm = dh.currentPass != RenderPass.THIRD || dh.vrSettings.mixedRealityRenderHands;
 
         if (dh.currentPass == RenderPass.CAMERA) {
             renderArm = false;
@@ -130,7 +126,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                 itemDisplayContext = mainHand ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.FIRST_PERSON_LEFT_HAND : ItemDisplayContext.FIRST_PERSON_RIGHT_HAND);
             }
 
-            dh.isfphand = true;
+            ClientDataHolderVR.isfphand = true;
 
             if (rendertype == VivecraftItemRendering.VivecraftItemTransformType.Map) {
                 RenderSystem.disableCull();
@@ -141,7 +137,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                     pMatrixStack.scale(0.625F, 0.625F, 0.625F);
                     pMatrixStack.translate(mainHand ? -0.53D : -0.47D, -0.5D, -0.6D);
                     //pMatrixStack.mulPose(Axis.XP.rotationDegrees(180.0F));
-                    this.minecraft.getBlockRenderer().getModelRenderer().renderModel(pMatrixStack.last(), pBuffer.getBuffer(Sheets.solidBlockSheet()), (BlockState) null, this.minecraft.getModelManager().getModel(TelescopeTracker.scopeModel), 0.5F, 0.5F, 1.0F, pCombinedLight, OverlayTexture.NO_OVERLAY);
+                    this.minecraft.getBlockRenderer().getModelRenderer().renderModel(pMatrixStack.last(), pBuffer.getBuffer(Sheets.solidBlockSheet()), null, this.minecraft.getModelManager().getModel(TelescopeTracker.scopeModel), 0.5F, 0.5F, 1.0F, pCombinedLight, OverlayTexture.NO_OVERLAY);
                     pMatrixStack.popPose();
                 }
 
@@ -156,7 +152,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                 this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
             }
 
-            dh.isfphand = false;
+            ClientDataHolderVR.isfphand = false;
             pMatrixStack.popPose();
         }
 
@@ -235,9 +231,9 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                         f2 = Mth.sin((float) ((double) swingProgress * Math.PI + Math.PI));
                     }
 
-                    matrixStackIn.translate(0.0D, 0.0D, (double) 0.2F);
+                    matrixStackIn.translate(0.0D, 0.0D, 0.2F);
                     matrixStackIn.mulPose(Axis.XP.rotationDegrees(f2 * 30.0F));
-                    matrixStackIn.translate(0.0D, 0.0D, (double) -0.2F);
+                    matrixStackIn.translate(0.0D, 0.0D, -0.2F);
                     break;
 
                 case Interact:
@@ -256,7 +252,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                     if ((double) swingProgress > 0.25D) {
                         f = Mth.sin((float) ((double) (swingProgress / 2.0F) * Math.PI + Math.PI));
                     }
-                    matrixStackIn.translate(0.0D, 0.0D, (double) (-(1.0F + f) * 0.1F));
+                    matrixStackIn.translate(0.0D, 0.0D, -(1.0F + f) * 0.1F);
             }
         }
     }

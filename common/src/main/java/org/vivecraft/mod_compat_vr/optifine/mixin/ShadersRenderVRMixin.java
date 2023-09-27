@@ -30,8 +30,6 @@ public class ShadersRenderVRMixin {
     public static void updateActiveRenderInfo(Camera activeRenderInfo, Minecraft mc, float partialTicks) {
     }
 
-    ;
-
     @Unique
     private static Method vivecraft$setCameraShadow = null;
 

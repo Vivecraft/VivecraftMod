@@ -204,11 +204,10 @@ public class Matrix3f extends Matrix {
     }
 
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append(this.m00).append(' ').append(this.m10).append(' ').append(this.m20).append(' ').append('\n');
-        stringbuilder.append(this.m01).append(' ').append(this.m11).append(' ').append(this.m21).append(' ').append('\n');
-        stringbuilder.append(this.m02).append(' ').append(this.m12).append(' ').append(this.m22).append(' ').append('\n');
-        return stringbuilder.toString();
+        String stringbuilder = String.valueOf(this.m00) + ' ' + this.m10 + ' ' + this.m20 + ' ' + '\n' +
+            this.m01 + ' ' + this.m11 + ' ' + this.m21 + ' ' + '\n' +
+            this.m02 + ' ' + this.m12 + ' ' + this.m22 + ' ' + '\n';
+        return stringbuilder;
     }
 
     public Matrix invert() {

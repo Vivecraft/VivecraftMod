@@ -48,7 +48,7 @@ public class CrawlTracker extends Tracker {
         if (Xplat.isModLoaded("pehkui")) {
             scaleMultiplier /= PehkuiHelper.getPlayerScale(player, mc.getFrameTime());
         }
-        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition((double) 0.2F).y * (double) this.dh.vrPlayer.worldScale * scaleMultiplier + (double) 0.1F < (double) this.dh.vrSettings.crawlThreshold;
+        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * (double) this.dh.vrPlayer.worldScale * scaleMultiplier + (double) 0.1F < (double) this.dh.vrSettings.crawlThreshold;
         this.updateState(player);
     }
 

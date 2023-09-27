@@ -39,7 +39,7 @@ public class Vector3 {
     }
 
     public Vec3 toVector3d() {
-        return new Vec3((double) this.x, (double) this.y, (double) this.z);
+        return new Vec3(this.x, this.y, this.z);
     }
 
     public Vector3 copy() {
@@ -127,13 +127,13 @@ public class Vector3 {
     public Angle angle(Vector3 other) {
         float f = other.x - this.x;
         float f1 = other.z - this.z;
-        float f2 = (float) Math.toDegrees(Math.atan2((double) (other.y - this.y), Math.sqrt((double) (f * f + f1 * f1))));
-        float f3 = (float) Math.toDegrees(Math.atan2((double) (-f), (double) (-f1)));
+        float f2 = (float) Math.toDegrees(Math.atan2(other.y - this.y, Math.sqrt(f * f + f1 * f1)));
+        float f3 = (float) Math.toDegrees(Math.atan2(-f, -f1));
         return new Angle(f2, f3);
     }
 
     public float length() {
-        return (float) Math.sqrt((double) (this.x * this.x + this.y * this.y + this.z * this.z));
+        return (float) Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
 
     public float lengthSquared() {
@@ -144,7 +144,7 @@ public class Vector3 {
         float f = other.x - this.x;
         float f1 = other.y - this.y;
         float f2 = other.z - this.z;
-        return (float) Math.sqrt((double) (f * f + f1 * f1 + f2 * f2));
+        return (float) Math.sqrt(f * f + f1 * f1 + f2 * f2);
     }
 
     public float distanceSquared(Vector3 other) {
@@ -208,10 +208,10 @@ public class Vector3 {
 
     public static Vector3 slerp(Vector3 start, Vector3 end, float fraction) {
         float f = start.dot(end);
-        float f1 = (float) Math.acos((double) f) * fraction;
+        float f1 = (float) Math.acos(f) * fraction;
         Vector3 vector3 = end.subtract(start.multiply(f));
         vector3.normalize();
-        return start.multiply((float) Math.cos((double) f1)).add(vector3.multiply((float) Math.sin((double) f1)));
+        return start.multiply((float) Math.cos(f1)).add(vector3.multiply((float) Math.sin(f1)));
     }
 
     public static Matrix3f lookMatrix(Vector3 forward, Vector3 up) {

@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.settings.profile;
 import com.google.gson.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -33,7 +34,7 @@ public class ProfileManager {
                 vrProfileCfgFile.createNewFile();
             }
 
-            InputStreamReader inputstreamreader = new InputStreamReader(new FileInputStream(vrProfileCfgFile), "UTF-8");
+            InputStreamReader inputstreamreader = new InputStreamReader(new FileInputStream(vrProfileCfgFile), StandardCharsets.UTF_8);
 
             try {
                 jsonConfigRoot = JsonParser.parseReader(inputstreamreader).getAsJsonObject();
@@ -75,8 +76,7 @@ public class ProfileManager {
             String s = (String) object;
             Object object1 = profiles.get(s);
 
-            if (object1 instanceof JsonObject) {
-                JsonObject JsonObject = (JsonObject) object1;
+            if (object1 instanceof JsonObject JsonObject) {
                 JsonObject JsonObject1 = null;
                 JsonObject JsonObject2 = null;
                 JsonObject JsonObject3 = null;
@@ -190,7 +190,7 @@ public class ProfileManager {
             if (JsonObject.has(set)) {
                 JsonObject JsonObject1 = JsonObject.get(set).getAsJsonObject();
 
-                for (String s : (Set<String>) JsonObject1.keySet()) {
+                for (String s : JsonObject1.keySet()) {
                     String s1 = JsonObject1.get(s).getAsString();
                     map.put(s, s1);
                 }
@@ -206,7 +206,7 @@ public class ProfileManager {
         if (theProfile.has(set)) {
             JsonObject JsonObject = theProfile.get(set).getAsJsonObject();
 
-            for (String s : (Set<String>) JsonObject.keySet()) {
+            for (String s : JsonObject.keySet()) {
                 String s1 = JsonObject.get(s).getAsString();
                 map.put(s, s1);
             }
@@ -249,7 +249,7 @@ public class ProfileManager {
 
     public static synchronized void save() {
         try {
-            OutputStreamWriter outputstreamwriter = new OutputStreamWriter(new FileOutputStream(vrProfileCfgFile), "UTF-8");
+            OutputStreamWriter outputstreamwriter = new OutputStreamWriter(new FileOutputStream(vrProfileCfgFile), StandardCharsets.UTF_8);
             String s = gson.toJson(jsonConfigRoot);
             outputstreamwriter.write(s);
             outputstreamwriter.flush();

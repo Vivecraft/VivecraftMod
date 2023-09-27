@@ -38,7 +38,7 @@ public class TeleportTracker extends Tracker {
     private Direction movementTeleportDestinationSideHit;
     public double movementTeleportProgress;
     public double movementTeleportDistance;
-    private Vec3[] movementTeleportArc = new Vec3[50];
+    private final Vec3[] movementTeleportArc = new Vec3[50];
     public int movementTeleportArcSteps = 0;
     public double lastTeleportArcDisplayOffset = 0.0D;
     public VRMovementStyle vrMovementStyle;
@@ -101,7 +101,7 @@ public class TeleportTracker extends Tracker {
                 ((PlayerExtension) player).vivecraft$setMovementTeleportTimer(((PlayerExtension) player).vivecraft$getMovementTeleportTimer() + 1);
 
                 if (((PlayerExtension) player).vivecraft$getMovementTeleportTimer() > 0) {
-                    this.movementTeleportProgress = (double) ((float) ((PlayerExtension) player).vivecraft$getMovementTeleportTimer() / 1.0F);
+                    this.movementTeleportProgress = (float) ((PlayerExtension) player).vivecraft$getMovementTeleportTimer();
 
                     if (this.movementTeleportProgress >= 1.0D) {
                         this.movementTeleportProgress = 1.0D;
@@ -116,7 +116,7 @@ public class TeleportTracker extends Tracker {
 
                         if (this.vrMovementStyle.airSparkles) {
                             for (int i = 0; i < 3; ++i) {
-                                double d0 = random.nextDouble() * 1.0D + 3.5D;
+                                double d0 = random.nextDouble() + 3.5D;
                                 double d1 = random.nextDouble() * 2.5D;
                                 double d2 = random.nextDouble() * 4.0D - 2.0D;
                                 Vec3 vec36 = new Vec3(vec38.x + vec32.x * d0, vec38.y + vec32.y * d0, vec38.z + vec32.z * d0);
@@ -134,7 +134,7 @@ public class TeleportTracker extends Tracker {
                 ((PlayerExtension) player).vivecraft$setMovementTeleportTimer(((PlayerExtension) player).vivecraft$getMovementTeleportTimer() + 1);
                 Vec3 vec39 = player.position();
                 double d6 = vec3.distanceTo(vec39);
-                double d7 = (double) ((PlayerExtension) player).vivecraft$getMovementTeleportTimer() * 1.0D / (d6 + 3.0D);
+                double d7 = (double) ((PlayerExtension) player).vivecraft$getMovementTeleportTimer() / (d6 + 3.0D);
 
                 if (((PlayerExtension) player).vivecraft$getMovementTeleportTimer() > 0) {
                     this.movementTeleportProgress = d7;
@@ -149,7 +149,7 @@ public class TeleportTracker extends Tracker {
 
                     if (this.vrMovementStyle.airSparkles) {
                         for (int j = 0; j < 3; ++j) {
-                            double d8 = random.nextDouble() * 1.0D + 3.5D;
+                            double d8 = random.nextDouble() + 3.5D;
                             double d9 = random.nextDouble() * 2.5D;
                             double d4 = random.nextDouble() * 4.0D - 2.0D;
                             Vec3 vec37 = new Vec3(player.getX() + vec311.x * d8, player.getY() + vec311.y * d8, player.getZ() + vec311.z * d8);
@@ -236,13 +236,13 @@ public class TeleportTracker extends Tracker {
         this.movementTeleportArc[0] = new Vec3(vec3.x, vec3.y, vec3.z);
         this.movementTeleportArcSteps = 1;
         float f = 0.098F;
-        Matrix4f matrix4f2 = Utils.rotationZMatrix((float) Math.toRadians((double) (-angle.getRoll())));
+        Matrix4f matrix4f2 = Utils.rotationZMatrix((float) Math.toRadians(-angle.getRoll()));
         Matrix4f matrix4f3 = Utils.rotationXMatrix(-2.5132742F);
         Matrix4f matrix4f4 = Matrix4f.multiply(matrix4f, matrix4f2);
         Vector3 vector3 = new Vector3(0.0F, 1.0F, 0.0F);
         Vector3 vector31 = matrix4f4.transform(vector3);
         Vec3 vec32 = vector31.negate().toVector3d();
-        vec32 = vec32.scale((double) f);
+        vec32 = vec32.scale(f);
         float f1 = 0.5F;
         Vec3 vec33 = new Vec3(vec31.x * (double) f1, vec31.y * (double) f1, vec31.z * (double) f1);
         Vec3 vec34 = new Vec3(vec3.x, vec3.y, vec3.z);
@@ -257,7 +257,7 @@ public class TeleportTracker extends Tracker {
                 flag = !mc.level.getFluidState(BlockPos.containing(vec3)).isEmpty();
             }
 
-            BlockHitResult blockhitresult = mc.level.clip(new ClipContext(vec34, vec35, ClipContext.Block.COLLIDER, flag ? ClipContext.Fluid.ANY : ClipContext.Fluid.ANY, mc.player));
+            BlockHitResult blockhitresult = mc.level.clip(new ClipContext(vec34, vec35, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, mc.player));
 
             if (blockhitresult != null && blockhitresult.getType() != HitResult.Type.MISS) {
                 this.movementTeleportArc[j] = blockhitresult.getLocation();
@@ -269,11 +269,7 @@ public class TeleportTracker extends Tracker {
                 double d0 = vec38.y;
                 this.movementTeleportDistance = vec38.length();
                 double d1 = Math.sqrt(vec38.x * vec38.x + vec38.z * vec38.z);
-                boolean flag1 = true;
-
-                if (mc.player.isShiftKeyDown() && d0 > 0.2D) {
-                    flag1 = false;
-                }
+                boolean flag1 = !mc.player.isShiftKeyDown() || !(d0 > 0.2D);
 
                 if (!mc.player.getAbilities().mayfly && ClientNetworking.isLimitedSurvivalTeleport()) {
                     if (ClientNetworking.getTeleportDownLimit() > 0 && d0 > (double) ClientNetworking.getTeleportDownLimit() + 0.2D) {
@@ -322,7 +318,7 @@ public class TeleportTracker extends Tracker {
         BlockState blockstate = player.level().getBlockState(blockpos);
 
         if (!mc.level.getFluidState(blockpos).isEmpty()) {
-            Vec3 vec3 = new Vec3(collision.getLocation().x, (double) blockpos.getY(), collision.getLocation().z);
+            Vec3 vec3 = new Vec3(collision.getLocation().x, blockpos.getY(), collision.getLocation().z);
             Vec3 vec31 = vec3.subtract(player.getX(), player.getBoundingBox().minY, player.getZ());
             AABB aabb = player.getBoundingBox().move(vec31.x, vec31.y, vec31.z);
             boolean flag = mc.level.noCollision(player, aabb);
@@ -411,7 +407,7 @@ public class TeleportTracker extends Tracker {
                 return new Vec3(this.movementTeleportArc[this.movementTeleportArcSteps - 1].x, this.movementTeleportArc[this.movementTeleportArcSteps - 1].y, this.movementTeleportArc[this.movementTeleportArcSteps - 1].z);
             } else {
                 float f = progress * (float) (this.movementTeleportArcSteps - 1);
-                int i = (int) Math.floor((double) f);
+                int i = (int) Math.floor(f);
                 double d0 = this.movementTeleportArc[i + 1].x - this.movementTeleportArc[i].x;
                 double d1 = this.movementTeleportArc[i + 1].y - this.movementTeleportArc[i].y;
                 double d2 = this.movementTeleportArc[i + 1].z - this.movementTeleportArc[i].z;

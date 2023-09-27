@@ -74,7 +74,7 @@ public class GuiHandler {
     public static final HandedKeyBinding keyKeyboardShift = new HandedKeyBinding("vivecraft.key.keyboardShift", -1, "vivecraft.key.category.keyboard") {
         public boolean isPriorityOnController(ControllerType type) {
             if (KeyboardHandler.Showing) {
-                return GuiHandler.dh.vrSettings.physicalKeyboard ? true : KeyboardHandler.isUsingController(type);
+                return GuiHandler.dh.vrSettings.physicalKeyboard || KeyboardHandler.isUsingController(type);
             } else {
                 return RadialHandler.isShowing() && RadialHandler.isUsingController(type);
             }
@@ -122,8 +122,8 @@ public class GuiHandler {
 
                         if (!(f < 0.0F) && !(f1 < 0.0F) && !(f > 1.0F) && !(f1 > 1.0F)) {
                             if (controllerMouseX == -1.0D) {
-                                controllerMouseX = (double) ((int) (f * (float) mc.getWindow().getScreenWidth()));
-                                controllerMouseY = (double) ((int) (f1 * (float) mc.getWindow().getScreenHeight()));
+                                controllerMouseX = (int) (f * (float) mc.getWindow().getScreenWidth());
+                                controllerMouseY = (int) (f1 * (float) mc.getWindow().getScreenHeight());
                             } else {
                                 float f2 = (float) ((int) (f * (float) mc.getWindow().getScreenWidth()));
                                 float f3 = (float) ((int) (f1 * (float) mc.getWindow().getScreenHeight()));
@@ -136,8 +136,8 @@ public class GuiHandler {
                         }
 
                         if (controllerMouseX >= 0.0D && controllerMouseX < (double) mc.getWindow().getScreenWidth() && controllerMouseY >= 0.0D && controllerMouseY < (double) mc.getWindow().getScreenHeight()) {
-                            double d1 = (double) Math.min(Math.max((int) controllerMouseX, 0), mc.getWindow().getScreenWidth());
-                            double d0 = (double) Math.min(Math.max((int) controllerMouseY, 0), mc.getWindow().getScreenHeight());
+                            double d1 = Math.min(Math.max((int) controllerMouseX, 0), mc.getWindow().getScreenWidth());
+                            double d0 = Math.min(Math.max((int) controllerMouseY, 0), mc.getWindow().getScreenHeight());
                             int i = 0;
                             int j = 0;
 
@@ -289,7 +289,7 @@ public class GuiHandler {
                 KeyboardHandler.setOverlayShowing(false);
             }
         } else {
-            RadialHandler.setOverlayShowing(false, (ControllerType) null);
+            RadialHandler.setOverlayShowing(false, null);
         }
 
         if (mc.level != null && !(newScreen instanceof WinScreen)) {
@@ -310,7 +310,7 @@ public class GuiHandler {
             guiScale = 2.0F;
             Vector2f afloat = MCVR.get().getPlayAreaSize();
             // slight offset to center of the room, to prevent z fighting
-            guiPos_room = new Vec3(0.02D, (double) 1.3F, (double) (-Math.max(afloat != null ? afloat.y / 2.0F : 0.0F, 1.5F)));
+            guiPos_room = new Vec3(0.02D, 1.3F, -Math.max(afloat != null ? afloat.y / 2.0F : 0.0F, 1.5F));
             guiRotation_room = new Matrix4f();
             guiRotation_room.M[0][0] = guiRotation_room.M[1][1] = guiRotation_room.M[2][2] = guiRotation_room.M[3][3] = 1.0F;
             guiRotation_room.M[0][1] = guiRotation_room.M[1][0] = guiRotation_room.M[2][3] = guiRotation_room.M[3][1] = 0.0F;
@@ -387,11 +387,11 @@ public class GuiHandler {
 
         if (mc.screen != null && guiPos_room == null) {
             //naughty mods!
-            onScreenChanged((Screen) null, mc.screen, false);
+            onScreenChanged(null, mc.screen, false);
         } else if (mc.screen == null && guiPos_room != null) {
             //even naughtier mods!
             // someone canceled the setScreen, so guiPos didn't get reset
-            onScreenChanged((Screen) null, null, false);
+            onScreenChanged(null, null, false);
         }
 
         Vec3 guipos = guiPos_room;
@@ -431,7 +431,7 @@ public class GuiHandler {
                         dh.vr.hudPopup = true;
                         boolean flag = mc.player.getModelName().equals("slim");
                         scale = 0.4F;
-                        guilocal = new Vec3((double) ((float) i * -0.136F * dh.vrPlayer.vrdata_world_render.worldScale), (flag ? 0.13D : 0.12D) * (double) dh.vrPlayer.vrdata_world_render.worldScale, 0.06D * (double) dh.vrPlayer.vrdata_world_render.worldScale);
+                        guilocal = new Vec3((float) i * -0.136F * dh.vrPlayer.vrdata_world_render.worldScale, (flag ? 0.13D : 0.12D) * (double) dh.vrPlayer.vrdata_world_render.worldScale, 0.06D * (double) dh.vrPlayer.vrdata_world_render.worldScale);
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY(((float) Math.PI / 5F) * (float) i));
                     }
                 } else {
@@ -474,8 +474,8 @@ public class GuiHandler {
             }
 
             f1 = f1 / (float) dh.vr.hmdYawSamples.size();
-            f1 = (float) Math.toRadians((double) f1);
-            Vec3 vec38 = new Vec3(-Math.sin((double) f1), 0.0D, Math.cos((double) f1));
+            f1 = (float) Math.toRadians(f1);
+            Vec3 vec38 = new Vec3(-Math.sin(f1), 0.0D, Math.cos(f1));
             float f4 = ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
             Vec3 vec39 = vec35.add(new Vec3(vec38.x * (double) f4, vec38.y * (double) f4, vec38.z * (double) f4));
             Vec3 vec310 = new Vec3(vec39.x, vec39.y, vec39.z);

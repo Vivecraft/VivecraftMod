@@ -194,9 +194,9 @@ public class VRSettings {
     @SettingField(VrOptions.BOW_MODE)
     public BowMode bowMode = BowMode.ON;
     @SettingField
-    public String keyboardKeys = "`1234567890-=qwertyuiop[]\\asdfghjkl;\':\"zxcvbnm,./?<>";
+    public String keyboardKeys = "`1234567890-=qwertyuiop[]\\asdfghjkl;':\"zxcvbnm,./?<>";
     @SettingField
-    public String keyboardKeysShift = "~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;\':\"ZXCVBNM,./?<>";
+    public String keyboardKeysShift = "~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL;':\"ZXCVBNM,./?<>";
     @SettingField(VrOptions.HRTF_SELECTION)
     public int hrtfSelection = 0;
     @SettingField(VrOptions.RIGHT_CLICK_DELAY)
@@ -441,13 +441,13 @@ public class VRSettings {
 
     public ServerOverrides overrides = new ServerOverrides();
 
-    private Map<VrOptions, Triple<Field, String, Boolean>> fieldEnumMap = new EnumMap<>(VrOptions.class);
-    private Map<String, Triple<Field, VrOptions, Boolean>> fieldConfigMap = new HashMap<>();
+    private final Map<VrOptions, Triple<Field, String, Boolean>> fieldEnumMap = new EnumMap<>(VrOptions.class);
+    private final Map<String, Triple<Field, VrOptions, Boolean>> fieldConfigMap = new HashMap<>();
 
     // This map is only here to preserve old settings, not intended for general use
     private Map<String, String> preservedSettingMap;
 
-    private Minecraft mc;
+    private final Minecraft mc;
 
     public VRSettings(Minecraft minecraft, File dataDir) {
         // Need to do this in the instance because array sizes aren't known until instantiation
@@ -829,7 +829,7 @@ public class VRSettings {
                                 String value = Objects.requireNonNull(saveOption(name, Array.get(obj, i), mapping.getMiddle(), type.getComponentType(), mapping.getRight()));
                                 joiner.add(value);
                             }
-                            var5.println(name + ":" + joiner.toString());
+                            var5.println(name + ":" + joiner);
                         }
                     } else {
                         String value = Objects.requireNonNull(saveOption(name, obj, mapping.getMiddle(), type, mapping.getRight()));
@@ -997,7 +997,7 @@ public class VRSettings {
     }
 
 
-    public static enum VrOptions {
+    public enum VrOptions {
         DUMMY(false, true), // Dummy
         HUD_SCALE(true, false, 0.35f, 2.5f, 0.01f, -1), // Head HUD Size
         HUD_DISTANCE(true, false, 0.25f, 5.0f, 0.01f, 2) { // Head HUD Distance
@@ -1213,7 +1213,7 @@ public class VRSettings {
 
             @Override
             Object setOptionValue(Object value) {
-                int index = IntStream.range(0, colors.size()).filter(i -> colors.get(i).getLeft().equals((Color) value)).findFirst().orElse(-1);
+                int index = IntStream.range(0, colors.size()).filter(i -> colors.get(i).getLeft().equals(value)).findFirst().orElse(-1);
                 return index == -1 || index == colors.size() - 1 ? colors.get(0).getLeft() : colors.get(index + 1).getLeft();
             }
         },
@@ -1606,21 +1606,21 @@ public class VRSettings {
 
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int) value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int) value) : prefix + "OFF";
+                return (int) value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", value) : prefix + "OFF";
             }
         },
         TELEPORT_UP_LIMIT(true, false, 0, 4, 1, 0) { // Up Limit
 
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int) value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int) value) : prefix + "OFF";
+                return (int) value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", value) : prefix + "OFF";
             }
         },
         TELEPORT_HORIZ_LIMIT(true, false, 0, 32, 1, 0) { // Distance Limit
 
             @Override
             String getDisplayString(String prefix, Object value) {
-                return (int) value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", (int) value) : prefix + "OFF";
+                return (int) value > 0 ? prefix + LangHelper.get("vivecraft.options.teleportlimit", value) : prefix + "OFF";
             }
         },
         ALLOW_STANDING_ORIGIN_OFFSET(false, true, LangHelper.YES_KEY, LangHelper.NO_KEY), // Allow Origin Offset
@@ -1915,11 +1915,7 @@ public class VRSettings {
         VRSettings.saveAll(mc);
 
         // Duplicate the profile data
-        if (!ProfileManager.duplicateProfile(originalProfile, newProfile, error)) {
-            return false;
-        }
-
-        return true;
+        return ProfileManager.duplicateProfile(originalProfile, newProfile, error);
     }
 
     public static synchronized boolean renameProfile(String originalProfile, String newProfile, StringBuilder error) {
@@ -1929,11 +1925,7 @@ public class VRSettings {
         VRSettings.saveAll(mc);
 
         // Rename the profile
-        if (!ProfileManager.renameProfile(originalProfile, newProfile, error)) {
-            return false;
-        }
-
-        return true;
+        return ProfileManager.renameProfile(originalProfile, newProfile, error);
     }
 
     public String[] getQuickCommandsDefaults() {
@@ -1989,8 +1981,8 @@ public class VRSettings {
     }
 
     public class ServerOverrides {
-        private Map<VrOptions, Setting> optionMap = new EnumMap<>(VrOptions.class);
-        private Map<String, Setting> networkNameMap = new HashMap<>();
+        private final Map<VrOptions, Setting> optionMap = new EnumMap<>(VrOptions.class);
+        private final Map<String, Setting> networkNameMap = new HashMap<>();
 
         private ServerOverrides() {
             registerSetting(VrOptions.LIMIT_TELEPORT, "limitedTeleport", () -> vrLimitedSurvivalTeleport);
@@ -2095,7 +2087,7 @@ public class VRSettings {
 
             public boolean getBoolean() {
                 Object val = getValue();
-                return val instanceof Boolean ? (boolean) val : false;
+                return val instanceof Boolean && (boolean) val;
             }
 
             public int getInt() {
