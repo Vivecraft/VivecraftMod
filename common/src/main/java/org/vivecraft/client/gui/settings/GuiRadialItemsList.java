@@ -1,11 +1,9 @@
 package org.vivecraft.client.gui.settings;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -55,8 +53,8 @@ public class GuiRadialItemsList extends ObjectSelectionList {
             this.labelWidth = GuiRadialItemsList.this.mc.font.width(this.labelText);
         }
 
-        public void render(GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks) {
-            GuiRadialItemsList.this.mc.font.draw(pMatrixStack, this.labelText, (float)(GuiRadialItemsList.this.mc.screen.width / 2 - this.labelWidth / 2), (float)(pTop + pHeight - 9 - 1), 6777215);
+        public void render(PoseStack poseStack, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks) {
+            GuiRadialItemsList.this.mc.font.draw(poseStack, this.labelText, (float) (GuiRadialItemsList.this.mc.screen.width / 2 - this.labelWidth / 2), (float) (pTop + pHeight - 9 - 1), 6777215);
         }
 
         @Override
@@ -75,14 +73,14 @@ public class GuiRadialItemsList extends ObjectSelectionList {
             this.parentScreen = parent;
         }
 
-        public void render(GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks) {
+        public void render(PoseStack poseStack, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks) {
             ChatFormatting chatformatting = ChatFormatting.WHITE;
 
             if (pIsMouseOver) {
                 chatformatting = ChatFormatting.GREEN;
             }
 
-            GuiRadialItemsList.this.mc.font.draw(pMatrixStack, chatformatting + I18n.get(this.myKey.getName()), (float)(GuiRadialItemsList.this.mc.screen.width / 2 - GuiRadialItemsList.this.maxListLabelWidth / 2), (float)(pTop + pHeight / 2 - 9 / 2), 16777215);
+            GuiRadialItemsList.this.mc.font.draw(poseStack, chatformatting + I18n.get(this.myKey.getName()), (float) (GuiRadialItemsList.this.mc.screen.width / 2 - GuiRadialItemsList.this.maxListLabelWidth / 2), (float) (pTop + pHeight / 2 - 9 / 2), 16777215);
         }
 
         public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY) {

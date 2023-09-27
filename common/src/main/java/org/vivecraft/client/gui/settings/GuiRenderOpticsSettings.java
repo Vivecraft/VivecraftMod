@@ -1,5 +1,6 @@
 package org.vivecraft.client.gui.settings;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.client.gui.framework.GuiVROption;
@@ -114,8 +115,8 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
         });
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
-        super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+    public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
+        super.render(poseStack, pMouseX, pMouseY, pPartialTicks);
     }
 
     protected void loadDefaults() {

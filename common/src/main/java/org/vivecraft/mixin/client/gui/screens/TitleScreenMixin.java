@@ -68,7 +68,7 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     @Inject(at = @At("TAIL"), method = "render")
-    public void vivecraft$renderToolTip(GuiGraphics guiGraphics, int i, int j, float f, CallbackInfo ci) {
+    public void vivecraft$renderToolTip(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
         vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
         if (vivecraft$vrModeButton.visible && vivecraft$vrModeButton.isMouseOver(i, j)) {

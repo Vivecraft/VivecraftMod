@@ -178,19 +178,19 @@ public abstract class GuiVROptionsBase extends Screen {
         this.init(avroptionentry, clear);
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
+    public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
         if (this.reinit) {
             this.reinit = false;
             this.init();
         }
 
-        this.renderBackground(pMatrixStack);
+        this.renderBackground(poseStack);
 
         if (this.visibleList != null) {
-            this.visibleList.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+            this.visibleList.render(poseStack, pMouseX, pMouseY, pPartialTicks);
         }
 
-        drawCenteredString(pMatrixStack, this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 16777215);
+        drawCenteredString(poseStack, this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 16777215);
 
         if (this.btnDefaults != null) {
             this.btnDefaults.visible = this.drawDefaultButtons;
@@ -200,8 +200,8 @@ public abstract class GuiVROptionsBase extends Screen {
             this.btnDone.visible = this.drawDefaultButtons;
         }
 
-        super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
-        renderTooltip(pMatrixStack, pMouseX, pMouseY);
+        super.render(poseStack, pMouseX, pMouseY, pPartialTicks);
+        renderTooltip(poseStack, pMouseX, pMouseY);
     }
 
     protected void actionPerformed(AbstractWidget button) {

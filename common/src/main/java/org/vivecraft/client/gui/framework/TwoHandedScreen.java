@@ -1,5 +1,6 @@
 package org.vivecraft.client.gui.framework;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -28,7 +29,7 @@ public abstract class TwoHandedScreen extends Screen {
         return super.mouseClicked(pMouseX, p_94738_, pMouseY);
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
+    public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
         if (this.reinit) {
             this.init();
             this.reinit = false;
@@ -47,9 +48,9 @@ public abstract class TwoHandedScreen extends Screen {
             boolean flag1 = d2 >= (double) abstractwidget2.getX() && d3 >= (double) abstractwidget2.getY() && d2 < (double) (abstractwidget2.getX() + abstractwidget2.getWidth()) && d3 < (double) (abstractwidget2.getY() + 20);
 
             if (flag) {
-                abstractwidget2.render(guiGraphics, (int) d0, (int) d1, pPartialTicks);
+                abstractwidget2.render(poseStack, (int) d0, (int) d1, pPartialTicks);
             } else {
-                abstractwidget2.render(guiGraphics, (int) d2, (int) d3, pPartialTicks);
+                abstractwidget2.render(poseStack, (int) d2, (int) d3, pPartialTicks);
             }
 
             if (flag) {

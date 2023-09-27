@@ -153,10 +153,10 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     // TODO maybe move to the LevelLightEngine
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"), method = "renderLevel")
-    public int vivecraft$oneLightingUpdates(LevelLightEngine instance) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"), method = "renderLevel")
+    public int vivecraft$oneLightingUpdates(LevelLightEngine instance, int i, boolean bl, boolean bl2) {
         if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
-            return instance.runLightUpdates();
+            return instance.runUpdates(i, bl, bl2);
         } else {
             return 0;
         }

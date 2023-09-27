@@ -289,7 +289,7 @@ public class MenuWorldExporter {
             for (int z = 0; z < zSize; z++) {
                 for (int y = ySize - 1; y >= 0; y--) {
                     int index = (y * zSize + z) * xSize + x;
-                    if (blocks[index].blocksMotion() || !blocks[index].getFluidState().isEmpty()) {
+                    if (blocks[index].getMaterial().blocksMotion() || !blocks[index].getFluidState().isEmpty()) {
                         heightmap[x][z] = (short) (y + 1);
                         break;
                     }

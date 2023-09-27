@@ -1,13 +1,12 @@
 package org.vivecraft.client.gui.settings;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsList.CommandEntry> {
     protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
@@ -94,14 +93,14 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
             return this.txt.isFocused() ? this.txt.keyPressed(pKeyCode, pScanCode, pModifiers) : super.keyPressed(pKeyCode, pScanCode, pModifiers);
         }
 
-        public void render(GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks) {
+        public void render(PoseStack poseStack, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks) {
             this.txt.setX(pLeft);
             this.txt.setY(pTop);
-            this.txt.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+            this.txt.render(poseStack, pMouseX, pMouseY, pPartialTicks);
             this.btnDelete.setX(this.txt.getX() + this.txt.getWidth() + 2);
             this.btnDelete.setY(this.txt.getY());
             this.btnDelete.visible = true;
-            this.btnDelete.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+            this.btnDelete.render(poseStack, pMouseX, pMouseY, pPartialTicks);
         }
 
         @Override

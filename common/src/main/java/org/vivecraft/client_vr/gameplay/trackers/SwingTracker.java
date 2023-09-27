@@ -206,10 +206,8 @@ public class SwingTracker extends Tracker {
                                     // some scythes just need to be used
                                     this.mc.gameMode.useItem(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                                 }
-                            }
-                            else if ((item instanceof BrushItem /*|| itemstack.is(ItemTags.VIVECRAFT_BRUSHES*/))
-                            {
-                                ((BrushItem)item).spawnDustParticles(player.level, blockhitresult1, blockstate, player.getViewVector(0.0F));
+                            } else if ((item instanceof BrushItem /*|| itemstack.is(ItemTags.VIVECRAFT_BRUSHES*/)) {
+                                ((BrushItem) item).spawnDustParticles(player.level, blockhitresult1, blockstate, player.getViewVector(0.0F));
                                 player.level.playSound(player, blockhitresult1.getBlockPos(), SoundEvents.BRUSH_BRUSHING, SoundSource.PLAYERS);
                                 this.mc.gameMode.useItemOn(player, i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockhitresult1);
                             } else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS)) {

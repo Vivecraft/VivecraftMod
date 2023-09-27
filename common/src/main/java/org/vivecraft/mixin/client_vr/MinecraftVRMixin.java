@@ -174,10 +174,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Shadow
     @Final
-    private RenderBuffers renderBuffers;
-
-    @Shadow
-    @Final
     private EntityRenderDispatcher entityRenderDispatcher;
 
     @Shadow
@@ -407,14 +403,13 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
             this.profiler.push("2D Keyboard");
             float actualPartialTicks = this.pause ? this.pausePartialTick : this.timer.partialTick;
-            GuiGraphics guiGraphics = new GuiGraphics((Minecraft) (Object) this, renderBuffers.bufferSource());
+
             if (KeyboardHandler.Showing
                 && !ClientDataHolderVR.getInstance().vrSettings.physicalKeyboard) {
                 this.mainRenderTarget = KeyboardHandler.Framebuffer;
                 this.mainRenderTarget.clear(Minecraft.ON_OSX);
                 this.mainRenderTarget.bindWrite(true);
-                RenderHelper.drawScreen(actualPartialTicks, KeyboardHandler.UI, guiGraphics);
-                guiGraphics.flush();
+                RenderHelper.drawScreen(actualPartialTicks, KeyboardHandler.UI, new PoseStack());
             }
 
             this.profiler.popPush("Radial Menu");
@@ -422,8 +417,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 this.mainRenderTarget = RadialHandler.Framebuffer;
                 this.mainRenderTarget.clear(Minecraft.ON_OSX);
                 this.mainRenderTarget.bindWrite(true);
-                RenderHelper.drawScreen(actualPartialTicks, RadialHandler.UI, guiGraphics);
-                guiGraphics.flush();
+                RenderHelper.drawScreen(actualPartialTicks, RadialHandler.UI, new PoseStack());
             }
             this.profiler.pop();
             this.vivecraft$checkGLError("post 2d ");
@@ -899,9 +893,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     private void vivecraft$drawProfiler() {
         if (this.fpsPieResults != null) {
             this.profiler.push("fpsPie");
-            GuiGraphics guiGraphics = new GuiGraphics((Minecraft) (Object) this, renderBuffers.bufferSource());
-            this.renderFpsMeter(guiGraphics, this.fpsPieResults);
-            guiGraphics.flush();
+            this.renderFpsMeter(new PoseStack(), this.fpsPieResults);
             this.profiler.pop();
         }
     }

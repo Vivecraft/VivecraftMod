@@ -22,7 +22,7 @@ public class RunTracker extends Tracker {
             } else if (p != null && p.isAlive()) {
                 if (this.mc.gameMode == null) {
                     return false;
-                } else if (p.onGround() || !p.isInWater() && !p.isInLava()) {
+                } else if (p.isOnGround() || !p.isInWater() && !p.isInLava()) {
                     if (p.onClimbable()) {
                         return false;
                     } else {

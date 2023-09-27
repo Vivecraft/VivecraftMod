@@ -5,7 +5,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -204,7 +203,7 @@ public class RenderHelper {
         }
     }
 
-    public static void drawScreen(float f, Screen screen, GuiGraphics guiGraphics) {
+    public static void drawScreen(float f, Screen screen, PoseStack poseStack) {
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
         posestack.setIdentity();
@@ -217,7 +216,7 @@ public class RenderHelper {
             GlStateManager.SourceFactor.ONE,
             GlStateManager.DestFactor.ONE);
 
-        screen.render(guiGraphics, 0, 0, f);
+        screen.render(poseStack, 0, 0, f);
 
         RenderSystem.blendFuncSeparate(
             GlStateManager.SourceFactor.SRC_ALPHA,

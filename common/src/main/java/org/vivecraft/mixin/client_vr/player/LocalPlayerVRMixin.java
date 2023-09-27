@@ -510,9 +510,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         float f1 = soundtype.getPitch();
         SoundEvent soundevent = soundtype.getStepSound();
 
-            this.level().playSound((LocalPlayer) null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
-        if (!this.isSilent() && !block.defaultBlockState().liquid()) {
-            this.level().playSound(null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
+        if (!this.isSilent() && !block.defaultBlockState().getMaterial().isLiquid()) {
+            this.level.playSound(null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
         }
     }
 

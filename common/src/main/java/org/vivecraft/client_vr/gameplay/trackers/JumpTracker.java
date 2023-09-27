@@ -43,7 +43,7 @@ public class JumpTracker extends Tracker {
         } else if (p != null && p.isAlive()) {
             if (this.mc.gameMode == null) {
                 return false;
-            } else if (!p.isInWater() && !p.isInLava() && p.onGround()) {
+            } else if (!p.isInWater() && !p.isInLava() && p.isOnGround()) {
                 return !p.isShiftKeyDown() && !p.isPassenger();
             } else {
                 return false;

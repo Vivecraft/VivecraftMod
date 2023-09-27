@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -144,7 +143,7 @@ public class ClimbTracker extends Tracker {
 
         if (this.wasGrabbingLadder() && !this.isGrabbingLadder()) {
             this.forceActivate = true;
-        } else if (this.mc.player.onGround() || this.mc.player.getAbilities().flying) {
+        } else if (this.mc.player.isOnGround() || this.mc.player.getAbilities().flying) {
             this.forceActivate = false;
         }
 
@@ -303,7 +302,7 @@ public class ClimbTracker extends Tracker {
                 aboolean[i] = this.inblock[i];
                 aboolean1[i] = this.inblock[i];
             } else {
-                if (this.mc.player.onGround()) {
+                if (this.mc.player.isOnGround()) {
                     this.mc.player.setOnGround(!this.latched[0] && !this.latched[1]);
                 }
 
@@ -416,7 +415,7 @@ public class ClimbTracker extends Tracker {
         }
 
         if (!this.latched[0] && !this.latched[1] && !flag2) {
-            if (player.onGround() && this.unsetflag) {
+            if (player.isOnGround() && this.unsetflag) {
                 this.unsetflag = false;
                 VivecraftVRMod.INSTANCE.keyClimbeyGrab.unpressKey(ControllerType.RIGHT);
                 VivecraftVRMod.INSTANCE.keyClimbeyGrab.unpressKey(ControllerType.LEFT);

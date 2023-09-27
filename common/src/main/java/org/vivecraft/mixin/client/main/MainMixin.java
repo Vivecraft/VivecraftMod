@@ -16,7 +16,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 public class MainMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;allowsUnrecognizedOptions()V"), method = "main", locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
-    private static void vivecraft$options(String[] strings, CallbackInfo ci, Stopwatch stopwatch, Stopwatch stopwatch2, OptionParser optionparser) {
+    private static void vivecraft$options(String[] strings, CallbackInfo ci, OptionParser optionparser) {
         optionparser.accepts("kiosk");
         optionparser.accepts("viewonly");
         optionparser.accepts("katvr");

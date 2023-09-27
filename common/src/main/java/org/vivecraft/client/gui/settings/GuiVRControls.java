@@ -1,5 +1,6 @@
 package org.vivecraft.client.gui.settings;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.framework.GuiVROptionsBase;
@@ -31,14 +32,14 @@ public class GuiVRControls extends GuiVROptionsBase {
         super.addDefaultButtons();
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
-        super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+    public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
+        super.render(poseStack, pMouseX, pMouseY, pPartialTicks);
 
         int middle = 240 / 2 - this.minecraft.font.lineHeight / 2 - 24;
         int lineHeight = this.minecraft.font.lineHeight + 3;
 
-        drawCenteredString(pMatrixStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 16777215);
-        drawCenteredString(pMatrixStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.2"), this.width / 2, middle, 16777215);
-        drawCenteredString(pMatrixStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 16777215);
+        drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 16777215);
+        drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.2"), this.width / 2, middle, 16777215);
+        drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 16777215);
     }
 }

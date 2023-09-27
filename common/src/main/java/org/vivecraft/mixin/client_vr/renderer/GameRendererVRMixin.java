@@ -8,7 +8,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
@@ -401,14 +400,14 @@ public abstract class GameRendererVRMixin
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"), method = "render(FJZ)V")
-    private void vivecraft$noGUIwithViewOnly(Gui instance, GuiGraphics guiGraphics, float f) {
+    private void vivecraft$noGUIwithViewOnly(Gui instance, PoseStack poseStack, float f) {
         if (RenderPassType.isVanilla() || !ClientDataHolderVR.viewonly) {
             instance.render(poseStack, f);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "renderConfusionOverlay", cancellable = true)
-    private void vivecraft$noConfusionOverlayOnGUI(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
+    private void vivecraft$noConfusionOverlayOnGUI(float f, CallbackInfo ci) {
         if (vivecraft$DATA_HOLDER.currentPass == RenderPass.GUI) {
             ci.cancel();
         }

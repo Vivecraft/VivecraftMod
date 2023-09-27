@@ -30,7 +30,7 @@ public abstract class TutorialToastVRMixin implements Toast {
     private int vivecraft$offset;
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiComponent;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V", shift = At.Shift.AFTER), method = "render")
-    private void vivecraft$extendToast(GuiGraphics guiGraphics, ToastComponent toastComponent, long l, CallbackInfoReturnable<Visibility> cir) {
+    private void vivecraft$extendToast(PoseStack poseStack, ToastComponent toastComponent, long l, CallbackInfoReturnable<Visibility> cir) {
         int width = Math.max(toastComponent.getMinecraft().font.width(this.title), message != null ? toastComponent.getMinecraft().font.width(this.message) : 0) + 34;
         vivecraft$offset = Math.min(this.width() - width, 0);
         if (vivecraft$offset < 0) {
@@ -47,7 +47,7 @@ public abstract class TutorialToastVRMixin implements Toast {
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;draw(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/network/chat/Component;FFI)I"), method = "render", index = 2)
-    private int vivecraft$offsetText(int x) {
+    private float vivecraft$offsetText(float x) {
         return x + vivecraft$offset;
     }
 
