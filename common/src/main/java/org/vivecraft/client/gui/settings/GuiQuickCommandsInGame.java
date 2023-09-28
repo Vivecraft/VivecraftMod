@@ -1,30 +1,26 @@
 package org.vivecraft.client.gui.settings;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
-public class GuiQuickCommandsInGame extends Screen
-{
-	protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+public class GuiQuickCommandsInGame extends Screen {
+    protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
     private int field_146445_a;
     private int field_146444_f;
     private static final String __OBFID = "CL_00000703";
     protected final Screen parentScreen;
 
-    public GuiQuickCommandsInGame(Screen parent)
-    {
+    public GuiQuickCommandsInGame(Screen parent) {
         super(new TextComponent(""));
         this.parentScreen = parent;
     }
 
-    public void init()
-    {
+    public void init() {
         KeyMapping.releaseAll();
         this.field_146445_a = 0;
         this.clearWidgets();
@@ -33,13 +29,12 @@ public class GuiQuickCommandsInGame extends Screen
         String[] astring = this.dataholder.vrSettings.vrQuickCommands;
         int i = 0;
 
-        for (int j = 0; j < astring.length; ++j)
-        {
+        for (int j = 0; j < astring.length; ++j) {
             i = j > 5 ? 1 : 0;
             String s = astring[j];
             this.addRenderableWidget(new Button(this.width / 2 - 125 + 127 * i, 36 + (j - 6 * i) * 24, 125, 20, new TranslatableComponent(s.toString()), (p) ->
             {
-                this.minecraft.setScreen((Screen)null);
+                this.minecraft.setScreen(null);
                 this.minecraft.player.chat(p.getMessage().getString());
             }));
         }
@@ -50,10 +45,9 @@ public class GuiQuickCommandsInGame extends Screen
         }));
     }
 
-    public void render(PoseStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks)
-    {
-        this.renderBackground(pMatrixStack);
-        drawCenteredString(pMatrixStack, this.font, "Quick Commands", this.width / 2, 16, 16777215);
-        super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+    public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
+        this.renderBackground(poseStack);
+        drawCenteredString(poseStack, this.font, "Quick Commands", this.width / 2, 16, 16777215);
+        super.render(poseStack, pMouseX, pMouseY, pPartialTicks);
     }
 }

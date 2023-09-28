@@ -13,7 +13,7 @@ import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Mixin(ForgeIngameGui.class)
-public abstract class ForgeIngameGuiVRMixin{
+public abstract class ForgeIngameGuiVRMixin {
     @Inject(method = "pre(Lnet/minecraftforge/client/gui/IIngameOverlay;Lcom/mojang/blaze3d/vertex/PoseStack;)Z", at = @At("HEAD"), remap = false, cancellable = true)
     private void noStuff(IIngameOverlay overlay, PoseStack poseStack, CallbackInfoReturnable<Boolean> info) {
         if (RenderPassType.isGuiOnly() && (overlay == ForgeIngameGui.VIGNETTE_ELEMENT || overlay == ForgeIngameGui.SPYGLASS_ELEMENT || overlay == ForgeIngameGui.HELMET_ELEMENT || overlay == ForgeIngameGui.FROSTBITE_ELEMENT || overlay == ForgeIngameGui.PORTAL_ELEMENT)) {
@@ -23,6 +23,6 @@ public abstract class ForgeIngameGuiVRMixin{
 
     @Redirect(method = "renderPlayerList(IILcom/mojang/blaze3d/vertex/PoseStack;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"))
     public boolean toggleableTabListForge(KeyMapping instance) {
-        return instance.isDown() || ((GuiExtension)this).getShowPlayerList();
+        return instance.isDown() || ((GuiExtension) this).vivecraft$getShowPlayerList();
     }
 }

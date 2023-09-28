@@ -16,7 +16,8 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
 @Mixin(ModelBakery.class)
 public abstract class FabricModelBakeryMixin {
-    @Shadow protected abstract void loadTopLevel(ModelResourceLocation modelResourceLocation);
+    @Shadow
+    protected abstract void loadTopLevel(ModelResourceLocation modelResourceLocation);
 
     @Inject(method = "<init>", at = @At(value = "CONSTANT", args = "stringValue=textures"))
     private void loadModels(ResourceManager resourceManager, BlockColors blockColors, ProfilerFiller profilerFiller, int i, CallbackInfo ci) {

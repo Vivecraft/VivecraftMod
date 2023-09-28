@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -27,13 +28,14 @@ public abstract class EndermanMixin extends Monster {
     }
 
     @Inject(at = @At("HEAD"), method = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z", cancellable = true)
-    public void lookAtVR(Player player, CallbackInfoReturnable<Boolean> cir){
+    public void vivecraft$lookAtVR(Player player, CallbackInfoReturnable<Boolean> cir) {
         if (ServerVRPlayers.isVRPlayer((ServerPlayer) player)) {
-            cir.setReturnValue(shouldEndermanAttackVRPlayer((EnderMan) (Object) this, (ServerPlayer) player));
+            cir.setReturnValue(vivecraft$shouldEndermanAttackVRPlayer((EnderMan) (Object) this, (ServerPlayer) player));
         }
     }
 
-    private static boolean shouldEndermanAttackVRPlayer(EnderMan enderman, ServerPlayer player) {
+    @Unique
+    private static boolean vivecraft$shouldEndermanAttackVRPlayer(EnderMan enderman, ServerPlayer player) {
         ItemStack itemstack = player.getInventory().armor.get(3);
         if (!itemstack.is(Items.CARVED_PUMPKIN)) { //no enderitem
             ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);
@@ -42,15 +44,15 @@ public abstract class EndermanMixin extends Monster {
             double d0 = vector3d1.length();
             vector3d1 = vector3d1.normalize();
             double d1 = vector3d.dot(vector3d1);
-            return d1 > 1.0D - 0.025D / d0 && d0 < 128.0 && canEntityBeSeen(enderman, data.getHMDPos(player));
+            return d1 > 1.0D - 0.025D / d0 && d0 < 128.0 && vivecraft$canEntityBeSeen(enderman, data.getHMDPos(player));
         }
 
         return false;
     }
 
-    private static boolean canEntityBeSeen(Entity entity, Vec3 playerEyePos) {
+    @Unique
+    private static boolean vivecraft$canEntityBeSeen(Entity entity, Vec3 playerEyePos) {
         Vec3 entityEyePos = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
         return entity.level.clip(new ClipContext(playerEyePos, entityEyePos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS;
     }
-
 }

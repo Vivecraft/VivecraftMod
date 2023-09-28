@@ -1,9 +1,11 @@
 package org.vivecraft.forge;
 
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkConstants;
+import org.vivecraft.client.gui.settings.VivecraftMainSettings;
 import org.vivecraft.server.config.ServerConfig;
 
 @Mod(Vivecraft.MODID)
@@ -17,5 +19,7 @@ public class Vivecraft {
             () -> NetworkConstants.IGNORESERVERONLY, // only needed on server, client is optional
             (s,b) -> true // any version is good
         ));
+
+        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, screen) -> new VivecraftMainSettings(screen)));
     }
 }

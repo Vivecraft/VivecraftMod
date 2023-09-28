@@ -1,25 +1,74 @@
 {
-    "blend": {
-        "func": "add",
-        "srcrgb": "srcalpha",
-        "dstrgb": "1-srcalpha"
+  "blend": {
+    "func": "add",
+    "srcrgb": "srcalpha",
+    "dstrgb": "1-srcalpha"
+  },
+  "vertex": "passthrough",
+  "fragment": "mixedreality",
+  "attributes": ["Position", "UV0"],
+  "samplers": [
+    {
+      "name": "Sampler0"
     },
-    "vertex": "passthrough",
-    "fragment": "mixedreality",
-    "attributes": [ "Position", "UV0" ],
-    "samplers": [
-        { "name": "Sampler0" },
-        { "name": "Sampler1" }
-    ],
-    "uniforms": [
-        { "name": "projectionMatrix",    "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
-        { "name": "viewMatrix",    "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
-        { "name": "resolution",    "type": "float",     "count": 2,  "values": [ 1.0, 1.0 ] },
-        { "name": "position",    "type": "float",     "count": 2,  "values": [ 1.0, 1.0 ] },
-        { "name": "hmdViewPosition",    "type": "float",     "count": 3,  "values": [ 1.0, 1.0, 1.0 ] },
-        { "name": "hmdPlaneNormal",    "type": "float",     "count": 3,  "values": [ 1.0, 1.0, 1.0 ] },
-        { "name": "keyColor",    "type": "float",     "count": 3,  "values": [ 1.0, 1.0, 1.0 ] },
-        { "name": "pass",    "type": "int",     "count": 1,  "values": [ 1 ] },
-        { "name": "alphaMode",    "type": "int",     "count": 1,  "values": [ 1 ] }
-    ]
+    {
+      "name": "Sampler1"
+    }
+  ],
+  "uniforms": [
+    {
+      "name": "projectionMatrix",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    },
+    {
+      "name": "viewMatrix",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    },
+    {
+      "name": "resolution",
+      "type": "float",
+      "count": 2,
+      "values": [1.0, 1.0]
+    },
+    {
+      "name": "position",
+      "type": "float",
+      "count": 2,
+      "values": [1.0, 1.0]
+    },
+    {
+      "name": "hmdViewPosition",
+      "type": "float",
+      "count": 3,
+      "values": [1.0, 1.0, 1.0]
+    },
+    {
+      "name": "hmdPlaneNormal",
+      "type": "float",
+      "count": 3,
+      "values": [1.0, 1.0, 1.0]
+    },
+    {
+      "name": "keyColor",
+      "type": "float",
+      "count": 3,
+      "values": [1.0, 1.0, 1.0]
+    },
+    {
+      "name": "pass",
+      "type": "int",
+      "count": 1,
+      "values": [1]
+    },
+    {
+      "name": "alphaMode",
+      "type": "int",
+      "count": 1,
+      "values": [1]
+    }
+  ]
 }

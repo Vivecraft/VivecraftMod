@@ -1,10 +1,10 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import java.util.concurrent.TimeUnit;
-
 import org.lwjgl.openvr.VRInput;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HapticScheduler;
+
+import java.util.concurrent.TimeUnit;
 
 public class OpenVRHapticScheduler extends HapticScheduler {
     private void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude) {

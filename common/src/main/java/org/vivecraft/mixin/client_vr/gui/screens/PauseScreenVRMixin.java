@@ -13,10 +13,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client.gui.settings.GuiQuickCommandsInGame;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client.gui.settings.GuiQuickCommandsInGame;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -29,9 +29,8 @@ public abstract class PauseScreenVRMixin extends Screen {
         super(component);
     }
 
-
-    @Inject(at =  @At("TAIL"), method = "createPauseMenu")
-    public void addInit(CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "createPauseMenu")
+    public void vivecraft$addInit(CallbackInfo ci) {
         if (!VRState.vrEnabled) {
             return;
         }
@@ -40,7 +39,7 @@ public abstract class PauseScreenVRMixin extends Screen {
         int threshold = this.height / 4 - 16 + 120;
 
         // move every button up a bit
-        for (GuiEventListener widget: this.children()) {
+        for (GuiEventListener widget : this.children()) {
             if (widget instanceof AbstractWidget) {
                 if (((AbstractWidget) widget).y >= threshold) {
                     ((AbstractWidget) widget).y += 24;
@@ -56,8 +55,9 @@ public abstract class PauseScreenVRMixin extends Screen {
             this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 48 + -16 + offset, 98, 20, new TranslatableComponent("vivecraft.gui.chat"), (p) ->
             {
                 this.minecraft.setScreen(new ChatScreen(""));
-                if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard)
+                if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard) {
                     KeyboardHandler.setOverlayShowing(true);
+                }
             }));
         } else {
             this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 48 + -16 + offset, 46, 20, new TranslatableComponent("vivecraft.gui.chat"), (p) ->
@@ -78,18 +78,20 @@ public abstract class PauseScreenVRMixin extends Screen {
         this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 96 + -16 + offset, 49, 20, new TranslatableComponent("vivecraft.gui.overlay"), (p) ->
         {
             this.minecraft.options.renderDebug = !this.minecraft.options.renderDebug;
-            this.minecraft.setScreen((Screen) null);
+            this.minecraft.setScreen(null);
         }));
         this.addRenderableWidget(new Button(this.width / 2 - 52, this.height / 4 + 96 + -16 + offset, 49, 20, new TranslatableComponent("vivecraft.gui.profiler"), (p) ->
         {
-            if (!this.minecraft.options.renderDebug) this.minecraft.options.renderDebugCharts = false;
+            if (!this.minecraft.options.renderDebug) {
+                this.minecraft.options.renderDebugCharts = false;
+            }
             this.minecraft.options.renderDebugCharts = !this.minecraft.options.renderDebugCharts;
             this.minecraft.options.renderDebug = this.minecraft.options.renderDebugCharts;
-            this.minecraft.setScreen((Screen) null);
+            this.minecraft.setScreen(null);
         }));
         this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 96 + -16 + offset, 98, 20, new TranslatableComponent("vivecraft.gui.screenshot"), (p) ->
         {
-            this.minecraft.setScreen((Screen) null);
+            this.minecraft.setScreen(null);
             ClientDataHolderVR.getInstance().grabScreenShot = true;
         }));
 
@@ -98,7 +100,7 @@ public abstract class PauseScreenVRMixin extends Screen {
             {
                 AutoCalibration.calibrateManual();
                 ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-                this.minecraft.setScreen((Screen) null);
+                this.minecraft.setScreen(null);
             }));
         }
 
@@ -106,7 +108,7 @@ public abstract class PauseScreenVRMixin extends Screen {
             this.addRenderableWidget(new Button(this.width / 2 + 106, this.height / 4 + 120 + -16 + offset, 98, 20, new TranslatableComponent("vivecraft.gui.alignkatwalk"), (p) ->
             {
                 jkatvr.resetYaw(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.hmd.getYaw());
-                this.minecraft.setScreen((Screen) null);
+                this.minecraft.setScreen(null);
             }));
         }
 
@@ -124,25 +126,28 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 3))
-    private GuiEventListener remove(PauseScreen instance, GuiEventListener guiEventListener) {
+    private GuiEventListener vivecraft$remove(PauseScreen instance, GuiEventListener guiEventListener) {
         // Feedback button
         // don't remove, just hide, so mods that rely on it being there, still work
-        ((AbstractWidget)guiEventListener).visible = !VRState.vrEnabled;
-        return this.addRenderableWidget((Button)guiEventListener);
+        ((AbstractWidget) guiEventListener).visible = !VRState.vrEnabled;
+        return this.addRenderableWidget((Button) guiEventListener);
     }
+
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 4))
-    private GuiEventListener remove2(PauseScreen instance, GuiEventListener guiEventListener) {
+    private GuiEventListener vivecraft$remove2(PauseScreen instance, GuiEventListener guiEventListener) {
         // report bugs button
         // don't remove, just hide, so mods that rely on it being there, still work
-        ((AbstractWidget)guiEventListener).visible = !VRState.vrEnabled;
-        return this.addRenderableWidget((Button)guiEventListener);
+        ((AbstractWidget) guiEventListener).visible = !VRState.vrEnabled;
+        return this.addRenderableWidget((Button) guiEventListener);
     }
+
     // TODO this seems unneeded?
     @Redirect(method = "createPauseMenu", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/Button;active:Z"))
-    private void remove3(Button instance, boolean value) {}
+    private void vivecraft$remove3(Button instance, boolean value) {
+    }
 
     @ModifyConstant(method = "render", constant = @Constant(intValue = 40))
-    private int moveTitleUp(int constant) {
+    private int vivecraft$moveTitleUp(int constant) {
         return (VRState.vrEnabled && (!ClientDataHolderVR.getInstance().vrSettings.seated || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY)) ? 16 : 40;
     }
 }

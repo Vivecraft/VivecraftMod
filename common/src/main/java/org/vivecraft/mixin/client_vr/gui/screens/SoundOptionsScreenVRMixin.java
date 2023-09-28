@@ -36,14 +36,14 @@ public class SoundOptionsScreenVRMixin extends Screen {
     private AbstractWidget directionalAudioVRButton = null;
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/SoundOptionsScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 2, shift = At.Shift.BEFORE))
-    private void addVivecraftSettings(CallbackInfo ci) {
-        directionalAudioVRButton = CycleButton.builder((bool) -> (boolean)bool ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF)
+    private void vivecraft$addVivecraftSettings(CallbackInfo ci) {
+        directionalAudioVRButton = CycleButton.builder((bool) -> (boolean) bool ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF)
             .withValues(false, true)
             .withInitialValue(ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0)
             .withTooltip(obj ->
                 minecraft.font.split(new TextComponent("vivecraft.options.HRTF_SELECTION.tooltip"), 200))
             .create(this.width / 2 - 155 + 160, this.height / 6 - 12 + 22 * 5, 150, 20, new TranslatableComponent("vivecraft.options.HRTF_SELECTION"), (cycleButton, newValue) -> {
-                ClientDataHolderVR.getInstance().vrSettings.hrtfSelection = (boolean)newValue ? 0 : -1;
+                ClientDataHolderVR.getInstance().vrSettings.hrtfSelection = (boolean) newValue ? 0 : -1;
                 ClientDataHolderVR.getInstance().vrSettings.setOptionValue(VRSettings.VrOptions.HRTF_SELECTION);
                 ClientDataHolderVR.getInstance().vrSettings.saveOptions();
 
@@ -54,10 +54,11 @@ public class SoundOptionsScreenVRMixin extends Screen {
 
         this.addRenderableWidget(directionalAudioVRButton);
     }
+
     @Inject(at = @At("TAIL"), method = "render")
     private void renderTooltip(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
         if (directionalAudioVRButton != null && directionalAudioVRButton.isMouseOver(i, j)) {
-            List<FormattedCharSequence> list = ((TooltipAccessor)this.directionalAudioVRButton).getTooltip();
+            List<FormattedCharSequence> list = ((TooltipAccessor) this.directionalAudioVRButton).getTooltip();
             this.renderTooltip(poseStack, list, i, j);
         }
     }

@@ -7,8 +7,7 @@ import com.sun.jna.ptr.DoubleByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
 
-public class jkatvr implements Library
-{
+public class jkatvr implements Library {
     public static final String KATVR_LIBRARY_NAME = "WalkerBase.dll";
     public static final NativeLibrary KATVR_NATIVE_LIB = NativeLibrary.getInstance("WalkerBase.dll");
     static float yaw;
@@ -35,50 +34,40 @@ public class jkatvr implements Library
 
     public static native boolean GetWalkerData(int var0, IntByReference var1, DoubleByReference var2, IntByReference var3, IntByReference var4, FloatByReference var5);
 
-    public static void query()
-    {
-        try
-        {
+    public static void query() {
+        try {
             boolean flag = GetWalkerData(0, y, pow, m, is, fl);
-            yaw = (float)y.getValue();
+            yaw = (float) y.getValue();
             power = pow.getValue();
             direction = -m.getValue();
             ismoving = is.getValue();
             yaw = yaw / 1024.0F * 360.0F;
-        }
-        catch (Exception exception)
-        {
+        } catch (Exception exception) {
             System.out.println("KATVR Error: " + exception.getMessage());
         }
     }
 
-    public static float getYaw()
-    {
+    public static float getYaw() {
         return yaw - yawOffset;
     }
 
-    public static boolean isMoving()
-    {
+    public static boolean isMoving() {
         return ismoving == 1;
     }
 
-    public static void resetYaw(float offsetDegrees)
-    {
+    public static void resetYaw(float offsetDegrees) {
         yawOffset = offsetDegrees + yaw;
     }
 
-    public static float walkDirection()
-    {
-        return (float)direction;
+    public static float walkDirection() {
+        return (float) direction;
     }
 
-    public static float getSpeed()
-    {
-        return (float)(power / (double)maxpower * (double)(walkDirection() == 1.0F ? mag : bmag));
+    public static float getSpeed() {
+        return (float) (power / (double) maxpower * (double) (walkDirection() == 1.0F ? mag : bmag));
     }
 
-    static
-    {
+    static {
         Native.register(jkatvr.class, KATVR_NATIVE_LIB);
     }
 }

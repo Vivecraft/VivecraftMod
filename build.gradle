@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.0-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.3-SNAPSHOT" apply false
     id 'io.github.juuxel.loom-quiltflower' version '1.8.0' apply false
 }
 
@@ -67,7 +67,6 @@ allprojects {
         // See https://docs.gradle.org/current/userguide/declaring_repositories.html
         // for more information about repositories.
 
-        maven { url = 'https://mvnrepository.com/' }
         maven { url 'https://jitpack.io' }
         exclusiveContent {
             forRepository {
@@ -121,12 +120,11 @@ allprojects {
         maven { url = "https://maven.terraformersmc.com/" }
         maven { url = "https://maven.cafeteria.dev/releases/" }
         maven { url = "https://maven.gegy.dev" }
-        maven { url = "https://dvs1.progwml6.com/files/maven/" }
         maven { url = "https://modmaven.dev" }
         exclusiveContent {
             forRepository {
                 maven {
-                    name = "Ladysnake Mods"
+                    name = "JamiesWhiteShirt"
                     url = "https://maven.jamieswhiteshirt.com/libs-release"
                 }
             }

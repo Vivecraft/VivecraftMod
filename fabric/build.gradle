@@ -37,6 +37,10 @@ dependencies {
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
+    // iris for immersive poortals
+    //modRuntimeOnly "maven.modrinth:iris:1.4.3+1.19.2"
+    //modRuntimeOnly 'io.github.douira:glsl-transformer:1.0.1' //temp iris
+
     // for REI compat
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:8.3.618"
 
@@ -48,17 +52,23 @@ dependencies {
     modRuntimeOnly "maven.modrinth:lithium:mc1.18.2-0.10.3"
     modRuntimeOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
 
-    /*
+    //mod menu
+    modApi("com.terraformersmc:modmenu:4.1.2")
+
     // for immersive portals compat
-    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v1.4.11-1.18'){ //temp immersiveportals
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.3.1-1.19') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v1.4.11-1.18'){ //temp immersiveportals
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.3.1-1.19') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    */
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:build:v2.3.1-1.19') {
+        exclude(group: "net.fabricmc.fabric-api")
+        transitive(false)
+    }
+    modRuntimeOnly("com.github.llamalad7.mixinextras:mixinextras-fabric:0.2.0-beta.9")
 
     // needed for resource loading
     include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))
@@ -88,25 +98,21 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    archiveClassifier.set("dev-shadow")
 }
 
 remapJar {
     injectAccessWidener = true
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
-}
-
-remapJar {
     archiveClassifier.set('fabric')
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier.set("dev")
     manifest {
         attributes(
-                'Main-Class': "org.vivecraft.LaunchPopup"
+            'Main-Class': "org.vivecraft.LaunchPopup"
         )
     }
 }

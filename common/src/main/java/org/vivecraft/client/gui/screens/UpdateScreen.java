@@ -4,15 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.vivecraft.client.gui.widgets.TextScrollWidget;
 import org.vivecraft.client.utils.UpdateChecker;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 
 public class UpdateScreen extends Screen {
@@ -29,26 +27,28 @@ public class UpdateScreen extends Screen {
         this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, UpdateChecker.changelog));
 
         this.addRenderableWidget(new Button(
-            this.width / 2 - 155, this.height - 56,
-            150, 20,
+            this.width / 2 - 155, this.height - 56, 150, 20,
             new TextComponent("Download from Modrinth"),
-            (p) -> {
-                try {
-                    Util.getPlatform().openUri(new URI("https://modrinth.com/mod/vivecraft"));
-                } catch (URISyntaxException ignored) {
-                }
-            }));
+            button ->
+                this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+                    if (bl) {
+                        Util.getPlatform().openUri("https://modrinth.com/mod/vivecraft");
+                    }
+                    this.minecraft.setScreen(this);
+                }, "https://modrinth.com/mod/vivecraft", true))
+        ));
 
         this.addRenderableWidget(new Button(
-            this.width / 2 + 5, this.height - 56,
-            150, 20,
+            this.width / 2 + 5, this.height - 56, 150, 20,
             new TextComponent("Download from Curseforge"),
-            (p) -> {
-                try {
-                    Util.getPlatform().openUri(new URI("https://www.curseforge.com/minecraft/mc-mods/vivecraft"));
-                } catch (URISyntaxException ignored) {
-                }
-            }));
+            button ->
+                this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+                    if (bl) {
+                        Util.getPlatform().openUri("https://www.curseforge.com/minecraft/mc-mods/vivecraft");
+                    }
+                    this.minecraft.setScreen(this);
+                }, "https://www.curseforge.com/minecraft/mc-mods/vivecraft", true))
+        ));
 
         this.addRenderableWidget(new Button(
             this.width / 2 - 75, this.height - 32,

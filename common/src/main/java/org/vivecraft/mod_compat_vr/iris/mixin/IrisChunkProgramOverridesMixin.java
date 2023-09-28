@@ -34,10 +34,11 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
     private EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> programs;
 
     @Unique
-    private final EnumMap<RenderPass, EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>>> pipelinePrograms = new EnumMap<>(RenderPass.class);
+    private final EnumMap<RenderPass, EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>>> vivecraft$pipelinePrograms = new EnumMap<>(RenderPass.class);
 
+    @Override
     @Unique
-    public void createAllPipelinesShadersSodiumProcessing(SodiumTerrainPipeline sodiumTerrainPipeline, Object chunkVertexType, Method createShadersMethod) throws InvocationTargetException, IllegalAccessException {
+    public void vivecraft$createAllPipelinesShadersSodiumProcessing(SodiumTerrainPipeline sodiumTerrainPipeline, Object chunkVertexType, Method createShadersMethod) throws InvocationTargetException, IllegalAccessException {
         if (VRState.vrInitialized) {
             WorldRenderPass current = RenderPassManager.wrp;
             RenderPass currentPass = ClientDataHolderVR.getInstance().currentPass;
@@ -46,12 +47,12 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
             for (RenderPass renderPass : RenderPass.values()) {
                 Iris.logger.info("Creating VR sodium shaders for RenderPass {}", renderPass);
 
-                WorldRenderingPipeline worldPipeline = ((PipelineManagerExtension) Iris.getPipelineManager()).getVRPipeline(renderPass);
+                WorldRenderingPipeline worldPipeline = ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getVRPipeline(renderPass);
                 // GUI and unused renderPasses don't have a pipeline
                 if (worldPipeline != null) {
                     SodiumTerrainPipeline sodiumPipeline = worldPipeline.getSodiumTerrainPipeline();
                     EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> renderPassShaders = new EnumMap<>(IrisTerrainPass.class);
-                    pipelinePrograms.put(renderPass, renderPassShaders);
+                    vivecraft$pipelinePrograms.put(renderPass, renderPassShaders);
                     createShadersMethod.invoke(this, sodiumPipeline, chunkVertexType);
                     // programs should have  the shaders for this pass now
                     renderPassShaders.putAll(programs);
@@ -62,7 +63,7 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
 
             RenderPassManager.setVanillaRenderPass();
             Iris.logger.info("Creating sodium shaders for vanilla RenderPass");
-            createShadersMethod.invoke(this, ((PipelineManagerExtension) Iris.getPipelineManager()).getVanillaPipeline().getSodiumTerrainPipeline(), chunkVertexType);
+            createShadersMethod.invoke(this, ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getVanillaPipeline().getSodiumTerrainPipeline(), chunkVertexType);
             if (current != null) {
                 RenderPassManager.setWorldRenderPass(current);
                 ClientDataHolderVR.getInstance().currentPass = currentPass;
@@ -73,15 +74,15 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
     }
 
     @Redirect(method = "getProgramOverride", at = @At(value = "INVOKE", target = "Ljava/util/EnumMap;get(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false)
-    public Object getVRPipelineShaders(EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> instance, Object key){
+    public Object vivecraft$getVRPipelineShaders(EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> instance, Object key) {
         // return shader of the current RenderPass
-        return !RenderPassType.isVanilla() ? pipelinePrograms.get(ClientDataHolderVR.getInstance().currentPass).get((IrisTerrainPass)key) : instance.get((IrisTerrainPass)key);
+        return !RenderPassType.isVanilla() ? vivecraft$pipelinePrograms.get(ClientDataHolderVR.getInstance().currentPass).get((IrisTerrainPass) key) : instance.get((IrisTerrainPass) key);
     }
 
     @Inject(method = "deleteShaders", at = @At("HEAD"), remap = false)
-    public void deleteVRPipelineShaders(CallbackInfo ci){
+    public void vivecraft$deleteVRPipelineShaders(CallbackInfo ci) {
         if (VRState.vrInitialized) {
-            for (EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> map : pipelinePrograms.values()) {
+            for (EnumMap<IrisTerrainPass, GlProgram<IrisChunkShaderInterface>> map : vivecraft$pipelinePrograms.values()) {
                 for (GlProgram<?> program : map.values()) {
                     if (program != null) {
                         program.delete();
@@ -89,7 +90,7 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
                 }
                 map.clear();
             }
-            pipelinePrograms.clear();
+            vivecraft$pipelinePrograms.clear();
         }
     }
 }

@@ -29,7 +29,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, String text) {
         super(x, y, width, height, new TextComponent(""));
 
-        formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth*2, Style.EMPTY);
+        formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth * 2, Style.EMPTY);
 
         initScroll();
     }
@@ -37,7 +37,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, new TextComponent(""));
 
-        formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth*2, Style.EMPTY);
+        formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth * 2, Style.EMPTY);
         initScroll();
     }
 
@@ -47,52 +47,51 @@ public class TextScrollWidget extends AbstractWidget {
         currentLine = 0;
         scrollSteps = formattedText.size() - maxLines;
         scrollSteps = Math.max(scrollSteps, 0);
-        scrollBarSize = scrollSteps == 0 ? height - 2 : (int)(Math.max(formattedText.size(), maxLines) / (float)(scrollSteps) * 12);
+        scrollBarSize = scrollSteps == 0 ? height - 2 : (int) (Math.max(formattedText.size(), maxLines) / (float) (scrollSteps) * 12);
         scrollBarOffset = height - scrollBarSize - 2;
-
     }
 
     @Override
     public void renderButton(PoseStack poseStack, int i, int j, float f) {
         // draw box outline
         fill(poseStack,
-                x,
-                y,
-                x + width,
-                y + this.height,
-                -6250336);
+            x,
+            y,
+            x + width,
+            y + this.height,
+            -6250336);
         // draw box inside
         fill(poseStack,
-                x + 1,
-                y + 1,
-                x + width - 1,
-                y + this.height - 1,
-                -16777216);
+            x + 1,
+            y + 1,
+            x + width - 1,
+            y + this.height - 1,
+            -16777216);
 
         // draw text
         for (int line = 0; line + currentLine < formattedText.size() && line < maxLines; line++) {
             drawString(poseStack, Minecraft.getInstance().font, formattedText.get(line + currentLine).getString(), x + padding, y + padding + line * 12, 16777215);
         }
 
-        float scrollbarStart = scrollSteps == 0 ? 0 : currentLine/(float)scrollSteps * scrollBarOffset;
+        float scrollbarStart = scrollSteps == 0 ? 0 : currentLine / (float) scrollSteps * scrollBarOffset;
 
         if (isFocused() || isHovered) {
             // draw scroll bar outline
             fill(poseStack,
-                    x + width - scrollBarWidth - 2,
-                    (int) (y + 1 + scrollbarStart),
-                    x + width - 1,
-                    (int) (y + 1 + scrollbarStart + scrollBarSize),
-                    -1);
+                x + width - scrollBarWidth - 2,
+                (int) (y + 1 + scrollbarStart),
+                x + width - 1,
+                (int) (y + 1 + scrollbarStart + scrollBarSize),
+                -1);
         }
 
         // draw scroll bar
         fill(poseStack,
-                x + width - scrollBarWidth - (isFocused() || isHovered ? 1 : 2),
-                (int)(y + (isFocused() || isHovered ? 2 : 1) + scrollbarStart),
-                x + width - (isFocused() || isHovered ? 2 : 1),
-                (int)(y + (isFocused() || isHovered ? 0 : 1) + scrollbarStart + scrollBarSize),
-                -6250336);
+            x + width - scrollBarWidth - (isFocused() || isHovered ? 1 : 2),
+            (int) (y + (isFocused() || isHovered ? 2 : 1) + scrollbarStart),
+            x + width - (isFocused() || isHovered ? 2 : 1),
+            (int) (y + (isFocused() || isHovered ? 0 : 1) + scrollbarStart + scrollBarSize),
+            -6250336);
     }
 
     @Override
@@ -102,7 +101,7 @@ public class TextScrollWidget extends AbstractWidget {
 
     @Override
     public void onClick(double x, double y) {
-        if (x >= x + width - scrollBarWidth && x <= x + width && y >= y && y <= y + height) {
+        if (x >= this.x + width - scrollBarWidth && x <= this.x + width && y >= this.y && y <= this.y + height) {
             scrollDragActive = true;
             if (maxLines < formattedText.size()) {
                 // update scroll position
@@ -125,12 +124,12 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     private void setCurrentLineFromYPos(double y) {
-        if (y < y + scrollBarSize * 0.5) {
+        if (y < this.y + scrollBarSize * 0.5) {
             currentLine = 0;
-        } else if (y > y + height - scrollBarSize * 0.5) {
+        } else if (y > this.y + height - scrollBarSize * 0.5) {
             currentLine = scrollSteps;
         } else {
-            currentLine = (int)((y - y - scrollBarSize * 0.5) / (height - scrollBarSize) * scrollSteps);
+            currentLine = (int) ((y - this.y - scrollBarSize * 0.5) / (height - scrollBarSize) * scrollSteps);
         }
     }
 

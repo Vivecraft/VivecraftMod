@@ -2,112 +2,92 @@ package org.vivecraft.common.utils.math;
 
 import org.vivecraft.common.utils.lwjgl.Matrix4f;
 
-public class Angle
-{
+public class Angle {
     private float pitch;
     private float yaw;
     private float roll;
     private Order order;
 
-    public Angle()
-    {
+    public Angle() {
         this.order = Order.YXZ;
     }
 
-    public Angle(Order order)
-    {
+    public Angle(Order order) {
         this.order = order;
     }
 
-    public Angle(float pitch, float yaw, float roll, Order order)
-    {
+    public Angle(float pitch, float yaw, float roll, Order order) {
         this.pitch = pitch;
         this.yaw = yaw;
         this.roll = roll;
         this.order = order;
     }
 
-    public Angle(float pitch, float yaw, float roll)
-    {
+    public Angle(float pitch, float yaw, float roll) {
         this(pitch, yaw, roll, Order.YXZ);
     }
 
-    public Angle(float pitch, float yaw)
-    {
+    public Angle(float pitch, float yaw) {
         this(pitch, yaw, 0.0F, Order.YXZ);
     }
 
-    public Angle(Angle other)
-    {
+    public Angle(Angle other) {
         this.pitch = other.pitch;
         this.yaw = other.yaw;
         this.roll = other.roll;
         this.order = other.order;
     }
 
-    public Angle copy()
-    {
+    public Angle copy() {
         return new Angle(this);
     }
 
-    public void set(float pitch, float yaw, float roll)
-    {
+    public void set(float pitch, float yaw, float roll) {
         this.pitch = pitch;
         this.yaw = yaw;
         this.roll = roll;
     }
 
-    public void set(Angle other)
-    {
+    public void set(Angle other) {
         this.pitch = other.pitch;
         this.yaw = other.yaw;
         this.roll = other.roll;
     }
 
-    public float getPitch()
-    {
+    public float getPitch() {
         return this.pitch;
     }
 
-    public void setPitch(float pitch)
-    {
+    public void setPitch(float pitch) {
         this.pitch = pitch;
     }
 
-    public float getYaw()
-    {
+    public float getYaw() {
         return this.yaw;
     }
 
-    public void setYaw(float yaw)
-    {
+    public void setYaw(float yaw) {
         this.yaw = yaw;
     }
 
-    public float getRoll()
-    {
+    public float getRoll() {
         return this.roll;
     }
 
-    public void setRoll(float roll)
-    {
+    public void setRoll(float roll) {
         this.roll = roll;
     }
 
-    public Order getOrder()
-    {
+    public Order getOrder() {
         return this.order;
     }
 
-    public void setOrder(Order order)
-    {
+    public void setOrder(Order order) {
         this.order = order;
     }
 
-    public Angle rotate(Axis axis, float degrees)
-    {
-        switch (axis)
-        {
+    public Angle rotate(Axis axis, float degrees) {
+        switch (axis) {
             case PITCH:
                 return new Angle(this.pitch + degrees, this.yaw, this.roll);
 
@@ -122,85 +102,65 @@ public class Angle
         }
     }
 
-    public Angle add(Angle other)
-    {
+    public Angle add(Angle other) {
         return new Angle(this.pitch + other.pitch, this.yaw + other.yaw, this.roll + other.roll, this.order);
     }
 
-    public Angle subtract(Angle other)
-    {
+    public Angle subtract(Angle other) {
         return new Angle(this.pitch - other.pitch, this.yaw - other.yaw, this.roll - other.roll, this.order);
     }
 
-    public Matrix4f getMatrix()
-    {
+    public Matrix4f getMatrix() {
         return (new Quaternion(this)).getMatrix();
     }
 
-    public Vector3 forward()
-    {
+    public Vector3 forward() {
         return (new Vector3(0.0F, 0.0F, -1.0F)).multiply(this.getMatrix());
     }
 
-    public Vector3 up()
-    {
+    public Vector3 up() {
         return (new Vector3(0.0F, 1.0F, 0.0F)).multiply(this.getMatrix());
     }
 
-    public Vector3 right()
-    {
+    public Vector3 right() {
         return (new Vector3(1.0F, 0.0F, 0.0F)).multiply(this.getMatrix());
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int i = 5;
         i = 89 * i + Float.floatToIntBits(this.pitch);
         i = 89 * i + Float.floatToIntBits(this.yaw);
         return 89 * i + Float.floatToIntBits(this.roll);
     }
 
-    public boolean equals(Object obj)
-    {
-        if (obj == null)
-        {
+    public boolean equals(Object obj) {
+        if (obj == null) {
             return false;
-        }
-        else if (this.getClass() != obj.getClass())
-        {
+        } else if (this.getClass() != obj.getClass()) {
             return false;
-        }
-        else
-        {
-            Angle angle = (Angle)obj;
+        } else {
+            Angle angle = (Angle) obj;
 
-            if (Float.floatToIntBits(this.pitch) != Float.floatToIntBits(angle.pitch))
-            {
+            if (Float.floatToIntBits(this.pitch) != Float.floatToIntBits(angle.pitch)) {
                 return false;
-            }
-            else if (Float.floatToIntBits(this.yaw) != Float.floatToIntBits(angle.yaw))
-            {
+            } else if (Float.floatToIntBits(this.yaw) != Float.floatToIntBits(angle.yaw)) {
                 return false;
-            }
-            else
-            {
+            } else {
                 return Float.floatToIntBits(this.roll) == Float.floatToIntBits(angle.roll);
             }
         }
     }
 
-    public String toString()
-    {
+    public String toString() {
         return "Angle{pitch=" + this.pitch + ", yaw=" + this.yaw + ", roll=" + this.roll + '}';
     }
 
-    public static enum Order
-    {
+    public enum Order {
         XYZ,
         ZYX,
         YXZ,
         ZXY,
         YZX,
-        XZY;
+        XZY
     }
 }

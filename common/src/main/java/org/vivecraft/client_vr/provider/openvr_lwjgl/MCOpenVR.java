@@ -62,13 +62,13 @@ public class MCOpenVR extends MCVR {
     private final String ACTION_LEFT_HAPTIC = "/actions/global/out/lefthaptic";
     private final String ACTION_RIGHT_HAND = "/actions/global/in/righthand";
     private final String ACTION_RIGHT_HAPTIC = "/actions/global/out/righthaptic";
-    private Map<VRInputActionSet, Long> actionSetHandles = new EnumMap<>(VRInputActionSet.class);
+    private final Map<VRInputActionSet, Long> actionSetHandles = new EnumMap<>(VRInputActionSet.class);
     private VRActiveActionSet.Buffer activeActionSetsBuffer;
     private Map<Long, String> controllerComponentNames;
     private Map<String, Matrix4f[]> controllerComponentTransforms;
     private boolean dbg = true;
     private long externalCameraPoseHandle;
-    private int[] controllerDeviceIndex = new int[3];
+    private final int[] controllerDeviceIndex = new int[3];
     private boolean getXforms = true;
     private final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     private final IntBuffer hmdErrorStore = MemoryUtil.memCallocInt(1);
@@ -78,16 +78,16 @@ public class MCOpenVR extends MCVR {
     private long leftControllerHandle;
     private long leftHapticHandle;
     private long leftPoseHandle;
-    private InputOriginInfo originInfo;
+    private final InputOriginInfo originInfo;
     private boolean paused = false;
-    private InputPoseActionData poseData;
+    private final InputPoseActionData poseData;
     private long rightControllerHandle;
     private long rightHapticHandle;
     private long rightPoseHandle;
     private final VRTextureBounds texBounds = VRTextureBounds.calloc();
-    private Map<String, TrackpadSwipeSampler> trackpadSwipeSamplers = new HashMap<>();
+    private final Map<String, TrackpadSwipeSampler> trackpadSwipeSamplers = new HashMap<>();
     private boolean tried;
-    private Queue<VREvent> vrEvents = new LinkedList<>();
+    private final Queue<VREvent> vrEvents = new LinkedList<>();
     final Texture texType0 = Texture.calloc();
     final Texture texType1 = Texture.calloc();
     InputDigitalActionData digital = InputDigitalActionData.calloc();
@@ -355,8 +355,8 @@ public class MCOpenVR extends MCVR {
             }, () ->
             {
                 this.changeHotbar(-1);
-            }, (Runnable) null, (Runnable) null);
-            this.processSwipeInput(VivecraftVRMod.INSTANCE.keyHotbarSwipeY, (Runnable) null, (Runnable) null, () ->
+            }, null, null);
+            this.processSwipeInput(VivecraftVRMod.INSTANCE.keyHotbarSwipeY, null, null, () ->
             {
                 this.changeHotbar(-1);
             }, () ->
@@ -663,10 +663,10 @@ public class MCOpenVR extends MCVR {
                                             Matrix4f matrix4f2 = this.getControllerComponentTransform(0, "handgrip");
                                             Vector3 vector3 = matrix4f1.transform(this.forward);
                                             Vector3 vector31 = matrix4f2.transform(this.forward);
-                                            double d0 = (double) Math.abs(vector3.normalized().dot(vector31.normalized()));
+                                            double d0 = Math.abs(vector3.normalized().dot(vector31.normalized()));
                                             double d1 = Math.acos(d0);
                                             double d2 = Math.toDegrees(d1);
-                                            double d3 = Math.acos((double) vector3.normalized().dot(this.forward.normalized()));
+                                            double d3 = Math.acos(vector3.normalized().dot(this.forward.normalized()));
                                             double d4 = Math.toDegrees(d3);
                                             this.gunStyle = d2 > 10.0D;
                                             this.gunAngle = d2;
@@ -802,10 +802,10 @@ public class MCOpenVR extends MCVR {
                     // application needs to be installed, so abort
                     String pathFormatted = "";
                     boolean hasInvalidChars = false;
-                    for (char c : file1.getAbsolutePath().toCharArray()){
+                    for (char c : file1.getAbsolutePath().toCharArray()) {
                         if (c > 127) {
                             hasInvalidChars = true;
-                            pathFormatted += "§c"+c+"§r";
+                            pathFormatted += "§c" + c + "§r";
                         } else {
                             pathFormatted += c;
                         }
@@ -1024,7 +1024,7 @@ public class MCOpenVR extends MCVR {
 
                     if (trackeddevicepose.bPoseIsValid()) {
                         OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(trackeddevicepose.mDeviceToAbsoluteTracking(), this.poseMatrices[i]);
-                        this.deviceVelocity[i] = new Vec3((double) trackeddevicepose.vVelocity().v(0), (double) trackeddevicepose.vVelocity().v(1), (double) trackeddevicepose.vVelocity().v(2));
+                        this.deviceVelocity[i] = new Vec3(trackeddevicepose.vVelocity().v(0), trackeddevicepose.vVelocity().v(1), trackeddevicepose.vVelocity().v(2));
                         Utils.Matrix4fCopy(this.poseMatrices[i], this.controllerPose[controller]);
                         this.controllerTracking[controller] = true;
                         return;
@@ -1070,7 +1070,7 @@ public class MCOpenVR extends MCVR {
 
                 if (this.hmdTrackedDevicePoses.get(j).bPoseIsValid()) {
                     OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(this.hmdTrackedDevicePoses.get(j).mDeviceToAbsoluteTracking(), this.poseMatrices[j]);
-                    this.deviceVelocity[j] = new Vec3((double) this.hmdTrackedDevicePoses.get(j).vVelocity().v(0), (double) this.hmdTrackedDevicePoses.get(j).vVelocity().v(1), (double) this.hmdTrackedDevicePoses.get(j).vVelocity().v(2));
+                    this.deviceVelocity[j] = new Vec3(this.hmdTrackedDevicePoses.get(j).vVelocity().v(0), this.hmdTrackedDevicePoses.get(j).vVelocity().v(1), this.hmdTrackedDevicePoses.get(j).vVelocity().v(2));
                 }
             }
 
@@ -1192,7 +1192,7 @@ public class MCOpenVR extends MCVR {
                         this.readDigitalData(action, controllertype1);
                     }
                 } else {
-                    this.readDigitalData(action, (ControllerType) null);
+                    this.readDigitalData(action, null);
                 }
 
                 break;
@@ -1205,7 +1205,7 @@ public class MCOpenVR extends MCVR {
                         this.readAnalogData(action, controllertype);
                     }
                 } else {
-                    this.readAnalogData(action, (ControllerType) null);
+                    this.readAnalogData(action, null);
                 }
         }
     }

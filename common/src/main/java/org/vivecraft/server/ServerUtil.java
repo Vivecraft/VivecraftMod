@@ -30,7 +30,7 @@ public class ServerUtil {
             (ServerConfig.vive_only.get() || ServerConfig.vr_only.get())) {
             scheduler.schedule(() -> {
                 // only do stuff, if the player is still on the server
-                if(!serverPlayer.hasDisconnected()) {
+                if (!serverPlayer.hasDisconnected()) {
                     ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
                     String message = "";
 
@@ -69,11 +69,11 @@ public class ServerUtil {
                         }
                     }
                 }
-            }, (long)(ServerConfig.messageKickDelay.get() * 1000), TimeUnit.MILLISECONDS);
+            }, (long) (ServerConfig.messageKickDelay.get() * 1000), TimeUnit.MILLISECONDS);
         }
     }
 
-    public static void sendUpdateNotificationIfOP (ServerPlayer serverPlayer) {
+    public static void sendUpdateNotificationIfOP(ServerPlayer serverPlayer) {
         if (ServerConfig.checkForUpdate.get()) {
             // don't send update notifications on singleplayer
             if (serverPlayer.server.isDedicatedServer() && serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile())) {
@@ -86,6 +86,7 @@ public class ServerUtil {
             }
         }
     }
+
     public static void registerCommands(CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("vivecraft-server-config")
             .requires(source -> source.hasPermission(4)).then(
@@ -115,7 +116,7 @@ public class ServerUtil {
                 argument = StringArgumentType.string();
             }
 
-            if (!(setting.get()instanceof List)) {
+            if (!(setting.get() instanceof List)) {
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
                     Commands.literal(setting.getPath()).then(
@@ -132,8 +133,7 @@ public class ServerUtil {
                                     return 1;
                                 })
                         )
-                    )
-                ));
+                    ));
             } else {
                 ConfigBuilder.ConfigValue<List<? extends String>> listConfig = setting;
                 dispatcher.register(Commands.literal("vivecraft-server-config")
@@ -156,9 +156,9 @@ public class ServerUtil {
                                     context.getSource().sendSuccess(new TextComponent("is now '" + setting.get()), true);
                                     return 1;
                                 })
+                            )
                         )
-                    )
-                ));
+                    ));
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
                     Commands.literal(setting.getPath()).then(
@@ -179,9 +179,9 @@ public class ServerUtil {
                                     context.getSource().sendSuccess(new TextComponent("is now '" + setting.get()), true);
                                     return 1;
                                 })
+                            )
                         )
-                    )
-                ));
+                    ));
             }
             dispatcher.register(Commands.literal("vivecraft-server-config")
                 .requires(source -> source.hasPermission(4)).then(
@@ -204,5 +204,4 @@ public class ServerUtil {
                 ));
         }
     }
-
 }

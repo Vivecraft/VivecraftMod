@@ -12,9 +12,8 @@ import org.vivecraft.server.ServerUtil;
 public class ServerLoginPacketListenerImplMixin {
 
     @Inject(at = @At("HEAD"), method = "placeNewPlayer")
-    private void scheduleLoginMessages(ServerPlayer serverPlayer, CallbackInfo ci) {
+    private void vivecraft$scheduleLoginMessages(ServerPlayer serverPlayer, CallbackInfo ci) {
         ServerUtil.scheduleWelcomeMessageOrKick(serverPlayer);
         ServerUtil.sendUpdateNotificationIfOP(serverPlayer);
     }
-
 }

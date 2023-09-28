@@ -3,32 +3,26 @@ package org.vivecraft.common.utils.lwjgl;
 import java.nio.FloatBuffer;
 
 @Deprecated
-public class Matrix2f extends Matrix
-{
+public class Matrix2f extends Matrix {
     public float m00;
     public float m01;
     public float m10;
     public float m11;
 
-    public Matrix2f()
-    {
+    public Matrix2f() {
         this.setIdentity();
     }
 
-    public Matrix2f(Matrix2f src)
-    {
+    public Matrix2f(Matrix2f src) {
         this.load(src);
     }
 
-    public Matrix2f load(Matrix2f src)
-    {
+    public Matrix2f load(Matrix2f src) {
         return load(src, this);
     }
 
-    public static Matrix2f load(Matrix2f src, Matrix2f dest)
-    {
-        if (dest == null)
-        {
+    public static Matrix2f load(Matrix2f src, Matrix2f dest) {
+        if (dest == null) {
             dest = new Matrix2f();
         }
 
@@ -39,8 +33,7 @@ public class Matrix2f extends Matrix
         return dest;
     }
 
-    public Matrix load(FloatBuffer buf)
-    {
+    public Matrix load(FloatBuffer buf) {
         this.m00 = buf.get();
         this.m01 = buf.get();
         this.m10 = buf.get();
@@ -48,8 +41,7 @@ public class Matrix2f extends Matrix
         return this;
     }
 
-    public Matrix loadTranspose(FloatBuffer buf)
-    {
+    public Matrix loadTranspose(FloatBuffer buf) {
         this.m00 = buf.get();
         this.m10 = buf.get();
         this.m01 = buf.get();
@@ -57,8 +49,7 @@ public class Matrix2f extends Matrix
         return this;
     }
 
-    public Matrix store(FloatBuffer buf)
-    {
+    public Matrix store(FloatBuffer buf) {
         buf.put(this.m00);
         buf.put(this.m01);
         buf.put(this.m10);
@@ -66,8 +57,7 @@ public class Matrix2f extends Matrix
         return this;
     }
 
-    public Matrix storeTranspose(FloatBuffer buf)
-    {
+    public Matrix storeTranspose(FloatBuffer buf) {
         buf.put(this.m00);
         buf.put(this.m10);
         buf.put(this.m01);
@@ -75,10 +65,8 @@ public class Matrix2f extends Matrix
         return this;
     }
 
-    public static Matrix2f add(Matrix2f left, Matrix2f right, Matrix2f dest)
-    {
-        if (dest == null)
-        {
+    public static Matrix2f add(Matrix2f left, Matrix2f right, Matrix2f dest) {
+        if (dest == null) {
             dest = new Matrix2f();
         }
 
@@ -89,10 +77,8 @@ public class Matrix2f extends Matrix
         return dest;
     }
 
-    public static Matrix2f sub(Matrix2f left, Matrix2f right, Matrix2f dest)
-    {
-        if (dest == null)
-        {
+    public static Matrix2f sub(Matrix2f left, Matrix2f right, Matrix2f dest) {
+        if (dest == null) {
             dest = new Matrix2f();
         }
 
@@ -103,10 +89,8 @@ public class Matrix2f extends Matrix
         return dest;
     }
 
-    public static Matrix2f mul(Matrix2f left, Matrix2f right, Matrix2f dest)
-    {
-        if (dest == null)
-        {
+    public static Matrix2f mul(Matrix2f left, Matrix2f right, Matrix2f dest) {
+        if (dest == null) {
             dest = new Matrix2f();
         }
 
@@ -121,10 +105,8 @@ public class Matrix2f extends Matrix
         return dest;
     }
 
-    public static Vector2f transform(Matrix2f left, Vector2f right, Vector2f dest)
-    {
-        if (dest == null)
-        {
+    public static Vector2f transform(Matrix2f left, Vector2f right, Vector2f dest) {
+        if (dest == null) {
             dest = new Vector2f();
         }
 
@@ -135,20 +117,16 @@ public class Matrix2f extends Matrix
         return dest;
     }
 
-    public Matrix transpose()
-    {
+    public Matrix transpose() {
         return this.transpose(this);
     }
 
-    public Matrix2f transpose(Matrix2f dest)
-    {
+    public Matrix2f transpose(Matrix2f dest) {
         return transpose(this, dest);
     }
 
-    public static Matrix2f transpose(Matrix2f src, Matrix2f dest)
-    {
-        if (dest == null)
-        {
+    public static Matrix2f transpose(Matrix2f src, Matrix2f dest) {
+        if (dest == null) {
             dest = new Matrix2f();
         }
 
@@ -159,19 +137,15 @@ public class Matrix2f extends Matrix
         return dest;
     }
 
-    public Matrix invert()
-    {
+    public Matrix invert() {
         return invert(this, this);
     }
 
-    public static Matrix2f invert(Matrix2f src, Matrix2f dest)
-    {
+    public static Matrix2f invert(Matrix2f src, Matrix2f dest) {
         float f = src.determinant();
 
-        if (f != 0.0F)
-        {
-            if (dest == null)
-            {
+        if (f != 0.0F) {
+            if (dest == null) {
                 dest = new Matrix2f();
             }
 
@@ -185,35 +159,27 @@ public class Matrix2f extends Matrix
             dest.m10 = f5;
             dest.m11 = f4;
             return dest;
-        }
-        else
-        {
+        } else {
             return null;
         }
     }
 
-    public String toString()
-    {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append(this.m00).append(' ').append(this.m10).append(' ').append('\n');
-        stringbuilder.append(this.m01).append(' ').append(this.m11).append(' ').append('\n');
-        return stringbuilder.toString();
+    public String toString() {
+        String stringbuilder = String.valueOf(this.m00) + ' ' + this.m10 + ' ' + '\n' +
+            this.m01 + ' ' + this.m11 + ' ' + '\n';
+        return stringbuilder;
     }
 
-    public Matrix negate()
-    {
+    public Matrix negate() {
         return this.negate(this);
     }
 
-    public Matrix2f negate(Matrix2f dest)
-    {
+    public Matrix2f negate(Matrix2f dest) {
         return negate(this, dest);
     }
 
-    public static Matrix2f negate(Matrix2f src, Matrix2f dest)
-    {
-        if (dest == null)
-        {
+    public static Matrix2f negate(Matrix2f src, Matrix2f dest) {
+        if (dest == null) {
             dest = new Matrix2f();
         }
 
@@ -224,13 +190,11 @@ public class Matrix2f extends Matrix
         return dest;
     }
 
-    public Matrix setIdentity()
-    {
+    public Matrix setIdentity() {
         return setIdentity(this);
     }
 
-    public static Matrix2f setIdentity(Matrix2f src)
-    {
+    public static Matrix2f setIdentity(Matrix2f src) {
         src.m00 = 1.0F;
         src.m01 = 0.0F;
         src.m10 = 0.0F;
@@ -238,13 +202,11 @@ public class Matrix2f extends Matrix
         return src;
     }
 
-    public Matrix setZero()
-    {
+    public Matrix setZero() {
         return setZero(this);
     }
 
-    public static Matrix2f setZero(Matrix2f src)
-    {
+    public static Matrix2f setZero(Matrix2f src) {
         src.m00 = 0.0F;
         src.m01 = 0.0F;
         src.m10 = 0.0F;
@@ -252,8 +214,7 @@ public class Matrix2f extends Matrix
         return src;
     }
 
-    public float determinant()
-    {
+    public float determinant() {
         return this.m00 * this.m11 - this.m01 * this.m10;
     }
 }

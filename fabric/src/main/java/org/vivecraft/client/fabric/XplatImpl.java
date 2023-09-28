@@ -27,8 +27,9 @@ public class XplatImpl {
     public static Path getConfigPath(String fileName) {
         return FabricLoader.getInstance().getConfigDir().resolve(fileName);
     }
+
     public static boolean isDedicatedServer() {
-       return FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER);
+        return FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER);
     }
 
     public static String getModloader() {
@@ -56,18 +57,18 @@ public class XplatImpl {
 
     public static String getUseMethodName() {
         return FabricLoader.getInstance().getMappingResolver().mapMethodName(
-                "intermediary",
-                "net.minecraft.class_4970", "method_9534",
-                "(Lnet/minecraft/class_2680;"+
-                        "Lnet/minecraft/class_1937;"+
-                        "Lnet/minecraft/class_2338;"+
-                        "Lnet/minecraft/class_1657;"+
-                        "Lnet/minecraft/class_1268;"+
-                        "Lnet/minecraft/class_3965;)"+
-                        "Lnet/minecraft/class_1269;");
+            "intermediary",
+            "net.minecraft.class_4970", "method_9534",
+            "(Lnet/minecraft/class_2680;" +
+                "Lnet/minecraft/class_1937;" +
+                "Lnet/minecraft/class_2338;" +
+                "Lnet/minecraft/class_1657;" +
+                "Lnet/minecraft/class_1268;" +
+                "Lnet/minecraft/class_3965;)" +
+                "Lnet/minecraft/class_1269;");
     }
 
-    public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn){
+    public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn) {
         if (isModLoaded("fabric-rendering-fluids-v1")) {
             return FluidRenderHandlerRegistry.INSTANCE.get(fluidStateIn.getType()).getFluidSprites(level, pos, fluidStateIn);
         } else {
@@ -86,11 +87,11 @@ public class XplatImpl {
         }
     }
 
-    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome){
-        return ((BiomeAccessor)(Object)biome).getClimateSettings();
+    public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
+        return ((BiomeAccessor) (Object) biome).getClimateSettings();
     }
 
-    public static BiomeSpecialEffects getBiomeEffects(Biome biome){
+    public static BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return biome.getSpecialEffects();
     }
 }

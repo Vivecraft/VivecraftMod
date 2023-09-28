@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import org.vivecraft.client.VRPlayersClient;
 
 public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
@@ -18,39 +17,40 @@ public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abst
     ResourceLocation DIAMOND_HMD = new ResourceLocation("vivecraft:textures/diamond_hmd.png");
     ResourceLocation GOLD_HMD = new ResourceLocation("vivecraft:textures/gold_hmd.png");
     ResourceLocation BLACK_HMD = new ResourceLocation("vivecraft:textures/black_hmd.png");
+
     public HMDLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderLayerParent) {
         super(renderLayerParent);
     }
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer entity, float f, float g, float h, float j, float k, float l) {
-        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player)entity).getUUID());
+        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entity.getUUID());
         ResourceLocation hmd = null; //this.BLACK_HMD;
         switch (rotinfo.hmd) {
-   	        case 0:
-    		    break;
+            case 0:
+                break;
 
-    	    case 1:
-    		    hmd = this.BLACK_HMD;
-    		    break;
+            case 1:
+                hmd = this.BLACK_HMD;
+                break;
 
-    	    case 2:
+            case 2:
                 hmd = this.GOLD_HMD;
-    		    break;
+                break;
 
-    	    case 3:
-    		    hmd = this.DIAMOND_HMD;
-    		    break;
+            case 3:
+                hmd = this.DIAMOND_HMD;
+                break;
 
-    	    case 4:
-                hmd =this.DIAMOND_HMD;
-    	}
+            case 4:
+                hmd = this.DIAMOND_HMD;
+        }
         if (hmd == null) {
             return;
         }
         poseStack.pushPose();
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(hmd));
-        ((VRPlayerModel)this.getParentModel()).renderHMDR(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
+        ((VRPlayerModel) this.getParentModel()).renderHMDR(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 }
