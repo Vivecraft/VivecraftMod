@@ -37,6 +37,10 @@ dependencies {
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
+    // iris for immersive poortals
+    //modRuntimeOnly "maven.modrinth:iris:1.4.3+1.19.2"
+    //modRuntimeOnly 'io.github.douira:glsl-transformer:1.0.1' //temp iris
+
     // for REI compat
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:9.1.619"
 
@@ -49,18 +53,18 @@ dependencies {
     modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
 
     //mod menu
-    modApi("com.terraformersmc:modmenu:6.3.1")
+    modApi("com.terraformersmc:modmenu:4.1.2")
 
     // for immersive portals compat
-    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.7.3-mc1.19.4') {
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.3.1-1.19') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.7.3-mc1.19.4') {
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.3.1-1.19') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:build:v2.7.3-mc1.19.4') {
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:build:v2.3.1-1.19') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }

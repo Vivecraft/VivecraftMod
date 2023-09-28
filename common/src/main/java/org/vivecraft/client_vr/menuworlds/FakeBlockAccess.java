@@ -360,15 +360,4 @@ public class FakeBlockAccess implements LevelReader {
     public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
         return null; // don't need this
     }
-
-
-    @Override
-    public RegistryAccess registryAccess() {
-        return null;
-    }
-
-    @Override
-    public FeatureFlagSet enabledFeatures() {
-        return null;
-    }
 }

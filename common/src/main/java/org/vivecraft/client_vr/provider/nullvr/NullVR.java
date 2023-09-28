@@ -49,7 +49,7 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public Vector2f getPlayAreaSize() {
+    public float[] getPlayAreaSize() {
         return new float[]{2,2};
     }
 

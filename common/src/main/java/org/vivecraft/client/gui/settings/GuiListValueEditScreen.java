@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
@@ -38,15 +37,20 @@ public class GuiListValueEditScreen extends GuiListScreen {
         list.setScrollAmount(scrollAmount);
         this.addWidget(this.list);
 
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
-            listValue.set(getCurrentValues());
-            this.minecraft.setScreen(this.lastScreen);
-        }).bounds(this.width / 2 - 155, this.height - 27, 150, 20).build());
+        this.addRenderableWidget(new Button(
+            this.width / 2 - 155, this.height - 27,
+            150, 20,
+            CommonComponents.GUI_DONE,
+            button -> {
+                listValue.set(getCurrentValues());
+                this.minecraft.setScreen(this.lastScreen);
+            }));
 
-        this.addRenderableWidget(Button
-            .builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
-            .bounds(this.width / 2 + 5, this.height - 27, 150, 20)
-            .build());
+        this.addRenderableWidget(new Button(
+            this.width / 2 + 5, this.height - 27,
+            150, 20,
+            CommonComponents.GUI_CANCEL,
+            button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
     private List<String> getCurrentValues() {
@@ -76,11 +80,15 @@ public class GuiListValueEditScreen extends GuiListScreen {
                 reinit = true;
             }));
         }
-        entries.add(new SettingsList.WidgetEntry(Component.translatable("vivecraft.options.addnew"), Button.builder(Component.literal("+"), button -> {
-            elements = getCurrentValues();
-            elements.add("");
-            reinit = true;
-        }).size(20, 20).build()));
+        entries.add(new SettingsList.WidgetEntry(Component.translatable("vivecraft.options.addnew"),
+            new Button(
+                0, 0, 20, 20,
+                Component.literal("+"),
+                button -> {
+                    elements = getCurrentValues();
+                    elements.add("");
+                    reinit = true;
+                })));
         return entries;
     }
 
@@ -92,19 +100,20 @@ public class GuiListValueEditScreen extends GuiListScreen {
         public ListValueEntry(Component name, EditBox valueWidget, Button.OnPress deleteAction) {
             super(name, valueWidget);
 
-            this.deleteButton = Button
-                .builder(Component.literal("-"), deleteAction)
-                .tooltip(Tooltip.create(Component.translatable("selectWorld.delete")))
-                .bounds(0, 0, 20, 20).build();
+            this.deleteButton = new Button(
+                0, 0, 20, 20,
+                Component.literal("-"),
+                deleteAction,
+                (button, poseStack, x, y) -> Minecraft.getInstance().screen.renderTooltip(poseStack, Component.translatable("selectWorld.delete"), x, y));
         }
 
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            this.valueWidget.setX(k + -50);
-            this.valueWidget.setY(j);
+            this.valueWidget.x = k + -50;
+            this.valueWidget.y = j;
             this.valueWidget.render(poseStack, n, o, f);
-            this.deleteButton.setX(k + 230);
-            this.deleteButton.setY(j);
+            this.deleteButton.x = k + 230;
+            this.deleteButton.y = j;
             this.deleteButton.render(poseStack, n, o, f);
         }
 

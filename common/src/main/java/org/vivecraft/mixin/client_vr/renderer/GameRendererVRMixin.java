@@ -3,6 +3,8 @@ package org.vivecraft.mixin.client_vr.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -20,7 +22,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -245,25 +246,25 @@ public abstract class GameRendererVRMixin
         } else if (vivecraft$DATA_HOLDER.currentPass == RenderPass.THIRD) {
             if (vivecraft$DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
                 posestack.mulPoseMatrix(
-                    new Matrix4f().setPerspective(vivecraft$DATA_HOLDER.vrSettings.mixedRealityFov * 0.01745329238474369F,
+                    Matrix4f.perspective(vivecraft$DATA_HOLDER.vrSettings.mixedRealityFov,
                         vivecraft$DATA_HOLDER.vrSettings.mixedRealityAspectRatio, this.vivecraft$minClipDistance,
                         this.vivecraft$clipDistance));
             } else {
                 posestack.mulPoseMatrix(
-                    new Matrix4f().setPerspective(vivecraft$DATA_HOLDER.vrSettings.mixedRealityFov * 0.01745329238474369F,
+                    Matrix4f.perspective(vivecraft$DATA_HOLDER.vrSettings.mixedRealityFov,
                         (float) this.minecraft.getWindow().getScreenWidth()
                             / (float) this.minecraft.getWindow().getScreenHeight(),
                         this.vivecraft$minClipDistance, this.vivecraft$clipDistance));
             }
             this.vivecraft$thirdPassProjectionMatrix = new Matrix4f(posestack.last().pose());
         } else if (vivecraft$DATA_HOLDER.currentPass == RenderPass.CAMERA) {
-            posestack.mulPoseMatrix(new Matrix4f().setPerspective(vivecraft$DATA_HOLDER.vrSettings.handCameraFov * 0.01745329238474369F,
+            posestack.mulPoseMatrix(Matrix4f.perspective(vivecraft$DATA_HOLDER.vrSettings.handCameraFov,
                 (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.viewWidth
                     / (float) vivecraft$DATA_HOLDER.vrRenderer.cameraFramebuffer.viewHeight,
                 this.vivecraft$minClipDistance, this.vivecraft$clipDistance));
         } else if (vivecraft$DATA_HOLDER.currentPass == RenderPass.SCOPEL
             || vivecraft$DATA_HOLDER.currentPass == RenderPass.SCOPER) {
-            posestack.mulPoseMatrix(new Matrix4f().setPerspective(70f / 8f * 0.01745329238474369F, 1.0F, 0.05F, this.vivecraft$clipDistance));
+            posestack.mulPoseMatrix(Matrix4f.perspective(70f / 8f, 1.0F, 0.05F, this.vivecraft$clipDistance));
         } else {
             if (this.zoom != 1.0F) {
                 posestack.translate(this.zoomX, -this.zoomY, 0.0D);
@@ -413,7 +414,7 @@ public abstract class GameRendererVRMixin
     }
 
     @Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(DDD)V"))
-    private void vivecraft$noTranslateItem(PoseStack poseStack, float x, float y, float z) {
+    private void vivecraft$noTranslateItem(PoseStack poseStack, double x, double y, double z) {
         if (RenderPassType.isVanilla()) {
             poseStack.translate(x, y, z);
         }

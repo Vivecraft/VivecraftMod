@@ -46,7 +46,6 @@ public abstract class GuiVROptionsBase extends Screen {
                 this.dataholder.vrSettings.saveOptions();
                 this.minecraft.setScreen(this.lastScreen);
             }
-            }
         }));
         this.addRenderableWidget(this.btnDefaults = new Button(this.width / 2 - 155, this.height - 30, 150, 20, Component.translatable("vivecraft.gui.loaddefaults"), (p) ->
         {

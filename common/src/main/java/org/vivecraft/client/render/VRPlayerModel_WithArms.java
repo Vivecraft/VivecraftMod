@@ -226,11 +226,11 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         ModelPart modelpart = this.getArm(pSide);
 
         if (this.laying) {
-            pMatrixStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+            pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
         }
 
         modelpart.translateAndRotate(pMatrixStack);
-        pMatrixStack.mulPose(Axis.XP.rotation((float) Math.sin((double) this.attackTime * Math.PI)));
+        pMatrixStack.mulPose(Vector3f.XP.rotation((float) Math.sin((double) this.attackTime * Math.PI)));
         pMatrixStack.translate(0.0D, -0.5D, 0.0D);
     }
 

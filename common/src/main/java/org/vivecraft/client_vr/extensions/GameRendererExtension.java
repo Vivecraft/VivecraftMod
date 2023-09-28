@@ -1,9 +1,9 @@
 package org.vivecraft.client_vr.extensions;
 
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 
 public interface GameRendererExtension {
 

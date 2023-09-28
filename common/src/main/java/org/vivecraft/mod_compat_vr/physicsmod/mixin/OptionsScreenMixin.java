@@ -28,11 +28,11 @@ public abstract class OptionsScreenMixin extends Screen {
                     if (button.getMessage().getContents() instanceof TranslatableContents contents && "physicsmod.menu.main.title".equals(contents.getKey())) {
                         // physics mods button would collide with ours, so make it half size to the right
                         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft) {
-                            button.setX(button.getX() + button.getWidth() / 2 + 5);
+                            button.x = button.x + button.getWidth() / 2 + 5;
                         }
                         button.setWidth(button.getWidth() / 2 - 5);
                         // move it up, so it aligns with ours
-                        button.setY(button.getY() - 6);
+                        button.y = button.y - 6;
                     }
                 }
             }

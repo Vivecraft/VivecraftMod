@@ -244,7 +244,7 @@ public class ServerConfig {
         climbeyBlocklist = builder
             .push("blocklist")
             .comment("The list of block names for use with include/exclude block mode.")
-            .defineList(Arrays.asList("white_wool", "dirt", "grass_block"), (s) -> s instanceof String && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation((String) s)));
+            .defineList(Arrays.asList("white_wool", "dirt", "grass_block"), (s) -> s instanceof String && Registry.BLOCK.containsKey(new ResourceLocation((String) s)));
         // end climbey
         builder.pop();
 

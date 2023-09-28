@@ -10,6 +10,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.sounds.SoundEvent;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -56,7 +58,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Unique
     private int vivecraft$movementTeleportTimer;
     @Unique
-    public String lastMsg = null;
+    public String vivecraft$lastMsg = null;
     @Unique
     private boolean vivecraft$teleported;
     @Unique
@@ -142,8 +144,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @Inject(at = @At("TAIL"), method = "chatSigned")
-    public void chatMsg(String string, Component component, CallbackInfo ci) {
-        this.lastMsg = string;
+    public void vivecraft$chatMsg(String string, Component component, CallbackInfo ci) {
+        this.vivecraft$lastMsg = string;
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/LocalPlayer;lastOnGround:Z", shift = At.Shift.AFTER, ordinal = 1), method = "sendPosition")
@@ -271,9 +273,9 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             return;
         }
         ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity((LocalPlayer) (Object) this, false, false);
-        if (!this.initFromServer) {
+        if (!this.vivecraft$initFromServer) {
             this.moveTo(pX, p_19892_, pY, p_19894_, pZ);
-            this.initFromServer = true;
+            this.vivecraft$initFromServer = true;
         }
     }
 
@@ -527,13 +529,15 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @Override
-    public String getLastMsg() {
-        return lastMsg;
+    @Unique
+    public String vivecraft$getLastMsg() {
+        return vivecraft$lastMsg;
     }
 
     @Override
-    public void setLastMsg(String string) {
-        this.lastMsg = string;
+    @Unique
+    public void vivecraft$setLastMsg(String string) {
+        this.vivecraft$lastMsg = string;
     }
 
     @Override

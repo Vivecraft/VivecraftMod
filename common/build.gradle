@@ -35,11 +35,11 @@ dependencies {
     modCompileOnly "maven.modrinth:resolution-control-plus:1.20-3.0.0"
 
     // for immersive portals compat
-    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.7.3-mc1.19.4') {
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.3.1-1.19') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.7.3-mc1.19.4') {
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.3.1-1.19') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }

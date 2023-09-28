@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.*;
-import org.joml.Vector2f;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
@@ -310,14 +309,14 @@ public class GuiHandler {
             guiScale = 2.0F;
             float[] afloat = MCVR.get().getPlayAreaSize();
             // slight offset to center of the room, to prevent z fighting
-            guiPos_room = new Vec3(0.02D, 1.3F, -Math.max(afloat != null ? afloat.y / 2.0F : 0.0F, 1.5F));
+            guiPos_room = new Vec3(0.02D, 1.3F, -Math.max(afloat != null ? afloat[1] / 2.0F : 0.0F, 1.5F));
             guiRotation_room = new Matrix4f();
             guiRotation_room.M[0][0] = guiRotation_room.M[1][1] = guiRotation_room.M[2][2] = guiRotation_room.M[3][3] = 1.0F;
             guiRotation_room.M[0][1] = guiRotation_room.M[1][0] = guiRotation_room.M[2][3] = guiRotation_room.M[3][1] = 0.0F;
             guiRotation_room.M[0][2] = guiRotation_room.M[1][2] = guiRotation_room.M[2][0] = guiRotation_room.M[3][2] = 0.0F;
             guiRotation_room.M[0][3] = guiRotation_room.M[1][3] = guiRotation_room.M[2][1] = guiRotation_room.M[3][0] = 0.0F;
         } else {
-            if (previousGuiScreen == null && newScreen != null || newScreen instanceof ChatScreen || newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen) {
+            if (previousGuiScreen == null && newScreen != null || newScreen instanceof ChatScreen || newScreen instanceof BookEditScreen || newScreen instanceof SignEditScreen) {
                 // check if screen is a container screen
                 // and if the pointed at block is the same that was last interacted with
                 boolean isBlockScreen = newScreen instanceof AbstractContainerScreen
@@ -351,7 +350,7 @@ public class GuiHandler {
 
                     if (newScreen instanceof ChatScreen) {
                         vec3 = new Vec3(0.0D, 0.5D, -2.0D);
-                    } else if (newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen) {
+                    } else if (newScreen instanceof BookEditScreen || newScreen instanceof SignEditScreen) {
                         vec3 = new Vec3(0.0D, 0.25D, -2.0D);
                     }
 

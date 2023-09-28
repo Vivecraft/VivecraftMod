@@ -54,17 +54,17 @@ public class TextScrollWidget extends AbstractWidget {
     public void renderButton(PoseStack poseStack, int i, int j, float f) {
         // draw box outline
         fill(poseStack,
-            getX(),
-            getY(),
-            getX() + width,
-            getY() + this.height,
+            x,
+            y,
+            x + width,
+            y + this.height,
             -6250336);
         // draw box inside
         fill(poseStack,
-            getX() + 1,
-            getY() + 1,
-            getX() + width - 1,
-            getY() + this.height - 1,
+            x + 1,
+            y + 1,
+            x + width - 1,
+            y + this.height - 1,
             -16777216);
 
         // draw text
@@ -77,19 +77,19 @@ public class TextScrollWidget extends AbstractWidget {
         if (isFocused() || isHovered) {
             // draw scroll bar outline
             fill(poseStack,
-                getX() + width - scrollBarWidth - 2,
-                (int) (getY() + 1 + scrollbarStart),
-                getX() + width - 1,
-                (int) (getY() + 1 + scrollbarStart + scrollBarSize),
+                x + width - scrollBarWidth - 2,
+                (int) (y + 1 + scrollbarStart),
+                x + width - 1,
+                (int) (y + 1 + scrollbarStart + scrollBarSize),
                 -1);
         }
 
         // draw scroll bar
         fill(poseStack,
-            getX() + width - scrollBarWidth - (isFocused() || isHovered ? 1 : 2),
-            (int) (getY() + (isFocused() || isHovered ? 2 : 1) + scrollbarStart),
-            getX() + width - (isFocused() || isHovered ? 2 : 1),
-            (int) (getY() + (isFocused() || isHovered ? 0 : 1) + scrollbarStart + scrollBarSize),
+            x + width - scrollBarWidth - (isFocused() || isHovered ? 1 : 2),
+            (int) (y + (isFocused() || isHovered ? 2 : 1) + scrollbarStart),
+            x + width - (isFocused() || isHovered ? 2 : 1),
+            (int) (y + (isFocused() || isHovered ? 0 : 1) + scrollbarStart + scrollBarSize),
             -6250336);
     }
 
@@ -100,7 +100,7 @@ public class TextScrollWidget extends AbstractWidget {
 
     @Override
     public void onClick(double x, double y) {
-        if (x >= x + width - scrollBarWidth && x <= x + width && y >= y && y <= y + height) {
+        if (x >= this.x + width - scrollBarWidth && x <= this.x + width && y >= this.y && y <= this.y + height) {
             scrollDragActive = true;
             if (maxLines < formattedText.size()) {
                 // update scroll position
@@ -123,12 +123,12 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     private void setCurrentLineFromYPos(double y) {
-        if (y < y + scrollBarSize * 0.5) {
+        if (y < this.y + scrollBarSize * 0.5) {
             currentLine = 0;
-        } else if (y > y + height - scrollBarSize * 0.5) {
+        } else if (y > this.y + height - scrollBarSize * 0.5) {
             currentLine = scrollSteps;
         } else {
-            currentLine = (int) ((y - getY() - scrollBarSize * 0.5) / (height - scrollBarSize) * scrollSteps);
+            currentLine = (int) ((y - this.y - scrollBarSize * 0.5) / (height - scrollBarSize) * scrollSteps);
         }
     }
 

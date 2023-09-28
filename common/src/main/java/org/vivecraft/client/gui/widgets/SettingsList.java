@@ -3,16 +3,13 @@ package org.vivecraft.client.gui.widgets;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -67,12 +64,6 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        @Nullable
-        public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
-            return null;
-        }
-
-        @Override
         public List<? extends GuiEventListener> children() {
             return Collections.emptyList();
         }
@@ -103,19 +94,17 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             super(name, valueWidget);
 
             this.canReset = () -> !configValue.isDefault();
-            this.resetButton = Button.builder(Component.literal("X"), button -> {
-                    configValue.reset();
-                    this.valueWidget = configValue.getWidget(valueWidget.getWidth(), valueWidget.getHeight());
-                })
-                .tooltip(Tooltip.create(Component.translatable("controls.reset")))
-                .bounds(0, 0, 20, 20).build();
+            this.resetButton = new Button(0, 0, 20, 20, Component.literal("X"), button -> {
+                configValue.reset();
+                this.valueWidget = configValue.getWidget(valueWidget.getWidth(), valueWidget.getHeight());
+            }, (button, poseStack, x, y) -> Minecraft.getInstance().screen.renderTooltip(poseStack, Component.translatable("controls.reset"), x, y));
         }
 
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
             super.render(poseStack, i, j, k, l, m, n, o, bl, f);
-            this.resetButton.setX(k + 230);
-            this.resetButton.setY(j);
+            this.resetButton.x = k + 230;
+            this.resetButton.y = j;
             this.resetButton.active = canReset.getAsBoolean();
             this.resetButton.render(poseStack, n, o, f);
         }
@@ -144,8 +133,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
             drawString(poseStack, Minecraft.getInstance().font, this.name, k + 90 - 140, j + m / 2 - Minecraft.getInstance().font.lineHeight / 2, 0xFFFFFF);
-            this.valueWidget.setX(k + 105);
-            this.valueWidget.setY(j);
+            this.valueWidget.x = k + 105;
+            this.valueWidget.y = j;
             this.valueWidget.render(poseStack, n, o, f);
         }
 

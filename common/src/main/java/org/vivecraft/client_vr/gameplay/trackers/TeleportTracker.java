@@ -200,7 +200,7 @@ public class TeleportTracker extends Tracker {
             }
 
             this.doTeleportCallback();
-            ((PlayerExtension) this.mc.player).vivecraft$stepSound(BlockPos.containing(vec3), vec3);
+            ((PlayerExtension) this.mc.player).vivecraft$stepSound(new BlockPos(vec3), vec3);
         }
     }
 

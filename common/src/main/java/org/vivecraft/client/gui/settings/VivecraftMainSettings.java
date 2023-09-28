@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.widgets.SettingsList;
@@ -26,7 +25,7 @@ public class VivecraftMainSettings extends GuiListScreen {
 
         AbstractWidget vrButton = CycleButton.onOffBuilder(VRState.vrEnabled)
             .displayOnlyValue()
-            .withTooltip(value -> Tooltip.create(Component.translatable("vivecraft.options.VR_MODE.tooltip")))
+            .withTooltip(value -> font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), 200))
             .create(0, 0, SettingsList.WidgetEntry.valueButtonWidth, 20, Component.empty(), (cycleButton, object) -> {
                 VRState.vrEnabled = !VRState.vrEnabled;
                 ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
@@ -41,11 +40,17 @@ public class VivecraftMainSettings extends GuiListScreen {
 
         entries.add(new SettingsList.WidgetEntry(
             Component.translatable("vivecraft.options.screen.main"),
-            Button.builder(Component.translatable("vivecraft.options.screen.main"), button -> this.minecraft.setScreen(new GuiMainVRSettings(this))).size(SettingsList.WidgetEntry.valueButtonWidth, 20).build()));
+            new Button(
+                0, 0, SettingsList.WidgetEntry.valueButtonWidth, 20,
+                Component.translatable("vivecraft.options.screen.main"),
+                button -> this.minecraft.setScreen(new GuiMainVRSettings(this)))));
 
         entries.add(new SettingsList.WidgetEntry(
             Component.translatable("vivecraft.options.screen.server"),
-            Button.builder(Component.translatable("vivecraft.options.screen.server"), button -> this.minecraft.setScreen(new GuiServerSettings(this))).size(SettingsList.WidgetEntry.valueButtonWidth, 20).build()));
+            new Button(
+                0, 0, SettingsList.WidgetEntry.valueButtonWidth, 20,
+                Component.translatable("vivecraft.options.screen.server"),
+                button -> this.minecraft.setScreen(new GuiServerSettings(this)))));
 
         entries.add(new SettingsList.CategoryEntry(Component.literal("Vivecraft Buttons")));
 

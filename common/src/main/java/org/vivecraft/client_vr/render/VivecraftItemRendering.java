@@ -1,7 +1,8 @@
 package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -14,7 +15,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
@@ -113,18 +113,18 @@ public class VivecraftItemRendering {
         boolean useLeftHandModelinLeftHand = false;
 
         double gunAngle = dh.vr.getGunAngle();
-        Quaternionf rotation = Axis.YP.rotationDegrees(0.0F);
-        Quaternionf preRotation = Axis.YP.rotationDegrees(0.0F);
-        rotation.mul(Axis.XP.rotationDegrees((float) (-110.0D + gunAngle)));
+        Quaternion rotation = Vector3f.YP.rotationDegrees(0.0F);
+        Quaternion preRotation = Vector3f.YP.rotationDegrees(0.0F);
+        rotation.mul(Vector3f.XP.rotationDegrees((float) (-110.0D + gunAngle)));
 
         if (rendertype == VivecraftItemTransformType.Bow_Seated) {
             translateY += -0.1D;
             translateZ += 0.1D;
-            rotation.mul(Axis.XP.rotationDegrees((float) (90.0D - gunAngle)));
+            rotation.mul(Vector3f.XP.rotationDegrees((float) (90.0D - gunAngle)));
             scale = 0.7F;
         } else if (rendertype == VivecraftItemTransformType.Bow_Roomscale) {
-            rotation = Axis.XP.rotationDegrees(0.0F);
-            pMatrixStack.mulPose(Axis.XP.rotationDegrees((float) (-110.0D + gunAngle)));
+            rotation = Vector3f.XP.rotationDegrees(0.0F);
+            pMatrixStack.mulPose(Vector3f.XP.rotationDegrees((float) (-110.0D + gunAngle)));
             translateY -= 0.25D;
             translateZ += (double) 0.025F + 0.03D * gunAngle / 40.0D;
             translateX += -0.0225D;
@@ -221,15 +221,15 @@ public class VivecraftItemRendering {
                 rotation = Vector3f.XP.rotationDegrees(0.0F);
                 translateY += -0.105D + 0.06D * gunAngle / 40.0D;
                 translateZ += -0.1F;
-                rotation.mul(Axis.XP.rotationDegrees(-45.0F));
-                rotation.mul(Axis.XP.rotationDegrees((float) gunAngle));
+                rotation.mul(Vector3f.XP.rotationDegrees(-45.0F));
+                rotation.mul(Vector3f.XP.rotationDegrees((float) gunAngle));
             } else if (rendertype == VivecraftItemTransformType.Horn) {
                 scale = 0.3F;
                 rotation = Vector3f.XP.rotationDegrees(0.0F);
                 translateY += -0.105D + 0.06D * gunAngle / 40.0D;
                 translateZ += -0.1F;
-                rotation.mul(Axis.XP.rotationDegrees(-45.0F));
-                rotation.mul(Axis.XP.rotationDegrees((float) gunAngle));
+                rotation.mul(Vector3f.XP.rotationDegrees(-45.0F));
+                rotation.mul(Vector3f.XP.rotationDegrees((float) gunAngle));
             } else if (rendertype == VivecraftItemTransformType.Shield) {
                 boolean reverse = dh.vrSettings.reverseHands && !dh.vrSettings.seated;
                 if (reverse) {
@@ -240,18 +240,18 @@ public class VivecraftItemRendering {
                 translateY += 0.18F;
                 //
                 if (k == 1) {
-                    rotation.mul(Axis.XP.rotationDegrees((float) (105.0D - gunAngle)));
+                    rotation.mul(Vector3f.XP.rotationDegrees((float) (105.0D - gunAngle)));
                     translateX += 0.11F;
                 } else {
-                    rotation.mul(Axis.XP.rotationDegrees((float) (115.0D - gunAngle)));
+                    rotation.mul(Vector3f.XP.rotationDegrees((float) (115.0D - gunAngle)));
                     translateX += -0.015D;
                 }
                 ////
                 translateZ += 0.1F;
 
                 if (pPlayer.isUsingItem() && pPlayer.getUseItemRemainingTicks() > 0 && pPlayer.getUsedItemHand() == pHand) {
-                    rotation.mul(Axis.XP.rotationDegrees(k * 5F));
-                    rotation.mul(Axis.ZP.rotationDegrees(-5F));
+                    rotation.mul(Vector3f.XP.rotationDegrees(k * 5F));
+                    rotation.mul(Vector3f.ZP.rotationDegrees(-5F));
 
                     if (k == 1) {
                         translateY += -0.12F;
@@ -266,14 +266,14 @@ public class VivecraftItemRendering {
 
                     ////
                     if (pPlayer.isBlocking()) {
-                        rotation.mul(Axis.YP.rotationDegrees((float) k * 90.0F));
+                        rotation.mul(Vector3f.YP.rotationDegrees((float) k * 90.0F));
                     } else {
-                        rotation.mul(Axis.YP.rotationDegrees((1.0F - pEquippedProgress) * (float) k * 90.0F));
+                        rotation.mul(Vector3f.YP.rotationDegrees((1.0F - pEquippedProgress) * (float) k * 90.0F));
                     }
                     ////
                 }
                 ////
-                rotation.mul(Axis.YP.rotationDegrees((float) k * -90.0F));
+                rotation.mul(Vector3f.YP.rotationDegrees((float) k * -90.0F));
             } else if (rendertype == VivecraftItemTransformType.Spear) {
                 rotation = Vector3f.XP.rotationDegrees(0.0F);
                 translateX += -0.135F;
@@ -294,7 +294,7 @@ public class VivecraftItemRendering {
                             f4 = 10.0F;
 
                             if (i1 > 0 && pPlayer.isInWaterOrRain()) {
-                                pMatrixStack.mulPose(Axis.ZP.rotationDegrees((float) (-dh.tickCounter * 10 * i1 % 360) - pPartialTicks * 10.0F * (float) i1));
+                                pMatrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) (-dh.tickCounter * 10 * i1 % 360) - pPartialTicks * 10.0F * (float) i1));
                             }
 
                             if (dh.frameIndex % 4L == 0L) {
@@ -310,13 +310,13 @@ public class VivecraftItemRendering {
                 if (pPlayer.isAutoSpinAttack()) {
                     i1 = 5;
                     translateZ += -0.15F;
-                    pMatrixStack.mulPose(Axis.ZP.rotationDegrees((float) (-dh.tickCounter * 10 * i1 % 360) - pPartialTicks * 10.0F * (float) i1));
+                    pMatrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) (-dh.tickCounter * 10 * i1 % 360) - pPartialTicks * 10.0F * (float) i1));
                     flag5 = true;
                 }
 
                 if (!flag5) {
                     translateY += 0.0D + 0.2D * gunAngle / 40.0D;
-                    rotation.mul(Axis.XP.rotationDegrees((float) gunAngle));
+                    rotation.mul(Vector3f.XP.rotationDegrees((float) gunAngle));
                 }
 
                 rotation.mul(Vector3f.XP.rotationDegrees(-65.0F));
@@ -332,7 +332,7 @@ public class VivecraftItemRendering {
                     boolean isClaws = dh.climbTracker.isClaws(pStack) && dh.climbTracker.isClimbeyClimb();
 
                     if (isClaws) {
-                        rotation.mul(Axis.XP.rotationDegrees((float) (-gunAngle)));
+                        rotation.mul(Vector3f.XP.rotationDegrees((float) (-gunAngle)));
                         scale = 0.3F;
                         translateZ += 0.075F;
                         translateY += 0.02F;
@@ -344,8 +344,8 @@ public class VivecraftItemRendering {
                     }
 
                     if (pStack.getItem() instanceof ArrowItem || pStack.is(ItemTags.VIVECRAFT_ARROWS)) {
-                        preRotation = Axis.ZP.rotationDegrees(-180.0F);
-                        rotation.mul(Axis.XP.rotationDegrees((float) (-gunAngle)));
+                        preRotation = Vector3f.ZP.rotationDegrees(-180.0F);
+                        rotation.mul(Vector3f.XP.rotationDegrees((float) (-gunAngle)));
                     }
                 } else if (rendertype == VivecraftItemTransformType.Telescope) {
                     preRotation = Vector3f.XP.rotationDegrees(0.0F);

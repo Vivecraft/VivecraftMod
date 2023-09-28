@@ -6,10 +6,8 @@ import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.gui.settings.GuiMainVRSettings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -41,20 +39,17 @@ public class OptionsScreenVRMixin extends Screen {
 
     // place below FOV slider
     @Inject(method = "init", at = @At(value = "HEAD"))
-    private void addVivecraftSettings(CallbackInfo ci) {
-        this.addRenderableWidget(new Button(this.width / 2 - 155,  this.height / 6 - 12 + 24, 150, 20, Component.translatable("vivecraft.options.screen.main.button"), (p) ->
-        {
-            Minecraft.getInstance().options.save();
-            Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
-        }));
-    }
+    private void vivecraft$addVivecraftSettings(CallbackInfo ci) {
+        if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
+            int xOffset = ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft
+                          ? -155
+                          : 5;
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout;arrangeElements()V"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vivecraft$noBigButtonsPlease(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
-        gridLayout.visitChildren(child -> {
-            if (child.getWidth() > 150 && child instanceof Button button) {
-                button.setWidth(150);
-            }
-        });
+            this.addRenderableWidget(new Button(this.width / 2 + xOffset, this.height / 6 - 12 + 24, 150, 20, Component.translatable("vivecraft.options.screen.main.button"), (p) ->
+            {
+                Minecraft.getInstance().options.save();
+                Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
+            }));
+        }
     }
 }

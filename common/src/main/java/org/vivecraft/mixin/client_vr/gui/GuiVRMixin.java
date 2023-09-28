@@ -48,7 +48,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     protected abstract Player getCameraPlayer();
 
     @Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
-    public void vivecraft$cancelRenderVignette(PoseStack poseStack, Entity entity, CallbackInfo ci) {
+    public void vivecraft$cancelRenderVignette(Entity entity, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             RenderSystem.enableDepthTest();
             ci.cancel();
@@ -56,21 +56,21 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     }
 
     @Inject(method = "renderTextureOverlay", at = @At("HEAD"), cancellable = true)
-    public void vivecraft$cancelRenderOverlay(PoseStack poseStack, ResourceLocation resourceLocation, float f, CallbackInfo ci) {
+    public void vivecraft$cancelRenderOverlay(ResourceLocation resourceLocation, float f, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
-    public void vivecraft$cancelRenderPortalOverlay(PoseStack poseStack, float f, CallbackInfo ci) {
+    public void vivecraft$cancelRenderPortalOverlay(float f, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
     @Inject(at = @At("HEAD"), method = "renderSpyglassOverlay", cancellable = true)
-    public void vivecraft$cancelRenderSpyglassOverlay(PoseStack poseStack, float f, CallbackInfo ci) {
+    public void vivecraft$cancelRenderSpyglassOverlay(float f, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
@@ -233,9 +233,10 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         float f1 = 0.00390625F;
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY + height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + 0) * f, (float)(v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY + height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + texWidth) * f, (float)(v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double)((float)centreX + width / 2.0F), (double)((float)centreY - height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + texWidth) * f, (float)(v + 0) * f1).endVertex();bufferbuilder.vertex((double)((float)centreX - width / 2.0F), (double)((float)centreY - height / 2.0F), (double)this.getBlitOffset()).uv((float)(u + 0) * f, (float)(v + 0) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY + height / 2.0F, this.getBlitOffset()).uv((float) (u) * f, (float) (v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY + height / 2.0F, this.getBlitOffset()).uv((float) (u + texWidth) * f, (float) (v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY - height / 2.0F, this.getBlitOffset()).uv((float) (u + texWidth) * f, (float) (v) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY - height / 2.0F, this.getBlitOffset()).uv((float) (u) * f, (float) (v) * f1).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
     }
 }

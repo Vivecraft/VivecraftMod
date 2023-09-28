@@ -2,6 +2,7 @@ package org.vivecraft.server.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
@@ -253,12 +254,13 @@ public class ConfigBuilder {
         }
 
         public AbstractWidget getWidget(int width, int height) {
-            return Button
-                .builder(Component.literal("" + get()), button -> {
-                })
-                .bounds(0, 0, width, height)
-                .tooltip(Tooltip.create(Component.literal(getComment())))
-                .build();
+            return new Button(
+                0, 0, width, height,
+                Component.literal("" + get()),
+                button -> {
+                },
+                ((button, poseStack, x, y) ->
+                    Minecraft.getInstance().screen.renderTooltip(poseStack, Minecraft.getInstance().font.split(Component.literal(getComment()), 200), x, y)));
         }
     }
 
@@ -272,7 +274,7 @@ public class ConfigBuilder {
             return CycleButton
                 .onOffBuilder(get())
                 .displayOnlyValue()
-                .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
+                .withTooltip((bool) -> getComment() != null ? Minecraft.getInstance().font.split(Component.literal(getComment()), 200) : null)
                 .create(0, 0, width, height, Component.empty(), (button, bool) -> set(bool));
         }
     }
@@ -298,10 +300,17 @@ public class ConfigBuilder {
                     set(this.getValue());
                     return ret;
                 }
+
+                @Override
+                public void renderButton(PoseStack poseStack, int x, int y, float f) {
+                    super.renderButton(poseStack, x, y, f);
+                    if (this.isHovered) {
+                        Minecraft.getInstance().screen.renderTooltip(poseStack, Minecraft.getInstance().font.split(Component.literal(getComment()), 200), x, y);
+                    }
+                }
             };
             box.setMaxLength(1000);
             box.setValue(get());
-            box.setTooltip(Tooltip.create(Component.literal(getComment())));
             return box;
         }
     }
@@ -314,16 +323,15 @@ public class ConfigBuilder {
         @Override
         public AbstractWidget getWidget(int width, int height) {
             // TODO handle other types than String
-            return Button
-                .builder(
-                    Component.translatable("vivecraft.options.editlist"),
-                    button -> Minecraft.getInstance()
-                        .setScreen(
-                            new GuiListValueEditScreen(Component.literal(getPath().substring(getPath().lastIndexOf("."))), Minecraft.getInstance().screen, (ListValue<String>) this)
-                        ))
-                .size(width, height)
-                .tooltip(Tooltip.create(Component.literal(getComment())))
-                .build();
+            return new Button(
+                0, 0, width, height,
+                Component.translatable("vivecraft.options.editlist"),
+                button -> Minecraft.getInstance()
+                    .setScreen(
+                        new GuiListValueEditScreen(Component.literal(getPath().substring(getPath().lastIndexOf("."))), Minecraft.getInstance().screen, (ListValue<String>) this)
+                    ),
+                (button, poseStack, x, y) ->
+                    Minecraft.getInstance().screen.renderTooltip(poseStack, Minecraft.getInstance().font.split(Component.literal(getComment()), 200), x, y));
         }
     }
 
@@ -347,7 +355,7 @@ public class ConfigBuilder {
                 // toArray is needed here, because the button uses Objects, and the collection is of other types
                 .withValues(getValidValues().toArray())
                 .displayOnlyValue()
-                .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
+                .withTooltip((bool) -> getComment() != null ? Minecraft.getInstance().font.split(Component.literal(getComment()), 200) : null)
                 .create(0, 0, width, height, Component.empty(), (button, newValue) -> set((T) newValue));
         }
     }
@@ -389,8 +397,15 @@ public class ConfigBuilder {
                 protected void applyValue() {
                     fromNormalized(value);
                 }
+
+                @Override
+                public void renderButton(PoseStack poseStack, int x, int y, float f) {
+                    super.renderButton(poseStack, x, y, f);
+                    if (this.isHovered) {
+                        Minecraft.getInstance().screen.renderTooltip(poseStack, Minecraft.getInstance().font.split(Component.literal(getComment()), 200), x, y);
+                    }
+                }
             };
-            widget.setTooltip(Tooltip.create(Component.literal(getComment())));
             return widget;
         }
     }

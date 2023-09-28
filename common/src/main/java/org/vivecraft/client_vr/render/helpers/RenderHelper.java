@@ -4,6 +4,9 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -14,9 +17,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43C;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -45,7 +45,7 @@ public class RenderHelper {
     public static void applyVRModelView(RenderPass currentPass, PoseStack poseStack) {
         Matrix4f modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
             .getMatrix().transposed().toMCMatrix();
-        poseStack.last().pose().mul(modelView);
+        poseStack.last().pose().multiply(modelView);
         poseStack.last().normal().mul(new Matrix3f(modelView));
     }
 
@@ -171,6 +171,7 @@ public class RenderHelper {
             polyCull = true;
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
+            RenderSystem.disableTexture();
             // GlStateManager._disableLighting();
             RenderSystem.disableCull();
 
@@ -187,6 +188,7 @@ public class RenderHelper {
             }
 
             if (polyTex) {
+                RenderSystem.enableTexture();
             }
 
             if (polyLight) {

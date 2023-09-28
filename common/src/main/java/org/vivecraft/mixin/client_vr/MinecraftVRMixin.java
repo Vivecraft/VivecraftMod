@@ -257,7 +257,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
 
         // set initial resourcepacks
-        vivecraft$resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
+        vivecraft$resourcepacks = resourceManager.listPacks().map(PackResources::getName).toList();
 
         if (OptifineHelper.isOptifineLoaded() && ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
             // with optifine this texture somehow fails to load, so manually reload it
@@ -394,13 +394,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             vivecraft$drawProfiler();
             // reset that, do not draw it again on something else
             fpsPieResults = null;
-        }
-        // pre 1.19.4 toasts are not drawn in GameRenderer::render
-        if (!this.noRender) {
-            this.profiler.push("toasts");
-            this.toast.render(new PoseStack());
-            this.profiler.pop();
-        }
 
             // generate mipmaps
             // TODO: does this do anything?

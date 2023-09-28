@@ -1,5 +1,7 @@
 package org.vivecraft.mixin.client_vr.renderer.entity;
 
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -8,7 +10,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -40,7 +41,7 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
     private Quaternion cameraOrientation;
 
     @Inject(at = @At("HEAD"), method = "cameraOrientation", cancellable = true)
-    public void vivecraft$cameraOrientation(CallbackInfoReturnable<Quaternionf> cir) {
+    public void vivecraft$cameraOrientation(CallbackInfoReturnable<Quaternion> cir) {
         if (RenderPassType.isVanilla() || RenderPassType.isGuiOnly()) {
             cir.setReturnValue(cameraOrientation);
         } else {
@@ -72,7 +73,7 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
 
     @Override
     @Unique
-    public Quaternionf vivecraft$getCameraOrientationOffset(float offset) {
+    public Quaternion vivecraft$getCameraOrientationOffset(float offset) {
         if (RenderPassType.isVanilla() || RenderPassType.isGuiOnly()) {
             return cameraOrientation;
         } else {

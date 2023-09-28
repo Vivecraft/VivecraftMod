@@ -33,4 +33,8 @@ public interface PlayerExtension {
     double vivecraft$getRoomYOffsetFromPose();
 
     boolean vivecraft$getInitFromServer();
+
+    String vivecraft$getLastMsg();
+
+    void vivecraft$setLastMsg(String string);
 }

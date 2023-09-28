@@ -52,41 +52,29 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
         this.clearWidgets();
 
         if (this.isselectmode) {
-            this.addRenderableWidget(new Button.Builder(Component.translatable("gui.cancel"), (p) ->
+            this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 25, 150, 20, Component.translatable("gui.cancel"), (p) ->
             {
                 this.isselectmode = false;
                 this.reinit = true;
                 this.visibleList = null;
-            })
-                .size(150, 20)
-                .pos(this.width / 2 - 155, this.height - 25)
-                .build());
-            this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.clear"), (p) ->
+            }));
+            this.addRenderableWidget(new Button(this.width / 2 - 155, 25, 150, 20, Component.translatable("vivecraft.gui.clear"), (p) ->
             {
                 this.setKey(null);
-            })
-                .size(150, 20)
-                .pos(this.width / 2 - 155, 25)
-                .build());
+            }));
         } else {
             if (this.isShift) {
-                this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.radialmenu.mainset"), (p) ->
+                this.addRenderableWidget(new Button(this.width / 2 + 2, 30, 150, 20, Component.translatable("vivecraft.gui.radialmenu.mainset"), (p) ->
                 {
                     this.isShift = !this.isShift;
                     this.reinit = true;
-                })
-                    .size(150, 20)
-                    .pos(this.width / 2 + 2, 30)
-                    .build());
+                }));
             } else {
-                this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.radialmenu.alternateset"), (p) ->
+                this.addRenderableWidget(new Button(this.width / 2 + 2, 30, 150, 20, Component.translatable("vivecraft.gui.radialmenu.alternateset"), (p) ->
                 {
                     this.isShift = !this.isShift;
                     this.reinit = true;
-                })
-                    .size(150, 20)
-                    .pos(this.width / 2 + 2, 30)
-                    .build());
+                }));
             }
 
             super.init(options, false);
@@ -149,7 +137,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
                 }
 
                 int l1 = k1;
-                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2, i2, 20,  Component.translatable(s), (p) ->
+                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2, i2, 20, Component.translatable(s), (p) ->
                 {
                     this.selectedIndex = l1;
                     this.isselectmode = true;

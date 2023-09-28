@@ -3,6 +3,7 @@ package org.vivecraft.mixin.client_vr.renderer;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -16,7 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -167,7 +167,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
      */
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE),
-        method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V ")
+        method = "renderLevel")
     public void vivecraft$stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
         if (!RenderPassType.isVanilla()) {
             this.minecraft.getProfiler().popPush("stencil");
@@ -308,11 +308,11 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             switch (i) {
                 // pre 1.19.4, they are now separate
                 case 1011,      // IRON_DOOR_CLOSE
-                        1012,   // WOODEN_DOOR_CLOSE
-                        1013,   // WOODEN_TRAPDOOR_CLOSE
-                        1014,   // FENCE_GATE_CLOSE
-                        1036    // IRON_TRAPDOOR_CLOSE
-                        -> ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
+                    1012,   // WOODEN_DOOR_CLOSE
+                    1013,   // WOODEN_TRAPDOOR_CLOSE
+                    1014,   // FENCE_GATE_CLOSE
+                    1036    // IRON_TRAPDOOR_CLOSE
+                    -> ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
                 case 1019,      // ZOMBIE_ATTACK_WOODEN_DOOR
                     1020,   // ZOMBIE_ATTACK_IRON_DOOR
                     1021    // ZOMBIE_BREAK_WOODEN_DOOR

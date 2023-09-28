@@ -141,7 +141,7 @@ public class ServerUtil {
                             Commands.literal("add").then(
                                 Commands.argument("block", StringArgumentType.greedyString())
                                     .suggests((context, builder) -> {
-                                        for (var block : BuiltInRegistries.BLOCK.keySet()) {
+                                        for (var block : Registry.BLOCK.keySet()) {
                                             builder.suggest(block.toString());
                                         }
                                         return builder.buildFuture();

@@ -1,12 +1,11 @@
 package org.vivecraft.mixin.client_vr.multiplayer;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.client.ClientTelemetryManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -26,6 +25,7 @@ import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -39,7 +39,7 @@ public class ClientPacketListenerVRMixin {
     private Minecraft minecraft;
 
     @Inject(at = @At("TAIL"), method = "<init>")
-    public void vivecraft$init(Minecraft minecraft, Screen screen, Connection connection, ServerData serverData, GameProfile gameProfile, WorldSessionTelemetryManager worldSessionTelemetryManager, CallbackInfo ci) {
+    public void vivecraft$init(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager, CallbackInfo ci) {
         if (ClientNetworking.needsReset) {
             ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
             ClientNetworking.resetServerSettings();
@@ -77,8 +77,8 @@ public class ClientPacketListenerVRMixin {
     }
     @Inject(at = @At("TAIL"), method = "handlePlayerChat")
     public void vivecraft$chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
-        String lastMsg = ((PlayerExtension)minecraft.player).getLastMsg();
-        ((PlayerExtension)minecraft.player).setLastMsg(null);
+        String lastMsg = ((PlayerExtension)minecraft.player).vivecraft$getLastMsg();
+        ((PlayerExtension)minecraft.player).vivecraft$setLastMsg(null);
         if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundPlayerChatPacket.message().signedHeader().sender() == minecraft.player.getUUID())) {
             vivecraft$triggerHapticSound();
         }
@@ -86,8 +86,8 @@ public class ClientPacketListenerVRMixin {
 
     @Inject(at = @At("TAIL"), method = "handleSystemChat")
     public void vivecraft$chatSystem(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
-        String lastMsg = ((PlayerExtension)minecraft.player).getLastMsg();
-        ((PlayerExtension)minecraft.player).setLastMsg(null);
+        String lastMsg = ((PlayerExtension)minecraft.player).vivecraft$getLastMsg();
+        ((PlayerExtension)minecraft.player).vivecraft$setLastMsg(null);
         if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundSystemChatPacket.content().getString().contains(lastMsg))) {
             vivecraft$triggerHapticSound();
         }

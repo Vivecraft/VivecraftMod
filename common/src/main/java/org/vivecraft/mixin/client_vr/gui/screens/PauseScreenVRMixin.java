@@ -10,9 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.gui.settings.GuiQuickCommandsInGame;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -30,8 +28,8 @@ public abstract class PauseScreenVRMixin extends Screen {
         super(component);
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 4), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$addInit(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper rowHelper) {
+    @Inject(at = @At("TAIL"), method = "createPauseMenu")
+    public void vivecraft$addInit(CallbackInfo ci) {
         if (!VRState.vrEnabled) {
             return;
         }
@@ -126,14 +124,14 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 3))
-    private GuiEventListener remove(PauseScreen instance, GuiEventListener guiEventListener) {
+    private GuiEventListener vivecraft$remove(PauseScreen instance, GuiEventListener guiEventListener) {
         // Feedback button
         // don't remove, just hide, so mods that rely on it being there, still work
         ((AbstractWidget)guiEventListener).visible = !VRState.vrEnabled;
         return this.addRenderableWidget((Button)guiEventListener);
     }
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 4))
-    private GuiEventListener remove2(PauseScreen instance, GuiEventListener guiEventListener) {
+    private GuiEventListener vivecraft$remove2(PauseScreen instance, GuiEventListener guiEventListener) {
         // report bugs button
         // don't remove, just hide, so mods that rely on it being there, still work
         ((AbstractWidget)guiEventListener).visible = !VRState.vrEnabled;
@@ -146,7 +144,7 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
     @ModifyConstant(method = "render", constant = @Constant(intValue = 40))
-    private int moveTitleUp(int constant) {
+    private int vivecraft$moveTitleUp(int constant) {
         return (VRState.vrEnabled && (!ClientDataHolderVR.getInstance().vrSettings.seated || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY)) ? 16 : 40;
     }
 }

@@ -103,7 +103,7 @@ public class InteractTracker extends Tracker {
             this.rightClickable = new HashSet<>();
 
             String name = Xplat.getUseMethodName();
-            for (Object object : BuiltInRegistries.BLOCK) {
+            for (Object object : Registry.BLOCK) {
                 Class<?> oclass = object.getClass();
 
                 try {
