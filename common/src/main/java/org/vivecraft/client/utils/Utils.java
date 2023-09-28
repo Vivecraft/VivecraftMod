@@ -742,8 +742,7 @@ public class Utils {
         }
     }
 
-    public static com.mojang.math.Matrix4f Matrix4fFromOpenVR(HmdMatrix44 in)
-    {
+    public static com.mojang.math.Matrix4f Matrix4fFromOpenVR(HmdMatrix44 in) {
         com.mojang.math.Matrix4f matrix4f = new com.mojang.math.Matrix4f();
         matrix4f.m00 = in.m(0);
         matrix4f.m01 = in.m(1);

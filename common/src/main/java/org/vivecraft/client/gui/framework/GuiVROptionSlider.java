@@ -36,7 +36,7 @@ public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROpti
         double d0 = this.enumOptions.denormalizeValue((float) this.value);
         dataholder.vrSettings.setOptionFloatValue(this.enumOptions, (float) d0);
         // TODO check if that works right on 1.19.2
-        this.value = this.enumOptions.normalizeValue((float)d0);
+        this.value = this.enumOptions.normalizeValue((float) d0);
     }
 
     @Override

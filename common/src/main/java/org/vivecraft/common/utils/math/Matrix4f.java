@@ -190,8 +190,7 @@ public class Matrix4f {
         return new Matrix4f(vector31.x, vector31.y, vector31.z, -vector31.dot(eye), vector32.x, vector32.y, vector32.z, -vector32.dot(eye), vector3.x, vector3.y, vector3.z, -vector3.dot(eye), 0.0F, 0.0F, 0.0F, 1.0F);
     }
 
-    public com.mojang.math.Matrix4f toMCMatrix()
-    {
+    public com.mojang.math.Matrix4f toMCMatrix() {
         com.mojang.math.Matrix4f matrix4f = new com.mojang.math.Matrix4f();
         matrix4f.m00 = this.M[0][0];
         matrix4f.m01 = this.M[0][1];

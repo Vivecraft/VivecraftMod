@@ -19,9 +19,9 @@ public class IrisChunkProgramOverridesMixinSodium_0_4_8 {
     public void createAllPipelinesShadersSodium_0_4_9(IrisChunkProgramOverrides instance, SodiumTerrainPipeline sodiumTerrainPipeline, ChunkVertexType chunkVertexType) {
         try {
             ((IrisChunkProgramOverridesExtension) this).vivecraft$createAllPipelinesShadersSodiumProcessing(
-                    sodiumTerrainPipeline,
-                    chunkVertexType,
-                    instance.getClass().getMethod("createShaders", SodiumTerrainPipeline.class, ChunkVertexType.class)
+                sodiumTerrainPipeline,
+                chunkVertexType,
+                instance.getClass().getMethod("createShaders", SodiumTerrainPipeline.class, ChunkVertexType.class)
             );
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             // this shouldn't happen if everything went well

@@ -110,8 +110,7 @@ public class Convert {
             }
         }
 
-        public com.mojang.math.Matrix4f toMCMatrix4f()
-        {
+        public com.mojang.math.Matrix4f toMCMatrix4f() {
             this.needFloats();
 
             if (this.dimension == 4) {

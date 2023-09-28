@@ -29,8 +29,7 @@ public class Matrix4f extends Matrix {
         this.load(src);
     }
 
-    public Matrix4f(com.mojang.math.Matrix4f src)
-    {
+    public Matrix4f(com.mojang.math.Matrix4f src) {
         this.m00 = src.m00;
         this.m01 = src.m01;
         this.m02 = src.m02;

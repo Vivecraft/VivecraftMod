@@ -75,10 +75,11 @@ public class ClientPacketListenerVRMixin {
     public void vivecraft$cleanup(CallbackInfo ci) {
         ClientNetworking.needsReset = true;
     }
+
     @Inject(at = @At("TAIL"), method = "handlePlayerChat")
     public void vivecraft$chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
-        String lastMsg = ((PlayerExtension)minecraft.player).vivecraft$getLastMsg();
-        ((PlayerExtension)minecraft.player).vivecraft$setLastMsg(null);
+        String lastMsg = ((PlayerExtension) minecraft.player).vivecraft$getLastMsg();
+        ((PlayerExtension) minecraft.player).vivecraft$setLastMsg(null);
         if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundPlayerChatPacket.message().signedHeader().sender() == minecraft.player.getUUID())) {
             vivecraft$triggerHapticSound();
         }
@@ -86,8 +87,8 @@ public class ClientPacketListenerVRMixin {
 
     @Inject(at = @At("TAIL"), method = "handleSystemChat")
     public void vivecraft$chatSystem(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
-        String lastMsg = ((PlayerExtension)minecraft.player).vivecraft$getLastMsg();
-        ((PlayerExtension)minecraft.player).vivecraft$setLastMsg(null);
+        String lastMsg = ((PlayerExtension) minecraft.player).vivecraft$getLastMsg();
+        ((PlayerExtension) minecraft.player).vivecraft$setLastMsg(null);
         if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundSystemChatPacket.content().getString().contains(lastMsg))) {
             vivecraft$triggerHapticSound();
         }

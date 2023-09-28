@@ -50,7 +50,7 @@ public class NullVR extends MCVR {
 
     @Override
     public float[] getPlayAreaSize() {
-        return new float[]{2,2};
+        return new float[]{2, 2};
     }
 
     @Override

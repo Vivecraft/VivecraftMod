@@ -17,7 +17,7 @@ public class WinScreenVRMixin {
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"), method = "respawn")
-    private void dontClearScreenInLevel(Minecraft instance, Screen screen){
+    private void dontClearScreenInLevel(Minecraft instance, Screen screen) {
         if (Minecraft.getInstance().level == null) {
             instance.setScreen(screen);
         }

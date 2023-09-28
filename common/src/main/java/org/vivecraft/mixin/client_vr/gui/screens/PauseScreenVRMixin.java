@@ -38,7 +38,7 @@ public abstract class PauseScreenVRMixin extends Screen {
         int threshold = this.height / 4 - 16 + 120;
 
         // move every button up a bit
-        for (GuiEventListener widget: this.children()) {
+        for (GuiEventListener widget : this.children()) {
             if (widget instanceof AbstractWidget) {
                 if (((AbstractWidget) widget).y >= threshold) {
                     ((AbstractWidget) widget).y += 24;
@@ -54,8 +54,9 @@ public abstract class PauseScreenVRMixin extends Screen {
             this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 48 + -16 + offset, 98, 20, Component.translatable("vivecraft.gui.chat"), (p) ->
             {
                 this.minecraft.setScreen(new ChatScreen(""));
-                if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard)
+                if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard) {
                     KeyboardHandler.setOverlayShowing(true);
+                }
             }));
         } else {
             this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 48 + -16 + offset, 46, 20, Component.translatable("vivecraft.gui.chat"), (p) ->
@@ -127,15 +128,16 @@ public abstract class PauseScreenVRMixin extends Screen {
     private GuiEventListener vivecraft$remove(PauseScreen instance, GuiEventListener guiEventListener) {
         // Feedback button
         // don't remove, just hide, so mods that rely on it being there, still work
-        ((AbstractWidget)guiEventListener).visible = !VRState.vrEnabled;
-        return this.addRenderableWidget((Button)guiEventListener);
+        ((AbstractWidget) guiEventListener).visible = !VRState.vrEnabled;
+        return this.addRenderableWidget((Button) guiEventListener);
     }
+
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 4))
     private GuiEventListener vivecraft$remove2(PauseScreen instance, GuiEventListener guiEventListener) {
         // report bugs button
         // don't remove, just hide, so mods that rely on it being there, still work
-        ((AbstractWidget)guiEventListener).visible = !VRState.vrEnabled;
-        return this.addRenderableWidget((Button)guiEventListener);
+        ((AbstractWidget) guiEventListener).visible = !VRState.vrEnabled;
+        return this.addRenderableWidget((Button) guiEventListener);
     }
 
     // TODO this seems unneeded?

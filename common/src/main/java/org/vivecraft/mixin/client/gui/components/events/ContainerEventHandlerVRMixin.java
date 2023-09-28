@@ -12,11 +12,10 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(ContainerEventHandler.class)
 public class ContainerEventHandlerVRMixin {
 
-	@Inject(at = @At("HEAD"), method = "setInitialFocus(Lnet/minecraft/client/gui/components/events/GuiEventListener;)V", cancellable = true)
-	public void vivecraft$focus(GuiEventListener pEventListener, CallbackInfo info) {
-		if (VRState.vrRunning && !ClientDataHolderVR.getInstance().vrSettings.seated)
-		{
-			info.cancel();
-		}
-	}
+    @Inject(at = @At("HEAD"), method = "setInitialFocus(Lnet/minecraft/client/gui/components/events/GuiEventListener;)V", cancellable = true)
+    public void vivecraft$focus(GuiEventListener pEventListener, CallbackInfo info) {
+        if (VRState.vrRunning && !ClientDataHolderVR.getInstance().vrSettings.seated) {
+            info.cancel();
+        }
+    }
 }

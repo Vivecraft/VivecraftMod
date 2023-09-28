@@ -41,15 +41,14 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         return super.mouseClicked(d, e, i);
     }
 
-    public class CommandEntry extends Entry<CommandEntry>
-    {
+    public class CommandEntry extends Entry<CommandEntry> {
         private final Button btnDelete;
         public final EditBox txt;
 
         private CommandEntry(String command, GuiQuickCommandsList parent) {
             this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, Component.literal(""));
             this.txt.setValue(command);
-            this.btnDelete = new Button(0, 0, 18, 18,  Component.literal("X"), (p) ->
+            this.btnDelete = new Button(0, 0, 18, 18, Component.literal("X"), (p) ->
             {
                 this.txt.setValue("");
                 this.txt.changeFocus(true);

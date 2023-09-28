@@ -16,6 +16,7 @@ public interface GuiVROption {
         }
         return 0;
     }
+
     default int getX() {
         if (this instanceof AbstractWidget widget) {
             return widget.x;
