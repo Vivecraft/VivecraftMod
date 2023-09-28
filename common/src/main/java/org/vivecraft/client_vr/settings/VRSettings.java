@@ -1484,7 +1484,7 @@ public class VRSettings {
 
             @Override
             Float getOptionFloatValue(float value) {
-                return (float)Minecraft.getInstance().options.fov;
+                return (float) Minecraft.getInstance().options.fov;
             }
 
             @Override
@@ -1641,23 +1641,26 @@ public class VRSettings {
             }
         },
         HRTF_SELECTION(false, false) { // HRTF
+
             @Override
             String getDisplayString(String prefix, Object value) {
-                int i = (int)value;
-                if (i == -1)
+                int i = (int) value;
+                if (i == -1) {
                     return prefix + I18n.get("options.off");
-                else if (i == 0)
+                } else if (i == 0) {
                     return prefix + I18n.get("vivecraft.options.default");
-                else if (i <= ClientDataHolderVR.hrtfList.size())
+                } else if (i <= ClientDataHolderVR.hrtfList.size()) {
                     return prefix + ClientDataHolderVR.hrtfList.get(i - 1);
+                }
                 return prefix;
             }
 
             @Override
             Object setOptionValue(Object value) {
-                int i = (int)value;
-                if (++i > ClientDataHolderVR.hrtfList.size())
+                int i = (int) value;
+                if (++i > ClientDataHolderVR.hrtfList.size()) {
                     i = -1;
+                }
                 return i;
             }
 

@@ -24,9 +24,9 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -500,7 +500,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     }
 
     // the VR runtime handles the frame limit, no need to manually limit it 60fps
-    @ModifyConstant(constant = @Constant(longValue = 16), method = "doWorldLoad", expect = 0)
+    @ModifyConstant(constant = @Constant(longValue = 16), method = {
+        "doLoadLevel", // fabric
+        "doLoadLevel(Ljava/lang/String;Ljava/util/function/Function;Ljava/util/function/Function;ZLnet/minecraft/client/Minecraft$ExperimentalDialogType;Z)V" // forge
+    }, expect = 0)
     private long vivecraft$noWaitOnLevelLoadFabric(long constant) {
         if (VRState.vrRunning) {
             return 0L;

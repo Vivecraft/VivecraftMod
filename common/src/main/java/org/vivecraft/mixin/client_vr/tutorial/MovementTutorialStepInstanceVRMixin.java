@@ -68,25 +68,25 @@ public class MovementTutorialStepInstanceVRMixin {
                 return switch (buttons.size()) {
                     case 1 -> new TranslatableComponent(
                         "vivecraft.toasts.move1",
-                        Component.literal(stringArray[0]).withStyle(ChatFormatting.BOLD)
+                        new TextComponent(stringArray[0]).withStyle(ChatFormatting.BOLD)
                     );
                     case 2 -> new TranslatableComponent(
                         "vivecraft.toasts.move2",
-                        Component.literal(stringArray[0]).withStyle(ChatFormatting.BOLD),
-                        Component.literal(stringArray[1]).withStyle(ChatFormatting.BOLD)
+                        new TextComponent(stringArray[0]).withStyle(ChatFormatting.BOLD),
+                        new TextComponent(stringArray[1]).withStyle(ChatFormatting.BOLD)
                     );
                     case 3 -> new TranslatableComponent(
                         "vivecraft.toasts.move3",
-                        Component.literal(stringArray[0]).withStyle(ChatFormatting.BOLD),
-                        Component.literal(stringArray[1]).withStyle(ChatFormatting.BOLD),
-                        Component.literal(stringArray[2]).withStyle(ChatFormatting.BOLD)
+                        new TextComponent(stringArray[0]).withStyle(ChatFormatting.BOLD),
+                        new TextComponent(stringArray[1]).withStyle(ChatFormatting.BOLD),
+                        new TextComponent(stringArray[2]).withStyle(ChatFormatting.BOLD)
                     );
                     case 4 -> new TranslatableComponent(
                         "vivecraft.toasts.move4",
-                        Component.literal(stringArray[0]).withStyle(ChatFormatting.BOLD),
-                        Component.literal(stringArray[1]).withStyle(ChatFormatting.BOLD),
-                        Component.literal(stringArray[2]).withStyle(ChatFormatting.BOLD),
-                        Component.literal(stringArray[3]).withStyle(ChatFormatting.BOLD)
+                        new TextComponent(stringArray[0]).withStyle(ChatFormatting.BOLD),
+                        new TextComponent(stringArray[1]).withStyle(ChatFormatting.BOLD),
+                        new TextComponent(stringArray[2]).withStyle(ChatFormatting.BOLD),
+                        new TextComponent(stringArray[3]).withStyle(ChatFormatting.BOLD)
                     );
                     default -> new TextComponent("");
                 };

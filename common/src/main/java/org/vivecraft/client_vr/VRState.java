@@ -45,7 +45,7 @@ public class VRState {
                 dh.vrRenderer.setupRenderConfiguration();
                 RenderPassManager.setVanillaRenderPass();
             } catch (RenderConfigException renderConfigException) {
-                throw new RenderConfigException("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error.getString() + "\nVR provider: " + dh.vr.getName()));
+                throw new RenderConfigException("VR Render Error", new TranslatableComponent("vivecraft.messages.rendersetupfailed", renderConfigException.error.getString() + "\nVR provider: " + dh.vr.getName()));
             } catch (Exception e) {
                 e.printStackTrace();
             }

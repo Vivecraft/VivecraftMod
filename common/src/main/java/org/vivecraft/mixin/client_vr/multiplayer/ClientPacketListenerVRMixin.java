@@ -76,8 +76,8 @@ public class ClientPacketListenerVRMixin {
         ClientNetworking.needsReset = true;
     }
 
-    @Inject(at = @At("TAIL"), method = "handlePlayerChat")
-    public void vivecraft$chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "handleChat")
+    public void vivecraft$chat(ClientboundChatPacket clientboundChatPacket, CallbackInfo ci) {
         String lastMsg = ((PlayerExtension) minecraft.player).vivecraft$getLastMsg();
         ((PlayerExtension) minecraft.player).vivecraft$setLastMsg(null);
         if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || !clientboundChatPacket.getMessage().getString().contains(lastMsg))) {

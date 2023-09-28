@@ -10,7 +10,6 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.sounds.SoundEvent;
@@ -21,7 +20,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -144,7 +142,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @Inject(at = @At("TAIL"), method = "chat")
-    public void vivecraft$chatMsg(String string, Component component, CallbackInfo ci) {
+    public void vivecraft$chatMsg(String string, CallbackInfo ci) {
         this.vivecraft$lastMsg = string;
     }
 
@@ -160,7 +158,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Override
     @Unique
     public void vivecraft$swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact) {
-        ((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).vivecraft$setSwingType(interact);
+        ((ItemInHandRendererExtension) this.minecraft.getItemInHandRenderer()).vivecraft$setSwingType(interact);
         this.swing(interactionhand);
     }
 

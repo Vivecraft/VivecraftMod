@@ -165,7 +165,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         } else {
             throw new IllegalStateException("Unexpected vertex format " + instance.getVertexFormat());
         }
-        BufferUploader.draw(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader._endInternal(bufferBuilder);
         instance.clear();
         RenderSystem.depthMask(true);
         RenderSystem.colorMask(true, true, true, true);
@@ -245,7 +246,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
             .color(255, 255, 255, 255).endVertex();
         bufferbuilder.vertex(f4, f5, 0.0D).uv(xCropFactor, f9 - yCropFactor)
             .color(255, 255, 255, 255).endVertex();
-        BufferUploader.draw(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader._endInternal(bufferbuilder);
         instance.clear();
 
         RenderSystem.depthMask(true);

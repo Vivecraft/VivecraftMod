@@ -119,81 +119,82 @@ public class ServerUtil {
             if (!(setting.get() instanceof List)) {
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
-                    Commands.literal(setting.getPath()).then(
-                        Commands.literal("set").then(
-                            Commands.argument(argumentName, argument)
-                                .executes(context -> {
-                                    try {
-                                        Object newValue = context.getArgument(argumentName, clazz);
-                                        setting.set(newValue);
-                                        context.getSource().sendSuccess(new TextComponent("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"), true);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    return 1;
-                                })
+                        Commands.literal(setting.getPath()).then(
+                            Commands.literal("set").then(
+                                Commands.argument(argumentName, argument)
+                                    .executes(context -> {
+                                        try {
+                                            Object newValue = context.getArgument(argumentName, clazz);
+                                            setting.set(newValue);
+                                            context.getSource().sendSuccess(new TextComponent("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"), true);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                        return 1;
+                                    })
+                            )
                         )
                     ));
             } else {
                 ConfigBuilder.ConfigValue<List<? extends String>> listConfig = setting;
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
-                    Commands.literal(setting.getPath()).then(
-                        Commands.literal("add").then(
-                            Commands.argument("block", StringArgumentType.greedyString())
-                                .suggests((context, builder) -> {
-                                    for (var block : Registry.BLOCK.keySet()) {
-                                        builder.suggest(block.toString());
-                                    }
-                                    return builder.buildFuture();
-                                })
-                                .executes(context -> {
-                                    String newValue = context.getArgument("block", String.class);
-                                    List list = listConfig.get();
-                                    list.add(newValue);
-                                    listConfig.set(list);
-                                    context.getSource().sendSuccess(new TextComponent("added '" + newValue + "' to §a[" + setting.getPath() + "]§r"), true);
-                                    context.getSource().sendSuccess(new TextComponent("is now '" + setting.get()), true);
-                                    return 1;
-                                })
+                        Commands.literal(setting.getPath()).then(
+                            Commands.literal("add").then(
+                                Commands.argument("block", StringArgumentType.greedyString())
+                                    .suggests((context, builder) -> {
+                                        for (var block : Registry.BLOCK.keySet()) {
+                                            builder.suggest(block.toString());
+                                        }
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(context -> {
+                                        String newValue = context.getArgument("block", String.class);
+                                        List list = listConfig.get();
+                                        list.add(newValue);
+                                        listConfig.set(list);
+                                        context.getSource().sendSuccess(new TextComponent("added '" + newValue + "' to §a[" + setting.getPath() + "]§r"), true);
+                                        context.getSource().sendSuccess(new TextComponent("is now '" + setting.get()), true);
+                                        return 1;
+                                    })
                             )
                         )
                     ));
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
-                    Commands.literal(setting.getPath()).then(
-                        Commands.literal("remove").then(
-                            Commands.argument("block", StringArgumentType.greedyString())
-                                .suggests((context, builder) -> {
-                                    for (String block : listConfig.get()) {
-                                        builder.suggest(block);
-                                    }
-                                    return builder.buildFuture();
-                                })
-                                .executes(context -> {
-                                    String newValue = context.getArgument("block", String.class);
-                                    List<? extends String> list = listConfig.get();
-                                    list.remove(newValue);
-                                    listConfig.set(list);
-                                    context.getSource().sendSuccess(new TextComponent("removed '" + newValue + "' from §a[" + setting.getPath() + "]§r"), true);
-                                    context.getSource().sendSuccess(new TextComponent("is now '" + setting.get()), true);
-                                    return 1;
-                                })
+                        Commands.literal(setting.getPath()).then(
+                            Commands.literal("remove").then(
+                                Commands.argument("block", StringArgumentType.greedyString())
+                                    .suggests((context, builder) -> {
+                                        for (String block : listConfig.get()) {
+                                            builder.suggest(block);
+                                        }
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(context -> {
+                                        String newValue = context.getArgument("block", String.class);
+                                        List<? extends String> list = listConfig.get();
+                                        list.remove(newValue);
+                                        listConfig.set(list);
+                                        context.getSource().sendSuccess(new TextComponent("removed '" + newValue + "' from §a[" + setting.getPath() + "]§r"), true);
+                                        context.getSource().sendSuccess(new TextComponent("is now '" + setting.get()), true);
+                                        return 1;
+                                    })
                             )
                         )
                     ));
             }
             dispatcher.register(Commands.literal("vivecraft-server-config")
                 .requires(source -> source.hasPermission(4)).then(
-                Commands.literal(setting.getPath()).then(
-                    Commands.literal("reset")
-                        .executes(context -> {
-                            Object newValue = setting.reset();
-                            context.getSource().sendSuccess(new TextComponent("reset §a[" + setting.getPath() + "]§r to '" + newValue + "'"), true);
-                            return 1;
-                        })
-                )
-            ));
+                    Commands.literal(setting.getPath()).then(
+                        Commands.literal("reset")
+                            .executes(context -> {
+                                Object newValue = setting.reset();
+                                context.getSource().sendSuccess(new TextComponent("reset §a[" + setting.getPath() + "]§r to '" + newValue + "'"), true);
+                                return 1;
+                            })
+                    )
+                ));
             dispatcher.register(Commands.literal("vivecraft-server-config")
                 .requires(source -> source.hasPermission(4)).then(
                     Commands.literal(setting.getPath())

@@ -38,8 +38,8 @@ public class GuiVRControls extends GuiVROptionsBase {
         int middle = 240 / 2 - this.minecraft.font.lineHeight / 2 - 24;
         int lineHeight = this.minecraft.font.lineHeight + 3;
 
-        drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 16777215);
-        drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.2"), this.width / 2, middle, 16777215);
-        drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 16777215);
+        drawCenteredString(poseStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 16777215);
+        drawCenteredString(poseStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.controls.2"), this.width / 2, middle, 16777215);
+        drawCenteredString(poseStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 16777215);
     }
 }

@@ -137,7 +137,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
                 }
 
                 int l1 = k1;
-                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2, i2, 20, Component.translatable(s), (p) ->
+                this.addRenderableWidget(new Button(i1 + j2 - i2 / 2, j1 + k2, i2, 20, new TranslatableComponent(s), (p) ->
                 {
                     this.selectedIndex = l1;
                     this.isselectmode = true;
@@ -170,11 +170,11 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
         super.render(poseStack, pMouseX, pMouseY, pPartialTicks);
 
         if (this.visibleList == null) {
-            drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925);
+            drawCenteredString(poseStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925);
         }
 
         if (this.isShift) {
-            drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015);
+            drawCenteredString(poseStack, this.minecraft.font, new TranslatableComponent("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015);
         }
     }
 }

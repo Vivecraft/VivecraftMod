@@ -2,11 +2,7 @@ package org.vivecraft.mixin.client_vr.blaze3d.audio;
 
 import com.mojang.blaze3d.audio.Library;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.ALC10;
-import org.lwjgl.openal.ALCCapabilities;
-import org.lwjgl.openal.ALCapabilities;
-import org.lwjgl.openal.SOFTHRTF;
+import org.lwjgl.openal.*;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,10 +29,10 @@ public class LibraryVRMixin {
     private long currentDevice;
 
     @Unique
-    private boolean checkALError(String string) {
+    private boolean vivecraft$checkALError(String string) {
         int i = AL10.alGetError();
         if (i != 0) {
-            LOGGER.error("{}: {}", string, alErrorToString(i));
+            LOGGER.error("{}: {}", string, vivecraft$alErrorToString(i));
             return true;
         } else {
             return false;
@@ -44,7 +40,7 @@ public class LibraryVRMixin {
     }
 
     @Unique
-    private String alErrorToString(int i) {
+    private String vivecraft$alErrorToString(int i) {
         return switch (i) {
             case 40961 -> "Invalid name parameter.";
             case 40962 -> "Invalid enumerated parameter value.";
@@ -56,7 +52,7 @@ public class LibraryVRMixin {
     }
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/OpenAlUtil;checkALError(Ljava/lang/String;)Z", ordinal = 0, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void setHRTF(String string, CallbackInfo ci, ALCCapabilities aLCCapabilities, int i, int j, int k, ALCapabilities aLCapabilities) {
+    private void vivecraft$setHRTF(String string, CallbackInfo ci, ALCCapabilities aLCCapabilities, int i, int j, int k, ALCapabilities aLCapabilities) {
         if (!VRState.vrRunning) {
             return;
         }
@@ -103,33 +99,17 @@ public class LibraryVRMixin {
                 ((Buffer) intbuffer.put(0)).flip();
                 SOFTHRTF.alcResetDeviceSOFT(this.currentDevice, intbuffer);
 
-                if (!checkALError("HRTF initialization")) {
+                if (!vivecraft$checkALError("HRTF initialization")) {
                     LOGGER.info("HRTF initialized.");
                     int j1 = ALC10.alcGetInteger(this.currentDevice, 6547);
 
                     switch (j1) {
-                        case 0:
-                            LOGGER.info("HRTF status: disabled");
-                            break;
-
-                        case 1:
-                            LOGGER.info("HRTF status: enabled");
-                            break;
-
-                        case 2:
-                            LOGGER.info("HRTF status: denied");
-                            break;
-
-                        case 3:
-                            LOGGER.info("HRTF status: required");
-                            break;
-
-                        case 4:
-                            LOGGER.info("HRTF status: headphones detected");
-                            break;
-
-                        case 5:
-                            LOGGER.info("HRTF status: unsupported format");
+                        case 0 -> LOGGER.info("HRTF status: disabled");
+                        case 1 -> LOGGER.info("HRTF status: enabled");
+                        case 2 -> LOGGER.info("HRTF status: denied");
+                        case 3 -> LOGGER.info("HRTF status: required");
+                        case 4 -> LOGGER.info("HRTF status: headphones detected");
+                        case 5 -> LOGGER.info("HRTF status: unsupported format");
                     }
                 }
             } else {

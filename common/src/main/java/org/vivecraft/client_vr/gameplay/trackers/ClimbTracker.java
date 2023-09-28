@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -85,7 +84,7 @@ public class ClimbTracker extends Tracker {
         } else if (!i.hasTag() || !i.getTag().getBoolean("Unbreakable")) {
             return false;
         } else {
-            return i.getHoverName().getContents() instanceof TranslatableContents && ((TranslatableContents) i.getHoverName().getContents()).getKey().equals("vivecraft.item.climbclaws") || i.getHoverName().getString().equals("Climb Claws");
+            return i.getHoverName() instanceof TranslatableComponent && ((TranslatableComponent) i.getHoverName()).getKey().equals("vivecraft.item.climbclaws") || i.getHoverName().getString().equals("Climb Claws");
         }
     }
 

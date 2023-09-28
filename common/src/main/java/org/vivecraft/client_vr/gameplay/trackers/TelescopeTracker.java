@@ -46,7 +46,7 @@ public class TelescopeTracker extends Tracker {
         } else if (!i.hasTag() || !i.getTag().getBoolean("Unbreakable")) {
             return false;
         } else {
-            return i.getHoverName().getContents() instanceof TranslatableContents && ((TranslatableContents) i.getHoverName().getContents()).getKey().equals("vivecraft.item.telescope") || i.getHoverName().getString().equals("Eye of the Farseer");
+            return i.getHoverName() instanceof TranslatableComponent && ((TranslatableComponent) i.getHoverName()).getKey().equals("vivecraft.item.telescope") || i.getHoverName().getString().equals("Eye of the Farseer");
         }
     }
 

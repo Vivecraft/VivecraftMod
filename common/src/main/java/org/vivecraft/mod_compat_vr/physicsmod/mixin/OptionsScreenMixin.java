@@ -25,7 +25,7 @@ public abstract class OptionsScreenMixin extends Screen {
         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
             for (GuiEventListener guiEventListener : children()) {
                 if (guiEventListener instanceof Button button) {
-                    if (button.getMessage().getContents() instanceof TranslatableContents contents && "physicsmod.menu.main.title".equals(contents.getKey())) {
+                    if (button.getMessage() instanceof TranslatableComponent contents && "physicsmod.menu.main.title".equals(contents.getKey())) {
                         // physics mods button would collide with ours, so make it half size to the right
                         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft) {
                             button.x = button.x + button.getWidth() / 2 + 5;

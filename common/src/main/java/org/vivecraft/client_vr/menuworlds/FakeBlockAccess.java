@@ -180,7 +180,7 @@ public class FakeBlockAccess implements LevelReader {
 
     @Override
     public int getBlockTint(BlockPos blockPosIn, ColorResolver colorResolverIn) {
-        int i = Minecraft.getInstance().options.biomeBlendRadius().get();
+        int i = Minecraft.getInstance().options.biomeBlendRadius;
 
         if (i == 0) {
             return colorResolverIn.getColor(this.getBiome(blockPosIn).value(), blockPosIn.getX(), blockPosIn.getZ());

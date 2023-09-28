@@ -42,7 +42,7 @@ public class KeyboardInputVRMixin extends Input {
     }
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
-    public void vivecraft$tick(boolean isSneaking, float sneakSpeed, CallbackInfo ci) {
+    public void vivecraft$tick(boolean isSneaking, CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
         }

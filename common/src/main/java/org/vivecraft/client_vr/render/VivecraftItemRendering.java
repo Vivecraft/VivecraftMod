@@ -57,9 +57,7 @@ public class VivecraftItemRendering {
                         rendertype = VivecraftItemTransformType.Bow_Roomscale;
                     }
                 }
-            }
-            else if (item instanceof SwordItem || pStack.is(ItemTags.VIVECRAFT_SWORDS))
-            {
+            } else if (item instanceof SwordItem || pStack.is(ItemTags.VIVECRAFT_SWORDS)) {
                 rendertype = VivecraftItemTransformType.Sword;
             } else if (item instanceof ShieldItem || pStack.is(ItemTags.VIVECRAFT_SHIELDS)) {
                 rendertype = VivecraftItemTransformType.Shield;

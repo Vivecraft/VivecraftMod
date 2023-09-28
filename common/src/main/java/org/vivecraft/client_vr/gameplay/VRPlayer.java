@@ -252,7 +252,7 @@ public class VRPlayer {
         }
     }
 
-    public void tick(LocalPlayer player, Minecraft mc, RandomSource rand) {
+    public void tick(LocalPlayer player, Minecraft mc, Random rand) {
         if (((PlayerExtension) player).vivecraft$getInitFromServer()) {
             if (!this.initdone) {
                 System.out.println("<Debug info start>");
@@ -285,13 +285,13 @@ public class VRPlayer {
 
                 if (entity instanceof AbstractHorse abstracthorse) {
 
-                    if (abstracthorse.isControlledByLocalInstance() && abstracthorse.isSaddled() && !dh.horseTracker.isActive(mc.player)) {
+                    if (abstracthorse.canBeControlledByRider() && abstracthorse.isSaddled() && !dh.horseTracker.isActive(mc.player)) {
                         abstracthorse.yBodyRot = this.vrdata_world_pre.getBodyYaw();
                         dh.vehicleTracker.rotationCooldown = 10;
                     }
                 } else if (entity instanceof Mob mob) {
 
-                    if (mob.isControlledByLocalInstance()) {
+                    if (mob.canBeControlledByRider()) {
                         mob.yBodyRot = this.vrdata_world_pre.getBodyYaw();
                         dh.vehicleTracker.rotationCooldown = 10;
                     }

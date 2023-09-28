@@ -1,22 +1,21 @@
 package org.vivecraft.mixin.server;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.Util;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -46,8 +45,8 @@ public abstract class ServerPlayerMixin extends Player {
     @Final
     public MinecraftServer server;
 
-    public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile, ProfilePublicKey profilePublicKey) {
-        super(level, blockPos, f, gameProfile, profilePublicKey);
+    public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
+        super(level, blockPos, f, gameProfile);
     }
 
     @Inject(at = @At("TAIL"), method = "initInventoryMenu")
@@ -56,10 +55,10 @@ public abstract class ServerPlayerMixin extends Player {
         if (ServerConfig.vrFun.get() && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
             ItemStack itemstack;
             if (this.random.nextInt(2) == 1) {
-                itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
+                itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(new TextComponent("EAT ME"));
             } else {
                 itemstack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)
-                    .setHoverName(Component.literal("DRINK ME"));
+                    .setHoverName(new TextComponent("DRINK ME"));
             }
 
             itemstack.getTag().putInt("HideFlags", 32);
@@ -219,7 +218,7 @@ public abstract class ServerPlayerMixin extends Player {
             }
             if (blockedDamage) {
                 if (ServerConfig.pvpNotifyBlockedDamage.get()) {
-                    other.sendSystemMessage(Component.literal(blockedDamageCase));
+                    other.sendMessage(new TextComponent(blockedDamageCase), ChatType.SYSTEM, Util.NIL_UUID);
                 }
                 cir.setReturnValue(false);
             }

@@ -185,7 +185,7 @@ public abstract class GuiVROptionsBase extends Screen {
             this.visibleList.render(poseStack, pMouseX, pMouseY, pPartialTicks);
         }
 
-        drawCenteredString(poseStack, this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 16777215);
+        drawCenteredString(poseStack, this.font, new TranslatableComponent(this.vrTitle), this.width / 2, 15, 16777215);
 
         if (this.btnDefaults != null) {
             this.btnDefaults.visible = this.drawDefaultButtons;

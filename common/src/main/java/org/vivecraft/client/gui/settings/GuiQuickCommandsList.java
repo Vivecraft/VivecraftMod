@@ -46,7 +46,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         private CommandEntry(String command, GuiQuickCommandsList parent) {
             this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, new TextComponent(""));
             this.txt.setValue(command);
-            this.btnDelete = new Button(0, 0, 18, 18, Component.literal("X"), (p) ->
+            this.btnDelete = new Button(0, 0, 18, 18, new TextComponent("X"), (p) ->
             {
                 this.txt.setValue("");
                 this.txt.changeFocus(true);

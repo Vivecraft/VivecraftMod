@@ -129,7 +129,8 @@ public class VRArmHelper {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         tesselator.getBuilder().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
         RenderHelper.renderBox(tesselator, start, end, -0.02F, 0.02F, -0.0125F, 0.0125F, color, alpha, poseStack);
-        BufferUploader.drawWithShader(tesselator.getBuilder().end());
+        tesselator.getBuilder().end();
+        BufferUploader.end(tesselator.getBuilder());
         poseStack.popPose();
         RenderSystem.depthFunc(GL11C.GL_LEQUAL);
     }

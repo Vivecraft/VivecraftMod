@@ -57,7 +57,7 @@ public class VehicleTracker extends Tracker {
         if (!(entity instanceof AbstractHorse) && !(entity instanceof Boat)) {
             if (entity instanceof Mob mob) {
 
-                if (mob.isControlledByLocalInstance()) {
+                if (mob.canBeControlledByRider()) {
                     int i = (player.getMainHandItem().getItem() instanceof FoodOnAStickItem || player.getMainHandItem().is(ItemTags.VIVECRAFT_FOOD_STICKS)) ? 0 : 1;
                     VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_world_pre.getController(i);
                     return vrdata$vrdevicepose.getPosition().add(vrdata$vrdevicepose.getDirection().scale(0.3D)).subtract(entity.position()).normalize();
@@ -92,14 +92,14 @@ public class VehicleTracker extends Tracker {
 
                 if (entity instanceof AbstractHorse abstracthorse && !this.dh.horseTracker.isActive(this.mc.player)) {
 
-                    if (abstracthorse.isControlledByLocalInstance() && abstracthorse.isSaddled()) {
+                    if (abstracthorse.canBeControlledByRider() && abstracthorse.isSaddled()) {
                         return;
                     }
 
                     this.rotationTarget = abstracthorse.yBodyRot;
                 } else if (entity instanceof Mob mob) {
 
-                    if (mob.isControlledByLocalInstance()) {
+                    if (mob.canBeControlledByRider()) {
                         return;
                     }
 

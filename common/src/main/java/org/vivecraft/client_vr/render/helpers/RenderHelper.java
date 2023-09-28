@@ -265,7 +265,8 @@ public class RenderHelper {
             .color(color[0], color[1], color[2], color[3])
             .normal(0.0F, 0.0F, 1.0F)
             .endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
     }
 
     public static void drawSizedQuad(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
@@ -291,7 +292,8 @@ public class RenderHelper {
             .vertex(pMatrix, (-(size / 2.0F)), (size * aspect / 2.0F), 0)
             .uv(0.0F, 1.0F)
             .endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
@@ -350,7 +352,8 @@ public class RenderHelper {
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
             .normal(0, 0, 1)
             .endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
 
         mc.gameRenderer.lightTexture().turnOffLightLayer();
 

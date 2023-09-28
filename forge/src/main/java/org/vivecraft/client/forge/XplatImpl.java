@@ -72,7 +72,7 @@ public class XplatImpl {
     }
 
     public static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
-        return ((BiomeAccessor)(Object)biome).getClimateSettings();
+        return ((BiomeAccessor) (Object) biome).getClimateSettings();
     }
 
     public static BiomeSpecialEffects getBiomeEffects(Biome biome) {

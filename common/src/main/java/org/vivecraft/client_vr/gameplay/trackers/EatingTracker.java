@@ -43,7 +43,7 @@ public class EatingTracker extends Tracker {
             if (p.getMainHandItem() != null) {
                 UseAnim useanim = p.getMainHandItem().getUseAnimation();
 
-                if (useanim == UseAnim.EAT || useanim == UseAnim.DRINK || useanim == UseAnim.TOOT_HORN) {
+                if (useanim == UseAnim.EAT || useanim == UseAnim.DRINK) {
                     return true;
                 }
             }
@@ -51,7 +51,7 @@ public class EatingTracker extends Tracker {
             if (p.getOffhandItem() != null) {
                 UseAnim useanim1 = p.getOffhandItem().getUseAnimation();
 
-                return useanim1 == UseAnim.EAT || useanim1 == UseAnim.DRINK || useanim1 == UseAnim.TOOT_HORN;
+                return useanim1 == UseAnim.EAT || useanim1 == UseAnim.DRINK;
             }
 
             return false;
@@ -87,8 +87,6 @@ public class EatingTracker extends Tracker {
                     }
                 } else if (itemstack.getUseAnimation() == UseAnim.EAT) {
                     crunchiness = 2;
-                } else if (itemstack.getUseAnimation() == UseAnim.TOOT_HORN) {
-                    crunchiness = 1;
                 } else {
                     continue;
                 }
@@ -96,7 +94,7 @@ public class EatingTracker extends Tracker {
                 if (!this.eating[c]) {
                     //Minecraft.getInstance().physicalGuiManager.preClickAction();
 
-                    if (this.mc.gameMode.useItem(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).consumesAction()) {
+                    if (this.mc.gameMode.useItem(player, player.level, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).consumesAction()) {
                         this.mc.gameRenderer.itemInHandRenderer.itemUsed(c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                         this.eating[c] = true;
                         this.eatStart = Util.getMillis();

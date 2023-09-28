@@ -13,6 +13,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.Vec3;
@@ -302,7 +303,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     @Inject(at = @At("HEAD"), method = "levelEvent")
-    public void vivecraft$shakeOnSound(int i, BlockPos blockPos, int j, CallbackInfo ci) {
+    public void vivecraft$shakeOnSound(Player player, int i, BlockPos blockPos, int j, CallbackInfo ci) {
         boolean playerNearAndVR = VRState.vrRunning && this.minecraft.player != null && this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(blockPos) < 25.0D;
         if (playerNearAndVR) {
             switch (i) {

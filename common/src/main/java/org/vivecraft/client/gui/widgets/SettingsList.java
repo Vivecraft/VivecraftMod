@@ -12,6 +12,8 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.server.config.ConfigBuilder;
 
 import java.util.Collections;
@@ -93,10 +95,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             super(name, valueWidget);
 
             this.canReset = () -> !configValue.isDefault();
-            this.resetButton = new Button(0, 0, 20, 20, Component.literal("X"), button -> {
+            this.resetButton = new Button(0, 0, 20, 20, new TextComponent("X"), button -> {
                 configValue.reset();
                 this.valueWidget = configValue.getWidget(valueWidget.getWidth(), valueWidget.getHeight());
-            }, (button, poseStack, x, y) -> Minecraft.getInstance().screen.renderTooltip(poseStack, Component.translatable("controls.reset"), x, y));
+            }, (button, poseStack, x, y) -> Minecraft.getInstance().screen.renderTooltip(poseStack, new TranslatableComponent("controls.reset"), x, y));
         }
 
         @Override
