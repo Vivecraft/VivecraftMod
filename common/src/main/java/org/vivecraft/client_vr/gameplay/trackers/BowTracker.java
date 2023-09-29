@@ -20,7 +20,8 @@ import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 
-import static org.joml.Math.*;
+import static org.joml.Math.acos;
+import static org.joml.Math.toDegrees;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
 import static org.vivecraft.common.utils.Utils.convertToVector3f;

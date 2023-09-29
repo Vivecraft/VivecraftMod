@@ -114,7 +114,7 @@ public class VivecraftItemRendering {
         Quaternionf rotation = new Quaternionf().rotationY(0.0F).rotateX(toRadians(-110.0F + gunAngle));
         Quaternionf preRotation = new Quaternionf().rotationY(0.0F);
 
-        switch (rendertype){
+        switch (rendertype) {
             case Bow_Seated -> {
                 translateY -= 0.1F;
                 translateZ += 0.1F;
@@ -358,7 +358,8 @@ public class VivecraftItemRendering {
                 translateY = 0.0F;
                 translateX = 0.0F;
             }
-            case Item, Block_Item, Sword -> {}
+            case Item, Block_Item, Sword -> {
+            }
             default -> {
                 rotation.rotationZ(toRadians(180.0F));
                 rotation.rotateX(toRadians(-135.0F));

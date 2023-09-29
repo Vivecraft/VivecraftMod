@@ -250,10 +250,18 @@ public class FakeBlockAccess implements net.minecraft.world.level.LevelReader {
             return flag ? 0.9F : 1.0F;
         } else {
             return switch (face) {
-                case DOWN -> { yield flag ? 0.9F : 0.5F; }
-                case UP -> { yield flag ? 0.9F : 1.0F; }
-                case NORTH, SOUTH -> { yield 0.8F; }
-                case WEST, EAST -> { yield 0.6F; }
+                case DOWN -> {
+                    yield flag ? 0.9F : 0.5F;
+                }
+                case UP -> {
+                    yield flag ? 0.9F : 1.0F;
+                }
+                case NORTH, SOUTH -> {
+                    yield 0.8F;
+                }
+                case WEST, EAST -> {
+                    yield 0.6F;
+                }
             };
         }
     }

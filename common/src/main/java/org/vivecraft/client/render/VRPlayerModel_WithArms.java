@@ -13,7 +13,6 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.VRPlayersClient.RotInfo;
@@ -106,7 +105,8 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
     }
 
 
-    @Override @Nonnull
+    @Override
+    @Nonnull
     protected Iterable<ModelPart> bodyParts() {
         return ImmutableList.of(this.body, this.leftHand, this.rightHand, this.leftShoulder, this.rightShoulder, this.leftShoulder_sleeve, this.rightShoulder_sleeve, this.rightLeg, this.leftLeg, this.hat, this.leftPants, this.rightPants, this.leftSleeve, this.rightSleeve, this.jacket);
     }
@@ -215,7 +215,8 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         this.leftHand.visible = pVisible;
     }
 
-    @Override @Nonnull
+    @Override
+    @Nonnull
     protected ModelPart getArm(HumanoidArm pSide) {
         return pSide == HumanoidArm.LEFT ? this.leftHand : this.rightHand;
     }

@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -50,22 +51,22 @@ public class OptionsScreenVRMixin extends Screen {
     }
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vivecraft$addVivecraftSettingsLeft(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+    private void vivecraft$addVivecraftSettingsLeft(CallbackInfo ci, GridLayout gridLayout, RowHelper rowHelper) {
         if (dh.vrSettings.vrSettingsButtonEnabled && dh.vrSettings.vrSettingsButtonPositionLeft) {
             this.vivecraft$addVivecraftButton(rowHelper);
         }
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vivecraft$addVivecraftSettingsRight(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void vivecraft$addVivecraftSettingsRight(CallbackInfo ci, GridLayout gridLayout, RowHelper rowHelper) {
         if (dh.vrSettings.vrSettingsButtonEnabled && !dh.vrSettings.vrSettingsButtonPositionLeft) {
             this.vivecraft$addVivecraftButton(rowHelper);
         }
     }
 
     @Unique
-    private void vivecraft$addVivecraftButton(GridLayout.RowHelper rowHelper) {
-        rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
+    private void vivecraft$addVivecraftButton(RowHelper rowHelper) {
+        rowHelper.addChild(new Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
         {
             mc.options.save();
             mc.setScreen(new GuiMainVRSettings(this));

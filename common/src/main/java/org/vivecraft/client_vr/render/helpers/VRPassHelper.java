@@ -133,7 +133,7 @@ public class VRPassHelper {
 
                     if (hurtTimer > 0.0F) { // hurt flash
                         hurtTimer = hurtTimer / mc.player.hurtDuration;
-                        hurtTimer = fma(sin((float)pow(hurtTimer, 4) * (float)PI), 0.5F, healthPercent);
+                        hurtTimer = fma(sin((float) pow(hurtTimer, 4) * (float) PI), 0.5F, healthPercent);
                         red = hurtTimer;
                     } else if (dh.vrSettings.low_health_indicator) { // red due to low health
                         red = healthPercent * abs(sin((2.5F * time) / (1.0F - healthPercent + 0.1F)));

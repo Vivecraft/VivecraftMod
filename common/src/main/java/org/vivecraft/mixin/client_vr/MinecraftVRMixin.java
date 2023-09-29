@@ -11,7 +11,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Timer;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
@@ -85,11 +84,13 @@ import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.client.Minecraft.ON_OSX;
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_CURSOR_DISABLED;
+import static org.lwjgl.glfw.GLFW.GLFW_CURSOR_NORMAL;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.PUTSTATIC;
 import static org.vivecraft.client.utils.Utils.*;
@@ -174,7 +175,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             target = "Lnet/minecraft/client/Minecraft;instance:Lnet/minecraft/client/Minecraft;"
         )
     )
-    private void vivecraft$captureMinecraftInstance(Minecraft value, Operation<Void> original){
+    private void vivecraft$captureMinecraftInstance(Minecraft value, Operation<Void> original) {
         original.call(mc = value); // Assign early to ensure subsequent accesses are safe.
     }
 
@@ -186,7 +187,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             target = "Lnet/minecraft/client/Minecraft;mainRenderTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;"
         )
     )
-    private void vivecraft$captureMainRenderTarget(Minecraft instance, RenderTarget value, Operation<RenderTarget> original){
+    private void vivecraft$captureMainRenderTarget(Minecraft instance, RenderTarget value, Operation<RenderTarget> original) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) value);
         original.call(instance, value);
     }
@@ -257,7 +258,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (vrEnabled) {
             initializeVR();
         } else if (vrInitialized) {
-            vivecraft$switchVRState(false);
+            this.vivecraft$switchVRState(false);
             destroyVR(true);
         }
         if (!vrInitialized) {
@@ -265,7 +266,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
         boolean vrActive = !dh.vrSettings.vrHotswitchingEnabled || dh.vr.isActive();
         if (vrRunning != vrActive && (ClientNetworking.serverAllowsVrSwitching || instance.player == null)) {
-            vivecraft$switchVRState(vrActive);
+            this.vivecraft$switchVRState(vrActive);
         }
         if (vrRunning) {
             ++dh.frameIndex;
@@ -343,7 +344,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 4, shift = At.Shift.AFTER), method = "runTick", locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 4, shift = Shift.AFTER), method = "runTick", locals = LocalCapture.CAPTURE_FAILHARD)
     public void vivecraft$renderVRPasses(boolean renderLevel, CallbackInfo ci, long nanoTime) {
         if (vrRunning) {
 
@@ -403,12 +404,24 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 dh.currentPass = renderpass;
 
                 switch (renderpass) {
-                    case LEFT, RIGHT -> { RenderPassManager.setWorldRenderPass(WorldRenderPass.stereoXR); }
-                    case CENTER -> { RenderPassManager.setWorldRenderPass(WorldRenderPass.center); }
-                    case THIRD -> { RenderPassManager.setWorldRenderPass(WorldRenderPass.mixedReality); }
-                    case SCOPEL -> { RenderPassManager.setWorldRenderPass(WorldRenderPass.leftTelescope); }
-                    case SCOPER -> { RenderPassManager.setWorldRenderPass(WorldRenderPass.rightTelescope); }
-                    case CAMERA -> { RenderPassManager.setWorldRenderPass(WorldRenderPass.camera); }
+                    case LEFT, RIGHT -> {
+                        RenderPassManager.setWorldRenderPass(WorldRenderPass.stereoXR);
+                    }
+                    case CENTER -> {
+                        RenderPassManager.setWorldRenderPass(WorldRenderPass.center);
+                    }
+                    case THIRD -> {
+                        RenderPassManager.setWorldRenderPass(WorldRenderPass.mixedReality);
+                    }
+                    case SCOPEL -> {
+                        RenderPassManager.setWorldRenderPass(WorldRenderPass.leftTelescope);
+                    }
+                    case SCOPER -> {
+                        RenderPassManager.setWorldRenderPass(WorldRenderPass.rightTelescope);
+                    }
+                    case CAMERA -> {
+                        RenderPassManager.setWorldRenderPass(WorldRenderPass.camera);
+                    }
                 }
 
                 this.profiler.push("Eye:" + renderpass);
@@ -420,10 +433,18 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
                 if (dh.grabScreenShot &&
                     switch (renderpass) {
-                        case CAMERA, CENTER -> { yield list.contains(renderpass); }
-                        case LEFT -> { yield dh.vrSettings.displayMirrorLeftEye; }
-                        case RIGHT -> { yield !dh.vrSettings.displayMirrorLeftEye; }
-                        default -> { yield false; }
+                        case CAMERA, CENTER -> {
+                            yield list.contains(renderpass);
+                        }
+                        case LEFT -> {
+                            yield dh.vrSettings.displayMirrorLeftEye;
+                        }
+                        case RIGHT -> {
+                            yield !dh.vrSettings.displayMirrorLeftEye;
+                        }
+                        default -> {
+                            yield false;
+                        }
                     }
                 ) {
                     instance.mainRenderTarget.unbindWrite();
@@ -509,12 +530,20 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;rightClickDelay:I", shift = Shift.AFTER, opcode = PUTFIELD), method = "startUseItem()V")
     public void vivecraft$breakDelay(CallbackInfo info) {
         if (vrRunning) {
-            switch (dh.vrSettings.rightclickDelay) {
-                case SLOW -> { this.rightClickDelay = 6; }
-                case SLOWER -> { this.rightClickDelay = 8; }
-                case SLOWEST -> { this.rightClickDelay = 10; }
-                default -> { this.rightClickDelay = 4; }
-            }
+            this.rightClickDelay = switch (dh.vrSettings.rightclickDelay) {
+                case SLOW -> {
+                     yield 6;
+                }
+                case SLOWER -> {
+                    yield 8;
+                }
+                case SLOWEST -> {
+                    yield 10;
+                }
+                default -> {
+                    yield 4;
+                }
+            };
         }
     }
 
@@ -902,9 +931,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 left = width; // setup for eye1
                 yield dh.vrRenderer.framebufferEye1;
             }
-            case FIRST_PERSON -> { yield dh.vrRenderer.framebufferUndistorted; }
-            case THIRD_PERSON -> { yield dh.vrRenderer.framebufferMR; }
-            case GUI -> { yield GuiHandler.guiFramebuffer; }
+            case FIRST_PERSON -> {
+                yield dh.vrRenderer.framebufferUndistorted;
+            }
+            case THIRD_PERSON -> {
+                yield dh.vrRenderer.framebufferMR;
+            }
+            case GUI -> {
+                yield GuiHandler.guiFramebuffer;
+            }
             case OFF -> {
                 if (dh.vr.isHMDTracking()) {
                     this.vivecraft$notifyMirror("Mirror is OFF", true, 1000);

@@ -54,7 +54,7 @@ public abstract class TitleScreenMixin extends net.minecraft.client.gui.screens.
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 72)
             .build();
-        vivecraft$vrModeButton.visible = dh.vrSettings.vrToggleButtonEnabled;
+        this.vivecraft$vrModeButton.visible = dh.vrSettings.vrToggleButtonEnabled;
 
         this.addRenderableWidget(this.vivecraft$vrModeButton);
 
@@ -72,7 +72,7 @@ public abstract class TitleScreenMixin extends net.minecraft.client.gui.screens.
     public void vivecraft$renderToolTip(GuiGraphics guiGraphics, int i, int j, float f, CallbackInfo ci) {
         this.vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
-        if (vivecraft$vrModeButton.visible && this.vivecraft$vrModeButton.isMouseOver(i, j)) {
+        if (this.vivecraft$vrModeButton.visible && this.vivecraft$vrModeButton.isMouseOver(i, j)) {
             guiGraphics.renderTooltip(this.font, this.font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), max(this.width / 2 - 43, 170)), i, j);
         }
         if (vrInitialized && !vrRunning) {

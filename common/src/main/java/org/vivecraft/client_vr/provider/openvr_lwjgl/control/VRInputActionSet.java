@@ -27,10 +27,18 @@ public enum VRInputActionSet {
 
     public static VRInputActionSet fromKeyBinding(KeyMapping keyMapping) {
         return switch (keyMapping.getCategory()) {
-            case "vivecraft.key.category.gui" -> { yield GUI; }
-            case "vivecraft.key.category.climbey" -> { yield CONTEXTUAL; }
-            case "vivecraft.key.category.keyboard" -> { yield KEYBOARD; }
-            default -> { yield VivecraftVRMod.isModBinding(keyMapping) ? MOD : INGAME; }
+            case "vivecraft.key.category.gui" -> {
+                yield GUI;
+            }
+            case "vivecraft.key.category.climbey" -> {
+                yield CONTEXTUAL;
+            }
+            case "vivecraft.key.category.keyboard" -> {
+                yield KEYBOARD;
+            }
+            default -> {
+                yield VivecraftVRMod.isModBinding(keyMapping) ? MOD : INGAME;
+            }
         };
     }
 }

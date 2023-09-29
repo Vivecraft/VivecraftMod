@@ -1,14 +1,14 @@
 {
-    "required": true,
-    "package": "org.vivecraft.mod_compat_vr.optifine.mixin",
-    "plugin": "org.vivecraft.MixinConfig",
-    "compatibilityLevel": "JAVA_17",
-    "client": [
-        "OptifineGamerRendererVRMixin",
-        "ShadersRenderVRMixin",
-        "ShadersVRMixin"
-    ],
-    "minVersion": "0.8.4",
-    "mixins": [
-    ]
+  "required": true,
+  "package": "org.vivecraft.mod_compat_vr.optifine.mixin",
+  "plugin": "org.vivecraft.MixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "OptifineGamerRendererVRMixin",
+    "ShadersRenderVRMixin",
+    "ShadersVRMixin"
+  ],
+  "minVersion": "0.8.4",
+  "mixins": [
+  ]
 }

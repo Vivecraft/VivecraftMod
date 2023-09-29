@@ -81,6 +81,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Shadow
     protected abstract void updateAutoJump(float f, float g);
 
+    @Override
     @Shadow
     public abstract void swing(InteractionHand interactionHand);
 

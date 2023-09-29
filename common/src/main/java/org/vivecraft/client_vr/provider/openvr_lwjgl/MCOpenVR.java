@@ -125,28 +125,72 @@ public class MCOpenVR extends MCVR {
 
     static String getInputErrorName(int code) {
         return switch (code) {
-            case EVRInputError_VRInputError_None -> { yield "None"; }
-            case EVRInputError_VRInputError_NameNotFound -> { yield "NameNotFound"; }
-            case EVRInputError_VRInputError_WrongType -> { yield "WrongType"; }
-            case EVRInputError_VRInputError_InvalidHandle -> { yield "InvalidHandle"; }
-            case EVRInputError_VRInputError_InvalidParam -> { yield "InvalidParam"; }
-            case EVRInputError_VRInputError_NoSteam -> { yield "NoSteam"; }
-            case EVRInputError_VRInputError_MaxCapacityReached -> { yield "MaxCapacityReached"; }
-            case EVRInputError_VRInputError_IPCError -> { yield "IPCError"; }
-            case EVRInputError_VRInputError_NoActiveActionSet -> { yield "NoActiveActionSet"; }
-            case EVRInputError_VRInputError_InvalidDevice -> { yield "InvalidDevice"; }
-            case EVRInputError_VRInputError_InvalidSkeleton -> { yield "InvalidSkeleton"; }
-            case EVRInputError_VRInputError_InvalidBoneCount -> { yield "InvalidBoneCount"; }
-            case EVRInputError_VRInputError_InvalidCompressedData -> { yield "InvalidCompressedData"; }
-            case EVRInputError_VRInputError_NoData -> { yield "NoData"; }
-            case EVRInputError_VRInputError_BufferTooSmall -> { yield "BufferTooSmall"; }
-            case EVRInputError_VRInputError_MismatchedActionManifest -> { yield "MismatchedActionManifest"; }
-            case EVRInputError_VRInputError_MissingSkeletonData -> { yield "MissingSkeletonData"; }
-            case EVRInputError_VRInputError_InvalidBoneIndex -> { yield "InvalidBoneIndex"; }
-            case EVRInputError_VRInputError_InvalidPriority -> { yield "InvalidPriority"; }
-            case EVRInputError_VRInputError_PermissionDenied -> { yield "PermissionDenied"; }
-            case EVRInputError_VRInputError_InvalidRenderModel -> { yield "InvalidRenderModel"; }
-            default -> { yield "Unknown"; }
+            case EVRInputError_VRInputError_None -> {
+                yield "None";
+            }
+            case EVRInputError_VRInputError_NameNotFound -> {
+                yield "NameNotFound";
+            }
+            case EVRInputError_VRInputError_WrongType -> {
+                yield "WrongType";
+            }
+            case EVRInputError_VRInputError_InvalidHandle -> {
+                yield "InvalidHandle";
+            }
+            case EVRInputError_VRInputError_InvalidParam -> {
+                yield "InvalidParam";
+            }
+            case EVRInputError_VRInputError_NoSteam -> {
+                yield "NoSteam";
+            }
+            case EVRInputError_VRInputError_MaxCapacityReached -> {
+                yield "MaxCapacityReached";
+            }
+            case EVRInputError_VRInputError_IPCError -> {
+                yield "IPCError";
+            }
+            case EVRInputError_VRInputError_NoActiveActionSet -> {
+                yield "NoActiveActionSet";
+            }
+            case EVRInputError_VRInputError_InvalidDevice -> {
+                yield "InvalidDevice";
+            }
+            case EVRInputError_VRInputError_InvalidSkeleton -> {
+                yield "InvalidSkeleton";
+            }
+            case EVRInputError_VRInputError_InvalidBoneCount -> {
+                yield "InvalidBoneCount";
+            }
+            case EVRInputError_VRInputError_InvalidCompressedData -> {
+                yield "InvalidCompressedData";
+            }
+            case EVRInputError_VRInputError_NoData -> {
+                yield "NoData";
+            }
+            case EVRInputError_VRInputError_BufferTooSmall -> {
+                yield "BufferTooSmall";
+            }
+            case EVRInputError_VRInputError_MismatchedActionManifest -> {
+                yield "MismatchedActionManifest";
+            }
+            case EVRInputError_VRInputError_MissingSkeletonData -> {
+                yield "MissingSkeletonData";
+            }
+            case EVRInputError_VRInputError_InvalidBoneIndex -> {
+                yield "InvalidBoneIndex";
+            }
+            case EVRInputError_VRInputError_InvalidPriority -> {
+                yield "InvalidPriority";
+            }
+            case EVRInputError_VRInputError_PermissionDenied -> {
+                yield "PermissionDenied";
+            }
+            case EVRInputError_VRInputError_InvalidRenderModel -> {
+                yield "InvalidRenderModel";
+            }
+            default -> {
+                yield "Unknown";
+            }
         };
     }
 
@@ -955,8 +999,12 @@ public class MCOpenVR extends MCVR {
                     EVREventType_VREvent_TrackedDeviceDeactivated,
                     EVREventType_VREvent_TrackedDeviceUpdated,
                     EVREventType_VREvent_TrackedDeviceRoleChanged,
-                    EVREventType_VREvent_ModelSkinSettingsHaveChanged -> { this.getXforms = true; }
-                case EVREventType_VREvent_Quit -> { mc.stop(); }
+                    EVREventType_VREvent_ModelSkinSettingsHaveChanged -> {
+                    this.getXforms = true;
+                }
+                case EVREventType_VREvent_Quit -> {
+                    mc.stop();
+                }
             }
         }
     }

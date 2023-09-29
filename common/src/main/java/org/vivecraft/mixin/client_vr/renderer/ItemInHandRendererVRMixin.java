@@ -129,7 +129,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
             dh.isfphand = true;
 
-            switch (rendertype){
+            switch (rendertype) {
                 case Map -> {
                     RenderSystem.disableCull();
                     this.renderMap(pMatrixStack, pBuffer, pCombinedLight, pStack);

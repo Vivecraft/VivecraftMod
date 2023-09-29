@@ -95,6 +95,7 @@ public abstract class EntityRenderDispatcherVRMixin implements
         }
     }
 
+    @Override
     public Map<String, VRArmRenderer> vivecraft$getArmSkinMap() {
         return this.vivecraft$armSkinMap;
     }

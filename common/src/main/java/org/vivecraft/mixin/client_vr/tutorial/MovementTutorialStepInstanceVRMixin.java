@@ -99,22 +99,24 @@ public class MovementTutorialStepInstanceVRMixin {
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 0), index = 2, method = "tick")
     private Component vivecraft$alterMovementDescription(Component description) {
-        return (!vrRunning || dh.vrSettings.seated || !dh.vr.getInputAction(mc.options.keyJump).isActive() ?
-               description :
-               Component.translatable(
-                   "tutorial.move.description",
-                   Component.literal(
-                       dh.vr.getOriginName(dh.vr.getInputAction(mc.options.keyJump).getLastOrigin())
-                   ).withStyle(ChatFormatting.BOLD)
-               )
+        return (
+            !vrRunning || dh.vrSettings.seated || !dh.vr.getInputAction(mc.options.keyJump).isActive() ?
+            description :
+            Component.translatable(
+                    "tutorial.move.description",
+                    Component.literal(
+                        dh.vr.getOriginName(dh.vr.getInputAction(mc.options.keyJump).getLastOrigin())
+                    ).withStyle(ChatFormatting.BOLD)
+                )
         );
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V", ordinal = 1), index = 2, method = "tick")
     private Component vivecraft$alterLookDescription(Component title) {
-        return (!vrRunning || dh.vrSettings.seated ?
-                title :
-                Component.translatable(
+        return (
+            !vrRunning || dh.vrSettings.seated ?
+            title :
+            Component.translatable(
                     "vivecraft.toasts.point_controller",
                     Component.translatable(
                         dh.vrSettings.reverseHands ?

@@ -1,22 +1,22 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-        "B",
-        "S"
-    ],
-    "key": {
-        "B": {
-            "item": "minecraft:leather_boots"
-        },
-        "S": {
-            "item": "minecraft:slime_block"
-        }
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "B",
+    "S"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:leather_boots"
     },
-    "result": {
-        "item": "vivecraft:jumpboots",
-        "vanillaitem": "minecraft:leather_boots",
-        "name": "vivecraft.item.jumpboots",
-        "hideflags": 4,
-        "unbreakable": true
+    "S": {
+      "item": "minecraft:slime_block"
     }
+  },
+  "result": {
+    "item": "vivecraft:jumpboots",
+    "vanillaitem": "minecraft:leather_boots",
+    "name": "vivecraft.item.jumpboots",
+    "hideflags": 4,
+    "unbreakable": true
+  }
 }

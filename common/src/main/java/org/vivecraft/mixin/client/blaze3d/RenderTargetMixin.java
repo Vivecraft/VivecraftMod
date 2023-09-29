@@ -106,6 +106,7 @@ public abstract class RenderTargetMixin implements org.vivecraft.client.extensio
         return this.vivecraft$useStencil ? GL30C.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
     }
 
+    @Override
     public void vivecraft$blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect) {
         RenderSystem.assertOnGameThreadOrInit();
         if (!RenderSystem.isInInitPhase()) {

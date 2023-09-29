@@ -247,14 +247,9 @@ public class TeleportTracker extends Tracker {
 
         for (int j = this.movementTeleportArcSteps; j < i && !((float) (j * 4) > this.teleportEnergy); ++j) {
             Vec3 vec35 = new Vec3(vec34.x + vec33.x, vec34.y + vec33.y, vec34.z + vec33.z);
-            boolean water = (
-                dh.vrSettings.seated ?
-                ((GameRendererExtension) mc.gameRenderer).vivecraft$isInWater() :
-                !mc.level.getFluidState(BlockPos.containing(vec3)).isEmpty()
-            );
 
             BlockHitResult blockhitresult = mc.level.clip(new ClipContext(
-                vec34, vec35, ClipContext.Block.COLLIDER, water ? Fluid.ANY : Fluid.ANY, mc.player
+                vec34, vec35, ClipContext.Block.COLLIDER, Fluid.ANY, mc.player
             ));
 
             if (blockhitresult != null && blockhitresult.getType() != Type.MISS) {

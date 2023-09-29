@@ -200,7 +200,7 @@ public abstract class MCVR {
     }
 
     public Vec3 getEyePosition(RenderPass eye) {
-        Vector3f vector3 = switch(eye){
+        Vector3f vector3 = switch (eye) {
             case LEFT -> {
                 yield this.hmdPose.mul0(this.hmdPoseLeftEye, new Matrix4f()).getTranslation(new Vector3f());
             }
@@ -210,7 +210,6 @@ public abstract class MCVR {
             default -> {
                 yield this.hmdPose.getTranslation(new Vector3f());
             }
-
         };
 
         if (dh.vrSettings.seated || dh.vrSettings.allowStandingOriginOffset) {

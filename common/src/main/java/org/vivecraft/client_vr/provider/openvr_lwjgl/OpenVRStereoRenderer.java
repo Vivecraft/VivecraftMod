@@ -123,20 +123,48 @@ public class OpenVRStereoRenderer extends VRRenderer {
 
     public static String getCompositorError(int code) {
         return switch (code) {
-            case EVRCompositorError_VRCompositorError_None -> { yield "None"; }
-            case EVRCompositorError_VRCompositorError_RequestFailed -> { yield "RequestFailed"; }
-            case EVRCompositorError_VRCompositorError_IncompatibleVersion -> { yield "IncompatibleVersion"; }
-            case EVRCompositorError_VRCompositorError_DoNotHaveFocus -> { yield "DoesNotHaveFocus"; }
-            case EVRCompositorError_VRCompositorError_InvalidTexture -> { yield "InvalidTexture"; }
-            case EVRCompositorError_VRCompositorError_IsNotSceneApplication -> { yield "IsNotSceneApplication"; }
-            case EVRCompositorError_VRCompositorError_TextureIsOnWrongDevice -> { yield "TextureIsOnWrongDevice"; }
-            case EVRCompositorError_VRCompositorError_TextureUsesUnsupportedFormat -> { yield "TextureUsesUnsupportedFormat"; }
-            case EVRCompositorError_VRCompositorError_SharedTexturesNotSupported -> { yield "SharedTexturesNotSupported"; }
-            case EVRCompositorError_VRCompositorError_IndexOutOfRange -> { yield "IndexOutOfRange"; }
-            case EVRCompositorError_VRCompositorError_AlreadySubmitted -> { yield "AlreadySubmitted"; }
-            case EVRCompositorError_VRCompositorError_InvalidBounds -> { yield "InvalidBounds"; }
-            case EVRCompositorError_VRCompositorError_AlreadySet -> { yield "AlreadySet"; }
-            default -> { yield "Unknown"; }
+            case EVRCompositorError_VRCompositorError_None -> {
+                yield "None";
+            }
+            case EVRCompositorError_VRCompositorError_RequestFailed -> {
+                yield "RequestFailed";
+            }
+            case EVRCompositorError_VRCompositorError_IncompatibleVersion -> {
+                yield "IncompatibleVersion";
+            }
+            case EVRCompositorError_VRCompositorError_DoNotHaveFocus -> {
+                yield "DoesNotHaveFocus";
+            }
+            case EVRCompositorError_VRCompositorError_InvalidTexture -> {
+                yield "InvalidTexture";
+            }
+            case EVRCompositorError_VRCompositorError_IsNotSceneApplication -> {
+                yield "IsNotSceneApplication";
+            }
+            case EVRCompositorError_VRCompositorError_TextureIsOnWrongDevice -> {
+                yield "TextureIsOnWrongDevice";
+            }
+            case EVRCompositorError_VRCompositorError_TextureUsesUnsupportedFormat -> {
+                yield "TextureUsesUnsupportedFormat";
+            }
+            case EVRCompositorError_VRCompositorError_SharedTexturesNotSupported -> {
+                yield "SharedTexturesNotSupported";
+            }
+            case EVRCompositorError_VRCompositorError_IndexOutOfRange -> {
+                yield "IndexOutOfRange";
+            }
+            case EVRCompositorError_VRCompositorError_AlreadySubmitted -> {
+                yield "AlreadySubmitted";
+            }
+            case EVRCompositorError_VRCompositorError_InvalidBounds -> {
+                yield "InvalidBounds";
+            }
+            case EVRCompositorError_VRCompositorError_AlreadySet -> {
+                yield "AlreadySet";
+            }
+            default -> {
+                yield "Unknown";
+            }
         };
     }
 

@@ -7,10 +7,18 @@ import java.lang.reflect.Method;
 public interface OptionEnum<T extends Enum<T>> {
     default String getLangKey() {
         return switch (name().toLowerCase()) {
-            case "yes" -> { yield LangHelper.YES_KEY; }
-            case "no" -> { yield LangHelper.NO_KEY; }
-            case "on" -> { yield LangHelper.ON_KEY; }
-            case "off" -> { yield LangHelper.OFF_KEY; }
+            case "yes" -> {
+                yield LangHelper.YES_KEY;
+            }
+            case "no" -> {
+                yield LangHelper.NO_KEY;
+            }
+            case "on" -> {
+                yield LangHelper.ON_KEY;
+            }
+            case "off" -> {
+                yield LangHelper.OFF_KEY;
+            }
             default -> {
                 Class<?> cls = getClass();
                 yield "vivecraft.options." + (cls.isAnonymousClass() ? cls.getSuperclass() : cls).getSimpleName().toLowerCase() + "." + name().toLowerCase().replace("_", "");

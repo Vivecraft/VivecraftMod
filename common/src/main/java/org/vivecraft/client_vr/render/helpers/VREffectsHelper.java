@@ -59,7 +59,6 @@ import java.util.stream.Stream;
 
 import static net.minecraft.client.Minecraft.ON_OSX;
 import static org.joml.Math.*;
-import static org.joml.Math.lerp;
 import static org.vivecraft.client.utils.Utils.message;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;

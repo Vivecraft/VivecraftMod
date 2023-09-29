@@ -153,13 +153,27 @@ public class VRData {
 
     public VRDevicePose getEye(RenderPass pass) {
         return switch (pass) {
-            case LEFT -> { yield this.eye0; }
-            case RIGHT -> { yield this.eye1; }
-            case THIRD -> { yield this.c2; }
-            case SCOPER -> { yield this.t0; }
-            case SCOPEL -> { yield this.t1; }
-            case CAMERA -> { yield this.cam; }
-            default -> { yield this.hmd; }
+            case LEFT -> {
+                yield this.eye0;
+            }
+            case RIGHT -> {
+                yield this.eye1;
+            }
+            case THIRD -> {
+                yield this.c2;
+            }
+            case SCOPER -> {
+                yield this.t0;
+            }
+            case SCOPEL -> {
+                yield this.t1;
+            }
+            case CAMERA -> {
+                yield this.cam;
+            }
+            default -> {
+                yield this.hmd;
+            }
         };
     }
 

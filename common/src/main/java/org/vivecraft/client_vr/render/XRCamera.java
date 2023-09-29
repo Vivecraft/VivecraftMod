@@ -4,7 +4,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
 import org.vivecraft.client_vr.VRData.VRDevicePose;
 import org.vivecraft.client_vr.settings.VRSettings.MirrorMode;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
@@ -47,9 +46,15 @@ public class XRCamera extends net.minecraft.client.Camera {
         return (RenderPassType.isVanilla() ?
                 super.isDetached() :
                 switch (dh.currentPass) {
-                    case THIRD -> { yield dh.vrSettings.displayMirrorMode == MirrorMode.THIRD_PERSON; }
-                    case CAMERA -> { yield true; }
-                    default -> { yield dh.vrSettings.shouldRenderSelf; }
+                    case THIRD -> {
+                        yield dh.vrSettings.displayMirrorMode == MirrorMode.THIRD_PERSON;
+                    }
+                    case CAMERA -> {
+                        yield true;
+                    }
+                    default -> {
+                        yield dh.vrSettings.shouldRenderSelf;
+                    }
                 }
         );
     }

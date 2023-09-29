@@ -139,7 +139,7 @@ public class RenderHelper {
 
         for (int i = 0; i < edges + 1; i++) {
             float startAngle = (float) i / (float) edges * (float) PI * 2.0F;
-            switch(side) {
+            switch (side) {
                 case 0, 1 -> { //y
                     float x = (float) pos.x + (float) Math.cos(startAngle) * radius;
                     float y = (float) pos.y;
