@@ -1,6 +1,5 @@
 [*]
 charset = utf-8
-end_of_line = crlf
 indent_size = 4
 indent_style = space
 insert_final_newline = true
@@ -29,6 +28,7 @@ ij_json_space_before_comma = false
 ij_json_spaces_within_braces = false
 ij_json_spaces_within_brackets = false
 ij_json_wrap_long_lines = false
+indent_size = 2
 
 [*.java]
 ij_java_align_consecutive_assignments = false

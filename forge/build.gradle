@@ -60,6 +60,9 @@ dependencies {
     bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
     bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
     bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }
+
+    // MixinExtras
+    implementation(include("io.github.llamalad7:mixinextras-forge:0.2.0-rc.4"))
 }
 
 processResources {

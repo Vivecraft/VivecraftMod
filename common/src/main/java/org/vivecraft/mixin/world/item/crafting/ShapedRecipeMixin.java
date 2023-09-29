@@ -9,17 +9,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-@Mixin(ShapedRecipe.class)
+@Mixin(net.minecraft.world.item.crafting.ShapedRecipe.class)
 public class ShapedRecipeMixin {
-    @Inject(method = "itemFromJson", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/DefaultedRegistry;getOptional(Lnet/minecraft/resources/ResourceLocation;)Ljava/util/Optional;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+    @Inject(method = "itemFromJson", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/DefaultedRegistry;getOptional(Lnet/minecraft/resources/ResourceLocation;)Ljava/util/Optional;", shift = Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     private static void vivecraft$getVivecraftVanillaItemInject(JsonObject jsonObject, CallbackInfoReturnable<Item> cir, String resourceLocation) {
         if (resourceLocation.startsWith("vivecraft")) {
             cir.setReturnValue(vivecraft$getVivecraftVanillaItem(jsonObject, resourceLocation));

@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
+import static org.joml.Math.*;
+
 @Mixin(Projectile.class)
 public class ProjectileMixin {
 
@@ -39,7 +41,7 @@ public class ProjectileMixin {
         at = @At("HEAD"), ordinal = 0, argsOnly = true)
     public float vivecraft$pX(float pXIn, Entity pProjectile) {
         if (this.vivecraft$controllerDir != null) {
-            return -((float) Math.toDegrees(Math.asin(this.vivecraft$controllerDir.y / this.vivecraft$controllerDir.length())));
+            return -((float) toDegrees(asin(this.vivecraft$controllerDir.y / this.vivecraft$controllerDir.length())));
         }
         return pXIn;
     }
@@ -48,7 +50,7 @@ public class ProjectileMixin {
         at = @At("HEAD"), ordinal = 1, argsOnly = true)
     public float vivecraft$pY(float pYIn, Entity pProjectile) {
         if (this.vivecraft$controllerDir != null) {
-            float toRet = (float) Math.toDegrees(Math.atan2(-this.vivecraft$controllerDir.x, this.vivecraft$controllerDir.z));
+            float toRet = (float) toDegrees(atan2(-this.vivecraft$controllerDir.x, this.vivecraft$controllerDir.z));
             this.vivecraft$controllerDir = null;
             return toRet;
         }

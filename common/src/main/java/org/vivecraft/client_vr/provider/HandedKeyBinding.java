@@ -8,8 +8,8 @@ public class HandedKeyBinding extends KeyMapping {
     private boolean[] pressed = new boolean[ControllerType.values().length];
     private int[] pressTime = new int[ControllerType.values().length];
 
-    public HandedKeyBinding(String p_90821_, int p_90822_, String p_90823_) {
-        super(p_90821_, p_90822_, p_90823_);
+    public HandedKeyBinding(String string, int i, String string2) {
+        super(string, i, string2);
     }
 
     @Override

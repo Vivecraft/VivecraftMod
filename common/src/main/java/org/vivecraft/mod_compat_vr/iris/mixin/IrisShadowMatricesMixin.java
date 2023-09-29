@@ -8,9 +8,10 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+
+import static org.vivecraft.client_vr.VRState.dh;
 
 @Pseudo
 @Mixin(targets = {"net.coderbot.iris.shadow.ShadowMatrices", "net.coderbot.iris.shadows.ShadowMatrices"})
@@ -39,11 +40,11 @@ public class IrisShadowMatricesMixin {
     }
 
     // offset camera pos, to be in the equal grid as left eye, but with correct offset
-    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE"), ordinal = 1, remap = false)
+    @ModifyVariable(method = "snapModelViewToGrid", at = @At("STORE"), ordinal = 1, remap = false)
     private static float vivecraft$modifyOffsetX(float original) {
         if (!RenderPassType.isVanilla()) {
-            vivecraft$currentPass = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
-            if (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
+            vivecraft$currentPass = dh.vrPlayer.getVRDataWorld().getEye(dh.currentPass).getPosition();
+            if (dh.currentPass == RenderPass.LEFT) {
                 vivecraft$leftPass = vivecraft$currentPass;
             }
             return (float) (vivecraft$leftPass.x % vivecraft$cachedShadowIntervalSize - (vivecraft$leftPass.x - vivecraft$currentPass.x));
@@ -52,7 +53,7 @@ public class IrisShadowMatricesMixin {
         }
     }
 
-    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE"), ordinal = 2, remap = false)
+    @ModifyVariable(method = "snapModelViewToGrid", at = @At("STORE"), ordinal = 2, remap = false)
     private static float vivecraft$modifyOffsetY(float original) {
         if (!RenderPassType.isVanilla()) {
             return (float) (vivecraft$leftPass.y % vivecraft$cachedShadowIntervalSize - (vivecraft$leftPass.y - vivecraft$currentPass.y));
@@ -61,7 +62,7 @@ public class IrisShadowMatricesMixin {
         }
     }
 
-    @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE"), ordinal = 3, remap = false)
+    @ModifyVariable(method = "snapModelViewToGrid", at = @At("STORE"), ordinal = 3, remap = false)
     private static float vivecraft$modifyOffsetZ(float original) {
         if (!RenderPassType.isVanilla()) {
             return (float) (vivecraft$leftPass.z % vivecraft$cachedShadowIntervalSize - (vivecraft$leftPass.z - vivecraft$currentPass.z));

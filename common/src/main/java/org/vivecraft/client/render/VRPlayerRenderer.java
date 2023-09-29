@@ -1,35 +1,34 @@
 package org.vivecraft.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
-import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client.VRPlayersClient.RotInfo;
 import org.vivecraft.client_vr.render.RenderPass;
 
 import java.util.UUID;
 
-public class VRPlayerRenderer extends PlayerRenderer {
+import static net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import static org.joml.Math.toDegrees;
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
+
+public class VRPlayerRenderer extends net.minecraft.client.renderer.entity.player.PlayerRenderer {
     static LayerDefinition VRLayerDef = LayerDefinition.create(VRPlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64);
     static LayerDefinition VRLayerDef_arms = LayerDefinition.create(VRPlayerModel_WithArms.createMesh(CubeDeformation.NONE, false), 64, 64);
     static LayerDefinition VRLayerDef_slim = LayerDefinition.create(VRPlayerModel.createMesh(CubeDeformation.NONE, true), 64, 64);
     static LayerDefinition VRLayerDef_arms_slim = LayerDefinition.create(VRPlayerModel_WithArms.createMesh(CubeDeformation.NONE, true), 64, 64);
 
-    public VRPlayerRenderer(EntityRendererProvider.Context context, boolean slim, boolean seated) {
+    public VRPlayerRenderer(Context context, boolean slim, boolean seated) {
         super(context, slim);
-        model = !slim ?
-                (seated ?
-                 new VRPlayerModel<>(VRLayerDef.bakeRoot(), slim) :
-                 new VRPlayerModel_WithArms<>(VRLayerDef_arms.bakeRoot(), slim)) :
-                (seated ?
-                 new VRPlayerModel<>(VRLayerDef_slim.bakeRoot(), slim) :
-                 new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), slim));
+        this.model = (seated ?
+                      new VRPlayerModel<>(slim ? VRLayerDef_slim.bakeRoot() : VRLayerDef.bakeRoot(), slim) :
+                      new VRPlayerModel_WithArms<>(slim ? VRLayerDef_arms_slim.bakeRoot() : VRLayerDef_arms.bakeRoot(), slim)
+        );
 
         this.addLayer(new HMDLayer(this));
     }
@@ -37,7 +36,7 @@ public class VRPlayerRenderer extends PlayerRenderer {
     @Override
     public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight) {
 
-        VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entityIn.getUUID());
+        RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entityIn.getUUID());
 
         if (playermodelcontroller$rotinfo != null) {
             matrixStackIn.scale(playermodelcontroller$rotinfo.heightScale, playermodelcontroller$rotinfo.heightScale, playermodelcontroller$rotinfo.heightScale);
@@ -59,7 +58,7 @@ public class VRPlayerRenderer extends PlayerRenderer {
 
         this.getModel().crouching &= !pClientPlayer.isVisuallySwimming();
 
-        if (pClientPlayer == Minecraft.getInstance().player && this.getModel() instanceof VRPlayerModel_WithArms<?> armsModel && ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA && ClientDataHolderVR.getInstance().cameraTracker.isQuickMode() && ClientDataHolderVR.getInstance().grabScreenShot) {
+        if (pClientPlayer == mc.player && this.getModel() instanceof VRPlayerModel_WithArms<?> armsModel && dh.currentPass == RenderPass.CAMERA && dh.cameraTracker.isQuickMode() && dh.grabScreenShot) {
             // player hands block the camera, so disable them for the screenshot
             armsModel.leftHand.visible = false;
             armsModel.rightHand.visible = false;
@@ -71,9 +70,9 @@ public class VRPlayerRenderer extends PlayerRenderer {
     @Override
     protected void setupRotations(AbstractClientPlayer pEntityLiving, PoseStack pMatrixStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks) {
         UUID uuid = pEntityLiving.getUUID();
-        if (ClientDataHolderVR.getInstance().currentPass != RenderPass.GUI && VRPlayersClient.getInstance().isTracked(uuid)) {
-            VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(uuid);
-            pRotationYaw = (float) Math.toDegrees(playermodelcontroller$rotinfo.getBodyYawRadians());
+        if (dh.currentPass != RenderPass.GUI && VRPlayersClient.getInstance().isTracked(uuid)) {
+            RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(uuid);
+            pRotationYaw = (float) toDegrees(playermodelcontroller$rotinfo.getBodyYawRadians());
         }
 
         //vanilla below here

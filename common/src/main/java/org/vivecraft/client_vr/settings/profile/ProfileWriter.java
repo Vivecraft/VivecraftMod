@@ -9,7 +9,7 @@ public class ProfileWriter {
     private String activeProfileName;
     private String set;
     private Map<String, String> data = new HashMap<>();
-    private JsonObject theProfile = null;
+    private JsonObject theProfile;
 
     public ProfileWriter(String set) {
         this.activeProfileName = ProfileManager.currentProfileName;

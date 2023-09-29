@@ -1,0 +1,6 @@
+<component name="DependencyValidationManager">
+  <state>
+    <deny_rule from_scope="vivecraft" to_scope="java.awt" is_deny="true" />
+    <deny_rule from_scope="vivecraft" to_scope="jetbrains annotations" is_deny="true" />
+  </state>
+</component>

@@ -3,16 +3,18 @@ package org.vivecraft.client.gui.framework;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GuiExtension;
-import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.MCVR;
+
+import static org.joml.Math.max;
+import static org.joml.Math.min;
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public abstract class TwoHandedScreen extends Screen {
-    protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
     public float cursorX1;
     public float cursorY1;
     public float cursorX2;
@@ -25,36 +27,46 @@ public abstract class TwoHandedScreen extends Screen {
         super(Component.literal(""));
     }
 
+    @Override
     public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY) {
         if (super.mouseClicked(pMouseX, p_94738_, pMouseY)) {
+            double d0 = (double) min(max((int) this.cursorX2, 0), mc.getWindow().getScreenWidth()) *
+                (double) mc.getWindow().getGuiScaledWidth() / (double) mc.getWindow().getScreenWidth();
             return true;
         } else {
             return false;
         }
     }
 
+    @Override
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
         if (this.reinit) {
             this.init();
             this.reinit = false;
         }
 
-        double d0 = (double) this.cursorX1 * (double) this.width / (double) GuiHandler.guiWidth;
-        double d1 = (double) this.cursorY1 * (double) this.height / (double) GuiHandler.guiHeight;
-        double d2 = (double) this.cursorX2 * (double) this.width / (double) GuiHandler.guiWidth;
-        double d3 = (double) this.cursorY2 * (double) this.height / (double) GuiHandler.guiHeight;
+        int i0 = ((int) this.cursorX1 * this.width / mc.getWindow().getGuiScaledWidth())
+            * mc.getWindow().getGuiScaledWidth() / mc.getWindow().getScreenWidth();
+        int i1 = ((int) this.cursorY1 * this.height / mc.getWindow().getGuiScaledHeight())
+            * mc.getWindow().getGuiScaledWidth() / mc.getWindow().getScreenWidth();
+        int i2 = ((int) this.cursorX2 * this.width / mc.getWindow().getGuiScaledWidth())
+            * mc.getWindow().getGuiScaledWidth() / mc.getWindow().getScreenWidth();
+        int i3 = ((int) this.cursorY2 * this.height / mc.getWindow().getGuiScaledHeight())
+            * mc.getWindow().getGuiScaledWidth() / mc.getWindow().getScreenWidth();
         AbstractWidget abstractwidget = null;
         AbstractWidget abstractwidget1 = null;
 
-        for (int i = 0; i < this.children().size(); ++i) {
-            AbstractWidget abstractwidget2 = (AbstractWidget) this.children().get(i);
-            boolean flag = d0 >= (double) abstractwidget2.getX() && d1 >= (double) abstractwidget2.getY() && d0 < (double) (abstractwidget2.getX() + abstractwidget2.getWidth()) && d1 < (double) (abstractwidget2.getY() + 20);
-            boolean flag1 = d2 >= (double) abstractwidget2.getX() && d3 >= (double) abstractwidget2.getY() && d2 < (double) (abstractwidget2.getX() + abstractwidget2.getWidth()) && d3 < (double) (abstractwidget2.getY() + 20);
+        for (GuiEventListener child : this.children()) {
+            AbstractWidget abstractwidget2 = (AbstractWidget) child;
+            boolean flag = i0 >= abstractwidget2.getX() && i1 >= abstractwidget2.getY() &&
+                i0 < (abstractwidget2.getX() + abstractwidget2.getWidth()) && i1 < (abstractwidget2.getY() + 20);
+            boolean flag1 = i2 >= abstractwidget2.getX() && i3 >= abstractwidget2.getY() &&
+                i2 < (abstractwidget2.getX() + abstractwidget2.getWidth()) && i3 < (abstractwidget2.getY() + 20);
 
             if (flag) {
-                abstractwidget2.render(guiGraphics, (int) d0, (int) d1, pPartialTicks);
+                abstractwidget2.render(guiGraphics, i0, i1, pPartialTicks);
             } else {
-                abstractwidget2.render(guiGraphics, (int) d2, (int) d3, pPartialTicks);
+                abstractwidget2.render(guiGraphics, i2, i3, pPartialTicks);
             }
 
             if (flag) {
@@ -69,18 +81,18 @@ public abstract class TwoHandedScreen extends Screen {
         if (abstractwidget == null) {
             this.lastHoveredButtonId1 = null;
         } else if (abstractwidget instanceof Button && this.lastHoveredButtonId1 != abstractwidget) {
-            MCVR.get().triggerHapticPulse(ControllerType.LEFT, 300);
+            dh.vr.triggerHapticPulse(ControllerType.LEFT, 300);
             this.lastHoveredButtonId1 = abstractwidget;
         }
 
         if (abstractwidget1 == null) {
             this.lastHoveredButtonId2 = null;
         } else if (abstractwidget1 instanceof Button && this.lastHoveredButtonId2 != abstractwidget1) {
-            MCVR.get().triggerHapticPulse(ControllerType.RIGHT, 300);
+            dh.vr.triggerHapticPulse(ControllerType.RIGHT, 300);
             this.lastHoveredButtonId2 = abstractwidget1;
         }
 
-        ((GuiExtension) this.minecraft.gui).vivecraft$drawMouseMenuQuad((int) d0, (int) d1);
-        ((GuiExtension) this.minecraft.gui).vivecraft$drawMouseMenuQuad((int) d2, (int) d3);
+        ((GuiExtension) mc.gui).vivecraft$drawMouseMenuQuad(i0, i1);
+        ((GuiExtension) mc.gui).vivecraft$drawMouseMenuQuad(i2, i3);
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Button.OnPress;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -12,7 +13,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.widgets.SettingsList;
-import org.vivecraft.server.config.ConfigBuilder;
+import org.vivecraft.client.gui.widgets.SettingsList.BaseEntry;
+import org.vivecraft.client.gui.widgets.SettingsList.WidgetEntry;
+import org.vivecraft.server.config.ConfigBuilder.ListValue;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -21,10 +24,10 @@ import java.util.stream.Collectors;
 
 public class GuiListValueEditScreen extends GuiListScreen {
 
-    protected final ConfigBuilder.ListValue<String> listValue;
+    protected final ListValue<String> listValue;
     private List<String> elements;
 
-    public GuiListValueEditScreen(Component title, Screen lastScreen, ConfigBuilder.ListValue<String> listValue) {
+    public GuiListValueEditScreen(Component title, Screen lastScreen, ListValue<String> listValue) {
         super(title, lastScreen);
         this.listValue = listValue;
     }
@@ -60,8 +63,8 @@ public class GuiListValueEditScreen extends GuiListScreen {
     }
 
     @Override
-    protected List<SettingsList.BaseEntry> getEntries() {
-        List<SettingsList.BaseEntry> entries = new LinkedList<>();
+    protected List<BaseEntry> getEntries() {
+        List<BaseEntry> entries = new LinkedList<>();
         if (elements == null) {
             elements = new ArrayList<>(listValue.get());
         }
@@ -76,7 +79,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
                 reinit = true;
             }));
         }
-        entries.add(new SettingsList.WidgetEntry(Component.translatable("vivecraft.options.addnew"), Button.builder(Component.literal("+"), button -> {
+        entries.add(new WidgetEntry(Component.translatable("vivecraft.options.addnew"), Button.builder(Component.literal("+"), button -> {
             elements = getCurrentValues();
             elements.add("");
             reinit = true;
@@ -84,12 +87,12 @@ public class GuiListValueEditScreen extends GuiListScreen {
         return entries;
     }
 
-    private static class ListValueEntry extends SettingsList.WidgetEntry {
+    private static class ListValueEntry extends WidgetEntry {
         public static final int valueButtonWidth = 280;
 
         private final Button deleteButton;
 
-        public ListValueEntry(Component name, EditBox valueWidget, Button.OnPress deleteAction) {
+        public ListValueEntry(Component name, EditBox valueWidget, OnPress deleteAction) {
             super(name, valueWidget);
 
             this.deleteButton = Button

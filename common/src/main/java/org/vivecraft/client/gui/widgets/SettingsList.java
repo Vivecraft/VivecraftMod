@@ -16,20 +16,21 @@ import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
-import org.vivecraft.server.config.ConfigBuilder;
+import org.vivecraft.client.gui.widgets.SettingsList.BaseEntry;
+import org.vivecraft.server.config.ConfigBuilder.ConfigValue;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
-public class SettingsList extends ContainerObjectSelectionList<SettingsList.BaseEntry> {
+public class SettingsList extends ContainerObjectSelectionList<BaseEntry> {
     final Screen parent;
     int maxNameWidth;
 
-    public SettingsList(Screen parent, Minecraft minecraft, List<SettingsList.BaseEntry> entries) {
+    public SettingsList(Screen parent, Minecraft minecraft, List<BaseEntry> entries) {
         super(minecraft, parent.width + 45, parent.height, 20, parent.height - 32, 20);
         this.parent = parent;
-        for (SettingsList.BaseEntry entry : entries) {
+        for (BaseEntry entry : entries) {
             int i;
             if ((i = minecraft.font.width(entry.name)) > this.maxNameWidth) {
                 this.maxNameWidth = i;
@@ -48,7 +49,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         return super.getRowWidth() + 32;
     }
 
-    public static BaseEntry ConfigToEntry(ConfigBuilder.ConfigValue configValue, Component name) {
+    public static BaseEntry ConfigToEntry(ConfigValue configValue, Component name) {
         AbstractWidget widget = configValue.getWidget(ResettableEntry.valueButtonWidth, 20);
         return new ResettableEntry(name, widget, configValue);
     }
@@ -81,8 +82,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         public List<? extends NarratableEntry> narratables() {
             return ImmutableList.of(new NarratableEntry() {
                 @Override
-                public NarratableEntry.NarrationPriority narrationPriority() {
-                    return NarratableEntry.NarrationPriority.HOVERED;
+                public NarrationPriority narrationPriority() {
+                    return NarrationPriority.HOVERED;
                 }
 
                 @Override
@@ -99,7 +100,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         public static final int valueButtonWidth = 125;
 
-        public ResettableEntry(Component name, AbstractWidget valueWidget, ConfigBuilder.ConfigValue configValue) {
+        public ResettableEntry(Component name, AbstractWidget valueWidget, ConfigValue configValue) {
             super(name, valueWidget);
 
             this.canReset = () -> !configValue.isDefault();

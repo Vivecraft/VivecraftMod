@@ -3,7 +3,6 @@ package org.vivecraft.client.utils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.logging.LogUtils;
 import net.minecraft.SharedConstants;
 import org.vivecraft.client.Xplat;
 
@@ -18,6 +17,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.vivecraft.common.utils.Utils.logger;
+
 public class UpdateChecker {
 
     public static boolean hasUpdate = false;
@@ -27,7 +28,7 @@ public class UpdateChecker {
     public static String newestVersion = "";
 
     public static boolean checkForUpdates() {
-        System.out.println("Checking for Vivecraft Updates");
+        logger.info("Checking for Updates...");
         try {
             String apiURL = "https://api.modrinth.com/v2/project/vivecraft/version?loaders=[%22" + Xplat.getModloader() + "%22]&game_versions=[%22" + SharedConstants.VERSION_STRING + "%22]";
             HttpURLConnection conn = (HttpURLConnection) new URL(apiURL).openConnection();
@@ -38,7 +39,7 @@ public class UpdateChecker {
             conn.connect();
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                LogUtils.getLogger().error("Error " + conn.getResponseCode() + " fetching Vivecraft updates");
+                logger.error("Error {} fetching updates", conn.getResponseCode());
                 return false;
             }
 
@@ -62,10 +63,12 @@ public class UpdateChecker {
 
             String currentVersionNumber = Xplat.getModVersion() + "-" + Xplat.getModloader();
             Version current = new Version(currentVersionNumber, currentVersionNumber, "");
+            StringBuilder changelogBuilder = new StringBuilder(changelog);
 
             for (Version v : versions) {
                 if (current.compareTo(v) > 0) {
-                    changelog += "§a" + v.fullVersion + "§r" + ": \n" + v.changelog + "\n\n";
+                    changelogBuilder.append("§a").append(v.fullVersion).append("§r: \n")
+                        .append(v.changelog).append("\n\n");
                     if (newestVersion.isEmpty()) {
                         newestVersion = v.fullVersion;
                     }
@@ -73,9 +76,9 @@ public class UpdateChecker {
                 }
             }
             // no carriage returns please
-            changelog = changelog.replaceAll("\\r", "");
+            changelog = changelogBuilder.toString().replaceAll("\\r", "");
             if (hasUpdate) {
-                LogUtils.getLogger().info("Vivecraft update found: " + newestVersion);
+                logger.info("Update Found: {}", newestVersion);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -125,7 +128,7 @@ public class UpdateChecker {
         }
 
         @Override
-        public int compareTo(UpdateChecker.Version o) {
+        public int compareTo(Version o) {
             long result = this.compareNumber() - o.compareNumber();
             if (result < 0) {
                 return 1;

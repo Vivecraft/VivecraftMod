@@ -8,20 +8,22 @@ import java.net.URL;
 import java.nio.file.FileSystems;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
+import static org.vivecraft.common.utils.Utils.logger;
 
 public class LoaderUtils {
     public static URL ZipFileUrl;
     public static File vivecraftFile;
-    private static java.util.zip.ZipFile ZipFile;
+    private static ZipFile ZipFile;
 
     public static void init() {
         try {
             ZipFileUrl = getVivecraftZipLocation().toURL();
             vivecraftFile = toFile(ZipFileUrl.toURI());
-            ZipFile = new java.util.zip.ZipFile(vivecraftFile);
+            ZipFile = new ZipFile(vivecraftFile);
         } catch (Exception e) {
-            System.out.print("Error getting Vivecraft library: " + e.getLocalizedMessage());
+            logger.error("Error getting Vivecraft library: " + e.getLocalizedMessage());
         }
     }
 
@@ -39,11 +41,11 @@ public class LoaderUtils {
         }
     }
 
-    public static java.util.zip.ZipFile getVivecraftZip() throws ZipException, URISyntaxException, IOException {
+    public static ZipFile getVivecraftZip() throws URISyntaxException, IOException {
         if (vivecraftFile == null) {
             init();
         }
-        return new java.util.zip.ZipFile(vivecraftFile);
+        return new ZipFile(vivecraftFile);
     }
 
     public static File toFile(URI uri) {
@@ -54,7 +56,7 @@ public class LoaderUtils {
                 String s = uri.getPath();
 
                 if (s.contains("#")) {
-                    s = s.substring(0, s.lastIndexOf("#"));
+                    s = s.substring(0, s.lastIndexOf('#'));
                 }
 
                 File file1 = new File(s);

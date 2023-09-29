@@ -8,8 +8,9 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.vrInitialized;
 
 @Pseudo
 @Mixin(SodiumGameOptionPages.class)
@@ -17,8 +18,8 @@ public class FabricSodiumGameOptionPagesVRMixin {
 
     @Inject(at = @At("HEAD"), method = "lambda$quality$23", remap = false)
     private static void vivecraft$initframe(Options opts, GraphicsStatus value, CallbackInfo ci) {
-        if (VRState.vrInitialized) {
-            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
+        if (vrInitialized) {
+            dh.vrRenderer.reinitFrameBuffers("gfx setting change");
         }
     }
 }

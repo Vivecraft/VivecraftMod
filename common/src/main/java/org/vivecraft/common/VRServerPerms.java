@@ -1,18 +1,16 @@
 package org.vivecraft.common;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
+import static org.vivecraft.client_vr.VRState.dh;
 
 public class VRServerPerms {
 
-    public static VRServerPerms INSTANCE = new VRServerPerms();
+    public static boolean noTeleportClient = true;
 
-    public boolean noTeleportClient = true;
+    public static void setTeleportSupported(boolean supported) {
+        noTeleportClient = !supported;
 
-    public void setTeleportSupported(boolean supported) {
-        this.noTeleportClient = !supported;
-
-        if (ClientDataHolderVR.getInstance().vrPlayer != null) {
-            ClientDataHolderVR.getInstance().vrPlayer.updateTeleportKeys();
+        if (dh.vrPlayer != null) {
+            dh.vrPlayer.updateTeleportKeys();
         }
     }
 }

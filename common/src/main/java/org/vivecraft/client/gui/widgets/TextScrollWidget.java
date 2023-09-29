@@ -1,15 +1,18 @@
 package org.vivecraft.client.gui.widgets;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+
+import static org.joml.Math.max;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class TextScrollWidget extends AbstractWidget {
 
@@ -28,7 +31,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, String text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth * 2, Style.EMPTY);
+        formattedText = mc.font.getSplitter().splitLines(text, width - scrollBarWidth * 2, Style.EMPTY);
 
         initScroll();
     }
@@ -36,7 +39,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth * 2, Style.EMPTY);
+        formattedText = mc.font.getSplitter().splitLines(text, width - scrollBarWidth * 2, Style.EMPTY);
         initScroll();
     }
 
@@ -45,8 +48,8 @@ public class TextScrollWidget extends AbstractWidget {
         maxLines = (height - 2 - padding + 3) / 12;
         currentLine = 0;
         scrollSteps = formattedText.size() - maxLines;
-        scrollSteps = Math.max(scrollSteps, 0);
-        scrollBarSize = scrollSteps == 0 ? height - 2 : (int) (Math.max(formattedText.size(), maxLines) / (float) (scrollSteps) * 12);
+        scrollSteps = max(scrollSteps, 0);
+        scrollBarSize = scrollSteps == 0 ? height - 2 : max(formattedText.size(), maxLines) / scrollSteps * 12;
         scrollBarOffset = height - scrollBarSize - 2;
     }
 
@@ -58,18 +61,20 @@ public class TextScrollWidget extends AbstractWidget {
             getY(),
             getX() + width,
             getY() + this.height,
-            -6250336);
+            -6250336
+        );
         // draw box inside
         guiGraphics.fill(
             getX() + 1,
             getY() + 1,
             getX() + width - 1,
             getY() + this.height - 1,
-            -16777216);
+            -16777216
+        );
 
         // draw text
         for (int line = 0; line + currentLine < formattedText.size() && line < maxLines; line++) {
-            guiGraphics.drawString(Minecraft.getInstance().font, formattedText.get(line + currentLine).getString(), getX() + padding, getY() + padding + line * 12, 16777215);
+            guiGraphics.drawString(mc.font, formattedText.get(line + currentLine).getString(), getX() + padding, getY() + padding + line * 12, 16777215);
         }
 
         float scrollbarStart = scrollSteps == 0 ? 0 : currentLine / (float) scrollSteps * scrollBarOffset;
@@ -81,7 +86,8 @@ public class TextScrollWidget extends AbstractWidget {
                 (int) (getY() + 1 + scrollbarStart),
                 getX() + width - 1,
                 (int) (getY() + 1 + scrollbarStart + scrollBarSize),
-                -1);
+                -1
+            );
         }
 
         // draw scroll bar
@@ -90,7 +96,8 @@ public class TextScrollWidget extends AbstractWidget {
             (int) (getY() + (isFocused() || isHovered ? 2 : 1) + scrollbarStart),
             getX() + width - (isFocused() || isHovered ? 2 : 1),
             (int) (getY() + (isFocused() || isHovered ? 0 : 1) + scrollbarStart + scrollBarSize),
-            -6250336);
+            -6250336
+        );
     }
 
     @Override
@@ -147,8 +154,8 @@ public class TextScrollWidget extends AbstractWidget {
 
     @Override
     public boolean keyPressed(int key, int scancode, int mods) {
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN) {
-            if (mouseScrolled(0, 0, key == GLFW.GLFW_KEY_UP ? 1 : -1)) {
+        if (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) {
+            if (mouseScrolled(0, 0, key == GLFW_KEY_UP ? 1 : -1)) {
                 return true;
             }
         }

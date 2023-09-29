@@ -14,16 +14,16 @@ public enum HardwareType {
     public final List<String> manufacturers;
     public final boolean hasTouchpad;
     public final boolean hasStick;
-    private static Map<String, HardwareType> map = new HashMap<>();
+    private static final Map<String, HardwareType> map = new HashMap<>();
 
-    private HardwareType(boolean hasTouchpad, boolean hasStick, String... manufacturers) {
+    HardwareType(boolean hasTouchpad, boolean hasStick, String... manufacturers) {
         this.hasTouchpad = hasTouchpad;
         this.hasStick = hasStick;
         this.manufacturers = ImmutableList.copyOf(manufacturers);
     }
 
     public static HardwareType fromManufacturer(String name) {
-        return map.containsKey(name) ? map.get(name) : VIVE;
+        return map.getOrDefault(name, VIVE);
     }
 
     static {

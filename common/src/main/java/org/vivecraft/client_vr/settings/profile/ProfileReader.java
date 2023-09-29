@@ -10,9 +10,9 @@ import java.util.Map.Entry;
 public class ProfileReader {
     private String set;
     private String profile;
-    private Map<String, String> currentProfile = null;
-    private Iterator profileSettingsIt = null;
-    private JsonObject theProfiles = null;
+    private Map<String, String> currentProfile;
+    private Iterator profileSettingsIt;
+    private JsonObject theProfiles;
 
     public ProfileReader(String set) {
         this.profile = ProfileManager.currentProfileName;

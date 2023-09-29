@@ -4,38 +4,41 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.debug.DebugRenderer;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.client.renderer.debug.DebugRenderer.SimpleDebugRenderer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.common.utils.math.Quaternion;
-import org.vivecraft.common.utils.math.Vector3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.vivecraft.common.utils.color.Color;
 
-import java.awt.*;
 import java.util.ArrayList;
+
+import static java.lang.Math.pow;
+import static org.joml.Math.sqrt;
+import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.*;
 
 public class Debug {
     Vec3 root;
-    Quaternion rotation;
+    Quaternionf rotation;
     public static boolean isEnabled = true;
     static Polygon cross = new Polygon(6);
     static Polygon arrowHead = new Polygon(8);
-    private static DebugRendererManual renderer = new DebugRendererManual();
+    private static final DebugRendererManual renderer = new DebugRendererManual();
 
     public Debug(Vec3 root) {
         this.root = root;
-        this.rotation = new Quaternion();
+        this.rotation = new Quaternionf();
     }
 
-    public Debug(Vec3 root, Quaternion rotation) {
+    public Debug(Vec3 root, Quaternionf rotation) {
         this.root = root;
         this.rotation = rotation;
     }
 
     public void drawPoint(Vec3 point, Color color) {
-        point = this.rotation.multiply(point);
+        point = convertToVec3(this.rotation.transformUnit(convertToVector3f(point, new Vector3f())));
         Vec3 vec3 = this.root.add(point);
         Polygon debug$polygon = cross.offset(vec3);
 
@@ -50,13 +53,19 @@ public class Debug {
 
     public void drawVector(Vec3 start, Vec3 direction, Color color) {
         Polygon debug$polygon = new Polygon(2);
-        start = this.rotation.multiply(start);
-        direction = this.rotation.multiply(direction);
+        start = convertToVec3(this.rotation.transformUnit(convertToVector3f(start, new Vector3f())));
+        direction = convertToVec3(this.rotation.transformUnit(convertToVector3f(direction, new Vector3f())));
         debug$polygon.vertices[0] = this.root.add(start);
         debug$polygon.colors[0] = new Color(0, 0, 0, 0);
         debug$polygon.vertices[1] = this.root.add(start).add(direction);
         debug$polygon.colors[1] = color;
-        Quaternion quaternion = Quaternion.createFromToVector(new Vector3(0.0F, 1.0F, 0.0F), new Vector3(direction.normalize()));
+        // TODO JOML probably has functions for this
+        Vec3 from = convertToVec3(up);
+        Vec3 to = direction.normalize();
+        float f = (float) (sqrt(pow(from.length(), 2.0D) * pow(to.length(), 2.0D)) + from.dot(to));
+        Vec3 vector3 = from.cross(to);
+        Quaternionf quaternion = new Quaternionf((float) vector3.x, (float) vector3.y, (float) vector3.z, f).normalize(new Quaternionf());
+        //
         Polygon debug$polygon1 = arrowHead.rotated(quaternion).offset(this.root.add(start).add(direction));
 
         for (int i = 0; i < debug$polygon1.colors.length; ++i) {
@@ -70,8 +79,8 @@ public class Debug {
     }
 
     public void drawLine(Vec3 start, Vec3 end, Color color) {
-        start = this.rotation.multiply(start);
-        end = this.rotation.multiply(end);
+        start = convertToVec3(this.rotation.transformUnit(convertToVector3f(start, new Vector3f())));
+        end = convertToVec3(this.rotation.transformUnit(convertToVector3f(end, new Vector3f())));
         Polygon debug$polygon = new Polygon(2);
         debug$polygon.vertices[0] = this.root.add(start);
         debug$polygon.colors[0] = new Color(0, 0, 0, 0);
@@ -95,13 +104,13 @@ public class Debug {
         avec31[3] = new Vec3(box.maxX, box.maxY, box.minZ);
 
         for (int j = 0; j < 4; ++j) {
-            avec3[j] = this.root.add(this.rotation.multiply(avec3[j]));
-            avec31[j] = this.root.add(this.rotation.multiply(avec31[j]));
+            avec3[j] = this.root.add(convertToVec3(this.rotation.transformUnit(convertToVector3f(avec3[j], new Vector3f()))));
+            avec31[j] = this.root.add(convertToVec3(this.rotation.transformUnit(convertToVector3f(avec31[j], new Vector3f()))));
         }
 
         for (int k = 0; k < 5; ++k) {
             if (k == 0) {
-                debug$polygon.colors[i] = new Color(0, 0, 0, 0);
+                debug$polygon.colors[i] = new Color(Color.OFF);
             } else {
                 debug$polygon.colors[i] = color;
             }
@@ -118,7 +127,7 @@ public class Debug {
 
         for (int i1 = 1; i1 < 4; ++i1) {
             debug$polygon.vertices[i] = avec3[i1];
-            debug$polygon.colors[i] = new Color(0, 0, 0, 0);
+            debug$polygon.colors[i] = new Color(Color.OFF);
             ++i;
             debug$polygon.vertices[i] = avec31[i1];
             debug$polygon.colors[i] = color;
@@ -133,38 +142,37 @@ public class Debug {
     }
 
     static {
-        cross.colors[0] = new Color(0, 0, 0, 0);
+        cross.colors[0] = new Color(Color.OFF);
         cross.vertices[0] = new Vec3(0.0D, -0.1D, 0.0D);
         cross.vertices[1] = new Vec3(0.0D, 0.1D, 0.0D);
-        cross.colors[2] = new Color(0, 0, 0, 0);
+        cross.colors[2] = new Color(Color.OFF);
         cross.vertices[2] = new Vec3(0.0D, 0.0D, -0.1D);
         cross.vertices[3] = new Vec3(0.0D, 0.0D, 0.1D);
-        cross.colors[4] = new Color(0, 0, 0, 0);
+        cross.colors[4] = new Color(Color.OFF);
         cross.vertices[4] = new Vec3(-0.1D, 0.0D, 0.0D);
         cross.vertices[5] = new Vec3(0.1D, 0.0D, 0.0D);
-        arrowHead.colors[0] = new Color(0, 0, 0, 0);
+        arrowHead.colors[0] = new Color(Color.OFF);
         arrowHead.vertices[0] = new Vec3(0.0D, 0.0D, 0.0D);
         arrowHead.vertices[1] = new Vec3(-0.05D, -0.05D, 0.0D);
-        arrowHead.colors[2] = new Color(0, 0, 0, 0);
+        arrowHead.colors[2] = new Color(Color.OFF);
         arrowHead.vertices[2] = new Vec3(0.0D, 0.0D, 0.0D);
         arrowHead.vertices[3] = new Vec3(0.05D, -0.05D, 0.0D);
-        arrowHead.colors[4] = new Color(0, 0, 0, 0);
+        arrowHead.colors[4] = new Color(Color.OFF);
         arrowHead.vertices[4] = new Vec3(0.0D, 0.0D, 0.0D);
         arrowHead.vertices[5] = new Vec3(0.0D, -0.05D, -0.05D);
-        arrowHead.colors[6] = new Color(0, 0, 0, 0);
+        arrowHead.colors[6] = new Color(Color.OFF);
         arrowHead.vertices[6] = new Vec3(0.0D, 0.0D, 0.0D);
         arrowHead.vertices[7] = new Vec3(0.0D, -0.05D, 0.05D);
     }
 
-    public static class DebugRendererManual implements DebugRenderer.SimpleDebugRenderer {
+    public static class DebugRendererManual implements SimpleDebugRenderer {
         public boolean manualClearing = false;
         ArrayList<Polygon> toDraw = new ArrayList<>();
 
         public void render(float partialTicks, long finishTimeNano) {
-            Player player = Minecraft.getInstance().player;
-            double d0 = player.xOld + (player.getX() - player.xOld) * (double) partialTicks;
-            double d1 = player.yOld + (player.getY() - player.yOld) * (double) partialTicks;
-            double d2 = player.zOld + (player.getZ() - player.zOld) * (double) partialTicks;
+            double d0 = mc.player.xOld + (mc.player.getX() - mc.player.xOld) * (double) partialTicks;
+            double d1 = mc.player.yOld + (mc.player.getY() - mc.player.yOld) * (double) partialTicks;
+            double d2 = mc.player.zOld + (mc.player.getZ() - mc.player.zOld) * (double) partialTicks;
             // GlStateManager.lineWidth(5.0F);
             //GlStateManager._disableLighting();
             RenderSystem.depthMask(false);
@@ -189,15 +197,17 @@ public class Debug {
             }
         }
 
+        @Override
         public void clear() {
             this.toDraw.clear();
         }
 
         void renderVertex(BufferBuilder buffer, Vec3 vert, Color color, double offX, double offY, double offZ) {
-            buffer.vertex(vert.x - offX, vert.y - offY, vert.z - offZ).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(vert.x - offX, vert.y - offY, vert.z - offZ).color(color.R(), color.G(), color.B(), color.A()).endVertex();
         }
 
-        public void render(PoseStack pMatrixStack, MultiBufferSource pBuffer, double pCamX, double p_113510_, double pCamY) {
+        @Override
+        public void render(PoseStack pMatrixStack, MultiBufferSource pBuffer, double camX, double camY, double camZ) {
         }
     }
 
@@ -221,11 +231,13 @@ public class Debug {
             return debug$polygon;
         }
 
-        public Polygon rotated(Quaternion quat) {
+        public Polygon rotated(Quaternionf quat) {
             Polygon debug$polygon = new Polygon(this.vertices.length);
 
             for (int i = 0; i < this.vertices.length; ++i) {
-                debug$polygon.vertices[i] = quat.multiply(new Vector3(this.vertices[i])).toVector3d();
+                debug$polygon.vertices[i] = convertToVec3(quat.transformUnit(
+                    new Vector3f().set(this.vertices[i].x, this.vertices[i].y, this.vertices[i].z)
+                ));
                 debug$polygon.colors[i] = this.colors[i];
             }
 

@@ -9,8 +9,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.ClipContext.Block;
+import net.minecraft.world.level.ClipContext.Fluid;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -53,6 +55,6 @@ public abstract class EndermanMixin extends Monster {
     @Unique
     private static boolean vivecraft$canEntityBeSeen(Entity entity, Vec3 playerEyePos) {
         Vec3 entityEyePos = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
-        return entity.level().clip(new ClipContext(playerEyePos, entityEyePos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS;
+        return entity.level().clip(new ClipContext(playerEyePos, entityEyePos, Block.COLLIDER, Fluid.NONE, entity)).getType() == Type.MISS;
     }
 }

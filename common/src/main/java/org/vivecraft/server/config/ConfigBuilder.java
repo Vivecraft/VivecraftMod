@@ -2,12 +2,13 @@ package org.vivecraft.server.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import com.electronwill.nightconfig.core.ConfigSpec.CorrectionListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
-import org.vivecraft.client.gui.widgets.SettingsList;
+import org.vivecraft.client.gui.widgets.SettingsList.ResettableEntry;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -73,7 +74,7 @@ public class ConfigBuilder {
      *
      * @param listener listener to send correction to
      */
-    public void correct(ConfigSpec.CorrectionListener listener) {
+    public void correct(CorrectionListener listener) {
         spec.correct(config, listener);
     }
 
@@ -254,7 +255,7 @@ public class ConfigBuilder {
 
         public AbstractWidget getWidget(int width, int height) {
             return Button
-                .builder(Component.literal("" + get()), button -> {
+                .builder(Component.literal(String.valueOf(get())), button -> {
                 })
                 .bounds(0, 0, width, height)
                 .tooltip(Tooltip.create(Component.literal(getComment())))
@@ -342,7 +343,7 @@ public class ConfigBuilder {
         @Override
         public AbstractWidget getWidget(int width, int height) {
             return CycleButton
-                .builder((newValue) -> Component.literal("" + newValue))
+                .builder((newValue) -> Component.literal(String.valueOf(newValue)))
                 .withInitialValue(get())
                 // toArray is needed here, because the button uses Objects, and the collection is of other types
                 .withValues(getValidValues().toArray())
@@ -379,10 +380,10 @@ public class ConfigBuilder {
 
         @Override
         public AbstractWidget getWidget(int width, int height) {
-            AbstractSliderButton widget = new AbstractSliderButton(0, 0, SettingsList.ResettableEntry.valueButtonWidth, 20, Component.literal("" + get()), normalize()) {
+            AbstractSliderButton widget = new AbstractSliderButton(0, 0, ResettableEntry.valueButtonWidth, 20, Component.literal(String.valueOf(get())), normalize()) {
                 @Override
                 protected void updateMessage() {
-                    setMessage(Component.literal("" + get()));
+                    setMessage(Component.literal(String.valueOf(get())));
                 }
 
                 @Override

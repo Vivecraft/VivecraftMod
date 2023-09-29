@@ -8,12 +8,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -36,8 +34,10 @@ import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 import org.vivecraft.server.config.ServerConfig;
 
+import static org.joml.Math.*;
+
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerMixin extends Player {
+public abstract class ServerPlayerMixin extends net.minecraft.world.entity.player.Player {
 
     @Shadow
     @Final
@@ -49,7 +49,7 @@ public abstract class ServerPlayerMixin extends Player {
 
     @Inject(at = @At("TAIL"), method = "initInventoryMenu")
     public void vivecraft$menu(CallbackInfo ci) {
-        ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
+        ServerVivePlayer serverviveplayer = this.vivecraft$getVivePlayer();
         if (ServerConfig.vrFun.get() && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
             ItemStack itemstack;
             if (this.random.nextInt(2) == 1) {
@@ -74,18 +74,18 @@ public abstract class ServerPlayerMixin extends Player {
 
     @Override
     public void sweepAttack() {
-        ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
+        ServerVivePlayer serverviveplayer = this.vivecraft$getVivePlayer();
 
         if (serverviveplayer != null && serverviveplayer.isVR()) {
             Vec3 vec3 = serverviveplayer.getControllerDir(0);
-            float f = (float) Math.toDegrees(Math.atan2(vec3.x, -vec3.z));
-            double d0 = (double) (-Mth.sin(f * ((float) Math.PI / 180F)));
-            double d1 = (double) Mth.cos(f * ((float) Math.PI / 180F));
+            float f = (float) atan2(vec3.x, -vec3.z);
+            float f0 = -sin(f);
+            float f1 = cos(f);
             Vec3 vec31 = serverviveplayer.getControllerPos(0, this);
 
             if (this.level() instanceof ServerLevel) {
-                ((ServerLevel) this.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, vec31.x + d0, vec31.y,
-                    vec31.z + d1, 0, d0, 0.0D, d1, 0.0D);
+                ((ServerLevel) this.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, vec31.x + f0, vec31.y,
+                    vec31.z + f1, 0, f0, 0.0D, f1, 0.0D);
             }
         } else {
             super.sweepAttack();
@@ -102,7 +102,7 @@ public abstract class ServerPlayerMixin extends Player {
 
             if (pStack.getUseAnimation() == UseAnim.EAT) {
                 this.vivecraft$addItemParticles(pStack, pCount);
-                this.playSound(this.getEatingSound(pStack), 0.5F + 0.5F * (float) this.random.nextInt(2),
+                this.playSound(this.getEatingSound(pStack), 0.5F + 0.5F * this.random.nextInt(2),
                     (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
             }
         }
@@ -111,15 +111,15 @@ public abstract class ServerPlayerMixin extends Player {
     // TODO: this should override "spawnItemParticles", or inject into LivingEntity
     @Unique
     private void vivecraft$addItemParticles(ItemStack stack, int count) {
-        ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
+        ServerVivePlayer serverviveplayer = this.vivecraft$getVivePlayer();
         for (int i = 0; i < count; ++i) {
             Vec3 vec3 = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
-            vec3 = vec3.xRot(-this.getXRot() * ((float) Math.PI / 180F));
-            vec3 = vec3.yRot(-this.getYRot() * ((float) Math.PI / 180F));
+            vec3 = vec3.xRot(toRadians(-this.getXRot()));
+            vec3 = vec3.yRot(toRadians(-this.getYRot()));
             double d0 = (double) (-this.random.nextFloat()) * 0.6D - 0.3D;
             Vec3 vec31 = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
-            vec31 = vec31.xRot(-this.getXRot() * ((float) Math.PI / 180F));
-            vec31 = vec31.yRot(-this.getYRot() * ((float) Math.PI / 180F));
+            vec31 = vec31.xRot(toRadians(-this.getXRot()));
+            vec31 = vec31.yRot(toRadians(-this.getYRot()));
             vec31 = vec31.add(this.getX(), this.getEyeY(), this.getZ());
             if (serverviveplayer != null && serverviveplayer.isVR()) {
                 InteractionHand interactionhand = this.getUsedItemHand();
@@ -137,9 +137,8 @@ public abstract class ServerPlayerMixin extends Player {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z", shift = Shift.BEFORE), method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
         locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$dropvive(ItemStack p_9085_, boolean dropAround, boolean includeName, CallbackInfoReturnable<ItemEntity> info,
-        ItemEntity itementity) {
-        ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
+    public void vivecraft$dropvive(ItemStack p_9085_, boolean dropAround, boolean includeName, CallbackInfoReturnable<ItemEntity> info, ItemEntity itementity) {
+        ServerVivePlayer serverviveplayer = this.vivecraft$getVivePlayer();
         if (serverviveplayer != null && serverviveplayer.isVR() && !dropAround) {
             Vec3 vec3 = serverviveplayer.getControllerPos(0, this);
             Vec3 vec31 = serverviveplayer.getControllerDir(0);
@@ -166,7 +165,7 @@ public abstract class ServerPlayerMixin extends Player {
             // both entities are players, so need to check
 
             ServerVivePlayer otherVive = ServerVRPlayers.getVivePlayer(other);
-            ServerVivePlayer thisVive = vivecraft$getVivePlayer();
+            ServerVivePlayer thisVive = this.vivecraft$getVivePlayer();
 
             // create new object, if they are null, simplifies the checks
             if (otherVive == null) {
@@ -181,33 +180,33 @@ public abstract class ServerPlayerMixin extends Player {
                 || (!thisVive.isVR() && otherVive.isVR() && otherVive.isSeated())) {
                 // nonvr vs Seated
                 if (!ServerConfig.pvpSEATEDVRvsNONVR.get()) {
-                    server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs seat"), false);
+                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs seat"), false);
                     cir.setReturnValue(false);
                 }
             } else if ((!otherVive.isVR() && thisVive.isVR() && !thisVive.isSeated())
                 || (!thisVive.isVR() && otherVive.isVR() && !otherVive.isSeated())) {
                 // nonvr vs Standing
                 if (!ServerConfig.pvpVRvsNONVR.get()) {
-                    server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs stand"), false);
+                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs stand"), false);
                     cir.setReturnValue(false);
                 }
             } else if ((otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated())
                 || (thisVive.isVR() && thisVive.isSeated() && otherVive.isVR() && !otherVive.isSeated())) {
                 // Standing vs Seated
                 if (!ServerConfig.pvpVRvsSEATEDVR.get()) {
-                    server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs stand"), false);
+                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs stand"), false);
                     cir.setReturnValue(false);
                 }
             } else if (otherVive.isVR() && !otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated()) {
                 // Standing vs Standing
                 if (!ServerConfig.pvpVRvsVR.get()) {
-                    server.getPlayerList().broadcastSystemMessage(Component.literal("canceled stand vs stand"), false);
+                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled stand vs stand"), false);
                     cir.setReturnValue(false);
                 }
             } else if (otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && thisVive.isSeated()) {
                 // Seated vs Seated
                 if (!ServerConfig.pvpSEATEDVRvsSEATEDVR.get()) {
-                    server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs seat"), false);
+                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs seat"), false);
                     cir.setReturnValue(false);
                 }
             }

@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -17,39 +16,38 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRHotkeys;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings.MirrorMode;
 
 import java.util.function.Function;
+
+import static org.joml.Math.toRadians;
+import static org.vivecraft.client.utils.Utils.getCombinedLightWithMin;
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class VRWidgetHelper {
     private static final RandomSource random = RandomSource.create();
     public static boolean debug = false;
 
     public static void renderVRThirdPersonCamWidget() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-
-        if (dataholder.vrSettings.mixedRealityRenderCameraModel) {
-            if ((dataholder.currentPass == RenderPass.LEFT || dataholder.currentPass == RenderPass.RIGHT) && (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON)) {
+        if (dh.vrSettings.mixedRealityRenderCameraModel) {
+            if ((dh.currentPass == RenderPass.LEFT || dh.currentPass == RenderPass.RIGHT) && (dh.vrSettings.displayMirrorMode == MirrorMode.MIXED_REALITY || dh.vrSettings.displayMirrorMode == MirrorMode.THIRD_PERSON)) {
                 float f = 0.35F;
 
-                if (dataholder.interactTracker.isInCamera() && !VRHotkeys.isMovingThirdPersonCam()) {
+                if (dh.interactTracker.isInCamera() && !VRHotkeys.isMovingThirdPersonCam()) {
                     f *= 1.03F;
                 }
 
-                renderVRCameraWidget(-0.748F, -0.438F, -0.06F, f, RenderPass.THIRD, ClientDataHolderVR.thirdPersonCameraModel, ClientDataHolderVR.thirdPersonCameraDisplayModel, () ->
+                renderVRCameraWidget(-0.748F, -0.438F, -0.06F, f, RenderPass.THIRD, dh.thirdPersonCameraModel, dh.thirdPersonCameraDisplayModel, () ->
                 {
-                    dataholder.vrRenderer.framebufferMR.bindRead();
-                    RenderSystem.setShaderTexture(0, dataholder.vrRenderer.framebufferMR.getColorTextureId());
+                    dh.vrRenderer.framebufferMR.bindRead();
+                    RenderSystem.setShaderTexture(0, dh.vrRenderer.framebufferMR.getColorTextureId());
                 }, (face) ->
                 {
                     if (face == Direction.NORTH) {
@@ -63,21 +61,19 @@ public class VRWidgetHelper {
     }
 
     public static void renderVRHandheldCameraWidget() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
-        if (dataholder.currentPass != RenderPass.CAMERA && dataholder.cameraTracker.isVisible()) {
+        if (dh.currentPass != RenderPass.CAMERA && dh.cameraTracker.isVisible()) {
             float f = 0.25F;
 
-            if (dataholder.interactTracker.isInHandheldCamera() && !dataholder.cameraTracker.isMoving()) {
+            if (dh.interactTracker.isInHandheldCamera() && !dh.cameraTracker.isMoving()) {
                 f *= 1.03F;
             }
 
             renderVRCameraWidget(-0.5F, -0.25F, -0.22F, f, RenderPass.CAMERA, CameraTracker.cameraModel, CameraTracker.cameraDisplayModel, () ->
             {
-                if (VREffectsHelper.getNearOpaqueBlock(dataholder.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance()) == null) {
-                    dataholder.vrRenderer.cameraFramebuffer.bindRead();
-                    RenderSystem.setShaderTexture(0, dataholder.vrRenderer.cameraFramebuffer.getColorTextureId());
+                if (VREffectsHelper.getNearOpaqueBlock(dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), (double) ((GameRendererExtension) mc.gameRenderer).vivecraft$getMinClipDistance()) == null) {
+                    dh.vrRenderer.cameraFramebuffer.bindRead();
+                    RenderSystem.setShaderTexture(0, dh.vrRenderer.cameraFramebuffer.getColorTextureId());
                 } else {
                     RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/black.png"));
                 }
@@ -89,48 +85,50 @@ public class VRWidgetHelper {
     }
 
     public static void renderVRCameraWidget(float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, ModelResourceLocation model, ModelResourceLocation displayModel, Runnable displayBindFunc, Function<Direction, DisplayFace> displayFaceFunc) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
         poseStack.setIdentity();
-        RenderHelper.applyVRModelView(dataholder.currentPass, poseStack);
+        RenderHelper.applyVRModelView(dh.currentPass, poseStack);
 
-        Vec3 vec3 = dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
-        Vec3 vec31 = dataholder.vrPlayer.vrdata_world_render.getEye(dataholder.currentPass).getPosition();
+        Vec3 vec3 = dh.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
+        Vec3 vec31 = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition();
         Vec3 vec32 = vec3.subtract(vec31);
 
-        poseStack.translate(vec32.x, vec32.y, vec32.z);
-        poseStack.mulPoseMatrix(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix());
-        scale = scale * dataholder.vrPlayer.vrdata_world_render.worldScale;
+        poseStack.last().pose()
+            .translate((float) vec32.x, (float) vec32.y, (float) vec32.z)
+            .mul(dh.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix());
+        scale *= dh.vrPlayer.vrdata_world_render.worldScale;
         poseStack.scale(scale, scale, scale);
 
         if (debug) {
-            MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
+            float ang = toRadians(180.0F);
+            poseStack.last().pose().rotateY(ang);
+            poseStack.last().normal().rotateY(ang);
             RenderHelper.renderDebugAxes(0, 0, 0, 0.08F);
-            MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
+            poseStack.last().pose().rotateY(ang);
+            poseStack.last().normal().rotateY(ang);
         }
 
-        poseStack.translate(offsetX, offsetY, offsetZ);
+        poseStack.last().pose().translate(offsetX, offsetY, offsetZ);
         RenderSystem.applyModelViewMatrix();
 
-        BlockPos blockpos = BlockPos.containing(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
-        int i = Utils.getCombinedLightWithMin(minecraft.level, blockpos, 0);
+        BlockPos blockpos = BlockPos.containing(dh.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
+        int i = getCombinedLightWithMin(mc.level, blockpos, 0);
 
         RenderSystem.enableDepthTest();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-        if (minecraft.level != null) {
+        if (mc.level != null) {
             RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
         } else {
             RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
         }
-        minecraft.gameRenderer.lightTexture().turnOnLightLayer();
+        mc.gameRenderer.lightTexture().turnOnLightLayer();
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
-        minecraft.getBlockRenderer().getModelRenderer().renderModel((new PoseStack()).last(), bufferbuilder, (BlockState) null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
+        mc.getBlockRenderer().getModelRenderer().renderModel((new PoseStack()).last(), bufferbuilder, null, mc.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
         tesselator.end();
 
         RenderSystem.disableBlend();
@@ -142,7 +140,7 @@ public class VRWidgetHelper {
 
         // TODO lighting changes with head movement
 
-        for (BakedQuad bakedquad : minecraft.getModelManager().getModel(displayModel).getQuads((BlockState) null, (Direction) null, random)) {
+        for (BakedQuad bakedquad : mc.getModelManager().getModel(displayModel).getQuads(null, null, random)) {
             if (displayFaceFunc.apply(bakedquad.getDirection()) != DisplayFace.NONE && bakedquad.getSprite().contents().name().equals(new ResourceLocation("vivecraft:transparent"))) {
                 int[] vertexList = bakedquad.getVertices();
                 boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == DisplayFace.MIRROR;
@@ -189,15 +187,15 @@ public class VRWidgetHelper {
         }
 
         tesselator.end();
-        minecraft.gameRenderer.lightTexture().turnOffLightLayer();
+        mc.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.enableBlend();
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
     }
 
-    public static enum DisplayFace {
+    public enum DisplayFace {
         NONE,
         NORMAL,
-        MIRROR;
+        MIRROR
     }
 }

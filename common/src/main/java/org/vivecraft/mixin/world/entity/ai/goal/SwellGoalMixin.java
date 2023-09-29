@@ -2,8 +2,6 @@ package org.vivecraft.mixin.world.entity.ai.goal;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.goal.SwellGoal;
-import net.minecraft.world.entity.monster.Creeper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,12 +12,12 @@ import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 import org.vivecraft.server.config.ServerConfig;
 
-@Mixin(SwellGoal.class)
+@Mixin(net.minecraft.world.entity.ai.goal.SwellGoal.class)
 public class SwellGoalMixin {
 
     @Final
     @Shadow
-    private Creeper creeper;
+    private net.minecraft.world.entity.monster.Creeper creeper;
 
     @Inject(at = @At("HEAD"), method = "canUse", cancellable = true)
     public void vivecraft$vrSwellDistance(CallbackInfoReturnable<Boolean> cir) {

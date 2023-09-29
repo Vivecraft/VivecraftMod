@@ -3,7 +3,9 @@ package org.vivecraft.client.gui.settings;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.widgets.SettingsList;
-import org.vivecraft.server.config.ConfigBuilder;
+import org.vivecraft.client.gui.widgets.SettingsList.BaseEntry;
+import org.vivecraft.client.gui.widgets.SettingsList.CategoryEntry;
+import org.vivecraft.server.config.ConfigBuilder.ConfigValue;
 import org.vivecraft.server.config.ServerConfig;
 
 import java.util.LinkedList;
@@ -16,17 +18,17 @@ public class GuiServerSettings extends GuiListScreen {
     }
 
     @Override
-    protected List<SettingsList.BaseEntry> getEntries() {
-        List<SettingsList.BaseEntry> entries = new LinkedList<>();
+    protected List<BaseEntry> getEntries() {
+        List<BaseEntry> entries = new LinkedList<>();
         String lastCategory = null;
-        for (ConfigBuilder.ConfigValue cv : ServerConfig.getConfigValues()) {
+        for (ConfigValue cv : ServerConfig.getConfigValues()) {
             int i;
             String path = cv.getPath();
             String category = path.substring(0, path.lastIndexOf("."));
             String name = path.substring(path.lastIndexOf(".") + 1);
             if (!category.equals(lastCategory)) {
                 lastCategory = category;
-                entries.add(new SettingsList.CategoryEntry(Component.literal(category)));
+                entries.add(new CategoryEntry(Component.literal(category)));
             }
             entries.add(SettingsList.ConfigToEntry(cv, Component.literal(name)));
         }

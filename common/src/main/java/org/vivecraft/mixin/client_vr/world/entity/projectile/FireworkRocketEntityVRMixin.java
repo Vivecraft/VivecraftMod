@@ -1,21 +1,20 @@
 package org.vivecraft.mixin.client_vr.world.entity.projectile;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
 
-@Mixin(FireworkRocketEntity.class)
+import javax.annotation.Nullable;
+
+import static org.vivecraft.client_vr.VRState.*;
+
+@Mixin(net.minecraft.world.entity.projectile.FireworkRocketEntity.class)
 public class FireworkRocketEntityVRMixin {
 
     @Shadow
@@ -26,27 +25,27 @@ public class FireworkRocketEntityVRMixin {
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 1, method = "tick")
     private double vivecraft$modifyX(double x) {
-        if (attachedToEntity instanceof LocalPlayer localPlayer && attachedToEntity == Minecraft.getInstance().player && VRState.vrRunning) {
-            var controller = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getHand(!localPlayer.getOffhandItem().is(Items.FIREWORK_ROCKET) && localPlayer.getMainHandItem().is(Items.FIREWORK_ROCKET) ? 0 : 1);
-            vivecraft$handPos = controller.getPosition().add(controller.getDirection().scale(0.25));
-            return vivecraft$handPos.x;
+        if (this.attachedToEntity instanceof LocalPlayer localPlayer && this.attachedToEntity == mc.player && vrRunning) {
+            var controller = dh.vrPlayer.getVRDataWorld().getHand(!localPlayer.getOffhandItem().is(Items.FIREWORK_ROCKET) && localPlayer.getMainHandItem().is(Items.FIREWORK_ROCKET) ? 0 : 1);
+            this.vivecraft$handPos = controller.getPosition().add(controller.getDirection().scale(0.25));
+            return this.vivecraft$handPos.x;
         }
         return x;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 2, method = "tick")
     private double vivecraft$modifyY(double y) {
-        if (vivecraft$handPos != null) {
-            return vivecraft$handPos.y;
+        if (this.vivecraft$handPos != null) {
+            return this.vivecraft$handPos.y;
         }
         return y;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 3, method = "tick")
     private double vivecraft$modifyZ(double z) {
-        if (vivecraft$handPos != null) {
-            z = vivecraft$handPos.z;
-            vivecraft$handPos = null;
+        if (this.vivecraft$handPos != null) {
+            z = this.vivecraft$handPos.z;
+            this.vivecraft$handPos = null;
         }
         return z;
     }
