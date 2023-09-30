@@ -48,7 +48,7 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     protected abstract Player getCameraPlayer();
 
     @Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
-    public void vivecraft$cancelRenderVignette(PoseStack poseStack, Entity entity, CallbackInfo ci) {
+    public void vivecraft$cancelRenderVignette(Entity entity, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             RenderSystem.enableDepthTest();
             ci.cancel();
@@ -56,21 +56,21 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     }
 
     @Inject(method = "renderTextureOverlay", at = @At("HEAD"), cancellable = true)
-    public void vivecraft$cancelRenderOverlay(PoseStack poseStack, ResourceLocation resourceLocation, float f, CallbackInfo ci) {
+    public void vivecraft$cancelRenderOverlay(ResourceLocation resourceLocation, float f, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
-    public void vivecraft$cancelRenderPortalOverlay(PoseStack poseStack, float f, CallbackInfo ci) {
+    public void vivecraft$cancelRenderPortalOverlay(float f, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }
     }
 
     @Inject(at = @At("HEAD"), method = "renderSpyglassOverlay", cancellable = true)
-    public void vivecraft$cancelRenderSpyglassOverlay(PoseStack poseStack, float f, CallbackInfo ci) {
+    public void vivecraft$cancelRenderSpyglassOverlay(float f, CallbackInfo ci) {
         if (RenderPassType.isGuiOnly()) {
             ci.cancel();
         }

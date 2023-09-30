@@ -3,7 +3,6 @@ package org.vivecraft.client.gui.widgets;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -12,10 +11,8 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
 import org.vivecraft.server.config.ConfigBuilder;
 
 import java.util.Collections;
@@ -64,12 +61,6 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
             drawString(poseStack, Minecraft.getInstance().font, this.name, Minecraft.getInstance().screen.width / 2 - this.width / 2, j + m - Minecraft.getInstance().font.lineHeight - 1, 0xFFFFFF);
-        }
-
-        @Override
-        @Nullable
-        public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
-            return null;
         }
 
         @Override

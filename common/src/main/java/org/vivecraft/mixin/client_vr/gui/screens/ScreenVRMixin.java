@@ -14,7 +14,7 @@ import org.vivecraft.client_vr.VRState;
 public abstract class ScreenVRMixin extends AbstractContainerEventHandler implements Renderable {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;fillGradient(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V"), method = "renderBackground(Lcom/mojang/blaze3d/vertex/PoseStack;I)V")
-    public void vivecraft$vrBackground(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+    public void vivecraft$vrBackground(Screen instance, PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings != null && !ClientDataHolderVR.getInstance().vrSettings.menuBackground) {
             this.fillGradient(poseStack, i, j, k, l, 0, 0);
         } else {

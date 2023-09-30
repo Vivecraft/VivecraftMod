@@ -17,7 +17,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -116,14 +115,14 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
             boolean useLeftHandModelinLeftHand = false;
 
-            ItemDisplayContext itemDisplayContext;
+            ItemTransforms.TransformType transformType;
             if (dh.vrSettings.thirdPersonItems) {
                 useLeftHandModelinLeftHand = true; //test
                 VivecraftItemRendering.applyThirdPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
-                itemDisplayContext = mainHand ? ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);
+                transformType = mainHand ? ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND : ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND);
             } else {
                 VivecraftItemRendering.applyFirstPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
-                itemDisplayContext = mainHand ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.FIRST_PERSON_LEFT_HAND : ItemDisplayContext.FIRST_PERSON_RIGHT_HAND);
+                transformType = mainHand ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND : ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND);
             }
 
             ClientDataHolderVR.isfphand = true;
@@ -149,7 +148,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                 VREffectsHelper.drawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
                 pMatrixStack.popPose();
             } else {
-                this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
+                this.renderItem(pPlayer, pStack, transformType, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
             }
 
             ClientDataHolderVR.isfphand = false;
@@ -160,7 +159,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
     }
 
     @Shadow
-    public abstract void renderItem(LivingEntity livingEntity, ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i);
+    public abstract void renderItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i);
 
     @Shadow
     protected abstract void renderMap(PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, ItemStack pStack);

@@ -1,8 +1,10 @@
 package org.vivecraft.mixin.client_vr.gui.screens;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.GridWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -47,22 +49,22 @@ public class OptionsScreenVRMixin extends Screen {
         return ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled ? 1 : 2;
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vivecraft$addVivecraftSettingsLeft(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;I)Lnet/minecraft/client/gui/components/AbstractWidget;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void vivecraft$addVivecraftSettingsLeft(CallbackInfo ci, GridWidget gridWidget, GridWidget.RowHelper rowHelper) {
         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled && ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft) {
             vivecraft$addVivecraftButton(rowHelper);
         }
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;I)Lnet/minecraft/client/gui/layouts/LayoutElement;", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vivecraft$addVivecraftSettingsRight(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;I)Lnet/minecraft/client/gui/components/AbstractWidget;", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void vivecraft$addVivecraftSettingsRight(CallbackInfo ci, GridWidget gridLayout, GridWidget.RowHelper rowHelper) {
         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled && !ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft) {
             vivecraft$addVivecraftButton(rowHelper);
         }
     }
 
     @Unique
-    private void vivecraft$addVivecraftButton(GridLayout.RowHelper rowHelper) {
+    private void vivecraft$addVivecraftButton(GridWidget.RowHelper rowHelper) {
         rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
         {
             Minecraft.getInstance().options.save();
@@ -71,12 +73,12 @@ public class OptionsScreenVRMixin extends Screen {
             .build());
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout;arrangeElements()V"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vivecraft$noBigButtonsPlease(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
-        gridLayout.visitChildren(child -> {
-            if (child.getWidth() > 150 && child instanceof Button button) {
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget;pack()V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void vivecraft$noBigButtonsPlease(CallbackInfo ci, GridWidget gridWidget, GridWidget.RowHelper rowHelper) {
+        for (GuiEventListener listener : gridWidget.children()) {
+            if (listener instanceof AbstractWidget child && child.getWidth() > 150 && child instanceof Button button) {
                 button.setWidth(150);
             }
-        });
+        };
     }
 }

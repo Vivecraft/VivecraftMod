@@ -85,6 +85,7 @@ public class VRArmHelper {
         ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTicks);
         poseStack.pushPose();
         poseStack.setIdentity();
+        RenderSystem.disableTexture();
         RenderSystem.enableDepthTest();
         RenderSystem.defaultBlendFunc();
         RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
@@ -113,7 +114,7 @@ public class VRArmHelper {
 
         if (mc.level != null) {
             float light = (float) mc.level.getMaxLocalRawBrightness(
-                BlockPos.containing(dataHolder.vrPlayer.vrdata_world_render.hmd.getPosition()));
+                new BlockPos(dataHolder.vrPlayer.vrdata_world_render.hmd.getPosition()));
 
             int minLight = ShadersHelper.ShaderLight();
 
@@ -256,6 +257,7 @@ public class VRArmHelper {
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            RenderSystem.disableTexture();
 
             //	TP energy
             if (ClientNetworking.isLimitedSurvivalTeleport() && !dataHolder.vrPlayer.getFreeMove()
@@ -296,6 +298,7 @@ public class VRArmHelper {
                 }
             }
 
+            RenderSystem.enableTexture();
             RenderSystem.defaultBlendFunc();
 
 //			if (Config.isShaders()) {

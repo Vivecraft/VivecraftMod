@@ -33,7 +33,7 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;", ordinal = 4), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$addInit(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper rowHelper) {
+    public void vivecraft$addInit(CallbackInfo ci, GridWidget gridWidget, GridWidget.RowHelper rowHelper) {
         if (!VRState.vrEnabled) {
             return;
         }
@@ -71,7 +71,7 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
     @Inject(at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/gui/screens/PauseScreen;disconnectButton:Lnet/minecraft/client/gui/components/Button;", shift = At.Shift.BY, by = -3), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$addLowerButtons(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper rowHelper) {
+    public void vivecraft$addLowerButtons(CallbackInfo ci, GridWidget gridWidget, GridWidget.RowHelper rowHelper) {
         if (!VRState.vrEnabled) {
             return;
         }
@@ -133,15 +133,15 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
     @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;", ordinal = 2))
-    private LayoutElement vivecraft$remove(GridLayout.RowHelper instance, LayoutElement layoutElement) {
+    private AbstractWidget vivecraft$remove(GridWidget.RowHelper instance, AbstractWidget abstractWidget) {
         // Feedback button
         // don't remove, just hide, so mods that rely on it being there, still work
         abstractWidget.visible = !VRState.vrEnabled;
         return instance.addChild(abstractWidget);
     }
 
-    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 3))
-    private LayoutElement vivecraft$remove2(GridLayout.RowHelper instance, LayoutElement layoutElement) {
+    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;", ordinal = 3))
+    private AbstractWidget vivecraft$remove2(GridWidget.RowHelper instance, AbstractWidget abstractWidget) {
         // report bugs button
         // don't remove, just hide, so mods that rely on it being there, still work
         abstractWidget.visible = !VRState.vrEnabled;

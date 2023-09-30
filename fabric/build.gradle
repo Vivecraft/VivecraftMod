@@ -29,7 +29,7 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
 
     // for iris compat
     modCompileOnly "maven.modrinth:iris:1.5.2+1.19.3"
@@ -48,18 +48,18 @@ dependencies {
     modCompileOnly "maven.modrinth:indium:1.0.14+mc1.19.3"
 
     //mod menu
-    modApi("com.terraformersmc:modmenu:6.3.1")
+    modApi("com.terraformersmc:modmenu:5.1.0")
 
     // for immersive portals compat
-    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.7.3-mc1.19.4') {
+    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.5.5-mc1.19.3') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.7.3-mc1.19.4') {
+    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.5.5-mc1.19.3') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:build:v2.7.3-mc1.19.4') {
+    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:build:v2.5.5-mc1.19.3') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }

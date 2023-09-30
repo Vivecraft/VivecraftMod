@@ -171,6 +171,7 @@ public class RenderHelper {
             polyCull = true;
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
+            RenderSystem.disableTexture();
             // GlStateManager._disableLighting();
             RenderSystem.disableCull();
 
@@ -187,6 +188,7 @@ public class RenderHelper {
             }
 
             if (polyTex) {
+                RenderSystem.enableTexture();
             }
 
             if (polyLight) {

@@ -64,7 +64,7 @@ public class VREffectsHelper {
         if (mc.level == null) {
             return false;
         } else {
-            BlockPos blockpos = BlockPos.containing(in);
+            BlockPos blockpos = new BlockPos(in);
             return mc.level.getBlockState(blockpos).isSolidRender(mc.level, blockpos);
         }
     }
@@ -89,6 +89,7 @@ public class VREffectsHelper {
             mc.gameRenderer.lightTexture().turnOffLightLayer();
             matrixStackIn.pushPose();
             RenderSystem.enableDepthTest();
+            RenderSystem.enableTexture();
 
             if (i == 0) {
                 dataHolder.vrRenderer.telescopeFramebufferR.bindRead();
@@ -106,7 +107,7 @@ public class VREffectsHelper {
             RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
             RenderSystem.enableBlend();
             matrixStackIn.translate(0.0D, 0.0D, 0.00001D);
-            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(dataHolder.vrPlayer.vrdata_world_render.getController(i).getPosition()));
+            int light = LevelRenderer.getLightColor(mc.level, new BlockPos(dataHolder.vrPlayer.vrdata_world_render.getController(i).getPosition()));
             RenderHelper.drawSizedQuadWithLightmapCutout(720.0F, 720.0F, scale, light, matrixStackIn.last().pose());
 
             matrixStackIn.popPose();
@@ -267,9 +268,10 @@ public class VREffectsHelper {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         RenderSystem.enableDepthTest();
-        //RenderSystem.enableTexture();
+        RenderSystem.enableTexture();
         RenderSystem.enableBlend();
         RenderSystem.enableCull();
+        RenderSystem.defaultBlendFunc();
 
         poseStack.pushPose();
 
@@ -614,6 +616,7 @@ public class VREffectsHelper {
     private static void renderScreen(PoseStack poseStack, RenderTarget screenFramebuffer, boolean depthAlways, boolean noFog, Vec3 screenPos) {
         screenFramebuffer.bindRead();
         RenderSystem.disableCull();
+        RenderSystem.enableTexture();
         RenderSystem.setShaderTexture(0, screenFramebuffer.getColorTextureId());
 
         // cache fog distance
@@ -657,7 +660,7 @@ public class VREffectsHelper {
             }
 
             int minLight = ShadersHelper.ShaderLight();
-            int light = Utils.getCombinedLightWithMin(mc.level, BlockPos.containing(screenPos), minLight);
+            int light = Utils.getCombinedLightWithMin(mc.level, new BlockPos(screenPos), minLight);
             RenderHelper.drawSizedQuadWithLightmapCutout((float) mc.getWindow().getGuiScaledWidth(),
                 (float) mc.getWindow().getGuiScaledHeight(), 1.5F, light, color,
                 poseStack.last().pose());
@@ -776,6 +779,7 @@ public class VREffectsHelper {
 
         RenderSystem.depthFunc(GL11C.GL_ALWAYS);
         RenderSystem.depthMask(true);
+        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.disableCull();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
@@ -785,6 +789,7 @@ public class VREffectsHelper {
         bufferbuilder.vertex(mat, -1.5F, 1.5F, 0.0F).endVertex();
         tesselator.end();
         RenderSystem.depthFunc(GL11C.GL_LEQUAL);
+        RenderSystem.enableTexture();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
@@ -896,7 +901,7 @@ public class VREffectsHelper {
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR,
                 GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(crosshairRenderPos));
+            int light = LevelRenderer.getLightColor(mc.level, new BlockPos(crosshairRenderPos));
             float brightness = 1.0F;
 
             if (mc.hitResult == null || mc.hitResult.getType() == HitResult.Type.MISS) {
