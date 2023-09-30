@@ -24,14 +24,14 @@ public abstract class ServerCommonPacketListenerImplMixin {
 
     @Inject(at = @At("TAIL"), method = "handleCustomPayload")
     public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket payloadPacket, CallbackInfo ci) {
-        if (payloadPacket.payload() instanceof VivecraftDataPacket dataPacket) {
+        if (payloadPacket.payload() instanceof VivecraftDataPacket dataPacket
+            && (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener) {
             var buffer = dataPacket.buffer();
             PacketUtils.ensureRunningOnSameThread(payloadPacket, (ServerCommonPacketListenerImpl) (Object) this, server);
             CommonNetworkHelper.PacketDiscriminators packetDiscriminator = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
-            ServerNetworking.handlePacket(packetDiscriminator, buffer, (ServerGamePacketListenerImpl) (Object) this);
+            ServerNetworking.handlePacket(packetDiscriminator, buffer, gamePacketListener);
 
-            if ((Object) this instanceof ServerGamePacketListenerImpl gamePacketListener
-                && packetDiscriminator == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
+            if (packetDiscriminator == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
                 gamePacketListener.aboveGroundTickCount = 0;
             }
         }
