@@ -34,6 +34,9 @@ import org.vivecraft.common.network.CommonNetworkHelper;
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerVRMixin {
+
+    @Unique
+    String vivecraft$lastMsg = null;
     @Final
     @Shadow
     private Minecraft minecraft;
@@ -76,33 +79,30 @@ public class ClientPacketListenerVRMixin {
         ClientNetworking.needsReset = true;
     }
 
-    @Unique
-    String lastMsg = null;
-
     @Inject(at = @At("TAIL"), method = "sendChat")
     public void vivecraft$chatMsg(String string, CallbackInfo ci) {
-        this.lastMsg = string;
+        this.vivecraft$lastMsg = string;
     }
 
     @Inject(at = @At("TAIL"), method = "sendCommand")
     public void vivecraft$commandMsg(String string, CallbackInfo ci) {
-        this.lastMsg = string;
+        this.vivecraft$lastMsg = string;
     }
 
     @Inject(at = @At("TAIL"), method = "handlePlayerChat")
     public void vivecraft$chat(ClientboundPlayerChatPacket clientboundPlayerChatPacket, CallbackInfo ci) {
-        if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundPlayerChatPacket.sender() == minecraft.player.getUUID())) {
+        if (VRState.vrRunning && (minecraft.player == null || vivecraft$lastMsg == null || clientboundPlayerChatPacket.sender() == minecraft.player.getUUID())) {
             vivecraft$triggerHapticSound();
         }
-        lastMsg = null;
+        vivecraft$lastMsg = null;
     }
 
     @Inject(at = @At("TAIL"), method = "handleSystemChat")
     public void vivecraft$chatSystem(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
-        if (VRState.vrRunning && (minecraft.player == null || lastMsg == null || clientboundSystemChatPacket.content().getString().contains(lastMsg))) {
+        if (VRState.vrRunning && (minecraft.player == null || vivecraft$lastMsg == null || clientboundSystemChatPacket.content().getString().contains(vivecraft$lastMsg))) {
             vivecraft$triggerHapticSound();
         }
-        lastMsg = null;
+        vivecraft$lastMsg = null;
     }
 
     @Unique
