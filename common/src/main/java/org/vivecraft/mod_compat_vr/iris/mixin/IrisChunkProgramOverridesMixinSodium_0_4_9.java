@@ -18,12 +18,12 @@ public class IrisChunkProgramOverridesMixinSodium_0_4_9 {
 
     @Group(name = "create sodium shaders", min = 1, max = 1)
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/coderbot/iris/compat/sodium/impl/shader_overrides/IrisChunkProgramOverrides;createShaders(Lnet/coderbot/iris/pipeline/SodiumTerrainPipeline;Lme/jellysquid/mods/sodium/client/render/vertex/type/ChunkVertexType;)V"), method = "getProgramOverride", remap = false, expect = 0)
-    public void createAllPipelinesShadersSodium_0_4_9(IrisChunkProgramOverrides instance, SodiumTerrainPipeline sodiumTerrainPipeline, ChunkVertexType chunkVertexType) {
+    public void vivecraft$createAllPipelinesShadersSodium_0_4_9(IrisChunkProgramOverrides instance, SodiumTerrainPipeline sodiumTerrainPipeline, ChunkVertexType chunkVertexType) {
         try {
-            ((IrisChunkProgramOverridesExtension) this).createAllPipelinesShadersSodiumProcessing(
-                    sodiumTerrainPipeline,
-                    chunkVertexType,
-                    instance.getClass().getMethod("createShaders", SodiumTerrainPipeline.class, ChunkVertexType.class)
+            ((IrisChunkProgramOverridesExtension) this).vivecraft$createAllPipelinesShadersSodiumProcessing(
+                sodiumTerrainPipeline,
+                chunkVertexType,
+                instance.getClass().getMethod("createShaders", SodiumTerrainPipeline.class, ChunkVertexType.class)
             );
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             // this shouldn't happen if everything went well

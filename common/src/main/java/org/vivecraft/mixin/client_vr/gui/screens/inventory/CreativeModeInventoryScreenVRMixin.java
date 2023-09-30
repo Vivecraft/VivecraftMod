@@ -30,17 +30,17 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen;scrollOffs:F", shift = At.Shift.BEFORE), method = "refreshSearchResults")
-    public void search(CallbackInfo ci) {
-        addCreativeSearch(this.searchBox.getValue(), this.menu.items);
+    public void vivecraft$search(CallbackInfo ci) {
+        vivecraft$addCreativeSearch(this.searchBox.getValue(), this.menu.items);
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;addAll(Ljava/util/Collection;)Z", ordinal = 1), method = "selectTab")
-    public void fill(CreativeModeTab creativeModeTab, CallbackInfo ci) {
-        addCreativeItems(creativeModeTab, this.menu.items);
+    public void vivecraft$fill(CreativeModeTab creativeModeTab, CallbackInfo ci) {
+        vivecraft$addCreativeItems(creativeModeTab, this.menu.items);
     }
 
     @Unique
-    private void addCreativeItems(CreativeModeTab tab, NonNullList<ItemStack> list) {
+    private void vivecraft$addCreativeItems(CreativeModeTab tab, NonNullList<ItemStack> list) {
         if (tab == CreativeModeTabs.FOOD_AND_DRINKS || tab == null) {
             ItemStack itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
             ItemStack itemstack1 = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER).setHoverName(Component.literal("DRINK ME"));
@@ -62,9 +62,9 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
     }
 
     @Unique
-    private void addCreativeSearch(String query, NonNullList<ItemStack> list) {
+    private void vivecraft$addCreativeSearch(String query, NonNullList<ItemStack> list) {
         NonNullList<ItemStack> nonnulllist = NonNullList.create();
-        addCreativeItems((CreativeModeTab)null, nonnulllist);
+        vivecraft$addCreativeItems(null, nonnulllist);
 
         for (ItemStack itemstack : nonnulllist) {
             if (query.isEmpty() || itemstack.getHoverName().toString().toLowerCase().contains(query.toLowerCase())) {
@@ -72,5 +72,4 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
             }
         }
     }
-
 }

@@ -55,8 +55,7 @@ public class VivecraftVRMod {
     public final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout", -1, "key.categories.movement");
 
     private void setupKeybindingSets() {
-        if (this.userKeyBindingSet == null || hiddenKeyBindingSet == null)
-        {
+        if (this.userKeyBindingSet == null || hiddenKeyBindingSet == null) {
             this.userKeyBindingSet = new LinkedHashSet<>();
             this.hiddenKeyBindingSet = new LinkedHashSet<>();
             this.allKeyBindingSet = new LinkedHashSet<>();
@@ -109,8 +108,7 @@ public class VivecraftVRMod {
         }
     }
 
-    public Set<KeyMapping> getUserKeyBindings()
-    {
+    public Set<KeyMapping> getUserKeyBindings() {
         setupKeybindingSets();
         return this.userKeyBindingSet;
     }
@@ -125,10 +123,8 @@ public class VivecraftVRMod {
         return allKeyBindingSet;
     }
 
-    public KeyMapping[] initializeBindings(KeyMapping[] keyBindings)
-    {
-        for (KeyMapping keymapping : this.getUserKeyBindings())
-        {
+    public KeyMapping[] initializeBindings(KeyMapping[] keyBindings) {
+        for (KeyMapping keymapping : this.getUserKeyBindings()) {
             keyBindings = ArrayUtils.add(keyBindings, keymapping);
         }
 
@@ -140,21 +136,17 @@ public class VivecraftVRMod {
         return keyBindings;
     }
 
-    public void setVanillaBindings(KeyMapping[] bindings)
-    {
+    public void setVanillaBindings(KeyMapping[] bindings) {
         this.vanillaBindingSet = new HashSet<>(Arrays.asList(bindings));
         // add hidden keys, since those are not in there
         vanillaBindingSet.addAll(hiddenKeyBindingSet);
     }
 
-    public boolean isSafeBinding(KeyMapping kb)
-    {
+    public boolean isSafeBinding(KeyMapping kb) {
         return this.getAllKeyBindings().contains(kb) || kb == mc.options.keyChat || kb == mc.options.keyInventory;
     }
 
-    public boolean isModBinding(KeyMapping kb)
-    {
+    public boolean isModBinding(KeyMapping kb) {
         return !this.vanillaBindingSet.contains(kb);
     }
-
 }

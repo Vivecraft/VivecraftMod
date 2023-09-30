@@ -1,5 +1,7 @@
 {
-    "variants": {
-        "": { "model": "vivecraft:telescope" }
+  "variants": {
+    "": {
+      "model": "vivecraft:telescope"
     }
+  }
 }

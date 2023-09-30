@@ -1,8 +1,13 @@
 package org.vivecraft.server.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
+import org.vivecraft.client.gui.widgets.SettingsList;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -14,13 +19,14 @@ public class ConfigBuilder {
     private final Deque<String> stack = new ArrayDeque<>();
     private final List<ConfigValue> configValues = new ArrayList<>();
 
-    public ConfigBuilder(CommentedConfig config, ConfigSpec spec){
+    public ConfigBuilder(CommentedConfig config, ConfigSpec spec) {
         this.config = config;
         this.spec = spec;
     }
 
     /**
      * pushes the given subPath to the path
+     *
      * @param subPath new sub path
      * @return this builder, for chaining commands
      */
@@ -31,6 +37,7 @@ public class ConfigBuilder {
 
     /**
      * pops the last sub path
+     *
      * @return this builder, for chaining commands
      */
     public ConfigBuilder pop() {
@@ -40,6 +47,7 @@ public class ConfigBuilder {
 
     /**
      * add a comment to the config
+     *
      * @param comment Text for the comment
      * @return this builder, for chaining commands
      */
@@ -51,7 +59,7 @@ public class ConfigBuilder {
     private void addDefaultValueComment(List<String> path, int defaultValue, int min, int max) {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
-            +"default: %d, min: %d, max: %d".formatted(defaultValue, min, max));
+            + "default: %d, min: %d, max: %d".formatted(defaultValue, min, max));
     }
 
     private void addDefaultValueComment(List<String> path, double defaultValue, double min, double max) {
@@ -62,6 +70,7 @@ public class ConfigBuilder {
 
     /**
      * corrects the attached config, with the built spec
+     *
      * @param listener listener to send correction to
      */
     public void correct(ConfigSpec.CorrectionListener listener) {
@@ -73,8 +82,10 @@ public class ConfigBuilder {
     }
 
     // general Settings
+
     /**
      * defines a setting with the current path, and pops the last path segment
+     *
      * @param defaultValue default value this setting should have
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
@@ -90,9 +101,10 @@ public class ConfigBuilder {
 
     /**
      * defines a setting with the current path, and pops the last path segment
+     *
      * @param defaultValue default value this setting should have
-     * @param min the minimum value, that  is valid for this setting
-     * @param max the maximum value, that  is valid for this setting
+     * @param min          the minimum value, that  is valid for this setting
+     * @param max          the maximum value, that  is valid for this setting
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
     public <T extends Comparable<? super T>> ConfigValue<T> defineInRange(T defaultValue, T min, T max) {
@@ -107,38 +119,40 @@ public class ConfigBuilder {
 
     /**
      * defines a setting with the current path, and pops the last path segment
+     *
      * @param defaultValue default value this setting should have
-     * @param validator Predicate, that signals, what values are accepted
+     * @param validator    Predicate, that signals, what values are accepted
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
-    public <T> ConfigValue<List<? extends T>> defineList(List<? extends T> defaultValue, Predicate<Object> validator) {
+    public <T> ListValue<T> defineList(List<T> defaultValue, Predicate<Object> validator) {
         List<String> path = stack.stream().toList();
         spec.defineList(path, defaultValue, validator);
         stack.removeLast();
 
-        ConfigValue<List<? extends T>> value = new ConfigValue<>(config, path, defaultValue);
+        ListValue<T> value = new ListValue<>(config, path, defaultValue);
         configValues.add(value);
         return value;
     }
 
     /**
      * defines a setting with the current path, and pops the last path segment
+     *
      * @param defaultValue default value this setting should have
-     * @param validValues Collection of values that are accepted
+     * @param validValues  Collection of values that are accepted
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
-    public <T> ConfigValue<T> defineInList(T defaultValue, Collection<? extends T> validValues) {
+    public <T> InListValue<T> defineInList(T defaultValue, Collection<? extends T> validValues) {
         List<String> path = stack.stream().toList();
         spec.defineInList(path, defaultValue, validValues);
         stack.removeLast();
 
-        ConfigValue<T> value = new ConfigValue<>(config, path, defaultValue);
+        InListValue<T> value = new InListValue<>(config, path, defaultValue, validValues);
         configValues.add(value);
         return value;
     }
 
     /**
-     *  same as {@link #define define(T defaultValue)} but returns a {@link BooleanValue}
+     * same as {@link #define define(T defaultValue)} but returns a {@link BooleanValue}
      */
     public BooleanValue define(boolean defaultValue) {
         List<String> path = stack.stream().toList();
@@ -151,7 +165,7 @@ public class ConfigBuilder {
     }
 
     /**
-     *  same as {@link #define define(T defaultValue)} but returns a {@link StringValue}
+     * same as {@link #define define(T defaultValue)} but returns a {@link StringValue}
      */
     public StringValue define(String defaultValue) {
         List<String> path = stack.stream().toList();
@@ -164,7 +178,7 @@ public class ConfigBuilder {
     }
 
     /**
-     *  same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
+     * same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
      */
     public DoubleValue defineInRange(double defaultValue, double min, double max) {
         List<String> path = stack.stream().toList();
@@ -172,13 +186,13 @@ public class ConfigBuilder {
         stack.removeLast();
         addDefaultValueComment(path, defaultValue, min, max);
 
-        DoubleValue value = new DoubleValue(config, path, defaultValue);
+        DoubleValue value = new DoubleValue(config, path, defaultValue, min, max);
         configValues.add(value);
         return value;
     }
 
     /**
-     *  same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
+     * same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
      */
     public IntValue defineInRange(int defaultValue, int min, int max) {
         List<String> path = stack.stream().toList();
@@ -186,7 +200,7 @@ public class ConfigBuilder {
         stack.removeLast();
         addDefaultValueComment(path, defaultValue, min, max);
 
-        IntValue value = new IntValue(config, path, defaultValue);
+        IntValue value = new IntValue(config, path, defaultValue, min, max);
         configValues.add(value);
         return value;
     }
@@ -195,13 +209,13 @@ public class ConfigBuilder {
     public static class ConfigValue<T> {
 
         // the config, this setting is part of
-        private final Config config;
+        private final CommentedConfig config;
         private final List<String> path;
         private final T defaultValue;
         // cache te value to minimize config lookups
         private T cachedValue = null;
 
-        public ConfigValue(Config config, List<String> path, T defaultValue) {
+        public ConfigValue(CommentedConfig config, List<String> path, T defaultValue) {
             this.config = config;
             this.path = path;
             this.defaultValue = defaultValue;
@@ -225,32 +239,185 @@ public class ConfigBuilder {
             return defaultValue;
         }
 
+        public boolean isDefault() {
+            return Objects.equals(get(), defaultValue);
+        }
+
+        public String getComment() {
+            String comment = config.getComment(path);
+            return comment != null ? comment : "";
+        }
+
         public String getPath() {
             return String.join(".", path);
         }
-    }
 
-    public static class BooleanValue extends ConfigValue<Boolean>{
-        public BooleanValue(Config config, List<String> path, boolean defaultValue) {
-            super(config, path, defaultValue);
+        public AbstractWidget getWidget(int width, int height) {
+            return Button
+                .builder(Component.literal("" + get()), button -> {
+                })
+                .bounds(0, 0, width, height)
+                .tooltip(Tooltip.create(Component.literal(getComment())))
+                .build();
         }
     }
 
-    public static class StringValue extends ConfigValue<String>{
-        public StringValue(Config config, List<String> path, String defaultValue) {
+    public static class BooleanValue extends ConfigValue<Boolean> {
+        public BooleanValue(CommentedConfig config, List<String> path, boolean defaultValue) {
             super(config, path, defaultValue);
+        }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            return CycleButton
+                .onOffBuilder(get())
+                .displayOnlyValue()
+                .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
+                .create(0, 0, width, height, Component.empty(), (button, bool) -> set(bool));
         }
     }
 
-    public static class IntValue extends ConfigValue<Integer>{
-        public IntValue(Config config, List<String> path, int defaultValue) {
+    public static class StringValue extends ConfigValue<String> {
+        public StringValue(CommentedConfig config, List<String> path, String defaultValue) {
             super(config, path, defaultValue);
+        }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, width - 1, height, Component.literal(get())) {
+                @Override
+                public boolean charTyped(char c, int i) {
+                    boolean ret = super.charTyped(c, i);
+                    set(this.getValue());
+                    return ret;
+                }
+
+                @Override
+                public boolean keyPressed(int i, int j, int k) {
+                    boolean ret = super.keyPressed(i, j, k);
+                    set(this.getValue());
+                    return ret;
+                }
+            };
+            box.setMaxLength(1000);
+            box.setValue(get());
+            box.setTooltip(Tooltip.create(Component.literal(getComment())));
+            return box;
         }
     }
 
-    public static class DoubleValue extends ConfigValue<Double>{
-        public DoubleValue(Config config, List<String> path, double defaultValue) {
+    public static class ListValue<T> extends ConfigValue<List<T>> {
+        public ListValue(CommentedConfig config, List<String> path, List<T> defaultValue) {
             super(config, path, defaultValue);
+        }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            // TODO handle other types than String
+            return Button
+                .builder(
+                    Component.translatable("vivecraft.options.editlist"),
+                    button -> Minecraft.getInstance()
+                        .setScreen(
+                            new GuiListValueEditScreen(Component.literal(getPath().substring(getPath().lastIndexOf("."))), Minecraft.getInstance().screen, (ListValue<String>) this)
+                        ))
+                .size(width, height)
+                .tooltip(Tooltip.create(Component.literal(getComment())))
+                .build();
+        }
+    }
+
+    public static class InListValue<T> extends ConfigValue<T> {
+        private final Collection<? extends T> validValues;
+
+        public InListValue(CommentedConfig config, List<String> path, T defaultValue, Collection<? extends T> validValues) {
+            super(config, path, defaultValue);
+            this.validValues = validValues;
+        }
+
+        public Collection<? extends T> getValidValues() {
+            return validValues;
+        }
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            return CycleButton
+                .builder((newValue) -> Component.literal("" + newValue))
+                .withInitialValue(get())
+                // toArray is needed here, because the button uses Objects, and the collection is of other types
+                .withValues(getValidValues().toArray())
+                .displayOnlyValue()
+                .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
+                .create(0, 0, width, height, Component.empty(), (button, newValue) -> set((T) newValue));
+        }
+    }
+
+    public static abstract class NumberValue<E extends Number> extends ConfigValue<E> {
+
+        private final E min;
+        private final E max;
+
+        public NumberValue(CommentedConfig config, List<String> path, E defaultValue, E min, E max) {
+            super(config, path, defaultValue);
+            this.min = min;
+            this.max = max;
+        }
+
+        public E getMin() {
+            return min;
+        }
+
+        public E getMax() {
+            return max;
+        }
+
+        public double normalize() {
+            return Mth.clamp((this.get().doubleValue() - min.doubleValue()) / (max.doubleValue() - min.doubleValue()), 0.0D, 1.0D);
+        }
+
+        abstract public void fromNormalized(double value);
+
+        @Override
+        public AbstractWidget getWidget(int width, int height) {
+            AbstractSliderButton widget = new AbstractSliderButton(0, 0, SettingsList.ResettableEntry.valueButtonWidth, 20, Component.literal("" + get()), normalize()) {
+                @Override
+                protected void updateMessage() {
+                    setMessage(Component.literal("" + get()));
+                }
+
+                @Override
+                protected void applyValue() {
+                    fromNormalized(value);
+                }
+            };
+            widget.setTooltip(Tooltip.create(Component.literal(getComment())));
+            return widget;
+        }
+    }
+
+    public static class IntValue extends NumberValue<Integer> {
+
+        public IntValue(CommentedConfig config, List<String> path, int defaultValue, int min, int max) {
+            super(config, path, defaultValue, min, max);
+        }
+
+        @Override
+        public void fromNormalized(double value) {
+            double newValue = this.getMin() + (this.getMax() - this.getMin()) * value;
+            this.set(Mth.floor(newValue + 0.5));
+        }
+    }
+
+    public static class DoubleValue extends NumberValue<Double> {
+
+        public DoubleValue(CommentedConfig config, List<String> path, double defaultValue, double min, double max) {
+            super(config, path, defaultValue, min, max);
+        }
+
+        @Override
+        public void fromNormalized(double value) {
+            double newValue = this.getMin() + (this.getMax() - this.getMin()) * value;
+            this.set(Math.round(newValue * 100.0) / 100.0);
         }
     }
 }

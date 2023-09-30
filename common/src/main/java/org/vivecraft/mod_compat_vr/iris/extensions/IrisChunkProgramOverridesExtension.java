@@ -7,6 +7,5 @@ import java.lang.reflect.Method;
 
 public interface IrisChunkProgramOverridesExtension {
 
-    void createAllPipelinesShadersSodiumProcessing(SodiumTerrainPipeline sodiumTerrainPipeline, Object chunkVertexType, Method createShaders) throws InvocationTargetException, IllegalAccessException;
-
+    void vivecraft$createAllPipelinesShadersSodiumProcessing(SodiumTerrainPipeline sodiumTerrainPipeline, Object chunkVertexType, Method createShaders) throws InvocationTargetException, IllegalAccessException;
 }

@@ -22,14 +22,13 @@ public class IrisHelper {
             System.err.println("Error reloading shaders on Frame Buffer reinit");
             e.printStackTrace();
         }
-
     }
 
     public static boolean hasWaterEffect() {
         return Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderUnderwaterOverlay).orElse(true);
     }
 
-    public static boolean isShaderActive(){
+    public static boolean isShaderActive() {
         return IrisApi.getInstance().isShaderPackInUse();
     }
 }

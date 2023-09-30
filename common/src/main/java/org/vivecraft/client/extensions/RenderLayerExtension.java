@@ -5,5 +5,7 @@ package org.vivecraft.client.extensions;
  */
 
 public interface RenderLayerExtension {
+
+    // no "vivecraft$" since that should mimic the method from the "Cloneable" interface
     Object clone() throws CloneNotSupportedException;
 }

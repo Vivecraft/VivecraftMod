@@ -2,8 +2,8 @@ package org.vivecraft.fabric;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import org.vivecraft.server.config.ServerConfig;
 import org.vivecraft.server.ServerUtil;
+import org.vivecraft.server.config.ServerConfig;
 
 public class VivecraftMod implements ModInitializer {
     @Override

@@ -15,7 +15,7 @@ public class RenderSectionManagerVRMixin {
     private ChunkRenderList chunkRenderList;
 
     @Inject(at = @At("HEAD"), method = "getVisibleChunkCount", cancellable = true, remap = false)
-    private void preventNullpointerException(CallbackInfoReturnable<Integer> cir){
+    private void vivecraft$preventNullpointerException(CallbackInfoReturnable<Integer> cir) {
         if (chunkRenderList == null) {
             cir.setReturnValue(-1);
         }

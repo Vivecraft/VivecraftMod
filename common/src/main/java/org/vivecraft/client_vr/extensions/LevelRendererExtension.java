@@ -4,13 +4,13 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.world.entity.Entity;
 
 public interface LevelRendererExtension {
-    Entity getRenderedEntity();
+    Entity vivecraft$getRenderedEntity();
 
-    RenderTarget getAlphaSortVROccludedFramebuffer();
+    RenderTarget vivecraft$getAlphaSortVROccludedFramebuffer();
 
-    RenderTarget getAlphaSortVRUnoccludedFramebuffer();
+    RenderTarget vivecraft$getAlphaSortVRUnoccludedFramebuffer();
 
-    RenderTarget getAlphaSortVRHandsFramebuffer();
+    RenderTarget vivecraft$getAlphaSortVRHandsFramebuffer();
 
-    void restoreVanillaPostChains();
+    void vivecraft$restoreVanillaPostChains();
 }

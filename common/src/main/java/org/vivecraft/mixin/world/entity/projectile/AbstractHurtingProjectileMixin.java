@@ -14,7 +14,7 @@ import org.vivecraft.server.ServerVivePlayer;
 public abstract class AbstractHurtingProjectileMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getLookAngle()Lnet/minecraft/world/phys/Vec3;"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z")
-    public Vec3 hurtvive(Entity instance) {
+    public Vec3 vivecraft$hurtvive(Entity instance) {
         if (instance instanceof ServerPlayer player) {
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);
             if (serverviveplayer != null && serverviveplayer.isVR()) {

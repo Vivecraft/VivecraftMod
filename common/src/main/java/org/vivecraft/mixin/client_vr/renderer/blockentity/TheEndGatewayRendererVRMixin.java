@@ -17,7 +17,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 @Mixin(TheEndGatewayRenderer.class)
 public class TheEndGatewayRendererVRMixin {
     @Unique
-    private static final RenderType END_GATEWAY_VR =
+    private static final RenderType vivecraft$END_GATEWAY_VR =
         RenderType
             .create(
                 "end_portal",
@@ -38,9 +38,9 @@ public class TheEndGatewayRendererVRMixin {
                     .createCompositeState(false));
 
     @Inject(at = @At("HEAD"), method = "renderType", cancellable = true)
-    private void differentShaderInVR(CallbackInfoReturnable<RenderType> cir){
-        if (!RenderPassType.isVanilla()){
-            cir.setReturnValue(END_GATEWAY_VR);;
+    private void vivecraft$differentShaderInVR(CallbackInfoReturnable<RenderType> cir) {
+        if (!RenderPassType.isVanilla()) {
+            cir.setReturnValue(vivecraft$END_GATEWAY_VR);
         }
     }
 }

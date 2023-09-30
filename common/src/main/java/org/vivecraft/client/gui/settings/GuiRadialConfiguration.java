@@ -1,22 +1,19 @@
 package org.vivecraft.client.gui.settings;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
-import org.vivecraft.client.gui.framework.VROptionLayout;
-import org.vivecraft.client_vr.settings.VRSettings;
-
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import org.apache.commons.lang3.ArrayUtils;
+import org.vivecraft.client.gui.framework.GuiVROptionsBase;
+import org.vivecraft.client.gui.framework.VROptionLayout;
+import org.vivecraft.client_vr.settings.VRSettings;
 
-public class GuiRadialConfiguration extends GuiVROptionsBase
-{
-    static VROptionLayout[] options = new VROptionLayout[] {
-            new VROptionLayout(VRSettings.VrOptions.RADIAL_MODE_HOLD, VROptionLayout.Position.POS_LEFT, 0.0F, true, "")
+public class GuiRadialConfiguration extends GuiVROptionsBase {
+    static VROptionLayout[] options = new VROptionLayout[]{
+        new VROptionLayout(VRSettings.VrOptions.RADIAL_MODE_HOLD, VROptionLayout.Position.POS_LEFT, 0.0F, true, "")
     };
     private String[] arr;
     private boolean isShift = false;
@@ -24,19 +21,14 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
     private GuiRadialItemsList list;
     private boolean isselectmode = false;
 
-    public GuiRadialConfiguration(Screen guiScreen)
-    {
+    public GuiRadialConfiguration(Screen guiScreen) {
         super(guiScreen);
     }
 
-    public void setKey(KeyMapping key)
-    {
-        if (key != null)
-        {
+    public void setKey(KeyMapping key) {
+        if (key != null) {
             this.arr[this.selectedIndex] = key.getName();
-        }
-        else
-        {
+        } else {
             this.arr[this.selectedIndex] = "";
         }
 
@@ -45,65 +37,55 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
         this.reinit = true;
         this.visibleList = null;
 
-        if (!this.isShift)
-        {
+        if (!this.isShift) {
             this.dataholder.vrSettings.vrRadialItems = ArrayUtils.clone(this.arr);
-        }
-        else
-        {
+        } else {
             this.dataholder.vrSettings.vrRadialItemsAlt = ArrayUtils.clone(this.arr);
         }
 
         this.dataholder.vrSettings.saveOptions();
     }
 
-    public void init()
-    {
+    public void init() {
         this.vrTitle = "vivecraft.options.screen.radialmenu";
         this.list = new GuiRadialItemsList(this, this.minecraft);
         this.clearWidgets();
 
-        if (this.isselectmode)
-        {
-            this.addRenderableWidget(new Button.Builder( Component.translatable("gui.cancel"),  (p) ->
+        if (this.isselectmode) {
+            this.addRenderableWidget(new Button.Builder(Component.translatable("gui.cancel"), (p) ->
+            {
+                this.isselectmode = false;
+                this.reinit = true;
+                this.visibleList = null;
+            })
+                .size(150, 20)
+                .pos(this.width / 2 - 155, this.height - 25)
+                .build());
+            this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.clear"), (p) ->
+            {
+                this.setKey(null);
+            })
+                .size(150, 20)
+                .pos(this.width / 2 - 155, 25)
+                .build());
+        } else {
+            if (this.isShift) {
+                this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.radialmenu.mainset"), (p) ->
                 {
-                    this.isselectmode = false;
+                    this.isShift = !this.isShift;
                     this.reinit = true;
-                    this.visibleList = null;
                 })
-                .size( 150,  20)
-                .pos(this.width / 2 - 155,  this.height - 25)
-                .build());
-            this.addRenderableWidget(new Button.Builder( Component.translatable("vivecraft.gui.clear"),  (p) ->
-                {
-                    this.setKey((KeyMapping)null);
-                })
-                .size( 150,  20)
-                .pos(this.width / 2 - 155,  25)
-                .build());
-        }
-        else
-        {
-            if (this.isShift)
-            {
-                this.addRenderableWidget(new Button.Builder( Component.translatable("vivecraft.gui.radialmenu.mainset"),  (p) ->
-                    {
-                        this.isShift = !this.isShift;
-                        this.reinit = true;
-                    })
-                    .size( 150,  20)
-                    .pos(this.width / 2 + 2,  30)
+                    .size(150, 20)
+                    .pos(this.width / 2 + 2, 30)
                     .build());
-            }
-            else
-            {
-                this.addRenderableWidget(new Button.Builder( Component.translatable("vivecraft.gui.radialmenu.alternateset"),  (p) ->
-                    {
-                        this.isShift = !this.isShift;
-                        this.reinit = true;
-                    })
-                    .size( 150,  20)
-                    .pos(this.width / 2 + 2,  30)
+            } else {
+                this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.radialmenu.alternateset"), (p) ->
+                {
+                    this.isShift = !this.isShift;
+                    this.reinit = true;
+                })
+                    .size(150, 20)
+                    .pos(this.width / 2 + 2, 30)
                     .build());
             }
 
@@ -117,27 +99,22 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
             this.arr = ArrayUtils.clone(this.dataholder.vrSettings.vrRadialItems);
             String[] astring = ArrayUtils.clone(this.dataholder.vrSettings.vrRadialItemsAlt);
 
-            if (this.isShift)
-            {
+            if (this.isShift) {
                 this.arr = astring;
             }
 
-            for (int k1 = 0; k1 < i; ++k1)
-            {
+            for (int k1 = 0; k1 < i; ++k1) {
                 KeyMapping keymapping = null;
 
-                for (KeyMapping keymapping1 : this.minecraft.options.keyMappings)
-                {
-                    if (keymapping1.getName().equalsIgnoreCase(this.arr[k1]))
-                    {
+                for (KeyMapping keymapping1 : this.minecraft.options.keyMappings) {
+                    if (keymapping1.getName().equalsIgnoreCase(this.arr[k1])) {
                         keymapping = keymapping1;
                     }
                 }
 
                 String s = "";
 
-                if (keymapping != null)
-                {
+                if (keymapping != null) {
                     s = I18n.get(keymapping.getName());
                 }
 
@@ -145,97 +122,74 @@ public class GuiRadialConfiguration extends GuiVROptionsBase
                 int j2 = 0;
                 int k2 = 0;
 
-                if (k1 == 0)
-                {
+                if (k1 == 0) {
                     j2 = 0;
                     k2 = -l;
-                }
-                else if (k1 == 1)
-                {
+                } else if (k1 == 1) {
                     j2 = i2 / 2 + 8;
                     k2 = -l / 2;
-                }
-                else if (k1 == 2)
-                {
+                } else if (k1 == 2) {
                     j2 = i2 / 2 + 32;
                     k2 = 0;
-                }
-                else if (k1 == 3)
-                {
+                } else if (k1 == 3) {
                     j2 = i2 / 2 + 8;
                     k2 = l / 2;
-                }
-                else if (k1 == 4)
-                {
+                } else if (k1 == 4) {
                     j2 = 0;
                     k2 = l;
-                }
-                else if (k1 == 5)
-                {
+                } else if (k1 == 5) {
                     j2 = -i2 / 2 - 8;
                     k2 = l / 2;
-                }
-                else if (k1 == 6)
-                {
+                } else if (k1 == 6) {
                     j2 = -i2 / 2 - 32;
                     k2 = 0;
-                }
-                else if (k1 == 7)
-                {
+                } else if (k1 == 7) {
                     j2 = -i2 / 2 - 8;
                     k2 = -l / 2;
                 }
 
                 int l1 = k1;
-                this.addRenderableWidget(new Button.Builder(  Component.translatable(s),  (p) ->
-                    {
-                        this.selectedIndex = l1;
-                        this.isselectmode = true;
-                        this.reinit = true;
-                        this.visibleList = this.list;
-                    })
-                    .size( i2,  20)
-                    .pos(i1 + j2 - i2 / 2,  j1 + k2)
+                this.addRenderableWidget(new Button.Builder(Component.translatable(s), (p) ->
+                {
+                    this.selectedIndex = l1;
+                    this.isselectmode = true;
+                    this.reinit = true;
+                    this.visibleList = this.list;
+                })
+                    .size(i2, 20)
+                    .pos(i1 + j2 - i2 / 2, j1 + k2)
                     .build());
                 super.addDefaultButtons();
             }
         }
     }
 
-    protected void loadDefaults()
-    {
+    protected void loadDefaults() {
         super.loadDefaults();
         this.settings.vrRadialItems = this.settings.getRadialItemsDefault();
         this.settings.vrRadialItemsAlt = this.settings.getRadialItemsAltDefault();
     }
 
-    protected boolean onDoneClicked()
-    {
-        if (this.isselectmode)
-        {
+    protected boolean onDoneClicked() {
+        if (this.isselectmode) {
             this.isselectmode = false;
             this.reinit = true;
             this.visibleList = null;
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
 
-    public void render(PoseStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks)
-    {
-        super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+    public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
+        super.render(poseStack, pMouseX, pMouseY, pPartialTicks);
 
-        if (this.visibleList == null)
-        {
-            drawCenteredString(pMatrixStack, this.minecraft.font,  Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925);
+        if (this.visibleList == null) {
+            drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50, 5635925);
         }
 
-        if (this.isShift)
-        {
-            drawCenteredString(pMatrixStack, this.minecraft.font,  Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015);
+        if (this.isShift) {
+            drawCenteredString(poseStack, this.minecraft.font, Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36, 13777015);
         }
     }
 }

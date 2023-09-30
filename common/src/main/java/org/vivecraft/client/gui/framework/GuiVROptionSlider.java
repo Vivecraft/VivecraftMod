@@ -1,31 +1,27 @@
 package org.vivecraft.client.gui.framework;
 
 import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.network.chat.Component;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import net.minecraft.network.chat.Component;
-
 import javax.annotation.Nullable;
 
-public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROption
-{
+public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROption {
     @Nullable
     private final VRSettings.VrOptions enumOptions;
     private int id = -1;
 
-    public GuiVROptionSlider(int id, int x, int y, int width, int height, VRSettings.VrOptions option)
-    {
+    public GuiVROptionSlider(int id, int x, int y, int width, int height, VRSettings.VrOptions option) {
         super(x, y, width, height,
-                Component.literal(ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(option)),
-                option.normalizeValue(ClientDataHolderVR.getInstance().vrSettings.getOptionFloatValue(option)));
+            Component.literal(ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(option)),
+            option.normalizeValue(ClientDataHolderVR.getInstance().vrSettings.getOptionFloatValue(option)));
 
         this.id = id;
         this.enumOptions = option;
     }
 
-    public GuiVROptionSlider(int id, int x, int y, VRSettings.VrOptions option)
-    {
+    public GuiVROptionSlider(int id, int x, int y, VRSettings.VrOptions option) {
         this(id, x, y, 150, 20, option);
     }
 
@@ -45,7 +41,7 @@ public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROpti
 
     @Override
     public int getId() {
-            return id;
+        return id;
     }
 
     @Override

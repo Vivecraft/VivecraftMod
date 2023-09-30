@@ -31,18 +31,17 @@ dependencies {
     // modCompileOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
     modCompileOnly "maven.modrinth:lithium:mc1.19.3-0.11.1"
     modCompileOnly "maven.modrinth:indium:1.0.14+mc1.19.3"
+    modCompileOnly "maven.modrinth:resolution-control-plus:1.20-3.0.0"
 
-    /*
     // for immersive portals compat
-    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:v2.5.2-mc1.19.3'){ //temp immersiveportals
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.7.3-mc1.19.4') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modCompileOnly ('com.github.qouteall.ImmersivePortalsMod:q_misc_util:v2.5.2-mc1.19.3'){ //temp immersiveportals
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.7.3-mc1.19.4') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    */
 
     // needed dependencies
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
@@ -58,7 +57,7 @@ jar {
         configurations
             .runtimeClasspath
             .collect {
-                if(it.name.startsWith("LaunchPopup")) {
+                if (it.name.startsWith("LaunchPopup")) {
                     zipTree(it)
                 }
             }

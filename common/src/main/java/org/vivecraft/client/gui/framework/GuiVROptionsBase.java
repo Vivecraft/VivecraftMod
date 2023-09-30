@@ -18,9 +18,8 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class GuiVROptionsBase extends Screen
-{
-	protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+public abstract class GuiVROptionsBase extends Screen {
+    protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
     public static final int DONE_BUTTON = 200;
     public static final int DEFAULTS_BUTTON = 201;
     protected final Screen lastScreen;
@@ -34,105 +33,82 @@ public abstract class GuiVROptionsBase extends Screen
     private Button btnDone;
     private Button btnDefaults;
 
-    public GuiVROptionsBase(Screen lastScreen)
-    {
+    public GuiVROptionsBase(Screen lastScreen) {
         super(Component.literal(""));
         this.lastScreen = lastScreen;
         this.settings = ClientDataHolderVR.getInstance().vrSettings;
     }
 
-    protected void addDefaultButtons()
-    {
+    protected void addDefaultButtons() {
         this.addRenderableWidget(this.btnDone = new Button.Builder(Component.translatable("gui.back"), (p) ->
-                    {
-                        if (!this.onDoneClicked())
-                        {
-                            this.dataholder.vrSettings.saveOptions();
-                            this.minecraft.setScreen(this.lastScreen);
-                        }
-                    })
-                .pos(this.width / 2 + 5, this.height - 30)
-                .size(150, 20)
-                .build());
+        {
+            if (!this.onDoneClicked()) {
+                this.dataholder.vrSettings.saveOptions();
+                this.minecraft.setScreen(this.lastScreen);
+            }
+        })
+            .pos(this.width / 2 + 5, this.height - 30)
+            .size(150, 20)
+            .build());
         this.addRenderableWidget(this.btnDefaults = new Button.Builder(Component.translatable("vivecraft.gui.loaddefaults"), (p) ->
-                {
-                    this.loadDefaults();
-                    this.dataholder.vrSettings.saveOptions();
-                    this.reinit = true;
-                })
-                .pos(this.width / 2 - 155, this.height - 30)
-                .size(150, 20)
-                .build());
+        {
+            this.loadDefaults();
+            this.dataholder.vrSettings.saveOptions();
+            this.reinit = true;
+        })
+            .pos(this.width / 2 - 155, this.height - 30)
+            .size(150, 20)
+            .build());
     }
 
-    protected boolean onDoneClicked()
-    {
+    protected boolean onDoneClicked() {
         return false;
     }
 
-    protected void init(VROptionLayout[] settings, boolean clear)
-    {
-        if (clear)
-        {
-        	this.clearWidgets();
+    protected void init(VROptionLayout[] settings, boolean clear) {
+        if (clear) {
+            this.clearWidgets();
         }
 
         int i = 0;
 
-        for (final VROptionLayout vroptionlayout : settings)
-        {
-            if (vroptionlayout.getOption() != null && vroptionlayout.getOption().getEnumFloat())
-            {
-                this.addRenderableWidget(new GuiVROptionSlider(vroptionlayout.getOrdinal(), vroptionlayout.getX(this.width), vroptionlayout.getY(this.height), vroptionlayout.getOption())
-                {
-                    public void onClick(double pMouseX, double p_93635_)
-                    {
-                        if (vroptionlayout.getCustomHandler() == null || !vroptionlayout.getCustomHandler().apply(this, new Vec2((float)pMouseX, (float)p_93635_)))
-                        {
+        for (final VROptionLayout vroptionlayout : settings) {
+            if (vroptionlayout.getOption() != null && vroptionlayout.getOption().getEnumFloat()) {
+                this.addRenderableWidget(new GuiVROptionSlider(vroptionlayout.getOrdinal(), vroptionlayout.getX(this.width), vroptionlayout.getY(this.height), vroptionlayout.getOption()) {
+                    public void onClick(double pMouseX, double p_93635_) {
+                        if (vroptionlayout.getCustomHandler() == null || !vroptionlayout.getCustomHandler().apply(this, new Vec2((float) pMouseX, (float) p_93635_))) {
                             super.onClick(pMouseX, p_93635_);
                         }
                     }
                 });
-            }
-            else if (vroptionlayout.getOption() != null)
-            {
+            } else if (vroptionlayout.getOption() != null) {
                 this.addRenderableWidget(new GuiVROptionButton(vroptionlayout.getOrdinal(), vroptionlayout.getX(this.width), vroptionlayout.getY(this.height), vroptionlayout.getOption(), vroptionlayout.getButtonText(), (p) ->
                 {
-                    if (vroptionlayout.getCustomHandler() == null || !vroptionlayout.getCustomHandler().apply((GuiVROptionButton)p, new Vec2(0.0F, 0.0F)))
-                    {
-                        this.settings.setOptionValue(((GuiVROptionButton)p).getOption());
+                    if (vroptionlayout.getCustomHandler() == null || !vroptionlayout.getCustomHandler().apply((GuiVROptionButton) p, new Vec2(0.0F, 0.0F))) {
+                        this.settings.setOptionValue(((GuiVROptionButton) p).getOption());
                         p.setMessage(Component.literal(vroptionlayout.getButtonText()));
                     }
                 }));
-            }
-            else if (vroptionlayout.getScreen() != null)
-            {
+            } else if (vroptionlayout.getScreen() != null) {
                 this.addRenderableWidget(new GuiVROptionButton(vroptionlayout.getOrdinal(), vroptionlayout.getX(this.width), vroptionlayout.getY(this.height), vroptionlayout.getButtonText(), (p) ->
                 {
                     try {
-                        if (vroptionlayout.getCustomHandler() != null && vroptionlayout.getCustomHandler().apply((GuiVROptionButton)p, new Vec2(0.0F, 0.0F)))
-                        {
+                        if (vroptionlayout.getCustomHandler() != null && vroptionlayout.getCustomHandler().apply((GuiVROptionButton) p, new Vec2(0.0F, 0.0F))) {
                             return;
                         }
 
                         this.settings.saveOptions();
                         this.minecraft.setScreen(vroptionlayout.getScreen().getConstructor(Screen.class).newInstance(this));
-                    }
-                    catch (ReflectiveOperationException reflectiveoperationexception)
-                    {
+                    } catch (ReflectiveOperationException reflectiveoperationexception) {
                         reflectiveoperationexception.printStackTrace();
                     }
                 }));
-            }
-            else if (vroptionlayout.getCustomHandler() != null)
-            {
+            } else if (vroptionlayout.getCustomHandler() != null) {
                 this.addRenderableWidget(new GuiVROptionButton(vroptionlayout.getOrdinal(), vroptionlayout.getX(this.width), vroptionlayout.getY(this.height), vroptionlayout.getButtonText(), (p) ->
                 {
-                    vroptionlayout.getCustomHandler().apply((GuiVROptionButton)p, new Vec2(0.0F, 0.0F));
+                    vroptionlayout.getCustomHandler().apply((GuiVROptionButton) p, new Vec2(0.0F, 0.0F));
                 }));
-            }
-            else
-            {
+            } else {
                 this.addRenderableWidget(new GuiVROptionButton(vroptionlayout.getOrdinal(), vroptionlayout.getX(this.width), vroptionlayout.getY(this.height), vroptionlayout.getButtonText(), (p) ->
                 {
                 }));
@@ -142,57 +118,46 @@ public abstract class GuiVROptionsBase extends Screen
         ++i;
     }
 
-    protected void loadDefaults()
-    {
+    protected void loadDefaults() {
         for (GuiEventListener child : this.children()) {
-            if (!(child instanceof GuiVROption))
+            if (!(child instanceof GuiVROption optionButton)) {
                 continue;
+            }
 
-            GuiVROption optionButton = (GuiVROption)child;
             this.settings.loadDefault(optionButton.getOption());
         }
     }
 
-    protected void init(VROptionEntry[] settings, boolean clear)
-    {
-        if (clear)
-        {
-        	this.clearWidgets();
+    protected void init(VROptionEntry[] settings, boolean clear) {
+        if (clear) {
+            this.clearWidgets();
             this.nextButtonIndex = 0;
         }
 
         ArrayList<VROptionLayout> arraylist = new ArrayList<>();
 
-        if (this.nextButtonIndex < this.children().size())
-        {
+        if (this.nextButtonIndex < this.children().size()) {
             this.nextButtonIndex = this.children().size();
         }
 
         int i = this.nextButtonIndex;
 
-        for (int j = 0; j < settings.length; ++j)
-        {
+        for (int j = 0; j < settings.length; ++j) {
             VROptionLayout.Position vroptionlayout$position = settings[j].center ? VROptionLayout.Position.POS_CENTER : (i % 2 == 0 ? VROptionLayout.Position.POS_LEFT : VROptionLayout.Position.POS_RIGHT);
 
-            if (settings[j].center && i % 2 != 0)
-            {
+            if (settings[j].center && i % 2 != 0) {
                 ++i;
             }
 
-            if (settings[j].option != null)
-            {
-                if (settings[j].option != VRSettings.VrOptions.DUMMY)
-                {
-                    arraylist.add(new VROptionLayout(settings[j].option, settings[j].customHandler, vroptionlayout$position, (float)Math.floor((double)((float)i / 2.0F)), true, settings[j].title));
+            if (settings[j].option != null) {
+                if (settings[j].option != VRSettings.VrOptions.DUMMY) {
+                    arraylist.add(new VROptionLayout(settings[j].option, settings[j].customHandler, vroptionlayout$position, (float) Math.floor((float) i / 2.0F), true, settings[j].title));
                 }
-            }
-            else if (settings[j].customHandler != null)
-            {
-                arraylist.add(new VROptionLayout(settings[j].customHandler, vroptionlayout$position, (float)Math.floor((double)((float)i / 2.0F)), true, settings[j].title));
+            } else if (settings[j].customHandler != null) {
+                arraylist.add(new VROptionLayout(settings[j].customHandler, vroptionlayout$position, (float) Math.floor((float) i / 2.0F), true, settings[j].title));
             }
 
-            if (settings[j].center)
-            {
+            if (settings[j].center) {
                 ++i;
             }
 
@@ -203,133 +168,107 @@ public abstract class GuiVROptionsBase extends Screen
         this.init(arraylist.toArray(new VROptionLayout[0]), false);
     }
 
-    protected void init(VRSettings.VrOptions[] settings, boolean clear)
-    {
+    protected void init(VRSettings.VrOptions[] settings, boolean clear) {
         VROptionEntry[] avroptionentry = new VROptionEntry[settings.length];
 
-        for (int i = 0; i < settings.length; ++i)
-        {
+        for (int i = 0; i < settings.length; ++i) {
             avroptionentry[i] = new VROptionEntry(settings[i]);
         }
 
         this.init(avroptionentry, clear);
     }
 
-    public void render(PoseStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks)
-    {
-        if (this.reinit)
-        {
+    public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
+        if (this.reinit) {
             this.reinit = false;
             this.init();
         }
 
-        this.renderBackground(pMatrixStack);
+        this.renderBackground(poseStack);
 
-        if (this.visibleList != null)
-        {
-            this.visibleList.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+        if (this.visibleList != null) {
+            this.visibleList.render(poseStack, pMouseX, pMouseY, pPartialTicks);
         }
 
-        drawCenteredString(pMatrixStack, this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 16777215);
+        drawCenteredString(poseStack, this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 16777215);
 
-        if (this.btnDefaults != null)
-        {
+        if (this.btnDefaults != null) {
             this.btnDefaults.visible = this.drawDefaultButtons;
         }
 
-        if (this.btnDone != null)
-        {
+        if (this.btnDone != null) {
             this.btnDone.visible = this.drawDefaultButtons;
         }
 
-        super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
-        renderTooltip(pMatrixStack, pMouseX, pMouseY);
+        super.render(poseStack, pMouseX, pMouseY, pPartialTicks);
+        renderTooltip(poseStack, pMouseX, pMouseY);
     }
 
-    protected void actionPerformed(AbstractWidget button)
-    {
+    protected void actionPerformed(AbstractWidget button) {
     }
 
-    protected void actionPerformedRightClick(AbstractWidget button)
-    {
+    protected void actionPerformedRightClick(AbstractWidget button) {
     }
 
-    public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY)
-    {
+    public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY) {
         boolean flag = super.mouseClicked(pMouseX, p_94738_, pMouseY);
-        AbstractWidget abstractwidget = ScreenUtils.getSelectedButton((int)pMouseX, (int)p_94738_, ScreenUtils.getButtonList(this));
+        AbstractWidget abstractwidget = ScreenUtils.getSelectedButton((int) pMouseX, (int) p_94738_, ScreenUtils.getButtonList(this));
 
-        if (abstractwidget != null)
-        {
-            if (pMouseY == 0)
-            {
+        if (abstractwidget != null) {
+            if (pMouseY == 0) {
                 this.actionPerformed(abstractwidget);
-            }
-            else if (pMouseY == 1)
-            {
+            } else if (pMouseY == 1) {
                 this.actionPerformedRightClick(abstractwidget);
             }
-        }
-        else if (this.visibleList != null)
-        {
+        } else if (this.visibleList != null) {
             return this.visibleList.mouseClicked(pMouseX, p_94738_, pMouseY);
         }
 
         return flag;
     }
 
-    public boolean mouseReleased(double pMouseX, double p_94754_, int pMouseY)
-    {
+    public boolean mouseReleased(double pMouseX, double p_94754_, int pMouseY) {
         return this.visibleList != null ? this.visibleList.mouseReleased(pMouseX, p_94754_, pMouseY) : super.mouseReleased(pMouseX, p_94754_, pMouseY);
     }
 
-    public boolean mouseDragged(double pMouseX, double p_94741_, int pMouseY, double p_94743_, double pButton)
-    {
+    public boolean mouseDragged(double pMouseX, double p_94741_, int pMouseY, double p_94743_, double pButton) {
         return this.visibleList != null ? this.visibleList.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton) : super.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton);
     }
 
-    public boolean mouseScrolled(double pMouseX, double p_94735_, double pMouseY)
-    {
-        if (this.visibleList != null)
-        {
+    public boolean mouseScrolled(double pMouseX, double p_94735_, double pMouseY) {
+        if (this.visibleList != null) {
             this.visibleList.mouseScrolled(pMouseX, p_94735_, pMouseY);
         }
 
         return super.mouseScrolled(pMouseX, p_94735_, pMouseY);
     }
 
-    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers)
-    {
-        if (pKeyCode == 256)
-        {
-            if (!this.onDoneClicked())
-            {
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (pKeyCode == 256) {
+            if (!this.onDoneClicked()) {
                 this.dataholder.vrSettings.saveOptions();
                 this.minecraft.setScreen(this.lastScreen);
             }
 
             return true;
-        }
-        else
-        {
-            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers) ? true : super.keyPressed(pKeyCode, pScanCode, pModifiers);
+        } else {
+            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers) || super.keyPressed(pKeyCode, pScanCode, pModifiers);
         }
     }
 
-    public boolean charTyped(char pCodePoint, int pModifiers)
-    {
-        return this.visibleList != null && this.visibleList.charTyped(pCodePoint, pModifiers) ? true : super.charTyped(pCodePoint, pModifiers);
+    public boolean charTyped(char pCodePoint, int pModifiers) {
+        return this.visibleList != null && this.visibleList.charTyped(pCodePoint, pModifiers) || super.charTyped(pCodePoint, pModifiers);
     }
 
     private void renderTooltip(PoseStack pMatrixStack, int pMouseX, int pMouseY) {
         AbstractWidget hover = null;
         // find active button
-        for (GuiEventListener child: children()) {
+        for (GuiEventListener child : children()) {
             if (child instanceof AbstractWidget && child.isMouseOver(pMouseX, pMouseY)) {
                 hover = (AbstractWidget) child;
             }
         }
-        if (hover != null ) {
+        if (hover != null) {
             if (hover instanceof GuiVROption guiHover) {
                 if (guiHover.getOption() != null) {
                     String tooltipString = "vivecraft.options." + guiHover.getOption().name() + ".tooltip";

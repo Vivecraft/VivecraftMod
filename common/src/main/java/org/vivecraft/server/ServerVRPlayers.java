@@ -32,6 +32,6 @@ public class ServerVRPlayers {
     }
 
     public static Map<UUID, ServerVivePlayer> getPlayersWithVivecraft(MinecraftServer server) {
-        return ((MinecraftServerExt) server).getPlayersWithVivecraft();
+        return ((MinecraftServerExt) server).vivecraft$getPlayersWithVivecraft();
     }
 }

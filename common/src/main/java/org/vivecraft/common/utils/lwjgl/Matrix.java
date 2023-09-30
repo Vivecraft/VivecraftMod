@@ -3,8 +3,7 @@ package org.vivecraft.common.utils.lwjgl;
 import java.nio.FloatBuffer;
 
 @Deprecated
-public abstract class Matrix
-{
+public abstract class Matrix {
     public abstract Matrix setIdentity();
 
     public abstract Matrix invert();

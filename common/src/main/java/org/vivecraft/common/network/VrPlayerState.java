@@ -12,16 +12,17 @@ import org.vivecraft.common.utils.math.Quaternion;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
-public record VrPlayerState(boolean seated, Pose hmd, boolean reverseHands, Pose controller0, boolean reverseHands1legacy, Pose controller1) {
+public record VrPlayerState(boolean seated, Pose hmd, boolean reverseHands, Pose controller0,
+                            boolean reverseHands1legacy, Pose controller1) {
 
     public static VrPlayerState create(VRPlayer vrPlayer) {
         return new VrPlayerState(
-                ClientDataHolderVR.getInstance().vrSettings.seated,
-                hmdPose(vrPlayer),
-                ClientDataHolderVR.getInstance().vrSettings.reverseHands,
-                controllerPose(vrPlayer, 0),
-                ClientDataHolderVR.getInstance().vrSettings.reverseHands,
-                controllerPose(vrPlayer, 1)
+            ClientDataHolderVR.getInstance().vrSettings.seated,
+            hmdPose(vrPlayer),
+            ClientDataHolderVR.getInstance().vrSettings.reverseHands,
+            controllerPose(vrPlayer, 0),
+            ClientDataHolderVR.getInstance().vrSettings.reverseHands,
+            controllerPose(vrPlayer, 1)
         );
     }
 
