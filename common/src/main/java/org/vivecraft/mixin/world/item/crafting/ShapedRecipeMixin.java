@@ -1,60 +1,16 @@
 package org.vivecraft.mixin.world.item.crafting;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.ShapedRecipe;
+import com.mojang.serialization.Codec;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.vivecraft.common.CustomShapedRecipe;
 
-@Mixin(ShapedRecipe.class)
+@Mixin(targets = "net.minecraft.world.item.crafting.ShapedRecipe$Serializer$RawShapedRecipe")
 public class ShapedRecipeMixin {
-    @Inject(method = "itemFromJson", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/DefaultedRegistry;getOptional(Lnet/minecraft/resources/ResourceLocation;)Ljava/util/Optional;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    private static void vivecraft$getVivecraftVanillaItemInject(JsonObject jsonObject, CallbackInfoReturnable<Item> cir, String resourceLocation) {
-        if (resourceLocation.startsWith("vivecraft")) {
-            cir.setReturnValue(vivecraft$getVivecraftVanillaItem(jsonObject, resourceLocation));
-        }
-    }
-
-    @Unique
-    private static Item vivecraft$getVivecraftVanillaItem(JsonObject jsonObject, String resourceLocation) {
-        String vanillaItem = GsonHelper.getAsString(jsonObject, "vanillaitem");
-        return BuiltInRegistries.ITEM.getOptional(new ResourceLocation(vanillaItem)).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + vanillaItem + "'"));
-    }
-
-    @Inject(method = "itemStackFromJson", at = @At("HEAD"), cancellable = true)
-    private static void vivecraft$customizeVanillaItemStackFabric(JsonObject jsonObject, CallbackInfoReturnable<ItemStack> cir) {
-        if (GsonHelper.getAsString(jsonObject, "item").startsWith("vivecraft")) {
-            Item vanillaItem = vivecraft$getVivecraftVanillaItem(jsonObject, GsonHelper.getAsString(jsonObject, "item"));
-            cir.setReturnValue(vivecraft$customizeVanillaItemStack(jsonObject, vanillaItem));
-        }
-    }
-
-    @Unique
-    private static ItemStack vivecraft$customizeVanillaItemStack(JsonObject jsonObject, Item vanillaItem) {
-        if (jsonObject.has("data")) {
-            throw new JsonParseException("Disallowed data tag found");
-        } else {
-            int i = GsonHelper.getAsInt(jsonObject, "count", 1);
-            if (i < 1) {
-                throw new JsonSyntaxException("Invalid output count: " + i);
-            } else {
-                ItemStack itemStack = new ItemStack(vanillaItem, i);
-                itemStack.setHoverName(Component.translatable(jsonObject.get("name").getAsString()));
-                itemStack.getOrCreateTag().putBoolean("Unbreakable", GsonHelper.getAsBoolean(jsonObject, "unbreakable", false));
-                itemStack.getOrCreateTag().putInt("HideFlags", GsonHelper.getAsInt(jsonObject, "hideflags", 0));
-                return itemStack;
-            }
-        }
+    @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/crafting/CraftingRecipeCodecs;ITEMSTACK_OBJECT_CODEC:Lcom/mojang/serialization/Codec;"), method = "method_53750")
+    private static Codec vivecraft$handleVivecraftRecipe() {
+        // CODEC needs to be external, or it isn't initialized, when the other static codec want's to access it
+        return CustomShapedRecipe.VIVECRAFT_ITEMSTACK_OBJECT_CODEC;
     }
 }

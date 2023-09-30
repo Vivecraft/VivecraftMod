@@ -2,8 +2,10 @@ package org.vivecraft.client;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -83,5 +85,9 @@ public interface Xplat {
     @ExpectPlatform
     static BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return null;
+    }
+
+    @ExpectPlatform
+    static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
     }
 }

@@ -77,11 +77,11 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
             }
         }
 
-        public boolean mouseScrolled(double pMouseX, double p_94735_, double pMouseY) {
-            if (this.btnDelete.mouseScrolled(pMouseX, p_94735_, pMouseY)) {
+        public boolean mouseScrolled(double x, double y, double scrollAmountX, double scrollAmountY) {
+            if (this.btnDelete.mouseScrolled(x, y, scrollAmountX, scrollAmountY)) {
                 return true;
             } else {
-                return this.txt.mouseScrolled(pMouseX, p_94735_, pMouseY) || super.mouseScrolled(pMouseX, p_94735_, pMouseY);
+                return this.txt.mouseScrolled(x, y, scrollAmountX, scrollAmountY) || super.mouseScrolled(x, y, scrollAmountX, scrollAmountY);
             }
         }
 

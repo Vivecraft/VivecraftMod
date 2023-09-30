@@ -184,7 +184,7 @@ public abstract class GuiVROptionsBase extends Screen {
             this.init();
         }
 
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, pMouseX, pMouseY, pPartialTicks);
 
         if (this.visibleList != null) {
             this.visibleList.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
@@ -235,12 +235,13 @@ public abstract class GuiVROptionsBase extends Screen {
         return this.visibleList != null ? this.visibleList.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton) : super.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton);
     }
 
-    public boolean mouseScrolled(double pMouseX, double p_94735_, double pMouseY) {
+    @Override
+    public boolean mouseScrolled(double x, double y, double scrollAmountX, double scrollAmountY) {
         if (this.visibleList != null) {
-            this.visibleList.mouseScrolled(pMouseX, p_94735_, pMouseY);
+            this.visibleList.mouseScrolled(x, y, scrollAmountX, scrollAmountY);
         }
 
-        return super.mouseScrolled(pMouseX, p_94735_, pMouseY);
+        return super.mouseScrolled(x, y, scrollAmountX, scrollAmountY);
     }
 
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {

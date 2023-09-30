@@ -1,8 +1,10 @@
 package org.vivecraft.client.forge;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -13,6 +15,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.network.ChannelListManager;
 
 import java.nio.file.Path;
 
@@ -76,5 +79,9 @@ public class XplatImpl {
 
     public static BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return biome.getModifiedSpecialEffects();
+    }
+
+    public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
+        ChannelListManager.addChannels(listener.getConnection(), resourceLocation);
     }
 }

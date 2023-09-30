@@ -249,8 +249,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     // on first resource load finished
     @Inject(at = @At("HEAD"), method = {
-        "method_24040", // fabric
-        "lambda$new$4"} // forge
+        "method_53522", // fabric
+        "lambda$new$6"} // forge
         , remap = false)
     public void vivecraft$initVROnLaunch(CallbackInfo ci) {
         // init vr after resource loading
@@ -269,7 +269,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (OptifineHelper.isOptifineLoaded() && ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
             // with optifine this texture somehow fails to load, so manually reload it
             try {
-                textureManager.getTexture(Gui.GUI_ICONS_LOCATION).load(resourceManager);
+                textureManager.getTexture(Gui.CROSSHAIR_SPRITE).load(resourceManager);
             } catch (IOException e) {
                 // if there was an error, just reload everything
                 reloadResourcePacks();

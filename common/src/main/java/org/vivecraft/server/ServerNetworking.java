@@ -4,7 +4,7 @@ import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
+import org.vivecraft.common.network.packets.VivecraftDataPacket;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.server.config.ServerConfig;
 
@@ -246,7 +247,7 @@ public class ServerNetworking {
         buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE.ordinal());
         buffer.writeBoolean(vrActive);
         buffer.writeUUID(playerID);
-        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
+        return new ClientboundCustomPayloadPacket(new VivecraftDataPacket(buffer));
     }
 
     public static ClientboundCustomPayloadPacket createUberPacket(Player player, VrPlayerState vrPlayerState, float worldScale, float heightScale) {
@@ -256,14 +257,14 @@ public class ServerNetworking {
         vrPlayerState.serialize(buffer);
         buffer.writeFloat(worldScale);
         buffer.writeFloat(heightScale);
-        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
+        return new ClientboundCustomPayloadPacket(new VivecraftDataPacket(buffer));
     }
 
     public static ClientboundCustomPayloadPacket getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators command, byte[] payload) {
         FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
         friendlybytebuf.writeByte(command.ordinal());
         friendlybytebuf.writeBytes(payload);
-        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, friendlybytebuf);
+        return new ClientboundCustomPayloadPacket(new VivecraftDataPacket(friendlybytebuf));
     }
 
     public static ClientboundCustomPayloadPacket getClimbeyServerPacket() {
@@ -283,14 +284,14 @@ public class ServerNetworking {
             // no block list
             friendlybytebuf.writeByte(0);
         }
-        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, friendlybytebuf);
+        return new ClientboundCustomPayloadPacket(new VivecraftDataPacket(friendlybytebuf));
     }
 
     public static ClientboundCustomPayloadPacket getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators command, String payload) {
         FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
         friendlybytebuf.writeByte(command.ordinal());
         friendlybytebuf.writeUtf(payload);
-        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, friendlybytebuf);
+        return new ClientboundCustomPayloadPacket(new VivecraftDataPacket(friendlybytebuf));
     }
 
     public static void sendVrPlayerStateToClients(ServerPlayer vrPlayerEntity) {

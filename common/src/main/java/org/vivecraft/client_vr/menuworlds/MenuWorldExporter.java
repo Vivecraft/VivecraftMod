@@ -388,7 +388,7 @@ public class MenuWorldExporter {
             int size = dis.readInt();
 
             for (int i = 0; i < size; i++) {
-                CompoundTag tag = CompoundTag.TYPE.load(dis, 0, NbtAccounter.UNLIMITED);
+                CompoundTag tag = CompoundTag.TYPE.load(dis, NbtAccounter.unlimitedHeap());
                 tag = (CompoundTag) dataFixer.update(References.BLOCK_STATE, new Dynamic<>(NbtOps.INSTANCE, tag), dataVersion, SharedConstants.getCurrentVersion().getDataVersion().getVersion()).getValue();
                 this.paletteMap.add(NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag));
             }
