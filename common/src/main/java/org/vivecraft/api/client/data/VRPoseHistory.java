@@ -34,15 +34,17 @@ public interface VRPoseHistory {
     List<VRPose> getAllHistoricalData() throws IllegalArgumentException;
 
     /**
-     * Gets the historical data ticksBack ticks back. This will throw an IllegalStateException if the data cannot
+     * Gets the historical data at the supplied index. This will throw an IllegalStateException if the data cannot
      * be retrieved due to not having enough history.
      *
-     * @param ticksBack Ticks back to retrieve data.
-     * @return A {@link VRPose} instance from ticksBack ticks ago.
-     * @throws IllegalStateException    If ticksBack references a tick that there is not yet data for.
+     * @param index The index of historical data to retrieve back. Index 0 is the oldest stored {@link VRPose}, while
+     *              the index calculated as '{@link VRPoseHistory#ticksOfHistory()} - 1' is the most recently stored
+     *              data (the current tick's data).
+     * @return A {@link VRPose} instance from index ticks ago.
+     * @throws IllegalStateException    If index references a tick that there is not yet data for.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than {@value #MAX_TICKS_BACK} or less than 0.
      */
-    VRPose getHistoricalData(int ticksBack) throws IllegalArgumentException, IllegalStateException;
+    VRPose getHistoricalData(int index) throws IllegalArgumentException, IllegalStateException;
 
     /**
      * Gets the net movement between the most recent data in this instance and the oldest position that can be
