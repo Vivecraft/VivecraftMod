@@ -70,11 +70,11 @@ public class GuiQuickCommandsList extends ObjectSelectionList<CommandEntry> {
         }
 
         @Override
-        public boolean mouseScrolled(double pMouseX, double p_94735_, double pMouseY) {
+        public boolean mouseScrolled(double x, double y, double scrollAmountX, double scrollAmountY) {
             return (
-                this.btnDelete.mouseScrolled(pMouseX, p_94735_, pMouseY) ||
-                    this.txt.mouseScrolled(pMouseX, p_94735_, pMouseY) ||
-                    super.mouseScrolled(pMouseX, p_94735_, pMouseY)
+                this.btnDelete.mouseScrolled(x, y, scrollAmountX, scrollAmountY) ||
+                    this.txt.mouseScrolled(x, y, scrollAmountX, scrollAmountY) ||
+                    super.mouseScrolled(x, y, scrollAmountX, scrollAmountY)
             );
         }
 

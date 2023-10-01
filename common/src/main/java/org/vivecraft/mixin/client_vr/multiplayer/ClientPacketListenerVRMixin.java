@@ -1,13 +1,11 @@
 package org.vivecraft.mixin.client_vr.multiplayer;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
+import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
@@ -24,17 +22,23 @@ import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings.ChatNotifications;
-import org.vivecraft.common.VRServerPerms;
-import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.CommonNetworkHelper.PacketDiscriminators;
+import org.vivecraft.common.network.packets.VivecraftDataPacket;
 
 import static org.vivecraft.client_vr.VRState.*;
 
 @Mixin(net.minecraft.client.multiplayer.ClientPacketListener.class)
-public class ClientPacketListenerVRMixin {
+public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketListenerImpl {
+
+    @Unique
+    String vivecraft$lastMsg = null;
+
+    protected ClientPacketListenerVRMixin(net.minecraft.client.Minecraft minecraft, Connection connection, CommonListenerCookie commonListenerCookie) {
+        super(minecraft, connection, commonListenerCookie);
+    }
 
     @Inject(at = @At("TAIL"), method = "<init>")
-    public void vivecraft$init(net.minecraft.client.Minecraft minecraft, Screen screen, Connection connection, ServerData serverData, GameProfile gameProfile, WorldSessionTelemetryManager worldSessionTelemetryManager, CallbackInfo ci) {
+    public void vivecraft$init(net.minecraft.client.Minecraft minecraft, Connection connection, CommonListenerCookie commonListenerCookie, CallbackInfo ci) {
         if (ClientNetworking.needsReset) {
             dh.vrSettings.overrides.resetAll();
             ClientNetworking.resetServerSettings();
@@ -57,22 +61,10 @@ public class ClientPacketListenerVRMixin {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "onDisconnect")
-    public void vivecraft$disconnect(Component component, CallbackInfo ci) {
-        VRServerPerms.setTeleportSupported(false);
-        if (vrInitialized) {
-            dh.vrPlayer.setTeleportOverride(false);
-        }
-        dh.vrSettings.overrides.resetAll();
-    }
-
     @Inject(at = @At("TAIL"), method = "close")
     public void vivecraft$cleanup(CallbackInfo ci) {
         ClientNetworking.needsReset = true;
     }
-
-    @Unique
-    String vivecraft$lastMsg;
 
     @Inject(at = @At("TAIL"), method = "sendChat")
     public void vivecraft$chatMsg(String string, CallbackInfo ci) {
@@ -131,9 +123,10 @@ public class ClientPacketListenerVRMixin {
         dh.vrSettings.overrides.resetAll();
     }
 
-    @Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getData()Lnet/minecraft/network/FriendlyByteBuf;"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;)V", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$handlepacket(ClientboundCustomPayloadPacket packet, CallbackInfo info, ResourceLocation channelID, FriendlyByteBuf buffer) {
-        if (channelID.equals(CommonNetworkHelper.CHANNEL)) {
+    @Inject(at = @At(value = "HEAD"), method = "handleCustomPayload", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    public void vivecraft$handlepacket(CustomPacketPayload packet, CallbackInfo info) {
+        if (packet instanceof VivecraftDataPacket dataPacket) {
+            FriendlyByteBuf buffer = dataPacket.buffer();
             var packetID = PacketDiscriminators.values()[buffer.readByte()];
             ClientNetworking.handlePacket(packetID, buffer);
             buffer.release();

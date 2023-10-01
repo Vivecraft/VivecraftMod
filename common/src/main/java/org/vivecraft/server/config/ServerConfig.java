@@ -47,6 +47,7 @@ public class ServerConfig {
     public static BooleanValue pvpVRvsNONVR;
     public static BooleanValue pvpSEATEDVRvsNONVR;
     public static BooleanValue pvpVRvsSEATEDVR;
+    public static BooleanValue pvpNotifyBlockedDamage;
 
     public static BooleanValue climbeyEnabled;
     public static InListValue<String> climbeyBlockmode;
@@ -206,6 +207,10 @@ public class ServerConfig {
         builder
             .push("pvp")
             .comment("VR vs. non-VR vs. seated player PVP settings");
+        pvpNotifyBlockedDamage = builder
+            .push("notifyBlockedDamage")
+            .comment("Notifies the player that would cause damage, that it was blocked.")
+            .define(false);
         pvpVRvsVR = builder
             .push("VRvsVR")
             .comment("Allows Standing VR players to damage each other.")

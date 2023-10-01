@@ -70,7 +70,7 @@ public class VRWidgetHelper {
 
             renderVRCameraWidget(-0.5F, -0.25F, -0.22F, f, RenderPass.CAMERA, CameraTracker.cameraModel, CameraTracker.cameraDisplayModel, () ->
             {
-                if (VREffectsHelper.getNearOpaqueBlock(dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), (double) ((GameRendererExtension) mc.gameRenderer).vivecraft$getMinClipDistance()) == null) {
+                if (VREffectsHelper.getNearOpaqueBlock(dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), ((GameRendererExtension) mc.gameRenderer).vivecraft$getMinClipDistance()) == null) {
                     dh.vrRenderer.cameraFramebuffer.bindRead();
                     RenderSystem.setShaderTexture(0, dh.vrRenderer.cameraFramebuffer.getColorTextureId());
                 } else {

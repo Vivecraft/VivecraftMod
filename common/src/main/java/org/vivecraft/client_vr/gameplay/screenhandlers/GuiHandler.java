@@ -411,7 +411,7 @@ public class GuiHandler {
                         scale = 0.4F;
                         guilocal.set(
                             hand * -0.136F * dh.vrPlayer.vrdata_world_render.worldScale,
-                            ("slim".equals(mc.player.getModelName()) ? 0.13F : 0.12F) * dh.vrPlayer.vrdata_world_render.worldScale,
+                            ("slim".equals(mc.player.getSkin().model().id()) ? 0.13F : 0.12F) * dh.vrPlayer.vrdata_world_render.worldScale,
                             0.06F * dh.vrPlayer.vrdata_world_render.worldScale
                         );
                         guirot.rotateY(((float) PI / 5F) * hand);

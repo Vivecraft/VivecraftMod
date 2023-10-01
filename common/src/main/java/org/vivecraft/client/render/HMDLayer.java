@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import org.vivecraft.client.VRPlayersClient;
 
 public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
@@ -25,7 +24,7 @@ public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abst
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer entity, float f, float g, float h, float j, float k, float l) {
-        ResourceLocation hmd = switch (VRPlayersClient.getInstance().getRotationsForPlayer(((Player) entity).getUUID()).hmd) {
+        ResourceLocation hmd = switch (VRPlayersClient.getInstance().getRotationsForPlayer((entity).getUUID()).hmd) {
             case 1 -> this.BLACK_HMD;
             case 2 -> this.GOLD_HMD;
             case 3, 4 -> this.DIAMOND_HMD;

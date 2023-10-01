@@ -19,11 +19,11 @@ public class MouseHandlerVRMixin {
     private boolean mouseGrabbed;
 
     // TODO, this seems unnecessary, and wrong
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseScrolled(DDD)Z", shift = Shift.BEFORE), method = "onScroll", cancellable = true)
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseScrolled(DDDD)Z", shift = Shift.BEFORE), method = "onScroll", cancellable = true)
     public void vivecraft$cancelScroll(long g, double h, double f, CallbackInfo ci) {
-        if (mc.screen.mouseScrolled(g, h, f)) {
+        /*if (mc.screen.mouseScrolled(g, h, f)) {
             ci.cancel();
-        }
+        }*/
     }
 
     @Redirect(method = "onPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))

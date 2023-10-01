@@ -1,9 +1,8 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
@@ -218,33 +217,25 @@ public class ClimbTracker extends Tracker {
                     List<AABB> list = new ArrayList<>();
 
                     if (block instanceof LadderBlock) {
-                        switch ((Direction) blockstate.getValue(LadderBlock.FACING)) {
-                            case DOWN:
-                                flag4 = false;
-                                break;
-
-                            case EAST:
+                        switch (blockstate.getValue(LadderBlock.FACING)) {
+                            case EAST -> {
                                 list.add(this.eastBB);
-                                break;
-
-                            case NORTH:
+                            }
+                            case NORTH -> {
                                 list.add(this.northbb);
-                                break;
-
-                            case SOUTH:
+                            }
+                            case SOUTH -> {
                                 list.add(this.southBB);
-                                break;
-
-                            case UP:
+                            }
+                            case UP -> {
                                 list.add(this.upBB);
-                                break;
-
-                            case WEST:
+                            }
+                            case WEST -> {
                                 list.add(this.westBB);
-                                break;
-
-                            default:
+                            }
+                            default -> {
                                 flag4 = false;
+                            }
                         }
                     }
 

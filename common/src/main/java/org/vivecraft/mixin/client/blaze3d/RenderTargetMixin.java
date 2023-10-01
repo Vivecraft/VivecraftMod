@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11C;
-//import org.lwjgl.opengl.GL12C;
 import org.lwjgl.opengl.GL30C;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;

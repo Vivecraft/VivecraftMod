@@ -272,7 +272,7 @@ public abstract class GuiVROptionsBase extends Screen {
             this.init();
         }
 
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         if (this.visibleList != null) {
             this.visibleList.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -331,12 +331,12 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollAmountX, double scrollAmountY) {
         if (this.visibleList != null) {
-            this.visibleList.mouseScrolled(mouseX, mouseY, delta);
+            this.visibleList.mouseScrolled(mouseX, mouseY, scrollAmountX, scrollAmountY);
         }
 
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX, mouseY, scrollAmountX, scrollAmountY);
     }
 
     @Override

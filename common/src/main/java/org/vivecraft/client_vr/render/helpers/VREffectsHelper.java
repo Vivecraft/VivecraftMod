@@ -898,7 +898,8 @@ public class VREffectsHelper {
                 brightness = 0.5F;
             }
 
-            RenderSystem.setShaderTexture(0, Gui.GUI_ICONS_LOCATION);
+            TextureAtlasSprite crosshairSprite = mc.getGuiSprites().getSprite(Gui.CROSSHAIR_SPRITE);
+            RenderSystem.setShaderTexture(0, crosshairSprite.atlasLocation());
             float uMax = 15.0F / 256.0F;
             float vMax = 15.0F / 256.0F;
 
@@ -908,13 +909,13 @@ public class VREffectsHelper {
             bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
             bufferbuilder.vertex(poseStack.last().pose(), -1.0F, 1.0F, 0.0F).color(brightness, brightness, brightness, 1.0F)
-                .uv(0.0F, vMax).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+                .uv(crosshairSprite.getU0(), crosshairSprite.getV1()).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(poseStack.last().pose(), 1.0F, 1.0F, 0.0F).color(brightness, brightness, brightness, 1.0F)
-                .uv(uMax, vMax).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+                .uv(crosshairSprite.getU1(), crosshairSprite.getV1()).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(poseStack.last().pose(), 1.0F, -1.0F, 0.0F).color(brightness, brightness, brightness, 1.0F)
-                .uv(uMax, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+                .uv(crosshairSprite.getU1(), crosshairSprite.getV0()).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(poseStack.last().pose(), -1.0F, -1.0F, 0.0F).color(brightness, brightness, brightness, 1.0F)
-                .uv(0.0F, 0.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+                .uv(crosshairSprite.getU0(), crosshairSprite.getV0()).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
 
             BufferUploader.drawWithShader(bufferbuilder.end());
 

@@ -29,41 +29,41 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modRuntimeOnly "maven.modrinth:sodium:mc1.20.1-0.5.2"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.20.2-0.5.3"
 
     // for iris compat
-    modRuntimeOnly "maven.modrinth:iris:1.6.8+1.20.1"
+    modRuntimeOnly "maven.modrinth:iris:1.6.9+1.20.2"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
     // for REI compat
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:12.0.634"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:13.0.661"
 
     // for Pehkui compat
-    modRuntimeOnly("com.github.Virtuoel:Pehkui:3.7.7", { exclude group: "net.fabricmc.fabric-api" })
+    modCompileOnly("com.github.Virtuoel:Pehkui:3.7.7", { exclude group: "net.fabricmc.fabric-api" })
 
     // other mods
     // modRuntimeOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
-    modCompileOnly "maven.modrinth:lithium:mc1.20.1-0.11.2"
-    modCompileOnly "maven.modrinth:indium:1.0.21+mc1.20.1"
+    modCompileOnly "maven.modrinth:lithium:mc1.20.2-0.12.0"
+    modCompileOnly "maven.modrinth:indium:1.0.27+mc1.20.1"
 
     //mod menu
-    modApi("com.terraformersmc:modmenu:7.2.2")
+    modApi("com.terraformersmc:modmenu:8.0.0")
 
     // for immersive portals compat
-    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v3.3.1-mc1.20.1') {
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v3.3.1-mc1.20.1') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v3.3.1-mc1.20.1') {
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v3.3.1-mc1.20.1') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly('com.github.iPortalTeam.ImmersivePortalsMod:build:v3.3.1-mc1.20.1') {
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:build:v3.3.1-mc1.20.1') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modRuntimeOnly("com.github.llamalad7.mixinextras:mixinextras-fabric:0.2.0-beta.9")
+    modCompileOnly("com.github.llamalad7.mixinextras:mixinextras-fabric:0.2.0-beta.9")
 
     // needed for resource loading
     include(modImplementation(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version)))

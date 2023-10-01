@@ -68,7 +68,7 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
     @Inject(at = @At("HEAD"), method = "getRenderer(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/client/renderer/entity/EntityRenderer;", cancellable = true)
     public void vivecraft$renderer(Entity pEntity, CallbackInfoReturnable<EntityRenderer<AbstractClientPlayer>> info) {
         if (pEntity instanceof AbstractClientPlayer) {
-            String s = ((AbstractClientPlayer) pEntity).getModelName();
+            String s = ((AbstractClientPlayer) pEntity).getSkin().model().id();
             RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(pEntity.getUUID());
             if (playermodelcontroller$rotinfo != null) {
                 VRPlayerRenderer vrplayerrenderer;

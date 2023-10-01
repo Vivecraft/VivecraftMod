@@ -85,17 +85,13 @@ public abstract class PauseScreenVRMixin extends net.minecraft.client.gui.screen
         RowHelper rowHelperOverlay_Profiler = gridWidgetOverlay_Profiler.createRowHelper(2);
         rowHelperOverlay_Profiler.addChild(new Builder(Component.translatable("vivecraft.gui.overlay"), (p) ->
         {
-            mc.options.renderDebug = !mc.options.renderDebug;
+            mc.gui.getDebugOverlay().toggleOverlay();
             mc.setScreen(null);
         }).width(48).build());
 
         rowHelperOverlay_Profiler.addChild(new Builder(Component.translatable("vivecraft.gui.profiler"), (p) ->
         {
-            if (!mc.options.renderDebug) {
-                mc.options.renderDebugCharts = false;
-            }
-            mc.options.renderDebugCharts = !mc.options.renderDebugCharts;
-            mc.options.renderDebug = mc.options.renderDebugCharts;
+            mc.gui.getDebugOverlay().toggleProfilerChart();
             mc.setScreen(null);
         }).width(48).pos(50, 0).build());
 

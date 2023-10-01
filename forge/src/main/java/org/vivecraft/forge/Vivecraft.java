@@ -1,6 +1,5 @@
 package org.vivecraft.forge;
 
-import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;

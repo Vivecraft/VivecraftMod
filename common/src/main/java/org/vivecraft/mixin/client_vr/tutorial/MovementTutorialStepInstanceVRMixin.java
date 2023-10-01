@@ -103,11 +103,11 @@ public class MovementTutorialStepInstanceVRMixin {
             !vrRunning || dh.vrSettings.seated || !dh.vr.getInputAction(mc.options.keyJump).isActive() ?
             description :
             Component.translatable(
-                    "tutorial.move.description",
-                    Component.literal(
-                        dh.vr.getOriginName(dh.vr.getInputAction(mc.options.keyJump).getLastOrigin())
-                    ).withStyle(ChatFormatting.BOLD)
-                )
+                "tutorial.move.description",
+                Component.literal(
+                    dh.vr.getOriginName(dh.vr.getInputAction(mc.options.keyJump).getLastOrigin())
+                ).withStyle(ChatFormatting.BOLD)
+            )
         );
     }
 
@@ -117,13 +117,13 @@ public class MovementTutorialStepInstanceVRMixin {
             !vrRunning || dh.vrSettings.seated ?
             title :
             Component.translatable(
-                    "vivecraft.toasts.point_controller",
-                    Component.translatable(
-                        dh.vrSettings.reverseHands ?
-                        "vivecraft.toasts.point_controller.left" :
-                        "vivecraft.toasts.point_controller.right"
-                    ).withStyle(ChatFormatting.BOLD)
-                )
+                "vivecraft.toasts.point_controller",
+                Component.translatable(
+                    dh.vrSettings.reverseHands ?
+                    "vivecraft.toasts.point_controller.left" :
+                    "vivecraft.toasts.point_controller.right"
+                ).withStyle(ChatFormatting.BOLD)
+            )
         );
     }
 

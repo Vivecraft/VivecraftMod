@@ -7,7 +7,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket.Rot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Pose;
@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings.ChatServerPluginMessage;
@@ -26,6 +27,7 @@ import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.CommonNetworkHelper.PacketDiscriminators;
 import org.vivecraft.common.network.VRPlayerState;
+import org.vivecraft.common.network.packets.VivecraftDataPacket;
 
 import java.util.UUID;
 
@@ -58,14 +60,14 @@ public class ClientNetworking {
         FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
         friendlybytebuf.writeByte(command.ordinal());
         friendlybytebuf.writeBytes(payload);
-        return new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, friendlybytebuf);
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(friendlybytebuf));
     }
 
     public static ServerboundCustomPayloadPacket createVRActivePacket(boolean vrActive) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeByte(PacketDiscriminators.IS_VR_ACTIVE.ordinal());
         buffer.writeBoolean(vrActive);
-        return new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(buffer));
     }
 
     public static void resetServerSettings() {
@@ -81,10 +83,8 @@ public class ClientNetworking {
     }
 
     public static void sendVersionInfo() {
-        String s = CommonNetworkHelper.CHANNEL.toString();
-        FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
-        friendlybytebuf.writeBytes(s.getBytes());
-        mc.getConnection().send(new ServerboundCustomPayloadPacket(new ResourceLocation("minecraft:register"), friendlybytebuf));
+        //mc.getConnection().send(new ServerboundCustomPayloadPacket(new ChannelRegisterPacket(CommonNetworkHelper.CHANNEL.toString())));
+        Xplat.addNetworkChannel(mc.getConnection(), CommonNetworkHelper.CHANNEL);
         // send version string, with currently running
         mc.getConnection().send(getVivecraftClientPacket(PacketDiscriminators.VERSION,
             (CommonDataHolder.getInstance().versionIdentifier + (vrRunning ? " VR" : " NONVR")
@@ -137,7 +137,7 @@ public class ClientNetworking {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeByte(PacketDiscriminators.VR_PLAYER_STATE.ordinal());
         vrPlayerState.serialize(buffer);
-        return new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(buffer));
     }
 
     public static void sendLegacyPackets(ClientPacketListener connection, VRPlayerState vrPlayerState) {
@@ -146,21 +146,21 @@ public class ClientNetworking {
         controller0Buffer.writeByte(PacketDiscriminators.CONTROLLER0DATA.ordinal());
         controller0Buffer.writeBoolean(dh.vrSettings.reverseHands);
         vrPlayerState.controller0().serialize(controller0Buffer);
-        connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, controller0Buffer));
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(controller0Buffer)));
 
         // right controller packet
         FriendlyByteBuf controller1Buffer = new FriendlyByteBuf(Unpooled.buffer());
         controller1Buffer.writeByte(PacketDiscriminators.CONTROLLER1DATA.ordinal());
         controller1Buffer.writeBoolean(dh.vrSettings.reverseHands);
         vrPlayerState.controller1().serialize(controller1Buffer);
-        connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, controller1Buffer));
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(controller1Buffer)));
 
         // hmd packet
         FriendlyByteBuf headBuffer = new FriendlyByteBuf(Unpooled.buffer());
         headBuffer.writeByte(PacketDiscriminators.HEADDATA.ordinal());
         headBuffer.writeBoolean(dh.vrSettings.seated);
         vrPlayerState.hmd().serialize(headBuffer);
-        connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, headBuffer));
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(headBuffer)));
     }
 
     public static boolean isLimitedSurvivalTeleport() {

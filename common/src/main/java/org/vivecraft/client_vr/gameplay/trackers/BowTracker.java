@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.Util;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;

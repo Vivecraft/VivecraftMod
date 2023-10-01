@@ -5,6 +5,7 @@ import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,17 +30,20 @@ public abstract class TutorialToastVRMixin implements Toast {
     @Final
     private Component message;
 
+    @Shadow
+    @Final
+    private static ResourceLocation BACKGROUND_SPRITE;
     @Unique
     private int vivecraft$offset;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", shift = Shift.AFTER), method = "render")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V", shift = Shift.AFTER), method = "render")
     private void vivecraft$extendToast(GuiGraphics guiGraphics, ToastComponent toastComponent, long l, CallbackInfoReturnable<Visibility> cir) {
         int width = max(toastComponent.getMinecraft().font.width(this.title), this.message != null ? toastComponent.getMinecraft().font.width(this.message) : 0) + 34;
         this.vivecraft$offset = min(this.width() - width, 0);
         if (this.vivecraft$offset < 0) {
             // draw a bigger toast from right to left, to override the left border
             for (int i = this.vivecraft$offset - (this.width() - 8) * (this.vivecraft$offset / (this.width() - 8)); i >= this.vivecraft$offset; i -= this.width() - 8) {
-                guiGraphics.blit(TEXTURE, i, 0, 0, 96, this.width() - 4, this.height());
+                guiGraphics.blit(BACKGROUND_SPRITE, i, 0, 0, 96, this.width() - 4, this.height());
             }
         }
     }

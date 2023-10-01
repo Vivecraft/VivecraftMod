@@ -176,39 +176,48 @@ public abstract class ServerPlayerMixin extends net.minecraft.world.entity.playe
                 thisVive = new ServerVivePlayer((ServerPlayer) (Object) this);
             }
 
+            boolean blockedDamage = false;
+            String blockedDamageCase = "";
+
             if ((!otherVive.isVR() && thisVive.isVR() && thisVive.isSeated())
                 || (!thisVive.isVR() && otherVive.isVR() && otherVive.isSeated())) {
                 // nonvr vs Seated
                 if (!ServerConfig.pvpSEATEDVRvsNONVR.get()) {
-                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs seat"), false);
-                    cir.setReturnValue(false);
+                    blockedDamage = true;
+                    blockedDamageCase = "canceled nonvr vs seated VR damage";
                 }
             } else if ((!otherVive.isVR() && thisVive.isVR() && !thisVive.isSeated())
                 || (!thisVive.isVR() && otherVive.isVR() && !otherVive.isSeated())) {
                 // nonvr vs Standing
                 if (!ServerConfig.pvpVRvsNONVR.get()) {
-                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled non vs stand"), false);
-                    cir.setReturnValue(false);
+                    blockedDamage = true;
+                    blockedDamageCase = "canceled nonvr vs standing VR damage";
                 }
             } else if ((otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated())
                 || (thisVive.isVR() && thisVive.isSeated() && otherVive.isVR() && !otherVive.isSeated())) {
                 // Standing vs Seated
                 if (!ServerConfig.pvpVRvsSEATEDVR.get()) {
-                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs stand"), false);
-                    cir.setReturnValue(false);
+                    blockedDamage = true;
+                    blockedDamageCase = "canceled seated VR vs standing VR damage";
                 }
             } else if (otherVive.isVR() && !otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated()) {
                 // Standing vs Standing
                 if (!ServerConfig.pvpVRvsVR.get()) {
-                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled stand vs stand"), false);
-                    cir.setReturnValue(false);
+                    blockedDamage = true;
+                    blockedDamageCase = "canceled standing VR vs standing VR damage";
                 }
             } else if (otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && thisVive.isSeated()) {
                 // Seated vs Seated
                 if (!ServerConfig.pvpSEATEDVRvsSEATEDVR.get()) {
-                    this.server.getPlayerList().broadcastSystemMessage(Component.literal("canceled seat vs seat"), false);
-                    cir.setReturnValue(false);
+                    blockedDamage = true;
+                    blockedDamageCase = "canceled seated VR vs seated VR damage";
                 }
+            }
+            if (blockedDamage) {
+                if (ServerConfig.pvpNotifyBlockedDamage.get()) {
+                    other.sendSystemMessage(Component.literal(blockedDamageCase));
+                }
+                cir.setReturnValue(false);
             }
         }
     }

@@ -12,7 +12,6 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import org.joml.Vector3f;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.VRPlayersClient.RotInfo;
@@ -114,8 +113,8 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
     @Override
     public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
-        this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player) pEntity).getUUID());
-        RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player) pEntity).getUUID());
+        this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer((pEntity).getUUID());
+        RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer((pEntity).getUUID());
 
         if (rotinfo == null) {
             return;

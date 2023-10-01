@@ -10,7 +10,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.VRPlayersClient.RotInfo;
 
@@ -39,8 +38,8 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
     @Override
     public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
-        this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player) pEntity).getUUID());
-        RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(((Player) pEntity).getUUID());
+        this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer((pEntity).getUUID());
+        RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer((pEntity).getUUID());
 
         if (rotinfo == null) {
             return; //how
@@ -48,8 +47,8 @@ public class VRPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
 
         double d0 = -1.501F * rotinfo.heightScale;
         float f = toRadians(pEntity.getYRot());
-        float f1 = (float) atan2(-rotinfo.headRot.x, -rotinfo.headRot.z);
-        float f2 = (float) asin(rotinfo.headRot.y / rotinfo.headRot.length());
+        float f1 = atan2(-rotinfo.headRot.x, -rotinfo.headRot.z);
+        float f2 = asin(rotinfo.headRot.y / rotinfo.headRot.length());
         double d1 = rotinfo.getBodyYawRadians();
         this.head.xRot = -f2;
         this.head.yRot = (float) (PI - (double) f1 - d1);
