@@ -4,10 +4,7 @@ import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.data.VRPoseHistory;
 import org.vivecraft.api.data.VRPose;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 public class VRPoseHistoryImpl implements VRPoseHistory {
 
@@ -17,9 +14,9 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     }
 
     public void addPose(VRPose pose) {
-        this.dataQueue.add(pose);
+        this.dataQueue.addFirst(pose);
         if (this.dataQueue.size() > VRPoseHistory.MAX_TICKS_BACK) {
-            this.dataQueue.removeFirst();
+            this.dataQueue.removeLast();
         }
     }
 
@@ -38,13 +35,13 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     }
 
     @Override
-    public VRPose getHistoricalData(int index) throws IllegalArgumentException, IllegalStateException {
-        checkTicksBack(index);
-        if (this.dataQueue.size() <= index) {
-            throw new IllegalStateException("Cannot retrieve data from " + index + " ticks ago, when there is " +
+    public VRPose getHistoricalData(int ticksBack) throws IllegalArgumentException, IllegalStateException {
+        checkTicksBack(ticksBack);
+        if (this.dataQueue.size() <= ticksBack) {
+            throw new IllegalStateException("Cannot retrieve data from " + ticksBack + " ticks ago, when there is " +
                 "only data for up to " + (this.dataQueue.size() - 1) + " ticks ago.");
         }
-        return this.dataQueue.get(index);
+        return this.dataQueue.get(ticksBack);
     }
 
     @Override
