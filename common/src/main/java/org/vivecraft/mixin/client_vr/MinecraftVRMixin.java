@@ -43,10 +43,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL13C;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -161,6 +158,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Shadow
     @Final
     private ReloadableResourceManager resourceManager;
+
+    @Mutable
+    @Final
+    @Shadow
+    private RenderTarget mainRenderTarget;
 
     @Shadow
     protected abstract void renderFpsMeter(GuiGraphics guiGraphics, ProfileResults profileResults);
@@ -328,8 +330,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             RenderPassManager.setGUIRenderPass();
             RenderSystem.depthMask(true);
             RenderSystem.colorMask(true, true, true, true);
-            mc.mainRenderTarget.clear(ON_OSX);
-            mc.mainRenderTarget.bindWrite(true);
+            this.mainRenderTarget.clear(ON_OSX);
+            this.mainRenderTarget.bindWrite(true);
 
             // draw screen/gui to buffer
             RenderSystem.getModelViewStack().pushPose();
@@ -369,26 +371,26 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
             // generate mipmaps
             // TODO: does this do anything?
-            mc.mainRenderTarget.bindRead();
-            ((RenderTargetExtension) mc.mainRenderTarget).vivecraft$genMipMaps();
-            mc.mainRenderTarget.unbindRead();
+            this.mainRenderTarget.bindRead();
+            ((RenderTargetExtension) this.mainRenderTarget).vivecraft$genMipMaps();
+            this.mainRenderTarget.unbindRead();
 
             this.profiler.popPush("2D Keyboard");
             float actualPartialTicks = this.pause ? this.pausePartialTick : this.timer.partialTick;
             GuiGraphics guiGraphics = new GuiGraphics(mc, this.renderBuffers.bufferSource());
             if (KeyboardHandler.isShowing() && !dh.vrSettings.physicalKeyboard) {
-                mc.mainRenderTarget = KeyboardHandler.Framebuffer;
-                mc.mainRenderTarget.clear(ON_OSX);
-                mc.mainRenderTarget.bindWrite(true);
+                this.mainRenderTarget = KeyboardHandler.Framebuffer;
+                this.mainRenderTarget.clear(ON_OSX);
+                this.mainRenderTarget.bindWrite(true);
                 RenderHelper.drawScreen(actualPartialTicks, KeyboardHandler.UI, guiGraphics);
                 guiGraphics.flush();
             }
 
             this.profiler.popPush("Radial Menu");
             if (RadialHandler.isShowing()) {
-                mc.mainRenderTarget = RadialHandler.Framebuffer;
-                mc.mainRenderTarget.clear(ON_OSX);
-                mc.mainRenderTarget.bindWrite(true);
+                this.mainRenderTarget = RadialHandler.Framebuffer;
+                this.mainRenderTarget.clear(ON_OSX);
+                this.mainRenderTarget.bindWrite(true);
                 RenderHelper.drawScreen(actualPartialTicks, RadialHandler.UI, guiGraphics);
                 guiGraphics.flush();
             }
@@ -424,7 +426,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
                 this.profiler.push("Eye:" + renderpass);
                 this.profiler.push("setup");
-                mc.mainRenderTarget.bindWrite(true);
+                this.mainRenderTarget.bindWrite(true);
                 this.profiler.pop();
                 VRPassHelper.renderSingleView(renderpass, actualPartialTicks, nanoTime, renderLevel);
                 this.profiler.pop();
@@ -445,11 +447,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         }
                     }
                 ) {
-                    mc.mainRenderTarget.unbindWrite();
+                    this.mainRenderTarget.unbindWrite();
                     takeScreenshot(
                         renderpass == RenderPass.CAMERA ?
                         dh.vrRenderer.cameraFramebuffer :
-                        mc.mainRenderTarget
+                        this.mainRenderTarget
                     );
                     this.window.updateDisplay();
                     dh.grabScreenShot = false;

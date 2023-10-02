@@ -29,11 +29,9 @@ public abstract class OptionsVRMixin {
     void processOptionsMixin(Options instance, KeyMapping[] keyMappings, Operation<KeyMapping[]> original) {
         if (keyMappings != null) {
             if (keyMappings.length > 0) {
+                // inject custom key mappings
                 keyMappings = Stream.concat(Arrays.stream(keyMappings), userKeyBindingSet.stream()).toArray(KeyMapping[]::new);
                 vanillaBindingSet.addAll(Arrays.asList(keyMappings));
-                KeyMapping.CATEGORY_SORT_ORDER.put("vivecraft.key.category.gui", 8);
-                KeyMapping.CATEGORY_SORT_ORDER.put("vivecraft.key.category.climbey", 9);
-                KeyMapping.CATEGORY_SORT_ORDER.put("vivecraft.key.category.keyboard", 10);
                 original.call(instance, keyMappings);
             } else {
                 throw new MissingResourceException(

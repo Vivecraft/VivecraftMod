@@ -17,6 +17,7 @@
     "client_vr.ClientBrandRetrieverVRMixin",
     "client_vr.KeyboardHandlerVRMixin",
     "client_vr.KeyboardInputVRMixin",
+    "client_vr.KeyMappingVRMixin",
     "client_vr.MinecraftVRMixin",
     "client_vr.MouseHandlerVRMixin",
     "client_vr.OptionsVRMixin",

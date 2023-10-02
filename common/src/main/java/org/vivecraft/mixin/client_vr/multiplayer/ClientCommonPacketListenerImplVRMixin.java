@@ -6,9 +6,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.common.VRServerPerms;
+
+import static org.vivecraft.client_vr.VRState.dh;
 
 @Mixin(ClientCommonPacketListenerImpl.class)
 public class ClientCommonPacketListenerImplVRMixin {
@@ -16,10 +17,10 @@ public class ClientCommonPacketListenerImplVRMixin {
 
     @Inject(at = @At("TAIL"), method = "onDisconnect")
     public void vivecraft$disconnect(Component component, CallbackInfo ci) {
-        VRServerPerms.INSTANCE.setTeleportSupported(false);
+        VRServerPerms.setTeleportSupported(false);
         if (VRState.vrInitialized) {
-            ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
+            dh.vrPlayer.setTeleportOverride(false);
         }
-        ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
+        dh.vrSettings.overrides.resetAll();
     }
 }

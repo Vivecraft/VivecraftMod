@@ -70,7 +70,7 @@ public class ShadersRenderVRMixin {
 
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", remap = true, shift = Shift.BEFORE), ordinal = 0, method = "renderShadowMap", remap = false)
     private static Entity vivecraft$fixPlayerPos(Entity entity, GameRenderer gameRenderer, Camera activeRenderInfo) {
-        if (!RenderPassType.isVanilla() && entity == activeRenderInfo.entity) {
+        if (!RenderPassType.isVanilla() && entity == activeRenderInfo.getEntity()) {
             ((GameRendererExtension) gameRenderer).vivecraft$restoreRVEPos((LivingEntity) entity);
         }
         return entity;
@@ -78,7 +78,7 @@ public class ShadersRenderVRMixin {
 
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", remap = true, shift = Shift.AFTER), ordinal = 0, method = "renderShadowMap", remap = false)
     private static Entity vivecraft$restorePlayerPos(Entity entity, GameRenderer gameRenderer, Camera activeRenderInfo) {
-        if (!RenderPassType.isVanilla() && entity == activeRenderInfo.entity) {
+        if (!RenderPassType.isVanilla() && entity == activeRenderInfo.getEntity()) {
             ((GameRendererExtension) gameRenderer).vivecraft$cacheRVEPos((LivingEntity) entity);
             ((GameRendererExtension) gameRenderer).vivecraft$setupRVE();
         }
