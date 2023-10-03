@@ -894,84 +894,76 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Unique
     private void vivecraft$copyToMirror() {
-        // TODO: fix mixed reality... again
-        int left = 0;
-        int width = this.window.getScreenWidth();
-        int height = this.window.getScreenHeight();
-        int top = 0;
-        boolean disableBlend = true;
-        float xCropFactor = 0.0F;
-        float yCropFactor = 0.0F;
-        boolean keepAspect = false;
-        RenderTarget source = switch (dh.vrSettings.displayMirrorMode) {
+        switch (dh.vrSettings.displayMirrorMode) {
             case MIXED_REALITY -> {
                 if (VRShaders.depthMaskShader != null) {
                     this.vivecraft$doMixedRealityMirror();
                 } else {
                     this.vivecraft$notifyMirror("Shader compile failed, see log", true, 10000);
                 }
-                yield null;
             }
             case DUAL -> {
+                int height = this.window.getScreenHeight();
+                int width = this.window.getScreenWidth() / 2;
                 // run eye0
-                width /= 2;
-                if (dh.vrRenderer.framebufferEye0 != null) {
-                    ((RenderTargetExtension) dh.vrRenderer.framebufferEye0).vivecraft$blitToScreen(
-                        left,
-                        width,
-                        height,
-                        top,
-                        disableBlend,
-                        xCropFactor,
-                        yCropFactor,
-                        keepAspect
-                    );
-                }
-                left = width; // setup for eye1
-                yield dh.vrRenderer.framebufferEye1;
+                ((RenderTargetExtension) dh.vrRenderer.framebufferEye0).vivecraft$blitToScreen(
+                    0, width, height, 0, true, 0.0F, 0.0F, false
+                );
+                // run eye1
+                ((RenderTargetExtension) dh.vrRenderer.framebufferEye1).vivecraft$blitToScreen(
+                    width, width, height, 0, true, 0.0F, 0.0F, false
+                );
             }
             case FIRST_PERSON -> {
-                yield dh.vrRenderer.framebufferUndistorted;
+                ((RenderTargetExtension) dh.vrRenderer.framebufferUndistorted).vivecraft$blitToScreen(
+                    0, this.window.getScreenWidth(), this.window.getScreenHeight(), 0, true, 0.0F, 0.0F, false
+                );
             }
             case THIRD_PERSON -> {
-                yield dh.vrRenderer.framebufferMR;
+                ((RenderTargetExtension) dh.vrRenderer.framebufferMR).vivecraft$blitToScreen(
+                    0, this.window.getScreenWidth(), this.window.getScreenHeight(), 0, true, 0.0F, 0.0F, false
+                );
             }
             case GUI -> {
-                yield GuiHandler.guiFramebuffer;
+                ((RenderTargetExtension) GuiHandler.guiFramebuffer).vivecraft$blitToScreen(
+                    0, this.window.getScreenWidth(), this.window.getScreenHeight(), 0, true, 0.0F, 0.0F, false
+                );
             }
             case OFF -> {
                 if (dh.vr.isHMDTracking()) {
                     this.vivecraft$notifyMirror("Mirror is OFF", true, 1000);
+                } else {
+                    ((RenderTargetExtension) (
+                        !dh.vrSettings.displayMirrorLeftEye ?
+                        dh.vrRenderer.framebufferEye1 :
+                        dh.vrRenderer.framebufferEye0
+                    )).vivecraft$blitToScreen(
+                        0, this.window.getScreenWidth(), this.window.getScreenHeight(), 0, true, 0.0F, 0.0F, false
+                    );
                 }
-                yield (!dh.vrSettings.displayMirrorLeftEye ?
-                       dh.vrRenderer.framebufferEye1 :
-                       dh.vrRenderer.framebufferEye0
-                );
             }
             case SINGLE -> {
-                yield !dh.vrSettings.displayMirrorLeftEye ?
-                      dh.vrRenderer.framebufferEye1 :
-                      dh.vrRenderer.framebufferEye0;
-            }
-            case CROPPED -> {
-                xCropFactor = 0.15F;
-                yCropFactor = 0.15F;
-                keepAspect = true;
-                yield (!dh.vrSettings.displayMirrorLeftEye ?
-                       dh.vrRenderer.framebufferEye1 :
-                       dh.vrRenderer.framebufferEye0
+                ((RenderTargetExtension) (
+                    !dh.vrSettings.displayMirrorLeftEye ?
+                    dh.vrRenderer.framebufferEye1 :
+                    dh.vrRenderer.framebufferEye0
+                )).vivecraft$blitToScreen(
+                    0, this.window.getScreenWidth(), this.window.getScreenHeight(), 0, true, 0.0F, 0.0F, false
                 );
             }
-        };
-        // Debug
-        // source = GuiHandler.guiFramebuffer;
-        // source = dh.vrRenderer.telescopeFramebufferR;
-        //
-        if (source != null) {
-            ((RenderTargetExtension) source).vivecraft$blitToScreen(
-                left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect
-            );
+            case CROPPED -> {
+                ((RenderTargetExtension) (
+                    !dh.vrSettings.displayMirrorLeftEye ?
+                    dh.vrRenderer.framebufferEye1 :
+                    dh.vrRenderer.framebufferEye0
+                )).vivecraft$blitToScreen(
+                    0, this.window.getScreenWidth(), this.window.getScreenHeight(), 0, true, 0.15F, 0.15F, true
+                );
+            }
         }
+        // TODO Debug
+        // GuiHandler.guiFramebuffer;
+        // dh.vrRenderer.telescopeFramebufferR;
     }
 
     @Unique
@@ -1012,7 +1004,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         VRShaders.depthMaskShader.setSampler("thirdPersonDepth", RenderSystem.getShaderTexture(1));
 
         if (dh.vrSettings.mixedRealityUnityLike) {
-            if (dh.vrSettings.mixedRealityUndistorted){
+            if (dh.vrSettings.mixedRealityUndistorted) {
                 RenderSystem.setShaderTexture(2, dh.vrRenderer.framebufferUndistorted.getColorTextureId());
             } else {
                 RenderSystem.setShaderTexture(2, dh.vrRenderer.framebufferEye0.getColorTextureId());
