@@ -8,6 +8,5 @@ public enum RenderPass {
     GUI,
     SCOPER,
     SCOPEL,
-    CAMERA,
-    VANILLA
+    CAMERA
 }

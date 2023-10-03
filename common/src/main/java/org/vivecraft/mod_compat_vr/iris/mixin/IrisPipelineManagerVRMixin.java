@@ -135,7 +135,7 @@ public class IrisPipelineManagerVRMixin implements org.vivecraft.mod_compat_vr.i
             vivecraft$vrPipelinesCurrentDimension = vivecraft$vrPipelinesPerDimension.get(newDimension);
 
             if (!RenderPassType.isVanilla()) {
-                if (dh.currentPass != RenderPass.VANILLA) {
+                if (dh.currentPass != null) {
                     pipeline = vivecraft$vrPipelinesCurrentDimension.get(dh.currentPass);
                 } else {
                     pipeline = vivecraft$vrPipelinesCurrentDimension.get(RenderPass.LEFT);

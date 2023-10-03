@@ -54,6 +54,7 @@
   "vivecraft.key.category.gui": "GUI",
   "vivecraft.key.category.climbey": "Climbey Motion",
   "vivecraft.key.category.keyboard": "Keyboard",
+  "vivecraft.key.category.skeletal_input": "Skeletal Input",
   "_comment2": "Action set names",
   "vivecraft.actionset.ingame": "In-Game",
   "vivecraft.actionset.gui": "GUI",

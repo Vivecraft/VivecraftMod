@@ -42,6 +42,26 @@ public class VivecraftVRMod {
     public static final KeyMapping keyToggleMovement = new KeyMapping("vivecraft.key.toggleMovement", GLFW_KEY_UNKNOWN, "key.categories.movement");
     public static final KeyMapping keyTogglePlayerList = new KeyMapping("vivecraft.key.togglePlayerList", GLFW_KEY_UNKNOWN, "key.categories.multiplayer");
     public static final HandedKeyBinding keyTrackpadTouch = new HandedKeyBinding("vivecraft.key.trackpadTouch", GLFW_KEY_UNKNOWN, "key.categories.misc");
+    public static final HandedKeyBinding keyCurlMainThumb = new HandedKeyBinding("vivecraft.key.mainThumb", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyCurlMainIndex = new HandedKeyBinding("vivecraft.key.mainIndex", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyCurlMainMiddle = new HandedKeyBinding("vivecraft.key.mainMiddle", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyCurlMainRing = new HandedKeyBinding("vivecraft.key.mainRing", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyCurlMainLittle = new HandedKeyBinding("vivecraft.key.mainLittle", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyCurlOffThumb = new HandedKeyBinding("vivecraft.key.offThumb", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyCurlOffIndex = new HandedKeyBinding("vivecraft.key.offIndex", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyCurlOffMiddle = new HandedKeyBinding("vivecraft.key.offMiddle", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyCurlOffRing = new HandedKeyBinding("vivecraft.key.offRing", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyCurlOffLittle = new HandedKeyBinding("vivecraft.key.offLittle", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionMainThumb = new HandedKeyBinding("vivecraft.key.mainThumb", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionMainIndex = new HandedKeyBinding("vivecraft.key.mainIndex", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionMainMiddle = new HandedKeyBinding("vivecraft.key.mainMiddle", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionMainRing = new HandedKeyBinding("vivecraft.key.mainRing", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionMainLittle = new HandedKeyBinding("vivecraft.key.mainLittle", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionOffThumb = new HandedKeyBinding("vivecraft.key.offThumb", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionOffIndex = new HandedKeyBinding("vivecraft.key.offIndex", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionOffMiddle = new HandedKeyBinding("vivecraft.key.offMiddle", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionOffRing = new HandedKeyBinding("vivecraft.key.offRing", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
+    public static final HandedKeyBinding keyExtensionOffLittle = new HandedKeyBinding("vivecraft.key.offLittle", GLFW_KEY_UNKNOWN, "vivecraft.key.category.skeletal_input");
     public static final HandedKeyBinding keyVRInteract = new HandedKeyBinding("vivecraft.key.vrInteract", GLFW_KEY_UNKNOWN, "key.categories.gameplay");
     public static final KeyMapping keyWalkabout = new KeyMapping("vivecraft.key.walkabout", GLFW_KEY_UNKNOWN, "key.categories.movement");
 
@@ -58,7 +78,27 @@ public class VivecraftVRMod {
         keyMoveThirdPersonCam,
         keyTogglePlayerList,
         keyToggleHandheldCam,
-        keyQuickHandheldCam
+        keyQuickHandheldCam,
+        keyCurlMainThumb,
+        keyCurlMainIndex,
+        keyCurlMainMiddle,
+        keyCurlMainRing,
+        keyCurlMainLittle,
+        keyCurlOffThumb,
+        keyCurlOffIndex,
+        keyCurlOffMiddle,
+        keyCurlOffRing,
+        keyCurlOffLittle,
+        keyExtensionMainThumb,
+        keyExtensionMainIndex,
+        keyExtensionMainMiddle,
+        keyExtensionMainRing,
+        keyExtensionMainLittle,
+        keyExtensionOffThumb,
+        keyExtensionOffIndex,
+        keyExtensionOffMiddle,
+        keyExtensionOffRing,
+        keyExtensionOffLittle
     ));
 
     /** Key binds internal to vivecraft, which the player may <u>not</u> bind. */

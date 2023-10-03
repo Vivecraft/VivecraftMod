@@ -18,6 +18,7 @@ import java.util.List;
 import static com.mojang.blaze3d.platform.InputConstants.Key;
 import static com.mojang.blaze3d.platform.InputConstants.Type;
 import static org.joml.Math.abs;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UNKNOWN;
 import static org.lwjgl.openvr.VR.k_ulInvalidInputValueHandle;
 import static org.vivecraft.client_vr.VRState.dh;
 
@@ -388,7 +389,7 @@ public class VRInputAction {
     private void pressKey() {
         Key inputconstants$key = this.keyBinding.key;
 
-        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+        if (inputconstants$key.getValue() != GLFW_KEY_UNKNOWN && !VivecraftVRMod.isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
             if (inputconstants$key.getType() == Type.KEYSYM) {
                 InputSimulator.pressKey(inputconstants$key.getValue());
@@ -407,7 +408,7 @@ public class VRInputAction {
     public void unpressKey() {
         Key inputconstants$key = this.keyBinding.key;
 
-        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+        if (inputconstants$key.getValue() != GLFW_KEY_UNKNOWN && !VivecraftVRMod.isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
             if (inputconstants$key.getType() == Type.KEYSYM) {
                 InputSimulator.releaseKey(inputconstants$key.getValue());

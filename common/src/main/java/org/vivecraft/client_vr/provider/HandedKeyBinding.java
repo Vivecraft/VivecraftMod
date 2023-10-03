@@ -5,8 +5,8 @@ import net.minecraft.client.KeyMapping;
 import java.util.Arrays;
 
 public class HandedKeyBinding extends KeyMapping {
-    private boolean[] pressed = new boolean[ControllerType.values().length];
-    private int[] pressTime = new int[ControllerType.values().length];
+    private final boolean[] pressed = new boolean[ControllerType.values().length];
+    private final int[] pressTime = new int[ControllerType.values().length];
 
     public HandedKeyBinding(String string, int i, String string2) {
         super(string, i, string2);

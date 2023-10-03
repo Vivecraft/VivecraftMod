@@ -19,5 +19,6 @@ public abstract class KeyMappingVRMixin {
         CATEGORY_SORT_ORDER.put("vivecraft.key.category.gui", 8);
         CATEGORY_SORT_ORDER.put("vivecraft.key.category.climbey", 9);
         CATEGORY_SORT_ORDER.put("vivecraft.key.category.keyboard", 10);
+        //CATEGORY_SORT_ORDER.put("vivecraft.key.category.skeletal_input", 11);
     }
 }

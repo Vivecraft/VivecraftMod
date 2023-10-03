@@ -9,8 +9,6 @@ import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import javax.annotation.Nonnull;
-
 public class ClientDataHolderVR {
 
     public static boolean kiosk;
@@ -46,8 +44,7 @@ public class ClientDataHolderVR {
     public boolean integratedServerLaunchInProgress = false;
     public boolean grabScreenShot = false;
     public long frameIndex = 0L;
-    @Nonnull
-    public RenderPass currentPass = RenderPass.VANILLA;
+    public RenderPass currentPass;
     public int tickCounter;
     public float watereffect;
     public float portaleffect;

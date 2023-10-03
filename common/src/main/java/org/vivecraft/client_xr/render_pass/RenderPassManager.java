@@ -40,7 +40,7 @@ public class RenderPassManager {
     }
 
     public static void setVanillaRenderPass() {
-        dh.currentPass = RenderPass.VANILLA;
+        dh.currentPass = null;
         RenderPassManager.wrp = null;
         renderPassType = RenderPassType.VANILLA;
         mc.mainRenderTarget = INSTANCE.vanillaRenderTarget;
