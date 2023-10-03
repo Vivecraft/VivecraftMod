@@ -7,7 +7,7 @@ import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
+import org.vivecraft.client_vr.provider.openxr.MCOpenXR;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -31,7 +31,8 @@ public class VRState {
             vrInitialized = true;
             ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
             if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
-                dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
+                dh.vr = new MCOpenXR(Minecraft.getInstance(), dh);
+                //dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
             } else {
                 dh.vr = new NullVR(Minecraft.getInstance(), dh);
             }

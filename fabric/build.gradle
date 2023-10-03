@@ -79,6 +79,10 @@ dependencies {
     include(implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos"))
     include(implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows"))
 
+    include(implementation("org.lwjgl:lwjgl-openxr:3.3.1"))
+    include(implementation("org.lwjgl:lwjgl-openxr:3.3.1:natives-linux"))
+    include(implementation("org.lwjgl:lwjgl-openxr:3.3.1:natives-windows"))
+
 }
 
 processResources {
