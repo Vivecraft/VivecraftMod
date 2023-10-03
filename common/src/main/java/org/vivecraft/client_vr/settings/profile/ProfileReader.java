@@ -25,7 +25,7 @@ public class ProfileReader {
         this.theProfiles = theProfiles;
     }
 
-    public String readLine() throws IOException {
+    public String readLine() {
         String s = null;
 
         if (this.currentProfile == null) {

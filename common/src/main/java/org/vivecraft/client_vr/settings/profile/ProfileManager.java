@@ -72,7 +72,7 @@ public class ProfileManager {
         }
     }
 
-    private static void validateProfiles() throws Exception {
+    private static void validateProfiles() {
         for (String s : profiles.keySet()) {
             if (profiles.get(s) instanceof JsonObject JsonObject) {
                 JsonObject JsonObject1 = null;
@@ -153,7 +153,7 @@ public class ProfileManager {
         return i != 0;
     }
 
-    private static synchronized boolean loadLegacySettings(String[] settingStr, JsonObject theProfile, String set) throws Exception {
+    private static synchronized boolean loadLegacySettings(String[] settingStr, JsonObject theProfile, String set) {
         Map<String, String> map = new HashMap<>();
         int i = 0;
 

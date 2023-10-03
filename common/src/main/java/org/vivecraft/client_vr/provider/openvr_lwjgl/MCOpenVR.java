@@ -826,21 +826,21 @@ public class MCOpenVR extends MCVR {
 
                 if (i != EVRApplicationError_VRApplicationError_None) {
                     // application needs to be installed, so abort
-                    String pathFormatted = "";
+                    StringBuilder pathFormatted = new StringBuilder();
                     boolean hasInvalidChars = false;
                     for (char c : file1.getAbsolutePath().toCharArray()) {
                         if (c > 127) {
                             hasInvalidChars = true;
-                            pathFormatted += "§c" + c + "§r";
+                            pathFormatted.append("§c").append(c).append("§r");
                         } else {
-                            pathFormatted += c;
+                            pathFormatted.append(c);
                         }
                     }
 
                     String error = VRApplications_GetApplicationsErrorNameFromEnum(i) + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
                     logger.error("Failed to install application manifest: {}{}", error, file1.getAbsolutePath());
 
-                    throw new RenderConfigException("Failed to install application manifest", Component.empty().append(error).append(pathFormatted));
+                    throw new RenderConfigException("Failed to install application manifest", Component.empty().append(error).append(pathFormatted.toString()));
                 }
 
                 logger.info("Application manifest installed successfully");

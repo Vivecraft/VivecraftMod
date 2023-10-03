@@ -9,7 +9,7 @@ import static com.mojang.blaze3d.platform.GlStateManager.*;
 import static org.vivecraft.common.utils.Utils.logger;
 
 public class ShaderHelper {
-    private static int createShader(String shaderGLSL, int shaderType) throws Exception {
+    private static int createShader(String shaderGLSL, int shaderType) {
         int i = 0;
 
         try {

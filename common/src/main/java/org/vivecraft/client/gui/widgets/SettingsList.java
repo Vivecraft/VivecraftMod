@@ -15,10 +15,10 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
 import org.vivecraft.client.gui.widgets.SettingsList.BaseEntry;
 import org.vivecraft.server.config.ConfigBuilder.ConfigValue;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;

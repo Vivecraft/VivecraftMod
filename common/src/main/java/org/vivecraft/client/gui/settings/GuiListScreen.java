@@ -52,7 +52,7 @@ public abstract class GuiListScreen extends Screen {
             init();
             reinit = false;
         }
-        this.render(guiGraphics, i, j, f);
+        super.render(guiGraphics, i, j, f);
         list.render(guiGraphics, i, j, f);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
     }

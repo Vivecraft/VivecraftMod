@@ -182,7 +182,7 @@ public class VRData {
     }
 
     @ParametersAreNonnullByDefault
-    public class VRDevicePose {
+    public static class VRDevicePose {
         final VRData data;
         final Vec3 pos;
         final Vec3 dir;

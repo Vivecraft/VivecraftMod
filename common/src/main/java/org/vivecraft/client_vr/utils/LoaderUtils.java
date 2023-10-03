@@ -41,7 +41,7 @@ public class LoaderUtils {
         }
     }
 
-    public static ZipFile getVivecraftZip() throws URISyntaxException, IOException {
+    public static ZipFile getVivecraftZip() throws IOException {
         if (vivecraftFile == null) {
             init();
         }

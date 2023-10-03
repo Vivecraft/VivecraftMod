@@ -122,7 +122,7 @@ public class HorseTracker extends Tracker {
         return this.info;
     }
 
-    public class ModelInfo {
+    public static class ModelInfo {
         public Vec3 leftReinPos = Vec3.ZERO;
         public Vec3 rightReinPos = Vec3.ZERO;
     }
