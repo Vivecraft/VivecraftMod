@@ -113,10 +113,14 @@ public class GuiRenderOpticsSettings extends org.vivecraft.client.gui.framework.
                         } else {
                             dh.vrRenderer.reinitFrameBuffers("Render Setting Changed");
                         }
+                        this.reinit = true;
                     }
                 }
                 case RELOAD_EXTERNAL_CAMERA -> {
                     VRHotkeys.loadExternalCameraConfig();
+                }
+                case MIXED_REALITY_ALPHA_MASK, MIXED_REALITY_UNITY_LIKE, MIXED_REALITY_UNDISTORTED -> {
+                    this.reinit = true;
                 }
             }
         }

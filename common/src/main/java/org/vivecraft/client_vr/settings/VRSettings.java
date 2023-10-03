@@ -1231,16 +1231,6 @@ public class VRSettings {
                     dh.vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
                 }
             }
-
-            @Override
-            Object setOptionValue(Object value) {
-                // TODO: remove this method after fixing mixed reality... again
-                MirrorMode mode = ((MirrorMode) value).getNext();
-                if (mode == MirrorMode.MIXED_REALITY) {
-                    mode = mode.getNext();
-                }
-                return mode;
-            }
         },
         MIRROR_EYE(false, true, "vivecraft.options.left", "vivecraft.options.right"), // Mirror Eye
         MIXED_REALITY_KEY_COLOR(false, false) { // Key Color
@@ -1286,23 +1276,19 @@ public class VRSettings {
 
             @Override
             void onOptionChange() {
-                dh.vrRenderer.resizeFrameBuffers("MR Setting Changed");
+                // reinit, because of maybe new first person pass
+                dh.vrRenderer.reinitFrameBuffers("MR Setting Changed");
             }
         },
         MIXED_REALITY_UNDISTORTED(false, true) { // Undistorted Pass
 
             @Override
             void onOptionChange() {
-                dh.vrRenderer.resizeFrameBuffers("MR Setting Changed");
+                // reinit, because of maybe new first person pass
+                dh.vrRenderer.reinitFrameBuffers("MR Setting Changed");
             }
         },
-        MIXED_REALITY_ALPHA_MASK(false, true) { // Alpha Mask
-
-            @Override
-            void onOptionChange() {
-                dh.vrRenderer.resizeFrameBuffers("MR Setting Changed");
-            }
-        },
+        MIXED_REALITY_ALPHA_MASK(false, true), // Alpha Mask
         MIXED_REALITY_FOV(true, false, 0, 179, 1, 0) { // Third Person FOV
 
             @Override

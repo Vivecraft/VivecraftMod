@@ -2,17 +2,22 @@ package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL13C;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings.MirrorMode;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import static java.lang.Math.pow;
 import static net.minecraft.client.Minecraft.ON_OSX;
@@ -185,7 +190,7 @@ public class VRPassHelper {
                     dh.vrRenderer.framebufferEye0.viewWidth,
                     dh.vrRenderer.framebufferEye0.viewHeight
                 );
-                GlStateManager._glUseProgram(0);
+                ProgramManager.glUseProgram(0);
                 checkGLError("post overlay" + eye);
                 mc.getProfiler().pop();
             }
@@ -206,12 +211,28 @@ public class VRPassHelper {
                 );
                 mc.getProfiler().pop();
             }
+            case THIRD -> {
+                if (dh.vrSettings.displayMirrorMode == MirrorMode.MIXED_REALITY && OptifineHelper.isOptifineLoaded() &&
+                    renderWorld && mc.level != null && OptifineHelper.isShaderActive() &&
+                    OptifineHelper.bindShaderFramebuffer()
+                ) {
+                    // copy optifine depth buffer, since we need it for the mixed reality split
+                    RenderSystem.activeTexture(GL13C.GL_TEXTURE0);
+                    RenderSystem.bindTexture(dh.vrRenderer.framebufferMR.getDepthTextureId());
+                    checkGLError("pre copy depth");
+                    GlStateManager._glCopyTexSubImage2D(GL13C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, dh.vrRenderer.framebufferMR.width, dh.vrRenderer.framebufferMR.height);
+                    checkGLError("post copy depth");
+                    // rebind the original buffer
+                    dh.vrRenderer.framebufferMR.bindWrite(false);
+                }
+            }
         }
     }
 
     public static void checkGLError(String string) {
-        if (GlStateManager._getError() != 0) {
-            logger.error(string);
+        int i = GlStateManager._getError();
+        if (i != 0) {
+            logger.error("{}: {}", string, i);
         }
     }
 }
