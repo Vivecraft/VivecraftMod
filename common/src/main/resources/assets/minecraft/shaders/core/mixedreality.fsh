@@ -1,43 +1,82 @@
 #version 330 core
 
-uniform vec2 resolution;
-uniform vec2 position;
-uniform sampler2D Sampler0;
-uniform sampler2D Sampler1;
+uniform sampler2D thirdPersonColor;
+uniform sampler2D thirdPersonDepth;
+uniform sampler2D firstPersonColor;
+
 uniform vec3 hmdViewPosition;
 uniform vec3 hmdPlaneNormal;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
-uniform int pass;
+uniform int firstPersonPass;
 uniform vec3 keyColor;
 uniform int alphaMode;
+
+in vec2 texCoordinates;
+
 out vec4 out_Color;
-vec3 getFragmentPosition(vec2 coord) {
-    vec4 posScreen = vec4(coord * 2.0 - 1.0, texture(Sampler1, coord).x * 2.0 - 1.0, 1);
+
+vec3 getFragmentPosition(in vec2 coord) {
+    vec4 posScreen = vec4(coord * 2.0 - 1.0, texture(thirdPersonDepth, coord).x * 2.0 - 1.0, 1);
     vec4 posView = inverse(projectionMatrix * viewMatrix) * posScreen;
     return posView.xyz / posView.w;
 }
+
+vec3 avoidKeyColor(in vec3 color) {
+    // make sure colors don't match keyColor
+    if (all(lessThan(color - keyColor, vec3(0.004)))) {
+        if (all(lessThan(keyColor, vec3(0.004)))) {
+            // if key is black add
+            return color + 0.004;
+        } else {
+            return color - 0.004;
+        }
+    } else {
+        return color;
+    }
+}
+
 void main(void) {
-    vec2 pos = (gl_FragCoord.xy - position) / resolution;
-    vec3 fragPos = getFragmentPosition(pos);
-    float fragHmdDot = dot(fragPos - hmdViewPosition, hmdPlaneNormal);
-    if (((pass == 0 || pass == 2) && fragHmdDot >= 0) || pass == 1) {
-        vec4 color = texture(Sampler0, pos);
-        if (pass == 2) {
-            color = vec4(1, 1, 1, 1);
-        } else if (alphaMode == 0) {
-            vec3 diff = color.rgb - keyColor;// The following code prevents actual colors from matching the key color and looking weird
-            if (keyColor.r < 0.004 && keyColor.g < 0.004 && keyColor.b < 0.004 && color.r < 0.004 && color.g < 0.004 && color.b < 0.004) {
-                color = vec4(0.004, 0.004, 0.004, 1);
-            } else if (diff.r < 0.004 && diff.g < 0.004 && diff.b < 0.004) {
-                color = vec4(color.r - 0.004, color.g - 0.004, color.b - 0.004, color.a);
+
+    out_Color = vec4(keyColor, 1.0);
+    if (firstPersonPass == 1) {
+        // unity like
+        vec2 sampleTexcCoord = fract(texCoordinates);
+        if (texCoordinates.x < 1.0 && texCoordinates.y < 1.0) {
+            // third person all
+            out_Color.rgb = texture(thirdPersonColor, sampleTexcCoord).rgb;
+        } else if (texCoordinates.y >= 1.0){
+            // third person front
+            vec3 fragPos = getFragmentPosition(sampleTexcCoord);
+            if (dot(fragPos - hmdViewPosition, hmdPlaneNormal) >= 0.0) {
+                if (texCoordinates.x < 1.0) {
+                    // color
+                    out_Color.rgb = texture(thirdPersonColor, sampleTexcCoord).rgb;
+                    if (alphaMode == 0) {
+                        out_Color.rgb = avoidKeyColor(out_Color.rgb);
+                    }
+                } else if (alphaMode == 1){
+                    // white mask
+                    out_Color.rgb = vec3(1.0);
+                }
+            }
+        } else if (texCoordinates.x >= 1.0 && texCoordinates.y < 1.0){
+            // first person
+            out_Color.rgb = texture(firstPersonColor, sampleTexcCoord).rgb;
+        }
+    } else {
+        // side by side
+        vec2 sampleTexcCoord = fract(texCoordinates * vec2(1.0, 0.5));
+        if (texCoordinates.x >= 1.0) {
+            // third person all
+            out_Color.rgb = texture(thirdPersonColor, sampleTexcCoord).rgb;
+        } else {
+            // third person front
+            vec3 fragPos = getFragmentPosition(sampleTexcCoord);
+            if (dot(fragPos - hmdViewPosition, hmdPlaneNormal) >= 0.0) {
+                // color
+                out_Color.rgb = avoidKeyColor(texture(thirdPersonColor, sampleTexcCoord).rgb);
             }
         }
-        out_Color = color;
-        //	out_Color = vec4(vec3((distance(fragPos.xz,hmdViewPosition.xz)) / 3), 1); // Draw distance to hmd
-        //	out_Color = texture(depthTex, pos); // Draw depth buffer
-    } else {
-        discard;// Throw out the fragment to save some GPU processing
-        //out_Color = vec4(1, 0, 1, 1);
     }
 }

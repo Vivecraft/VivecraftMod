@@ -136,9 +136,15 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
                 } else {
                     this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
                 }
+                this.reinit = true;
             }
             if (guivroption.getId() == VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA.ordinal()) {
                 VRHotkeys.loadExternalCameraConfig();
+            }
+            if (guivroption.getId() == VRSettings.VrOptions.MIXED_REALITY_ALPHA_MASK.ordinal()
+                || guivroption.getId() == VRSettings.VrOptions.MIXED_REALITY_UNITY_LIKE.ordinal()
+                || guivroption.getId() == VRSettings.VrOptions.MIXED_REALITY_UNDISTORTED.ordinal()) {
+                this.reinit = true;
             }
         }
     }

@@ -9,10 +9,13 @@
   "attributes": ["Position", "UV0"],
   "samplers": [
     {
-      "name": "Sampler0"
+      "name": "thirdPersonColor"
     },
     {
-      "name": "Sampler1"
+      "name": "thirdPersonDepth"
+    },
+    {
+      "name": "firstPersonColor"
     }
   ],
   "uniforms": [
@@ -27,18 +30,6 @@
       "type": "matrix4x4",
       "count": 16,
       "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-    },
-    {
-      "name": "resolution",
-      "type": "float",
-      "count": 2,
-      "values": [1.0, 1.0]
-    },
-    {
-      "name": "position",
-      "type": "float",
-      "count": 2,
-      "values": [1.0, 1.0]
     },
     {
       "name": "hmdViewPosition",
@@ -59,7 +50,7 @@
       "values": [1.0, 1.0, 1.0]
     },
     {
-      "name": "pass",
+      "name": "firstPersonPass",
       "type": "int",
       "count": 1,
       "values": [1]

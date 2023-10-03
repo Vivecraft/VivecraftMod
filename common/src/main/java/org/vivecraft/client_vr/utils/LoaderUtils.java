@@ -8,7 +8,6 @@ import java.net.URL;
 import java.nio.file.FileSystems;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipException;
 
 public class LoaderUtils {
     public static URL ZipFileUrl;

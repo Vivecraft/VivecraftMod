@@ -820,8 +820,9 @@ public class VREffectsHelper {
             return false;
         } else if (dataHolder.climbTracker.isGrabbingLadder(0)) {
             return false;
-        } else
+        } else {
             return !(dataHolder.vrPlayer.worldScale > 15.0F);
+        }
     }
 
     public static void renderCrosshairAtDepth(boolean depthAlways, PoseStack poseStack) {

@@ -32,7 +32,6 @@ import org.vivecraft.common.utils.math.Vector3;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
