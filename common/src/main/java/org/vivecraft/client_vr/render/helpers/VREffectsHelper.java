@@ -107,7 +107,7 @@ public class VREffectsHelper {
             RenderSystem.enableBlend();
             matrixStackIn.translate(0.0D, 0.0D, 0.00001D);
             int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(dataHolder.vrPlayer.vrdata_world_render.getController(i).getPosition()));
-            RenderHelper.drawSizedQuadWithLightmapCutout(720.0F, 720.0F, scale, light, matrixStackIn.last().pose());
+            RenderHelper.drawSizedQuadWithLightmapCutout(720.0F, 720.0F, scale, light, matrixStackIn.last().pose(), true);
 
             matrixStackIn.popPose();
             mc.gameRenderer.lightTexture().turnOnLightLayer();
@@ -660,7 +660,7 @@ public class VREffectsHelper {
             int light = Utils.getCombinedLightWithMin(mc.level, BlockPos.containing(screenPos), minLight);
             RenderHelper.drawSizedQuadWithLightmapCutout((float) mc.getWindow().getGuiScaledWidth(),
                 (float) mc.getWindow().getGuiScaledHeight(), 1.5F, light, color,
-                poseStack.last().pose());
+                poseStack.last().pose(), false);
         } else {
             RenderHelper.drawSizedQuad((float) mc.getWindow().getGuiScaledWidth(),
                 (float) mc.getWindow().getGuiScaledHeight(), 1.5F, color,

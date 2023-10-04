@@ -294,22 +294,22 @@ public class RenderHelper {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
-    public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int lighti, Matrix4f pMatrix) {
-        drawSizedQuadWithLightmapCutout(displayWidth, displayHeight, size, lighti, new float[]{1, 1, 1, 1}, pMatrix);
+    public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int lighti, Matrix4f pMatrix, boolean flipY) {
+        drawSizedQuadWithLightmapCutout(displayWidth, displayHeight, size, lighti, new float[]{1, 1, 1, 1}, pMatrix, flipY);
     }
 
     public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int lighti,
-        float[] color, Matrix4f pMatrix) {
-        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, lighti, color, pMatrix, GameRenderer::getRendertypeEntityCutoutNoCullShader);
+        float[] color, Matrix4f pMatrix, boolean flipY) {
+        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, lighti, color, pMatrix, GameRenderer::getRendertypeEntityCutoutNoCullShader, flipY);
     }
 
     public static void drawSizedQuadSolid(float displayWidth, float displayHeight, float size,
         float[] color, Matrix4f pMatrix) {
-        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.pack(15, 15), color, pMatrix, GameRenderer::getRendertypeEntitySolidShader);
+        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.pack(15, 15), color, pMatrix, GameRenderer::getRendertypeEntitySolidShader, false);
     }
 
     public static void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
-        float[] color, Matrix4f pMatrix, Supplier<ShaderInstance> shader) {
+        float[] color, Matrix4f pMatrix, Supplier<ShaderInstance> shader, boolean flipY) {
         float aspect = displayHeight / displayWidth;
         RenderSystem.setShader(shader);
         mc.gameRenderer.lightTexture().turnOnLightLayer();
@@ -327,25 +327,25 @@ public class RenderHelper {
 
         bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * aspect) / 2.0F), 0)
             .color(color[0], color[1], color[2], color[3])
-            .uv(0.0F, 0.0F)
+            .uv(0.0F, flipY ? 1.0F : 0.0F)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
             .normal(0, 0, 1)
             .endVertex();
         bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * aspect) / 2.0F), 0)
             .color(color[0], color[1], color[2], color[3])
-            .uv(1.0F, 0.0F)
+            .uv(1.0F, flipY ? 1.0F : 0.0F)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
             .normal(0, 0, 1)
             .endVertex();
         bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * aspect / 2.0F), 0)
             .color(color[0], color[1], color[2], color[3])
-            .uv(1.0F, 1.0F)
+            .uv(1.0F, flipY ? 0.0F : 1.0F)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
             .normal(0, 0, 1)
             .endVertex();
         bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * aspect / 2.0F), 0)
             .color(color[0], color[1], color[2], color[3])
-            .uv(0.0F, 1.0F)
+            .uv(0.0F, flipY ? 0.0F : 1.0F)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
             .normal(0, 0, 1)
             .endVertex();
