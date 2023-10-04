@@ -30,7 +30,7 @@ public class ServerUtil {
                 // only do stuff, if the player is still on the server
                 if (!serverPlayer.hasDisconnected()) {
                     ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
-                    String message = "";
+                    String message;
 
                     boolean isOpAndAllowed = ServerConfig.allow_op.get() && serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile());
 

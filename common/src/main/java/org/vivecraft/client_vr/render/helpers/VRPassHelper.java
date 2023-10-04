@@ -14,7 +14,6 @@ import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRShaders;
-import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.settings.VRSettings.MirrorMode;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;

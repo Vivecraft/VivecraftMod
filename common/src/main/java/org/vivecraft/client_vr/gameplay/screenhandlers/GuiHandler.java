@@ -50,16 +50,16 @@ public class GuiHandler {
     public static float guiScaleApplied = 1.0F;
     public static Vec3 guiPos_room;
     public static Matrix4f guiRotation_room;
-    public static final KeyMapping keyLeftClick = new KeyMapping("vivecraft.key.guiLeftClick", -1, "vivecraft.key.category.gui");
-    public static final KeyMapping keyRightClick = new KeyMapping("vivecraft.key.guiRightClick", -1, "vivecraft.key.category.gui");
-    public static final KeyMapping keyMiddleClick = new KeyMapping("vivecraft.key.guiMiddleClick", -1, "vivecraft.key.category.gui");
-    public static final KeyMapping keyShift = new KeyMapping("vivecraft.key.guiShift", -1, "vivecraft.key.category.gui");
-    public static final KeyMapping keyCtrl = new KeyMapping("vivecraft.key.guiCtrl", -1, "vivecraft.key.category.gui");
-    public static final KeyMapping keyAlt = new KeyMapping("vivecraft.key.guiAlt", -1, "vivecraft.key.category.gui");
-    public static final KeyMapping keyScrollUp = new KeyMapping("vivecraft.key.guiScrollUp", -1, "vivecraft.key.category.gui");
-    public static final KeyMapping keyScrollDown = new KeyMapping("vivecraft.key.guiScrollDown", -1, "vivecraft.key.category.gui");
-    public static final KeyMapping keyScrollAxis = new KeyMapping("vivecraft.key.guiScrollAxis", -1, "vivecraft.key.category.gui");
-    public static final HandedKeyBinding keyKeyboardClick = new HandedKeyBinding("vivecraft.key.keyboardClick", -1, "vivecraft.key.category.keyboard") {
+    public static final KeyMapping keyLeftClick = new KeyMapping("vivecraft.key.guiLeftClick", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
+    public static final KeyMapping keyRightClick = new KeyMapping("vivecraft.key.guiRightClick", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
+    public static final KeyMapping keyMiddleClick = new KeyMapping("vivecraft.key.guiMiddleClick", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
+    public static final KeyMapping keyShift = new KeyMapping("vivecraft.key.guiShift", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
+    public static final KeyMapping keyCtrl = new KeyMapping("vivecraft.key.guiCtrl", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
+    public static final KeyMapping keyAlt = new KeyMapping("vivecraft.key.guiAlt", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
+    public static final KeyMapping keyScrollUp = new KeyMapping("vivecraft.key.guiScrollUp", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
+    public static final KeyMapping keyScrollDown = new KeyMapping("vivecraft.key.guiScrollDown", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
+    public static final KeyMapping keyScrollAxis = new KeyMapping("vivecraft.key.guiScrollAxis", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
+    public static final HandedKeyBinding keyKeyboardClick = new HandedKeyBinding("vivecraft.key.keyboardClick", GLFW_KEY_UNKNOWN, "vivecraft.key.category.keyboard") {
         @Override
         public boolean isPriorityOnController(ControllerType type) {
             if (KeyboardHandler.isShowing() && !dh.vrSettings.physicalKeyboard) {
@@ -69,7 +69,7 @@ public class GuiHandler {
             }
         }
     };
-    public static final HandedKeyBinding keyKeyboardShift = new HandedKeyBinding("vivecraft.key.keyboardShift", -1, "vivecraft.key.category.keyboard") {
+    public static final HandedKeyBinding keyKeyboardShift = new HandedKeyBinding("vivecraft.key.keyboardShift", GLFW_KEY_UNKNOWN, "vivecraft.key.category.keyboard") {
         @Override
         public boolean isPriorityOnController(ControllerType type) {
             if (KeyboardHandler.isShowing()) {

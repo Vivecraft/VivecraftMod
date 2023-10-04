@@ -77,9 +77,8 @@ public class VRWidgetHelper {
                     RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/black.png"));
                 }
             }, (face) ->
-            {
-                return face == Direction.SOUTH ? DisplayFace.NORMAL : DisplayFace.NONE;
-            });
+                face == Direction.SOUTH ? DisplayFace.NORMAL : DisplayFace.NONE
+            );
         }
     }
 

@@ -43,7 +43,7 @@ public class TelescopeTracker extends Tracker {
 
     private static Vec3 getLensOrigin(int controller) {
         VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_room_pre.getController(controller);
-        return vrdata$vrdevicepose.getPosition().add(getViewVector(controller).scale(-0.2D).add(vrdata$vrdevicepose.getDirection().scale((double) 0.05F)));
+        return vrdata$vrdevicepose.getPosition().add(getViewVector(controller).scale(-0.2D).add(vrdata$vrdevicepose.getDirection().scale(0.05F)));
     }
 
     private static Vec3 getViewVector(int controller) {

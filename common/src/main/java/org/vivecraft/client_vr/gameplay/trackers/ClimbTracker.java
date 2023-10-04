@@ -464,12 +464,12 @@ public class ClimbTracker extends Tracker {
                     if (j != 2 && j != 3) {
                         if (j == 4 || j == 5) {
                             d0 = d8 - vec36.z;
-                            d10 = (double) ((float) blockpos2.getX() + 0.5F);
+                            d10 = (float) blockpos2.getX() + 0.5F;
                             d10 += (1.0 - min(dh.vrPlayer.worldScale, 1.0)) * (j == 4 ? 0.5 : -0.5);
                         }
                     } else {
                         d10 = d4 - vec36.x;
-                        d0 = (double) ((float) blockpos2.getZ() + 0.5F);
+                        d0 = (float) blockpos2.getZ() + 0.5F;
                         d0 += (1.0 - min(dh.vrPlayer.worldScale, 1.0)) * (j == 2 ? 0.5 : -0.5);
                     }
                 }
@@ -478,7 +478,7 @@ public class ClimbTracker extends Tracker {
                 double d1 = dh.vrPlayer.vrdata_room_pre.getController(this.latchStartController).getPosition().y;
 
                 if (!this.wantjump && this.latchbox[this.latchStartController] != null && d1 <= d12 / 2.0D && this.latchStart[this.latchStartController].y > this.latchbox[this.latchStartController].maxY * 0.8D + (double) blockpos2.getY()) {
-                    Vec3 vec32 = dh.vrPlayer.vrdata_world_pre.hmd.getDirection().scale((double) 0.1F);
+                    Vec3 vec32 = dh.vrPlayer.vrdata_world_pre.hmd.getDirection().scale(0.1F);
                     Vec3 vec33 = (new Vec3(vec32.x, 0.0D, vec32.z)).normalize().scale(0.1D);
                     boolean flag5 = mc.level.noCollision(mc.player, mc.player.getBoundingBox().move(vec33.x, this.latchbox[this.latchStartController].maxY + (double) blockpos2.getY() - mc.player.getY(), vec33.z));
 

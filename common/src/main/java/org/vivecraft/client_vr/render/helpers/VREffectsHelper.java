@@ -685,7 +685,7 @@ public class VREffectsHelper {
                     .rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
                 poseStack.last().normal().rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
 
-                if (dh.menuWorldRenderer.isReady()) {
+                if (dh.menuWorldRenderer != null && dh.menuWorldRenderer.isReady()) {
                     try {
                         renderTechjarsAwesomeMainMenuRoom(poseStack);
                     } catch (Exception exception) {

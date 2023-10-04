@@ -100,19 +100,30 @@ public class IrisPipelineManagerVRMixin implements org.vivecraft.mod_compat_vr.i
 
                 for (RenderPass renderPass : RenderPass.values()) {
                     Iris.logger.info("Creating VR pipeline for dimension {}, RenderPass {}", newDimension, renderPass);
-                    WorldRenderPass worldRenderPass = null;
-                    switch (renderPass) {
-                        case LEFT, RIGHT -> worldRenderPass = WorldRenderPass.stereoXR;
-                        case CENTER -> worldRenderPass = WorldRenderPass.center;
-                        case THIRD -> worldRenderPass = WorldRenderPass.mixedReality;
-                        case SCOPEL -> worldRenderPass = WorldRenderPass.leftTelescope;
-                        case SCOPER -> worldRenderPass = WorldRenderPass.rightTelescope;
-                        case CAMERA -> worldRenderPass = WorldRenderPass.camera;
+                    WorldRenderPass worldRenderPass = switch (renderPass) {
+                        case LEFT, RIGHT -> {
+                            yield WorldRenderPass.stereoXR;
+                        }
+                        case CENTER -> {
+                            yield WorldRenderPass.center;
+                        }
+                        case THIRD -> {
+                            yield WorldRenderPass.mixedReality;
+                        }
+                        case SCOPEL -> {
+                            yield WorldRenderPass.leftTelescope;
+                        }
+                        case SCOPER -> {
+                            yield WorldRenderPass.rightTelescope;
+                        }
+                        case CAMERA -> {
+                            yield WorldRenderPass.camera;
+                        }
                         default -> {
                             Iris.logger.info("skipped VR pipeline for dimension {}, RenderPass {}, not used", newDimension, renderPass);
-                            continue;
+                            yield null;
                         }
-                    }
+                    };
 
                     if (worldRenderPass != null) {
                         RenderPassManager.setWorldRenderPass(worldRenderPass);

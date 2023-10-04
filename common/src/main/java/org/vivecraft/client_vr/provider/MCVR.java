@@ -380,9 +380,8 @@ public abstract class MCVR {
 
     protected KeyMapping findKeyBinding(String name) {
         return Stream.concat(Arrays.stream(mc.options.keyMappings), VivecraftVRMod.hiddenKeyBindingSet.stream()).filter((kb) ->
-        {
-            return name.equals(kb.getName());
-        }).findFirst().orElse(null);
+            name.equals(kb.getName())
+        ).findFirst().orElse(null);
     }
 
     protected void hmdSampling() {
@@ -445,7 +444,6 @@ public abstract class MCVR {
     protected void updateAim() {
         RenderPassManager.setGUIRenderPass();
 
-
         this.hmdRotation.identity();
         this.hmdRotation.set3x3(this.hmdPose);
         this.hmdPivotHistory.add(
@@ -453,108 +451,79 @@ public abstract class MCVR {
                 .add(this.hmdHistory.add(this.getCenterEyePosition()))
         );
 
-        if (dh.vrSettings.seated) {
-            this.controllerPose[0] = this.hmdPose.invert(new Matrix4f()).invert(new Matrix4f());
-            this.controllerPose[1] = this.hmdPose.invert(new Matrix4f()).invert(new Matrix4f());
-        }
-
-        Matrix4f[] amatrix4f = new Matrix4f[]{new Matrix4f(), new Matrix4f()};
-        Matrix4f[] amatrix4f1 = new Matrix4f[]{new Matrix4f(), new Matrix4f()};
+        // should be Matrix4fc, don't edit these!
+        final Matrix4f controller1tip;
+        final Matrix4f controller1hand;
 
         if (dh.vrSettings.seated) {
-            amatrix4f1[0].set(this.controllerPose[0]);
-        } else {
-            this.controllerPose[0].mul0(this.getControllerComponentTransform(0, "handgrip"), amatrix4f1[0]);
-        }
+            this.hmdPose.invert(this.controllerPose[0]).invert();
+            this.hmdPose.invert(this.controllerPose[1]).invert();
+            controller1tip = controller1hand = this.controllerPose[1];
+            this.aimSource[0].set(this.getCenterEyePosition());
+            this.aimSource[1].set(this.getCenterEyePosition());
+            if (mc.screen == null && mc.isWindowActive()) {
+                final int i = mc.getWindow().getScreenHeight();
+                final float width = mc.getWindow().getScreenWidth();
+                final float height = i % 2 != 0 ? i - 1 : i;
+                final float xpos = (float) mc.mouseHandler.xpos();
 
-        this.handRotation[0].identity();
-        this.handRotation[0].set3x3(amatrix4f1[0]);
+                final float f1 = xpos / width * 110.0F - (110.0F / 2.0F);
+                final float f2 = abs(f1);
+                final float f3;
+                final float f4;
 
-        if (dh.vrSettings.seated) {
-            amatrix4f[0].set(this.controllerPose[0]);
-        } else {
-            this.controllerPose[0].mul0(this.getControllerComponentTransform(0, "tip"), amatrix4f[0]);
-        }
-
-        amatrix4f[0].getTranslation(this.aimSource[0]);
-        this.controllerHistory[0].add(this.getAimSource(0));
-        this.controllerRotation[0].identity();
-        this.controllerRotation[0].set3x3(amatrix4f[0]);
-
-        if (dh.vrSettings.seated && mc.screen == null) {
-            Matrix4f matrix4f = new Matrix4f();
-            if (mc.isWindowActive()) {
-                float f = 110.0F;
-                float f1 = 180.0F;
-                int i = mc.getWindow().getScreenHeight();
-
-                if (i % 2 != 0) {
-                    --i;
-                }
-                double d0 = mc.mouseHandler.xpos() / (double) mc.getWindow().getScreenWidth() * f - (f / 2.0F);
-                double d3;
-                Vector3f vec31 = this.getHmdVector();
-
-                if (d0 < (double) (-dh.vrSettings.keyholeX)) {
-                    this.seatedRot += 20.0F * dh.vrSettings.xSensitivity * (((float) abs(d0) - dh.vrSettings.keyholeX) / (f / 2.0F - dh.vrSettings.keyholeX));
-                    this.seatedRot %= 360.0F;
+                if (f2 > dh.vrSettings.keyholeX) {
+                    Vector3f vec31 = this.getHmdVector();
                     this.hmdForwardYaw = (float) toDegrees(atan2(vec31.x, vec31.z));
-                    d3 = ((int) ((double) (-dh.vrSettings.keyholeX + f / 2.0F) * (double) mc.getWindow().getScreenWidth() / (double) f) + 1);
-                    d0 = -dh.vrSettings.keyholeX;
-                } else if (d0 > (double) dh.vrSettings.keyholeX) {
-                    this.seatedRot -= 20.0F * dh.vrSettings.xSensitivity * (((float) abs(d0) - dh.vrSettings.keyholeX) / (f / 2.0F - dh.vrSettings.keyholeX));
+                    float f5 = 20.0F * dh.vrSettings.xSensitivity * ((f2 - dh.vrSettings.keyholeX) / (110.0F / 2.0F - dh.vrSettings.keyholeX));
+                    if (f1 < -dh.vrSettings.keyholeX) {
+                        this.seatedRot += f5;
+                        f3 = (int) ((-dh.vrSettings.keyholeX + 110.0F / 2.0F) * width / 110.0F) + 1;
+                        f4 = -dh.vrSettings.keyholeX;
+                    } else {
+                        this.seatedRot -= f5;
+                        f3 = (int) ((dh.vrSettings.keyholeX + 110.0F / 2.0F) * width / 110.0F) - 1;
+                        f4 = dh.vrSettings.keyholeX;
+                    }
                     this.seatedRot %= 360.0F;
-                    this.hmdForwardYaw = (float) toDegrees(atan2(vec31.x, vec31.z));
-                    d3 = ((int) ((double) (dh.vrSettings.keyholeX + f / 2.0F) * (double) mc.getWindow().getScreenWidth() / (double) f) - 1);
-                    d0 = dh.vrSettings.keyholeX;
                 } else {
-                    d3 = mc.mouseHandler.xpos();
+                    f3 = xpos;
+                    f4 = f1;
                 }
 
-                InputSimulator.setMousePos(d3, i / 2.0D);
-                glfwSetCursorPos(mc.getWindow().getWindow(), d3, i / 2.0D);
-                matrix4f.rotateX((float) toRadians(-clamp(
-                    -89.9D, 89.9D, this.aimPitch + (-mc.mouseHandler.ypos() / i * f1 + (f1 / 2.0F)) * 0.5F * dh.vrSettings.ySensitivity
-                )));
-                matrix4f.rotateY((float) toRadians(-180.0D + d0 - (double) this.hmdForwardYaw));
+                InputSimulator.setMousePos(f3, height / 2.0F);
+                glfwSetCursorPos(mc.getWindow().getWindow(), f3, height / 2.0F);
+                final float xRot = toRadians(-clamp(
+                    -89.9F, 89.9F, this.aimPitch + (-((float) mc.mouseHandler.ypos()) / height * 180.0F + (180.0F / 2.0F)) * 0.5F * dh.vrSettings.ySensitivity
+                ));
+                final float yRot = toRadians(-180.0F + f4 - this.hmdForwardYaw);
+                this.handRotation[0].rotationXYZ(xRot, yRot, 0);
+                this.controllerRotation[0].rotationXYZ(xRot, yRot, 0);
+            } else {
+                this.handRotation[0].identity().set3x3(this.controllerPose[0]);
+                this.controllerRotation[0].identity().set3x3(this.controllerPose[0]);
             }
-
-            this.controllerRotation[0].set3x3(matrix4f);
-
-            this.handRotation[0].set3x3(matrix4f);
-        }
-
-        Vec3 vec32 = this.getAimVector(0);
-        this.aimPitch = (float) toDegrees(asin(vec32.y / vec32.length()));
-        this.controllerForwardHistory[0].add(vec32);
-        this.controllerUpHistory[0].add(this.controllerRotation[0].transformProject(up, new Vector3f()));
-
-        if (dh.vrSettings.seated) {
-            amatrix4f1[1].set(this.controllerPose[1]);
         } else {
-            this.controllerPose[1].mul0(this.getControllerComponentTransform(1, "handgrip"), amatrix4f1[1]);
+            controller1hand = this.controllerPose[1].mul0(this.getControllerComponentTransform(1, "handgrip"), new Matrix4f());
+            final Matrix4f controller0tip = this.controllerPose[0].mul0(this.getControllerComponentTransform(0, "tip"), new Matrix4f());
+            controller1tip = this.controllerPose[1].mul0(this.getControllerComponentTransform(1, "tip"), new Matrix4f());
+            controller0tip.getTranslation(this.aimSource[0]);
+            controller1tip.getTranslation(this.aimSource[1]);
+            this.handRotation[0].identity().set3x3(this.controllerPose[0].mul0(this.getControllerComponentTransform(0, "handgrip"), new Matrix4f()));
+            this.controllerRotation[0].identity().set3x3(controller0tip);
         }
 
-        this.handRotation[1].identity();
-        this.handRotation[1].set3x3(amatrix4f1[1]);
+        this.handRotation[1].identity().set3x3(controller1hand);
+        this.controllerRotation[1].identity().set3x3(controller1tip);
 
-        if (dh.vrSettings.seated) {
-            amatrix4f[1].set(this.controllerPose[1]);
-        } else {
-            this.controllerPose[1].mul0(this.getControllerComponentTransform(1, "tip"), amatrix4f[1]);
-        }
-
-        amatrix4f[1].getTranslation(this.aimSource[1]);
+        this.controllerHistory[0].add(this.getAimSource(0));
         this.controllerHistory[1].add(this.getAimSource(1));
-        this.controllerRotation[1].identity();
-        this.controllerRotation[1].set3x3(amatrix4f[1]);
+
+        Vector3dc vec32 = this.controllerForwardHistory[0].add(this.getAimVector(0));
+        this.aimPitch = (float) toDegrees(asin(vec32.y() / vec32.length()));
+        this.controllerUpHistory[0].add(this.controllerRotation[0].transformProject(up, new Vector3f()));
         this.controllerForwardHistory[1].add(this.getAimVector(1));
         this.controllerUpHistory[1].add(this.controllerRotation[1].transformProject(up, new Vector3f()));
-
-        if (dh.vrSettings.seated) {
-            this.aimSource[1].set(this.getCenterEyePosition());
-            this.aimSource[0].set(this.getCenterEyePosition());
-        }
 
 //        boolean flag = false;
 //
@@ -613,7 +582,7 @@ public abstract class MCVR {
                     float f2 = f;
                     ControllerType controllertype = this.findActiveBindingControllerType(VivecraftVRMod.keyWalkabout);
 
-                    if (controllertype != null && controllertype == ControllerType.LEFT) {
+                    if (controllertype == ControllerType.LEFT) {
                         f2 = f1;
                     }
 
@@ -799,7 +768,7 @@ public abstract class MCVR {
             }
 
             if (RadialHandler.isShowing() && VivecraftVRMod.keyMenuButton.consumeClick()) {
-                RadialHandler.setOverlayShowing(false, (ControllerType) null);
+                RadialHandler.setOverlayShowing(false, null);
             }
 
             if (VivecraftVRMod.keyMenuButton.consumeClick()) {
@@ -987,9 +956,9 @@ public abstract class MCVR {
     protected void changeHotbar(int dir) {
         if (mc.player != null && (!dh.climbTracker.isGrabbingLadder() || !dh.climbTracker.isClaws(mc.player.getMainHandItem()))) {
             if (mc.screen == null) {
-                InputSimulator.scrollMouse(0.0D, (double) (dir * 4));
+                InputSimulator.scrollMouse(0.0D, dir * 4);
             } else {
-                mc.player.getInventory().swapPaint((double) dir);
+                mc.player.getInventory().swapPaint(dir);
             }
         }
     }

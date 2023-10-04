@@ -29,7 +29,7 @@ public abstract class EndermanMixin extends Monster {
         super(entityType, level);
     }
 
-    @Inject(at = @At("HEAD"), method = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z", cancellable = true)
     public void vivecraft$lookAtVR(Player player, CallbackInfoReturnable<Boolean> cir) {
         if (ServerVRPlayers.isVRPlayer((ServerPlayer) player)) {
             cir.setReturnValue(vivecraft$shouldEndermanAttackVRPlayer((EnderMan) (Object) this, (ServerPlayer) player));

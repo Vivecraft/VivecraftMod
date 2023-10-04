@@ -81,7 +81,7 @@ public class RunTracker extends Tracker {
             }
 
             if (this.speed > 1.0D) {
-                this.speed = (double) 1.3F;
+                this.speed = 1.3F;
             }
         }
     }

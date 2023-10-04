@@ -78,27 +78,7 @@ public class VivecraftVRMod {
         keyMoveThirdPersonCam,
         keyTogglePlayerList,
         keyToggleHandheldCam,
-        keyQuickHandheldCam,
-        keyCurlMainThumb,
-        keyCurlMainIndex,
-        keyCurlMainMiddle,
-        keyCurlMainRing,
-        keyCurlMainLittle,
-        keyCurlOffThumb,
-        keyCurlOffIndex,
-        keyCurlOffMiddle,
-        keyCurlOffRing,
-        keyCurlOffLittle,
-        keyExtensionMainThumb,
-        keyExtensionMainIndex,
-        keyExtensionMainMiddle,
-        keyExtensionMainRing,
-        keyExtensionMainLittle,
-        keyExtensionOffThumb,
-        keyExtensionOffIndex,
-        keyExtensionOffMiddle,
-        keyExtensionOffRing,
-        keyExtensionOffLittle
+        keyQuickHandheldCam
     ));
 
     /** Key binds internal to vivecraft, which the player may <u>not</u> bind. */
@@ -130,7 +110,27 @@ public class VivecraftVRMod {
         keyHotbarPrev,
         keyHotbarScroll,
         keyVRInteract,
-        keyWalkabout
+        keyWalkabout,
+        keyCurlMainThumb,
+        keyCurlMainIndex,
+        keyCurlMainMiddle,
+        keyCurlMainRing,
+        keyCurlMainLittle,
+        keyCurlOffThumb,
+        keyCurlOffIndex,
+        keyCurlOffMiddle,
+        keyCurlOffRing,
+        keyCurlOffLittle,
+        keyExtensionMainThumb,
+        keyExtensionMainIndex,
+        keyExtensionMainMiddle,
+        keyExtensionMainRing,
+        keyExtensionMainLittle,
+        keyExtensionOffThumb,
+        keyExtensionOffIndex,
+        keyExtensionOffMiddle,
+        keyExtensionOffRing,
+        keyExtensionOffLittle
     ));
 
     /** Key binds provided by vanilla. */
@@ -146,7 +146,7 @@ public class VivecraftVRMod {
         return allKeyBindingSet.contains(kb) || kb == mc.options.keyChat || kb == mc.options.keyInventory;
     }
 
-    /** checks if a key bind is provided by vanilla or internal to vivecraft */
+    /** checks if a key bind is NOT provided by vanilla NOR internal to vivecraft */
     public static boolean isModBinding(final KeyMapping kb) {
         return !hiddenKeyBindingSet.contains(kb) && !vanillaBindingSet.contains(kb);
     }

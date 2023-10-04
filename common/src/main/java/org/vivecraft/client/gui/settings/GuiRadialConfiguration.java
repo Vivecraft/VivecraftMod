@@ -65,9 +65,7 @@ public class GuiRadialConfiguration extends org.vivecraft.client.gui.framework.G
                     .build()
             );
             this.addRenderableWidget(new Builder(Component.translatable("vivecraft.gui.clear"), (p) ->
-                {
-                    this.setKey(null);
-                })
+                this.setKey(null))
                     .size(150, 20)
                     .pos(this.width / 2 - 155, 25)
                     .build()

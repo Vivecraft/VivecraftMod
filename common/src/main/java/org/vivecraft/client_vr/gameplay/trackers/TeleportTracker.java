@@ -100,7 +100,7 @@ public class TeleportTracker extends Tracker {
                 ((PlayerExtension) mc.player).vivecraft$setMovementTeleportTimer(((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer() + 1);
 
                 if (((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer() > 0) {
-                    this.movementTeleportProgress = (double) ((float) ((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer());
+                    this.movementTeleportProgress = (float) ((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer();
 
                     if (this.movementTeleportProgress >= 1.0D) {
                         this.movementTeleportProgress = 1.0D;
@@ -308,7 +308,7 @@ public class TeleportTracker extends Tracker {
         BlockState blockstate = player.level().getBlockState(blockpos);
 
         if (!mc.level.getFluidState(blockpos).isEmpty()) {
-            Vec3 vec3 = new Vec3(collision.getLocation().x, (double) blockpos.getY(), collision.getLocation().z);
+            Vec3 vec3 = new Vec3(collision.getLocation().x, blockpos.getY(), collision.getLocation().z);
             Vec3 vec31 = vec3.subtract(player.getX(), player.getBoundingBox().minY, player.getZ());
             AABB aabb = player.getBoundingBox().move(vec31.x, vec31.y, vec31.z);
             boolean flag = mc.level.noCollision(player, aabb);

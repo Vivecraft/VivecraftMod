@@ -554,7 +554,7 @@ public abstract class VRRenderer {
 
             float resolutionScale = ResolutionControlHelper.isLoaded() ? ResolutionControlHelper.getCurrentScaleFactor() : 1.0F;
 
-            this.renderScale = (float) sqrt(dh.vrSettings.renderScaleFactor) * resolutionScale;
+            this.renderScale = sqrt(dh.vrSettings.renderScaleFactor) * resolutionScale;
             int eyeFBWidth = roundUsing(eyew * this.renderScale, RoundingMode.CEILING);
             int eyeFBHeight = roundUsing(eyeh * this.renderScale, RoundingMode.CEILING);
 

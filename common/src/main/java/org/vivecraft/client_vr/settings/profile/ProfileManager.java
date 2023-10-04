@@ -211,7 +211,7 @@ public class ProfileManager {
     }
 
     public static synchronized void setProfileSet(String profile, String set, Map<String, String> settings) {
-        JsonObject JsonObject = null;
+        JsonObject JsonObject;
         JsonObject JsonObject1 = new JsonObject();
 
         if (profiles.has(profile)) {

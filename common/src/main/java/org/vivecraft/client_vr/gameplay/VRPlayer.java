@@ -352,7 +352,7 @@ public class VRPlayer {
                         }
 
                         float f3 = player.getDimensions(player.getPose()).width * 0.45F;
-                        double d3 = (double) (f - f3);
+                        double d3 = f - f3;
                         AABB aabb1 = new AABB(
                             vec31.x - d3,
                             aabb.minY,
@@ -390,7 +390,7 @@ public class VRPlayer {
                                         aabb.maxY,
                                         aabb.maxZ
                                     ));
-                                    Vec3 vec32 = this.roomOrigin.add(d4, (double) (0.1F * (float) j), d5);
+                                    Vec3 vec32 = this.roomOrigin.add(d4, 0.1F * (float) j, d5);
                                     this.setRoomOrigin(vec32.x, vec32.y, vec32.z, false);
                                     Vec3 vec33 = player.getLookAngle();
                                     Vec3 vec34 = (new Vec3(vec33.x, 0.0D, vec33.z)).normalize();

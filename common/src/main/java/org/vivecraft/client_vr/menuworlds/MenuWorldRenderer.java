@@ -942,8 +942,8 @@ public class MenuWorldRenderer {
                 double localZ = rainZ + 0.5;
                 float distance = (float) sqrt(localX * localX + localZ * localZ) / (float) rainDistance;
                 float blend;
-                float xOffset = 0;
-                float yOffset = 0;
+                float xOffset;
+                float yOffset;
 
                 int skyLight = blockAccess.getBrightness(LightLayer.SKY, mutableBlockPos) << 4;
                 int blockLight = blockAccess.getBrightness(LightLayer.BLOCK, mutableBlockPos) << 4;
@@ -959,6 +959,7 @@ public class MenuWorldRenderer {
                     }
 
                     blend = ((1.0F - distance * distance) * 0.5F + 0.5F);
+                    xOffset = 0;
                     int x = this.ticks + rainX * rainX * 3121 + rainX * 45238971 + rainZ * rainZ * 418711 + rainZ * 13761 & 0x1F;
                     yOffset = -((float) x + mc.getFrameTime()) / 32.0f * (3.0f + randomSource.nextFloat());
                 } else if (precipitation == Precipitation.SNOW) {

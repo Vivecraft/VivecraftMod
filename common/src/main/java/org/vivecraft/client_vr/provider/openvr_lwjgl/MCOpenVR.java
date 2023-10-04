@@ -454,10 +454,7 @@ public class MCOpenVR extends MCVR {
 
         map.put("action_sets", list);
         List<VRInputAction> list1 = new ArrayList<>(this.inputActions.values());
-        list1.sort(Comparator.comparing((action) ->
-        {
-            return action.keyBinding;
-        }));
+        list1.sort(Comparator.comparing((action) -> action.keyBinding));
         List<Map<String, Object>> list2 = new ArrayList<>();
 
         for (VRInputAction vrinputaction : list1) {

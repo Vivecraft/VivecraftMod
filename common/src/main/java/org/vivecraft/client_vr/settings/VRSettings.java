@@ -807,7 +807,7 @@ public class VRSettings {
         try {
             ProfileReader optionsVRReader = new ProfileReader(ProfileManager.PROFILE_SET_VR, theProfiles);
 
-            String var2 = "";
+            String var2;
 
             while ((var2 = optionsVRReader.readLine()) != null) {
                 try {
@@ -918,9 +918,7 @@ public class VRSettings {
         String var2 = par1EnumOptions.getLangKey();
         var2 = var2 != null ? I18n.get(var2) : I18n.get("vivecraft.options." + par1EnumOptions.name());
 
-        String var3 = var2 + ": ";
-        String var4 = var3;
-        String var5;
+        String var4 = var2 + ": ";
 
         try {
             var mapping = fieldEnumMap.get(par1EnumOptions);

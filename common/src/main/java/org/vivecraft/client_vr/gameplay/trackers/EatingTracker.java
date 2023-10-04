@@ -65,7 +65,7 @@ public class EatingTracker extends Tracker {
     @Override
     public void doProcess() {
         Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
-        Vec3 mouthPos = dh.vrPlayer.vrdata_room_pre.getController(0).getCustomVector(new Vec3(0.0D, (double) (-this.mouthtoEyeDistance), 0.0D)).add(hmdPos);
+        Vec3 mouthPos = dh.vrPlayer.vrdata_room_pre.getController(0).getCustomVector(new Vec3(0.0D, -this.mouthtoEyeDistance, 0.0D)).add(hmdPos);
 
         for (int c = 0; c < 2; ++c) {
 
@@ -103,7 +103,7 @@ public class EatingTracker extends Tracker {
                 }
 
                 if (this.eating[c]) {
-                    long k = (long) mc.player.getUseItemRemainingTicks();
+                    long k = mc.player.getUseItemRemainingTicks();
 
                     if (k > 0L && k % 5L <= (long) crunchiness) {
                         dh.vr.triggerHapticPulse(c, 700);

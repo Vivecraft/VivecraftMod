@@ -109,9 +109,7 @@ public abstract class RenderTargetMixin implements org.vivecraft.client.extensio
     public void vivecraft$blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect) {
         RenderSystem.assertOnGameThreadOrInit();
         if (!RenderSystem.isInInitPhase()) {
-            RenderSystem.recordRenderCall(() -> {
-                this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
-            });
+            RenderSystem.recordRenderCall(() -> this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect));
         } else {
             this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
         }

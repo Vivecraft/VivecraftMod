@@ -213,12 +213,9 @@ public class VRPlayersClient {
 
     public static RotInfo getMainPlayerRotInfo(VRData data) {
         RotInfo playermodelcontroller$rotinfo = new RotInfo();
-        Quaternionf quaternion = new Quaternionf().setFromNormalized(data.getController(1).getMatrix());
-        Quaternionf quaternion1 = new Quaternionf().setFromNormalized(data.getController(0).getMatrix());
-        Quaternionf quaternion2 = new Quaternionf().setFromNormalized(data.hmd.getMatrix());
-        playermodelcontroller$rotinfo.headQuat = quaternion2;
-        playermodelcontroller$rotinfo.leftArmQuat = quaternion;
-        playermodelcontroller$rotinfo.rightArmQuat = quaternion1;
+        playermodelcontroller$rotinfo.headQuat.setFromNormalized(data.hmd.getMatrix());
+        playermodelcontroller$rotinfo.leftArmQuat.setFromNormalized(data.getController(1).getMatrix());
+        playermodelcontroller$rotinfo.rightArmQuat.setFromNormalized(data.getController(0).getMatrix());
         playermodelcontroller$rotinfo.seated = dh.vrSettings.seated;
         convertToVector3f(data.getController(1).getPosition(), playermodelcontroller$rotinfo.leftArmPos);
         convertToVector3f(data.getController(0).getPosition(), playermodelcontroller$rotinfo.rightArmPos);

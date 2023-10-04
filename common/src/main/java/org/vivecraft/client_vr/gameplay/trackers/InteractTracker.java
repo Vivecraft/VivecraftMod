@@ -186,9 +186,7 @@ public class InteractTracker extends Tracker {
                     Vec3 vec33 = new Vec3(vec3.x + vec31.x * -0.1D, vec3.y + vec31.y * -0.1D, vec3.z + vec31.z * -0.1D);
                     AABB aabb = new AABB(vec3, vec33);
                     this.inEntityHit[j] = ProjectileUtil.getEntityHitResult(mc.getCameraEntity(), vec35, vec3, aabb, (e) ->
-                    {
-                        return !e.isSpectator() && e.isPickable() && e != mc.getCameraEntity().getVehicle();
-                    }, 0.0D);
+                        !e.isSpectator() && e.isPickable() && e != mc.getCameraEntity().getVehicle(), 0.0D);
 
                     if (this.inEntityHit[j] != null) {
                         Entity entity = this.inEntityHit[j].getEntity();
@@ -198,8 +196,7 @@ public class InteractTracker extends Tracker {
                 }
 
                 if (!this.active[j]) {
-                    BlockPos blockpos = null;
-                    blockpos = BlockPos.containing(vec3);
+                    BlockPos blockpos = BlockPos.containing(vec3);
                     BlockState blockstate = mc.level.getBlockState(blockpos);
                     BlockHitResult blockhitresult = blockstate.getShape(mc.level, blockpos).clip(vec35, vec3, blockpos);
                     this.inBlockPos[j] = blockpos;

@@ -473,9 +473,7 @@ public class Utils {
         }, Style.EMPTY);
         List<FormattedText> list = Lists.newArrayList();
         fontRenderer.getSplitter().splitLines(componentcollector.getResultOrEmpty(), width, Style.EMPTY, (lineText, sameLine) ->
-        {
-            list.add(sameLine && linePrefix != null ? FormattedText.composite(linePrefix, lineText) : lineText);
-        });
+            list.add(sameLine && linePrefix != null ? FormattedText.composite(linePrefix, lineText) : lineText));
         return list.isEmpty() ? Lists.newArrayList(FormattedText.EMPTY) : list;
     }
 

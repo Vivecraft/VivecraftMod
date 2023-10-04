@@ -136,8 +136,6 @@ public class ServerNetworking {
                 listener.send(getVivecraftServerPacket(PacketDiscriminators.VR_SWITCHING, new byte[]{(byte) (ServerConfig.vrSwitchingEnabled.get() && !ServerConfig.vr_only.get() ? 1 : 0)}));
 
                 listener.send(getVivecraftServerPacket(PacketDiscriminators.NETWORK_VERSION, new byte[]{(byte) vivePlayer.networkVersion}));
-
-                break;
             }
             case IS_VR_ACTIVE -> {
                 if (vivePlayer.isVR() != buffer.readBoolean()) {
@@ -153,19 +151,29 @@ public class ServerNetworking {
                 }
             }
 
-            case DRAW -> vivePlayer.draw = buffer.readFloat();
+            case DRAW -> {
+                vivePlayer.draw = buffer.readFloat();
+            }
 
-            case VR_PLAYER_STATE -> vivePlayer.vrPlayerState = VRPlayerState.deserialize(buffer);
+            case VR_PLAYER_STATE -> {
+                vivePlayer.vrPlayerState = VRPlayerState.deserialize(buffer);
+            }
 
-            case WORLDSCALE -> vivePlayer.worldScale = buffer.readFloat();
-            case HEIGHT -> vivePlayer.heightScale = buffer.readFloat();
+            case WORLDSCALE -> {
+                vivePlayer.worldScale = buffer.readFloat();
+            }
+            case HEIGHT -> {
+                vivePlayer.heightScale = buffer.readFloat();
+            }
             case TELEPORT -> {
                 float f = buffer.readFloat();
                 float f1 = buffer.readFloat();
                 float f2 = buffer.readFloat();
                 playerEntity.absMoveTo(f, f1, f2, playerEntity.getYRot(), playerEntity.getXRot());
             }
-            case CLIMBING -> playerEntity.fallDistance = 0.0F;
+            case CLIMBING -> {
+                playerEntity.fallDistance = 0.0F;
+            }
             case ACTIVEHAND -> {
                 vivePlayer.activeHand = buffer.readByte();
 

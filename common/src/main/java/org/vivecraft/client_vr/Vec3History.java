@@ -22,12 +22,13 @@ public class Vec3History {
         _data.addAll(generate(entry::new).limit(_capacity).toList());
     }
 
-    public void add(double x, double y, double z) {
+    public Vector3dc add(double x, double y, double z) {
         this._data.addFirst(this._data.removeLast().set(x, y, z));
+        return this._data.getFirst().data;
     }
 
-    public void add(Vec3 in) {
-        this.add(in.x(), in.y(), in.z());
+    public Vector3dc add(Vec3 in) {
+        return this.add(in.x(), in.y(), in.z());
     }
 
     public Vector3dc add(Vector3dc in) {

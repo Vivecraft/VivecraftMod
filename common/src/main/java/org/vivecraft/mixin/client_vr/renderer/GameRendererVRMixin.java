@@ -298,7 +298,7 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "render(FJZ)V")
     public void vivecraft$matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
         this.resetProjectionMatrix(this.getProjectionMatrix(mc.options.fov().get()));
         RenderSystem.getModelViewStack().setIdentity();
@@ -311,7 +311,7 @@ public abstract class GameRendererVRMixin
         return poseStack;
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V", shift = Shift.AFTER), method = "render(FJZ)V")
     public void vivecraft$renderoverlay(float f, long l, boolean bl, CallbackInfo ci) {
         if (vrRunning && dh.currentPass != RenderPass.THIRD && dh.currentPass != RenderPass.CAMERA) {
             VREffectsHelper.renderFaceOverlay(f, this.vivecraft$stack);
@@ -347,7 +347,7 @@ public abstract class GameRendererVRMixin
         this.vivecraft$shouldDrawGui = shouldDrawGui;
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.BEFORE, ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.BEFORE, ordinal = 6), method = "render(FJZ)V", cancellable = true)
     public void vivecraft$mainMenu(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
         if (RenderPassType.isVanilla()) {
             return;

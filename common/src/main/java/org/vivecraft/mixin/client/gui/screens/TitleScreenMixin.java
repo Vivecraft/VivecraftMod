@@ -83,7 +83,7 @@ public abstract class TitleScreenMixin extends net.minecraft.client.gui.screens.
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), method = "render")
     public void vivecraft$maybeNoPanorama(PanoramaRenderer instance, float f, float g) {
-        if (vrRunning && dh.menuWorldRenderer.isReady()) {
+        if (vrRunning && dh.menuWorldRenderer != null && dh.menuWorldRenderer.isReady()) {
             return;
         }
         instance.render(f, g);

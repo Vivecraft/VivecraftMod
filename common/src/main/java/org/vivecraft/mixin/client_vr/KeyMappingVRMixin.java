@@ -16,9 +16,9 @@ public abstract class KeyMappingVRMixin {
 
     // inject custom controls categories
     static {
-        CATEGORY_SORT_ORDER.put("vivecraft.key.category.gui", 8);
-        CATEGORY_SORT_ORDER.put("vivecraft.key.category.climbey", 9);
-        CATEGORY_SORT_ORDER.put("vivecraft.key.category.keyboard", 10);
-        //CATEGORY_SORT_ORDER.put("vivecraft.key.category.skeletal_input", 11);
+        CATEGORY_SORT_ORDER.put("vivecraft.key.category.gui", CATEGORY_SORT_ORDER.values().stream().max(Integer::compareTo).orElse(0) + 1);
+        CATEGORY_SORT_ORDER.put("vivecraft.key.category.climbey", CATEGORY_SORT_ORDER.values().stream().max(Integer::compareTo).orElse(0) + 1);
+        CATEGORY_SORT_ORDER.put("vivecraft.key.category.keyboard", CATEGORY_SORT_ORDER.values().stream().max(Integer::compareTo).orElse(0) + 1);
+        CATEGORY_SORT_ORDER.put("vivecraft.key.category.skeletal_input", CATEGORY_SORT_ORDER.values().stream().max(Integer::compareTo).orElse(0) + 1);
     }
 }

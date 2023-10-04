@@ -137,9 +137,7 @@ public abstract class GuiVROptionsBase extends Screen {
             }));
         } else if (customHandler != null) {
             this.addRenderableWidget(new GuiVROptionButton(x, y, buttonText, (p) ->
-            {
-                customHandler.apply((GuiVROptionButton) p, new Vec2(0.0F, 0.0F));
-            }));
+                customHandler.apply((GuiVROptionButton) p, new Vec2(0.0F, 0.0F))));
         } else {
             this.addRenderableWidget(new GuiVROptionButton(x, y, buttonText, (p) -> {
             }));

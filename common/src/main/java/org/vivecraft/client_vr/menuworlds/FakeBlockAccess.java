@@ -195,7 +195,7 @@ public class FakeBlockAccess implements net.minecraft.world.level.LevelReader {
 
             for (MutableBlockPos blockpos$mutable = new MutableBlockPos(); cursor3D.advance(); i1 += j1 & 255) {
                 blockpos$mutable.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
-                j1 = colorResolverIn.getColor(this.getBiome(blockpos$mutable).value(), (double) blockpos$mutable.getX(), (double) blockpos$mutable.getZ());
+                j1 = colorResolverIn.getColor(this.getBiome(blockpos$mutable).value(), blockpos$mutable.getX(), blockpos$mutable.getZ());
                 k += (j1 & 16711680) >> 16;
                 l += (j1 & 65280) >> 8;
             }

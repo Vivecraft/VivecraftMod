@@ -83,7 +83,7 @@ public class VehicleTracker extends Tracker {
 
             if (dh.vrSettings.vehicleRotation && mc.player.isPassenger() && this.rotationCooldown == 0) {
                 Entity entity = mc.player.getVehicle();
-                this.rotationTarget = (double) entity.getYRot();
+                this.rotationTarget = entity.getYRot();
 
                 if (entity instanceof AbstractHorse abstracthorse && !dh.horseTracker.isActive()) {
 
@@ -91,14 +91,14 @@ public class VehicleTracker extends Tracker {
                         return;
                     }
 
-                    this.rotationTarget = (double) abstracthorse.yBodyRot;
+                    this.rotationTarget = abstracthorse.yBodyRot;
                 } else if (entity instanceof Mob mob) {
 
                     if (mob.isControlledByLocalInstance()) {
                         return;
                     }
 
-                    this.rotationTarget = (double) mob.yBodyRot;
+                    this.rotationTarget = mob.yBodyRot;
                 }
 
                 boolean flag = true;
@@ -113,7 +113,7 @@ public class VehicleTracker extends Tracker {
                         this.minecartStupidityCounter = 3;
                     }
 
-                    this.rotationTarget = (double) this.getMinecartRenderYaw((Minecart) entity);
+                    this.rotationTarget = this.getMinecartRenderYaw((Minecart) entity);
 
                     if (this.minecartStupidityCounter > 0) {
                         this.vehicleInitialRotation = (float) this.rotationTarget;

@@ -2,7 +2,6 @@ package org.vivecraft.client_vr.settings.profile;
 
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;

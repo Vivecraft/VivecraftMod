@@ -112,7 +112,7 @@ import static org.joml.Math.floor;
  * </samp></pre>
  * @apiNote This class intentionally shadows {@link java.awt.Color} to prevent it from being used.
  * <br>
- * Using {@link java.awt.Color} or any of {@link java.awt}, may crash {@link org.lwjgl} on MacOS.
+ * Using {@link java.awt.Color} or any of {@link java.awt}, may crash {@link org.lwjgl} on macOS.
  */
 @ParametersAreNonnullByDefault
 public class Color {

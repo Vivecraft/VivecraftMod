@@ -345,7 +345,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             double d7 = 1.0D;
 
             if (d3 >= (double) 1.0E-4F || dh.katvr) {
-                d3 = (double) sqrt((float) d3);
+                d3 = sqrt((float) d3);
 
                 if (d3 < 1.0D && !dh.katvr) {
                     d3 = 1.0D;
@@ -359,7 +359,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
                 if (dh.katvr) {
                     jkatvr.query();
-                    d3 = (double) (jkatvr.getSpeed() * jkatvr.walkDirection() * dh.vrSettings.movementSpeedMultiplier);
+                    d3 = jkatvr.getSpeed() * jkatvr.walkDirection() * dh.vrSettings.movementSpeedMultiplier;
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
                     if (isFlyingOrSwimming) {
@@ -369,7 +369,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                     vec3 = vec3.yRot(toRadians(-jkatvr.getYaw()) + dh.vrPlayer.vrdata_world_pre.rotation_radians);
                 } else if (dh.infinadeck) {
                     jinfinadeck.query();
-                    d3 = (double) (jinfinadeck.getSpeed() * jinfinadeck.walkDirection() * dh.vrSettings.movementSpeedMultiplier);
+                    d3 = jinfinadeck.getSpeed() * jinfinadeck.walkDirection() * dh.vrSettings.movementSpeedMultiplier;
                     vec3 = new Vec3(0.0D, 0.0D, d3);
 
                     if (isFlyingOrSwimming) {
