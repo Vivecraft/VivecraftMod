@@ -47,16 +47,18 @@ import static org.lwjgl.system.MemoryUtil.*;
 public class MCOpenXR extends MCVR {
 
     private final MCOpenXR ome;
-    private XrInstance instance;
-    private XrSession session;
-    private XrSpace xrAppSpace;
-    private XrSpace xrViewSpace;
-    private XrSwapchain swapchain;
+    public XrInstance instance;
+    public XrSession session;
+    public XrSpace xrAppSpace;
+    public XrSpace xrViewSpace;
+    public XrSwapchain swapchain;
     public final XrEventDataBuffer eventDataBuffer = XrEventDataBuffer.calloc();
     private HashMap<String, XrAction> inputs;
     private HashMap<String, XrActionSet> actionSets;
     private boolean tried;
     private long systemID;
+    public XrViewConfigurationView viewConfig;
+    public XrView.Buffer viewBuffer;
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -192,8 +194,8 @@ public class MCOpenXR extends MCVR {
             }
 
             this.initialized = true;
+            return true;
         }
-        return false;
     }
 
     private void initializeOpenXRInstance() {
@@ -259,6 +261,13 @@ public class MCOpenXR extends MCVR {
             }
             instance = new XrInstance(instancePtr.get(0), createInfo);
 
+            this.poseMatrices = new Matrix4f[64];
+
+            for (int i = 0; i < this.poseMatrices.length; ++i) {
+                this.poseMatrices[i] = new Matrix4f();
+            }
+
+            this.initSuccess = true;
         }
     }
 
@@ -289,12 +298,7 @@ public class MCOpenXR extends MCVR {
             info.systemId(systemID);
 
             PointerBuffer sessionPtr = stack.callocPointer(1);
-            int i = XR10.xrCreateSession(instance, info, sessionPtr);
-            ByteBuffer str = stackCalloc(XR10.XR_MAX_RESULT_STRING_SIZE);
-
-            if (XR10.xrResultToString(instance, i, str) >= 0) {
-                throw new RuntimeException(memUTF8Safe(str).trim());
-            }
+            XR10.xrCreateSession(instance, info, sessionPtr);
 
             session = new XrSession(sessionPtr.get(0), instance);
         }
@@ -331,10 +335,14 @@ public class MCOpenXR extends MCVR {
             XR10.xrEnumerateViewConfigurationViews(instance, systemID,  XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, intBuf, null);
 
             //Get all views
-            ByteBuffer viewBuffer = bufferStack(intBuf.get(0), XrViewConfigurationView.SIZEOF, XR10.XR_TYPE_VIEW_CONFIGURATION_VIEW);
-            XrViewConfigurationView.Buffer views = new XrViewConfigurationView.Buffer(viewBuffer);
+            ByteBuffer viewConfBuffer = bufferStack(intBuf.get(0), XrViewConfigurationView.SIZEOF, XR10.XR_TYPE_VIEW_CONFIGURATION_VIEW);
+            XrViewConfigurationView.Buffer views = new XrViewConfigurationView.Buffer(viewConfBuffer);
             XR10.xrEnumerateViewConfigurationViews(instance, systemID,  XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, intBuf, views);
+            int viewCountNumber = intBuf.get(0);
 
+            this.viewBuffer = new XrView.Buffer(
+                bufferHeap(viewCountNumber, XrView.SIZEOF, XR10.XR_TYPE_VIEW)
+            );
             //Check swapchain formats
             XR10.xrEnumerateSwapchainFormats(session, intBuf, null);
 
@@ -380,7 +388,7 @@ public class MCOpenXR extends MCVR {
             }
 
             //Make swapchain
-            XrViewConfigurationView viewConfig = views.get(0);
+            this.viewConfig = views.get(0);
             XrSwapchainCreateInfo swapchainCreateInfo = XrSwapchainCreateInfo.calloc(stack);
             swapchainCreateInfo.type(XR10.XR_TYPE_SWAPCHAIN_CREATE_INFO);
             swapchainCreateInfo.next(NULL);
@@ -401,6 +409,27 @@ public class MCOpenXR extends MCVR {
     }
 
     private Struct getGraphicsAPI(MemoryStack stack) {
+        XrGraphicsRequirementsOpenGLKHR graphicsRequirements = XrGraphicsRequirementsOpenGLKHR.calloc(stack).type(KHROpenGLEnable.XR_TYPE_GRAPHICS_REQUIREMENTS_OPENGL_KHR);
+        KHROpenGLEnable.xrGetOpenGLGraphicsRequirementsKHR(instance, systemID, graphicsRequirements);
+
+        XrSystemProperties systemProperties = XrSystemProperties.calloc(stack).type(XR10.XR_TYPE_SYSTEM_PROPERTIES);
+        XR10.xrGetSystemProperties(instance, systemID, systemProperties);
+        XrSystemTrackingProperties trackingProperties = systemProperties.trackingProperties();
+        XrSystemGraphicsProperties graphicsProperties = systemProperties.graphicsProperties();
+
+        String systemName = memUTF8(memAddress(systemProperties.systemName()));
+        int vendor = systemProperties.vendorId();
+        boolean orientationTracking = trackingProperties.orientationTracking();
+        boolean positionTracking = trackingProperties.positionTracking();
+        int maxWidth = graphicsProperties.maxSwapchainImageWidth();
+        int maxHeight = graphicsProperties.maxSwapchainImageHeight();
+        int maxLayerCount = graphicsProperties.maxLayerCount();
+
+        System.out.println(String.format("Found device with id: %d", systemID));
+        System.out.println(String.format("Headset Name:%s Vendor:%d ", systemName, vendor));
+        System.out.println(String.format("Headset Orientation Tracking:%b Position Tracking:%b ", orientationTracking, positionTracking));
+        System.out.println(String.format("Headset Max Width:%d Max Height:%d Max Layer Count:%d ", maxWidth, maxHeight, maxLayerCount));
+        
         //Bind the OpenGL context to the OpenXR instance and create the session
         Window window = mc.getWindow();
         long windowHandle = window.getWindow();
@@ -534,5 +563,16 @@ public class MCOpenXR extends MCVR {
             int i = XR10.xrCreateActionSet(instance, info, buffer);
             return new XrActionSet(buffer.get(0), instance);
         }
+    }
+
+    static ByteBuffer bufferHeap(int capacity, int sizeof, int type) {
+        ByteBuffer b = memCalloc(capacity * sizeof);
+
+        for (int i = 0; i < capacity; i++) {
+            b.position(i * sizeof);
+            b.putInt(type);
+        }
+        b.rewind();
+        return b;
     }
 }

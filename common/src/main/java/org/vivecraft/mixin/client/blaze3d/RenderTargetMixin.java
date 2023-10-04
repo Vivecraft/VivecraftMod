@@ -59,6 +59,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     }
 
     @Override
+    public void vivecraft$setColorid(int colorid) {
+        this.colorTextureId = colorid;
+    }
+
+    @Override
     public void vivecraft$isLinearFilter(boolean linearFilter) {
         this.vivecraft$linearFilter = linearFilter;
     }

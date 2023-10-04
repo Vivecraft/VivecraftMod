@@ -932,8 +932,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 this.vivecraft$notifyMirror("Shader compile failed, see log", true, 10000);
             }
         } else if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.DUAL) {
-            RenderTarget rendertarget = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
-            RenderTarget rendertarget1 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1;
+            RenderTarget rendertarget = ClientDataHolderVR.getInstance().vrRenderer.getLeftEyeTarget();
+            RenderTarget rendertarget1 = ClientDataHolderVR.getInstance().vrRenderer.getRightEyeTarget();
 
             if (rendertarget != null) {
                 ((RenderTargetExtension) rendertarget).vivecraft$blitToScreen(0, this.window.getScreenWidth() / 2,
@@ -948,7 +948,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             float xcrop = 0.0F;
             float ycrop = 0.0F;
             boolean ar = false;
-            RenderTarget source = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
+            RenderTarget source = ClientDataHolderVR.getInstance().vrRenderer.getLeftEyeTarget();
 
             if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
                 source = ClientDataHolderVR.getInstance().vrRenderer.framebufferUndistorted;
@@ -959,11 +959,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             } else if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.SINGLE
                 || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF) {
                 if (!ClientDataHolderVR.getInstance().vrSettings.displayMirrorLeftEye) {
-                    source = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1;
+                    source = ClientDataHolderVR.getInstance().vrRenderer.getRightEyeTarget();
                 }
             } else if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.CROPPED) {
                 if (!ClientDataHolderVR.getInstance().vrSettings.displayMirrorLeftEye) {
-                    source = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1;
+                    source = ClientDataHolderVR.getInstance().vrRenderer.getRightEyeTarget();
                 }
 
                 xcrop = 0.15F;
@@ -1061,7 +1061,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     this.window.getScreenWidth() / 2, this.window.getScreenWidth() / 2,
                     this.window.getScreenHeight() / 2, 0, true, 0.0F, 0.0F, false);
             } else {
-                ((RenderTargetExtension) ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0).vivecraft$blitToScreen(
+                ((RenderTargetExtension) ClientDataHolderVR.getInstance().vrRenderer.getLeftEyeTarget()).vivecraft$blitToScreen(
                     this.window.getScreenWidth() / 2, this.window.getScreenWidth() / 2,
                     this.window.getScreenHeight() / 2, 0, true, 0.0F, 0.0F, false);
             }

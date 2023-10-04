@@ -39,9 +39,9 @@ public class VRPassHelper {
             if (dataHolder.vrSettings.useFsaa) {
                 RenderSystem.clearColor(RenderSystem.getShaderFogColor()[0], RenderSystem.getShaderFogColor()[1], RenderSystem.getShaderFogColor()[2], RenderSystem.getShaderFogColor()[3]);
                 if (eye == RenderPass.LEFT) {
-                    dataHolder.vrRenderer.framebufferEye0.bindWrite(true);
+                    dataHolder.vrRenderer.getLeftEyeTarget().bindWrite(true);
                 } else {
-                    dataHolder.vrRenderer.framebufferEye1.bindWrite(true);
+                    dataHolder.vrRenderer.getRightEyeTarget().bindWrite(true);
                 }
                 RenderSystem.clear(16384, Minecraft.ON_OSX);
                 mc.getProfiler().push("fsaa");
@@ -52,9 +52,9 @@ public class VRPassHelper {
             }
 
             if (eye == RenderPass.LEFT) {
-                dataHolder.vrRenderer.framebufferEye0.bindWrite(true);
+                dataHolder.vrRenderer.getLeftEyeTarget().bindWrite(true);
             } else {
-                dataHolder.vrRenderer.framebufferEye1.bindWrite(true);
+                dataHolder.vrRenderer.getRightEyeTarget().bindWrite(true);
             }
 
             if (dataHolder.vrSettings.useFOVReduction
@@ -181,7 +181,7 @@ public class VRPassHelper {
             VRShaders._Overlay_pumpkinAmplitutde.set(dataHolder.pumpkineffect);
 
             VRShaders._Overlay_eye.set(dataHolder.currentPass == RenderPass.LEFT ? 1 : -1);
-            ((RenderTargetExtension) rendertarget).vivecraft$blitFovReduction(VRShaders.fovReductionShader, dataHolder.vrRenderer.framebufferEye0.viewWidth, dataHolder.vrRenderer.framebufferEye0.viewHeight);
+            ((RenderTargetExtension) rendertarget).vivecraft$blitFovReduction(VRShaders.fovReductionShader, dataHolder.vrRenderer.getLeftEyeTarget().viewWidth, dataHolder.vrRenderer.getLeftEyeTarget().viewHeight);
             GlStateManager._glUseProgram(0);
             checkGLError("post overlay" + eye);
             mc.getProfiler().pop();
