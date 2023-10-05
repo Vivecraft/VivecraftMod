@@ -57,7 +57,6 @@ public class MCOpenXR extends MCVR {
     private HashMap<String, XrActionSet> actionSets;
     private boolean tried;
     private long systemID;
-    public XrViewConfigurationView viewConfig;
     public XrView.Buffer viewBuffer;
     int width;
     int height;
@@ -397,7 +396,7 @@ public class MCOpenXR extends MCVR {
             }
 
             //Make swapchain
-            this.viewConfig = views.get(0);
+            XrViewConfigurationView viewConfig = views.get(0);
             XrSwapchainCreateInfo swapchainCreateInfo = XrSwapchainCreateInfo.calloc(stack);
             swapchainCreateInfo.type(XR10.XR_TYPE_SWAPCHAIN_CREATE_INFO);
             swapchainCreateInfo.next(NULL);

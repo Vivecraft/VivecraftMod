@@ -21,10 +21,9 @@ public class OpenXRStereoRenderer extends VRRenderer {
     private int swapIndex;
     private VRTextureTarget[] leftFramebuffers;
     private VRTextureTarget[] rightFramebuffers;
-    private PointerBuffer layers;
-    private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
     private long time;
     private boolean render;
+    private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
 
     public OpenXRStereoRenderer(MCOpenXR vr) {
         super(vr);
@@ -68,9 +67,8 @@ public class OpenXRStereoRenderer extends VRRenderer {
         if (!render) {
             return;
         }
-
+        this.projectionLayerViews = XrCompositionLayerProjectionView.calloc(2);
         try (MemoryStack stack = MemoryStack.stackPush()){
-            this.layers = stack.callocPointer(1);
             XrFrameState frameState = XrFrameState.calloc(stack).type(XR10.XR_TYPE_FRAME_STATE);
 
             //TODO tick game and poll input during xrWaitFrame (this might not work due to the gl context belonging to the xrWaitFrame thread)
@@ -115,8 +113,6 @@ public class OpenXRStereoRenderer extends VRRenderer {
                 System.out.println("error3 " + i);
             }
 
-            this.projectionLayerViews = XrCompositionLayerProjectionView.calloc(2, stack);
-
             IntBuffer intBuf2 = stack.callocInt(1);
 
             XR10.xrAcquireSwapchainImage(
@@ -150,13 +146,14 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
     @Override
     public Matrix4f getProjectionMatrix(int var1, float var2, float var3) {
-        return new Matrix4f();
+        //TODO this is the null provider, replace with proper one.
+        return new Matrix4f().setPerspective(90.0F, 1.0F, var2, var3);
     }
 
     @Override
     public void endFrame() throws RenderConfigException {
         try (MemoryStack stack = MemoryStack.stackPush()){
-
+            PointerBuffer layers = stack.callocPointer(1);
             if (render) {
                 XR10.xrReleaseSwapchainImage(
                     openxr.swapchain,
@@ -187,6 +184,8 @@ public class OpenXRStereoRenderer extends VRRenderer {
                     System.out.println(memUTF8(memAddress(str)));
                 }
             }
+
+            projectionLayerViews.close();
         }
     }
 
