@@ -11,7 +11,6 @@ import org.vivecraft.client.extensions.RenderTargetExtension;
 public class VRTextureTarget extends RenderTarget {
 
     private final String name;
-
     public VRTextureTarget(String name, int width, int height, boolean usedepth, boolean onMac, int texid, boolean depthtex, boolean linearFilter, boolean useStencil) {
         super(usedepth);
         this.name = name;

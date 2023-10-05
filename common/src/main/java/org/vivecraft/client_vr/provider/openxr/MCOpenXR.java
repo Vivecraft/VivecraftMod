@@ -59,6 +59,8 @@ public class MCOpenXR extends MCVR {
     private long systemID;
     public XrViewConfigurationView viewConfig;
     public XrView.Buffer viewBuffer;
+    int width;
+    int height;
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -301,6 +303,13 @@ public class MCOpenXR extends MCVR {
             XR10.xrCreateSession(instance, info, sessionPtr);
 
             session = new XrSession(sessionPtr.get(0), instance);
+
+            XrSessionBeginInfo sessionBeginInfo = XrSessionBeginInfo.calloc(stack);
+            sessionBeginInfo.type(XR10.XR_TYPE_SESSION_BEGIN_INFO);
+            sessionBeginInfo.next(NULL);
+            sessionBeginInfo.primaryViewConfigurationType(XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO);
+
+            XR10.xrBeginSession(session, sessionBeginInfo);
         }
     }
 
@@ -405,6 +414,8 @@ public class MCOpenXR extends MCVR {
             PointerBuffer handlePointer = stack.callocPointer(1);
             XR10.xrCreateSwapchain(session, swapchainCreateInfo, handlePointer);
             swapchain = new XrSwapchain(handlePointer.get(0), session);
+            this.width = swapchainCreateInfo.width();
+            this.height = swapchainCreateInfo.height();
         }
     }
 

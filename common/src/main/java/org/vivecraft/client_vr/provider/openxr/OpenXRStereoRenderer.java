@@ -1,18 +1,20 @@
 package org.vivecraft.client_vr.provider.openxr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
 
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
+import static org.lwjgl.system.MemoryUtil.memAddress;
+import static org.lwjgl.system.MemoryUtil.memUTF8;
 
 public class OpenXRStereoRenderer extends VRRenderer {
     private final MCOpenXR openxr;
@@ -20,7 +22,9 @@ public class OpenXRStereoRenderer extends VRRenderer {
     private VRTextureTarget[] leftFramebuffers;
     private VRTextureTarget[] rightFramebuffers;
     private PointerBuffer layers;
-    private XrFrameState frameState;
+    private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
+    private long time;
+    private boolean render;
 
     public OpenXRStereoRenderer(MCOpenXR vr) {
         super(vr);
@@ -49,29 +53,50 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
             for (int i = 0; i < imageCount; i++) {
                 XrSwapchainImageOpenGLKHR openxrImage = swapchainImageBuffer.get(i);
-                leftFramebuffers[i] = new VRTextureTarget("L Eye " + i, width, height, openxrImage.image(), i);
-                rightFramebuffers[i] = new VRTextureTarget("R Eye " + i, width, height, openxrImage.image(), i);
+                leftFramebuffers[i] = new VRTextureTarget("L Eye " + i, width, height, openxrImage.image(), 0);
+                this.checkGLError("Left Eye framebuffer setup");
+                rightFramebuffers[i] = new VRTextureTarget("R Eye " + i, width, height, openxrImage.image(), 1);
+                this.checkGLError("Right Eye framebuffer setup");
             }
         }
     }
 
     @Override
-    public void setupRenderConfiguration() throws Exception {
-        super.setupRenderConfiguration();
+    public void setupRenderConfiguration(boolean render) throws Exception {
+        super.setupRenderConfiguration(render);
+        
+        if (!render) {
+            return;
+        }
 
         try (MemoryStack stack = MemoryStack.stackPush()){
-            this.frameState = XrFrameState.calloc(stack).type(XR10.XR_TYPE_FRAME_STATE);
+            this.layers = stack.callocPointer(1);
+            XrFrameState frameState = XrFrameState.calloc(stack).type(XR10.XR_TYPE_FRAME_STATE);
 
-            GLFW.glfwSwapBuffers(Minecraft.getInstance().getWindow().getWindow());
             //TODO tick game and poll input during xrWaitFrame (this might not work due to the gl context belonging to the xrWaitFrame thread)
-            XR10.xrWaitFrame(
+            int i = XR10.xrWaitFrame(
                     openxr.session,
                     XrFrameWaitInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_WAIT_INFO),
                     frameState);
 
-            XR10.xrBeginFrame(
+            this.time = frameState.predictedDisplayTime();
+            this.render = frameState.shouldRender();
+
+            if (i != 0) {
+                System.out.println("error " + i);
+            }
+
+            i = XR10.xrBeginFrame(
                 openxr.session,
                 XrFrameBeginInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_BEGIN_INFO));
+
+            if (i != 0) {
+                System.out.println("error2 " + i);
+            }
+
+            if (!frameState.shouldRender()) {
+                return;
+            }
 
             XrViewState viewState = XrViewState.calloc(stack).type(XR10.XR_TYPE_VIEW_STATE);
             IntBuffer intBuf = stack.callocInt(1);
@@ -84,11 +109,16 @@ public class OpenXRStereoRenderer extends VRRenderer {
                 openxr.xrAppSpace
             );
 
-            XR10.xrLocateViews(openxr.session, viewLocateInfo, viewState, intBuf, openxr.viewBuffer);
+            i = XR10.xrLocateViews(openxr.session, viewLocateInfo, viewState, intBuf, openxr.viewBuffer);
 
-            var projectionLayerViews = XrCompositionLayerProjectionView.calloc(2, stack);
+            if (i != 0) {
+                System.out.println("error3 " + i);
+            }
+
+            this.projectionLayerViews = XrCompositionLayerProjectionView.calloc(2, stack);
 
             IntBuffer intBuf2 = stack.callocInt(1);
+
             XR10.xrAcquireSwapchainImage(
                 openxr.swapchain,
                 XrSwapchainImageAcquireInfo.calloc(stack).type(XR10.XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO),
@@ -111,26 +141,10 @@ public class OpenXRStereoRenderer extends VRRenderer {
                     .subImage();
                 subImage.swapchain(openxr.swapchain);
                 subImage.imageRect().offset().set(0, 0);
-                subImage.imageRect().extent().set(openxr.viewConfig.recommendedImageRectWidth(), openxr.viewConfig.recommendedImageRectHeight());
+                subImage.imageRect().extent().set(openxr.width, openxr.height);
                 subImage.imageArrayIndex(viewIndex);
 
             }
-
-            XR10.xrReleaseSwapchainImage(
-                openxr.swapchain,
-                XrSwapchainImageReleaseInfo.calloc(stack)
-                    .type(XR10.XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO));
-
-            this.layers = stack.callocPointer(1);
-
-            XrCompositionLayerProjection compositionLayerProjection = XrCompositionLayerProjection.calloc(stack)
-                .type(XR10.XR_TYPE_COMPOSITION_LAYER_PROJECTION)
-                .space(openxr.xrAppSpace)
-                .views(projectionLayerViews);
-
-            layers.put(compositionLayerProjection);
-            layers.flip();
-
         }
     }
 
@@ -142,13 +156,37 @@ public class OpenXRStereoRenderer extends VRRenderer {
     @Override
     public void endFrame() throws RenderConfigException {
         try (MemoryStack stack = MemoryStack.stackPush()){
-            XR10.xrEndFrame(
+
+            if (render) {
+                XR10.xrReleaseSwapchainImage(
+                    openxr.swapchain,
+                    XrSwapchainImageReleaseInfo.calloc(stack)
+                        .type(XR10.XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO));
+
+                XrCompositionLayerProjection compositionLayerProjection = XrCompositionLayerProjection.calloc(stack)
+                    .type(XR10.XR_TYPE_COMPOSITION_LAYER_PROJECTION)
+                    .space(openxr.xrAppSpace)
+                    .views(projectionLayerViews);
+
+                layers.put(compositionLayerProjection);
+            }
+            layers.flip();
+
+            int i = XR10.xrEndFrame(
                 openxr.session,
                 XrFrameEndInfo.calloc(stack)
                     .type(XR10.XR_TYPE_FRAME_END_INFO)
-                    .displayTime(frameState.predictedDisplayTime())
+                    .displayTime(time)
                     .environmentBlendMode(XR10.XR_ENVIRONMENT_BLEND_MODE_OPAQUE)
                     .layers(layers));
+
+            if (i != XR10.XR_SUCCESS) {
+                ByteBuffer str = stack.calloc(XR10.XR_MAX_RESULT_STRING_SIZE);
+
+                if (XR10.xrResultToString(openxr.instance, i, str) >= 0) {
+                    System.out.println(memUTF8(memAddress(str)));
+                }
+            }
         }
     }
 
@@ -169,6 +207,6 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
     @Override
     public Tuple<Integer, Integer> getRenderTextureSizes() {
-        return new Tuple<>(openxr.viewConfig.recommendedImageRectHeight(), openxr.viewConfig.recommendedImageRectWidth());
+        return new Tuple<>(openxr.width, openxr.height);
     }
 }

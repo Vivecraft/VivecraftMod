@@ -43,7 +43,7 @@ public class VRState {
             dh.vrRenderer = dh.vr.createVRRenderer();
             dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
             try {
-                dh.vrRenderer.setupRenderConfiguration();
+                dh.vrRenderer.setupRenderConfiguration(false);
                 RenderPassManager.setVanillaRenderPass();
             } catch (RenderConfigException renderConfigException) {
                 throw new RenderConfigException("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error.getString() + "\nVR provider: " + dh.vr.getName()));

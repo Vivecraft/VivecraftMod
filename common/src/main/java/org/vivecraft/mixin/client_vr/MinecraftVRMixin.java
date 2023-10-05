@@ -347,7 +347,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             this.profiler.push("setupRenderConfiguration");
             try {
                 this.vivecraft$checkGLError("pre render setup ");
-                ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
+                ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration(true);
                 this.vivecraft$checkGLError("post render setup ");
             } catch (RenderConfigException renderConfigException) {
                 vivecraft$switchVRState(false);

@@ -413,7 +413,7 @@ public abstract class VRRenderer {
         this.resizeFrameBuffers = true;
     }
 
-    public void setupRenderConfiguration() throws Exception {
+    public void setupRenderConfiguration(boolean render) throws Exception {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
