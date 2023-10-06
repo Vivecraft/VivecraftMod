@@ -51,8 +51,12 @@ public class VRState {
 
             vrInitialized = true;
             dh.vr = switch (dh.vrSettings.stereoProviderPluginID) {
-                case OPENVR -> new MCOpenVR();
-                default -> new NullVR();
+                case OPENVR -> {
+                    yield new MCOpenVR();
+                }
+                default -> {
+                    yield new NullVR();
+                }
             };
             if (dh.vr.init()) {
                 dh.vrRenderer = dh.vr.createVRRenderer();

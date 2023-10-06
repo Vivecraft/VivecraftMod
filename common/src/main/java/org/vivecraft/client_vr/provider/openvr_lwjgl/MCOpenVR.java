@@ -56,7 +56,6 @@ import static org.vivecraft.client_vr.VRState.mc;
 import static org.vivecraft.common.utils.Utils.*;
 
 public class MCOpenVR extends MCVR {
-    protected static MCOpenVR ome;
     private final String ACTION_EXTERNAL_CAMERA = "/actions/mixedreality/in/externalcamera";
     private final String ACTION_LEFT_HAND = "/actions/global/in/lefthand";
     private final String ACTION_LEFT_HAND_GESTURE = "/actions/global/in/lefthandbones";
@@ -100,7 +99,6 @@ public class MCOpenVR extends MCVR {
 
     public MCOpenVR() {
         super();
-        ome = this;
         this.hapticScheduler = new OpenVRHapticScheduler();
 
         for (int i = 0; i < controllerDeviceIndex.length; ++i) {
@@ -117,10 +115,6 @@ public class MCOpenVR extends MCVR {
         this.poseData = InputPoseActionData.calloc();
         this.gestureData = InputPoseActionData.calloc();
         this.originInfo = InputOriginInfo.calloc();
-    }
-
-    public static MCOpenVR get() {
-        return ome;
     }
 
     static String getInputErrorName(int code) {

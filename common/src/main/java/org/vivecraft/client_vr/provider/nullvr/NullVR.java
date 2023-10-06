@@ -19,19 +19,12 @@ import static org.vivecraft.client_vr.VRState.mc;
 import static org.vivecraft.common.utils.Utils.logger;
 
 public class NullVR extends MCVR {
-    protected static NullVR ome;
-
     private boolean vrActive = true;
     private boolean vrActiveChangedLastFrame = false;
 
     public NullVR() {
         super();
-        ome = this;
         this.hapticScheduler = new NullVRHapticScheduler();
-    }
-
-    public static NullVR get() {
-        return ome;
     }
 
 

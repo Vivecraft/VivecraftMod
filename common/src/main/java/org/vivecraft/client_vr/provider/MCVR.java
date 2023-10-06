@@ -49,7 +49,6 @@ import static org.vivecraft.common.utils.Utils.*;
 
 @ParametersAreNonnullByDefault
 public abstract class MCVR {
-    protected static MCVR me;
     protected Matrix4f hmdPose = new Matrix4f();
     public Matrix4f hmdRotation = new Matrix4f();
     public HardwareType detectedHardware = HardwareType.VIVE;
