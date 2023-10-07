@@ -22,7 +22,9 @@ import org.lwjgl.opengl.GL43C;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 
@@ -43,10 +45,27 @@ public class RenderHelper {
     private static final Minecraft mc = Minecraft.getInstance();
 
     public static void applyVRModelView(RenderPass currentPass, PoseStack poseStack) {
-        Matrix4f modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
-            .getMatrix().transposed().toMCMatrix();
+        Matrix4f modelView;
+        if (currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
+            modelView = new Matrix4f().rotation(MCVR.get().hmdRotHistory
+                .averageRotation(dataHolder.vrSettings.displayMirrorCenterSmooth));
+        } else {
+            modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
+                .getMatrix().transposed().toMCMatrix();
+        }
         poseStack.last().pose().mul(modelView);
         poseStack.last().normal().mul(new Matrix3f(modelView));
+    }
+
+    public static Vec3 getSmoothCameraPosition(RenderPass renderpass, VRData vrData) {
+        if (dataHolder.currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
+            return MCVR.get().hmdHistory.averagePosition(dataHolder.vrSettings.displayMirrorCenterSmooth)
+                .scale(vrData.worldScale)
+                .yRot(vrData.rotation_radians)
+                .add(vrData.origin);
+        } else {
+            return vrData.getEye(renderpass).getPosition();
+        }
     }
 
     public static void applyStereo(RenderPass currentPass, PoseStack matrix) {
@@ -69,7 +88,6 @@ public class RenderHelper {
                 dir = dir.yRot((float) Math.toRadians(c == 0 ? -35.0D : 35.0D));
                 dir = new Vec3(dir.x, 0.0D, dir.z);
                 dir = dir.normalize();
-                RenderPass renderpass = RenderPass.CENTER;
                 if (TelescopeTracker.isTelescope(mc.player.getUseItem())) {
                     if (c == 0 && mc.player.getUsedItemHand() == InteractionHand.MAIN_HAND) {
                         out = dataHolder.vrPlayer.vrdata_world_render.eye0.getPosition()
@@ -83,7 +101,7 @@ public class RenderHelper {
                     }
                 }
                 if (out == null) {
-                    out = dataHolder.vrPlayer.vrdata_world_render.getEye(renderpass).getPosition().add(
+                    out = dataHolder.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().add(
                         dir.x * 0.3D * dataHolder.vrPlayer.vrdata_world_render.worldScale,
                         -0.4D * dataHolder.vrPlayer.vrdata_world_render.worldScale,
                         dir.z * 0.3D * dataHolder.vrPlayer.vrdata_world_render.worldScale);
@@ -102,8 +120,8 @@ public class RenderHelper {
 
     public static void setupRenderingAtController(int controller, PoseStack matrix) {
         Vec3 aimSource = getControllerRenderPos(controller);
-        aimSource = aimSource.subtract(dataHolder.vrPlayer.getVRDataWorld()
-            .getEye(dataHolder.currentPass).getPosition());
+        aimSource = aimSource.subtract(
+            getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.getVRDataWorld()));
         matrix.translate(aimSource.x, aimSource.y, aimSource.z);
         float sc = dataHolder.vrPlayer.vrdata_world_render.worldScale;
         if (mc.level != null && TelescopeTracker.isTelescope(mc.player.getUseItem())) {
@@ -293,22 +311,22 @@ public class RenderHelper {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
-    public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int lighti, Matrix4f pMatrix) {
-        drawSizedQuadWithLightmapCutout(displayWidth, displayHeight, size, lighti, new float[]{1, 1, 1, 1}, pMatrix);
+    public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int lighti, Matrix4f pMatrix, boolean flipY) {
+        drawSizedQuadWithLightmapCutout(displayWidth, displayHeight, size, lighti, new float[]{1, 1, 1, 1}, pMatrix, flipY);
     }
 
     public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int lighti,
-        float[] color, Matrix4f pMatrix) {
-        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, lighti, color, pMatrix, GameRenderer::getRendertypeEntityCutoutNoCullShader);
+        float[] color, Matrix4f pMatrix, boolean flipY) {
+        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, lighti, color, pMatrix, GameRenderer::getRendertypeEntityCutoutNoCullShader, flipY);
     }
 
     public static void drawSizedQuadSolid(float displayWidth, float displayHeight, float size,
         float[] color, Matrix4f pMatrix) {
-        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.pack(15, 15), color, pMatrix, GameRenderer::getRendertypeEntitySolidShader);
+        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.pack(15, 15), color, pMatrix, GameRenderer::getRendertypeEntitySolidShader, false);
     }
 
     public static void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
-        float[] color, Matrix4f pMatrix, Supplier<ShaderInstance> shader) {
+        float[] color, Matrix4f pMatrix, Supplier<ShaderInstance> shader, boolean flipY) {
         float aspect = displayHeight / displayWidth;
         RenderSystem.setShader(shader);
         mc.gameRenderer.lightTexture().turnOnLightLayer();
@@ -326,25 +344,25 @@ public class RenderHelper {
 
         bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * aspect) / 2.0F), 0)
             .color(color[0], color[1], color[2], color[3])
-            .uv(0.0F, 0.0F)
+            .uv(0.0F, flipY ? 1.0F : 0.0F)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
             .normal(0, 0, 1)
             .endVertex();
         bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * aspect) / 2.0F), 0)
             .color(color[0], color[1], color[2], color[3])
-            .uv(1.0F, 0.0F)
+            .uv(1.0F, flipY ? 1.0F : 0.0F)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
             .normal(0, 0, 1)
             .endVertex();
         bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * aspect / 2.0F), 0)
             .color(color[0], color[1], color[2], color[3])
-            .uv(1.0F, 1.0F)
+            .uv(1.0F, flipY ? 0.0F : 1.0F)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
             .normal(0, 0, 1)
             .endVertex();
         bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * aspect / 2.0F), 0)
             .color(color[0], color[1], color[2], color[3])
-            .uv(0.0F, 1.0F)
+            .uv(0.0F, flipY ? 0.0F : 1.0F)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
             .normal(0, 0, 1)
             .endVertex();

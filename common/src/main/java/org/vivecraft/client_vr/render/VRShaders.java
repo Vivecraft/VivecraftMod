@@ -14,14 +14,11 @@ public class VRShaders {
     public static AbstractUniform _Lanczos_projectionUniform;
     public static AbstractUniform _Lanczos_modelViewUniform;
     public static ShaderInstance depthMaskShader;
-    public static AbstractUniform _DepthMask_resolutionUniform;
-    public static AbstractUniform _DepthMask_positionUniform;
-    public static AbstractUniform _DepthMask_scaleUniform;
     public static AbstractUniform _DepthMask_hmdViewPosition;
     public static AbstractUniform _DepthMask_hmdPlaneNormal;
     public static AbstractUniform _DepthMask_projectionMatrix;
     public static AbstractUniform _DepthMask_viewMatrix;
-    public static AbstractUniform _DepthMask_passUniform;
+    public static AbstractUniform _DepthMask_firstPersonPassUniform;
     public static AbstractUniform _DepthMask_keyColorUniform;
     public static AbstractUniform _DepthMask_alphaModeUniform;
     public static int _FOVReduction_Enabled;
@@ -55,14 +52,11 @@ public class VRShaders {
     public static void setupDepthMask() throws Exception {
         depthMaskShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "mixedreality", DefaultVertexFormat.POSITION_TEX);
 
-
-        _DepthMask_resolutionUniform = depthMaskShader.safeGetUniform("resolution");
-        _DepthMask_positionUniform = depthMaskShader.safeGetUniform("position");
         _DepthMask_hmdViewPosition = depthMaskShader.safeGetUniform("hmdViewPosition");
         _DepthMask_hmdPlaneNormal = depthMaskShader.safeGetUniform("hmdPlaneNormal");
         _DepthMask_projectionMatrix = depthMaskShader.safeGetUniform("projectionMatrix");
         _DepthMask_viewMatrix = depthMaskShader.safeGetUniform("viewMatrix");
-        _DepthMask_passUniform = depthMaskShader.safeGetUniform("pass");
+        _DepthMask_firstPersonPassUniform = depthMaskShader.safeGetUniform("firstPersonPass");
         _DepthMask_keyColorUniform = depthMaskShader.safeGetUniform("keyColor");
         _DepthMask_alphaModeUniform = depthMaskShader.safeGetUniform("alphaMode");
     }

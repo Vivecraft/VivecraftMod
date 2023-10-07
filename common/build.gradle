@@ -28,6 +28,7 @@ dependencies {
     modApi("com.github.Virtuoel:Pehkui:3.7.7", { exclude group: "net.fabricmc.fabric-api" })
 
     // other mods
+    modCompileOnly "maven.modrinth:dynamic-fps:3.2.0"
     // modCompileOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
     modCompileOnly "maven.modrinth:lithium:mc1.19.4-0.11.1"
     modCompileOnly "maven.modrinth:indium:1.0.15+mc1.19.4"
