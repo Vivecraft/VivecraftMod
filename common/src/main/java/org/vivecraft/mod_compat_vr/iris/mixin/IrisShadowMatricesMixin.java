@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Pseudo
@@ -42,7 +43,7 @@ public class IrisShadowMatricesMixin {
     @ModifyVariable(method = "snapModelViewToGrid", at = @At(value = "STORE"), ordinal = 1, remap = false)
     private static float vivecraft$modifyOffsetX(float original) {
         if (!RenderPassType.isVanilla()) {
-            vivecraft$currentPass = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
+            vivecraft$currentPass = RenderHelper.getSmoothCameraPosition(ClientDataHolderVR.getInstance().currentPass, ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld());
             if (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT) {
                 vivecraft$leftPass = vivecraft$currentPass;
             }

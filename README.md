@@ -19,7 +19,7 @@ Mod compatibility is important to us. If you find any issues, don't be afraid to
 - [x] Fully playable
 - [x] Sodium support
 - [X] Iris support
-- [ ] In game VR switching
+- [X] In game VR switching
 - [ ] API
 - [ ] OpenXR support
 
