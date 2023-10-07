@@ -2,19 +2,23 @@ package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import org.lwjgl.opengl.GL13C;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 public class VRPassHelper {
 
@@ -182,7 +186,7 @@ public class VRPassHelper {
 
             VRShaders._Overlay_eye.set(dataHolder.currentPass == RenderPass.LEFT ? 1 : -1);
             ((RenderTargetExtension) rendertarget).vivecraft$blitFovReduction(VRShaders.fovReductionShader, dataHolder.vrRenderer.framebufferEye0.viewWidth, dataHolder.vrRenderer.framebufferEye0.viewHeight);
-            GlStateManager._glUseProgram(0);
+            ProgramManager.glUseProgram(0);
             checkGLError("post overlay" + eye);
             mc.getProfiler().pop();
         }
@@ -197,11 +201,28 @@ public class VRPassHelper {
                 dataHolder.vrRenderer.cameraFramebuffer.viewHeight, 0, true, 0.0F, 0.0F, false);
             mc.getProfiler().pop();
         }
+
+        if (dataHolder.currentPass == RenderPass.THIRD
+            && dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY
+            && OptifineHelper.isOptifineLoaded()
+            && renderWorld && mc.level != null
+            && OptifineHelper.isShaderActive()
+            && OptifineHelper.bindShaderFramebuffer()) {
+            // copy optifine depth buffer, since we need it for the mixed reality split
+            RenderSystem.activeTexture(GL13C.GL_TEXTURE0);
+            RenderSystem.bindTexture(dataHolder.vrRenderer.framebufferMR.getDepthTextureId());
+            checkGLError("pre copy depth");
+            GlStateManager._glCopyTexSubImage2D(GL13C.GL_TEXTURE_2D, 0, 0, 0, 0, 0, dataHolder.vrRenderer.framebufferMR.width, dataHolder.vrRenderer.framebufferMR.height);
+            checkGLError("post copy depth");
+            // rebind the original buffer
+            dataHolder.vrRenderer.framebufferMR.bindWrite(false);
+        }
     }
 
     private static void checkGLError(String string) {
-        if (GlStateManager._getError() != 0) {
-            System.err.println(string);
+        int i = GlStateManager._getError();
+        if (i != 0) {
+            System.err.println(string + ": " + i);
         }
     }
 }

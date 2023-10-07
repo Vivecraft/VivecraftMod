@@ -18,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
+import org.joml.Vector3f;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -95,11 +97,11 @@ public class VRWidgetHelper {
         poseStack.setIdentity();
         RenderHelper.applyVRModelView(dataholder.currentPass, poseStack);
 
-        Vec3 vec3 = dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
-        Vec3 vec31 = dataholder.vrPlayer.vrdata_world_render.getEye(dataholder.currentPass).getPosition();
-        Vec3 vec32 = vec3.subtract(vec31);
+        Vec3 widgetPosition = dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
+        Vec3 eye = RenderHelper.getSmoothCameraPosition(dataholder.currentPass, dataholder.vrPlayer.vrdata_world_render);
+        Vec3 widgetOffset = widgetPosition.subtract(eye);
 
-        poseStack.translate(vec32.x, vec32.y, vec32.z);
+        poseStack.translate(widgetOffset.x, widgetOffset.y, widgetOffset.z);
         poseStack.mulPoseMatrix(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix());
         scale = scale * dataholder.vrPlayer.vrdata_world_render.worldScale;
         poseStack.scale(scale, scale, scale);
@@ -129,7 +131,13 @@ public class VRWidgetHelper {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
-        minecraft.getBlockRenderer().getModelRenderer().renderModel((new PoseStack()).last(), bufferbuilder, null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
+
+        PoseStack poseStack2 = new PoseStack();
+        RenderHelper.applyVRModelView(dataholder.currentPass, poseStack2);
+        poseStack2.last().pose().identity();
+        poseStack2.last().normal().mul(new Matrix3f(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix()));
+
+        minecraft.getBlockRenderer().getModelRenderer().renderModel(poseStack2.last(), bufferbuilder, null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
         tesselator.end();
 
         RenderSystem.disableBlend();
@@ -139,12 +147,13 @@ public class VRWidgetHelper {
         BufferBuilder bufferbuilder1 = tesselator.getBuilder();
         bufferbuilder1.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
-        // TODO lighting changes with head movement
-
         for (BakedQuad bakedquad : minecraft.getModelManager().getModel(displayModel).getQuads(null, null, random)) {
             if (displayFaceFunc.apply(bakedquad.getDirection()) != DisplayFace.NONE && bakedquad.getSprite().contents().name().equals(new ResourceLocation("vivecraft:transparent"))) {
                 int[] vertexList = bakedquad.getVertices();
                 boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == DisplayFace.MIRROR;
+                // make normals point up, so they are always bright
+                // TODO: might break with shaders?
+                Vector3f normal = poseStack.last().normal().transform(new Vector3f(0.0F, 1.0F, 0.0F));
                 int j = LightTexture.pack(15, 15);
                 int step = vertexList.length / 4;
                 bufferbuilder1.vertex(
@@ -155,7 +164,7 @@ public class VRWidgetHelper {
                     .uv(flag ? 1.0F : 0.0F, 1.0F)
                     .overlayCoords(OverlayTexture.NO_OVERLAY)
                     .uv2(j)
-                    .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F)
+                    .normal(normal.x, normal.y, normal.z)
                     .endVertex();
                 bufferbuilder1.vertex(
                         Float.intBitsToFloat(vertexList[step]),
@@ -165,7 +174,7 @@ public class VRWidgetHelper {
                     .uv(flag ? 1.0F : 0.0F, 0.0F)
                     .overlayCoords(OverlayTexture.NO_OVERLAY)
                     .uv2(j)
-                    .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                    .normal(normal.x, normal.y, normal.z).endVertex();
                 bufferbuilder1.vertex(
                         Float.intBitsToFloat(vertexList[step * 2]),
                         Float.intBitsToFloat(vertexList[step * 2 + 1]),
@@ -174,7 +183,7 @@ public class VRWidgetHelper {
                     .uv(flag ? 0.0F : 1.0F, 0.0F)
                     .overlayCoords(OverlayTexture.NO_OVERLAY)
                     .uv2(j)
-                    .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                    .normal(normal.x, normal.y, normal.z).endVertex();
                 bufferbuilder1.vertex(
                         Float.intBitsToFloat(vertexList[step * 3]),
                         Float.intBitsToFloat(vertexList[step * 3 + 1]),
@@ -183,7 +192,7 @@ public class VRWidgetHelper {
                     .uv(flag ? 0.0F : 1.0F, 1.0F)
                     .overlayCoords(OverlayTexture.NO_OVERLAY)
                     .uv2(j)
-                    .normal(0.0F, 0.0F, flag ? -1.0F : 1.0F).endVertex();
+                    .normal(normal.x, normal.y, normal.z).endVertex();
             }
         }
 

@@ -6,8 +6,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
@@ -25,14 +29,27 @@ public class XRCamera extends Camera {
         RenderPass renderpass = dataholder.currentPass;
 
         VRData.VRDevicePose eye = dataholder.vrPlayer.vrdata_world_render.getEye(renderpass);
-        this.setPosition(eye.getPosition());
-        this.xRot = -eye.getPitch();
-        this.yRot = eye.getYaw();
-        this.getLookVector().set((float) eye.getDirection().x, (float) eye.getDirection().y, (float) eye.getDirection().z);
-        Vec3 vec3 = eye.getCustomVector(new Vec3(0.0D, 1.0D, 0.0D));
-        this.getUpVector().set((float) vec3.x, (float) vec3.y, (float) vec3.z);
-        eye.getCustomVector(new Vec3(1.0D, 0.0D, 0.0D));
-        this.getLeftVector().set((float) vec3.x, (float) vec3.y, (float) vec3.z);
+        if (renderpass == RenderPass.CENTER && dataholder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
+            this.setPosition(RenderHelper.getSmoothCameraPosition(renderpass, dataholder.vrPlayer.vrdata_world_render));
+
+            Quaternionf rotation = MCVR.get().hmdRotHistory.averageRotation(dataholder.vrSettings.displayMirrorCenterSmooth);
+            this.getLookVector().set(rotation.transform(new Vector3f(0F, 0F, 1F)));
+            this.xRot = -(float) Math.toDegrees(Math.asin(this.getLookVector().y));
+            this.yRot = (float) Math.toDegrees(Math.atan2(-this.getLookVector().x, this.getLookVector().z));
+
+            this.getUpVector().set(rotation.transform(new Vector3f(0F, 1F, 0F)));
+            this.getLeftVector().set(rotation.transform(new Vector3f(1F, 0F, 0F)));
+        } else {
+            this.setPosition(eye.getPosition());
+            this.xRot = -eye.getPitch();
+            this.yRot = eye.getYaw();
+            this.getLookVector().set((float) eye.getDirection().x, (float) eye.getDirection().y, (float) eye.getDirection().z);
+            Vec3 up = eye.getCustomVector(new Vec3(0.0D, 1.0D, 0.0D));
+            this.getUpVector().set((float) up.x, (float) up.y, (float) up.z);
+            Vec3 left = eye.getCustomVector(new Vec3(1.0D, 0.0D, 0.0D));
+            this.getLeftVector().set((float) left.x, (float) left.y, (float) left.z);
+        }
+
         this.rotation().set(0.0F, 0.0F, 0.0F, 1.0F);
         this.rotation().mul(Axis.YP.rotationDegrees(-this.yRot));
         this.rotation().mul(Axis.XP.rotationDegrees(this.xRot));

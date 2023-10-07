@@ -108,7 +108,7 @@ public class VREffectsHelper {
             RenderSystem.enableBlend();
             matrixStackIn.translate(0.0D, 0.0D, 0.00001D);
             int light = LevelRenderer.getLightColor(mc.level, new BlockPos(dataHolder.vrPlayer.vrdata_world_render.getController(i).getPosition()));
-            RenderHelper.drawSizedQuadWithLightmapCutout(720.0F, 720.0F, scale, light, matrixStackIn.last().pose());
+            RenderHelper.drawSizedQuadWithLightmapCutout(720.0F, 720.0F, scale, light, matrixStackIn.last().pose(), true);
 
             matrixStackIn.popPose();
             mc.gameRenderer.lightTexture().turnOnLightLayer();
@@ -456,9 +456,7 @@ public class VREffectsHelper {
                             RenderSystem.disableCull();
 
                             RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
-
-                            Vec3 vec3 = dataHolder.vrPlayer.vrdata_world_render
-                                .getEye(dataHolder.currentPass).getPosition();
+                            Vec3 vec3 = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
                             Vec3 interpolatedPlayerPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(partialTicks);
                             Vec3 pos = interpolatedPlayerPos.subtract(vec3).add(0.0D, 0.005D, 0.0D);
                             RenderHelper.setupPolyRendering(true);
@@ -571,14 +569,14 @@ public class VREffectsHelper {
             poseStack.setIdentity();
 
             mc.getProfiler().push("applyPhysicalKeyboardModelView");
-            Vec3 eye = dataHolder.vrPlayer.vrdata_world_render.getEye(dataHolder.currentPass).getPosition();
+            Vec3 eye = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
 
             //convert previously calculated coords to world coords
             Vec3 guiPos = VRPlayer.room_to_world_pos(KeyboardHandler.Pos_room, dataHolder.vrPlayer.vrdata_world_render);
             org.vivecraft.common.utils.math.Matrix4f rot = org.vivecraft.common.utils.math.Matrix4f.rotationY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians);
             org.vivecraft.common.utils.math.Matrix4f guiRot = org.vivecraft.common.utils.math.Matrix4f.multiply(rot, KeyboardHandler.Rotation_room);
 
-            poseStack.mulPoseMatrix(dataHolder.vrPlayer.vrdata_world_render.getEye(dataHolder.currentPass).getMatrix().transposed().toMCMatrix());
+            RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
 
             // offset from eye to gui pos
             poseStack.translate((float) (guiPos.x - eye.x), (float) (guiPos.y - eye.y), (float) (guiPos.z - eye.z));
@@ -663,7 +661,7 @@ public class VREffectsHelper {
             int light = Utils.getCombinedLightWithMin(mc.level, new BlockPos(screenPos), minLight);
             RenderHelper.drawSizedQuadWithLightmapCutout((float) mc.getWindow().getGuiScaledWidth(),
                 (float) mc.getWindow().getGuiScaledHeight(), 1.5F, light, color,
-                poseStack.last().pose());
+                poseStack.last().pose(), false);
         } else {
             RenderHelper.drawSizedQuad((float) mc.getWindow().getGuiScaledWidth(),
                 (float) mc.getWindow().getGuiScaledHeight(), 1.5F, color,
@@ -692,7 +690,7 @@ public class VREffectsHelper {
                         depthAlways = true;
 
                         poseStack.pushPose();
-                        Vec3 eye = dataHolder.vrPlayer.vrdata_world_render.getEye(dataHolder.currentPass).getPosition();
+                        Vec3 eye = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
                         poseStack.translate(dataHolder.vrPlayer.vrdata_world_render.origin.x - eye.x,
                             dataHolder.vrPlayer.vrdata_world_render.origin.y - eye.y,
                             dataHolder.vrPlayer.vrdata_world_render.origin.z - eye.z);
@@ -732,7 +730,7 @@ public class VREffectsHelper {
 
             mc.getProfiler().push("apply2DModelView");
 
-            Vec3 eye = dataHolder.vrPlayer.vrdata_world_render.getEye(dataHolder.currentPass).getPosition();
+            Vec3 eye = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
 
             Vec3 guiPos = VRPlayer.room_to_world_pos(pos, dataHolder.vrPlayer.vrdata_world_render);
             org.vivecraft.common.utils.math.Matrix4f yRot = org.vivecraft.common.utils.math.Matrix4f

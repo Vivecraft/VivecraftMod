@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.provider;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.GlUtil;
+import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.GraphicsStatus;
@@ -179,7 +180,7 @@ public abstract class VRRenderer {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableTexture();
         RenderSystem.enableCull();
-        GlStateManager._glUseProgram(s);
+        ProgramManager.glUseProgram(s);
         RenderSystem.stencilFunc(GL11.GL_NOTEQUAL, 255, 1);
         RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         RenderSystem.stencilMask(0); // Dont Write to stencil buffer
