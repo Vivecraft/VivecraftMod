@@ -25,9 +25,9 @@ public class XRCamera extends Camera {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         RenderPass renderpass = dataholder.currentPass;
 
-        VRData.VRDevicePose eye = dataholder.vrPlayer.vrdata_world_render.getEye(renderpass);
+        VRData.VRDevicePose eye = dataholder.vrPlayer.getVRDataWorld().getEye(renderpass);
         if (renderpass == RenderPass.CENTER && dataholder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
-            this.setPosition(RenderHelper.getSmoothCameraPosition(renderpass, dataholder.vrPlayer.vrdata_world_render));
+            this.setPosition(RenderHelper.getSmoothCameraPosition(renderpass, dataholder.vrPlayer.getVRDataWorld()));
         } else {
             this.setPosition(eye.getPosition());
         }

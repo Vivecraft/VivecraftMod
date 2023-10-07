@@ -18,6 +18,7 @@ dependencies {
     modCompileOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
     modCompileOnly "883067831485366304:1076634925077364786:sodium-fabric-mc1.19.3-0.4.10rev.c131708-dirty:jar"
     modCompileOnly "maven.modrinth:rubidium:0.5.6"
+    compileOnly 'org.joml:joml:1.10.4' //temp sodium
 
 
     // for iris compat
