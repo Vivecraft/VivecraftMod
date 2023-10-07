@@ -20,6 +20,7 @@ import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
+import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
 public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerModel<T> {
     private final boolean slim;
@@ -49,19 +50,35 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         if (!leftShoulder.cubes.isEmpty()) {
             copyUV(leftShoulder.cubes.get(0).polygons[1], leftHand.cubes.get(0).polygons[1]);
             copyUV(leftShoulder.cubes.get(0).polygons[1], leftHand.cubes.get(0).polygons[0]);
+            if (SodiumHelper.isLoaded()) {
+                SodiumHelper.copyModelCuboidUV(leftShoulder, leftHand, 3, 3);
+                SodiumHelper.copyModelCuboidUV(leftShoulder, leftHand, 3, 2);
+            }
         }
         if (!rightShoulder.cubes.isEmpty()) {
             copyUV(rightShoulder.cubes.get(0).polygons[1], this.rightHand.cubes.get(0).polygons[1]);
             copyUV(rightShoulder.cubes.get(0).polygons[1], this.rightHand.cubes.get(0).polygons[0]);
+            if (SodiumHelper.isLoaded()) {
+                SodiumHelper.copyModelCuboidUV(rightShoulder, rightHand, 3, 3);
+                SodiumHelper.copyModelCuboidUV(rightShoulder, rightHand, 3, 2);
+            }
         }
 
         if (!rightSleeve.cubes.isEmpty()) {
             copyUV(rightShoulder_sleeve.cubes.get(0).polygons[1], this.rightSleeve.cubes.get(0).polygons[1]);
             copyUV(rightShoulder_sleeve.cubes.get(0).polygons[1], this.rightSleeve.cubes.get(0).polygons[0]);
+            if (SodiumHelper.isLoaded()) {
+                SodiumHelper.copyModelCuboidUV(rightShoulder_sleeve, rightSleeve, 3, 3);
+                SodiumHelper.copyModelCuboidUV(rightShoulder_sleeve, rightSleeve, 3, 2);
+            }
         }
         if (!leftSleeve.cubes.isEmpty()) {
             copyUV(leftShoulder_sleeve.cubes.get(0).polygons[1], leftSleeve.cubes.get(0).polygons[1]);
             copyUV(leftShoulder_sleeve.cubes.get(0).polygons[1], leftSleeve.cubes.get(0).polygons[0]);
+            if (SodiumHelper.isLoaded()) {
+                SodiumHelper.copyModelCuboidUV(leftShoulder_sleeve, leftSleeve, 3, 3);
+                SodiumHelper.copyModelCuboidUV(leftShoulder_sleeve, leftSleeve, 3, 2);
+            }
         }
     }
 
