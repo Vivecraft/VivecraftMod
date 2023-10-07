@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
 import net.minecraft.client.renderer.ItemModelShaper;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemStack;
@@ -33,8 +32,8 @@ public class ItemRendererVRMixin {
     @Unique
     float vivecraft$manualFade = 1.0F;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V", shift = At.Shift.AFTER), method = "render")
-    public void vivecraft$fade(ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel, CallbackInfo ci) {
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(DDD)V", shift = At.Shift.AFTER), method = "render")
+    public void vivecraft$fade(ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel, CallbackInfo ci) {
         LocalPlayer localplayer = Minecraft.getInstance().player;
         this.vivecraft$fade = localplayer != null && ClientDataHolderVR.isfphand
                               ? SwingTracker.getItemFade(localplayer, itemStack)

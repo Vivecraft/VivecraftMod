@@ -134,7 +134,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                     pMatrixStack.pushPose();
                     pMatrixStack.scale(0.625F, 0.625F, 0.625F);
                     pMatrixStack.translate(mainHand ? -0.03D : 0.03D, 0.0D, -0.1D);
-                    this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
+                    this.renderItem(pPlayer, pStack, transformType, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
                     pMatrixStack.popPose();
                 }
 
