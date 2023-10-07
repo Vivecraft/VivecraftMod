@@ -383,7 +383,7 @@ public class GuiHandler {
 
     public static Vec3 applyGUIModelView(RenderPass currentPass, PoseStack pMatrixStack) {
         mc.getProfiler().push("applyGUIModelView");
-        Vec3 vec3 = dh.vrPlayer.vrdata_world_render.getEye(currentPass).getPosition();
+        Vec3 vec3 = RenderHelper.getSmoothCameraPosition(currentPass, dh.vrPlayer.vrdata_world_render);
 
         if (mc.screen != null && guiPos_room == null) {
             //naughty mods!
