@@ -1,5 +1,5 @@
 {
-  "required": true,
+  "required": false,
   "package": "org.vivecraft.mod_compat_vr.optifine.mixin",
   "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",

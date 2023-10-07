@@ -46,6 +46,9 @@ public class OptifineHelper {
     private static Class<?> shaders;
     private static Method shadersBeginEntitiesMethod;
     private static Method shadersEndEntitiesMethod;
+    private static Field shadersDFB;
+
+    private static Method shadersFramebufferBindFramebuffer;
 
     private static Field optionsOfRenderRegions;
     private static Field optionsOfCloudHeight;
@@ -77,6 +80,19 @@ public class OptifineHelper {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static boolean bindShaderFramebuffer() {
+        try {
+            Object dfb = shadersDFB.get(shaders);
+            if (dfb != null) {
+                shadersFramebufferBindFramebuffer.invoke(dfb);
+                return true;
+            }
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static void beginOutlineShader() {
@@ -297,6 +313,9 @@ public class OptifineHelper {
             shadersBeginEntitiesMethod = shaders.getMethod("beginEntities");
             shadersEndEntitiesMethod = shaders.getMethod("endEntities");
 
+            Class<?> shadersFramebuffer = Class.forName("net.optifine.shaders.ShadersFramebuffer");
+            shadersFramebufferBindFramebuffer = shadersFramebuffer.getMethod("bindFramebuffer");
+
             // private methods
             customColorsGetSkyColoEndMethod = customColors.getDeclaredMethod("getSkyColorEnd", Vec3.class);
             customColorsGetSkyColoEndMethod.setAccessible(true);
@@ -306,6 +325,10 @@ public class OptifineHelper {
             customColorsGetFogColorEndMethod.setAccessible(true);
             customColorsGetFogColorNetherMethod = customColors.getDeclaredMethod("getFogColorNether", Vec3.class);
             customColorsGetFogColorNetherMethod.setAccessible(true);
+
+            // private Fields
+            shadersDFB = shaders.getDeclaredField("dfb");
+            shadersDFB.setAccessible(true);
 
             try {
                 vertexRenderPositions = ModelPart.Vertex.class.getField("renderPositions");

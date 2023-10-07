@@ -15,6 +15,7 @@ import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.QuaternionfHistory;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.Vec3History;
 import org.vivecraft.client_vr.extensions.GuiExtension;
@@ -55,6 +56,7 @@ public abstract class MCVR {
     protected org.vivecraft.common.utils.math.Matrix4f hmdPoseRightEye = new org.vivecraft.common.utils.math.Matrix4f();
     public Vec3History hmdHistory = new Vec3History();
     public Vec3History hmdPivotHistory = new Vec3History();
+    public QuaternionfHistory hmdRotHistory = new QuaternionfHistory();
     protected boolean headIsTracking;
     protected org.vivecraft.common.utils.math.Matrix4f[] controllerPose = new org.vivecraft.common.utils.math.Matrix4f[3];
     protected org.vivecraft.common.utils.math.Matrix4f[] controllerRotation = new org.vivecraft.common.utils.math.Matrix4f[3];
@@ -502,6 +504,8 @@ public abstract class MCVR {
             this.hmdHistory.add(vec3);
             Vector3 vector3 = this.hmdRotation.transform(new Vector3(0.0F, -0.1F, 0.1F));
             this.hmdPivotHistory.add(new Vec3((double) vector3.getX() + vec3.x, (double) vector3.getY() + vec3.y, (double) vector3.getZ() + vec3.z));
+            Quaternion rot = new Quaternion(org.vivecraft.common.utils.math.Matrix4f.multiply(org.vivecraft.common.utils.math.Matrix4f.rotationY((float) Math.toRadians(this.dh.vrSettings.worldRotation)), hmdRotation).transposed());
+            hmdRotHistory.add(new com.mojang.math.Quaternion(rot.x, rot.y, rot.z, rot.w));
 
             if (this.dh.vrSettings.seated) {
                 this.controllerPose[0] = this.hmdPose.inverted().inverted();
