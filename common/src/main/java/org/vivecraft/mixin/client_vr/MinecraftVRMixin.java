@@ -297,7 +297,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
         if (VRState.vrRunning) {
             ++ClientDataHolderVR.getInstance().frameIndex;
-
+            RenderPassManager.setGUIRenderPass();
             // reset camera position, if there is one, since it only gets set at the start of rendering, and the last renderpass can be anywhere
             if (gameRenderer != null && gameRenderer.getMainCamera() != null && level != null && this.getCameraEntity() != null) {
                 this.gameRenderer.getMainCamera().setup(this.level, this.getCameraEntity(), false, false, this.pause ? this.pausePartialTick : this.timer.partialTick);
