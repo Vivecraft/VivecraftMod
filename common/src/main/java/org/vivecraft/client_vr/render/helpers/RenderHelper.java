@@ -23,7 +23,9 @@ import org.lwjgl.opengl.GL43C;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
+import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 
@@ -44,10 +46,27 @@ public class RenderHelper {
     private static final Minecraft mc = Minecraft.getInstance();
 
     public static void applyVRModelView(RenderPass currentPass, PoseStack poseStack) {
-        Matrix4f modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
-            .getMatrix().transposed().toMCMatrix();
+        Matrix4f modelView;
+        if (currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
+            modelView = new Matrix4f().rotation(MCVR.get().hmdRotHistory
+                .averageRotation(dataHolder.vrSettings.displayMirrorCenterSmooth));
+        } else {
+            modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
+                .getMatrix().transposed().toMCMatrix();
+        }
         poseStack.last().pose().mul(modelView);
         poseStack.last().normal().mul(new Matrix3f(modelView));
+    }
+
+    public static Vec3 getSmoothCameraPosition(RenderPass renderpass, VRData vrData) {
+        if (dataHolder.currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
+            return MCVR.get().hmdHistory.averagePosition(dataHolder.vrSettings.displayMirrorCenterSmooth)
+                .scale(vrData.worldScale)
+                .yRot(vrData.rotation_radians)
+                .add(vrData.origin);
+        } else {
+            return vrData.getEye(renderpass).getPosition();
+        }
     }
 
     public static void applyStereo(RenderPass currentPass, PoseStack matrix) {
@@ -70,7 +89,6 @@ public class RenderHelper {
                 dir = dir.yRot((float) Math.toRadians(c == 0 ? -35.0D : 35.0D));
                 dir = new Vec3(dir.x, 0.0D, dir.z);
                 dir = dir.normalize();
-                RenderPass renderpass = RenderPass.CENTER;
                 if (TelescopeTracker.isTelescope(mc.player.getUseItem())) {
                     if (c == 0 && mc.player.getUsedItemHand() == InteractionHand.MAIN_HAND) {
                         out = dataHolder.vrPlayer.vrdata_world_render.eye0.getPosition()
@@ -84,7 +102,7 @@ public class RenderHelper {
                     }
                 }
                 if (out == null) {
-                    out = dataHolder.vrPlayer.vrdata_world_render.getEye(renderpass).getPosition().add(
+                    out = dataHolder.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().add(
                         dir.x * 0.3D * dataHolder.vrPlayer.vrdata_world_render.worldScale,
                         -0.4D * dataHolder.vrPlayer.vrdata_world_render.worldScale,
                         dir.z * 0.3D * dataHolder.vrPlayer.vrdata_world_render.worldScale);
@@ -103,8 +121,8 @@ public class RenderHelper {
 
     public static void setupRenderingAtController(int controller, PoseStack matrix) {
         Vec3 aimSource = getControllerRenderPos(controller);
-        aimSource = aimSource.subtract(dataHolder.vrPlayer.getVRDataWorld()
-            .getEye(dataHolder.currentPass).getPosition());
+        aimSource = aimSource.subtract(
+            getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.getVRDataWorld()));
         matrix.translate(aimSource.x, aimSource.y, aimSource.z);
         float sc = dataHolder.vrPlayer.vrdata_world_render.worldScale;
         if (mc.level != null && TelescopeTracker.isTelescope(mc.player.getUseItem())) {

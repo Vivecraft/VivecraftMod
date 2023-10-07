@@ -95,11 +95,11 @@ public class VRWidgetHelper {
         poseStack.setIdentity();
         RenderHelper.applyVRModelView(dataholder.currentPass, poseStack);
 
-        Vec3 vec3 = dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
-        Vec3 vec31 = dataholder.vrPlayer.vrdata_world_render.getEye(dataholder.currentPass).getPosition();
-        Vec3 vec32 = vec3.subtract(vec31);
+        Vec3 widgetPosition = dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
+        Vec3 eye = RenderHelper.getSmoothCameraPosition(dataholder.currentPass, dataholder.vrPlayer.vrdata_world_render);
+        Vec3 widgetOffset = widgetPosition.subtract(eye);
 
-        poseStack.translate(vec32.x, vec32.y, vec32.z);
+        poseStack.translate(widgetOffset.x, widgetOffset.y, widgetOffset.z);
         poseStack.mulPoseMatrix(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix());
         scale = scale * dataholder.vrPlayer.vrdata_world_render.worldScale;
         poseStack.scale(scale, scale, scale);

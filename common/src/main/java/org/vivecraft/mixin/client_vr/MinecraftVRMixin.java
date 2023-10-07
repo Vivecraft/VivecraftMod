@@ -1027,8 +1027,13 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 RenderSystem.setShaderTexture(2,
                     ClientDataHolderVR.getInstance().vrRenderer.framebufferUndistorted.getColorTextureId());
             } else {
-                RenderSystem.setShaderTexture(2,
-                    ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0.getColorTextureId());
+                if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorLeftEye) {
+                    RenderSystem.setShaderTexture(2,
+                        ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0.getColorTextureId());
+                } else {
+                    RenderSystem.setShaderTexture(2,
+                        ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1.getColorTextureId());
+                }
             }
             VRShaders.depthMaskShader.setSampler("firstPersonColor", RenderSystem.getShaderTexture(2));
         }

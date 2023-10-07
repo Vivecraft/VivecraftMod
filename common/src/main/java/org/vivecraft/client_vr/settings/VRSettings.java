@@ -301,6 +301,8 @@ public class VRSettings {
     public MirrorMode displayMirrorMode = MirrorMode.CROPPED;
     @SettingField(VrOptions.MIRROR_EYE)
     public boolean displayMirrorLeftEye = false;
+    @SettingField(VrOptions.MIRROR_CENTER_SMOOTH)
+    public float displayMirrorCenterSmooth = 0.0F;
     public boolean shouldRenderSelf = false;
     @SettingField(VrOptions.MENU_WORLD_SELECTION)
     public MenuWorld menuWorldSelection = MenuWorld.BOTH;
@@ -1169,6 +1171,17 @@ public class VRSettings {
             }
         },
         MIRROR_EYE(false, true, "vivecraft.options.left", "vivecraft.options.right"), // Mirror Eye
+        MIRROR_CENTER_SMOOTH(true, false, 0.0f, 1.0f, 0.1f, 1) {
+            @Override
+            String getDisplayString(String prefix, Object value) {
+                if ((float) value == 0) {
+                    return prefix + I18n.get("options.off");
+                } else {
+                    return prefix + String.format("%.1f", (float) value) + "s";
+                }
+
+            }
+        },
         MIXED_REALITY_KEY_COLOR(false, false) { // Key Color
             private static final List<Pair<Color, String>> colors;
             static {
@@ -1461,7 +1474,7 @@ public class VRSettings {
                 }
             }
         },
-        MONO_FOV(true, false, 1, 179, 1, 0) { // Undistorted FOV
+        MONO_FOV(true, false, 30, 110, 1, 0) { // Undistorted FOV
 
             @Override
             String getDisplayString(String prefix, Object value) {

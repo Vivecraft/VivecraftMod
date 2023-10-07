@@ -37,7 +37,8 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.MIXED_REALITY_RENDER_CAMERA_MODEL
     };
     static VRSettings.VrOptions[] UDOptions = new VRSettings.VrOptions[]{
-        VRSettings.VrOptions.MONO_FOV
+        VRSettings.VrOptions.MONO_FOV,
+        VRSettings.VrOptions.MIRROR_CENTER_SMOOTH
     };
     static VRSettings.VrOptions[] TUDOptions = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.MIXED_REALITY_FOV,
@@ -62,8 +63,13 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
                 avrsettings$vroptions[i] = VRSettings.VrOptions.DUMMY;
             }
 
-            if (vrsettings$vroptions == VRSettings.VrOptions.MIRROR_EYE && this.dataholder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.CROPPED && this.dataholder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.SINGLE) {
-                avrsettings$vroptions[i] = VRSettings.VrOptions.DUMMY;
+            if (vrsettings$vroptions == VRSettings.VrOptions.MIRROR_EYE && this.dataholder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.CROPPED && this.dataholder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.SINGLE && !(this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY && this.dataholder.vrSettings.mixedRealityUnityLike && !this.dataholder.vrSettings.mixedRealityUndistorted)) {
+                if (this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY
+                    && this.dataholder.vrSettings.mixedRealityUnityLike) {
+                    avrsettings$vroptions[i] = VRSettings.VrOptions.MIRROR_CENTER_SMOOTH;
+                } else {
+                    avrsettings$vroptions[i] = VRSettings.VrOptions.DUMMY;
+                }
             }
         }
 
