@@ -1030,6 +1030,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             VRShaders.depthMaskShader.setSampler("firstPersonColor", RenderSystem.getShaderTexture(2));
         }
 
+        RenderSystem.setShader(() -> VRShaders.depthMaskShader);
         VRShaders.depthMaskShader.apply();
 
         Tesselator tesselator = RenderSystem.renderThreadTesselator();
@@ -1039,7 +1040,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         bufferbuilder.vertex(1, -1, 0.0).uv(2, 0).endVertex();
         bufferbuilder.vertex(1, 1, 0.0).uv(2, 2).endVertex();
         bufferbuilder.vertex(-1, 1, 0.0).uv(0, 2).endVertex();
-        BufferUploader.draw(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
         VRShaders.depthMaskShader.clear();
 
         ProgramManager.glUseProgram(0);
