@@ -47,14 +47,14 @@ public class RenderHelper {
     public static void applyVRModelView(RenderPass currentPass, PoseStack poseStack) {
         Matrix4f modelView;
         if (currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
-            modelView = new Matrix4f().rotation(MCVR.get().hmdRotHistory
+            poseStack.mulPose(MCVR.get().hmdRotHistory
                 .averageRotation(dataHolder.vrSettings.displayMirrorCenterSmooth));
         } else {
             modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
                 .getMatrix().transposed().toMCMatrix();
+            poseStack.last().pose().multiply(modelView);
+            poseStack.last().normal().mul(new Matrix3f(modelView));
         }
-        poseStack.last().pose().multiply(modelView);
-        poseStack.last().normal().mul(new Matrix3f(modelView));
     }
 
     public static Vec3 getSmoothCameraPosition(RenderPass renderpass, VRData vrData) {

@@ -1,7 +1,6 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
 import net.minecraft.client.renderer.ItemModelShaper;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemStack;

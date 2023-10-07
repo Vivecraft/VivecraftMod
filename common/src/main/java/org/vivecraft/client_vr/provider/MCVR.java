@@ -504,7 +504,8 @@ public abstract class MCVR {
             this.hmdHistory.add(vec3);
             Vector3 vector3 = this.hmdRotation.transform(new Vector3(0.0F, -0.1F, 0.1F));
             this.hmdPivotHistory.add(new Vec3((double) vector3.getX() + vec3.x, (double) vector3.getY() + vec3.y, (double) vector3.getZ() + vec3.z));
-            hmdRotHistory.add(new Quaternionf().setFromNormalized(hmdRotation.transposed().toMCMatrix().rotateY((float) -Math.toRadians(this.dh.vrSettings.worldRotation))));
+            Quaternion rot = new Quaternion(org.vivecraft.common.utils.math.Matrix4f.multiply(org.vivecraft.common.utils.math.Matrix4f.rotationY((float) Math.toRadians(this.dh.vrSettings.worldRotation)), hmdRotation).transposed());
+            hmdRotHistory.add(new com.mojang.math.Quaternion(rot.x, rot.y, rot.z, rot.w));
 
             if (this.dh.vrSettings.seated) {
                 this.controllerPose[0] = this.hmdPose.inverted().inverted();

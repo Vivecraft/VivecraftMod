@@ -6,6 +6,8 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -18,8 +20,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix3f;
-import org.joml.Vector3f;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
@@ -134,7 +134,7 @@ public class VRWidgetHelper {
 
         PoseStack poseStack2 = new PoseStack();
         RenderHelper.applyVRModelView(dataholder.currentPass, poseStack2);
-        poseStack2.last().pose().identity();
+        poseStack2.last().pose().setIdentity();
         poseStack2.last().normal().mul(new Matrix3f(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix()));
 
         minecraft.getBlockRenderer().getModelRenderer().renderModel(poseStack2.last(), bufferbuilder, null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
@@ -153,7 +153,8 @@ public class VRWidgetHelper {
                 boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == DisplayFace.MIRROR;
                 // make normals point up, so they are always bright
                 // TODO: might break with shaders?
-                Vector3f normal = poseStack.last().normal().transform(new Vector3f(0.0F, 1.0F, 0.0F));
+                Vector3f normal = new Vector3f(0.0F, 1.0F, 0.0F);
+                normal.transform(poseStack.last().normal());
                 int j = LightTexture.pack(15, 15);
                 int step = vertexList.length / 4;
                 bufferbuilder1.vertex(
@@ -164,7 +165,7 @@ public class VRWidgetHelper {
                     .uv(flag ? 1.0F : 0.0F, 1.0F)
                     .overlayCoords(OverlayTexture.NO_OVERLAY)
                     .uv2(j)
-                    .normal(normal.x, normal.y, normal.z)
+                    .normal(normal.x(), normal.y(), normal.z())
                     .endVertex();
                 bufferbuilder1.vertex(
                         Float.intBitsToFloat(vertexList[step]),
@@ -174,7 +175,7 @@ public class VRWidgetHelper {
                     .uv(flag ? 1.0F : 0.0F, 0.0F)
                     .overlayCoords(OverlayTexture.NO_OVERLAY)
                     .uv2(j)
-                    .normal(normal.x, normal.y, normal.z).endVertex();
+                    .normal(normal.x(), normal.y(), normal.z()).endVertex();
                 bufferbuilder1.vertex(
                         Float.intBitsToFloat(vertexList[step * 2]),
                         Float.intBitsToFloat(vertexList[step * 2 + 1]),
@@ -183,7 +184,7 @@ public class VRWidgetHelper {
                     .uv(flag ? 0.0F : 1.0F, 0.0F)
                     .overlayCoords(OverlayTexture.NO_OVERLAY)
                     .uv2(j)
-                    .normal(normal.x, normal.y, normal.z).endVertex();
+                    .normal(normal.x(), normal.y(), normal.z()).endVertex();
                 bufferbuilder1.vertex(
                         Float.intBitsToFloat(vertexList[step * 3]),
                         Float.intBitsToFloat(vertexList[step * 3 + 1]),
@@ -192,7 +193,7 @@ public class VRWidgetHelper {
                     .uv(flag ? 0.0F : 1.0F, 1.0F)
                     .overlayCoords(OverlayTexture.NO_OVERLAY)
                     .uv2(j)
-                    .normal(normal.x, normal.y, normal.z).endVertex();
+                    .normal(normal.x(), normal.y(), normal.z()).endVertex();
             }
         }
 
