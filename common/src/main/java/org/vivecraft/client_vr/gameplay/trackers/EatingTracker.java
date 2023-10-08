@@ -4,14 +4,14 @@ import net.minecraft.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3d;
+import org.joml.Vector3f;
 
 import java.util.Random;
 
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
 import static org.vivecraft.common.utils.Utils.convertToVec3;
+import static org.vivecraft.common.utils.Utils.convertToVector3f;
 
 public class EatingTracker extends Tracker {
     float mouthtoEyeDistance = 0.0F;
@@ -64,15 +64,16 @@ public class EatingTracker extends Tracker {
 
     @Override
     public void doProcess() {
-        Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
-        Vec3 mouthPos = dh.vrPlayer.vrdata_room_pre.getController(0).getCustomVector(new Vec3(0.0D, -this.mouthtoEyeDistance, 0.0D)).add(hmdPos);
+        Vector3f hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition(new Vector3f());
+        Vector3f mouthPos = dh.vrPlayer.vrdata_room_pre.getController(0).getCustomVector(new Vector3f(0.0F, -this.mouthtoEyeDistance, 0.0F)).add(hmdPos);
 
         for (int c = 0; c < 2; ++c) {
 
-            Vec3 controllerPos = convertToVec3(dh.vr.controllerHistory[c].averagePosition(0.333D, new Vector3d())).add(dh.vrPlayer.vrdata_room_pre.getController(c).getCustomVector(new Vec3(0.0D, 0.0D, -0.1D)));
-            controllerPos = controllerPos.add(dh.vrPlayer.vrdata_room_pre.getController(c).getDirection().scale(0.1D));
+            Vector3f controllerPos = dh.vr.controllerHistory[c].averagePosition(0.333F, new Vector3f())
+                .add(dh.vrPlayer.vrdata_room_pre.getController(c).getCustomVector(new Vector3f(0.0F, 0.0F, -0.1F)))
+                .add(dh.vrPlayer.vrdata_room_pre.getController(c).getDirection(new Vector3f()).mul(0.1F));
 
-            if (mouthPos.distanceTo(controllerPos) < (double) this.threshold) {
+            if (mouthPos.distance(controllerPos) < (double) this.threshold) {
                 ItemStack itemstack = c == 0 ? mc.player.getMainHandItem() : mc.player.getOffhandItem();
                 if (itemstack == ItemStack.EMPTY) {
                     continue;
@@ -81,7 +82,7 @@ public class EatingTracker extends Tracker {
                 int crunchiness = 0;
 
                 if (itemstack.getUseAnimation() == UseAnim.DRINK) {//thats how liquid works.
-                    if (dh.vrPlayer.vrdata_room_pre.getController(c).getCustomVector(new Vec3(0, 1, 0)).y > 0) {
+                    if (dh.vrPlayer.vrdata_room_pre.getController(c).getCustomVector(new Vector3f(0, 1, 0)).y > 0) {
                         continue;
                     }
                 } else if (itemstack.getUseAnimation() == UseAnim.EAT) {

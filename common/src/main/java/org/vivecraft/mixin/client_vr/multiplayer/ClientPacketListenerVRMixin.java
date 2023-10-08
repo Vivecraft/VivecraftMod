@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -100,7 +101,7 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
             }
 
             if (dh.vrSettings.chatNotifications == ChatNotifications.SOUND || dh.vrSettings.chatNotifications == ChatNotifications.BOTH) {
-                Vec3 vec3 = dh.vrPlayer.vrdata_world_pre.getController(1).getPosition();
+                Vector3f vec3 = dh.vrPlayer.vrdata_world_pre.getController(1).getPosition(new Vector3f());
                 mc.level.playLocalSound(vec3.x(), vec3.y(), vec3.z(), BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation(dh.vrSettings.chatNotificationSound)), SoundSource.NEUTRAL, 0.3F, 0.1F, false);
             }
         }

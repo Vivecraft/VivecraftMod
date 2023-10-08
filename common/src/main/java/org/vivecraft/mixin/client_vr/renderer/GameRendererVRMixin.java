@@ -20,6 +20,7 @@ import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,6 +51,8 @@ import java.nio.file.Path;
 
 import static org.joml.Math.*;
 import static org.vivecraft.client_vr.VRState.*;
+import static org.vivecraft.common.utils.Utils.convertToVec3;
+import static org.vivecraft.common.utils.Utils.convertToVector3f;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererVRMixin
@@ -57,8 +60,10 @@ public abstract class GameRendererVRMixin
 
     @Unique
     public float vivecraft$minClipDistance = 0.02F;
+
+    // TODO: @Nonnull and remove @CheckForNull
     @Unique
-    public Vec3 vivecraft$crossVec;
+    public Vector3f vivecraft$crossVec;
     @Unique
     public Matrix4f vivecraft$thirdPassProjectionMatrix = new Matrix4f();
     @Unique
@@ -195,8 +200,10 @@ public abstract class GameRendererVRMixin
             return original;
         }
         mc.hitResult = dh.vrPlayer.rayTraceBlocksVR(dh.vrPlayer.vrdata_world_render, 0, mc.gameMode.getPickRange(), false);
-        this.vivecraft$crossVec = dh.vrPlayer.AimedPointAtDistance(dh.vrPlayer.vrdata_world_render, 0, mc.gameMode.getPickRange());
-        return dh.vrPlayer.vrdata_world_render.getController(0).getPosition();
+        Vector3f dest = new Vector3f();
+        this.vivecraft$getCrossVec(dest);
+        this.vivecraft$crossVec = dh.vrPlayer.AimedPointAtDistance(dh.vrPlayer.vrdata_world_render, 0, mc.gameMode.getPickRange(), dest);
+        return convertToVec3(dh.vrPlayer.vrdata_world_render.getController(0).getPosition(new Vector3f()));
     }
 
     @ModifyVariable(at = @At("STORE"), method = "pick(F)V", ordinal = 1)
@@ -204,7 +211,7 @@ public abstract class GameRendererVRMixin
         if (!vrRunning) {
             return original;
         }
-        return dh.vrPlayer.vrdata_world_render.getController(0).getDirection();
+        return convertToVec3(dh.vrPlayer.vrdata_world_render.getController(0).getDirection(new Vector3f()));
     }
 
     //TODO Vivecraft add riding check in case your hand is somewhere inappropriate
@@ -268,7 +275,7 @@ public abstract class GameRendererVRMixin
                     posestack.scale(this.zoom, this.zoom, 1.0F);
                 }
                 yield view.perspective(
-                    (float) toRadians(d),
+                    toRadians((float) d),
                     (float) mc.getWindow().getScreenWidth() / (float) mc.getWindow().getScreenHeight(),
                     0.05F,
                     this.vivecraft$clipDistance
@@ -468,7 +475,9 @@ public abstract class GameRendererVRMixin
             this.pick(pPartialTicks);
 
             if (mc.hitResult != null && mc.hitResult.getType() != Type.MISS) {
-                this.vivecraft$crossVec = mc.hitResult.getLocation();
+                Vector3f dest = new Vector3f();
+                this.vivecraft$getCrossVec(dest);
+                this.vivecraft$crossVec = convertToVector3f(mc.hitResult.getLocation(), dest);
             }
 
             if (mc.screen == null) {
@@ -539,7 +548,7 @@ public abstract class GameRendererVRMixin
     public void vivecraft$setupRVE() {
         if (this.vivecraft$cached) {
             VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass);
-            Vec3 vec3 = vrdata$vrdevicepose.getPosition();
+            Vector3f vec3 = vrdata$vrdevicepose.getPosition(new Vector3f());
             LivingEntity livingentity = (LivingEntity) mc.getCameraEntity();
             livingentity.setPosRaw(vec3.x, vec3.y, vec3.z);
             livingentity.xOld = vec3.x;
@@ -611,8 +620,8 @@ public abstract class GameRendererVRMixin
 
     @Override
     @Unique
-    public Vec3 vivecraft$getRvePos(float partialTicks) {
-        return new Vec3(
+    public Vector3f vivecraft$getRvePos(float partialTicks, Vector3f dest) {
+        return dest.set(
             lerp(this.vivecraft$rvelastX, this.vivecraft$rveX, partialTicks),
             lerp(this.vivecraft$rvelastY, this.vivecraft$rveY, partialTicks),
             lerp(this.vivecraft$rvelastZ, this.vivecraft$rveZ, partialTicks)
@@ -626,8 +635,7 @@ public abstract class GameRendererVRMixin
         this.vivecraft$onfire = false;
 
         if (!mc.player.isSpectator() && !this.vivecraft$isInMenuRoom() && mc.player.isAlive()) {
-            Vec3 vec3 = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition();
-            Triple<Float, BlockState, BlockPos> triple = VREffectsHelper.getNearOpaqueBlock(vec3, this.vivecraft$minClipDistance);
+            Triple<Float, BlockState, BlockPos> triple = VREffectsHelper.getNearOpaqueBlock(dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition(new Vector3f()), this.vivecraft$minClipDistance);
 
             if (triple != null && !Xevents.renderBlockOverlay(mc.player, new PoseStack(), triple.getMiddle(), triple.getRight())) {
                 this.vivecraft$inBlock = triple.getLeft();
@@ -704,8 +712,8 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     @CheckForNull
-    public Vec3 vivecraft$getCrossVec() {
-        return this.vivecraft$crossVec;
+    public Vector3f vivecraft$getCrossVec(Vector3f dest) {
+        return this.vivecraft$crossVec != null ? dest.set(this.vivecraft$crossVec) : null;
     }
 
     @Override

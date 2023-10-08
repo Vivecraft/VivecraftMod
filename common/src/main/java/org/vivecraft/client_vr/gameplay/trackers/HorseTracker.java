@@ -48,16 +48,16 @@ public class HorseTracker extends Tracker {
         Quaternionf quaternion = new Quaternionf().setAngleAxis(-this.horse.yBodyRot, 0.0F, 1.0F, 0.0F)
             .mul(new Quaternionf().setAngleAxis(0.0F, 1.0F, 0.0F, 0.0F), new Quaternionf())
             .mul(new Quaternionf().setAngleAxis(0.0F, 0.0F, 0.0F, 1.0F), new Quaternionf());
-        Vec3 vec32 = convertToVec3(quaternion.transformUnit(forward, new Vector3f()));
-        Vec3 vec33 = convertToVec3(quaternion.transformUnit(right, new Vector3f()));
-        Vec3 vec34 = convertToVec3(quaternion.transformUnit(left, new Vector3f()));
+        Vector3f vec32 = quaternion.transformUnit(forward, new Vector3f());
+        Vector3f vec33 = quaternion.transformUnit(right, new Vector3f());
+        Vector3f vec34 = quaternion.transformUnit(left, new Vector3f());
         Quaternionf quaternion1 = new Quaternionf().setAngleAxis(toRadians(dh.vrSettings.worldRotation), 0.0F, 1.0F, 0.0F)
             .mul(new Quaternionf().setAngleAxis(0.0F, 1.0F, 0.0F, 0.0F), new Quaternionf())
             .mul(new Quaternionf().setAngleAxis(0.0F, 0.0F, 0.0F, 1.0F), new Quaternionf());
-        Vec3 vec35 = dh.vrPlayer.roomOrigin.add(convertToVec3(quaternion1.transformUnit(dh.vr.controllerHistory[1].latest(new Vector3f()), new Vector3f())));
-        Vec3 vec36 = dh.vrPlayer.roomOrigin.add(convertToVec3(quaternion1.transformUnit(dh.vr.controllerHistory[0].latest(new Vector3f()), new Vector3f())));
-        double d1 = vec35.subtract(this.info.leftReinPos).dot(vec32) + vec35.subtract(this.info.leftReinPos).dot(vec33);
-        double d2 = vec36.subtract(this.info.rightReinPos).dot(vec32) + vec36.subtract(this.info.rightReinPos).dot(vec34);
+        Vector3f vec35 = dh.vrPlayer.roomOrigin.add(quaternion1.transformUnit(dh.vr.controllerHistory[1].latest(new Vector3f()))).sub(this.info.leftReinPos);
+        Vector3f vec36 = dh.vrPlayer.roomOrigin.add(quaternion1.transformUnit(dh.vr.controllerHistory[0].latest(new Vector3f()))).sub(this.info.rightReinPos);
+        double d1 = vec35.dot(vec32) + vec35.dot(vec33);
+        double d2 = vec36.dot(vec32) + vec36.dot(vec34);
 
         if (this.speedLevel < 0) {
             this.speedLevel = 0;
@@ -123,7 +123,7 @@ public class HorseTracker extends Tracker {
     }
 
     public static class ModelInfo {
-        public Vec3 leftReinPos = Vec3.ZERO;
-        public Vec3 rightReinPos = Vec3.ZERO;
+        public Vector3f leftReinPos = new Vector3f();
+        public Vector3f rightReinPos = new Vector3f();
     }
 }

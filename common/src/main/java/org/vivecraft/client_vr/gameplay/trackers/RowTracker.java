@@ -9,8 +9,7 @@ import org.joml.Vector3f;
 import static org.joml.Math.*;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
-import static org.vivecraft.common.utils.Utils.backward;
-import static org.vivecraft.common.utils.Utils.convertToVec3;
+import static org.vivecraft.common.utils.Utils.*;
 
 public class RowTracker extends Tracker {
     Vec3[] lastUWPs = new Vec3[2];
@@ -91,12 +90,12 @@ public class RowTracker extends Tracker {
                 this.forces[i] = 0.0D;
                 this.lastUWPs[i] = null;
             } else {
-                Vec3 vec3 = this.getArmToPaddleVector(i, boat);
-                Vec3 vec31 = this.getAttachmentPoint(i, boat);
-                Vec3 vec32 = vec31.add(vec3.normalize()).subtract(boat.position());
+                Vector3f vec32 = this.getAttachmentPoint(i, boat, new Vector3f())
+                    .add(this.getArmToPaddleVector(i, boat, new Vector3f()).normalize())
+                    .sub(convertToVector3f(boat.position(), new Vector3f()));
 
                 if (this.lastUWPs[i] != null) {
-                    Vec3 vec33 = this.lastUWPs[i].subtract(vec32);
+                    Vec3 vec33 = this.lastUWPs[i].subtract(vec32.x, vec32.y, vec32.z);
                     vec33 = vec33.subtract(boat.getDeltaMovement());
                     Vec3 vec34 = convertToVec3(quaternion.transformUnit(new Vector3f(backward)));
                     double d0 = vec33.dot(vec34) * this.transmissionEfficiency / 5.0D;
@@ -108,18 +107,16 @@ public class RowTracker extends Tracker {
                     }
                 }
 
-                this.lastUWPs[i] = vec32;
+                this.lastUWPs[i] = convertToVec3(vec32);
             }
         }
     }
 
-    Vec3 getArmToPaddleVector(int paddle, Boat boat) {
-        Vec3 vec3 = this.getAttachmentPoint(paddle, boat);
-        Vec3 vec31 = this.getAbsArmPos(paddle == 0 ? 1 : 0);
-        return vec3.subtract(vec31);
+    Vector3f getArmToPaddleVector(int paddle, Boat boat, Vector3f dest) {
+        return this.getAttachmentPoint(paddle, boat, dest).sub(this.getAbsArmPos(paddle == 0 ? 1 : 0, new Vector3f()));
     }
 
-    Vec3 getAttachmentPoint(int paddle, Boat boat) {
+    Vector3f getAttachmentPoint(int paddle, Boat boat, Vector3f dest) {
         Quaternionf quaternion = new Quaternionf().setAngleAxis(-(boat.getYRot() % 360.0F), 0.0F, 1.0F, 0.0F)
             .mul(new Quaternionf().setAngleAxis(boat.getXRot(), 1.0F, 0.0F, 0.0F))
             .mul(new Quaternionf().setAngleAxis(0.0F, 0.0F, 0.0F, 1.0F));
@@ -128,24 +125,25 @@ public class RowTracker extends Tracker {
         } else {
             quaternion.identity();
         }
-        return boat.position().add(convertToVec3(quaternion.transformUnit(new Vector3f(
+        return convertToVector3f(boat.position(), dest).add(quaternion.transformUnit(new Vector3f(
             (paddle == 0 ? 9.0F : -9.0F) / 16.0F, 0.625F, 0.1875F)
-        )));
-    }
-
-    Vec3 getAbsArmPos(int side) {
-        return dh.vrPlayer.roomOrigin.add(convertToVec3(
-            new Quaternionf().setAngleAxis(toRadians(dh.vrSettings.worldRotation), 0.0F, 1.0F, 0.0F)
-                .mul(new Quaternionf().setAngleAxis(0.0F, 1.0F, 0.0F, 0.0F))
-                .mul(new Quaternionf().setAngleAxis(0.0F, 0.0F, 0.0F, 1.0F))
-                .transformUnit(dh.vr.controllerHistory[side].averagePosition(0.1D, new Vector3f()))
         ));
     }
 
+    Vector3f getAbsArmPos(int side, Vector3f dest) {
+        return dh.vrPlayer.roomOrigin.add(
+            new Quaternionf().setAngleAxis(toRadians(dh.vrSettings.worldRotation), 0.0F, 1.0F, 0.0F)
+                .mul(new Quaternionf().setAngleAxis(0.0F, 1.0F, 0.0F, 0.0F))
+                .mul(new Quaternionf().setAngleAxis(0.0F, 0.0F, 0.0F, 1.0F))
+                .transformUnit(dh.vr.controllerHistory[side].averagePosition(0.1D, dest))
+        );
+    }
+
     boolean isPaddleUnderWater(int paddle, Boat boat) {
-        Vec3 vec3 = this.getAttachmentPoint(paddle, boat);
-        Vec3 vec31 = this.getArmToPaddleVector(paddle, boat).normalize();
-        BlockPos blockpos = BlockPos.containing(vec3.add(vec31));
+        Vector3f vec3 = this.getAttachmentPoint(paddle, boat, new Vector3f());
+        Vector3f vec31 = this.getArmToPaddleVector(paddle, boat, new Vector3f()).normalize();
+        vec3.add(vec31);
+        BlockPos blockpos = BlockPos.containing(vec3.x, vec3.y, vec3.z);
         // TODO: liquid is deprecated
         return boat.level().getBlockState(blockpos).liquid();
     }

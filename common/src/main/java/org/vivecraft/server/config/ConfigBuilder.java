@@ -3,7 +3,6 @@ package org.vivecraft.server.config;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.ConfigSpec.CorrectionListener;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -12,6 +11,8 @@ import org.vivecraft.client.gui.widgets.SettingsList.ResettableEntry;
 
 import java.util.*;
 import java.util.function.Predicate;
+
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class ConfigBuilder {
 
@@ -285,7 +286,7 @@ public class ConfigBuilder {
 
         @Override
         public AbstractWidget getWidget(int width, int height) {
-            EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, width - 1, height, Component.literal(get())) {
+            EditBox box = new EditBox(mc.font, 0, 0, width - 1, height, Component.literal(get())) {
                 @Override
                 public boolean charTyped(char c, int i) {
                     boolean ret = super.charTyped(c, i);
@@ -318,10 +319,10 @@ public class ConfigBuilder {
             return Button
                 .builder(
                     Component.translatable("vivecraft.options.editlist"),
-                    button -> Minecraft.getInstance()
-                        .setScreen(
-                            new GuiListValueEditScreen(Component.literal(getPath().substring(getPath().lastIndexOf("."))), Minecraft.getInstance().screen, (ListValue<String>) this)
-                        ))
+                    button -> mc.setScreen(
+                        new GuiListValueEditScreen(Component.literal(getPath().substring(getPath().lastIndexOf("."))), mc.screen, (ListValue<String>) this)
+                    )
+                )
                 .size(width, height)
                 .tooltip(Tooltip.create(Component.literal(getComment())))
                 .build();

@@ -12,9 +12,8 @@ import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.BlockTags;
@@ -28,7 +27,7 @@ import java.util.*;
 import static org.joml.Math.min;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
-import static org.vivecraft.common.utils.Utils.convertToVec3;
+import static org.vivecraft.common.utils.Utils.convertToVector3f;
 
 public class ClimbTracker extends Tracker {
     private boolean[] latched = new boolean[2];
@@ -39,9 +38,12 @@ public class ClimbTracker extends Tracker {
     public byte serverblockmode = 0;
     private boolean gravityOverride = false;
     public boolean forceActivate = false;
-    public Vec3[] latchStart = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
-    public Vec3[] latchStart_room = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
-    public Vec3[] latchStartBody = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
+    public final Vector3f latchStartc0 = new Vector3f();
+    public final Vector3f latchStartc1 = new Vector3f();
+    public final Vector3f latchStart_roomc0 = new Vector3f();
+    public final Vector3f latchStart_roomc1 = new Vector3f();
+    public final Vector3f latchStartBodyc0 = new Vector3f();
+    public final Vector3f latchStartBodyc1 = new Vector3f();
     public int latchStartController = -1;
     boolean wantjump = false;
     AABB[] box = new AABB[2];
@@ -164,17 +166,29 @@ public class ClimbTracker extends Tracker {
     public void doProcess() {
         boolean[] aboolean = new boolean[2];
         boolean[] aboolean1 = new boolean[2];
-        Vec3[] avec3 = new Vec3[2];
+        Vector3f[] avec3 = new Vector3f[2];
         boolean flag = false;
         boolean flag1 = false;
         boolean flag2 = false;
         boolean flag3 = false;
 
         for (int i = 0; i < 2; ++i) {
-            avec3[i] = dh.vrPlayer.vrdata_world_pre.getController(i).getPosition();
-            Vec3 vec3 = dh.vrPlayer.vrdata_world_pre.getController(i).getDirection();
+            final Vector3f latchStart;
+            final Vector3f latchStartRoom;
+            final Vector3f latchStartBody;
+            if (i == 0) {
+                latchStart = latchStartc0;
+                latchStartRoom = latchStart_roomc0;
+                latchStartBody = latchStartBodyc0;
+            } else {
+                latchStart = latchStartc1;
+                latchStartRoom = latchStart_roomc1;
+                latchStartBody = latchStartBodyc1;
+            }
+            avec3[i] = dh.vrPlayer.vrdata_world_pre.getController(i).getPosition(new Vector3f());
+            Vector3f vec3 = dh.vrPlayer.vrdata_world_pre.getController(i).getDirection(new Vector3f());
             this.inblock[i] = false;
-            BlockPos blockpos = BlockPos.containing(avec3[i]);
+            BlockPos blockpos = BlockPos.containing(avec3[i].x(), avec3[i].y(), avec3[i].z());
             BlockState blockstate = mc.level.getBlockState(blockpos);
             Block block = blockstate.getBlock();
             VoxelShape voxelshape = blockstate.getCollisionShape(mc.level, blockpos);
@@ -186,13 +200,13 @@ public class ClimbTracker extends Tracker {
             }
 
             if (!dh.climbTracker.isClimbeyClimb()) {
-                Vec3 vec31 = dh.vrPlayer.vrdata_world_pre.getController(i).getPosition().subtract(vec3.scale(0.2D));
-                AABB aabb = new AABB(avec3[i], vec31);
+                Vector3f vec31 = dh.vrPlayer.vrdata_world_pre.getController(i).getPosition(new Vector3f()).sub(vec3.mul(0.2F, new Vector3f()));
+                AABB aabb = new AABB(avec3[i].x(), avec3[i].y(), avec3[i].z(), vec31.x(), vec31.y(), vec31.z());
                 flag3 = true;
                 boolean flag4 = block instanceof LadderBlock || block instanceof VineBlock || blockstate.is(BlockTags.VIVECRAFT_CLIMBABLE);
 
                 if (!flag4) {
-                    BlockPos blockpos1 = BlockPos.containing(vec31);
+                    BlockPos blockpos1 = BlockPos.containing(vec31.x(), vec31.y(), vec31.z());
                     BlockState blockstate1 = mc.level.getBlockState(blockpos1);
                     Block block1 = blockstate1.getBlock();
 
@@ -282,13 +296,12 @@ public class ClimbTracker extends Tracker {
                         }
                     }
                 } else {
-                    Vec3 vec311 = this.latchStart[i].subtract(avec3[i]);
-                    double d9 = vec311.length();
+                    double d9 = latchStart.sub(avec3[i], new Vector3f()).length();
 
                     if (d9 > 0.5D) {
                         this.inblock[i] = false;
                     } else {
-                        BlockPos blockpos5 = BlockPos.containing(this.latchStart[i]);
+                        BlockPos blockpos5 = BlockPos.containing(latchStart.x, latchStart.y, latchStart.z);
                         BlockState blockstate2 = mc.level.getBlockState(blockpos5);
                         this.inblock[i] = this.wasinblock[i] && blockstate2.getBlock() instanceof LadderBlock || blockstate2.getBlock() instanceof VineBlock || blockstate2.is(BlockTags.VIVECRAFT_CLIMBABLE);
                     }
@@ -307,13 +320,12 @@ public class ClimbTracker extends Tracker {
                     aboolean[i] = VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.LEFT);
                 }
 
-                this.inblock[i] = this.box[i] != null && this.box[i].move(blockpos).contains(avec3[i]);
+                this.inblock[i] = this.box[i] != null && this.box[i].move(blockpos).contains(avec3[i].x, avec3[i].y, avec3[i].z);
 
                 if (!this.inblock[i]) {
-                    Vec3 vec310 = this.latchStart[i].subtract(avec3[i]);
-                    double d7 = vec310.length();
+                    Vector3f vec310 = latchStart.sub(avec3[i], new Vector3f());
 
-                    if (d7 > 0.5D) {
+                    if (vec310.length() > 0.5F) {
                         aboolean[i] = false;
                     }
                 }
@@ -343,9 +355,9 @@ public class ClimbTracker extends Tracker {
                 if (!this.wasinblock[i] && this.inblock[i] && aboolean[i] || !this.wasbutton[i] && aboolean[i] && this.inblock[i]) {
                     flag1 = true;
                     this.wantjump = false;
-                    this.latchStart[i] = avec3[i];
-                    this.latchStart_room[i] = dh.vrPlayer.vrdata_room_pre.getController(i).getPosition();
-                    this.latchStartBody[i] = mc.player.position();
+                    latchStart.set(avec3[i]);
+                    dh.vrPlayer.vrdata_room_pre.getController(i).getPosition(latchStartRoom);
+                    convertToVector3f(mc.player.position(), latchStartBody);
                     this.latchStartController = i;
                     this.latchbox[i] = this.box[i];
                     this.latched[i] = true;
@@ -358,10 +370,10 @@ public class ClimbTracker extends Tracker {
                     }
 
                     dh.vr.triggerHapticPulse(i, 2000);
-                    ((PlayerExtension) mc.player).vivecraft$stepSound(blockpos, this.latchStart[i].x(), this.latchStart[i].y(), this.latchStart[i].z());
+                    ((PlayerExtension) mc.player).vivecraft$stepSound(blockpos, latchStart.x(), latchStart.y(), latchStart.z());
 
                     if (!flag3) {
-                        dh.vrPlayer.blockDust(this.latchStart[i].x(), this.latchStart[i].y(), this.latchStart[i].z(), 5, blockpos, blockstate, 0.1F, 0.2F);
+                        dh.vrPlayer.blockDust(latchStart.x(), latchStart.y(), latchStart.z(), 5, blockpos, blockstate, 0.1F, 0.2F);
                     }
                 }
             }
@@ -374,19 +386,26 @@ public class ClimbTracker extends Tracker {
             for (int k = 0; k < 2; ++k) {
                 if (this.inblock[k] && aboolean[k] && aboolean1[k]) {
                     flag1 = true;
-                    this.latchStart[k] = avec3[k];
-                    this.latchStart_room[k] = dh.vrPlayer.vrdata_room_pre.getController(k).getPosition();
-                    this.latchStartBody[k] = mc.player.position();
+                    final Vector3f latchStart;
+                    if (k == 0) {
+                        latchStart = latchStartc0.set(avec3[k]);
+                        dh.vrPlayer.vrdata_room_pre.getController(k).getPosition(latchStart_roomc0);
+                        convertToVector3f(mc.player.position(), latchStartBodyc0);
+                    } else {
+                        latchStart = latchStartc1.set(avec3[k]);
+                        dh.vrPlayer.vrdata_room_pre.getController(k).getPosition(latchStart_roomc1);
+                        convertToVector3f(mc.player.position(), latchStartBodyc1);
+                    }
                     this.latchStartController = k;
                     this.latched[k] = true;
                     this.latchbox[k] = this.box[k];
                     this.wantjump = false;
                     dh.vr.triggerHapticPulse(k, 2000);
-                    BlockPos blockpos4 = BlockPos.containing(this.latchStart[k]);
+                    BlockPos blockpos4 = BlockPos.containing(latchStart.x, latchStart.y, latchStart.z);
                     BlockState blockstate4 = mc.level.getBlockState(blockpos4);
 
                     if (!flag3) {
-                        dh.vrPlayer.blockDust(this.latchStart[k].x, this.latchStart[k].y, this.latchStart[k].z, 5, blockpos4, blockstate4, 0.1F, 0.2F);
+                        dh.vrPlayer.blockDust(latchStart.x, latchStart.y, latchStart.z, 5, blockpos4, blockstate4, 0.1F, 0.2F);
                     }
                 }
             }
@@ -418,27 +437,34 @@ public class ClimbTracker extends Tracker {
 
             this.latchStartController = -1;
         } else {
+            final Vector3f latchStart;
+            final Vector3f latchStartRoom;
+            final Vector3f latchStartBody;
+            if (latchStartController == 0) {
+                latchStart = latchStartc0;
+                latchStartRoom = latchStart_roomc0;
+            } else {
+                latchStart = latchStartc1;
+                latchStartRoom = latchStart_roomc1;
+            }
             if ((this.latched[0] || this.latched[1]) && this.rand.nextInt(20) == 10) {
                 mc.player.causeFoodExhaustion(0.1F);
-                BlockPos blockpos3 = BlockPos.containing(this.latchStart[this.latchStartController]);
+                BlockPos blockpos3 = BlockPos.containing(latchStart.x, latchStart.y, latchStart.z);
                 BlockState blockstate3 = mc.level.getBlockState(blockpos3);
 
                 if (!flag3) {
-                    dh.vrPlayer.blockDust(this.latchStart[this.latchStartController].x, this.latchStart[this.latchStartController].y, this.latchStart[this.latchStartController].z, 1, blockpos3, blockstate3, 0.1F, 0.2F);
+                    dh.vrPlayer.blockDust(latchStart.x, latchStart.y, latchStart.z, 1, blockpos3, blockstate3, 0.1F, 0.2F);
                 }
             }
 
-            Vec3 vec34 = dh.vrPlayer.vrdata_world_pre.getController(this.latchStartController).getPosition();
-            Vec3 vec35 = VRPlayer.room_to_world_pos(this.latchStart_room[this.latchStartController], dh.vrPlayer.vrdata_world_pre);
-            Vec3 vec36 = vec34.subtract(vec35);
-            this.latchStart_room[this.latchStartController] = dh.vrPlayer.vrdata_room_pre.getController(this.latchStartController).getPosition();
+            Vector3f vec36 = dh.vrPlayer.vrdata_world_pre.getController(this.latchStartController).getPosition(new Vector3f()).sub(VRPlayer.room_to_world_pos(latchStartRoom, dh.vrPlayer.vrdata_world_pre, new Vector3f()));
+            dh.vrPlayer.vrdata_room_pre.getController(this.latchStartController).getPosition(latchStartRoom);
 
             if (this.wantjump) {
                 dh.vr.triggerHapticPulse(this.latchStartController, 200);
             }
 
             if (!flag2) {
-                Vec3 vec37 = this.latchStart[this.latchStartController];
 
                 if (flag1) {
                     mc.player.setDeltaMovement(0.0D, 0.0D, 0.0D);
@@ -453,7 +479,7 @@ public class ClimbTracker extends Tracker {
                 double d10 = d4;
                 double d0 = d8;
                 double d11 = d6 - vec36.y;
-                BlockPos blockpos2 = BlockPos.containing(vec37);
+                BlockPos blockpos2 = BlockPos.containing(latchStart.x, latchStart.y, latchStart.z);
 
                 if (!flag3) {
                     d10 = d4 - vec36.x;
@@ -474,18 +500,19 @@ public class ClimbTracker extends Tracker {
                     }
                 }
 
-                double d12 = dh.vrPlayer.vrdata_room_pre.getHeadPivot().y;
-                double d1 = dh.vrPlayer.vrdata_room_pre.getController(this.latchStartController).getPosition().y;
+                double d12 = dh.vrPlayer.vrdata_room_pre.getHeadPivot(new Vector3f()).y;
+                double d1 = dh.vrPlayer.vrdata_room_pre.getController(this.latchStartController).getPosition(new Vector3f()).y;
 
-                if (!this.wantjump && this.latchbox[this.latchStartController] != null && d1 <= d12 / 2.0D && this.latchStart[this.latchStartController].y > this.latchbox[this.latchStartController].maxY * 0.8D + (double) blockpos2.getY()) {
-                    Vec3 vec32 = dh.vrPlayer.vrdata_world_pre.hmd.getDirection().scale(0.1F);
-                    Vec3 vec33 = (new Vec3(vec32.x, 0.0D, vec32.z)).normalize().scale(0.1D);
-                    boolean flag5 = mc.level.noCollision(mc.player, mc.player.getBoundingBox().move(vec33.x, this.latchbox[this.latchStartController].maxY + (double) blockpos2.getY() - mc.player.getY(), vec33.z));
+                if (!this.wantjump && this.latchbox[this.latchStartController] != null && d1 <= d12 / 2.0D && latchStart.y > this.latchbox[this.latchStartController].maxY * 0.8D + (double) blockpos2.getY()) {
+                    Vector3f vec32 = dh.vrPlayer.vrdata_world_pre.hmd.getDirection(new Vector3f()).mul(0.1F);
+                    vec32.y = 0;
+                    vec32.normalize().mul(0.1F);
+                    boolean flag5 = mc.level.noCollision(mc.player, mc.player.getBoundingBox().move(vec32.x, this.latchbox[this.latchStartController].maxY + (double) blockpos2.getY() - mc.player.getY(), vec32.z));
 
                     if (flag5) {
-                        d10 = mc.player.getX() + vec33.x;
+                        d10 = mc.player.getX() + vec32.x;
                         d11 = this.latchbox[this.latchStartController].maxY + (double) blockpos2.getY();
-                        d0 = mc.player.getZ() + vec33.z;
+                        d0 = mc.player.getZ() + vec32.z;
                         this.latchStartController = -1;
                         this.latched[0] = false;
                         this.latched[1] = false;
@@ -569,27 +596,30 @@ public class ClimbTracker extends Tracker {
                 }
             } else {
                 this.wantjump = false;
-                Vec3 vec38 = mc.player.position().subtract(vec36);
-                Vec3 vec39 = convertToVec3(dh.vr.controllerHistory[this.latchStartController].netMovement(0.3D, new Vector3d()));
-                double d5 = dh.vr.controllerHistory[this.latchStartController].averageSpeed(0.3D);
-                vec39 = vec39.scale(0.66D * d5);
+                Vector3f vec38 = convertToVector3f(mc.player.position(), new Vector3f()).sub(vec36);
+                Vector3f vec39 = dh.vr.controllerHistory[this.latchStartController].netMovement(0.3F, new Vector3f());
+                float d5 = dh.vr.controllerHistory[this.latchStartController].averageSpeed(0.3F);
+                vec39.mul(0.66F * d5);
                 float f = 0.66F;
 
-                if (vec39.length() > (double) f) {
-                    vec39 = vec39.scale((double) f / vec39.length());
+                if (vec39.length() > f) {
+                    vec39.mul(f / vec39.length());
                 }
 
                 if (mc.player.hasEffect(MobEffects.JUMP)) {
-                    vec39 = vec39.scale((double) mc.player.getEffect(MobEffects.JUMP).getAmplifier() + 1.5D);
+                    vec39.mul(mc.player.getEffect(MobEffects.JUMP).getAmplifier() + 1.5F);
                 }
 
-                vec39 = vec39.yRot(dh.vrPlayer.vrdata_world_pre.rotation_radians);
-                mc.player.setDeltaMovement(vec39.multiply(-1.0D, -1.0D, -1.0D));
+                vec39.rotateY(dh.vrPlayer.vrdata_world_pre.rotation_radians);
+                mc.player.setDeltaMovement(-vec39.x, -vec39.y, -vec39.z);
                 mc.player.xOld = vec38.x;
                 mc.player.yOld = vec38.y;
                 mc.player.zOld = vec38.z;
-                vec38 = vec38.add(mc.player.getDeltaMovement().x, mc.player.getDeltaMovement().y, mc.player.getDeltaMovement().z);
-                mc.player.setPos(vec38.x, vec38.y, vec38.z);
+                mc.player.setPos(
+                    vec38.x + mc.player.getDeltaMovement().x,
+                    vec38.y + mc.player.getDeltaMovement().y,
+                    vec38.z + mc.player.getDeltaMovement().z
+                );
                 dh.vrPlayer.snapRoomOriginToPlayerEntity(false, false);
                 mc.player.causeFoodExhaustion(0.3F);
             }

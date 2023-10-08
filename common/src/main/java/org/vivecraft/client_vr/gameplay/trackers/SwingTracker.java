@@ -17,6 +17,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.BlockTags;
 import org.vivecraft.client_vr.ItemTags;
@@ -30,16 +32,21 @@ import java.util.List;
 import static org.joml.Math.min;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.*;
 
 public class SwingTracker extends Tracker {
-    private Vec3[] lastWeaponEndAir = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
-    private boolean[] lastWeaponSolid = new boolean[2];
-    public Vec3[] miningPoint = new Vec3[2];
-    public Vec3[] attackingPoint = new Vec3[2];
-    public Vec3History[] tipHistory = new Vec3History[]{new Vec3History(), new Vec3History()};
-    public boolean[] canact = new boolean[2];
+    private final Vector3f lastWeaponEndAirc0 = new Vector3f();
+    private final Vector3f lastWeaponEndAirc1 = new Vector3f();
+    private final boolean[] lastWeaponSolid = new boolean[2];
+    public final Vector3f miningPointc0 = new Vector3f();
+    public final Vector3f miningPointc1 = new Vector3f();
+    public final Vector3f attackingPointc0 = new Vector3f();
+    public final Vector3f attackingPointc1 = new Vector3f();
+
+    public final Vec3History tipHistoryc0 = new Vec3History();
+    public final Vec3History tipHistoryc1 = new Vec3History();
+    public final boolean[] canact = new boolean[2];
     public int disableSwing = 3;
-    Vec3 forward = new Vec3(0.0D, 0.0D, -1.0D);
     double speedthresh = 3.0D;
 
     @Override
@@ -91,9 +98,24 @@ public class SwingTracker extends Tracker {
         mc.getProfiler().push("updateSwingAttack");
 
         for (int i = 0; i < 2; ++i) {
+            final Vector3f miningPoint;
+            final Vector3f lastWeaponEndAir;
+            final Vector3f attackingPoint;
+            final Vec3History tipHistory;
+            if (i == 0){
+                miningPoint = miningPointc0;
+                lastWeaponEndAir = lastWeaponEndAirc0;
+                attackingPoint = attackingPointc0;
+                tipHistory = tipHistoryc0;
+            } else {
+                miningPoint = miningPointc1;
+                lastWeaponEndAir = lastWeaponEndAirc1;
+                attackingPoint = attackingPointc1;
+                tipHistory = tipHistoryc1;
+            }
             if (!dh.climbTracker.isGrabbingLadder(i)) {
-                Vec3 vec3 = dh.vrPlayer.vrdata_world_pre.getController(i).getPosition();
-                Vec3 vec31 = dh.vrPlayer.vrdata_world_pre.getHand(i).getCustomVector(this.forward);
+                Vector3fc vec3 = dh.vrPlayer.vrdata_world_pre.getController(i).getPosition(new Vector3f());
+                Vector3fc vec31 = dh.vrPlayer.vrdata_world_pre.getHand(i).getCustomVector(new Vector3f(forward));
                 ItemStack itemstack = mc.player.getItemInHand(i == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                 Item item = itemstack.getItem();
                 boolean flag = false;
@@ -128,30 +150,30 @@ public class SwingTracker extends Tracker {
                 }
 
                 f *= dh.vrPlayer.vrdata_world_pre.worldScale;
-                this.miningPoint[i] = vec3.add(vec31.scale(f));
-                this.tipHistory[i].add(
-                    dh.vrPlayer.vrdata_room_pre.getController(i).getPosition().add(
-                        dh.vrPlayer.vrdata_room_pre.getHand(i).getCustomVector(this.forward).scale(0.3D)
+                vec3.add(vec31.mul(f, new Vector3f()), miningPoint);
+                tipHistory.add(
+                    dh.vrPlayer.vrdata_room_pre.getController(i).getPosition(new Vector3f()).add(
+                        dh.vrPlayer.vrdata_room_pre.getHand(i).getCustomVector(new Vector3f(forward)).mul(0.3F)
                     )
                 );
-                float f2 = (float) this.tipHistory[i].averageSpeed(0.33D);
+                float f2 = tipHistory.averageSpeed(0.33F);
                 boolean flag2 = false;
                 this.canact[i] = (double) f2 > this.speedthresh && !this.lastWeaponSolid[i];
                 boolean flag3 = this.canact[i];
 
                 if (flag3) {
-                    BlockHitResult blockhitresult = mc.level.clip(new ClipContext(dh.vrPlayer.vrdata_world_pre.hmd.getPosition(), vec3, Block.OUTLINE, Fluid.NONE, mc.player));
+                    BlockHitResult blockhitresult = mc.level.clip(new ClipContext(convertToVec3(dh.vrPlayer.vrdata_world_pre.hmd.getPosition(new Vector3f())), convertToVec3(vec3), Block.OUTLINE, Fluid.NONE, mc.player));
 
                     if (blockhitresult.getType() != Type.MISS) {
                         flag3 = false;
                     }
                 }
 
-                this.attackingPoint[i] = this.constrain(vec3, this.miningPoint[i]);
-                Vec3 vec33 = vec3.add(vec31.scale(f + f1));
-                vec33 = this.constrain(vec3, vec33);
-                AABB aabb = new AABB(vec3, this.attackingPoint[i]);
-                AABB aabb1 = new AABB(vec3, vec33);
+                this.constrain(vec3, miningPoint, attackingPoint);
+                Vector3f vec33 = vec31.mul(f + f1, new Vector3f()).add(vec3);
+                this.constrain(vec3, vec33, vec33);
+                AABB aabb = new AABB(convertToVec3(vec3), convertToVec3(attackingPoint));
+                AABB aabb1 = new AABB(convertToVec3(vec3), convertToVec3(vec33));
                 List<Entity> list = mc.level.getEntities(mc.player, aabb1);
                 list.removeIf((e) -> e instanceof Player);
                 List<Entity> list1 = mc.level.getEntities(mc.player, aabb);
@@ -174,11 +196,11 @@ public class SwingTracker extends Tracker {
                 this.canact[i] = this.canact[i] && !flag1 && !flag2;
 
                 if (!dh.climbTracker.isClimbeyClimb() || (i != 0 || !VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.RIGHT)) && flag && (i != 1 || !VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.LEFT)) && flag) {
-                    BlockPos blockpos = BlockPos.containing(this.miningPoint[i]);
+                    BlockPos blockpos = BlockPos.containing(miningPoint.x, miningPoint.y, miningPoint.z);
                     BlockState blockstate = mc.level.getBlockState(blockpos);
-                    BlockHitResult blockhitresult1 = mc.level.clip(new ClipContext(this.lastWeaponEndAir[i], this.miningPoint[i], Block.OUTLINE, Fluid.NONE, mc.player));
+                    BlockHitResult blockhitresult1 = mc.level.clip(new ClipContext(convertToVec3(lastWeaponEndAir), convertToVec3(miningPoint), Block.OUTLINE, Fluid.NONE, mc.player));
 
-                    if (!blockstate.isAir() && blockhitresult1.getType() == Type.BLOCK && this.lastWeaponEndAir[i].length() != 0.0D) {
+                    if (!blockstate.isAir() && blockhitresult1.getType() == Type.BLOCK && lastWeaponEndAir.length() != 0.0F) {
                         this.lastWeaponSolid[i] = true;
                         boolean flag4 = blockhitresult1.getBlockPos().equals(blockpos);
                         boolean flag5 = dh.vrSettings.realisticClimbEnabled && (blockstate.getBlock() instanceof LadderBlock || blockstate.getBlock() instanceof VineBlock || blockstate.is(BlockTags.VIVECRAFT_CLIMBABLE));
@@ -233,7 +255,7 @@ public class SwingTracker extends Tracker {
                             dh.vr.triggerHapticPulse(i, 250 * j);
                         }
                     } else {
-                        this.lastWeaponEndAir[i] = this.miningPoint[i];
+                        lastWeaponEndAir.set(miningPoint);
                         this.lastWeaponSolid[i] = false;
                     }
                 }
@@ -252,9 +274,9 @@ public class SwingTracker extends Tracker {
         // Minecraft.getInstance().gameMode.blockBreakingCooldown = 1;
     }
 
-    public Vec3 constrain(Vec3 start, Vec3 end) {
-        BlockHitResult blockhitresult = mc.level.clip(new ClipContext(start, end, Block.OUTLINE, Fluid.NONE, mc.player));
-        return blockhitresult.getType() == Type.BLOCK ? blockhitresult.getLocation() : end;
+    public Vector3f constrain(Vector3fc start, Vector3fc end, Vector3f dest) {
+        BlockHitResult blockhitresult = mc.level.clip(new ClipContext(convertToVec3(start), convertToVec3(end), Block.OUTLINE, Fluid.NONE, mc.player));
+        return blockhitresult.getType() == Type.BLOCK ? convertToVector3f(blockhitresult.getLocation(), dest) : dest.set(end);
     }
 
     public static float getItemFade(ItemStack is) {

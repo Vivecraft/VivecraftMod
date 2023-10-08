@@ -361,8 +361,8 @@ public class PhysicalKeyboard {
     private KeyButton findTouchedKey(ControllerType controller) {
         Matrix4f matrix4f = new Matrix4f().translate(this.getCenterPos())
             .mul(KeyboardHandler.Rotation_room.invertAffine(new Matrix4f()))
-            .translate(convertToVector3f(KeyboardHandler.Pos_room, new Vector3f()).negate());
-        Vector3f vector = convertToVector3f(dh.vrPlayer.vrdata_room_pre.getController(controller.ordinal()).getPosition(), new Vector3f());
+            .translate(-KeyboardHandler.Pos_room.x(), -KeyboardHandler.Pos_room.y(), -KeyboardHandler.Pos_room.z());
+        Vector3f vector = dh.vrPlayer.vrdata_room_pre.getController(controller.ordinal()).getPosition(new Vector3f());
         matrix4f.transformPosition(vector, vector);
 
         for (KeyButton physicalkeyboard$keybutton : this.keys) {

@@ -5,6 +5,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.BlockHitResult;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,6 +15,7 @@ import org.vivecraft.client.network.ClientNetworking;
 
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.vrRunning;
+import static org.vivecraft.common.utils.Utils.convertToVector3f;
 
 
 @Mixin(net.minecraft.client.multiplayer.MultiPlayerGameMode.class)
@@ -36,7 +38,7 @@ public class MultiPlayerGameModeVRMixin {
     @Inject(at = @At("HEAD"), method = "useItemOn")
     public void vivecraft$overrideUseOn(LocalPlayer localPlayer, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
         if (vrRunning) {
-            ClientNetworking.overrideLook(localPlayer, blockHitResult.getLocation().subtract(localPlayer.getEyePosition(1.0F)).normalize());
+            ClientNetworking.overrideLook(localPlayer, convertToVector3f(blockHitResult.getLocation().subtract(localPlayer.getEyePosition(1.0F)).normalize(), new Vector3f()));
         }
     }
 }

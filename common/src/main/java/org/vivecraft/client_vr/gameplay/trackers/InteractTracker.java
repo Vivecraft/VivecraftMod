@@ -19,6 +19,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.VRData.VRDevicePose;
@@ -36,6 +38,8 @@ import static org.joml.Math.roundUsing;
 import static org.joml.RoundingMode.FLOOR;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.convertToVec3;
+import static org.vivecraft.common.utils.Utils.convertToVector3f;
 
 public class InteractTracker extends Tracker {
     public boolean[] bukkit = new boolean[2];
@@ -150,19 +154,19 @@ public class InteractTracker extends Tracker {
                     this.active[j] = true;
                 }
 
-                Vec3 vec35 = dh.vrPlayer.vrdata_world_pre.getHeadPivot();
-                Vec3 vec3 = dh.vrPlayer.vrdata_world_pre.getController(j).getPosition();
-                Vec3 vec31 = dh.vrPlayer.vrdata_world_pre.getHand(j).getCustomVector(vec34);
+                Vector3f vec35 = dh.vrPlayer.vrdata_world_pre.getHeadPivot(new Vector3f());
+                Vector3f vec3 = dh.vrPlayer.vrdata_world_pre.getController(j).getPosition(new Vector3f());
+                Vector3fc vec31 = dh.vrPlayer.vrdata_world_pre.getHand(j).getCustomVector(convertToVector3f(vec34, new Vector3f()));
                 ItemStack itemstack = mc.player.getItemInHand(j == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                 Item item = null;
 
                 if (!this.active[j] && (dh.vrSettings.displayMirrorMode == MirrorMode.MIXED_REALITY || dh.vrSettings.displayMirrorMode == MirrorMode.THIRD_PERSON) && dh.vrSettings.mixedRealityRenderCameraModel) {
                     VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_world_pre.getEye(RenderPass.THIRD);
-                    Vec3 vec32 = vrdata$vrdevicepose.getPosition();
-                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double) 0.15F * dh.vrPlayer.vrdata_world_pre.worldScale));
-                    vec32 = vec32.subtract(vrdata$vrdevicepose.getCustomVector(new Vec3(0.0D, -1.0D, 0.0D)).scale((double) 0.05F * dh.vrPlayer.vrdata_world_pre.worldScale));
+                    Vector3f vec32 = vrdata$vrdevicepose.getPosition(new Vector3f())
+                        .sub(vrdata$vrdevicepose.getCustomVector(new Vector3f(0.0F, 0.0F, -1.0F)).mul(0.15F * dh.vrPlayer.vrdata_world_pre.worldScale))
+                        .sub(vrdata$vrdevicepose.getCustomVector(new Vector3f(0.0F, -1.0F, 0.0F)).mul(0.05F * dh.vrPlayer.vrdata_world_pre.worldScale));
 
-                    if (vec3.distanceTo(vec32) < (double) 0.15F * dh.vrPlayer.vrdata_world_pre.worldScale) {
+                    if (vec3.distance(vec32) < (double) 0.15F * dh.vrPlayer.vrdata_world_pre.worldScale) {
                         this.inCamera[j] = true;
                         this.active[j] = true;
                     }
@@ -170,10 +174,9 @@ public class InteractTracker extends Tracker {
 
                 if (!this.active[j] && dh.cameraTracker.isVisible() && !dh.cameraTracker.isQuickMode()) {
                     VRDevicePose vrdata$vrdevicepose1 = dh.vrPlayer.vrdata_world_pre.getEye(RenderPass.CAMERA);
-                    Vec3 vec36 = vrdata$vrdevicepose1.getPosition();
-                    vec36 = vec36.subtract(vrdata$vrdevicepose1.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).scale((double) 0.08F * dh.vrPlayer.vrdata_world_pre.worldScale));
+                    Vector3f vec36 = vrdata$vrdevicepose1.getPosition(new Vector3f()).sub(vrdata$vrdevicepose1.getCustomVector(new Vector3f(0.0F, 0.0F, -1.0F)).mul(0.08F * dh.vrPlayer.vrdata_world_pre.worldScale));
 
-                    if (vec3.distanceTo(vec36) < (double) 0.11F * dh.vrPlayer.vrdata_world_pre.worldScale) {
+                    if (vec3.distance(vec36) < (double) 0.11F * dh.vrPlayer.vrdata_world_pre.worldScale) {
                         this.inHandheldCamera[j] = true;
                         this.active[j] = true;
                     }
@@ -183,9 +186,9 @@ public class InteractTracker extends Tracker {
                     int k = roundUsing(vec3.x, FLOOR);
                     int l = roundUsing(vec3.y, FLOOR);
                     int i = roundUsing(vec3.z, FLOOR);
-                    Vec3 vec33 = new Vec3(vec3.x + vec31.x * -0.1D, vec3.y + vec31.y * -0.1D, vec3.z + vec31.z * -0.1D);
-                    AABB aabb = new AABB(vec3, vec33);
-                    this.inEntityHit[j] = ProjectileUtil.getEntityHitResult(mc.getCameraEntity(), vec35, vec3, aabb, (e) ->
+                    Vec3 vec33 = new Vec3(vec3.x + vec31.x() * -0.1D, vec3.y + vec31.y() * -0.1D, vec3.z + vec31.z() * -0.1D);
+                    AABB aabb = new AABB(vec3.x, vec3.y, vec3.z, vec33.x, vec33.y, vec33.z);
+                    this.inEntityHit[j] = ProjectileUtil.getEntityHitResult(mc.getCameraEntity(), convertToVec3(vec35), convertToVec3(vec3), aabb, (e) ->
                         !e.isSpectator() && e.isPickable() && e != mc.getCameraEntity().getVehicle(), 0.0D);
 
                     if (this.inEntityHit[j] != null) {
@@ -196,9 +199,9 @@ public class InteractTracker extends Tracker {
                 }
 
                 if (!this.active[j]) {
-                    BlockPos blockpos = BlockPos.containing(vec3);
+                    BlockPos blockpos = BlockPos.containing(vec3.x, vec3.y, vec3.z);
                     BlockState blockstate = mc.level.getBlockState(blockpos);
-                    BlockHitResult blockhitresult = blockstate.getShape(mc.level, blockpos).clip(vec35, vec3, blockpos);
+                    BlockHitResult blockhitresult = blockstate.getShape(mc.level, blockpos).clip(convertToVec3(vec35), convertToVec3(vec3), blockpos);
                     this.inBlockPos[j] = blockpos;
                     this.inBlockHit[j] = blockhitresult;
                     this.active[j] = blockhitresult != null && (this.rightClickable.contains(blockstate.getBlock().getClass()) || this.rightClickable.contains(blockstate.getBlock().getClass().getSuperclass()));

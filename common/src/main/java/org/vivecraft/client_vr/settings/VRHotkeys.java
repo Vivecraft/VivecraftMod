@@ -232,24 +232,24 @@ public class VRHotkeys {
     }
 
     public static void snapMRCam(int controller) {
-        Vec3 vec3 = dh.vrPlayer.vrdata_room_pre.getController(controller).getPosition();
-        dh.vrSettings.vrFixedCamposX = (float) vec3.x;
-        dh.vrSettings.vrFixedCamposY = (float) vec3.y;
-        dh.vrSettings.vrFixedCamposZ = (float) vec3.z;
+        Vector3f vec3 = dh.vrPlayer.vrdata_room_pre.getController(controller).getPosition(new Vector3f());
+        dh.vrSettings.vrFixedCamposX = vec3.x;
+        dh.vrSettings.vrFixedCamposY = vec3.y;
+        dh.vrSettings.vrFixedCamposZ = vec3.z;
         dh.vrSettings.vrFixedCamrotQuat.setFromNormalized(dh.vrPlayer.vrdata_room_pre.getController(controller).getMatrix());
     }
 
     public static void updateMovingThirdPersonCam() {
         if (startControllerPose != null) {
             VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_room_pre.getController(startController);
-            Vec3 vec3 = startControllerPose.getPosition();
-            Vec3 vec31 = vrdata$vrdevicepose.getPosition().subtract(vec3);
+            Vector3f vec3 = startControllerPose.getPosition(new Vector3f());
+            Vector3f vec31 = vrdata$vrdevicepose.getPosition(new Vector3f()).sub(vec3);
             Matrix4f matrix4f = vrdata$vrdevicepose.getMatrix().mul0(startControllerPose.getMatrix().invertAffine(), new Matrix4f());
-            Vector3f vector3 = new Vector3f(startCamposX - (float) vec3.x, startCamposY - (float) vec3.y, startCamposZ - (float) vec3.z);
+            Vector3f vector3 = new Vector3f(startCamposX - vec3.x, startCamposY - vec3.y, startCamposZ - vec3.z);
             Vector3f vector31 = matrix4f.transformProject(vector3, new Vector3f());
-            dh.vrSettings.vrFixedCamposX = startCamposX + (float) vec31.x + (vector31.x - vector3.x);
-            dh.vrSettings.vrFixedCamposY = startCamposY + (float) vec31.y + (vector31.y - vector3.y);
-            dh.vrSettings.vrFixedCamposZ = startCamposZ + (float) vec31.z + (vector31.z - vector3.z);
+            dh.vrSettings.vrFixedCamposX = startCamposX + vec31.x + (vector31.x - vector3.x);
+            dh.vrSettings.vrFixedCamposY = startCamposY + vec31.y + (vector31.y - vector3.y);
+            dh.vrSettings.vrFixedCamposZ = startCamposZ + vec31.z + (vector31.z - vector3.z);
             dh.vrSettings.vrFixedCamrotQuat.setFromNormalized(matrix4f);
             startCamrotQuat.mul(dh.vrSettings.vrFixedCamrotQuat, dh.vrSettings.vrFixedCamrotQuat);
         }

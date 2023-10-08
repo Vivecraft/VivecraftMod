@@ -971,15 +971,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         // set viewport  to fullscreen, since it would be still on the one from the last pass
         RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
 
-        Vec3 camPlayer = dh.vrPlayer.vrdata_room_pre.getHeadPivot()
-            .subtract(dh.vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());
+        Vector3f camPlayer = dh.vrPlayer.vrdata_room_pre.getHeadPivot(new Vector3f())
+            .sub(dh.vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition(new Vector3f()));
         Matrix4f viewMatrix = dh.vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getMatrix();
         Vector3f cameraLook = viewMatrix.transformProject(forward, new Vector3f());
 
         // set uniforms
         VRShaders._DepthMask_projectionMatrix.set(((GameRendererExtension) mc.gameRenderer).vivecraft$getThirdPassProjectionMatrix());
         VRShaders._DepthMask_viewMatrix.set(viewMatrix);
-        VRShaders._DepthMask_hmdViewPosition.set((float) camPlayer.x, (float) camPlayer.y, (float) camPlayer.z);
+        VRShaders._DepthMask_hmdViewPosition.set(camPlayer.x, camPlayer.y, camPlayer.z);
         VRShaders._DepthMask_hmdPlaneNormal.set(-cameraLook.x(), 0.0F, -cameraLook.z());
 
         boolean alphaMask = dh.vrSettings.mixedRealityUnityLike && dh.vrSettings.mixedRealityAlphaMask;

@@ -22,29 +22,65 @@ public class Vec3History {
         _data.addAll(generate(entry::new).limit(_capacity).toList());
     }
 
+    /**
+     * update the queue with newer data
+     * @param x newer x
+     * @param y newer y
+     * @param z newer z
+     * @return reference to the internal {@link Vector3d} (be careful with it)
+     */
     public Vector3dc add(double x, double y, double z) {
         this._data.addFirst(this._data.removeLast().set(x, y, z));
-        return this._data.getFirst().data;
+        return this._data.getFirst().data; // allow chaining on the queue structs
     }
 
+    /**
+     * update the queue with newer data
+     * @param in newer vector
+     * @return reference to the internal {@link Vector3d} (be careful with it)
+     */
     public Vector3dc add(Vec3 in) {
-        return this.add(in.x(), in.y(), in.z());
+        return this.add(in.x(), in.y(), in.z()); // allow chaining on the queue structs
     }
 
+    /**
+     * update the queue with newer data
+     * @param in newer vector
+     * @return {@code in}
+     * @apiNote {@code in} is not to be confused with the internal {@link Vector3d}.
+     */
     public Vector3dc add(Vector3dc in) {
+        // the result of this.add is intentionally ignored
         this.add(in.x(), in.y(), in.z());
-        return in;
+        return in; // allow chaining on `in` rather than the queue structs
     }
 
+    /**
+     * update the queue with newer data
+     * @param in newer vector
+     * @return {@code in}
+     * @apiNote {@code in} is not to be confused with the internal {@link Vector3d}.
+     */
     public Vector3fc add(Vector3fc in) {
+        // the result of this.add is intentionally ignored
         this.add(in.x(), in.y(), in.z());
-        return in;
+        return in; // allow chaining on `in` rather than the queue structs
     }
 
+    /**
+     * copy the newest data in the queue
+     * @param dest location to put the newest data in
+     * @return {@code dest}
+     */
     public Vector3d latest(Vector3d dest) {
         return dest.set((this._data.getFirst()).data);
     }
 
+    /**
+     * copy the newest data in the queue
+     * @param dest location to put the newest data in
+     * @return {@code dest}
+     */
     public Vector3f latest(Vector3f dest) {
         return dest.set((this._data.getFirst()).data);
     }
@@ -67,6 +103,10 @@ public class Vec3History {
         }
 
         return d0;
+    }
+
+    public float totalMovement(float seconds){
+        return (float) totalMovement((double) seconds);
     }
 
     public Vector3d netMovement(double seconds, Vector3d dest) {
@@ -131,6 +171,10 @@ public class Vec3History {
         }
 
         return j == 0 ? d0 : d0 / j;
+    }
+
+    public float averageSpeed(float seconds){
+        return (float) averageSpeed((double) seconds);
     }
 
     public Vector3d averagePosition(double seconds, Vector3d dest) {

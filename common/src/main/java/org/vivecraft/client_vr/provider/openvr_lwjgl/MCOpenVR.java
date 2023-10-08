@@ -1071,7 +1071,7 @@ public class MCOpenVR extends MCVR {
             for (VRBoneTransform BoneTrans : BoneTransDat) {
                 HmdVector4 pos = BoneTrans.position$();
                 // print("Skeletal Bone Position: " + pos);
-                this.gestureFingerTransforms[controller].add(new Vector4f(pos.v(0), pos.v(1), pos.v(2), pos.v(3)));
+                this.gestureFingerTransforms[controller].add(new Vector4f(pos.v()));
                 HmdQuaternionf dir = BoneTrans.orientation();
                 // print("Skeletal Bone Orientation: " + BoneTrans.orientation());
                 this.gestureFingerOrientations[controller].add(new Quaternionf(dir.w(), dir.x(), dir.y(), dir.z()));

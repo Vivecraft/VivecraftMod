@@ -3,7 +3,6 @@ package org.vivecraft.mixin.client_vr.player;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -26,6 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,9 +61,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     private double vivecraft$additionX;
     @Unique
     private double vivecraft$additionZ;
-    @Final
-    @Shadow
-    protected Minecraft minecraft;
     @Shadow
     private boolean startedUsingItem;
     @Shadow
@@ -143,21 +140,21 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         // clear teleport here, after all the packets would be sent
         this.vivecraft$teleported = false;
         if (vrRunning && dh.vrSettings.walkUpBlocks) {
-            this.minecraft.options.autoJump().set(false);
+            mc.options.autoJump().set(false);
         }
     }
 
     @Override
     @Unique
     public void vivecraft$swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact) {
-        ((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()).vivecraft$setSwingType(interact);
+        ((ItemInHandRendererExtension) mc.getEntityRenderDispatcher().getItemInHandRenderer()).vivecraft$setSwingType(interact);
         this.swing(interactionhand);
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;aiStep()V"), method = "aiStep")
     public void vivecraft$ai(CallbackInfo ci) {
         if (vrRunning) {
-            dh.vrPlayer.tick((LocalPlayer) (Object) this, this.minecraft, this.random);
+            dh.vrPlayer.tick((LocalPlayer) (Object) this);
         }
     }
 
@@ -179,7 +176,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 flag1 = true;
             }
 
-            Vec3 vec3 = dh.vrPlayer.roomOrigin;
+            Vector3f vec3 = dh.vrPlayer.roomOrigin;
 
             if ((dh.climbTracker.isGrabbingLadder() || flag
                 || dh.swimTracker.isActive())
@@ -282,15 +279,13 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         Entity entity = this.getVehicle();
 
         if (this.isPassenger()) {
-            Vec3 vec3 = dh.vehicleTracker.Premount_Pos_Room;
-            vec3 = vec3.yRot(dh.vrPlayer.vrdata_world_pre.rotation_radians);
-            x = x - vec3.x;
+            Vector3f vec3 = dh.vehicleTracker.Premount_Pos_Room.rotateY(dh.vrPlayer.vrdata_world_pre.rotation_radians, new Vector3f());
+            x -= vec3.x;
             y = dh.vehicleTracker.getVehicleFloor(entity, y);
-            z = z - vec3.z;
+            z -= vec3.z;
             dh.vrPlayer.setRoomOrigin(x, y, z, x + y + z == 0.0D);
         } else {
-            Vec3 vec31 = dh.vrPlayer.roomOrigin;
-            dh.vrPlayer.setRoomOrigin(vec31.x + (d3 - d0), vec31.y + (d4 - d1), vec31.z + (d5 - d2), x + y + z == 0.0D);
+            dh.vrPlayer.setRoomOrigin(dh.vrPlayer.roomOrigin.x + (d3 - d0), dh.vrPlayer.roomOrigin.y + (d4 - d1), dh.vrPlayer.roomOrigin.z + (d5 - d2), x + y + z == 0.0D);
         }
     }
 
@@ -412,10 +407,10 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                             case RUN_IN_PLACE -> {
                                 vec3 = vec3.yRot((float) -dh.runTracker.getYaw());
                                 vec3 = vec3.scale(dh.runTracker.getSpeed());
-                                vec3 = vec3.yRot(toRadians(180.0F + dh.vrSettings.worldRotation));
+                                vec3 = vec3.yRot((float) PI + toRadians(dh.vrSettings.worldRotation));
                             }
                             case ROOM -> {
-                                vec3 = vec3.yRot(toRadians(180.0F + dh.vrSettings.worldRotation));
+                                vec3 = vec3.yRot((float) PI + toRadians(dh.vrSettings.worldRotation));
                             }
                         }
                     }

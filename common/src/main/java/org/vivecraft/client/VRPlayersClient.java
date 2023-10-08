@@ -217,9 +217,9 @@ public class VRPlayersClient {
         playermodelcontroller$rotinfo.leftArmQuat.setFromNormalized(data.getController(1).getMatrix());
         playermodelcontroller$rotinfo.rightArmQuat.setFromNormalized(data.getController(0).getMatrix());
         playermodelcontroller$rotinfo.seated = dh.vrSettings.seated;
-        convertToVector3f(data.getController(1).getPosition(), playermodelcontroller$rotinfo.leftArmPos);
-        convertToVector3f(data.getController(0).getPosition(), playermodelcontroller$rotinfo.rightArmPos);
-        convertToVector3f(data.hmd.getPosition(), playermodelcontroller$rotinfo.Headpos);
+        data.getController(1).getPosition(playermodelcontroller$rotinfo.leftArmPos);
+        data.getController(0).getPosition(playermodelcontroller$rotinfo.rightArmPos);
+        data.hmd.getPosition(playermodelcontroller$rotinfo.Headpos);
         return playermodelcontroller$rotinfo;
     }
 

@@ -1,7 +1,7 @@
 package org.vivecraft.mixin.client_vr.particle;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,12 +27,12 @@ public class ItemPickupParticleVRMixin {
     private Entity itemEntity;
 
     @Unique
-    private Vec3 vivecraft$playerPos;
+    private final Vector3f vivecraft$playerPos = new Vector3f();
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 0), method = "render")
     public double vivecraft$updateX(double d, double e, double f) {
         if (vrRunning && this.target == mc.player) {
-            this.vivecraft$playerPos = RenderHelper.getControllerRenderPos(0);
+            RenderHelper.getControllerRenderPos(0, this.vivecraft$playerPos);
             e = f = this.vivecraft$playerPos.x;
         }
 
@@ -59,7 +59,6 @@ public class ItemPickupParticleVRMixin {
     public double vivecraft$updateZ(double d, double e, double f) {
         if (vrRunning && this.target == mc.player) {
             e = f = this.vivecraft$playerPos.z;
-            this.vivecraft$playerPos = null;
         }
 
         return lerp(e, f, d);

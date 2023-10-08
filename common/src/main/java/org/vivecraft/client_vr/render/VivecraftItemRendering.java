@@ -12,6 +12,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
@@ -23,6 +25,7 @@ import javax.annotation.Nonnull;
 import static org.joml.Math.*;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.convertToVec3;
 
 public class VivecraftItemRendering {
     public static VivecraftItemTransformType getTransformType(ItemStack pStack, AbstractClientPlayer pPlayer, ItemRenderer itemRenderer) {
@@ -103,8 +106,7 @@ public class VivecraftItemRendering {
 
 
     public static void applyFirstPersonItemTransforms(@Nonnull PoseStack pMatrixStack, VivecraftItemTransformType rendertype, boolean mainHand, AbstractClientPlayer pPlayer, float pEquippedProgress, float pPartialTicks, ItemStack pStack, InteractionHand pHand) {
-        int k = mainHand ? 1 : -1;
-        float scale = 0.7F;
+        final float scale;
         float translateX = -0.05F;
         float translateY = 0.005F;
         float translateZ = 0.0F;
@@ -116,9 +118,10 @@ public class VivecraftItemRendering {
 
         switch (rendertype) {
             case Bow_Seated -> {
+                scale = 0.7F;
                 translateY -= 0.1F;
                 translateZ += 0.1F;
-                rotation.rotateX(toRadians(90.0F - gunAngle));
+                rotation.rotateX((float) PI / 2.0F - toRadians(gunAngle));
             }
             case Bow_Roomscale -> {
                 rotation.rotationX(0.0F);
@@ -135,34 +138,21 @@ public class VivecraftItemRendering {
                 scale = 1.0F;
                 int i = dh.vrSettings.reverseShootingEye ? 1 : 0;
 
-                Vec3 vec3 = dh.bowTracker.getAimVector();
-                Vec3 vec31 = new Vec3(vec3.x, vec3.y, vec3.z);
-                Vec3 vec32 = dh.vrPlayer.vrdata_world_render.getHand(1).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
-                Vec3 vec33 = dh.vrPlayer.vrdata_world_render.getHand(1).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D));
-                vec31.cross(vec32);
-                float f = (float) toDegrees(asin(vec31.y / vec31.length()));
-                float f1 = (float) toDegrees(atan2(vec31.x, vec31.z));
-                Vec3 vec34 = new Vec3(0.0D, 1.0D, 0.0D);
-                Vec3 vec35 = new Vec3(vec31.x, 0.0D, vec31.z);
-                Vec3 vec36 = Vec3.ZERO;
-                double d5 = vec33.dot(vec35);
+                Vector3fc vec31 = dh.bowTracker.getAimVector();
+                // Vector3f vec32 = dh.vrPlayer.vrdata_world_render.getHand(1).getCustomVector(new Vector3f(0.0F, -1.0F, 0.0F));
+                Vector3f vec33 = dh.vrPlayer.vrdata_world_render.getHand(1).getCustomVector(new Vector3f(0.0F, 0.0F, -1.0F));
+                // vec31.cross(vec32); // TODO: wtf
+                Vector3fc vec35 = new Vector3f(vec31.x(), 0.0F, vec31.z());
+                Vector3f vec36 = new Vector3f();
+                float f2 = vec33.dot(vec31.x(), 0.0F, vec31.z());
 
-                if (d5 != 0.0D) {
-                    vec36 = vec35.scale(d5);
+                if (f2 != 0.0F) {
+                    vec35.mul(f2, vec36);
                 }
 
-                Vec3 vec37 = vec33.subtract(vec36).normalize();
-                double d6 = vec37.dot(vec34);
-                double d7 = vec35.dot(vec37.cross(vec34));
-                float f2;
-
-                if (d7 < 0.0D) {
-                    f2 = -((float) acos(d6));
-                } else {
-                    f2 = (float) acos(d6);
-                }
-
-                float f3 = (180F / (float) PI) * f2;
+                vec33.sub(vec36, vec36).normalize();
+                float f3 = vec36.dot(0.0F, 1.0F, 0.0F);
+                float f5 = acos(f3);
 
                 if (dh.bowTracker.isCharged()) {
                     long j = Util.getMillis() - dh.bowTracker.startDrawTime;
@@ -172,13 +162,13 @@ public class VivecraftItemRendering {
                 pMatrixStack.last().pose()
                     .translate(0.0F, 0.0F, 0.1F)
                     .mul(dh.vrPlayer.vrdata_world_render.getController(1).getMatrix());
-                rotation.rotateY(toRadians(f1));
-                rotation.rotateX(toRadians(-f));
-                rotation.rotateZ(toRadians(-f3));
-                rotation.rotateZ(toRadians(180.0F));
+                rotation.rotateY(atan2(vec31.x(), vec31.z()));
+                rotation.rotateX(-asin(vec31.y() / vec31.length()));
+                rotation.rotateZ(-f5 * ((vec35.dot(vec36.cross(0.0F, 1.0F, 0.0F)) < 0.0F) ? -1 : 1));
+                rotation.rotateZ((float) PI);
                 pMatrixStack.last().pose().rotate(rotation);
                 rotation.rotationY(0.0F);
-                rotation.rotateY(toRadians(180.0F));
+                rotation.rotateY((float) PI);
                 rotation.rotateX(toRadians(160.0F));
                 translateY += 0.1225F;
                 translateX += 0.125F;
@@ -190,10 +180,10 @@ public class VivecraftItemRendering {
                 translateY -= 0.02F;
                 scale = 0.5F;
                 rotation.rotationX(0.0F);
-                rotation.rotateY(toRadians(10.0F));
+                rotation.rotateY((float) PI / 18.0F);
             }
             case Map -> {
-                rotation.rotationX(toRadians(-45.0F));
+                rotation.rotationX((float) PI / -4.0F);
                 translateX = 0.0F;
                 translateY = 0.16F;
                 translateZ = -0.075F;
@@ -201,7 +191,7 @@ public class VivecraftItemRendering {
             }
             case Noms -> {
                 long l = mc.player.getUseItemRemainingTicks();
-                rotation.rotationZ(toRadians(180.0F));
+                rotation.rotationZ((float) PI);
                 rotation.rotateX(toRadians(-135.0F));
                 translateZ += 0.006F * sin(l);
                 translateZ += 0.02F;
@@ -209,7 +199,7 @@ public class VivecraftItemRendering {
                 scale = 0.4F;
             }
             case Compass -> {
-                rotation.rotationY(toRadians(90.0F));
+                rotation.rotationY((float) PI / 2.0F);
                 rotation.rotateX(toRadians(25.0F));
                 scale = 0.4F;
             }
@@ -219,10 +209,11 @@ public class VivecraftItemRendering {
                 translateX += 0.05F;
             }
             case Block_Stick -> {
+                scale = 0.7F;
                 rotation.rotationX(0.0F);
                 translateY += -0.105F + 0.06F * gunAngle / 40.0F;
                 translateZ -= 0.1F;
-                rotation.rotateX(toRadians(-45.0F));
+                rotation.rotateX((float) PI / -4.0F);
                 rotation.rotateX(toRadians(gunAngle));
             }
             case Horn -> {
@@ -230,18 +221,15 @@ public class VivecraftItemRendering {
                 rotation = new Quaternionf().rotationX(0.0F);
                 translateY += -0.105F + 0.06F * gunAngle / 40.0F;
                 translateZ -= 0.1F;
-                rotation.rotateX(toRadians(-45.0F));
+                rotation.rotateX((float) PI / -4.0F);
                 rotation.rotateX(toRadians(gunAngle));
             }
             case Shield -> {
-                boolean reverse = dh.vrSettings.reverseHands && !dh.vrSettings.seated;
-                if (reverse) {
-                    k *= -1;
-                }
+                int hand = (mainHand || dh.vrSettings.seated) && !dh.vrSettings.reverseHands ? 1 : -1;
                 scale = 0.4F;
 
                 translateY += 0.18F;
-                if (k == 1) {
+                if (hand == 1) {
                     rotation.rotateX(toRadians(105.0F - gunAngle));
                     translateX += 0.11F;
                 } else {
@@ -251,11 +239,11 @@ public class VivecraftItemRendering {
                 translateZ += 0.1F;
 
                 if (pPlayer.isUsingItem() && pPlayer.getUseItemRemainingTicks() > 0 && pPlayer.getUsedItemHand() == pHand) {
-                    rotation.rotateX(toRadians(k * 5F));
+                    rotation.rotateX(toRadians(hand * 5F));
                     rotation.rotateZ(toRadians(-5F));
 
                     translateY -= 0.12F;
-                    if (k == 1) {
+                    if (hand == 1) {
                         translateZ -= .1F;
                         translateX += .04F;
                     } else {
@@ -265,12 +253,12 @@ public class VivecraftItemRendering {
 
 
                     if (pPlayer.isBlocking()) {
-                        rotation.rotateY(toRadians((float) k * 90.0F));
+                        rotation.rotateY(hand * (float) PI / 2.0F);
                     } else {
-                        rotation.rotateY(toRadians((1.0F - pEquippedProgress)) * (float) k * 90.0F);
+                        rotation.rotateY(hand * toRadians(1.0F - pEquippedProgress) * ((float) PI / 2.0F));
                     }
                 }
-                rotation.rotateY(toRadians((float) k * -90.0F));
+                rotation.rotateY(hand * (float) PI / -2.0F);
             }
             case Spear -> {
                 rotation.rotationX(0.0F);
@@ -344,14 +332,17 @@ public class VivecraftItemRendering {
                     if (VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.RIGHT) && mainHand || VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.LEFT) && !mainHand) {
                         translateZ -= 0.2F;
                     }
+                } else {
+                    scale = 0.7F;
                 }
 
                 if (pStack.getItem() instanceof ArrowItem || pStack.is(ItemTags.VIVECRAFT_ARROWS)) {
-                    preRotation.rotationZ(toRadians(-180.0F));
+                    preRotation.rotationZ(-(float) PI);
                     rotation.rotateX(toRadians(-gunAngle));
                 }
             }
             case Telescope -> {
+                scale = 0.7F;
                 preRotation.rotationX(0.0F);
                 rotation.rotationX(0.0F);
                 translateZ = 0.0F;
@@ -359,9 +350,10 @@ public class VivecraftItemRendering {
                 translateX = 0.0F;
             }
             case Item, Block_Item, Sword -> {
+                scale = 0.7F;
             }
             default -> {
-                rotation.rotationZ(toRadians(180.0F));
+                rotation.rotationZ((float) PI);
                 rotation.rotateX(toRadians(-135.0F));
                 scale = 0.4F;
                 translateX += 0.08F;

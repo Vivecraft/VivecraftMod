@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3fc;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -195,12 +196,12 @@ public class ClientNetworking {
         }
     }
 
-    public static void overrideLook(Player player, Vec3 view) {
+    public static void overrideLook(Player player, Vector3fc view) {
         if (!serverWantsData) {
             capturedPitch = player.getXRot();
             capturedYaw = player.getYRot();
-            float f = (float) toDegrees(asin(-view.y / view.length()));
-            float f1 = (float) toDegrees(atan2(-view.x, view.z));
+            float f = (float) toDegrees(asin(-view.y() / view.length()));
+            float f1 = (float) toDegrees(atan2(-view.x(), view.z()));
             ((LocalPlayer) player).connection.send(new Rot(f1, f, player.onGround()));
             overrideActive = true;
         }

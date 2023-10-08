@@ -1,7 +1,6 @@
 package org.vivecraft.client.gui.settings;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Button.OnPress;
@@ -22,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.vivecraft.client_vr.VRState.mc;
+
 public class GuiListValueEditScreen extends GuiListScreen {
 
     protected final ListValue<String> listValue;
@@ -37,17 +38,17 @@ public class GuiListValueEditScreen extends GuiListScreen {
         clearWidgets();
         double scrollAmount = list != null ? list.getScrollAmount() : 0.0D;
 
-        this.list = new SettingsList(this, minecraft, getEntries());
+        this.list = new SettingsList(this, getEntries());
         list.setScrollAmount(scrollAmount);
         this.addWidget(this.list);
 
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
             listValue.set(getCurrentValues());
-            this.minecraft.setScreen(this.lastScreen);
+            mc.setScreen(this.lastScreen);
         }).bounds(this.width / 2 - 155, this.height - 27, 150, 20).build());
 
         this.addRenderableWidget(Button
-            .builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
+            .builder(CommonComponents.GUI_CANCEL, button -> mc.setScreen(this.lastScreen))
             .bounds(this.width / 2 + 5, this.height - 27, 150, 20)
             .build());
     }
@@ -70,7 +71,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
         }
         int i = 0;
         for (String item : elements) {
-            EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, ListValueEntry.valueButtonWidth - 1, 20, Component.literal(item));
+            EditBox box = new EditBox(mc.font, 0, 0, ListValueEntry.valueButtonWidth - 1, 20, Component.literal(item));
             box.setMaxLength(1000);
             box.setValue(item);
             int index = i++;

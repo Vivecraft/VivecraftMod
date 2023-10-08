@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,6 +37,7 @@ import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import javax.annotation.Nullable;
 
 import static org.vivecraft.client_vr.VRState.*;
+import static org.vivecraft.common.utils.Utils.convertToVec3;
 
 // priority 999 to inject before iris, for the vrFast rendering
 @Mixin(value = LevelRenderer.class, priority = 999)
@@ -100,7 +102,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 0), method = "renderSnowAndRain")
     public double vivecraft$rainX(double x) {
         if (!RenderPassType.isVanilla() && (dh.currentPass == RenderPass.LEFT || dh.currentPass == RenderPass.RIGHT)) {
-            return dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().x;
+            return dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition(new Vector3f()).x;
         }
         return x;
     }
@@ -108,7 +110,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 1), method = "renderSnowAndRain")
     public double vivecraft$rainY(double y) {
         if (!RenderPassType.isVanilla() && (dh.currentPass == RenderPass.LEFT || dh.currentPass == RenderPass.RIGHT)) {
-            return dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().y;
+            return dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition(new Vector3f()).y;
         }
         return y;
     }
@@ -116,7 +118,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 2), method = "renderSnowAndRain")
     public double vivecraft$rainZ(double z) {
         if (!RenderPassType.isVanilla() && (dh.currentPass == RenderPass.LEFT || dh.currentPass == RenderPass.RIGHT)) {
-            return dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().z;
+            return dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition(new Vector3f()).z;
         }
         return z;
     }
@@ -208,7 +210,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             }
             for (int c = 0; c < 2; c++) {
                 if (dh.interactTracker.isInteractActive(c) && (dh.interactTracker.inBlockHit[c] != null || dh.interactTracker.bukkit[c])) {
-                    BlockPos blockpos = dh.interactTracker.inBlockHit[c] != null ? dh.interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(dh.vrPlayer.vrdata_world_render.getController(c).getPosition());
+                    BlockPos blockpos = dh.interactTracker.inBlockHit[c] != null ? dh.interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(convertToVec3(dh.vrPlayer.vrdata_world_render.getController(c).getPosition(new Vector3f())));
                     BlockState blockstate = this.level.getBlockState(blockpos);
                     this.renderHitOutline(poseStack, this.renderBuffers.bufferSource().getBuffer(RenderType.lines()), camera.getEntity(), vec3.x, vec3.y, vec3.z, blockpos, blockstate);
                 }

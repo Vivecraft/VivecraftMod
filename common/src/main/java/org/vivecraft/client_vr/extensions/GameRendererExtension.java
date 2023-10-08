@@ -2,8 +2,9 @@ package org.vivecraft.client_vr.extensions;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public interface GameRendererExtension {
 
@@ -27,13 +28,13 @@ public interface GameRendererExtension {
 
     double vivecraft$getRveY();
 
-    Vec3 vivecraft$getRvePos(float partialTicks);
+    Vector3f vivecraft$getRvePos(float partialTicks, Vector3f dest);
 
     boolean vivecraft$isInMenuRoom();
 
     boolean vivecraft$willBeInMenuRoom(Screen newScreen);
 
-    Vec3 vivecraft$getCrossVec();
+    Vector3f vivecraft$getCrossVec(Vector3f dest);
 
     void vivecraft$resetProjectionMatrix(float partialTicks);
 

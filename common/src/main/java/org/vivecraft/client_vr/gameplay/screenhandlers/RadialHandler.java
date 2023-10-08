@@ -2,7 +2,6 @@ package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.vivecraft.client.VivecraftVRMod;
@@ -17,8 +16,8 @@ import static org.vivecraft.client_vr.VRState.mc;
 public class RadialHandler {
     private static boolean Showing = false;
     public static GuiRadial UI = new GuiRadial();
-    public static Vec3 Pos_room = new Vec3(0.0D, 0.0D, 0.0D);
-    public static Matrix4f Rotation_room = new Matrix4f();
+    public static final Vector3f Pos_room = new Vector3f();
+    public static final Matrix4f Rotation_room = new Matrix4f();
     private static boolean PointedL;
     private static boolean PointedR;
     public static RenderTarget Framebuffer;
@@ -32,11 +31,7 @@ public class RadialHandler {
         if (dh.kiosk) {
             return false;
         } else {
-            if (dh.vrSettings.seated) {
-                showingState = false;
-            }
-
-            if (showingState) {
+            if (showingState && !dh.vrSettings.seated) {
                 UI.init(mc, GuiHandler.scaledWidth, GuiHandler.scaledHeight);
                 Showing = true;
                 activecontroller = controller;
@@ -54,78 +49,67 @@ public class RadialHandler {
         PointedL = false;
         PointedR = false;
 
-        if (isShowing()) {
-            if (!dh.vrSettings.seated) {
-                if (Rotation_room != null) {
-                    Vec2 vec2 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(1));
-                    Vec2 vec21 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(0));
-                    float f = vec21.x;
-                    float f1 = vec21.y;
+        if (isShowing() && !dh.vrSettings.seated) {
+            Vec2 conOne = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(1));
+            Vec2 conZero = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(0));
+            float u = conZero.x;
+            float v = conZero.y;
 
-                    if (!(f < 0.0F) && !(f1 < 0.0F) && !(f > 1.0F) && !(f1 > 1.0F)) {
-                        if (UI.cursorX2 == -1.0F) {
-                            UI.cursorX2 = (float) ((int) (f * GuiHandler.guiWidth));
-                            UI.cursorY2 = (float) ((int) (f1 * GuiHandler.guiHeight));
-                        } else {
-                            float f2 = (float) ((int) (f * GuiHandler.guiWidth));
-                            float f3 = (float) ((int) (f1 * GuiHandler.guiHeight));
-                            UI.cursorX2 = UI.cursorX2 * 0.7F + f2 * 0.3F;
-                            UI.cursorY2 = UI.cursorY2 * 0.7F + f3 * 0.3F;
-                        }
-                        PointedR = true;
-                    } else {
-                        UI.cursorX2 = -1.0F;
-                        UI.cursorY2 = -1.0F;
-                        PointedR = false;
-                    }
-
-                    f = vec2.x;
-                    f1 = vec2.y;
-
-                    if (!(f < 0.0F) && !(f1 < 0.0F) && !(f > 1.0F) && !(f1 > 1.0F)) {
-                        if (UI.cursorX1 == -1.0F) {
-                            UI.cursorX1 = (float) ((int) (f * GuiHandler.guiWidth));
-                            UI.cursorY1 = (float) ((int) (f1 * GuiHandler.guiHeight));
-                        } else {
-                            float f4 = (float) ((int) (f * GuiHandler.guiWidth));
-                            float f5 = (float) ((int) (f1 * GuiHandler.guiHeight));
-                            UI.cursorX1 = UI.cursorX1 * 0.7F + f4 * 0.3F;
-                            UI.cursorY1 = UI.cursorY1 * 0.7F + f5 * 0.3F;
-                        }
-                        PointedL = true;
-                    } else {
-                        UI.cursorX1 = -1.0F;
-                        UI.cursorY1 = -1.0F;
-                        PointedL = false;
-                    }
+            if (!(u < 0.0F) && !(v < 0.0F) && !(u > 1.0F) && !(v > 1.0F)) {
+                if (UI.cursorX2 == -1.0F) {
+                    UI.cursorX2 = (float) ((int) (u * GuiHandler.guiWidth));
+                    UI.cursorY2 = (float) ((int) (v * GuiHandler.guiHeight));
+                } else {
+                    UI.cursorX2 = UI.cursorX2 * 0.7F + (float) ((int) (u * GuiHandler.guiWidth)) * 0.3F;
+                    UI.cursorY2 = UI.cursorY2 * 0.7F + (float) ((int) (v * GuiHandler.guiHeight)) * 0.3F;
                 }
+                PointedR = true;
+            } else {
+                UI.cursorX2 = -1.0F;
+                UI.cursorY2 = -1.0F;
+                PointedR = false;
+            }
+
+            u = conOne.x;
+            v = conOne.y;
+
+            if (!(u < 0.0F) && !(v < 0.0F) && !(u > 1.0F) && !(v > 1.0F)) {
+                if (UI.cursorX1 == -1.0F) {
+                    UI.cursorX1 = (float) ((int) (u * GuiHandler.guiWidth));
+                    UI.cursorY1 = (float) ((int) (v * GuiHandler.guiHeight));
+                } else {
+                    UI.cursorX1 = UI.cursorX1 * 0.7F + (float) ((int) (u * GuiHandler.guiWidth)) * 0.3F;
+                    UI.cursorY1 = UI.cursorY1 * 0.7F + (float) ((int) (v * GuiHandler.guiHeight)) * 0.3F;
+                }
+                PointedL = true;
+            } else {
+                UI.cursorX1 = -1.0F;
+                UI.cursorY1 = -1.0F;
+                PointedL = false;
             }
         }
     }
 
     public static void orientOverlay(ControllerType controller) {
         if (isShowing()) {
-            VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_room_pre.hmd;
-            float f = 2.0F;
             int con = (controller == ControllerType.LEFT) ? 1 : 0;
+            VRDevicePose pose;
+            float f;
 
             if (dh.vrSettings.radialModeHold) {
-                vrdata$vrdevicepose = dh.vrPlayer.vrdata_room_pre.getController(con);
+                pose = dh.vrPlayer.vrdata_room_pre.getController(con);
                 f = 1.2F;
+            } else {
+                pose = dh.vrPlayer.vrdata_room_pre.hmd;
+                f = 2.0F;
             }
 
-            Vec3 vec3 = vrdata$vrdevicepose.getPosition();
-            Vec3 vec31 = new Vec3(0.0D, 0.0D, -f);
-            Vec3 vec32 = vrdata$vrdevicepose.getCustomVector(vec31);
-            Pos_room = new Vec3(vec32.x / 2.0D + vec3.x, vec32.y / 2.0D + vec3.y, vec32.z / 2.0D + vec3.z);
-            Vector3f vector3 = new Vector3f(
-                (float) (Pos_room.x - vec3.x),
-                (float) (Pos_room.y - vec3.y),
-                (float) (Pos_room.z - vec3.z)
-            );
-            float f1 = asin(vector3.y / vector3.length());
-            float f2 = (float) PI + atan2(vector3.x, vector3.z);
-            Rotation_room.rotationY(f2).rotateX(f1);
+            pose.getPosition(Pos_room);
+            Vector3f look = pose.getCustomVector(new Vector3f(0.0F, 0.0F, -f)).mul(0.5F);
+            Pos_room.add(look);
+            float pitch = asin(look.y / look.length());
+            float yaw = (float) PI + atan2(look.x, look.z);
+            Rotation_room.rotationY(yaw).rotateX(pitch);
         }
     }
 

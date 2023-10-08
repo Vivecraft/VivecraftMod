@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
@@ -53,68 +54,61 @@ public class RenderHelper {
 
     public static void applyStereo(RenderPass currentPass, PoseStack matrix) {
         if (currentPass == RenderPass.LEFT || currentPass == RenderPass.RIGHT) {
-            matrix.last().pose().translate(convertToVector3f(
-                dh.vrPlayer.vrdata_world_render.getEye(currentPass).getPosition()
-                    .subtract(dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition()),
-                new Vector3f()
-            ));
+            matrix.last().pose().translate(
+                dh.vrPlayer.vrdata_world_render.getEye(currentPass).getPosition(new Vector3f())
+                    .sub(dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition(new Vector3f()))
+            );
             // TODO .negate()?
         }
     }
 
-    public static Vec3 getControllerRenderPos(int c) {
+    public static Vector3f getControllerRenderPos(int c, Vector3f dest) {
         if (!dh.vrSettings.seated) {
-            return dh.vrPlayer.vrdata_world_render.getController(c).getPosition();
+            return dh.vrPlayer.vrdata_world_render.getController(c).getPosition(dest);
         } else {
-            Vec3 out = null;
+            Vector3f dir = dh.vrPlayer.vrdata_world_render.hmd.getDirection(new Vector3f());
+            dir.rotateY(c == 0 ? -(float) PI * 7.0F / 36.0F : (float) PI * 7.0F / 36.0F).y = 0.0F;
+            dir.normalize();
 
             if (mc.getCameraEntity() != null && mc.level != null) {
-                Vec3 dir = dh.vrPlayer.vrdata_world_render.hmd.getDirection();
-                dir = dir.yRot((float) toRadians(c == 0 ? -35.0D : 35.0D));
-                dir = new Vec3(dir.x, 0.0D, dir.z);
-                dir = dir.normalize();
                 RenderPass renderpass = RenderPass.CENTER;
-                if (TelescopeTracker.isTelescope(mc.player.getUseItem())) {
-                    if (c == 0 && mc.player.getUsedItemHand() == InteractionHand.MAIN_HAND) {
-                        out = dh.vrPlayer.vrdata_world_render.eye0.getPosition()
-                            .add(dh.vrPlayer.vrdata_world_render.hmd.getDirection()
-                                .scale(0.2 * dh.vrPlayer.vrdata_world_render.worldScale));
-                    }
-                    if (c == 1 && mc.player.getUsedItemHand() == InteractionHand.OFF_HAND) {
-                        out = dh.vrPlayer.vrdata_world_render.eye1.getPosition()
-                            .add(dh.vrPlayer.vrdata_world_render.hmd.getDirection()
-                                .scale(0.2 * dh.vrPlayer.vrdata_world_render.worldScale));
-                    }
-                }
-                if (out == null) {
-                    out = dh.vrPlayer.vrdata_world_render.getEye(renderpass).getPosition().add(
-                        dir.x * 0.3D * dh.vrPlayer.vrdata_world_render.worldScale,
-                        -0.4D * dh.vrPlayer.vrdata_world_render.worldScale,
-                        dir.z * 0.3D * dh.vrPlayer.vrdata_world_render.worldScale);
+                if (c == 0 && mc.player.getUsedItemHand() == InteractionHand.MAIN_HAND && TelescopeTracker.isTelescope(mc.player.getUseItem())) {
+                    dh.vrPlayer.vrdata_world_render.eye0.getPosition(dest)
+                        .add(
+                            dh.vrPlayer.vrdata_world_render.hmd.getDirection(new Vector3f())
+                                .mul(0.2F * dh.vrPlayer.vrdata_world_render.worldScale)
+                        );
+                } else if (c == 1 && mc.player.getUsedItemHand() == InteractionHand.OFF_HAND && TelescopeTracker.isTelescope(mc.player.getUseItem())) {
+                    dh.vrPlayer.vrdata_world_render.eye1.getPosition(dest)
+                        .add(
+                            dh.vrPlayer.vrdata_world_render.hmd.getDirection(new Vector3f())
+                                .mul(0.2F * dh.vrPlayer.vrdata_world_render.worldScale)
+                        );
+                } else {
+                    dh.vrPlayer.vrdata_world_render.getEye(renderpass).getPosition(dest).add(
+                        dir.x * 0.3F * dh.vrPlayer.vrdata_world_render.worldScale,
+                        -0.4F * dh.vrPlayer.vrdata_world_render.worldScale,
+                        dir.z * 0.3F * dh.vrPlayer.vrdata_world_render.worldScale
+                    );
                 }
             } else { //main menu
-                Vec3 dir = dh.vrPlayer.vrdata_world_render.hmd.getDirection();
-                dir = dir.yRot((float) toRadians(c == 0 ? -35.0D : 35.0D));
-                dir = new Vec3(dir.x, 0.0D, dir.z);
-                dir = dir.normalize();
-                out = dh.vrPlayer.vrdata_world_render.hmd.getPosition().add(dir.x * 0.3D, -0.4D,
-                    dir.z * 0.3D);
+                dh.vrPlayer.vrdata_world_render.hmd.getPosition(dest).add(dir.x * 0.3F, -0.4F, dir.z * 0.3F);
             }
-            return out;
+            return dest;
         }
     }
 
     public static void setupRenderingAtController(int controller, PoseStack matrix) {
-        Vec3 aimSource = getControllerRenderPos(controller);
-        aimSource = aimSource.subtract(dh.vrPlayer.getVRDataWorld().getEye(dh.currentPass).getPosition());
+        Vector3f aimSource = getControllerRenderPos(controller, new Vector3f());
+        aimSource.sub(dh.vrPlayer.getVRDataWorld().getEye(dh.currentPass).getPosition(new Vector3f()));
         matrix.last().pose().translate((float) aimSource.x, (float) aimSource.y, (float) aimSource.z);
         float sc = dh.vrPlayer.vrdata_world_render.worldScale;
         if (mc.level != null && TelescopeTracker.isTelescope(mc.player.getUseItem())) {
             matrix.last().pose()
                 .mul(dh.vrPlayer.vrdata_world_render.hmd.getMatrix())
-                .rotateX(toRadians(90.0F))
+                .rotateX((float) PI / 2.0F)
                 .translate(controller == 0 ? 0.075F * sc : -0.075F * sc, -0.025F * sc, 0.0325F * sc);
-            matrix.last().normal().rotateX(toRadians(90.0F));
+            matrix.last().normal().rotateX((float) PI / 2.0F);
         } else {
             matrix.last().pose().mul(dh.vrPlayer.vrdata_world_render.getController(controller).getMatrix());
         }
@@ -345,20 +339,20 @@ public class RenderHelper {
         }
     }
 
-    public static void renderFlatQuad(Vec3 pos, float width, float height, float yaw, int r, int g, int b, int a, PoseStack poseStack) {
+    public static void renderFlatQuad(Vector3fc pos, float width, float height, float yaw, int r, int g, int b, int a, PoseStack poseStack) {
         Tesselator tesselator = Tesselator.getInstance();
         tesselator.getBuilder().begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
-        Vec3 offset = (new Vec3((width / 2.0F), 0.0, height / 2.0F)).yRot(toRadians(-yaw));
+        Vector3fc offset = new Vector3f(width / 2.0F, 0.0F, height / 2.0F).rotateY(toRadians(-yaw));
 
         Matrix4f mat = poseStack.last().pose();
-        tesselator.getBuilder().vertex(mat, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
+        tesselator.getBuilder().vertex(mat, pos.x() + offset.x(), pos.y(), pos.z() + offset.z())
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.getBuilder().vertex(mat, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z - offset.z))
+        tesselator.getBuilder().vertex(mat, pos.x() + offset.x(), pos.y(), pos.z() - offset.z())
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.getBuilder().vertex(mat, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z - offset.z))
+        tesselator.getBuilder().vertex(mat, pos.x() - offset.x(), pos.y(), pos.z() - offset.z())
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.getBuilder().vertex(mat, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z + offset.z))
+        tesselator.getBuilder().vertex(mat, pos.x() - offset.x(), pos.y(), pos.z() + offset.z())
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
         tesselator.end();
     }

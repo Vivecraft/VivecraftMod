@@ -8,6 +8,7 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.FoodOnAStickItem;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.VRData.VRDevicePose;
 import org.vivecraft.client_vr.settings.VRSettings.FreeMove;
@@ -15,9 +16,10 @@ import org.vivecraft.client_vr.settings.VRSettings.FreeMove;
 import static org.joml.Math.*;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.convertToVector3f;
 
 public class VehicleTracker extends Tracker {
-    public Vec3 Premount_Pos_Room = new Vec3(0.0D, 0.0D, 0.0D);
+    public final Vector3f Premount_Pos_Room = new Vector3f();
     public float vehicleInitialRotation = 0.0F;
     public int rotationCooldown = 0;
     private double rotationTarget = 0.0D;
@@ -46,8 +48,7 @@ public class VehicleTracker extends Tracker {
         return original;
     }
 
-    public static Vec3 getSteeringDirection(LocalPlayer player) {
-        Vec3 vec3 = null;
+    public static Vector3f getSteeringDirection(LocalPlayer player, Vector3f dest) {
         Entity entity = player.getVehicle();
 
         if (!(entity instanceof AbstractHorse) && !(entity instanceof Boat)) {
@@ -56,18 +57,18 @@ public class VehicleTracker extends Tracker {
                 if (mob.isControlledByLocalInstance()) {
                     int i = (player.getMainHandItem().getItem() instanceof FoodOnAStickItem || player.getMainHandItem().is(ItemTags.VIVECRAFT_FOOD_STICKS)) ? 0 : 1;
                     VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_world_pre.getController(i);
-                    return vrdata$vrdevicepose.getPosition().add(vrdata$vrdevicepose.getDirection().scale(0.3D)).subtract(entity.position()).normalize();
+                    return vrdata$vrdevicepose.getPosition(new Vector3f()).add(vrdata$vrdevicepose.getDirection(new Vector3f()).mul(0.3F)).sub(convertToVector3f(entity.position(), dest)).normalize();
                 }
             }
         } else if (player.zza > 0.0F) {
             if (dh.vrSettings.vrFreeMoveMode == FreeMove.HMD) {
-                return dh.vrPlayer.vrdata_world_pre.hmd.getDirection();
+                return dh.vrPlayer.vrdata_world_pre.hmd.getDirection(dest);
             }
 
-            return dh.vrPlayer.vrdata_world_pre.getController(0).getDirection();
+            return dh.vrPlayer.vrdata_world_pre.getController(0).getDirection(dest);
         }
 
-        return vec3;
+        return null;
     }
 
     @Override
@@ -157,8 +158,8 @@ public class VehicleTracker extends Tracker {
     }
 
     public void onStartRiding(Entity vehicle, LocalPlayer player) {
-        Vec3 vec3 = dh.vrPlayer.vrdata_room_pre.getHeadPivot();
-        this.Premount_Pos_Room = new Vec3(vec3.x, 0.0D, vec3.z);
+        Vector3f vec3 = dh.vrPlayer.vrdata_room_pre.getHeadPivot(new Vector3f());
+        this.Premount_Pos_Room.set(vec3.x, 0.0F, vec3.z);
         this.dismountCooldown = 5;
 
         if (dh.vrSettings.vehicleRotation) {

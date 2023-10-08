@@ -19,6 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.BlockTags;
@@ -31,17 +32,17 @@ import java.util.Random;
 import static org.joml.Math.*;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
-import static org.vivecraft.common.utils.Utils.up;
+import static org.vivecraft.common.utils.Utils.*;
 
 public class TeleportTracker extends Tracker {
     private float teleportEnergy;
-    private Vec3 movementTeleportDestination = new Vec3(0.0D, 0.0D, 0.0D);
+    private final Vector3f movementTeleportDestination = new Vector3f();
     private Direction movementTeleportDestinationSideHit;
     public double movementTeleportProgress;
     public double movementTeleportDistance;
     private Vec3[] movementTeleportArc = new Vec3[50];
     public int movementTeleportArcSteps = 0;
-    public double lastTeleportArcDisplayOffset = 0.0D;
+    public float lastTeleportArcDisplayOffset = 0.0F;
     public final VRMovementStyle vrMovementStyle = new VRMovementStyle();
 
     public float getTeleportEnergy() {
@@ -52,7 +53,7 @@ public class TeleportTracker extends Tracker {
         return this.movementTeleportProgress > 0.0D;
     }
 
-    public Vec3 getDestination() {
+    public Vector3fc getDestination() {
         return this.movementTeleportDestination;
     }
 
@@ -71,7 +72,7 @@ public class TeleportTracker extends Tracker {
 
     @Override
     public void reset() {
-        this.movementTeleportDestination = new Vec3(0.0D, 0.0D, 0.0D);
+        this.movementTeleportDestination.zero();
         this.movementTeleportArcSteps = 0;
         this.movementTeleportProgress = 0.0D;
     }
@@ -85,7 +86,7 @@ public class TeleportTracker extends Tracker {
         }
 
         boolean flag = false;
-        Vec3 vec3 = null;
+        Vector3f vec3 = null;
         boolean flag1 = VivecraftVRMod.keyTeleport.isDown() && dh.vrPlayer.isTeleportEnabled();
         boolean flag2 = dh.vrSettings.seated && !dh.vrPlayer.getFreeMove() && (mc.player.input.forwardImpulse != 0.0F || mc.player.input.leftImpulse != 0.0F);
 
@@ -106,9 +107,9 @@ public class TeleportTracker extends Tracker {
                         this.movementTeleportProgress = 1.0D;
                     }
 
-                    if (vec3.x != 0.0D || vec3.y != 0.0D || vec3.z != 0.0D) {
-                        Vec3 vec38 = dh.vrPlayer.vrdata_world_pre.hmd.getPosition();
-                        Vec3 vec31 = vec3.add(-vec38.x, -vec38.y, -vec38.z).normalize();
+                    if (vec3.x != 0.0F || vec3.y != 0.0F || vec3.z != 0.0F) {
+                        Vector3f vec38 = dh.vrPlayer.vrdata_world_pre.hmd.getPosition(new Vector3f());
+                        Vector3f vec31 = vec3.add(-vec38.x, -vec38.y, -vec38.z, new Vector3f()).normalize();
                         Vec3 vec32 = mc.player.getLookAngle();
                         Vec3 vec33 = vec32.cross(new Vec3(0.0D, 1.0D, 0.0D));
                         Vec3 vec34 = vec33.cross(vec32);
@@ -126,13 +127,13 @@ public class TeleportTracker extends Tracker {
                         }
                     }
                 }
-            } else if (((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer() >= 0 && (vec3.x != 0.0D || vec3.y != 0.0D || vec3.z != 0.0D)) {
+            } else if (((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer() >= 0 && (vec3.x != 0.0F || vec3.y != 0.0F || vec3.z != 0.0F)) {
                 if (((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer() == 0) {
                 }
 
                 ((PlayerExtension) mc.player).vivecraft$setMovementTeleportTimer(((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer() + 1);
                 Vec3 vec39 = mc.player.position();
-                double d6 = vec3.distanceTo(vec39);
+                float d6 = vec3.distance((float) vec39.x, (float) vec39.y, (float) vec39.z);
                 double d7 = (double) ((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer() / (d6 + 3.0D);
 
                 if (((PlayerExtension) mc.player).vivecraft$getMovementTeleportTimer() > 0) {
@@ -141,7 +142,7 @@ public class TeleportTracker extends Tracker {
                     if (this.vrMovementStyle.destinationSparkles) {
                     }
 
-                    Vec3 vec310 = vec3.add(-mc.player.getX(), -mc.player.getY(), -mc.player.getZ()).normalize();
+                    Vector3f vec310 = vec3.add((float) -mc.player.getX(), (float) -mc.player.getY(), (float) -mc.player.getZ(), new Vector3f()).normalize();
                     Vec3 vec311 = mc.player.getLookAngle();
                     Vec3 vec35 = vec311.cross(new Vec3(0.0D, 1.0D, 0.0D));
                     Vec3 vec312 = vec35.cross(vec311);
@@ -176,7 +177,7 @@ public class TeleportTracker extends Tracker {
         }
 
         if (flag && vec3 != null && (vec3.x != 0.0D || vec3.y != 0.0D || vec3.z != 0.0D)) {
-            this.movementTeleportDistance = vec3.distanceTo(mc.player.position());
+            this.movementTeleportDistance = vec3.distance((float) mc.player.position().x, (float) mc.player.position().y, (float) mc.player.position().z);
 
             if (this.movementTeleportDistance > 0.0D && this.vrMovementStyle.endTeleportingSound != null) {
                 boolean flag3 = true;
@@ -198,7 +199,7 @@ public class TeleportTracker extends Tracker {
             }
 
             this.doTeleportCallback();
-            ((PlayerExtension) mc.player).vivecraft$stepSound(BlockPos.containing(vec3), vec3.x(), vec3.y(), vec3.z());
+            ((PlayerExtension) mc.player).vivecraft$stepSound(BlockPos.containing(convertToVec3(vec3)), vec3.x(), vec3.y(), vec3.z());
         }
     }
 
@@ -206,7 +207,7 @@ public class TeleportTracker extends Tracker {
         mc.getProfiler().push("updateTeleportDestinations");
 
         if (this.vrMovementStyle.arcAiming) {
-            this.movementTeleportDestination = new Vec3(0.0D, 0.0D, 0.0D);
+            this.movementTeleportDestination.zero();
 
             if (this.movementTeleportProgress > 0.0D) {
                 this.updateTeleportArc();
@@ -217,23 +218,23 @@ public class TeleportTracker extends Tracker {
     }
 
     private void updateTeleportArc() {
-        Vec3 vec3;
-        Vec3 vec31;
+        final Vector3fc vec3;
+        final Vector3fc vec31;
         Matrix4f matrix4f;
 
         if (dh.vrSettings.seated) {
-            vec3 = RenderHelper.getControllerRenderPos(0);
-            vec31 = dh.vrPlayer.vrdata_world_render.getController(0).getDirection();
+            vec3 = RenderHelper.getControllerRenderPos(0, new Vector3f());
+            vec31 = dh.vrPlayer.vrdata_world_render.getController(0).getDirection(new Vector3f());
             matrix4f = new Matrix4f(dh.vr.getAimRotation(0)).rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
         } else {
-            vec3 = dh.vrPlayer.vrdata_world_render.getController(1).getPosition();
-            vec31 = dh.vrPlayer.vrdata_world_render.getController(1).getDirection();
+            vec3 = dh.vrPlayer.vrdata_world_render.getController(1).getPosition(new Vector3f());
+            vec31 = dh.vrPlayer.vrdata_world_render.getController(1).getDirection(new Vector3f());
             matrix4f = new Matrix4f(dh.vr.getAimRotation(1)).rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
         }
 
         Quaternionf quaternion = new Quaternionf().setFromUnnormalized(matrix4f);
         int i = 50;
-        this.movementTeleportArc[0] = new Vec3(vec3.x, vec3.y, vec3.z);
+        this.movementTeleportArc[0] = new Vec3(vec3.x(), vec3.y(), vec3.z());
         this.movementTeleportArcSteps = 1;
         float f = 0.098F;
         Matrix4f matrix4f4 = matrix4f.rotateZ(-atan2((2.0F * (quaternion.x * quaternion.y + quaternion.w * quaternion.z)), (quaternion.w * quaternion.w - quaternion.x * quaternion.x + quaternion.y * quaternion.y - quaternion.z * quaternion.z)));
@@ -241,8 +242,8 @@ public class TeleportTracker extends Tracker {
         Vec3 vec32 = new Vec3(-vector31.x, -vector31.y, -vector31.z);
         vec32 = vec32.scale(f);
         float f1 = 0.5F;
-        Vec3 vec33 = new Vec3(vec31.x * (double) f1, vec31.y * (double) f1, vec31.z * (double) f1);
-        Vec3 vec34 = new Vec3(vec3.x, vec3.y, vec3.z);
+        Vec3 vec33 = new Vec3(vec31.x() * (double) f1, vec31.y() * (double) f1, vec31.z() * (double) f1);
+        Vec3 vec34 = new Vec3(vec3.x(), vec3.y(), vec3.z());
 
         for (int j = this.movementTeleportArcSteps; j < i && !((float) (j * 4) > this.teleportEnergy); ++j) {
             Vec3 vec35 = new Vec3(vec34.x + vec33.x, vec34.y + vec33.y, vec34.z + vec33.z);
@@ -256,8 +257,8 @@ public class TeleportTracker extends Tracker {
                 this.movementTeleportArcSteps = j + 1;
                 Vec3 vec36 = vec34.subtract(vec35).normalize();
                 Vec3 vec37 = new Vec3(-vec36.x * 0.02D, -vec36.y * 0.02D, -vec36.z * 0.02D);
-                this.checkAndSetTeleportDestination(mc, mc.player, vec3, blockhitresult, vec37);
-                Vec3 vec38 = mc.player.position().subtract(this.movementTeleportDestination);
+                this.checkAndSetTeleportDestination(mc, mc.player, convertToVec3(vec3), blockhitresult, vec37);
+                Vec3 vec38 = mc.player.position().subtract(this.movementTeleportDestination.x, this.movementTeleportDestination.y, this.movementTeleportDestination.z);
                 double d0 = vec38.y;
                 this.movementTeleportDistance = vec38.length();
                 double d1 = sqrt(vec38.x * vec38.x + vec38.z * vec38.z);
@@ -274,7 +275,7 @@ public class TeleportTracker extends Tracker {
                 }
 
                 if (!flag1) {
-                    this.movementTeleportDestination = new Vec3(0.0D, 0.0D, 0.0D);
+                    this.movementTeleportDestination.zero();
                     this.movementTeleportDistance = 0.0D;
                 }
 
@@ -327,7 +328,7 @@ public class TeleportTracker extends Tracker {
             }
 
             if (flag) {
-                this.movementTeleportDestination = new Vec3(aabb.getCenter().x, aabb.minY + (double) f, aabb.getCenter().z);
+                this.movementTeleportDestination.set(aabb.getCenter().x, aabb.minY + f, aabb.getCenter().z);
                 this.movementTeleportDestinationSideHit = collision.getDirection();
                 return true;
             }
@@ -340,7 +341,7 @@ public class TeleportTracker extends Tracker {
                     vec36 = vec36.add(0.0D, -1.0D, 0.0D);
                 }
 
-                this.movementTeleportDestination = vec36.scale(1.0D);
+                convertToVector3f(vec36.scale(1.0D), this.movementTeleportDestination);
                 this.movementTeleportDestinationSideHit = collision.getDirection();
                 return true;
             }
@@ -380,7 +381,7 @@ public class TeleportTracker extends Tracker {
 
                 if (flag1) {
                     Vec3 vec37 = new Vec3(aabb1.getCenter().x, (double) blockpos1.getY() + d2, aabb1.getCenter().z);
-                    this.movementTeleportDestination = vec37.scale(1.0D);
+                    convertToVector3f(vec37.scale(1.0D), this.movementTeleportDestination);
                     return true;
                 }
 
@@ -391,10 +392,10 @@ public class TeleportTracker extends Tracker {
         return false;
     }
 
-    public Vec3 getInterpolatedArcPosition(float progress) {
+    public Vector3f getInterpolatedArcPosition(float progress, Vector3f dest) {
         if (this.movementTeleportArcSteps != 1 && !(progress <= 0.0F)) {
             if (progress >= 1.0F) {
-                return new Vec3(this.movementTeleportArc[this.movementTeleportArcSteps - 1].x, this.movementTeleportArc[this.movementTeleportArcSteps - 1].y, this.movementTeleportArc[this.movementTeleportArcSteps - 1].z);
+                return convertToVector3f(this.movementTeleportArc[this.movementTeleportArcSteps - 1], dest);
             } else {
                 float f = progress * (float) (this.movementTeleportArcSteps - 1);
                 int i = (int) floor(f);
@@ -402,10 +403,10 @@ public class TeleportTracker extends Tracker {
                 double d1 = this.movementTeleportArc[i + 1].y - this.movementTeleportArc[i].y;
                 double d2 = this.movementTeleportArc[i + 1].z - this.movementTeleportArc[i].z;
                 float f1 = f - (float) i;
-                return new Vec3(this.movementTeleportArc[i].x + d0 * (double) f1, this.movementTeleportArc[i].y + d1 * (double) f1, this.movementTeleportArc[i].z + d2 * (double) f1);
+                return dest.set(this.movementTeleportArc[i].x + d0 * (double) f1, this.movementTeleportArc[i].y + d1 * (double) f1, this.movementTeleportArc[i].z + d2 * (double) f1);
             }
         } else {
-            return new Vec3(this.movementTeleportArc[0].x, this.movementTeleportArc[0].y, this.movementTeleportArc[0].z);
+            return convertToVector3f(this.movementTeleportArc[0], dest);
         }
     }
 }

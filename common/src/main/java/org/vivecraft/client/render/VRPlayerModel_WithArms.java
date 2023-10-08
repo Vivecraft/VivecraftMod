@@ -225,7 +225,7 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         ModelPart modelpart = this.getArm(pSide);
 
         if (this.laying) {
-            float ang = toRadians(-90.0F);
+            float ang = (float) PI / -2.0F;
             pMatrixStack.last().pose().rotateX(ang);
             pMatrixStack.last().normal().rotateX(ang);
         }
@@ -261,7 +261,7 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 //
 //			if (this.laying)
 //			{
-//				float ang = toRadians(-90.0F);
+//				float ang = (float) PI / -2.0F;
 //				pMatrixStack.last().pose().rotateX(ang);
 // 				pMatrixStack.last().normal().rotateX(ang);
 //			}

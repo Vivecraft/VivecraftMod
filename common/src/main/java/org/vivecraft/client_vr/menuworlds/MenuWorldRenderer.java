@@ -45,6 +45,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings.MenuWorld;
@@ -59,12 +60,14 @@ import java.util.concurrent.Future;
 
 import static java.lang.Math.pow;
 import static net.minecraft.client.Minecraft.useFancyGraphics;
+import static net.minecraft.util.CubicSampler.gaussianSampleVec3;
+import static net.minecraft.world.phys.Vec3.fromRGB24;
 import static org.joml.Math.*;
 import static org.joml.RoundingMode.FLOOR;
 import static org.joml.Vector2i.lengthSquared;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
-import static org.vivecraft.common.utils.Utils.logger;
+import static org.vivecraft.common.utils.Utils.*;
 
 public class MenuWorldRenderer {
     private static final ResourceLocation MOON_LOCATION = new ResourceLocation("textures/environment/moon_phases.png");
@@ -177,8 +180,10 @@ public class MenuWorldRenderer {
             .translate(-0.5F, -blockAccess.getGround() + (int) blockAccess.getGround(), -0.5F);
 
         // not sure why this needs to be rotated twice, but it works
-        Vec3 offset = new Vec3(0.5, -blockAccess.getGround() + (int) blockAccess.getGround(), 0.5).yRot(worldRotRads);
-        Vec3 eyePosition = getEyePos().add(offset).yRot(-worldRotRads);
+        // TODO: because it's not rotated twice
+        Vector3f eyePosition = getEyePos(new Vector3f())
+            .add(new Vector3f(0.5F, -blockAccess.getGround() + (int) blockAccess.getGround(), 0.5F).rotateY(worldRotRads))
+            .rotateY(-worldRotRads);
 
         fogRenderer.levelFogColor();
 
@@ -486,7 +491,7 @@ public class MenuWorldRenderer {
     }
     // End VanillaFix support
 
-    public void renderSky(PoseStack poseStack, Vec3 position) {
+    public void renderSky(PoseStack poseStack, Vector3fc position) {
         if (this.dimensionInfo.skyType() == SkyType.END) {
             this.renderEndSky(poseStack);
         } else if (this.dimensionInfo.skyType() == SkyType.NORMAL) {
@@ -495,17 +500,19 @@ public class MenuWorldRenderer {
             ShaderInstance skyShader = RenderSystem.getShader();
             //RenderSystem.disableTexture();
 
-            Vec3 skyColor = this.getSkyColor(position);
+            Vector3f skyColor;
 
             if (OptifineHelper.isOptifineLoaded()) {
-                skyColor = OptifineHelper.getCustomSkyColor(skyColor, blockAccess, position.x, position.y, position.z);
+                skyColor = OptifineHelper.getCustomSkyColor(new Vector3f(), blockAccess, position.x(), position.y(), position.z());
+            } else {
+                skyColor = this.getSkyColor(position);
             }
 
             fogRenderer.levelFogColor();
 
             BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
             RenderSystem.depthMask(false);
-            RenderSystem.setShaderColor((float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1.0F);
+            RenderSystem.setShaderColor(skyColor.x, skyColor.y, skyColor.z, 1.0F);
 
 
             if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSkyEnabled()) {
@@ -525,8 +532,8 @@ public class MenuWorldRenderer {
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 poseStack.pushPose();
 
-                float ang0 = toRadians(90.0F);
-                float ang1 = sin(this.getSunAngle()) < 0.0F ? toRadians(180.0F) : 0.0F;
+                float ang0 = (float) PI / 2.0F;
+                float ang1 = sin(this.getSunAngle()) < 0.0F ? (float) PI : 0.0F;
 
                 poseStack.last().pose()
                     .rotateX(ang0)
@@ -565,7 +572,7 @@ public class MenuWorldRenderer {
 
             float f10 = 1.0F - getRainLevel();
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, f10);
-            float ang1 = toRadians(-90.0F);
+            float ang1 = (float) PI / -2.0F;
             poseStack.last().normal().rotateY(ang1);
             Matrix4f modelView = poseStack.last().pose().rotateY(ang1);
 
@@ -628,7 +635,7 @@ public class MenuWorldRenderer {
             poseStack.popPose();
             //RenderSystem.disableTexture();
 
-            double horizonDistance = position.y - this.blockAccess.getHorizon();
+            double horizonDistance = position.y() - this.blockAccess.getHorizon();
 
             if (horizonDistance < 0.0D) {
                 RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
@@ -659,27 +666,27 @@ public class MenuWorldRenderer {
                 poseStack.pushPose();
                 Matrix4f modelView = switch (i) {
                     case 1 -> {
-                        float ang1 = toRadians(90.0F);
+                        float ang1 = (float) PI / 2.0F;
                         poseStack.last().normal().rotateX(ang1);
                         yield poseStack.last().pose().rotateX(ang1);
                     }
                     case 2 -> {
-                        float ang2 = toRadians(-90.0F);
+                        float ang2 = (float) PI / -2.0F;
                         poseStack.last().normal().rotateX(ang2);
                         yield poseStack.last().pose().rotateX(ang2);
                     }
                     case 3 -> {
-                        float ang3 = toRadians(180.0F);
+                        float ang3 = (float) PI;
                         poseStack.last().normal().rotateX(ang3);
                         yield poseStack.last().pose().rotateX(ang3);
                     }
                     case 4 -> {
-                        float ang4 = toRadians(90.0F);
+                        float ang4 = (float) PI / 2.0F;
                         poseStack.last().normal().rotateZ(ang4);
                         yield poseStack.last().pose().rotateZ(ang4);
                     }
                     case 5 -> {
-                        float ang5 = toRadians(-90.0F);
+                        float ang5 = (float) PI / -2.0F;
                         poseStack.last().normal().rotateZ(ang5);
                         yield poseStack.last().pose().rotateZ(ang5);
                     }
@@ -690,16 +697,20 @@ public class MenuWorldRenderer {
 
                 bufferBuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
-                int r = 40;
-                int g = 40;
-                int b = 40;
+                int r;
+                int g;
+                int b;
 
                 if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isCustomColors()) {
-                    Vec3 newSkyColor = new Vec3((double) r / 255.0D, (double) g / 255.0D, (double) b / 255.0D);
-                    newSkyColor = OptifineHelper.getCustomSkyColorEnd(newSkyColor);
-                    r = (int) (newSkyColor.x * 255.0D);
-                    g = (int) (newSkyColor.y * 255.0D);
-                    b = (int) (newSkyColor.z * 255.0D);
+                    Vector3f newSkyColor = new Vector3f(40 / 255.0F, 40 / 255.0F, 40 / 255.0F);
+                    OptifineHelper.getCustomSkyColorEnd(newSkyColor);
+                    r = (int) (newSkyColor.x * 255.0F);
+                    g = (int) (newSkyColor.y * 255.0F);
+                    b = (int) (newSkyColor.z * 255.0F);
+                } else {
+                    r = 40;
+                    g = 40;
+                    b = 40;
                 }
                 bufferBuilder.vertex(modelView, -100.0F, -100.0F, -100.0F).uv(0.0F, 0.0F).color(r, g, b, 255).endVertex();
                 bufferBuilder.vertex(modelView, -100.0F, -100.0F, 100.0F).uv(0.0F, 16.0F).color(r, g, b, 255).endVertex();
@@ -1055,12 +1066,12 @@ public class MenuWorldRenderer {
         return f1 * f1 * 0.5F;
     }
 
-    public Vec3 getSkyColor(Vec3 position) {
+    public Vector3f getSkyColor(Vector3fc position) {
         float dayTime = this.getTimeOfDay();
 
-        Vec3 samplePosition = position.subtract(2.0, 2.0, 2.0).scale(0.25);
+        Vector3f samplePosition = position.sub(2.0F, 2.0F, 2.0F, new Vector3f()).mul(0.25F);
 
-        Vec3 skyColor = CubicSampler.gaussianSampleVec3(samplePosition, (i, j, k) -> Vec3.fromRGB24(blockAccess.getBiomeManager().getNoiseBiomeAtQuart(i, j, k).value().getSkyColor()));
+        Vec3 skyColor = gaussianSampleVec3(convertToVec3(samplePosition), (i, j, k) -> fromRGB24(blockAccess.getBiomeManager().getNoiseBiomeAtQuart(i, j, k).value().getSkyColor()));
 
         float h = cos(dayTime * ((float) PI * 2)) * 2.0F + 0.5F;
         h = clamp(0.0F, 1.0F, h);
@@ -1093,13 +1104,13 @@ public class MenuWorldRenderer {
             skyColorG = skyColorG * (1.0F - flash) + 0.8F * flash;
             skyColorB = skyColorB * (1.0F - flash) + flash;
         }
-        return new Vec3(skyColorR, skyColorG, skyColorB);
+        return samplePosition.set(skyColorR, skyColorG, skyColorB);
     }
 
-    public Vec3 getFogColor(Vec3 pos) {
+    public Vector3f getFogColor(Vector3f pos) {
         float f = clamp(0.0F, 1.0F, cos(this.getTimeOfDay() * ((float) PI * 2F)) * 2.0F + 0.5F);
-        Vec3 scaledPos = pos.subtract(2.0D, 2.0D, 2.0D).scale(0.25D);
-        return CubicSampler.gaussianSampleVec3(scaledPos, (x, y, z) -> this.dimensionInfo.getBrightnessDependentFogColor(Vec3.fromRGB24(this.blockAccess.getBiomeManager().getNoiseBiomeAtQuart(x, y, z).value().getFogColor()), f));
+        pos.sub(2.0F, 2.0F, 2.0F).mul(0.25F);
+        return convertToVector3f(gaussianSampleVec3(convertToVec3(pos), (x, y, z) -> this.dimensionInfo.getBrightnessDependentFogColor(fromRGB24(this.blockAccess.getBiomeManager().getNoiseBiomeAtQuart(x, y, z).value().getFogColor()), f)), pos);
     }
 
     public Vec3 getCloudColour() {
@@ -1368,14 +1379,14 @@ public class MenuWorldRenderer {
             return false;
         }
 
-        Vec3 pos = getEyePos();
-        BlockPos blockpos = BlockPos.containing(pos);
+        Vector3f pos = getEyePos(new Vector3f());
+        BlockPos blockpos = BlockPos.containing(pos.x(), pos.y(), pos.z());
         FluidState fluidstate = this.blockAccess.getFluidState(blockpos);
         return isFluidTagged(fluidstate, tagIn) && pos.y < (double) ((float) blockpos.getY() + fluidstate.getAmount() + 0.11111111F);
     }
 
-    public Vec3 getEyePos() {
-        return dh.vrPlayer.vrdata_room_post.hmd.getPosition();
+    public Vector3f getEyePos(Vector3f dest) {
+        return dh.vrPlayer.vrdata_room_post.hmd.getPosition(dest);
     }
 
     private boolean isFluidTagged(Fluid fluid, TagKey<Fluid> tag) {
@@ -1407,7 +1418,7 @@ public class MenuWorldRenderer {
         }
 
         public void setupFogColor() {
-            Vec3 eyePos = this.menuWorldRenderer.getEyePos();
+            Vector3f eyePos = this.menuWorldRenderer.getEyePos(new Vector3f());
 
             FogType fogType = getEyeFogType();
 
@@ -1493,36 +1504,40 @@ public class MenuWorldRenderer {
         private void updateSurfaceFog() {
             float f = 0.25F + 0.75F * (float) this.menuWorldRenderer.renderDistanceChunks / 32.0F;
             f = 1.0F - (float) pow(f, 0.25);
-            Vec3 eyePos = this.menuWorldRenderer.getEyePos();
-            Vec3 skyColor = this.menuWorldRenderer.getSkyColor(eyePos);
+            Vector3f eyePos = this.menuWorldRenderer.getEyePos(new Vector3f());
+            Vector3f skyColor = this.menuWorldRenderer.getSkyColor(eyePos);
             if (OptifineHelper.isOptifineLoaded()) {
                 if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS)) {
-                    skyColor = OptifineHelper.getCustomSkyColor(skyColor, menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
+                    OptifineHelper.getCustomSkyColor(skyColor, menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
                 } else if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.END_EFFECTS)) {
-                    skyColor = OptifineHelper.getCustomSkyColorEnd(skyColor);
+                    OptifineHelper.getCustomSkyColorEnd(skyColor);
                 }
             }
-            float f1 = (float) skyColor.x;
-            float f2 = (float) skyColor.y;
-            float f3 = (float) skyColor.z;
-            Vec3 fogColor = this.menuWorldRenderer.getFogColor(eyePos);
+            float f1 = skyColor.x;
+            float f2 = skyColor.y;
+            float f3 = skyColor.z;
+            Vector3f fogColor = this.menuWorldRenderer.getFogColor(eyePos);
             if (OptifineHelper.isOptifineLoaded()) {
                 if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS)) {
-                    fogColor = OptifineHelper.getCustomFogColor(fogColor, menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
+                    OptifineHelper.getCustomFogColor(fogColor, menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
                 } else if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.END_EFFECTS)) {
-                    fogColor = OptifineHelper.getCustomFogColorEnd(fogColor);
+                    OptifineHelper.getCustomFogColorEnd(fogColor);
                 } else if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.NETHER_EFFECTS)) {
-                    fogColor = OptifineHelper.getCustomFogColorNether(fogColor);
+                    OptifineHelper.getCustomFogColorNether(fogColor);
                 }
             }
-            fogRed = (float) fogColor.x;
-            fogGreen = (float) fogColor.y;
-            fogBlue = (float) fogColor.z;
+            fogRed = fogColor.x;
+            fogGreen = fogColor.y;
+            fogBlue = fogColor.z;
 
             if (this.menuWorldRenderer.renderDistanceChunks >= 4) {
-                float d0 = sin(this.menuWorldRenderer.getSunAngle()) > 0.0F ? -1.0F : 1.0F;
-                Vec3 vec3d2 = new Vec3(d0, 0.0F, 0.0F).yRot(0);
-                float f5 = (float) dh.vrPlayer.vrdata_room_post.hmd.getDirection().yRot(menuWorldRenderer.worldRotation).dot(vec3d2);
+                float f5 = dh.vrPlayer.vrdata_room_post.hmd.getDirection(new Vector3f())
+                    .rotateY(menuWorldRenderer.worldRotation)
+                    .dot(new Vector3f(
+                        sin(this.menuWorldRenderer.getSunAngle()) > 0.0F ? -1.0F : 1.0F,
+                        0.0F,
+                        0.0F
+                    ).rotateY(0));
 
                 if (f5 < 0.0F) {
                     f5 = 0.0F;
@@ -1565,7 +1580,7 @@ public class MenuWorldRenderer {
 
         private void updateWaterFog(LevelReader levelIn) {
             long currentTime = Util.getMillis();
-            int waterFogColor = levelIn.getBiome(BlockPos.containing(this.menuWorldRenderer.getEyePos())).value().getWaterFogColor();
+            int waterFogColor = levelIn.getBiome(BlockPos.containing(convertToVec3(this.menuWorldRenderer.getEyePos(new Vector3f())))).value().getWaterFogColor();
 
             if (this.biomeChangedTime < 0L) {
                 targetBiomeFog = waterFogColor;
@@ -1611,7 +1626,7 @@ public class MenuWorldRenderer {
                 fogStart = -8.0F;
                 fogEnd = 96.0F;
 
-                Holder<Biome> holder = menuWorldRenderer.blockAccess.getBiome(BlockPos.containing(menuWorldRenderer.getEyePos()));
+                Holder<Biome> holder = menuWorldRenderer.blockAccess.getBiome(BlockPos.containing(convertToVec3(menuWorldRenderer.getEyePos(new Vector3f()))));
                 if (holder.is(BiomeTags.HAS_CLOSER_WATER_FOG)) {
                     fogEnd *= 0.85F;
                 }
@@ -1643,7 +1658,7 @@ public class MenuWorldRenderer {
                 fogType = FogType.WATER;
             } else if (menuWorldRenderer.areEyesInFluid(FluidTags.LAVA)) {
                 fogType = FogType.LAVA;
-            } else if (menuWorldRenderer.blockAccess.getBlockState(BlockPos.containing(menuWorldRenderer.getEyePos())).is(Blocks.POWDER_SNOW)) {
+            } else if (menuWorldRenderer.blockAccess.getBlockState(BlockPos.containing(convertToVec3(menuWorldRenderer.getEyePos(new Vector3f())))).is(Blocks.POWDER_SNOW)) {
                 fogType = FogType.POWDER_SNOW;
             }
             return fogType;

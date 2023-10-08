@@ -3,8 +3,9 @@ package org.vivecraft.mixin.client_vr.renderer.entity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.FishingRodItem;
-import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
@@ -21,20 +22,26 @@ public abstract class FishingHookRendererVRMixin extends net.minecraft.client.re
         super(context);
     }
 
-    private Vec3 vivecraft$CachedHandPos;
+    @Unique
+    private final Vector3f vivecraft$CachedHandPos = new Vector3f();
 
     @ModifyVariable(at = @At("LOAD"),
         method = "render(Lnet/minecraft/world/entity/projectile/FishingHook;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", index = 25)
     private double vivecraft$fishingLineStartX(double value, FishingHook fishingHook) {
         if (!RenderPassType.isVanilla() && (this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson()) && fishingHook.getPlayerOwner() == mc.player) {
-            int j = 1;
+            final int j;
             if (fishingHook.getPlayerOwner().getMainHandItem().getItem() instanceof FishingRodItem) {
                 j = 0;
+            } else {
+                j = 1;
             }
-            Vec3 vec31 = RenderHelper.getControllerRenderPos(j);
-            Vec3 vec32 = dh.vrPlayer.vrdata_world_render.getHand(j).getDirection();
-            this.vivecraft$CachedHandPos = vec31.add(vec32.scale(0.47 * dh.vrPlayer.vrdata_world_render.worldScale));
-            return this.vivecraft$CachedHandPos.x;
+            RenderHelper.getControllerRenderPos(j, this.vivecraft$CachedHandPos);
+            return (
+                this.vivecraft$CachedHandPos.add(
+                    dh.vrPlayer.vrdata_world_render.getHand(j).getDirection(new Vector3f())
+                        .mul(0.47F * dh.vrPlayer.vrdata_world_render.worldScale)
+                ).x
+            );
         } else {
             return value;
         }

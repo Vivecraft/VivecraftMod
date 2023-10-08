@@ -1,6 +1,6 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.vivecraft.client_vr.settings.VRSettings.FreeMove;
 
 import static org.joml.Math.abs;
@@ -11,7 +11,6 @@ import static org.vivecraft.client_vr.VRState.mc;
 public class RunTracker extends Tracker {
     private double direction = 0.0D;
     private double speed = 0.0D;
-    private Vec3 movedir;
 
     @Override
     public boolean isActive() {
@@ -53,8 +52,6 @@ public class RunTracker extends Tracker {
 
     @Override
     public void doProcess() {
-        Vec3 vec3 = dh.vrPlayer.vrdata_world_pre.getController(0).getPosition();
-        Vec3 vec31 = dh.vrPlayer.vrdata_world_pre.getController(1).getPosition();
         double d0 = dh.vr.controllerHistory[0].averageSpeed(0.33D);
         double d1 = dh.vr.controllerHistory[1].averageSpeed(0.33D);
 
@@ -71,7 +68,7 @@ public class RunTracker extends Tracker {
         if (abs(d0 - d1) > 0.5D) {
             this.speed = 0.0D;
         } else {
-            Vec3 vec32 = dh.vrPlayer.vrdata_world_pre.getController(0).getDirection().add(dh.vrPlayer.vrdata_world_pre.getController(1).getDirection()).scale(0.5D);
+            Vector3f vec32 = dh.vrPlayer.vrdata_world_pre.getController(0).getDirection(new Vector3f()).add(dh.vrPlayer.vrdata_world_pre.getController(1).getDirection(new Vector3f())).mul(0.5F);
             this.direction = atan2(-vec32.x, vec32.z);
             double d2 = (d0 + d1) / 2.0D;
             this.speed = d2 * 1.0D * 1.3D;

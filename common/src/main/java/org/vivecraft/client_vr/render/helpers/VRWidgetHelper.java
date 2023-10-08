@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
 import org.vivecraft.client_vr.render.RenderPass;
@@ -25,10 +26,12 @@ import org.vivecraft.client_vr.settings.VRSettings.MirrorMode;
 
 import java.util.function.Function;
 
+import static org.joml.Math.PI;
 import static org.joml.Math.toRadians;
 import static org.vivecraft.client.utils.Utils.getCombinedLightWithMin;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.convertToVec3;
 
 public class VRWidgetHelper {
     private static final RandomSource random = RandomSource.create();
@@ -70,7 +73,7 @@ public class VRWidgetHelper {
 
             renderVRCameraWidget(-0.5F, -0.25F, -0.22F, f, RenderPass.CAMERA, CameraTracker.cameraModel, CameraTracker.cameraDisplayModel, () ->
             {
-                if (VREffectsHelper.getNearOpaqueBlock(dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), ((GameRendererExtension) mc.gameRenderer).vivecraft$getMinClipDistance()) == null) {
+                if (VREffectsHelper.getNearOpaqueBlock(dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(new Vector3f()), ((GameRendererExtension) mc.gameRenderer).vivecraft$getMinClipDistance()) == null) {
                     dh.vrRenderer.cameraFramebuffer.bindRead();
                     RenderSystem.setShaderTexture(0, dh.vrRenderer.cameraFramebuffer.getColorTextureId());
                 } else {
@@ -88,18 +91,17 @@ public class VRWidgetHelper {
         poseStack.setIdentity();
         RenderHelper.applyVRModelView(dh.currentPass, poseStack);
 
-        Vec3 vec3 = dh.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
-        Vec3 vec31 = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition();
-        Vec3 vec32 = vec3.subtract(vec31);
+        Vector3f vec32 = dh.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition(new Vector3f())
+            .sub(dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition(new Vector3f()));
 
         poseStack.last().pose()
-            .translate((float) vec32.x, (float) vec32.y, (float) vec32.z)
+            .translate(vec32.x, vec32.y, vec32.z)
             .mul(dh.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix());
         scale *= dh.vrPlayer.vrdata_world_render.worldScale;
         poseStack.scale(scale, scale, scale);
 
         if (debug) {
-            float ang = toRadians(180.0F);
+            float ang = (float) PI;
             poseStack.last().pose().rotateY(ang);
             poseStack.last().normal().rotateY(ang);
             RenderHelper.renderDebugAxes(0, 0, 0, 0.08F);
@@ -110,7 +112,7 @@ public class VRWidgetHelper {
         poseStack.last().pose().translate(offsetX, offsetY, offsetZ);
         RenderSystem.applyModelViewMatrix();
 
-        BlockPos blockpos = BlockPos.containing(dh.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
+        BlockPos blockpos = BlockPos.containing(convertToVec3(dh.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition(new Vector3f())));
         int i = getCombinedLightWithMin(mc.level, blockpos, 0);
 
         RenderSystem.enableDepthTest();

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,6 +18,7 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.common.utils.Utils.convertToVec3;
 
 @Pseudo
 @Mixin(targets = "net.optifine.shaders.Shaders")
@@ -32,15 +34,15 @@ public class ShadersVRMixin {
         if (RenderPassType.isVanilla()) {
             return camera.getPosition();
         } else {
-            return dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition();
+            return convertToVec3(dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition(new Vector3f()));
         }
     }
 
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack$Pose;pose()Lorg/joml/Matrix4f;", shift = Shift.AFTER, remap = true), method = "setCameraShadow", remap = false)
     private static PoseStack vivecraft$offsetShadow(PoseStack shadowModelViewMat) {
         if (!RenderPassType.isVanilla()) {
-            Vec3 offset = dh.vrPlayer.getVRDataWorld().getEye(dh.currentPass).getPosition().subtract(dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition());
-            shadowModelViewMat.last().pose().translate((float) offset.x, (float) offset.y, (float) offset.z);
+            Vector3f offset = dh.vrPlayer.getVRDataWorld().getEye(dh.currentPass).getPosition(new Vector3f()).sub(dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition(new Vector3f()));
+            shadowModelViewMat.last().pose().translate(offset.x, offset.y, offset.z);
         }
         return shadowModelViewMat;
     }
@@ -50,7 +52,7 @@ public class ShadersVRMixin {
         if (RenderPassType.isVanilla()) {
             return entity.getX();
         } else {
-            return dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition().x;
+            return dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition(new Vector3f()).x;
         }
     }
 
@@ -59,7 +61,7 @@ public class ShadersVRMixin {
         if (RenderPassType.isVanilla()) {
             return entity.getZ();
         } else {
-            return dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition().z;
+            return dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition(new Vector3f()).z;
         }
     }
 }

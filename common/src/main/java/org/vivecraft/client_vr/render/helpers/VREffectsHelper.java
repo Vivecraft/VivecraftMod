@@ -7,7 +7,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -24,11 +23,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
-import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.Xplat;
@@ -76,11 +75,11 @@ public class VREffectsHelper {
         }
     }
 
-    public static Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 in, double dist) {
+    public static Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vector3fc in, double dist) {
         if (mc.level == null) {
             return null;
         } else {
-            AABB aabb = new AABB(in.subtract(dist, dist, dist), in.add(dist, dist, dist));
+            AABB aabb = new AABB(in.x() - dist, in.y() - dist, in.z() - dist, in.x() + dist, in.y() + dist, in.z() + dist);
             Stream<BlockPos> stream = BlockPos.betweenClosedStream(aabb).filter((bp) ->
                 mc.level.getBlockState(bp).isSolidRender(mc.level, bp));
             Optional<BlockPos> optional = stream.findFirst();
@@ -114,7 +113,8 @@ public class VREffectsHelper {
             RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
             RenderSystem.enableBlend();
             matrixStackIn.last().pose().translate(0.0F, 0.0F, 0.00001F);
-            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(dh.vrPlayer.vrdata_world_render.getController(i).getPosition()));
+            Vector3fc vector3f = dh.vrPlayer.vrdata_world_render.getController(i).getPosition(new Vector3f());
+            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(vector3f.x(), vector3f.y(), vector3f.z()));
             RenderHelper.drawSizedQuadWithLightmapCutout(720.0F, 720.0F, scale, light, matrixStackIn.last().pose());
 
             matrixStackIn.popPose();
@@ -396,7 +396,7 @@ public class VREffectsHelper {
         }
 
         // render hands in second pass when gui is open
-        boolean renderHandsSecond = RadialHandler.isShowing() || KeyboardHandler.isShowing() || Minecraft.getInstance().screen != null;
+        boolean renderHandsSecond = RadialHandler.isShowing() || KeyboardHandler.isShowing() || mc.screen != null;
         if (secondPass == renderHandsSecond) {
             // should render hands in second pass if menus are open, else in the first pass
             // only render the hands only once
@@ -409,7 +409,7 @@ public class VREffectsHelper {
         if (dh.currentPass != RenderPass.THIRD && dh.currentPass != RenderPass.CAMERA) {
             return !((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() && mc.screen == null && !KeyboardHandler.isShowing()
                 && !RadialHandler.isShowing() && dh.vrSettings.hudOcclusion
-                && !isInsideOpaqueBlock(dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition().toVector3f());
+                && !isInsideOpaqueBlock(dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition(new Vector3f()));
         } else {
             return true;
         }
@@ -419,7 +419,7 @@ public class VREffectsHelper {
         if (shadowFirst) {
             VREffectsHelper.renderVrShadow(partialTicks, depthAlways, poseStack);
         }
-        if (Minecraft.getInstance().screen != null || !KeyboardHandler.isShowing()) {
+        if (mc.screen != null || !KeyboardHandler.isShowing()) {
             renderGuiLayer(partialTicks, depthAlways, poseStack);
         }
         if (!shadowFirst) {
@@ -455,10 +455,9 @@ public class VREffectsHelper {
                 poseStack.setIdentity();
                 RenderSystem.disableCull();
                 RenderHelper.applyVRModelView(dh.currentPass, poseStack);
-                Vec3 vec3 = dh.vrPlayer.vrdata_world_render
-                    .getEye(dh.currentPass).getPosition();
-                Vec3 interpolatedPlayerPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(partialTicks);
-                Vec3 pos = interpolatedPlayerPos.subtract(vec3).add(0.0D, 0.005D, 0.0D);
+                Vector3f vec3 = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition(new Vector3f());
+                Vector3f interpolatedPlayerPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(partialTicks, new Vector3f());
+                Vector3f pos = interpolatedPlayerPos.sub(vec3.x(), vec3.y() - 0.005F, vec3.z());
                 RenderHelper.setupPolyRendering(true);
                 RenderSystem.enableDepthTest();
 
@@ -528,7 +527,7 @@ public class VREffectsHelper {
         float v0 = lerp(vMin, vMid, ShrinkRatio);
         float v1 = lerp(vMax, vMid, ShrinkRatio);
         float a = 0.3F;
-        float b = (float) (dh.vrPlayer.vrdata_world_render.getHeadPivot().y - ((GameRendererExtension) mc.gameRenderer).vivecraft$getRveY());
+        float b = (float) (dh.vrPlayer.vrdata_world_render.getHeadPivot(new Vector3f()).y - ((GameRendererExtension) mc.gameRenderer).vivecraft$getRveY());
 
         for (int i = 0; i < 4; ++i) {
             posestack.pushPose();
@@ -556,10 +555,10 @@ public class VREffectsHelper {
             poseStack.setIdentity();
 
             mc.getProfiler().push("applyPhysicalKeyboardModelView");
-            Vector3f eye = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition().toVector3f();
+            Vector3f eye = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition(new Vector3f());
 
             //convert previously calculated coords to world coords
-            Vector3f guiPos = VRPlayer.room_to_world_pos(KeyboardHandler.Pos_room, dh.vrPlayer.vrdata_world_render).toVector3f();
+            Vector3f guiPos = VRPlayer.room_to_world_pos(KeyboardHandler.Pos_room, dh.vrPlayer.vrdata_world_render, new Vector3f());
 
             poseStack.last().pose()
                 .mul(dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getMatrix())
@@ -604,7 +603,8 @@ public class VREffectsHelper {
         // cache fog distance
         float fogStart = RenderSystem.getShaderFogStart();
         float[] color = new float[]{1.0F, 1.0F, 1.0F, 1.0F};
-        if (!((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom()) {
+        GameRendererExtension GRE = ((GameRendererExtension) mc.gameRenderer);
+        if (!GRE.vivecraft$isInMenuRoom()) {
             if (mc.screen == null) {
                 color[3] = dh.vrSettings.hudOpacity;
             }
@@ -639,8 +639,8 @@ public class VREffectsHelper {
         RenderSystem.enableDepthTest();
 
         if (mc.level != null) {
-            if (isInsideOpaqueBlock(screenPos) || ((GameRendererExtension) mc.gameRenderer).vivecraft$isInBlock() > 0.0F) {
-                convertToVector3f(dh.vrPlayer.vrdata_world_render.hmd.getPosition(), screenPos);
+            if (isInsideOpaqueBlock(screenPos) || GRE.vivecraft$isInBlock() > 0.0F) {
+                dh.vrPlayer.vrdata_world_render.hmd.getPosition(screenPos);
             }
 
             int minLight = ShadersHelper.ShaderLight();
@@ -678,8 +678,11 @@ public class VREffectsHelper {
                 poseStack.pushPose();
                 poseStack.last().pose()
                     .translate(
-                        dh.vrPlayer.vrdata_world_render.origin.toVector3f()
-                            .sub(dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition().toVector3f())
+                        dh.vrPlayer.vrdata_world_render.origin
+                            .sub(
+                                dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition(new Vector3f()),
+                                new Vector3f()
+                            )
                     )
                     // remove world rotation or the room doesn't align with the screen
                     .rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
@@ -707,15 +710,15 @@ public class VREffectsHelper {
         }
     }
 
-    public static void render2D(float partialTicks, RenderTarget framebuffer, Vec3 pos, Matrix4f rot, boolean depthAlways, PoseStack poseStack) {
+    public static void render2D(float partialTicks, RenderTarget framebuffer, Vector3fc pos, Matrix4f rot, boolean depthAlways, PoseStack poseStack) {
         if (!dh.bowTracker.isDrawing) {
             setupScreenRendering(poseStack, partialTicks);
 
             mc.getProfiler().push("apply2DModelView");
 
-            Vector3f eye = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition().toVector3f();
+            Vector3f eye = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass).getPosition(new Vector3f());
 
-            Vector3f guiPos = VRPlayer.room_to_world_pos(pos, dh.vrPlayer.vrdata_world_render).toVector3f();
+            Vector3f guiPos = VRPlayer.room_to_world_pos(pos, dh.vrPlayer.vrdata_world_render, new Vector3f());
 
             poseStack.last().pose()
                 .translate(guiPos.sub(eye))
@@ -815,47 +818,48 @@ public class VREffectsHelper {
 
             // white crosshair, with blending
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            Vec3 crosshairRenderPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getCrossVec();
-            Vec3 aim = crosshairRenderPos.subtract(dh.vrPlayer.vrdata_world_render.getController(0).getPosition());
-            float crossDepth = (float) aim.length();
+            Vector3f crosshairRenderPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getCrossVec(new Vector3f());
+            Vector3f aim = dh.vrPlayer.vrdata_world_render.getController(0).getPosition(new Vector3f());
+            float crossDepth = crosshairRenderPos.sub(aim, aim).length();
             float scale = 0.125F * dh.vrSettings.crosshairScale * sqrt(dh.vrPlayer.vrdata_world_render.worldScale);
 
             //scooch closer a bit for light calc.
-            crosshairRenderPos = crosshairRenderPos.add(aim.normalize().scale(-0.01D));
+            crosshairRenderPos.add(aim.normalize().mul(-0.01F));
 
             poseStack.pushPose();
             poseStack.setIdentity();
             RenderHelper.applyVRModelView(dh.currentPass, poseStack);
 
-            Vec3 translate = crosshairRenderPos.subtract(mc.getCameraEntity().position());
-            poseStack.last().pose().translate((float) translate.x, (float) translate.y, (float) translate.z);
+            Vector3f translate = convertToVector3f(mc.getCameraEntity().position(), new Vector3f());
+            crosshairRenderPos.sub(translate, translate);
+            poseStack.last().pose().translate(translate.x, translate.y, translate.z);
 
             if (mc.hitResult instanceof BlockHitResult hit && hit.getType() == Type.BLOCK) {
                 switch (hit.getDirection()) {
                     case DOWN -> {
                         float ang1 = toRadians(dh.vrPlayer.vrdata_world_render.getController(0).getYaw());
-                        float ang2 = toRadians(-90.0F);
+                        float ang2 = (float) PI / -2.0F;
                         poseStack.last().pose().rotateY(ang1).rotateX(ang2);
                         poseStack.last().normal().rotateY(ang1).rotateX(ang2);
                     }
                     case UP -> {
                         float ang1 = toRadians(-dh.vrPlayer.vrdata_world_render.getController(0).getYaw());
-                        float ang2 = toRadians(90.0F);
+                        float ang2 = (float) PI / 2.0F;
                         poseStack.last().pose().rotateY(ang1).rotateX(ang2);
                         poseStack.last().normal().rotateY(ang1).rotateX(ang2);
                     }
                     case WEST -> {
-                        float ang = toRadians(90.0F);
+                        float ang = (float) PI / 2.0F;
                         poseStack.last().pose().rotateY(ang);
                         poseStack.last().normal().rotateY(ang);
                     }
                     case EAST -> {
-                        float ang = toRadians(-90.0F);
+                        float ang = (float) PI / -2.0F;
                         poseStack.last().pose().rotateY(ang);
                         poseStack.last().normal().rotateY(ang);
                     }
                     case SOUTH -> {
-                        float ang = toRadians(180.0F);
+                        float ang = (float) PI;
                         poseStack.last().pose().rotateY(ang);
                         poseStack.last().normal().rotateY(ang);
                     }
@@ -891,11 +895,13 @@ public class VREffectsHelper {
             RenderSystem.blendFuncSeparate(
                 SourceFactor.ONE_MINUS_DST_COLOR, DestFactor.ZERO, SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA
             );
-            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(crosshairRenderPos));
-            float brightness = 1.0F;
+            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(crosshairRenderPos.x(), crosshairRenderPos.y(), crosshairRenderPos.z()));
+            float brightness;
 
             if (mc.hitResult == null || mc.hitResult.getType() == Type.MISS) {
                 brightness = 0.5F;
+            } else {
+                brightness = 1.0F;
             }
 
             TextureAtlasSprite crosshairSprite = mc.getGuiSprites().getSprite(Gui.CROSSHAIR_SPRITE);

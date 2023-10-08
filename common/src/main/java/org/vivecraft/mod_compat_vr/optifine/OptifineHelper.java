@@ -5,13 +5,14 @@ import net.minecraft.client.model.geom.ModelPart.Vertex;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static org.vivecraft.client_vr.VRState.mc;
-import static org.vivecraft.common.utils.Utils.logger;
+import static org.vivecraft.common.utils.Utils.*;
 
 public class OptifineHelper {
 
@@ -191,18 +192,18 @@ public class OptifineHelper {
         }
     }
 
-    public static Vec3 getCustomSkyColor(Vec3 skyColor, BlockAndTintGetter blockAccess, double x, double y, double z) {
+    public static Vector3f getCustomSkyColor(Vector3f skyColor, BlockAndTintGetter blockAccess, double x, double y, double z) {
         try {
-            return (Vec3) customColorsGetSkyColorMethod.invoke(customColors, skyColor, blockAccess, x, y, z);
+            return convertToVector3f((Vec3) customColorsGetSkyColorMethod.invoke(customColors, convertToVec3(skyColor), blockAccess, x, y, z), skyColor);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return skyColor;
         }
     }
 
-    public static Vec3 getCustomSkyColorEnd(Vec3 skyColor) {
+    public static Vector3f getCustomSkyColorEnd(Vector3f skyColor) {
         try {
-            return (Vec3) customColorsGetSkyColorEndMethod.invoke(customColors, skyColor);
+            return convertToVector3f((Vec3) customColorsGetSkyColorEndMethod.invoke(customColors, convertToVec3(skyColor)), skyColor);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return skyColor;
@@ -228,27 +229,27 @@ public class OptifineHelper {
         }
     }
 
-    public static Vec3 getCustomFogColor(Vec3 fogColor, BlockAndTintGetter blockAccess, double x, double y, double z) {
+    public static Vector3f getCustomFogColor(Vector3f fogColor, BlockAndTintGetter blockAccess, double x, double y, double z) {
         try {
-            return (Vec3) customColorsGetFogColorMethod.invoke(customColors, fogColor, blockAccess, x, y, z);
+            return convertToVector3f((Vec3) customColorsGetFogColorMethod.invoke(customColors, convertToVec3(fogColor), blockAccess, x, y, z), fogColor);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return fogColor;
         }
     }
 
-    public static Vec3 getCustomFogColorEnd(Vec3 fogColor) {
+    public static Vector3f getCustomFogColorEnd(Vector3f fogColor) {
         try {
-            return (Vec3) customColorsGetFogColorEndMethod.invoke(customColors, fogColor);
+            return convertToVector3f((Vec3) customColorsGetFogColorEndMethod.invoke(customColors, convertToVec3(fogColor)), fogColor);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return fogColor;
         }
     }
 
-    public static Vec3 getCustomFogColorNether(Vec3 fogColor) {
+    public static Vector3f getCustomFogColorNether(Vector3f fogColor) {
         try {
-            return (Vec3) customColorsGetFogColorNetherMethod.invoke(customColors, fogColor);
+            return convertToVector3f((Vec3) customColorsGetFogColorNetherMethod.invoke(customColors, convertToVec3(fogColor)), fogColor);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return fogColor;

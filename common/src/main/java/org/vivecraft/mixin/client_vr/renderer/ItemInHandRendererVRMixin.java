@@ -2,7 +2,6 @@ package org.vivecraft.mixin.client_vr.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -33,18 +32,13 @@ import org.vivecraft.client_vr.render.VivecraftItemRendering.VivecraftItemTransf
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 
 import static org.joml.Math.*;
-import static org.vivecraft.client_vr.VRState.dh;
-import static org.vivecraft.client_vr.VRState.vrRunning;
+import static org.vivecraft.client_vr.VRState.*;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {
 
     @Unique
     private VRFirstPersonArmSwing vivecraft$swingType = VRFirstPersonArmSwing.Attack;
-
-    @Final
-    @Shadow
-    private Minecraft minecraft;
     @Final
     @Shadow
     private EntityRenderDispatcher entityRenderDispatcher;
@@ -139,14 +133,14 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                         pMatrixStack.pushPose();
                         pMatrixStack.scale(0.625F, 0.625F, 0.625F);
                         pMatrixStack.last().pose().translate(mainHand ? -0.53F : -0.47F, -0.5F, -0.6F);
-                        //pMatrixStack.last().pose().rotateX(toRadians(180.0F));
-                        //pMatrixStack.last().normal().rotateX(toRadians(180.0F));
-                        this.minecraft.getBlockRenderer().getModelRenderer().renderModel(pMatrixStack.last(), pBuffer.getBuffer(Sheets.solidBlockSheet()), null, this.minecraft.getModelManager().getModel(TelescopeTracker.scopeModel), 0.5F, 0.5F, 1.0F, pCombinedLight, OverlayTexture.NO_OVERLAY);
+                        //pMatrixStack.last().pose().rotateX((float) PI);
+                        //pMatrixStack.last().normal().rotateX((float) PI);
+                        mc.getBlockRenderer().getModelRenderer().renderModel(pMatrixStack.last(), pBuffer.getBuffer(Sheets.solidBlockSheet()), null, mc.getModelManager().getModel(TelescopeTracker.scopeModel), 0.5F, 0.5F, 1.0F, pCombinedLight, OverlayTexture.NO_OVERLAY);
                         pMatrixStack.popPose();
                     }
 
-                    float ang1 = toRadians(90.0F);
-                    float ang2 = toRadians(180.0F);
+                    float ang1 = (float) PI / 2.0F;
+                    float ang2 = (float) PI;
 
                     pMatrixStack.pushPose();
                     pMatrixStack.last().pose()
@@ -186,7 +180,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
     private void vivecraft$vrPlayerArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm) {
         boolean flag = humanoidArm != HumanoidArm.LEFT;
         float h = flag ? 1.0F : -1.0F;
-        AbstractClientPlayer abstractclientplayer = this.minecraft.player;
+        AbstractClientPlayer abstractclientplayer = mc.player;
         RenderSystem.setShaderTexture(0, abstractclientplayer.getSkin().texture());
         VRArmRenderer vrarmrenderer = ((EntityRenderDispatcherVRExtension) this.entityRenderDispatcher).vivecraft$getArmSkinMap().get(abstractclientplayer.getSkin().model().id());
         poseStack.pushPose();
@@ -212,8 +206,8 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
              x offset: (5 - 1 + 4*0.5) / 16 = 0.375
              z offset: (-2 + 2 + 12) / 16 = 0.75
             */
-        float ang1 = toRadians(-90);
-        float ang2 = toRadians(180);
+        float ang1 = (float) PI / -2.0F;
+        float ang2 = (float) PI;
 
         poseStack.last().pose()
             .translate((slim ? -0.34375F : -0.375F) * h, 0.0F, slim ? 0.78125F : 0.75F)

@@ -3,7 +3,8 @@ package org.vivecraft.client_vr.render;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.material.FogType;
-import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.client_vr.VRData.VRDevicePose;
 import org.vivecraft.client_vr.settings.VRSettings.MirrorMode;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
@@ -23,14 +24,15 @@ public class XRCamera extends net.minecraft.client.Camera {
         this.level = pLevel;
         this.entity = pRenderViewEntity;
         VRDevicePose eye = dh.vrPlayer.vrdata_world_render.getEye(dh.currentPass);
-        this.setPosition(eye.getPosition());
+        Vector3fc eyePos = eye.getPosition(new Vector3f());
+        this.setPosition(eyePos.x(), eyePos.y(), eyePos.z());
         this.xRot = -eye.getPitch();
         this.yRot = eye.getYaw();
-        this.getLookVector().set((float) eye.getDirection().x, (float) eye.getDirection().y, (float) eye.getDirection().z);
-        Vec3 vec3 = eye.getCustomVector(new Vec3(0.0D, 1.0D, 0.0D));
-        this.getUpVector().set((float) vec3.x, (float) vec3.y, (float) vec3.z);
-        eye.getCustomVector(new Vec3(1.0D, 0.0D, 0.0D));
-        this.getLeftVector().set((float) vec3.x, (float) vec3.y, (float) vec3.z);
+        this.getLookVector().set(eye.getDirection(new Vector3f()));
+        Vector3f vec3 = eye.getCustomVector(new Vector3f(0.0F, 1.0F, 0.0F));
+        this.getUpVector().set(vec3);
+        eye.getCustomVector(vec3.set(1.0F, 0.0F, 0.0F));
+        this.getLeftVector().set(vec3);
         this.rotation().set(0.0F, 0.0F, 0.0F, 1.0F).rotateY(toRadians(-this.yRot)).rotateX(toRadians(this.xRot));
     }
 

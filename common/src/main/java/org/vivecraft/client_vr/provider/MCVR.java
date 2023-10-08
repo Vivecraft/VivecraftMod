@@ -9,7 +9,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.TorchBlock;
-import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.VRData.VRDevicePose;
@@ -40,6 +39,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.joml.Math.*;
+import static org.joml.RoundingMode.FLOOR;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.glfwSetCursorPos;
 import static org.vivecraft.client.utils.Utils.message;
@@ -80,16 +80,12 @@ public abstract class MCVR {
     protected Matrix4f[] poseMatrices;
     protected Vector3f[] aimSource = new Vector3f[]{new Vector3f(), new Vector3f()};
     public int hmdAvgLength = 90;
-    public LinkedList<Vec3> hmdPosSamples = new LinkedList<>();
+    public LinkedList<Vector3f> hmdPosSamples = new LinkedList<>();
     public LinkedList<Float> hmdYawSamples = new LinkedList<>();
     protected float hmdYawTotal;
     protected float hmdYawLast;
     protected boolean trigger;
     public boolean mrMovingCamActive;
-    public Vec3 mrControllerPos = Vec3.ZERO;
-    public float mrControllerPitch;
-    public float mrControllerYaw;
-    public float mrControllerRoll;
     protected HapticScheduler hapticScheduler;
     public float seatedRot;
     public float aimPitch = 0.0F;
@@ -121,16 +117,16 @@ public abstract class MCVR {
         return this.controllerRotation[controller];
     }
 
-    public Vec3 getAimSource(int controller) {
-        return convertToVec3(
+    public Vector3f getAimSource(int controller, Vector3f dest) {
+        return (
             !dh.vrSettings.seated && dh.vrSettings.allowStandingOriginOffset && dh.vr.isHMDTracking() ?
-            this.aimSource[controller].add(dh.vrSettings.originOffset, new Vector3f()) :
-            this.aimSource[controller]
+            this.aimSource[controller].add(dh.vrSettings.originOffset, dest) :
+            dest.set(this.aimSource[controller])
         );
     }
 
-    public Vec3 getAimVector(int controller) {
-        return convertToVec3(this.controllerRotation[controller].transformProject(forward, new Vector3f()));
+    public Vector3f getAimVector(int controller, Vector3f dest) {
+        return this.controllerRotation[controller].transformProject(forward, dest);
     }
 
     public Vector3f getGesturePosition(int controller) {
@@ -186,8 +182,8 @@ public abstract class MCVR {
         return this.handRotation[controller];
     }
 
-    public Vec3 getHandVector(int controller) {
-        return convertToVec3(this.handRotation[controller].transformProject(forward, new Vector3f()));
+    public Vector3f getHandVector(int controller, Vector3f dest) {
+        return this.handRotation[controller].transformProject(forward, dest);
     }
 
     public Vector3f getCenterEyePosition() {
@@ -198,7 +194,7 @@ public abstract class MCVR {
         );
     }
 
-    public Vec3 getEyePosition(RenderPass eye) {
+    public Vector3f getEyePosition(RenderPass eye) {
         Vector3f vector3 = switch (eye) {
             case LEFT -> {
                 yield this.hmdPose.mul0(this.hmdPoseLeftEye, new Matrix4f()).getTranslation(new Vector3f());
@@ -217,7 +213,7 @@ public abstract class MCVR {
             }
         }
 
-        return convertToVec3(vector3);
+        return vector3;
     }
 
     public HardwareType getHardwareType() {
@@ -309,55 +305,53 @@ public abstract class MCVR {
             return;
         }
 
-        Vec3 main = this.getAimSource(0);
-        Vec3 off = this.getAimSource(1);
-        Vec3 barStartos, barEndos;
+        Vector3f main = this.getAimSource(0, new Vector3f());
+        Vector3f off = this.getAimSource(1, new Vector3f());
+        Vector3f barStartos, barEndos;
 
         int i = dh.vrSettings.reverseHands ? 0 : 1;
 
         if (dh.vrSettings.vrHudLockMode == HUDLock.WRIST) {
-            barStartos = convertToVec3(this.getAimRotation(1).transformProject((float) i * 0.02F, 0.05F, 0.26F, new Vector3f()));
-            barEndos = convertToVec3(this.getAimRotation(1).transformProject((float) i * 0.02F, 0.05F, 0.01F, new Vector3f()));
+            barStartos = this.getAimRotation(1).transformProject((float) i * 0.02F, 0.05F, 0.26F, new Vector3f());
+            barEndos = this.getAimRotation(1).transformProject((float) i * 0.02F, 0.05F, 0.01F, new Vector3f());
         } else if (dh.vrSettings.vrHudLockMode == HUDLock.HAND) {
-            barStartos = convertToVec3(this.getAimRotation(1).transformProject((float) i * -0.18F, 0.08F, -0.01F, new Vector3f()));
-            barEndos = convertToVec3(this.getAimRotation(1).transformProject((float) i * 0.19F, 0.04F, -0.08F, new Vector3f()));
+            barStartos = this.getAimRotation(1).transformProject((float) i * -0.18F, 0.08F, -0.01F, new Vector3f());
+            barEndos = this.getAimRotation(1).transformProject((float) i * 0.19F, 0.04F, -0.08F, new Vector3f());
         } else {
             return; //how did u get here
         }
 
 
-        Vec3 barStart = off.add(barStartos.x, barStartos.y, barStartos.z);
-        Vec3 barEnd = off.add(barEndos.x, barEndos.y, barEndos.z);
+        Vector3f barStart = off.add(barStartos, new Vector3f());
+        Vector3f barEnd = off.add(barEndos, new Vector3f());
 
-        Vec3 u = barStart.subtract(barEnd);
-        Vec3 pq = barStart.subtract(main);
-        float dist = (float) (pq.cross(u).length() / u.length());
+        Vector3f u = barStart.sub(barEnd, new Vector3f());
+        Vector3f pq = barStart.sub(main, new Vector3f());
+        float dist = pq.cross(u).length() / u.length();
 
         if (dist > 0.06) {
             return;
         }
 
-        float fact = (float) (pq.dot(u) / (u.x * u.x + u.y * u.y + u.z * u.z));
+        float fact = pq.dot(u) / (u.x * u.x + u.y * u.y + u.z * u.z);
 
         if (fact < -1) {
             return;
         }
 
-        Vec3 w2 = u.scale(fact).subtract(pq);
+        Vector3f w2 = u.mul(fact, new Vector3f()).sub(pq);
 
-        Vec3 point = main.subtract(w2);
-        float linelen = (float) u.length();
-        float ilen = (float) barStart.subtract(point).length();
+        float ilen = barStart.sub(main.sub(w2)).length();
         if (fact < 0) {
             ilen *= -1;
         }
-        float pos = ilen / linelen * 9;
+        float pos = ilen / u.length() * 9.0F;
 
         if (dh.vrSettings.reverseHands) {
             pos = 9 - pos;
         }
 
-        int box = (int) floor(pos);
+        int box = roundUsing(pos, FLOOR);
 
         if (box > 8) {
             return;
@@ -416,7 +410,7 @@ public abstract class MCVR {
             logger.warn("HMD yaw desync/overflow corrected");
         }
 
-        this.hmdPosSamples.add(dh.vrPlayer.vrdata_room_pre.hmd.getPosition());
+        this.hmdPosSamples.add(dh.vrPlayer.vrdata_room_pre.hmd.getPosition(new Vector3f()));
         float f2 = 0.0F;
 
         if (this.hmdYawSamples.size() > 0) {
@@ -493,9 +487,9 @@ public abstract class MCVR {
                 InputSimulator.setMousePos(f3, height / 2.0F);
                 glfwSetCursorPos(mc.getWindow().getWindow(), f3, height / 2.0F);
                 final float xRot = toRadians(-clamp(
-                    -89.9F, 89.9F, this.aimPitch + (-((float) mc.mouseHandler.ypos()) / height * 180.0F + (180.0F / 2.0F)) * 0.5F * dh.vrSettings.ySensitivity
+                    -89.9F, 89.9F, this.aimPitch + (-((float) mc.mouseHandler.ypos()) / height * 180.0F + 90.0F) * 0.5F * dh.vrSettings.ySensitivity
                 ));
-                final float yRot = toRadians(-180.0F + f4 - this.hmdForwardYaw);
+                final float yRot = toRadians(f4 - this.hmdForwardYaw) - (float) PI;
                 this.handRotation[0].rotationXYZ(xRot, yRot, 0);
                 this.controllerRotation[0].rotationXYZ(xRot, yRot, 0);
             } else {
@@ -515,13 +509,13 @@ public abstract class MCVR {
         this.handRotation[1].identity().set3x3(controller1hand);
         this.controllerRotation[1].identity().set3x3(controller1tip);
 
-        this.controllerHistory[0].add(this.getAimSource(0));
-        this.controllerHistory[1].add(this.getAimSource(1));
+        this.controllerHistory[0].add(this.getAimSource(0, new Vector3f()));
+        this.controllerHistory[1].add(this.getAimSource(1, new Vector3f()));
 
-        Vector3dc vec32 = this.controllerForwardHistory[0].add(this.getAimVector(0));
+        Vector3fc vec32 = this.controllerForwardHistory[0].add(this.getAimVector(0, new Vector3f()));
         this.aimPitch = (float) toDegrees(asin(vec32.y() / vec32.length()));
         this.controllerUpHistory[0].add(this.controllerRotation[0].transformProject(up, new Vector3f()));
-        this.controllerForwardHistory[1].add(this.getAimVector(1));
+        this.controllerForwardHistory[1].add(this.getAimVector(1, new Vector3f()));
         this.controllerUpHistory[1].add(this.controllerRotation[1].transformProject(up, new Vector3f()));
 
 //        boolean flag = false;
@@ -571,8 +565,8 @@ public abstract class MCVR {
                 }
             }
 
-            Vec3 vec3 = this.getAimVector(0);
-            Vec3 vec31 = this.getAimVector(1);
+            Vector3f vec3 = this.getAimVector(0, new Vector3f());
+            Vector3f vec31 = this.getAimVector(1, new Vector3f());
             float f = (float) toDegrees(atan2(-vec3.x, vec3.z));
             float f1 = (float) toDegrees(atan2(-vec31.x, vec31.z));
 
@@ -798,7 +792,7 @@ public abstract class MCVR {
                     }
 
                     VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_world_pre.getController(hand.ordinal());
-                    dh.cameraTracker.setPosition(vrdata$vrdevicepose.getPosition());
+                    dh.cameraTracker.setPosition(vrdata$vrdevicepose.getPosition(new Vector3f()));
                     dh.cameraTracker.setRotation(new Quaternionf().setFromNormalized(vrdata$vrdevicepose.getMatrix()));
                 }
             }
@@ -815,7 +809,7 @@ public abstract class MCVR {
                 }
 
                 VRDevicePose vrdata$vrdevicepose1 = dh.vrPlayer.vrdata_world_pre.getController(hand.ordinal());
-                dh.cameraTracker.setPosition(vrdata$vrdevicepose1.getPosition());
+                dh.cameraTracker.setPosition(vrdata$vrdevicepose1.getPosition(new Vector3f()));
                 dh.cameraTracker.setRotation(new Quaternionf().setFromNormalized(vrdata$vrdevicepose1.getMatrix()));
                 dh.cameraTracker.startMoving(hand.ordinal(), true);
             }

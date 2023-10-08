@@ -17,8 +17,8 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.client_vr.VRData.VRDevicePose;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -32,6 +32,7 @@ import org.vivecraft.client_vr.settings.VRSettings.HUDLock;
 import static org.joml.Math.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.vivecraft.client_vr.VRState.*;
+import static org.vivecraft.client_vr.gameplay.VRPlayer.world_to_room_pos;
 import static org.vivecraft.common.utils.Utils.*;
 
 public class GuiHandler {
@@ -48,7 +49,7 @@ public class GuiHandler {
     public static boolean guiAppearOverBlockActive = false;
     public static float guiScale = 1.0F;
     public static float guiScaleApplied = 1.0F;
-    public static Vec3 guiPos_room;
+    public static Vector3f guiPos_room;
     public static Matrix4f guiRotation_room;
     public static final KeyMapping keyLeftClick = new KeyMapping("vivecraft.key.guiLeftClick", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
     public static final KeyMapping keyRightClick = new KeyMapping("vivecraft.key.guiRightClick", GLFW_KEY_UNKNOWN, "vivecraft.key.category.gui");
@@ -159,35 +160,33 @@ public class GuiHandler {
         }
     }
 
-    public static Vec2 getTexCoordsForCursor(Vec3 guiPos_room, Matrix4f guiRotation_room, float guiScale, VRDevicePose controller) {
-        Vec3 vec3 = controller.getPosition();
-        Vector3f vector3 = convertToVector3f(vec3, new Vector3f());
-        Vec3 vec31 = controller.getDirection();
-        Vector3f vector31 = convertToVector3f(vec31, new Vector3f());
-        Vector3f vector33 = guiRotation_room.transformProject(backward, new Vector3f());
-        Vector3f vector34 = guiRotation_room.transformProject(right, new Vector3f());
-        Vector3f vector35 = guiRotation_room.transformProject(up, new Vector3f());
-        float f = vector33.dot(vector31);
+    public static Vec2 getTexCoordsForCursor(Vector3fc guiPos_room, Matrix4f guiRotation_room, float guiScale, VRDevicePose controller) {
+        Vector3f cPos = controller.getPosition(new Vector3f());
+        Vector3f cDir = controller.getDirection(new Vector3f());
+        Vector3f guiNormal = guiRotation_room.transformProject(backward, new Vector3f());
+        Vector3f guiRight = guiRotation_room.transformProject(right, new Vector3f());
+        Vector3f guiUp = guiRotation_room.transformProject(up, new Vector3f());
+        float f = guiNormal.dot(cDir);
 
         if (abs(f) > 1.0E-5F) {
-            float f1 = 1.0F;
-            float f2 = f1 * 0.5F;
-            float f3 = 1.0F;
-            float f4 = f3 * 0.5F;
-            Vector3f vector36 = convertToVector3f(guiPos_room, new Vector3f());
-            Vector3f vector37 = vector36.sub(vector35.div(1.0F / f4, new Vector3f()), new Vector3f()).sub(vector34.div(1.0F / f2, new Vector3f()), new Vector3f());
-            float f5 = -vector33.dot(vector3.sub(vector37, new Vector3f())) / f;
+            float guiWidth = 1.0F;
+            float guiHalfWidth = guiWidth * 0.5F;
+            float guiHeight = 1.0F;
+            float guiHalfHeight = guiHeight * 0.5F;
+            Vector3f gp = new Vector3f(guiPos_room);
+            Vector3f guiTopLeft = gp.sub(guiUp.div(1.0F / guiHalfHeight, new Vector3f()), new Vector3f()).sub(guiRight.div(1.0F / guiHalfWidth, new Vector3f()), new Vector3f());
+            float intersectDist = -guiNormal.dot(cPos.sub(guiTopLeft, new Vector3f())) / f;
 
-            if (f5 > 0.0F) {
-                Vector3f vector38 = vector3.add(vector31.div(1.0F / f5, new Vector3f()), new Vector3f());
-                Vector3f vector39 = vector38.sub(vector37, new Vector3f());
-                float f6 = vector39.dot(vector34.div(1.0F / f1, new Vector3f()));
-                float f7 = vector39.dot(vector35.div(1.0F / f1, new Vector3f()));
-                float f8 = (float) mc.getWindow().getGuiScaledHeight() / (float) mc.getWindow().getGuiScaledWidth();
-                f6 = (f6 - 0.5F) / 1.5F / guiScale + 0.5F;
-                f7 = (f7 - 0.5F) / f8 / 1.5F / guiScale + 0.5F;
-                f7 = 1.0F - f7;
-                return new Vec2(f6, f7);
+            if (intersectDist > 0.0F) {
+                Vector3f pointOnPlane = cPos.add(cDir.div(1.0F / intersectDist, new Vector3f()), new Vector3f());
+                Vector3f relativePoint = pointOnPlane.sub(guiTopLeft, new Vector3f());
+                float u = relativePoint.dot(guiRight.div(1.0F / guiWidth, new Vector3f()));
+                float v = relativePoint.dot(guiUp.div(1.0F / guiWidth, new Vector3f()));
+                float ar = (float) mc.getWindow().getGuiScaledHeight() / (float) mc.getWindow().getGuiScaledWidth();
+                u = (u - 0.5F) / 1.5F / guiScale + 0.5F;
+                v = (v - 0.5F) / ar / 1.5F / guiScale + 0.5F;
+                v = 1.0F - v;
+                return new Vec2(u, v);
             }
         }
 
@@ -195,9 +194,9 @@ public class GuiHandler {
     }
 
     public static void processBindingsGui() {
-        boolean flag = controllerMouseX >= 0.0D && controllerMouseX < (double) mc.getWindow().getScreenWidth() && controllerMouseY >= 0.0D && controllerMouseY < (double) mc.getWindow().getScreenWidth();
+        boolean mouseValid = controllerMouseX >= 0.0D && controllerMouseX < (double) mc.getWindow().getScreenWidth() && controllerMouseY >= 0.0D && controllerMouseY < (double) mc.getWindow().getScreenWidth();
 
-        if (keyLeftClick.consumeClick() && mc.screen != null && flag) {
+        if (keyLeftClick.consumeClick() && mc.screen != null && mouseValid) {
             InputSimulator.pressMouse(GLFW_MOUSE_BUTTON_LEFT);
             lastPressedLeftClick = true;
         }
@@ -207,7 +206,7 @@ public class GuiHandler {
             lastPressedLeftClick = false;
         }
 
-        if (keyRightClick.consumeClick() && mc.screen != null && flag) {
+        if (keyRightClick.consumeClick() && mc.screen != null && mouseValid) {
             InputSimulator.pressMouse(GLFW_MOUSE_BUTTON_RIGHT);
             lastPressedRightClick = true;
         }
@@ -217,7 +216,7 @@ public class GuiHandler {
             lastPressedRightClick = false;
         }
 
-        if (keyMiddleClick.consumeClick() && mc.screen != null && flag) {
+        if (keyMiddleClick.consumeClick() && mc.screen != null && mouseValid) {
             InputSimulator.pressMouse(GLFW_MOUSE_BUTTON_MIDDLE);
             lastPressedMiddleClick = true;
         }
@@ -303,9 +302,9 @@ public class GuiHandler {
 
         if (staticScreen) {
             guiScale = 2.0F;
-            Vector2f afloat = dh.vr.getPlayAreaSize();
+            Vector2f playArea = dh.vr.getPlayAreaSize();
             // slight offset to center of the room, to prevent z fighting
-            guiPos_room = new Vec3(0.02D, 1.3F, -max(afloat != null ? afloat.y / 2.0F : 0.0F, 1.5F));
+            guiPos_room = new Vector3f(0.02F, 1.3F, -max(playArea != null ? playArea.y / 2.0F : 0.0F, 1.5F));
             guiRotation_room = new Matrix4f();
         } else {
             if (previousGuiScreen == null && newScreen != null || newScreen instanceof ChatScreen || newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen) {
@@ -321,42 +320,38 @@ public class GuiHandler {
                     && mc.hitResult instanceof EntityHitResult
                     && ((EntityHitResult) mc.hitResult).getEntity() instanceof ContainerEntity;
 
-                Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
+                Vector3f hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition(new Vector3f());
 
                 if (guiAppearOverBlockActive && (isBlockScreen || isEntityScreen) && dh.vrSettings.guiAppearOverBlock) {
-                    Vec3 sourcePos;
+                    Vector3f sourcePos;
                     if (isEntityScreen) {
                         EntityHitResult entityHitResult = (EntityHitResult) mc.hitResult;
-                        sourcePos = new Vec3(entityHitResult.getEntity().getX(), entityHitResult.getEntity().getY(), entityHitResult.getEntity().getZ());
+                        sourcePos = convertToVector3f(entityHitResult.getEntity().position(), new Vector3f());
                     } else {
                         BlockHitResult blockHitResult = (BlockHitResult) mc.hitResult;
-                        sourcePos = new Vec3(((float) blockHitResult.getBlockPos().getX() + 0.5F), blockHitResult.getBlockPos().getY(), ((float) blockHitResult.getBlockPos().getZ() + 0.5F));
+                        sourcePos = convertToVector3f(blockHitResult.getBlockPos(), new Vector3f());
+                        sourcePos.x += 0.5F;
+                        sourcePos.z += 0.5F;
                     }
 
-                    Vec3 roomPos = VRPlayer.world_to_room_pos(sourcePos, dh.vrPlayer.vrdata_world_pre);
-                    double distance = roomPos.subtract(hmdPos).length();
+                    double distance = world_to_room_pos(sourcePos, dh.vrPlayer.vrdata_world_pre, new Vector3f()).sub(hmdPos).length();
                     guiScale = (float) sqrt(distance);
-                    Vec3 sourcePosWorld = new Vec3(sourcePos.x, sourcePos.y + 1.1D + (double) (0.5F * guiScale / 2.0F), sourcePos.z);
-                    guiPos_room = VRPlayer.world_to_room_pos(sourcePosWorld, dh.vrPlayer.vrdata_world_pre);
+                    Vector3f sourcePosWorld = new Vector3f(sourcePos.x, sourcePos.y + 1.1F + (0.5F * guiScale / 2.0F), sourcePos.z);
+                    guiPos_room = world_to_room_pos(sourcePosWorld, dh.vrPlayer.vrdata_world_pre, new Vector3f());
                 } else {
-                    Vec3 vec3 = new Vec3(0.0D, 0.0D, -2.0D);
-
-                    if (newScreen instanceof ChatScreen) {
-                        vec3 = new Vec3(0.0D, 0.5D, -2.0D);
-                    } else if (newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen) {
-                        vec3 = new Vec3(0.0D, 0.25D, -2.0D);
-                    }
-
-                    Vec3 vec32 = dh.vrPlayer.vrdata_room_pre.hmd.getCustomVector(vec3);
-                    guiPos_room = new Vec3(vec32.x / 2.0D + hmdPos.x, vec32.y / 2.0D + hmdPos.y, vec32.z / 2.0D + hmdPos.z);
-
-                    if (dh.vrSettings.physicalKeyboard && KeyboardHandler.isShowing() && guiPos_room.y < hmdPos.y + 0.2D) {
-                        guiPos_room = new Vec3(guiPos_room.x, hmdPos.y + 0.2D, guiPos_room.z);
+                    guiPos_room = dh.vrPlayer.vrdata_room_pre.hmd.getCustomVector(
+                        newScreen instanceof ChatScreen ? new Vector3f(0.0F, 0.5F, -2.0F) :
+                        (newScreen instanceof BookEditScreen || newScreen instanceof AbstractSignEditScreen) ?
+                        new Vector3f(0.0F, 0.25F, -2.0F) :
+                        new Vector3f(0.0F, 0.0F, -2.0F)
+                    ).mul(0.5F).add(hmdPos);
+                    if (dh.vrSettings.physicalKeyboard && KeyboardHandler.isShowing() && guiPos_room.y < hmdPos.y + 0.2F) {
+                        guiPos_room.y = hmdPos.y + 0.2F;
                     }
                 }
 
                 // orient screen
-                Vector3f look = new Vector3f((float) (guiPos_room.x - hmdPos.x), (float) (guiPos_room.y - hmdPos.y), (float) (guiPos_room.z - hmdPos.z));
+                Vector3f look = new Vector3f(guiPos_room.x - hmdPos.x, guiPos_room.y - hmdPos.y, guiPos_room.z - hmdPos.z);
                 float pitch = asin((look.y / look.length()));
                 float yaw = (float) (PI + atan2(look.x, look.z));
                 guiRotation_room = new Matrix4f().rotationY(yaw).rotateX(pitch);
@@ -399,14 +394,14 @@ public class GuiHandler {
                             .rotateY(((float) PI * 0.1F) * hand);
                         scale = 0.58823526F;
                         guilocal.y = 0.32F * dh.vrPlayer.vrdata_world_render.worldScale;
-                        convertToVector3f(RenderHelper.getControllerRenderPos(1), guipos);
+                        RenderHelper.getControllerRenderPos(1, guipos);
                         dh.vr.hudPopup = true;
                     }
                     case WRIST -> {
                         guirot.mul0(dh.vr.getAimRotation(1))
                             .rotateZ(((float) PI / 2F) * hand)
                             .rotateY(((float) PI * 0.3F) * hand);
-                        convertToVector3f(RenderHelper.getControllerRenderPos(1), guipos);
+                        RenderHelper.getControllerRenderPos(1, guipos);
                         dh.vr.hudPopup = true;
                         scale = 0.4F;
                         guilocal.set(
@@ -418,57 +413,52 @@ public class GuiHandler {
                     }
                     default -> {
                         guirot.mul0(dh.vr.hmdRotation);
-                        convertToVector3f(dh.vrPlayer.vrdata_world_render.hmd.getPosition(), guipos);
-                        Vector3f vec34 = new Vector3f();
+                        dh.vrPlayer.vrdata_world_render.hmd.getPosition(guipos);
+                        Vector3f d;
 
                         if (dh.vrSettings.seated && dh.vrSettings.seatedHudAltMode) {
-                            convertToVector3f(dh.vrPlayer.vrdata_world_render.getController(0).getDirection(), vec34);
+                            d = dh.vrPlayer.vrdata_world_render.getController(0).getDirection(new Vector3f());
                             guirot.mul0(dh.vr.getAimRotation(0));
                         } else {
-                            convertToVector3f(dh.vrPlayer.vrdata_world_render.hmd.getDirection(), vec34);
+                            d = dh.vrPlayer.vrdata_world_render.hmd.getDirection(new Vector3f());
                         }
 
-                        guipos.add(vec34.mul(dh.vrPlayer.vrdata_world_render.worldScale * dh.vrSettings.hudDistance));
+                        guipos.add(d.mul(dh.vrPlayer.vrdata_world_render.worldScale * dh.vrSettings.hudDistance));
 
                         scale = dh.vrSettings.hudScale;
                     }
                 }
             }
         } else {
-            convertToVector3f(VRPlayer.room_to_world_pos(guiPos_room, dh.vrPlayer.vrdata_world_render), guipos);
+            VRPlayer.room_to_world_pos(guiPos_room, dh.vrPlayer.vrdata_world_render, guipos);
             guirot.set(guiRotation_room).rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
         }
 
         if ((dh.vrSettings.seated || dh.vrSettings.menuAlwaysFollowFace) && ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom()) {
             scale = 2.0F;
-            Vector3d vec35 = new Vector3d();
-
-            for (Vec3 vec37 : dh.vr.hmdPosSamples) {
-                vec35.add(vec37.x, vec37.y, vec37.z);
-            }
-
-            vec35.div(dh.vr.hmdPosSamples.size());
-            float f1 = 0.0F;
-
-            for (float f3 : dh.vr.hmdYawSamples) {
-                f1 += f3;
-            }
-
-            f1 /= dh.vr.hmdYawSamples.size();
-            f1 = toRadians(f1);
-            float f4 = ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
-            vec35.add(-sin(f1) * f4, 0, cos(f1) * f4);
-            guiPos_room = convertToVec3(vec35);
-            convertToVector3f(VRPlayer.room_to_world_pos(guiPos_room, dh.vrPlayer.vrdata_world_render), guipos);
-            guiRotation_room = guirot.rotationY((float) PI - f1).rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
+            Vector3f posAvg = dh.vr.hmdPosSamples.parallelStream().reduce(new Vector3f(), Vector3f::add)
+                .div(dh.vr.hmdPosSamples.size());
+            float yawAvg = toRadians(
+                dh.vr.hmdYawSamples.parallelStream().reduce(0.0F, Float::sum) / dh.vr.hmdYawSamples.size()
+            );
+            float roomScale = (
+                ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() ?
+                2.5F * dh.vrPlayer.vrdata_world_render.worldScale :
+                dh.vrSettings.hudDistance
+            );
+            posAvg.x -= sin(yawAvg) * roomScale;
+            posAvg.z += cos(yawAvg) * roomScale;
+            guiPos_room = posAvg;
+            VRPlayer.room_to_world_pos(guiPos_room, dh.vrPlayer.vrdata_world_render, guipos);
+            guiRotation_room = guirot.rotationY((float) PI - yawAvg).rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
             guiScale = 2.0F;
         }
 
-        Vector3f eye = dh.vrPlayer.vrdata_world_render.getEye(currentPass).getPosition().toVector3f();
-        pMatrixStack.last().pose().translate(guipos.sub(eye)).mul(guirot).translate(guilocal);
-        float f2 = scale * dh.vrPlayer.vrdata_world_render.worldScale;
-        pMatrixStack.scale(f2, f2, f2);
-        guiScaleApplied = f2;
+        Vector3f eye = dh.vrPlayer.vrdata_world_render.getEye(currentPass).getPosition(new Vector3f());
+        pMatrixStack.last().pose().translate(guipos.sub(eye, eye)).mul(guirot).translate(guilocal);
+        float guiScaleApplied = scale * dh.vrPlayer.vrdata_world_render.worldScale;
+        pMatrixStack.scale(guiScaleApplied, guiScaleApplied, guiScaleApplied);
+        GuiHandler.guiScaleApplied = guiScaleApplied;
         mc.getProfiler().pop();
         return guipos;
     }

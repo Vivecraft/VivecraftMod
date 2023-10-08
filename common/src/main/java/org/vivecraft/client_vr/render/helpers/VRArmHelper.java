@@ -17,6 +17,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -30,6 +32,8 @@ import static org.joml.Math.roundUsing;
 import static org.joml.RoundingMode.FLOOR;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.convertToVec3;
+import static org.vivecraft.common.utils.Utils.convertToVector3f;
 
 public class VRArmHelper {
 
@@ -118,7 +122,7 @@ public class VRArmHelper {
 
         if (mc.level != null) {
             float light = mc.level.getMaxLocalRawBrightness(
-                BlockPos.containing(dh.vrPlayer.vrdata_world_render.hmd.getPosition())
+                BlockPos.containing(convertToVec3(dh.vrPlayer.vrdata_world_render.hmd.getPosition(new Vector3f())))
             );
 
             int minLight = ShadersHelper.ShaderLight();
@@ -273,7 +277,6 @@ public class VRArmHelper {
             ) {
                 poseStack.pushPose();
                 RenderHelper.setupRenderingAtController(1, poseStack);
-                Vec3 start = new Vec3(0.0D, 0.005D, 0.03D);
                 float max = 0.03F;
                 float r;
 
@@ -290,9 +293,9 @@ public class VRArmHelper {
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
                 mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
                 RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
-                RenderHelper.renderFlatQuad(start.add(0.0D, 0.05001D, 0.0D), r, r, 0.0F, tpLimitedColor.getX(),
+                RenderHelper.renderFlatQuad(new Vector3f(0.0F, 0.05501F, 0.03F), r, r, 0.0F, tpLimitedColor.getX(),
                     tpLimitedColor.getY(), tpLimitedColor.getZ(), 128, poseStack);
-                RenderHelper.renderFlatQuad(start.add(0.0D, 0.05D, 0.0D), max, max, 0.0F, tpLimitedColor.getX(),
+                RenderHelper.renderFlatQuad(new Vector3f(0.0F, 0.055F, 0.03F), max, max, 0.0F, tpLimitedColor.getX(),
                     tpLimitedColor.getY(), tpLimitedColor.getZ(), 50, poseStack);
                 poseStack.popPose();
             }
@@ -331,12 +334,12 @@ public class VRArmHelper {
             Tesselator tesselator = Tesselator.getInstance();
             tesselator.getBuilder().begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
-            double VOffset = dh.teleportTracker.lastTeleportArcDisplayOffset;
-            Vec3 dest = dh.teleportTracker.getDestination();
-            boolean validLocation = dest.x != 0.0D || dest.y != 0.0D || dest.z != 0.0D;
+            float VOffset = dh.teleportTracker.lastTeleportArcDisplayOffset;
+            Vector3fc dest = dh.teleportTracker.getDestination();
+            boolean validLocation = dest.x() != 0.0F || dest.y() != 0.0F || dest.z() != 0.0F;
 
-            byte alpha = -1;
-            Vec3i color;
+            final byte alpha;
+            final Vec3i color;
 
             if (!validLocation) {
                 color = tpInvalidColor;
@@ -348,9 +351,9 @@ public class VRArmHelper {
                     color = tpUnlimitedColor;
                 }
 
-                VOffset = dh.vrRenderer.getCurrentTimeSecs()
-                    * (double) dh.teleportTracker.vrMovementStyle.textureScrollSpeed * 0.6D;
-                dh.teleportTracker.lastTeleportArcDisplayOffset = VOffset;
+                VOffset = dh.teleportTracker.lastTeleportArcDisplayOffset = (float) dh.vrRenderer.getCurrentTimeSecs()
+                    * dh.teleportTracker.vrMovementStyle.textureScrollSpeed * 0.6F;
+                alpha = -1;
             }
 
             float segmentHalfWidth = dh.teleportTracker.vrMovementStyle.beamHalfWidth * 0.15F;
@@ -360,22 +363,27 @@ public class VRArmHelper {
                 segments = (int) (segments * dh.teleportTracker.movementTeleportProgress);
             }
 
-            double segmentProgress = 1.0D / (double) segments;
+            float segmentProgress = 1.0F / (float) segments;
 
+            Vector3fc camPos = convertToVector3f(mc.getCameraEntity().position(), new Vector3f());
             // arc
             for (int i = 0; i < segments; ++i) {
-                double progress = (double) i / (double) segments + VOffset * segmentProgress;
-                int progressBase = roundUsing(progress, FLOOR);
-                progress -= progressBase;
+                float progress = (float) i / segments + VOffset * segmentProgress;
+                progress -= roundUsing(progress, FLOOR);
+                float shift = progress * 2.0F;
 
-                Vec3 start = dh.teleportTracker
-                    .getInterpolatedArcPosition((float) (progress - segmentProgress * (double) 0.4F))
-                    .subtract(mc.getCameraEntity().position());
-
-                Vec3 end = dh.teleportTracker.getInterpolatedArcPosition((float) progress)
-                    .subtract(mc.getCameraEntity().position());
-                float shift = (float) progress * 2.0F;
-                RenderHelper.renderBox(tesselator, start, end, -segmentHalfWidth, segmentHalfWidth, (-1.0F + shift) * segmentHalfWidth, (1.0F + shift) * segmentHalfWidth, color, alpha, poseStack);
+                RenderHelper.renderBox(
+                    tesselator,
+                    convertToVec3(dh.teleportTracker.getInterpolatedArcPosition(progress - segmentProgress * 0.4F, new Vector3f()).sub(camPos)),
+                    convertToVec3(dh.teleportTracker.getInterpolatedArcPosition(progress, new Vector3f()).sub(camPos)),
+                    -segmentHalfWidth,
+                    segmentHalfWidth,
+                    (-1.0F + shift) * segmentHalfWidth,
+                    (1.0F + shift) * segmentHalfWidth,
+                    color,
+                    alpha,
+                    poseStack
+                );
             }
 
             tesselator.end();
@@ -383,25 +391,22 @@ public class VRArmHelper {
             // hit indicator
             if (validLocation && dh.teleportTracker.movementTeleportProgress >= 1.0D) {
                 RenderSystem.disableCull();
-                Vec3 vec34 = (new Vec3(dest.x, dest.y, dest.z)).subtract(mc.getCameraEntity().position());
+                Vector3f vec34 = dest.sub(camPos, new Vector3f());
                 float offset = 0.01F;
-                double x = 0.0D;
-                double y = 0.0D;
-                double z = 0.0D;
 
-                y += offset;
+                vec34.y += offset;
 
-                RenderHelper.renderFlatQuad(vec34.add(x, y, z), 0.6F, 0.6F, 0.0F, (int) (color.getX() * 1.03D),
+                RenderHelper.renderFlatQuad(vec34, 0.6F, 0.6F, 0.0F, (int) (color.getX() * 1.03D),
                     (int) (color.getY() * 1.03D), (int) (color.getZ() * 1.03D), 64, poseStack);
 
-                y += offset;
+                vec34.y += offset;
 
-                RenderHelper.renderFlatQuad(vec34.add(x, y, z), 0.4F, 0.4F, 0.0F, (int) (color.getX() * 1.04D),
+                RenderHelper.renderFlatQuad(vec34, 0.4F, 0.4F, 0.0F, (int) (color.getX() * 1.04D),
                     (int) (color.getY() * 1.04D), (int) (color.getZ() * 1.04D), 64, poseStack);
 
-                y += offset;
+                vec34.y += offset;
 
-                RenderHelper.renderFlatQuad(vec34.add(x, y, z), 0.2F, 0.2F, 0.0F, (int) (color.getX() * 1.05D),
+                RenderHelper.renderFlatQuad(vec34, 0.2F, 0.2F, 0.0F, (int) (color.getX() * 1.05D),
                     (int) (color.getY() * 1.05D), (int) (color.getZ() * 1.05D), 64, poseStack);
                 RenderSystem.enableCull();
             }

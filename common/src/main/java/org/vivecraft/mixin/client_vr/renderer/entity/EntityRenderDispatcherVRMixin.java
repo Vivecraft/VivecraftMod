@@ -3,8 +3,8 @@ package org.vivecraft.mixin.client_vr.renderer.entity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -26,6 +26,7 @@ import static org.joml.Math.asin;
 import static org.joml.Math.atan2;
 import static org.vivecraft.client_vr.VRState.dh;
 import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.convertToVector3f;
 
 
 @Mixin(net.minecraft.client.renderer.entity.EntityRenderDispatcher.class)
@@ -51,14 +52,19 @@ public abstract class EntityRenderDispatcherVRMixin implements
             if (entity == null) {
                 cir.setReturnValue(this.camera.rotation());
             } else {
-                Vec3 vec3 = dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition();
+                final Vector3f vec3;
                 if (dh.currentPass == RenderPass.THIRD || dh.currentPass == RenderPass.CAMERA) {
-                    vec3 = dh.vrPlayer.getVRDataWorld().getEye(dh.currentPass).getPosition();
+                    vec3 = dh.vrPlayer.getVRDataWorld().getEye(dh.currentPass).getPosition(new Vector3f());
+                } else {
+                    vec3 = dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition(new Vector3f());
                 }
-                Vec3 vec31 = entity.position().add(0.0D, entity.getBbHeight() / 2.0F, 0.0D).subtract(vec3).normalize();
+                Vector3f vec31 = convertToVector3f(entity.position(), new Vector3f())
+                    .add(0.0F, entity.getBbHeight() / 2.0F, 0.0F)
+                    .sub(vec3)
+                    .normalize();
                 cir.setReturnValue(new Quaternionf()
-                    .mul(new Quaternionf().rotationY((float) -atan2(-vec31.x, vec31.z)))
-                    .mul(new Quaternionf().rotationX((float) -asin(vec31.y / vec31.length())))
+                    .mul(new Quaternionf().rotationY(-atan2(-vec31.x, vec31.z)))
+                    .mul(new Quaternionf().rotationX(-asin(vec31.y / vec31.length())))
                 );
             }
         }
@@ -82,14 +88,19 @@ public abstract class EntityRenderDispatcherVRMixin implements
             if (entity == null) {
                 return this.camera.rotation();
             } else {
-                Vec3 vec3 = dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition();
+                final Vector3f vec3;
                 if (dh.currentPass == RenderPass.THIRD || dh.currentPass == RenderPass.CAMERA) {
-                    vec3 = dh.vrPlayer.getVRDataWorld().getEye(dh.currentPass).getPosition();
+                    vec3 = dh.vrPlayer.getVRDataWorld().getEye(dh.currentPass).getPosition(new Vector3f());
+                } else {
+                    vec3 = dh.vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition(new Vector3f());
                 }
-                Vec3 vec31 = entity.position().add(0.0D, entity.getBbHeight() + offset, 0.0D).subtract(vec3).normalize();
+                Vector3f vec31 = convertToVector3f(entity.position(), new Vector3f())
+                    .add(0.0F, entity.getBbHeight() + offset, 0.0F)
+                    .sub(vec3)
+                    .normalize();
                 return (new Quaternionf()
-                    .mul(new Quaternionf().rotationY((float) -atan2(-vec31.x, vec31.z)))
-                    .mul(new Quaternionf().rotationX((float) -asin(vec31.y / vec31.length())))
+                    .mul(new Quaternionf().rotationY(-atan2(-vec31.x, vec31.z)))
+                    .mul(new Quaternionf().rotationX(-asin(vec31.y / vec31.length())))
                 );
             }
         }

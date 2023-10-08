@@ -86,7 +86,7 @@ public class Utils {
      * This function is helpful for handling Optfine methods.
      *
      * @param color the color to convert.
-     * @return a new {@link net.minecraft.world.phys.Vec3} whose x, y, and z components are equal to the {@link Color#r}, {@link Color#g}, and {@link Color#b} components of {@code color}.
+     * @return a new {@link net.minecraft.world.phys.Vec3} whose x, y, and z components are equal to the {@link Color#r}, {@link Color#g}, and {@link Color#b} components as {@code color}.
      * @apiNote Use this function whenever reasonably possible.
      * <br>
      * {@link net.minecraft.world.phys.Vec3} is superseded by {@link Vector3d} in any color context.
@@ -101,7 +101,7 @@ public class Utils {
      *
      * @param vector the vector to copy.
      * @param dest   the {@link Vector3d} to save to.
-     * @return the {@code dest} containing the same x, y, and z components of vector.
+     * @return the {@code dest} containing the same x, y, and z components as {@code vector}.
      * @apiNote Use this function whenever reasonably possible.
      * <br>
      * {@link net.minecraft.world.phys.Vec3} is superseded by {@link Vector3d} in any math context.
@@ -116,7 +116,7 @@ public class Utils {
      *
      * @param vector the vector to copy.
      * @param dest   the {@link Vector3f} to save to.
-     * @return the {@code dest} containing the same x, y, and z components of vector.
+     * @return the {@code dest} containing the same x, y, and z components as {@code vector}.
      * @apiNote Use this function only when float values are required!
      * <br>
      * When converting {@link net.minecraft.world.phys.Vec3}, prefer this function over
@@ -129,10 +129,27 @@ public class Utils {
     }
 
     /**
+     * Convert a {@link net.minecraft.core.Vec3i} to a {@link Vector3f}.
+     *
+     * @param vector the vector to copy.
+     * @param dest   the {@link Vector3f} to save to.
+     * @return the {@code dest} containing the same x, y, and z components as {@code vector}.
+     * @apiNote Use this function only when float values are required!
+     * <br>
+     * When converting {@link net.minecraft.world.phys.Vec3}, prefer this function over
+     * {@link net.minecraft.world.phys.Vec3#toVector3f()}
+     * to avoid creating multiple objects.
+     * @see Utils#convertToVec3(Vector3fc)
+     */
+    public static Vector3f convertToVector3f(@Nullable net.minecraft.core.Vec3i vector, @Nonnull Vector3f dest) {
+        return vector != null ? dest.set(vector.getX(), vector.getY(), vector.getZ()) : dest;
+    }
+
+    /**
      * Convert a JOML {@link Vector3d} to a {@link net.minecraft.world.phys.Vec3}.
      *
      * @param vector the vector to copy.
-     * @return a new Vec3 containing the same x, y, and z components of vector.
+     * @return a new Vec3 containing the same x, y, and z components as {@code vector}.
      * @apiNote Avoid this function whenever reasonably possible.
      * <br>
      * If there is an x, y, z signature alternative,
@@ -148,7 +165,7 @@ public class Utils {
      * Convert a JOML {@link Vector3f} to a {@link net.minecraft.world.phys.Vec3}.
      *
      * @param vector the vector to copy.
-     * @return a new Vec3 containing the same x, y, and z components of vector.
+     * @return a new Vec3 containing the same x, y, and z components as {@code vector}.
      * @apiNote Avoid this function whenever reasonably possible.
      * <br>
      * If there is an x, y, z signature alternative,
