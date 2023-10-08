@@ -24,6 +24,6 @@ public class DynamicFPSModVRMixin {
     @ModifyVariable(at = @At(value = "LOAD", target = "Lorg/vivecraft/mod_compat_vr/dynamicfps/mixin/DynamicFPSModVRMixin;state:Ldynamic_fps/impl/PowerState;"), method = "checkForStateChanges()V", remap = false)
     private static PowerState vivecraft$alwaysFocused(PowerState value) {
         // always focused in VR
-        return VRState.vrRunning ? PowerState.FOCUSED : value;
+        return vrRunning ? PowerState.FOCUSED : value;
     }
 }

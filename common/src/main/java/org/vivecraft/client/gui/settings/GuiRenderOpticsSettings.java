@@ -123,11 +123,6 @@ public class GuiRenderOpticsSettings extends org.vivecraft.client.gui.framework.
                     this.reinit = true;
                 }
             }
-            if (guivroption.getId() == VRSettings.VrOptions.MIXED_REALITY_ALPHA_MASK.ordinal()
-                || guivroption.getId() == VRSettings.VrOptions.MIXED_REALITY_UNITY_LIKE.ordinal()
-                || guivroption.getId() == VRSettings.VrOptions.MIXED_REALITY_UNDISTORTED.ordinal()) {
-                this.reinit = true;
-            }
         }
     }
 
