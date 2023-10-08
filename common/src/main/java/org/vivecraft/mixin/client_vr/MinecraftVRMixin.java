@@ -921,7 +921,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Unique
     private void vivecraft$copyToMirror() {
-        // TODO: fix mixed reality... again
         if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF
             && ClientDataHolderVR.getInstance().vr.isHMDTracking()) {
             this.vivecraft$notifyMirror("Mirror is OFF", true, 1000);
