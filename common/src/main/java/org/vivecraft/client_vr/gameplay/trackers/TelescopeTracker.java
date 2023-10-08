@@ -1,35 +1,26 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.joml.Vector3f;
 import org.vivecraft.client_vr.ItemTags;
-import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.VRData.VRDevicePose;
 import org.vivecraft.client_vr.render.RenderPass;
+
+import static org.joml.Math.abs;
+import static org.joml.Math.min;
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class TelescopeTracker extends Tracker {
     //public static final ResourceLocation scopeResource = new ResourceLocation("vivecraft:trashbin");
     public static final ModelResourceLocation scopeModel = new ModelResourceLocation("vivecraft", "spyglass_in_hand", "inventory");
-    private static final double lensDistMax = 0.05D;
-    private static final double lensDistMin = 0.185D;
-    private static final double lensDotMax = 0.9D;
-    private static final double lensDotMin = 0.75D;
-
-    public TelescopeTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
-    }
-
-    public boolean isActive(LocalPlayer player) {
-        return false;
-    }
-
-    public void doProcess(LocalPlayer player) {
-    }
+    private static final float lensDistMax = 0.05F;
+    private static final float lensDistMin = 0.185F;
+    private static final float lensDotMax = 0.9F;
+    private static final float lensDotMin = 0.75F;
 
     public static boolean isTelescope(ItemStack i) {
         return i != null && (i.getItem() == Items.SPYGLASS || isLegacyTelescope(i) || i.is(ItemTags.VIVECRAFT_TELESCOPE));
@@ -46,17 +37,17 @@ public class TelescopeTracker extends Tracker {
         } else if (!i.hasTag() || !i.getTag().getBoolean("Unbreakable")) {
             return false;
         } else {
-            return i.getHoverName().getContents() instanceof TranslatableContents && ((TranslatableContents) i.getHoverName().getContents()).getKey().equals("vivecraft.item.telescope") || i.getHoverName().getString().equals("Eye of the Farseer");
+            return i.getHoverName().getContents() instanceof TranslatableContents && "vivecraft.item.telescope".equals(((TranslatableContents) i.getHoverName().getContents()).getKey()) || "Eye of the Farseer".equals(i.getHoverName().getString());
         }
     }
 
-    private static Vec3 getLensOrigin(int controller) {
-        VRData.VRDevicePose vrdata$vrdevicepose = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getController(controller);
-        return vrdata$vrdevicepose.getPosition().add(getViewVector(controller).scale(-0.2D).add(vrdata$vrdevicepose.getDirection().scale(0.05F)));
+    private static Vector3f getLensOrigin(int controller, Vector3f dest) {
+        VRDevicePose con = dh.vrPlayer.vrdata_room_pre.getController(controller);
+        return con.getPosition(dest).add(getViewVector(controller, new Vector3f()).mul(-0.2F).add(con.getDirection(new Vector3f()).mul(0.05F)));
     }
 
-    private static Vec3 getViewVector(int controller) {
-        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getController(controller).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
+    private static Vector3f getViewVector(int controller, Vector3f dest) {
+        return dh.vrPlayer.vrdata_room_pre.getController(controller).getCustomVector(dest.set(0.0F, -1.0F, 0.0F));
     }
 
     public static boolean isViewing(int controller) {
@@ -64,9 +55,8 @@ public class TelescopeTracker extends Tracker {
     }
 
     public static float viewPercent(int controller) {
-        LocalPlayer p = Minecraft.getInstance().player;
-        if (p != null && ClientDataHolderVR.getInstance().vrSettings.seated) {
-            if (isTelescope(p.getUseItem())) {
+        if (mc.player != null && dh.vrSettings.seated) {
+            if (isTelescope(mc.player.getUseItem())) {
                 return 1;
             } else {
                 return 0;
@@ -90,17 +80,17 @@ public class TelescopeTracker extends Tracker {
         if (e == -1) {
             return 0.0F;
         } else {
-            VRData.VRDevicePose eye = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.values()[e]);
-            double dist = eye.getPosition().subtract(getLensOrigin(controller)).length();
-            Vec3 look = eye.getDirection();
-            double dot = Math.abs(look.dot(getViewVector(controller)));
+            VRDevicePose eye = dh.vrPlayer.vrdata_room_pre.getEye(RenderPass.values()[e]);
+            float dist = eye.getPosition(new Vector3f()).sub(getLensOrigin(controller, new Vector3f())).length();
+            Vector3f look = eye.getDirection(new Vector3f());
+            float dot = abs(look.dot(getViewVector(controller, new Vector3f())));
 
-            double dfact = 0.0D;
-            double distfact = 0.0D;
+            float dfact = 0.0F;
+            float distfact = 0.0F;
 
             if (dot > lensDotMin) {
                 if (dot > lensDotMax) {
-                    dfact = 1.0D;
+                    dfact = 1.0F;
                 } else {
                     dfact = (dot - lensDotMin) / (lensDotMax - lensDotMin);
                 }
@@ -108,13 +98,13 @@ public class TelescopeTracker extends Tracker {
 
             if (dist < lensDistMin) {
                 if (dist < lensDistMax) {
-                    distfact = 1.0D;
+                    distfact = 1.0F;
                 } else {
-                    distfact = 1.0D - (dist - lensDistMax) / (lensDistMin - lensDistMax);
+                    distfact = 1.0F - (dist - lensDistMax) / (lensDistMin - lensDistMax);
                 }
             }
 
-            return (float) Math.min(dfact, distfact);
+            return min(dfact, distfact);
         }
     }
 }

@@ -1,24 +1,23 @@
 package org.vivecraft.mixin.client_vr.world;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
+
+import static org.joml.Math.*;
+import static org.vivecraft.client_vr.VRState.*;
 
 //TODO needed?
-@Mixin(Boat.class)
-public abstract class BoatMixin extends Entity {
+@Mixin(net.minecraft.world.entity.vehicle.Boat.class)
+public abstract class BoatMixin extends net.minecraft.world.entity.Entity {
 
     @Shadow
     private float deltaRotation;
@@ -36,37 +35,35 @@ public abstract class BoatMixin extends Entity {
         super(entityType, level);
     }
 
-    @ModifyConstant(constant = @Constant(floatValue = 1F, ordinal = 0), method = "controlBoat()V")
+
+    @ModifyConstant(constant = @Constant(floatValue = 1.0F, ordinal = 0), method = "controlBoat()V")
     public float vivecraft$inputLeft(float f) {
-        Minecraft minecraft = Minecraft.getInstance();
-        float f1 = minecraft.player.input.leftImpulse;
+        float f1 = mc.player.input.leftImpulse;
         return f1;
     }
 
-    @ModifyConstant(constant = @Constant(floatValue = 1F, ordinal = 1), method = "controlBoat()V")
+    @ModifyConstant(constant = @Constant(floatValue = 1.0F, ordinal = 1), method = "controlBoat()V")
     public float vivecraft$inputRight(float f) {
-        Minecraft minecraft = Minecraft.getInstance();
-        float f1 = minecraft.player.input.leftImpulse;
+        float f1 = mc.player.input.leftImpulse;
         return -f1;
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/Boat;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.BEFORE), method = "controlBoat", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/Boat;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", shift = Shift.BEFORE), method = "controlBoat", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     public void vivecraft$roomscaleRowing(CallbackInfo ci, float f) {
-        if (!VRState.vrRunning) {
+        if (!vrRunning) {
             return;
         }
 
         double mx, mz;
-        ClientDataHolderVR clientDataHolderVR = ClientDataHolderVR.getInstance();
 
-        if (this.inputUp && !clientDataHolderVR.vrSettings.seated) {
+        if (this.inputUp && !dh.vrSettings.seated) {
             //controller-based
-            float yaw = clientDataHolderVR.vrPlayer.vrdata_world_pre.getController(1).getYaw();
-            if (clientDataHolderVR.vrSettings.vehicleRotation) {
+            float yaw = dh.vrPlayer.vrdata_world_pre.getController(1).getYaw();
+            if (dh.vrSettings.vehicleRotation) {
                 //tank controls
                 float end = this.getYRot() % 360;
                 float start = yaw;
-                float difference = Math.abs(end - start);
+                float difference = abs(end - start);
 
                 if (difference > 180) {
                     if (end > start) {
@@ -78,63 +75,59 @@ public abstract class BoatMixin extends Entity {
 
                 difference = end - start;
 
-                f = 0;
-
-                if (Math.abs(difference) < 30) {
-                    f = 0.04f;
-                } else if (Math.abs(difference) > 150) {
+                if (abs(difference) < 30) {
+                    f = 0.04F;
+                } else if (abs(difference) > 150) {
                     f = -0.005F;
                 } else if (difference < 0) {
                     this.deltaRotation += 1;
-                    f = 0.005f;
+                    f = 0.005F;
                 } else if (difference > 0) {
                     this.deltaRotation -= 1;
-                    f = 0.005f;
+                    f = 0.005F;
+                } else {
+                    f = 0;
                 }
 
-                mx = Math.sin(-this.getYRot() * 0.017453292F) * f;
-                mz = Math.cos(this.getYRot() * 0.017453292F) * f;
+                mx = sin(toRadians(-this.getYRot())) * f;
+                mz = cos(toRadians(this.getYRot())) * f;
             } else {
                 //point to move
-                mx = Math.sin(-yaw * 0.017453292F) * f;
-                mz = Math.cos(yaw * 0.017453292F) * f;
+                mx = sin(toRadians(-yaw)) * f;
+                mz = cos(toRadians(yaw)) * f;
                 this.setYRot(yaw);
             }
         } else {
             //roomscale or vanilla behavior
-            if (clientDataHolderVR.rowTracker.isRowing() && !clientDataHolderVR.vrSettings.seated) {
+            if (dh.rowTracker.isRowing() && !dh.vrSettings.seated) {
 
-                this.deltaRotation += clientDataHolderVR.rowTracker.LOar / 1.5;
-                this.deltaRotation -= clientDataHolderVR.rowTracker.ROar / 1.5;
-    				/*
-    				this.deltaRotation += mc.rowTracker.forces[0] *50;
-    				this.deltaRotation -= mc.rowTracker.forces[1] *50;
-    				 */
+                this.deltaRotation += dh.rowTracker.LOar / 1.5F;
+                this.deltaRotation -= dh.rowTracker.ROar / 1.5F;
+                    /*
+                    this.deltaRotation += mc.rowTracker.forces[0] *50;
+                    this.deltaRotation -= mc.rowTracker.forces[1] *50;
+                     */
 
-                if (deltaRotation < 0) {
+                if (this.deltaRotation < 0) {
                     this.inputLeft = true;
                 }
-                if (deltaRotation > 0) {
+                if (this.deltaRotation > 0) {
                     this.inputRight = true;
                 }
 
-                f = 0.06f * clientDataHolderVR.rowTracker.Foar;
+                f = 0.06F * dh.rowTracker.FOar;
                 if (f > 0) {
                     this.inputUp = true;
                 }
 
-    				/*
-    				f=(float)(mc.rowTracker.forces[0] + mc.rowTracker.forces[1]);
-    				if(f > 0.005) this.forwardInputDown = true;
-    				*/
+                    /*
+                    f=(float)(mc.rowTracker.forces[0] + mc.rowTracker.forces[1]);
+                    if(f > 0.005) this.forwardInputDown = true;
+                    */
 
-                mx = Math.sin(-this.getYRot() * 0.017453292F) * f;
-                mz = Math.cos(this.getYRot() * 0.017453292F) * f;
-            } else {
-                //default boat (seated mode)
-                mx = Math.sin(-this.getYRot() * 0.017453292F) * f;
-                mz = Math.cos(this.getYRot() * 0.017453292F) * f;
             }
+            mx = sin(toRadians(-this.getYRot())) * f;
+            mz = cos(toRadians(this.getYRot())) * f;
         }
         this.setDeltaMovement(this.getDeltaMovement().x + mx, this.getDeltaMovement().y, this.getDeltaMovement().z + mz);
 

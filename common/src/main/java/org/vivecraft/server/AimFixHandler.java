@@ -14,6 +14,9 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.server.config.ServerConfig;
 
+import static org.joml.Math.*;
+import static org.vivecraft.common.utils.Utils.logger;
+
 public class AimFixHandler extends ChannelInboundHandlerAdapter {
     private final Connection netManager;
 
@@ -21,6 +24,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
         this.netManager = netManager;
     }
 
+    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ServerPlayer serverplayer = ((ServerGamePacketListenerImpl) this.netManager.getPacketListener()).player;
         boolean flag = msg instanceof ServerboundUseItemPacket || msg instanceof ServerboundUseItemOnPacket || msg instanceof ServerboundPlayerActionPacket;
@@ -53,14 +57,14 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
                 serverplayer.xo = aimPos.x;
                 serverplayer.yo = aimPos.y;
                 serverplayer.zo = aimPos.z;
-                serverplayer.setXRot((float) Math.toDegrees(Math.asin(-dir.y)));
-                serverplayer.setYRot((float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                serverplayer.setXRot((float) toDegrees(asin(-dir.y)));
+                serverplayer.setYRot((float) toDegrees(atan2(-dir.x, dir.z)));
                 serverplayer.xRotO = serverplayer.getXRot();
                 serverplayer.yRotO = serverplayer.yHeadRotO = serverplayer.yHeadRot = serverplayer.getYRot();
                 serverplayer.eyeHeight = 0.0001F;
                 serverviveplayer.offset = position.subtract(aimPos);
                 if (ServerConfig.debug.get()) {
-                    System.out.println("AimFix " + aimPos.x + " " + aimPos.y + " " + aimPos.z + " " + (float) Math.toDegrees(Math.asin(-dir.y)) + " " + (float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                    logger.info("AimFix " + aimPos.x + " " + aimPos.y + " " + aimPos.z + " " + (float) toDegrees(asin(-dir.y)) + " " + (float) toDegrees(atan2(-dir.x, dir.z)));
                 }
             }
 
@@ -68,7 +72,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
                 if (this.netManager.isConnected()) {
                     try {
                         ((Packet) msg).handle(this.netManager.getPacketListener());
-                    } catch (RunningOnDifferentThreadException runningondifferentthreadexception) {
+                    } catch (RunningOnDifferentThreadException ignored) {
                     }
                 }
             } finally {
@@ -79,7 +83,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             if ((aimPos != null && !serverplayer.position().equals(aimPos)) || (aimPos == null && !serverplayer.position().equals(position))) {
                 position = serverplayer.position();
                 if (ServerConfig.debug.get()) {
-                    System.out.println("AimFix moved Player to " + position.x + " " + position.y + " " + position.z);
+                    logger.info("AimFix moved Player to {}", position);
                 }
             }
 

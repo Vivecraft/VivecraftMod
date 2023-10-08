@@ -1,17 +1,24 @@
 package org.vivecraft.mixin.client_vr.blaze3d.platform;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager.BlendState;
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import static com.mojang.blaze3d.platform.GlStateManager.BLEND;
 import static com.mojang.blaze3d.platform.GlStateManager.glBlendFuncSeparate;
 
-@Mixin(GlStateManager.class)
+@Mixin(com.mojang.blaze3d.platform.GlStateManager.class)
 public class GlStateManagerVRMixin {
+
+    @Final
+    @Shadow
+    public static BlendState BLEND;
 
     //Change the limit of textures to 32
     @ModifyArg(at = @At(value = "INVOKE", target = "Ljava/util/stream/IntStream;range(II)Ljava/util/stream/IntStream;"), index = 1, method = "<clinit>")
@@ -34,8 +41,8 @@ public class GlStateManagerVRMixin {
     @Overwrite(remap = false)
     public static void _blendFuncSeparate(int i, int j, int k, int l) {
         RenderSystem.assertOnRenderThread();
-        if (i == GlStateManager.SourceFactor.SRC_ALPHA.value && j == GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value && k == GlStateManager.SourceFactor.ONE.value && l == GlStateManager.DestFactor.ZERO.value) {
-            l = GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value;
+        if (i == SourceFactor.SRC_ALPHA.value && j == DestFactor.ONE_MINUS_SRC_ALPHA.value && k == SourceFactor.ONE.value && l == DestFactor.ZERO.value) {
+            l = DestFactor.ONE_MINUS_SRC_ALPHA.value;
         }
         if (i != BLEND.srcRgb || j != BLEND.dstRgb || k != BLEND.srcAlpha || l != BLEND.dstAlpha) {
             BLEND.srcRgb = i;

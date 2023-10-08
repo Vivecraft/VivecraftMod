@@ -1,12 +1,11 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
@@ -17,13 +16,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.client.extensions.RenderLayerExtension;
-import org.vivecraft.client.utils.RenderLayerTypes;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client.utils.RenderLayerTypes.LayerType;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static org.vivecraft.client.utils.RenderLayerTypes.LayerType.*;
+import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.logger;
 
 /**
  * A hacky way of copying regular PlayerRenderer layers to the VRPlayerRenderers
@@ -35,7 +35,7 @@ import static org.vivecraft.client.utils.RenderLayerTypes.LayerType.*;
 public abstract class PlayerRendererMixin<T extends LivingEntity, M extends EntityModel<T>> extends LivingEntityRenderer<T, M> {
 
     // dummy constructor
-    public PlayerRendererMixin(EntityRendererProvider.Context context, M entityModel, float f) {
+    public PlayerRendererMixin(Context context, M entityModel, float f) {
         super(context, entityModel, f);
     }
 
@@ -44,11 +44,11 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
         // check if the layer gets added from the PlayerRenderer, we don't want to copy, if we add it to the VRPlayerRenderer
         // also check that the VRPlayerRenderers were created, this method also gets called in the constructor,
         // those default Layers already are added to the VRPlayerRenderer there
-        if ((Object) this.getClass() == PlayerRenderer.class && !((EntityRenderDispatcherExtension) Minecraft.getInstance().getEntityRenderDispatcher()).vivecraft$getSkinMapVRSeated().isEmpty()) {
+        if ((Object) this.getClass() == PlayerRenderer.class && !((EntityRenderDispatcherExtension) mc.getEntityRenderDispatcher()).vivecraft$getSkinMapVRSeated().isEmpty()) {
 
             // try to find a suitable constructor, so we can create a new Object without issues
             Constructor<?> constructor = null;
-            RenderLayerTypes.LayerType type = OTHER;
+            LayerType type = OTHER;
             for (Constructor<?> c : renderLayer.getClass().getConstructors()) {
                 if (c.getParameterCount() == 1
                     && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])) {
@@ -73,21 +73,21 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
             // if no suitable constructor was found, use do a basic Object.clone call, and replace the parent of the copy
             if (constructor == null) {
                 // do a hacky clone, and replace parent
-                if (((PlayerModel<?>) model).slim) {
-                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("slim"));
-                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("slim"));
+                if (((PlayerModel<?>) this.model).slim) {
+                    this.addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) this.entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("slim"));
+                    this.addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) this.entityRenderDispatcher).vivecraft$getSkinMapVR().get("slim"));
                 } else {
-                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("default"));
-                    addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("default"));
+                    this.addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) this.entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("default"));
+                    this.addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) this.entityRenderDispatcher).vivecraft$getSkinMapVR().get("default"));
                 }
             } else {
                 // make a new instance with the vr model as parent
-                if (((PlayerModel<?>) model).slim) {
-                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("slim"));
-                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("slim"));
+                if (((PlayerModel<?>) this.model).slim) {
+                    this.addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) this.entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("slim"));
+                    this.addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) this.entityRenderDispatcher).vivecraft$getSkinMapVR().get("slim"));
                 } else {
-                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("default"));
-                    addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("default"));
+                    this.addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) this.entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("default"));
+                    this.addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) this.entityRenderDispatcher).vivecraft$getSkinMapVR().get("default"));
                 }
             }
         }
@@ -100,7 +100,7 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
     @Unique
     private void addLayerClone(RenderLayer<T, M> renderLayer, LivingEntityRenderer<T, M> target) {
         try {
-            VRSettings.logger.warn("Copying layer: {} with Object.copy, this could cause issues", renderLayer.getClass());
+            logger.warn("Copying layer: {} with Object.copy, this could cause issues", renderLayer.getClass());
             RenderLayer<T, M> newLayer = (RenderLayer<T, M>) ((RenderLayerExtension) renderLayer).clone();
             newLayer.renderer = target;
             target.addLayer(newLayer);
@@ -113,21 +113,25 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
      * uses the provided constructor, to create a new RenderLayer Instance
      */
     @Unique
-    private void addLayerConstructor(Constructor<?> constructor, RenderLayerTypes.LayerType type, LivingEntityRenderer<T, M> target) {
+    private void addLayerConstructor(Constructor<?> constructor, LayerType type, LivingEntityRenderer<T, M> target) {
         try {
             switch (type) {
                 case PARENT_ONLY -> target.addLayer((RenderLayer<T, M>) constructor.newInstance(target));
                 case PARENT_MODELSET ->
-                    target.addLayer((RenderLayer<T, M>) constructor.newInstance(target, Minecraft.getInstance().getEntityModels()));
+                    target.addLayer((RenderLayer<T, M>) constructor.newInstance(target, mc.getEntityModels()));
                 case PARENT_MODEL_MODEL -> {
-                    if (((PlayerModel<?>) model).slim) {
-                        target.addLayer((RenderLayer<T, M>) constructor.newInstance(target,
-                            new HumanoidModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_INNER_ARMOR)),
-                            new HumanoidModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_OUTER_ARMOR))));
+                    if (((PlayerModel<?>) this.model).slim) {
+                        target.addLayer((RenderLayer<T, M>) constructor.newInstance(
+                            target,
+                            new HumanoidModel(mc.getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_INNER_ARMOR)),
+                            new HumanoidModel(mc.getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_OUTER_ARMOR))
+                        ));
                     } else {
-                        target.addLayer((RenderLayer<T, M>) constructor.newInstance(target,
-                            new HumanoidModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
-                            new HumanoidModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR))));
+                        target.addLayer((RenderLayer<T, M>) constructor.newInstance(
+                            target,
+                            new HumanoidModel(mc.getEntityModels().bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
+                            new HumanoidModel(mc.getEntityModels().bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR))
+                        ));
                     }
                 }
             }

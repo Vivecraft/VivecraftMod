@@ -1,22 +1,21 @@
 package org.vivecraft.mixin.client_vr.gui.screens;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Renderable;
-import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
-import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
 
-@Mixin(Screen.class)
-public abstract class ScreenVRMixin extends AbstractContainerEventHandler implements Renderable {
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.vrRunning;
+
+@Mixin(net.minecraft.client.gui.screens.Screen.class)
+public abstract class ScreenVRMixin extends net.minecraft.client.gui.components.events.AbstractContainerEventHandler implements
+    net.minecraft.client.gui.components.Renderable {
 
     @Inject(at = @At("HEAD"), method = "renderTransparentBackground", cancellable = true)
     public void vivecraft$vrBackground(GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings != null && !ClientDataHolderVR.getInstance().vrSettings.menuBackground) {
+        if (vrRunning && dh.vrSettings != null && !dh.vrSettings.menuBackground) {
             ci.cancel();
         }
     }

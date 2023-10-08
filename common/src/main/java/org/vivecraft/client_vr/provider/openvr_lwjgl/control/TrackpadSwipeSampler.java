@@ -1,10 +1,11 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 
+import org.joml.Vector2f;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
-import org.vivecraft.common.utils.lwjgl.Vector2f;
-import org.vivecraft.common.utils.math.Vector2;
+
+import static org.vivecraft.client_vr.VRState.dh;
 
 public class TrackpadSwipeSampler {
     private static final int UP = 0;
@@ -24,11 +25,11 @@ public class TrackpadSwipeSampler {
         }
     }
 
-    public void update(ControllerType hand, Vector2 position) {
-        MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).setCurrentHand(hand);
+    public void update(ControllerType hand, Vector2f position) {
+        ((MCOpenVR) dh.vr).getInputAction(VivecraftVRMod.keyTrackpadTouch).setCurrentHand(hand);
 
-        if (MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).isButtonPressed()) {
-            this.buffer[this.index].set(position.getX(), position.getY());
+        if (((MCOpenVR) dh.vr).getInputAction(VivecraftVRMod.keyTrackpadTouch).isButtonPressed()) {
+            this.buffer[this.index].set(position.x(), position.y());
 
             if (++this.index >= this.buffer.length) {
                 this.index = 0;
@@ -43,7 +44,7 @@ public class TrackpadSwipeSampler {
             this.count = 0L;
         }
 
-        if (this.count >= (long) this.buffer.length) {
+        if (this.count >= this.buffer.length) {
             int i = (this.index + 1) % this.buffer.length;
             this.accumulator.x += this.buffer[i].x - this.buffer[this.index].x;
             this.accumulator.y += this.buffer[i].y - this.buffer[this.index].y;

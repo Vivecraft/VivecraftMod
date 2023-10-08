@@ -3,38 +3,40 @@ package org.vivecraft.client.gui.settings;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.client.gui.framework.GuiVROption;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.settings.VRSettings.VrOptions;
 
-public class GuiTeleportSettings extends GuiVROptionsBase {
-    private static final VRSettings.VrOptions[] teleportSettings = new VRSettings.VrOptions[]{
-        VRSettings.VrOptions.SIMULATE_FALLING,
-        VRSettings.VrOptions.LIMIT_TELEPORT
-    };
-    private static final VRSettings.VrOptions[] limitedTeleportSettings = new VRSettings.VrOptions[]{
-        VRSettings.VrOptions.TELEPORT_UP_LIMIT,
-        VRSettings.VrOptions.TELEPORT_DOWN_LIMIT,
-        VRSettings.VrOptions.TELEPORT_HORIZ_LIMIT
-    };
+import static org.vivecraft.client_vr.VRState.dh;
+
+public class GuiTeleportSettings extends org.vivecraft.client.gui.framework.GuiVROptionsBase {
+    public static String vrTitle = "vivecraft.options.screen.teleport";
 
     public GuiTeleportSettings(Screen guiScreen) {
         super(guiScreen);
     }
 
+    @Override
     public void init() {
-        this.vrTitle = "vivecraft.options.screen.teleport";
-        super.init(teleportSettings, true);
+        super.clearWidgets();
+        super.init(
+            VrOptions.SIMULATE_FALLING,
+            VrOptions.LIMIT_TELEPORT
+        );
 
-        if (this.settings.vrLimitedSurvivalTeleport) {
-            super.init(limitedTeleportSettings, false);
+        if (dh.vrSettings.vrLimitedSurvivalTeleport) {
+            super.init(
+                VrOptions.TELEPORT_UP_LIMIT,
+                VrOptions.TELEPORT_DOWN_LIMIT,
+                VrOptions.TELEPORT_HORIZ_LIMIT
+            );
         }
 
         super.addDefaultButtons();
     }
 
+    @Override
     protected void actionPerformed(AbstractWidget widget) {
         if (widget instanceof GuiVROption guivroption) {
-            if (guivroption.getId() == VRSettings.VrOptions.LIMIT_TELEPORT.ordinal()) {
+            if (guivroption.getOption() == VrOptions.LIMIT_TELEPORT) {
                 this.reinit = true;
             }
         }

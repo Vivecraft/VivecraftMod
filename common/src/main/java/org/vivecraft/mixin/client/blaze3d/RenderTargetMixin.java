@@ -1,24 +1,24 @@
 package org.vivecraft.mixin.client.blaze3d;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL30C;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
-import org.vivecraft.client.extensions.RenderTargetExtension;
+
+import static org.vivecraft.client_vr.VRState.mc;
 
 @Debug(export = true)
-@Mixin(RenderTarget.class)
-public abstract class RenderTargetMixin implements RenderTargetExtension {
+@Mixin(com.mojang.blaze3d.pipeline.RenderTarget.class)
+public abstract class RenderTargetMixin implements org.vivecraft.client.extensions.RenderTargetExtension {
 
     @Unique
     private int vivecraft$texid = -1;
@@ -50,7 +50,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
     @Override
     public boolean vivecraft$getUseStencil() {
-        return vivecraft$useStencil;
+        return this.vivecraft$useStencil;
     }
 
     @Override
@@ -65,11 +65,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
     @Override
     public String toString() {
-        String stringbuilder = "\n" +
+        return "\n" +
             "Size:   " + this.viewWidth + " x " + this.viewHeight + "\n" +
             "FB ID:  " + this.frameBufferId + "\n" +
             "Tex ID: " + this.colorTextureId + "\n";
-        return stringbuilder;
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I", ordinal = 0), method = "createBuffers")
@@ -83,35 +82,34 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 2)
     public int vivecraft$modifyTexImage2DInternalformat(int internalformat) {
-        return vivecraft$useStencil ? GL30.GL_DEPTH32F_STENCIL8 : internalformat;
+        return this.vivecraft$useStencil ? GL30C.GL_DEPTH32F_STENCIL8 : internalformat;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 6)
     public int vivecraft$modifyTexImage2DFormat(int format) {
-        return vivecraft$useStencil ? GL30.GL_DEPTH_STENCIL : format;
+        return this.vivecraft$useStencil ? GL30C.GL_DEPTH_STENCIL : format;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", ordinal = 0), method = "createBuffers", index = 7)
     public int vivecraft$modifyTexImage2DType(int type) {
-        return vivecraft$useStencil ? GL30.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
+        return this.vivecraft$useStencil ? GL30C.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
     }
 
     @ModifyConstant(method = "createBuffers", constant = @Constant(intValue = 9728))
     public int vivecraft$changeTextPar(int i) {
-        return vivecraft$linearFilter ? GL11.GL_LINEAR : i;
+        return this.vivecraft$linearFilter ? GL11C.GL_LINEAR : i;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", ordinal = 1), method = "createBuffers", index = 1)
     public int vivecraft$modifyGlFramebufferTexture2DAttachment(int attachment) {
-        return vivecraft$useStencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
+        return this.vivecraft$useStencil ? GL30C.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
     }
 
+    @Override
     public void vivecraft$blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect) {
         RenderSystem.assertOnGameThreadOrInit();
         if (!RenderSystem.isInInitPhase()) {
-            RenderSystem.recordRenderCall(() -> {
-                this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
-            });
+            RenderSystem.recordRenderCall(() -> this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect));
         } else {
             this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
         }
@@ -125,10 +123,9 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         RenderSystem.depthMask(false);
         RenderSystem.viewport(0, 0, width, height);
         RenderSystem.disableBlend();
-        Minecraft minecraft = Minecraft.getInstance();
         RenderSystem.setShaderTexture(0, this.colorTextureId);
         if (instance == null) {
-            instance = minecraft.gameRenderer.blitShader;
+            instance = mc.gameRenderer.blitShader;
             instance.setSampler("DiffuseSampler", this.colorTextureId);
         } else {
             for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
@@ -136,32 +133,30 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
                 instance.setSampler("Sampler" + k, l);
             }
         }
-        Matrix4f matrix4f = new Matrix4f().setOrtho(0, width, height, 0, 1000.0f, 3000.0f);
+        Matrix4f matrix4f = new Matrix4f().setOrtho(0, width, height, 0, 1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
         if (instance.MODEL_VIEW_MATRIX != null) {
-            instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0f, 0.0f, -2000.0f));
+            instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0F, 0.0F, -2000.0F));
         }
         if (instance.PROJECTION_MATRIX != null) {
             instance.PROJECTION_MATRIX.set(matrix4f);
         }
         instance.apply();
-        float f = width;
-        float g = height;
-        float h = (float) this.viewWidth / (float) this.width;
-        float k = (float) this.viewHeight / (float) this.height;
+        float h = (float) this.viewWidth / this.width;
+        float k = (float) this.viewHeight / this.height;
         Tesselator tesselator = RenderSystem.renderThreadTesselator();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
+        bufferBuilder.begin(Mode.QUADS, instance.getVertexFormat());
         if (instance.getVertexFormat() == DefaultVertexFormat.POSITION_TEX) {
-            bufferBuilder.vertex(0.0, g, 0.0).uv(0.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0f).endVertex();
-            bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).endVertex();
-            bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, k).endVertex();
+            bufferBuilder.vertex(0.0D, height, 0.0D).uv(0.0F, 0.0F).endVertex();
+            bufferBuilder.vertex(width, height, 0.0D).uv(h, 0.0F).endVertex();
+            bufferBuilder.vertex(width, 0.0D, 0.0D).uv(h, k).endVertex();
+            bufferBuilder.vertex(0.0D, 0.0D, 0.0D).uv(0.0F, k).endVertex();
         } else if (instance.getVertexFormat() == DefaultVertexFormat.POSITION_TEX_COLOR) {
-            bufferBuilder.vertex(0.0, g, 0.0).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
-            bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0f).color(255, 255, 255, 255).endVertex();
-            bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).color(255, 255, 255, 255).endVertex();
-            bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, k).color(255, 255, 255, 255).endVertex();
+            bufferBuilder.vertex(0.0D, height, 0.0D).uv(0.0F, 0.0F).color(255, 255, 255, 255).endVertex();
+            bufferBuilder.vertex(width, height, 0.0D).uv(h, 0.0F).color(255, 255, 255, 255).endVertex();
+            bufferBuilder.vertex(width, 0.0D, 0.0D).uv(h, k).color(255, 255, 255, 255).endVertex();
+            bufferBuilder.vertex(0.0D, 0.0D, 0.0D).uv(0.0F, k).color(255, 255, 255, 255).endVertex();
         } else {
             throw new IllegalStateException("Unexpected vertex format " + instance.getVertexFormat());
         }
@@ -182,38 +177,37 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
             RenderSystem.disableBlend();
         }
 
-        Minecraft minecraft = Minecraft.getInstance();
 
-        float f = (float) width / (float) height;
-        float f1 = (float) this.viewWidth / (float) this.viewHeight;
-        float f2 = (float) width;
-        float f3 = (float) height;
+        float f = (float) width / height;
+        float f1 = (float) this.viewWidth / this.viewHeight;
+        float f2 = width;
+        float f3 = height;
         float f4 = 0.0F;
         float f5 = 0.0F;
 
         if (keepAspect) {
             if (f > f1) {
-                float f6 = (float) width / (float) this.viewWidth;
+                float f6 = (float) width / this.viewWidth;
                 f4 = 0.0F;
-                f2 = (float) width;
-                f5 = (float) height / 2.0F - (float) this.viewHeight / 2.0F * f6;
-                f3 = (float) height / 2.0F + (float) this.viewHeight / 2.0F * f6;
+                f2 = width;
+                f5 = height / 2.0F - this.viewHeight / 2.0F * f6;
+                f3 = height / 2.0F + this.viewHeight / 2.0F * f6;
             } else {
-                float f10 = (float) height / (float) this.viewHeight;
-                f4 = (float) width / 2.0F - (float) this.viewWidth / 2.0F * f10;
-                f2 = (float) width / 2.0F + (float) this.viewWidth / 2.0F * f10;
+                float f10 = (float) height / this.viewHeight;
+                f4 = width / 2.0F - this.viewWidth / 2.0F * f10;
+                f2 = width / 2.0F + this.viewWidth / 2.0F * f10;
                 f5 = 0.0F;
-                f3 = (float) height;
+                f3 = height;
             }
         }
 
-        float f11 = (float) width;
-        float f7 = (float) height;
-        float f8 = (float) this.viewWidth / (float) this.width;
-        float f9 = (float) this.viewHeight / (float) this.height;
+        float f11 = width;
+        float f7 = height;
+        float f8 = (float) this.viewWidth / this.width;
+        float f9 = (float) this.viewHeight / this.height;
 
         if (instance == null) {
-            instance = minecraft.gameRenderer.blitShader;
+            instance = mc.gameRenderer.blitShader;
             instance.setSampler("DiffuseSampler", this.colorTextureId);
         } else {
             for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
@@ -221,7 +215,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
                 instance.setSampler("Sampler" + k, l);
             }
         }
-        Matrix4f matrix4f = new Matrix4f().setOrtho(0, (float) width, (float) (height), 0, 1000.0F, 3000.0F);
+        Matrix4f matrix4f = new Matrix4f().setOrtho(0, width, height, 0, 1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 
         if (instance.MODEL_VIEW_MATRIX != null) {
@@ -236,15 +230,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
         Tesselator tesselator = RenderSystem.renderThreadTesselator();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
-        bufferbuilder.vertex(f4, f3, 0.0D).uv(xCropFactor, yCropFactor).color(255, 255, 255, 255)
-            .endVertex();
-        bufferbuilder.vertex(f2, f3, 0.0D).uv(f8 - xCropFactor, yCropFactor)
-            .color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(f2, f5, 0.0D).uv(f8 - xCropFactor, f9 - yCropFactor)
-            .color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(f4, f5, 0.0D).uv(xCropFactor, f9 - yCropFactor)
-            .color(255, 255, 255, 255).endVertex();
+        bufferbuilder.begin(Mode.QUADS, instance.getVertexFormat());
+        bufferbuilder.vertex(f4, f3, 0.0D).uv(xCropFactor, yCropFactor).color(255, 255, 255, 255).endVertex();
+        bufferbuilder.vertex(f2, f3, 0.0D).uv(f8 - xCropFactor, yCropFactor).color(255, 255, 255, 255).endVertex();
+        bufferbuilder.vertex(f2, f5, 0.0D).uv(f8 - xCropFactor, f9 - yCropFactor).color(255, 255, 255, 255).endVertex();
+        bufferbuilder.vertex(f4, f5, 0.0D).uv(xCropFactor, f9 - yCropFactor).color(255, 255, 255, 255).endVertex();
         BufferUploader.draw(bufferbuilder.end());
         instance.clear();
 

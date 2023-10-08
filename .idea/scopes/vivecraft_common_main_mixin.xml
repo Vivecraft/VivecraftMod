@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="vivecraft.common.main.mixin" pattern="file[vivecraft.common.main]:java/org/vivecraft/mixin//*" />
+</component>

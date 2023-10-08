@@ -11,9 +11,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import static org.joml.Math.max;
+import static org.joml.Math.min;
 
 @Mixin(TutorialToast.class)
 public abstract class TutorialToastVRMixin implements Toast {
@@ -32,13 +36,13 @@ public abstract class TutorialToastVRMixin implements Toast {
     @Unique
     private int vivecraft$offset;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V", shift = At.Shift.AFTER), method = "render")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V", shift = Shift.AFTER), method = "render")
     private void vivecraft$extendToast(GuiGraphics guiGraphics, ToastComponent toastComponent, long l, CallbackInfoReturnable<Visibility> cir) {
-        int width = Math.max(toastComponent.getMinecraft().font.width(this.title), message != null ? toastComponent.getMinecraft().font.width(this.message) : 0) + 34;
-        vivecraft$offset = Math.min(this.width() - width, 0);
-        if (vivecraft$offset < 0) {
+        int width = max(toastComponent.getMinecraft().font.width(this.title), this.message != null ? toastComponent.getMinecraft().font.width(this.message) : 0) + 34;
+        this.vivecraft$offset = min(this.width() - width, 0);
+        if (this.vivecraft$offset < 0) {
             // draw a bigger toast from right to left, to override the left border
-            for (int i = vivecraft$offset - (this.width() - 8) * (vivecraft$offset / (this.width() - 8)); i >= vivecraft$offset; i -= this.width() - 8) {
+            for (int i = this.vivecraft$offset - (this.width() - 8) * (this.vivecraft$offset / (this.width() - 8)); i >= this.vivecraft$offset; i -= this.width() - 8) {
                 guiGraphics.blit(BACKGROUND_SPRITE, i, 0, 0, 96, this.width() - 4, this.height());
             }
         }
@@ -46,21 +50,21 @@ public abstract class TutorialToastVRMixin implements Toast {
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;render(Lnet/minecraft/client/gui/GuiGraphics;II)V"), method = "render", index = 1)
     private int vivecraft$offsetIcon(int x) {
-        return x + vivecraft$offset;
+        return x + this.vivecraft$offset;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)I"), method = "render", index = 2)
     private int vivecraft$offsetText(int x) {
-        return x + vivecraft$offset;
+        return x + this.vivecraft$offset;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;fill(IIIII)V"), method = "render", index = 0)
     private int vivecraft$offsetProgressStart(int x) {
-        return x + vivecraft$offset;
+        return x + this.vivecraft$offset;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;fill(IIIII)V", ordinal = 1), method = "render", index = 2)
     private int vivecraft$offsetProgressEnd(int x) {
-        return x + vivecraft$offset - (int) ((float) x / TutorialToast.PROGRESS_BAR_WIDTH * vivecraft$offset);
+        return x + this.vivecraft$offset - (int) ((float) x / TutorialToast.PROGRESS_BAR_WIDTH * this.vivecraft$offset);
     }
 }

@@ -1,32 +1,30 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.joml.Vector3f;
+import org.vivecraft.client_vr.settings.VRSettings.FreeMove;
+
+import static org.joml.Math.abs;
+import static org.joml.Math.atan2;
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class RunTracker extends Tracker {
     private double direction = 0.0D;
     private double speed = 0.0D;
-    private Vec3 movedir;
 
-    public RunTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
-    }
-
-    public boolean isActive(LocalPlayer p) {
-        if (ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.seated) {
-            if (ClientDataHolderVR.getInstance().vrSettings.vrFreeMoveMode != VRSettings.FreeMove.RUN_IN_PLACE) {
+    @Override
+    public boolean isActive() {
+        if (dh.vrPlayer.getFreeMove() && !dh.vrSettings.seated) {
+            if (dh.vrSettings.vrFreeMoveMode != FreeMove.RUN_IN_PLACE) {
                 return false;
-            } else if (p != null && p.isAlive()) {
-                if (this.mc.gameMode == null) {
+            } else if (mc.player != null && mc.player.isAlive()) {
+                if (mc.gameMode == null) {
                     return false;
-                } else if (p.onGround() || !p.isInWater() && !p.isInLava()) {
-                    if (p.onClimbable()) {
+                } else if (mc.player.onGround() || !mc.player.isInWater() && !mc.player.isInLava()) {
+                    if (mc.player.onClimbable()) {
                         return false;
                     } else {
-                        return !ClientDataHolderVR.getInstance().bowTracker.isNotched();
+                        return !dh.bowTracker.isNotched();
                     }
                 } else {
                     return false;
@@ -47,15 +45,15 @@ public class RunTracker extends Tracker {
         return this.speed;
     }
 
-    public void reset(LocalPlayer player) {
+    @Override
+    public void reset() {
         this.speed = 0.0D;
     }
 
-    public void doProcess(LocalPlayer player) {
-        Vec3 vec3 = this.dh.vrPlayer.vrdata_world_pre.getController(0).getPosition();
-        Vec3 vec31 = this.dh.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-        double d0 = this.dh.vr.controllerHistory[0].averageSpeed(0.33D);
-        double d1 = this.dh.vr.controllerHistory[1].averageSpeed(0.33D);
+    @Override
+    public void doProcess() {
+        double d0 = dh.vr.controllerHistory[0].averageSpeed(0.33D);
+        double d1 = dh.vr.controllerHistory[1].averageSpeed(0.33D);
 
         if (this.speed > 0.0D) {
             if (d0 < 0.1D && d1 < 0.1D) {
@@ -67,11 +65,11 @@ public class RunTracker extends Tracker {
             return;
         }
 
-        if (Math.abs(d0 - d1) > 0.5D) {
+        if (abs(d0 - d1) > 0.5D) {
             this.speed = 0.0D;
         } else {
-            Vec3 vec32 = this.dh.vrPlayer.vrdata_world_pre.getController(0).getDirection().add(this.dh.vrPlayer.vrdata_world_pre.getController(1).getDirection()).scale(0.5D);
-            this.direction = (float) Math.toDegrees(Math.atan2(-vec32.x, vec32.z));
+            Vector3f vec32 = dh.vrPlayer.vrdata_world_pre.getController(0).getDirection(new Vector3f()).add(dh.vrPlayer.vrdata_world_pre.getController(1).getDirection(new Vector3f())).mul(0.5F);
+            this.direction = atan2(-vec32.x, vec32.z);
             double d2 = (d0 + d1) / 2.0D;
             this.speed = d2 * 1.0D * 1.3D;
 

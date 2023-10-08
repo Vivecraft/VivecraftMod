@@ -8,14 +8,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.client_vr.VRState;
+
+import static org.vivecraft.client_vr.VRState.vrRunning;
 
 @Pseudo
 @Mixin(DynamicFPSMod.class)
 public class DynamicFPSModVRMixin {
     @Inject(at = @At("HEAD"), method = {"checkForRender()Z", "shouldShowLevels()Z"}, remap = false, cancellable = true)
     private static void vivecraft$alwaysRenderVR(CallbackInfoReturnable<Boolean> cir) {
-        if (VRState.vrRunning) {
+        if (vrRunning) {
             cir.setReturnValue(true);
         }
     }

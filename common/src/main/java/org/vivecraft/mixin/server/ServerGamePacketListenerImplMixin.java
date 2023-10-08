@@ -49,7 +49,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
                 this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(this.player.getName().getString())), false);
             }
         }
-        // remove player from vivepalyer list, when they leave
+        // remove player from viveplayer list, when they leave
         ServerVRPlayers.getPlayersWithVivecraft(this.server).remove(this.player.getUUID());
     }
 }

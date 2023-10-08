@@ -2,15 +2,13 @@ package org.vivecraft.mixin.client_vr.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.util.Mth;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,28 +21,24 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
-import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRArmRenderer;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.VivecraftItemRendering;
+import org.vivecraft.client_vr.render.VivecraftItemRendering.VivecraftItemTransformType;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
-import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
+
+import static org.joml.Math.*;
+import static org.vivecraft.client_vr.VRState.*;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {
 
     @Unique
     private VRFirstPersonArmSwing vivecraft$swingType = VRFirstPersonArmSwing.Attack;
-
-    @Final
-    @Shadow
-    private Minecraft minecraft;
     @Final
     @Shadow
     private EntityRenderDispatcher entityRenderDispatcher;
@@ -62,16 +56,16 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
     @Inject(at = @At("HEAD"), method = "renderPlayerArm", cancellable = true)
     public void vivecraft$overrideArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm, CallbackInfo ci) {
-        if (!VRState.vrRunning) {
+        if (!vrRunning) {
             return;
         }
-        vivecraft$vrPlayerArm(poseStack, multiBufferSource, i, f, g, humanoidArm);
+        this.vivecraft$vrPlayerArm(poseStack, multiBufferSource, i, f, g, humanoidArm);
         ci.cancel();
     }
 
     @Inject(at = @At("HEAD"), method = "renderArmWithItem", cancellable = true)
     public void vivecraft$overrideArmItem(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j, CallbackInfo ci) {
-        if (!VRState.vrRunning) {
+        if (!vrRunning) {
             return;
         }
         this.vivecraft$vrRenderArmWithItem(abstractClientPlayer, f, g, interactionHand, h, itemStack, i, poseStack, multiBufferSource, j);
@@ -81,25 +75,28 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
     @Unique
     private void vivecraft$vrRenderArmWithItem(AbstractClientPlayer pPlayer, float pPartialTicks, float pPitch, InteractionHand pHand, float pSwingProgress, ItemStack pStack, float pEquippedProgress, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight) {
         boolean mainHand = pHand == InteractionHand.MAIN_HAND;
-        ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
         HumanoidArm humanoidarm = mainHand ? pPlayer.getMainArm() : pPlayer.getMainArm().getOpposite();
         pEquippedProgress = this.vivecraft$getEquipProgress(pHand, pPartialTicks);
         pMatrixStack.pushPose();
-        boolean renderArm = dh.currentPass != RenderPass.THIRD || dh.vrSettings.mixedRealityRenderHands;
 
-        if (dh.currentPass == RenderPass.CAMERA) {
-            renderArm = false;
+        if (!(dh.bowTracker.isActive(pHand)) && !pPlayer.isInvisible() && switch (dh.currentPass) {
+            case THIRD -> {
+                yield dh.vrSettings.mixedRealityRenderHands;
+            }
+            case CAMERA -> {
+                yield false;
+            }
+            case SCOPEL -> {
+                yield !(TelescopeTracker.isTelescope(pStack) && !mainHand);
+            }
+            case SCOPER -> {
+                yield !(TelescopeTracker.isTelescope(pStack) && mainHand);
+            }
+            default -> {
+                yield true;
+            }
         }
-
-        if (BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer)) {
-            renderArm = false;
-        }
-
-        if (TelescopeTracker.isTelescope(pStack) && (pHand == InteractionHand.OFF_HAND && dh.currentPass == RenderPass.SCOPEL || pHand == InteractionHand.MAIN_HAND && dh.currentPass == RenderPass.SCOPER)) {
-            renderArm = false;
-        }
-
-        if (renderArm && !pPlayer.isInvisible()) {
+        ) {
             this.renderPlayerArm(pMatrixStack, pBuffer, pCombinedLight, pEquippedProgress, pSwingProgress, humanoidarm);
         }
 
@@ -110,7 +107,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                 this.vivecraft$transformFirstPersonVR(pMatrixStack, humanoidarm, pSwingProgress);
             }
 
-            VivecraftItemRendering.VivecraftItemTransformType rendertype = VivecraftItemRendering.getTransformType(pStack, pPlayer, itemRenderer);
+            VivecraftItemTransformType rendertype = VivecraftItemRendering.getTransformType(pStack, pPlayer, this.itemRenderer);
 
             boolean useLeftHandModelinLeftHand = false;
 
@@ -124,39 +121,41 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                 itemDisplayContext = mainHand ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.FIRST_PERSON_LEFT_HAND : ItemDisplayContext.FIRST_PERSON_RIGHT_HAND);
             }
 
-            ClientDataHolderVR.isfphand = true;
+            dh.isfphand = true;
 
-            if (rendertype == VivecraftItemRendering.VivecraftItemTransformType.Map) {
-                RenderSystem.disableCull();
-                this.renderMap(pMatrixStack, pBuffer, pCombinedLight, pStack);
-            } else if (rendertype == VivecraftItemRendering.VivecraftItemTransformType.Telescope) {
-                if (dh.currentPass != RenderPass.SCOPEL && dh.currentPass != RenderPass.SCOPER) {
+            switch (rendertype) {
+                case Map -> {
+                    RenderSystem.disableCull();
+                    this.renderMap(pMatrixStack, pBuffer, pCombinedLight, pStack);
+                }
+                case Telescope -> {
+                    if (dh.currentPass != RenderPass.SCOPEL && dh.currentPass != RenderPass.SCOPER) {
+                        pMatrixStack.pushPose();
+                        pMatrixStack.scale(0.625F, 0.625F, 0.625F);
+                        pMatrixStack.last().pose().translate(mainHand ? -0.53F : -0.47F, -0.5F, -0.6F);
+                        //pMatrixStack.last().pose().rotateX((float) PI);
+                        //pMatrixStack.last().normal().rotateX((float) PI);
+                        mc.getBlockRenderer().getModelRenderer().renderModel(pMatrixStack.last(), pBuffer.getBuffer(Sheets.solidBlockSheet()), null, mc.getModelManager().getModel(TelescopeTracker.scopeModel), 0.5F, 0.5F, 1.0F, pCombinedLight, OverlayTexture.NO_OVERLAY);
+                        pMatrixStack.popPose();
+                    }
+
+                    float ang1 = (float) PI / 2.0F;
+                    float ang2 = (float) PI;
+
                     pMatrixStack.pushPose();
-                    pMatrixStack.scale(0.625F, 0.625F, 0.625F);
-                    pMatrixStack.translate(mainHand ? -0.03D : 0.03D, 0.0D, -0.1D);
-                    this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
+                    pMatrixStack.last().pose()
+                        .translate(mainHand ? -0.01875F : 0.01875F, 0.215F, -0.0626F)
+                        .rotateXYZ(ang1, ang2, ang2);
+                    pMatrixStack.last().normal().rotateXYZ(ang1, ang2, ang2);
+                    VREffectsHelper.drawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
                     pMatrixStack.popPose();
                 }
-
-                pMatrixStack.pushPose();
-                pMatrixStack.translate(mainHand ? -0.01875D : 0.01875D, 0.215D, -0.0626D);
-                pMatrixStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-                pMatrixStack.mulPose(Axis.YP.rotationDegrees(180.0F));
-                pMatrixStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
-                if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-                    // this messes stuff up when rendering the quads
-                    OptifineHelper.endEntities();
+                default -> {
+                    this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
                 }
-                VREffectsHelper.drawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
-                pMatrixStack.popPose();
-                if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-                    OptifineHelper.beginEntities();
-                }
-            } else {
-                this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
             }
 
-            ClientDataHolderVR.isfphand = false;
+            dh.isfphand = false;
             pMatrixStack.popPose();
         }
 
@@ -181,9 +180,9 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
     private void vivecraft$vrPlayerArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm) {
         boolean flag = humanoidArm != HumanoidArm.LEFT;
         float h = flag ? 1.0F : -1.0F;
-        AbstractClientPlayer abstractclientplayer = this.minecraft.player;
+        AbstractClientPlayer abstractclientplayer = mc.player;
         RenderSystem.setShaderTexture(0, abstractclientplayer.getSkin().texture());
-        VRArmRenderer vrarmrenderer = ((EntityRenderDispatcherVRExtension) entityRenderDispatcher).vivecraft$getArmSkinMap().get(abstractclientplayer.getSkin().model().id());
+        VRArmRenderer vrarmrenderer = ((EntityRenderDispatcherVRExtension) this.entityRenderDispatcher).vivecraft$getArmSkinMap().get(abstractclientplayer.getSkin().model().id());
         poseStack.pushPose();
 
         if (abstractclientplayer.swingingArm == InteractionHand.MAIN_HAND && flag) {
@@ -195,7 +194,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
         }
 
         poseStack.scale(0.4f, 0.4F, 0.4F);
-        boolean slim = abstractclientplayer.getSkin().model().id().equals("slim");
+        boolean slim = "slim".equals(abstractclientplayer.getSkin().model().id());
 
             /*
              x offset: (arm x origin + arm x offset + arm x dimension * 0.5) / 16
@@ -207,10 +206,17 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
              x offset: (5 - 1 + 4*0.5) / 16 = 0.375
              z offset: (-2 + 2 + 12) / 16 = 0.75
             */
+        float ang1 = (float) PI / -2.0F;
+        float ang2 = (float) PI;
 
-        poseStack.translate((slim ? -0.34375F : -0.375F) * h, 0.0F, slim ? 0.78125F : 0.75F);
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
-        poseStack.mulPose(Axis.YP.rotationDegrees(180));
+        poseStack.last().pose()
+            .translate((slim ? -0.34375F : -0.375F) * h, 0.0F, slim ? 0.78125F : 0.75F)
+            .rotateX(ang1)
+            .rotateY(ang2);
+        poseStack.last().normal()
+            .rotateX(ang1)
+            .rotateY(ang2);
+
         if (flag) {
             vrarmrenderer.renderRightHand(poseStack, multiBufferSource, i, abstractclientplayer);
         } else {
@@ -229,34 +235,36 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
     private void vivecraft$transformFirstPersonVR(PoseStack matrixStackIn, HumanoidArm hand, float swingProgress) {
         if (swingProgress != 0.0F) {
             switch (this.vivecraft$swingType) {
-                case Attack:
-                    float f2 = Mth.sin((float) ((double) (swingProgress * 3.0F) * Math.PI));
-                    if ((double) swingProgress > 0.5D) {
-                        f2 = Mth.sin((float) ((double) swingProgress * Math.PI + Math.PI));
+                case Attack -> {
+                    float f2 = sin((swingProgress * 3.0F) * (float) PI);
+                    if (swingProgress > 0.5F) {
+                        f2 = sin((swingProgress * (float) PI + (float) PI));
                     }
-
-                    matrixStackIn.translate(0.0D, 0.0D, 0.2F);
-                    matrixStackIn.mulPose(Axis.XP.rotationDegrees(f2 * 30.0F));
-                    matrixStackIn.translate(0.0D, 0.0D, -0.2F);
-                    break;
-
-                case Interact:
-                    float f1 = Mth.sin((float) ((double) (swingProgress * 3.0F) * Math.PI));
-
-                    if ((double) swingProgress > 0.5D) {
-                        f1 = Mth.sin((float) ((double) swingProgress * Math.PI + Math.PI));
+                    f2 *= 30.0F;
+                    f2 = toRadians(f2);
+                    matrixStackIn.last().pose()
+                        .translate(0.0F, 0.0F, 0.2F)
+                        .rotateX(f2)
+                        .translate(0.0F, 0.0F, -0.2F);
+                    matrixStackIn.last().normal().rotateX(f2);
+                }
+                case Interact -> {
+                    float f1 = sin((swingProgress * 3.0F) * (float) PI);
+                    if (swingProgress > 0.5F) {
+                        f1 = sin(swingProgress * (float) PI + (float) PI);
                     }
-
-                    matrixStackIn.mulPose(Axis.ZP.rotationDegrees((float) (hand == HumanoidArm.RIGHT ? -1 : 1) * f1 * 45.0F));
-                    break;
-
-                case Use:
-                    float f = Mth.sin((float) ((double) (swingProgress * 2.0F) * Math.PI));
-
-                    if ((double) swingProgress > 0.25D) {
-                        f = Mth.sin((float) ((double) (swingProgress / 2.0F) * Math.PI + Math.PI));
+                    f1 *= hand == HumanoidArm.RIGHT ? -45.0F : 45.0F;
+                    f1 = toRadians(f1);
+                    matrixStackIn.last().pose().rotateZ(f1);
+                    matrixStackIn.last().normal().rotateZ(f1);
+                }
+                case Use -> {
+                    float f = sin((swingProgress * 2.0F) * (float) PI);
+                    if (swingProgress > 0.25F) {
+                        f = sin((swingProgress / 2.0F) * (float) PI + (float) PI);
                     }
-                    matrixStackIn.translate(0.0D, 0.0D, -(1.0F + f) * 0.1F);
+                    matrixStackIn.last().pose().translate(0.0F, 0.0F, -(1.0F + f) * 0.1F);
+                }
             }
         }
     }

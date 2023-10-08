@@ -1,55 +1,43 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.CommonNetworkHelper;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.client_vr.settings.VRSettings.BowMode;
+import org.vivecraft.common.network.CommonNetworkHelper.PacketDiscriminators;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 
+import static org.joml.Math.acos;
+import static org.joml.Math.toDegrees;
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
+
 public class BowTracker extends Tracker {
-    private double lastcontrollersDist;
-    private double lastcontrollersDot;
-    private double controllersDist;
-    private double controllersDot;
-    private double currentDraw;
-    private double lastDraw;
+    private float currentDraw;
     public boolean isDrawing;
     private boolean pressed;
-    private boolean lastpressed;
     private boolean canDraw;
-    private boolean lastcanDraw;
     public long startDrawTime;
-    private final double notchDotThreshold = 20.0D;
-    private double maxDraw;
-    private final long maxDrawMillis = 1100L;
-    private Vec3 aim;
+    private float maxDraw;
+    private long maxDrawMillis = 1100L;
+    private final Vector3f aim = new Vector3f();
     float tsNotch = 0.0F;
     int hapcounter = 0;
     int lasthapStep = 0;
 
-    public BowTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
-    }
-
-    public Vec3 getAimVector() {
+    public Vector3fc getAimVector() {
         return this.aim;
     }
 
@@ -64,34 +52,47 @@ public class BowTracker extends Tracker {
     public static boolean isBow(ItemStack itemStack) {
         if (itemStack == ItemStack.EMPTY) {
             return false;
-        } else if (ClientDataHolderVR.getInstance().vrSettings.bowMode == VRSettings.BowMode.OFF) {
+        } else if (dh.vrSettings.bowMode == BowMode.OFF) {
             return false;
-        } else if (ClientDataHolderVR.getInstance().vrSettings.bowMode == VRSettings.BowMode.VANILLA) {
+        } else if (dh.vrSettings.bowMode == BowMode.VANILLA) {
             return itemStack.getItem() == Items.BOW;
         } else {
             return itemStack.getItem().getUseAnimation(itemStack) == UseAnim.BOW;
         }
     }
 
-    public static boolean isHoldingBow(LivingEntity e, InteractionHand hand) {
-        return !ClientDataHolderVR.getInstance().vrSettings.seated && isBow(e.getItemInHand(hand));
+    public static boolean isHoldingBow(InteractionHand hand) {
+        return !dh.vrSettings.seated && isBow(mc.player.getItemInHand(hand));
     }
 
-    public static boolean isHoldingBowEither(LivingEntity e) {
-        return isHoldingBow(e, InteractionHand.MAIN_HAND) || isHoldingBow(e, InteractionHand.OFF_HAND);
+    public static boolean isHoldingBowEither() {
+        return isHoldingBow(InteractionHand.MAIN_HAND) || isHoldingBow(InteractionHand.OFF_HAND);
     }
 
-    public boolean isActive(LocalPlayer p) {
-        if (p == null) {
+    @Override
+    public boolean isActive() {
+        return this.isActive(null);
+    }
+
+    /**
+     * Test a specific hand isActive.
+     *
+     * @param hand the hand to test or either hand (null)
+     * @return bow tracker isActive for the specified hand or either hand
+     */
+    public boolean isActive(@Nullable InteractionHand hand) {
+        if (mc.player == null) {
             return false;
-        } else if (this.mc.gameMode == null) {
+        } else if (mc.gameMode == null) {
             return false;
-        } else if (!p.isAlive()) {
+        } else if (!mc.player.isAlive()) {
             return false;
-        } else if (p.isSleeping()) {
+        } else if (mc.player.isSleeping()) {
             return false;
+        } else if (hand != null) {
+            return isHoldingBow(hand);
         } else {
-            return isHoldingBow(p, InteractionHand.MAIN_HAND) || isHoldingBow(p, InteractionHand.OFF_HAND);
+            return isHoldingBowEither();
         }
     }
 
@@ -99,73 +100,64 @@ public class BowTracker extends Tracker {
         return Util.getMillis() - this.startDrawTime >= this.maxDrawMillis;
     }
 
-    public void reset(LocalPlayer player) {
+    @Override
+    public void reset() {
         this.isDrawing = false;
     }
 
+    @Override
     public EntryPoint getEntryPoint() {
         return EntryPoint.SPECIAL_ITEMS;
     }
 
-    public void doProcess(LocalPlayer player) {
-        VRData vrdata = this.dh.vrPlayer.vrdata_world_render;
+    @Override
+    public void doProcess() {
+        VRData vrdata = dh.vrPlayer.getVRDataWorld();
 
-        if (vrdata == null) {
-            vrdata = this.dh.vrPlayer.vrdata_world_pre;
-        }
-
-        VRPlayer vrplayer = this.dh.vrPlayer;
-
-        if (this.dh.vrSettings.seated) {
-            this.aim = vrdata.getController(0).getCustomVector(new Vec3(0.0D, 0.0D, 1.0D));
+        if (dh.vrSettings.seated) {
+            vrdata.getController(0).getCustomVector(this.aim.set(0.0F, 0.0F, 1.0F));
         } else {
-            this.lastcontrollersDist = this.controllersDist;
-            this.lastcontrollersDot = this.controllersDot;
-            this.lastpressed = this.pressed;
-            this.lastDraw = this.currentDraw;
-            this.lastcanDraw = this.canDraw;
-            this.maxDraw = (double) this.mc.player.getBbHeight() * 0.22D;
+            boolean lastpressed = this.pressed;
+            boolean lastcanDraw = this.canDraw;
+            this.maxDraw = mc.player.getBbHeight() * 0.22F;
+            PlayerExtension playerExt = (PlayerExtension) mc.player;
 
             if (Xplat.isModLoaded("pehkui")) {
                 // this is meant to be relative to the base Bb height, not the scaled one
-                this.maxDraw /= PehkuiHelper.getPlayerBbScale(player, mc.getFrameTime());
+                this.maxDraw /= PehkuiHelper.getPlayerBbScale(mc.player, mc.getFrameTime());
             }
 
-            Vec3 vec3 = vrdata.getController(0).getPosition();
-            Vec3 vec31 = vrdata.getController(1).getPosition();
-            this.controllersDist = vec31.distanceTo(vec3);
-            Vec3 vec32 = new Vec3(0.0D, 1.0D * vrdata.worldScale, 0.0D);
-            Vec3 vec33 = vrdata.getHand(1).getCustomVector(vec32).scale(this.maxDraw * 0.5D).add(vec31);
-            double d0 = vec3.distanceTo(vec33);
-            this.aim = vec3.subtract(vec31).normalize();
-            Vec3 vec34 = vrdata.getController(0).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D));
-            Vector3 vector3 = new Vector3((float) vec34.x, (float) vec34.y, (float) vec34.z);
-            Vec3 vec35 = vrdata.getHand(1).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
-            Vector3 vector31 = new Vector3((float) vec35.x, (float) vec35.y, (float) vec35.z);
-            this.controllersDot = (180D / Math.PI) * Math.acos(vector31.dot(vector3));
-            this.pressed = this.mc.options.keyAttack.isDown();
-            float f = 0.15F * vrdata.worldScale;
-            boolean flag = isHoldingBow(player, InteractionHand.MAIN_HAND);
-            InteractionHand interactionhand = flag ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-            ItemStack itemstack = ItemStack.EMPTY;
-            ItemStack itemstack1 = ItemStack.EMPTY;
-
-            if (flag) {
-                itemstack1 = player.getMainHandItem();
-                itemstack = player.getProjectile(itemstack1);
+            Vector3fc rightPos = vrdata.getController(0).getPosition(new Vector3f());
+            Vector3fc leftPos = vrdata.getController(1).getPosition(new Vector3f());
+            float controllersDist = leftPos.distance(rightPos);
+            Vector3fc stringPos = vrdata.getHand(1).getCustomVector(new Vector3f(0.0F, vrdata.worldScale, 0.0F)).mul(this.maxDraw * 0.5F).add(leftPos);
+            float notchDist = rightPos.distance(stringPos);
+            rightPos.sub(leftPos, this.aim).normalize();
+            Vector3fc rightAim = vrdata.getController(0).getCustomVector(new Vector3f(0.0F, 0.0F, -1.0F));
+            Vector3fc leftAim = vrdata.getHand(1).getCustomVector(new Vector3f(0.0F, -1.0F, 0.0F));
+            float controllersDot = (float) toDegrees(acos(leftAim.dot(rightAim)));
+            this.pressed = mc.options.keyAttack.isDown();
+            float notchDistThreshold = 0.15F * vrdata.worldScale;
+            boolean main = isHoldingBow(InteractionHand.MAIN_HAND);
+            InteractionHand interactionhand = main ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+            final ItemStack bow;
+            final ItemStack ammo;
+            if (main) {
+                ammo = mc.player.getProjectile(bow = mc.player.getMainHandItem());
             } else {
-                if (player.getMainHandItem().is(ItemTags.ARROWS)) {
-                    itemstack = player.getMainHandItem();
+                bow = mc.player.getOffhandItem();
+                if (mc.player.getMainHandItem().is(ItemTags.ARROWS)){
+                    ammo = mc.player.getMainHandItem();
+                } else {
+                    ammo = ItemStack.EMPTY;
                 }
+            };
 
-                itemstack1 = player.getOffhandItem();
-            }
+            int stage0 = bow.getUseDuration();
+            int stage1 = bow.getUseDuration() - 15;
+            int stage2 = 0;
 
-            int i = itemstack1.getUseDuration();
-            int j = itemstack1.getUseDuration() - 15;
-            int k = 0;
-
-            if (itemstack != ItemStack.EMPTY && d0 <= (double) f && this.controllersDot <= 20.0D) {
+            if (ammo != ItemStack.EMPTY && notchDist <= notchDistThreshold && controllersDot <= 20.0F) {
                 if (!this.canDraw) {
                     this.startDrawTime = Util.getMillis();
                 }
@@ -174,29 +166,27 @@ public class BowTracker extends Tracker {
                 this.tsNotch = (float) Util.getMillis();
 
                 if (!this.isDrawing) {
-                    ((PlayerExtension) player).vivecraft$setItemInUseClient(itemstack1, interactionhand);
-                    ((PlayerExtension) player).vivecraft$setItemInUseCountClient(i);
+                    playerExt.vivecraft$setItemInUseClient(bow, interactionhand);
+                    playerExt.vivecraft$setItemInUseCountClient(stage0);
                     //Minecraft.getInstance().physicalGuiManager.preClickAction();
                 }
             } else if ((float) Util.getMillis() - this.tsNotch > 500.0F) {
                 this.canDraw = false;
-                ((PlayerExtension) player).vivecraft$setItemInUseClient(ItemStack.EMPTY, interactionhand);
+                playerExt.vivecraft$setItemInUseClient(ItemStack.EMPTY, interactionhand);
             }
 
-            if (!this.isDrawing && this.canDraw && this.pressed && !this.lastpressed) {
+            if (!this.isDrawing && this.canDraw && this.pressed && !lastpressed) {
                 this.isDrawing = true;
                 //Minecraft.getInstance().physicalGuiManager.preClickAction();
-                this.mc.gameMode.useItem(player, interactionhand);
+                mc.gameMode.useItem(mc.player, interactionhand);
             }
 
-            if (this.isDrawing && !this.pressed && this.lastpressed && (double) this.getDrawPercent() > 0.0D) {
-                this.dh.vr.triggerHapticPulse(0, 500);
-                this.dh.vr.triggerHapticPulse(1, 3000);
-                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(this.getDrawPercent()).array());
-                Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
-                this.mc.gameMode.releaseUsingItem(player);
-                serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(0.0F).array());
-                Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
+            if (this.isDrawing && !this.pressed && lastpressed && this.getDrawPercent() > 0.0F) {
+                dh.vr.triggerHapticPulse(0, 500);
+                dh.vr.triggerHapticPulse(1, 3000);
+                mc.getConnection().send(ClientNetworking.getVivecraftClientPacket(PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(this.getDrawPercent()).array()));
+                mc.gameMode.releaseUsingItem(mc.player);
+                mc.getConnection().send(ClientNetworking.getVivecraftClientPacket(PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(0.0F).array()));
                 this.isDrawing = false;
             }
 
@@ -204,51 +194,52 @@ public class BowTracker extends Tracker {
                 this.isDrawing = false;
             }
 
-            if (!this.isDrawing && this.canDraw && !this.lastcanDraw) {
-                this.dh.vr.triggerHapticPulse(1, 800);
-                this.dh.vr.triggerHapticPulse(0, 800);
+            if (!this.isDrawing && this.canDraw && !lastcanDraw) {
+                dh.vr.triggerHapticPulse(1, 800);
+                dh.vr.triggerHapticPulse(0, 800);
             }
 
             if (this.isDrawing) {
-                this.currentDraw = (this.controllersDist - (double) f) / vrdata.worldScale;
+                this.currentDraw = (controllersDist - notchDistThreshold) / vrdata.worldScale;
 
                 if (this.currentDraw > this.maxDraw) {
                     this.currentDraw = this.maxDraw;
                 }
 
-                int j1 = 0;
+                float drawPerc = this.getDrawPercent();
+                int hap;
 
-                if (this.getDrawPercent() > 0.0F) {
-                    j1 = (int) (this.getDrawPercent() * 500.0F) + 700;
-                }
-
-                int l = (int) ((float) itemstack1.getUseDuration() - this.getDrawPercent() * (float) this.maxDrawMillis);
-                ((PlayerExtension) player).vivecraft$setItemInUseClient(itemstack1, interactionhand);
-                double d1 = this.getDrawPercent();
-
-                if (d1 >= 1.0D) {
-                    ((PlayerExtension) player).vivecraft$setItemInUseCountClient(k);
-                } else if (d1 > 0.4D) {
-                    ((PlayerExtension) player).vivecraft$setItemInUseCountClient(j);
+                if (drawPerc > 0.0F) {
+                    hap = (int) (drawPerc * 500.0F) + 700;
                 } else {
-                    ((PlayerExtension) player).vivecraft$setItemInUseCountClient(i);
+                    hap = 0;
                 }
 
-                int i1 = (int) (d1 * 4.0D * 4.0D * 3.0D);
+                playerExt.vivecraft$setItemInUseClient(bow, interactionhand);
 
-                if (i1 % 2 == 0 && this.lasthapStep != i1) {
-                    this.dh.vr.triggerHapticPulse(0, j1);
+                if (drawPerc >= 1.0F) {
+                    playerExt.vivecraft$setItemInUseCountClient(stage2);
+                } else if (drawPerc > 0.4F) {
+                    playerExt.vivecraft$setItemInUseCountClient(stage1);
+                } else {
+                    playerExt.vivecraft$setItemInUseCountClient(stage0);
+                }
 
-                    if (d1 == 1.0D) {
-                        this.dh.vr.triggerHapticPulse(1, j1);
+                int hapStep = (int) (drawPerc * 4.0F * 4.0F * 3.0F);
+
+                if ((hapStep % 2) == 0 && this.lasthapStep != hapStep) {
+                    dh.vr.triggerHapticPulse(0, hap);
+
+                    if (drawPerc == 1.0F) {
+                        dh.vr.triggerHapticPulse(1, hap);
                     }
                 }
 
                 if (this.isCharged() && this.hapcounter % 4 == 0) {
-                    this.dh.vr.triggerHapticPulse(1, 200);
+                    dh.vr.triggerHapticPulse(1, 200);
                 }
 
-                this.lasthapStep = i1;
+                this.lasthapStep = hapStep;
                 ++this.hapcounter;
             } else {
                 this.hapcounter = 0;

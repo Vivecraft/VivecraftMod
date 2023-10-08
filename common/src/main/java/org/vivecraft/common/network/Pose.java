@@ -2,9 +2,9 @@ package org.vivecraft.common.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.common.utils.math.Quaternion;
+import org.joml.Quaternionf;
 
-public record Pose(Vec3 position, Quaternion orientation) {
+public record Pose(Vec3 position, Quaternionf orientation) {
 
     public static Pose deserialize(FriendlyByteBuf byteBuf) {
         return new Pose(CommonNetworkHelper.deserializeFVec3(byteBuf), CommonNetworkHelper.deserializeVivecraftQuaternion(byteBuf));

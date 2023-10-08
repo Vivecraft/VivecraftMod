@@ -6,9 +6,10 @@ import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+
+import static org.vivecraft.client_vr.VRState.dh;
 
 @Mixin(GameRenderer.class)
 public class FabricGameRendererVRMixin {
@@ -25,7 +26,7 @@ public class FabricGameRendererVRMixin {
         if (RenderPassType.isVanilla()) {
             s.mulPose(quaternion);
         } else {
-            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, s);
+            RenderHelper.applyVRModelView(dh.currentPass, s);
         }
     }
 

@@ -28,11 +28,13 @@ import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 import org.vivecraft.server.config.ServerConfig;
 
+import static org.joml.Math.max;
+
 @Mixin(AbstractArrow.class)
 public abstract class AbstractArrowMixin extends Entity {
 
-    protected AbstractArrowMixin(EntityType<? extends Projectile> p_37248_, Level p_37249_) {
-        super(p_37248_, p_37249_);
+    protected AbstractArrowMixin(EntityType<? extends Projectile> entityType, Level level) {
+        super(entityType, level);
         // TODO Auto-generated constructor stub
     }
 
@@ -40,16 +42,16 @@ public abstract class AbstractArrowMixin extends Entity {
     private double baseDamage;
 
     @Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V")
-    public void vivecraft$pickup(EntityType<? extends AbstractArrow> p_36717_, LivingEntity p_36718_, Level p_36719_, CallbackInfo info) {
-        if (p_36718_ instanceof ServerPlayer player) {
+    public void vivecraft$pickup(EntityType<? extends AbstractArrow> entityType, LivingEntity livingEntity, Level level, CallbackInfo info) {
+        if (livingEntity instanceof ServerPlayer player) {
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);
             if (serverviveplayer != null && serverviveplayer.isVR()) {
-                Vec3 vec3 = serverviveplayer.getControllerPos(serverviveplayer.activeHand, (Player) p_36718_);
+                Vec3 vec3 = serverviveplayer.getControllerPos(serverviveplayer.activeHand, (Player) livingEntity);
                 Vec3 vec31 = serverviveplayer.getControllerDir(serverviveplayer.activeHand);
 
                 if (!serverviveplayer.isSeated() && serverviveplayer.getDraw() > 0.0F) {
-                    vec31 = serverviveplayer.getControllerPos(1, (Player) p_36718_).subtract(serverviveplayer.getControllerPos(0, (Player) p_36718_)).normalize();
-                    vec3 = serverviveplayer.getControllerPos(0, (Player) p_36718_);
+                    vec31 = serverviveplayer.getControllerPos(1, (Player) livingEntity).subtract(serverviveplayer.getControllerPos(0, (Player) livingEntity)).normalize();
+                    vec3 = serverviveplayer.getControllerPos(0, (Player) livingEntity);
                 }
 
                 this.setPos(vec3.x + vec31.x, vec3.y + vec31.y, vec3.z + vec31.z);
@@ -63,7 +65,7 @@ public abstract class AbstractArrowMixin extends Entity {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(owner);
             Vec3 hitpos;
             double multiplier = 1.0;
-            if ((hitpos = vivecraft$isHeadshot(entityHitResult)) != null) {
+            if ((hitpos = this.vivecraft$isHeadshot(entityHitResult)) != null) {
                 if (serverVivePlayer != null && serverVivePlayer.isVR()) {
                     if (serverVivePlayer.isSeated()) {
                         multiplier = ServerConfig.bowSeatedHeadshotMultiplier.get();
@@ -89,19 +91,19 @@ public abstract class AbstractArrowMixin extends Entity {
                         -this.getDeltaMovement().z,
                         0.1);
                     // send sound effect
-                    owner.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.ITEM_BREAK), SoundSource.PLAYERS, owner.getX(), owner.getY(), owner.getZ(), 0.7f, 0.5f, owner.level().random.nextLong()));
+                    owner.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.ITEM_BREAK), SoundSource.PLAYERS, owner.getX(), owner.getY(), owner.getZ(), 0.7F, 0.5F, owner.level().random.nextLong()));
                 }
             }
             // if headshots are disabled, still use the regular multiplier
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {
                 if (serverVivePlayer.isSeated()) {
-                    multiplier = Math.max(multiplier, ServerConfig.bowSeatedMultiplier.get());
+                    multiplier = max(multiplier, ServerConfig.bowSeatedMultiplier.get());
                 } else {
-                    multiplier = Math.max(multiplier, ServerConfig.bowStandingMultiplier.get());
+                    multiplier = max(multiplier, ServerConfig.bowStandingMultiplier.get());
                 }
             }
 
-            baseDamage *= multiplier;
+            this.baseDamage *= multiplier;
         }
     }
 

@@ -16,50 +16,52 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
+import static org.joml.Math.*;
+
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin extends Entity {
 
-    protected FishingHookMixin(EntityType<? extends Projectile> p_37248_, Level p_37249_) {
-        super(p_37248_, p_37249_);
+    protected FishingHookMixin(EntityType<? extends Projectile> entityType, Level level) {
+        super(entityType, level);
         // TODO Auto-generated constructor stub
     }
 
     @Unique
-    private ServerVivePlayer vivecraft$serverviveplayer = null;
+    private ServerVivePlayer vivecraft$serverviveplayer;
     @Unique
-    private Vec3 vivecraft$controllerDir = null;
+    private Vec3 vivecraft$controllerDir;
     @Unique
-    private Vec3 vivecraft$controllerPos = null;
+    private Vec3 vivecraft$controllerPos;
 
-    @ModifyVariable(at = @At(value = "STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 0)
+    @ModifyVariable(at = @At("STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 0)
     private float vivecraft$modifyXrot(float xRot, Player player) {
-        vivecraft$serverviveplayer = ServerVRPlayers.getVivePlayer((ServerPlayer) player);
-        if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
-            vivecraft$controllerDir = vivecraft$serverviveplayer.getControllerDir(vivecraft$serverviveplayer.activeHand);
-            vivecraft$controllerPos = vivecraft$serverviveplayer.getControllerPos(vivecraft$serverviveplayer.activeHand, player);
-            return -((float) Math.toDegrees(Math.asin(vivecraft$controllerDir.y / vivecraft$controllerDir.length())));
+        this.vivecraft$serverviveplayer = ServerVRPlayers.getVivePlayer((ServerPlayer) player);
+        if (this.vivecraft$serverviveplayer != null && this.vivecraft$serverviveplayer.isVR()) {
+            this.vivecraft$controllerDir = this.vivecraft$serverviveplayer.getControllerDir(this.vivecraft$serverviveplayer.activeHand);
+            this.vivecraft$controllerPos = this.vivecraft$serverviveplayer.getControllerPos(this.vivecraft$serverviveplayer.activeHand, player);
+            return -((float) toDegrees(asin(this.vivecraft$controllerDir.y / this.vivecraft$controllerDir.length())));
         }
         return xRot;
     }
 
-    @ModifyVariable(at = @At(value = "STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 1)
+    @ModifyVariable(at = @At("STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 1)
     private float vivecraft$modifyYrot(float yRot) {
-        if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
-            return (float) Math.toDegrees(Math.atan2(-vivecraft$controllerDir.x, vivecraft$controllerDir.z));
+        if (this.vivecraft$serverviveplayer != null && this.vivecraft$serverviveplayer.isVR()) {
+            return (float) toDegrees(atan2(-this.vivecraft$controllerDir.x, this.vivecraft$controllerDir.z));
         }
         return yRot;
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;moveTo(DDDFF)V"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V")
     private void vivecraft$modifyMoveTo(FishingHook instance, double x, double y, double z, float yRot, float xRot) {
-        if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
-            instance.moveTo(vivecraft$controllerPos.x + vivecraft$controllerDir.x * (double) 0.6F, vivecraft$controllerPos.y + vivecraft$controllerDir.y * (double) 0.6F, vivecraft$controllerPos.z + vivecraft$controllerDir.z * (double) 0.6F, yRot, xRot);
-            vivecraft$controllerDir = null;
-            vivecraft$controllerPos = null;
+        if (this.vivecraft$serverviveplayer != null && this.vivecraft$serverviveplayer.isVR()) {
+            instance.moveTo(this.vivecraft$controllerPos.x + this.vivecraft$controllerDir.x * (double) 0.6F, this.vivecraft$controllerPos.y + this.vivecraft$controllerDir.y * (double) 0.6F, this.vivecraft$controllerPos.z + this.vivecraft$controllerDir.z * (double) 0.6F, yRot, xRot);
+            this.vivecraft$controllerDir = null;
+            this.vivecraft$controllerPos = null;
         } else {
             this.moveTo(x, y, z, yRot, xRot);
         }
 
-        vivecraft$serverviveplayer = null;
+        this.vivecraft$serverviveplayer = null;
     }
 }

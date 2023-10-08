@@ -7,9 +7,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+
+import static org.vivecraft.client_vr.VRState.dh;
 
 @Pseudo
 @Mixin(ProgramUniforms.class)
@@ -24,14 +25,14 @@ public class IrisProgramUniformsMixin {
 
 
     // modify the frame counter on RenderPasChange, so perFrame Uniforms are recalculated
-    @ModifyVariable(method = "update", at = @At(value = "STORE"), remap = false)
+    @ModifyVariable(method = "update", at = @At("STORE"), remap = false)
     private int vivecraft$checkNewFrame(int currentFrame) {
         if (!RenderPassType.isVanilla()) {
             vivecraft$actualFrame = currentFrame;
-            if (lastFrame == currentFrame && vivecraft$lastPass != ClientDataHolderVR.getInstance().currentPass) {
+            if (lastFrame == currentFrame && vivecraft$lastPass != dh.currentPass) {
                 currentFrame--;
             }
-            vivecraft$lastPass = ClientDataHolderVR.getInstance().currentPass;
+            vivecraft$lastPass = dh.currentPass;
         }
         return currentFrame;
     }

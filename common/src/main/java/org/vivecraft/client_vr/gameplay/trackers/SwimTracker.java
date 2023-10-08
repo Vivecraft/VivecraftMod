@@ -1,63 +1,59 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.joml.Vector3f;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class SwimTracker extends Tracker {
-    Vec3 motion = Vec3.ZERO;
-    double friction = 0.9F;
-    double lastDist;
-    final double riseSpeed = 0.005F;
-    double swimspeed = 1.3F;
+    final Vector3f motion = new Vector3f();
+    final float friction = 0.9F;
+    float lastDist;
+    final float riseSpeed = 0.005F;
+    final float swimspeed = 1.3F;
 
-    public SwimTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
-    }
-
-    public boolean isActive(LocalPlayer p) {
-        if (this.dh.vrSettings.seated) {
+    @Override
+    public boolean isActive() {
+        if (dh.vrSettings.seated) {
             return false;
-        } else if (!this.dh.vrSettings.realisticSwimEnabled) {
+        } else if (!dh.vrSettings.realisticSwimEnabled) {
             return false;
-        } else if (this.mc.screen != null) {
+        } else if (mc.screen != null) {
             return false;
-        } else if (p != null && p.isAlive()) {
-            if (this.mc.gameMode == null) {
+        } else if (mc.player != null && mc.player.isAlive()) {
+            if (mc.gameMode == null) {
                 return false;
-            } else if (!p.isInWater() && !p.isInLava()) {
+            } else if (!mc.player.isInWater() && !mc.player.isInLava()) {
                 return false;
-            } else if (p.zza > 0.0F) {
+            } else if (mc.player.zza > 0.0F) {
                 return false;
             } else {
-                return !(p.xxa > 0.0F);
+                return !(mc.player.xxa > 0.0F);
             }
         } else {
             return false;
         }
     }
 
-    public void doProcess(LocalPlayer player) {
-        Vec3 vec3 = this.dh.vrPlayer.vrdata_world_pre.getController(0).getPosition();
-        Vec3 vec31 = this.dh.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-        Vec3 vec32 = vec31.subtract(vec3).scale(0.5D).add(vec3);
-        Vec3 vec33 = this.dh.vrPlayer.vrdata_world_pre.getHeadPivot().subtract(0.0D, 0.3D, 0.0D);
-        Vec3 vec34 = vec32.subtract(vec33).normalize().add(this.dh.vrPlayer.vrdata_world_pre.hmd.getDirection()).scale(0.5D);
-        Vec3 vec35 = this.dh.vrPlayer.vrdata_world_pre.getController(0).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D)).add(this.dh.vrPlayer.vrdata_world_pre.getController(1).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D))).scale(0.5D);
-        double d0 = vec35.add(vec34).length() / 2.0D;
-        double d1 = vec33.distanceTo(vec32);
-        double d2 = this.lastDist - d1;
+    @Override
+    public void doProcess() {
+        Vector3f vec3 = dh.vrPlayer.vrdata_world_pre.getController(0).getPosition(new Vector3f());
+        Vector3f vec32 = dh.vrPlayer.vrdata_world_pre.getController(1).getPosition(new Vector3f()).sub(vec3).mul(0.5F).add(vec3);
+        Vector3f vec33 = dh.vrPlayer.vrdata_world_pre.getHeadPivot(new Vector3f()).sub(0.0F, 0.3F, 0.0F);
+        Vector3f vec34 = vec32.sub(vec33, new Vector3f()).normalize().add(dh.vrPlayer.vrdata_world_pre.hmd.getDirection(new Vector3f())).mul(0.5F);
+        Vector3f vec35 = dh.vrPlayer.vrdata_world_pre.getController(0).getCustomVector(new Vector3f(0.0F, 0.0F, -1.0F)).add(dh.vrPlayer.vrdata_world_pre.getController(1).getCustomVector(new Vector3f(0.0F, 0.0F, -1.0F))).mul(0.5F);
+        float d0 = vec34.add(vec35.x, vec35.y, vec35.z).length() / 2.0F;
+        float d1 = vec33.distance(vec32);
+        float d2 = this.lastDist - d1;
 
-        if (d2 > 0.0D) {
-            Vec3 vec36 = vec34.scale(d2 * this.swimspeed * d0);
-            this.motion = this.motion.add(vec36.scale(0.15D));
+        if (d2 > 0.0F) {
+            this.motion.add(vec34.mul(d2 * this.swimspeed * d0).mul(0.15F));
         }
 
         this.lastDist = d1;
-        player.setSwimming(this.motion.length() > (double) 0.3F);
-        player.setSprinting(this.motion.length() > 1.0D);
-        player.push(this.motion.x, this.motion.y, this.motion.z);
-        this.motion = this.motion.scale(this.friction);
+        mc.player.setSwimming(this.motion.length() > 0.3F);
+        mc.player.setSprinting(this.motion.length() > 1.0F);
+        mc.player.push(this.motion.x, this.motion.y, this.motion.z);
+        this.motion.mul(this.friction);
     }
 }

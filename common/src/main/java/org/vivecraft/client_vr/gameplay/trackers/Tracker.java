@@ -1,26 +1,17 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-
 public abstract class Tracker {
-    public Minecraft mc;
-    public ClientDataHolderVR dh;
-
-    public Tracker(Minecraft mc, ClientDataHolderVR dh) {
-        this.mc = mc;
-        this.dh = dh;
+    public boolean isActive() {
+        return false;
     }
 
-    public abstract boolean isActive(LocalPlayer var1);
-
-    public abstract void doProcess(LocalPlayer var1);
-
-    public void reset(LocalPlayer player) {
+    public void doProcess() {
     }
 
-    public void idleTick(LocalPlayer player) {
+    public void reset() {
+    }
+
+    public void idleTick() {
     }
 
     public EntryPoint getEntryPoint() {

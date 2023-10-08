@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static org.vivecraft.common.utils.Utils.logger;
 
 public class ProfileManager {
     public static final String DEFAULT_PROFILE = "Default";
@@ -16,12 +17,12 @@ public class ProfileManager {
     static final String KEY_PROFILES = "Profiles";
     static final String KEY_SELECTED_PROFILE = "selectedProfile";
     static String currentProfileName = "Default";
-    static File vrProfileCfgFile = null;
-    static JsonObject jsonConfigRoot = null;
-    static JsonObject profiles = null;
+    static File vrProfileCfgFile;
+    static JsonObject jsonConfigRoot;
+    static JsonObject profiles;
     static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     static boolean loaded = false;
-    public static final String[] DEFAULT_BINDINGS = new String[]{"key.playerlist:b:6:Button 6", "axis.updown:a:2:-:Y Rotation", "walk.forward:a:0:-:Y ", "gui.axis.leftright:a:3:-:X Rotation", "gui.axis.updown:a:2:-:Y Rotation", "key.sneak:b:9:Button 9", "gui.Left:px:-", "key.itemright:b:5:Button 5", "gui.Right:px:+", "key.left:a:1:-:X ", "gui.Select:b:0:Button 0", "key.aimcenter:b:8:Button 8", "key.pickItem:b:2:Button 2", "key.menu:b:7:Button 7", "key.attack:a:4:-:Z ", "gui.Up:py:-", "key.use:a:4:+:Z ", "axis.leftright:a:3:-:X Rotation", "gui.Down:py:+", "key.right:a:1:+:X ", "key.back:a:0:+:Y ", "key.inventory:b:3:Button 3", "key.jump:b:0:Button 0", "key.drop:b:1:Button 1", "gui.Back:b:1:Button 1", "key.itemleft:b:4:Button 4"};
+    public static final String[] DEFAULT_BINDINGS = {"key.playerlist:b:6:Button 6", "axis.updown:a:2:-:Y Rotation", "walk.forward:a:0:-:Y ", "gui.axis.leftright:a:3:-:X Rotation", "gui.axis.updown:a:2:-:Y Rotation", "key.sneak:b:9:Button 9", "gui.Left:px:-", "key.itemright:b:5:Button 5", "gui.Right:px:+", "key.left:a:1:-:X ", "gui.Select:b:0:Button 0", "key.aimcenter:b:8:Button 8", "key.pickItem:b:2:Button 2", "key.menu:b:7:Button 7", "key.attack:a:4:-:Z ", "gui.Up:py:-", "key.use:a:4:+:Z ", "axis.leftright:a:3:-:X Rotation", "gui.Down:py:+", "key.right:a:1:+:X ", "key.back:a:0:+:Y ", "key.inventory:b:3:Button 3", "key.jump:b:0:Button 0", "key.drop:b:1:Button 1", "gui.Back:b:1:Button 1", "key.itemleft:b:4:Button 4"};
 
     public static synchronized void init(File dataDir) {
         vrProfileCfgFile = new File(dataDir, "optionsviveprofiles.txt");
@@ -65,42 +66,36 @@ public class ProfileManager {
             validateProfiles();
             loaded = true;
         } catch (Exception exception1) {
-            System.out.println("FAILED to read VR profile settings!");
+            logger.error("FAILED to read VR profile settings!");
             exception1.printStackTrace();
             loaded = false;
         }
     }
 
-    private static void validateProfiles() throws Exception {
-        for (Object object : profiles.keySet()) {
-            String s = (String) object;
-            Object object1 = profiles.get(s);
-
-            if (object1 instanceof JsonObject JsonObject) {
+    private static void validateProfiles() {
+        for (String s : profiles.keySet()) {
+            if (profiles.get(s) instanceof JsonObject JsonObject) {
                 JsonObject JsonObject1 = null;
                 JsonObject JsonObject2 = null;
                 JsonObject JsonObject3 = null;
                 JsonObject JsonObject4 = null;
 
-                for (Object object2 : JsonObject.keySet()) {
-                    String s1 = (String) object2;
-                    Object object3 = JsonObject.get(s1);
-
-                    if (object3 instanceof JsonObject) {
-                        if (s1.equals("Mc")) {
-                            JsonObject1 = (JsonObject) object3;
+                for (String s1 : JsonObject.keySet()) {
+                    if (JsonObject.get(s1) instanceof JsonObject jsonobject) {
+                        if ("Mc".equals(s1)) {
+                            JsonObject1 = jsonobject;
                         }
 
-                        if (s1.equals("Of")) {
-                            JsonObject2 = (JsonObject) object3;
+                        if ("Of".equals(s1)) {
+                            JsonObject2 = jsonobject;
                         }
 
-                        if (s1.equals("Vr")) {
-                            JsonObject3 = (JsonObject) object3;
+                        if ("Vr".equals(s1)) {
+                            JsonObject3 = jsonobject;
                         }
 
-                        if (s1.equals("Controller")) {
-                            JsonObject4 = (JsonObject) object3;
+                        if ("Controller".equals(s1)) {
+                            JsonObject4 = jsonobject;
                         }
                     }
                 }
@@ -158,7 +153,7 @@ public class ProfileManager {
         return i != 0;
     }
 
-    private static synchronized boolean loadLegacySettings(String[] settingStr, JsonObject theProfile, String set) throws Exception {
+    private static synchronized boolean loadLegacySettings(String[] settingStr, JsonObject theProfile, String set) {
         Map<String, String> map = new HashMap<>();
         int i = 0;
 
@@ -216,7 +211,7 @@ public class ProfileManager {
     }
 
     public static synchronized void setProfileSet(String profile, String set, Map<String, String> settings) {
-        JsonObject JsonObject = null;
+        JsonObject JsonObject;
         JsonObject JsonObject1 = new JsonObject();
 
         if (profiles.has(profile)) {
@@ -269,12 +264,7 @@ public class ProfileManager {
     }
 
     private static JsonObject getCurrentProfile() {
-        if (!profiles.has(currentProfileName)) {
-            return null;
-        } else {
-            Object object = profiles.get(currentProfileName);
-            return object != null && object instanceof JsonObject ? (JsonObject) object : null;
-        }
+        return (profiles.get(currentProfileName) instanceof JsonObject objectJSON) ? objectJSON : null;
     }
 
     public static synchronized String getCurrentProfileName() {
@@ -283,7 +273,7 @@ public class ProfileManager {
 
     public static synchronized boolean setCurrentProfile(String profileName, StringBuilder error) {
         if (!profiles.has(profileName)) {
-            error.append("Profile '" + profileName + "' not found.");
+            error.append("Profile '").append(profileName).append("' not found.");
             return false;
         } else {
             currentProfileName = profileName;
@@ -294,7 +284,7 @@ public class ProfileManager {
 
     public static synchronized boolean createProfile(String profileName, StringBuilder error) {
         if (profiles.has(profileName)) {
-            error.append("Profile '" + profileName + "' already exists.");
+            error.append("Profile '").append(profileName).append("' already exists.");
             return false;
         } else {
             JsonObject JsonObject = new JsonObject();
@@ -304,14 +294,14 @@ public class ProfileManager {
     }
 
     public static synchronized boolean renameProfile(String existingProfileName, String newProfileName, StringBuilder error) {
-        if (existingProfileName.equals("Default")) {
+        if ("Default".equals(existingProfileName)) {
             error.append("Cannot rename Default profile.");
             return false;
         } else if (!profiles.has(existingProfileName)) {
-            error.append("Profile '" + existingProfileName + "' not found.");
+            error.append("Profile '").append(existingProfileName).append("' not found.");
             return false;
         } else if (profiles.has(newProfileName)) {
-            error.append("Profile '" + newProfileName + "' already exists.");
+            error.append("Profile '").append(newProfileName).append("' already exists.");
             return false;
         } else {
             JsonObject JsonObject = profiles.get(existingProfileName).getAsJsonObject().deepCopy();
@@ -328,10 +318,10 @@ public class ProfileManager {
 
     public static synchronized boolean duplicateProfile(String profileName, String duplicateProfileName, StringBuilder error) {
         if (!profiles.has(profileName)) {
-            error.append("Profile '" + profileName + "' not found.");
+            error.append("Profile '").append(profileName).append("' not found.");
             return false;
         } else if (profiles.has(duplicateProfileName)) {
-            error.append("Profile '" + duplicateProfileName + "' already exists.");
+            error.append("Profile '").append(duplicateProfileName).append("' already exists.");
             return false;
         } else {
             JsonObject JsonObject = profiles.get(profileName).getAsJsonObject().deepCopy();
@@ -341,11 +331,11 @@ public class ProfileManager {
     }
 
     public static synchronized boolean deleteProfile(String profileName, StringBuilder error) {
-        if (profileName.equals("Default")) {
+        if ("Default".equals(profileName)) {
             error.append("Cannot delete Default profile.");
             return false;
         } else if (!profiles.has(profileName)) {
-            error.append("Profile '" + profileName + "' not found.");
+            error.append("Profile '").append(profileName).append("' not found.");
             return false;
         } else {
             profiles.remove(profileName);

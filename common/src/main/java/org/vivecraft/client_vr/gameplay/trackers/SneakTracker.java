@@ -1,43 +1,43 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.joml.Vector3d;
 import org.vivecraft.client_vr.settings.AutoCalibration;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class SneakTracker extends Tracker {
     public boolean sneakOverride = false;
     public int sneakCounter = 0;
 
-    public SneakTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
-    }
-
-    public boolean isActive(LocalPlayer p) {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated) {
+    @Override
+    public boolean isActive() {
+        if (dh.vrSettings.seated) {
             return false;
-        } else if (!ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling) {
+        } else if (!dh.vrPlayer.getFreeMove() && !dh.vrSettings.simulateFalling) {
             return false;
-        } else if (!ClientDataHolderVR.getInstance().vrSettings.realisticSneakEnabled) {
+        } else if (!dh.vrSettings.realisticSneakEnabled) {
             return false;
-        } else if (this.mc.gameMode == null) {
+        } else if (mc.gameMode == null) {
             return false;
-        } else if (p != null && p.isAlive() && p.onGround()) {
-            return !p.isPassenger();
+        } else if (mc.player != null && mc.player.isAlive() && mc.player.onGround()) {
+            return !mc.player.isPassenger();
         } else {
             return false;
         }
     }
 
-    public void reset(LocalPlayer player) {
+    @Override
+    public void reset() {
         this.sneakOverride = false;
     }
 
-    public void doProcess(LocalPlayer player) {
-        if (!this.mc.isPaused() && this.dh.sneakTracker.sneakCounter > 0) {
-            --this.dh.sneakTracker.sneakCounter;
+    @Override
+    public void doProcess() {
+        if (!mc.isPaused() && dh.sneakTracker.sneakCounter > 0) {
+            --dh.sneakTracker.sneakCounter;
         }
 
-        this.sneakOverride = (double) AutoCalibration.getPlayerHeight() - this.dh.vr.hmdPivotHistory.latest().y > (double) this.dh.vrSettings.sneakThreshold;
+        this.sneakOverride = (double) AutoCalibration.getPlayerHeight() - dh.vr.hmdPivotHistory.latest(new Vector3d()).y > (double) dh.vrSettings.sneakThreshold;
     }
 }

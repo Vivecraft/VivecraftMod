@@ -10,7 +10,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipeCodecs;
 
 public class CustomShapedRecipe {
-
     public static final Codec<ItemStack> VIVECRAFT_ITEMSTACK_OBJECT_CODEC = RecordCodecBuilder.create((instance) ->
         instance.group(
             BuiltInRegistries.ITEM.byNameCodec()
@@ -41,5 +40,4 @@ public class CustomShapedRecipe {
 
     public static final Codec<ItemStack> CODEC = ExtraCodecs.either(VIVECRAFT_ITEMSTACK_OBJECT_CODEC, CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC)
         .xmap(itemStackItemStackEither -> itemStackItemStackEither.map(stack -> stack, stack -> stack), Either::right);
-
 }

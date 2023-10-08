@@ -7,6 +7,9 @@ import com.sun.jna.ptr.DoubleByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
 
+import static org.joml.Math.toDegrees;
+import static org.vivecraft.common.utils.Utils.logger;
+
 public class jinfinadeck implements Library {
     public static final String INFINADECK_LIBRARY_NAME = "InfinadeckAPI.dll";
     public static final NativeLibrary INFINADECK_NATIVE_LIB = NativeLibrary.getInstance("InfinadeckAPI.dll");
@@ -60,9 +63,9 @@ public class jinfinadeck implements Library {
             power = GetFloorSpeedMagnitude();
             direction = 1;
             ismoving = GetTreadmillRunState();
-            yaw *= 57.296F;
+            yaw = (float) toDegrees(yaw);
         } catch (Exception exception) {
-            System.out.println("Infinadeck Error: " + exception.getMessage());
+            logger.error("Infinadeck Error: {}", exception.getMessage());
         }
     }
 
@@ -79,11 +82,11 @@ public class jinfinadeck implements Library {
     }
 
     public static float walkDirection() {
-        return (float) direction;
+        return direction;
     }
 
-    public static float getSpeed() {
-        return (float) (power / (double) maxpower * (double) (walkDirection() == 1.0F ? mag : bmag));
+    public static double getSpeed() {
+        return power / maxpower * (walkDirection() == 1.0F ? mag : bmag);
     }
 
     static {

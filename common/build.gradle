@@ -52,6 +52,9 @@ dependencies {
     //LaunchPopup
     implementation 'com.github.fayer3:LaunchPopup:master-SNAPSHOT'
 
+    // MixinExtras
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.2.0-rc.5"))
+
 }
 // extract the LaunchPopup classes
 jar {

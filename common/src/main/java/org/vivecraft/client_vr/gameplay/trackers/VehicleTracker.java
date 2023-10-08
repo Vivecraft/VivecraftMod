@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
@@ -9,75 +8,72 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.FoodOnAStickItem;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.joml.Vector3f;
 import org.vivecraft.client_vr.ItemTags;
-import org.vivecraft.client_vr.VRData;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.VRData.VRDevicePose;
+import org.vivecraft.client_vr.settings.VRSettings.FreeMove;
+
+import static org.joml.Math.*;
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.convertToVector3f;
 
 public class VehicleTracker extends Tracker {
-    private float PreMount_World_Rotation;
-    public Vec3 Premount_Pos_Room = new Vec3(0.0D, 0.0D, 0.0D);
+    public final Vector3f Premount_Pos_Room = new Vector3f();
     public float vehicleInitialRotation = 0.0F;
     public int rotationCooldown = 0;
     private double rotationTarget = 0.0D;
     private int minecartStupidityCounter;
     public int dismountCooldown = 0;
 
-    public VehicleTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
-    }
+    @Override
+    public boolean isActive() {
 
-    public boolean isActive(LocalPlayer p) {
-        Minecraft minecraft = Minecraft.getInstance();
-
-        if (p == null) {
+        if (mc.player == null) {
             return false;
-        } else if (minecraft.gameMode == null) {
+        } else if (mc.gameMode == null) {
             return false;
         } else {
-            return p.isAlive();
+            return mc.player.isAlive();
         }
     }
 
-    public void reset(LocalPlayer player) {
+    @Override
+    public void reset() {
         this.minecartStupidityCounter = 2;
-        super.reset(player);
+        super.reset();
     }
 
     public double getVehicleFloor(Entity vehicle, double original) {
         return original;
     }
 
-    public static Vec3 getSteeringDirection(LocalPlayer player) {
-        Vec3 vec3 = null;
+    public static Vector3f getSteeringDirection(LocalPlayer player, Vector3f dest) {
         Entity entity = player.getVehicle();
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         if (!(entity instanceof AbstractHorse) && !(entity instanceof Boat)) {
             if (entity instanceof Mob mob) {
 
                 if (mob.isControlledByLocalInstance()) {
                     int i = (player.getMainHandItem().getItem() instanceof FoodOnAStickItem || player.getMainHandItem().is(ItemTags.VIVECRAFT_FOOD_STICKS)) ? 0 : 1;
-                    VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_world_pre.getController(i);
-                    return vrdata$vrdevicepose.getPosition().add(vrdata$vrdevicepose.getDirection().scale(0.3D)).subtract(entity.position()).normalize();
+                    VRDevicePose vrdata$vrdevicepose = dh.vrPlayer.vrdata_world_pre.getController(i);
+                    return vrdata$vrdevicepose.getPosition(new Vector3f()).add(vrdata$vrdevicepose.getDirection(new Vector3f()).mul(0.3F)).sub(convertToVector3f(entity.position(), dest)).normalize();
                 }
             }
         } else if (player.zza > 0.0F) {
-            VRSettings vrsettings = dataholder.vrSettings;
-
-            if (dataholder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD) {
-                return dataholder.vrPlayer.vrdata_world_pre.hmd.getDirection();
+            if (dh.vrSettings.vrFreeMoveMode == FreeMove.HMD) {
+                return dh.vrPlayer.vrdata_world_pre.hmd.getDirection(dest);
             }
 
-            return dataholder.vrPlayer.vrdata_world_pre.getController(0).getDirection();
+            return dh.vrPlayer.vrdata_world_pre.getController(0).getDirection(dest);
         }
 
-        return vec3;
+        return null;
     }
 
-    public void doProcess(LocalPlayer player) {
-        if (!this.mc.isPaused()) {
+    @Override
+    public void doProcess() {
+        if (!mc.isPaused()) {
             if (this.dismountCooldown > 0) {
                 --this.dismountCooldown;
             }
@@ -86,11 +82,11 @@ public class VehicleTracker extends Tracker {
                 --this.rotationCooldown;
             }
 
-            if (this.dh.vrSettings.vehicleRotation && this.mc.player.isPassenger() && this.rotationCooldown == 0) {
-                Entity entity = this.mc.player.getVehicle();
+            if (dh.vrSettings.vehicleRotation && mc.player.isPassenger() && this.rotationCooldown == 0) {
+                Entity entity = mc.player.getVehicle();
                 this.rotationTarget = entity.getYRot();
 
-                if (entity instanceof AbstractHorse abstracthorse && !this.dh.horseTracker.isActive(this.mc.player)) {
+                if (entity instanceof AbstractHorse abstracthorse && !dh.horseTracker.isActive()) {
 
                     if (abstracthorse.isControlledByLocalInstance() && abstracthorse.isSaddled()) {
                         return;
@@ -132,7 +128,9 @@ public class VehicleTracker extends Tracker {
                     }
                 }
 
-                float f1 = this.dh.vrPlayer.rotDiff_Degrees((float) this.rotationTarget, this.vehicleInitialRotation);
+                float f0 = toRadians(this.vehicleInitialRotation);
+                float f11 = toRadians((float) this.rotationTarget);
+                float f1 = (float) toDegrees(atan2(sin(f0 - f11), cos(f0 - f11)));
 
                 if (flag) {
                     if (f1 > smoothed) {
@@ -144,57 +142,61 @@ public class VehicleTracker extends Tracker {
                     }
                 }
 
-                this.dh.vrSettings.worldRotation += f1;
-                this.dh.vrSettings.worldRotation %= 360.0F;
-                this.dh.vr.seatedRot = this.dh.vrSettings.worldRotation;
+                dh.vrSettings.worldRotation += f1;
+                dh.vrSettings.worldRotation %= 360.0F;
+                dh.vr.seatedRot = dh.vrSettings.worldRotation;
                 this.vehicleInitialRotation -= f1;
                 this.vehicleInitialRotation %= 360.0F;
             } else {
                 this.minecartStupidityCounter = 3;
 
-                if (this.mc.player.isPassenger()) {
-                    this.vehicleInitialRotation = this.mc.player.getVehicle().getYRot();
+                if (mc.player.isPassenger()) {
+                    this.vehicleInitialRotation = mc.player.getVehicle().getYRot();
                 }
             }
         }
     }
 
     public void onStartRiding(Entity vehicle, LocalPlayer player) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        this.PreMount_World_Rotation = dataholder.vrPlayer.vrdata_world_pre.rotation_radians;
-        Vec3 vec3 = dataholder.vrPlayer.vrdata_room_pre.getHeadPivot();
-        this.Premount_Pos_Room = new Vec3(vec3.x, 0.0D, vec3.z);
+        Vector3f vec3 = dh.vrPlayer.vrdata_room_pre.getHeadPivot(new Vector3f());
+        this.Premount_Pos_Room.set(vec3.x, 0.0F, vec3.z);
         this.dismountCooldown = 5;
 
-        if (dataholder.vrSettings.vehicleRotation) {
-            float f = dataholder.vrPlayer.vrdata_world_pre.hmd.getYaw();
+        if (dh.vrSettings.vehicleRotation) {
+            float f = dh.vrPlayer.vrdata_world_pre.hmd.getYaw();
             float f1 = vehicle.getYRot() % 360.0F;
-            this.vehicleInitialRotation = dataholder.vrSettings.worldRotation;
+            this.vehicleInitialRotation = dh.vrSettings.worldRotation;
             this.rotationCooldown = 2;
 
             if (vehicle instanceof Minecart) {
                 return;
             }
 
-            float f2 = dataholder.vrPlayer.rotDiff_Degrees(f1, f);
-            dataholder.vrSettings.worldRotation = (float) (Math.toDegrees(dataholder.vrPlayer.vrdata_world_pre.rotation_radians) + (double) f2);
-            dataholder.vrSettings.worldRotation %= 360.0F;
-            dataholder.vr.seatedRot = dataholder.vrSettings.worldRotation;
+            float f0 = toRadians(f);
+            float f11 = toRadians(f1);
+            float f2 = (float) toDegrees(atan2(sin(f0 - f11), cos(f0 - f11)));
+            dh.vrSettings.worldRotation = (float) (toDegrees(dh.vrPlayer.vrdata_world_pre.rotation_radians) + f2);
+            dh.vrSettings.worldRotation %= 360.0F;
+            dh.vr.seatedRot = dh.vrSettings.worldRotation;
         }
     }
 
+    // TODO: remove onStopRiding?
     public void onStopRiding(LocalPlayer player) {
-        this.dh.swingTracker.disableSwing = 10;
-        this.dh.sneakTracker.sneakCounter = 0;
+        dh.swingTracker.disableSwing = 10;
+        dh.sneakTracker.sneakCounter = 0;
 
-        if (this.dh.vrSettings.vehicleRotation) {
+        if (dh.vrSettings.vehicleRotation) {
+            //I dont wanna do this anymore.
+            //I think its more confusing to get off the thing and not know where you're looking
+            //	mc.vrSettings.vrWorldRotation = playerRotation_PreMount;
+            //	mc.vr.seatedRot = playerRotation_PreMount;
         }
     }
 
     private float getMinecartRenderYaw(Minecart entity) {
         Vec3 vec3 = new Vec3(entity.getX() - entity.xOld, entity.getY() - entity.yOld, entity.getZ() - entity.zOld);
-        float f = (float) Math.toDegrees(Math.atan2(-vec3.x, vec3.z));
+        float f = (float) toDegrees(atan2(-vec3.x, vec3.z));
         return this.shouldMinecartTurnView(entity) ? -180.0F + f : this.vehicleInitialRotation;
     }
 
@@ -208,7 +210,7 @@ public class VehicleTracker extends Tracker {
         return vec3.length() > 0.001D;
     }
 
-    public boolean canRoomscaleDismount(LocalPlayer player) {
-        return player.zza == 0.0F && player.xxa == 0.0F && player.isPassenger() && player.getVehicle().onGround() && this.dismountCooldown == 0;
+    public boolean canRoomscaleDismount() {
+        return mc.player.zza == 0.0F && mc.player.xxa == 0.0F && mc.player.isPassenger() && mc.player.getVehicle().onGround() && this.dismountCooldown == 0;
     }
 }

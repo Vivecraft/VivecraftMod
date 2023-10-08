@@ -149,7 +149,7 @@
 //            }
 //            else
 //            {
-//                this.hmdPose.SetIdentity();
+//                this.hmdPose.identity();
 //                this.hmdPose.M[1][3] = 1.62F;
 //            }
 //
@@ -187,7 +187,7 @@
 //            if (OVR.ovr_Create(this.session, this.luid) != 0)
 //            {
 //                this.initStatus = "Couldn't create OVR!";
-//                System.err.println(this.initStatus);
+//                logger.error(this.initStatus);
 //                return false;
 //            }
 //            else

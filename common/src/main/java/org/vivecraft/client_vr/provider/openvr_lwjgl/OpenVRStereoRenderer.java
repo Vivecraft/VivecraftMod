@@ -6,46 +6,45 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.openvr.HiddenAreaMesh;
 import org.lwjgl.openvr.HmdMatrix44;
-import org.lwjgl.openvr.OpenVR;
-import org.lwjgl.openvr.VR;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
-import org.vivecraft.client_vr.render.RenderPass;
 
+import java.nio.IntBuffer;
+
+import static org.lwjgl.openvr.OpenVR.VRCompositor;
+import static org.lwjgl.openvr.VR.*;
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_PostPresentHandoff;
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_Submit;
 import static org.lwjgl.openvr.VRSystem.*;
+import static org.vivecraft.common.utils.Utils.logger;
 
 public class OpenVRStereoRenderer extends VRRenderer {
     private final HiddenAreaMesh[] hiddenMeshes = new HiddenAreaMesh[2];
     private final MCOpenVR openvr;
 
-    public OpenVRStereoRenderer(MCVR vr) {
+    public OpenVRStereoRenderer(MCOpenVR vr) {
         super(vr);
-        this.openvr = (MCOpenVR) vr;
+        this.openvr = vr;
         hiddenMeshes[0] = HiddenAreaMesh.calloc();
         hiddenMeshes[1] = HiddenAreaMesh.calloc();
     }
 
+    @Override
     public Tuple<Integer, Integer> getRenderTextureSizes() {
-        if (this.resolution != null) {
-            return this.resolution;
-        } else {
+        if (this.resolution == null) {
             try (MemoryStack stack = MemoryStack.stackPush()) {
-                var intbyreference = stack.callocInt(1);
-                var intbyreference1 = stack.callocInt(1);
+                IntBuffer intbyreference = stack.callocInt(1);
+                IntBuffer intbyreference1 = stack.callocInt(1);
                 VRSystem_GetRecommendedRenderTargetSize(intbyreference, intbyreference1);
                 this.resolution = new Tuple<>(intbyreference.get(0), intbyreference1.get(0));
-                System.out.println("OpenVR Render Res " + this.resolution.getA() + " x " + this.resolution.getB());
+                logger.info("OpenVR Render Res {} x {}", this.resolution.getA(), this.resolution.getB());
                 this.ss = this.openvr.getSuperSampling();
-                System.out.println("OpenVR Supersampling: " + this.ss);
+                logger.info("OpenVR Supersampling: {}", this.ss);
             }
 
             for (int i = 0; i < 2; ++i) {
@@ -53,7 +52,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
                 int j = this.hiddenMeshes[i].unTriangleCount();
 
                 if (j <= 0) {
-                    System.out.println("No stencil mesh found for eye " + i);
+                    logger.warn("No stencil mesh found for eye {}", i);
                 } else {
                     this.hiddenMesheVertecies[i] = new float[this.hiddenMeshes[i].unTriangleCount() * 3 * 2];
                     MemoryUtil.memFloatBuffer(MemoryUtil.memAddress(this.hiddenMeshes[i].pVertexData()), this.hiddenMesheVertecies[i].length).get(this.hiddenMesheVertecies[i]);
@@ -63,130 +62,120 @@ public class OpenVRStereoRenderer extends VRRenderer {
                         this.hiddenMesheVertecies[i][k + 1] *= (float) this.resolution.getB();
                     }
 
-                    System.out.println("Stencil mesh loaded for eye " + i);
+                    logger.info("Stencil mesh loaded for eye {}", i);
                 }
             }
-
-            return this.resolution;
         }
+        return this.resolution;
     }
 
-    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
+    @Override
+    public Matrix4f getProjectionMatrix(int eyeType, double nearClip, double farClip, Matrix4f dest) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            if (eyeType == 0) {
-                return Utils.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(0, nearClip, farClip, HmdMatrix44.calloc(stack)));
-            } else {
-                return Utils.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(1, nearClip, farClip, HmdMatrix44.calloc(stack)));
-            }
+            return dest.setTransposed(
+                VRSystem_GetProjectionMatrix(
+                    eyeType == 0 ? EVREye_Eye_Left : EVREye_Eye_Right,
+                    (float) nearClip,
+                    (float) farClip,
+                    HmdMatrix44.calloc(stack)
+                ).m()
+            );
         }
     }
 
-    public String getLastError() {
-        return "";
-    }
-
+    @Override
     public void createRenderTexture(int lwidth, int lheight) {
         this.LeftEyeTextureId = GlStateManager._genTexture();
-        int i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
+        int i = GlStateManager._getInteger(GL11C.GL_TEXTURE_BINDING_2D);
         RenderSystem.bindTexture(this.LeftEyeTextureId);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, null);
+        RenderSystem.texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
+        RenderSystem.texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
+        GlStateManager._texImage2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA8, lwidth, lheight, 0, GL11C.GL_RGBA, GL11C.GL_INT, null);
         RenderSystem.bindTexture(i);
         this.openvr.texType0.handle(this.LeftEyeTextureId);
-        this.openvr.texType0.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
-        this.openvr.texType0.eType(VR.ETextureType_TextureType_OpenGL);
+        this.openvr.texType0.eColorSpace(EColorSpace_ColorSpace_Gamma);
+        this.openvr.texType0.eType(ETextureType_TextureType_OpenGL);
 
         this.RightEyeTextureId = GlStateManager._genTexture();
-        i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
+        i = GlStateManager._getInteger(GL11C.GL_TEXTURE_BINDING_2D);
         RenderSystem.bindTexture(this.RightEyeTextureId);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, null);
+        RenderSystem.texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
+        RenderSystem.texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
+        GlStateManager._texImage2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA8, lwidth, lheight, 0, GL11C.GL_RGBA, GL11C.GL_INT, null);
         RenderSystem.bindTexture(i);
         this.openvr.texType1.handle(this.RightEyeTextureId);
-        this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
-        this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
+        this.openvr.texType1.eColorSpace(EColorSpace_ColorSpace_Gamma);
+        this.openvr.texType1.eType(ETextureType_TextureType_OpenGL);
     }
 
-    public boolean endFrame(RenderPass eye) {
-        return true;
-    }
-
+    @Override
     public void endFrame() throws RenderConfigException {
-        if (OpenVR.VRCompositor.Submit != 0) {
+        if (VRCompositor.Submit != 0) {
             int i = VRCompositor_Submit(0, this.openvr.texType0, null, 0);
             int j = VRCompositor_Submit(1, this.openvr.texType1, null, 0);
             VRCompositor_PostPresentHandoff();
 
             if (i + j > 0) {
-                throw new RenderConfigException("Compositor Error", Component.literal("Texture submission error: Left/Right " + getCompostiorError(i) + "/" + getCompostiorError(j)));
+                throw new RenderConfigException("Compositor Error", Component.literal("Texture submission error: Left/Right " + getCompositorError(i) + "/" + getCompositorError(j)));
             }
         }
     }
 
-    public static String getCompostiorError(int code) {
-        switch (code) {
-            case 0:
-                return "None:";
-
-            case 1:
-                return "RequestFailed";
-
-            case 100:
-                return "IncompatibleVersion";
-
-            case 101:
-                return "DoesNotHaveFocus";
-
-            case 102:
-                return "InvalidTexture";
-
-            case 103:
-                return "IsNotSceneApplication";
-
-            case 104:
-                return "TextureIsOnWrongDevice";
-
-            case 105:
-                return "TextureUsesUnsupportedFormat:";
-
-            case 106:
-                return "SharedTexturesNotSupported";
-
-            case 107:
-                return "IndexOutOfRange";
-
-            case 108:
-                return "AlreadySubmitted:";
-
-            default:
-                return "Unknown";
-        }
+    public static String getCompositorError(int code) {
+        return switch (code) {
+            case EVRCompositorError_VRCompositorError_None -> {
+                yield "None";
+            }
+            case EVRCompositorError_VRCompositorError_RequestFailed -> {
+                yield "RequestFailed";
+            }
+            case EVRCompositorError_VRCompositorError_IncompatibleVersion -> {
+                yield "IncompatibleVersion";
+            }
+            case EVRCompositorError_VRCompositorError_DoNotHaveFocus -> {
+                yield "DoesNotHaveFocus";
+            }
+            case EVRCompositorError_VRCompositorError_InvalidTexture -> {
+                yield "InvalidTexture";
+            }
+            case EVRCompositorError_VRCompositorError_IsNotSceneApplication -> {
+                yield "IsNotSceneApplication";
+            }
+            case EVRCompositorError_VRCompositorError_TextureIsOnWrongDevice -> {
+                yield "TextureIsOnWrongDevice";
+            }
+            case EVRCompositorError_VRCompositorError_TextureUsesUnsupportedFormat -> {
+                yield "TextureUsesUnsupportedFormat";
+            }
+            case EVRCompositorError_VRCompositorError_SharedTexturesNotSupported -> {
+                yield "SharedTexturesNotSupported";
+            }
+            case EVRCompositorError_VRCompositorError_IndexOutOfRange -> {
+                yield "IndexOutOfRange";
+            }
+            case EVRCompositorError_VRCompositorError_AlreadySubmitted -> {
+                yield "AlreadySubmitted";
+            }
+            case EVRCompositorError_VRCompositorError_InvalidBounds -> {
+                yield "InvalidBounds";
+            }
+            case EVRCompositorError_VRCompositorError_AlreadySet -> {
+                yield "AlreadySet";
+            }
+            default -> {
+                yield "Unknown";
+            }
+        };
     }
 
+    @Override
     public boolean providesStencilMask() {
         return true;
     }
 
-    public float[] getStencilMask(RenderPass eye) {
-        if (this.hiddenMesheVertecies != null && (eye == RenderPass.LEFT || eye == RenderPass.RIGHT)) {
-            return eye == RenderPass.LEFT ? this.hiddenMesheVertecies[0] : this.hiddenMesheVertecies[1];
-        } else {
-            return null;
-        }
-    }
-
+    @Override
     public String getName() {
         return "OpenVR";
-    }
-
-    public boolean isInitialized() {
-        return this.vr.initSuccess;
-    }
-
-    public String getinitError() {
-        return this.vr.initStatus;
     }
 
     @Override

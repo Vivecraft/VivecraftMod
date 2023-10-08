@@ -1,7 +1,6 @@
 package org.vivecraft.client.gui.widgets;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -15,23 +14,26 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
-import org.vivecraft.server.config.ConfigBuilder;
+import org.vivecraft.client.gui.widgets.SettingsList.BaseEntry;
+import org.vivecraft.server.config.ConfigBuilder.ConfigValue;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
-public class SettingsList extends ContainerObjectSelectionList<SettingsList.BaseEntry> {
+import static org.vivecraft.client_vr.VRState.mc;
+
+public class SettingsList extends ContainerObjectSelectionList<BaseEntry> {
     final Screen parent;
     int maxNameWidth;
 
-    public SettingsList(Screen parent, Minecraft minecraft, List<SettingsList.BaseEntry> entries) {
-        super(minecraft, parent.width + 45, parent.height, 20, parent.height - 32, 20);
+    public SettingsList(Screen parent, List<BaseEntry> entries) {
+        super(mc, parent.width + 45, parent.height, 20, parent.height - 32, 20);
         this.parent = parent;
-        for (SettingsList.BaseEntry entry : entries) {
+        for (BaseEntry entry : entries) {
             int i;
-            if ((i = minecraft.font.width(entry.name)) > this.maxNameWidth) {
+            if ((i = mc.font.width(entry.name)) > this.maxNameWidth) {
                 this.maxNameWidth = i;
             }
             this.addEntry(entry);
@@ -48,7 +50,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         return super.getRowWidth() + 32;
     }
 
-    public static BaseEntry ConfigToEntry(ConfigBuilder.ConfigValue configValue, Component name) {
+    public static BaseEntry ConfigToEntry(ConfigValue configValue, Component name) {
         AbstractWidget widget = configValue.getWidget(ResettableEntry.valueButtonWidth, 20);
         return new ResettableEntry(name, widget, configValue);
     }
@@ -58,12 +60,12 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         public CategoryEntry(Component name) {
             super(name);
-            this.width = Minecraft.getInstance().font.width(this.name);
+            this.width = mc.font.width(this.name);
         }
 
         @Override
         public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            guiGraphics.drawString(Minecraft.getInstance().font, this.name, Minecraft.getInstance().screen.width / 2 - this.width / 2, j + m - Minecraft.getInstance().font.lineHeight - 1, 0xFFFFFF);
+            guiGraphics.drawString(mc.font, this.name, mc.screen.width / 2 - this.width / 2, j + m - mc.font.lineHeight - 1, 0xFFFFFF);
         }
 
         @Override
@@ -81,8 +83,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         public List<? extends NarratableEntry> narratables() {
             return ImmutableList.of(new NarratableEntry() {
                 @Override
-                public NarratableEntry.NarrationPriority narrationPriority() {
-                    return NarratableEntry.NarrationPriority.HOVERED;
+                public NarrationPriority narrationPriority() {
+                    return NarrationPriority.HOVERED;
                 }
 
                 @Override
@@ -99,7 +101,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         public static final int valueButtonWidth = 125;
 
-        public ResettableEntry(Component name, AbstractWidget valueWidget, ConfigBuilder.ConfigValue configValue) {
+        public ResettableEntry(Component name, AbstractWidget valueWidget, ConfigValue configValue) {
             super(name, valueWidget);
 
             this.canReset = () -> !configValue.isDefault();
@@ -143,7 +145,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         @Override
         public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            guiGraphics.drawString(Minecraft.getInstance().font, this.name, k + 90 - 140, j + m / 2 - Minecraft.getInstance().font.lineHeight / 2, 0xFFFFFF);
+            guiGraphics.drawString(mc.font, this.name, k + 90 - 140, j + m / 2 - mc.font.lineHeight / 2, 0xFFFFFF);
             this.valueWidget.setX(k + 105);
             this.valueWidget.setY(j);
             this.valueWidget.render(guiGraphics, n, o, f);

@@ -7,10 +7,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
+
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.vrRunning;
 
 @Pseudo
 @Mixin(ResolutionControlMod.class)
@@ -26,21 +27,21 @@ public class ResolutionControlModMixin {
 
     @Inject(at = @At("HEAD"), method = "updateFramebufferSize", remap = false)
     private void vivecraft$resizeVRBuffers(CallbackInfo ci) {
-        if (VRState.vrRunning) {
-            ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("");
+        if (vrRunning) {
+            dh.vrRenderer.resizeFrameBuffers("");
         }
     }
 
     @Inject(at = @At("HEAD"), method = "getCurrentWidth", remap = false, cancellable = true)
     public void vivecraft$getVRWidth(CallbackInfoReturnable<Integer> cir) {
-        if (VRState.vrRunning) {
+        if (vrRunning) {
             cir.setReturnValue(WorldRenderPass.stereoXR.target.width);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "getCurrentHeight", remap = false, cancellable = true)
     public void vivecraft$getVRHeight(CallbackInfoReturnable<Integer> cir) {
-        if (VRState.vrRunning) {
+        if (vrRunning) {
             cir.setReturnValue(WorldRenderPass.stereoXR.target.height);
         }
     }

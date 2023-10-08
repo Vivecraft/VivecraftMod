@@ -9,19 +9,17 @@ public class ProfileWriter {
     private final String activeProfileName;
     private final String set;
     private Map<String, String> data = new HashMap<>();
-    private JsonObject theProfile = null;
+    private JsonObject theProfile;
 
     public ProfileWriter(String set) {
         this.activeProfileName = ProfileManager.currentProfileName;
         this.set = set;
-        this.data = new HashMap<>();
     }
 
     public ProfileWriter(String set, JsonObject theProfile) {
         this.activeProfileName = ProfileManager.currentProfileName;
         this.set = set;
         this.theProfile = theProfile;
-        this.data = new HashMap<>();
     }
 
     public void println(String s) {

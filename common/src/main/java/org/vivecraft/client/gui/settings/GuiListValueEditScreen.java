@@ -1,9 +1,9 @@
 package org.vivecraft.client.gui.settings;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Button.OnPress;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -12,19 +12,23 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.widgets.SettingsList;
-import org.vivecraft.server.config.ConfigBuilder;
+import org.vivecraft.client.gui.widgets.SettingsList.BaseEntry;
+import org.vivecraft.client.gui.widgets.SettingsList.WidgetEntry;
+import org.vivecraft.server.config.ConfigBuilder.ListValue;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.vivecraft.client_vr.VRState.mc;
+
 public class GuiListValueEditScreen extends GuiListScreen {
 
-    protected final ConfigBuilder.ListValue<String> listValue;
+    protected final ListValue<String> listValue;
     private List<String> elements;
 
-    public GuiListValueEditScreen(Component title, Screen lastScreen, ConfigBuilder.ListValue<String> listValue) {
+    public GuiListValueEditScreen(Component title, Screen lastScreen, ListValue<String> listValue) {
         super(title, lastScreen);
         this.listValue = listValue;
     }
@@ -34,17 +38,17 @@ public class GuiListValueEditScreen extends GuiListScreen {
         clearWidgets();
         double scrollAmount = list != null ? list.getScrollAmount() : 0.0D;
 
-        this.list = new SettingsList(this, minecraft, getEntries());
+        this.list = new SettingsList(this, getEntries());
         list.setScrollAmount(scrollAmount);
         this.addWidget(this.list);
 
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
             listValue.set(getCurrentValues());
-            this.minecraft.setScreen(this.lastScreen);
+            mc.setScreen(this.lastScreen);
         }).bounds(this.width / 2 - 155, this.height - 27, 150, 20).build());
 
         this.addRenderableWidget(Button
-            .builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
+            .builder(CommonComponents.GUI_CANCEL, button -> mc.setScreen(this.lastScreen))
             .bounds(this.width / 2 + 5, this.height - 27, 150, 20)
             .build());
     }
@@ -60,14 +64,14 @@ public class GuiListValueEditScreen extends GuiListScreen {
     }
 
     @Override
-    protected List<SettingsList.BaseEntry> getEntries() {
-        List<SettingsList.BaseEntry> entries = new LinkedList<>();
+    protected List<BaseEntry> getEntries() {
+        List<BaseEntry> entries = new LinkedList<>();
         if (elements == null) {
             elements = new ArrayList<>(listValue.get());
         }
         int i = 0;
         for (String item : elements) {
-            EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, ListValueEntry.valueButtonWidth - 1, 20, Component.literal(item));
+            EditBox box = new EditBox(mc.font, 0, 0, ListValueEntry.valueButtonWidth - 1, 20, Component.literal(item));
             box.setMaxLength(1000);
             box.setValue(item);
             int index = i++;
@@ -76,7 +80,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
                 reinit = true;
             }));
         }
-        entries.add(new SettingsList.WidgetEntry(Component.translatable("vivecraft.options.addnew"), Button.builder(Component.literal("+"), button -> {
+        entries.add(new WidgetEntry(Component.translatable("vivecraft.options.addnew"), Button.builder(Component.literal("+"), button -> {
             elements = getCurrentValues();
             elements.add("");
             reinit = true;
@@ -84,12 +88,12 @@ public class GuiListValueEditScreen extends GuiListScreen {
         return entries;
     }
 
-    private static class ListValueEntry extends SettingsList.WidgetEntry {
+    private static class ListValueEntry extends WidgetEntry {
         public static final int valueButtonWidth = 280;
 
         private final Button deleteButton;
 
-        public ListValueEntry(Component name, EditBox valueWidget, Button.OnPress deleteAction) {
+        public ListValueEntry(Component name, EditBox valueWidget, OnPress deleteAction) {
             super(name, valueWidget);
 
             this.deleteButton = Button
@@ -100,7 +104,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
 
         @Override
         public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            this.valueWidget.setX(k + -50);
+            this.valueWidget.setX(k - 50);
             this.valueWidget.setY(j);
             this.valueWidget.render(guiGraphics, n, o, f);
             this.deleteButton.setX(k + 230);

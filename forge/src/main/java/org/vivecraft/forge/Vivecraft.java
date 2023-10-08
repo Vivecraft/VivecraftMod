@@ -1,6 +1,6 @@
 package org.vivecraft.forge;
 
-import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import org.vivecraft.client.gui.settings.VivecraftMainSettings;
@@ -14,6 +14,6 @@ public class Vivecraft {
         // init server config
         ServerConfig.init(null);
 
-        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, screen) -> new VivecraftMainSettings(screen)));
+        ModLoadingContext.get().registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((mc, screen) -> new VivecraftMainSettings(screen)));
     }
 }

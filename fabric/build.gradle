@@ -79,6 +79,9 @@ dependencies {
     include(implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos"))
     include(implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows"))
 
+    // MixinExtras
+    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.0-rc.5")))
+
 }
 
 processResources {

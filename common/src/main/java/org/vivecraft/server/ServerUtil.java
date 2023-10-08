@@ -7,7 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.vivecraft.client.utils.UpdateChecker;
-import org.vivecraft.server.config.ConfigBuilder;
+import org.vivecraft.server.config.ConfigBuilder.ConfigValue;
 import org.vivecraft.server.config.ServerConfig;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class ServerUtil {
                 // only do stuff, if the player is still on the server
                 if (!serverPlayer.hasDisconnected()) {
                     ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
-                    String message = "";
+                    String message;
 
                     boolean isOpAndAllowed = ServerConfig.allow_op.get() && serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile());
 
@@ -134,7 +134,7 @@ public class ServerUtil {
                         )
                     ));
             } else {
-                ConfigBuilder.ConfigValue<List<? extends String>> listConfig = setting;
+                ConfigValue<List<? extends String>> listConfig = setting;
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
                         Commands.literal(setting.getPath()).then(

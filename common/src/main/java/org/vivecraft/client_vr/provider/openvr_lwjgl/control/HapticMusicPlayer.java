@@ -9,11 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.vivecraft.client_vr.VRState.dh;
+
 public class HapticMusicPlayer {
     private static final Map<String, Music> map = new HashMap<>();
-
-    private HapticMusicPlayer() {
-    }
 
     public static Music newMusic(String name) {
         Music hapticmusicplayer$music = new Music(name);
@@ -35,7 +34,7 @@ public class HapticMusicPlayer {
 
     public static class Music {
         final String name;
-        private final List<Object> data = new LinkedList<>();
+        private List<Object> data = new LinkedList<>();
 
         private Music(String name) {
             this.name = name;
@@ -62,10 +61,10 @@ public class HapticMusicPlayer {
                 if (object instanceof Note hapticmusicplayer$music$note) {
 
                     if (hapticmusicplayer$music$note.controller != null) {
-                        MCOpenVR.get().triggerHapticPulse(hapticmusicplayer$music$note.controller, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
+                        dh.vr.triggerHapticPulse(hapticmusicplayer$music$note.controller, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
                     } else {
-                        MCOpenVR.get().triggerHapticPulse(ControllerType.RIGHT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
-                        MCOpenVR.get().triggerHapticPulse(ControllerType.LEFT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
+                        dh.vr.triggerHapticPulse(ControllerType.RIGHT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
+                        dh.vr.triggerHapticPulse(ControllerType.LEFT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
                     }
                 } else if (object instanceof Delay hapticmusicplayer$music$delay) {
                     f += hapticmusicplayer$music$delay.durationSeconds;
@@ -73,7 +72,7 @@ public class HapticMusicPlayer {
             }
         }
 
-        private class Delay {
+        private static class Delay {
             final float durationSeconds;
 
             private Delay(float durationSeconds) {
@@ -81,7 +80,7 @@ public class HapticMusicPlayer {
             }
         }
 
-        private class Note {
+        private static class Note {
             final ControllerType controller;
             final float durationSeconds;
             final float frequency;
@@ -96,7 +95,7 @@ public class HapticMusicPlayer {
         }
     }
 
-    public class MusicBuilder {
+    public static class MusicBuilder {
         private Music music;
         private float tempo;
     }

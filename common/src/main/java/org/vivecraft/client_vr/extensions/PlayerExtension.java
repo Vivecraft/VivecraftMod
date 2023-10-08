@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.extensions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 public interface PlayerExtension {
@@ -20,7 +19,7 @@ public interface PlayerExtension {
 
     boolean vivecraft$isClimbeyClimbEquipped();
 
-    void vivecraft$stepSound(BlockPos blockpos, Vec3 vec3);
+    void vivecraft$stepSound(BlockPos blockpos, double soundPosX, double soundPosY, double soundPosZ);
 
     void vivecraft$swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact);
 

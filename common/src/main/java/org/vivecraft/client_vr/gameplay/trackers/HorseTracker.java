@@ -1,14 +1,15 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.utils.math.Quaternion;
+import org.joml.Quaternionf;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
+
+import static org.joml.Math.*;
+import static org.vivecraft.client_vr.VRState.dh;
+import static org.vivecraft.client_vr.VRState.mc;
+import static org.vivecraft.common.utils.Utils.*;
 
 public class HorseTracker extends Tracker {
     double boostTrigger = 1.4D;
@@ -19,54 +20,50 @@ public class HorseTracker extends Tracker {
     long lastBoostMillis = -1L;
     double turnspeed = 6.0D;
     double bodyturnspeed = 0.2D;
-    double baseSpeed = 0.2D;
+    float baseSpeed = 0.2F;
     Horse horse = null;
     ModelInfo info = new ModelInfo();
 
-    public HorseTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
-    }
-
-    public boolean isActive(LocalPlayer p) {
-        return false;
-    }
-
-    public void reset(LocalPlayer player) {
-        super.reset(player);
-
+    @Override
+    public void reset() {
         if (this.horse != null) {
             this.horse.setNoAi(false);
         }
     }
 
-    public void doProcess(LocalPlayer player) {
-        this.horse = (Horse) player.getVehicle();
+    @Override
+    public void doProcess() {
+        this.horse = (Horse) mc.player.getVehicle();
         this.horse.setNoAi(true);
         float f = (this.horse.getYRot() + 360.0F) % 360.0F;
         float f1 = (this.horse.yBodyRot + 360.0F) % 360.0F;
-        Vec3 vec3 = this.dh.vr.controllerHistory[1].netMovement(0.1D).scale(10.0D);
-        Vec3 vec31 = this.dh.vr.controllerHistory[0].netMovement(0.1D).scale(10.0D);
-        double d0 = Math.min(-vec3.y, -vec31.y);
+        Vec3 vec3 = convertToVec3(dh.vr.controllerHistory[1].netMovement(0.1D, new Vector3d())).scale(10.0D);
+        Vec3 vec31 = convertToVec3(dh.vr.controllerHistory[0].netMovement(0.1D, new Vector3d())).scale(10.0D);
+        double d0 = min(-vec3.y, -vec31.y);
 
         if (d0 > this.boostTrigger) {
             this.boost();
         }
 
-        Quaternion quaternion = new Quaternion(0.0F, -this.horse.yBodyRot, 0.0F);
-        Vec3 vec32 = quaternion.multiply(new Vec3(0.0D, 0.0D, -1.0D));
-        Vec3 vec33 = quaternion.multiply(new Vec3(1.0D, 0.0D, 0.0D));
-        Vec3 vec34 = quaternion.multiply(new Vec3(-1.0D, 0.0D, 0.0D));
-        Quaternion quaternion1 = new Quaternion(0.0F, VRSettings.inst.worldRotation, 0.0F);
-        Vec3 vec35 = VRPlayer.get().roomOrigin.add(quaternion1.multiply(this.dh.vr.controllerHistory[1].latest()));
-        Vec3 vec36 = VRPlayer.get().roomOrigin.add(quaternion1.multiply(this.dh.vr.controllerHistory[0].latest()));
-        double d1 = vec35.subtract(this.info.leftReinPos).dot(vec32) + vec35.subtract(this.info.leftReinPos).dot(vec33);
-        double d2 = vec36.subtract(this.info.rightReinPos).dot(vec32) + vec36.subtract(this.info.rightReinPos).dot(vec34);
+        Quaternionf quaternion = new Quaternionf().setAngleAxis(-this.horse.yBodyRot, 0.0F, 1.0F, 0.0F)
+            .mul(new Quaternionf().setAngleAxis(0.0F, 1.0F, 0.0F, 0.0F), new Quaternionf())
+            .mul(new Quaternionf().setAngleAxis(0.0F, 0.0F, 0.0F, 1.0F), new Quaternionf());
+        Vector3f vec32 = quaternion.transformUnit(forward, new Vector3f());
+        Vector3f vec33 = quaternion.transformUnit(right, new Vector3f());
+        Vector3f vec34 = quaternion.transformUnit(left, new Vector3f());
+        Quaternionf quaternion1 = new Quaternionf().setAngleAxis(toRadians(dh.vrSettings.worldRotation), 0.0F, 1.0F, 0.0F)
+            .mul(new Quaternionf().setAngleAxis(0.0F, 1.0F, 0.0F, 0.0F), new Quaternionf())
+            .mul(new Quaternionf().setAngleAxis(0.0F, 0.0F, 0.0F, 1.0F), new Quaternionf());
+        Vector3f vec35 = dh.vrPlayer.roomOrigin.add(quaternion1.transformUnit(dh.vr.controllerHistory[1].latest(new Vector3f()))).sub(this.info.leftReinPos);
+        Vector3f vec36 = dh.vrPlayer.roomOrigin.add(quaternion1.transformUnit(dh.vr.controllerHistory[0].latest(new Vector3f()))).sub(this.info.rightReinPos);
+        double d1 = vec35.dot(vec32) + vec35.dot(vec33);
+        double d2 = vec36.dot(vec32) + vec36.dot(vec34);
 
         if (this.speedLevel < 0) {
             this.speedLevel = 0;
         }
 
-        if (d1 > this.pullTrigger + 0.3D && d2 > this.pullTrigger + 0.3D && Math.abs(d2 - d1) < 0.1D) {
+        if (d1 > this.pullTrigger + 0.3D && d2 > this.pullTrigger + 0.3D && abs(d2 - d1) < 0.1D) {
             if (this.speedLevel <= 0 && System.currentTimeMillis() > this.lastBoostMillis + (long) this.coolDownMillis) {
                 this.speedLevel = -1;
             } else {
@@ -87,9 +84,12 @@ public class HorseTracker extends Tracker {
             this.horse.setYRot((float) ((double) f + (d4 - d3) * this.turnspeed));
         }
 
-        this.horse.yBodyRot = (float) Utils.lerpMod(f1, f, this.bodyturnspeed, 360.0D);
+        this.horse.yBodyRot = (float) (abs(f - f1) < 360.0D / 2.0D ?
+                                       f1 + (f - f1) * this.bodyturnspeed :
+                                       f1 + (f - f1 - signum(f - f1) * 360.0D) * this.bodyturnspeed
+        );
         this.horse.yHeadRot = f;
-        Vec3 vec37 = quaternion.multiply(new Vec3(0.0D, 0.0D, (double) this.speedLevel * this.baseSpeed));
+        Vector3f vec37 = quaternion.transformUnit(new Vector3f(0.0F, 0.0F, this.speedLevel * this.baseSpeed));
         this.horse.setDeltaMovement(vec37.x, this.horse.getDeltaMovement().y, vec37.z);
     }
 
@@ -111,7 +111,7 @@ public class HorseTracker extends Tracker {
         } else if (System.currentTimeMillis() < this.lastBoostMillis + (long) this.coolDownMillis) {
             return false;
         } else {
-            System.out.println("Breaking");
+            logger.info("Breaking");
             --this.speedLevel;
             this.lastBoostMillis = System.currentTimeMillis();
             return true;
@@ -122,8 +122,8 @@ public class HorseTracker extends Tracker {
         return this.info;
     }
 
-    public class ModelInfo {
-        public Vec3 leftReinPos = Vec3.ZERO;
-        public Vec3 rightReinPos = Vec3.ZERO;
+    public static class ModelInfo {
+        public Vector3f leftReinPos = new Vector3f();
+        public Vector3f rightReinPos = new Vector3f();
     }
 }

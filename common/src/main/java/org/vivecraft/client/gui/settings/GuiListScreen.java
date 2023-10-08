@@ -6,8 +6,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.widgets.SettingsList;
+import org.vivecraft.client.gui.widgets.SettingsList.BaseEntry;
 
 import java.util.List;
+
+import static org.vivecraft.client_vr.VRState.mc;
 
 public abstract class GuiListScreen extends Screen {
 
@@ -27,17 +30,22 @@ public abstract class GuiListScreen extends Screen {
         clearWidgets();
         double scrollAmount = list != null ? list.getScrollAmount() : 0.0D;
 
-        this.list = new SettingsList(this, minecraft, getEntries());
+        this.list = new SettingsList(this, getEntries());
         list.setScrollAmount(scrollAmount);
         this.addWidget(this.list);
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, this.height - 27, 200, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> mc.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, this.height - 27, 200, 20).build());
     }
 
-    protected abstract List<SettingsList.BaseEntry> getEntries();
+    protected abstract List<BaseEntry> getEntries();
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(lastScreen);
+        mc.setScreen(lastScreen);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderDirtBackground(guiGraphics);
     }
 
     @Override

@@ -2,8 +2,9 @@ package org.vivecraft.client_vr.render;
 
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+
+import static org.vivecraft.client_vr.VRState.mc;
 
 public class VRShaders {
     public static ShaderInstance lanczosShader;
@@ -46,11 +47,9 @@ public class VRShaders {
         return rendertypeEndGatewayShaderVR;
     }
 
-    private VRShaders() {
-    }
-
     public static void setupDepthMask() throws Exception {
-        depthMaskShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "mixedreality", DefaultVertexFormat.POSITION_TEX);
+        depthMaskShader = new ShaderInstance(mc.getResourceManager(), "mixedreality", DefaultVertexFormat.POSITION_TEX);
+
 
         _DepthMask_hmdViewPosition = depthMaskShader.safeGetUniform("hmdViewPosition");
         _DepthMask_hmdPlaneNormal = depthMaskShader.safeGetUniform("hmdPlaneNormal");
@@ -62,7 +61,7 @@ public class VRShaders {
     }
 
     public static void setupFSAA() throws Exception {
-        lanczosShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "lanczos", DefaultVertexFormat.POSITION_TEX);
+        lanczosShader = new ShaderInstance(mc.getResourceManager(), "lanczos", DefaultVertexFormat.POSITION_TEX);
 
 
         _Lanczos_texelWidthOffsetUniform = lanczosShader.safeGetUniform("texelWidthOffset");
@@ -74,7 +73,7 @@ public class VRShaders {
     }
 
     public static void setupFOVReduction() throws Exception {
-        fovReductionShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "fovreduction", DefaultVertexFormat.POSITION_TEX);
+        fovReductionShader = new ShaderInstance(mc.getResourceManager(), "fovreduction", DefaultVertexFormat.POSITION_TEX);
 
 
         _FOVReduction_RadiusUniform = fovReductionShader.safeGetUniform("circle_radius");
@@ -91,7 +90,7 @@ public class VRShaders {
     }
 
     public static void setupPortalShaders() throws Exception {
-        rendertypeEndPortalShaderVR = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "rendertype_end_portal_vr", DefaultVertexFormat.POSITION);
-        rendertypeEndGatewayShaderVR = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "rendertype_end_gateway_vr", DefaultVertexFormat.POSITION);
+        rendertypeEndPortalShaderVR = new ShaderInstance(mc.getResourceManager(), "rendertype_end_portal_vr", DefaultVertexFormat.POSITION);
+        rendertypeEndGatewayShaderVR = new ShaderInstance(mc.getResourceManager(), "rendertype_end_gateway_vr", DefaultVertexFormat.POSITION);
     }
 }

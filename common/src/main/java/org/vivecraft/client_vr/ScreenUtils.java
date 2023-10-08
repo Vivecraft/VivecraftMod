@@ -7,6 +7,8 @@ import net.minecraft.client.gui.screens.Screen;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.vivecraft.client_vr.VRState.dh;
+
 public class ScreenUtils {
 
     //Vivecraft / OF
@@ -33,23 +35,21 @@ public class ScreenUtils {
     }
 
     public static int getBGFrom() {
-        if (ClientDataHolderVR.getInstance().vrSettings == null || ClientDataHolderVR.getInstance().vrSettings.menuBackground) {
+        if (dh.vrSettings == null || dh.vrSettings.menuBackground) {
             return -1072689136;
         }
         return 0;
     }
 
     public static int getBGTo() {
-        if (ClientDataHolderVR.getInstance().vrSettings == null || ClientDataHolderVR.getInstance().vrSettings.menuBackground) {
+        if (dh.vrSettings == null || dh.vrSettings.menuBackground) {
             return -804253680;
         }
         return 0;
     }
 
     public static AbstractWidget getSelectedButton(int x, int y, List<AbstractWidget> listButtons) {
-        for (int i = 0; i < listButtons.size(); ++i) {
-            AbstractWidget abstractwidget = listButtons.get(i);
-
+        for (AbstractWidget abstractwidget : listButtons) {
             if (abstractwidget.visible) {
                 int j = abstractwidget.getWidth();
                 int k = abstractwidget.getHeight();
