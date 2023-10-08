@@ -138,6 +138,7 @@ public class VRSettings {
 
     public enum VRProvider implements OptionEnum<VRProvider> {
         OPENVR,
+        OPENXR,
         NULLVR
     }
 

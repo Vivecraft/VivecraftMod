@@ -7,6 +7,7 @@ import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.provider.openxr.MCOpenXR;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -30,18 +31,19 @@ public class VRState {
 
             vrInitialized = true;
             ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-            if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
-                dh.vr = new MCOpenXR(Minecraft.getInstance(), dh);
-                //dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
-            } else {
-                dh.vr = new NullVR(Minecraft.getInstance(), dh);
+            Minecraft instance = Minecraft.getInstance();
+            switch (dh.vrSettings.stereoProviderPluginID) {
+                case OPENVR -> dh.vr = new MCOpenVR(instance, dh);
+                case OPENXR -> dh.vr = new MCOpenXR(instance, dh);
+                default -> dh.vr = new NullVR(instance, dh);
             }
+
             if (!dh.vr.init()) {
                 throw new RenderConfigException("VR init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus + "\nVR provider: " + dh.vr.getName()));
             }
 
             dh.vrRenderer = dh.vr.createVRRenderer();
-            dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
+            dh.vrRenderer.lastGuiScale = instance.options.guiScale().get();
             try {
                 dh.vrRenderer.setupRenderConfiguration(false);
                 RenderPassManager.setVanillaRenderPass();

@@ -46,24 +46,25 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public class MCOpenXR extends MCVR {
 
-    private final MCOpenXR ome;
+    private static MCOpenXR ome;
     public XrInstance instance;
     public XrSession session;
     public XrSpace xrAppSpace;
     public XrSpace xrViewSpace;
     public XrSwapchain swapchain;
     public final XrEventDataBuffer eventDataBuffer = XrEventDataBuffer.calloc();
+    public long time;
     private HashMap<String, XrAction> inputs;
     private HashMap<String, XrActionSet> actionSets;
     private boolean tried;
     private long systemID;
     public XrView.Buffer viewBuffer;
-    int width;
-    int height;
+    public int width;
+    public int height;
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
-        this.ome = this;
+        ome = this;
         this.hapticScheduler = new OpenXRHapticSchedular();
 
     }
@@ -85,7 +86,25 @@ public class MCOpenXR extends MCVR {
 
     @Override
     public void destroy() {
-
+        if (swapchain != null) {
+            XR10.xrDestroySwapchain(swapchain);
+        }
+        if (viewBuffer != null) {
+            viewBuffer.close();
+        }
+        if (xrAppSpace != null) {
+            XR10.xrDestroySpace(xrAppSpace);
+        }
+        if (xrViewSpace != null) {
+            XR10.xrDestroySpace(xrViewSpace);
+        }
+        if (session != null){
+            XR10.xrEndSession(session);
+        }
+        if (instance != null){
+            XR10.xrEndSession(session);
+        }
+        eventDataBuffer.close();
     }
 
     @Override
@@ -132,7 +151,11 @@ public class MCOpenXR extends MCVR {
     }
 
     private void updatePose() {
-
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrSpaceLocation space_location = XrSpaceLocation.calloc(stack).type(XR10.XR_TYPE_SPACE_LOCATION);
+            XR10.xrLocateSpace(xrViewSpace, xrAppSpace, time, space_location);
+            //hmdPose = new Matrix4f(space_location.pose());
+        }
     }
 
     private void processVREvents() {
@@ -270,6 +293,10 @@ public class MCOpenXR extends MCVR {
 
             this.initSuccess = true;
         }
+    }
+
+    public static MCOpenXR get() {
+        return ome;
     }
 
     private void initializeOpenXRSession() {

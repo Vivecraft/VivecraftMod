@@ -21,7 +21,6 @@ public class OpenXRStereoRenderer extends VRRenderer {
     private int swapIndex;
     private VRTextureTarget[] leftFramebuffers;
     private VRTextureTarget[] rightFramebuffers;
-    private long time;
     private boolean render;
     private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
 
@@ -72,25 +71,17 @@ public class OpenXRStereoRenderer extends VRRenderer {
             XrFrameState frameState = XrFrameState.calloc(stack).type(XR10.XR_TYPE_FRAME_STATE);
 
             //TODO tick game and poll input during xrWaitFrame (this might not work due to the gl context belonging to the xrWaitFrame thread)
-            int i = XR10.xrWaitFrame(
+            XR10.xrWaitFrame(
                     openxr.session,
                     XrFrameWaitInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_WAIT_INFO),
                     frameState);
 
-            this.time = frameState.predictedDisplayTime();
+            openxr.time = frameState.predictedDisplayTime();
             this.render = frameState.shouldRender();
 
-            if (i != 0) {
-                System.out.println("error " + i);
-            }
-
-            i = XR10.xrBeginFrame(
+            XR10.xrBeginFrame(
                 openxr.session,
                 XrFrameBeginInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_BEGIN_INFO));
-
-            if (i != 0) {
-                System.out.println("error2 " + i);
-            }
 
             if (!frameState.shouldRender()) {
                 return;
@@ -107,11 +98,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
                 openxr.xrAppSpace
             );
 
-            i = XR10.xrLocateViews(openxr.session, viewLocateInfo, viewState, intBuf, openxr.viewBuffer);
-
-            if (i != 0) {
-                System.out.println("error3 " + i);
-            }
+            XR10.xrLocateViews(openxr.session, viewLocateInfo, viewState, intBuf, openxr.viewBuffer);
 
             IntBuffer intBuf2 = stack.callocInt(1);
 
@@ -173,7 +160,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
                 openxr.session,
                 XrFrameEndInfo.calloc(stack)
                     .type(XR10.XR_TYPE_FRAME_END_INFO)
-                    .displayTime(time)
+                    .displayTime(openxr.time)
                     .environmentBlendMode(XR10.XR_ENVIRONMENT_BLEND_MODE_OPAQUE)
                     .layers(layers));
 
