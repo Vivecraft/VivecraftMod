@@ -17,6 +17,5 @@ public class Vivecraft {
             () -> NetworkConstants.IGNORESERVERONLY, // only needed on server, client is optional
             (s, b) -> true // any version is good
         ));
-
     }
 }

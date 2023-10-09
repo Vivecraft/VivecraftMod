@@ -132,7 +132,7 @@ public class ServerUtil {
                                         try {
                                             Object newValue = context.getArgument(argumentName, clazz);
                                             setting.set(newValue);
-                                            context.getSource().sendSystemMessage(Component.literal("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"));
+                                            context.getSource().sendSuccess(new TextComponent("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"), true);
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                         }
