@@ -2,15 +2,12 @@ package org.vivecraft.server.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.*;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.util.Mth;
-import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
-import org.vivecraft.client.gui.widgets.SettingsList;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class ConfigBuilder {
 
@@ -252,13 +249,8 @@ public class ConfigBuilder {
             return String.join(".", path);
         }
 
-        public AbstractWidget getWidget(int width, int height) {
-            return Button
-                .builder(Component.literal("" + get()), button -> {
-                })
-                .bounds(0, 0, width, height)
-                .tooltip(Tooltip.create(Component.literal(getComment())))
-                .build();
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getBaseWidget(this, width, height);
         }
     }
 
@@ -268,12 +260,8 @@ public class ConfigBuilder {
         }
 
         @Override
-        public AbstractWidget getWidget(int width, int height) {
-            return CycleButton
-                .onOffBuilder(get())
-                .displayOnlyValue()
-                .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
-                .create(0, 0, width, height, Component.empty(), (button, bool) -> set(bool));
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getOnOffWidget(this, width, height);
         }
     }
 
@@ -283,26 +271,8 @@ public class ConfigBuilder {
         }
 
         @Override
-        public AbstractWidget getWidget(int width, int height) {
-            EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, width - 1, height, Component.literal(get())) {
-                @Override
-                public boolean charTyped(char c, int i) {
-                    boolean ret = super.charTyped(c, i);
-                    set(this.getValue());
-                    return ret;
-                }
-
-                @Override
-                public boolean keyPressed(int i, int j, int k) {
-                    boolean ret = super.keyPressed(i, j, k);
-                    set(this.getValue());
-                    return ret;
-                }
-            };
-            box.setMaxLength(1000);
-            box.setValue(get());
-            box.setTooltip(Tooltip.create(Component.literal(getComment())));
-            return box;
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getEditBoxWidget(this, width, height);
         }
     }
 
@@ -312,18 +282,8 @@ public class ConfigBuilder {
         }
 
         @Override
-        public AbstractWidget getWidget(int width, int height) {
-            // TODO handle other types than String
-            return Button
-                .builder(
-                    Component.translatable("vivecraft.options.editlist"),
-                    button -> Minecraft.getInstance()
-                        .setScreen(
-                            new GuiListValueEditScreen(Component.literal(getPath().substring(getPath().lastIndexOf("."))), Minecraft.getInstance().screen, (ListValue<String>) this)
-                        ))
-                .size(width, height)
-                .tooltip(Tooltip.create(Component.literal(getComment())))
-                .build();
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getEditListWidget(this, width, height);
         }
     }
 
@@ -340,15 +300,8 @@ public class ConfigBuilder {
         }
 
         @Override
-        public AbstractWidget getWidget(int width, int height) {
-            return CycleButton
-                .builder((newValue) -> Component.literal("" + newValue))
-                .withInitialValue(get())
-                // toArray is needed here, because the button uses Objects, and the collection is of other types
-                .withValues(getValidValues().toArray())
-                .displayOnlyValue()
-                .withTooltip((bool) -> getComment() != null ? Tooltip.create(Component.literal(getComment())) : null)
-                .create(0, 0, width, height, Component.empty(), (button, newValue) -> set((T) newValue));
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getCycleWidget(this, width, height);
         }
     }
 
@@ -378,20 +331,8 @@ public class ConfigBuilder {
         abstract public void fromNormalized(double value);
 
         @Override
-        public AbstractWidget getWidget(int width, int height) {
-            AbstractSliderButton widget = new AbstractSliderButton(0, 0, SettingsList.ResettableEntry.valueButtonWidth, 20, Component.literal("" + get()), normalize()) {
-                @Override
-                protected void updateMessage() {
-                    setMessage(Component.literal("" + get()));
-                }
-
-                @Override
-                protected void applyValue() {
-                    fromNormalized(value);
-                }
-            };
-            widget.setTooltip(Tooltip.create(Component.literal(getComment())));
-            return widget;
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getSliderWidget(this, width, height);
         }
     }
 
