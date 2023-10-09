@@ -96,7 +96,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             this.canReset = () -> !configValue.isDefault();
             this.resetButton = new Button(0, 0, 20, 20, Component.literal("X"), button -> {
                 configValue.reset();
-                this.valueWidget = configValue.getWidget(valueWidget.getWidth(), valueWidget.getHeight());
+                this.valueWidget = configValue.getWidget(valueWidget.getWidth(), valueWidget.getHeight()).get();
             }, (button, poseStack, x, y) -> Minecraft.getInstance().screen.renderTooltip(poseStack, Component.translatable("controls.reset"), x, y));
         }
 
