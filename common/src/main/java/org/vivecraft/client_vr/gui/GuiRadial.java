@@ -2,96 +2,89 @@ package org.vivecraft.client_vr.gui;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Button.Builder;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import org.vivecraft.client.gui.framework.TwoHandedScreen;
-import org.vivecraft.client_vr.provider.MCVR;
+import org.joml.Math;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 
-public class GuiRadial extends TwoHandedScreen {
+public class GuiRadial extends org.vivecraft.client.gui.framework.TwoHandedScreen {
     private boolean isShift = false;
     String[] arr;
 
+    @Override
     public void init() {
-        this.arr = this.dataholder.vrSettings.vrRadialItems;
-        String[] astring = this.dataholder.vrSettings.vrRadialItemsAlt;
+        this.arr = this.isShift ? ClientDataHolderVR.getInstance().vrSettings.vrRadialItemsAlt : ClientDataHolderVR.getInstance().vrSettings.vrRadialItems;
         this.clearWidgets();
-        int i = 8;
-        int j = 120;
-        int k = 360 / i;
-        int l = 48;
-        int i1 = this.width / 2;
-        int j1 = this.height / 2;
 
-        if (this.isShift) {
-            this.arr = astring;
-        }
+        int numButts = 8;
+        int buttonWidthMin = 120;
+        int degreesPerButt = 360 / numButts;
+        int dist = 48;
+        int centerx = this.width / 2;
+        int centery = this.height / 2;
 
-        for (int k1 = 0; k1 < i; ++k1) {
-            KeyMapping keymapping = null;
+        for (int i = 0; i < numButts; ++i) {
+            KeyMapping b = null;
 
-            for (KeyMapping keymapping1 : this.minecraft.options.keyMappings) {
-                if (keymapping1.getName().equalsIgnoreCase(this.arr[k1])) {
-                    keymapping = keymapping1;
+            for (KeyMapping kb : this.minecraft.options.keyMappings) {
+                if (kb.getName().equalsIgnoreCase(this.arr[i])) {
+                    b = kb;
                 }
             }
 
-            String s = "?";
+            String str = "?";
 
-            if (keymapping != null) {
-                s = I18n.get(keymapping.getName());
+            if (b != null) {
+                str = I18n.get(b.getName());
             }
 
-            int i2 = Math.max(j, this.font.width(s));
-            int j2 = 0;
-            int k2 = 0;
+            int buttonwidth = Math.max(buttonWidthMin, this.font.width(str));
+            int x = 0, y = 0;
 
-            if (k1 == 0) {
-                j2 = 0;
-                k2 = -l;
-            } else if (k1 == 1) {
-                j2 = i2 / 2 + 8;
-                k2 = -l / 2;
-            } else if (k1 == 2) {
-                j2 = i2 / 2 + 32;
-                k2 = 0;
-            } else if (k1 == 3) {
-                j2 = i2 / 2 + 8;
-                k2 = l / 2;
-            } else if (k1 == 4) {
-                j2 = 0;
-                k2 = l;
-            } else if (k1 == 5) {
-                j2 = -i2 / 2 - 8;
-                k2 = l / 2;
-            } else if (k1 == 6) {
-                j2 = -i2 / 2 - 32;
-                k2 = 0;
-            } else if (k1 == 7) {
-                j2 = -i2 / 2 - 8;
-                k2 = -l / 2;
+            if (i == 0) {
+                y = -dist;
+            } else if (i == 1) {
+                x = buttonwidth / 2 + 8;
+                y = -dist / 2;
+            } else if (i == 2) {
+                x = buttonwidth / 2 + 32;
+            } else if (i == 3) {
+                x = buttonwidth / 2 + 8;
+                y = dist / 2;
+            } else if (i == 4) {
+                y = dist;
+            } else if (i == 5) {
+                x = -buttonwidth / 2 - 8;
+                y = dist / 2;
+            } else if (i == 6) {
+                x = -buttonwidth / 2 - 32;
+            } else if (i == 7) {
+                x = -buttonwidth / 2 - 8;
+                y = -dist / 2;
             }
 
-            int l1 = k1;
+            final int idx = i;
 
-            if (s != "?") {
-                this.addRenderableWidget(new Button.Builder(Component.translatable(s), (p) ->
-                {
-                    if (l1 < 200) {
-                        VRInputAction vrinputaction = MCVR.get().getInputAction(this.arr[l1]);
+            if (!"?".equals(str)) {
+                this.addRenderableWidget(new Builder(Component.translatable(str), (p) ->
+                    {
+                        if (idx < 200) {
+                            VRInputAction vb = ClientDataHolderVR.getInstance().vr.getInputAction(this.arr[idx]);
 
-                        if (vrinputaction != null) {
-                            vrinputaction.pressBinding();
-                            vrinputaction.unpressBinding(2);
+                            if (vb != null) {
+                                vb.pressBinding();
+                                vb.unpressBinding(2);
+                            }
+                        } else if (idx == 201) {
+                            this.setShift(!this.isShift);
                         }
-                    } else if (l1 == 201) {
-                        this.setShift(!this.isShift);
-                    }
-                })
-                    .size(i2, 20)
-                    .pos(i1 + j2 - i2 / 2, j1 + k2 - 10)
-                    .build());
+                    })
+                        .size(buttonwidth, 20)
+                        .pos(centerx + x - buttonwidth / 2, centery + y - 10)
+                        .build()
+                );
             }
         }
     }
@@ -103,6 +96,7 @@ public class GuiRadial extends TwoHandedScreen {
         }
     }
 
+    @Override
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
         this.renderBackground(guiGraphics, pMouseX, pMouseY, pPartialTicks);
         super.render(guiGraphics, 0, 0, pPartialTicks);

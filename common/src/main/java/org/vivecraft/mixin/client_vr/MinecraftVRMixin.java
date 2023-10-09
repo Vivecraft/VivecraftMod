@@ -227,7 +227,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay vivecraft$initVivecraft(Overlay overlay) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.mainRenderTarget);
-        VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
+        VRSettings.initSettings();
 
         // register a resource reload listener, to reload the menu world
         resourceManager.registerReloadListener((ResourceManagerReloadListener) resourceManager -> {

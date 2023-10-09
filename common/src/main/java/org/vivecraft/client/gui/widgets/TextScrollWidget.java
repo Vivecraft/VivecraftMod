@@ -7,6 +7,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import org.joml.Math;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class TextScrollWidget extends AbstractWidget {
         currentLine = 0;
         scrollSteps = formattedText.size() - maxLines;
         scrollSteps = Math.max(scrollSteps, 0);
-        scrollBarSize = scrollSteps == 0 ? height - 2 : (int) (Math.max(formattedText.size(), maxLines) / (float) (scrollSteps) * 12);
+        scrollBarSize = scrollSteps == 0 ? height - 2 : Math.max(formattedText.size(), maxLines) / scrollSteps * 12;
         scrollBarOffset = height - scrollBarSize - 2;
     }
 
@@ -58,14 +59,16 @@ public class TextScrollWidget extends AbstractWidget {
             getY(),
             getX() + width,
             getY() + this.height,
-            -6250336);
+            -6250336
+        );
         // draw box inside
         guiGraphics.fill(
             getX() + 1,
             getY() + 1,
             getX() + width - 1,
             getY() + this.height - 1,
-            -16777216);
+            -16777216
+        );
 
         // draw text
         for (int line = 0; line + currentLine < formattedText.size() && line < maxLines; line++) {
@@ -81,7 +84,8 @@ public class TextScrollWidget extends AbstractWidget {
                 (int) (getY() + 1 + scrollbarStart),
                 getX() + width - 1,
                 (int) (getY() + 1 + scrollbarStart + scrollBarSize),
-                -1);
+                -1
+            );
         }
 
         // draw scroll bar
@@ -90,7 +94,8 @@ public class TextScrollWidget extends AbstractWidget {
             (int) (getY() + (isFocused() || isHovered ? 2 : 1) + scrollbarStart),
             getX() + width - (isFocused() || isHovered ? 2 : 1),
             (int) (getY() + (isFocused() || isHovered ? 0 : 1) + scrollbarStart + scrollBarSize),
-            -6250336);
+            -6250336
+        );
     }
 
     @Override

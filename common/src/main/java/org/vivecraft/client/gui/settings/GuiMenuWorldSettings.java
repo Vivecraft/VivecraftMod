@@ -2,48 +2,56 @@ package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.client.gui.framework.GuiVROptionsBase;
-import org.vivecraft.client.gui.framework.VROptionEntry;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.settings.VRSettings.VrOptions;
 
 public class GuiMenuWorldSettings extends GuiVROptionsBase {
-    private final VROptionEntry[] miscSettings = new VROptionEntry[]{
-        new VROptionEntry(VRSettings.VrOptions.MENU_WORLD_SELECTION),
-        new VROptionEntry("vivecraft.gui.menuworld.refresh", (button, mousePos) -> {
-            if (this.dataholder.menuWorldRenderer != null && this.dataholder.menuWorldRenderer.getLevel() != null) {
-                try {
-                    this.dataholder.menuWorldRenderer.destroy();
-                    this.dataholder.menuWorldRenderer.prepare();
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-            }
-
-            return true;
-        }),
-        new VROptionEntry(VRSettings.VrOptions.DUMMY), new VROptionEntry("vivecraft.gui.menuworld.loadnew", (button, mousePos) -> {
-        if (this.dataholder.menuWorldRenderer != null) {
-            try {
-                if (this.dataholder.menuWorldRenderer.isReady()) {
-                    this.dataholder.menuWorldRenderer.destroy();
-                }
-
-                this.dataholder.menuWorldRenderer.init();
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        }
-
-        return true;
-    })
-    };
+    public static String vrTitle = "vivecraft.options.screen.menuworld";
 
     public GuiMenuWorldSettings(Screen guiScreen) {
         super(guiScreen);
     }
 
+    @Override
     public void init() {
-        this.vrTitle = "vivecraft.options.screen.menuworld";
-        super.init(this.miscSettings, true);
+        super.clearWidgets();
+        super.init(VrOptions.MENU_WORLD_SELECTION);
+        super.init(
+            "vivecraft.gui.menuworld.refresh",
+            (button, mousePos) ->
+            {
+                if (ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.getLevel() != null) {
+                    try {
+                        ClientDataHolderVR.getInstance().menuWorldRenderer.destroy();
+                        ClientDataHolderVR.getInstance().menuWorldRenderer.prepare();
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                }
+
+                return true;
+            }
+        );
+        super.init(VrOptions.DUMMY);
+        super.init(
+            "vivecraft.gui.menuworld.loadnew",
+            (button, mousePos) ->
+            {
+                if (ClientDataHolderVR.getInstance().menuWorldRenderer != null) {
+                    try {
+                        if (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
+                            ClientDataHolderVR.getInstance().menuWorldRenderer.destroy();
+                        }
+
+                        ClientDataHolderVR.getInstance().menuWorldRenderer.init();
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                }
+
+                return true;
+            }
+        );
         super.addDefaultButtons();
     }
 }
