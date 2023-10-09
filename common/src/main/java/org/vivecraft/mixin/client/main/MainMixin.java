@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 @Mixin(Main.class)
@@ -25,7 +24,6 @@ public class MainMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Ljoptsimple/OptionParser;parse([Ljava/lang/String;)Ljoptsimple/OptionSet;", remap = false), method = "main", remap = false)
     private static OptionSet vivecraft$kiosk(OptionParser optionparser, String[] p_129642_) {
-        new Thread(UpdateChecker::checkForUpdates).start();
         OptionSet optionset = optionparser.parse(p_129642_);
         ClientDataHolderVR.kiosk = optionset.has("kiosk");
 
