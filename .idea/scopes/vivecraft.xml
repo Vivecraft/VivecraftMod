@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="vivecraft" pattern="file[vivecraft*]:*//*" />
+</component>

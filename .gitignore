@@ -11,7 +11,9 @@ libs/
 
 .classpath
 .project
-.idea/
+.idea/*
+!.idea/inspectionProfiles/
+!.idea/scopes/
 classes/
 .metadata
 .vscode
