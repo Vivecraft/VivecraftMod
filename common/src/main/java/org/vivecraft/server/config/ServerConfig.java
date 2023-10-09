@@ -16,6 +16,7 @@ public class ServerConfig {
     // config keys
     public static ConfigBuilder.BooleanValue debug;
     public static ConfigBuilder.BooleanValue checkForUpdate;
+    public static ConfigBuilder.InListValue<String> checkForUpdateType;
     public static ConfigBuilder.BooleanValue vr_only;
     public static ConfigBuilder.BooleanValue vive_only;
     public static ConfigBuilder.BooleanValue allow_op;
@@ -108,6 +109,10 @@ public class ServerConfig {
             .push("checkForUpdate")
             .comment("will check for a newer version and alert any OP when they login to the server.")
             .define(true);
+        checkForUpdateType = builder
+            .push("checkForUpdateType")
+            .comment("What updates to check for.\n r: Release, b: Beta, a: Alpha")
+            .defineInList("r", Arrays.asList("r", "b", "a"));
         vr_only = builder
             .push("vr_only")
             .comment("Set to true to only allow VR players to play.\n If enabled, VR hotswitching will be automatically disabled.")
