@@ -141,10 +141,16 @@ public class VRSettings {
         NULLVR
     }
 
-    public enum ChatServerPluginMessage implements OptionEnum<VRProvider> {
+    public enum ChatServerPluginMessage implements OptionEnum<ChatServerPluginMessage> {
         ALWAYS,
         SERVER_ONLY,
         NEVER
+    }
+
+    public enum UpdateType implements OptionEnum<UpdateType> {
+        RELEASE,
+        BETA,
+        ALPHA
     }
 
     @SettingField
@@ -410,6 +416,8 @@ public class VRSettings {
     public boolean alwaysShowUpdates = true;
     @SettingField
     public String lastUpdate = "";
+    @SettingField(VrOptions.UPDATE_TYPE)
+    public UpdateType updateType = UpdateType.RELEASE;
     @SettingField(VrOptions.SHOW_PLUGIN)
     public ChatServerPluginMessage showServerPluginMessage = ChatServerPluginMessage.SERVER_ONLY;
     @SettingField(VrOptions.SHOW_PLUGIN_MISSING)
@@ -1125,6 +1133,7 @@ public class VRSettings {
             }
         },
         SHOW_UPDATES(false, true, "vivecraft.options.always", "vivecraft.options.once"),
+        UPDATE_TYPE(false, true),
         SHOW_PLUGIN(false, true),
         SHOW_PLUGIN_MISSING(false, true, "vivecraft.options.always", "vivecraft.options.once"),
         CHAT_MESSAGE_STENCIL(false, true), // warning for other mod using stencil

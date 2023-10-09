@@ -223,6 +223,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     public Overlay vivecraft$initVivecraft(Overlay overlay) {
         RenderPassManager.INSTANCE = new RenderPassManager((MainTarget) this.mainRenderTarget);
         VRSettings.initSettings((Minecraft) (Object) this, this.gameDirectory);
+        new Thread(UpdateChecker::checkForUpdates, "VivecraftUpdateThread").start();
 
         // register a resource reload listener, to reload the menu world
         resourceManager.registerReloadListener((ResourceManagerReloadListener) resourceManager -> {
@@ -913,7 +914,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Unique
     private void vivecraft$copyToMirror() {
-        // TODO: fix mixed reality... again
         if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.OFF
             && ClientDataHolderVR.getInstance().vr.isHMDTracking()) {
             this.vivecraft$notifyMirror("Mirror is OFF", true, 1000);

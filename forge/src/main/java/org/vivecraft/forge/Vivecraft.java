@@ -1,11 +1,9 @@
 package org.vivecraft.forge;
 
-import net.minecraftforge.client.ConfigGuiHandler;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkConstants;
-import org.vivecraft.client.gui.settings.VivecraftMainSettings;
 import org.vivecraft.server.config.ServerConfig;
 
 @Mod(Vivecraft.MODID)
@@ -20,6 +18,5 @@ public class Vivecraft {
             (s, b) -> true // any version is good
         ));
 
-        ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((mc, screen) -> new VivecraftMainSettings(screen)));
     }
 }

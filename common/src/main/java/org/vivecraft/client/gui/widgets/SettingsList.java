@@ -19,6 +19,7 @@ import org.vivecraft.server.config.ConfigBuilder;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 public class SettingsList extends ContainerObjectSelectionList<SettingsList.BaseEntry> {
     final Screen parent;
@@ -46,8 +47,8 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         return super.getRowWidth() + 32;
     }
 
-    public static BaseEntry ConfigToEntry(ConfigBuilder.ConfigValue configValue, Component name) {
-        AbstractWidget widget = configValue.getWidget(ResettableEntry.valueButtonWidth, 20);
+    public static BaseEntry ConfigToEntry(ConfigBuilder.ConfigValue<?> configValue, Component name) {
+        AbstractWidget widget = configValue.getWidget(ResettableEntry.valueButtonWidth, 20).get();
         return new ResettableEntry(name, widget, configValue);
     }
 
@@ -91,13 +92,13 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
         public static final int valueButtonWidth = 125;
 
-        public ResettableEntry(Component name, AbstractWidget valueWidget, ConfigBuilder.ConfigValue configValue) {
+        public ResettableEntry(Component name, AbstractWidget valueWidget, ConfigBuilder.ConfigValue<?> configValue) {
             super(name, valueWidget);
 
             this.canReset = () -> !configValue.isDefault();
             this.resetButton = new Button(0, 0, 20, 20, new TextComponent("X"), button -> {
                 configValue.reset();
-                this.valueWidget = configValue.getWidget(valueWidget.getWidth(), valueWidget.getHeight());
+                this.valueWidget = configValue.getWidget(valueWidget.getWidth(), valueWidget.getHeight()).get();
             }, (button, poseStack, x, y) -> Minecraft.getInstance().screen.renderTooltip(poseStack, new TranslatableComponent("controls.reset"), x, y));
         }
 
