@@ -22,6 +22,7 @@ public class GuiOtherHUDSettings extends GuiVROptionsBase {
 
     static VRSettings.VrOptions[] messages = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.SHOW_UPDATES,
+        VRSettings.VrOptions.UPDATE_TYPE,
         VRSettings.VrOptions.SHOW_PLUGIN,
         VRSettings.VrOptions.SHOW_PLUGIN_MISSING,
         VRSettings.VrOptions.CHAT_MESSAGE_STENCIL
