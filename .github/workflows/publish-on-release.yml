@@ -262,6 +262,7 @@ jobs:
           print(sys.argv)
           mc_version = sys.argv[1]
           mod_version = sys.argv[2]
+          release_type = sys.argv[3]
           jsonContent = {}
           with open('forge_updates.json', 'r') as infile:
             jsonContent = json.load(infile)
@@ -269,11 +270,12 @@ jobs:
             version = str.strip('[]\" ')
             if version != '':
               jsonContent['promos'][version + '-latest'] = mod_version
-              jsonContent['promos'][version + '-recommended'] = mod_version
+              if release_type == 'release':
+                jsonContent['promos'][version + '-recommended'] = mod_version
           print(json.dumps(jsonContent, indent='\t'))
           with open('forge_updates.json', 'w') as outfile:
             outfile.write(json.dumps(jsonContent, indent='\t'))
-          " "${{ steps.version.outputs.FORGE_MC_VERSIONS }}" "${{ steps.version.outputs.MOD_VERSION }}"
+          " "${{ steps.version.outputs.FORGE_MC_VERSIONS }}" "${{ steps.version.outputs.MOD_VERSION }}" "${{ steps.version.outputs.RELEASE_TYPE }}"
       - name: push new update json
         if: steps.assets.outputs.FORGE_FILE_PATH != ''
         uses: EndBug/add-and-commit@v9
