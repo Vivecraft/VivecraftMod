@@ -123,7 +123,7 @@ public class VREffectsHelper {
 
         if (wasStencilOn && !showedStencilMessage && dataHolder.vrSettings.vrUseStencil && dataHolder.vrSettings.showChatMessageStencil) {
             showedStencilMessage = true;
-            Utils.message(Component.translatable("vivecraft.messages.stencil",
+            Utils.printChatMessage(Component.translatable("vivecraft.messages.stencil",
                 Component.translatable("vivecraft.messages.3options",
                         Component.translatable("options.title"),
                         Component.translatable("vivecraft.options.screen.main"),

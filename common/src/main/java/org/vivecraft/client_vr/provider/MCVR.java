@@ -741,16 +741,16 @@ public abstract class MCVR {
             } else if (++this.moveModeSwitchCount == 80 || flag2) {
                 if (this.dh.vrSettings.seated) {
                     this.dh.vrSettings.seatedFreeMove = !this.dh.vrSettings.seatedFreeMove;
-                    Utils.message(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
+                    Utils.printChatMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
                 } else if (this.dh.vrPlayer.isTeleportSupported()) {
                     this.dh.vrSettings.forceStandingFreeMove = !this.dh.vrSettings.forceStandingFreeMove;
-                    Utils.message(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
+                    Utils.printChatMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
                 } else if (this.dh.vrPlayer.isTeleportOverridden()) {
                     this.dh.vrPlayer.setTeleportOverride(false);
-                    Utils.message(Component.translatable("vivecraft.messages.teleportdisabled"));
+                    Utils.printChatMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
                 } else {
                     this.dh.vrPlayer.setTeleportOverride(true);
-                    Utils.message(Component.translatable("vivecraft.messages.teleportenabled"));
+                    Utils.printChatMessage(Component.translatable("vivecraft.messages.teleportenabled"));
                 }
             }
 

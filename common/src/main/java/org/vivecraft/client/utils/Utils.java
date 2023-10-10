@@ -50,7 +50,7 @@ public class Utils {
     private static final int READ_TIMEOUT = 20000;
     private static final Random avRandomizer = new Random();
 
-    public static void message(final Component literal) {
+    public static void printChatMessage(final Component literal) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null) {
             mc.gui.getChat().addMessage(literal);
@@ -654,7 +654,7 @@ public class Utils {
 
     public static void takeScreenshot(RenderTarget fb) {
         Minecraft mc = Minecraft.getInstance();
-        Screenshot.grab(mc.gameDirectory, fb, (text) -> mc.execute(() -> message(text)));
+        Screenshot.grab(mc.gameDirectory, fb, (text) -> mc.execute(() -> printChatMessage(text)));
     }
 
     public static List<FormattedText> wrapText(FormattedText text, int width, Font fontRenderer, @Nullable FormattedText linePrefix) {

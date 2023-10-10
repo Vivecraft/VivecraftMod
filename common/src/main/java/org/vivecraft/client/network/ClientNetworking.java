@@ -227,10 +227,10 @@ public class ClientNetworking {
                     && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
                     || (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()))) {
                     ClientNetworking.displayedChatMessage = true;
-                    Utils.message(Component.translatable("vivecraft.messages.serverplugin", s11));
+                    Utils.printChatMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
                 }
                 if (VRState.vrEnabled && dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
-                    Utils.message(Component.translatable("vivecraft.messages.calibrateheight"));
+                    Utils.printChatMessage(Component.translatable("vivecraft.messages.calibrateheight"));
                 }
             }
             case IS_VR_ACTIVE -> {
@@ -314,7 +314,7 @@ public class ClientNetworking {
                 ClientNetworking.serverAllowsVrSwitching = buffer.readBoolean();
                 if (VRState.vrInitialized) {
                     if (!ClientNetworking.serverAllowsVrSwitching) {
-                        Utils.message(Component.translatable("vivecraft.messages.novrhotswitching"));
+                        Utils.printChatMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
                     }
                     dataholder.vrPlayer.vrSwitchWarning = false;
                 }

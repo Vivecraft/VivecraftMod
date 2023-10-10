@@ -142,12 +142,12 @@ public class VRMovementStyle {
             }
             default -> {
                 flag = false;
-                Utils.message(Component.translatableWithFallback("vivecraft.options.teleport.style", "Unknown teleport style requested: " + requestedStyle, requestedStyle));
+                Utils.printChatMessage(Component.translatableWithFallback("vivecraft.options.teleport.style", "Unknown teleport style requested: " + requestedStyle, requestedStyle));
             }
         }
 
         if (flag && this.dataholder != null) {
-            Utils.message(Component.translatableWithFallback("vivecraft.options.teleport.style", "Teleport style (RCTRL-M): " + this.name, this.name));
+            Utils.printChatMessage(Component.translatableWithFallback("vivecraft.options.teleport.style", "Teleport style (RCTRL-M): " + this.name, this.name));
         }
     }
 }
