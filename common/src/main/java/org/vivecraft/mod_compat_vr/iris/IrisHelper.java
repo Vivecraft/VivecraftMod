@@ -4,6 +4,7 @@ import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.irisshaders.iris.api.v0.IrisApi;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.common.utils.Utils;
 
 import java.io.IOException;
 
@@ -19,7 +20,7 @@ public class IrisHelper {
             RenderPassManager.setVanillaRenderPass();
             Iris.reload();
         } catch (IOException e) {
-            System.err.println("Error reloading shaders on Frame Buffer reinit");
+            Utils.logger.error("Error reloading shaders on Frame Buffer reinit");
             e.printStackTrace();
         }
     }

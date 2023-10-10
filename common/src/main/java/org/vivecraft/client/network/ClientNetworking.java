@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -226,10 +227,10 @@ public class ClientNetworking {
                     && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
                     || (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()))) {
                     ClientNetworking.displayedChatMessage = true;
-                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
+                    Utils.message(Component.translatable("vivecraft.messages.serverplugin", s11));
                 }
                 if (VRState.vrEnabled && dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
-                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibrateheight"));
+                    Utils.message(Component.translatable("vivecraft.messages.calibrateheight"));
                 }
             }
             case IS_VR_ACTIVE -> {
@@ -299,7 +300,7 @@ public class ClientNetworking {
                                 }
                             }
 
-                            System.out.println("Server setting override: " + s13 + " = " + s14);
+                            org.vivecraft.common.utils.Utils.logger.info("Server setting override: {} = {}", s13, s14);
                         } catch (Exception exception) {
                             exception.printStackTrace();
                         }
@@ -313,7 +314,7 @@ public class ClientNetworking {
                 ClientNetworking.serverAllowsVrSwitching = buffer.readBoolean();
                 if (VRState.vrInitialized) {
                     if (!ClientNetworking.serverAllowsVrSwitching) {
-                        Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
+                        Utils.message(Component.translatable("vivecraft.messages.novrhotswitching"));
                     }
                     dataholder.vrPlayer.vrSwitchWarning = false;
                 }

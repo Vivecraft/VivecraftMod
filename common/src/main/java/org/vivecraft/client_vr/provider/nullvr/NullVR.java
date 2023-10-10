@@ -60,7 +60,7 @@ public class NullVR extends MCVR {
             this.mc = Minecraft.getInstance();
 
             // only supports seated mode
-            System.out.println("NullDriver. Forcing seated mode.");
+            org.vivecraft.common.utils.Utils.logger.info("NullDriver. Forcing seated mode.");
             this.dh.vrSettings.seated = true;
 
             this.headIsTracking = false;

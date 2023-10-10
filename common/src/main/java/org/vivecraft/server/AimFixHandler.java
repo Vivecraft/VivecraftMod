@@ -12,6 +12,7 @@ import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.server.config.ServerConfig;
 
 public class AimFixHandler extends ChannelInboundHandlerAdapter {
@@ -60,7 +61,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
                 serverplayer.eyeHeight = 0.0001F;
                 serverviveplayer.offset = position.subtract(aimPos);
                 if (ServerConfig.debug.get()) {
-                    System.out.println("AimFix " + aimPos.x + " " + aimPos.y + " " + aimPos.z + " " + (float) Math.toDegrees(Math.asin(-dir.y)) + " " + (float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                    Utils.logger.info("AimFix {} {} {}", aimPos, (float) Math.toDegrees(Math.asin(-dir.y)), (float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
                 }
             }
 
@@ -79,7 +80,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             if ((aimPos != null && !serverplayer.position().equals(aimPos)) || (aimPos == null && !serverplayer.position().equals(position))) {
                 position = serverplayer.position();
                 if (ServerConfig.debug.get()) {
-                    System.out.println("AimFix moved Player to " + position.x + " " + position.y + " " + position.z);
+                    Utils.logger.info("AimFix moved Player to {}", position);
                 }
             }
 

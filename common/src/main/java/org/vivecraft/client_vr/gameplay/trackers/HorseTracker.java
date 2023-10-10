@@ -111,7 +111,7 @@ public class HorseTracker extends Tracker {
         } else if (System.currentTimeMillis() < this.lastBoostMillis + (long) this.coolDownMillis) {
             return false;
         } else {
-            System.out.println("Breaking");
+            org.vivecraft.common.utils.Utils.logger.info("Breaking");
             --this.speedLevel;
             this.lastBoostMillis = System.currentTimeMillis();
             return true;

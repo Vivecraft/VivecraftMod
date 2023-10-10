@@ -454,7 +454,7 @@ public abstract class MCVR {
 
         if (Math.abs(Utils.angleNormalize(this.hmdYawTotal) - this.hmdYawLast) > 1.0F || this.hmdYawTotal > 100000.0F) {
             this.hmdYawTotal = this.hmdYawLast;
-            System.out.println("HMD yaw desync/overflow corrected");
+            org.vivecraft.common.utils.Utils.logger.warn("HMD yaw desync/overflow corrected");
         }
 
         this.hmdPosSamples.add(this.dh.vrPlayer.vrdata_room_pre.hmd.getPosition());
@@ -741,16 +741,16 @@ public abstract class MCVR {
             } else if (++this.moveModeSwitchCount == 80 || flag2) {
                 if (this.dh.vrSettings.seated) {
                     this.dh.vrSettings.seatedFreeMove = !this.dh.vrSettings.seatedFreeMove;
-                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
+                    Utils.message(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
                 } else if (this.dh.vrPlayer.isTeleportSupported()) {
                     this.dh.vrSettings.forceStandingFreeMove = !this.dh.vrSettings.forceStandingFreeMove;
-                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
+                    Utils.message(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
                 } else if (this.dh.vrPlayer.isTeleportOverridden()) {
                     this.dh.vrPlayer.setTeleportOverride(false);
-                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
+                    Utils.message(Component.translatable("vivecraft.messages.teleportdisabled"));
                 } else {
                     this.dh.vrPlayer.setTeleportOverride(true);
-                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                    Utils.message(Component.translatable("vivecraft.messages.teleportenabled"));
                 }
             }
 
@@ -1073,7 +1073,7 @@ public abstract class MCVR {
         File file1 = new File("customactionsets.txt");
 
         if (file1.exists()) {
-            System.out.println("Loading custom action set definitions...");
+            org.vivecraft.common.utils.Utils.logger.info("Loading custom action set definitions...");
             String s;
 
             try (BufferedReader bufferedreader = new BufferedReader(new FileReader(file1))) {
@@ -1081,14 +1081,14 @@ public abstract class MCVR {
                     String[] astring = s.split(":", 2);
 
                     if (astring.length < 2) {
-                        System.out.println("Invalid tokens: " + s);
+                        org.vivecraft.common.utils.Utils.logger.warn("Invalid tokens: " + s);
                     } else {
                         KeyMapping keymapping = this.findKeyBinding(astring[0]);
 
                         if (keymapping == null) {
-                            System.out.println("Unknown key binding: " + astring[0]);
+                            org.vivecraft.common.utils.Utils.logger.warn("Unknown key binding: " + astring[0]);
                         } else if (mod.getAllKeyBindings().contains(keymapping)) {
-                            System.out.println("NO! Don't touch Vivecraft bindings!");
+                            org.vivecraft.common.utils.Utils.logger.warn("NO! Don't touch Vivecraft bindings!");
                         } else {
                             VRInputActionSet vrinputactionset = null;
                             String s1 = astring[1].toLowerCase();
@@ -1107,7 +1107,7 @@ public abstract class MCVR {
                             }
 
                             if (vrinputactionset == null) {
-                                System.out.println("Unknown action set: " + astring[1]);
+                                org.vivecraft.common.utils.Utils.logger.warn("Unknown action set: {}", astring[1]);
                             } else {
                                 this.addActionParams(map, keymapping, "optional", "boolean", vrinputactionset);
                             }

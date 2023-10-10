@@ -1,6 +1,5 @@
 package org.vivecraft.server;
 
-import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -12,11 +11,11 @@ import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
-import org.slf4j.Logger;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packets.VivecraftDataPacket;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.server.config.ServerConfig;
 
@@ -26,8 +25,6 @@ public class ServerNetworking {
 
     // temporarily stores the packets from legacy clients to assemble a complete VrPlayerState
     private final static Map<UUID, Map<CommonNetworkHelper.PacketDiscriminators, FriendlyByteBuf>> legacyDataMap = new HashMap<>();
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void handlePacket(CommonNetworkHelper.PacketDiscriminators packetID, FriendlyByteBuf buffer, ServerGamePacketListenerImpl listener) {
         var playerEntity = listener.player;
@@ -50,7 +47,7 @@ public class ServerNetworking {
                 String clientVivecraftVersion = parts[0];
 
                 if (ServerConfig.debug.get()) {
-                    LOGGER.info("Vivecraft: player '{}' joined with {}", listener.player.getName().getString(), clientVivecraftVersion);
+                    Utils.logger.info("player '{}' joined with {}", listener.player.getName().getString(), clientVivecraftVersion);
                 }
 
                 if (parts.length >= 3) {
@@ -62,13 +59,13 @@ public class ServerNetworking {
                         && clientMinVersion <= CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION) {
                         vivePlayer.networkVersion = Math.min(clientMaxVersion, CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION);
                         if (ServerConfig.debug.get()) {
-                            LOGGER.info("{} networking supported, using version {}", listener.player.getName().getString(), vivePlayer.networkVersion);
+                            Utils.logger.info("{} networking supported, using version {}", listener.player.getName().getString(), vivePlayer.networkVersion);
                         }
                     } else {
                         // unsupported version, send notification, and disregard
                         listener.player.sendSystemMessage(Component.literal("Unsupported vivecraft version, VR features will not work"));
                         if (ServerConfig.debug.get()) {
-                            LOGGER.info("{} networking not supported. client range [{},{}], server range [{},{}]",
+                            Utils.logger.info("{} networking not supported. client range [{},{}], server range [{},{}]",
                                 listener.player.getName().getString(),
                                 clientMinVersion,
                                 clientMaxVersion,
@@ -81,7 +78,7 @@ public class ServerNetworking {
                     // client didn't send a version, so it's a legacy client
                     vivePlayer.networkVersion = -1;
                     if (ServerConfig.debug.get()) {
-                        LOGGER.info("{} using legacy networking", listener.player.getName().getString());
+                        Utils.logger.info("{} using legacy networking", listener.player.getName().getString());
                     }
                 }
 

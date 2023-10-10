@@ -256,14 +256,18 @@ public class VRPlayer {
     public void tick(LocalPlayer player, Minecraft mc, RandomSource rand) {
         if (((PlayerExtension) player).vivecraft$getInitFromServer()) {
             if (!this.initdone) {
-                System.out.println("<Debug info start>");
-                System.out.println("Room object: " + this);
-                System.out.println("Room origin: " + this.vrdata_world_pre.origin);
-                System.out.println("Hmd position room: " + this.vrdata_room_pre.hmd.getPosition());
-                System.out.println("Hmd position world: " + this.vrdata_world_pre.hmd.getPosition());
-                System.out.println("Hmd Projection Left: " + dh.vrRenderer.eyeproj[0]);
-                System.out.println("Hmd Projection Right: " + dh.vrRenderer.eyeproj[1]);
-                System.out.println("<Debug info end>");
+                org.vivecraft.common.utils.Utils.logger.info(
+                    """
+                    {}
+                        Hmd Projection Left:
+                    {}
+                        Hmd Projection Right:
+                    {}
+                    """,
+                    this,
+                    dh.vrRenderer.eyeproj[0],
+                    dh.vrRenderer.eyeproj[1]
+                );
                 this.initdone = true;
             }
 

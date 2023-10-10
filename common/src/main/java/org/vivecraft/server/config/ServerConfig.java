@@ -85,7 +85,7 @@ public class ServerConfig {
         if (listener == null) {
             listener = (action, path, incorrectValue, correctedValue) -> {
                 if (incorrectValue != null) {
-                    System.out.println("Corrected " + String.join(".", path) + ": was " + incorrectValue + ", is now " + correctedValue);
+                    org.vivecraft.common.utils.Utils.logger.info("Corrected {}: was {}, is now {}", String.join(".", path), incorrectValue, correctedValue);
                 }
             };
         }

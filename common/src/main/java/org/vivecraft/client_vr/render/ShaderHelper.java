@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL43C;
+import org.vivecraft.common.utils.Utils;
 
 import java.util.List;
 
@@ -37,10 +38,14 @@ public class ShaderHelper {
         int i = GL11.glGetError();
 
         if (i != 0) {
-            String s = "";
-            System.out.println("########## GL ERROR ##########");
-            System.out.println("@ " + par1Str);
-            System.out.println(i + ": " + s);
+            Utils.logger.error(
+                """
+                ########## GL ERROR ##########
+                "@ %s"
+                "%d"
+                """
+                .formatted(par1Str, i)
+            );
         }
 
         return i;
@@ -91,12 +96,12 @@ public class ShaderHelper {
 
             String log = GL20C.glGetShaderInfoLog(i);
             if (!log.isEmpty()) {
-                System.out.println("Shader compilation log: " + log);
+                Utils.logger.info("Shader compilation log: {}", log);
                 return 0;
             }
             String log2 = GL20C.glGetShaderInfoLog(j);
             if (!log2.isEmpty()) {
-                System.out.println("Shader compilation log: " + log2);
+                Utils.logger.info("Shader compilation log: {}", log2);
                 return 0;
             } else {
                 return k;

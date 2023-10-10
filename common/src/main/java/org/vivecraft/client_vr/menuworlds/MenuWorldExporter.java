@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 
 import java.io.*;
 import java.util.*;
@@ -223,7 +223,7 @@ public class MenuWorldExporter {
         }
 
         if (dataVersion > SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
-            VRSettings.logger.warn("Data version is newer than current, this menu world may not load correctly.");
+            Utils.logger.warn("Data version is newer than current, this menu world may not load correctly.");
         }
 
         OptionalLong dimFixedTime = OptionalLong.empty();

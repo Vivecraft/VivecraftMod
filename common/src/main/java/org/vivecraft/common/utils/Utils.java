@@ -11,7 +11,12 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
 public class Utils {
 
     public static AABB getEntityHeadHitbox(Entity entity, double inflate) {
@@ -53,5 +58,34 @@ public class Utils {
             return new AABB(headpos.subtract(headsize, headsize, headsize), headpos.add(headsize, headsize, headsize)).inflate(inflate * 0.25).expandTowards(headpos.subtract(entity.position()).scale(inflate));
         }
         return null;
+    }
+
+    /**
+     * Vivecraft's logger for printing to console.
+     */
+    public static final Logger logger = LoggerFactory.getLogger("Vivecraft");
+
+    public static void printStackIfContainsClass(String className) {
+        StackTraceElement[] astacktraceelement = Thread.currentThread().getStackTrace();
+        boolean flag = false;
+
+        for (StackTraceElement stacktraceelement : astacktraceelement) {
+            if (stacktraceelement.getClassName().equals(className)) {
+                flag = true;
+                break;
+            }
+        }
+
+        if (flag) {
+            Thread.dumpStack();
+        }
+    }
+
+    public static long microTime() {
+        return System.nanoTime() / 1000L;
+    }
+
+    public static long milliTime() {
+        return System.nanoTime() / 1000000L;
     }
 }

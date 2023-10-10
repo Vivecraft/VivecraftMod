@@ -69,14 +69,4 @@ public class ClientDataHolderVR {
         }
         return INSTANCE;
     }
-
-    public void printChatMessage(String string) {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void print(String string) {
-        string = string.replace("\n", "\n[Minecrift] ");
-        System.out.println("[Minecrift] " + string);
-    }
 }

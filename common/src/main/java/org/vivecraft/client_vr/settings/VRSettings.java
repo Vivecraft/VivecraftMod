@@ -14,8 +14,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -25,6 +23,7 @@ import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.settings.profile.ProfileManager;
 import org.vivecraft.client_vr.settings.profile.ProfileReader;
 import org.vivecraft.client_vr.settings.profile.ProfileWriter;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.common.utils.math.Angle;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
@@ -43,7 +42,6 @@ import java.util.stream.Stream;
 
 public class VRSettings {
     public static final int VERSION = 2;
-    public static final Logger logger = LogManager.getLogger();
     public static VRSettings inst;
     public JsonObject defaults = new JsonObject();
     public static final int UNKNOWN_VERSION = 0;
@@ -577,7 +575,7 @@ public class VRSettings {
         }
 
         // If we get here, the value wasn't interpreted
-        logger.warn("Don't know how to load VR option " + name + " with type " + type.getSimpleName());
+        Utils.logger.warn("Don't know how to load VR option {} with type {}", name, type.getSimpleName());
         return null;
     }
 
@@ -623,7 +621,7 @@ public class VRSettings {
         }
 
         // If we get here, the object wasn't interpreted
-        logger.warn("Don't know how to save VR option " + name + " with type " + type.getSimpleName());
+        Utils.logger.warn("Don't know how to save VR option {} with type {}", name, type.getSimpleName());
         return null;
     }
 
@@ -697,7 +695,7 @@ public class VRSettings {
         }
 
         // If we get here, the value wasn't interpreted
-        logger.warn("Don't know how to load default VR option " + name + " with type " + type.getSimpleName());
+        Utils.logger.warn("Don't know how to load default VR option {} with type {}", name, type.getSimpleName());
         return null;
     }
 
@@ -738,7 +736,7 @@ public class VRSettings {
                 field.set(this, obj);
             }
         } catch (Exception ex) {
-            logger.warn("Failed to load default VR option: " + option);
+            Utils.logger.warn("Failed to load default VR option: {}", option);
             ex.printStackTrace();
         }
     }
@@ -790,7 +788,7 @@ public class VRSettings {
                         field.set(this, obj);
                     }
                 } catch (Exception var7) {
-                    logger.warn("Skipping bad VR option: " + var2);
+                    Utils.logger.warn("Skipping bad VR option: {}", var2);
                     var7.printStackTrace();
                 }
             }
@@ -798,7 +796,7 @@ public class VRSettings {
             preservedSettingMap = optionsVRReader.getData();
             optionsVRReader.close();
         } catch (Exception var8) {
-            logger.warn("Failed to load VR options!");
+            Utils.logger.warn("Failed to load VR options!");
             var8.printStackTrace();
         }
     }
@@ -846,14 +844,14 @@ public class VRSettings {
                         var5.println(name + ":" + value);
                     }
                 } catch (Exception ex) {
-                    logger.warn("Failed to save VR option: " + name);
+                    Utils.logger.warn("Failed to save VR option: {}", name);
                     ex.printStackTrace();
                 }
             }
 
             var5.close();
         } catch (Exception var3) {
-            logger.warn("Failed to save VR options: " + var3.getMessage());
+            Utils.logger.warn("Failed to save VR options: {}", var3.getMessage());
             var3.printStackTrace();
         }
     }
@@ -901,7 +899,7 @@ public class VRSettings {
                 return var4 + obj.toString();
             }
         } catch (Exception ex) {
-            System.out.println("Failed to get VR option display string: " + par1EnumOptions);
+            Utils.logger.info("Failed to get VR option display string: {}", par1EnumOptions);
             ex.printStackTrace();
         }
 
@@ -923,7 +921,7 @@ public class VRSettings {
 
             return Objects.requireNonNullElse(par1EnumOptions.getOptionFloatValue(value), value);
         } catch (Exception ex) {
-            System.out.println("Failed to get VR option float value: " + par1EnumOptions);
+            Utils.logger.info("Failed to get VR option float value: {}", par1EnumOptions);
             ex.printStackTrace();
         }
 
@@ -950,14 +948,14 @@ public class VRSettings {
             } else if (OptionEnum.class.isAssignableFrom(type)) {
                 field.set(this, ((OptionEnum<?>) field.get(this)).getNext());
             } else {
-                logger.warn("Don't know how to set VR option " + mapping.getMiddle() + " with type " + type.getSimpleName());
+                Utils.logger.warn("Don't know how to set VR option {} with type {}", mapping.getMiddle(), type.getSimpleName());
                 return;
             }
 
             par1EnumOptions.onOptionChange();
             this.saveOptions();
         } catch (Exception ex) {
-            System.out.println("Failed to set VR option: " + par1EnumOptions);
+            Utils.logger.info("Failed to set VR option: {}", par1EnumOptions);
             ex.printStackTrace();
         }
     }
@@ -987,7 +985,7 @@ public class VRSettings {
             par1EnumOptions.onOptionChange();
             this.saveOptions();
         } catch (Exception ex) {
-            System.out.println("Failed to set VR option float value: " + par1EnumOptions);
+            Utils.logger.error("Failed to set VR option float value: {}", par1EnumOptions);
             ex.printStackTrace();
         }
     }

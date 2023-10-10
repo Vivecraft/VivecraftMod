@@ -2,7 +2,6 @@ package org.vivecraft.mixin.client_vr;
 
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.shaders.ProgramManager;
@@ -347,9 +346,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
             this.profiler.push("setupRenderConfiguration");
             try {
-                this.vivecraft$checkGLError("pre render setup ");
+                VRPassHelper.checkGLError("pre render setup");
                 ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
-                this.vivecraft$checkGLError("post render setup ");
+                VRPassHelper.checkGLError("post render setup");
             } catch (RenderConfigException renderConfigException) {
                 vivecraft$switchVRState(false);
                 VRState.destroyVR(true);
@@ -430,7 +429,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 guiGraphics.flush();
             }
             this.profiler.pop();
-            this.vivecraft$checkGLError("post 2d ");
+            VRPassHelper.checkGLError("post 2d");
 
             // render the different vr passes
             List<RenderPass> list = ClientDataHolderVR.getInstance().vrRenderer.getRenderPasses();
@@ -489,10 +488,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             try {
                 ClientDataHolderVR.getInstance().vrRenderer.endFrame();
             } catch (RenderConfigException exception) {
-                VRSettings.logger.error(exception.toString());
+                org.vivecraft.common.utils.Utils.logger.error(exception.toString());
             }
             this.profiler.pop();
-            this.vivecraft$checkGLError("post submit ");
+            VRPassHelper.checkGLError("post submit");
         }
     }
 
@@ -504,7 +503,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             this.profiler.push("mirror");
             this.vivecraft$copyToMirror();
             this.vivecraft$drawNotifyMirror();
-            this.vivecraft$checkGLError("post-mirror ");
+            VRPassHelper.checkGLError("post-mirror");
         }
     }
 
@@ -685,8 +684,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     final File file2 = new File(file1, "world" + i + ".mmw");
 
                     if (!file2.exists()) {
-                        VRSettings.logger.info("Exporting world... area size: " + size);
-                        VRSettings.logger.info("Saving to " + file2.getAbsolutePath());
+                        org.vivecraft.common.utils.Utils.logger.info("Exporting world... area size: " + size);
+                        org.vivecraft.common.utils.Utils.logger.info("Saving to " + file2.getAbsolutePath());
 
                         if (isLocalServer()) {
                             final Level level = getSingleplayerServer().getLevel(player.level().dimension());
@@ -909,14 +908,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             this.renderFpsMeter(guiGraphics, this.fpsPieResults);
             guiGraphics.flush();
             this.profiler.pop();
-        }
-    }
-
-    @Unique
-    private void vivecraft$checkGLError(String string) {
-        // TODO optifine
-        if (GlStateManager._getError() != 0) {
-            System.err.println(string);
         }
     }
 

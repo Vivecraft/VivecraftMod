@@ -236,11 +236,11 @@ public class MCOpenVR extends MCVR {
             }
 
             if (OpenVR.VRInput == null) {
-                System.out.println("Controller input not available. Forcing seated mode.");
+                org.vivecraft.common.utils.Utils.logger.info("Controller input not available. Forcing seated mode.");
                 this.dh.vrSettings.seated = true;
             }
 
-            System.out.println("OpenVR initialized & VR connected.");
+            org.vivecraft.common.utils.Utils.logger.info("OpenVR initialized & VR connected.");
             this.deviceVelocity = new Vec3[64];
 
             for (int i = 0; i < this.poseMatrices.length; ++i) {
@@ -252,36 +252,36 @@ public class MCOpenVR extends MCVR {
 
             if (ClientDataHolderVR.katvr) {
                 try {
-                    System.out.println("Waiting for KATVR....");
+                    org.vivecraft.common.utils.Utils.logger.info("Waiting for KATVR....");
                     Utils.unpackNatives("katvr");
                     NativeLibrary.addSearchPath("WalkerBase.dll", (new File("openvr/katvr")).getAbsolutePath());
                     jkatvr.Init(1);
                     jkatvr.Launch();
 
                     if (jkatvr.CheckForLaunch()) {
-                        System.out.println("KATVR Loaded");
+                        org.vivecraft.common.utils.Utils.logger.info("KATVR Loaded");
                     } else {
-                        System.out.println("KATVR Failed to load");
+                        org.vivecraft.common.utils.Utils.logger.warn("KATVR Failed to load");
                     }
                 } catch (Exception exception1) {
-                    System.out.println("KATVR crashed: " + exception1.getMessage());
+                    org.vivecraft.common.utils.Utils.logger.error("KATVR crashed: {}", exception1.getMessage());
                 }
             }
 
             if (ClientDataHolderVR.infinadeck) {
                 try {
-                    System.out.println("Waiting for Infinadeck....");
+                    org.vivecraft.common.utils.Utils.logger.info("Waiting for Infinadeck....");
                     Utils.unpackNatives("infinadeck");
                     NativeLibrary.addSearchPath("InfinadeckAPI.dll", (new File("openvr/infinadeck")).getAbsolutePath());
 
                     if (jinfinadeck.InitConnection()) {
                         jinfinadeck.CheckConnection();
-                        System.out.println("Infinadeck Loaded");
+                        org.vivecraft.common.utils.Utils.logger.info("Infinadeck Loaded");
                     } else {
-                        System.out.println("Infinadeck Failed to load");
+                        org.vivecraft.common.utils.Utils.logger.warn("Infinadeck Failed to load");
                     }
                 } catch (Exception exception) {
-                    System.out.println("Infinadeck crashed: " + exception.getMessage());
+                    org.vivecraft.common.utils.Utils.logger.error("Infinadeck crashed: {}", exception.getMessage());
                 }
             }
 
@@ -694,7 +694,7 @@ public class MCOpenVR extends MCVR {
         }
 
         if (OpenVR.VRSystem != null && !this.isError()) {
-            System.out.println("OpenVR System Initialized OK.");
+            org.vivecraft.common.utils.Utils.logger.info("OpenVR System Initialized OK.");
             this.hmdTrackedDevicePoses = TrackedDevicePose.calloc(64);
             this.poseMatrices = new Matrix4f[64];
 
@@ -743,10 +743,10 @@ public class MCOpenVR extends MCVR {
             VRCompositor_SetTrackingSpace(1);
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 var pointer = stack.calloc(20);
-                System.out.println("TrackingSpace: " + VRCompositor_GetTrackingSpace());
+                org.vivecraft.common.utils.Utils.logger.info("TrackingSpace: {}", VRCompositor_GetTrackingSpace());
                 VRSystem_GetStringTrackedDeviceProperty(0, 1005, pointer, this.hmdErrorStore);
                 String s = memUTF8NullTerminated(pointer);
-                System.out.println("Device manufacturer is: " + s);
+                org.vivecraft.common.utils.Utils.logger.info("Device manufacturer is: {}", s);
                 this.detectedHardware = HardwareType.fromManufacturer(s);
             }
             this.dh.vrSettings.loadOptions();
@@ -754,7 +754,7 @@ public class MCOpenVR extends MCVR {
         }
 
         if (OpenVR.VRCompositor == null) {
-            System.out.println("Skipping VR Compositor...");
+            org.vivecraft.common.utils.Utils.logger.info("Skipping VR Compositor...");
         }
 
         this.texBounds.uMax(1.0F);
@@ -767,7 +767,7 @@ public class MCOpenVR extends MCVR {
         this.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
         this.texType1.eType(VR.ETextureType_TextureType_OpenGL);
         this.texType1.handle(-1);
-        System.out.println("OpenVR Compositor initialized OK.");
+        org.vivecraft.common.utils.Utils.logger.info("OpenVR Compositor initialized OK.");
     }
 
     private void installApplicationManifest(boolean force) throws RenderConfigException {
@@ -786,15 +786,15 @@ public class MCOpenVR extends MCVR {
                 Map map = (new Gson()).fromJson(new FileReader(file1), Map.class);
                 s = ((Map) ((List) map.get("applications")).get(0)).get("app_key").toString();
             } catch (Exception exception1) {
-                System.out.println("Error reading appkey from manifest");
+                org.vivecraft.common.utils.Utils.logger.error("Error reading appkey from manifest");
                 exception1.printStackTrace();
                 return;
             }
 
-            System.out.println("Appkey: " + s);
+            org.vivecraft.common.utils.Utils.logger.info("Appkey: {}", s);
 
             if (!force && VRApplications_IsApplicationInstalled(s)) {
-                System.out.println("Application manifest already installed");
+                org.vivecraft.common.utils.Utils.logger.info("Application manifest already installed");
             } else {
                 int i = VRApplications_AddApplicationManifest(file1.getAbsolutePath(), true);
 
@@ -812,12 +812,12 @@ public class MCOpenVR extends MCVR {
                     }
 
                     String error = VRApplications_GetApplicationsErrorNameFromEnum(i) + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
-                    System.out.println("Failed to install application manifest: " + error + file1.getAbsolutePath());
+                    org.vivecraft.common.utils.Utils.logger.error("Failed to install application manifest: {}{}", error, file1.getAbsolutePath());
 
                     throw new RenderConfigException("Failed to install application manifest", Component.empty().append(error).append(pathFormatted));
                 }
 
-                System.out.println("Application manifest installed successfully");
+                org.vivecraft.common.utils.Utils.logger.info("Application manifest installed successfully");
             }
 
             int j;
@@ -826,7 +826,7 @@ public class MCOpenVR extends MCVR {
                 String s1 = ManagementFactory.getRuntimeMXBean().getName();
                 j = Integer.parseInt(s1.split("@")[0]);
             } catch (Exception exception) {
-                System.out.println("Error getting process id");
+                org.vivecraft.common.utils.Utils.logger.error("Error getting process id");
                 exception.printStackTrace();
                 return;
             }
@@ -834,9 +834,9 @@ public class MCOpenVR extends MCVR {
             int k = VRApplications_IdentifyApplication(j, s);
 
             if (k != 0) {
-                System.out.println("Failed to identify application: " + VRApplications_GetApplicationsErrorNameFromEnum(k));
+                org.vivecraft.common.utils.Utils.logger.warn("Failed to identify application: {}", VRApplications_GetApplicationsErrorNameFromEnum(k));
             } else {
-                System.out.println("Application identified successfully");
+                org.vivecraft.common.utils.Utils.logger.info("Application identified successfully");
             }
         }
     }
@@ -1043,7 +1043,7 @@ public class MCOpenVR extends MCVR {
             int i = VRCompositor_WaitGetPoses(this.hmdTrackedDevicePoses, null);
 
             if (i > 0) {
-                System.out.println("Compositor Error: GetPoseError " + OpenVRStereoRenderer.getCompostiorError(i));
+                org.vivecraft.common.utils.Utils.logger.error("Compositor Error: GetPoseError {}", OpenVRStereoRenderer.getCompostiorError(i));
             }
 
             if (i == 101) {
