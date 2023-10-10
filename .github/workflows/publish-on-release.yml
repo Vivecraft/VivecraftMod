@@ -199,7 +199,7 @@ jobs:
           version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
 
           loaders: "${{ steps.version.outputs.LOADERS_FABRIC }}"
-          game-versions: "${{ steps.version.outputs.FABRIC_MC_VERSIONS }}"
+          #game-versions: "${{ steps.version.outputs.FABRIC_MC_VERSIONS }}"
 
       - name: publish forge
         if: steps.assets.outputs.FORGE_FILE_PATH != ''
@@ -219,7 +219,7 @@ jobs:
           version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
 
           loaders: "${{ steps.version.outputs.LOADERS_FORGE}}"
-          game-versions: "${{ steps.version.outputs.FORGE_MC_VERSIONS }}"
+          #game-versions: "${{ steps.version.outputs.FORGE_MC_VERSIONS }}"
 
       - name: publish quilt
         if: steps.assets.outputs.QUILT_FILE_PATH != ''
@@ -239,7 +239,7 @@ jobs:
           version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
 
           loaders: "${{ steps.version.outputs.LOADERS_QUILT}}"
-          game-versions: "${{ steps.version.outputs.QUILT_MC_VERSIONS }}"
+          #game-versions: "${{ steps.version.outputs.QUILT_MC_VERSIONS }}"
 
       # update forge versions json
       - name: checkout repo forge-versions
