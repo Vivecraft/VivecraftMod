@@ -113,7 +113,33 @@ public class ServerUtil {
                 argument = StringArgumentType.string();
             }
 
-            if (!(setting.get() instanceof List)) {
+            if (setting instanceof ConfigBuilder.InListValue<?> inListValue) {
+                dispatcher.register(Commands.literal("vivecraft-server-config")
+                    .requires(source -> source.hasPermission(4)).then(
+                        Commands.literal(inListValue.getPath()).then(
+                            Commands.literal("set").then(
+                                Commands.argument(argumentName, argument)
+                                    .suggests((context, builder) -> {
+                                        for (var value : inListValue.getValidValues()) {
+                                            builder.suggest(value.toString());
+                                        }
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(context -> {
+                                        try {
+                                            Object newValue = context.getArgument(argumentName, clazz);
+                                            setting.set(newValue);
+                                            context.getSource().sendSystemMessage(Component.literal("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"));
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                        return 1;
+                                    })
+                            )
+                        )
+                    )
+                );
+            } else if (!(setting.get() instanceof List)) {
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
                         Commands.literal(setting.getPath()).then(
@@ -131,7 +157,8 @@ public class ServerUtil {
                                     })
                             )
                         )
-                    ));
+                    )
+                );
             } else {
                 ConfigBuilder.ConfigValue<List<? extends String>> listConfig = setting;
                 dispatcher.register(Commands.literal("vivecraft-server-config")
@@ -156,7 +183,8 @@ public class ServerUtil {
                                     })
                             )
                         )
-                    ));
+                    )
+                );
                 dispatcher.register(Commands.literal("vivecraft-server-config")
                     .requires(source -> source.hasPermission(4)).then(
                         Commands.literal(setting.getPath()).then(
@@ -179,7 +207,8 @@ public class ServerUtil {
                                     })
                             )
                         )
-                    ));
+                    )
+                );
             }
             dispatcher.register(Commands.literal("vivecraft-server-config")
                 .requires(source -> source.hasPermission(4)).then(
@@ -191,7 +220,8 @@ public class ServerUtil {
                                 return 1;
                             })
                     )
-                ));
+                )
+            );
             dispatcher.register(Commands.literal("vivecraft-server-config")
                 .requires(source -> source.hasPermission(4)).then(
                     Commands.literal(setting.getPath())
@@ -199,7 +229,8 @@ public class ServerUtil {
                             context.getSource().sendSystemMessage(Component.literal("§a[" + setting.getPath() + "]§r is set to '" + setting.get() + "'"));
                             return 1;
                         })
-                ));
+                )
+            );
         }
     }
 }

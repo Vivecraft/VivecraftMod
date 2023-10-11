@@ -4,7 +4,7 @@ run-name: Posting jars on Curseforge and Modrinth
 
 on:
   release:
-    types: [published]
+    types: [ published ]
 
 jobs:
   publish:
@@ -25,7 +25,7 @@ jobs:
             if [ -n "${filePaths[i]}" ]; then
               curl -L -o "./${fileNames[i]}" "${filePaths[i]}"
             fi
-
+          
             if [[ "${fileNames[i]}" == *"fabric"* ]]; then
               echo "FABRIC_FILE_NAME=${fileNames[i]}" >> $GITHUB_OUTPUT
               echo "FABRIC_FILE_PATH=./${fileNames[i]}" >> $GITHUB_OUTPUT
@@ -48,6 +48,33 @@ jobs:
         id: version
         shell: bash
         run: |
+          parse_fabric () {
+            unzip -j "$1" "$2" -d ./fabric
+            deps=false
+            bracket=false
+            parsedVersion=""
+            depReg='\s+"depends"'
+            minecraftVersionReg='\s*?"minecraft":\s*?(.+?)*'
+            wordReg="(.*?),*"
+            bracketReg="(.*])"
+            while read -r; do
+              if [[ $REPLY =~ $depReg ]]; then
+              deps=true
+              elif [[ $REPLY =~ $minecraftVersionReg && $deps == "true" ]]; then
+                if [[ ${BASH_REMATCH[1]} =~ $wordReg ]]; then
+                    parsedVersion=${BASH_REMATCH[1]}
+                    if [[ ${BASH_REMATCH[1]} == "[" ]]; then
+                      bracket=true
+                    fi
+                fi
+              elif [[ $bracket == "true" && $REPLY != *"]"* ]]; then
+                parsedVersion=${parsedVersion}$REPLY
+              elif  [[ $bracket == "true" && $REPLY =~ $bracketReg ]]; then
+                parsedVersion=${parsedVersion}${BASH_REMATCH[1]}
+                bracket=false
+              fi
+            done < ./fabric/$2
+          }
           file=""
           if [ -n "${{ steps.assets.outputs.FABRIC_FILE_NAME }}" ]; then
             file="${{ steps.assets.outputs.FABRIC_FILE_NAME }}"
@@ -57,7 +84,7 @@ jobs:
             file="${{ steps.assets.outputs.QUILT_FILE_NAME }}"
           fi
           echo $file
-
+          
           # save the current IFS value
           OLDIFS=$IFS
           # set the IFS to the delimiter ("-")
@@ -66,24 +93,24 @@ jobs:
           array=($file)
           # restore the IFS value
           IFS=$OLDIFS
-
+          
           # alphas or beats should be included in the version
           if [ ${array[3]:0:1} = "a" ] || [ ${array[3]:0:1} = "b" ]; then
             array[2]=${array[2]}-${array[3]}
           fi
-
+          
           release_type="release"
           if [ ${array[3]:0:1} = "a" ]; then
             release_type="alpha"
           elif [ ${array[3]:0:1} = "b" ]; then
             release_type="beta"
           fi
-
+          
           echo release type: ${release_type}
           echo "RELEASE_TYPE=${release_type}" >> $GITHUB_OUTPUT
-
+          
           mc_version=${array[1]}
-
+          
           # mod loaders
           loaders_fabric=fabric
           # check if there is a quilt specific jar
@@ -93,19 +120,41 @@ jobs:
             loaders_quilt="quilt"
           fi
           loaders_forge="forge"
-
-          echo mc version: $mc_version
-          echo "MC_VERSION=$mc_version" >> $GITHUB_OUTPUT
-
+          
+          if [ -n "${{ steps.assets.outputs.FABRIC_FILE_NAME }}" ]; then
+            parse_fabric ${{ steps.assets.outputs.FABRIC_FILE_NAME }} "fabric.mod.json"
+            echo "FABRIC_MC_VERSIONS="${parsedVersion}"" >> $GITHUB_OUTPUT
+          fi
+          if [ -n "${{ steps.assets.outputs.FORGE_FILE_NAME }}" ]; then
+            unzip -j "${{ steps.assets.outputs.FORGE_FILE_NAME }}" "META-INF/mods.toml" -d ./forge
+            minecraftDep=false
+            minecraftIdReg='modId\s+=\s+"minecraft"'
+            versionRangeReg='versionRange\s+=\s+"(.+?)"'
+            while read -r; do
+              if [[ $REPLY =~ $minecraftIdReg ]]; then
+                minecraftDep=true
+                echo $REPLY
+              elif [[ $REPLY =~ $versionRangeReg && $minecraftDep == "true" ]]; then
+                echo "FORGE_MC_VERSIONS="${BASH_REMATCH[1]}"" >> $GITHUB_OUTPUT
+                echo ${BASH_REMATCH[0]}
+                echo ${BASH_REMATCH[1]}
+              fi
+            done < ./forge/mods.toml
+          fi
+          if [ -n "${{ steps.assets.outputs.QUILT_FILE_NAME }}" ]; then
+            parse_fabric ${{ steps.assets.outputs.QUILT_FILE_NAME }} "quilt.mod.json"
+            echo "QUILT_MC_VERSIONS="${parsedVersion}"" >> $GITHUB_OUTPUT
+          fi
+          
           echo loaders fabric: ${loaders_fabric}
           echo "LOADERS_FABRIC=${loaders_fabric}" >> $GITHUB_OUTPUT
-
+          
           echo loaders forge: ${loaders_forge}
           echo "LOADERS_FORGE=${loaders_forge}" >> $GITHUB_OUTPUT
-
+          
           echo loaders quilt: ${loaders_quilt}
           echo "LOADERS_QUILT=${loaders_quilt}" >> $GITHUB_OUTPUT
-
+          
           mod_name="${array[0]^} $mc_version-${array[2]}"
           echo file name fabric: "${mod_name}-fabric"
           echo "VERSION_NAME_FABRIC=${mod_name}-fabric" >> $GITHUB_OUTPUT
@@ -113,18 +162,24 @@ jobs:
           echo "VERSION_NAME_FORGE=${mod_name}-forge" >> $GITHUB_OUTPUT
           echo file name quilt: "${mod_name}-quilt"
           echo "VERSION_NAME_QUILT=${mod_name}-quilt" >> $GITHUB_OUTPUT
-
+          
           # modrinth mod versions
           base_version="$mc_version-${array[2]}"
-          echo md version fabric: "${base_version}-fabric"
-          echo "MD_VERSION_FABRIC=${base_version}-fabric" >> $GITHUB_OUTPUT
-          echo md version forge: "${base_version}-forge"
-          echo "MD_VERSION_FORGE=${base_version}-forge" >> $GITHUB_OUTPUT
-          echo md version fquilt: "${base_version}-quilt"
-          echo "MD_VERSION_QUILT=${base_version}-quilt" >> $GITHUB_OUTPUT
+          echo "MOD_VERSION_FABRIC=${base_version}-fabric" >> $GITHUB_OUTPUT
+          echo "MOD_VERSION_FORGE=${base_version}-forge" >> $GITHUB_OUTPUT
+          echo "MOD_VERSION_QUILT=${base_version}-quilt" >> $GITHUB_OUTPUT
+          echo "MOD_VERSION=${base_version}" >> $GITHUB_OUTPUT
 
-      - run: echo Minecraft target version is ${{ steps.version.outputs.MC_VERSION }}
       - run: echo release type is ${{ steps.version.outputs.RELEASE_TYPE }}
+
+      - run: echo fabric mc versions are ${{ steps.version.outputs.FABRIC_MC_VERSIONS }}
+      - run: echo fabric mod version ${{ steps.version.outputs.MOD_VERSION_FABRIC }}
+
+      - run: echo forge mc versions are ${{ steps.version.outputs.FORGE_MC_VERSIONS }}
+      - run: echo forge mod version ${{ steps.version.outputs.MOD_VERSION_FORGE }}
+
+      - run: echo quilt mc versions are ${{ steps.version.outputs.QUILT_MC_VERSIONS }}
+      - run: echo quilt mod version ${{ steps.version.outputs.MOD_VERSION_QUILT }}
 
       - name: publish fabric
         if: steps.assets.outputs.FABRIC_FILE_PATH != ''
@@ -140,11 +195,11 @@ jobs:
           files-primary: ${{ steps.assets.outputs.FABRIC_FILE_PATH }}
 
           name: "${{ steps.version.outputs.VERSION_NAME_FABRIC }}"
-          version: "${{ steps.version.outputs.MD_VERSION_FABRIC }}"
+          version: "${{ steps.version.outputs.MOD_VERSION_FABRIC }}"
           version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
 
           loaders: "${{ steps.version.outputs.LOADERS_FABRIC }}"
-          game-versions: "${{ steps.version.outputs.MC_VERSION }}"
+          #game-versions: "${{ steps.version.outputs.FABRIC_MC_VERSIONS }}"
 
       - name: publish forge
         if: steps.assets.outputs.FORGE_FILE_PATH != ''
@@ -160,11 +215,11 @@ jobs:
           files-primary: ${{ steps.assets.outputs.FORGE_FILE_PATH }}
 
           name: "${{ steps.version.outputs.VERSION_NAME_FORGE }}"
-          version: "${{ steps.version.outputs.MD_VERSION_FORGE }}"
+          version: "${{ steps.version.outputs.MOD_VERSION_FORGE }}"
           version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
 
           loaders: "${{ steps.version.outputs.LOADERS_FORGE}}"
-          game-versions: "${{ steps.version.outputs.MC_VERSION }}"
+          #game-versions: "${{ steps.version.outputs.FORGE_MC_VERSIONS }}"
 
       - name: publish quilt
         if: steps.assets.outputs.QUILT_FILE_PATH != ''
@@ -180,8 +235,50 @@ jobs:
           files-primary: ${{ steps.assets.outputs.QUILT_FILE_PATH }}
 
           name: "${{ steps.version.outputs.VERSION_NAME_QUILT }}"
-          version: "${{ steps.version.outputs.MD_VERSION_QUILT}}"
+          version: "${{ steps.version.outputs.MOD_VERSION_QUILT}}"
           version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
 
           loaders: "${{ steps.version.outputs.LOADERS_QUILT}}"
-          game-versions: "${{ steps.version.outputs.MC_VERSION }}"
+          #game-versions: "${{ steps.version.outputs.QUILT_MC_VERSIONS }}"
+
+      # update forge versions json
+      - name: checkout repo forge-versions
+        if: steps.assets.outputs.FORGE_FILE_PATH != ''
+        uses: actions/checkout@v4
+        with:
+          ref: 'forge-versions'
+
+      - name: setup python
+        if: steps.assets.outputs.FORGE_FILE_PATH != ''
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: execute py script to update json
+        if: steps.assets.outputs.FORGE_FILE_PATH != ''
+        run: |
+          python -c "
+          import sys, json
+          print(sys.argv)
+          mc_version = sys.argv[1]
+          mod_version = sys.argv[2]
+          release_type = sys.argv[3]
+          jsonContent = {}
+          with open('forge_updates.json', 'r') as infile:
+            jsonContent = json.load(infile)
+          for str in mc_version.split(','):
+            version = str.strip('[]\" ')
+            if version != '':
+              jsonContent['promos'][version + '-latest'] = mod_version
+              if release_type == 'release':
+                jsonContent['promos'][version + '-recommended'] = mod_version
+          print(json.dumps(jsonContent, indent='\t'))
+          with open('forge_updates.json', 'w') as outfile:
+            outfile.write(json.dumps(jsonContent, indent='\t'))
+          " "${{ steps.version.outputs.FORGE_MC_VERSIONS }}" "${{ steps.version.outputs.MOD_VERSION }}" "${{ steps.version.outputs.RELEASE_TYPE }}"
+      - name: push new update json
+        if: steps.assets.outputs.FORGE_FILE_PATH != ''
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update ${{ steps.version.outputs.FORGE_MC_VERSIONS }} to ${{ steps.version.outputs.MOD_VERSION }}'
+          push: true
