@@ -192,7 +192,7 @@ jobs:
           curseforge-id: 667903
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
-          files-primary: ${{ steps.assets.outputs.FABRIC_FILE_PATH }}
+          files: ${{ steps.assets.outputs.FABRIC_FILE_PATH }}
 
           name: "${{ steps.version.outputs.VERSION_NAME_FABRIC }}"
           version: "${{ steps.version.outputs.MOD_VERSION_FABRIC }}"
@@ -212,7 +212,7 @@ jobs:
           curseforge-id: 667903
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
-          files-primary: ${{ steps.assets.outputs.FORGE_FILE_PATH }}
+          files: ${{ steps.assets.outputs.FORGE_FILE_PATH }}
 
           name: "${{ steps.version.outputs.VERSION_NAME_FORGE }}"
           version: "${{ steps.version.outputs.MOD_VERSION_FORGE }}"
@@ -232,7 +232,7 @@ jobs:
           curseforge-id: 667903
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
-          files-primary: ${{ steps.assets.outputs.QUILT_FILE_PATH }}
+          files: ${{ steps.assets.outputs.QUILT_FILE_PATH }}
 
           name: "${{ steps.version.outputs.VERSION_NAME_QUILT }}"
           version: "${{ steps.version.outputs.MOD_VERSION_QUILT}}"
