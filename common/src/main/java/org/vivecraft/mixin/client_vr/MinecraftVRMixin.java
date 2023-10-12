@@ -362,6 +362,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             this.mainRenderTarget.bindWrite(true);
 
             // draw screen/gui to buffer
+            // push pose so we can pop it later
             RenderSystem.getModelViewStack().pushPose();
             ((GameRendererExtension) this.gameRenderer).vivecraft$setShouldDrawScreen(true);
             // only draw the gui when the level was rendered once, since some mods expect that
@@ -396,6 +397,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             vivecraft$drawProfiler();
             // reset that, do not draw it again on something else
             fpsPieResults = null;
+
+            // pop pose that we pushed before the gui
+            RenderSystem.getModelViewStack().popPose();
+            RenderSystem.applyModelViewMatrix();
 
             // generate mipmaps
             // TODO: does this do anything?

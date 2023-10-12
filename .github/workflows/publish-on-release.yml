@@ -183,7 +183,7 @@ jobs:
 
       - name: publish fabric
         if: steps.assets.outputs.FABRIC_FILE_PATH != ''
-        uses: Kir-Antipov/mc-publish@v3.2
+        uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
@@ -203,7 +203,7 @@ jobs:
 
       - name: publish forge
         if: steps.assets.outputs.FORGE_FILE_PATH != ''
-        uses: Kir-Antipov/mc-publish@v3.2
+        uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
@@ -223,7 +223,7 @@ jobs:
 
       - name: publish quilt
         if: steps.assets.outputs.QUILT_FILE_PATH != ''
-        uses: Kir-Antipov/mc-publish@v3.2
+        uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: wGoQDPN5
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
