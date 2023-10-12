@@ -438,8 +438,8 @@ public class MenuWorldExporter {
 
                 boolean hasPrecipitation = dis.readBoolean();
                 float temperature = dis.readFloat();
-                builder.temperature(temperature);
                 builder.precipitation(hasPrecipitation ? (temperature < 0.15f ? Biome.Precipitation.SNOW : Biome.Precipitation.RAIN) : Biome.Precipitation.NONE);
+                builder.temperature(temperature);
                 builder.biomeCategory(Biome.BiomeCategory.NONE);
                 decodeEnum(Biome.TemperatureModifier.class, dis.readUTF()).ifPresent(builder::temperatureAdjustment);
                 builder.downfall(dis.readFloat());
