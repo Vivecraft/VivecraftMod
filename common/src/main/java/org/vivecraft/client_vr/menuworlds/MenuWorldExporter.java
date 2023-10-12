@@ -439,7 +439,9 @@ public class MenuWorldExporter {
                 dis.readUTF(); // registry key, not actually used though, just for reference
 
                 boolean hasPrecipitation = dis.readBoolean();
-                builder.temperature(dis.readFloat());
+                float temperature = dis.readFloat();
+                builder.precipitation(hasPrecipitation ? (temperature < 0.15f ? Biome.Precipitation.SNOW : Biome.Precipitation.RAIN) : Biome.Precipitation.NONE);
+                builder.temperature(temperature);
                 decodeEnum(Biome.TemperatureModifier.class, dis.readUTF()).ifPresent(builder::temperatureAdjustment);
                 builder.downfall(dis.readFloat());
 
