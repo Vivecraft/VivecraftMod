@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.widgets.SettingsList;
 import org.vivecraft.common.ConfigBuilder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,7 +95,7 @@ public class GuiArrayValueEditScreen<T> extends GuiListScreen{
 
         @Override
         public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            this.valueWidget.setX(k + -50);
+            this.valueWidget.setX(k - 50);
             this.valueWidget.setY(j);
             this.valueWidget.render(guiGraphics, n, o, f);
             this.resetButton.setX(k + 230);

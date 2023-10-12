@@ -3,11 +3,7 @@ package org.vivecraft.common;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.EnumGetMethod;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -18,8 +14,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-;
 
 public class ConfigBuilder {
 
@@ -80,19 +74,19 @@ public class ConfigBuilder {
     private <T extends Enum<T>> void addDefaultValueComment(List<String> path, T defaultValue) {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
-                + new Formatter(Locale.US).format("default: %s", defaultValue.name()));
+            + new Formatter(Locale.US).format("default: %s", defaultValue.name()));
     }
 
     private void addDefaultValueComment(List<String> path, Quaternionf defaultValue) {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
-                +"x: %.2f, y %.2f, z: %.2f, w: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z, defaultValue.w));
+            + "x: %.2f, y %.2f, z: %.2f, w: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z, defaultValue.w));
     }
 
     private void addDefaultValueComment(List<String> path, Vector3f defaultValue) {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
-                +"x: %.2f, y: %.2f, z: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z));
+            + "x: %.2f, y: %.2f, z: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z));
     }
 
     /**
@@ -258,7 +252,7 @@ public class ConfigBuilder {
 
     public <T> ArrayValue<T> define(T[] defaultValue, Class<T> clazz, Function<String, T> fromString) {
         List<String> path = stack.stream().toList();
-        for (int i = 0; i< defaultValue.length; i++) {
+        for (int i = 0; i < defaultValue.length; i++) {
             stack.add(i + "");
             spec.define(stack.stream().toList(), defaultValue[i]);
             stack.removeLast();
@@ -268,7 +262,6 @@ public class ConfigBuilder {
         ArrayValue value = new ArrayValue<>(config, path, defaultValue, clazz, fromString);
         configValues.add(value);
         return value;
-
     }
 
     /**
@@ -337,7 +330,7 @@ public class ConfigBuilder {
             if (get() instanceof Object[]) {
                 return Arrays.equals((Object[]) get(), (Object[]) defaultValue);
             }
-            return Objects.equals(get(),  defaultValue);
+            return Objects.equals(get(), defaultValue);
         }
 
         public String getComment() {
@@ -540,7 +533,7 @@ public class ConfigBuilder {
         }
     }
 
-    public class VectorValue extends ConfigValue<Vector3f> {
+    public static class VectorValue extends ConfigValue<Vector3f> {
 
         public VectorValue(CommentedConfig config, List<String> path, Vector3f defaultValue) {
             super(config, path, defaultValue);
@@ -624,7 +617,7 @@ public class ConfigBuilder {
             cachedValue = newValue;
             List<String> path2 = new ArrayList<>(path);
             path2.add("0");
-            for (int i = 0; i< newValue.length; i++) {
+            for (int i = 0; i < newValue.length; i++) {
                 path2.set(path.size(), i + "");
                 config.set(path2, newValue[i]);
             }
@@ -635,7 +628,7 @@ public class ConfigBuilder {
             List<String> path2 = new ArrayList<>(path);
             path2.add("0");
             config.set(path2, defaultValue.length);
-            for (int i = 0; i< defaultValue.length; i++) {
+            for (int i = 0; i < defaultValue.length; i++) {
                 path2.set(path.size(), i + "");
                 config.set(path2, defaultValue[i]);
             }

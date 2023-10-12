@@ -100,7 +100,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
 
         @Override
         public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            this.valueWidget.setX(k + -50);
+            this.valueWidget.setX(k - 50);
             this.valueWidget.setY(j);
             this.valueWidget.render(guiGraphics, n, o, f);
             this.deleteButton.setX(k + 230);
