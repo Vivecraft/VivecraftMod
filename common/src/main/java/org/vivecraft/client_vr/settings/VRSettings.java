@@ -1188,7 +1188,6 @@ public class VRSettings {
                 } else {
                     return prefix + String.format("%.1f", (float) value) + "s";
                 }
-
             }
         },
         MIXED_REALITY_KEY_COLOR(false, false) { // Key Color
