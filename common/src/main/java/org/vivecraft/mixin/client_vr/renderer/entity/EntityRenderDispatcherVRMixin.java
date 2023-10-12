@@ -58,7 +58,6 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                 q.mul(Vector3f.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
                 q.mul(Vector3f.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
                 cir.setReturnValue(q);
-                return;
             }
         }
     }
