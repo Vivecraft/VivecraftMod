@@ -44,7 +44,7 @@ public class OptionsScreenVRMixin extends Screen {
     */
 
     // place below FOV slider
-    @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;I)Lnet/minecraft/client/gui/components/AbstractWidget;"),index = 1)
+    @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/GridWidget$RowHelper;addChild(Lnet/minecraft/client/gui/components/AbstractWidget;I)Lnet/minecraft/client/gui/components/AbstractWidget;"), index = 1)
     private int vivecraft$makeSpacer1wide(int layoutElement) {
         return ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled ? 1 : 2;
     }
@@ -79,6 +79,7 @@ public class OptionsScreenVRMixin extends Screen {
             if (listener instanceof AbstractWidget child && child.getWidth() > 150 && child instanceof Button button) {
                 button.setWidth(150);
             }
-        };
+        }
+        ;
     }
 }

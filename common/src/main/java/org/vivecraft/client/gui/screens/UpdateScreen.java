@@ -28,11 +28,11 @@ public class UpdateScreen extends Screen {
         this.addRenderableWidget(new Button.Builder(Component.literal("Download from Modrinth"),
             button ->
                 this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-                        if (bl) {
-                            Util.getPlatform().openUri("https://modrinth.com/mod/vivecraft");
-                        }
-                        this.minecraft.setScreen(this);
-                    }, "https://modrinth.com/mod/vivecraft", true)))
+                    if (bl) {
+                        Util.getPlatform().openUri("https://modrinth.com/mod/vivecraft");
+                    }
+                    this.minecraft.setScreen(this);
+                }, "https://modrinth.com/mod/vivecraft", true)))
             .pos(this.width / 2 - 155, this.height - 56)
             .size(150, 20)
             .build());

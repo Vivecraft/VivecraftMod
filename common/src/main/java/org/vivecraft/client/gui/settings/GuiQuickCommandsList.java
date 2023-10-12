@@ -41,8 +41,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         return super.mouseClicked(d, e, i);
     }
 
-    public class CommandEntry extends Entry<CommandEntry>
-    {
+    public class CommandEntry extends Entry<CommandEntry> {
         private final Button btnDelete;
         public final EditBox txt;
 
@@ -52,7 +51,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
             this.btnDelete = new Button.Builder(Component.literal("X"), (p) ->
             {
                 this.txt.setValue("");
-                    this.txt.changeFocus(true);
+                this.txt.changeFocus(true);
             })
                 .size(18, 18)
                 .pos(0, 0)
