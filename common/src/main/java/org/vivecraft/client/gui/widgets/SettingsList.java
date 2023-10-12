@@ -21,7 +21,6 @@ import org.vivecraft.server.config.ConfigBuilder;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 public class SettingsList extends ContainerObjectSelectionList<SettingsList.BaseEntry> {
     final Screen parent;
