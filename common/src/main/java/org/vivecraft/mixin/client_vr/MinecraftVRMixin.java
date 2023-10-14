@@ -383,6 +383,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     public void vivecraft$renderVRPasses(boolean renderLevel, CallbackInfo ci, long nanoTime) {
         if (VRState.vrRunning) {
 
+            // some mods mess with the depth mask?
+            RenderSystem.depthMask(true);
+
             // draw cursor on Gui Layer
             if (this.screen != null) {
                 PoseStack poseStack = RenderSystem.getModelViewStack();
