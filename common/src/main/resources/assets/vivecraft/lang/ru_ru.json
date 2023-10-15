@@ -363,7 +363,7 @@
   "vivecraft.messages.serverplugin": "Vivecraft обнаружил серверный мод: %s",
   "vivecraft.messages.noserverplugin": "Vivecraft не обнаружен. Этот сервер может не поддерживать телепортацию. Включен режим ограниченного передвижения (возврат к свободному перемещению).",
   "vivecraft.messages.calibrateheight": "Пожалуйста, откаллибруйте высоту в меню паузы.",
-  "vivecraft.messages.rendersetupfailed": "Ошибка рендера: %s",
+  "vivecraft.messages.rendersetupfailed": "Ошибка рендера: %s\nVR provider: %s",
   "vivecraft.messages.intelgraphics": "Интегрированная графика Intel не поддерживается. Если это ноутбук, пожалуйста, установите высокопроизводительный GPU. Найденное GPU: %s",
   "vivecraft.messages.nosteamvr": "OpenVR не обнаружен. Вы установили SteamVR?",
   "vivecraft.messages.menuworldexportcomplete.1": "Экспорт завершен... размер области: %d",
