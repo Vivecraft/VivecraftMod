@@ -94,7 +94,7 @@ public class MCOpenVR extends MCVR {
     InputAnalogActionData analog = InputAnalogActionData.calloc();
 
     public MCOpenVR(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh, VivecraftVRMod.INSTANCE);
+        super(mc, dh);
         ome = this;
         this.hapticScheduler = new OpenVRHapticScheduler();
 
@@ -342,21 +342,21 @@ public class MCOpenVR extends MCVR {
             {
                 InputSimulator.scrollMouse(0.0D, -1.0D);
             });
-            this.processScrollInput(VivecraftVRMod.INSTANCE.keyHotbarScroll, () ->
+            this.processScrollInput(VivecraftVRMod.keyHotbarScroll, () ->
             {
                 this.changeHotbar(-1);
             }, () ->
             {
                 this.changeHotbar(1);
             });
-            this.processSwipeInput(VivecraftVRMod.INSTANCE.keyHotbarSwipeX, () ->
+            this.processSwipeInput(VivecraftVRMod.keyHotbarSwipeX, () ->
             {
                 this.changeHotbar(1);
             }, () ->
             {
                 this.changeHotbar(-1);
             }, null, null);
-            this.processSwipeInput(VivecraftVRMod.INSTANCE.keyHotbarSwipeY, null, null, () ->
+            this.processSwipeInput(VivecraftVRMod.keyHotbarSwipeY, null, null, () ->
             {
                 this.changeHotbar(-1);
             }, () ->

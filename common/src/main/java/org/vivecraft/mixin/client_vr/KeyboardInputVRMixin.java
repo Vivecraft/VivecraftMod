@@ -55,7 +55,7 @@ public class KeyboardInputVRMixin extends Input {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         boolean climbing = dataholder.climbTracker.isClimbeyClimb() && !minecraft.player.isInWater() && dataholder.climbTracker.isGrabbingLadder();
 
-        if (climbing || !this.options.keyUp.isDown() && !VivecraftVRMod.INSTANCE.keyTeleportFallback.isDown()) {
+        if (climbing || !this.options.keyUp.isDown() && !VivecraftVRMod.keyTeleportFallback.isDown()) {
             this.up = false;
         } else {
             ++this.forwardImpulse;
@@ -87,8 +87,8 @@ public class KeyboardInputVRMixin extends Input {
         float f = 0.0F;
 
         if (!climbing && !dataholder.vrSettings.seated && minecraft.screen == null && !KeyboardHandler.Showing) {
-            VRInputAction vrinputaction = dataholder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyFreeMoveStrafe);
-            VRInputAction vrinputaction1 = dataholder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyFreeMoveRotate);
+            VRInputAction vrinputaction = dataholder.vr.getInputAction(VivecraftVRMod.keyFreeMoveStrafe);
+            VRInputAction vrinputaction1 = dataholder.vr.getInputAction(VivecraftVRMod.keyFreeMoveRotate);
             Vector2 vector2 = vrinputaction.getAxis2DUseTracked();
             Vector2 vector21 = vrinputaction1.getAxis2DUseTracked();
 
@@ -112,7 +112,7 @@ public class KeyboardInputVRMixin extends Input {
                     float f1 = getMovementAxisValue(this.options.keyUp);
 
                     if (f1 == 0.0F) {
-                        f1 = getMovementAxisValue(VivecraftVRMod.INSTANCE.keyTeleportFallback);
+                        f1 = getMovementAxisValue(VivecraftVRMod.keyTeleportFallback);
                     }
 
                     f = f1;

@@ -87,7 +87,7 @@ public class TeleportTracker extends Tracker {
 
         boolean flag = false;
         Vec3 vec3 = null;
-        boolean flag1 = VivecraftVRMod.INSTANCE.keyTeleport.isDown() && this.dh.vrPlayer.isTeleportEnabled();
+        boolean flag1 = VivecraftVRMod.keyTeleport.isDown() && this.dh.vrPlayer.isTeleportEnabled();
         boolean flag2 = this.dh.vrSettings.seated && !this.dh.vrPlayer.getFreeMove() && (player.input.forwardImpulse != 0.0F || player.input.leftImpulse != 0.0F);
 
         if ((flag1 || flag2) && !player.isPassenger()) {

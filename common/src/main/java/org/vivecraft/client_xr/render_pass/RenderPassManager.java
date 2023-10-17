@@ -6,9 +6,12 @@ import net.minecraft.client.renderer.PostChain;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.mixin.client.MinecraftAccessor;
+import org.vivecraft.mixin.client.renderer.GameRendererAccessor;
 
 public class RenderPassManager {
     private static final Minecraft mc = Minecraft.getInstance();
+    private static final MinecraftAccessor mcac = (MinecraftAccessor) mc;
 
     public static RenderPassManager INSTANCE;
 
@@ -26,9 +29,9 @@ public class RenderPassManager {
     public static void setWorldRenderPass(WorldRenderPass wrp) {
         RenderPassManager.wrp = wrp;
         renderPassType = RenderPassType.WORLD_ONLY;
-        mc.mainRenderTarget = wrp.target;
+        mcac.setMainRenderTarget(wrp.target);
         if (mc.gameRenderer != null) {
-            mc.gameRenderer.postEffect = wrp.postEffect;
+            ((GameRendererAccessor) mc.gameRenderer).setPostEffect(wrp.postEffect);
         }
     }
 
@@ -36,16 +39,16 @@ public class RenderPassManager {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.GUI;
         RenderPassManager.wrp = null;
         renderPassType = RenderPassType.GUI_ONLY;
-        mc.mainRenderTarget = GuiHandler.guiFramebuffer;
+        mcac.setMainRenderTarget(GuiHandler.guiFramebuffer);
     }
 
     public static void setVanillaRenderPass() {
         ClientDataHolderVR.getInstance().currentPass = null;
         RenderPassManager.wrp = null;
         renderPassType = RenderPassType.VANILLA;
-        mc.mainRenderTarget = INSTANCE.vanillaRenderTarget;
+        mcac.setMainRenderTarget(INSTANCE.vanillaRenderTarget);
         if (mc.gameRenderer != null) {
-            mc.gameRenderer.postEffect = INSTANCE.vanillaPostEffect;
+            ((GameRendererAccessor) mc.gameRenderer).setPostEffect(INSTANCE.vanillaPostEffect);
         }
     }
 }

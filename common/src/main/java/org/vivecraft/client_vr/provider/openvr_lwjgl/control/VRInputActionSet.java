@@ -39,7 +39,7 @@ public enum VRInputActionSet {
                 return KEYBOARD;
 
             default:
-                return VivecraftVRMod.INSTANCE.isModBinding(keyBinding) ? MOD : INGAME;
+                return VivecraftVRMod.isModBinding(keyBinding) ? MOD : INGAME;
         }
     }
 }

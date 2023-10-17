@@ -24,7 +24,7 @@ public class NullVR extends MCVR {
     private boolean vrActiveChangedLastFrame = false;
 
     public NullVR(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh, VivecraftVRMod.INSTANCE);
+        super(mc, dh);
         ome = this;
         this.hapticScheduler = new NullVRHapticScheduler();
     }

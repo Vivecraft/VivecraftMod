@@ -426,7 +426,7 @@ public class VRInputAction {
     private void pressKey() {
         InputConstants.Key inputconstants$key = this.keyBinding.key;
 
-        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
             if (inputconstants$key.getType() == InputConstants.Type.KEYSYM) {
                 InputSimulator.pressKey(inputconstants$key.getValue());
@@ -445,7 +445,7 @@ public class VRInputAction {
     public void unpressKey() {
         InputConstants.Key inputconstants$key = this.keyBinding.key;
 
-        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.INSTANCE.isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
+        if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
             if (inputconstants$key.getType() == InputConstants.Type.KEYSYM) {
                 InputSimulator.releaseKey(inputconstants$key.getValue());

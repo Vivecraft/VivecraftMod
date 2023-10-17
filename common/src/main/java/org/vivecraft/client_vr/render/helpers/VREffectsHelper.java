@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -30,6 +29,7 @@ import org.joml.Vector2f;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.mixin.client.gui.GuiAccessor;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.settings.GuiOtherHUDSettings;
 import org.vivecraft.client.gui.settings.GuiRenderOpticsSettings;
@@ -47,6 +47,7 @@ import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mixin.client.renderer.GameRendererAccessor;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
@@ -490,7 +491,7 @@ public class VREffectsHelper {
             && dataHolder.currentPass != RenderPass.CAMERA) {
             VREffectsHelper.renderFireInFirstPerson();
         }
-        mc.gameRenderer.renderItemActivationAnimation(0, 0, par1);
+        ((GameRendererAccessor) mc.gameRenderer).callRenderItemActivationAnimation(0, 0, par1);
     }
 
     public static void renderFireInFirstPerson() {
@@ -808,11 +809,11 @@ public class VREffectsHelper {
             return false;
         } else if (dataHolder.bowTracker.isNotched()) {
             return false;
-        } else if (dataHolder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract).isEnabledRaw(ControllerType.RIGHT)
-            || VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.RIGHT)) {
+        } else if (dataHolder.vr.getInputAction(VivecraftVRMod.keyVRInteract).isEnabledRaw(ControllerType.RIGHT)
+            || VivecraftVRMod.keyVRInteract.isDown(ControllerType.RIGHT)) {
             return false;
-        } else if (dataHolder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyGrab).isEnabledRaw(ControllerType.RIGHT)
-            || VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT)) {
+        } else if (dataHolder.vr.getInputAction(VivecraftVRMod.keyClimbeyGrab).isEnabledRaw(ControllerType.RIGHT)
+            || VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.RIGHT)) {
             return false;
         } else if (dataHolder.teleportTracker.isAiming()) {
             return false;
@@ -901,7 +902,7 @@ public class VREffectsHelper {
                 brightness = 0.5F;
             }
 
-            RenderSystem.setShaderTexture(0, Gui.GUI_ICONS_LOCATION);
+            RenderSystem.setShaderTexture(0, GuiAccessor.getGUI_ICONS_LOCATION());
             float uMax = 15.0F / 256.0F;
             float vMax = 15.0F / 256.0F;
 

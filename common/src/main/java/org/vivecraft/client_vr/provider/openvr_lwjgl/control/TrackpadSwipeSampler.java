@@ -25,9 +25,9 @@ public class TrackpadSwipeSampler {
     }
 
     public void update(ControllerType hand, Vector2 position) {
-        MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).setCurrentHand(hand);
+        MCOpenVR.get().getInputAction(VivecraftVRMod.keyTrackpadTouch).setCurrentHand(hand);
 
-        if (MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).isButtonPressed()) {
+        if (MCOpenVR.get().getInputAction(VivecraftVRMod.keyTrackpadTouch).isButtonPressed()) {
             this.buffer[this.index].set(position.getX(), position.getY());
 
             if (++this.index >= this.buffer.length) {

@@ -18,6 +18,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.mixin.client.CameraAccessor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -68,7 +69,7 @@ public class ShadersRenderVRMixin {
 
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", remap = true, shift = At.Shift.BEFORE), ordinal = 0, method = "renderShadowMap", remap = false)
     private static Entity vivecraft$fixPlayerPos(Entity entity, GameRenderer gameRenderer, Camera activeRenderInfo) {
-        if (!RenderPassType.isVanilla() && entity == activeRenderInfo.entity) {
+        if (!RenderPassType.isVanilla() && entity == ((CameraAccessor) activeRenderInfo).getEntity()) {
             ((GameRendererExtension) gameRenderer).vivecraft$restoreRVEPos((LivingEntity) entity);
         }
         return entity;
@@ -76,7 +77,7 @@ public class ShadersRenderVRMixin {
 
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V", remap = true, shift = At.Shift.AFTER), ordinal = 0, method = "renderShadowMap", remap = false)
     private static Entity vivecraft$restorePlayerPos(Entity entity, GameRenderer gameRenderer, Camera activeRenderInfo) {
-        if (!RenderPassType.isVanilla() && entity == activeRenderInfo.entity) {
+        if (!RenderPassType.isVanilla() && entity == ((CameraAccessor) activeRenderInfo).getEntity()) {
             ((GameRendererExtension) gameRenderer).vivecraft$cacheRVEPos((LivingEntity) entity);
             ((GameRendererExtension) gameRenderer).vivecraft$setupRVE();
         }

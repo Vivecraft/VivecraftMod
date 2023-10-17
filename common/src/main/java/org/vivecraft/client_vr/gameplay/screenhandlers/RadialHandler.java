@@ -172,7 +172,7 @@ public class RadialHandler {
                     return;
                 }
 
-                if (!VivecraftVRMod.INSTANCE.keyRadialMenu.isDown()) {
+                if (!VivecraftVRMod.keyRadialMenu.isDown()) {
                     if (activecontroller == ControllerType.LEFT) {
                         UI.mouseClicked((int) d0, (int) d1, 0);
                     } else {
