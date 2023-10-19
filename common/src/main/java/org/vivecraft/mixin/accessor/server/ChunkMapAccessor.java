@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.server;
+package org.vivecraft.mixin.accessor.server;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.server.level.ChunkMap;

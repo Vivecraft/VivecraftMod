@@ -36,7 +36,7 @@ import org.vivecraft.common.utils.lwjgl.Matrix4f;
 import org.vivecraft.common.utils.lwjgl.Vector3f;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
-import org.vivecraft.mixin.client.MinecraftAccessor;
+import org.vivecraft.mixin.accessor.client.MinecraftAccessor;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 
 import java.io.BufferedReader;

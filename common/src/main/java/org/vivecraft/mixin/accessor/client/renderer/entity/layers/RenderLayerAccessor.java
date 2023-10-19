@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.client.renderer.entity.layers;
+package org.vivecraft.mixin.accessor.client.renderer.entity.layers;
 
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;

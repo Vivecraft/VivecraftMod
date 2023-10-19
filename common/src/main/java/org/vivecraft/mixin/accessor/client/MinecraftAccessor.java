@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.client;
+package org.vivecraft.mixin.accessor.client;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;

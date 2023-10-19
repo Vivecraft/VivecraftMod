@@ -43,6 +43,7 @@ import org.lwjgl.opengl.GL11;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mixin.accessor.world.level.block.state.StateHolderAccessor;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
@@ -1620,7 +1621,7 @@ public class MenuWorldRenderer {
 
         @SuppressWarnings("unchecked")
         public FluidStateWrapper(FluidState fluidState) {
-            super(fluidState.getType(), fluidState.getValues(), fluidState.propertiesCodec);
+            super(fluidState.getType(), fluidState.getValues(), ((StateHolderAccessor) fluidState).getPropertiesCodec());
 
             this.fluidState = fluidState;
         }

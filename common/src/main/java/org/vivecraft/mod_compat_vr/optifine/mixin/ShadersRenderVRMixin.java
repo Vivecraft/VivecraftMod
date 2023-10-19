@@ -18,7 +18,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.mixin.client.CameraAccessor;
+import org.vivecraft.mixin.accessor.client.CameraAccessor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

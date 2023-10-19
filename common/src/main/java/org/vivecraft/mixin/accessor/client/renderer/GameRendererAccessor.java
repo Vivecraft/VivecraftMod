@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.client.renderer;
+package org.vivecraft.mixin.accessor.client.renderer;
 
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;

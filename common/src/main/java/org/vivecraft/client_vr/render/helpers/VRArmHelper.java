@@ -21,6 +21,7 @@ import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mixin.accessor.client.renderer.ItemInHandRendererAccessor;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
@@ -181,7 +182,7 @@ public class VRArmHelper {
 
         mc.gameRenderer.lightTexture().turnOnLightLayer();
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        mc.gameRenderer.itemInHandRenderer.renderArmWithItem(mc.player, partialTicks,
+        ((ItemInHandRendererAccessor) mc.gameRenderer.itemInHandRenderer).callRenderArmWithItem(mc.player, partialTicks,
             0.0F, InteractionHand.MAIN_HAND, mc.player.getAttackAnim(partialTicks), item, 0.0F,
             poseStack, bufferSource,
             mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, partialTicks));
@@ -228,7 +229,7 @@ public class VRArmHelper {
 
         mc.gameRenderer.lightTexture().turnOnLightLayer();
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        mc.gameRenderer.itemInHandRenderer.renderArmWithItem(mc.player, partialTicks,
+        ((ItemInHandRendererAccessor) mc.gameRenderer.itemInHandRenderer).callRenderArmWithItem(mc.player, partialTicks,
             0.0F, InteractionHand.OFF_HAND, mc.player.getAttackAnim(partialTicks), item, 0.0F,
             poseStack, bufferSource,
             mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, partialTicks));

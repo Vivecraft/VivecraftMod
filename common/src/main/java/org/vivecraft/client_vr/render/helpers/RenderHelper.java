@@ -27,7 +27,7 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
+import org.vivecraft.mixin.accessor.blaze3d.RenderSystemAccessor;
 
 import java.util.function.Supplier;
 

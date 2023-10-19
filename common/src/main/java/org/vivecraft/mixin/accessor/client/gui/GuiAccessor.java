@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.client.gui;
+package org.vivecraft.mixin.accessor.client.gui;
 
 import net.minecraft.client.gui.Gui;
 import net.minecraft.resources.ResourceLocation;

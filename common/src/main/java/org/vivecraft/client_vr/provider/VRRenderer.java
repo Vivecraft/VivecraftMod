@@ -33,7 +33,7 @@ import org.vivecraft.client_vr.render.ShaderHelper;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
-import org.vivecraft.mixin.client.MinecraftAccessor;
+import org.vivecraft.mixin.accessor.client.MinecraftAccessor;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.mod_compat_vr.resolutioncontrol.ResolutionControlHelper;
 

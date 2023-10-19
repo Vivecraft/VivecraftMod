@@ -12,6 +12,7 @@ import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.mixin.accessor.world.entity.EntityAccessor;
 import org.vivecraft.server.config.ServerConfig;
 
 public class AimFixHandler extends ChannelInboundHandlerAdapter {
@@ -40,7 +41,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             float xRotO = serverplayer.xRotO;
             float yRotO = serverplayer.yRotO;
             float yHeadRotO = serverplayer.yHeadRotO;
-            float eyeHeight = serverplayer.getEyeHeight();
+            float eyeHeight = ((EntityAccessor) serverplayer).getEyeHeight();
 
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(serverplayer);
 
@@ -57,7 +58,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
                 serverplayer.setYRot((float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
                 serverplayer.xRotO = serverplayer.getXRot();
                 serverplayer.yRotO = serverplayer.yHeadRotO = serverplayer.yHeadRot = serverplayer.getYRot();
-                serverplayer.eyeHeight = 0.0001F;
+                ((EntityAccessor) serverplayer).setEyeHeight(0.0001F);
                 serverviveplayer.offset = position.subtract(aimPos);
                 if (ServerConfig.debug.get()) {
                     System.out.println("AimFix " + aimPos.x + " " + aimPos.y + " " + aimPos.z + " " + (float) Math.toDegrees(Math.asin(-dir.y)) + " " + (float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
@@ -93,7 +94,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             serverplayer.xRotO = xRotO;
             serverplayer.yRotO = yRotO;
             serverplayer.yHeadRotO = yHeadRotO;
-            serverplayer.eyeHeight = eyeHeight;
+            ((EntityAccessor) serverplayer).setEyeHeight(eyeHeight);
             if (serverviveplayer != null) {
                 serverviveplayer.offset = new Vec3(0.0D, 0.0D, 0.0D);
             }

@@ -6,8 +6,8 @@ import net.minecraft.client.renderer.PostChain;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.mixin.client.MinecraftAccessor;
-import org.vivecraft.mixin.client.renderer.GameRendererAccessor;
+import org.vivecraft.mixin.accessor.client.MinecraftAccessor;
+import org.vivecraft.mixin.accessor.client.renderer.GameRendererAccessor;
 
 public class RenderPassManager {
     private static final Minecraft mc = Minecraft.getInstance();

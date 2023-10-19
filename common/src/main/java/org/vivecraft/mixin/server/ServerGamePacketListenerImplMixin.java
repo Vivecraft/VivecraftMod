@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.server;
 
+import io.netty.channel.Channel;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketUtils;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.mixin.accessor.network.ConnectionAccessor;
 import org.vivecraft.server.AimFixHandler;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
@@ -43,9 +45,9 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
     @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;)V")
     public void vivecraft$init(MinecraftServer p_9770_, Connection p_9771_, ServerPlayer p_9772_, CallbackInfo info) {
         // Vivecraft
-        if (this.connection.channel != null && this.connection.channel.pipeline().get("packet_handler") != null) { //fake player fix
-            this.connection.channel.pipeline().addBefore("packet_handler", "vr_aim_fix",
-                new AimFixHandler(this.connection));
+        Channel channel = ((ConnectionAccessor) this.connection).getChannel();
+        if (channel != null && channel.pipeline().get("packet_handler") != null) { //fake player fix
+            channel.pipeline().addBefore("packet_handler", "vr_aim_fix", new AimFixHandler(this.connection));
         }
     }
 

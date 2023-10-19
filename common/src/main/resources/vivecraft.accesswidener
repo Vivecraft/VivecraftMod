@@ -13,47 +13,11 @@ extendable method net/minecraft/client/renderer/entity/player/PlayerRenderer set
 accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
 extendable method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
 
-# gui handling
-accessible method net/minecraft/client/MouseHandler onPress (JIII)V
-accessible method net/minecraft/client/MouseHandler onMove (JDD)V
-accessible method net/minecraft/client/MouseHandler onScroll (JDD)V
-accessible method net/minecraft/client/KeyboardHandler charTyped (JII)V
-
-# for aim fix
-accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
-
-# to check key inputs
-accessible field net/minecraft/client/KeyMapping clickCount I
-accessible method net/minecraft/client/KeyMapping release ()V
-accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
-
 # to get the current blend state
 accessible field com/mojang/blaze3d/platform/GlStateManager BLEND Lcom/mojang/blaze3d/platform/GlStateManager$BlendState;
 accessible class com/mojang/blaze3d/platform/GlStateManager$BlendState
 
-# to render vr hands
-accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWithItem (Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V
-
-# to create custom END shader
-accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
-
-# to disable destroy delay, on roomscale hitting
-accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
-
-# for correct vr rendering
-accessible field net/minecraft/world/entity/Entity eyeHeight F
-
-# to add vivecraft items in the creative menus
-accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES Lnet/minecraft/resources/ResourceKey;
-accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/minecraft/resources/ResourceKey;
-
-# to render crosshair
-accessible field net/minecraft/client/gui/Gui GUI_ICONS_LOCATION Lnet/minecraft/resources/ResourceLocation;
-
 # for menuworlds
 accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData isFlat Z
-accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
 accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
-accessible field net/minecraft/world/level/biome/AmbientParticleSettings probability F
 extendable class net/minecraft/world/level/material/FluidState
-accessible field net/minecraft/world/level/block/state/StateHolder propertiesCodec Lcom/mojang/serialization/MapCodec;

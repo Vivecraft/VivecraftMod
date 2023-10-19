@@ -11,7 +11,7 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
-import org.vivecraft.mixin.client.CameraAccessor;
+import org.vivecraft.mixin.accessor.client.CameraAccessor;
 
 
 public class XRCamera extends Camera {

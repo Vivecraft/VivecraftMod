@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
+import org.vivecraft.mixin.accessor.blaze3d.RenderSystemAccessor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

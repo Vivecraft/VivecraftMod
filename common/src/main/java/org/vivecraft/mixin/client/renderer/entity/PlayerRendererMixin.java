@@ -16,10 +16,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.client.extensions.RenderLayerExtension;
-import org.vivecraft.mixin.client.model.PlayerModelAccessor;
+import org.vivecraft.mixin.accessor.client.model.PlayerModelAccessor;
 import org.vivecraft.client.utils.RenderLayerTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.mixin.client.renderer.entity.layers.RenderLayerAccessor;
+import org.vivecraft.mixin.accessor.client.renderer.entity.layers.RenderLayerAccessor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.client;
+package org.vivecraft.mixin.accessor.client;
 
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;

@@ -32,6 +32,8 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mixin.accessor.world.level.biome.AmbientParticleSettingsAccessor;
+import org.vivecraft.mixin.accessor.world.level.biome.BiomeManagerAccessor;
 
 import java.io.*;
 import java.util.*;
@@ -96,7 +98,7 @@ public class MenuWorldExporter {
         if (level instanceof ServerLevel) {
             dos.writeLong(((ServerLevel) level).getSeed());
         } else {
-            dos.writeLong(level.getBiomeManager().biomeZoomSeed); // not really correct :/
+            dos.writeLong(((BiomeManagerAccessor) level.getBiomeManager()).getBiomeZoomSeed()); // not really correct :/
         }
 
         dos.writeInt(SharedConstants.getCurrentVersion().getDataVersion().getVersion());
@@ -511,7 +513,7 @@ public class MenuWorldExporter {
                 if (specialEffects.getAmbientParticleSettings().isPresent()) {
                     AmbientParticleSettings ambientParticleSettings = specialEffects.getAmbientParticleSettings().get();
                     dos.writeUTF(BuiltInRegistries.PARTICLE_TYPE.getKey(ambientParticleSettings.getOptions().getType()).toString());
-                    dos.writeFloat(ambientParticleSettings.probability);
+                    dos.writeFloat(((AmbientParticleSettingsAccessor) ambientParticleSettings).getProbability());
                 }
             }
         }

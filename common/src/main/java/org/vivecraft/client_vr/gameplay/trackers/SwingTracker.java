@@ -24,6 +24,7 @@ import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.Vec3History;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mixin.accessor.client.multiplayer.MultiplayerGameModeAccessor;
 
 import java.util.List;
 
@@ -230,7 +231,7 @@ public class SwingTracker extends Tracker {
                                         }
                                     }
 
-                                    Minecraft.getInstance().gameMode.destroyDelay = 0;
+                                    ((MultiplayerGameModeAccessor) Minecraft.getInstance().gameMode).setDestroyDelay(0);
                                 }
 
                                 this.dh.vrPlayer.blockDust(blockhitresult1.getLocation().x, blockhitresult1.getLocation().y, blockhitresult1.getLocation().z, 3 * j, blockpos, blockstate, 0.6F, 1.0F);

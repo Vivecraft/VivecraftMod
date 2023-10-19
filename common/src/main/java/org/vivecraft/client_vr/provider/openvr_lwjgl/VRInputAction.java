@@ -10,6 +10,7 @@ import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.common.utils.math.Vector2;
 import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.mixin.accessor.client.KeyMappingAccessor;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -419,12 +420,12 @@ public class VRInputAction {
     public static void setKeyBindState(KeyMapping kb, boolean pressed) {
         if (kb != null) {
             kb.setDown(pressed);
-            kb.clickCount += 1;
+            ((KeyMappingAccessor) kb).setClickCount(((KeyMappingAccessor) kb).getClickCount() + 1);
         }
     }
 
     private void pressKey() {
-        InputConstants.Key inputconstants$key = this.keyBinding.key;
+        InputConstants.Key inputconstants$key = ((KeyMappingAccessor) this.keyBinding).getKey();
 
         if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.isSafeBinding(this.keyBinding)) //&& (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
@@ -443,7 +444,7 @@ public class VRInputAction {
     }
 
     public void unpressKey() {
-        InputConstants.Key inputconstants$key = this.keyBinding.key;
+        InputConstants.Key inputconstants$key = ((KeyMappingAccessor) this.keyBinding).getKey();
 
         if (inputconstants$key.getValue() != -1 && !VivecraftVRMod.isSafeBinding(this.keyBinding)) // && (!Reflector.ForgeKeyBinding_getKeyModifier.exists() || Reflector.call(this.keyBinding, Reflector.ForgeKeyBinding_getKeyModifier) == Reflector.getFieldValue(Reflector.KeyModifier_NONE)))
         {
@@ -458,7 +459,7 @@ public class VRInputAction {
             }
         }
 
-        this.keyBinding.release();
+        ((KeyMappingAccessor) this.keyBinding).callRelease();
     }
 
     public class AnalogData {

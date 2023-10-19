@@ -31,6 +31,7 @@ import org.vivecraft.client_vr.utils.external.jinfinadeck;
 import org.vivecraft.client_vr.utils.external.jkatvr;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.mixin.accessor.client.KeyMappingAccessor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -896,7 +897,7 @@ public class MCOpenVR extends MCVR {
         if (action.isActive() && action.isEnabledRaw()
             // try to prevent double left clicks
             && (!ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui
-            || !(action.actionSet == VRInputActionSet.INGAME && action.keyBinding.key.getType() == InputConstants.Type.MOUSE && action.keyBinding.key.getValue() == 0 && mc.screen != null))) {
+            || !(action.actionSet == VRInputActionSet.INGAME && ((KeyMappingAccessor) action.keyBinding).getKey().getType() == InputConstants.Type.MOUSE && ((KeyMappingAccessor) action.keyBinding).getKey().getValue() == 0 && mc.screen != null))) {
             if (action.isButtonChanged()) {
                 if (action.isButtonPressed() && action.isEnabled()) {
                     if (!this.ignorePressesNextFrame) {

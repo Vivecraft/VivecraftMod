@@ -49,6 +49,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
+import org.vivecraft.mixin.accessor.world.entity.EntityAccessor;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 
 import java.io.IOException;
@@ -543,7 +544,7 @@ public abstract class GameRendererVRMixin
             livingentity.setYRot(vrdata$vrdevicepose.getYaw());
             livingentity.yHeadRot = livingentity.getYRot();
             livingentity.yHeadRotO = livingentity.getYRot();
-            livingentity.eyeHeight = 0.0001F;
+            ((EntityAccessor) livingentity).setEyeHeight(0.0001F);
         }
     }
 
@@ -565,7 +566,7 @@ public abstract class GameRendererVRMixin
                 this.vivecraft$rvepitch = e.getXRot();
                 this.vivecraft$rvelastyaw = e.yHeadRotO;
                 this.vivecraft$rvelastpitch = e.xRotO;
-                this.vivecraft$rveHeight = e.getEyeHeight();
+                this.vivecraft$rveHeight = ((EntityAccessor) e).getEyeHeight();
                 this.vivecraft$cached = true;
             }
         }
@@ -588,7 +589,7 @@ public abstract class GameRendererVRMixin
             e.xRotO = this.vivecraft$rvelastpitch;
             e.yHeadRot = this.vivecraft$rveyaw;
             e.yHeadRotO = this.vivecraft$rvelastyaw;
-            e.eyeHeight = this.vivecraft$rveHeight;
+            ((EntityAccessor) e).setEyeHeight(this.vivecraft$rveHeight);
             this.vivecraft$cached = false;
         }
     }
