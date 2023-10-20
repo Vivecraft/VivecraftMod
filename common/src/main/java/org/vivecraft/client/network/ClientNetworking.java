@@ -39,6 +39,7 @@ public class ClientNetworking {
     public static boolean serverWantsData = false;
     public static boolean serverAllowsClimbey = false;
     public static boolean serverSupportsDirectTeleport = false;
+    public static boolean serverAllowsTeleport = true;
     public static boolean serverAllowsCrawling = false;
     public static boolean serverAllowsVrSwitching = false;
     // assume a legacy server by default, to not send invalid packets
@@ -72,6 +73,7 @@ public class ClientNetworking {
         serverAllowsClimbey = false;
         serverWantsData = false;
         serverSupportsDirectTeleport = false;
+        serverAllowsTeleport = true;
         serverAllowsCrawling = false;
         serverAllowsVrSwitching = false;
         usedNetworkVersion = -1;
@@ -255,7 +257,17 @@ public class ClientNetworking {
                     }
                 }
             }
-            case TELEPORT -> ClientNetworking.serverSupportsDirectTeleport = true;
+            case TELEPORT -> {
+                ClientNetworking.serverSupportsDirectTeleport = true;
+                if (buffer.readableBytes() > 0) {
+                    ClientNetworking.serverAllowsTeleport = buffer.readBoolean();
+                    if (!ClientNetworking.serverAllowsTeleport) {
+                        dataholder.vrPlayer.setTeleportOverride(false);
+                    }
+                } else {
+                    ClientNetworking.serverAllowsTeleport = true;
+                }
+            }
             case UBERPACKET -> {
                 UUID uuid = buffer.readUUID();
                 var vrPlayerState = VrPlayerState.deserialize(buffer);
