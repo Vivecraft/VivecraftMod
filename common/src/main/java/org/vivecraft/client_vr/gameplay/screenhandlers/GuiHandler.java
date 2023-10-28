@@ -395,6 +395,7 @@ public class GuiHandler {
         if (mc.screen != null && guiPos_room == null) {
             //naughty mods!
             onScreenChanged(null, mc.screen, false);
+        } else if (mc.screen == null && !mc.mouseHandler.isMouseGrabbed()) {
             // some mod want's to do a mouse selection overlay
             if (guiPos_room == null) {
                 onScreenChanged(null, new Screen(Component.empty()) {}, false, true);
