@@ -387,7 +387,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             RenderSystem.depthMask(true);
 
             // draw cursor on Gui Layer
-            if (this.screen != null) {
+            if (this.screen != null || !mouseHandler.isMouseGrabbed()) {
                 PoseStack poseStack = RenderSystem.getModelViewStack();
                 poseStack.pushPose();
                 poseStack.setIdentity();
@@ -875,7 +875,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
             // release mouse when switching to standing
             if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
-                mouseHandler.releaseMouse();
                 InputConstants.grabOrReleaseMouse(window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseHandler.xpos(), mouseHandler.ypos());
             }
         } else {

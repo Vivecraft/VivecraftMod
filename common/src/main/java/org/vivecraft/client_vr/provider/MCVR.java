@@ -566,7 +566,7 @@ public abstract class MCVR {
             this.controllerRotation[0].M[3][3] = 1.0F;
             Vec3 vec31 = this.getHmdVector();
 
-            if (this.dh.vrSettings.seated && this.mc.screen == null) {
+            if (this.dh.vrSettings.seated && this.mc.screen == null && this.mc.mouseHandler.isMouseGrabbed()) {
                 Matrix4f matrix4f = new Matrix4f();
                 float f = 110.0F;
                 float f1 = 180.0F;

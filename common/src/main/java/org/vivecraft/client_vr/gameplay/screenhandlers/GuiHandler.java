@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.*;
 import org.joml.Vector2f;
@@ -112,7 +113,7 @@ public class GuiHandler {
     }
 
     public static void processGui() {
-        if (mc.screen != null) {
+        if (mc.screen != null || !mc.mouseHandler.isMouseGrabbed()) {
             if (!dh.vrSettings.seated) {
                 if (guiRotation_room != null) {
                     if (MCVR.get().isControllerTracking(0)) {
@@ -272,6 +273,10 @@ public class GuiHandler {
     }
 
     public static void onScreenChanged(Screen previousGuiScreen, Screen newScreen, boolean unpressKeys) {
+        onScreenChanged(previousGuiScreen, newScreen, unpressKeys, false);
+    }
+
+    public static void onScreenChanged(Screen previousGuiScreen, Screen newScreen, boolean unpressKeys, boolean infrontOfHand) {
         if (!VRState.vrRunning) {
             return;
         }
@@ -330,6 +335,8 @@ public class GuiHandler {
                     && mc.hitResult instanceof EntityHitResult
                     && ((EntityHitResult) mc.hitResult).getEntity() instanceof ContainerEntity;
 
+                VRData.VRDevicePose facingDevice = infrontOfHand ? dh.vrPlayer.vrdata_room_pre.getController(0) : dh.vrPlayer.vrdata_room_pre.hmd;
+
                 if (guiAppearOverBlockActive && (isBlockScreen || isEntityScreen) && dh.vrSettings.guiAppearOverBlock) {
                     Vec3 sourcePos;
                     if (isEntityScreen) {
@@ -355,8 +362,8 @@ public class GuiHandler {
                         vec3 = new Vec3(0.0D, 0.25D, -2.0D);
                     }
 
-                    Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
-                    Vec3 vec32 = dh.vrPlayer.vrdata_room_pre.hmd.getCustomVector(vec3);
+                    Vec3 hmdPos = facingDevice.getPosition();
+                    Vec3 vec32 = facingDevice.getCustomVector(vec3);
                     guiPos_room = new Vec3(vec32.x / 2.0D + hmdPos.x, vec32.y / 2.0D + hmdPos.y, vec32.z / 2.0D + hmdPos.z);
 
                     if (dh.vrSettings.physicalKeyboard && KeyboardHandler.Showing && guiPos_room.y < hmdPos.y + 0.2D) {
@@ -365,7 +372,7 @@ public class GuiHandler {
                 }
 
                 // orient screen
-                Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
+                Vec3 hmdPos = facingDevice.getPosition();
                 Vector3 look = new Vector3();
                 look.setX((float) (guiPos_room.x - hmdPos.x));
                 look.setY((float) (guiPos_room.y - hmdPos.y));
@@ -388,6 +395,10 @@ public class GuiHandler {
         if (mc.screen != null && guiPos_room == null) {
             //naughty mods!
             onScreenChanged(null, mc.screen, false);
+            // some mod want's to do a mouse selection overlay
+            if (guiPos_room == null) {
+                onScreenChanged(null, new Screen(Component.empty()) {}, false, true);
+            }
         } else if (mc.screen == null && guiPos_room != null) {
             //even naughtier mods!
             // someone canceled the setScreen, so guiPos didn't get reset
