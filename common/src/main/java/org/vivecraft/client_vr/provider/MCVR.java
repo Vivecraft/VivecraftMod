@@ -21,6 +21,7 @@ import org.vivecraft.client_vr.QuaternionfHistory;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.Vec3History;
 import org.vivecraft.client_vr.extensions.GuiExtension;
+import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -605,8 +606,10 @@ public abstract class MCVR {
                     double d4 = 0.5D * (double) this.dh.vrSettings.ySensitivity;
                     d2 = (double) this.aimPitch + d1 * d4;
                     d2 = Mth.clamp(d2, -89.9D, 89.9D);
-                    InputSimulator.setMousePos(d3, i / 2);
-                    GLFW.glfwSetCursorPos(this.mc.getWindow().getWindow(), d3, i / 2);
+                    double screenX = d3 * (((WindowExtension) (Object) this.mc.getWindow()).vivecraft$getActualScreenWidth() / (double) this.mc.getWindow().getScreenWidth());
+                    double screenY = (i * 0.5F) * (((WindowExtension) (Object) this.mc.getWindow()).vivecraft$getActualScreenHeight() / (double) this.mc.getWindow().getScreenHeight());
+                    InputSimulator.setMousePos(screenX, screenY);
+                    GLFW.glfwSetCursorPos(this.mc.getWindow().getWindow(), screenX, screenY);
                     matrix4f.rotate((float) Math.toRadians(-d2), new Vector3f(1.0F, 0.0F, 0.0F));
                     matrix4f.rotate((float) Math.toRadians(-180.0D + d0 - (double) this.hmdForwardYaw), new Vector3f(0.0F, 1.0F, 0.0F));
                 }
