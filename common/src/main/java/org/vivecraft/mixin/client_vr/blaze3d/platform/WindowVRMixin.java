@@ -33,7 +33,7 @@ public abstract class WindowVRMixin implements WindowExtension {
         return v;
     }
 
-    @Inject(method = {/*"getScreenWidth", */"getWidth"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getWidth", at = @At("HEAD"), cancellable = true)
     void vivecraft$getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
         if (vivecraft$shouldOverrideSide()) {
 //			if (mcxrGameRenderer.reloadingDepth > 0) {
@@ -46,7 +46,7 @@ public abstract class WindowVRMixin implements WindowExtension {
         }
     }
 
-    @Inject(method = {/*"getScreenHeight",*/ "getHeight"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getHeight", at = @At("HEAD"), cancellable = true)
     void vivecraft$getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
         if (vivecraft$shouldOverrideSide()) {
 //			if (mcxrGameRenderer.reloadingDepth > 0) {
