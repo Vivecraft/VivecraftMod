@@ -487,11 +487,13 @@ public abstract class VRRenderer {
             }
 
             // mirror
-            if (WorldRenderPass.center != null) {
-                WorldRenderPass.center.resize(mirrorSize.getA(), mirrorSize.getB());
-            }
-            if (WorldRenderPass.mixedReality != null) {
-                WorldRenderPass.mixedReality.resize(mirrorSize.getA(), mirrorSize.getB());
+            if (mirrorSize.getA() > 0 && mirrorSize.getB() > 0) {
+                if (WorldRenderPass.center != null) {
+                    WorldRenderPass.center.resize(mirrorSize.getA(), mirrorSize.getB());
+                }
+                if (WorldRenderPass.mixedReality != null) {
+                    WorldRenderPass.mixedReality.resize(mirrorSize.getA(), mirrorSize.getB());
+                }
             }
 
             // telescopes
