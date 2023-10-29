@@ -837,8 +837,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             RenderSystem.getModelViewStack().setIdentity();
             RenderSystem.getModelViewStack().translate(0, 0, -2000);
             RenderSystem.applyModelViewMatrix();
-            PoseStack p = new PoseStack();
-            p.scale(3, 3, 3);
+            RenderSystem.setShaderFogStart(Float.MAX_VALUE);
+
+            GuiGraphics guiGraphics = new GuiGraphics((Minecraft) (Object) this, renderBuffers.bufferSource());
+            guiGraphics.pose().scale(3, 3, 3);
             RenderSystem.clear(256, ON_OSX);
 
             if (this.vivecraft$mirrorNotifyClear) {
@@ -856,7 +858,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             int j = 1;
             int k = 12;
 
-            GuiGraphics guiGraphics = new GuiGraphics((Minecraft) (Object) this, renderBuffers.bufferSource());
             for (String s : arraylist) {
                 guiGraphics.drawString(this.font, s, 1, j, 16777215);
                 j += 12;
