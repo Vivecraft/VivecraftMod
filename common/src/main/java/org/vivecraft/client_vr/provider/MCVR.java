@@ -15,6 +15,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.QuaternionfHistory;
@@ -739,18 +740,20 @@ public abstract class MCVR {
             if (!this.mc.options.keyPickItem.isDown() && !flag2) {
                 this.moveModeSwitchCount = 0;
             } else if (++this.moveModeSwitchCount == 80 || flag2) {
-                if (this.dh.vrSettings.seated) {
-                    this.dh.vrSettings.seatedFreeMove = !this.dh.vrSettings.seatedFreeMove;
-                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
-                } else if (this.dh.vrPlayer.isTeleportSupported()) {
-                    this.dh.vrSettings.forceStandingFreeMove = !this.dh.vrSettings.forceStandingFreeMove;
-                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
-                } else if (this.dh.vrPlayer.isTeleportOverridden()) {
-                    this.dh.vrPlayer.setTeleportOverride(false);
-                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
-                } else {
-                    this.dh.vrPlayer.setTeleportOverride(true);
-                    this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                if (ClientNetworking.serverAllowsTeleport) {
+                    if (this.dh.vrSettings.seated) {
+                        this.dh.vrSettings.seatedFreeMove = !this.dh.vrSettings.seatedFreeMove;
+                        this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
+                    } else if (this.dh.vrPlayer.isTeleportSupported()) {
+                        this.dh.vrSettings.forceStandingFreeMove = !this.dh.vrSettings.forceStandingFreeMove;
+                        this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.movementmodeswitch", this.dh.vrSettings.seatedFreeMove ? Component.translatable("vivecraft.options.freemove") : Component.translatable("vivecraft.options.teleport")));
+                    } else if (this.dh.vrPlayer.isTeleportOverridden()) {
+                        this.dh.vrPlayer.setTeleportOverride(false);
+                        this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
+                    } else {
+                        this.dh.vrPlayer.setTeleportOverride(true);
+                        this.mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                    }
                 }
             }
 

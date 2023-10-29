@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -59,12 +60,14 @@ public class VRHotkeys {
             }
 
             if (action == 1 && key == 82 && MethodHolder.isKeyDown(345)) {
-                if (dataholder.vrPlayer.isTeleportOverridden()) {
-                    dataholder.vrPlayer.setTeleportOverride(false);
-                    minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
-                } else {
-                    dataholder.vrPlayer.setTeleportOverride(true);
-                    minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                if (ClientNetworking.serverAllowsTeleport) {
+                    if (dataholder.vrPlayer.isTeleportOverridden()) {
+                        dataholder.vrPlayer.setTeleportOverride(false);
+                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
+                    } else {
+                        dataholder.vrPlayer.setTeleportOverride(true);
+                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                    }
                 }
 
                 flag = true;

@@ -561,7 +561,7 @@ public class VRPlayer {
     }
 
     public boolean isTeleportEnabled() {
-        boolean flag = !VRServerPerms.INSTANCE.noTeleportClient || this.teleportOverride;
+        boolean flag = (!VRServerPerms.INSTANCE.noTeleportClient || this.teleportOverride) && ClientNetworking.serverAllowsTeleport;
 
         if (this.dh.vrSettings.seated) {
             return flag;

@@ -97,7 +97,7 @@ public class ServerNetworking {
                 }
 
                 if (ServerConfig.teleportEnabled.get()) {
-                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.TELEPORT, new byte[0]));
+                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.TELEPORT, new byte[]{1}));
                 }
                 if (ServerConfig.teleportLimitedSurvival.get()) {
                     FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
