@@ -491,7 +491,7 @@ public class GuiHandler {
         //GL11.glMultMatrixf(dh.vrPlayer.vrdata_world_render.getEye(currentPass).getMatrix().toFloatBuffer());
 
         if (guipos == null) {
-            VRSettings.logger.error("guipos was null, how did that happen. vrRunning: {}", VRState.vrRunning);
+            org.vivecraft.common.utils.Utils.logger.error("guipos was null, how did that happen. vrRunning: {}", VRState.vrRunning);
             new RuntimeException().printStackTrace();
             guiPos_room = new Vec3(0, 0, 0);
             guipos = VRPlayer.room_to_world_pos(guiPos_room, dh.vrPlayer.vrdata_world_render);

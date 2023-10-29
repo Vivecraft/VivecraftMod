@@ -43,6 +43,7 @@ import org.lwjgl.opengl.GL11;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
@@ -124,20 +125,20 @@ public class MenuWorldRenderer {
         try {
             InputStream inputStream = MenuWorldDownloader.getRandomWorld();
             if (inputStream != null) {
-                VRSettings.logger.info("MenuWorlds: Initializing main menu world renderer...");
+                Utils.logger.info("MenuWorlds: Initializing main menu world renderer...");
                 loadRenderers();
-                VRSettings.logger.info("MenuWorlds: Loading world data...");
+                Utils.logger.info("MenuWorlds: Loading world data...");
                 setWorld(MenuWorldExporter.loadWorld(inputStream));
                 prepare();
                 fastTime = new Random().nextInt(10) == 0;
             } else {
-                VRSettings.logger.warn("Failed to load any main menu world, falling back to old menu room");
+                Utils.logger.warn("Failed to load any main menu world, falling back to old menu room");
             }
         } catch (Throwable e) { // Only effective way of preventing crash on poop computers with low heap size
             if (e instanceof OutOfMemoryError || e.getCause() instanceof OutOfMemoryError) {
-                VRSettings.logger.error("OutOfMemoryError while loading main menu world. Low heap size or 32-bit Java?");
+                Utils.logger.error("OutOfMemoryError while loading main menu world. Low heap size or 32-bit Java?");
             } else {
-                VRSettings.logger.error("Exception thrown when loading main menu world, falling back to old menu room. \n {}", e.getMessage());
+                Utils.logger.error("Exception thrown when loading main menu world, falling back to old menu room. \n {}", e.getMessage());
             }
             e.printStackTrace();
             destroy();
@@ -226,7 +227,7 @@ public class MenuWorldRenderer {
 
     public void prepare() {
         if (vertexBuffers == null) {
-            VRSettings.logger.info("MenuWorlds: Building geometry...");
+            Utils.logger.info("MenuWorlds: Building geometry...");
             boolean ao = mc.options.ambientOcclusion().get();
             mc.options.ambientOcclusion().set(true);
 
@@ -337,7 +338,7 @@ public class MenuWorldRenderer {
                 }
             }
         }
-        VRSettings.logger.info("Built " + c + " blocks.");
+        Utils.logger.info("Built {} blocks.", c);
         if (layer == RenderType.translucent()) {
             vertBuffer.setQuadSorting(VertexSorting.byDistance(0, Mth.frac(blockAccess.getGround()), 0));
         }

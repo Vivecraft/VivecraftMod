@@ -123,7 +123,7 @@ public class VREffectsHelper {
 
         if (wasStencilOn && !showedStencilMessage && dataHolder.vrSettings.vrUseStencil && dataHolder.vrSettings.showChatMessageStencil) {
             showedStencilMessage = true;
-            mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.stencil",
+            Utils.printChatMessage(Component.translatable("vivecraft.messages.stencil",
                 Component.translatable("vivecraft.messages.3options",
                         Component.translatable("options.title"),
                         Component.translatable("vivecraft.options.screen.main"),
@@ -699,7 +699,7 @@ public class VREffectsHelper {
                             try {
                                 renderTechjarsAwesomeMainMenuRoom(poseStack);
                             } catch (Exception exception) {
-                                System.out.println("Error rendering main menu world, unloading to prevent more errors");
+                                org.vivecraft.common.utils.Utils.logger.error("Error rendering main menu world, unloading to prevent more errors");
                                 exception.printStackTrace();
                                 dataHolder.menuWorldRenderer.destroy();
                             }

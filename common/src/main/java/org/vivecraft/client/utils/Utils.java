@@ -12,6 +12,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -19,7 +20,6 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
 import org.lwjgl.openvr.HmdMatrix44;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.render.VRShaders;
@@ -49,6 +49,13 @@ public class Utils {
     private static final int CONNECT_TIMEOUT = 5000;
     private static final int READ_TIMEOUT = 20000;
     private static final Random avRandomizer = new Random();
+
+    public static void printChatMessage(final Component literal) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            mc.gui.getChat().addMessage(literal);
+        }
+    }
 
     public static String sanitizeFileName(String fileName) {
         StringBuilder stringbuilder = new StringBuilder();
@@ -334,7 +341,7 @@ public class Utils {
         if (required) {
             throw new RuntimeException("Failed to load asset: " + name, e);
         } else {
-            System.out.println("Failed to load asset: " + name);
+            org.vivecraft.common.utils.Utils.logger.error("Failed to load asset: {}", name);
             e.printStackTrace();
         }
     }
@@ -352,10 +359,10 @@ public class Utils {
                 }
 
                 if (path1.toFile().exists()) {
-                    System.out.println("Copying " + directory + " natives...");
+                    org.vivecraft.common.utils.Utils.logger.info("Copying {} natives...", directory);
 
                     for (File file1 : path1.toFile().listFiles()) {
-                        System.out.println(file1.getName());
+                        org.vivecraft.common.utils.Utils.logger.info(file1.getName());
                         Files.copy(file1, new File("openvr/" + directory + "/" + file1.getName()));
                     }
 
@@ -364,18 +371,18 @@ public class Utils {
             } catch (Exception exception) {
             }
 
-            System.out.println("Unpacking " + directory + " natives...");
+            org.vivecraft.common.utils.Utils.logger.info("Unpacking {} natives...", directory);
 
             Path jarPath = Xplat.getJarPath();
             boolean didExtractSomething = false;
             try (Stream<Path> natives = java.nio.file.Files.list(jarPath.resolve("natives/" + directory))) {
                 for (Path file : natives.collect(Collectors.toCollection(ArrayList::new))) {
                     didExtractSomething = true;
-                    System.out.println(file);
+                    org.vivecraft.common.utils.Utils.logger.info(file.toString());
                     java.nio.file.Files.copy(file, new File("openvr/" + directory + "/" + file.getFileName()).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 }
             } catch (IOException e) {
-                System.out.println("Failed to unpack natives from jar");
+                org.vivecraft.common.utils.Utils.logger.error("Failed to unpack natives from jar");
             }
             if (!didExtractSomething) {
                 ZipFile zipfile = LoaderUtils.getVivecraftZip();
@@ -386,7 +393,7 @@ public class Utils {
 
                     if (zipentry.getName().startsWith("natives/" + directory)) {
                         String s = Paths.get(zipentry.getName()).getFileName().toString();
-                        System.out.println(s);
+                        org.vivecraft.common.utils.Utils.logger.info(s);
                         writeStreamToFile(zipfile.getInputStream(zipentry), new File("openvr/" + directory + "/" + s));
                     }
                 }
@@ -394,7 +401,7 @@ public class Utils {
                 zipfile.close();
             }
         } catch (Exception exception1) {
-            System.out.println("Failed to unpack natives");
+            org.vivecraft.common.utils.Utils.logger.error("Failed to unpack natives");
             exception1.printStackTrace();
         }
     }
@@ -627,7 +634,7 @@ public class Utils {
             try {
                 minecraft.level.addParticle(type, position.x + d0, position.y + d1, position.z + d2, d3, d4, d5);
             } catch (Throwable throwable) {
-                LogManager.getLogger().warn("Could not spawn particle effect {}", type);
+                org.vivecraft.common.utils.Utils.logger.warn("Could not spawn particle effect {}", type);
                 return;
             }
         }
@@ -646,13 +653,8 @@ public class Utils {
     }
 
     public static void takeScreenshot(RenderTarget fb) {
-        Minecraft minecraft = Minecraft.getInstance();
-        Screenshot.grab(minecraft.gameDirectory, fb, (text) ->
-        {
-            minecraft.execute(() -> {
-                minecraft.gui.getChat().addMessage(text);
-            });
-        });
+        Minecraft mc = Minecraft.getInstance();
+        Screenshot.grab(mc.gameDirectory, fb, (text) -> mc.execute(() -> printChatMessage(text)));
     }
 
     public static List<FormattedText> wrapText(FormattedText text, int width, Font fontRenderer, @Nullable FormattedText linePrefix) {
@@ -716,30 +718,6 @@ public class Utils {
 
     public static String styleToFormatString(Style style) {
         return formatsToString(styleToFormats(style));
-    }
-
-    public static long microTime() {
-        return System.nanoTime() / 1000L;
-    }
-
-    public static long milliTime() {
-        return System.nanoTime() / 1000000L;
-    }
-
-    public static void printStackIfContainsClass(String className) {
-        StackTraceElement[] astacktraceelement = Thread.currentThread().getStackTrace();
-        boolean flag = false;
-
-        for (StackTraceElement stacktraceelement : astacktraceelement) {
-            if (stacktraceelement.getClassName().equals(className)) {
-                flag = true;
-                break;
-            }
-        }
-
-        if (flag) {
-            Thread.dumpStack();
-        }
     }
 
     public static org.joml.Matrix4f Matrix4fFromOpenVR(HmdMatrix44 in) {

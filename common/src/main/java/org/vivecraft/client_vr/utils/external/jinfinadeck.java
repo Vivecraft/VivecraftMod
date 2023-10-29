@@ -6,6 +6,7 @@ import com.sun.jna.NativeLibrary;
 import com.sun.jna.ptr.DoubleByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
+import org.vivecraft.common.utils.Utils;
 
 public class jinfinadeck implements Library {
     public static final String INFINADECK_LIBRARY_NAME = "InfinadeckAPI.dll";
@@ -62,7 +63,7 @@ public class jinfinadeck implements Library {
             ismoving = GetTreadmillRunState();
             yaw *= 57.296F;
         } catch (Exception exception) {
-            System.out.println("Infinadeck Error: " + exception.getMessage());
+            Utils.logger.error("Infinadeck Error: {}", exception.getMessage());
         }
     }
 

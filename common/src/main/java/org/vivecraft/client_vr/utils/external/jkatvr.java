@@ -6,6 +6,7 @@ import com.sun.jna.NativeLibrary;
 import com.sun.jna.ptr.DoubleByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
+import org.vivecraft.common.utils.Utils;
 
 public class jkatvr implements Library {
     public static final String KATVR_LIBRARY_NAME = "WalkerBase.dll";
@@ -43,7 +44,7 @@ public class jkatvr implements Library {
             ismoving = is.getValue();
             yaw = yaw / 1024.0F * 360.0F;
         } catch (Exception exception) {
-            System.out.println("KATVR Error: " + exception.getMessage());
+            Utils.logger.error("KATVR Error: {}", exception.getMessage());
         }
     }
 

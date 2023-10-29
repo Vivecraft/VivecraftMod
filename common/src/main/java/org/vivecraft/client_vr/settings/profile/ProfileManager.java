@@ -1,6 +1,7 @@
 package org.vivecraft.client_vr.settings.profile;
 
 import com.google.gson.*;
+import org.vivecraft.common.utils.Utils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -65,7 +66,7 @@ public class ProfileManager {
             validateProfiles();
             loaded = true;
         } catch (Exception exception1) {
-            System.out.println("FAILED to read VR profile settings!");
+            Utils.logger.error("FAILED to read VR profile settings!");
             exception1.printStackTrace();
             loaded = false;
         }

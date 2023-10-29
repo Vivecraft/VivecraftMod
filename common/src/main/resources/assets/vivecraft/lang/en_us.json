@@ -314,6 +314,8 @@
   "vivecraft.options.bowmode.vanilla": "Vanilla",
   "vivecraft.options.teleportlimit": "%d Blocks",
   "vivecraft.options.teleport": "Teleport",
+  "vivecraft.options.teleport.style": "Teleport style (RCTRL-M): %s",
+  "vivecraft.options.teleport.style.unknown": "Unknown teleport style requested: %s",
   "vivecraft.options.freemove": "Free Move",
   "vivecraft.options.menuworld.both": "Official & Custom",
   "vivecraft.options.menuworld.custom": "Custom Only",

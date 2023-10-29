@@ -140,13 +140,13 @@ public class PhysicalKeyboard {
             this.addKey(new KeyButton(1000 + l, "Shift", l == 1 ? this.keyWidthSpecial + this.spacing + (float) this.columns * (this.keyWidth + this.spacing) : 0.0F, 3.0F * (this.keyHeight + this.spacing), this.keyWidthSpecial, this.keyHeight) {
                 @Override
                 public void onPressed() {
-                    if (PhysicalKeyboard.this.shift && !PhysicalKeyboard.this.shiftSticky && Utils.milliTime() - PhysicalKeyboard.this.shiftPressTime < 400L) {
+                    if (PhysicalKeyboard.this.shift && !PhysicalKeyboard.this.shiftSticky && org.vivecraft.common.utils.Utils.milliTime() - PhysicalKeyboard.this.shiftPressTime < 400L) {
                         PhysicalKeyboard.this.setShift(true, true);
                     } else {
                         PhysicalKeyboard.this.setShift(!PhysicalKeyboard.this.shift, false);
                     }
 
-                    PhysicalKeyboard.this.shiftPressTime = Utils.milliTime();
+                    PhysicalKeyboard.this.shiftPressTime = org.vivecraft.common.utils.Utils.milliTime();
                 }
 
                 @Override
@@ -307,7 +307,7 @@ public class PhysicalKeyboard {
                             RGBAColor color = new RGBAColor(Integer.parseInt(colorSplit[0]), Integer.parseInt(colorSplit[1]), Integer.parseInt(colorSplit[2]), 255);
                             customTheme.put(id, color);
                         } catch (Exception ex) {
-                            System.out.println("Bad theme line: " + line);
+                            org.vivecraft.common.utils.Utils.logger.error("Bad theme line: {}", line);
                             ex.printStackTrace();
                         }
                     });
@@ -330,7 +330,7 @@ public class PhysicalKeyboard {
             KeyButton physicalkeyboard$keybutton = this.findTouchedKey(controllertype);
 
             if (physicalkeyboard$keybutton != null) {
-                if (physicalkeyboard$keybutton != this.pressedKey[i] && Utils.milliTime() - this.pressTime[i] >= 150L) {
+                if (physicalkeyboard$keybutton != this.pressedKey[i] && org.vivecraft.common.utils.Utils.milliTime() - this.pressTime[i] >= 150L) {
                     if (this.pressedKey[i] != null) {
                         this.pressedKey[i].unpress(controllertype);
                         this.pressedKey[i] = null;
@@ -338,16 +338,16 @@ public class PhysicalKeyboard {
 
                     physicalkeyboard$keybutton.press(controllertype, false);
                     this.pressedKey[i] = physicalkeyboard$keybutton;
-                    this.pressTime[i] = Utils.milliTime();
-                    this.pressRepeatTime[i] = Utils.milliTime();
-                } else if (physicalkeyboard$keybutton == this.pressedKey[i] && Utils.milliTime() - this.pressTime[i] >= 500L && Utils.milliTime() - this.pressRepeatTime[i] >= 100L) {
+                    this.pressTime[i] = org.vivecraft.common.utils.Utils.milliTime();
+                    this.pressRepeatTime[i] = org.vivecraft.common.utils.Utils.milliTime();
+                } else if (physicalkeyboard$keybutton == this.pressedKey[i] && org.vivecraft.common.utils.Utils.milliTime() - this.pressTime[i] >= 500L && org.vivecraft.common.utils.Utils.milliTime() - this.pressRepeatTime[i] >= 100L) {
                     physicalkeyboard$keybutton.press(controllertype, true);
-                    this.pressRepeatTime[i] = Utils.milliTime();
+                    this.pressRepeatTime[i] = org.vivecraft.common.utils.Utils.milliTime();
                 }
             } else if (this.pressedKey[i] != null) {
                 this.pressedKey[i].unpress(controllertype);
                 this.pressedKey[i] = null;
-                this.pressTime[i] = Utils.milliTime();
+                this.pressTime[i] = org.vivecraft.common.utils.Utils.milliTime();
             }
         }
     }

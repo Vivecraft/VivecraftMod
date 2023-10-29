@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.common.utils.Utils;
 
 @Mixin(Main.class)
 public class MainMixin {
@@ -24,14 +25,14 @@ public class MainMixin {
         ClientDataHolderVR.kiosk = optionset.has("kiosk");
 
         if (ClientDataHolderVR.kiosk) {
-            System.out.println("Setting kiosk");
+            Utils.logger.info("Setting kiosk");
         }
 
         if (ClientDataHolderVR.kiosk) {
             ClientDataHolderVR.viewonly = optionset.has("viewonly");
 
             if (ClientDataHolderVR.viewonly) {
-                System.out.println("Setting viewonly");
+                Utils.logger.info("Setting viewonly");
             }
         }
 

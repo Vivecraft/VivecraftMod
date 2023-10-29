@@ -38,13 +38,13 @@ public class PatreonReceiver {
                                 }
                             }
                         } catch (Exception exception1) {
-                            System.out.println("error with donors txt " + exception1.getMessage());
+                            org.vivecraft.common.utils.Utils.logger.error("error with donors txt {}", exception1.getMessage());
                         }
                     }
 
                     cache = hashmap;
                 } catch (Exception exception1) {
-                    System.out.println("Error parsing data: " + url + ", " + exception1.getClass().getName() + ": " + exception1.getMessage());
+                    org.vivecraft.common.utils.Utils.logger.error("Error parsing data: {}, {}: {}", url, exception1.getClass().getName(), exception1.getMessage());
                     downloadFailed = true;
                 }
             } else {

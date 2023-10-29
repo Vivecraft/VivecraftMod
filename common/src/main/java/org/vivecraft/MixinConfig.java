@@ -1,12 +1,11 @@
 package org.vivecraft;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_11;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_9;
 import org.vivecraft.mod_compat_vr.sodium.mixin.RenderSectionManagerVRMixin;
@@ -50,7 +49,7 @@ public class MixinConfig implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (!Xplat.isModLoadedSuccess()) {
-            LogManager.getLogger().log(Level.WARN, "not loading '" + mixinClassName + "' because mod failed to load completely");
+            Utils.logger.warn("not loading '{}' because mod failed to load completely", mixinClassName);
             return false;
         }
 
@@ -76,7 +75,7 @@ public class MixinConfig implements IMixinConfigPlugin {
                 MixinService.getService().getBytecodeProvider().getClassNode(neededClass);
                 return true;
             } catch (ClassNotFoundException | IOException e) {
-                LogManager.getLogger().log(Level.INFO, "Vivecraft: skipping mixin '" + mixinClassName + "'");
+                Utils.logger.info("skipping mixin '{}'", mixinClassName);
                 return false;
             }
         }

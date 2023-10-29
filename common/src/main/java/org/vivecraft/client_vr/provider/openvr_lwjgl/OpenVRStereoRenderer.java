@@ -43,9 +43,9 @@ public class OpenVRStereoRenderer extends VRRenderer {
                 var intbyreference1 = stack.callocInt(1);
                 VRSystem_GetRecommendedRenderTargetSize(intbyreference, intbyreference1);
                 this.resolution = new Tuple<>(intbyreference.get(0), intbyreference1.get(0));
-                System.out.println("OpenVR Render Res " + this.resolution.getA() + " x " + this.resolution.getB());
+                org.vivecraft.common.utils.Utils.logger.info("OpenVR Render Res {} x {}", this.resolution.getA(), this.resolution.getB());
                 this.ss = this.openvr.getSuperSampling();
-                System.out.println("OpenVR Supersampling: " + this.ss);
+                org.vivecraft.common.utils.Utils.logger.info("OpenVR Supersampling: {}", this.ss);
             }
 
             for (int i = 0; i < 2; ++i) {
@@ -53,7 +53,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
                 int j = this.hiddenMeshes[i].unTriangleCount();
 
                 if (j <= 0) {
-                    System.out.println("No stencil mesh found for eye " + i);
+                    org.vivecraft.common.utils.Utils.logger.info("No stencil mesh found for eye {}", i);
                 } else {
                     this.hiddenMesheVertecies[i] = new float[this.hiddenMeshes[i].unTriangleCount() * 3 * 2];
                     MemoryUtil.memFloatBuffer(MemoryUtil.memAddress(this.hiddenMeshes[i].pVertexData()), this.hiddenMesheVertecies[i].length).get(this.hiddenMesheVertecies[i]);
@@ -63,7 +63,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
                         this.hiddenMesheVertecies[i][k + 1] *= (float) this.resolution.getB();
                     }
 
-                    System.out.println("Stencil mesh loaded for eye " + i);
+                    org.vivecraft.common.utils.Utils.logger.info("Stencil mesh loaded for eye {}", i);
                 }
             }
 

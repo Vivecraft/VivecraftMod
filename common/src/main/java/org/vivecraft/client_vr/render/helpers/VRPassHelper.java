@@ -17,6 +17,7 @@ import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
@@ -219,10 +220,10 @@ public class VRPassHelper {
         }
     }
 
-    private static void checkGLError(String string) {
+    public static void checkGLError(String string) {
         int i = GlStateManager._getError();
         if (i != 0) {
-            System.err.println(string + ": " + i);
+            Utils.logger.error("{}: {}", string, i);
         }
     }
 }

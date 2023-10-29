@@ -1,5 +1,7 @@
 package org.vivecraft.client_vr.utils;
 
+import org.vivecraft.common.utils.Utils;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -20,7 +22,7 @@ public class LoaderUtils {
             vivecraftFile = toFile(ZipFileUrl.toURI());
             ZipFile = new java.util.zip.ZipFile(vivecraftFile);
         } catch (Exception e) {
-            System.out.print("Error getting Vivecraft library: " + e.getLocalizedMessage());
+            Utils.logger.error("Error getting Vivecraft library: {}", e.getLocalizedMessage());
         }
     }
 
