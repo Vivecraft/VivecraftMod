@@ -820,7 +820,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (System.currentTimeMillis() < this.vivecraft$mirroNotifyStart + this.vivecraft$mirroNotifyLen) {
             RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
             Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float) this.window.getScreenWidth(),
-                (float) this.window.getScreenHeight(), 0.0F, 1000.0F, 3000.0F);
+                0.0F, (float) this.window.getScreenHeight(), 1000.0F, 3000.0F);
             RenderSystem.setProjectionMatrix(matrix4f);
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().setIdentity();
