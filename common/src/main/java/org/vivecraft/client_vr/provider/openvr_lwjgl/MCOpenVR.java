@@ -8,6 +8,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.sun.jna.NativeLibrary;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.ClientLanguage;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.Vec3;
@@ -427,63 +429,82 @@ public class MCOpenVR extends MCVR {
 
     private void generateActionManifest() {
         Map<String, Object> map = new HashMap<>();
-        List<Map<String, Object>> list = new ArrayList<>();
+        List<Map<String, Object>> actionSets = new ArrayList<>();
 
-        for (VRInputActionSet vrinputactionset : VRInputActionSet.values()) {
-            String s = vrinputactionset.usage;
+        for (VRInputActionSet actionSet : VRInputActionSet.values()) {
+            String usage = actionSet.usage;
 
-            if (vrinputactionset.advanced && !this.dh.vrSettings.allowAdvancedBindings) {
-                s = "hidden";
+            if (actionSet.advanced && !this.dh.vrSettings.allowAdvancedBindings) {
+                usage = "hidden";
             }
 
-            list.add(ImmutableMap.<String, Object>builder().put("name", vrinputactionset.name).put("usage", s).build());
+            actionSets.add(ImmutableMap.<String, Object>builder().put("name", actionSet.name).put("usage", usage).build());
         }
 
-        map.put("action_sets", list);
-        List<VRInputAction> list1 = new ArrayList<>(this.inputActions.values());
-        list1.sort(Comparator.comparing((action) ->
+        map.put("action_sets", actionSets);
+        List<VRInputAction> sortedActions = new ArrayList<>(this.inputActions.values());
+        sortedActions.sort(Comparator.comparing((action) ->
         {
             return action.keyBinding;
         }));
-        List<Map<String, Object>> list2 = new ArrayList<>();
+        List<Map<String, Object>> actions = new ArrayList<>();
 
-        for (VRInputAction vrinputaction : list1) {
-            list2.add(ImmutableMap.<String, Object>builder().put("name", vrinputaction.name).put("requirement", vrinputaction.requirement).put("type", vrinputaction.type).build());
+        for (VRInputAction action : sortedActions) {
+            actions.add(ImmutableMap.<String, Object>builder().put("name", action.name).put("requirement", action.requirement).put("type", action.type).build());
         }
 
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAND).put("requirement", "suggested").put("type", "pose").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAND).put("requirement", "suggested").put("type", "pose").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_EXTERNAL_CAMERA).put("requirement", "optional").put("type", "pose").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
-        map.put("actions", list2);
-        Map<String, Object> map1 = new HashMap<>();
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAND).put("requirement", "suggested").put("type", "pose").build());
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAND).put("requirement", "suggested").put("type", "pose").build());
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_EXTERNAL_CAMERA).put("requirement", "optional").put("type", "pose").build());
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
+        map.put("actions", actions);
 
-        for (VRInputAction vrinputaction1 : list1) {
-            MutableComponent component = Component.translatable(vrinputaction1.keyBinding.getCategory()).append(" - ").append(Component.translatable(vrinputaction1.keyBinding.getName()));
-            map1.put(vrinputaction1.name, component.getString());
+        // Last updated 10/29/2023
+        // Hard-coded list of languages Steam supports
+        String[] steamLanguages = {"en_US", "bg_BG", "zh_CN", "zh_TW", "cs_CZ", "da_DK", "nl_NL", "fi_FI", "fr_FR", "de_DE", "el_GR", "hu_HU", "id_ID", "it_IT", "ja_JP", "ko_KR", "no_NO", "pl_PL", "pt_PT", "pt_BR", "ro_RO", "ru_RU", "es_ES", "es_MX", "sv_SE", "th_TH", "tr_TR", "uk_UA", "vi_VN"};
+        // Steam uses some incorrect language codes, this remaps to those
+        // SteamVR itself is also not translated into all languages Steam supports yet, so in those cases English may be used regardless
+        Map<String, String> wrongCodeMappings = Map.ofEntries(Map.entry("cs_CZ", "cs_CS"), Map.entry("da_DK", "da_DA"), Map.entry("el_GR", "el_EL"), Map.entry("sv_SE", "sv_SV"));
+
+        List<Map<String, Object>> localeList = new ArrayList<>();
+        for (String langCode : steamLanguages) {
+            Map<String, Object> localeMap = new HashMap<>();
+
+            // Load the language
+            List<String> langs = new ArrayList<>();
+            langs.add("en_us");
+            if (!langCode.equals("en_US")) langs.add(langCode.toLowerCase());
+            Language lang = ClientLanguage.loadFrom(mc.getResourceManager(), langs, false);
+
+            for (VRInputAction action : sortedActions) {
+                localeMap.put(action.name, lang.getOrDefault(action.keyBinding.getCategory()) + " - " + lang.getOrDefault(action.keyBinding.getName()));
+            }
+
+            for (VRInputActionSet actionSet : VRInputActionSet.values()) {
+                localeMap.put(actionSet.name, lang.getOrDefault(actionSet.localizedName));
+            }
+
+            // We don't really care about localizing these
+            localeMap.put(ACTION_LEFT_HAND, "Left Hand Pose");
+            localeMap.put(ACTION_RIGHT_HAND, "Right Hand Pose");
+            localeMap.put(ACTION_EXTERNAL_CAMERA, "External Camera");
+            localeMap.put(ACTION_LEFT_HAPTIC, "Left Hand Haptic");
+            localeMap.put(ACTION_RIGHT_HAPTIC, "Right Hand Haptic");
+
+            localeMap.put("language_tag", wrongCodeMappings.getOrDefault(langCode, langCode));
+            localeList.add(localeMap);
         }
+        map.put("localization", localeList);
 
-        for (VRInputActionSet vrinputactionset1 : VRInputActionSet.values()) {
-            MutableComponent component = Component.translatable(vrinputactionset1.localizedName);
-            map1.put(vrinputactionset1.name, component.getString());
-        }
-
-        map1.put(ACTION_LEFT_HAND, "Left Hand Pose");
-        map1.put(ACTION_RIGHT_HAND, "Right Hand Pose");
-        map1.put(ACTION_EXTERNAL_CAMERA, "External Camera");
-        map1.put(ACTION_LEFT_HAPTIC, "Left Hand Haptic");
-        map1.put(ACTION_RIGHT_HAPTIC, "Right Hand Haptic");
-        map1.put("language_tag", "en_US");
-        map.put("localization", ImmutableList.<Map<String, Object>>builder().add(map1).build());
-        List<Map<String, Object>> list3 = new ArrayList<>();
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_controller").put("binding_url", "vive_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "oculus_touch").put("binding_url", "oculus_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "holographic_controller").put("binding_url", "wmr_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "knuckles").put("binding_url", "knuckles_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_cosmos_controller").put("binding_url", "cosmos_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_tracker_camera").put("binding_url", "tracker_defaults.json").build());
-        map.put("default_bindings", list3);
+        List<Map<String, Object>> defaults = new ArrayList<>();
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_controller").put("binding_url", "vive_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "oculus_touch").put("binding_url", "oculus_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "holographic_controller").put("binding_url", "wmr_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "knuckles").put("binding_url", "knuckles_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_cosmos_controller").put("binding_url", "cosmos_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_tracker_camera").put("binding_url", "tracker_defaults.json").build());
+        map.put("default_bindings", defaults);
 
         try {
             (new File("openvr/input")).mkdirs();
@@ -495,12 +516,12 @@ public class MCOpenVR extends MCVR {
             throw new RuntimeException("Failed to write action manifest", exception);
         }
 
-        String s1 = this.dh.vrSettings.reverseHands ? "_reversed" : "";
-        Utils.loadAssetToFile("input/vive_defaults" + s1 + ".json", new File("openvr/input/vive_defaults.json"), false);
-        Utils.loadAssetToFile("input/oculus_defaults" + s1 + ".json", new File("openvr/input/oculus_defaults.json"), false);
-        Utils.loadAssetToFile("input/wmr_defaults" + s1 + ".json", new File("openvr/input/wmr_defaults.json"), false);
-        Utils.loadAssetToFile("input/knuckles_defaults" + s1 + ".json", new File("openvr/input/knuckles_defaults.json"), false);
-        Utils.loadAssetToFile("input/cosmos_defaults" + s1 + ".json", new File("openvr/input/cosmos_defaults.json"), false);
+        String rev = this.dh.vrSettings.reverseHands ? "_reversed" : "";
+        Utils.loadAssetToFile("input/vive_defaults" + rev + ".json", new File("openvr/input/vive_defaults.json"), false);
+        Utils.loadAssetToFile("input/oculus_defaults" + rev + ".json", new File("openvr/input/oculus_defaults.json"), false);
+        Utils.loadAssetToFile("input/wmr_defaults" + rev + ".json", new File("openvr/input/wmr_defaults.json"), false);
+        Utils.loadAssetToFile("input/knuckles_defaults" + rev + ".json", new File("openvr/input/knuckles_defaults.json"), false);
+        Utils.loadAssetToFile("input/cosmos_defaults" + rev + ".json", new File("openvr/input/cosmos_defaults.json"), false);
         Utils.loadAssetToFile("input/tracker_defaults.json", new File("openvr/input/tracker_defaults.json"), false);
     }
 
