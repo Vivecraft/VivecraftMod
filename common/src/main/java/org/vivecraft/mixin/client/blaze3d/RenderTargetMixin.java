@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client.extensions.RenderTargetExtension;
+import org.vivecraft.mixin.accessor.blaze3d.RenderSystemAccessor;
 
 @Debug(export = true)
 @Mixin(RenderTarget.class)

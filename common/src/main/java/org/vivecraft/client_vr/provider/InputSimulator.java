@@ -1,6 +1,8 @@
 package org.vivecraft.client_vr.provider;
 
 import net.minecraft.client.Minecraft;
+import org.vivecraft.mixin.accessor.client.KeyboardHandlerAccessor;
+import org.vivecraft.mixin.accessor.client.MouseHandlerAccessor;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,7 +33,7 @@ public class InputSimulator {
     }
 
     public static void typeChar(char character, int modifiers) {
-        Minecraft.getInstance().keyboardHandler.charTyped(Minecraft.getInstance().getWindow().getWindow(), character, modifiers);
+        ((KeyboardHandlerAccessor) Minecraft.getInstance().keyboardHandler).callCharTyped(Minecraft.getInstance().getWindow().getWindow(), character, modifiers);
     }
 
     public static void typeChar(char character) {
@@ -39,7 +41,7 @@ public class InputSimulator {
     }
 
     public static void pressMouse(int button, int modifiers) {
-        Minecraft.getInstance().mouseHandler.onPress(Minecraft.getInstance().getWindow().getWindow(), button, 1, modifiers);
+        ((MouseHandlerAccessor) Minecraft.getInstance().mouseHandler).callOnPress(Minecraft.getInstance().getWindow().getWindow(), button, 1, modifiers);
     }
 
     public static void pressMouse(int button) {
@@ -47,7 +49,7 @@ public class InputSimulator {
     }
 
     public static void releaseMouse(int button, int modifiers) {
-        Minecraft.getInstance().mouseHandler.onPress(Minecraft.getInstance().getWindow().getWindow(), button, 0, modifiers);
+        ((MouseHandlerAccessor) Minecraft.getInstance().mouseHandler).callOnPress(Minecraft.getInstance().getWindow().getWindow(), button, 0, modifiers);
     }
 
     public static void releaseMouse(int button) {
@@ -55,11 +57,11 @@ public class InputSimulator {
     }
 
     public static void setMousePos(double x, double y) {
-        Minecraft.getInstance().mouseHandler.onMove(Minecraft.getInstance().getWindow().getWindow(), x, y);
+        ((MouseHandlerAccessor) Minecraft.getInstance().mouseHandler).callOnMove(Minecraft.getInstance().getWindow().getWindow(), x, y);
     }
 
     public static void scrollMouse(double xOffset, double yOffset) {
-        Minecraft.getInstance().mouseHandler.onScroll(Minecraft.getInstance().getWindow().getWindow(), xOffset, yOffset);
+        ((MouseHandlerAccessor) Minecraft.getInstance().mouseHandler).callOnScroll(Minecraft.getInstance().getWindow().getWindow(), xOffset, yOffset);
     }
 
     public static void typeChars(CharSequence characters) {

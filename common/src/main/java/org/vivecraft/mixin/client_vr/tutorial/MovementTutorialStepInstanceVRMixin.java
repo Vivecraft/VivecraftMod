@@ -36,12 +36,12 @@ public class MovementTutorialStepInstanceVRMixin {
 
         if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
             // find the currently used movement binding
-            if (MCVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyFreeMoveStrafe).isActive()) {
+            if (MCVR.get().getInputAction(VivecraftVRMod.keyFreeMoveStrafe).isActive()) {
                 // moveStrafe active
-                return Component.translatable("vivecraft.toasts.move1", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyFreeMoveStrafe).getLastOrigin())).withStyle(ChatFormatting.BOLD));
-            } else if (MCVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyFreeMoveRotate).isActive()) {
+                return Component.translatable("vivecraft.toasts.move1", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(VivecraftVRMod.keyFreeMoveStrafe).getLastOrigin())).withStyle(ChatFormatting.BOLD));
+            } else if (MCVR.get().getInputAction(VivecraftVRMod.keyFreeMoveRotate).isActive()) {
                 // moveRotate active
-                return Component.translatable("vivecraft.toasts.move1", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyFreeMoveRotate).getLastOrigin())).withStyle(ChatFormatting.BOLD));
+                return Component.translatable("vivecraft.toasts.move1", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(VivecraftVRMod.keyFreeMoveRotate).getLastOrigin())).withStyle(ChatFormatting.BOLD));
             } else if (MCVR.get().getInputAction(Minecraft.getInstance().options.keyUp).isActive() ||
                 MCVR.get().getInputAction(Minecraft.getInstance().options.keyDown).isActive() ||
                 MCVR.get().getInputAction(Minecraft.getInstance().options.keyLeft).isActive() ||
@@ -88,12 +88,12 @@ public class MovementTutorialStepInstanceVRMixin {
                     );
                     default -> Component.literal("");
                 };
-            } else if (MCVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTeleportFallback).isActive()) {
+            } else if (MCVR.get().getInputAction(VivecraftVRMod.keyTeleportFallback).isActive()) {
                 // teleport fallback
-                return Component.translatable("vivecraft.toasts.move1", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTeleportFallback).getLastOrigin())).withStyle(ChatFormatting.BOLD));
-            } else if (MCVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTeleport).isActive()) {
+                return Component.translatable("vivecraft.toasts.move1", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(VivecraftVRMod.keyTeleportFallback).getLastOrigin())).withStyle(ChatFormatting.BOLD));
+            } else if (MCVR.get().getInputAction(VivecraftVRMod.keyTeleport).isActive()) {
                 // teleport
-                return Component.translatable("vivecraft.toasts.teleport", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTeleport).getLastOrigin())).withStyle(ChatFormatting.BOLD));
+                return Component.translatable("vivecraft.toasts.teleport", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(VivecraftVRMod.keyTeleport).getLastOrigin())).withStyle(ChatFormatting.BOLD));
             }
         }
         return title;
@@ -125,7 +125,7 @@ public class MovementTutorialStepInstanceVRMixin {
 
     @Inject(at = @At("TAIL"), method = "onInput")
     private void vivecraft$addTeleport(Input input, CallbackInfo ci) {
-        moved |= VivecraftVRMod.INSTANCE.keyTeleport.isDown();
+        moved |= VivecraftVRMod.keyTeleport.isDown();
     }
 
     @Inject(at = @At("HEAD"), method = "onMouse", cancellable = true)

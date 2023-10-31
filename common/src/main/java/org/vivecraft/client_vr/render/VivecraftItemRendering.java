@@ -338,7 +338,7 @@ public class VivecraftItemRendering {
                         translateY += 0.02F;
                         translateX += 0.03F;
 
-                        if (VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT) && mainHand || VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.LEFT) && !mainHand) {
+                        if (VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.RIGHT) && mainHand || VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.LEFT) && !mainHand) {
                             translateZ += -0.2F;
                         }
                     }

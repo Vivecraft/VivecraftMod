@@ -58,7 +58,7 @@ public class JumpTracker extends Tracker {
     }
 
     public void idleTick(LocalPlayer player) {
-        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyJump).setEnabled(this.isClimbeyJumpEquipped() && (this.isActive(player) || this.dh.climbTracker.isClimbeyClimbEquipped() && this.dh.climbTracker.isGrabbingLadder()));
+        this.dh.vr.getInputAction(VivecraftVRMod.keyClimbeyJump).setEnabled(this.isClimbeyJumpEquipped() && (this.isActive(player) || this.dh.climbTracker.isClimbeyClimbEquipped() && this.dh.climbTracker.isGrabbingLadder()));
     }
 
     public void reset(LocalPlayer player) {
@@ -72,7 +72,7 @@ public class JumpTracker extends Tracker {
             boolean[] aboolean = new boolean[2];
 
             for (int i = 0; i < 2; ++i) {
-                aboolean[i] = VivecraftVRMod.INSTANCE.keyClimbeyJump.isDown();
+                aboolean[i] = VivecraftVRMod.keyClimbeyJump.isDown();
             }
 
             boolean flag = false;

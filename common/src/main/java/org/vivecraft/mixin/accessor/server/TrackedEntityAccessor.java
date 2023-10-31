@@ -1,4 +1,4 @@
-package org.vivecraft.mixin.server;
+package org.vivecraft.mixin.accessor.server;
 
 import net.minecraft.server.network.ServerPlayerConnection;
 import org.spongepowered.asm.mixin.Mixin;

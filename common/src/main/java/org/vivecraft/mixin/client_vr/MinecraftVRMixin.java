@@ -42,10 +42,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -53,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.extensions.RenderTargetExtension;
+import org.vivecraft.mixin.accessor.client.gui.GuiAccessor;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.UpdateScreen;
@@ -161,7 +159,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     public ClientLevel level;
 
     @Shadow
-    public RenderTarget mainRenderTarget;
+    @Final
+    @Mutable
+    private RenderTarget mainRenderTarget;
 
     @Shadow
     public LocalPlayer player;
@@ -270,7 +270,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (OptifineHelper.isOptifineLoaded() && ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
             // with optifine this texture somehow fails to load, so manually reload it
             try {
-                textureManager.getTexture(Gui.GUI_ICONS_LOCATION).load(resourceManager);
+                textureManager.getTexture(GuiAccessor.getGUI_ICONS_LOCATION()).load(resourceManager);
             } catch (IOException e) {
                 // if there was an error, just reload everything
                 reloadResourcePacks();
@@ -679,7 +679,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         VRPlayersClient.getInstance().tick();
 
-        if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && level != null && player != null) {
+        if (VivecraftVRMod.keyExportWorld.consumeClick() && level != null && player != null) {
             Throwable error = null;
             try {
                 final BlockPos blockpos = player.blockPosition();

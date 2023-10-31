@@ -31,6 +31,7 @@ import org.vivecraft.client_vr.utils.external.jinfinadeck;
 import org.vivecraft.client_vr.utils.external.jkatvr;
 import org.vivecraft.common.utils.math.Matrix4f;
 import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.mixin.accessor.client.KeyMappingAccessor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -94,7 +95,7 @@ public class MCOpenVR extends MCVR {
     InputAnalogActionData analog = InputAnalogActionData.calloc();
 
     public MCOpenVR(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh, VivecraftVRMod.INSTANCE);
+        super(mc, dh);
         ome = this;
         this.hapticScheduler = new OpenVRHapticScheduler();
 
@@ -342,21 +343,21 @@ public class MCOpenVR extends MCVR {
             {
                 InputSimulator.scrollMouse(0.0D, -1.0D);
             });
-            this.processScrollInput(VivecraftVRMod.INSTANCE.keyHotbarScroll, () ->
+            this.processScrollInput(VivecraftVRMod.keyHotbarScroll, () ->
             {
                 this.changeHotbar(-1);
             }, () ->
             {
                 this.changeHotbar(1);
             });
-            this.processSwipeInput(VivecraftVRMod.INSTANCE.keyHotbarSwipeX, () ->
+            this.processSwipeInput(VivecraftVRMod.keyHotbarSwipeX, () ->
             {
                 this.changeHotbar(1);
             }, () ->
             {
                 this.changeHotbar(-1);
             }, null, null);
-            this.processSwipeInput(VivecraftVRMod.INSTANCE.keyHotbarSwipeY, null, null, () ->
+            this.processSwipeInput(VivecraftVRMod.keyHotbarSwipeY, null, null, () ->
             {
                 this.changeHotbar(-1);
             }, () ->
@@ -896,7 +897,7 @@ public class MCOpenVR extends MCVR {
         if (action.isActive() && action.isEnabledRaw()
             // try to prevent double left clicks
             && (!ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui
-            || !(action.actionSet == VRInputActionSet.INGAME && action.keyBinding.key.getType() == InputConstants.Type.MOUSE && action.keyBinding.key.getValue() == 0 && mc.screen != null))) {
+            || !(action.actionSet == VRInputActionSet.INGAME && ((KeyMappingAccessor) action.keyBinding).getKey().getType() == InputConstants.Type.MOUSE && ((KeyMappingAccessor) action.keyBinding).getKey().getValue() == 0 && mc.screen != null))) {
             if (action.isButtonChanged()) {
                 if (action.isButtonPressed() && action.isEnabled()) {
                     if (!this.ignorePressesNextFrame) {

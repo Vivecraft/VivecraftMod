@@ -24,6 +24,7 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jkatvr;
+import org.vivecraft.mixin.accessor.client.MinecraftAccessor;
 
 @Mixin(value = PauseScreen.class, priority = 900)
 public abstract class PauseScreenVRMixin extends Screen {
@@ -43,7 +44,7 @@ public abstract class PauseScreenVRMixin extends Screen {
         } catch (IllegalArgumentException e) {
         }
 
-        if (!Minecraft.getInstance().isMultiplayerServer()) {
+        if (!((MinecraftAccessor) Minecraft.getInstance()).callIsMultiplayerServer()) {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"), (p) ->
             {
                 this.minecraft.setScreen(new ChatScreen(""));

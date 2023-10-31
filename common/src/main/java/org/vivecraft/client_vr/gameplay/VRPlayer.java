@@ -583,7 +583,7 @@ public class VRPlayer {
     }
 
     public void updateTeleportKeys() {
-        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleport).setEnabled(this.isTeleportEnabled());
-        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
+        this.dh.vr.getInputAction(VivecraftVRMod.keyTeleport).setEnabled(this.isTeleportEnabled());
+        this.dh.vr.getInputAction(VivecraftVRMod.keyTeleportFallback).setEnabled(!this.isTeleportEnabled());
     }
 }

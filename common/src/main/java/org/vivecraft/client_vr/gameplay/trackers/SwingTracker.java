@@ -24,6 +24,7 @@ import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.Vec3History;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mixin.accessor.client.multiplayer.MultiplayerGameModeAccessor;
 
 import java.util.List;
 
@@ -179,7 +180,7 @@ public class SwingTracker extends Tracker {
 
                 this.canact[i] = this.canact[i] && !flag1 && !flag2;
 
-                if (!this.dh.climbTracker.isClimbeyClimb() || (i != 0 || !VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT)) && flag && (i != 1 || !VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.LEFT)) && flag) {
+                if (!this.dh.climbTracker.isClimbeyClimb() || (i != 0 || !VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.RIGHT)) && flag && (i != 1 || !VivecraftVRMod.keyClimbeyGrab.isDown(ControllerType.LEFT)) && flag) {
                     BlockPos blockpos = BlockPos.containing(this.miningPoint[i]);
                     BlockState blockstate = this.mc.level.getBlockState(blockpos);
                     BlockHitResult blockhitresult1 = this.mc.level.clip(new ClipContext(this.lastWeaponEndAir[i], this.miningPoint[i], ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.mc.player));
@@ -230,7 +231,7 @@ public class SwingTracker extends Tracker {
                                         }
                                     }
 
-                                    Minecraft.getInstance().gameMode.destroyDelay = 0;
+                                    ((MultiplayerGameModeAccessor) Minecraft.getInstance().gameMode).setDestroyDelay(0);
                                 }
 
                                 this.dh.vrPlayer.blockDust(blockhitresult1.getLocation().x, blockhitresult1.getLocation().y, blockhitresult1.getLocation().z, 3 * j, blockpos, blockstate, 0.6F, 1.0F);

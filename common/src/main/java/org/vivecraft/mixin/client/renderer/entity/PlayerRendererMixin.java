@@ -3,7 +3,6 @@ package org.vivecraft.mixin.client.renderer.entity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -17,8 +16,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.client.extensions.RenderLayerExtension;
+import org.vivecraft.mixin.accessor.client.model.PlayerModelAccessor;
 import org.vivecraft.client.utils.RenderLayerTypes;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mixin.accessor.client.renderer.entity.layers.RenderLayerAccessor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -73,7 +74,7 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
             // if no suitable constructor was found, use do a basic Object.clone call, and replace the parent of the copy
             if (constructor == null) {
                 // do a hacky clone, and replace parent
-                if (((PlayerModel<?>) model).slim) {
+                if (((PlayerModelAccessor) model).isSlim()) {
                     addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("slim"));
                     addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("slim"));
                 } else {
@@ -82,7 +83,7 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
                 }
             } else {
                 // make a new instance with the vr model as parent
-                if (((PlayerModel<?>) model).slim) {
+                if (((PlayerModelAccessor) model).isSlim()) {
                     addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVRSeated().get("slim"));
                     addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) ((EntityRenderDispatcherExtension) entityRenderDispatcher).vivecraft$getSkinMapVR().get("slim"));
                 } else {
@@ -102,7 +103,7 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
         try {
             VRSettings.logger.warn("Copying layer: {} with Object.copy, this could cause issues", renderLayer.getClass());
             RenderLayer<T, M> newLayer = (RenderLayer<T, M>) ((RenderLayerExtension) renderLayer).clone();
-            newLayer.renderer = target;
+            ((RenderLayerAccessor) newLayer).setRenderer(target);
             target.addLayer(newLayer);
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
@@ -120,7 +121,7 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
                 case PARENT_MODELSET ->
                     target.addLayer((RenderLayer<T, M>) constructor.newInstance(target, Minecraft.getInstance().getEntityModels()));
                 case PARENT_MODEL_MODEL -> {
-                    if (((PlayerModel<?>) model).slim) {
+                    if (((PlayerModelAccessor) model).isSlim()) {
                         target.addLayer((RenderLayer<T, M>) constructor.newInstance(target,
                             new HumanoidModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_INNER_ARMOR)),
                             new HumanoidModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_OUTER_ARMOR))));

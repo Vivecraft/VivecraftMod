@@ -8,7 +8,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -19,6 +18,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.mixin.accessor.world.item.CreativeModeTabsAccessor;
 
 @Mixin(CreativeModeInventoryScreen.class)
 public abstract class CreativeModeInventoryScreenVRMixin extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
@@ -42,7 +42,7 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
 
     @Unique
     private void vivecraft$addCreativeItems(CreativeModeTab tab, NonNullList<ItemStack> list) {
-        if (tab == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FOOD_AND_DRINKS) || tab == null) {
+        if (tab == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getFOOD_AND_DRINKS()) || tab == null) {
             ItemStack itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
             ItemStack itemstack1 = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER).setHoverName(Component.literal("DRINK ME"));
             itemstack1.getTag().putInt("HideFlags", 32);
@@ -50,7 +50,7 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
             list.add(itemstack1);
         }
 
-        if (tab == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.TOOLS_AND_UTILITIES) || tab == null) {
+        if (tab == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getTOOLS_AND_UTILITIES()) || tab == null) {
             ItemStack itemstack3 = (new ItemStack(Items.LEATHER_BOOTS)).setHoverName(Component.translatable("vivecraft.item.jumpboots"));
             itemstack3.getTag().putBoolean("Unbreakable", true);
             itemstack3.getTag().putInt("HideFlags", 4);
