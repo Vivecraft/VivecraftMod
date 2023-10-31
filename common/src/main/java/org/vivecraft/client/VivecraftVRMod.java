@@ -149,6 +149,6 @@ public class VivecraftVRMod {
     }
 
     public boolean isModBinding(KeyMapping kb) {
-        return !this.vanillaBindingSet.contains(kb);
+        return !this.vanillaBindingSet.contains(kb) && kb != mc.options.keyUse;
     }
 }
