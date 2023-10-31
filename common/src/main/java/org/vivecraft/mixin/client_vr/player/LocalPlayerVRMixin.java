@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -73,8 +72,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     private final ClientDataHolderVR vivecraft$dataholder = ClientDataHolderVR.getInstance();
     @Shadow
     private InteractionHand usingItemHand;
-    @Shadow
-    public Input input;
 
     public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile) {
         super(clientLevel, gameProfile);
