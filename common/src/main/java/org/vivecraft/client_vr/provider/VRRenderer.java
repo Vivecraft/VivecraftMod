@@ -6,10 +6,15 @@ import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
@@ -35,6 +40,8 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.mod_compat_vr.resolutioncontrol.ResolutionControlHelper;
+import oshi.SystemInfo;
+import oshi.hardware.GraphicsCard;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -513,9 +520,29 @@ public abstract class VRRenderer {
             this.reinitShadersFlag = true;
             this.checkGLError("Start Init");
 
-            if (GlUtil.getRenderer().toLowerCase().contains("intel")) //Optifine
-            {
-                throw new RenderConfigException("Incompatible", Component.translatable("vivecraft.messages.intelgraphics", GlUtil.getRenderer()));
+            if (Util.getPlatform() == Util.OS.WINDOWS && GlUtil.getRenderer().toLowerCase().contains("intel")) {
+                StringBuilder gpus = new StringBuilder();
+                boolean onlyIntel = true;
+                for (GraphicsCard gpu : (new SystemInfo()).getHardware().getGraphicsCards()) {
+                    gpus.append("\n");
+                    if (gpu.getVendor().toLowerCase().contains("intel") || gpu.getName().toLowerCase().contains("intel")) {
+                        gpus.append("§c❌§r ");
+                    } else {
+                        onlyIntel = false;
+                        gpus.append("§a✔§r ");
+                    }
+                    gpus.append(gpu.getVendor()).append(": ").append(gpu.getName());
+                }
+                throw new RenderConfigException("Incompatible", Component.translatable(
+                    "vivecraft.messages.intelgraphics1",
+                    Component.literal(GlUtil.getRenderer()).withStyle(ChatFormatting.GOLD),
+                    gpus.toString(),
+                    onlyIntel ? Component.empty()
+                              : Component.translatable("vivecraft.messages.intelgraphics2", Component.literal("https://www.vivecraft.org/faq/#gpu")
+                                  .withStyle(style -> style.withUnderlined(true)
+                                      .withColor(ChatFormatting.GREEN)
+                                      .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommonComponents.GUI_OPEN_IN_BROWSER))
+                                      .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.vivecraft.org/faq/#gpu"))))));
             }
 
             if (!this.isInitialized()) {

@@ -363,7 +363,7 @@
   "vivecraft.messages.serverplugin": "Wykryto serwerowy mod Vivecraft: %s",
   "vivecraft.messages.noserverplugin": "Nie wykryto serwerowego moda Vivecraft. Ten serwer moze nie wspierać teleportacji. Restrykcyjny tryb ruchu włączony (rezerwa do swobodnego ruchu).",
   "vivecraft.messages.calibrateheight": "Proszę skalibruj swoją wysokość w menu.",
-  "vivecraft.messages.rendersetupfailed": "Renderowanie nie powiodło się %s",
+  "vivecraft.messages.rendersetupfailed": "Renderowanie nie powiodło się %s\nVR provider: %s",
   "vivecraft.messages.intelgraphics": "Zintegrowana grafika Intela nie jest wspierana. Jeśli to jest laptop, wymuś użycie wysokiej wydajności GPU. Wykryte GPU: %s",
   "vivecraft.messages.nosteamvr": "OpenVR nie zostało wykryte. Zainstalowałeś SteamVR? ",
   "vivecraft.messages.menuworldexportcomplete.1": "Export świata pomyślny... rozmiar strefy: %d",

@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.vivecraft.client.gui.widgets.TextScrollWidget;
 
-
 public class ErrorScreen extends Screen {
 
     private final Screen lastScreen;
