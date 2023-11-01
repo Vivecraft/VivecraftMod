@@ -8,7 +8,6 @@ import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionEntry;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
-import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiHUDSettings extends GuiVROptionsBase {
@@ -55,8 +54,8 @@ public class GuiHUDSettings extends GuiVROptionsBase {
             if (button.getId() == VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE.ordinal()) {
                 GuiHandler.onScreenChanged(Minecraft.getInstance().screen, Minecraft.getInstance().screen, false);
             }
-            if (button.getId() == VRSettings.VrOptions.DOUBLE_GUI_RESOLUTION.ordinal() && VRState.vrRunning) {
-                this.dataholder.vrRenderer.reinitFrameBuffers("GUI Setting Changed");
+            if (button.getId() == VRSettings.VrOptions.DOUBLE_GUI_RESOLUTION.ordinal() && VRState.vrEnabled) {
+                this.dataholder.vrRenderer.resizeFrameBuffers("GUI Setting Changed");
             }
         }
     }

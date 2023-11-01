@@ -516,6 +516,16 @@ public abstract class VRRenderer {
             } else {
                 WorldRenderPass.camera.resize(cameraSize.getA(), cameraSize.getB());
             }
+
+            // resize gui, if changed
+            if (GuiHandler.updateResolution()) {
+                GuiHandler.guiFramebuffer.resize(GuiHandler.guiWidth, GuiHandler.guiHeight, Minecraft.ON_OSX);
+                if (minecraft.screen != null) {
+                    int l2 = minecraft.getWindow().getGuiScaledWidth();
+                    int j3 = minecraft.getWindow().getGuiScaledHeight();
+                    minecraft.screen.init(minecraft, l2, j3);
+                }
+            }
         }
 
         if (this.reinitFramebuffers) {

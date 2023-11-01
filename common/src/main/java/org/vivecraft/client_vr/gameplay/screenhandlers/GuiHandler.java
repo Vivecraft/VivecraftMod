@@ -113,10 +113,23 @@ public class GuiHandler {
         return j;
     }
 
-    public static void updateResolution() {
+    public static boolean updateResolution() {
+        int oldWidth = guiWidth;
+        int oldHeight = guiHeight;
         guiWidth = dh.vrSettings.doubleGUIResolution ? 2560 : 1280;
         guiHeight = dh.vrSettings.doubleGUIResolution ? 1440 : 720;
         guiScaleFactor = calculateScale(0, false, guiWidth, guiHeight);
+        if (oldWidth != guiWidth) {
+            // move cursor to right position
+            InputSimulator.setMousePos(
+                mc.mouseHandler.xpos() * ((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenWidth() / oldWidth,
+                mc.mouseHandler.ypos() * ((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenHeight() / oldHeight);
+            controllerMouseX *= (double) guiWidth / oldWidth;
+            controllerMouseY *= (double) guiHeight / oldHeight;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static void processGui() {
