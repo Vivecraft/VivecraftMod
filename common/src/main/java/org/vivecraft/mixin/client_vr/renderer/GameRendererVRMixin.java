@@ -265,14 +265,14 @@ public abstract class GameRendererVRMixin
                 this.vivecraft$minClipDistance, this.vivecraft$clipDistance));
         } else if (vivecraft$DATA_HOLDER.currentPass == RenderPass.SCOPEL
             || vivecraft$DATA_HOLDER.currentPass == RenderPass.SCOPER) {
-            posestack.mulPoseMatrix(new Matrix4f().setPerspective(70f / 8f * 0.01745329238474369F, 1.0F, 0.05F, this.vivecraft$clipDistance));
+            posestack.mulPoseMatrix(new Matrix4f().setPerspective(70f / 8f * 0.01745329238474369F, 1.0F, this.vivecraft$minClipDistance, this.vivecraft$clipDistance));
         } else {
             if (this.zoom != 1.0F) {
                 posestack.translate(this.zoomX, -this.zoomY, 0.0D);
                 posestack.scale(this.zoom, this.zoom, 1.0F);
             }
             posestack.mulPoseMatrix(new Matrix4f().setPerspective((float) d * 0.01745329238474369F, (float) this.minecraft.getWindow().getScreenWidth()
-                / (float) this.minecraft.getWindow().getScreenHeight(), 0.05F, this.vivecraft$clipDistance));
+                / (float) this.minecraft.getWindow().getScreenHeight(), this.vivecraft$minClipDistance, this.vivecraft$clipDistance));
         }
         info.setReturnValue(posestack.last().pose());
     }

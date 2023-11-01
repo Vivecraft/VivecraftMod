@@ -425,7 +425,8 @@ public class VRPlayer {
             this.isFreeMoveCurrent = false;
         }
 
-        if (this.mc.player.input.forwardImpulse != 0.0F || this.mc.player.input.leftImpulse != 0.0F) {
+        // during login input can be null, and can cause a weird async crash, if not checked
+        if (this.mc.player.input != null && (this.mc.player.input.forwardImpulse != 0.0F || this.mc.player.input.leftImpulse != 0.0F)) {
             this.isFreeMoveCurrent = true;
         }
 

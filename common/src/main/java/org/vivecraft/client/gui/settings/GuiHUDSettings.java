@@ -20,20 +20,18 @@ public class GuiHUDSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.HUD_OPACITY),
         new VROptionEntry(VRSettings.VrOptions.RENDER_MENU_BACKGROUND),
         new VROptionEntry(VRSettings.VrOptions.TOUCH_HOTBAR),
-        new VROptionEntry(VRSettings.VrOptions.AUTO_OPEN_KEYBOARD),
         new VROptionEntry(VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE),
-        new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD, (button, mousePos) -> {
-            KeyboardHandler.setOverlayShowing(false);
-            return false;
-        }),
         new VROptionEntry(VRSettings.VrOptions.GUI_APPEAR_OVER_BLOCK),
-        new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_SCALE),
+        new VROptionEntry(VRSettings.VrOptions.DUMMY),
+        new VROptionEntry(VRSettings.VrOptions.SHADER_GUI_RENDER),
+        new VROptionEntry("vivecraft.options.screen.keyboard.button", (button, mousePos) -> {
+            Minecraft.getInstance().setScreen(new GuiKeyboardSettings(this));
+            return true;
+        }),
         new VROptionEntry("vivecraft.options.screen.menuworld.button", (button, mousePos) -> {
             Minecraft.getInstance().setScreen(new GuiMenuWorldSettings(this));
             return true;
         }),
-        new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME),
-        new VROptionEntry(VRSettings.VrOptions.SHADER_GUI_RENDER)
     };
 
     public GuiHUDSettings(Screen guiScreen) {
@@ -53,9 +51,6 @@ public class GuiHUDSettings extends GuiVROptionsBase {
 
     protected void actionPerformed(AbstractWidget widget) {
         if (widget instanceof GuiVROption button) {
-            if (button.getId() == VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME.ordinal()) {
-                KeyboardHandler.physicalKeyboard.init();
-            }
             if (button.getId() == VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE.ordinal()) {
                 GuiHandler.onScreenChanged(Minecraft.getInstance().screen, Minecraft.getInstance().screen, false);
             }
