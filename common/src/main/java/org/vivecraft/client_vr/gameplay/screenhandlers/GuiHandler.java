@@ -19,6 +19,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
@@ -143,7 +144,9 @@ public class GuiHandler {
                             int j = 0;
 
                             if (MCVR.get().isControllerTracking(ControllerType.RIGHT)) {
-                                InputSimulator.setMousePos(d1, d0);
+                                InputSimulator.setMousePos(
+                                    d1 * (((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenWidth() / (double) mc.getWindow().getScreenWidth()),
+                                    d0 * (((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenHeight() / (double) mc.getWindow().getScreenHeight()));
                                 controllerMouseValid = true;
                             }
                         } else {
@@ -398,7 +401,8 @@ public class GuiHandler {
         } else if (mc.screen == null && !mc.mouseHandler.isMouseGrabbed()) {
             // some mod want's to do a mouse selection overlay
             if (guiPos_room == null) {
-                onScreenChanged(null, new Screen(Component.empty()) {}, false, true);
+                onScreenChanged(null, new Screen(Component.empty()) {
+                }, false, true);
             }
         } else if (mc.screen == null && guiPos_room != null) {
             //even naughtier mods!

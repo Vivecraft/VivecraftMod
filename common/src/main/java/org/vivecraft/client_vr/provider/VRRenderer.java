@@ -28,6 +28,7 @@ import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -324,7 +325,8 @@ public abstract class VRRenderer {
         list.add(RenderPass.RIGHT);
 
         // only do these, if the window is not minimized
-        if (minecraft.getWindow().getScreenWidth() > 0 && minecraft.getWindow().getScreenHeight() > 0) {
+        if (((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() > 0
+            && ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight() > 0) {
             if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
                 list.add(RenderPass.CENTER);
             } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
@@ -358,8 +360,8 @@ public abstract class VRRenderer {
     public abstract Tuple<Integer, Integer> getRenderTextureSizes();
 
     public Tuple<Integer, Integer> getMirrorTextureSize(int eyeFBWidth, int eyeFBHeight, float resolutionScale) {
-        mirrorFBWidth = (int) Math.ceil(Minecraft.getInstance().getWindow().getScreenWidth() * resolutionScale);
-        mirrorFBHeight = (int) Math.ceil(Minecraft.getInstance().getWindow().getScreenHeight() * resolutionScale);
+        mirrorFBWidth = (int) Math.ceil(((WindowExtension) (Object) Minecraft.getInstance().getWindow()).vivecraft$getActualScreenWidth() * resolutionScale);
+        mirrorFBHeight = (int) Math.ceil(((WindowExtension) (Object) Minecraft.getInstance().getWindow()).vivecraft$getActualScreenHeight() * resolutionScale);
 
         if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
             mirrorFBWidth = mirrorFBWidth / 2;
@@ -704,7 +706,7 @@ public abstract class VRRenderer {
                 minecraft.screen.init(minecraft, l2, j3);
             }
 
-            long windowPixels = (long) minecraft.getWindow().getScreenWidth() * minecraft.getWindow().getScreenHeight();
+            long windowPixels = (long) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() * ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight();
             long vrPixels = eyeFBWidth * eyeFBHeight * 2L;
 
             if (list.contains(RenderPass.CENTER)) {
@@ -718,7 +720,7 @@ public abstract class VRRenderer {
             System.out.println("[Minecrift] New render config:" +
                 "\nOpenVR target width: " + eyew + ", height: " + eyeh + " [" + String.format("%.1f", (float) (eyew * eyeh) / 1000000.0F) + " MP]" +
                 "\nRender target width: " + eyeFBWidth + ", height: " + eyeFBHeight + " [Render scale: " + Math.round(dataholder.vrSettings.renderScaleFactor * 100.0F) + "%, " + String.format("%.1f", (float) (eyeFBWidth * eyeFBHeight) / 1000000.0F) + " MP]" +
-                "\nMain window width: " + minecraft.getWindow().getScreenWidth() + ", height: " + minecraft.getWindow().getScreenHeight() + " [" + String.format("%.1f", (float) windowPixels / 1000000.0F) + " MP]" +
+                "\nMain window width: " + ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() + ", height: " + ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight() + " [" + String.format("%.1f", (float) windowPixels / 1000000.0F) + " MP]" +
                 "\nTotal shaded pixels per frame: " + String.format("%.1f", (float) vrPixels / 1000000.0F) + " MP (eye stencil not accounted for)");
             this.lastDisplayFBWidth = eyeFBWidth;
             this.lastDisplayFBHeight = eyeFBHeight;
@@ -732,8 +734,8 @@ public abstract class VRRenderer {
 
     public boolean wasDisplayResized() {
         Minecraft minecraft = Minecraft.getInstance();
-        int i = minecraft.getWindow().getScreenHeight();
-        int j = minecraft.getWindow().getScreenWidth();
+        int i = ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight();
+        int j = ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth();
         boolean flag = this.dispLastHeight != i || this.dispLastWidth != j;
         this.dispLastHeight = i;
         this.dispLastWidth = j;
