@@ -616,6 +616,7 @@ public abstract class VRRenderer {
                 }
             }
 
+            GuiHandler.updateResolution();
             GuiHandler.guiFramebuffer = new VRTextureTarget("GUI", GuiHandler.guiWidth, GuiHandler.guiHeight, true, false, -1, false, true, false);
             dataholder.print(GuiHandler.guiFramebuffer.toString());
             this.checkGLError("GUI framebuffer setup");
