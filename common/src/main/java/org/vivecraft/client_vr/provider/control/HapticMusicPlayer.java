@@ -1,4 +1,4 @@
-package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
+package org.vivecraft.client_vr.provider.control;
 
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;

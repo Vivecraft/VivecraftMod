@@ -22,8 +22,9 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.provider.*;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.control.TrackpadSwipeSampler;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.control.TrackpadSwipeSampler;
+import org.vivecraft.client_vr.provider.control.VRInputAction;
+import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -1162,7 +1163,7 @@ public class MCOpenVR extends MCVR {
         }
     }
 
-    ControllerType getOriginControllerType(long inputValueHandle) {
+    public ControllerType getOriginControllerType(long inputValueHandle) {
         if (inputValueHandle == 0L) {
             return null;
         } else {

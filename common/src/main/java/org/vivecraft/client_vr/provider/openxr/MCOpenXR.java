@@ -14,6 +14,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
+import org.lwjgl.openvr.OpenVR;
+import org.lwjgl.openvr.VRActiveActionSet;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.Platform;
@@ -23,11 +25,13 @@ import org.lwjgl.system.windows.User32;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
+import org.vivecraft.client_vr.provider.control.VRInputAction;
+import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.math.Matrix4f;
@@ -35,10 +39,7 @@ import org.vivecraft.common.utils.math.Matrix4f;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.lwjgl.opengl.GLX13.*;
 import static org.lwjgl.system.MemoryStack.*;
@@ -54,13 +55,16 @@ public class MCOpenXR extends MCVR {
     public XrSwapchain swapchain;
     public final XrEventDataBuffer eventDataBuffer = XrEventDataBuffer.calloc();
     public long time;
-    private HashMap<String, XrAction> inputs;
-    private HashMap<String, XrActionSet> actionSets;
     private boolean tried;
     private long systemID;
     public XrView.Buffer viewBuffer;
     public int width;
     public int height;
+    //TODO either move to MCVR, Or make special for OpenXR holding the instance itself.
+    private final Map<VRInputActionSet, Long> actionSetHandles = new EnumMap<>(VRInputActionSet.class);
+    //TODO Move to MCVR
+    private boolean inputInitialized;
+    private  XrActiveActionSet.Buffer activeActionSetsBuffer;
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -155,7 +159,180 @@ public class MCOpenXR extends MCVR {
             XrSpaceLocation space_location = XrSpaceLocation.calloc(stack).type(XR10.XR_TYPE_SPACE_LOCATION);
             XR10.xrLocateSpace(xrViewSpace, xrAppSpace, time, space_location);
             //hmdPose = new Matrix4f(space_location.pose());
+
+
+            if (this.inputInitialized) {
+                this.mc.getProfiler().push("updateActionState");
+
+                if (this.updateActiveActionSets()) {
+                    XrActionsSyncInfo syncInfo = XrActionsSyncInfo.calloc(stack)
+                        .type(XR10.XR_TYPE_ACTIONS_SYNC_INFO)
+                        .activeActionSets(activeActionSetsBuffer);
+                    XR10.xrSyncActions(session, syncInfo);
+                }
+
+                this.inputActions.values().forEach(this::readNewData);
+                this.mc.getProfiler().pop();
+            }
+
+//            if (this.dh.vrSettings.reverseHands) {
+//                this.updateControllerPose(0, this.leftPoseHandle);
+//                this.updateControllerPose(1, this.rightPoseHandle);
+//            } else {
+//                this.updateControllerPose(0, this.rightPoseHandle);
+//                this.updateControllerPose(1, this.leftPoseHandle);
+//            }
+//
+//            this.updateControllerPose(2, this.externalCameraPoseHandle);
         }
+
+        this.updateAim();
+    }
+
+    public void readNewData(VRInputAction action) {
+        String s = action.type;
+
+        switch (s) {
+            case "boolean":
+                if (action.isHanded()) {
+                    for (ControllerType controllertype1 : ControllerType.values()) {
+                        this.readBoolean(action, controllertype1);
+                    }
+                } else {
+                    this.readBoolean(action, null);
+                }
+
+                break;
+
+            case "vector1":
+                if (action.isHanded()) {
+                    for (ControllerType controllertype : ControllerType.values()) {
+                        this.readFloat(action, controllertype);
+                    }
+                } else {
+                    this.readFloat(action, null);
+                }
+            case "vector2":
+                if (action.isHanded()) {
+                    for (ControllerType controllertype : ControllerType.values()) {
+                        this.readVecData(action, controllertype);
+                    }
+                } else {
+                    this.readVecData(action, null);
+                }
+            case "vector3":
+
+        }
+    }
+
+    private void readBoolean(VRInputAction action, ControllerType hand) {
+        int i = 0;
+
+        if (hand != null) {
+            i = hand.ordinal();
+        }
+        try (MemoryStack stack = MemoryStack.stackPush()){
+            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+            info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
+            info.action(new XrAction(action.handle, new XrActionSet(actionSetHandles.get(action.actionSet), instance)));
+            XrActionStateBoolean state = XrActionStateBoolean.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_BOOLEAN);
+            XR10.xrGetActionStateBoolean(session, info, state);
+
+            action.digitalData[i].state = state.currentState();
+            action.digitalData[i].isActive = state.isActive();
+            action.digitalData[i].isChanged = state.changedSinceLastSync();
+        }
+    }
+
+    private void readFloat(VRInputAction action, ControllerType hand) {
+        int i = 0;
+
+        if (hand != null) {
+            i = hand.ordinal();
+        }
+        try (MemoryStack stack = MemoryStack.stackPush()){
+            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+            info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
+            info.action(new XrAction(action.handle, new XrActionSet(actionSetHandles.get(action.actionSet), instance)));
+            XrActionStateFloat state = XrActionStateFloat.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_FLOAT);
+            XR10.xrGetActionStateFloat(session, info, state);
+
+            action.analogData[i].deltaX = action.analogData[i].x - state.currentState();
+            action.analogData[i].x = state.currentState();
+            //action.analogData[i].activeOrigin = this.analog.activeOrigin();
+            action.analogData[i].isActive = state.isActive();
+            action.analogData[i].isChanged = state.changedSinceLastSync();
+        }
+    }
+
+    private void readVecData(VRInputAction action, ControllerType hand) {
+        int i = 0;
+
+        if (hand != null) {
+            i = hand.ordinal();
+        }
+        try (MemoryStack stack = MemoryStack.stackPush()){
+            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+            info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
+            info.action(new XrAction(action.handle, new XrActionSet(actionSetHandles.get(action.actionSet), instance)));
+            XrActionStateVector2f state = XrActionStateVector2f.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_VECTOR2F);
+            XR10.xrGetActionStateVector2f(session, info, state);
+
+            action.analogData[i].deltaX = action.analogData[i].x - state.currentState().x();
+            action.analogData[i].deltaX = action.analogData[i].y - state.currentState().y();
+            action.analogData[i].x = state.currentState().x();
+            action.analogData[i].x = state.currentState().y();
+            //action.analogData[i].activeOrigin = this.analog.activeOrigin();
+            action.analogData[i].isActive = state.isActive();
+            action.analogData[i].isChanged = state.changedSinceLastSync();
+        }
+    }
+
+    private boolean updateActiveActionSets() {
+        ArrayList<VRInputActionSet> arraylist = new ArrayList<>();
+        arraylist.add(VRInputActionSet.GLOBAL);
+
+        // we are always modded
+        arraylist.add(VRInputActionSet.MOD);
+
+        arraylist.add(VRInputActionSet.MIXED_REALITY);
+        arraylist.add(VRInputActionSet.TECHNICAL);
+
+        if (this.mc.screen == null) {
+            arraylist.add(VRInputActionSet.INGAME);
+            arraylist.add(VRInputActionSet.CONTEXTUAL);
+        } else {
+            arraylist.add(VRInputActionSet.GUI);
+            if (ClientDataHolderVR.getInstance().vrSettings.ingameBindingsInGui) {
+                arraylist.add(VRInputActionSet.INGAME);
+            }
+        }
+
+        if (KeyboardHandler.Showing || RadialHandler.isShowing()) {
+            arraylist.add(VRInputActionSet.KEYBOARD);
+        }
+
+        if (this.activeActionSetsBuffer == null) {
+            activeActionSetsBuffer = XrActiveActionSet.calloc(arraylist.size());
+        } else if (activeActionSetsBuffer.capacity() != arraylist.size()) {
+            activeActionSetsBuffer.close();
+            activeActionSetsBuffer = XrActiveActionSet.calloc(arraylist.size());
+        }
+
+        for (int i = 0; i < arraylist.size(); ++i) {
+            VRInputActionSet vrinputactionset = arraylist.get(i);
+            activeActionSetsBuffer.get(i).set(new XrActionSet(this.getActionSetHandle(vrinputactionset), instance), NULL);
+        }
+
+        return !arraylist.isEmpty();
+    }
+
+    private void updateControllerPose(int controller, long actionHandle) {
+
+    }
+
+    long getActionSetHandle(VRInputActionSet actionSet) {
+        return this.actionSetHandles.get(actionSet);
     }
 
     private void processVREvents() {
@@ -523,11 +700,19 @@ public class MCOpenXR extends MCVR {
     @Override
     public boolean postinit() throws RenderConfigException {
         this.initInputAndApplication();
-        return false;
+        return inputInitialized;
     }
 
     private void initInputAndApplication() {
+        this.populateInputActions();
 
+        //this.generateActionManifest();
+        //this.loadActionManifest();
+        this.loadActionHandles();
+        this.loadDefaultBindings();
+        //this.installApplicationManifest(false);
+        this.inputInitialized = true;
+        
     }
 
     @Override
@@ -562,16 +747,25 @@ public class MCOpenXR extends MCVR {
 
     //TODO Collect and register all actions
     private void loadActionHandles() {
-        this.actionSets = new HashMap<>();
         for (VRInputActionSet vrinputactionset : VRInputActionSet.values()) {
-            this.actionSets.put(vrinputactionset.name, makeActionSet(instance, vrinputactionset.name, vrinputactionset.localizedName, 0));
+            long actionSet = makeActionSet(instance, vrinputactionset.name, vrinputactionset.localizedName, 0);
+            this.actionSetHandles.put(vrinputactionset, actionSet);
         }
 
-        this.inputs = new HashMap<>();
-        inputs.put("hands", createAction("hands", "Hands", actionSets.get("gameplay")));
+        for (VRInputAction vrinputaction : this.inputActions.values()) {
+            long action = createAction(vrinputaction.name, vrinputaction.name, new XrActionSet(this.actionSetHandles.get(vrinputaction.actionSet), instance));
+            vrinputaction.setHandle(action);
+        }
+
+
+
     }
 
-    private XrAction createAction(String name, String localisedName, XrActionSet actionSet) {
+    private void loadDefaultBindings() {
+        
+    }
+
+    private long createAction(String name, String localisedName, XrActionSet actionSet) {
         try (MemoryStack stack = MemoryStack.stackPush()){
             XrActionCreateInfo hands = XrActionCreateInfo.calloc(stack);
             hands.actionType(XR10.XR_TYPE_ACTION_CREATE_INFO);
@@ -583,11 +777,11 @@ public class MCOpenXR extends MCVR {
             hands.localizedActionName(ByteBuffer.wrap(localisedName.getBytes()));
             PointerBuffer buffer = stackCallocPointer(1);
             XR10.xrCreateAction(actionSet, hands, buffer);
-            return new XrAction(buffer.get(0), actionSet);
+            return buffer.get(0);
         }
     }
 
-    private XrActionSet makeActionSet(XrInstance instance, String name, String localisedName, int priority) {
+    private long makeActionSet(XrInstance instance, String name, String localisedName, int priority) {
         try (MemoryStack stack = MemoryStack.stackPush()){
             XrActionSetCreateInfo info = XrActionSetCreateInfo.calloc(stack);
             info.type(XR10.XR_TYPE_ACTION_SET_CREATE_INFO);
@@ -598,7 +792,7 @@ public class MCOpenXR extends MCVR {
             PointerBuffer buffer = stack.callocPointer(1);
             //Handle error
             int i = XR10.xrCreateActionSet(instance, info, buffer);
-            return new XrActionSet(buffer.get(0), instance);
+            return buffer.get(0);
         }
     }
 
