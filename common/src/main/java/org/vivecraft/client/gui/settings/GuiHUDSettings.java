@@ -33,6 +33,7 @@ public class GuiHUDSettings extends GuiVROptionsBase {
             return true;
         }),
         new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME),
+        new VROptionEntry(VRSettings.VrOptions.KEYBOARD_PRESS_BINDS),
         new VROptionEntry(VRSettings.VrOptions.SHADER_GUI_RENDER)
     };
 
