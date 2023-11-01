@@ -107,8 +107,6 @@ public class MouseHandlerVRMixin {
     @ModifyVariable(at = @At(value = "HEAD"), ordinal = 1, method = "onMove", argsOnly = true)
     public double vivecraft$modifyY(double y) {
         if (VRState.vrRunning) {
-            double h = GuiHandler.guiHeight;
-            double ah = ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight();
             y *= (double) GuiHandler.guiHeight / (double) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight();
         }
         return y;
