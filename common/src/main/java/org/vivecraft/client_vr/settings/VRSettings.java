@@ -417,6 +417,8 @@ public class VRSettings {
     public boolean guiAppearOverBlock = true;
     @SettingField(VrOptions.SHADER_GUI_RENDER)
     public ShaderGUIRender shaderGUIRender = ShaderGUIRender.AFTER_SHADER;
+    @SettingField(VrOptions.DOUBLE_GUI_RESOLUTION)
+    public boolean doubleGUIResolution = false;
     @SettingField(VrOptions.SHOW_UPDATES)
     public boolean alwaysShowUpdates = true;
     @SettingField
@@ -1163,7 +1165,8 @@ public class VRSettings {
         PHYSICAL_KEYBOARD_THEME(false, false), // Keyboard Theme
         KEYBOARD_PRESS_BINDS(false, true), // Keyboard Presses Bindings
         GUI_APPEAR_OVER_BLOCK(false, true), // Appear Over Block
-        SHADER_GUI_RENDER(false, true),
+        SHADER_GUI_RENDER(false, false), // Shaders GUI
+        DOUBLE_GUI_RESOLUTION(false, true), // 1440p GUI
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
         LOW_HEALTH_INDICATOR(false, true), // red low health pulse

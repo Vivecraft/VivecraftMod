@@ -113,6 +113,12 @@ public class GuiHandler {
         return j;
     }
 
+    public static void updateResolution() {
+        guiWidth = dh.vrSettings.doubleGUIResolution ? 2560 : 1280;
+        guiHeight = dh.vrSettings.doubleGUIResolution ? 1440 : 720;
+        guiScaleFactor = calculateScale(0, false, guiWidth, guiHeight);
+    }
+
     public static void processGui() {
         if (mc.screen != null || !mc.mouseHandler.isMouseGrabbed()) {
             if (!dh.vrSettings.seated) {
