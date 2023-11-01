@@ -6,6 +6,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -14,7 +15,11 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.client.extensions.RenderLayerExtension;
 import org.vivecraft.client.utils.RenderLayerTypes;
@@ -31,16 +36,18 @@ import static org.vivecraft.client.utils.RenderLayerTypes.LayerType.*;
  * so mods could add it manually, but some mods hardcode only the slim/default model,
  * and that would mean the VRPlayerRenderers would be missing those layers completely
  */
-@Mixin(PlayerRenderer.class)
-public abstract class PlayerRendererMixin<T extends LivingEntity, M extends EntityModel<T>> extends LivingEntityRenderer<T, M> {
+@Mixin(LivingEntityRenderer.class)
+public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> {
 
-    // dummy constructor
-    public PlayerRendererMixin(EntityRendererProvider.Context context, M entityModel, float f) {
-        super(context, entityModel, f);
+    @Shadow
+    protected M model;
+
+    protected LivingEntityRendererMixin(EntityRendererProvider.Context context) {
+        super(context);
     }
 
-    @Override
-    public boolean addLayer(RenderLayer<T, M> renderLayer) {
+    @Inject(at = @At("HEAD"), method = "addLayer")
+    public void vivecraft$copyLayer(RenderLayer<T, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {
         // check if the layer gets added from the PlayerRenderer, we don't want to copy, if we add it to the VRPlayerRenderer
         // also check that the VRPlayerRenderers were created, this method also gets called in the constructor,
         // those default Layers already are added to the VRPlayerRenderer there
@@ -91,7 +98,6 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
                 }
             }
         }
-        return super.addLayer(renderLayer);
     }
 
     /**

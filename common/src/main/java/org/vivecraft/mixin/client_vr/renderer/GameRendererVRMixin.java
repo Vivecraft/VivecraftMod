@@ -32,7 +32,6 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.Xevents;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -157,6 +156,9 @@ public abstract class GameRendererVRMixin
     @Shadow
     @Final
     private Camera mainCamera;
+
+    @Shadow
+    private int itemActivationTicks;
 
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/Camera"))
     public Camera vivecraft$replaceCamera() {
@@ -422,25 +424,27 @@ public abstract class GameRendererVRMixin
     }
 
     @Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
-    private void vivecraft$noScaleItem(PoseStack poseStack, float x, float y, float z) {
+    private void vivecraft$noScaleItem(PoseStack poseStack, float x, float y, float z, int width, int height, float partialTicks) {
         if (RenderPassType.isVanilla()) {
             poseStack.scale(x, y, z);
-        }
-    }
-
-    @Inject(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vivecraft$transformItem(int i, int j, float f, CallbackInfo ci, int k, float g, float h, float l, float m, float n, float o, float p, PoseStack posestack) {
-        if (!RenderPassType.isVanilla()) {
+        } else {
+            // need to do stuff twice, because redirects have no access to locals
+            int i = 40 - this.itemActivationTicks;
+            float g = ((float) i + partialTicks) / 40.0f;
+            float h = g * g;
+            float l = g * h;
+            float m = 10.25f * l * h - 24.95f * h * h + 25.5f * l - 13.8f * h + 4.0f * g;
+            float n = m * (float) Math.PI;
             float sinN = Mth.sin(n) * 0.5F;
-            posestack.translate(0, 0, sinN - 1.0);
+            poseStack.translate(0, 0, sinN - 1.0);
             if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD) {
-                sinN *= ClientDataHolderVR.getInstance().vrSettings.mixedRealityFov / 70.0;
+                sinN *= (float) (ClientDataHolderVR.getInstance().vrSettings.mixedRealityFov / 70.0);
             }
-            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, posestack);
-            RenderHelper.applyStereo(ClientDataHolderVR.getInstance().currentPass, posestack);
-            posestack.scale(sinN, sinN, sinN);
-            posestack.mulPose(Axis.YP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getYaw()));
-            posestack.mulPose(Axis.XP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPitch()));
+            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, poseStack);
+            RenderHelper.applyStereo(ClientDataHolderVR.getInstance().currentPass, poseStack);
+            poseStack.scale(sinN, sinN, sinN);
+            poseStack.mulPose(Axis.YP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getYaw()));
+            poseStack.mulPose(Axis.XP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPitch()));
         }
     }
 

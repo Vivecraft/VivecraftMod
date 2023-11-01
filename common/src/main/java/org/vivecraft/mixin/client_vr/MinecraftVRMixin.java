@@ -96,7 +96,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     private boolean vivecraft$lastClick;
 
     @Unique
-    private ItemStack vivecraft$itemInHand; //Captured item
+    private int vivecraft$currentHand = 0;
 
     @Unique
     private long vivecraft$mirroNotifyStart;
@@ -570,22 +570,23 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @ModifyVariable(at = @At(value = "STORE", ordinal = 0), method = "startUseItem")
-    public ItemStack vivecraft$handItemStore(ItemStack itemInHand) {
-        this.vivecraft$itemInHand = itemInHand;
-        return itemInHand;
-    }
-
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$activeHandSend(CallbackInfo ci, InteractionHand[] var1, int var2, int var3, InteractionHand interactionHand) {
-        if (VRState.vrRunning && (ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(vivecraft$itemInHand))) {
-            ClientNetworking.sendActiveHand((byte) interactionHand.ordinal());
-        }
+    @Inject(at = @At("HEAD"), method = "startUseItem")
+    private void vivecraft$resetHand(CallbackInfo ci) {
+        vivecraft$currentHand = 0;
     }
 
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem")
-    public HitResult vivecraft$activeHand2(Minecraft instance) {
-        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(vivecraft$itemInHand)) {
+    public HitResult vivecraft$activeHand(Minecraft instance) {
+        boolean isTelescope = false;
+        if (VRState.vrRunning) {
+            InteractionHand interactionHand = InteractionHand.values()[vivecraft$currentHand++];
+            ItemStack itemInHand = this.player.getItemInHand(interactionHand);
+            isTelescope = TelescopeTracker.isTelescope(itemInHand);
+            if (ClientDataHolderVR.getInstance().vrSettings.seated || !isTelescope) {
+                ClientNetworking.sendActiveHand((byte) interactionHand.ordinal());
+            }
+        }
+        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().vrSettings.seated || !isTelescope) {
             return instance.hitResult;
         }
         return null;
