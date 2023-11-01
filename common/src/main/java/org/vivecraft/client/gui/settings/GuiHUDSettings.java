@@ -23,6 +23,8 @@ public class GuiHUDSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE),
         new VROptionEntry(VRSettings.VrOptions.GUI_APPEAR_OVER_BLOCK),
         new VROptionEntry(VRSettings.VrOptions.DOUBLE_GUI_RESOLUTION),
+        new VROptionEntry(VRSettings.VrOptions.GUI_SCALE),
+        new VROptionEntry(VRSettings.VrOptions.DUMMY),
         new VROptionEntry(VRSettings.VrOptions.SHADER_GUI_RENDER),
         new VROptionEntry("vivecraft.options.screen.keyboard.button", (button, mousePos) -> {
             Minecraft.getInstance().setScreen(new GuiKeyboardSettings(this));
@@ -54,8 +56,13 @@ public class GuiHUDSettings extends GuiVROptionsBase {
             if (button.getId() == VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE.ordinal()) {
                 GuiHandler.onScreenChanged(Minecraft.getInstance().screen, Minecraft.getInstance().screen, false);
             }
-            if (button.getId() == VRSettings.VrOptions.DOUBLE_GUI_RESOLUTION.ordinal() && VRState.vrEnabled) {
+            if ((button.getId() == VRSettings.VrOptions.DOUBLE_GUI_RESOLUTION.ordinal()
+                || button.getId() == VRSettings.VrOptions.GUI_SCALE.ordinal())
+                && VRState.vrEnabled) {
                 this.dataholder.vrRenderer.resizeFrameBuffers("GUI Setting Changed");
+            }
+            if (button.getId() == VRSettings.VrOptions.DOUBLE_GUI_RESOLUTION.ordinal()) {
+                this.reinit = true;
             }
         }
     }

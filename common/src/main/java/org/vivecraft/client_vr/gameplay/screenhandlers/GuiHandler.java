@@ -86,39 +86,53 @@ public class GuiHandler {
     public static int guiWidth = 1280;
     public static int guiHeight = 720;
     public static int guiScaleFactor = calculateScale(0, false, guiWidth, guiHeight);
+    public static int guiScaleFactorMax = guiScaleFactor;
     public static int scaledWidth;
     public static int scaledHeight;
 
     public static int calculateScale(int scaleIn, boolean forceUnicode, int framebufferWidth, int framebufferHeight) {
-        int j = 1;
+        int scale = 1;
+        int maxScale = 1;
 
-        while (j != scaleIn &&
-            j < framebufferWidth &&
-            j < framebufferHeight &&
-            framebufferWidth / (j + 1) >= 320 &&
-            framebufferHeight / (j + 1) >= 240) {
-            ++j;
+        while (maxScale < framebufferWidth &&
+            maxScale < framebufferHeight &&
+            framebufferWidth / (maxScale + 1) >= 320 &&
+            framebufferHeight / (maxScale + 1) >= 240) {
+            if (scale < scaleIn || scaleIn == 0) {
+                scale++;
+            }
+            maxScale++;
         }
 
-        if (forceUnicode && j % 2 != 0) {
-            ++j;
+        if (forceUnicode) {
+            if (scale % 2 != 0) {
+                scale++;
+            }
+            if (maxScale % 2 != 0) {
+                maxScale++;
+            }
         }
 
-        int widthFloor = framebufferWidth / j;
-        scaledWidth = framebufferWidth / j > widthFloor ? widthFloor + 1 : widthFloor;
+        guiScaleFactorMax = maxScale;
 
-        int heightFloor = framebufferHeight / j;
-        scaledHeight = framebufferHeight / j > heightFloor ? heightFloor + 1 : heightFloor;
+        int widthFloor = framebufferWidth / scale;
+        scaledWidth = framebufferWidth / scale > widthFloor ? widthFloor + 1 : widthFloor;
 
-        return j;
+        int heightFloor = framebufferHeight / scale;
+        scaledHeight = framebufferHeight / scale > heightFloor ? heightFloor + 1 : heightFloor;
+
+        return scale;
     }
 
     public static boolean updateResolution() {
         int oldWidth = guiWidth;
         int oldHeight = guiHeight;
+        int oldGuiScale = guiScaleFactor;
         guiWidth = dh.vrSettings.doubleGUIResolution ? 2560 : 1280;
         guiHeight = dh.vrSettings.doubleGUIResolution ? 1440 : 720;
-        guiScaleFactor = calculateScale(0, false, guiWidth, guiHeight);
+        guiScaleFactor = calculateScale(
+            dh.vrSettings.doubleGUIResolution ? dh.vrSettings.guiScale : (int) Math.ceil(dh.vrSettings.guiScale * 0.5f),
+            false, guiWidth, guiHeight);
         if (oldWidth != guiWidth) {
             // move cursor to right position
             InputSimulator.setMousePos(
@@ -126,6 +140,8 @@ public class GuiHandler {
                 mc.mouseHandler.ypos() * ((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenHeight() / oldHeight);
             controllerMouseX *= (double) guiWidth / oldWidth;
             controllerMouseY *= (double) guiHeight / oldHeight;
+            return true;
+        } else if (oldGuiScale != guiScaleFactor) {
             return true;
         } else {
             return false;

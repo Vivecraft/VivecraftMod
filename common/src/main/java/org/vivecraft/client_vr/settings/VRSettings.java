@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -419,6 +418,8 @@ public class VRSettings {
     public ShaderGUIRender shaderGUIRender = ShaderGUIRender.AFTER_SHADER;
     @SettingField(VrOptions.DOUBLE_GUI_RESOLUTION)
     public boolean doubleGUIResolution = false;
+    @SettingField(VrOptions.GUI_SCALE)
+    public int guiScale = 0;
     @SettingField(VrOptions.SHOW_UPDATES)
     public boolean alwaysShowUpdates = true;
     @SettingField
@@ -1020,7 +1021,8 @@ public class VRSettings {
         //return this.headTrackSensitivity;  // TODO: If head track sensitivity is working again... if
     }
 
-    record ConfigEntry(Field field, VrOptions vrOptions, String configName, boolean separate, boolean fixedSize) { }
+    record ConfigEntry(Field field, VrOptions vrOptions, String configName, boolean separate, boolean fixedSize) {
+    }
 
     public enum VrOptions {
         DUMMY(false, true), // Dummy
@@ -1167,6 +1169,21 @@ public class VRSettings {
         GUI_APPEAR_OVER_BLOCK(false, true), // Appear Over Block
         SHADER_GUI_RENDER(false, false), // Shaders GUI
         DOUBLE_GUI_RESOLUTION(false, true), // 1440p GUI
+        GUI_SCALE(true, true, 0, 6, 1, 0) { // GUI Scale
+
+            @Override
+            String getDisplayString(String prefix, Object value) {
+                if ((int) value == 0) {
+                    return prefix + I18n.get("options.guiScale.auto");
+                } else {
+                    if (ClientDataHolderVR.getInstance().vrSettings.doubleGUIResolution) {
+                        return prefix + value;
+                    } else {
+                        return prefix + (int) Math.ceil((int) value * 0.5f);
+                    }
+                }
+            }
+        },
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
         LOW_HEALTH_INDICATOR(false, true), // red low health pulse
@@ -2001,7 +2018,7 @@ public class VRSettings {
 
     public int[] getKeyboardCodesDefault() {
         // Some keys in the in-game keyboard don't have assignable key codes
-        int[] out = new int[] {
+        int[] out = new int[]{
             GLFW.GLFW_KEY_GRAVE_ACCENT,
             GLFW.GLFW_KEY_1,
             GLFW.GLFW_KEY_2,

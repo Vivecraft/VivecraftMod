@@ -359,7 +359,7 @@ public abstract class MCVR {
 
         Vec3 main = this.getAimSource(0);
         Vec3 off = this.getAimSource(1);
-        Vec3 barStartos = null, barEndos = null;
+        Vec3 barStartPos = null, barEndPos = null;
 
         int i = 1;
         if (this.dh.vrSettings.reverseHands) {
@@ -367,18 +367,28 @@ public abstract class MCVR {
         }
 
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST) {
-            barStartos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.26F)).toVector3d();
-            barEndos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.01F)).toVector3d();
+            barStartPos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.26F)).toVector3d();
+            barEndPos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.01F)).toVector3d();
         } else if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
-            barStartos = this.getAimRotation(1).transform(new Vector3((float) i * -0.18F, 0.08F, -0.01F)).toVector3d();
-            barEndos = this.getAimRotation(1).transform(new Vector3((float) i * 0.19F, 0.04F, -0.08F)).toVector3d();
+            barStartPos = this.getAimRotation(1).transform(new Vector3((float) i * -0.18F, 0.08F, -0.01F)).toVector3d();
+            barEndPos = this.getAimRotation(1).transform(new Vector3((float) i * 0.19F, 0.04F, -0.08F)).toVector3d();
         } else {
             return; //how did u get here
         }
 
+        float guiScaleFactor = (float) GuiHandler.guiScaleFactor / GuiHandler.guiScaleFactorMax;
 
-        Vec3 barStart = off.add(barStartos.x, barStartos.y, barStartos.z);
-        Vec3 barEnd = off.add(barEndos.x, barEndos.y, barEndos.z);
+        Vec3 barMidPos = barStartPos.add(barEndPos).scale(0.5);
+
+        Vec3 barStart = off.add(
+            Mth.lerp(guiScaleFactor, barMidPos.x, barStartPos.x),
+            Mth.lerp(guiScaleFactor, barMidPos.y, barStartPos.y),
+            Mth.lerp(guiScaleFactor, barMidPos.z, barStartPos.z));
+        Vec3 barEnd = off.add(
+            Mth.lerp(guiScaleFactor, barMidPos.x, barEndPos.x),
+            Mth.lerp(guiScaleFactor, barMidPos.y, barEndPos.y),
+            Mth.lerp(guiScaleFactor, barMidPos.z, barEndPos.z));
+
 
         Vec3 u = barStart.subtract(barEnd);
         Vec3 pq = barStart.subtract(main);
