@@ -1,6 +1,7 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.client.gui.framework.GuiVROption;
@@ -24,7 +25,7 @@ public class GuiHUDSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.GUI_APPEAR_OVER_BLOCK),
         new VROptionEntry(VRSettings.VrOptions.DOUBLE_GUI_RESOLUTION),
         new VROptionEntry(VRSettings.VrOptions.GUI_SCALE),
-        new VROptionEntry(VRSettings.VrOptions.DUMMY),
+        new VROptionEntry(VRSettings.VrOptions.HUD_MAX_GUI_SCALE),
         new VROptionEntry(VRSettings.VrOptions.SHADER_GUI_RENDER),
         new VROptionEntry("vivecraft.options.screen.keyboard.button", (button, mousePos) -> {
             Minecraft.getInstance().setScreen(new GuiKeyboardSettings(this));
@@ -60,8 +61,6 @@ public class GuiHUDSettings extends GuiVROptionsBase {
                 || button.getId() == VRSettings.VrOptions.GUI_SCALE.ordinal())
                 && VRState.vrEnabled) {
                 this.dataholder.vrRenderer.resizeFrameBuffers("GUI Setting Changed");
-            }
-            if (button.getId() == VRSettings.VrOptions.DOUBLE_GUI_RESOLUTION.ordinal()) {
                 this.reinit = true;
             }
         }

@@ -77,21 +77,30 @@ public abstract class WindowVRMixin implements WindowExtension {
     @Inject(method = "getGuiScaledHeight", at = @At("HEAD"), cancellable = true)
     void vivecraft$getScaledHeight(CallbackInfoReturnable<Integer> cir) {
         if (vivecraft$shouldOverrideSide()) {
-            cir.setReturnValue(GuiHandler.scaledHeight);
+            cir.setReturnValue(
+                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale
+                ? GuiHandler.scaledHeightMax
+                : GuiHandler.scaledHeight);
         }
     }
 
     @Inject(method = "getGuiScaledWidth", at = @At("HEAD"), cancellable = true)
     void vivecraft$getScaledWidth(CallbackInfoReturnable<Integer> cir) {
         if (vivecraft$shouldOverrideSide()) {
-            cir.setReturnValue(GuiHandler.scaledWidth);
+            cir.setReturnValue(
+                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale
+                ? GuiHandler.scaledWidthMax
+                : GuiHandler.scaledWidth);
         }
     }
 
     @Inject(method = "getGuiScale", at = @At("HEAD"), cancellable = true)
     void vivecraft$getScaleFactor(CallbackInfoReturnable<Double> cir) {
         if (vivecraft$shouldOverrideSide()) {
-            cir.setReturnValue((double) GuiHandler.guiScaleFactor);
+            cir.setReturnValue(
+                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale
+                ? (double) GuiHandler.guiScaleFactorMax
+                : (double) GuiHandler.guiScaleFactor);
         }
     }
 

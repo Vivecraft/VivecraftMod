@@ -420,6 +420,8 @@ public class VRSettings {
     public boolean doubleGUIResolution = false;
     @SettingField(VrOptions.GUI_SCALE)
     public int guiScale = 0;
+    @SettingField(VrOptions.HUD_MAX_GUI_SCALE)
+    public boolean hudMaxScale = false;
     @SettingField(VrOptions.SHOW_UPDATES)
     public boolean alwaysShowUpdates = true;
     @SettingField
@@ -1183,7 +1185,14 @@ public class VRSettings {
                     }
                 }
             }
+            @Override
+            void onOptionChange() {
+                if (VRState.vrEnabled) {
+                    ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("");
+                }
+            }
         },
+        HUD_MAX_GUI_SCALE(false, true), // force HUD to render with max GUI scale
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
         LOW_HEALTH_INDICATOR(false, true), // red low health pulse

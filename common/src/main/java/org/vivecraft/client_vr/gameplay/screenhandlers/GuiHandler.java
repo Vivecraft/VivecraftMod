@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.*;
 import org.joml.Vector2f;
@@ -85,10 +86,12 @@ public class GuiHandler {
     public static RenderTarget guiFramebuffer = null;
     public static int guiWidth = 1280;
     public static int guiHeight = 720;
+    public static int guiScaleFactorMax;
     public static int guiScaleFactor = calculateScale(0, false, guiWidth, guiHeight);
-    public static int guiScaleFactorMax = guiScaleFactor;
     public static int scaledWidth;
     public static int scaledHeight;
+    public static int scaledWidthMax;
+    public static int scaledHeightMax;
 
     public static int calculateScale(int scaleIn, boolean forceUnicode, int framebufferWidth, int framebufferHeight) {
         int scale = 1;
@@ -115,11 +118,11 @@ public class GuiHandler {
 
         guiScaleFactorMax = maxScale;
 
-        int widthFloor = framebufferWidth / scale;
-        scaledWidth = framebufferWidth / scale > widthFloor ? widthFloor + 1 : widthFloor;
+        scaledWidth =  Mth.ceil(framebufferWidth / (float) scale);
+        scaledWidthMax =  Mth.ceil(framebufferWidth / (float) maxScale);
 
-        int heightFloor = framebufferHeight / scale;
-        scaledHeight = framebufferHeight / scale > heightFloor ? heightFloor + 1 : heightFloor;
+        scaledHeight =  Mth.ceil(framebufferHeight / (float) scale);
+        scaledHeightMax =  Mth.ceil(framebufferHeight / (float) maxScale);
 
         return scale;
     }

@@ -376,7 +376,7 @@ public abstract class MCVR {
             return; //how did u get here
         }
 
-        float guiScaleFactor = (float) GuiHandler.guiScaleFactor / GuiHandler.guiScaleFactorMax;
+        float guiScaleFactor = (float) this.mc.getWindow().getGuiScale() / GuiHandler.guiScaleFactorMax;
 
         Vec3 barMidPos = barStartPos.add(barEndPos).scale(0.5);
 
