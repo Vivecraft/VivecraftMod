@@ -12,6 +12,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -90,6 +91,7 @@ public class PhysicalKeyboard {
     }
 
     public void init() {
+        this.unpressAllKeys();
         this.keys.clear();
         this.rows = ROWS;
         this.columns = COLUMNS;
@@ -118,9 +120,11 @@ public class PhysicalKeyboard {
                 }
 
                 final char c1 = c0;
+                final int code = k < this.dh.vrSettings.keyboardCodes.length ? this.dh.vrSettings.keyboardCodes[k] : GLFW.GLFW_KEY_UNKNOWN;
                 this.addKey(new KeyButton(k, String.valueOf(c0), this.keyWidthSpecial + this.spacing + (float) j * (this.keyWidth + this.spacing), (float) i * (this.keyHeight + this.spacing), this.keyWidth, this.keyHeight) {
                     @Override
                     public void onPressed() {
+                        InputSimulator.pressKeyForBind(code);
                         InputSimulator.typeChar(c1);
 
                         if (!PhysicalKeyboard.this.shiftSticky) {
@@ -131,6 +135,11 @@ public class PhysicalKeyboard {
                             InputSimulator.pressKey(GLFW.GLFW_KEY_SLASH);
                             InputSimulator.releaseKey(GLFW.GLFW_KEY_SLASH);
                         }
+                    }
+
+                    @Override
+                    public void onReleased() {
+                        InputSimulator.releaseKeyForBind(code);
                     }
                 });
             }
@@ -169,13 +178,23 @@ public class PhysicalKeyboard {
         this.addKey(new KeyButton(1002, " ", this.keyWidthSpecial + this.spacing + (float) (this.columns - 5) / 2.0F * (this.keyWidth + this.spacing), (float) this.rows * (this.keyHeight + this.spacing), 5.0F * (this.keyWidth + this.spacing) - this.spacing, this.keyHeight) {
             @Override
             public void onPressed() {
+                InputSimulator.pressKeyForBind(GLFW.GLFW_KEY_SPACE);
                 InputSimulator.typeChar(' ');
+            }
+
+            @Override
+            public void onReleased() {
+                InputSimulator.releaseKeyForBind(GLFW.GLFW_KEY_SPACE);
             }
         });
         this.addKey(new KeyButton(1003, "Tab", 0.0F, this.keyHeight + this.spacing, this.keyWidthSpecial, this.keyHeight) {
             @Override
             public void onPressed() {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_TAB);
+            }
+
+            @Override
+            public void onReleased() {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_TAB);
             }
         });
@@ -183,6 +202,10 @@ public class PhysicalKeyboard {
             @Override
             public void onPressed() {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_ESCAPE);
+            }
+
+            @Override
+            public void onReleased() {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_ESCAPE);
             }
         });
@@ -190,6 +213,10 @@ public class PhysicalKeyboard {
             @Override
             public void onPressed() {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_BACKSPACE);
+            }
+
+            @Override
+            public void onReleased() {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_BACKSPACE);
             }
         });
@@ -197,6 +224,10 @@ public class PhysicalKeyboard {
             @Override
             public void onPressed() {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_ENTER);
+            }
+
+            @Override
+            public void onReleased() {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_ENTER);
             }
         });
@@ -204,6 +235,10 @@ public class PhysicalKeyboard {
             @Override
             public void onPressed() {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_UP);
+            }
+
+            @Override
+            public void onReleased() {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_UP);
             }
         });
@@ -211,6 +246,10 @@ public class PhysicalKeyboard {
             @Override
             public void onPressed() {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_DOWN);
+            }
+
+            @Override
+            public void onReleased() {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_DOWN);
             }
         });
@@ -218,6 +257,10 @@ public class PhysicalKeyboard {
             @Override
             public void onPressed() {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_LEFT);
+            }
+
+            @Override
+            public void onReleased() {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_LEFT);
             }
         });
@@ -225,6 +268,10 @@ public class PhysicalKeyboard {
             @Override
             public void onPressed() {
                 InputSimulator.pressKey(GLFW.GLFW_KEY_RIGHT);
+            }
+
+            @Override
+            public void onReleased() {
                 InputSimulator.releaseKey(GLFW.GLFW_KEY_RIGHT);
             }
         });
@@ -332,7 +379,7 @@ public class PhysicalKeyboard {
             if (physicalkeyboard$keybutton != null) {
                 if (physicalkeyboard$keybutton != this.pressedKey[i] && Utils.milliTime() - this.pressTime[i] >= 150L) {
                     if (this.pressedKey[i] != null) {
-                        this.pressedKey[i].unpress(controllertype);
+                        this.pressedKey[i].unpress();
                         this.pressedKey[i] = null;
                     }
 
@@ -345,7 +392,7 @@ public class PhysicalKeyboard {
                     this.pressRepeatTime[i] = Utils.milliTime();
                 }
             } else if (this.pressedKey[i] != null) {
-                this.pressedKey[i].unpress(controllertype);
+                this.pressedKey[i].unpress();
                 this.pressedKey[i] = null;
                 this.pressTime[i] = Utils.milliTime();
             }
@@ -535,6 +582,12 @@ public class PhysicalKeyboard {
         this.reinit = true;
     }
 
+    public void unpressAllKeys() {
+        for (KeyButton key : this.keys) {
+            if(key.pressed) key.unpress();
+        }
+    }
+
     private KeyButton addKey(KeyButton key) {
         this.keys.add(key);
         return key;
@@ -609,11 +662,13 @@ public class PhysicalKeyboard {
             PhysicalKeyboard.this.updateEasterEgg(this.label);
         }
 
-        public final void unpress(ControllerType controller) {
+        public final void unpress() {
             this.pressed = false;
+            this.onReleased();
         }
 
         public abstract void onPressed();
+        public void onReleased() {}
     }
 
     public enum KeyboardTheme implements OptionEnum<KeyboardTheme> {

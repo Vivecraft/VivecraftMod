@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -73,8 +72,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     private final ClientDataHolderVR vivecraft$dataholder = ClientDataHolderVR.getInstance();
     @Shadow
     private InteractionHand usingItemHand;
-    @Shadow
-    public Input input;
 
     public LocalPlayerVRMixin(ClientLevel clientLevel, GameProfile gameProfile) {
         super(clientLevel, gameProfile);
@@ -88,28 +85,28 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Inject(at = @At("TAIL"), method = "startRiding")
     public void vivecraft$startRidingTracker(Entity entity, boolean bl, CallbackInfoReturnable<Boolean> cir) {
-        if (VRState.vrInitialized) {
+        if (VRState.vrInitialized && vivecraft$isLocalPlayer(this)) {
             ClientDataHolderVR.getInstance().vehicleTracker.onStartRiding(entity, (LocalPlayer) (Object) this);
         }
     }
 
     @Inject(at = @At("TAIL"), method = "removeVehicle")
     public void vivecraft$stopRidingTracker(CallbackInfo ci) {
-        if (VRState.vrInitialized) {
+        if (VRState.vrInitialized && vivecraft$isLocalPlayer(this)) {
             ClientDataHolderVR.getInstance().vehicleTracker.onStopRiding((LocalPlayer) (Object) this);
         }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.BEFORE), method = "tick")
     public void vivecraft$overrideLookPre(CallbackInfo ci) {
-        if (VRState.vrRunning) {
+        if (VRState.vrRunning && vivecraft$isLocalPlayer(this)) {
             ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
         }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;tick()V", shift = At.Shift.AFTER), method = "tick")
     public void vivecraft$overridePose(CallbackInfo ci) {
-        if (VRState.vrRunning) {
+        if (VRState.vrRunning && vivecraft$isLocalPlayer(this)) {
             ClientNetworking.overridePose((LocalPlayer) (Object) this);
             ClientDataHolderVR.getInstance().vrPlayer.doPermanantLookOverride((LocalPlayer) (Object) this, ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre);
         }
@@ -157,14 +154,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;aiStep()V"), method = "aiStep")
     public void vivecraft$ai(CallbackInfo ci) {
-        if (VRState.vrRunning) {
+        if (VRState.vrRunning && vivecraft$isLocalPlayer(this)) {
             this.vivecraft$dataholder.vrPlayer.tick((LocalPlayer) (Object) this, this.minecraft, this.random);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V", cancellable = true)
     public void vivecraft$overwriteMove(MoverType pType, Vec3 pPos, CallbackInfo info) {
-        if (!VRState.vrRunning) {
+        if (!VRState.vrRunning || !vivecraft$isLocalPlayer(this)) {
             return;
         }
 
@@ -249,7 +246,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Override
     public void moveTo(double pX, double p_20109_, double pY, float p_20111_, float pZ) {
         super.moveTo(pX, p_20109_, pY, p_20111_, pZ);
-        if (!VRState.vrRunning) {
+        if (!VRState.vrRunning || !vivecraft$isLocalPlayer(this)) {
             return;
         }
         if (this.vivecraft$initFromServer) {
@@ -260,7 +257,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Override
     public void absMoveTo(double pX, double p_19892_, double pY, float p_19894_, float pZ) {
         super.absMoveTo(pX, p_19892_, pY, p_19894_, pZ);
-        if (!VRState.vrRunning) {
+        if (!VRState.vrRunning || !vivecraft$isLocalPlayer(this)) {
             return;
         }
         ClientDataHolderVR.getInstance().vrPlayer.snapRoomOriginToPlayerEntity((LocalPlayer) (Object) this, false, false);
@@ -269,7 +266,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Override
     public void setPos(double pX, double p_20211_, double pY) {
         this.vivecraft$initFromServer = true;
-        if (!VRState.vrRunning) {
+        if (!VRState.vrRunning || !vivecraft$isLocalPlayer(this)) {
             super.setPos(pX, p_20211_, pY);
             return;
         }
@@ -330,7 +327,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void moveRelative(float pAmount, Vec3 pRelative) {
-        if (!VRState.vrRunning) {
+        if (!VRState.vrRunning || !vivecraft$isLocalPlayer(this)) {
             super.moveRelative(pAmount, pRelative);
             return;
         }
@@ -457,7 +454,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Override
     public void die(DamageSource pCause) {
         super.die(pCause);
-        if (!VRState.vrRunning) {
+        if (!VRState.vrRunning || !vivecraft$isLocalPlayer(this)) {
             return;
         }
         ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 2000);
@@ -533,7 +530,9 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public void releaseUsingItem() {
-        ClientNetworking.sendActiveHand((byte) this.getUsedItemHand().ordinal());
+        if (vivecraft$isLocalPlayer(this)) {
+            ClientNetworking.sendActiveHand((byte) this.getUsedItemHand().ordinal());
+        }
         super.releaseUsingItem();
     }
 
@@ -561,5 +560,10 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Unique
     public void vivecraft$setItemInUseCountClient(int count) {
         this.useItemRemaining = count;
+    }
+
+    @Unique
+    private boolean vivecraft$isLocalPlayer(Object player) {
+        return player.getClass().equals(LocalPlayer.class) || Minecraft.getInstance().player == player;
     }
 }

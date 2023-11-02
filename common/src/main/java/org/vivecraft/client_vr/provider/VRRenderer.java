@@ -6,10 +6,15 @@ import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
@@ -23,6 +28,7 @@ import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -35,6 +41,8 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.mod_compat_vr.resolutioncontrol.ResolutionControlHelper;
+import oshi.SystemInfo;
+import oshi.hardware.GraphicsCard;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -317,7 +325,8 @@ public abstract class VRRenderer {
         list.add(RenderPass.RIGHT);
 
         // only do these, if the window is not minimized
-        if (minecraft.getWindow().getScreenWidth() > 0 && minecraft.getWindow().getScreenHeight() > 0) {
+        if (((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() > 0
+            && ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight() > 0) {
             if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
                 list.add(RenderPass.CENTER);
             } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
@@ -351,8 +360,8 @@ public abstract class VRRenderer {
     public abstract Tuple<Integer, Integer> getRenderTextureSizes();
 
     public Tuple<Integer, Integer> getMirrorTextureSize(int eyeFBWidth, int eyeFBHeight, float resolutionScale) {
-        mirrorFBWidth = (int) Math.ceil(Minecraft.getInstance().getWindow().getScreenWidth() * resolutionScale);
-        mirrorFBHeight = (int) Math.ceil(Minecraft.getInstance().getWindow().getScreenHeight() * resolutionScale);
+        mirrorFBWidth = (int) Math.ceil(((WindowExtension) (Object) Minecraft.getInstance().getWindow()).vivecraft$getActualScreenWidth() * resolutionScale);
+        mirrorFBHeight = (int) Math.ceil(((WindowExtension) (Object) Minecraft.getInstance().getWindow()).vivecraft$getActualScreenHeight() * resolutionScale);
 
         if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
             mirrorFBWidth = mirrorFBWidth / 2;
@@ -487,11 +496,13 @@ public abstract class VRRenderer {
             }
 
             // mirror
-            if (WorldRenderPass.center != null) {
-                WorldRenderPass.center.resize(mirrorSize.getA(), mirrorSize.getB());
-            }
-            if (WorldRenderPass.mixedReality != null) {
-                WorldRenderPass.mixedReality.resize(mirrorSize.getA(), mirrorSize.getB());
+            if (mirrorSize.getA() > 0 && mirrorSize.getB() > 0) {
+                if (WorldRenderPass.center != null) {
+                    WorldRenderPass.center.resize(mirrorSize.getA(), mirrorSize.getB());
+                }
+                if (WorldRenderPass.mixedReality != null) {
+                    WorldRenderPass.mixedReality.resize(mirrorSize.getA(), mirrorSize.getB());
+                }
             }
 
             // telescopes
@@ -505,15 +516,45 @@ public abstract class VRRenderer {
             } else {
                 WorldRenderPass.camera.resize(cameraSize.getA(), cameraSize.getB());
             }
+
+            // resize gui, if changed
+            if (GuiHandler.updateResolution()) {
+                GuiHandler.guiFramebuffer.resize(GuiHandler.guiWidth, GuiHandler.guiHeight, Minecraft.ON_OSX);
+                if (minecraft.screen != null) {
+                    int l2 = minecraft.getWindow().getGuiScaledWidth();
+                    int j3 = minecraft.getWindow().getGuiScaledHeight();
+                    minecraft.screen.init(minecraft, l2, j3);
+                }
+            }
         }
 
         if (this.reinitFramebuffers) {
             this.reinitShadersFlag = true;
             this.checkGLError("Start Init");
 
-            if (GlUtil.getRenderer().toLowerCase().contains("intel")) //Optifine
-            {
-                throw new RenderConfigException("Incompatible", Component.translatable("vivecraft.messages.intelgraphics", GlUtil.getRenderer()));
+            if (Util.getPlatform() == Util.OS.WINDOWS && GlUtil.getRenderer().toLowerCase().contains("intel")) {
+                StringBuilder gpus = new StringBuilder();
+                boolean onlyIntel = true;
+                for (GraphicsCard gpu : (new SystemInfo()).getHardware().getGraphicsCards()) {
+                    gpus.append("\n");
+                    if (gpu.getVendor().toLowerCase().contains("intel") || gpu.getName().toLowerCase().contains("intel")) {
+                        gpus.append("§c❌§r ");
+                    } else {
+                        onlyIntel = false;
+                        gpus.append("§a✔§r ");
+                    }
+                    gpus.append(gpu.getVendor()).append(": ").append(gpu.getName());
+                }
+                throw new RenderConfigException("Incompatible", Component.translatable(
+                    "vivecraft.messages.intelgraphics1",
+                    Component.literal(GlUtil.getRenderer()).withStyle(ChatFormatting.GOLD),
+                    gpus.toString(),
+                    onlyIntel ? Component.empty()
+                              : Component.translatable("vivecraft.messages.intelgraphics2", Component.literal("https://www.vivecraft.org/faq/#gpu")
+                                  .withStyle(style -> style.withUnderlined(true)
+                                      .withColor(ChatFormatting.GREEN)
+                                      .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommonComponents.GUI_OPEN_IN_BROWSER))
+                                      .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.vivecraft.org/faq/#gpu"))))));
             }
 
             if (!this.isInitialized()) {
@@ -587,6 +628,7 @@ public abstract class VRRenderer {
                 }
             }
 
+            GuiHandler.updateResolution();
             GuiHandler.guiFramebuffer = new VRTextureTarget("GUI", GuiHandler.guiWidth, GuiHandler.guiHeight, true, false, -1, false, true, false);
             dataholder.print(GuiHandler.guiFramebuffer.toString());
             this.checkGLError("GUI framebuffer setup");
@@ -675,7 +717,7 @@ public abstract class VRRenderer {
                 minecraft.screen.init(minecraft, l2, j3);
             }
 
-            long windowPixels = (long) minecraft.getWindow().getScreenWidth() * minecraft.getWindow().getScreenHeight();
+            long windowPixels = (long) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() * ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight();
             long vrPixels = eyeFBWidth * eyeFBHeight * 2L;
 
             if (list.contains(RenderPass.CENTER)) {
@@ -689,7 +731,7 @@ public abstract class VRRenderer {
             System.out.println("[Minecrift] New render config:" +
                 "\nOpenVR target width: " + eyew + ", height: " + eyeh + " [" + String.format("%.1f", (float) (eyew * eyeh) / 1000000.0F) + " MP]" +
                 "\nRender target width: " + eyeFBWidth + ", height: " + eyeFBHeight + " [Render scale: " + Math.round(dataholder.vrSettings.renderScaleFactor * 100.0F) + "%, " + String.format("%.1f", (float) (eyeFBWidth * eyeFBHeight) / 1000000.0F) + " MP]" +
-                "\nMain window width: " + minecraft.getWindow().getScreenWidth() + ", height: " + minecraft.getWindow().getScreenHeight() + " [" + String.format("%.1f", (float) windowPixels / 1000000.0F) + " MP]" +
+                "\nMain window width: " + ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() + ", height: " + ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight() + " [" + String.format("%.1f", (float) windowPixels / 1000000.0F) + " MP]" +
                 "\nTotal shaded pixels per frame: " + String.format("%.1f", (float) vrPixels / 1000000.0F) + " MP (eye stencil not accounted for)");
             this.lastDisplayFBWidth = eyeFBWidth;
             this.lastDisplayFBHeight = eyeFBHeight;
@@ -703,8 +745,8 @@ public abstract class VRRenderer {
 
     public boolean wasDisplayResized() {
         Minecraft minecraft = Minecraft.getInstance();
-        int i = minecraft.getWindow().getScreenHeight();
-        int j = minecraft.getWindow().getScreenWidth();
+        int i = ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight();
+        int j = ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth();
         boolean flag = this.dispLastHeight != i || this.dispLastWidth != j;
         this.dispLastHeight = i;
         this.dispLastWidth = j;

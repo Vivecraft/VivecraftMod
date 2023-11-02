@@ -302,88 +302,95 @@ public class VRPlayer {
     }
 
     public void doPlayerMoveInRoom(LocalPlayer player) {
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+
         if (this.roomScaleMovementDelay > 0) {
             --this.roomScaleMovementDelay;
-        } else {
+        } else if (player != null
+            && !player.isShiftKeyDown() //jrbudda : prevent falling off things or walking up blocks while moving in room scale.
+            && !player.isSleeping()
+            && !dataholder.jumpTracker.isjumping()
+            && !dataholder.climbTracker.isGrabbingLadder()
+            && player.isAlive()) {
+
             Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
-            if (player != null) {
-                if (!player.isShiftKeyDown()) {
-                    if (!player.isSleeping()) {
-                        if (!dataholder.jumpTracker.isjumping()) {
-                            if (!dataholder.climbTracker.isGrabbingLadder()) {
-                                if (player.isAlive()) {
-                                    VRData vrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
+            VRData tempVrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
 
-                                    if (dataholder.vehicleTracker.canRoomscaleDismount(minecraft.player)) {
-                                        Vec3 vec35 = minecraft.player.getVehicle().position();
-                                        Vec3 vec36 = vrdata.getHeadPivot();
-                                        double d6 = Math.sqrt((vec36.x - vec35.x) * (vec36.x - vec35.x) + (vec36.z - vec35.z) * (vec36.z - vec35.z));
+            if (dataholder.vehicleTracker.canRoomscaleDismount(minecraft.player)) {
+                Vec3 mountpos = minecraft.player.getVehicle().position();
+                Vec3 head = tempVrdata.getHeadPivot();
+                double distance = Math.sqrt((head.x - mountpos.x) * (head.x - mountpos.x) + (head.z - mountpos.z) * (head.z - mountpos.z));
 
-                                        if (d6 > 1.0D) {
-                                            dataholder.sneakTracker.sneakCounter = 5;
-                                        }
-                                    } else {
-                                        float f = player.getBbWidth() / 2.0F;
-                                        float f1 = player.getBbHeight();
-                                        Vec3 vec3 = vrdata.getHeadPivot();
-                                        double d0 = vec3.x;
-                                        double d1 = player.getY();
-                                        double d2 = vec3.z;
-                                        AABB aabb = new AABB(d0 - (double) f, d1, d2 - (double) f, d0 + (double) f, d1 + (double) f1, d2 + (double) f);
-                                        Vec3 vec31 = null;
-                                        float f2 = 0.0625F;
-                                        boolean flag = minecraft.level.noCollision(player, aabb);
+                if (distance > 1.0D) {
+                    dataholder.sneakTracker.sneakCounter = 5;
+                }
+            } else {
+                // move player's X/Z coords as the HMD moves around the room
+                float playerHalfWidth = player.getBbWidth() / 2.0F;
+                float playerHeight = player.getBbHeight();
+                Vec3 eyePos = tempVrdata.getHeadPivot();
 
-                                        if (flag) {
-                                            player.setPosRaw(d0, !dataholder.vrSettings.simulateFalling ? d1 : player.getY(), d2);
-                                            player.setBoundingBox(new AABB(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.minY + (double) f1, aabb.maxZ));
-                                            player.fallDistance = 0.0F;
-                                            this.getEstimatedTorsoPosition(d0, d1, d2);
-                                        } else if ((dataholder.vrSettings.walkUpBlocks && ((PlayerExtension) player).vivecraft$getMuhJumpFactor() == 1.0F || dataholder.climbTracker.isGrabbingLadder() && dataholder.vrSettings.realisticClimbEnabled) && player.fallDistance == 0.0F) {
-                                            if (vec31 == null) {
-                                                vec31 = this.getEstimatedTorsoPosition(d0, d1, d2);
-                                            }
+                double x = eyePos.x;
+                double y = player.getY();
+                double z = eyePos.z;
 
-                                            float f3 = player.getDimensions(player.getPose()).width * 0.45F;
-                                            double d3 = f - f3;
-                                            AABB aabb1 = new AABB(vec31.x - d3, aabb.minY, vec31.z - d3, vec31.x + d3, aabb.maxY, vec31.z + d3);
-                                            boolean flag1 = !minecraft.level.noCollision(player, aabb1);
+                // create bounding box at dest position
+                AABB bb = new AABB(
+                    x - playerHalfWidth,
+                    y,
+                    z - playerHalfWidth,
+                    x + playerHalfWidth,
+                    y + playerHeight,
+                    z + playerHalfWidth);
 
-                                            if (flag1) {
-                                                double d4 = vec31.x - d0;
-                                                double d5 = vec31.z - d2;
-                                                aabb = aabb.move(d4, 0.0D, d5);
-                                                int i = 0;
+                Vec3 torso = new Vec3(x, y, z);
 
-                                                if (player.onClimbable() && dataholder.vrSettings.realisticClimbEnabled) {
-                                                    i = 6;
-                                                }
+                if (minecraft.level.noCollision(player, bb)) {
+                    // no collision
+                    // don't call setPosition style functions to avoid shifting room origin
+                    player.setPosRaw(x, !dataholder.vrSettings.simulateFalling ? y : player.getY(), z);
+                    player.setBoundingBox(bb);
+                    player.fallDistance = 0.0F;
+                } else if ((
+                    //collision, test for climbing up a block
+                    (dataholder.vrSettings.walkUpBlocks && ((PlayerExtension) player).vivecraft$getMuhJumpFactor() == 1.0F)
+                        || (dataholder.climbTracker.isGrabbingLadder() && dataholder.vrSettings.realisticClimbEnabled)) && player.fallDistance == 0.0F) {
 
-                                                for (int j = 0; j <= 10 + i; ++j) {
-                                                    aabb = aabb.move(0.0D, 0.1D, 0.0D);
-                                                    flag = minecraft.level.noCollision(player, aabb);
+                    // is the player significantly inside a block?
+                    float climbShrink = player.getDimensions(player.getPose()).width * 0.45F;
+                    double shrunkClimbHalfWidth = playerHalfWidth - climbShrink;
 
-                                                    if (flag) {
-                                                        d0 = d0 + d4;
-                                                        d2 = d2 + d5;
-                                                        d1 = d1 + (double) (0.1F * (float) j);
-                                                        player.setPosRaw(d0, d1, d2);
-                                                        player.setBoundingBox(new AABB(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ));
-                                                        Vec3 vec32 = this.roomOrigin.add(d4, 0.1F * (float) j, d5);
-                                                        this.setRoomOrigin(vec32.x, vec32.y, vec32.z, false);
-                                                        Vec3 vec33 = player.getLookAngle();
-                                                        Vec3 vec34 = (new Vec3(vec33.x, 0.0D, vec33.z)).normalize();
-                                                        player.fallDistance = 0.0F;
-                                                        ((PlayerExtension) minecraft.player).vivecraft$stepSound(BlockPos.containing(player.position()), player.position());
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                    AABB bbClimb = new AABB(
+                        torso.x - shrunkClimbHalfWidth,
+                        bb.minY,
+                        torso.z - shrunkClimbHalfWidth,
+                        torso.x + shrunkClimbHalfWidth,
+                        bb.maxY,
+                        torso.z + shrunkClimbHalfWidth);
+
+                    // colliding with a block
+                    if (!minecraft.level.noCollision(player, bbClimb)) {
+                        int extra = 0;
+
+                        if (player.onClimbable() && dataholder.vrSettings.realisticClimbEnabled) {
+                            extra = 6;
+                        }
+
+                        for (int i = 0; i <= 10 + extra; ++i) {
+                            bb = bb.move(0.0D, 0.1D, 0.0D);
+
+                            if (minecraft.level.noCollision(player, bb)) {
+                                // free spot, move player there
+                                player.setPosRaw(x, bb.minY, z);
+                                player.setBoundingBox(bb);
+
+                                Vec3 dest = this.roomOrigin.add(0.0, 0.1F * (i + 1), 0.0);
+                                this.setRoomOrigin(dest.x, dest.y, dest.z, false);
+
+                                player.fallDistance = 0.0F;
+                                ((PlayerExtension) minecraft.player).vivecraft$stepSound(BlockPos.containing(player.position()), player.position());
+                                break;
                             }
                         }
                     }
@@ -418,7 +425,8 @@ public class VRPlayer {
             this.isFreeMoveCurrent = false;
         }
 
-        if (this.mc.player.input.forwardImpulse != 0.0F || this.mc.player.input.leftImpulse != 0.0F) {
+        // during login input can be null, and can cause a weird async crash, if not checked
+        if (this.mc.player.input != null && (this.mc.player.input.forwardImpulse != 0.0F || this.mc.player.input.leftImpulse != 0.0F)) {
             this.isFreeMoveCurrent = true;
         }
 

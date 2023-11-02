@@ -5,10 +5,12 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.framework.TwoHandedScreen;
+import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.provider.InputSimulator;
 
 public class GuiKeyboard extends TwoHandedScreen {
     private boolean isShift = false;
+    private long airTypingWarningTime;
 
     public void init() {
         String s = this.dataholder.vrSettings.keyboardKeys;
@@ -42,8 +44,11 @@ public class GuiKeyboard extends TwoHandedScreen {
                 }
 
                 String s2 = String.valueOf(c0);
+                final int code = l1 < this.dataholder.vrSettings.keyboardCodes.length ? this.dataholder.vrSettings.keyboardCodes[l1] : GLFW.GLFW_KEY_UNKNOWN;
                 Button button = new Button.Builder(Component.literal(s2), (p) ->
                 {
+                    InputSimulator.pressKeyForBind(code);
+                    InputSimulator.releaseKeyForBind(code);
                     InputSimulator.typeChars(s2);
                 })
                     .size(i1, 20)
@@ -62,6 +67,8 @@ public class GuiKeyboard extends TwoHandedScreen {
             .build());
         this.addRenderableWidget(new Button.Builder(Component.literal(" "), (p) ->
         {
+            InputSimulator.pressKeyForBind(GLFW.GLFW_KEY_SPACE);
+            InputSimulator.releaseKeyForBind(GLFW.GLFW_KEY_SPACE);
             InputSimulator.typeChars(" ");
         })
             .size(5 * (i1 + l), 20)

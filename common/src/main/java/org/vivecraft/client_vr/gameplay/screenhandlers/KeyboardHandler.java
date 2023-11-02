@@ -56,6 +56,9 @@ public class KeyboardHandler {
                 }
             } else {
                 Showing = false;
+                if (dh.vrSettings.physicalKeyboard) {
+                    physicalKeyboard.unpressAllKeys();
+                }
             }
 
             return Showing;

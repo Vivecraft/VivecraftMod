@@ -1,9 +1,14 @@
 package org.vivecraft.client_vr.provider;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class InputSimulator {
     private static final Set<Integer> pressedKeys = new HashSet<>();
@@ -68,6 +73,30 @@ public class InputSimulator {
         for (int j = 0; j < i; ++j) {
             char c0 = characters.charAt(j);
             typeChar(c0);
+        }
+    }
+
+    private static long airTypingWarningTime;
+    public static void pressKeyForBind(int code) {
+        Minecraft minecraft = Minecraft.getInstance();
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
+
+        if (dataHolder.vrSettings.keyboardPressBinds) {
+            if (code != GLFW.GLFW_KEY_UNKNOWN) {
+                pressKey(code);
+            }
+        } else if (minecraft.screen == null && Utils.milliTime() - airTypingWarningTime >= 30000) {
+            minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.airtypingwarning"));
+            airTypingWarningTime = Utils.milliTime();
+        }
+    }
+
+
+    public static void releaseKeyForBind(int code) {
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
+
+        if (dataHolder.vrSettings.keyboardPressBinds && code != GLFW.GLFW_KEY_UNKNOWN) {
+            releaseKey(code);
         }
     }
 }
