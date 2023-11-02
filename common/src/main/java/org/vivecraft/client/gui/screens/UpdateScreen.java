@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 import org.vivecraft.client.gui.widgets.TextScrollWidget;
 import org.vivecraft.client.utils.UpdateChecker;
@@ -14,6 +15,7 @@ import org.vivecraft.client.utils.UpdateChecker;
 public class UpdateScreen extends Screen {
 
     private final Screen lastScreen;
+    private TextScrollWidget text;
 
     public UpdateScreen() {
         super(Component.literal("New Update Available"));
@@ -22,7 +24,7 @@ public class UpdateScreen extends Screen {
 
     protected void init() {
 
-        this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, UpdateChecker.changelog));
+        text = this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, UpdateChecker.changelog));
 
         this.addRenderableWidget(new Button.Builder(Component.literal("Download from Modrinth"),
             ConfirmLinkScreen.confirmLink("https://modrinth.com/mod/vivecraft", this, true))
@@ -48,6 +50,11 @@ public class UpdateScreen extends Screen {
         this.renderBackground(poseStack);
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
         super.render(poseStack, i, j, f);
+
+        Style style = text.getMouseover(i, j);
+        if (style != null) {
+            renderComponentHoverEffect(poseStack, style, i, j);
+        }
     }
 
     @Override

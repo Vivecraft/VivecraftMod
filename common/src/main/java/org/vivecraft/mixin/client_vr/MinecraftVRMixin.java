@@ -833,8 +833,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             RenderSystem.applyModelViewMatrix();
             RenderSystem.setShaderFogStart(Float.MAX_VALUE);
 
-            GuiGraphics guiGraphics = new GuiGraphics((Minecraft) (Object) this, renderBuffers.bufferSource());
-            guiGraphics.pose().scale(3, 3, 3);
+            PoseStack p = new PoseStack();
+            p.scale(3, 3, 3);
             RenderSystem.clear(256, ON_OSX);
 
             if (this.vivecraft$mirrorNotifyClear) {

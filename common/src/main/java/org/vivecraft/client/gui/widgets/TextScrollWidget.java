@@ -53,7 +53,7 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int x, int y, float f) {
+    public void renderWidget(PoseStack poseStack, int x, int y, float f) {
         // draw box outline
         fill(poseStack,
             getX(),
@@ -71,7 +71,7 @@ public class TextScrollWidget extends AbstractWidget {
 
         // draw text
         for (int line = 0; line + currentLine < formattedChars.size() && line < maxLines; line++) {
-            guiGraphics.drawString(Minecraft.getInstance().font, formattedChars.get(line + currentLine), getX() + padding, getY() + padding + line * 12, 16777215);
+            drawString(poseStack, Minecraft.getInstance().font, formattedChars.get(line + currentLine), getX() + padding, getY() + padding + line * 12, 16777215);
         }
 
         float scrollbarStart = scrollSteps == 0 ? 0 : currentLine / (float) scrollSteps * scrollBarOffset;
@@ -93,8 +93,6 @@ public class TextScrollWidget extends AbstractWidget {
             getX() + width - (isFocused() || isHovered ? 2 : 1),
             (int) (getY() + (isFocused() || isHovered ? 0 : 1) + scrollbarStart + scrollBarSize),
             -6250336);
-
-        renderMouseover(guiGraphics, x, y);
     }
 
     @Override
@@ -181,10 +179,11 @@ public class TextScrollWidget extends AbstractWidget {
         }
     }
 
-    public void renderMouseover(GuiGraphics guiGraphics, int x, int y) {
+    public Style getMouseover(int x, int y) {
         Style style = this.getMouseoverStyle(x, y);
         if (style != null && style.getHoverEvent() != null) {
-            guiGraphics.renderComponentHoverEffect(Minecraft.getInstance().font, style, x, y);
+            return style;
         }
+        return null;
     }
 }
