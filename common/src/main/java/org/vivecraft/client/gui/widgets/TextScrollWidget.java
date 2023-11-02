@@ -3,10 +3,12 @@ package org.vivecraft.client.gui.widgets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -23,12 +25,12 @@ public class TextScrollWidget extends AbstractWidget {
 
     private final int scrollBarWidth = 5;
     private final int padding = 5;
-    private final List<FormattedText> formattedText;
+    private final List<FormattedCharSequence> formattedChars;
 
     public TextScrollWidget(int x, int y, int width, int height, String text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth * 2, Style.EMPTY);
+        formattedChars = ComponentRenderUtils.wrapComponents(Component.literal(text), width - scrollBarWidth * 2, Minecraft.getInstance().font);
 
         initScroll();
     }
@@ -36,7 +38,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedText = Minecraft.getInstance().font.getSplitter().splitLines(text, width - scrollBarWidth * 2, Style.EMPTY);
+        formattedChars = ComponentRenderUtils.wrapComponents(text, width - scrollBarWidth * 2, Minecraft.getInstance().font);
         initScroll();
     }
 
@@ -44,14 +46,14 @@ public class TextScrollWidget extends AbstractWidget {
 
         maxLines = (height - 2 - padding + 3) / 12;
         currentLine = 0;
-        scrollSteps = formattedText.size() - maxLines;
+        scrollSteps = formattedChars.size() - maxLines;
         scrollSteps = Math.max(scrollSteps, 0);
-        scrollBarSize = scrollSteps == 0 ? height - 2 : (int) (Math.max(formattedText.size(), maxLines) / (float) (scrollSteps) * 12);
+        scrollBarSize = scrollSteps == 0 ? height - 2 : (int) (Math.max(formattedChars.size(), maxLines) / (float) (scrollSteps) * 12);
         scrollBarOffset = height - scrollBarSize - 2;
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
+    public void renderWidget(GuiGraphics guiGraphics, int x, int y, float f) {
         // draw box outline
         guiGraphics.fill(
             getX(),
@@ -68,8 +70,8 @@ public class TextScrollWidget extends AbstractWidget {
             -16777216);
 
         // draw text
-        for (int line = 0; line + currentLine < formattedText.size() && line < maxLines; line++) {
-            guiGraphics.drawString(Minecraft.getInstance().font, formattedText.get(line + currentLine).getString(), getX() + padding, getY() + padding + line * 12, 16777215);
+        for (int line = 0; line + currentLine < formattedChars.size() && line < maxLines; line++) {
+            guiGraphics.drawString(Minecraft.getInstance().font, formattedChars.get(line + currentLine), getX() + padding, getY() + padding + line * 12, 16777215);
         }
 
         float scrollbarStart = scrollSteps == 0 ? 0 : currentLine / (float) scrollSteps * scrollBarOffset;
@@ -91,6 +93,8 @@ public class TextScrollWidget extends AbstractWidget {
             getX() + width - (isFocused() || isHovered ? 2 : 1),
             (int) (getY() + (isFocused() || isHovered ? 0 : 1) + scrollbarStart + scrollBarSize),
             -6250336);
+
+        renderMouseover(guiGraphics, x, y);
     }
 
     @Override
@@ -102,9 +106,14 @@ public class TextScrollWidget extends AbstractWidget {
     public void onClick(double x, double y) {
         if (x >= getX() + width - scrollBarWidth && x <= getX() + width && y >= getY() && y <= getY() + height) {
             scrollDragActive = true;
-            if (maxLines < formattedText.size()) {
+            if (maxLines < formattedChars.size()) {
                 // update scroll position
                 setCurrentLineFromYPos(y);
+            }
+        } else if (this.clicked(x, y)) {
+            Style style = getMouseoverStyle(x, y);
+            if (style != null && style.getClickEvent() != null) {
+                Minecraft.getInstance().screen.handleComponentClicked(style);
             }
         }
     }
@@ -153,5 +162,29 @@ public class TextScrollWidget extends AbstractWidget {
             }
         }
         return super.keyPressed(key, scancode, mods);
+    }
+
+    public Style getMouseoverStyle(double x, double y) {
+        int lineIndex = this.getLineIndex(x, y);
+        if (lineIndex >= 0 && lineIndex < this.formattedChars.size()) {
+            FormattedCharSequence line = this.formattedChars.get(lineIndex);
+            return Minecraft.getInstance().font.getSplitter().componentStyleAtWidth(line, Mth.floor(x - this.getX()));
+        }
+        return null;
+    }
+
+    private int getLineIndex(double x, double y) {
+        if (!this.clicked(x, y)) {
+            return -1;
+        } else {
+            return (int) ((y - this.getY() - padding * 0.5) / 12.0);
+        }
+    }
+
+    public void renderMouseover(GuiGraphics guiGraphics, int x, int y) {
+        Style style = this.getMouseoverStyle(x, y);
+        if (style != null && style.getHoverEvent() != null) {
+            guiGraphics.renderComponentHoverEffect(Minecraft.getInstance().font, style, x, y);
+        }
     }
 }
