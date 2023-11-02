@@ -13,9 +13,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -171,6 +171,8 @@ public class VRSettings {
     public String[] vrRadialItems = getRadialItemsDefault();
     @SettingField(config = "RADIALALT", separate = true)
     public String[] vrRadialItemsAlt = getRadialItemsAltDefault();
+    @SettingField(fixedSize = false)
+    public int[] keyboardCodes = getKeyboardCodesDefault();
 
     //Control
     @SettingField(VrOptions.REVERSE_HANDS)
@@ -402,6 +404,8 @@ public class VRSettings {
     public float physicalKeyboardScale = 1.0f;
     @SettingField(VrOptions.PHYSICAL_KEYBOARD_THEME)
     public PhysicalKeyboard.KeyboardTheme physicalKeyboardTheme = PhysicalKeyboard.KeyboardTheme.DEFAULT;
+    @SettingField(VrOptions.KEYBOARD_PRESS_BINDS)
+    public boolean keyboardPressBinds = false;
     @SettingField(VrOptions.ALLOW_ADVANCED_BINDINGS)
     public boolean allowAdvancedBindings = false;
     @SettingField(VrOptions.CHAT_NOTIFICATIONS)
@@ -412,6 +416,12 @@ public class VRSettings {
     public boolean guiAppearOverBlock = true;
     @SettingField(VrOptions.SHADER_GUI_RENDER)
     public ShaderGUIRender shaderGUIRender = ShaderGUIRender.AFTER_SHADER;
+    @SettingField(VrOptions.DOUBLE_GUI_RESOLUTION)
+    public boolean doubleGUIResolution = false;
+    @SettingField(VrOptions.GUI_SCALE)
+    public int guiScale = 0;
+    @SettingField(VrOptions.HUD_MAX_GUI_SCALE)
+    public boolean hudMaxScale = false;
     @SettingField(VrOptions.SHOW_UPDATES)
     public boolean alwaysShowUpdates = true;
     @SettingField
@@ -451,8 +461,8 @@ public class VRSettings {
 
     public ServerOverrides overrides = new ServerOverrides();
 
-    private final Map<VrOptions, Triple<Field, String, Boolean>> fieldEnumMap = new EnumMap<>(VrOptions.class);
-    private final Map<String, Triple<Field, VrOptions, Boolean>> fieldConfigMap = new HashMap<>();
+    private final Map<VrOptions, ConfigEntry> fieldEnumMap = new EnumMap<>(VrOptions.class);
+    private final Map<String, ConfigEntry> fieldConfigMap = new HashMap<>();
 
     // This map is only here to preserve old settings, not intended for general use
     private Map<String, String> preservedSettingMap;
@@ -489,14 +499,14 @@ public class VRSettings {
                 }
 
                 String config = ann.config().isEmpty() ? field.getName() : ann.config();
+                ConfigEntry configEntry = new ConfigEntry(field, ann.value(), config, ann.separate(), ann.fixedSize());
                 if (ann.value() != VrOptions.DUMMY) {
                     if (fieldEnumMap.containsKey(ann.value())) {
                         throw new RuntimeException("duplicate enum in setting field: " + field.getName());
                     }
-                    fieldEnumMap.put(ann.value(), Triple.of(field, config, ann.separate()));
+                    fieldEnumMap.put(ann.value(), configEntry);
                 }
 
-                Triple<Field, VrOptions, Boolean> configEntry = Triple.of(field, ann.value(), ann.separate());
                 if (ann.separate() && field.getType().isArray()) {
                     int len = Array.getLength(field.get(this));
                     IntStream.range(0, len).forEach(i -> fieldConfigMap.put(config + "_" + i, configEntry));
@@ -711,16 +721,16 @@ public class VRSettings {
             if (mapping == null) {
                 return;
             }
-            Field field = mapping.getLeft();
+            Field field = mapping.field;
             Class<?> type = field.getType();
-            String name = mapping.getMiddle();
+            String name = mapping.configName;
 
             Map<String, String> profileSet = ProfileManager.getProfileSet(this.defaults, ProfileManager.PROFILE_SET_VR);
 
             if (type.isArray()) {
                 Object arr = field.get(this);
                 int len = Array.getLength(arr);
-                if (mapping.getRight()) {
+                if (mapping.separate) {
                     for (int i = 0; i < len; i++) {
                         Object obj = Objects.requireNonNull(loadDefault(name + "_" + i, null, option, type.getComponentType(), false, profileSet));
                         Array.set(arr, i, obj);
@@ -734,7 +744,7 @@ public class VRSettings {
                     }
                 }
             } else {
-                Object obj = Objects.requireNonNull(loadDefault(name, null, option, type, mapping.getRight(), profileSet));
+                Object obj = Objects.requireNonNull(loadDefault(name, null, option, type, mapping.separate, profileSet));
                 field.set(this, obj);
             }
         } catch (Exception ex) {
@@ -769,24 +779,31 @@ public class VRSettings {
                         continue;
                     }
 
-                    Field field = mapping.getLeft();
+                    Field field = mapping.field;
                     Class<?> type = field.getType();
                     Object currentValue = field.get(this);
                     if (type.isArray()) {
-                        if (mapping.getRight()) {
+                        if (mapping.separate) {
                             int index = Integer.parseInt(name.substring(name.lastIndexOf('_') + 1));
-                            Object obj = Objects.requireNonNull(loadOption(name.substring(0, name.lastIndexOf('_')), value, Array.get(currentValue, index), mapping.getMiddle(), type.getComponentType(), false));
+                            Object obj = Objects.requireNonNull(loadOption(name.substring(0, name.lastIndexOf('_')), value, Array.get(currentValue, index), mapping.vrOptions, type.getComponentType(), false));
                             Array.set(currentValue, index, obj);
                         } else {
                             int len = Array.getLength(currentValue);
                             String[] split = value.split(";", -1); // Avoid conflicting with other comma-delimited types
+                            if (split.length != len && !mapping.fixedSize) {
+                                Object newValue = Array.newInstance(type.getComponentType(), split.length);
+                                System.arraycopy(currentValue, 0, newValue, 0, Math.min(len, split.length));
+                                field.set(this, newValue);
+                                currentValue = newValue;
+                                len = split.length;
+                            }
                             for (int i = 0; i < len; i++) {
-                                Object obj = Objects.requireNonNull(loadOption(name, split[i], Array.get(currentValue, i), mapping.getMiddle(), type.getComponentType(), false));
+                                Object obj = Objects.requireNonNull(loadOption(name, split[i], Array.get(currentValue, i), mapping.vrOptions, type.getComponentType(), false));
                                 Array.set(currentValue, i, obj);
                             }
                         }
                     } else {
-                        Object obj = Objects.requireNonNull(loadOption(name, value, currentValue, mapping.getMiddle(), type, mapping.getRight()));
+                        Object obj = Objects.requireNonNull(loadOption(name, value, currentValue, mapping.vrOptions, type, mapping.separate));
                         field.set(this, obj);
                     }
                 } catch (Exception var7) {
@@ -822,27 +839,27 @@ public class VRSettings {
             for (var entry : fieldConfigMap.entrySet()) {
                 String name = entry.getKey();
                 var mapping = entry.getValue();
-                Field field = mapping.getLeft();
+                Field field = mapping.field;
                 Class<?> type = field.getType();
                 Object obj = field.get(this);
 
                 try {
                     if (type.isArray()) {
-                        if (mapping.getRight()) {
+                        if (mapping.separate) {
                             int index = Integer.parseInt(name.substring(name.lastIndexOf('_') + 1));
-                            String value = Objects.requireNonNull(saveOption(name.substring(0, name.lastIndexOf('_')), Array.get(obj, index), mapping.getMiddle(), type.getComponentType(), mapping.getRight()));
+                            String value = Objects.requireNonNull(saveOption(name.substring(0, name.lastIndexOf('_')), Array.get(obj, index), mapping.vrOptions, type.getComponentType(), mapping.separate));
                             var5.println(name + ":" + value);
                         } else {
                             StringJoiner joiner = new StringJoiner(";");
                             int len = Array.getLength(obj);
                             for (int i = 0; i < len; i++) {
-                                String value = Objects.requireNonNull(saveOption(name, Array.get(obj, i), mapping.getMiddle(), type.getComponentType(), mapping.getRight()));
+                                String value = Objects.requireNonNull(saveOption(name, Array.get(obj, i), mapping.vrOptions, type.getComponentType(), mapping.separate));
                                 joiner.add(value);
                             }
                             var5.println(name + ":" + joiner);
                         }
                     } else {
-                        String value = Objects.requireNonNull(saveOption(name, obj, mapping.getMiddle(), type, mapping.getRight()));
+                        String value = Objects.requireNonNull(saveOption(name, obj, mapping.vrOptions, type, mapping.separate));
                         var5.println(name + ":" + value);
                     }
                 } catch (Exception ex) {
@@ -875,7 +892,7 @@ public class VRSettings {
             if (mapping == null) {
                 return var2;
             }
-            Field field = mapping.getLeft();
+            Field field = mapping.field;
             Class<?> type = field.getType();
 
             Object obj = field.get(this);
@@ -914,7 +931,7 @@ public class VRSettings {
             if (mapping == null) {
                 return 0;
             }
-            Field field = mapping.getLeft();
+            Field field = mapping.field;
 
             float value = ((Number) field.get(this)).floatValue();
             if (overrides.hasSetting(par1EnumOptions)) {
@@ -939,7 +956,7 @@ public class VRSettings {
             if (mapping == null) {
                 return;
             }
-            Field field = mapping.getLeft();
+            Field field = mapping.field;
             Class<?> type = field.getType();
 
             Object obj = par1EnumOptions.setOptionValue(field.get(this));
@@ -950,7 +967,7 @@ public class VRSettings {
             } else if (OptionEnum.class.isAssignableFrom(type)) {
                 field.set(this, ((OptionEnum<?>) field.get(this)).getNext());
             } else {
-                logger.warn("Don't know how to set VR option " + mapping.getMiddle() + " with type " + type.getSimpleName());
+                logger.warn("Don't know how to set VR option " + mapping.configName + " with type " + type.getSimpleName());
                 return;
             }
 
@@ -968,7 +985,7 @@ public class VRSettings {
             if (mapping == null) {
                 return;
             }
-            Field field = mapping.getLeft();
+            Field field = mapping.field;
             Class<?> type = field.getType();
 
             float f = Objects.requireNonNullElse(par1EnumOptions.setOptionFloatValue(par2), par2);
@@ -1006,6 +1023,8 @@ public class VRSettings {
         //return this.headTrackSensitivity;  // TODO: If head track sensitivity is working again... if
     }
 
+    record ConfigEntry(Field field, VrOptions vrOptions, String configName, boolean separate, boolean fixedSize) {
+    }
 
     public enum VrOptions {
         DUMMY(false, true), // Dummy
@@ -1148,8 +1167,32 @@ public class VRSettings {
             }
         },
         PHYSICAL_KEYBOARD_THEME(false, false), // Keyboard Theme
+        KEYBOARD_PRESS_BINDS(false, true), // Keyboard Presses Bindings
         GUI_APPEAR_OVER_BLOCK(false, true), // Appear Over Block
-        SHADER_GUI_RENDER(false, true),
+        SHADER_GUI_RENDER(false, false), // Shaders GUI
+        DOUBLE_GUI_RESOLUTION(false, true), // 1440p GUI
+        GUI_SCALE(true, true, 0, 6, 1, 0) { // GUI Scale
+
+            @Override
+            String getDisplayString(String prefix, Object value) {
+                if ((int) value == 0) {
+                    return prefix + I18n.get("options.guiScale.auto");
+                } else {
+                    if (ClientDataHolderVR.getInstance().vrSettings.doubleGUIResolution) {
+                        return prefix + value;
+                    } else {
+                        return prefix + (int) Math.ceil((int) value * 0.5f);
+                    }
+                }
+            }
+            @Override
+            void onOptionChange() {
+                if (VRState.vrEnabled) {
+                    ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("");
+                }
+            }
+        },
+        HUD_MAX_GUI_SCALE(false, true), // force HUD to render with max GUI scale
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
         LOW_HEALTH_INDICATOR(false, true), // red low health pulse
@@ -1978,6 +2021,66 @@ public class VRSettings {
         out[5] = "";
         out[6] = "";
         out[7] = "";
+
+        return out;
+    }
+
+    public int[] getKeyboardCodesDefault() {
+        // Some keys in the in-game keyboard don't have assignable key codes
+        int[] out = new int[]{
+            GLFW.GLFW_KEY_GRAVE_ACCENT,
+            GLFW.GLFW_KEY_1,
+            GLFW.GLFW_KEY_2,
+            GLFW.GLFW_KEY_3,
+            GLFW.GLFW_KEY_4,
+            GLFW.GLFW_KEY_5,
+            GLFW.GLFW_KEY_6,
+            GLFW.GLFW_KEY_7,
+            GLFW.GLFW_KEY_8,
+            GLFW.GLFW_KEY_9,
+            GLFW.GLFW_KEY_0,
+            GLFW.GLFW_KEY_MINUS,
+            GLFW.GLFW_KEY_EQUAL,
+            GLFW.GLFW_KEY_Q,
+            GLFW.GLFW_KEY_W,
+            GLFW.GLFW_KEY_E,
+            GLFW.GLFW_KEY_R,
+            GLFW.GLFW_KEY_T,
+            GLFW.GLFW_KEY_Y,
+            GLFW.GLFW_KEY_U,
+            GLFW.GLFW_KEY_I,
+            GLFW.GLFW_KEY_O,
+            GLFW.GLFW_KEY_P,
+            GLFW.GLFW_KEY_LEFT_BRACKET,
+            GLFW.GLFW_KEY_RIGHT_BRACKET,
+            GLFW.GLFW_KEY_BACKSLASH,
+            GLFW.GLFW_KEY_A,
+            GLFW.GLFW_KEY_S,
+            GLFW.GLFW_KEY_D,
+            GLFW.GLFW_KEY_F,
+            GLFW.GLFW_KEY_G,
+            GLFW.GLFW_KEY_H,
+            GLFW.GLFW_KEY_J,
+            GLFW.GLFW_KEY_K,
+            GLFW.GLFW_KEY_L,
+            GLFW.GLFW_KEY_SEMICOLON,
+            GLFW.GLFW_KEY_APOSTROPHE,
+            GLFW.GLFW_KEY_UNKNOWN, // colon
+            GLFW.GLFW_KEY_UNKNOWN, // quote
+            GLFW.GLFW_KEY_Z,
+            GLFW.GLFW_KEY_X,
+            GLFW.GLFW_KEY_C,
+            GLFW.GLFW_KEY_V,
+            GLFW.GLFW_KEY_B,
+            GLFW.GLFW_KEY_N,
+            GLFW.GLFW_KEY_M,
+            GLFW.GLFW_KEY_COMMA,
+            GLFW.GLFW_KEY_PERIOD,
+            GLFW.GLFW_KEY_SLASH,
+            GLFW.GLFW_KEY_UNKNOWN, // question mark
+            GLFW.GLFW_KEY_UNKNOWN, // less than
+            GLFW.GLFW_KEY_UNKNOWN // greater than
+        };
 
         return out;
     }

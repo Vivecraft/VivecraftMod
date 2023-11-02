@@ -363,7 +363,7 @@
   "vivecraft.messages.serverplugin": "Vivecraft-servermod gedetecteerd: %s",
   "vivecraft.messages.noserverplugin": "Vivecraft-servermod niet gedetecteerd. Deze server biedt mogelijk geen ondersteuning voor teleporteren. De beperkte bewegingsmodus (terugvallen op vrije beweging) is ingeschakeld.",
   "vivecraft.messages.calibrateheight": "Kalibreer uw lengte in het pauzemenu.",
-  "vivecraft.messages.rendersetupfailed": "Installatie van weergave mislukt: %s",
+  "vivecraft.messages.rendersetupfailed": "Installatie van weergave mislukt: %s\nVR provider: %s",
   "vivecraft.messages.intelgraphics": "Intel Integrated Graphics wordt niet ondersteund. Als dit een laptop is, forceer dan de krachtige GPU. Gedetecteerde GPU: %s",
   "vivecraft.messages.nosteamvr": "OpenVR runtime niet gedetecteerd. Heb je SteamVR geïnstalleerd?",
   "vivecraft.messages.menuworldexportcomplete.1": "Wereld export compleet ... gebiedsgrootte: %d",

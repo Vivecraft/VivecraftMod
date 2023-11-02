@@ -10,6 +10,8 @@ import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.*;
 import org.joml.Vector2f;
@@ -18,6 +20,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
@@ -83,36 +86,73 @@ public class GuiHandler {
     public static RenderTarget guiFramebuffer = null;
     public static int guiWidth = 1280;
     public static int guiHeight = 720;
+    public static int guiScaleFactorMax;
     public static int guiScaleFactor = calculateScale(0, false, guiWidth, guiHeight);
     public static int scaledWidth;
     public static int scaledHeight;
+    public static int scaledWidthMax;
+    public static int scaledHeightMax;
 
     public static int calculateScale(int scaleIn, boolean forceUnicode, int framebufferWidth, int framebufferHeight) {
-        int j = 1;
+        int scale = 1;
+        int maxScale = 1;
 
-        while (j != scaleIn &&
-            j < framebufferWidth &&
-            j < framebufferHeight &&
-            framebufferWidth / (j + 1) >= 320 &&
-            framebufferHeight / (j + 1) >= 240) {
-            ++j;
+        while (maxScale < framebufferWidth &&
+            maxScale < framebufferHeight &&
+            framebufferWidth / (maxScale + 1) >= 320 &&
+            framebufferHeight / (maxScale + 1) >= 240) {
+            if (scale < scaleIn || scaleIn == 0) {
+                scale++;
+            }
+            maxScale++;
         }
 
-        if (forceUnicode && j % 2 != 0) {
-            ++j;
+        if (forceUnicode) {
+            if (scale % 2 != 0) {
+                scale++;
+            }
+            if (maxScale % 2 != 0) {
+                maxScale++;
+            }
         }
 
-        int widthFloor = framebufferWidth / j;
-        scaledWidth = framebufferWidth / j > widthFloor ? widthFloor + 1 : widthFloor;
+        guiScaleFactorMax = maxScale;
 
-        int heightFloor = framebufferHeight / j;
-        scaledHeight = framebufferHeight / j > heightFloor ? heightFloor + 1 : heightFloor;
+        scaledWidth =  Mth.ceil(framebufferWidth / (float) scale);
+        scaledWidthMax =  Mth.ceil(framebufferWidth / (float) maxScale);
 
-        return j;
+        scaledHeight =  Mth.ceil(framebufferHeight / (float) scale);
+        scaledHeightMax =  Mth.ceil(framebufferHeight / (float) maxScale);
+
+        return scale;
+    }
+
+    public static boolean updateResolution() {
+        int oldWidth = guiWidth;
+        int oldHeight = guiHeight;
+        int oldGuiScale = guiScaleFactor;
+        guiWidth = dh.vrSettings.doubleGUIResolution ? 2560 : 1280;
+        guiHeight = dh.vrSettings.doubleGUIResolution ? 1440 : 720;
+        guiScaleFactor = calculateScale(
+            dh.vrSettings.doubleGUIResolution ? dh.vrSettings.guiScale : (int) Math.ceil(dh.vrSettings.guiScale * 0.5f),
+            false, guiWidth, guiHeight);
+        if (oldWidth != guiWidth) {
+            // move cursor to right position
+            InputSimulator.setMousePos(
+                mc.mouseHandler.xpos() * ((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenWidth() / oldWidth,
+                mc.mouseHandler.ypos() * ((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenHeight() / oldHeight);
+            controllerMouseX *= (double) guiWidth / oldWidth;
+            controllerMouseY *= (double) guiHeight / oldHeight;
+            return true;
+        } else if (oldGuiScale != guiScaleFactor) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static void processGui() {
-        if (mc.screen != null) {
+        if (mc.screen != null || !mc.mouseHandler.isMouseGrabbed()) {
             if (!dh.vrSettings.seated) {
                 if (guiRotation_room != null) {
                     if (MCVR.get().isControllerTracking(0)) {
@@ -142,7 +182,9 @@ public class GuiHandler {
                             int j = 0;
 
                             if (MCVR.get().isControllerTracking(ControllerType.RIGHT)) {
-                                InputSimulator.setMousePos(d1, d0);
+                                InputSimulator.setMousePos(
+                                    d1 * (((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenWidth() / (double) mc.getWindow().getScreenWidth()),
+                                    d0 * (((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenHeight() / (double) mc.getWindow().getScreenHeight()));
                                 controllerMouseValid = true;
                             }
                         } else {
@@ -272,6 +314,10 @@ public class GuiHandler {
     }
 
     public static void onScreenChanged(Screen previousGuiScreen, Screen newScreen, boolean unpressKeys) {
+        onScreenChanged(previousGuiScreen, newScreen, unpressKeys, false);
+    }
+
+    public static void onScreenChanged(Screen previousGuiScreen, Screen newScreen, boolean unpressKeys, boolean infrontOfHand) {
         if (!VRState.vrRunning) {
             return;
         }
@@ -330,6 +376,8 @@ public class GuiHandler {
                     && mc.hitResult instanceof EntityHitResult
                     && ((EntityHitResult) mc.hitResult).getEntity() instanceof ContainerEntity;
 
+                VRData.VRDevicePose facingDevice = infrontOfHand ? dh.vrPlayer.vrdata_room_pre.getController(0) : dh.vrPlayer.vrdata_room_pre.hmd;
+
                 if (guiAppearOverBlockActive && (isBlockScreen || isEntityScreen) && dh.vrSettings.guiAppearOverBlock) {
                     Vec3 sourcePos;
                     if (isEntityScreen) {
@@ -355,8 +403,8 @@ public class GuiHandler {
                         vec3 = new Vec3(0.0D, 0.25D, -2.0D);
                     }
 
-                    Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
-                    Vec3 vec32 = dh.vrPlayer.vrdata_room_pre.hmd.getCustomVector(vec3);
+                    Vec3 hmdPos = facingDevice.getPosition();
+                    Vec3 vec32 = facingDevice.getCustomVector(vec3);
                     guiPos_room = new Vec3(vec32.x / 2.0D + hmdPos.x, vec32.y / 2.0D + hmdPos.y, vec32.z / 2.0D + hmdPos.z);
 
                     if (dh.vrSettings.physicalKeyboard && KeyboardHandler.Showing && guiPos_room.y < hmdPos.y + 0.2D) {
@@ -365,7 +413,7 @@ public class GuiHandler {
                 }
 
                 // orient screen
-                Vec3 hmdPos = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
+                Vec3 hmdPos = facingDevice.getPosition();
                 Vector3 look = new Vector3();
                 look.setX((float) (guiPos_room.x - hmdPos.x));
                 look.setY((float) (guiPos_room.y - hmdPos.y));
@@ -388,6 +436,12 @@ public class GuiHandler {
         if (mc.screen != null && guiPos_room == null) {
             //naughty mods!
             onScreenChanged(null, mc.screen, false);
+        } else if (mc.screen == null && !mc.mouseHandler.isMouseGrabbed()) {
+            // some mod want's to do a mouse selection overlay
+            if (guiPos_room == null) {
+                onScreenChanged(null, new Screen(Component.empty()) {
+                }, false, true);
+            }
         } else if (mc.screen == null && guiPos_room != null) {
             //even naughtier mods!
             // someone canceled the setScreen, so guiPos didn't get reset

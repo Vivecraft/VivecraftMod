@@ -21,6 +21,7 @@ import org.vivecraft.client_vr.QuaternionfHistory;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.Vec3History;
 import org.vivecraft.client_vr.extensions.GuiExtension;
+import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -358,7 +359,7 @@ public abstract class MCVR {
 
         Vec3 main = this.getAimSource(0);
         Vec3 off = this.getAimSource(1);
-        Vec3 barStartos = null, barEndos = null;
+        Vec3 barStartPos = null, barEndPos = null;
 
         int i = 1;
         if (this.dh.vrSettings.reverseHands) {
@@ -366,18 +367,28 @@ public abstract class MCVR {
         }
 
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST) {
-            barStartos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.26F)).toVector3d();
-            barEndos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.01F)).toVector3d();
+            barStartPos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.26F)).toVector3d();
+            barEndPos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.01F)).toVector3d();
         } else if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
-            barStartos = this.getAimRotation(1).transform(new Vector3((float) i * -0.18F, 0.08F, -0.01F)).toVector3d();
-            barEndos = this.getAimRotation(1).transform(new Vector3((float) i * 0.19F, 0.04F, -0.08F)).toVector3d();
+            barStartPos = this.getAimRotation(1).transform(new Vector3((float) i * -0.18F, 0.08F, -0.01F)).toVector3d();
+            barEndPos = this.getAimRotation(1).transform(new Vector3((float) i * 0.19F, 0.04F, -0.08F)).toVector3d();
         } else {
             return; //how did u get here
         }
 
+        float guiScaleFactor = (float) this.mc.getWindow().getGuiScale() / GuiHandler.guiScaleFactorMax;
 
-        Vec3 barStart = off.add(barStartos.x, barStartos.y, barStartos.z);
-        Vec3 barEnd = off.add(barEndos.x, barEndos.y, barEndos.z);
+        Vec3 barMidPos = barStartPos.add(barEndPos).scale(0.5);
+
+        Vec3 barStart = off.add(
+            Mth.lerp(guiScaleFactor, barMidPos.x, barStartPos.x),
+            Mth.lerp(guiScaleFactor, barMidPos.y, barStartPos.y),
+            Mth.lerp(guiScaleFactor, barMidPos.z, barStartPos.z));
+        Vec3 barEnd = off.add(
+            Mth.lerp(guiScaleFactor, barMidPos.x, barEndPos.x),
+            Mth.lerp(guiScaleFactor, barMidPos.y, barEndPos.y),
+            Mth.lerp(guiScaleFactor, barMidPos.z, barEndPos.z));
+
 
         Vec3 u = barStart.subtract(barEnd);
         Vec3 pq = barStart.subtract(main);
@@ -566,7 +577,7 @@ public abstract class MCVR {
             this.controllerRotation[0].M[3][3] = 1.0F;
             Vec3 vec31 = this.getHmdVector();
 
-            if (this.dh.vrSettings.seated && this.mc.screen == null) {
+            if (this.dh.vrSettings.seated && this.mc.screen == null && this.mc.mouseHandler.isMouseGrabbed()) {
                 Matrix4f matrix4f = new Matrix4f();
                 float f = 110.0F;
                 float f1 = 180.0F;
@@ -605,8 +616,10 @@ public abstract class MCVR {
                     double d4 = 0.5D * (double) this.dh.vrSettings.ySensitivity;
                     d2 = (double) this.aimPitch + d1 * d4;
                     d2 = Mth.clamp(d2, -89.9D, 89.9D);
-                    InputSimulator.setMousePos(d3, i / 2);
-                    GLFW.glfwSetCursorPos(this.mc.getWindow().getWindow(), d3, i / 2);
+                    double screenX = d3 * (((WindowExtension) (Object) this.mc.getWindow()).vivecraft$getActualScreenWidth() / (double) this.mc.getWindow().getScreenWidth());
+                    double screenY = (i * 0.5F) * (((WindowExtension) (Object) this.mc.getWindow()).vivecraft$getActualScreenHeight() / (double) this.mc.getWindow().getScreenHeight());
+                    InputSimulator.setMousePos(screenX, screenY);
+                    GLFW.glfwSetCursorPos(this.mc.getWindow().getWindow(), screenX, screenY);
                     matrix4f.rotate((float) Math.toRadians(-d2), new Vector3f(1.0F, 0.0F, 0.0F));
                     matrix4f.rotate((float) Math.toRadians(-180.0D + d0 - (double) this.hmdForwardYaw), new Vector3f(0.0F, 1.0F, 0.0F));
                 }
