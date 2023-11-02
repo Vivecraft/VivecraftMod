@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,9 +8,9 @@ import com.sun.jna.NativeLibrary;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.ClientLanguage;
+import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2f;
 import org.lwjgl.openvr.*;
@@ -472,10 +471,12 @@ public class MCOpenVR extends MCVR {
             Map<String, Object> localeMap = new HashMap<>();
 
             // Load the language
-            List<String> langs = new ArrayList<>();
-            langs.add("en_us");
-            if (!langCode.equals("en_US")) langs.add(langCode.toLowerCase());
-            Language lang = ClientLanguage.loadFrom(mc.getResourceManager(), langs, false);
+            List<LanguageInfo> langs = new ArrayList<>();
+            langs.add(mc.getLanguageManager().getLanguage("en_us"));
+            if (!langCode.equals("en_US")) {
+                langs.add(mc.getLanguageManager().getLanguage(langCode.toLowerCase()));
+            }
+            Language lang = ClientLanguage.loadFrom(mc.getResourceManager(), langs);
 
             for (VRInputAction action : sortedActions) {
                 localeMap.put(action.name, lang.getOrDefault(action.keyBinding.getCategory()) + " - " + lang.getOrDefault(action.keyBinding.getName()));

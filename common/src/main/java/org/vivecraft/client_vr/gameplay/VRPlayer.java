@@ -389,7 +389,7 @@ public class VRPlayer {
                                 this.setRoomOrigin(dest.x, dest.y, dest.z, false);
 
                                 player.fallDistance = 0.0F;
-                                ((PlayerExtension) minecraft.player).vivecraft$stepSound(BlockPos.containing(player.position()), player.position());
+                                ((PlayerExtension) minecraft.player).vivecraft$stepSound(new BlockPos(player.position()), player.position());
                                 break;
                             }
                         }
