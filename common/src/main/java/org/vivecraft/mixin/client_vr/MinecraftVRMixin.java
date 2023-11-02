@@ -377,8 +377,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     public void vivecraft$renderVRPasses(boolean renderLevel, CallbackInfo ci, long nanoTime) {
         if (VRState.vrRunning) {
 
+            // some mods mess with the depth mask?
+            RenderSystem.depthMask(true);
+
             // draw cursor on Gui Layer
-            if (this.screen != null) {
+            if (this.screen != null || !mouseHandler.isMouseGrabbed()) {
                 PoseStack poseStack = RenderSystem.getModelViewStack();
                 poseStack.pushPose();
                 poseStack.setIdentity();
@@ -818,14 +821,18 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Unique
     private void vivecraft$drawNotifyMirror() {
         if (System.currentTimeMillis() < this.vivecraft$mirroNotifyStart + this.vivecraft$mirroNotifyLen) {
-            RenderSystem.viewport(0, 0, this.window.getScreenWidth(), this.window.getScreenHeight());
-            Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float) this.window.getScreenWidth(),
-                0.0F, (float) this.window.getScreenHeight(), 1000.0F, 3000.0F);
+            int screenX = ((WindowExtension) (Object) this.window).vivecraft$getActualScreenWidth();
+            int screenY = ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight();
+            RenderSystem.viewport(0, 0, screenX, screenY);
+            Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float) screenX,
+                screenY, 0.0F, 1000.0F, 3000.0F);
             RenderSystem.setProjectionMatrix(matrix4f);
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().setIdentity();
             RenderSystem.getModelViewStack().translate(0, 0, -2000);
             RenderSystem.applyModelViewMatrix();
+            RenderSystem.setShaderFogStart(Float.MAX_VALUE);
+
             PoseStack p = new PoseStack();
             p.scale(3, 3, 3);
             RenderSystem.clear(256, ON_OSX);
@@ -862,7 +869,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
             // release mouse when switching to standing
             if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
-                mouseHandler.releaseMouse();
                 InputConstants.grabOrReleaseMouse(window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, mouseHandler.xpos(), mouseHandler.ypos());
             }
         } else {
@@ -928,14 +934,16 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             RenderTarget rendertarget = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
             RenderTarget rendertarget1 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1;
 
+            int screenWidth = ((WindowExtension) (Object) this.window).vivecraft$getActualScreenWidth() / 2;
+            int screenHeight = ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight();
             if (rendertarget != null) {
-                ((RenderTargetExtension) rendertarget).vivecraft$blitToScreen(0, this.window.getScreenWidth() / 2,
-                    this.window.getScreenHeight(), 0, true, 0.0F, 0.0F, false);
+                ((RenderTargetExtension) rendertarget).vivecraft$blitToScreen(0, screenWidth,
+                    screenHeight, 0, true, 0.0F, 0.0F, false);
             }
 
             if (rendertarget1 != null) {
-                ((RenderTargetExtension) rendertarget1).vivecraft$blitToScreen(this.window.getScreenWidth() / 2,
-                    this.window.getScreenWidth() / 2, this.window.getScreenHeight(), 0, true, 0.0F, 0.0F, false);
+                ((RenderTargetExtension) rendertarget1).vivecraft$blitToScreen(screenWidth,
+                    screenWidth, screenHeight, 0, true, 0.0F, 0.0F, false);
             }
         } else {
             float xcrop = 0.0F;
@@ -968,8 +976,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             // source = DataHolder.getInstance().vrRenderer.telescopeFramebufferR;
             //
             if (source != null) {
-                ((RenderTargetExtension) source).vivecraft$blitToScreen(0, this.window.getScreenWidth(),
-                    this.window.getScreenHeight(), 0, true, xcrop, ycrop, ar);
+                ((RenderTargetExtension) source).vivecraft$blitToScreen(0, ((WindowExtension) (Object) this.window).vivecraft$getActualScreenWidth(),
+                    ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight(), 0, true, xcrop, ycrop, ar);
             }
         }
     }
@@ -977,7 +985,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Unique
     private void vivecraft$doMixedRealityMirror() {
         // set viewport to fullscreen, since it would be still on the one from the last pass
-        RenderSystem.viewport(0, 0, window.getScreenWidth(), window.getScreenHeight());
+        RenderSystem.viewport(0, 0,
+            ((WindowExtension) (Object) this.window).vivecraft$getActualScreenWidth(),
+            ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight());
 
         Vec3 camPlayer = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getHeadPivot()
             .subtract(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());

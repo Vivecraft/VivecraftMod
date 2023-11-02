@@ -363,7 +363,7 @@
   "vivecraft.messages.serverplugin": "Vivecraft server mod detected: %s",
   "vivecraft.messages.noserverplugin": "Vivecraft server mod not detected. This server may not support teleporting. Restricted movement mode (fallback to free move) has been enabled.",
   "vivecraft.messages.calibrateheight": "Please calibrate your height in the pause menu.",
-  "vivecraft.messages.rendersetupfailed": "Render setup failed: %s",
+  "vivecraft.messages.rendersetupfailed": "Render setup failed: %s\nVR provider: %s",
   "vivecraft.messages.intelgraphics": "Intel Integrated Graphics are not supported. If this is a laptop, please force the high-performance GPU. Detected GPU: %s",
   "vivecraft.messages.nosteamvr": "OpenVR runtime not detected. Did you install SteamVR?",
   "vivecraft.messages.menuworldexportcomplete.1": "World export complete... area size: %d",

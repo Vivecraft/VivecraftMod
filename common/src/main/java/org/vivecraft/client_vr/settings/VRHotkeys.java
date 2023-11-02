@@ -5,11 +5,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
+import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
 import org.vivecraft.common.utils.math.*;
 
@@ -37,28 +39,28 @@ public class VRHotkeys {
         } else {
             Minecraft minecraft = Minecraft.getInstance();
             ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-            boolean flag = false;
+            boolean gotKey = false;
 
-            if (action == 1 && key == 344 && MethodHolder.isKeyDown(345)) {
+            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_RIGHT_SHIFT && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
                 dataholder.vrSettings.storeDebugAim = true;
                 minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.showaim"));
-                flag = true;
+                gotKey = true;
             }
 
-            if (action == 1 && key == 66 && MethodHolder.isKeyDown(345)) {
+            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_B && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
                 dataholder.vrSettings.walkUpBlocks = !dataholder.vrSettings.walkUpBlocks;
                 minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.walkupblocks", dataholder.vrSettings.walkUpBlocks ? LangHelper.getYes() : LangHelper.getNo()));
-                flag = true;
+                gotKey = true;
             }
 
-            if (action == 1 && key == 73 && MethodHolder.isKeyDown(345)) {
+            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_I && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
                 dataholder.vrSettings.inertiaFactor = dataholder.vrSettings.inertiaFactor.getNext();
                 minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.playerinertia", Component.translatable(dataholder.vrSettings.inertiaFactor.getLangKey())));
 
-                flag = true;
+                gotKey = true;
             }
 
-            if (action == 1 && key == 82 && MethodHolder.isKeyDown(345)) {
+            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_R && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
                 if (dataholder.vrPlayer.isTeleportOverridden()) {
                     dataholder.vrPlayer.setTeleportOverride(false);
                     minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
@@ -67,29 +69,36 @@ public class VRHotkeys {
                     minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
                 }
 
-                flag = true;
+                gotKey = true;
             }
 
-            if (action == 1 && key == 268 && MethodHolder.isKeyDown(345)) {
+            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_HOME && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
                 snapMRCam(0);
-                flag = true;
+                gotKey = true;
             }
 
-            if (action == 1 && key == 301 && debug) {
+            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_F12 && debug) {
                 minecraft.setScreen(new WinScreen(false, Runnables.doNothing()));
-                flag = true;
+                gotKey = true;
             }
 
-            if ((minecraft.level == null || minecraft.screen != null) && action == 1 && key == 294) {
+            if ((minecraft.level == null || minecraft.screen != null) && action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_F5) {
                 dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
                 ((MinecraftExtension) minecraft).vivecraft$notifyMirror(dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
             }
 
-            if (flag) {
+            // toggle VR with a keyboard shortcut
+            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_F7 && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
+                VRState.vrEnabled = !VRState.vrEnabled;
+                ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
+                gotKey = true;
+            }
+
+            if (gotKey) {
                 dataholder.vrSettings.saveOptions();
             }
 
-            return flag;
+            return gotKey;
         }
     }
 
@@ -98,82 +107,82 @@ public class VRHotkeys {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         boolean flag = false;
 
-        if (MethodHolder.isKeyDown(263) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamPos(new Vector3(-0.01F, 0.0F, 0.0F));
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(262) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamPos(new Vector3(0.01F, 0.0F, 0.0F));
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(265) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamPos(new Vector3(0.0F, 0.0F, -0.01F));
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(264) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamPos(new Vector3(0.0F, 0.0F, 0.01F));
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(266) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamPos(new Vector3(0.0F, 0.01F, 0.0F));
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(267) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamPos(new Vector3(0.0F, -0.01F, 0.0F));
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(265) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamRot(Axis.PITCH, 0.5F);
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(264) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamRot(Axis.PITCH, -0.5F);
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(263) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamRot(Axis.YAW, 0.5F);
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(262) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamRot(Axis.YAW, -0.5F);
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(266) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamRot(Axis.ROLL, 0.5F);
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(267) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             adjustCamRot(Axis.ROLL, -0.5F);
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(260) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_INSERT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             minecraft.options.fov().set(minecraft.options.fov().get() + 1);
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(261) && MethodHolder.isKeyDown(345) && !MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DELETE) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             minecraft.options.fov().set(minecraft.options.fov().get() - 1);
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(260) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_INSERT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             ++dataholder.vrSettings.mixedRealityFov;
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(261) && MethodHolder.isKeyDown(345) && MethodHolder.isKeyDown(344)) {
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DELETE) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
             --dataholder.vrSettings.mixedRealityFov;
             flag = true;
         }
