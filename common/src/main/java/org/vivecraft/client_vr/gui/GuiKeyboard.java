@@ -45,7 +45,7 @@ public class GuiKeyboard extends TwoHandedScreen {
 
                 String s2 = String.valueOf(c0);
                 final int code = l1 < this.dataholder.vrSettings.keyboardCodes.length ? this.dataholder.vrSettings.keyboardCodes[l1] : GLFW.GLFW_KEY_UNKNOWN;
-                Button button = new Button(k + k1 * (i1 + l), k + j1 * (20 + l), i1, 20, Component.literal(s2), (p) ->
+                Button button = new Button(k + k1 * (i1 + l), k + j1 * (20 + l), i1, 20, new TextComponent(s2), (p) ->
                 {
                     InputSimulator.pressKeyForBind(code);
                     InputSimulator.releaseKeyForBind(code);

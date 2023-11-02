@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.phys.*;
@@ -117,11 +117,11 @@ public class GuiHandler {
 
         guiScaleFactorMax = maxScale;
 
-        scaledWidth =  Mth.ceil(framebufferWidth / (float) scale);
-        scaledWidthMax =  Mth.ceil(framebufferWidth / (float) maxScale);
+        scaledWidth = Mth.ceil(framebufferWidth / (float) scale);
+        scaledWidthMax = Mth.ceil(framebufferWidth / (float) maxScale);
 
-        scaledHeight =  Mth.ceil(framebufferHeight / (float) scale);
-        scaledHeightMax =  Mth.ceil(framebufferHeight / (float) maxScale);
+        scaledHeight = Mth.ceil(framebufferHeight / (float) scale);
+        scaledHeightMax = Mth.ceil(framebufferHeight / (float) maxScale);
 
         return scale;
     }
@@ -438,7 +438,7 @@ public class GuiHandler {
         } else if (mc.screen == null && !mc.mouseHandler.isMouseGrabbed()) {
             // some mod want's to do a mouse selection overlay
             if (guiPos_room == null) {
-                onScreenChanged(null, new Screen(Component.empty()) {
+                onScreenChanged(null, new Screen(TextComponent.EMPTY) {
                 }, false, true);
             }
         } else if (mc.screen == null && guiPos_room != null) {
