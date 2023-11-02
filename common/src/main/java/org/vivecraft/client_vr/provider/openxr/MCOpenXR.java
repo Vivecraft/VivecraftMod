@@ -14,8 +14,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
-import org.lwjgl.openvr.OpenVR;
-import org.lwjgl.openvr.VRActiveActionSet;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.Platform;
@@ -63,8 +61,9 @@ public class MCOpenXR extends MCVR {
     //TODO either move to MCVR, Or make special for OpenXR holding the instance itself.
     private final Map<VRInputActionSet, Long> actionSetHandles = new EnumMap<>(VRInputActionSet.class);
     //TODO Move to MCVR
-    private boolean inputInitialized;
     private  XrActiveActionSet.Buffer activeActionSetsBuffer;
+    private boolean isActive;
+    private final HashMap<String, Long> paths = new HashMap<>();
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -84,12 +83,11 @@ public class MCOpenXR extends MCVR {
     }
 
     @Override
-    public void processInputs() {
-
-    }
-
-    @Override
     public void destroy() {
+        //Not sure if we need the action sets one here, as we are shutting down
+        for (Long inputActionSet : actionSetHandles.values()){
+            XR10.xrDestroyActionSet(new XrActionSet(inputActionSet, instance));
+        }
         if (swapchain != null) {
             XR10.xrDestroySwapchain(swapchain);
         }
@@ -141,9 +139,6 @@ public class MCOpenXR extends MCVR {
 
                 this.mc.getProfiler().pop();
             }
-
-            this.mc.getProfiler().popPush("processEvents");
-            this.processVREvents();
             this.mc.getProfiler().popPush("updatePose/Vsync");
             this.updatePose();
             this.mc.getProfiler().popPush("processInputs");
@@ -335,23 +330,62 @@ public class MCOpenXR extends MCVR {
         return this.actionSetHandles.get(actionSet);
     }
 
-    private void processVREvents() {
+    private void pollVREvents() {
+        while (true) {
+            eventDataBuffer.clear();
+            eventDataBuffer.type(XR10.XR_TYPE_EVENT_DATA_BUFFER);
+            int error = XR10.xrPollEvent(instance, eventDataBuffer);
+            if (error != XR10.XR_SUCCESS) {
+                break;
+            }
+            XrEventDataBaseHeader event = XrEventDataBaseHeader.create(eventDataBuffer.address());
 
+            switch (event.type()) {
+                case XR10.XR_TYPE_EVENT_DATA_INSTANCE_LOSS_PENDING -> {
+                    XrEventDataInstanceLossPending instanceLossPending = XrEventDataInstanceLossPending.create(event.address());
+                }
+                case XR10.XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED -> {
+                    this.sessionChanged(XrEventDataSessionStateChanged.create(event.address()));
+                }
+                case XR10.XR_TYPE_EVENT_DATA_INTERACTION_PROFILE_CHANGED -> {
+                }
+                case XR10.XR_TYPE_EVENT_DATA_REFERENCE_SPACE_CHANGE_PENDING -> {
+                }
+                default -> {
+                }
+            }
+        }
     }
 
-    private void pollVREvents() {
-        //TODO loop over events
+    private void sessionChanged(XrEventDataSessionStateChanged xrEventDataSessionStateChanged) {
+        int state = xrEventDataSessionStateChanged.state();
 
-        eventDataBuffer.clear();
-        eventDataBuffer.type(XR10.XR_TYPE_EVENT_DATA_BUFFER);
-        int error = XR10.xrPollEvent(instance, eventDataBuffer);
-        XrEventDataBaseHeader event = XrEventDataBaseHeader.create(eventDataBuffer.address());
+        switch (state) {
+            case XR10.XR_SESSION_STATE_READY: {
+                try (MemoryStack stack = MemoryStack.stackPush()){
+                    XrSessionBeginInfo sessionBeginInfo = XrSessionBeginInfo.calloc(stack);
+                    sessionBeginInfo.type(XR10.XR_TYPE_SESSION_BEGIN_INFO);
+                    sessionBeginInfo.next(NULL);
+                    sessionBeginInfo.primaryViewConfigurationType(XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO);
 
-        //TODO handle events
-        switch (event.type()) {
-
+                    XR10.xrBeginSession(session, sessionBeginInfo);
+                }
+                this.isActive = true;
+                break;
+            }
+            case XR10.XR_SESSION_STATE_STOPPING: {
+                this.isActive = false;
+                XR10.xrEndSession(session);
+            }
+            case XR10.XR_SESSION_STATE_EXITING: {
+                break;
+            }
+            case XR10.XR_SESSION_STATE_LOSS_PENDING: {
+                break;
+            }
+            default:
+                break;
         }
-
     }
 
     @Override
@@ -506,13 +540,6 @@ public class MCOpenXR extends MCVR {
             XR10.xrCreateSession(instance, info, sessionPtr);
 
             session = new XrSession(sessionPtr.get(0), instance);
-
-            XrSessionBeginInfo sessionBeginInfo = XrSessionBeginInfo.calloc(stack);
-            sessionBeginInfo.type(XR10.XR_TYPE_SESSION_BEGIN_INFO);
-            sessionBeginInfo.next(NULL);
-            sessionBeginInfo.primaryViewConfigurationType(XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO);
-
-            XR10.xrBeginSession(session, sessionBeginInfo);
         }
     }
 
@@ -742,7 +769,7 @@ public class MCOpenXR extends MCVR {
 
     @Override
     public boolean isActive() {
-        return false;
+        return isActive;
     }
 
     //TODO Collect and register all actions
@@ -761,8 +788,115 @@ public class MCOpenXR extends MCVR {
 
     }
 
+    //TODO All of this needs to be gone
+    private Map<String, String> globalBindings() {
+        HashMap<String, String> map = new HashMap<>();
+
+        map.put("/actions/global/in/vivecraft.key.ingamemenubutton", "/user/hand/left/input/y/click");
+        map.put("/actions/global/in/vivecraft.key.togglekeyboard", "/user/hand/left/input/y/long");
+        map.put("/actions/global/in/key.inventory", "/user/hand/left/input/x/click");
+        return map;
+    }
+
+    private Map<String, String> guiBindings() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("/actions/gui/in/vivecraft.key.guishift", "/user/hand/left/input/grip/click");
+        map.put("/actions/gui/in/vivecraft.key.guimiddleclick", "/user/hand/right/input/grip/click");
+        map.put("/actions/gui/in/vivecraft.key.guileftclick", "/user/hand/right/input/trigger/click");
+        map.put("/actions/gui/in/vivecraft.key.guirightclick", "/user/hand/right/input/a/click");
+        map.put("/actions/gui/in/vivecraft.key.guiscrollaxis", "/user/hand/right/input/joystick/scroll");
+        return map;
+    }
+
+    private Map<String, String> ingameBindings() {
+        HashMap<String, String> map2 = new HashMap<>();
+        map2.put("/actions/ingame/in/vivecraft.key.hotbarprev", "/user/hand/left/input/grip/click");
+        map2.put("/actions/ingame/in/vivecraft.key.hotbarnext", "/user/hand/right/input/grip/click");
+        map2.put("/actions/ingame/in/key.attack", "/user/hand/right/input/trigger/click");
+        map2.put("/actions/ingame/in/vivecraft.key.teleport", "/user/hand/left/input/trigger/click");
+        map2.put("/actions/ingame/in/vivecraft.key.radialmenu", "/user/hand/right/input/b/click");
+        map2.put("/actions/ingame/in/key.use", "/user/hand/right/input/a/click");
+        map2.put("/actions/ingame/in/vivecraft.key.freemovestrafe", "/user/hand/left/input/joystick/position");
+        map2.put("/actions/ingame/in/vivecraft.key.rotateaxis", "/user/hand/right/input/joystick/position");
+        map2.put("/actions/ingame/in/vivecraft.key.teleportfallback", "/user/hand/left/input/trigger/pull");
+        map2.put("/actions/ingame/in/key.jump", "/user/hand/left/input/bumper/click");
+        map2.put("/actions/ingame/in/key.sneak", "/user/hand/right/input/bumper/click");
+        return map2;
+    }
+
+    private Map<String, String> keyboardBindings() {
+        HashMap<String, String> map3 = new HashMap<>();
+        map3.put("/actions/keyboard/in/vivecraft.key.keyboardshift", "/user/hand/left/input/grip/click");
+        map3.put("/actions/keyboard/in/vivecraft.key.keyboardclick", "/user/hand/left/input/trigger/click");
+        //map3.put("/actions/keyboard/in/vivecraft.key.keyboardclick", "/user/hand/right/input/trigger/click");
+        return map3;
+    }
+
+    private String getBinding(VRInputActionSet set, String action){
+        switch (set) {
+            case GLOBAL -> {
+                return globalBindings().get(set);
+            }
+            case GUI -> {
+                return guiBindings().get(action);
+            }
+            case KEYBOARD -> {
+                return keyboardBindings().get(action);
+            }
+            case INGAME -> {
+                return ingameBindings().get(action);
+            }
+            default -> {
+                return "";
+            }
+        }
+    }
+
     private void loadDefaultBindings() {
-        
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(inputActions.size(), stack);
+
+            VRInputAction[] bindingsArray = (VRInputAction[]) inputActions.values().toArray();
+
+            for (int i = 0; i < bindingsArray.length; i++) {
+                VRInputAction binding = bindingsArray[i];
+                bindings.get(i).set(
+                    new XrAction(binding.handle, new XrActionSet(actionSetHandles.get(binding.actionSet), instance)),
+                    getPath(getBinding(binding.actionSet, binding.name))
+                );
+            }
+
+            XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(stack);
+            suggested_binds.type(XR10.XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING);
+            suggested_binds.next(NULL);
+            suggested_binds.interactionProfile(getPath("/interaction_profiles/htc/vive_cosmos_controller")); //TODO replace for other binds as well
+            suggested_binds.suggestedBindings(bindings);
+
+            XR10.xrSuggestInteractionProfileBindings(instance, suggested_binds);
+
+            XrSessionActionSetsAttachInfo attach_info = XrSessionActionSetsAttachInfo.calloc(stack);
+            attach_info.type(XR10.XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO);
+            attach_info.next(NULL);
+            attach_info.actionSets(stackPointers(actionSetHandles.values().stream().mapToLong(value -> value).toArray()));
+
+            XR10.xrAttachSessionActionSets(session, attach_info);
+
+            //Controller tracking?
+            //XrActionSpaceCreateInfo
+            //XR10.xrCreateActionSpace()
+
+
+        }
+    }
+
+    public long getPath(String pathString) {
+        return this.paths.computeIfAbsent(pathString, s -> {
+            try (MemoryStack ignored = stackPush()) {
+                LongBuffer buf = stackCallocLong(1);
+                int xrResult = XR10.xrStringToPath(instance, pathString, buf);
+                return buf.get();
+            }
+        });
     }
 
     private long createAction(String name, String localisedName, XrActionSet actionSet) {
