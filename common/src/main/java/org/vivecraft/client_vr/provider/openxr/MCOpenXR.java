@@ -856,7 +856,7 @@ public class MCOpenXR extends MCVR {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(inputActions.size(), stack);
 
-            VRInputAction[] bindingsArray = (VRInputAction[]) inputActions.values().toArray();
+            VRInputAction[] bindingsArray = inputActions.values().toArray(new VRInputAction[0]);
 
             for (int i = 0; i < bindingsArray.length; i++) {
                 VRInputAction binding = bindingsArray[i];
