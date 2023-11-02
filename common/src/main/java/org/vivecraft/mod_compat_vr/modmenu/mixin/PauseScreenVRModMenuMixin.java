@@ -41,11 +41,11 @@ public abstract class PauseScreenVRModMenuMixin extends Screen {
 
             // make sure we found the buttons, and they are actually overlapping
             if (reportBugsButton == null && modmenuButton != null && commandsButton != null
-                && modmenuButton.getX() == commandsButton.getX()
-                && modmenuButton.getY() == commandsButton.getY()) {
+                && modmenuButton.x == commandsButton.x
+                && modmenuButton.y == commandsButton.y) {
                 modmenuButton.setWidth(modmenuButton.getWidth() / 2 - 1);
                 commandsButton.setWidth(commandsButton.getWidth() / 2);
-                modmenuButton.setX(commandsButton.getX() + commandsButton.getWidth() + 1);
+                modmenuButton.x = commandsButton.x + commandsButton.getWidth() + 1;
             }
         }
     }

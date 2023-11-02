@@ -824,8 +824,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             int screenX = ((WindowExtension) (Object) this.window).vivecraft$getActualScreenWidth();
             int screenY = ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight();
             RenderSystem.viewport(0, 0, screenX, screenY);
-            Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float) screenX,
-                screenY, 0.0F, 1000.0F, 3000.0F);
+            Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float) screenX,
+                0.0F, (float) screenY, 1000.0F, 3000.0F);
             RenderSystem.setProjectionMatrix(matrix4f);
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().setIdentity();

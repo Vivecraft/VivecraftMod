@@ -71,7 +71,7 @@ public class TextScrollWidget extends AbstractWidget {
 
         // draw text
         for (int line = 0; line + currentLine < formattedChars.size() && line < maxLines; line++) {
-            drawString(poseStack, Minecraft.getInstance().font, formattedChars.get(line + currentLine), getX() + padding, getY() + padding + line * 12, 16777215);
+            drawString(poseStack, Minecraft.getInstance().font, formattedChars.get(line + currentLine), x + padding, y + padding + line * 12, 16777215);
         }
 
         float scrollbarStart = scrollSteps == 0 ? 0 : currentLine / (float) scrollSteps * scrollBarOffset;
@@ -166,7 +166,7 @@ public class TextScrollWidget extends AbstractWidget {
         int lineIndex = this.getLineIndex(x, y);
         if (lineIndex >= 0 && lineIndex < this.formattedChars.size()) {
             FormattedCharSequence line = this.formattedChars.get(lineIndex);
-            return Minecraft.getInstance().font.getSplitter().componentStyleAtWidth(line, Mth.floor(x - this.getX()));
+            return Minecraft.getInstance().font.getSplitter().componentStyleAtWidth(line, Mth.floor(x - this.x));
         }
         return null;
     }
@@ -175,7 +175,7 @@ public class TextScrollWidget extends AbstractWidget {
         if (!this.clicked(x, y)) {
             return -1;
         } else {
-            return (int) ((y - this.getY() - padding * 0.5) / 12.0);
+            return (int) ((y - this.y - padding * 0.5) / 12.0);
         }
     }
 
