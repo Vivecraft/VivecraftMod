@@ -225,7 +225,7 @@ public class MenuWorldRenderer {
     }
 
     public void prepare() {
-        if (vertexBuffers == null && blockAccess != null && !ready && mc.level == null) {
+        if (vertexBuffers == null) {
             VRSettings.logger.info("MenuWorlds: Building geometry...");
             boolean ao = mc.options.ambientOcclusion().get();
             mc.options.ambientOcclusion().set(true);
@@ -441,8 +441,6 @@ public class MenuWorldRenderer {
     }
 
     public boolean isReady() {
-        // prepare menuworld, if that task wasn't started yet
-        prepare();
         return ready;
     }
 
