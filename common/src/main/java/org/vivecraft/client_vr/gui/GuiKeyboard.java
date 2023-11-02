@@ -5,10 +5,12 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.TextComponent;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.framework.TwoHandedScreen;
+import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.provider.InputSimulator;
 
 public class GuiKeyboard extends TwoHandedScreen {
     private boolean isShift = false;
+    private long airTypingWarningTime;
 
     public void init() {
         String s = this.dataholder.vrSettings.keyboardKeys;
@@ -42,8 +44,11 @@ public class GuiKeyboard extends TwoHandedScreen {
                 }
 
                 String s2 = String.valueOf(c0);
-                Button button = new Button(k + k1 * (i1 + l), k + j1 * (20 + l), i1, 20, new TextComponent(s2), (p) ->
+                final int code = l1 < this.dataholder.vrSettings.keyboardCodes.length ? this.dataholder.vrSettings.keyboardCodes[l1] : GLFW.GLFW_KEY_UNKNOWN;
+                Button button = new Button(k + k1 * (i1 + l), k + j1 * (20 + l), i1, 20, Component.literal(s2), (p) ->
                 {
+                    InputSimulator.pressKeyForBind(code);
+                    InputSimulator.releaseKeyForBind(code);
                     InputSimulator.typeChars(s2);
                 });
                 this.addRenderableWidget(button);
@@ -56,6 +61,8 @@ public class GuiKeyboard extends TwoHandedScreen {
         }));
         this.addRenderableWidget(new Button(k + 4 * (i1 + l), k + j * (20 + l), 5 * (i1 + l), 20, new TextComponent(" "), (p) ->
         {
+            InputSimulator.pressKeyForBind(GLFW.GLFW_KEY_SPACE);
+            InputSimulator.releaseKeyForBind(GLFW.GLFW_KEY_SPACE);
             InputSimulator.typeChars(" ");
         }));
         this.addRenderableWidget(new Button(i * (i1 + l) + k, k, 35, 20, new TextComponent("BKSP"), (p) ->

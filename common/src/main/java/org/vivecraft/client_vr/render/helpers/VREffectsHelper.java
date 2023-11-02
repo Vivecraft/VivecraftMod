@@ -815,6 +815,9 @@ public class VREffectsHelper {
             return false;
         } else if (RadialHandler.isUsingController(ControllerType.RIGHT)) {
             return false;
+        } else if (GuiHandler.guiPos_room != null) {
+            // don't show it, when a screen is open, or a popup
+            return false;
         } else if (dataHolder.bowTracker.isNotched()) {
             return false;
         } else if (dataHolder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract).isEnabledRaw(ControllerType.RIGHT)
@@ -833,7 +836,6 @@ public class VREffectsHelper {
     }
 
     public static void renderCrosshairAtDepth(boolean depthAlways, PoseStack poseStack) {
-        // TODO broken
         if (shouldRenderCrosshair()) {
             mc.getProfiler().push("crosshair");
 
