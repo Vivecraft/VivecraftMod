@@ -322,6 +322,16 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (VRState.vrRunning) {
             ClientDataHolderVR.getInstance().vrPlayer.preTick();
         }
+        if (VRState.vrEnabled) {
+            if (ClientDataHolderVR.getInstance().menuWorldRenderer != null) {
+                ClientDataHolderVR.getInstance().menuWorldRenderer.checkTask();
+                if (ClientDataHolderVR.getInstance().menuWorldRenderer.isBuilding()) {
+                    this.profiler.push("Build Menu World");
+                    ClientDataHolderVR.getInstance().menuWorldRenderer.buildNext();
+                    this.profiler.pop();
+                }
+            }
+        }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V", shift = At.Shift.AFTER), method = "runTick")
