@@ -7,7 +7,6 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
-import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.common.utils.math.Vector2;
 import org.vivecraft.common.utils.math.Vector3;
 
@@ -229,7 +228,7 @@ public class VRInputAction {
                 return false;
             } else {
                 for (VRInputAction vrinputaction : ClientDataHolderVR.getInstance().vr.getInputActions()) {
-                    if (vrinputaction != this && vrinputaction.isEnabledRaw(controllertype) && vrinputaction.isActive() && vrinputaction.getPriority() > this.getPriority() && MCVR.get().getOrigins(vrinputaction).contains(i)) {
+                    if (vrinputaction != this && vrinputaction.isEnabledRaw(controllertype) && vrinputaction.isActive() && vrinputaction.getPriority() > this.getPriority() && ClientDataHolderVR.getInstance().vr.getOrigins(vrinputaction).contains(i)) {
                         if (vrinputaction.isHanded()) {
                             return !((HandedKeyBinding) vrinputaction.keyBinding).isPriorityOnController(controllertype);
                         }
