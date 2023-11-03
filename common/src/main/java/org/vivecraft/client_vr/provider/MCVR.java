@@ -1273,4 +1273,6 @@ public abstract class MCVR {
     public abstract VRRenderer createVRRenderer();
 
     public abstract boolean isActive();
+
+    public abstract ControllerType getOriginControllerType(long i);
 }

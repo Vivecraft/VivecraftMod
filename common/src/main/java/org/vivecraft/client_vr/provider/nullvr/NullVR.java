@@ -192,4 +192,9 @@ public class NullVR extends MCVR {
         }
         return vrActive;
     }
+
+    @Override
+    public ControllerType getOriginControllerType(long i) {
+        return ControllerType.LEFT;
+    }
 }

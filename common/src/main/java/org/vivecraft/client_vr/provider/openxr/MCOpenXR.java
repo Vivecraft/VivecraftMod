@@ -781,6 +781,11 @@ public class MCOpenXR extends MCVR {
         return isActive;
     }
 
+    @Override
+    public ControllerType getOriginControllerType(long i) {
+        return ControllerType.LEFT;
+    }
+
     //TODO Collect and register all actions
     private void loadActionHandles() {
         for (VRInputActionSet vrinputactionset : VRInputActionSet.values()) {
