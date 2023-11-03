@@ -540,6 +540,15 @@ public class MCOpenXR extends MCVR {
             XR10.xrCreateSession(instance, info, sessionPtr);
 
             session = new XrSession(sessionPtr.get(0), instance);
+
+            XrSessionBeginInfo sessionBeginInfo = XrSessionBeginInfo.calloc(stack);
+            sessionBeginInfo.type(XR10.XR_TYPE_SESSION_BEGIN_INFO);
+            sessionBeginInfo.next(NULL);
+            sessionBeginInfo.primaryViewConfigurationType(XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO);
+
+            XR10.xrBeginSession(session, sessionBeginInfo);
+            this.isActive = true;
+
         }
     }
 
@@ -780,7 +789,7 @@ public class MCOpenXR extends MCVR {
         }
 
         for (VRInputAction vrinputaction : this.inputActions.values()) {
-            long action = createAction(vrinputaction.name, vrinputaction.name, new XrActionSet(this.actionSetHandles.get(vrinputaction.actionSet), instance));
+            long action = createAction(vrinputaction.name, vrinputaction.name, vrinputaction.type, new XrActionSet(this.actionSetHandles.get(vrinputaction.actionSet), instance));
             vrinputaction.setHandle(action);
         }
 
@@ -835,16 +844,16 @@ public class MCOpenXR extends MCVR {
     private String getBinding(VRInputActionSet set, String action){
         switch (set) {
             case GLOBAL -> {
-                return globalBindings().get(set);
+                return globalBindings().get(action.toLowerCase());
             }
             case GUI -> {
-                return guiBindings().get(action);
+                return guiBindings().get(action.toLowerCase());
             }
             case KEYBOARD -> {
-                return keyboardBindings().get(action);
+                return keyboardBindings().get(action.toLowerCase());
             }
             case INGAME -> {
-                return ingameBindings().get(action);
+                return ingameBindings().get(action.toLowerCase());
             }
             default -> {
                 return "";
@@ -860,6 +869,13 @@ public class MCOpenXR extends MCVR {
 
             for (int i = 0; i < bindingsArray.length; i++) {
                 VRInputAction binding = bindingsArray[i];
+                if (!binding.requirement.equals("suggested")) {
+                    bindings.get(i).set(
+                        new XrAction(binding.handle, new XrActionSet(actionSetHandles.get(binding.actionSet), instance)),
+                        getPath("/user/hand/left/input/y/click")
+                    );
+                    continue;
+                }
                 bindings.get(i).set(
                     new XrAction(binding.handle, new XrActionSet(actionSetHandles.get(binding.actionSet), instance)),
                     getPath(getBinding(binding.actionSet, binding.name))
@@ -872,7 +888,7 @@ public class MCOpenXR extends MCVR {
             suggested_binds.interactionProfile(getPath("/interaction_profiles/htc/vive_cosmos_controller")); //TODO replace for other binds as well
             suggested_binds.suggestedBindings(bindings);
 
-            XR10.xrSuggestInteractionProfileBindings(instance, suggested_binds);
+            int i = XR10.xrSuggestInteractionProfileBindings(instance, suggested_binds);
 
             XrSessionActionSetsAttachInfo attach_info = XrSessionActionSetsAttachInfo.calloc(stack);
             attach_info.type(XR10.XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO);
@@ -899,18 +915,23 @@ public class MCOpenXR extends MCVR {
         });
     }
 
-    private long createAction(String name, String localisedName, XrActionSet actionSet) {
+    private long createAction(String name, String localisedName, String type, XrActionSet actionSet) {
         try (MemoryStack stack = MemoryStack.stackPush()){
+            String s = name.split("/")[name.split("/").length -1].toLowerCase();
             XrActionCreateInfo hands = XrActionCreateInfo.calloc(stack);
             hands.actionType(XR10.XR_TYPE_ACTION_CREATE_INFO);
             hands.next(NULL);
-            hands.actionName(ByteBuffer.wrap(name.getBytes()));
-            hands.actionType(XR10.XR_ACTION_TYPE_POSE_INPUT);
+            hands.actionName(memUTF8(s));
+            switch (type) {
+                case "boolean" -> hands.actionType(XR10.XR_ACTION_TYPE_BOOLEAN_INPUT);
+                case "vector1" -> hands.actionType(XR10.XR_ACTION_TYPE_FLOAT_INPUT);
+                case "vector2" -> hands.actionType(XR10.XR_ACTION_TYPE_VECTOR2F_INPUT);
+            }
             hands.countSubactionPaths(0);
             hands.subactionPaths(null);
-            hands.localizedActionName(ByteBuffer.wrap(localisedName.getBytes()));
+            hands.localizedActionName(memUTF8(s));
             PointerBuffer buffer = stackCallocPointer(1);
-            XR10.xrCreateAction(actionSet, hands, buffer);
+            int i = XR10.xrCreateAction(actionSet, hands, buffer);
             return buffer.get(0);
         }
     }
@@ -920,8 +941,8 @@ public class MCOpenXR extends MCVR {
             XrActionSetCreateInfo info = XrActionSetCreateInfo.calloc(stack);
             info.type(XR10.XR_TYPE_ACTION_SET_CREATE_INFO);
             info.next(NULL);
-            info.actionSetName(ByteBuffer.wrap(name.getBytes()));
-            info.localizedActionSetName(ByteBuffer.wrap(localisedName.getBytes()));
+            info.actionSetName(memUTF8(localisedName.toLowerCase()));
+            info.localizedActionSetName(memUTF8(localisedName.toLowerCase()));
             info.priority(priority);
             PointerBuffer buffer = stack.callocPointer(1);
             //Handle error
