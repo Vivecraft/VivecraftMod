@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector2f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFWNativeGLX;
@@ -64,6 +65,13 @@ public class MCOpenXR extends MCVR {
     private  XrActiveActionSet.Buffer activeActionSetsBuffer;
     private boolean isActive;
     private final HashMap<String, Long> paths = new HashMap<>();
+    private XrActionSet handsSet;
+    private long[] grip;
+    private long[] aim;
+    public static final XrPosef POSE_IDENTITY = XrPosef.calloc().set(
+        XrQuaternionf.calloc().set(0, 0, 0, 1),
+        XrVector3f.calloc()
+    );
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -167,6 +175,14 @@ public class MCOpenXR extends MCVR {
                 }
 
                 this.inputActions.values().forEach(this::readNewData);
+
+                //TODO Not needed it seems? Poses come from the action space
+                XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), instance);
+                this.readPoseData(this.grip[0], actionSet);
+                this.readPoseData(this.grip[1], actionSet);
+                this.readPoseData(this.aim[0], actionSet);
+                this.readPoseData(this.aim[1], actionSet);
+
                 this.mc.getProfiler().pop();
             }
 
@@ -280,6 +296,16 @@ public class MCOpenXR extends MCVR {
             //action.analogData[i].activeOrigin = this.analog.activeOrigin();
             action.analogData[i].isActive = state.isActive();
             action.analogData[i].isChanged = state.changedSinceLastSync();
+        }
+    }
+
+    private void readPoseData(Long action, XrActionSet set) {
+        try (MemoryStack stack = MemoryStack.stackPush()){
+            XrActionStateGetInfo info = XrActionStateGetInfo.calloc(stack);
+            info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
+            info.action(new XrAction(action, set));
+            XrActionStatePose state = XrActionStatePose.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_POSE);
+            XR10.xrGetActionStatePose(session, info, state);
         }
     }
 
@@ -691,7 +717,6 @@ public class MCOpenXR extends MCVR {
                 GLFWNativeWGL.glfwGetWGLContext(windowHandle)
             );
         } else if (Platform.get() == Platform.LINUX) {
-            //Possible TODO Wayland + XCB (look at https://github.com/Admicos/minecraft-wayland)
             long xDisplay = GLFWNativeX11.glfwGetX11Display();
 
             long glXContext = GLFWNativeGLX.glfwGetGLXContext(windowHandle);
@@ -799,101 +824,90 @@ public class MCOpenXR extends MCVR {
         }
 
 
-
     }
 
-    //TODO All of this needs to be gone
-    private Map<String, String> globalBindings() {
-        HashMap<String, String> map = new HashMap<>();
+    private void setupControllers() {
+        XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), instance);
+        this.grip[0] = createAction("/actions/global/in/lefthand", "/actions/global/in/lefthand", "pose", actionSet);
+        this.grip[1] = createAction("/actions/global/in/righthand", "/actions/global/in/righthand", "pose", actionSet);
+        this.aim[0] = createAction("/actions/global/in/lefthandaim", "/actions/global/in/lefthandaim", "pose", actionSet);
+        this.aim[1] = createAction("/actions/global/in/righthandaim", "/actions/global/in/righthandaim", "pose", actionSet);
 
-        map.put("/actions/global/in/vivecraft.key.ingamemenubutton", "/user/hand/left/input/y/click");
-        map.put("/actions/global/in/vivecraft.key.togglekeyboard", "/user/hand/left/input/y/long");
-        map.put("/actions/global/in/key.inventory", "/user/hand/left/input/x/click");
-        return map;
-    }
+        try (MemoryStack stack = MemoryStack.stackPush()){
+            XrActionSpaceCreateInfo grip_left = XrActionSpaceCreateInfo.calloc(stack);
+            grip_left.type(XR10.XR_TYPE_ACTION_SPACE_CREATE_INFO);
+            grip_left.next(NULL);
+            grip_left.action(new XrAction(grip[0], actionSet));
+            grip_left.subactionPath(getPath("/user/hand/left/input/grip/pose"));
+            grip_left.poseInActionSpace(POSE_IDENTITY);
+            PointerBuffer pp = stackCallocPointer(1);
+            XR10.xrCreateActionSpace(session, grip_left, pp);
+            new XrSpace(pp.get(0), session);
 
-    private Map<String, String> guiBindings() {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("/actions/gui/in/vivecraft.key.guishift", "/user/hand/left/input/grip/click");
-        map.put("/actions/gui/in/vivecraft.key.guimiddleclick", "/user/hand/right/input/grip/click");
-        map.put("/actions/gui/in/vivecraft.key.guileftclick", "/user/hand/right/input/trigger/click");
-        map.put("/actions/gui/in/vivecraft.key.guirightclick", "/user/hand/right/input/a/click");
-        map.put("/actions/gui/in/vivecraft.key.guiscrollaxis", "/user/hand/right/input/joystick/scroll");
-        return map;
-    }
+            grip_left.action(new XrAction(grip[1], actionSet));
+            grip_left.subactionPath(getPath("/user/hand/right/input/grip/pose"));
+            XR10.xrCreateActionSpace(session, grip_left, pp);
+            new XrSpace(pp.get(0), session);
 
-    private Map<String, String> ingameBindings() {
-        HashMap<String, String> map2 = new HashMap<>();
-        map2.put("/actions/ingame/in/vivecraft.key.hotbarprev", "/user/hand/left/input/grip/click");
-        map2.put("/actions/ingame/in/vivecraft.key.hotbarnext", "/user/hand/right/input/grip/click");
-        map2.put("/actions/ingame/in/key.attack", "/user/hand/right/input/trigger/click");
-        map2.put("/actions/ingame/in/vivecraft.key.teleport", "/user/hand/left/input/trigger/click");
-        map2.put("/actions/ingame/in/vivecraft.key.radialmenu", "/user/hand/right/input/b/click");
-        map2.put("/actions/ingame/in/key.use", "/user/hand/right/input/a/click");
-        map2.put("/actions/ingame/in/vivecraft.key.freemovestrafe", "/user/hand/left/input/joystick/position");
-        map2.put("/actions/ingame/in/vivecraft.key.rotateaxis", "/user/hand/right/input/joystick/position");
-        map2.put("/actions/ingame/in/vivecraft.key.teleportfallback", "/user/hand/left/input/trigger/pull");
-        map2.put("/actions/ingame/in/key.jump", "/user/hand/left/input/bumper/click");
-        map2.put("/actions/ingame/in/key.sneak", "/user/hand/right/input/bumper/click");
-        return map2;
-    }
+            grip_left.action(new XrAction(aim[0], actionSet));
+            grip_left.subactionPath(getPath("/user/hand/left/input/aim/pose"));
+            XR10.xrCreateActionSpace(session, grip_left, pp);
+            new XrSpace(pp.get(0), session);
 
-    private Map<String, String> keyboardBindings() {
-        HashMap<String, String> map3 = new HashMap<>();
-        map3.put("/actions/keyboard/in/vivecraft.key.keyboardshift", "/user/hand/left/input/grip/click");
-        map3.put("/actions/keyboard/in/vivecraft.key.keyboardclick", "/user/hand/left/input/trigger/click");
-        //map3.put("/actions/keyboard/in/vivecraft.key.keyboardclick", "/user/hand/right/input/trigger/click");
-        return map3;
-    }
+            grip_left.action(new XrAction(aim[1], actionSet));
+            grip_left.subactionPath(getPath("/user/hand/right/input/aim/pose"));
+            XR10.xrCreateActionSpace(session, grip_left, pp);
+            new XrSpace(pp.get(0), session);
 
-    private String getBinding(VRInputActionSet set, String action){
-        switch (set) {
-            case GLOBAL -> {
-                return globalBindings().get(action.toLowerCase());
-            }
-            case GUI -> {
-                return guiBindings().get(action.toLowerCase());
-            }
-            case KEYBOARD -> {
-                return keyboardBindings().get(action.toLowerCase());
-            }
-            case INGAME -> {
-                return ingameBindings().get(action.toLowerCase());
-            }
-            default -> {
-                return "";
-            }
+
         }
+
     }
 
     private void loadDefaultBindings() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(inputActions.size(), stack);
 
-            VRInputAction[] bindingsArray = inputActions.values().toArray(new VRInputAction[0]);
+            for (String headset: XRBindings.supportedHeadsets()) {
+                Pair<String, String>[] defaultBindings = XRBindings.getBinding(headset).toArray(new Pair[0]);
+                XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(defaultBindings.length + 4, stack); //TODO different way of adding controller poses
 
-            for (int i = 0; i < bindingsArray.length; i++) {
-                VRInputAction binding = bindingsArray[i];
-                if (!binding.requirement.equals("suggested")) {
+                for (int i = 0; i < defaultBindings.length; i++) {
+                    Pair<String, String> pair = defaultBindings[i];
+                    VRInputAction binding = this.getInputActionByName(pair.getRight());
                     bindings.get(i).set(
                         new XrAction(binding.handle, new XrActionSet(actionSetHandles.get(binding.actionSet), instance)),
-                        getPath("/user/hand/left/input/y/click")
+                        getPath(pair.getLeft())
                     );
-                    continue;
                 }
-                bindings.get(i).set(
-                    new XrAction(binding.handle, new XrActionSet(actionSetHandles.get(binding.actionSet), instance)),
-                    getPath(getBinding(binding.actionSet, binding.name))
+
+                //TODO make this also changeable?
+                XrActionSet actionSet = new XrActionSet(actionSetHandles.get(VRInputActionSet.GLOBAL), instance);
+                bindings.get(defaultBindings.length).set(
+                    new XrAction(this.grip[0], actionSet),
+                    getPath("/user/hand/left/input/grip/pose")
                 );
+                bindings.get(defaultBindings.length + 1).set(
+                    new XrAction(this.grip[1], actionSet),
+                    getPath("/user/hand/right/input/grip/pose")
+                );
+                bindings.get(defaultBindings.length + 2).set(
+                    new XrAction(this.aim[0], actionSet),
+                    getPath("/user/hand/left/input/aim/pose")
+                );
+                bindings.get(defaultBindings.length + 3).set(
+                    new XrAction(this.aim[1], actionSet),
+                    getPath("/user/hand/right/input/aim/pose")
+                );
+
+                XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(stack);
+                suggested_binds.type(XR10.XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING);
+                suggested_binds.next(NULL);
+                suggested_binds.interactionProfile(getPath(headset));
+                suggested_binds.suggestedBindings(bindings);
+
+                int i = XR10.xrSuggestInteractionProfileBindings(instance, suggested_binds);
             }
 
-            XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(stack);
-            suggested_binds.type(XR10.XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING);
-            suggested_binds.next(NULL);
-            suggested_binds.interactionProfile(getPath("/interaction_profiles/htc/vive_cosmos_controller")); //TODO replace for other binds as well
-            suggested_binds.suggestedBindings(bindings);
-
-            int i = XR10.xrSuggestInteractionProfileBindings(instance, suggested_binds);
 
             XrSessionActionSetsAttachInfo attach_info = XrSessionActionSetsAttachInfo.calloc(stack);
             attach_info.type(XR10.XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO);
@@ -931,6 +945,7 @@ public class MCOpenXR extends MCVR {
                 case "boolean" -> hands.actionType(XR10.XR_ACTION_TYPE_BOOLEAN_INPUT);
                 case "vector1" -> hands.actionType(XR10.XR_ACTION_TYPE_FLOAT_INPUT);
                 case "vector2" -> hands.actionType(XR10.XR_ACTION_TYPE_VECTOR2F_INPUT);
+                case "pose" -> hands.actionType(XR10.XR_ACTION_TYPE_POSE_INPUT);
             }
             hands.countSubactionPaths(0);
             hands.subactionPaths(null);
