@@ -493,6 +493,10 @@ public abstract class VRRenderer {
             }
         }
 
+        //for OPENXR, it needs to reinit
+        this.eyeproj[0] = this.getProjectionMatrix(0, ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getClipDistance());
+        this.eyeproj[1] = this.getProjectionMatrix(1, ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getClipDistance());
+
         if (this.reinitFramebuffers) {
             this.reinitShadersFlag = true;
             this.checkGLError("Start Init");

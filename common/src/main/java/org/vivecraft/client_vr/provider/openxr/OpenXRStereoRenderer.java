@@ -132,9 +132,9 @@ public class OpenXRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public Matrix4f getProjectionMatrix(int var1, float var2, float var3) {
-        //TODO this is the null provider, replace with proper one.
-        return new Matrix4f().setPerspective(90.0F, 1.0F, var2, var3);
+    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
+        XrFovf fov = openxr.viewBuffer.get(eyeType).fov();
+        return new Matrix4f().setPerspectiveOffCenterFov(fov.angleLeft(), fov.angleRight(), fov.angleDown(), fov.angleUp(), nearClip, farClip);
     }
 
     @Override

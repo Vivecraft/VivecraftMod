@@ -164,19 +164,26 @@ public class MCOpenXR extends MCVR {
             XrSpaceLocation space_location = XrSpaceLocation.calloc(stack).type(XR10.XR_TYPE_SPACE_LOCATION);
             //HMD pose
             XR10.xrLocateSpace(xrViewSpace, xrAppSpace, time, space_location);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.hmdPose);
 
             //Eye positions
+            OpenXRUtil.openXRPoseToMarix(viewBuffer.get(0).pose(), this.hmdPoseLeftEye);
             viewBuffer.get(0).pose();
             viewBuffer.get(0).fov();
 
+            OpenXRUtil.openXRPoseToMarix(viewBuffer.get(1).pose(), this.hmdPoseRightEye);
             viewBuffer.get(1).pose();
             viewBuffer.get(1).fov();
 
             //Controller aim and grip poses
             XR10.xrLocateSpace(gripSpace[0], xrAppSpace, time, space_location);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[0]);
             XR10.xrLocateSpace(gripSpace[1], xrAppSpace, time, space_location);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[1]);
             XR10.xrLocateSpace(aimSpace[0], xrAppSpace, time, space_location);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.handRotation[0]);
             XR10.xrLocateSpace(aimSpace[1], xrAppSpace, time, space_location);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.handRotation[1]);
 
             if (this.inputInitialized) {
                 this.mc.getProfiler().push("updateActionState");
