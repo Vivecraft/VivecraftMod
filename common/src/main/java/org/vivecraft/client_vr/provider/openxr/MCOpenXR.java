@@ -65,13 +65,15 @@ public class MCOpenXR extends MCVR {
     private  XrActiveActionSet.Buffer activeActionSetsBuffer;
     private boolean isActive;
     private final HashMap<String, Long> paths = new HashMap<>();
-    private XrActionSet handsSet;
-    private long[] grip;
-    private long[] aim;
+    private final long[] grip = new long[2];
+    private final long[] aim = new long[2];
+    private final XrSpace[] gripSpace = new XrSpace[2];
+    private final XrSpace[] aimSpace = new XrSpace[2];
     public static final XrPosef POSE_IDENTITY = XrPosef.calloc().set(
         XrQuaternionf.calloc().set(0, 0, 0, 1),
         XrVector3f.calloc()
     );
+
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -160,9 +162,21 @@ public class MCOpenXR extends MCVR {
     private void updatePose() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             XrSpaceLocation space_location = XrSpaceLocation.calloc(stack).type(XR10.XR_TYPE_SPACE_LOCATION);
+            //HMD pose
             XR10.xrLocateSpace(xrViewSpace, xrAppSpace, time, space_location);
-            //hmdPose = new Matrix4f(space_location.pose());
 
+            //Eye positions
+            viewBuffer.get(0).pose();
+            viewBuffer.get(0).fov();
+
+            viewBuffer.get(1).pose();
+            viewBuffer.get(1).fov();
+
+            //Controller aim and grip poses
+            XR10.xrLocateSpace(gripSpace[0], xrAppSpace, time, space_location);
+            XR10.xrLocateSpace(gripSpace[1], xrAppSpace, time, space_location);
+            XR10.xrLocateSpace(aimSpace[0], xrAppSpace, time, space_location);
+            XR10.xrLocateSpace(aimSpace[1], xrAppSpace, time, space_location);
 
             if (this.inputInitialized) {
                 this.mc.getProfiler().push("updateActionState");
@@ -197,7 +211,7 @@ public class MCOpenXR extends MCVR {
 //            this.updateControllerPose(2, this.externalCameraPoseHandle);
         }
 
-        this.updateAim();
+        //this.updateAim();
     }
 
     public void readNewData(VRInputAction action) {
@@ -823,7 +837,7 @@ public class MCOpenXR extends MCVR {
             vrinputaction.setHandle(action);
         }
 
-
+        setupControllers();
     }
 
     private void setupControllers() {
@@ -842,22 +856,22 @@ public class MCOpenXR extends MCVR {
             grip_left.poseInActionSpace(POSE_IDENTITY);
             PointerBuffer pp = stackCallocPointer(1);
             XR10.xrCreateActionSpace(session, grip_left, pp);
-            new XrSpace(pp.get(0), session);
+            this.gripSpace[0] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(grip[1], actionSet));
             grip_left.subactionPath(getPath("/user/hand/right/input/grip/pose"));
             XR10.xrCreateActionSpace(session, grip_left, pp);
-            new XrSpace(pp.get(0), session);
+            this.gripSpace[1] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(aim[0], actionSet));
             grip_left.subactionPath(getPath("/user/hand/left/input/aim/pose"));
             XR10.xrCreateActionSpace(session, grip_left, pp);
-            new XrSpace(pp.get(0), session);
+            this.aimSpace[0] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(aim[1], actionSet));
             grip_left.subactionPath(getPath("/user/hand/right/input/aim/pose"));
             XR10.xrCreateActionSpace(session, grip_left, pp);
-            new XrSpace(pp.get(0), session);
+            this.aimSpace[1] = new XrSpace(pp.get(0), session);
 
 
         }
@@ -873,10 +887,10 @@ public class MCOpenXR extends MCVR {
 
                 for (int i = 0; i < defaultBindings.length; i++) {
                     Pair<String, String> pair = defaultBindings[i];
-                    VRInputAction binding = this.getInputActionByName(pair.getRight());
+                    VRInputAction binding = this.getInputActionByName(pair.getLeft());
                     bindings.get(i).set(
                         new XrAction(binding.handle, new XrActionSet(actionSetHandles.get(binding.actionSet), instance)),
-                        getPath(pair.getLeft())
+                        getPath(pair.getRight())
                     );
                 }
 
