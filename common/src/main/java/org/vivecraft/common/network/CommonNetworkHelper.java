@@ -3,7 +3,7 @@ package org.vivecraft.common.network;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.common.utils.math.Quaternion;
+import org.joml.Quaternionf;
 
 public class CommonNetworkHelper {
 
@@ -42,18 +42,18 @@ public class CommonNetworkHelper {
         buffer.writeFloat((float) vec3.z);
     }
 
-    public static void serialize(FriendlyByteBuf buffer, Quaternion quat) {
-        buffer.writeFloat(quat.w);
+    public static void serialize(FriendlyByteBuf buffer, Quaternionf quat) {
         buffer.writeFloat(quat.x);
         buffer.writeFloat(quat.y);
         buffer.writeFloat(quat.z);
+        buffer.writeFloat(quat.w);
     }
 
     public static Vec3 deserializeFVec3(FriendlyByteBuf buffer) {
         return new Vec3(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
     }
 
-    public static Quaternion deserializeVivecraftQuaternion(FriendlyByteBuf buffer) {
-        return new Quaternion(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+    public static Quaternionf deserializeQuaternionf(FriendlyByteBuf buffer) {
+        return new Quaternionf(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
     }
 }

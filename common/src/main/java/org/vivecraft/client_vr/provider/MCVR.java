@@ -11,11 +11,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
-import org.joml.Vector2f;
+import org.joml.Math;
+import org.joml.*;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.QuaternionfHistory;
 import org.vivecraft.client_vr.VRData;
@@ -33,10 +32,7 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
-import org.vivecraft.common.utils.lwjgl.Matrix4f;
-import org.vivecraft.common.utils.lwjgl.Vector3f;
-import org.vivecraft.common.utils.math.Quaternion;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 
 import java.io.BufferedReader;
@@ -52,19 +48,19 @@ public abstract class MCVR {
     protected ClientDataHolderVR dh;
     protected static MCVR me;
     protected static VivecraftVRMod mod;
-    protected org.vivecraft.common.utils.math.Matrix4f hmdPose = new org.vivecraft.common.utils.math.Matrix4f();
-    public org.vivecraft.common.utils.math.Matrix4f hmdRotation = new org.vivecraft.common.utils.math.Matrix4f();
+    protected Matrix4f hmdPose = new Matrix4f();
+    public Matrix4f hmdRotation = new Matrix4f();
     public HardwareType detectedHardware = HardwareType.VIVE;
-    protected org.vivecraft.common.utils.math.Matrix4f hmdPoseLeftEye = new org.vivecraft.common.utils.math.Matrix4f();
-    protected org.vivecraft.common.utils.math.Matrix4f hmdPoseRightEye = new org.vivecraft.common.utils.math.Matrix4f();
+    protected Matrix4f hmdPoseLeftEye = new Matrix4f();
+    protected Matrix4f hmdPoseRightEye = new Matrix4f();
     public Vec3History hmdHistory = new Vec3History();
     public Vec3History hmdPivotHistory = new Vec3History();
     public QuaternionfHistory hmdRotHistory = new QuaternionfHistory();
     protected boolean headIsTracking;
-    protected org.vivecraft.common.utils.math.Matrix4f[] controllerPose = new org.vivecraft.common.utils.math.Matrix4f[3];
-    protected org.vivecraft.common.utils.math.Matrix4f[] controllerRotation = new org.vivecraft.common.utils.math.Matrix4f[3];
+    protected Matrix4f[] controllerPose = new Matrix4f[3];
+    protected Matrix4f[] controllerRotation = new Matrix4f[3];
     protected boolean[] controllerTracking = new boolean[3];
-    protected org.vivecraft.common.utils.math.Matrix4f[] handRotation = new org.vivecraft.common.utils.math.Matrix4f[3];
+    protected Matrix4f[] handRotation = new Matrix4f[3];
     public Vec3History[] controllerHistory = new Vec3History[]{new Vec3History(), new Vec3History()};
     public Vec3History[] controllerForwardHistory = new Vec3History[]{new Vec3History(), new Vec3History()};
     public Vec3History[] controllerUpHistory = new Vec3History[]{new Vec3History(), new Vec3History()};
@@ -73,11 +69,11 @@ public abstract class MCVR {
     public boolean initialized;
     public String initStatus;
     public boolean initSuccess;
-    protected org.vivecraft.common.utils.math.Matrix4f[] poseMatrices;
+    protected Matrix4f[] poseMatrices;
     protected Vec3[] deviceVelocity;
     protected Vec3[] aimSource = new Vec3[3];
-    public Vector3 forward = new Vector3(0.0F, 0.0F, -1.0F);
-    public Vector3 up = new Vector3(0.0F, 1.0F, 0.0F);
+    public Vector3f forward = new Vector3f(0.0F, 0.0F, -1.0F);
+    public Vector3f up = new Vector3f(0.0F, 1.0F, 0.0F);
     public int hmdAvgLength = 90;
     public LinkedList<Vec3> hmdPosSamples = new LinkedList<>();
     public LinkedList<Float> hmdYawSamples = new LinkedList<>();
@@ -92,9 +88,27 @@ public abstract class MCVR {
     protected HapticScheduler hapticScheduler;
     public float seatedRot;
     public float aimPitch = 0.0F;
-    protected final org.vivecraft.common.utils.math.Matrix4f Neutral_HMD = new org.vivecraft.common.utils.math.Matrix4f(1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 1.62F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F);
-    protected final org.vivecraft.common.utils.math.Matrix4f TPose_Left = new org.vivecraft.common.utils.math.Matrix4f(1.0F, 0.0F, 0.0F, 0.25F, 0.0F, 1.0F, 0.0F, 1.62F, 0.0F, 0.0F, 1.0F, 0.25F, 0.0F, 0.0F, 0.0F, 1.0F);
-    protected final org.vivecraft.common.utils.math.Matrix4f TPose_Right = new org.vivecraft.common.utils.math.Matrix4f(1.0F, 0.0F, 0.0F, 0.75F, 0.0F, 1.0F, 0.0F, 1.62F, 0.0F, 0.0F, 1.0F, 0.75F, 0.0F, 0.0F, 0.0F, 1.0F);
+    protected final Matrix4f Neutral_HMD;
+
+    {
+        Matrix4f matrix4f = new Matrix4f();
+        Neutral_HMD = matrix4f.setTransposed(matrix4f.transpose(new Matrix4f()).setTranslation(0.0F, 1.62F, 0.0F));
+    }
+
+    protected final Matrix4f TPose_Left;
+
+    {
+        Matrix4f matrix4f = new Matrix4f();
+        TPose_Left = matrix4f.setTransposed(matrix4f.transpose(new Matrix4f()).setTranslation(0.25F, 1.62F, 0.25F));
+    }
+
+    protected final Matrix4f TPose_Right;
+
+    {
+        Matrix4f matrix4f = new Matrix4f();
+        TPose_Right = matrix4f.setTransposed(matrix4f.transpose(new Matrix4f()).setTranslation(0.75F, 1.62F, 0.75F));
+    }
+
     protected boolean TPose = false;
     public boolean hudPopup = true;
     protected int moveModeSwitchCount = 0;
@@ -117,9 +131,9 @@ public abstract class MCVR {
 
         for (int i = 0; i < 3; ++i) {
             this.aimSource[i] = new Vec3(0.0D, 0.0D, 0.0D);
-            this.controllerPose[i] = new org.vivecraft.common.utils.math.Matrix4f();
-            this.controllerRotation[i] = new org.vivecraft.common.utils.math.Matrix4f();
-            this.handRotation[i] = new org.vivecraft.common.utils.math.Matrix4f();
+            this.controllerPose[i] = new Matrix4f();
+            this.controllerRotation[i] = new Matrix4f();
+            this.handRotation[i] = new Matrix4f();
         }
     }
 
@@ -139,7 +153,7 @@ public abstract class MCVR {
         return this.gunAngle;
     }
 
-    public org.vivecraft.common.utils.math.Matrix4f getAimRotation(int controller) {
+    public Matrix4f getAimRotation(int controller) {
         return this.controllerRotation[controller];
     }
 
@@ -148,7 +162,7 @@ public abstract class MCVR {
 
         if (!this.dh.vrSettings.seated && this.dh.vrSettings.allowStandingOriginOffset) {
             if (this.dh.vr.isHMDTracking()) {
-                vec3 = vec3.add(this.dh.vrSettings.originOffset.getX(), this.dh.vrSettings.originOffset.getY(), this.dh.vrSettings.originOffset.getZ());
+                vec3 = vec3.add(this.dh.vrSettings.originOffset.x(), this.dh.vrSettings.originOffset.y(), this.dh.vrSettings.originOffset.z());
             }
         }
 
@@ -156,8 +170,8 @@ public abstract class MCVR {
     }
 
     public Vec3 getAimVector(int controller) {
-        Vector3 vector3 = this.controllerRotation[controller].transform(this.forward);
-        return vector3.toVector3d();
+        Vector3f vector3 = this.controllerRotation[controller].transpose(new Matrix4f()).transformProject(this.forward, new Vector3f());
+        return Utils.toVec3(vector3);
     }
 
     public void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude) {
@@ -192,19 +206,16 @@ public abstract class MCVR {
         }
     }
 
-    public org.vivecraft.common.utils.math.Matrix4f getHandRotation(int controller) {
+    public Matrix4f getHandRotation(int controller) {
         return this.handRotation[controller];
     }
 
     public Vec3 getHandVector(int controller) {
-        Vector3 vector3 = new Vector3(0.0F, 0.0F, -1.0F);
-        org.vivecraft.common.utils.math.Matrix4f matrix4f = this.handRotation[controller];
-        Vector3 vector31 = matrix4f.transform(vector3);
-        return vector31.toVector3d();
+        return Utils.toVec3(this.handRotation[controller].transpose(new Matrix4f()).transformProject(0.0F, 0.0F, -1.0F, new Vector3f()));
     }
 
     public Vec3 getCenterEyePosition() {
-        Vector3 vector3 = Utils.convertMatrix4ftoTranslationVector(this.hmdPose);
+        Vector3f vector3 = this.hmdPose.transpose(new Matrix4f()).getTranslation(new Vector3f());
 
         if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
             if (this.dh.vr.isHMDTracking()) {
@@ -212,11 +223,11 @@ public abstract class MCVR {
             }
         }
 
-        return vector3.toVector3d();
+        return Utils.toVec3(vector3);
     }
 
     public Vec3 getEyePosition(RenderPass eye) {
-        org.vivecraft.common.utils.math.Matrix4f matrix4f = this.hmdPoseRightEye;
+        Matrix4f matrix4f = this.hmdPoseRightEye;
 
         if (eye == RenderPass.LEFT) {
             matrix4f = this.hmdPoseLeftEye;
@@ -227,27 +238,26 @@ public abstract class MCVR {
         }
 
         if (matrix4f == null) {
-            org.vivecraft.common.utils.math.Matrix4f matrix4f2 = this.hmdPose;
-            Vector3 vector31 = Utils.convertMatrix4ftoTranslationVector(matrix4f2);
+            Vector3f vector31 = this.hmdPose.transpose(new Matrix4f()).getTranslation(new Vector3f());
 
             if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
                 if (this.dh.vr.isHMDTracking()) {
-                    vector31 = vector31.add(this.dh.vrSettings.originOffset);
+                    vector31.add(this.dh.vrSettings.originOffset);
                 }
             }
 
-            return vector31.toVector3d();
+            return Utils.toVec3(vector31);
         } else {
-            org.vivecraft.common.utils.math.Matrix4f matrix4f1 = org.vivecraft.common.utils.math.Matrix4f.multiply(this.hmdPose, matrix4f);
-            Vector3 vector3 = Utils.convertMatrix4ftoTranslationVector(matrix4f1);
+            Matrix4f dest = new Matrix4f().setTransposed(this.hmdPose.transpose(new Matrix4f()).mul0(matrix4f.transpose(new Matrix4f())));
+            Vector3f vector3 = dest.transpose(new Matrix4f()).getTranslation(new Vector3f());
 
             if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
                 if (this.dh.vr.isHMDTracking()) {
-                    vector3 = vector3.add(this.dh.vrSettings.originOffset);
+                    vector3.add(this.dh.vrSettings.originOffset);
                 }
             }
 
-            return vector3.toVector3d();
+            return Utils.toVec3(vector3);
         }
     }
 
@@ -256,12 +266,12 @@ public abstract class MCVR {
     }
 
     public Vec3 getHmdVector() {
-        Vector3 vector3 = this.hmdRotation.transform(this.forward);
-        return vector3.toVector3d();
+        Vector3f vector3 = this.hmdRotation.transpose(new Matrix4f()).transformProject(this.forward, new Vector3f());
+        return Utils.toVec3(vector3);
     }
 
-    public org.vivecraft.common.utils.math.Matrix4f getEyeRotation(RenderPass eye) {
-        org.vivecraft.common.utils.math.Matrix4f matrix4f;
+    public Matrix4f getEyeRotation(RenderPass eye) {
+        Matrix4f matrix4f;
 
         if (eye == RenderPass.LEFT) {
             matrix4f = this.hmdPoseLeftEye;
@@ -272,24 +282,7 @@ public abstract class MCVR {
         }
 
         if (matrix4f != null) {
-            org.vivecraft.common.utils.math.Matrix4f matrix4f1 = new org.vivecraft.common.utils.math.Matrix4f();
-            matrix4f1.M[0][0] = matrix4f.M[0][0];
-            matrix4f1.M[0][1] = matrix4f.M[0][1];
-            matrix4f1.M[0][2] = matrix4f.M[0][2];
-            matrix4f1.M[0][3] = 0.0F;
-            matrix4f1.M[1][0] = matrix4f.M[1][0];
-            matrix4f1.M[1][1] = matrix4f.M[1][1];
-            matrix4f1.M[1][2] = matrix4f.M[1][2];
-            matrix4f1.M[1][3] = 0.0F;
-            matrix4f1.M[2][0] = matrix4f.M[2][0];
-            matrix4f1.M[2][1] = matrix4f.M[2][1];
-            matrix4f1.M[2][2] = matrix4f.M[2][2];
-            matrix4f1.M[2][3] = 0.0F;
-            matrix4f1.M[3][0] = 0.0F;
-            matrix4f1.M[3][1] = 0.0F;
-            matrix4f1.M[3][2] = 0.0F;
-            matrix4f1.M[3][3] = 1.0F;
-            return org.vivecraft.common.utils.math.Matrix4f.multiply(this.hmdRotation, matrix4f1);
+            return new Matrix4f().setTransposed(this.hmdRotation.transpose(new Matrix4f()).mul0(new Matrix4f().setTransposed(new Matrix4f().set3x3(matrix4f.transpose(new Matrix4f()))).transpose(new Matrix4f())));
         } else {
             return this.hmdRotation;
         }
@@ -327,12 +320,12 @@ public abstract class MCVR {
     }
 
     public void resetPosition() {
-        Vec3 vec3 = this.getCenterEyePosition().scale(-1.0D).add(this.dh.vrSettings.originOffset.getX(), this.dh.vrSettings.originOffset.getY(), this.dh.vrSettings.originOffset.getZ());
-        this.dh.vrSettings.originOffset = new Vector3((float) vec3.x, (float) vec3.y + 1.62F, (float) vec3.z);
+        Vec3 vec3 = this.getCenterEyePosition().scale(-1.0D).add(this.dh.vrSettings.originOffset.x(), this.dh.vrSettings.originOffset.y(), this.dh.vrSettings.originOffset.z());
+        this.dh.vrSettings.originOffset = new Vector3f((float) vec3.x, (float) vec3.y + 1.62F, (float) vec3.z);
     }
 
     public void clearOffset() {
-        this.dh.vrSettings.originOffset = new Vector3(0.0F, 0.0F, 0.0F);
+        this.dh.vrSettings.originOffset = new Vector3f(0.0F, 0.0F, 0.0F);
     }
 
     public boolean isHMDTracking() {
@@ -367,11 +360,15 @@ public abstract class MCVR {
         }
 
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST) {
-            barStartPos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.26F)).toVector3d();
-            barEndPos = this.getAimRotation(1).transform(new Vector3((float) i * 0.02F, 0.05F, 0.01F)).toVector3d();
+            Matrix4f matrix4f1 = this.getAimRotation(1);
+            barStartPos = Utils.toVec3(matrix4f1.transpose(new Matrix4f()).transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.26F), new Vector3f()));
+            Matrix4f matrix4f = this.getAimRotation(1);
+            barEndPos = Utils.toVec3(matrix4f.transpose(new Matrix4f()).transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.01F), new Vector3f()));
         } else if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
-            barStartPos = this.getAimRotation(1).transform(new Vector3((float) i * -0.18F, 0.08F, -0.01F)).toVector3d();
-            barEndPos = this.getAimRotation(1).transform(new Vector3((float) i * 0.19F, 0.04F, -0.08F)).toVector3d();
+            Matrix4f matrix4f1 = this.getAimRotation(1);
+            barStartPos = Utils.toVec3(matrix4f1.transpose(new Matrix4f()).transformProject(new Vector3f((float) i * -0.18F, 0.08F, -0.01F), new Vector3f()));
+            Matrix4f matrix4f = this.getAimRotation(1);
+            barEndPos = Utils.toVec3(matrix4f.transpose(new Matrix4f()).transformProject(new Vector3f((float) i * 0.19F, 0.04F, -0.08F), new Vector3f()));
         } else {
             return; //how did u get here
         }
@@ -454,36 +451,27 @@ public abstract class MCVR {
             this.hmdYawSamples.removeFirst();
         }
 
-        float f = this.dh.vrPlayer.vrdata_room_pre.hmd.getYaw();
-
-        if (f < 0.0F) {
-            f += 360.0F;
-        }
-
-        this.hmdYawTotal += Utils.angleDiff(f, this.hmdYawLast);
+        float f = Math.abs(this.dh.vrPlayer.vrdata_room_pre.hmd.getYaw() % 360.0F);
+        float f3 = Math.abs(f - this.hmdYawLast) % 360.0F;
+        int i = (!(f - this.hmdYawLast >= 0.0F) || !(f - this.hmdYawLast <= 180.0F)) && (!(f - this.hmdYawLast <= -180.0F) || !(f - this.hmdYawLast >= -360.0F)) ? -1 : 1;
+        this.hmdYawTotal += (f3 > 180.0F ? 360.0F - f3 : f3) * (float) i;
         this.hmdYawLast = f;
 
-        if (Math.abs(Utils.angleNormalize(this.hmdYawTotal) - this.hmdYawLast) > 1.0F || this.hmdYawTotal > 100000.0F) {
+        if (Math.abs(Math.abs(this.hmdYawTotal % 360.0F) - this.hmdYawLast) > 1.0F || this.hmdYawTotal > 100000.0F) {
             this.hmdYawTotal = this.hmdYawLast;
             System.out.println("HMD yaw desync/overflow corrected");
         }
 
         this.hmdPosSamples.add(this.dh.vrPlayer.vrdata_room_pre.hmd.getPosition());
-        float f1 = 0.0F;
+        float f1 = Math.abs(this.hmdYawTotal - (
+            !this.hmdYawSamples.isEmpty() ?
+            this.hmdYawSamples.stream().reduce(0.0F, Float::sum) / this.hmdYawSamples.size() :
+            0
+        ));
 
-        if (this.hmdYawSamples.size() > 0) {
-            for (float f2 : this.hmdYawSamples) {
-                f1 += f2;
-            }
-
-            f1 /= (float) this.hmdYawSamples.size();
-        }
-
-        if (Math.abs(this.hmdYawTotal - f1) > 20.0F) {
+        if (f1 > 20.0F) {
             this.trigger = true;
-        }
-
-        if (Math.abs(this.hmdYawTotal - f1) < 1.0F) {
+        } else if (f1 < 1.0F) {
             this.trigger = false;
         }
 
@@ -497,84 +485,40 @@ public abstract class MCVR {
 
 
         if (this.mc != null) {
-            this.hmdRotation.M[0][0] = this.hmdPose.M[0][0];
-            this.hmdRotation.M[0][1] = this.hmdPose.M[0][1];
-            this.hmdRotation.M[0][2] = this.hmdPose.M[0][2];
-            this.hmdRotation.M[0][3] = 0.0F;
-            this.hmdRotation.M[1][0] = this.hmdPose.M[1][0];
-            this.hmdRotation.M[1][1] = this.hmdPose.M[1][1];
-            this.hmdRotation.M[1][2] = this.hmdPose.M[1][2];
-            this.hmdRotation.M[1][3] = 0.0F;
-            this.hmdRotation.M[2][0] = this.hmdPose.M[2][0];
-            this.hmdRotation.M[2][1] = this.hmdPose.M[2][1];
-            this.hmdRotation.M[2][2] = this.hmdPose.M[2][2];
-            this.hmdRotation.M[2][3] = 0.0F;
-            this.hmdRotation.M[3][0] = 0.0F;
-            this.hmdRotation.M[3][1] = 0.0F;
-            this.hmdRotation.M[3][2] = 0.0F;
-            this.hmdRotation.M[3][3] = 1.0F;
+            this.hmdRotation.setTransposed(new Matrix4f().set3x3(this.hmdPose.transpose(new Matrix4f())));
             Vec3 vec3 = this.getCenterEyePosition();
             this.hmdHistory.add(vec3);
-            Vector3 vector3 = this.hmdRotation.transform(new Vector3(0.0F, -0.1F, 0.1F));
-            this.hmdPivotHistory.add(new Vec3((double) vector3.getX() + vec3.x, (double) vector3.getY() + vec3.y, (double) vector3.getZ() + vec3.z));
-            hmdRotHistory.add(new Quaternionf().setFromNormalized(hmdRotation.transposed().toMCMatrix().rotateY((float) -Math.toRadians(this.dh.vrSettings.worldRotation))));
+            Vector3f vector3 = this.hmdRotation.transpose(new Matrix4f()).transformProject(0.0F, -0.1F, 0.1F, new Vector3f());
+            this.hmdPivotHistory.add(new Vec3((double) vector3.x() + vec3.x, (double) vector3.y() + vec3.y, (double) vector3.z() + vec3.z));
+            this.hmdRotHistory.add(new Quaternionf().setFromNormalized(this.hmdRotation.transpose(new Matrix4f()).transpose().rotateY((float) -Math.toRadians(this.dh.vrSettings.worldRotation))));
 
             if (this.dh.vrSettings.seated) {
-                this.controllerPose[0] = this.hmdPose.inverted().inverted();
-                this.controllerPose[1] = this.hmdPose.inverted().inverted();
+                Matrix4f matrix4f1 = this.hmdPose.setTransposed(this.hmdPose.transpose(new Matrix4f()).invert());
+                this.controllerPose[0].set(matrix4f1.setTransposed(matrix4f1.transpose(new Matrix4f()).invert()));
+                Matrix4f matrix4f = this.hmdPose.setTransposed(this.hmdPose.transpose(new Matrix4f()).invert());
+                this.controllerPose[1].set(matrix4f.setTransposed(matrix4f.transpose(new Matrix4f()).invert()));
             }
 
-            org.vivecraft.common.utils.math.Matrix4f[] amatrix4f = new org.vivecraft.common.utils.math.Matrix4f[]{new org.vivecraft.common.utils.math.Matrix4f(), new org.vivecraft.common.utils.math.Matrix4f()};
-            org.vivecraft.common.utils.math.Matrix4f[] amatrix4f1 = new org.vivecraft.common.utils.math.Matrix4f[]{new org.vivecraft.common.utils.math.Matrix4f(), new org.vivecraft.common.utils.math.Matrix4f()};
+            Matrix4f[] amatrix4f = new Matrix4f[]{new Matrix4f(), new Matrix4f()};
+            Matrix4f[] amatrix4f1 = new Matrix4f[]{new Matrix4f(), new Matrix4f()};
 
             if (this.dh.vrSettings.seated) {
-                amatrix4f1[0] = this.controllerPose[0];
+                amatrix4f1[0].set(this.controllerPose[0]);
             } else {
-                amatrix4f1[0] = org.vivecraft.common.utils.math.Matrix4f.multiply(this.controllerPose[0], this.getControllerComponentTransform(0, "handgrip"));
+                amatrix4f1[0].setTransposed(this.controllerPose[0].transpose(new Matrix4f()).mul0(this.getControllerComponentTransform(0, "handgrip").transpose(new Matrix4f())));
             }
 
-            this.handRotation[0].M[0][0] = amatrix4f1[0].M[0][0];
-            this.handRotation[0].M[0][1] = amatrix4f1[0].M[0][1];
-            this.handRotation[0].M[0][2] = amatrix4f1[0].M[0][2];
-            this.handRotation[0].M[0][3] = 0.0F;
-            this.handRotation[0].M[1][0] = amatrix4f1[0].M[1][0];
-            this.handRotation[0].M[1][1] = amatrix4f1[0].M[1][1];
-            this.handRotation[0].M[1][2] = amatrix4f1[0].M[1][2];
-            this.handRotation[0].M[1][3] = 0.0F;
-            this.handRotation[0].M[2][0] = amatrix4f1[0].M[2][0];
-            this.handRotation[0].M[2][1] = amatrix4f1[0].M[2][1];
-            this.handRotation[0].M[2][2] = amatrix4f1[0].M[2][2];
-            this.handRotation[0].M[2][3] = 0.0F;
-            this.handRotation[0].M[3][0] = 0.0F;
-            this.handRotation[0].M[3][1] = 0.0F;
-            this.handRotation[0].M[3][2] = 0.0F;
-            this.handRotation[0].M[3][3] = 1.0F;
+            this.handRotation[0].setTransposed(new Matrix4f().set3x3(amatrix4f1[0].transpose(new Matrix4f())));
 
             if (this.dh.vrSettings.seated) {
-                amatrix4f[0] = this.controllerPose[0];
+                amatrix4f[0].set(this.controllerPose[0]);
             } else {
-                amatrix4f[0] = org.vivecraft.common.utils.math.Matrix4f.multiply(this.controllerPose[0], this.getControllerComponentTransform(0, "tip"));
+                amatrix4f[0].setTransposed(this.controllerPose[0].transpose(new Matrix4f()).mul0(this.getControllerComponentTransform(0, "tip").transpose(new Matrix4f())));
             }
 
-            Vector3 vector31 = Utils.convertMatrix4ftoTranslationVector(amatrix4f[0]);
-            this.aimSource[0] = vector31.toVector3d();
+            this.aimSource[0] = Utils.toVec3(amatrix4f[0].transpose(new Matrix4f()).getTranslation(new Vector3f()));
             this.controllerHistory[0].add(this.getAimSource(0));
-            this.controllerRotation[0].M[0][0] = amatrix4f[0].M[0][0];
-            this.controllerRotation[0].M[0][1] = amatrix4f[0].M[0][1];
-            this.controllerRotation[0].M[0][2] = amatrix4f[0].M[0][2];
-            this.controllerRotation[0].M[0][3] = 0.0F;
-            this.controllerRotation[0].M[1][0] = amatrix4f[0].M[1][0];
-            this.controllerRotation[0].M[1][1] = amatrix4f[0].M[1][1];
-            this.controllerRotation[0].M[1][2] = amatrix4f[0].M[1][2];
-            this.controllerRotation[0].M[1][3] = 0.0F;
-            this.controllerRotation[0].M[2][0] = amatrix4f[0].M[2][0];
-            this.controllerRotation[0].M[2][1] = amatrix4f[0].M[2][1];
-            this.controllerRotation[0].M[2][2] = amatrix4f[0].M[2][2];
-            this.controllerRotation[0].M[2][3] = 0.0F;
-            this.controllerRotation[0].M[3][0] = 0.0F;
-            this.controllerRotation[0].M[3][1] = 0.0F;
-            this.controllerRotation[0].M[3][2] = 0.0F;
-            this.controllerRotation[0].M[3][3] = 1.0F;
+            this.controllerRotation[0].setTransposed(new Matrix4f().set3x3(amatrix4f[0].transpose(new Matrix4f())));
             Vec3 vec31 = this.getHmdVector();
 
             if (this.dh.vrSettings.seated && this.mc.screen == null && this.mc.mouseHandler.isMouseGrabbed()) {
@@ -620,88 +564,41 @@ public abstract class MCVR {
                     double screenY = (i * 0.5F) * (((WindowExtension) (Object) this.mc.getWindow()).vivecraft$getActualScreenHeight() / (double) this.mc.getWindow().getScreenHeight());
                     InputSimulator.setMousePos(screenX, screenY);
                     GLFW.glfwSetCursorPos(this.mc.getWindow().getWindow(), screenX, screenY);
-                    matrix4f.rotate((float) Math.toRadians(-d2), new Vector3f(1.0F, 0.0F, 0.0F));
-                    matrix4f.rotate((float) Math.toRadians(-180.0D + d0 - (double) this.hmdForwardYaw), new Vector3f(0.0F, 1.0F, 0.0F));
+                    matrix4f
+                        .rotateX((float) Math.toRadians(-d2))
+                        .rotateY((float) Math.toRadians(-180.0D + d0 - (double) this.hmdForwardYaw));
                 }
 
-                this.controllerRotation[0].M[0][0] = matrix4f.m00;
-                this.controllerRotation[0].M[0][1] = matrix4f.m01;
-                this.controllerRotation[0].M[0][2] = matrix4f.m02;
-                this.controllerRotation[0].M[1][0] = matrix4f.m10;
-                this.controllerRotation[0].M[1][1] = matrix4f.m11;
-                this.controllerRotation[0].M[1][2] = matrix4f.m12;
-                this.controllerRotation[0].M[2][0] = matrix4f.m20;
-                this.controllerRotation[0].M[2][1] = matrix4f.m21;
-                this.controllerRotation[0].M[2][2] = matrix4f.m22;
-
-                this.handRotation[0].M[0][0] = matrix4f.m00;
-                this.handRotation[0].M[0][1] = matrix4f.m01;
-                this.handRotation[0].M[0][2] = matrix4f.m02;
-                this.handRotation[0].M[1][0] = matrix4f.m10;
-                this.handRotation[0].M[1][1] = matrix4f.m11;
-                this.handRotation[0].M[1][2] = matrix4f.m12;
-                this.handRotation[0].M[2][0] = matrix4f.m20;
-                this.handRotation[0].M[2][1] = matrix4f.m21;
-                this.handRotation[0].M[2][2] = matrix4f.m22;
+                this.controllerRotation[0].setTransposed(this.controllerRotation[0].transpose(new Matrix4f()).set3x3(matrix4f.transpose(new Matrix4f())));
+                this.handRotation[0].setTransposed(this.handRotation[0].transpose(new Matrix4f()).set3x3(matrix4f.transpose(new Matrix4f())));
             }
 
             Vec3 vec32 = this.getAimVector(0);
             this.aimPitch = (float) Math.toDegrees(Math.asin(vec32.y / vec32.length()));
             this.controllerForwardHistory[0].add(vec32);
-            Vec3 vec33 = this.controllerRotation[0].transform(this.up).toVector3d();
+            Vec3 vec33 = Utils.toVec3(this.controllerRotation[0].transpose(new Matrix4f()).transformProject(this.up, new Vector3f()));
             this.controllerUpHistory[0].add(vec33);
 
             if (this.dh.vrSettings.seated) {
-                amatrix4f1[1] = this.controllerPose[1];
+                amatrix4f1[1].set(this.controllerPose[1]);
             } else {
-                amatrix4f1[1] = org.vivecraft.common.utils.math.Matrix4f.multiply(this.controllerPose[1], this.getControllerComponentTransform(1, "handgrip"));
+                amatrix4f1[1].setTransposed(this.controllerPose[1].transpose(new Matrix4f()).mul0(this.getControllerComponentTransform(1, "handgrip").transpose(new Matrix4f())));
             }
 
-            this.handRotation[1].M[0][0] = amatrix4f1[1].M[0][0];
-            this.handRotation[1].M[0][1] = amatrix4f1[1].M[0][1];
-            this.handRotation[1].M[0][2] = amatrix4f1[1].M[0][2];
-            this.handRotation[1].M[0][3] = 0.0F;
-            this.handRotation[1].M[1][0] = amatrix4f1[1].M[1][0];
-            this.handRotation[1].M[1][1] = amatrix4f1[1].M[1][1];
-            this.handRotation[1].M[1][2] = amatrix4f1[1].M[1][2];
-            this.handRotation[1].M[1][3] = 0.0F;
-            this.handRotation[1].M[2][0] = amatrix4f1[1].M[2][0];
-            this.handRotation[1].M[2][1] = amatrix4f1[1].M[2][1];
-            this.handRotation[1].M[2][2] = amatrix4f1[1].M[2][2];
-            this.handRotation[1].M[2][3] = 0.0F;
-            this.handRotation[1].M[3][0] = 0.0F;
-            this.handRotation[1].M[3][1] = 0.0F;
-            this.handRotation[1].M[3][2] = 0.0F;
-            this.handRotation[1].M[3][3] = 1.0F;
+            this.handRotation[1].setTransposed(new Matrix4f().set3x3(amatrix4f1[1].transpose(new Matrix4f())));
 
             if (this.dh.vrSettings.seated) {
-                amatrix4f[1] = this.controllerPose[1];
+                amatrix4f[1].set(this.controllerPose[1]);
             } else {
-                amatrix4f[1] = org.vivecraft.common.utils.math.Matrix4f.multiply(this.controllerPose[1], this.getControllerComponentTransform(1, "tip"));
+                amatrix4f[1].setTransposed(this.controllerPose[1].transpose(new Matrix4f()).mul0(this.getControllerComponentTransform(1, "tip").transpose(new Matrix4f())));
             }
 
-            vector31 = Utils.convertMatrix4ftoTranslationVector(amatrix4f[1]);
-            this.aimSource[1] = vector31.toVector3d();
+            this.aimSource[1] = Utils.toVec3(amatrix4f[1].transpose(new Matrix4f()).getTranslation(new Vector3f()));
             this.controllerHistory[1].add(this.getAimSource(1));
-            this.controllerRotation[1].M[0][0] = amatrix4f[1].M[0][0];
-            this.controllerRotation[1].M[0][1] = amatrix4f[1].M[0][1];
-            this.controllerRotation[1].M[0][2] = amatrix4f[1].M[0][2];
-            this.controllerRotation[1].M[0][3] = 0.0F;
-            this.controllerRotation[1].M[1][0] = amatrix4f[1].M[1][0];
-            this.controllerRotation[1].M[1][1] = amatrix4f[1].M[1][1];
-            this.controllerRotation[1].M[1][2] = amatrix4f[1].M[1][2];
-            this.controllerRotation[1].M[1][3] = 0.0F;
-            this.controllerRotation[1].M[2][0] = amatrix4f[1].M[2][0];
-            this.controllerRotation[1].M[2][1] = amatrix4f[1].M[2][1];
-            this.controllerRotation[1].M[2][2] = amatrix4f[1].M[2][2];
-            this.controllerRotation[1].M[2][3] = 0.0F;
-            this.controllerRotation[1].M[3][0] = 0.0F;
-            this.controllerRotation[1].M[3][1] = 0.0F;
-            this.controllerRotation[1].M[3][2] = 0.0F;
-            this.controllerRotation[1].M[3][3] = 1.0F;
+            this.controllerRotation[1].setTransposed(new Matrix4f().set3x3(amatrix4f[1].transpose(new Matrix4f())));
             vec31 = this.getAimVector(1);
             this.controllerForwardHistory[1].add(vec31);
-            vec32 = this.controllerRotation[1].transform(this.up).toVector3d();
+            vec32 = Utils.toVec3(this.controllerRotation[1].transpose(new Matrix4f()).transformProject(this.up, new Vector3f()));
             this.controllerUpHistory[1].add(vec32);
 
             if (this.dh.vrSettings.seated) {
@@ -712,33 +609,17 @@ public abstract class MCVR {
             boolean flag = false;
 
             if (flag) {
-                this.controllerPose[2] = this.controllerPose[0];
+                this.controllerPose[2].set(this.controllerPose[0]);
             }
 
-            this.controllerRotation[2].M[0][0] = this.controllerPose[2].M[0][0];
-            this.controllerRotation[2].M[0][1] = this.controllerPose[2].M[0][1];
-            this.controllerRotation[2].M[0][2] = this.controllerPose[2].M[0][2];
-            this.controllerRotation[2].M[0][3] = 0.0F;
-            this.controllerRotation[2].M[1][0] = this.controllerPose[2].M[1][0];
-            this.controllerRotation[2].M[1][1] = this.controllerPose[2].M[1][1];
-            this.controllerRotation[2].M[1][2] = this.controllerPose[2].M[1][2];
-            this.controllerRotation[2].M[1][3] = 0.0F;
-            this.controllerRotation[2].M[2][0] = this.controllerPose[2].M[2][0];
-            this.controllerRotation[2].M[2][1] = this.controllerPose[2].M[2][1];
-            this.controllerRotation[2].M[2][2] = this.controllerPose[2].M[2][2];
-            this.controllerRotation[2].M[2][3] = 0.0F;
-            this.controllerRotation[2].M[3][0] = 0.0F;
-            this.controllerRotation[2].M[3][1] = 0.0F;
-            this.controllerRotation[2].M[3][2] = 0.0F;
-            this.controllerRotation[2].M[3][3] = 1.0F;
+            this.controllerRotation[2].setTransposed(new Matrix4f().set3x3(this.controllerPose[2].transpose(new Matrix4f())));
 
             if ((!this.hasThirdController() || this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY && this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.THIRD_PERSON) && !flag) {
                 this.mrMovingCamActive = false;
-                this.aimSource[2] = new Vec3(this.dh.vrSettings.vrFixedCamposX, this.dh.vrSettings.vrFixedCamposY, this.dh.vrSettings.vrFixedCamposZ);
+                this.aimSource[2] = Utils.toVec3(this.dh.vrSettings.vrFixedCampos);
             } else {
                 this.mrMovingCamActive = true;
-                Vector3 vector32 = Utils.convertMatrix4ftoTranslationVector(this.controllerPose[2]);
-                this.aimSource[2] = vector32.toVector3d();
+                this.aimSource[2] = Utils.toVec3(this.controllerPose[2].transpose(new Matrix4f()).getTranslation(new Vector3f()));
             }
         }
     }
@@ -849,10 +730,10 @@ public abstract class MCVR {
             }
 
             if (this.dh.vrSettings.worldRotationIncrement == 0.0F) {
-                float f4 = this.getInputAction(mod.keyRotateAxis).getAxis2DUseTracked().getX();
+                float f4 = this.getInputAction(mod.keyRotateAxis).getAxis2DUseTracked().x();
 
                 if (f4 == 0.0F) {
-                    f4 = this.getInputAction(mod.keyFreeMoveRotate).getAxis2DUseTracked().getX();
+                    f4 = this.getInputAction(mod.keyFreeMoveRotate).getAxis2DUseTracked().x();
                 }
 
                 if (f4 != 0.0F) {
@@ -861,10 +742,10 @@ public abstract class MCVR {
                     this.dh.vrSettings.worldRotation %= 360.0F;
                 }
             } else if (mod.keyRotateAxis.consumeClick() || mod.keyFreeMoveRotate.consumeClick()) {
-                float f5 = this.getInputAction(mod.keyRotateAxis).getAxis2D(false).getX();
+                float f5 = this.getInputAction(mod.keyRotateAxis).getAxis2D(false).x();
 
                 if (f5 == 0.0F) {
-                    f5 = this.getInputAction(mod.keyFreeMoveRotate).getAxis2D(false).getX();
+                    f5 = this.getInputAction(mod.keyFreeMoveRotate).getAxis2D(false).x();
                 }
 
                 if (Math.abs(f5) > 0.5F) {
@@ -993,7 +874,7 @@ public abstract class MCVR {
 
                     VRData.VRDevicePose vrdata$vrdevicepose = this.dh.vrPlayer.vrdata_world_pre.getController(controllertype3.ordinal());
                     this.dh.cameraTracker.setPosition(vrdata$vrdevicepose.getPosition());
-                    this.dh.cameraTracker.setRotation(new Quaternion(vrdata$vrdevicepose.getMatrix().transposed()));
+                    this.dh.cameraTracker.setRotation(new Quaternionf().setFromNormalized(vrdata$vrdevicepose.getMatrix().transpose(new Matrix4f())));
                 }
             }
 
@@ -1010,7 +891,7 @@ public abstract class MCVR {
 
                 VRData.VRDevicePose vrdata$vrdevicepose1 = this.dh.vrPlayer.vrdata_world_pre.getController(controllertype4.ordinal());
                 this.dh.cameraTracker.setPosition(vrdata$vrdevicepose1.getPosition());
-                this.dh.cameraTracker.setRotation(new Quaternion(vrdata$vrdevicepose1.getMatrix().transposed()));
+                this.dh.cameraTracker.setRotation(new Quaternionf().setFromNormalized(vrdata$vrdevicepose1.getMatrix().transpose(new Matrix4f())));
                 this.dh.cameraTracker.startMoving(controllertype4.ordinal(), true);
             }
 
@@ -1162,7 +1043,7 @@ public abstract class MCVR {
 
     public abstract boolean postinit() throws RenderConfigException;
 
-    public abstract org.vivecraft.common.utils.math.Matrix4f getControllerComponentTransform(int var1, String var2);
+    public abstract Matrix4f getControllerComponentTransform(int var1, String var2);
 
     public abstract boolean hasThirdController();
 

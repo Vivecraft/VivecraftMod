@@ -1,9 +1,9 @@
 package org.vivecraft.client_vr.menuworlds;
 
 import net.minecraft.SharedConstants;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;

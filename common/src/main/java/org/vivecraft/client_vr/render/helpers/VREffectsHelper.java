@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -33,7 +34,6 @@ import org.vivecraft.client.Xplat;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.settings.GuiOtherHUDSettings;
 import org.vivecraft.client.gui.settings.GuiRenderOpticsSettings;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -571,14 +571,16 @@ public class VREffectsHelper {
 
             //convert previously calculated coords to world coords
             Vec3 guiPos = VRPlayer.room_to_world_pos(KeyboardHandler.Pos_room, dataHolder.vrPlayer.vrdata_world_render);
-            org.vivecraft.common.utils.math.Matrix4f rot = org.vivecraft.common.utils.math.Matrix4f.rotationY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians);
-            org.vivecraft.common.utils.math.Matrix4f guiRot = org.vivecraft.common.utils.math.Matrix4f.multiply(rot, KeyboardHandler.Rotation_room);
+            Matrix4f matrix4f = new Matrix4f();
+            Matrix4f rot = matrix4f.setTransposed(new Matrix4f().rotationY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians));
+            Matrix4f dest = new Matrix4f();
+            Matrix4f guiRot = dest.setTransposed(rot.transpose(new Matrix4f()).mul0(KeyboardHandler.Rotation_room.transpose(new Matrix4f())));
 
             RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
 
             // offset from eye to gui pos
             poseStack.translate((float) (guiPos.x - eye.x), (float) (guiPos.y - eye.y), (float) (guiPos.z - eye.z));
-            poseStack.mulPoseMatrix(guiRot.toMCMatrix());
+            poseStack.mulPoseMatrix(guiRot.transpose(new Matrix4f()));
 
             float scale = dataHolder.vrPlayer.vrdata_world_render.worldScale;
             poseStack.scale(scale, scale, scale);
@@ -655,7 +657,7 @@ public class VREffectsHelper {
             }
 
             int minLight = ShadersHelper.ShaderLight();
-            int light = Utils.getCombinedLightWithMin(mc.level, BlockPos.containing(screenPos), minLight);
+            int light = getCombinedLightWithMin(mc.level, BlockPos.containing(screenPos), minLight);
             RenderHelper.drawSizedQuadWithLightmapCutout((float) mc.getWindow().getGuiScaledWidth(),
                 (float) mc.getWindow().getGuiScaledHeight(), 1.5F, light, color,
                 poseStack.last().pose(), false);
@@ -721,7 +723,7 @@ public class VREffectsHelper {
         }
     }
 
-    public static void render2D(float partialTicks, RenderTarget framebuffer, Vec3 pos, org.vivecraft.common.utils.math.Matrix4f rot, boolean depthAlways, PoseStack poseStack) {
+    public static void render2D(float partialTicks, RenderTarget framebuffer, Vec3 pos, Matrix4f rot, boolean depthAlways, PoseStack poseStack) {
         if (!dataHolder.bowTracker.isDrawing) {
             setupScreenRendering(poseStack, partialTicks);
 
@@ -730,12 +732,13 @@ public class VREffectsHelper {
             Vec3 eye = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
 
             Vec3 guiPos = VRPlayer.room_to_world_pos(pos, dataHolder.vrPlayer.vrdata_world_render);
-            org.vivecraft.common.utils.math.Matrix4f yRot = org.vivecraft.common.utils.math.Matrix4f
-                .rotationY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians);
-            org.vivecraft.common.utils.math.Matrix4f guiRot = org.vivecraft.common.utils.math.Matrix4f.multiply(yRot, rot);
+            Matrix4f matrix4f = new Matrix4f();
+            Matrix4f yRot = matrix4f.setTransposed(new Matrix4f().rotationY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians));
+            Matrix4f dest = new Matrix4f();
+            Matrix4f guiRot = dest.setTransposed(yRot.transpose(new Matrix4f()).mul0(rot.transpose(new Matrix4f())));
 
             poseStack.translate((float) (guiPos.x - eye.x), (float) (guiPos.y - eye.y), (float) (guiPos.z - eye.z));
-            poseStack.mulPoseMatrix(guiRot.toMCMatrix());
+            poseStack.mulPoseMatrix(guiRot.transpose(new Matrix4f()));
 
             float scale = GuiHandler.guiScale * dataHolder.vrPlayer.vrdata_world_render.worldScale;
             poseStack.scale(scale, scale, scale);
@@ -929,5 +932,17 @@ public class VREffectsHelper {
             poseStack.popPose();
             mc.getProfiler().pop();
         }
+    }
+
+    public static int getCombinedLightWithMin(BlockAndTintGetter lightReader, BlockPos pos, int minLight) {
+        int i = LevelRenderer.getLightColor(lightReader, pos);
+        int j = i >> 4 & 15;
+
+        if (j < minLight) {
+            i = i & -256;
+            i = i | minLight << 4;
+        }
+
+        return i;
     }
 }

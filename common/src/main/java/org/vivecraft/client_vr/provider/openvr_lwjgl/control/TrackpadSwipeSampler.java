@@ -1,10 +1,9 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 
+import org.joml.Vector2f;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
-import org.vivecraft.common.utils.lwjgl.Vector2f;
-import org.vivecraft.common.utils.math.Vector2;
 
 public class TrackpadSwipeSampler {
     private static final int UP = 0;
@@ -24,11 +23,14 @@ public class TrackpadSwipeSampler {
         }
     }
 
-    public void update(ControllerType hand, Vector2 position) {
+    public void update(ControllerType hand, Vector2f position) {
         MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).setCurrentHand(hand);
 
         if (MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).isButtonPressed()) {
-            this.buffer[this.index].set(position.getX(), position.getY());
+            float x = position.x();
+            float y = position.y();
+            this.buffer[this.index].x = x;
+            this.buffer[this.index].y = y;
 
             if (++this.index >= this.buffer.length) {
                 this.index = 0;
@@ -37,7 +39,8 @@ public class TrackpadSwipeSampler {
             ++this.count;
         } else {
             for (Vector2f vector2f : this.buffer) {
-                vector2f.set(0.0F, 0.0F);
+                vector2f.x = 0.0F;
+                vector2f.y = 0.0F;
             }
 
             this.count = 0L;
@@ -68,7 +71,8 @@ public class TrackpadSwipeSampler {
                 int l = this.swiped[2]++;
             }
         } else {
-            this.accumulator.set(0.0F, 0.0F);
+            this.accumulator.x = 0.0F;
+            this.accumulator.y = 0.0F;
         }
     }
 

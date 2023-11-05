@@ -10,15 +10,19 @@ import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.common.utils.math.Quaternion;
-import org.vivecraft.common.utils.math.Vector3;
+import org.joml.Math;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.vivecraft.common.utils.Utils;
 
 import java.awt.*;
 import java.util.ArrayList;
 
+import static java.lang.Math.pow;
+
 public class Debug {
     Vec3 root;
-    Quaternion rotation;
+    Quaternionf rotation;
     public static boolean isEnabled = true;
     static Polygon cross = new Polygon(6);
     static Polygon arrowHead = new Polygon(8);
@@ -26,16 +30,16 @@ public class Debug {
 
     public Debug(Vec3 root) {
         this.root = root;
-        this.rotation = new Quaternion();
+        this.rotation = new Quaternionf();
     }
 
-    public Debug(Vec3 root, Quaternion rotation) {
+    public Debug(Vec3 root, Quaternionf rotation) {
         this.root = root;
         this.rotation = rotation;
     }
 
     public void drawPoint(Vec3 point, Color color) {
-        point = this.rotation.multiply(point);
+        point = Utils.toVec3(this.rotation.transformInverse(new Vector3f((float) point.x, (float) point.y, (float) point.z), new Vector3f()));
         Vec3 vec3 = this.root.add(point);
         Polygon debug$polygon = cross.offset(vec3);
 
@@ -50,13 +54,28 @@ public class Debug {
 
     public void drawVector(Vec3 start, Vec3 direction, Color color) {
         Polygon debug$polygon = new Polygon(2);
-        start = this.rotation.multiply(start);
-        direction = this.rotation.multiply(direction);
+        start = Utils.toVec3(this.rotation.transformInverse(new Vector3f((float) start.x, (float) start.y, (float) start.z), new Vector3f()));
+        direction = Utils.toVec3(this.rotation.transformInverse(new Vector3f((float) direction.x, (float) direction.y, (float) direction.z), new Vector3f()));
         debug$polygon.vertices[0] = this.root.add(start);
         debug$polygon.colors[0] = new Color(0, 0, 0, 0);
         debug$polygon.vertices[1] = this.root.add(start).add(direction);
         debug$polygon.colors[1] = color;
-        Quaternion quaternion = Quaternion.createFromToVector(new Vector3(0.0F, 1.0F, 0.0F), new Vector3(direction.normalize()));
+        Vec3 normalized = direction.normalize();
+        Vector3f from = new Vector3f(0.0F, 1.0F, 0.0F);
+        Vector3f to = new Vector3f((float) normalized.x(), (float) normalized.y(), (float) normalized.z());
+        Vector3f vector3 = from.cross(to, new Vector3f());
+        float f = (float) (Math.sqrt(pow(from.length(), 2.0D) * pow(to.length(), 2.0D)) + (double) from.dot(to));
+        Quaternionf quaternion1 = (new Quaternionf(vector3.x, vector3.y, vector3.z, f));
+        Quaternionf dest = new Quaternionf();
+        float f4 = Math.sqrt(quaternion1.lengthSquared());
+
+        if (f4 > 0.0F) {
+            dest.normalize();
+        } else {
+            dest.identity();
+        }
+
+        Quaternionf quaternion = dest;
         Polygon debug$polygon1 = arrowHead.rotated(quaternion).offset(this.root.add(start).add(direction));
 
         for (int i = 0; i < debug$polygon1.colors.length; ++i) {
@@ -70,8 +89,8 @@ public class Debug {
     }
 
     public void drawLine(Vec3 start, Vec3 end, Color color) {
-        start = this.rotation.multiply(start);
-        end = this.rotation.multiply(end);
+        start = Utils.toVec3(this.rotation.transformInverse(new Vector3f((float) start.x, (float) start.y, (float) start.z), new Vector3f()));
+        end = Utils.toVec3(this.rotation.transformInverse(new Vector3f((float) end.x, (float) end.y, (float) end.z), new Vector3f()));
         Polygon debug$polygon = new Polygon(2);
         debug$polygon.vertices[0] = this.root.add(start);
         debug$polygon.colors[0] = new Color(0, 0, 0, 0);
@@ -95,8 +114,8 @@ public class Debug {
         avec31[3] = new Vec3(box.maxX, box.maxY, box.minZ);
 
         for (int j = 0; j < 4; ++j) {
-            avec3[j] = this.root.add(this.rotation.multiply(avec3[j]));
-            avec31[j] = this.root.add(this.rotation.multiply(avec31[j]));
+            avec3[j] = this.root.add(Utils.toVec3(this.rotation.transformInverse(new Vector3f((float) avec3[j].x, (float) avec3[j].y, (float) avec3[j].z), new Vector3f())));
+            avec31[j] = this.root.add(Utils.toVec3(this.rotation.transformInverse(new Vector3f((float) avec31[j].x, (float) avec31[j].y, (float) avec31[j].z), new Vector3f())));
         }
 
         for (int k = 0; k < 5; ++k) {
@@ -221,11 +240,11 @@ public class Debug {
             return debug$polygon;
         }
 
-        public Polygon rotated(Quaternion quat) {
+        public Polygon rotated(Quaternionf quat) {
             Polygon debug$polygon = new Polygon(this.vertices.length);
 
             for (int i = 0; i < this.vertices.length; ++i) {
-                debug$polygon.vertices[i] = quat.multiply(new Vector3(this.vertices[i])).toVector3d();
+                debug$polygon.vertices[i] = Utils.toVec3(quat.transformInverse(new Vector3f((float) this.vertices[i].x, (float) this.vertices[i].y, (float) this.vertices[i].z), new Vector3f()));
                 debug$polygon.colors[i] = this.colors[i];
             }
 

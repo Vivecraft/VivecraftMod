@@ -12,16 +12,16 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -30,8 +30,7 @@ import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.settings.OptionEnum;
 import org.vivecraft.client_vr.utils.RGBAColor;
-import org.vivecraft.common.utils.lwjgl.Matrix4f;
-import org.vivecraft.common.utils.lwjgl.Vector3f;
+import org.vivecraft.common.utils.Utils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -411,19 +410,17 @@ public class PhysicalKeyboard {
         }
     }
 
-    private Vector3f getCenterPos() {
-        return new Vector3f(((this.keyWidth + this.spacing) * ((float) this.columns + (float) this.columns % 2.0F / 2.0F) + (this.keyWidthSpecial + this.spacing) * 2.0F) / 2.0F, (this.keyHeight + this.spacing) * (float) (this.rows + 1), 0.0F);
+    private org.joml.Vector3f getCenterPos() {
+        return new org.joml.Vector3f(((this.keyWidth + this.spacing) * ((float) this.columns + (float) this.columns % 2.0F / 2.0F) + (this.keyWidthSpecial + this.spacing) * 2.0F) / 2.0F, (this.keyHeight + this.spacing) * (float) (this.rows + 1), 0.0F);
     }
 
     private KeyButton findTouchedKey(ControllerType controller) {
-        Matrix4f matrix4f = new Matrix4f();
-        matrix4f.translate(this.getCenterPos());
-        Matrix4f.mul(matrix4f, (Matrix4f) Utils.convertOVRMatrix(KeyboardHandler.Rotation_room).invert(), matrix4f);
-        matrix4f.translate((Vector3f) Utils.convertToVector3f(KeyboardHandler.Pos_room).negate());
-        Vec3 vec3 = Utils.convertToVector3d(Utils.transformVector(matrix4f, Utils.convertToVector3f(this.dh.vrPlayer.vrdata_room_pre.getController(controller.ordinal()).getPosition()), true));
+        Matrix4f matrix4f = new Matrix4f().translate(this.getCenterPos()).mul(KeyboardHandler.Rotation_room.transpose(new Matrix4f()).invertAffine()).translate(new Vector3f((float) KeyboardHandler.Pos_room.x, (float) KeyboardHandler.Pos_room.y, (float) KeyboardHandler.Pos_room.z).negate());
+        Vec3 vector = this.dh.vrPlayer.vrdata_room_pre.getController(controller.ordinal()).getPosition();
+        org.joml.Vector3f vec3 = matrix4f.transformPosition(new Vector3f((float) vector.x, (float) vector.y, (float) vector.z));
 
         for (KeyButton physicalkeyboard$keybutton : this.keys) {
-            if (physicalkeyboard$keybutton.getCollisionBoundingBox().contains(vec3)) {
+            if (physicalkeyboard$keybutton.getCollisionBoundingBox().contains(vec3.x, vec3.y, vec3.z)) {
                 return physicalkeyboard$keybutton;
             }
         }
@@ -478,7 +475,7 @@ public class PhysicalKeyboard {
 
     public void render(PoseStack poseStack) {
         poseStack.pushPose();
-        Vector3f center = this.getCenterPos();
+        org.joml.Vector3f center = this.getCenterPos();
         poseStack.translate(-center.x, -center.y, -center.z);
         RenderSystem.disableCull();
         RenderSystem.enableBlend();

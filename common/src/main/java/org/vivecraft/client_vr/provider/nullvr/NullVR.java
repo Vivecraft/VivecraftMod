@@ -2,10 +2,10 @@ package org.vivecraft.client_vr.provider.nullvr;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -13,7 +13,6 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
-import org.vivecraft.common.utils.math.Matrix4f;
 
 import java.util.List;
 
@@ -64,12 +63,12 @@ public class NullVR extends MCVR {
             this.dh.vrSettings.seated = true;
 
             this.headIsTracking = false;
-            Utils.Matrix4fSetIdentity(this.hmdPose);
-            this.hmdPose.M[1][3] = 1.62F;
+            this.hmdPose.identity();
+            this.hmdPose.m13(1.62F);
 
             // eye offset, 10cm total distance
-            this.hmdPoseLeftEye.M[0][3] = -0.05F;
-            this.hmdPoseRightEye.M[0][3] = 0.05F;
+            this.hmdPoseLeftEye.m03(-0.05F);
+            this.hmdPoseRightEye.m03(0.05F);
 
             this.initialized = true;
             this.initSuccess = true;
@@ -93,40 +92,21 @@ public class NullVR extends MCVR {
 
             this.updateAim();
 
-            this.controllerPose[0].M[0][3] = 0.3F;
-            this.controllerPose[0].M[1][3] = 1.2F;
-            this.controllerPose[0].M[2][3] = -0.5F;
+            this.controllerPose[0].setTransposed(this.controllerPose[0].transpose(new org.joml.Matrix4f()).setTranslation(0.3F, 1.2F, -0.5F));
 
-            this.controllerPose[1].M[0][3] = -0.3F;
-            this.controllerPose[1].M[1][3] = 1.2F;
-            this.controllerPose[1].M[2][3] = -0.5F;
+            this.controllerPose[1].setTransposed(this.controllerPose[1].transpose(new org.joml.Matrix4f()).setTranslation(-0.3F, 1.2F, -0.5F));
 
             this.dh.vrSettings.xSensitivity = xSens;
             this.dh.vrSettings.keyholeX = xKey;
 
 
             // point head in cursor direction
-            hmdRotation.M[0][0] = handRotation[0].M[0][0];
-            hmdRotation.M[0][1] = handRotation[0].M[0][1];
-            hmdRotation.M[0][2] = handRotation[0].M[0][2];
-            hmdRotation.M[1][0] = handRotation[0].M[1][0];
-            hmdRotation.M[1][1] = handRotation[0].M[1][1];
-            hmdRotation.M[1][2] = handRotation[0].M[1][2];
-            hmdRotation.M[2][0] = handRotation[0].M[2][0];
-            hmdRotation.M[2][1] = handRotation[0].M[2][1];
-            hmdRotation.M[2][2] = handRotation[0].M[2][2];
+
+            this.hmdRotation.setTransposed(this.hmdRotation.transpose(new org.joml.Matrix4f()).set3x3(this.handRotation[0].transpose(new org.joml.Matrix4f())));
 
             if (GuiHandler.guiRotation_room != null) {
                 // look at screen, so that it's centered
-                hmdRotation.M[0][0] = GuiHandler.guiRotation_room.M[0][0];
-                hmdRotation.M[0][1] = GuiHandler.guiRotation_room.M[0][1];
-                hmdRotation.M[0][2] = GuiHandler.guiRotation_room.M[0][2];
-                hmdRotation.M[1][0] = GuiHandler.guiRotation_room.M[1][0];
-                hmdRotation.M[1][1] = GuiHandler.guiRotation_room.M[1][1];
-                hmdRotation.M[1][2] = GuiHandler.guiRotation_room.M[1][2];
-                hmdRotation.M[2][0] = GuiHandler.guiRotation_room.M[2][0];
-                hmdRotation.M[2][1] = GuiHandler.guiRotation_room.M[2][1];
-                hmdRotation.M[2][2] = GuiHandler.guiRotation_room.M[2][2];
+                this.hmdRotation.setTransposed(this.hmdRotation.transpose(new org.joml.Matrix4f()).set3x3(GuiHandler.guiRotation_room.transpose(new org.joml.Matrix4f())));
             }
             this.mc.getProfiler().popPush("hmdSampling");
             this.hmdSampling();

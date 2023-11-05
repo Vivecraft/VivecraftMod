@@ -4,14 +4,13 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gui.GuiRadial;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.common.utils.math.Matrix4f;
-import org.vivecraft.common.utils.math.Vector3;
 
 public class RadialHandler {
     public static Minecraft mc = Minecraft.getInstance();
@@ -128,15 +127,19 @@ public class RadialHandler {
             Vec3 vec31 = new Vec3(0.0D, 0.0D, -f);
             Vec3 vec32 = vrdata$vrdevicepose.getCustomVector(vec31);
             Pos_room = new Vec3(vec32.x / 2.0D + vec3.x, vec32.y / 2.0D + vec3.y, vec32.z / 2.0D + vec3.z);
-            Vector3 vector3 = new Vector3();
-            vector3.setX((float) (Pos_room.x - vec3.x));
-            vector3.setY((float) (Pos_room.y - vec3.y));
-            vector3.setZ((float) (Pos_room.z - vec3.z));
-            float f1 = (float) Math.asin(vector3.getY() / vector3.length());
-            float f2 = (float) ((double) (float) Math.PI + Math.atan2(vector3.getX(), vector3.getZ()));
-            Rotation_room = Matrix4f.rotationY(f2);
-            Matrix4f matrix4f = Utils.rotationXMatrix(f1);
-            Rotation_room = Matrix4f.multiply(Rotation_room, matrix4f);
+            Vector3f vector3 = new Vector3f(
+                (float) (Pos_room.x - vec3.x),
+                (float) (Pos_room.y - vec3.y),
+                (float) (Pos_room.z - vec3.z)
+            );
+            float f1 = (float) Math.asin(vector3.y() / vector3.length());
+            float f2 = (float) ((double) (float) Math.PI + Math.atan2(vector3.x(), vector3.z()));
+            Matrix4f matrix4f2 = new Matrix4f();
+            Rotation_room = matrix4f2.setTransposed(new org.joml.Matrix4f().rotationY(f2));
+            Matrix4f matrix4f1 = new Matrix4f();
+            Matrix4f matrix4f = matrix4f1.setTransposed(new org.joml.Matrix4f().rotationX(f1));
+            Matrix4f dest = new Matrix4f();
+            Rotation_room = dest.setTransposed(Rotation_room.transpose(new org.joml.Matrix4f()).mul0(matrix4f.transpose(new org.joml.Matrix4f())));
         }
     }
 

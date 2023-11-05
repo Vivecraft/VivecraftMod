@@ -6,12 +6,12 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.common.network.VrPlayerState;
-import org.vivecraft.common.utils.math.Quaternion;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.common.utils.Utils;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -54,10 +54,10 @@ public class VRPlayersClient {
 
     public void Update(UUID uuid, VrPlayerState vrPlayerState, float worldScale, float heightScale, boolean localPlayer) {
         if (localPlayer || !this.mc.player.getUUID().equals(uuid)) {
-            Vector3 forward = new Vector3(0.0F, 0.0F, -1.0F);
-            Vector3 hmdDir = vrPlayerState.hmd().orientation().multiply(forward);
-            Vector3 controller0Dir = vrPlayerState.controller0().orientation().multiply(forward);
-            Vector3 controller1Dir = vrPlayerState.controller1().orientation().multiply(forward);
+            Vector3f forward = new Vector3f(0.0F, 0.0F, -1.0F);
+            Vector3f hmdDir = vrPlayerState.hmd().orientation().transformInverse(forward, new Vector3f());
+            Vector3f controller0Dir = vrPlayerState.controller0().orientation().transformInverse(forward, new Vector3f());
+            Vector3f controller1Dir = vrPlayerState.controller1().orientation().transformInverse(forward, new Vector3f());
             var rotInfo = new RotInfo();
             rotInfo.reverse = vrPlayerState.reverseHands();
             rotInfo.seated = vrPlayerState.seated();
@@ -66,9 +66,9 @@ public class VRPlayersClient {
                 rotInfo.hmd = this.donors.get(uuid);
             }
 
-            rotInfo.leftArmRot = new Vec3(controller1Dir.getX(), controller1Dir.getY(), controller1Dir.getZ());
-            rotInfo.rightArmRot = new Vec3(controller0Dir.getX(), controller0Dir.getY(), controller0Dir.getZ());
-            rotInfo.headRot = new Vec3(hmdDir.getX(), hmdDir.getY(), hmdDir.getZ());
+            rotInfo.leftArmRot = new Vec3(controller1Dir.x(), controller1Dir.y(), controller1Dir.z());
+            rotInfo.rightArmRot = new Vec3(controller0Dir.x(), controller0Dir.y(), controller0Dir.z());
+            rotInfo.headRot = new Vec3(hmdDir.x(), hmdDir.y(), hmdDir.z());
             rotInfo.Headpos = vrPlayerState.hmd().position();
             rotInfo.leftArmPos = vrPlayerState.controller1().position();
             rotInfo.rightArmPos = vrPlayerState.controller0().position();
@@ -184,10 +184,10 @@ public class VRPlayersClient {
             playermodelcontroller$rotinfo2.leftArmQuat = playermodelcontroller$rotinfo.leftArmQuat;
             playermodelcontroller$rotinfo2.rightArmQuat = playermodelcontroller$rotinfo.rightArmQuat;
             playermodelcontroller$rotinfo2.headQuat = playermodelcontroller$rotinfo.headQuat;
-            Vector3 vector3 = new Vector3(0.0F, 0.0F, -1.0F);
-            playermodelcontroller$rotinfo2.leftArmRot = Utils.vecLerp(playermodelcontroller$rotinfo1.leftArmRot, Utils.convertToVector3d(playermodelcontroller$rotinfo2.leftArmQuat.multiply(vector3)), f);
-            playermodelcontroller$rotinfo2.rightArmRot = Utils.vecLerp(playermodelcontroller$rotinfo1.rightArmRot, Utils.convertToVector3d(playermodelcontroller$rotinfo2.rightArmQuat.multiply(vector3)), f);
-            playermodelcontroller$rotinfo2.headRot = Utils.vecLerp(playermodelcontroller$rotinfo1.headRot, Utils.convertToVector3d(playermodelcontroller$rotinfo2.headQuat.multiply(vector3)), f);
+            Vector3f vector3 = new Vector3f(0.0F, 0.0F, -1.0F);
+            playermodelcontroller$rotinfo2.leftArmRot = Utils.vecLerp(playermodelcontroller$rotinfo1.leftArmRot, Utils.convertToVector3d(playermodelcontroller$rotinfo2.leftArmQuat.transformInverse(vector3, new Vector3f())), f);
+            playermodelcontroller$rotinfo2.rightArmRot = Utils.vecLerp(playermodelcontroller$rotinfo1.rightArmRot, Utils.convertToVector3d(playermodelcontroller$rotinfo2.rightArmQuat.transformInverse(vector3, new Vector3f())), f);
+            playermodelcontroller$rotinfo2.headRot = Utils.vecLerp(playermodelcontroller$rotinfo1.headRot, Utils.convertToVector3d(playermodelcontroller$rotinfo2.headQuat.transformInverse(vector3, new Vector3f())), f);
             playermodelcontroller$rotinfo2.heightScale = playermodelcontroller$rotinfo.heightScale;
             playermodelcontroller$rotinfo2.worldScale = playermodelcontroller$rotinfo.worldScale;
             return playermodelcontroller$rotinfo2;
@@ -198,9 +198,9 @@ public class VRPlayersClient {
 
     public static RotInfo getMainPlayerRotInfo(VRData data) {
         RotInfo playermodelcontroller$rotinfo = new RotInfo();
-        Quaternion quaternion = new Quaternion(data.getController(1).getMatrix());
-        Quaternion quaternion1 = new Quaternion(data.getController(0).getMatrix());
-        Quaternion quaternion2 = new Quaternion(data.hmd.getMatrix());
+        Quaternionf quaternion = new Quaternionf().setFromNormalized(data.getController(1).getMatrix().transpose(new org.joml.Matrix4f()));
+        Quaternionf quaternion1 = new Quaternionf().setFromNormalized(data.getController(0).getMatrix().transpose(new org.joml.Matrix4f()));
+        Quaternionf quaternion2 = new Quaternionf().setFromNormalized(data.hmd.getMatrix().transpose(new org.joml.Matrix4f()));
         playermodelcontroller$rotinfo.headQuat = quaternion2;
         playermodelcontroller$rotinfo.leftArmQuat = quaternion;
         playermodelcontroller$rotinfo.rightArmQuat = quaternion1;
@@ -221,8 +221,10 @@ public class VRPlayersClient {
         return (float) Math.toDegrees(Math.atan2(vec3.x, vec3.z));
     }
 
-    public static Vec3 getOrientVec(Quaternion quat) {
-        Vec3 vec3 = quat.multiply(new Vec3(0.0D, 0.0D, -1.0D)).cross(quat.multiply(new Vec3(0.0D, 1.0D, 0.0D))).normalize();
+    public static Vec3 getOrientVec(Quaternionf quat) {
+        Vec3 vec = new Vec3(0.0D, 1.0D, 0.0D);
+        Vec3 vec1 = new Vec3(0.0D, 0.0D, -1.0D);
+        Vec3 vec3 = Utils.toVec3(quat.transformInverse(new Vector3f((float) vec1.x, (float) vec1.y, (float) vec1.z), new Vector3f())).cross(Utils.toVec3(quat.transform(new Vector3f((float) vec.x, (float) vec.y, (float) vec.z), new Vector3f()))).normalize();
         return (new Vec3(0.0D, 1.0D, 0.0D)).cross(vec3).normalize();
     }
 
@@ -230,9 +232,9 @@ public class VRPlayersClient {
         public boolean seated;
         public boolean reverse;
         public int hmd = 0;
-        public Quaternion leftArmQuat;
-        public Quaternion rightArmQuat;
-        public Quaternion headQuat;
+        public Quaternionf leftArmQuat;
+        public Quaternionf rightArmQuat;
+        public Quaternionf headQuat;
         public Vec3 leftArmRot;
         public Vec3 rightArmRot;
         public Vec3 headRot;

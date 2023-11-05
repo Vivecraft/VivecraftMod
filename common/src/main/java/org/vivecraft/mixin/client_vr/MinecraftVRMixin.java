@@ -40,6 +40,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -58,7 +59,6 @@ import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.UpdateChecker;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.*;
@@ -79,7 +79,7 @@ import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import javax.annotation.Nullable;
@@ -482,7 +482,13 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         }
 
                         this.mainRenderTarget.unbindWrite();
-                        Utils.takeScreenshot(rendertarget);
+                        Minecraft minecraft = Minecraft.getInstance();
+                        Screenshot.grab(minecraft.gameDirectory, rendertarget, (text) ->
+                        {
+                            minecraft.execute(() -> {
+                                minecraft.gui.getChat().addMessage(text);
+                            });
+                        });
                         this.window.updateDisplay();
                         ClientDataHolderVR.getInstance().grabScreenShot = false;
                     }
@@ -1003,16 +1009,16 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         Vec3 camPlayer = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getHeadPivot()
             .subtract(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());
         Matrix4f viewMatrix = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD)
-            .getMatrix().transposed().toMCMatrix();
-        Vector3 cameraLook = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getMatrix()
-            .transform(Vector3.forward());
+            .getMatrix().transpose(new Matrix4f()).transpose();
+        Matrix4f matrix4f = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getMatrix();
+        Vector3f cameraLook = matrix4f.transpose(new Matrix4f()).transformProject(Utils.forward(), new Vector3f());
 
         // set uniforms
         VRShaders._DepthMask_projectionMatrix.set(((GameRendererExtension) this.gameRenderer).vivecraft$getThirdPassProjectionMatrix());
         VRShaders._DepthMask_viewMatrix.set(viewMatrix);
 
         VRShaders._DepthMask_hmdViewPosition.set((float) camPlayer.x, (float) camPlayer.y, (float) camPlayer.z);
-        VRShaders._DepthMask_hmdPlaneNormal.set(-cameraLook.getX(), 0.0F, -cameraLook.getZ());
+        VRShaders._DepthMask_hmdPlaneNormal.set(-cameraLook.x(), 0.0F, -cameraLook.z());
 
         boolean alphaMask = ClientDataHolderVR.getInstance().vrSettings.mixedRealityUnityLike
             && ClientDataHolderVR.getInstance().vrSettings.mixedRealityAlphaMask;

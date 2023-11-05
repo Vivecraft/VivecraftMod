@@ -15,6 +15,8 @@ import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -25,9 +27,6 @@ import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.settings.profile.ProfileManager;
 import org.vivecraft.client_vr.settings.profile.ProfileReader;
 import org.vivecraft.client_vr.settings.profile.ProfileWriter;
-import org.vivecraft.common.utils.math.Angle;
-import org.vivecraft.common.utils.math.Quaternion;
-import org.vivecraft.common.utils.math.Vector3;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 
 import java.awt.*;
@@ -151,6 +150,15 @@ public class VRSettings {
         RELEASE,
         BETA,
         ALPHA
+    }
+
+    public enum Order {
+        XYZ,
+        ZYX,
+        YXZ,
+        ZXY,
+        YZX,
+        XZY
     }
 
     @SettingField
@@ -279,7 +287,7 @@ public class VRSettings {
     @SettingField(VrOptions.AUTO_SPRINT_THRESHOLD)
     public float autoSprintThreshold = 0.9f;
     @SettingField
-    public Vector3 originOffset = new Vector3(0.0F, 0.0F, 0.0F);
+    public Vector3f originOffset = new Vector3f(0.0F, 0.0F, 0.0F);
     @SettingField(VrOptions.ALLOW_STANDING_ORIGIN_OFFSET)
     public boolean allowStandingOriginOffset = false;
     @SettingField(VrOptions.SEATED_FREE_MOVE)
@@ -330,24 +338,16 @@ public class VRSettings {
     public boolean mixedRealityAlphaMask = false;
     @SettingField(VrOptions.MIXED_REALITY_FOV)
     public float mixedRealityFov = 40;
-    @SettingField
-    public float vrFixedCamposX = -1.0f;
-    @SettingField
-    public float vrFixedCamposY = 2.4f;
-    @SettingField
-    public float vrFixedCamposZ = 2.7f;
+    @SettingField(config = "vrFixedCampos", separate = true)
+    public Vector3f vrFixedCampos = new Vector3f(-1.0f, 2.4f, 2.7f);
     @SettingField(config = "vrFixedCamrot", separate = true)
-    public Quaternion vrFixedCamrotQuat = new Quaternion(.962f, .125f, .239f, .041f);
-    @SettingField
-    public float mrMovingCamOffsetX = 0;
-    @SettingField
-    public float mrMovingCamOffsetY = 0;
-    @SettingField
-    public float mrMovingCamOffsetZ = 0;
+    public Quaternionf vrFixedCamrotQuat = new Quaternionf(.125f, .239f, .041f, .962f);
+    @SettingField(config = "mrMovingCamOffset", separate = true)
+    public Vector3f mrMovingCamOffset = new Vector3f();
     @SettingField(config = "mrMovingCamOffsetRot", separate = true)
-    public Quaternion mrMovingCamOffsetRotQuat = new Quaternion();
+    public Quaternionf mrMovingCamOffsetRotQuat = new Quaternionf();
     @SettingField
-    public Angle.Order externalCameraAngleOrder = Angle.Order.XZY;
+    public Order externalCameraAngleOrder = Order.XZY;
     @SettingField(VrOptions.HANDHELD_CAMERA_FOV)
     public float handCameraFov = 70;
     @SettingField(VrOptions.HANDHELD_CAMERA_RENDER_SCALE)
@@ -510,9 +510,9 @@ public class VRSettings {
                 if (ann.separate() && field.getType().isArray()) {
                     int len = Array.getLength(field.get(this));
                     IntStream.range(0, len).forEach(i -> fieldConfigMap.put(config + "_" + i, configEntry));
-                } else if (ann.separate() && Quaternion.class.isAssignableFrom(field.getType())) {
+                } else if (ann.separate() && Quaternionf.class.isAssignableFrom(field.getType())) {
                     Stream.of('W', 'X', 'Y', 'Z').forEach(suffix -> fieldConfigMap.put(config + suffix, configEntry));
-                } else if (ann.separate() && Vector3.class.isAssignableFrom(field.getType())) {
+                } else if (ann.separate() && Vector3f.class.isAssignableFrom(field.getType())) {
                     Stream.of('X', 'Y', 'Z').forEach(suffix -> fieldConfigMap.put(config + suffix, configEntry));
                 } else {
                     fieldConfigMap.put(config, configEntry);
@@ -550,8 +550,8 @@ public class VRSettings {
         } else if (type.isEnum()) {
             Method m = type.getMethod("valueOf", String.class);
             return m.invoke(null, value);
-        } else if (Quaternion.class.isAssignableFrom(type)) {
-            Quaternion quat = ((Quaternion) currentValue).copy();
+        } else if (Quaternionf.class.isAssignableFrom(type)) {
+            Quaternionf quat = new Quaternionf(((Quaternionf) currentValue));
             if (separate) {
                 float f = Float.parseFloat(value);
                 switch (name.charAt(name.length() - 1)) {
@@ -562,14 +562,14 @@ public class VRSettings {
                 }
             } else {
                 String[] split = value.split(",");
-                quat.w = Float.parseFloat(split[0]);
-                quat.x = Float.parseFloat(split[1]);
-                quat.y = Float.parseFloat(split[2]);
-                quat.z = Float.parseFloat(split[3]);
+                quat.x = Float.parseFloat(split[0]);
+                quat.y = Float.parseFloat(split[1]);
+                quat.z = Float.parseFloat(split[2]);
+                quat.w = Float.parseFloat(split[3]);
             }
             return quat;
-        } else if (Vector3.class.isAssignableFrom(type)) {
-            Vector3 vec = ((Vector3) currentValue).copy();
+        } else if (Vector3f.class.isAssignableFrom(type)) {
+            Vector3f vec = new Vector3f(((Vector3f) currentValue));
             if (separate) {
                 float f = Float.parseFloat(value);
                 switch (name.charAt(name.length() - 1)) {
@@ -605,8 +605,8 @@ public class VRSettings {
             return obj.toString();
         } else if (type.isEnum()) {
             return ((Enum<?>) obj).name();
-        } else if (Quaternion.class.isAssignableFrom(type)) {
-            Quaternion quat = (Quaternion) obj;
+        } else if (Quaternionf.class.isAssignableFrom(type)) {
+            Quaternionf quat = (Quaternionf) obj;
             if (separate) {
                 return Float.toString(switch (name.charAt(name.length() - 1)) {
                     case 'W' -> quat.w;
@@ -616,10 +616,10 @@ public class VRSettings {
                     default -> 0; // shouldn't happen
                 });
             } else {
-                return quat.w + "," + quat.x + "," + quat.y + "," + quat.z;
+                return quat.x + "," + quat.y + "," + quat.z + "," + quat.w;
             }
-        } else if (Vector3.class.isAssignableFrom(type)) {
-            Vector3 vec = (Vector3) obj;
+        } else if (Vector3f.class.isAssignableFrom(type)) {
+            Vector3f vec = (Vector3f) obj;
             if (separate) {
                 return Float.toString(switch (name.charAt(name.length() - 1)) {
                     case 'X' -> vec.x;
@@ -664,8 +664,8 @@ public class VRSettings {
         } else if (type.isEnum()) {
             Method m = type.getMethod("valueOf", String.class);
             return m.invoke(null, value);
-        } else if (Quaternion.class.isAssignableFrom(type)) {
-            Quaternion quat = new Quaternion();
+        } else if (Quaternionf.class.isAssignableFrom(type)) {
+            Quaternionf quat = new Quaternionf();
             if (separate) {
                 Stream.of('W', 'X', 'Y', 'Z').forEach(suffix -> {
                     String str = profileSet.get(name + suffix);
@@ -679,14 +679,14 @@ public class VRSettings {
                 });
             } else {
                 String[] split = value.split(",");
-                quat.w = Float.parseFloat(split[0]);
-                quat.x = Float.parseFloat(split[1]);
-                quat.y = Float.parseFloat(split[2]);
-                quat.z = Float.parseFloat(split[3]);
+                quat.x = Float.parseFloat(split[0]);
+                quat.y = Float.parseFloat(split[1]);
+                quat.z = Float.parseFloat(split[2]);
+                quat.w = Float.parseFloat(split[3]);
             }
             return quat;
-        } else if (Vector3.class.isAssignableFrom(type)) {
-            Vector3 vec = new Vector3();
+        } else if (Vector3f.class.isAssignableFrom(type)) {
+            Vector3f vec = new Vector3f();
             if (separate) {
                 Stream.of('X', 'Y', 'Z').forEach(suffix -> {
                     String str = profileSet.get(name + suffix);

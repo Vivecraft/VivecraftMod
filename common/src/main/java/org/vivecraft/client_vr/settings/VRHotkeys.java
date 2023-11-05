@@ -4,16 +4,16 @@ import com.google.common.util.concurrent.Runnables;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.phys.Vec3;
+import org.joml.Math;
+import org.joml.*;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.utils.LangHelper;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
-import org.vivecraft.common.utils.math.*;
+import org.vivecraft.common.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,11 +27,10 @@ public class VRHotkeys {
     static boolean debug = false;
     private static int startController;
     private static VRData.VRDevicePose startControllerPose;
-    private static float startCamposX;
-    private static float startCamposY;
-    private static float startCamposZ;
-    private static Quaternion startCamrotQuat;
+    private static final Vector3f startCampos = new Vector3f();
+    private static final Quaternionf startCamrotQuat = new Quaternionf();
     private static Triggerer camTriggerer;
+    private static final File ExternalCameraCFG = new File("ExternalCamera.cfg");
 
     public static boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
         if (nextRead != 0L && System.currentTimeMillis() < nextRead) {
@@ -73,7 +72,8 @@ public class VRHotkeys {
             }
 
             if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_HOME && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                snapMRCam(0);
+                Utils.convertVector(dataholder.vrPlayer.vrdata_room_pre.getController(0).getPosition(), dataholder.vrSettings.vrFixedCampos);
+                dataholder.vrSettings.vrFixedCamrotQuat.setFromNormalized(dataholder.vrPlayer.vrdata_room_pre.getController(0).getMatrix().transpose(new org.joml.Matrix4f()));
                 gotKey = true;
             }
 
@@ -105,65 +105,74 @@ public class VRHotkeys {
     public static void handleMRKeys() {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        final Quaternionf cam;
+        final Vector3f pos;
+        if (dataholder.vr.mrMovingCamActive) {
+            cam = dataholder.vrSettings.mrMovingCamOffsetRotQuat;
+            pos = dataholder.vrSettings.mrMovingCamOffset;
+        } else {
+            cam = dataholder.vrSettings.vrFixedCamrotQuat;
+            pos = dataholder.vrSettings.vrFixedCampos;
+        }
         boolean flag = false;
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(-0.01F, 0.0F, 0.0F));
+            pos.add(cam.transformInverse(-0.01F, 0.0F, 0.0F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.01F, 0.0F, 0.0F));
+            pos.add(cam.transformInverse(0.01F, 0.0F, 0.0F, new Vector3f()));
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.0F, 0.0F, -0.01F));
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
+            pos.add(cam.transformInverse(0.0F, 0.0F, -0.01F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.0F, 0.0F, 0.01F));
+            pos.add(cam.transformInverse(0.0F, 0.0F, 0.01F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.0F, 0.01F, 0.0F));
+            pos.add(cam.transformInverse(0.0F, 0.01F, 0.0F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.0F, -0.01F, 0.0F));
+            pos.add(cam.transformInverse(0.0F, -0.01F, 0.0F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.PITCH, 0.5F);
+            cam.invert().rotateX(Math.toRadians(0.5F)).invert();
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.PITCH, -0.5F);
+            cam.invert().rotateX(Math.toRadians(-0.5F)).invert();
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.YAW, 0.5F);
+            cam.invert().rotateY(Math.toRadians(0.5F)).invert();
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.YAW, -0.5F);
+            cam.invert().rotateY(Math.toRadians(-0.5F)).invert();
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.ROLL, 0.5F);
+            cam.invert().rotateZ(Math.toRadians(0.5F)).invert();
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.ROLL, -0.5F);
+            cam.invert().rotateZ(Math.toRadians(-0.5F)).invert();
             flag = true;
         }
 
@@ -189,56 +198,10 @@ public class VRHotkeys {
 
         if (flag) {
             dataholder.vrSettings.saveOptions();
-
-            if (dataholder.vr.mrMovingCamActive) {
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.coords", dataholder.vrSettings.mrMovingCamOffsetX, dataholder.vrSettings.mrMovingCamOffsetY, dataholder.vrSettings.mrMovingCamOffsetZ)));
-                Angle angle = dataholder.vrSettings.mrMovingCamOffsetRotQuat.toEuler();
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.angles", angle.getPitch(), angle.getYaw(), angle.getRoll())));
-            } else {
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.coords", dataholder.vrSettings.vrFixedCamposX, dataholder.vrSettings.vrFixedCamposY, dataholder.vrSettings.vrFixedCamposZ)));
-                Angle angle1 = dataholder.vrSettings.vrFixedCamrotQuat.toEuler();
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.angles", angle1.getPitch(), angle1.getYaw(), angle1.getRoll())));
-            }
+            Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.coords", pos.x, pos.y, pos.z)));
+            Vector3fc angles = cam.getEulerAnglesYXZ(new Vector3f()); // TODO: verify
+            Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.angles", angles.x(), angles.y(), angles.z())));
         }
-    }
-
-    private static void adjustCamPos(Vector3 offset) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-
-        if (dataholder.vr.mrMovingCamActive) {
-            offset = dataholder.vrSettings.mrMovingCamOffsetRotQuat.multiply(offset);
-            dataholder.vrSettings.mrMovingCamOffsetX += offset.getX();
-            dataholder.vrSettings.mrMovingCamOffsetY += offset.getY();
-            dataholder.vrSettings.mrMovingCamOffsetZ += offset.getZ();
-        } else {
-            offset = dataholder.vrSettings.vrFixedCamrotQuat.inverse().multiply(offset);
-            dataholder.vrSettings.vrFixedCamposX += offset.getX();
-            dataholder.vrSettings.vrFixedCamposY += offset.getY();
-            dataholder.vrSettings.vrFixedCamposZ += offset.getZ();
-        }
-    }
-
-    private static void adjustCamRot(Axis axis, float degrees) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-
-        if (dataholder.vr.mrMovingCamActive) {
-            dataholder.vrSettings.mrMovingCamOffsetRotQuat.set(dataholder.vrSettings.mrMovingCamOffsetRotQuat.rotate(axis, degrees, true));
-        } else {
-            dataholder.vrSettings.vrFixedCamrotQuat.set(dataholder.vrSettings.vrFixedCamrotQuat.rotate(axis, degrees, false));
-        }
-    }
-
-    public static void snapMRCam(int controller) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        Vec3 vec3 = dataholder.vrPlayer.vrdata_room_pre.getController(controller).getPosition();
-        dataholder.vrSettings.vrFixedCamposX = (float) vec3.x;
-        dataholder.vrSettings.vrFixedCamposY = (float) vec3.y;
-        dataholder.vrSettings.vrFixedCamposZ = (float) vec3.z;
-        Quaternion quaternion = new Quaternion(Utils.convertOVRMatrix(dataholder.vrPlayer.vrdata_room_pre.getController(controller).getMatrix()));
-        dataholder.vrSettings.vrFixedCamrotQuat.set(quaternion);
     }
 
     public static void updateMovingThirdPersonCam() {
@@ -247,15 +210,17 @@ public class VRHotkeys {
 
         if (startControllerPose != null) {
             VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_room_pre.getController(startController);
-            Vec3 vec3 = startControllerPose.getPosition();
-            Vec3 vec31 = vrdata$vrdevicepose.getPosition().subtract(vec3);
-            Matrix4f matrix4f = Matrix4f.multiply(vrdata$vrdevicepose.getMatrix(), startControllerPose.getMatrix().inverted());
-            Vector3 vector3 = new Vector3(startCamposX - (float) vec3.x, startCamposY - (float) vec3.y, startCamposZ - (float) vec3.z);
-            Vector3 vector31 = matrix4f.transform(vector3);
-            dataholder.vrSettings.vrFixedCamposX = startCamposX + (float) vec31.x + (vector31.getX() - vector3.getX());
-            dataholder.vrSettings.vrFixedCamposY = startCamposY + (float) vec31.y + (vector31.getY() - vector3.getY());
-            dataholder.vrSettings.vrFixedCamposZ = startCamposZ + (float) vec31.z + (vector31.getZ() - vector3.getZ());
-            dataholder.vrSettings.vrFixedCamrotQuat.set(startCamrotQuat.multiply(new Quaternion(Utils.convertOVRMatrix(matrix4f))));
+            Vector3f vec3 = Utils.convertVector(startControllerPose.getPosition(), new Vector3f());
+            Vector3f vec31 = Utils.convertVector(vrdata$vrdevicepose.getPosition(), new Vector3f()).sub(vec3);
+            Matrix4f matrix4f2 = startControllerPose.getMatrix();
+            Matrix4f matrix4f = new Matrix4f().setTransposed(
+                vrdata$vrdevicepose.getMatrix().transpose(new org.joml.Matrix4f()).mul0(
+                    matrix4f2.setTransposed(matrix4f2.transpose(new org.joml.Matrix4f()).invert())
+                        .transpose(new org.joml.Matrix4f())
+                )
+            );
+            matrix4f.transpose(new org.joml.Matrix4f()).transformProject(startCampos.sub(vec3, vec3), dataholder.vrSettings.vrFixedCampos).sub(vec3).add(vec31).add(startCampos);
+            startCamrotQuat.mul(dataholder.vrSettings.vrFixedCamrotQuat.setFromNormalized(matrix4f.transpose(new org.joml.Matrix4f()).transpose()), dataholder.vrSettings.vrFixedCamrotQuat);
         }
     }
 
@@ -264,10 +229,8 @@ public class VRHotkeys {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         startController = controller;
         startControllerPose = dataholder.vrPlayer.vrdata_room_pre.getController(controller);
-        startCamposX = dataholder.vrSettings.vrFixedCamposX;
-        startCamposY = dataholder.vrSettings.vrFixedCamposY;
-        startCamposZ = dataholder.vrSettings.vrFixedCamposZ;
-        startCamrotQuat = dataholder.vrSettings.vrFixedCamrotQuat.copy();
+        startCampos.set(dataholder.vrSettings.vrFixedCampos);
+        startCamrotQuat.set(dataholder.vrSettings.vrFixedCamrotQuat);
         camTriggerer = triggerer;
     }
 
@@ -288,50 +251,29 @@ public class VRHotkeys {
     }
 
     public static void loadExternalCameraConfig() {
-        File file1 = new File("ExternalCamera.cfg");
+        if (ExternalCameraCFG.exists()) {
+            float x = 0.0F;
+            float y = 0.0F;
+            float z = 0.0F;
+            float rx = 0.0F;
+            float ry = 0.0F;
+            float rz = 0.0F;
+            float fov = 40.0F;
 
-        if (file1.exists()) {
-            float f = 0.0F;
-            float f1 = 0.0F;
-            float f2 = 0.0F;
-            float f3 = 0.0F;
-            float f4 = 0.0F;
-            float f5 = 0.0F;
-            float f6 = 40.0F;
-            String s;
-
-            try (BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(new FileInputStream(file1), StandardCharsets.UTF_8))) {
+            try (BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(new FileInputStream(ExternalCameraCFG), StandardCharsets.UTF_8))) {
+                String s;
                 while ((s = bufferedreader.readLine()) != null) {
                     String[] astring = s.split("=", 2);
                     String s1 = astring[0];
 
                     switch (s1) {
-                        case "x":
-                            f = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "y":
-                            f1 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "z":
-                            f2 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "rx":
-                            f3 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "ry":
-                            f4 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "rz":
-                            f5 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "fov":
-                            f6 = Float.parseFloat(astring[1]);
+                        case "x" -> x = Float.parseFloat(astring[1]);
+                        case "y" -> y = Float.parseFloat(astring[1]);
+                        case "z" -> z = Float.parseFloat(astring[1]);
+                        case "rx" -> rx = Math.toRadians(Float.parseFloat(astring[1]));
+                        case "ry" -> ry = Math.toRadians(Float.parseFloat(astring[1]));
+                        case "rz" -> rz = Math.toRadians(Float.parseFloat(astring[1]));
+                        case "fov" -> fov = Float.parseFloat(astring[1]);
                     }
                 }
             } catch (Exception exception) {
@@ -341,21 +283,26 @@ public class VRHotkeys {
 
             Minecraft minecraft = Minecraft.getInstance();
             ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-            Quaternion quaternion = new Quaternion(f3, f4, f5, dataholder.vrSettings.externalCameraAngleOrder);
-            dataholder.vrSettings.mrMovingCamOffsetX = f;
-            dataholder.vrSettings.mrMovingCamOffsetY = f1;
-            dataholder.vrSettings.mrMovingCamOffsetZ = f2;
-            dataholder.vrSettings.mrMovingCamOffsetRotQuat.set(quaternion);
-            dataholder.vrSettings.vrFixedCamposX = f;
-            dataholder.vrSettings.vrFixedCamposY = f1;
-            dataholder.vrSettings.vrFixedCamposZ = f2;
-            dataholder.vrSettings.vrFixedCamrotQuat.set(quaternion);
-            dataholder.vrSettings.mixedRealityFov = f6;
+            dataholder.vrSettings.mrMovingCamOffsetRotQuat.set(switch (dataholder.vrSettings.externalCameraAngleOrder) {
+                case XYZ -> dataholder.vrSettings.vrFixedCamrotQuat.rotationXYZ(rx, ry, rz);
+                case ZYX -> dataholder.vrSettings.vrFixedCamrotQuat.rotationZYX(rz, ry, rx);
+                case YXZ -> dataholder.vrSettings.vrFixedCamrotQuat.rotationYXZ(ry, rx, rz);
+                case ZXY -> // TODO: add rotationZXY to JOML
+                    dataholder.vrSettings.vrFixedCamrotQuat.rotationZ(rz).rotateX(rx).rotateY(ry);
+                case YZX -> // TODO: add rotationYZX to JOML
+                    dataholder.vrSettings.vrFixedCamrotQuat.rotationY(ry).rotateZ(rz).rotateX(rx);
+                case XZY -> // TODO: add rotationXZY to JOML
+                    // default angle order
+                    dataholder.vrSettings.vrFixedCamrotQuat.rotationX(rx).rotateZ(rz).rotateY(ry);
+            });
+            dataholder.vrSettings.mrMovingCamOffset.set(x, y, z);
+            dataholder.vrSettings.vrFixedCampos.set(x, y, z);
+            dataholder.vrSettings.mixedRealityFov = fov;
         }
     }
 
     public static boolean hasExternalCameraConfig() {
-        return (new File("ExternalCamera.cfg")).exists();
+        return ExternalCameraCFG.exists();
     }
 
     public enum Triggerer {
