@@ -178,8 +178,10 @@ public class MCOpenXR extends MCVR {
             //Controller aim and grip poses
             XR10.xrLocateSpace(gripSpace[0], xrAppSpace, time, space_location);
             OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[0]);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[0]);
             XR10.xrLocateSpace(gripSpace[1], xrAppSpace, time, space_location);
             OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[1]);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[1]);
             XR10.xrLocateSpace(aimSpace[0], xrAppSpace, time, space_location);
             OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.handRotation[0]);
             XR10.xrLocateSpace(aimSpace[1], xrAppSpace, time, space_location);
