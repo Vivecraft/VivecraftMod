@@ -165,6 +165,7 @@ public class MCOpenXR extends MCVR {
             //HMD pose
             XR10.xrLocateSpace(xrViewSpace, xrAppSpace, time, space_location);
             OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.hmdPose);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.hmdRotation);
 
             //Eye positions
             OpenXRUtil.openXRPoseToMarix(viewBuffer.get(0).pose(), this.hmdPoseLeftEye);
@@ -177,15 +178,21 @@ public class MCOpenXR extends MCVR {
 
             //Controller aim and grip poses
             XR10.xrLocateSpace(gripSpace[0], xrAppSpace, time, space_location);
-            OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[0]);
-            OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[0]);
-            XR10.xrLocateSpace(gripSpace[1], xrAppSpace, time, space_location);
-            OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[1]);
-            OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[1]);
-            XR10.xrLocateSpace(aimSpace[0], xrAppSpace, time, space_location);
             OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.handRotation[0]);
-            XR10.xrLocateSpace(aimSpace[1], xrAppSpace, time, space_location);
+
+            XR10.xrLocateSpace(gripSpace[1], xrAppSpace, time, space_location);
             OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.handRotation[1]);
+
+            XR10.xrLocateSpace(aimSpace[0], xrAppSpace, time, space_location);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[0]);
+            //OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[0]);
+            this.aimSource[0] = new Vec3(space_location.pose().position$().x(),space_location.pose().position$().y(),space_location.pose().position$().z());
+
+            XR10.xrLocateSpace(aimSpace[1], xrAppSpace, time, space_location);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[1]);
+            //OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[1]);
+            this.aimSource[1] = new Vec3(space_location.pose().position$().x(),space_location.pose().position$().y(),space_location.pose().position$().z());
+
 
             if (this.inputInitialized) {
                 this.mc.getProfiler().push("updateActionState");

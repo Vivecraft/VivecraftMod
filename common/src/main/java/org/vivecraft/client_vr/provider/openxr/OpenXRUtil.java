@@ -29,7 +29,7 @@ public class OpenXRUtil {
     }
 
     public static void openXRPoseToMarix(XrQuaternionf quat, Matrix4f mat) {
-        Matrix3f matrix3f = new Quaternionf(quat.x(), quat.x(), quat.x(), quat.x()).get(new Matrix3f());
+        Matrix3f matrix3f = new Quaternionf(quat.x(), quat.y(), quat.z(), quat.w()).get(new Matrix3f());
         mat.M[0][0] = matrix3f.m00;
         mat.M[0][1] = matrix3f.m10;
         mat.M[0][2] = matrix3f.m20;
