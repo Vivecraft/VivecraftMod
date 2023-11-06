@@ -34,6 +34,7 @@ import org.vivecraft.client_vr.provider.control.VRInputActionSet;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.math.Matrix4f;
+import org.vivecraft.common.utils.math.Vector3;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -167,6 +168,12 @@ public class MCOpenXR extends MCVR {
             OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.hmdPose);
             OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.hmdRotation);
 
+            Vec3 vec3 = new Vec3(space_location.pose().position$().x(), space_location.pose().position$().y(), space_location.pose().position$().z());
+            this.hmdHistory.add(vec3);
+            Vector3 vector3 = this.hmdRotation.transform(new Vector3(0.0F, -0.1F, 0.1F));
+            this.hmdPivotHistory.add(new Vec3((double) vector3.getX() + vec3.x, (double) vector3.getY() + vec3.y, (double) vector3.getZ() + vec3.z));
+
+
             //Eye positions
             OpenXRUtil.openXRPoseToMarix(viewBuffer.get(0).pose(), this.hmdPoseLeftEye);
             viewBuffer.get(0).pose();
@@ -185,14 +192,32 @@ public class MCOpenXR extends MCVR {
 
             XR10.xrLocateSpace(aimSpace[0], xrAppSpace, time, space_location);
             OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[0]);
-            //OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[0]);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[0]);
             this.aimSource[0] = new Vec3(space_location.pose().position$().x(),space_location.pose().position$().y(),space_location.pose().position$().z());
+            this.controllerHistory[0].add(this.getAimSource(0));
+            this.controllerForwardHistory[0].add(this.getAimSource(0));
+            Vec3 vec33 = this.controllerRotation[0].transform(this.up).toVector3d();
+            this.controllerUpHistory[0].add(vec33);
 
             XR10.xrLocateSpace(aimSpace[1], xrAppSpace, time, space_location);
             OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[1]);
-            //OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[1]);
+            OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[1]);
             this.aimSource[1] = new Vec3(space_location.pose().position$().x(),space_location.pose().position$().y(),space_location.pose().position$().z());
+            this.controllerHistory[1].add(this.getAimSource(1));
+            this.controllerForwardHistory[1].add(this.getAimSource(1));
+            Vec3 vec32 = this.controllerRotation[1].transform(this.up).toVector3d();
+            this.controllerUpHistory[1].add(vec32);
 
+            if (this.dh.vrSettings.seated) {
+                this.controllerPose[0] = this.hmdPose.inverted().inverted();
+                this.controllerPose[1] = this.hmdPose.inverted().inverted();
+                this.handRotation[0] = hmdRotation;
+                this.handRotation[1] = hmdRotation;
+                this.controllerRotation[0] = hmdRotation;
+                this.controllerRotation[1] = hmdRotation;
+                this.aimSource[1] = this.getCenterEyePosition();
+                this.aimSource[0] = this.getCenterEyePosition();
+            }
 
             if (this.inputInitialized) {
                 this.mc.getProfiler().push("updateActionState");
