@@ -209,6 +209,9 @@ public class MCOpenXR extends MCVR {
                 this.controllerForwardHistory[0].add(this.getAimSource(0));
                 Vec3 vec33 = this.controllerRotation[0].transform(this.up).toVector3d();
                 this.controllerUpHistory[0].add(vec33);
+                this.controllerTracking[0] = true;
+            } else {
+                this.controllerTracking[0] = false;
             }
 
             error = XR10.xrLocateSpace(aimSpace[1], xrAppSpace, time, space_location);
@@ -220,8 +223,12 @@ public class MCOpenXR extends MCVR {
                 this.controllerForwardHistory[1].add(this.getAimSource(1));
                 Vec3 vec32 = this.controllerRotation[1].transform(this.up).toVector3d();
                 this.controllerUpHistory[1].add(vec32);
+                this.controllerTracking[1] = true;
+            } else {
+                this.controllerTracking[1] = false;
             }
 
+            //TODO merge with updateAim so it's one method
             if (this.dh.vrSettings.seated) {
                 this.controllerPose[0] = this.hmdPose.inverted().inverted();
                 this.controllerPose[1] = this.hmdPose.inverted().inverted();
@@ -338,6 +345,7 @@ public class MCOpenXR extends MCVR {
         //this.updateAim();
     }
 
+    @Override
     public Vec3 getEyePosition(RenderPass eye) {
         org.vivecraft.common.utils.math.Matrix4f matrix4f = this.hmdPoseRightEye;
 
@@ -373,6 +381,7 @@ public class MCOpenXR extends MCVR {
         }
     }
 
+    @Override
     public org.vivecraft.common.utils.math.Matrix4f getEyeRotation(RenderPass eye) {
         org.vivecraft.common.utils.math.Matrix4f matrix4f;
 
@@ -1046,24 +1055,24 @@ public class MCOpenXR extends MCVR {
             grip_left.type(XR10.XR_TYPE_ACTION_SPACE_CREATE_INFO);
             grip_left.next(NULL);
             grip_left.action(new XrAction(grip[0], actionSet));
-            grip_left.subactionPath(getPath("/user/hand/left/input/grip/pose"));
+            grip_left.subactionPath(getPath("/user/hand/left"));
             grip_left.poseInActionSpace(POSE_IDENTITY);
             PointerBuffer pp = stackCallocPointer(1);
             XR10.xrCreateActionSpace(session, grip_left, pp);
             this.gripSpace[0] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(grip[1], actionSet));
-            grip_left.subactionPath(getPath("/user/hand/right/input/grip/pose"));
+            grip_left.subactionPath(getPath("/user/hand/right"));
             XR10.xrCreateActionSpace(session, grip_left, pp);
             this.gripSpace[1] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(aim[0], actionSet));
-            grip_left.subactionPath(getPath("/user/hand/left/input/aim/pose"));
+            grip_left.subactionPath(getPath("/user/hand/left"));
             XR10.xrCreateActionSpace(session, grip_left, pp);
             this.aimSpace[0] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(aim[1], actionSet));
-            grip_left.subactionPath(getPath("/user/hand/right/input/aim/pose"));
+            grip_left.subactionPath(getPath("/user/hand/right"));
             XR10.xrCreateActionSpace(session, grip_left, pp);
             this.aimSpace[1] = new XrSpace(pp.get(0), session);
 
