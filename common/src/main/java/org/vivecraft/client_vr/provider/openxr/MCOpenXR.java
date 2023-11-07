@@ -77,6 +77,7 @@ public class MCOpenXR extends MCVR {
         XrVector3f.calloc()
     );
     public boolean shouldRender = true;
+    public long[] haptics = new long[2];
 
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
@@ -124,13 +125,39 @@ public class MCOpenXR extends MCVR {
     }
 
     @Override
-    protected void triggerBindingHapticPulse(KeyMapping var1, int var2) {
+    protected void triggerBindingHapticPulse(KeyMapping binding, int duration) {
+        ControllerType controllertype = this.findActiveBindingControllerType(binding);
 
+        if (controllertype != null) {
+            this.triggerHapticPulse(controllertype, duration);
+        }
     }
 
     @Override
-    protected ControllerType findActiveBindingControllerType(KeyMapping var1) {
-        return null;
+    protected ControllerType findActiveBindingControllerType(KeyMapping binding) {
+        if (!this.inputInitialized) {
+            return null;
+        } else {
+            long path = this.getInputAction(binding).getLastOrigin();
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                IntBuffer buf = stack.callocInt(1);
+                XR10.xrPathToString(instance, path, buf, null);
+
+                int size = buf.get();
+                if (size <= 0) {
+                    return null;
+                }
+
+                buf = stack.callocInt(size);
+                ByteBuffer byteBuffer = stack.calloc(size);
+                XR10.xrPathToString(instance, path, buf, byteBuffer);
+                String name = new String(byteBuffer.array());
+                if (name.contains("right")) {
+                    return ControllerType.RIGHT;
+                }
+                return ControllerType.LEFT;
+            }
+        }
     }
 
     @Override
@@ -218,6 +245,16 @@ public class MCOpenXR extends MCVR {
             //Eye positions
             OpenXRUtil.openXRPoseToMarix(viewBuffer.get(0).pose(), this.hmdPoseLeftEye);
             OpenXRUtil.openXRPoseToMarix(viewBuffer.get(1).pose(), this.hmdPoseRightEye);
+
+            //reverse
+            if (this.dh.vrSettings.reverseHands) {
+                XrSpace temp = gripSpace[0];
+                gripSpace[0] = gripSpace[1];
+                gripSpace[1] = temp;
+                temp = aimSpace[0];
+                aimSpace[0] = aimSpace[1];
+                aimSpace[1] = temp;
+            }
 
             //Controller aim and grip poses
             error = XR10.xrLocateSpace(gripSpace[0], xrAppSpace, time, space_location);
@@ -360,19 +397,7 @@ public class MCOpenXR extends MCVR {
 
                 this.mc.getProfiler().pop();
             }
-
-//            if (this.dh.vrSettings.reverseHands) {
-//                this.updateControllerPose(0, this.leftPoseHandle);
-//                this.updateControllerPose(1, this.rightPoseHandle);
-//            } else {
-//                this.updateControllerPose(0, this.rightPoseHandle);
-//                this.updateControllerPose(1, this.leftPoseHandle);
-//            }
-//
-//            this.updateControllerPose(2, this.externalCameraPoseHandle);
         }
-
-        //this.updateAim();
     }
 
     @Override
@@ -1098,6 +1123,9 @@ public class MCOpenXR extends MCVR {
 
     @Override
     public ControllerType getOriginControllerType(long i) {
+        if (i == aim[0]) {
+            return ControllerType.RIGHT;
+        }
         return ControllerType.LEFT;
     }
 
@@ -1114,6 +1142,11 @@ public class MCOpenXR extends MCVR {
         }
 
         setupControllers();
+
+        XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), instance);
+        this.haptics[0] = createAction("/actions/global/out/righthaptic", "/actions/global/out/righthaptic", "haptic", actionSet);
+        this.haptics[1] = createAction("/actions/global/out/lefthaptic", "/actions/global/out/lefthaptic", "haptic", actionSet);
+
     }
 
     private void setupControllers() {
@@ -1158,7 +1191,7 @@ public class MCOpenXR extends MCVR {
 
             for (String headset: XRBindings.supportedHeadsets()) {
                 Pair<String, String>[] defaultBindings = XRBindings.getBinding(headset).toArray(new Pair[0]);
-                XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(defaultBindings.length + 4, stack); //TODO different way of adding controller poses
+                XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(defaultBindings.length + 6, stack); //TODO different way of adding controller poses
 
                 for (int i = 0; i < defaultBindings.length; i++) {
                     Pair<String, String> pair = defaultBindings[i];
@@ -1186,6 +1219,16 @@ public class MCOpenXR extends MCVR {
                 bindings.get(defaultBindings.length + 3).set(
                     new XrAction(this.aim[1], actionSet),
                     getPath("/user/hand/right/input/aim/pose")
+                );
+
+                bindings.get(defaultBindings.length + 4).set(
+                    new XrAction(this.haptics[0], actionSet),
+                    getPath("/user/hand/right/output/haptic")
+                );
+
+                bindings.get(defaultBindings.length + 5).set(
+                    new XrAction(this.haptics[1], actionSet),
+                    getPath("/user/hand/left/output/haptic")
                 );
 
                 XrInteractionProfileSuggestedBinding suggested_binds = XrInteractionProfileSuggestedBinding.calloc(stack);
@@ -1235,6 +1278,7 @@ public class MCOpenXR extends MCVR {
                 case "vector1" -> hands.actionType(XR10.XR_ACTION_TYPE_FLOAT_INPUT);
                 case "vector2" -> hands.actionType(XR10.XR_ACTION_TYPE_VECTOR2F_INPUT);
                 case "pose" -> hands.actionType(XR10.XR_ACTION_TYPE_POSE_INPUT);
+                case "haptic" -> hands.actionType(XR10.XR_ACTION_TYPE_VIBRATION_OUTPUT);
             }
             hands.countSubactionPaths(0);
             hands.subactionPaths(null);
