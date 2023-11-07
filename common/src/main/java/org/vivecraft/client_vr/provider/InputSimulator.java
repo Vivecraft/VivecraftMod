@@ -7,8 +7,8 @@ import org.lwjgl.glfw.GLFW;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.common.utils.Utils;
 
 public class InputSimulator {
     private static final Set<Integer> pressedKeys = new HashSet<>();
