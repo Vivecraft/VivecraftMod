@@ -503,6 +503,7 @@ public class MCOpenXR extends MCVR {
             action.digitalData[i].state = state.currentState();
             action.digitalData[i].isActive = state.isActive();
             action.digitalData[i].isChanged = state.changedSinceLastSync();
+            action.digitalData[i].activeOrigin = getOrigins(action).get(0);
         }
     }
 
@@ -521,7 +522,7 @@ public class MCOpenXR extends MCVR {
 
             action.analogData[i].deltaX = action.analogData[i].x - state.currentState();
             action.analogData[i].x = state.currentState();
-            //action.analogData[i].activeOrigin = this.analog.activeOrigin();
+            action.analogData[i].activeOrigin = getOrigins(action).get(0);
             action.analogData[i].isActive = state.isActive();
             action.analogData[i].isChanged = state.changedSinceLastSync();
         }
@@ -544,7 +545,7 @@ public class MCOpenXR extends MCVR {
             action.analogData[i].deltaY = action.analogData[i].y - state.currentState().y();
             action.analogData[i].x = state.currentState().x();
             action.analogData[i].y = state.currentState().y();
-            //action.analogData[i].activeOrigin = this.analog.activeOrigin();
+            action.analogData[i].activeOrigin = getOrigins(action).get(0);
             action.analogData[i].isActive = state.isActive();
             action.analogData[i].isChanged = state.changedSinceLastSync();
         }
@@ -876,12 +877,14 @@ public class MCOpenXR extends MCVR {
             XR10.xrEnumerateSwapchainFormats(session, intBuf, swapchainFormats);
 
             long[] desiredSwapchainFormats = {
-                GL11.GL_RGB10_A2,
-                GL30.GL_RGBA16F,
-                GL30.GL_RGB16F,
                 //SRGB formats
                 GL21.GL_SRGB8_ALPHA8,
                 GL21.GL_SRGB8,
+                //others
+                GL11.GL_RGB10_A2,
+                GL30.GL_RGBA16F,
+                GL30.GL_RGB16F,
+
                 // The two below should only be used as a fallback, as they are linear color formats without enough bits for color
                 // depth, thus leading to banding.
                 GL11.GL_RGBA8,
@@ -1044,7 +1047,7 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_BOUND_SOURCES_FOR_ACTION_ENUMERATE_INFO);
             info.next(NULL);
             info.action(new XrAction(var1.handle, new XrActionSet(actionSetHandles.get(var1.actionSet), instance)));
-            IntBuffer buf = stack.callocInt(0);
+            IntBuffer buf = stack.callocInt(1);
             XR10.xrEnumerateBoundSourcesForAction(session, info, buf, null);
 
             int size = buf.get();
@@ -1068,7 +1071,7 @@ public class MCOpenXR extends MCVR {
             info.sourcePath(l);
             info.whichComponents(XR10.XR_INPUT_SOURCE_LOCALIZED_NAME_COMPONENT_BIT);
 
-            IntBuffer buf = stack.callocInt(0);
+            IntBuffer buf = stack.callocInt(1);
             XR10.xrGetInputSourceLocalizedName(session, info, buf, null);
 
             int size = buf.get();
@@ -1115,37 +1118,36 @@ public class MCOpenXR extends MCVR {
 
     private void setupControllers() {
         XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), instance);
-        this.grip[0] = createAction("/actions/global/in/lefthand", "/actions/global/in/lefthand", "pose", actionSet);
-        this.grip[1] = createAction("/actions/global/in/righthand", "/actions/global/in/righthand", "pose", actionSet);
-        this.aim[0] = createAction("/actions/global/in/lefthandaim", "/actions/global/in/lefthandaim", "pose", actionSet);
-        this.aim[1] = createAction("/actions/global/in/righthandaim", "/actions/global/in/righthandaim", "pose", actionSet);
+        this.grip[0] = createAction("/actions/global/in/righthand", "/actions/global/in/righthand", "pose", actionSet);
+        this.grip[1] = createAction("/actions/global/in/lefthand", "/actions/global/in/lefthand", "pose", actionSet);
+        this.aim[0] = createAction("/actions/global/in/righthandaim", "/actions/global/in/righthandaim", "pose", actionSet);
+        this.aim[1] = createAction("/actions/global/in/lefthandaim", "/actions/global/in/lefthandaim", "pose", actionSet);
 
         try (MemoryStack stack = MemoryStack.stackPush()){
             XrActionSpaceCreateInfo grip_left = XrActionSpaceCreateInfo.calloc(stack);
             grip_left.type(XR10.XR_TYPE_ACTION_SPACE_CREATE_INFO);
             grip_left.next(NULL);
             grip_left.action(new XrAction(grip[0], actionSet));
-            grip_left.subactionPath(getPath("/user/hand/left"));
-            grip_left.poseInActionSpace(POSE_IDENTITY);
+            grip_left.subactionPath(getPath("/user/hand/right"));
             PointerBuffer pp = stackCallocPointer(1);
             XR10.xrCreateActionSpace(session, grip_left, pp);
             this.gripSpace[0] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(grip[1], actionSet));
-            grip_left.subactionPath(getPath("/user/hand/right"));
+            grip_left.subactionPath(getPath("/user/hand/left"));
+            grip_left.poseInActionSpace(POSE_IDENTITY);
             XR10.xrCreateActionSpace(session, grip_left, pp);
             this.gripSpace[1] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(aim[0], actionSet));
-            grip_left.subactionPath(getPath("/user/hand/left"));
+            grip_left.subactionPath(getPath("/user/hand/right"));
             XR10.xrCreateActionSpace(session, grip_left, pp);
             this.aimSpace[0] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(aim[1], actionSet));
-            grip_left.subactionPath(getPath("/user/hand/right"));
+            grip_left.subactionPath(getPath("/user/hand/left"));
             XR10.xrCreateActionSpace(session, grip_left, pp);
             this.aimSpace[1] = new XrSpace(pp.get(0), session);
-
 
         }
 
