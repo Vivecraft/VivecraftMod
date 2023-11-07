@@ -116,10 +116,10 @@ public class MCOpenXR extends MCVR {
             XR10.xrDestroySpace(xrViewSpace);
         }
         if (session != null){
-            XR10.xrEndSession(session);
+            XR10.xrDestroySession(session);
         }
         if (instance != null){
-            XR10.xrEndSession(session);
+            XR10.xrDestroyInstance(instance);
         }
         eventDataBuffer.close();
     }
