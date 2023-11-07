@@ -68,37 +68,6 @@ public class OpenXRStereoRenderer extends VRRenderer {
         }
         this.projectionLayerViews = XrCompositionLayerProjectionView.calloc(2);
         try (MemoryStack stack = MemoryStack.stackPush()){
-            XrFrameState frameState = XrFrameState.calloc(stack).type(XR10.XR_TYPE_FRAME_STATE);
-
-            //TODO tick game and poll input during xrWaitFrame (this might not work due to the gl context belonging to the xrWaitFrame thread)
-            XR10.xrWaitFrame(
-                    openxr.session,
-                    XrFrameWaitInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_WAIT_INFO),
-                    frameState);
-
-            openxr.time = frameState.predictedDisplayTime();
-            this.render = frameState.shouldRender();
-
-            XR10.xrBeginFrame(
-                openxr.session,
-                XrFrameBeginInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_BEGIN_INFO));
-
-            if (!frameState.shouldRender()) {
-                return;
-            }
-
-            XrViewState viewState = XrViewState.calloc(stack).type(XR10.XR_TYPE_VIEW_STATE);
-            IntBuffer intBuf = stack.callocInt(1);
-
-            XrViewLocateInfo viewLocateInfo = XrViewLocateInfo.calloc(stack);
-            viewLocateInfo.set(XR10.XR_TYPE_VIEW_LOCATE_INFO,
-                0,
-                XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO,
-                frameState.predictedDisplayTime(),
-                openxr.xrAppSpace
-            );
-
-            XR10.xrLocateViews(openxr.session, viewLocateInfo, viewState, intBuf, openxr.viewBuffer);
 
             IntBuffer intBuf2 = stack.callocInt(1);
 
@@ -141,7 +110,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
     public void endFrame() throws RenderConfigException {
         try (MemoryStack stack = MemoryStack.stackPush()){
             PointerBuffer layers = stack.callocPointer(1);
-            if (render) {
+            if (this.openxr.shouldRender) {
                 XR10.xrReleaseSwapchainImage(
                     openxr.swapchain,
                     XrSwapchainImageReleaseInfo.calloc(stack)

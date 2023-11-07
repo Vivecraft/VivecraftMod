@@ -76,6 +76,7 @@ public class MCOpenXR extends MCVR {
         XrQuaternionf.calloc().set(0, 0, 0, 1),
         XrVector3f.calloc()
     );
+    public boolean shouldRender = true;
 
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
@@ -169,7 +170,36 @@ public class MCOpenXR extends MCVR {
             return;
         }
         try (MemoryStack stack = MemoryStack.stackPush()) {
+            XrFrameState frameState = XrFrameState.calloc(stack).type(XR10.XR_TYPE_FRAME_STATE);
+
+            XR10.xrWaitFrame(
+                session,
+                XrFrameWaitInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_WAIT_INFO),
+                frameState);
+
+            time = frameState.predictedDisplayTime();
+            this.shouldRender = frameState.shouldRender();
+
+            XR10.xrBeginFrame(
+                session,
+                XrFrameBeginInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_BEGIN_INFO));
+
+
+            XrViewState viewState = XrViewState.calloc(stack).type(XR10.XR_TYPE_VIEW_STATE);
+            IntBuffer intBuf = stack.callocInt(1);
+
+            XrViewLocateInfo viewLocateInfo = XrViewLocateInfo.calloc(stack);
+            viewLocateInfo.set(XR10.XR_TYPE_VIEW_LOCATE_INFO,
+                0,
+                XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO,
+                frameState.predictedDisplayTime(),
+                xrAppSpace
+            );
+
+            XR10.xrLocateViews(session, viewLocateInfo, viewState, intBuf, viewBuffer);
+
             XrSpaceLocation space_location = XrSpaceLocation.calloc(stack).type(XR10.XR_TYPE_SPACE_LOCATION);
+
             //HMD pose
             int error = XR10.xrLocateSpace(xrViewSpace, xrAppSpace, time, space_location);
             if (error >= 0) {
@@ -440,6 +470,8 @@ public class MCOpenXR extends MCVR {
                 } else {
                     this.readFloat(action, null);
                 }
+                break;
+
             case "vector2":
                 if (action.isHanded()) {
                     for (ControllerType controllertype : ControllerType.values()) {
@@ -448,6 +480,8 @@ public class MCOpenXR extends MCVR {
                 } else {
                     this.readVecData(action, null);
                 }
+                break;
+
             case "vector3":
 
         }
@@ -507,9 +541,9 @@ public class MCOpenXR extends MCVR {
             XR10.xrGetActionStateVector2f(session, info, state);
 
             action.analogData[i].deltaX = action.analogData[i].x - state.currentState().x();
-            action.analogData[i].deltaX = action.analogData[i].y - state.currentState().y();
+            action.analogData[i].deltaY = action.analogData[i].y - state.currentState().y();
             action.analogData[i].x = state.currentState().x();
-            action.analogData[i].x = state.currentState().y();
+            action.analogData[i].y = state.currentState().y();
             //action.analogData[i].activeOrigin = this.analog.activeOrigin();
             action.analogData[i].isActive = state.isActive();
             action.analogData[i].isChanged = state.changedSinceLastSync();
@@ -1005,12 +1039,48 @@ public class MCOpenXR extends MCVR {
 
     @Override
     public List<Long> getOrigins(VRInputAction var1) {
-        return List.of(0L);
+        try (MemoryStack stack = MemoryStack.stackPush()){
+            XrBoundSourcesForActionEnumerateInfo info = XrBoundSourcesForActionEnumerateInfo.calloc(stack);
+            info.type(XR10.XR_TYPE_BOUND_SOURCES_FOR_ACTION_ENUMERATE_INFO);
+            info.next(NULL);
+            info.action(new XrAction(var1.handle, new XrActionSet(actionSetHandles.get(var1.actionSet), instance)));
+            IntBuffer buf = stack.callocInt(0);
+            XR10.xrEnumerateBoundSourcesForAction(session, info, buf, null);
+
+            int size = buf.get();
+            if (size <= 0) {
+                return List.of(0L);
+            }
+
+            buf = stack.callocInt(size);
+            LongBuffer longbuf = stack.callocLong(size);
+            XR10.xrEnumerateBoundSourcesForAction(session, info, buf, longbuf);
+            return Arrays.stream(longbuf.array()).boxed().toList();
+        }
     }
 
     @Override
     public String getOriginName(long l) {
-        return "null";
+        try (MemoryStack stack = MemoryStack.stackPush()){
+            XrInputSourceLocalizedNameGetInfo info = XrInputSourceLocalizedNameGetInfo.calloc(stack);
+            info.type(XR10.XR_TYPE_INPUT_SOURCE_LOCALIZED_NAME_GET_INFO);
+            info.next(0);
+            info.sourcePath(l);
+            info.whichComponents(XR10.XR_INPUT_SOURCE_LOCALIZED_NAME_COMPONENT_BIT);
+
+            IntBuffer buf = stack.callocInt(0);
+            XR10.xrGetInputSourceLocalizedName(session, info, buf, null);
+
+            int size = buf.get();
+            if (size <= 0) {
+                return "";
+            }
+
+            buf = stack.callocInt(size);
+            ByteBuffer byteBuffer = stack.calloc(size);
+            XR10.xrGetInputSourceLocalizedName(session, info, buf, byteBuffer);
+            return new String(byteBuffer.array());
+        }
     }
 
     @Override
