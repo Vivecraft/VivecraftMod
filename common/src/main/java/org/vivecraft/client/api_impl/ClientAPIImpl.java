@@ -130,7 +130,7 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
         if (isVrActive()) {
             return ClientDataHolderVR.getInstance().vrPlayer.worldScale;
         } else {
-            return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
+            return 1f;
         }
     }
 
