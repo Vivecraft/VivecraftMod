@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
@@ -78,7 +80,7 @@ public class MenuWorldRenderer {
     public int ticks = 0;
     public long time = 1000;
     public boolean fastTime;
-    private HashMap<RenderType, VertexBuffer> vertexBuffers;
+    private HashMap<RenderType, List<VertexBuffer>> vertexBuffers;
     private VertexBuffer starVBO;
     private VertexBuffer skyVBO;
     private VertexBuffer sky2VBO;
@@ -106,16 +108,20 @@ public class MenuWorldRenderer {
 
     private CompletableFuture<FakeBlockAccess> getWorldTask;
 
-    private boolean building = false;
-    private Map<RenderType, BufferBuilder> bufferBuilders;
-    private Map<RenderType, BlockPos.MutableBlockPos> currentPositions;
-    private Map<RenderType, Integer> blockCounts;
-    private Map<RenderType, Long> renderTimes;
-    private Queue<Thread> builderThreads = new ConcurrentLinkedQueue<>();
     public int renderMaxTime = 40;
-    private static boolean firstRenderDone;
+    public Vec3i segmentSize = new Vec3i(64, 64, 64);
+
+    private boolean building = false;
+    private long buildStartTime;
+    private Map<Pair<RenderType, BlockPos>, BufferBuilder> bufferBuilders;
+    private Map<Pair<RenderType, BlockPos>, BlockPos.MutableBlockPos> currentPositions;
+    private Map<Pair<RenderType, BlockPos>, Integer> blockCounts;
+    private Map<Pair<RenderType, BlockPos>, Long> renderTimes;
     private List<CompletableFuture<Void>> builderFutures = new ArrayList<>();
+    private Queue<Thread> builderThreads = new ConcurrentLinkedQueue<>();
     private Throwable builderError;
+
+    private static boolean firstRenderDone;
 
     public MenuWorldRenderer() {
         this.mc = Minecraft.getInstance();
@@ -240,13 +246,17 @@ public class MenuWorldRenderer {
     }
 
     private void renderChunkLayer(RenderType layer, Matrix4f modelView, Matrix4f Projection) {
+        List<VertexBuffer> buffers = vertexBuffers.get(layer);
+        if (buffers.size() == 0) return;
+
         layer.setupRenderState();
-        VertexBuffer vertexBuffer = vertexBuffers.get(layer);
-        vertexBuffer.bind();
         ShaderInstance shaderInstance = RenderSystem.getShader();
         shaderInstance.apply();
         turnOnLightLayer();
-        vertexBuffer.drawWithShader(modelView, Projection, shaderInstance);
+        for (VertexBuffer vertexBuffer : buffers) {
+            vertexBuffer.bind();
+            vertexBuffer.drawWithShader(modelView, Projection, shaderInstance);
+        }
         turnOffLightLayer();
     }
 
@@ -260,22 +270,39 @@ public class MenuWorldRenderer {
             }
             fastTime = new Random().nextInt(10) == 0;
 
-            vertexBuffers = new HashMap<>();
             animatedSprites = ConcurrentHashMap.newKeySet();
             blockCounts = new ConcurrentHashMap<>();
             renderTimes = new ConcurrentHashMap<>();
 
-            bufferBuilders = new HashMap<>();
-            currentPositions = new HashMap<>();
-            for (RenderType layer : RenderType.chunkBufferLayers()) {
-                BufferBuilder vertBuffer = new BufferBuilder(20 * 2097152);
-                vertBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-                bufferBuilders.put(layer, vertBuffer);
+            try {
+                vertexBuffers = new HashMap<>();
+                bufferBuilders = new HashMap<>();
+                currentPositions = new HashMap<>();
+                for (RenderType layer : RenderType.chunkBufferLayers()) {
+                    vertexBuffers.put(layer, new LinkedList<>());
 
-                BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(-blockAccess.getXSize() / 2, (int)-blockAccess.getGround(), -blockAccess.getZSize() / 2);
-                currentPositions.put(layer, pos);
+                    for (int x = -blockAccess.getXSize() / 2; x < blockAccess.getXSize() / 2; x += segmentSize.getX()) {
+                        for (int y = (int) -blockAccess.getGround(); y < blockAccess.getYSize() - (int) blockAccess.getGround(); y += segmentSize.getY()) {
+                            for (int z = -blockAccess.getZSize() / 2; z < blockAccess.getZSize() / 2; z += segmentSize.getZ()) {
+                                BlockPos pos = new BlockPos(x, y, z);
+                                Pair<RenderType, BlockPos> pair = Pair.of(layer, pos);
+
+                                BufferBuilder vertBuffer = new BufferBuilder(layer.bufferSize());
+                                vertBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+
+                                bufferBuilders.put(pair, vertBuffer);
+                                currentPositions.put(pair, pos.mutable());
+                            }
+                        }
+                    }
+                }
+            } catch (OutOfMemoryError e) {
+                VRSettings.logger.error("OutOfMemoryError while building main menu world. Low heap size or 32-bit Java?");
+                destroy();
+                return;
             }
 
+            buildStartTime = Utils.milliTime();
             building = true;
         }
     }
@@ -289,44 +316,47 @@ public class MenuWorldRenderer {
             return;
         builderFutures.clear();
 
-        if (currentPositions.values().stream().allMatch(pos -> pos.getY() >= blockAccess.getYSize() - (int)blockAccess.getGround())) {
+        if (currentPositions.entrySet().stream().allMatch(entry -> entry.getValue().getY() >= Math.min(segmentSize.getY() + entry.getKey().getRight().getY(), blockAccess.getYSize() - (int)blockAccess.getGround()))) {
             finishBuilding();
             return;
         }
 
         long startTime = Utils.milliTime();
-        if (!SodiumHelper.isLoaded() || !SodiumHelper.hasIssuesWithParallelBlockBuilding() || firstRenderDone) {
-            // generate the data in parallel
-            for (RenderType layer : RenderType.chunkBufferLayers()) {
-                builderFutures.add(CompletableFuture.runAsync(() -> buildGeometrySegment(layer, startTime, renderMaxTime), Util.backgroundExecutor()));
+        for (var pair : bufferBuilders.keySet()) {
+            if (currentPositions.get(pair).getY() < Math.min(segmentSize.getY() + pair.getRight().getY(), blockAccess.getYSize() - (int)blockAccess.getGround())) {
+                if (firstRenderDone || !SodiumHelper.isLoaded() || !SodiumHelper.hasIssuesWithParallelBlockBuilding()) {
+                    // generate the data in parallel
+                    builderFutures.add(CompletableFuture.runAsync(() -> buildGeometry(pair, startTime, renderMaxTime), Util.backgroundExecutor()));
+                } else {
+                    // generate first data in series to avoid weird class loading error
+                    buildGeometry(pair, startTime, renderMaxTime);
+                    if (blockCounts.getOrDefault(pair, 0) > 0)
+                        firstRenderDone = true;
+                }
             }
-            CompletableFuture.allOf(builderFutures.toArray(new CompletableFuture[0])).thenRunAsync(this::handleError, Util.backgroundExecutor());
-        } else {
-            // generate first data in series to avoid weird class loading error
-            for (RenderType layer : RenderType.chunkBufferLayers()) {
-                buildGeometrySegment(layer, startTime, renderMaxTime);
-            }
-            handleError();
-            firstRenderDone = true;
         }
+
+        CompletableFuture.allOf(builderFutures.toArray(new CompletableFuture[0])).thenRunAsync(this::handleError, Util.backgroundExecutor());
     }
 
-    private void buildGeometrySegment(RenderType layer, long startTime, int maxTime) {
-        BlockPos.MutableBlockPos pos = currentPositions.get(layer);
-        if (pos.getY() >= blockAccess.getYSize() - (int)blockAccess.getGround())
+    private void buildGeometry(Pair<RenderType, BlockPos> pair, long startTime, int maxTime) {
+        if (Utils.milliTime() - startTime >= maxTime)
             return;
 
+        RenderType layer = pair.getLeft();
+        BlockPos offset = pair.getRight();
         builderThreads.add(Thread.currentThread());
 
         try {
             PoseStack thisPose = new PoseStack();
             int renderDistSquare = (renderDistance + 1) * (renderDistance + 1);
             BlockRenderDispatcher blockRenderer = mc.getBlockRenderer();
-            BufferBuilder vertBuffer = bufferBuilders.get(layer);
+            BufferBuilder vertBuffer = bufferBuilders.get(pair);
+            BlockPos.MutableBlockPos pos = currentPositions.get(pair);
             RandomSource randomSource = RandomSource.create();
 
             int count = 0;
-            while (Utils.milliTime() - startTime < maxTime && pos.getY() < blockAccess.getYSize() - (int)blockAccess.getGround() && building) {
+            while (Utils.milliTime() - startTime < maxTime && pos.getY() < Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int)blockAccess.getGround()) && building) {
                 // only build blocks not obscured by fog
                 if (Mth.abs(pos.getY()) <= renderDistance + 1 && Mth.lengthSquared(pos.getX(), pos.getZ()) <= renderDistSquare) {
                     BlockState state = blockAccess.getBlockState(pos);
@@ -359,22 +389,27 @@ public class MenuWorldRenderer {
 
                 // iterate the position
                 pos.setX(pos.getX() + 1);
-                if (pos.getX() >= blockAccess.getXSize() / 2) {
-                    pos.setX(-blockAccess.getXSize() / 2);
+                if (pos.getX() >= Math.min(segmentSize.getX() + offset.getX(), blockAccess.getXSize() / 2)) {
+                    pos.setX(offset.getX());
                     pos.setZ(pos.getZ() + 1);
-                    if (pos.getZ() >= blockAccess.getZSize() / 2) {
-                        pos.setZ(-blockAccess.getZSize() / 2);
+                    if (pos.getZ() >= Math.min(segmentSize.getZ() + offset.getZ(), blockAccess.getZSize() / 2)) {
+                        pos.setZ(offset.getZ());
                         pos.setY(pos.getY() + 1);
                     }
                 }
             }
 
             //VRSettings.logger.info("MenuWorlds: Built segment of " + count + " blocks in " + ((RenderStateShardAccessor)layer).getName() + " layer.");
-            blockCounts.put(layer, blockCounts.getOrDefault(layer, 0) + count);
-            renderTimes.put(layer, renderTimes.getOrDefault(layer, 0L) + (Utils.milliTime() - startTime));
+            blockCounts.put(pair, blockCounts.getOrDefault(pair, 0) + count);
+            renderTimes.put(pair, renderTimes.getOrDefault(pair, 0L) + (Utils.milliTime() - startTime));
 
-            if (pos.getY() >= blockAccess.getYSize() - (int)blockAccess.getGround())
-                VRSettings.logger.info("MenuWorlds: Built " + blockCounts.get(layer) + " blocks on " + ((RenderStateShardAccessor)layer).getName() + " layer in " + renderTimes.get(layer) + "ms");
+            if (pos.getY() >= Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int)blockAccess.getGround())) {
+                VRSettings.logger.debug("MenuWorlds: Built {} blocks on {} layer at {},{},{} in {} ms",
+                    blockCounts.get(pair),
+                    ((RenderStateShardAccessor)layer).getName(),
+                    offset.getX(), offset.getY(), offset.getZ(),
+                    renderTimes.get(pair));
+            }
         } catch (Throwable e) { // Only effective way of preventing crash on poop computers with low heap size
             builderError = e;
         } finally {
@@ -383,17 +418,21 @@ public class MenuWorldRenderer {
     }
 
     private void finishBuilding() {
-        for (RenderType layer : RenderType.chunkBufferLayers()) {
-            BufferBuilder vertBuffer = bufferBuilders.get(layer);
+        for (var entry : bufferBuilders.entrySet()) {
+            RenderType layer = entry.getKey().getLeft();
+            BufferBuilder vertBuffer = entry.getValue();
             if (layer == RenderType.translucent()) {
                 vertBuffer.setQuadSorting(VertexSorting.byDistance(0, Mth.frac(blockAccess.getGround()), 0));
             }
-            uploadGeometry(layer, vertBuffer.end());
+            BufferBuilder.RenderedBuffer renderedBuffer = vertBuffer.end();
+            if (!renderedBuffer.isEmpty())
+                uploadGeometry(layer, renderedBuffer);
         }
         bufferBuilders = null;
         currentPositions = null;
         building = false;
         ready = true;
+        VRSettings.logger.info("MenuWorlds: Finished building in {} ms", Utils.milliTime() - buildStartTime);
     }
 
     public boolean isOnBuilderThread() {
@@ -418,7 +457,7 @@ public class MenuWorldRenderer {
         buffer.bind();
         buffer.upload(renderedBuffer);
         VertexBuffer.unbind();
-        vertexBuffers.put(layer, buffer);
+        vertexBuffers.get(layer).add(buffer);
     }
 
     public void cancelBuilding() {
@@ -431,9 +470,11 @@ public class MenuWorldRenderer {
     public void destroy() {
         cancelBuilding();
         if (vertexBuffers != null) {
-            for (VertexBuffer vertexBuffer : vertexBuffers.values()) {
-                if (vertexBuffer != null) {
-                    vertexBuffer.close();
+            for (List<VertexBuffer> buffers : vertexBuffers.values()) {
+                for (VertexBuffer vertexBuffer : buffers) {
+                    if (vertexBuffer != null) {
+                        vertexBuffer.close();
+                    }
                 }
             }
             vertexBuffers = null;
