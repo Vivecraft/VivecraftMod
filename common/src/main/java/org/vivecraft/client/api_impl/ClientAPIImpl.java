@@ -10,6 +10,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 public final class ClientAPIImpl implements VivecraftClientAPI {
@@ -126,7 +127,11 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
 
     @Override
     public float getWorldScale() {
-        return ClientDataHolderVR.getInstance().vrPlayer.worldScale;
+        if (isVrActive()) {
+            return ClientDataHolderVR.getInstance().vrPlayer.worldScale;
+        } else {
+            return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
+        }
     }
 
     @Override
