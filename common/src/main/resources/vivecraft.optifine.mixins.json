@@ -6,6 +6,7 @@
   "client": [
     "OptifineGamerRendererVRMixin",
     "OptifineLiquidBlockRendererMixin",
+    "OptifineModelBlockRendererMixin",
     "ShadersRenderVRMixin",
     "ShadersVRMixin"
   ],

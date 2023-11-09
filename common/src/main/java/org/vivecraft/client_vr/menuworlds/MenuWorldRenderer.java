@@ -42,6 +42,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -143,8 +144,7 @@ public class MenuWorldRenderer {
             VRSettings.logger.info("MenuWorlds: Initializing main menu world renderer...");
             loadRenderers();
             getWorldTask = CompletableFuture.supplyAsync(() -> {
-                try {
-                    InputStream inputStream = MenuWorldDownloader.getRandomWorld();
+                try (InputStream inputStream = MenuWorldDownloader.getRandomWorld()) {
                     VRSettings.logger.info("MenuWorlds: Loading world data...");
                     return inputStream != null ? MenuWorldExporter.loadWorld(inputStream) : null;
                 } catch (Exception e) {
@@ -278,6 +278,7 @@ public class MenuWorldRenderer {
                 vertexBuffers = new HashMap<>();
                 bufferBuilders = new HashMap<>();
                 currentPositions = new HashMap<>();
+
                 for (RenderType layer : RenderType.chunkBufferLayers()) {
                     vertexBuffers.put(layer, new LinkedList<>());
 
@@ -287,7 +288,7 @@ public class MenuWorldRenderer {
                                 BlockPos pos = new BlockPos(x, y, z);
                                 Pair<RenderType, BlockPos> pair = Pair.of(layer, pos);
 
-                                BufferBuilder vertBuffer = new BufferBuilder(layer.bufferSize());
+                                BufferBuilder vertBuffer = new BufferBuilder(32768); // yields most efficient memory use for some reason
                                 vertBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
                                 bufferBuilders.put(pair, vertBuffer);
@@ -297,7 +298,7 @@ public class MenuWorldRenderer {
                     }
                 }
             } catch (OutOfMemoryError e) {
-                VRSettings.logger.error("OutOfMemoryError while building main menu world. Low heap size or 32-bit Java?");
+                VRSettings.logger.error("OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?");
                 destroy();
                 return;
             }
@@ -346,6 +347,7 @@ public class MenuWorldRenderer {
         RenderType layer = pair.getLeft();
         BlockPos offset = pair.getRight();
         builderThreads.add(Thread.currentThread());
+        long realStartTime = Utils.milliTime();
 
         try {
             PoseStack thisPose = new PoseStack();
@@ -401,7 +403,7 @@ public class MenuWorldRenderer {
 
             //VRSettings.logger.info("MenuWorlds: Built segment of " + count + " blocks in " + ((RenderStateShardAccessor)layer).getName() + " layer.");
             blockCounts.put(pair, blockCounts.getOrDefault(pair, 0) + count);
-            renderTimes.put(pair, renderTimes.getOrDefault(pair, 0L) + (Utils.milliTime() - startTime));
+            renderTimes.put(pair, renderTimes.getOrDefault(pair, 0L) + (Utils.milliTime() - realStartTime));
 
             if (pos.getY() >= Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int)blockAccess.getGround())) {
                 VRSettings.logger.debug("MenuWorlds: Built {} blocks on {} layer at {},{},{} in {} ms",
@@ -418,21 +420,44 @@ public class MenuWorldRenderer {
     }
 
     private void finishBuilding() {
-        for (var entry : bufferBuilders.entrySet()) {
+        building = false;
+
+        // Sort buffers from nearest to furthest
+        var entryList = new ArrayList<>(bufferBuilders.entrySet());
+        entryList.sort(Comparator.comparing(entry -> entry.getKey().getRight(), (posA, posB) -> {
+            Vec3i center = new Vec3i(segmentSize.getX() / 2, segmentSize.getY() / 2, segmentSize.getZ() / 2);
+            double distA = posA.offset(center).distSqr(BlockPos.ZERO);
+            double distB = posB.offset(center).distSqr(BlockPos.ZERO);
+            return Double.compare(distA, distB);
+        }));
+
+        int totalMemory = 0, count = 0;
+        for (var entry : entryList) {
             RenderType layer = entry.getKey().getLeft();
             BufferBuilder vertBuffer = entry.getValue();
             if (layer == RenderType.translucent()) {
                 vertBuffer.setQuadSorting(VertexSorting.byDistance(0, Mth.frac(blockAccess.getGround()), 0));
             }
             BufferBuilder.RenderedBuffer renderedBuffer = vertBuffer.end();
-            if (!renderedBuffer.isEmpty())
+            if (!renderedBuffer.isEmpty()) {
                 uploadGeometry(layer, renderedBuffer);
+                count++;
+            }
+            totalMemory += ((BufferBuilderExtension)vertBuffer).vivecraft$getBufferSize();
+            ((BufferBuilderExtension)vertBuffer).vivecraft$freeBuffer();
         }
+
         bufferBuilders = null;
         currentPositions = null;
-        building = false;
         ready = true;
-        VRSettings.logger.info("MenuWorlds: Finished building in {} ms", Utils.milliTime() - buildStartTime);
+        VRSettings.logger.info("MenuWorlds: Built {} blocks in {} ms ({} ms CPU time)",
+            blockCounts.values().stream().reduce(Integer::sum).orElse(0),
+            Utils.milliTime() - buildStartTime,
+            renderTimes.values().stream().reduce(Long::sum).orElse(0L));
+        VRSettings.logger.info("MenuWorlds: Used {} temporary buffers ({} MiB), uploaded {} non-empty buffers",
+            entryList.size(),
+            totalMemory / 1048576,
+            count);
     }
 
     public boolean isOnBuilderThread() {
@@ -442,7 +467,7 @@ public class MenuWorldRenderer {
     private void handleError() {
         if (builderError == null) return;
         if (builderError instanceof OutOfMemoryError || builderError.getCause() instanceof OutOfMemoryError) {
-            VRSettings.logger.error("OutOfMemoryError while building main menu world. Low heap size or 32-bit Java?");
+            VRSettings.logger.error("OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?");
         } else {
             VRSettings.logger.error("Exception thrown when building main menu world, falling back to old menu room. \n {}", builderError.getMessage());
         }
@@ -461,9 +486,13 @@ public class MenuWorldRenderer {
     }
 
     public void cancelBuilding() {
-        if (!building) return;
         building = false;
-        bufferBuilders = null;
+        if (bufferBuilders != null) {
+            for (BufferBuilder vertBuffer : bufferBuilders.values()) {
+                ((BufferBuilderExtension)vertBuffer).vivecraft$freeBuffer();
+            }
+            bufferBuilders = null;
+        }
         currentPositions = null;
     }
 

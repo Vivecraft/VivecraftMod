@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class OptifineLiquidBlockRendererMixin {
     // needed for menuworlds water rendering
     @Redirect(method = "tesselate", at = @At(value = "INVOKE", target = "Lnet/optifine/Config;isRenderRegions()Z"))
-    private static boolean vivecraft$optifineChunkClipping() {
+    private boolean vivecraft$optifineChunkClipping() {
         return OptifineHelper.isRenderRegions() && (ClientDataHolderVR.getInstance().menuWorldRenderer == null || !ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread());
     }
 }

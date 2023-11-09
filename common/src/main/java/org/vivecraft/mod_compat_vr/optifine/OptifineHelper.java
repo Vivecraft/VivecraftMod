@@ -52,6 +52,7 @@ public class OptifineHelper {
 
     private static Field optionsOfRenderRegions;
     private static Field optionsOfCloudHeight;
+    private static Field optionsOfAoLevel;
     private static Field vertexRenderPositions;
 
     public static boolean isOptifineLoaded() {
@@ -263,6 +264,15 @@ public class OptifineHelper {
         }
     }
 
+    public static double getAoLevel() {
+        try {
+            return (double) optionsOfAoLevel.get(Minecraft.getInstance().options);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return 1.0;
+        }
+    }
+
     public static void markTextureAsActive(TextureAtlasSprite sprite) {
         try {
             smartAnimationsSpriteRenderedMethod.invoke(smartAnimations, sprite);
@@ -298,6 +308,7 @@ public class OptifineHelper {
 
             optionsOfRenderRegions = Options.class.getField("ofRenderRegions");
             optionsOfCloudHeight = Options.class.getField("ofCloudsHeight");
+            optionsOfAoLevel = Options.class.getField("ofAoLevel");
 
             customColors = Class.forName("net.optifine.CustomColors");
             customColorsGetSkyColorMethod = customColors.getMethod("getSkyColor", Vec3.class, BlockAndTintGetter.class, double.class, double.class, double.class);
