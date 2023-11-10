@@ -176,7 +176,7 @@ public class VivecraftItemRendering {
             }
 
             pMatrixStack.translate(0.0D, 0.0D, 0.1D);
-            pMatrixStack.last().pose().mul(dh.vrPlayer.vrdata_world_render.getController(1).getMatrix(new Matrix4f()).transpose());
+            pMatrixStack.last().pose().mul(dh.vrPlayer.vrdata_world_render.getController(1).getMatrix(new Matrix4f()));
             rotation.mul(Axis.YP.rotationDegrees(f1));
             rotation.mul(Axis.XP.rotationDegrees(-f));
             rotation.mul(Axis.ZP.rotationDegrees(-f3));

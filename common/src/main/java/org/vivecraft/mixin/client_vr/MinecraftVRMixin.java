@@ -1006,7 +1006,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         Vec3 camPlayer = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getHeadPivot()
             .subtract(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());
-        Matrix4f viewMatrix = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getMatrix(new Matrix4f()).transpose().transpose();
+        Matrix4f viewMatrix = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getMatrix(new Matrix4f()).transpose();
         Vector3f cameraLook = viewMatrix.transformProject(Utils.forward(), new Vector3f());
 
         // set uniforms

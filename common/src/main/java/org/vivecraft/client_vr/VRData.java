@@ -114,14 +114,14 @@ public class VRData {
     public Vec3 getHeadPivot() {
         Vec3 vec3 = this.hmd.getPosition();
         // scale pivot point with world scale, to prevent unwanted player movement
-        Matrix4f matrix4f = this.hmd.getMatrix(new Matrix4f()).transpose();
+        Matrix4f matrix4f = this.hmd.getMatrix(new Matrix4f());
         Vector3f vector3 = matrix4f.transformProject(new Vector3f(0.0F, -0.1F * worldScale, 0.1F * worldScale), new Vector3f());
         return new Vec3((double) vector3.x() + vec3.x, (double) vector3.y() + vec3.y, (double) vector3.z() + vec3.z);
     }
 
     public Vec3 getHeadRear() {
         Vec3 vec3 = this.hmd.getPosition();
-        Matrix4f matrix4f = this.hmd.getMatrix(new Matrix4f()).transpose();
+        Matrix4f matrix4f = this.hmd.getMatrix(new Matrix4f());
         Vector3f vector3 = matrix4f.transformProject(new Vector3f(0.0F, -0.2F, 0.2F), new Vector3f());
         return new Vec3((double) vector3.x() + vec3.x, (double) vector3.y() + vec3.y, (double) vector3.z() + vec3.z);
     }
@@ -156,10 +156,6 @@ public class VRData {
 
     public String toString() {
         return "data:\r\n \t\t origin: " + this.origin + "\r\n \t\t rotation: " + String.format("%.2f", this.rotation_radians) + "\r\n \t\t scale: " + String.format("%.2f", this.worldScale) + "\r\n \t\t hmd " + this.hmd + "\r\n \t\t c0 " + this.c0 + "\r\n \t\t c1 " + this.c1 + "\r\n \t\t c2 " + this.c2;
-    }
-
-    protected Vec3 vecMult(Vec3 in, float factor) {
-        return new Vec3(in.x * (double) factor, in.y * (double) factor, in.z * (double) factor);
     }
 
     public class VRDevicePose {
@@ -205,7 +201,7 @@ public class VRData {
         }
 
         public Matrix4f getMatrix(Matrix4f dest) {
-            return this.matrix.transpose(dest).rotateLocalY(this.data.rotation_radians).transpose();
+            return this.matrix.transpose(dest).rotateLocalY(this.data.rotation_radians);
         }
 
         public String toString() {

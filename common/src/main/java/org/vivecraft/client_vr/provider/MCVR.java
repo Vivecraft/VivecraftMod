@@ -857,7 +857,7 @@ public abstract class MCVR {
 
                     VRData.VRDevicePose vrdata$vrdevicepose = this.dh.vrPlayer.vrdata_world_pre.getController(controllertype3.ordinal());
                     this.dh.cameraTracker.setPosition(vrdata$vrdevicepose.getPosition());
-                    this.dh.cameraTracker.setRotation(new Quaternionf().setFromNormalized(vrdata$vrdevicepose.getMatrix(new Matrix4f()).transpose()));
+                    this.dh.cameraTracker.setRotation(new Quaternionf().setFromNormalized(vrdata$vrdevicepose.getMatrix(new Matrix4f())));
                 }
             }
 
@@ -874,7 +874,7 @@ public abstract class MCVR {
 
                 VRData.VRDevicePose vrdata$vrdevicepose1 = this.dh.vrPlayer.vrdata_world_pre.getController(controllertype4.ordinal());
                 this.dh.cameraTracker.setPosition(vrdata$vrdevicepose1.getPosition());
-                this.dh.cameraTracker.setRotation(new Quaternionf().setFromNormalized(vrdata$vrdevicepose1.getMatrix(new Matrix4f()).transpose()));
+                this.dh.cameraTracker.setRotation(new Quaternionf().setFromNormalized(vrdata$vrdevicepose1.getMatrix(new Matrix4f())));
                 this.dh.cameraTracker.startMoving(controllertype4.ordinal(), true);
             }
 
