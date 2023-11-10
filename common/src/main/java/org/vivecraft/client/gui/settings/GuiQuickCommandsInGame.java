@@ -31,7 +31,7 @@ public class GuiQuickCommandsInGame extends Screen {
         for (int j = 0; j < astring.length; ++j) {
             i = j > 5 ? 1 : 0;
             String s = astring[j];
-            this.addRenderableWidget(new Button(this.width / 2 - 125 + 127 * i, 36 + (j - 6 * i) * 24, 125, 20, Component.translatable(s.toString()), (p) ->
+            this.addRenderableWidget(new Button(this.width / 2 - 125 + 127 * i, 36 + (j - 6 * i) * 24, 125, 20, Component.translatable(s), (p) ->
             {
                 this.minecraft.setScreen(null);
                 if (p.getMessage().getString().startsWith("/")) {

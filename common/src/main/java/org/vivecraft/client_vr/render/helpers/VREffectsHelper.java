@@ -277,13 +277,13 @@ public class VREffectsHelper {
 
         poseStack.popPose();
 
-        Vector2f area = dataHolder.vr.getPlayAreaSize();
+        float[] area = dataHolder.vr.getPlayAreaSize();
         if (area == null) {
-            area = new Vector2f(2, 2);
+            area = new float[]{2, 2};
         }
         for (int i = 0; i < 2; i++) {
-            float width = area.x + i * 2;
-            float length = area.y + i * 2;
+            float width = area[0] + i * 2;
+            float length = area[1] + i * 2;
 
             poseStack.pushPose();
             RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);

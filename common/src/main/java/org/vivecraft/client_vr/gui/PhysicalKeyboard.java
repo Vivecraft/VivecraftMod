@@ -557,7 +557,7 @@ public class PhysicalKeyboard {
         // Build all the text
         for (Tuple<String, Vector3f> label : labels) {
             poseStack.pushPose();
-            poseStack.translate((label.getB()).x, (label.getB()).y, (double) (label.getB()).z);
+            poseStack.translate((label.getB()).x, (label.getB()).y, (label.getB()).z);
             poseStack.scale(textScale, textScale, 1.0F);
             font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack.last().pose(), multibuffersource$buffersource, false, 0, 15728880, font.isBidirectional());
             poseStack.popPose();
