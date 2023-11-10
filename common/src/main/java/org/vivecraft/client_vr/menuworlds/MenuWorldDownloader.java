@@ -46,7 +46,7 @@ public class MenuWorldDownloader {
         Utils.httpReadToFile(baseUrl + path, file, true);
     }
 
-    public static InputStream getRandomWorld() throws IOException, NoSuchAlgorithmException {
+    public static InputStream getRandomWorld() {
         init();
         VRSettings settings = ClientDataHolderVR.getInstance().vrSettings;
 
@@ -73,9 +73,14 @@ public class MenuWorldDownloader {
                 lastWorld = world.file != null ? world.file.getPath() : world.path;
             }
             return getStreamForWorld(world);
-        } catch (IOException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
-            return getRandomWorldFallback();
+            try {
+                return getRandomWorldFallback();
+            } catch (IOException | NoSuchAlgorithmException e2) {
+                e2.printStackTrace();
+                return null;
+            }
         }
     }
 

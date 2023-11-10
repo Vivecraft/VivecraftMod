@@ -36,7 +36,7 @@ public class ErrorScreen extends Screen {
             this.width / 2 - 155, this.height - 32,
             150, 20,
             new TranslatableComponent("chat.copy"),
-            (p) -> Minecraft.getInstance().keyboardHandler.setClipboard(error.getString())));
+            (p) -> Minecraft.getInstance().keyboardHandler.setClipboard(this.title.getString() + "\n" + error.getString())));
     }
 
     @Override

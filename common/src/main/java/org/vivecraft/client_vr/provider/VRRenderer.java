@@ -13,7 +13,6 @@ import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -248,8 +247,9 @@ public abstract class VRRenderer {
 
             // Clean up time
             VRShaders.lanczosShader.clear();
-            Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
+            this.fsaaLastPassResultFBO.unbindWrite();
             RenderSystem.depthFunc(GL43.GL_LEQUAL);
+            RenderSystem.enableBlend();
         }
     }
 
