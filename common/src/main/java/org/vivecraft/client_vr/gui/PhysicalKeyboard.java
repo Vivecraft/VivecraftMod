@@ -12,7 +12,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -584,7 +583,9 @@ public class PhysicalKeyboard {
 
     public void unpressAllKeys() {
         for (KeyButton key : this.keys) {
-            if(key.pressed) key.unpress();
+            if (key.pressed) {
+                key.unpress();
+            }
         }
     }
 
@@ -668,7 +669,9 @@ public class PhysicalKeyboard {
         }
 
         public abstract void onPressed();
-        public void onReleased() {}
+
+        public void onReleased() {
+        }
     }
 
     public enum KeyboardTheme implements OptionEnum<KeyboardTheme> {

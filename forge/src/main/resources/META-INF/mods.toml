@@ -9,7 +9,7 @@ version = "${version}"
 displayName = "Vivecraft"
 displayURL = "https://modrinth.com/mod/vivecraft"
 logoFile = "vivecraft_icon.png"
-authors = "fayer3, Ferri_Arnus, IMS, jrbudda, minecraft player"
+authors = "fayer3, Ferri_Arnus, IMS, jrbudda, minecraft player, Techjar"
 displayTest = "IGNORE_SERVER_VERSION"
 description = '''
 The VR mod for any loader!

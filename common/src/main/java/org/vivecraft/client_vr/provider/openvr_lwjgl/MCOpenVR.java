@@ -1,17 +1,16 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.sun.jna.NativeLibrary;
+import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2f;
 import org.lwjgl.openvr.*;
@@ -94,6 +93,49 @@ public class MCOpenVR extends MCVR {
     final Texture texType1 = Texture.calloc();
     InputDigitalActionData digital = InputDigitalActionData.calloc();
     InputAnalogActionData analog = InputAnalogActionData.calloc();
+
+    // Last updated 10/29/2023
+    // Hard-coded list of languages Steam supports
+    private static final Map<String, String> steamLanguages = Map.ofEntries(
+        Map.entry("english", "en_US"),
+        Map.entry("bulgarian", "bg_BG"),
+        Map.entry("schinese", "zh_CN"),
+        Map.entry("tchinese", "zh_TW"),
+        Map.entry("czech", "cs_CZ"),
+        Map.entry("danish", "da_DK"),
+        Map.entry("dutch", "nl_NL"),
+        Map.entry("finnish", "fi_FI"),
+        Map.entry("french", "fr_FR"),
+        Map.entry("german", "de_DE"),
+        Map.entry("greek", "el_GR"),
+        Map.entry("hungarian", "hu_HU"),
+        Map.entry("indonesian", "id_ID"),
+        Map.entry("italian", "it_IT"),
+        Map.entry("japanese", "ja_JP"),
+        Map.entry("koreana", "ko_KR"),
+        Map.entry("norwegian", "no_NO"),
+        Map.entry("polish", "pl_PL"),
+        Map.entry("portuguese", "pt_PT"),
+        Map.entry("brazilian", "pt_BR"),
+        Map.entry("romanian", "ro_RO"),
+        Map.entry("russian", "ru_RU"),
+        Map.entry("spanish", "es_ES"),
+        Map.entry("latam", "es_MX"),
+        Map.entry("swedish", "sv_SE"),
+        Map.entry("thai", "th_TH"),
+        Map.entry("turkish", "tr_TR"),
+        Map.entry("ukrainian", "uk_UA"),
+        Map.entry("vietnamese", "vi_VN")
+    );
+
+    // Steam uses some incorrect language codes, this remaps to those
+    // SteamVR itself is also not translated into all languages Steam supports yet, so in those cases English may be used regardless
+    private static final Map<String, String> steamLanguageWrongMappings = Map.ofEntries(
+        Map.entry("cs_CZ", "cs_CS"),
+        Map.entry("da_DK", "da_DA"),
+        Map.entry("el_GR", "el_EL"),
+        Map.entry("sv_SE", "sv_SV")
+    );
 
     public MCOpenVR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -460,21 +502,46 @@ public class MCOpenVR extends MCVR {
         actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
         map.put("actions", actions);
 
-        // Last updated 10/29/2023
-        // Hard-coded list of languages Steam supports
-        String[] steamLanguages = {"en_US", "bg_BG", "zh_CN", "zh_TW", "cs_CZ", "da_DK", "nl_NL", "fi_FI", "fr_FR", "de_DE", "el_GR", "hu_HU", "id_ID", "it_IT", "ja_JP", "ko_KR", "no_NO", "pl_PL", "pt_PT", "pt_BR", "ro_RO", "ru_RU", "es_ES", "es_MX", "sv_SE", "th_TH", "tr_TR", "uk_UA", "vi_VN"};
-        // Steam uses some incorrect language codes, this remaps to those
-        // SteamVR itself is also not translated into all languages Steam supports yet, so in those cases English may be used regardless
-        Map<String, String> wrongCodeMappings = Map.ofEntries(Map.entry("cs_CZ", "cs_CS"), Map.entry("da_DK", "da_DA"), Map.entry("el_GR", "el_EL"), Map.entry("sv_SE", "sv_SV"));
+        // TODO: revert to exporting all Steam languages when Valve fixes the crash with large action manifests
+        List<String> languages = new ArrayList<>();
+        languages.add("en_US");
+
+        boolean gotRegistryValue = false;
+        if (Util.getPlatform() == Util.OS.WINDOWS) {
+            // Try to read the user's Steam language setting from the registry
+            String language = Utils.readWinRegistry("HKCU\\SOFTWARE\\Valve\\Steam\\Language");
+            if (language != null) {
+                gotRegistryValue = true;
+                VRSettings.logger.info("Steam language setting: {}", language);
+                if (!language.equals("english") && steamLanguages.containsKey(language)) {
+                    languages.add(steamLanguages.get(language));
+                }
+            } else {
+                VRSettings.logger.warn("Unable to read Steam language setting");
+            }
+        }
+
+        if (!gotRegistryValue && !mc.options.languageCode.startsWith("en_")) {
+            // Try to find a Steam language matching the user's in-game language selection
+            String ucLanguageCode = mc.options.languageCode.substring(0, mc.options.languageCode.indexOf('_')) + mc.options.languageCode.substring(mc.options.languageCode.indexOf('_')).toUpperCase();
+            if (steamLanguages.containsValue(ucLanguageCode)) {
+                languages.add(ucLanguageCode);
+            } else {
+                Optional<String> langCode = steamLanguages.values().stream().filter(s -> ucLanguageCode.substring(0, ucLanguageCode.indexOf('_')).equals(s.substring(0, s.indexOf('_')))).findFirst();
+                langCode.ifPresent(languages::add);
+            }
+        }
 
         List<Map<String, Object>> localeList = new ArrayList<>();
-        for (String langCode : steamLanguages) {
+        for (String langCode : languages) {
             Map<String, Object> localeMap = new HashMap<>();
 
             // Load the language
             List<String> langs = new ArrayList<>();
             langs.add("en_us");
-            if (!langCode.equals("en_US")) langs.add(langCode.toLowerCase());
+            if (!langCode.equals("en_US")) {
+                langs.add(langCode.toLowerCase());
+            }
             Language lang = ClientLanguage.loadFrom(mc.getResourceManager(), langs, false);
 
             for (VRInputAction action : sortedActions) {
@@ -492,7 +559,7 @@ public class MCOpenVR extends MCVR {
             localeMap.put(ACTION_LEFT_HAPTIC, "Left Hand Haptic");
             localeMap.put(ACTION_RIGHT_HAPTIC, "Right Hand Haptic");
 
-            localeMap.put("language_tag", wrongCodeMappings.getOrDefault(langCode, langCode));
+            localeMap.put("language_tag", steamLanguageWrongMappings.getOrDefault(langCode, langCode));
             localeList.add(localeMap);
         }
         map.put("localization", localeList);

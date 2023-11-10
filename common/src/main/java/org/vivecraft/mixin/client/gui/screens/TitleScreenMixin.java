@@ -81,6 +81,6 @@ public abstract class TitleScreenMixin extends Screen {
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), method = "render", index = 1)
     public float vivecraft$maybeNoPanorama(float alpha) {
-        return VRState.vrRunning && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() ? 0.0F : alpha;
+        return VRState.vrRunning && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() || ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama) ? 0.0F : alpha;
     }
 }
