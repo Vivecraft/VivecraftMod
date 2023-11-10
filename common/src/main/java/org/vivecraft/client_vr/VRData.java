@@ -54,7 +54,7 @@ public class VRData {
         if (dataholder.vr.mrMovingCamActive) {
             this.c2 = new VRDevicePose(this, dataholder.vr.getAimRotation(2, new Matrix4f()), dataholder.vr.getAimSource(2).subtract(vec3).add(vec31), dataholder.vr.getAimVector(2));
         } else {
-            Matrix4f matrix4f3 = new Matrix4f().rotation(dataholder.vrSettings.vrFixedCamrotQuat).transpose();
+            Matrix4f matrix4f3 = new Matrix4f().rotation(dataholder.vrSettings.vrFixedCamrotQuat);
             Vec3 vec32 = Utils.toVec3(dataholder.vrSettings.vrFixedCampos);
             Vec3 vec33 = Utils.toVec3(matrix4f3.transformProject(Utils.forward(), new Vector3f()));
             this.c2 = new VRDevicePose(this, matrix4f3, vec32.subtract(vec3).add(vec31), vec33);

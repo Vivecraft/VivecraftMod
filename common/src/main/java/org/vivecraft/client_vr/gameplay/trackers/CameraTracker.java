@@ -45,7 +45,7 @@ public class CameraTracker extends Tracker {
             Vector3f vrDevPosition = Utils.convertVector(vrDevPose.getPosition(), new Vector3f()).sub(vrOldPosition);
             Matrix4f matrix4f = vrDevPose.getMatrix(new Matrix4f()).mul(this.startControllerPose.getMatrix(new Matrix4f()).invert());
             matrix4f.transformProject(this.startPosition.sub(vrOldPosition, vrOldPosition), this.position).sub(vrOldPosition).add(vrDevPosition).add(this.startPosition);
-            this.startRotation.mul(this.rotation.setFromNormalized(matrix4f), this.rotation);
+            this.rotation.setFromUnnormalized(matrix4f).mul(this.startRotation);
         }
 
         if (this.quickMode && !this.isMoving() && !this.dh.grabScreenShot) {
