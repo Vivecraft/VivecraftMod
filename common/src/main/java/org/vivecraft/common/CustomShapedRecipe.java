@@ -41,5 +41,4 @@ public class CustomShapedRecipe {
 
     public static final Codec<ItemStack> CODEC = ExtraCodecs.either(VIVECRAFT_ITEMSTACK_OBJECT_CODEC, CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC)
         .xmap(itemStackItemStackEither -> itemStackItemStackEither.map(stack -> stack, stack -> stack), Either::right);
-
 }
