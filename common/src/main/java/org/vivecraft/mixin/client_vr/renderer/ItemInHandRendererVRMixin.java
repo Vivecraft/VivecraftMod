@@ -115,7 +115,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
             boolean useLeftHandModelinLeftHand = false;
 
             ItemTransforms.TransformType transformType;
-            if (dh.vrSettings.thirdPersonItems) {
+            if (dh.vrSettings.thirdPersonItems && !(BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer))) {
                 useLeftHandModelinLeftHand = true; //test
                 VivecraftItemRendering.applyThirdPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
                 transformType = mainHand ? ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND : ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND);

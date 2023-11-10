@@ -571,6 +571,23 @@ public class Utils {
         return bytearrayoutputstream.toByteArray();
     }
 
+    public static String readWinRegistry(String key) {
+        try {
+            Process process = Runtime.getRuntime().exec("reg query \"" + key.substring(0, key.lastIndexOf('\\')) + "\" /v \"" + key.substring(key.lastIndexOf('\\') + 1) + "\"");
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                    String[] split = line.split("REG_SZ|REG_DWORD");
+                    if (split.length > 1) {
+                        return split[1].trim();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static Quaternion slerp(Quaternion start, Quaternion end, float alpha) {
         float f = start.x * end.x + start.y * end.y + start.z * end.z + start.w * end.w;
         float f1 = f < 0.0F ? -f : f;
