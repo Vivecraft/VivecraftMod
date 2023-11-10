@@ -10,17 +10,18 @@ import org.joml.Vector3f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.common.utils.Utils;
 
 public class CameraTracker extends Tracker {
     public static final ModelResourceLocation cameraModel = new ModelResourceLocation("vivecraft", "camera", "");
     public static final ModelResourceLocation cameraDisplayModel = new ModelResourceLocation("vivecraft", "camera_display", "");
     private boolean visible = false;
-    private Vec3 position = new Vec3(0.0D, 0.0D, 0.0D);
-    private Quaternionf rotation = new Quaternionf();
+    private final Vector3f position = new Vector3f();
+    private final Quaternionf rotation = new Quaternionf();
     private int startController;
     private VRData.VRDevicePose startControllerPose;
-    private Vec3 startPosition;
-    private Quaternionf startRotation;
+    private final Vector3f startPosition = new Vector3f();
+    private final Quaternionf startRotation = new Quaternionf();
     private boolean quickMode;
 
     public CameraTracker(Minecraft mc, ClientDataHolderVR dh) {
@@ -39,25 +40,19 @@ public class CameraTracker extends Tracker {
 
     public void doProcess(LocalPlayer player) {
         if (this.startControllerPose != null) {
-            VRData.VRDevicePose vrdata$vrdevicepose = this.dh.vrPlayer.vrdata_world_render.getController(this.startController);
-            Vec3 vec3 = this.startControllerPose.getPosition();
-            Vec3 vec31 = vrdata$vrdevicepose.getPosition().subtract(vec3);
-            Matrix4f matrix4f1 = vrdata$vrdevicepose.getMatrix();
-            Matrix4f matrix4f2 = this.startControllerPose.getMatrix();
-            Matrix4f b = matrix4f2.setTransposed(matrix4f2.transpose(new org.joml.Matrix4f()).invert());
-            Matrix4f dest = new Matrix4f();
-            Matrix4f matrix4f = dest.setTransposed(matrix4f1.transpose(new org.joml.Matrix4f()).mul0(b.transpose(new org.joml.Matrix4f())));
-            Vector3f vector3 = new Vector3f((float) this.startPosition.x - (float) vec3.x, (float) this.startPosition.y - (float) vec3.y, (float) this.startPosition.z - (float) vec3.z);
-            Vector3f vector31 = matrix4f.transpose(new org.joml.Matrix4f()).transformProject(vector3, new Vector3f());
-            this.position = new Vec3(this.startPosition.x + (double) ((float) vec31.x) + (double) (vector31.x() - vector3.x()), this.startPosition.y + (double) ((float) vec31.y) + (double) (vector31.y() - vector3.y()), this.startPosition.z + (double) ((float) vec31.z) + (double) (vector31.z() - vector3.z()));
-            this.startRotation.mul(new Quaternionf().setFromNormalized(matrix4f.transpose(new org.joml.Matrix4f())), this.rotation);
+            VRData.VRDevicePose vrDevPose = this.dh.vrPlayer.vrdata_world_render.getController(this.startController);
+            Vector3f vrOldPosition = Utils.convertVector(this.startControllerPose.getPosition(), new Vector3f());
+            Vector3f vrDevPosition = Utils.convertVector(vrDevPose.getPosition(), new Vector3f()).sub(vrOldPosition);
+            Matrix4f matrix4f = vrDevPose.getMatrix(new Matrix4f()).transpose().mul0(this.startControllerPose.getMatrix(new Matrix4f()).transpose().invert());
+            matrix4f.transformProject(this.startPosition.sub(vrOldPosition, vrOldPosition), this.position).sub(vrOldPosition).add(vrDevPosition).add(this.startPosition);
+            this.startRotation.mul(this.rotation.setFromNormalized(matrix4f), this.rotation);
         }
 
         if (this.quickMode && !this.isMoving() && !this.dh.grabScreenShot) {
             this.visible = false;
         }
 
-        if (this.dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().distanceTo(this.position) > (double) (this.mc.options.getEffectiveRenderDistance() * 12)) {
+        if (Utils.convertVector(this.dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition(), new Vector3f()).distance(this.position) > (double) (this.mc.options.getEffectiveRenderDistance() * 12)) {
             this.visible = false;
         }
     }
@@ -81,11 +76,11 @@ public class CameraTracker extends Tracker {
     }
 
     public Vec3 getPosition() {
-        return this.position;
+        return Utils.convertToVector3d(this.position);
     }
 
     public void setPosition(Vec3 position) {
-        this.position = position;
+        Utils.convertVector(position, this.position);
     }
 
     public Quaternionf getRotation() {
@@ -111,8 +106,8 @@ public class CameraTracker extends Tracker {
     public void startMoving(int controller, boolean quickMode) {
         this.startController = controller;
         this.startControllerPose = this.dh.vrPlayer.vrdata_world_pre.getController(controller);
-        this.startPosition = this.position;
-        this.startRotation = new Quaternionf(this.rotation);
+        this.startPosition.set(this.position);
+        this.startRotation.set(this.rotation);
         this.quickMode = quickMode;
     }
 

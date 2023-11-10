@@ -73,7 +73,7 @@ public class VRHotkeys {
 
             if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_HOME && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
                 Utils.convertVector(dataholder.vrPlayer.vrdata_room_pre.getController(0).getPosition(), dataholder.vrSettings.vrFixedCampos);
-                dataholder.vrSettings.vrFixedCamrotQuat.setFromNormalized(dataholder.vrPlayer.vrdata_room_pre.getController(0).getMatrix().transpose(new org.joml.Matrix4f()));
+                dataholder.vrSettings.vrFixedCamrotQuat.setFromNormalized(dataholder.vrPlayer.vrdata_room_pre.getController(0).getMatrix(new Matrix4f()).transpose()).invert();
                 gotKey = true;
             }
 
@@ -117,62 +117,62 @@ public class VRHotkeys {
         boolean flag = false;
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            pos.add(cam.transformInverse(-0.01F, 0.0F, 0.0F, new Vector3f()));
+            pos.add(cam.transformUnit(-0.01F, 0.0F, 0.0F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            pos.add(cam.transformInverse(0.01F, 0.0F, 0.0F, new Vector3f()));
+            pos.add(cam.transformUnit(0.01F, 0.0F, 0.0F, new Vector3f()));
             flag = true;
         }
 
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            pos.add(cam.transformInverse(0.0F, 0.0F, -0.01F, new Vector3f()));
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
+            pos.add(cam.transformUnit(0.0F, 0.0F, -0.01F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            pos.add(cam.transformInverse(0.0F, 0.0F, 0.01F, new Vector3f()));
+            pos.add(cam.transformUnit(0.0F, 0.0F, 0.01F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            pos.add(cam.transformInverse(0.0F, 0.01F, 0.0F, new Vector3f()));
+            pos.add(cam.transformUnit(0.0F, 0.01F, 0.0F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            pos.add(cam.transformInverse(0.0F, -0.01F, 0.0F, new Vector3f()));
+            pos.add(cam.transformUnit(0.0F, -0.01F, 0.0F, new Vector3f()));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            cam.invert().rotateX(Math.toRadians(0.5F)).invert();
+            cam.rotateX(Math.toRadians(0.5F));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            cam.invert().rotateX(Math.toRadians(-0.5F)).invert();
+            cam.rotateX(Math.toRadians(-0.5F));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            cam.invert().rotateY(Math.toRadians(0.5F)).invert();
+            cam.rotateY(Math.toRadians(0.5F));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            cam.invert().rotateY(Math.toRadians(-0.5F)).invert();
+            cam.rotateY(Math.toRadians(-0.5F));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            cam.invert().rotateZ(Math.toRadians(0.5F)).invert();
+            cam.rotateZ(Math.toRadians(0.5F));
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            cam.invert().rotateZ(Math.toRadians(-0.5F)).invert();
+            cam.rotateZ(Math.toRadians(-0.5F));
             flag = true;
         }
 
@@ -209,18 +209,12 @@ public class VRHotkeys {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         if (startControllerPose != null) {
-            VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_room_pre.getController(startController);
-            Vector3f vec3 = Utils.convertVector(startControllerPose.getPosition(), new Vector3f());
-            Vector3f vec31 = Utils.convertVector(vrdata$vrdevicepose.getPosition(), new Vector3f()).sub(vec3);
-            Matrix4f matrix4f2 = startControllerPose.getMatrix();
-            Matrix4f matrix4f = new Matrix4f().setTransposed(
-                vrdata$vrdevicepose.getMatrix().transpose(new org.joml.Matrix4f()).mul0(
-                    matrix4f2.setTransposed(matrix4f2.transpose(new org.joml.Matrix4f()).invert())
-                        .transpose(new org.joml.Matrix4f())
-                )
-            );
-            matrix4f.transpose(new org.joml.Matrix4f()).transformProject(startCampos.sub(vec3, vec3), dataholder.vrSettings.vrFixedCampos).sub(vec3).add(vec31).add(startCampos);
-            startCamrotQuat.mul(dataholder.vrSettings.vrFixedCamrotQuat.setFromNormalized(matrix4f.transpose(new org.joml.Matrix4f()).transpose()), dataholder.vrSettings.vrFixedCamrotQuat);
+            VRData.VRDevicePose vrDevPose = dataholder.vrPlayer.vrdata_room_pre.getController(startController);
+            Vector3f vrOldPosition = Utils.convertVector(startControllerPose.getPosition(), new Vector3f());
+            Vector3f vrDevPosition = Utils.convertVector(vrDevPose.getPosition(), new Vector3f()).sub(vrOldPosition);
+            Matrix4f matrix4f = vrDevPose.getMatrix(new Matrix4f()).transpose().mul0(startControllerPose.getMatrix(new Matrix4f()).transpose().invert());
+            matrix4f.transformProject(startCampos.sub(vrOldPosition, vrOldPosition), dataholder.vrSettings.vrFixedCampos).sub(vrOldPosition).add(vrDevPosition).add(startCampos);
+            startCamrotQuat.mul(dataholder.vrSettings.vrFixedCamrotQuat.setFromNormalized(matrix4f).invert(), dataholder.vrSettings.vrFixedCamrotQuat);
         }
     }
 

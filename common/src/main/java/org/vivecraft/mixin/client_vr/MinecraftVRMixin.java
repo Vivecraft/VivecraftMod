@@ -482,13 +482,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         }
 
                         this.mainRenderTarget.unbindWrite();
-                        Minecraft minecraft = Minecraft.getInstance();
-                        Screenshot.grab(minecraft.gameDirectory, rendertarget, (text) ->
-                        {
-                            minecraft.execute(() -> {
-                                minecraft.gui.getChat().addMessage(text);
-                            });
-                        });
+                        Screenshot.grab(((Minecraft) (Object) this).gameDirectory, rendertarget, (text) ->
+                            ((Minecraft) (Object) this).execute(() ->
+                                ((Minecraft) (Object) this).gui.getChat().addMessage(text)
+                            )
+                        );
                         this.window.updateDisplay();
                         ClientDataHolderVR.getInstance().grabScreenShot = false;
                     }
@@ -1008,10 +1006,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         Vec3 camPlayer = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getHeadPivot()
             .subtract(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());
-        Matrix4f viewMatrix = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD)
-            .getMatrix().transpose(new Matrix4f()).transpose();
-        Matrix4f matrix4f = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getMatrix();
-        Vector3f cameraLook = matrix4f.transpose(new Matrix4f()).transformProject(Utils.forward(), new Vector3f());
+        Matrix4f viewMatrix = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getMatrix(new Matrix4f()).transpose().transpose();
+        Vector3f cameraLook = viewMatrix.transformProject(Utils.forward(), new Vector3f());
 
         // set uniforms
         VRShaders._DepthMask_projectionMatrix.set(((GameRendererExtension) this.gameRenderer).vivecraft$getThirdPassProjectionMatrix());

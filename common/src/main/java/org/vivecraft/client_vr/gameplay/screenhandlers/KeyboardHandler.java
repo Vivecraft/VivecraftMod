@@ -128,7 +128,6 @@ public class KeyboardHandler {
 
         if (Showing) {
             keyboardForGui = guiRelative;
-            Matrix4f matrix4f = new Matrix4f();
 
             if (dh.vrSettings.physicalKeyboard) {
                 Vec3 vec3 = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
@@ -136,23 +135,20 @@ public class KeyboardHandler {
                 vec31 = vec31.yRot((float) Math.toRadians(-dh.vrPlayer.vrdata_room_pre.hmd.getYaw()));
                 Pos_room = new Vec3(vec3.x + vec31.x, vec3.y + vec31.y, vec3.z + vec31.z);
                 float f = (float) Math.PI + (float) Math.toRadians(-dh.vrPlayer.vrdata_room_pre.hmd.getYaw());
-                Matrix4f matrix4f2 = new Matrix4f();
-                Rotation_room = matrix4f2.setTransposed(new Matrix4f().rotationY(f));
-                Matrix4f matrix4f1 = new Matrix4f();
-                Matrix4f b = matrix4f1.setTransposed(new Matrix4f().rotationX(2.5132742F));
-                Matrix4f dest = new Matrix4f();
-                Rotation_room = dest.setTransposed(Rotation_room.transpose(new Matrix4f()).mul0(b.transpose(new Matrix4f())));
+                Rotation_room = new Matrix4f().rotationY(f).rotateX(2.5132742F).transpose();
             } else if (guiRelative && GuiHandler.guiRotation_room != null) {
                 Matrix4f matrix4f1 = GuiHandler.guiRotation_room.transpose(new Matrix4f());
                 Vec3 vec35 = new Vec3(matrix4f1.m10(), matrix4f1.m11(), matrix4f1.m12());
                 Vec3 vec37 = (new Vec3(matrix4f1.m20(), matrix4f1.m21(), matrix4f1.m22())).scale(0.25D * GuiHandler.guiScale);
                 vec35 = vec35.scale(0.8F);
-                matrix4f.translate((float) (GuiHandler.guiPos_room.x - vec35.x), (float) (GuiHandler.guiPos_room.y - vec35.y), (float) (GuiHandler.guiPos_room.z - vec35.z));
-                matrix4f.translate((float) vec37.x, (float) vec37.y, (float) vec37.z);
-                matrix4f.mul(matrix4f1, matrix4f).rotate((float) Math.toRadians(30.0F), -1.0F, 0.0F, 0.0F);
-                Rotation_room = new Matrix4f().setTransposed(matrix4f);
-                Pos_room = Utils.toVec3(Rotation_room.transpose(new Matrix4f()).getTranslation(new Vector3f()));
-                Rotation_room.setTransposed(Rotation_room.transpose(new Matrix4f()).setTranslation(0.0F, 0.0F, 0.0F));
+                Rotation_room = new Matrix4f()
+                    .translate((float) (GuiHandler.guiPos_room.x - vec35.x), (float) (GuiHandler.guiPos_room.y - vec35.y), (float) (GuiHandler.guiPos_room.z - vec35.z))
+                    .translate((float) vec37.x, (float) vec37.y, (float) vec37.z)
+                    .mul(matrix4f1)
+                    .rotate((float) Math.toRadians(30.0F), -1.0F, 0.0F, 0.0F)
+                ;
+                Pos_room = Utils.toVec3(Rotation_room.getTranslation(new Vector3f()));
+                Rotation_room.setTranslation(0.0F, 0.0F, 0.0F).transpose();
             } else {
                 Vec3 vec33 = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
                 Vec3 vec34 = new Vec3(0.0D, -0.5D, -2.0D);
@@ -166,8 +162,7 @@ public class KeyboardHandler {
                 );
                 float f1 = (float) Math.asin(vector3.y() / vector3.length());
                 float f2 = (float) ((double) (float) Math.PI + Math.atan2(vector3.x(), vector3.z()));
-                Matrix4f matrix4f1 = new Matrix4f();
-                Rotation_room = matrix4f1.setTransposed(new Matrix4f().rotationY(f2));
+                Rotation_room = new Matrix4f().rotationY(f2).transpose();
             }
         }
     }

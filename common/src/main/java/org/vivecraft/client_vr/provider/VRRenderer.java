@@ -54,7 +54,8 @@ public abstract class VRRenderer {
     public RenderTarget cameraRenderFramebuffer;
     protected int dispLastWidth;
     protected int dispLastHeight;
-    public Matrix4f[] eyeproj = new Matrix4f[2];
+    public final Matrix4f eyeproj0 = new Matrix4f();
+    public final Matrix4f eyeproj1 = new Matrix4f();
     public RenderTarget framebufferEye0;
     public RenderTarget framebufferEye1;
     public RenderTarget framebufferMR;
@@ -103,7 +104,7 @@ public abstract class VRRenderer {
 
     public abstract void createRenderTexture(int var1, int var2);
 
-    public abstract Matrix4f getProjectionMatrix(int var1, float var2, float var3);
+    public abstract Matrix4f getProjectionMatrix(int var1, float var2, float var3, Matrix4f dest);
 
     public abstract void endFrame() throws RenderConfigException;
 
@@ -675,8 +676,8 @@ public abstract class VRRenderer {
 
             this.checkGLError("Camera render framebuffer setup");
             ((GameRendererExtension) minecraft.gameRenderer).vivecraft$setupClipPlanes();
-            this.eyeproj[0] = this.getProjectionMatrix(0, ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getClipDistance());
-            this.eyeproj[1] = this.getProjectionMatrix(1, ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getClipDistance());
+            this.getProjectionMatrix(0, ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getClipDistance(), this.eyeproj0);
+            this.getProjectionMatrix(1, ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getClipDistance(), this.eyeproj1);
 
             if (dataholder.vrSettings.useFsaa) {
                 try {

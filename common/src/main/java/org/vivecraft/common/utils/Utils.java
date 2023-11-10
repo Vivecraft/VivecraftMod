@@ -14,9 +14,9 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Math;
+import org.joml.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vivecraft.client.Xplat;
@@ -26,6 +26,7 @@ import org.vivecraft.client_vr.utils.LoaderUtils;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,7 +44,6 @@ public class Utils {
     private static final char[] illegalChars = new char[]{'"', '<', '>', '|', '\u0000', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u0007', '\b', '\t', '\n', '\u000b', '\f', '\r', '\u000e', '\u000f', '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', '\u0017', '\u0018', '\u0019', '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f', ':', '*', '?', '\\', '/'};
     private static final int CONNECT_TIMEOUT = 5000;
     private static final int READ_TIMEOUT = 20000;
-    private static final Random avRandomizer = new Random();
 
     public static final Vector3fc PITCH = new Vector3f(1.0F, 0.0F, 0.0F);
     public static final Vector3fc YAW = new Vector3f(0.0F, 1.0F, 0.0F);
@@ -83,7 +83,7 @@ public class Utils {
         }
     }
 
-    public static org.joml.Vector3f convertVector(Vec3 vector, Vector3f dest) {
+    public static Vector3f convertVector(Vec3 vector, Vector3f dest) {
         return dest.set((float) vector.x(), (float) vector.y(), (float) vector.z());
     }
 
@@ -404,12 +404,65 @@ public class Utils {
         return new Vec3(vector3fc.x(), vector3fc.y(), vector3fc.z());
     }
 
-    public static Matrix4f convertSteamVRMatrix3ToMatrix4f(FloatBuffer floatBuffer, Matrix4f mat) {
-        return mat.setTransposed(new org.joml.Matrix4f(
+    public static Matrix4f convertSteamVRMatrix3ToMatrix4f(@NotNull FloatBuffer floatBuffer, @NotNull Matrix4f mat) {
+        return mat.set(
             floatBuffer.get(0), floatBuffer.get(4), floatBuffer.get(8), 0.0F,
             floatBuffer.get(1), floatBuffer.get(5), floatBuffer.get(9), 0.0F,
             floatBuffer.get(2), floatBuffer.get(6), floatBuffer.get(10), 0.0F,
             floatBuffer.get(3), floatBuffer.get(7), floatBuffer.get(11), 1.0F
-        ));
+        ).transpose();
+    }
+
+    /**
+     * Convert a {@link FloatBuffer} containing a row-major 3x4 matrix,
+     * like {@link org.lwjgl.openvr.HmdMatrix34},
+     * to a column-major {@link Matrix4d}.
+     * This function is required for org.lwjgl.openvr compatibility due to
+     * {@link Matrix4x3f} only accepting inputs with column-major memory layouts, whereas
+     * {@link org.lwjgl.openvr} <a href="https://github.com/ValveSoftware/openvr/wiki/Matrix-Usage-Example">uses row-major layout.</a>
+     *
+     * @see Utils#convertRM34ToCM44(FloatBuffer, Matrix4d)
+     */
+    public static Matrix4f convertRM34ToCM44(@NotNull FloatBuffer floatBuffer, @NotNull Matrix4f dest) {
+        return dest.set(
+            floatBuffer.get(0), floatBuffer.get(4), floatBuffer.get(8), 0.0F,
+            floatBuffer.get(1), floatBuffer.get(5), floatBuffer.get(9), 0.0F,
+            floatBuffer.get(2), floatBuffer.get(6), floatBuffer.get(10), 0.0F,
+            floatBuffer.get(3), floatBuffer.get(7), floatBuffer.get(11), 1.0F
+        );
+    }
+
+    /**
+     * Convert a {@link FloatBuffer} containing a row-major 3x4 matrix,
+     * like {@link org.lwjgl.openvr.HmdMatrix34},
+     * to a column-major {@link Matrix4d}.
+     * This function is required for org.lwjgl.openvr compatibility due to
+     * {@link Matrix4x3f} only accepting inputs with column-major memory layouts, whereas
+     * {@link org.lwjgl.openvr} <a href="https://github.com/ValveSoftware/openvr/wiki/Matrix-Usage-Example">uses row-major layout.</a>
+     *
+     * @see Utils#convertRM34ToCM44(DoubleBuffer, Matrix4d)
+     */
+    public static Matrix4d convertRM34ToCM44(@NotNull FloatBuffer floatBuffer, @NotNull Matrix4d dest) {
+        return dest.set(
+            floatBuffer.get(0), floatBuffer.get(4), floatBuffer.get(8), 0.0F,
+            floatBuffer.get(1), floatBuffer.get(5), floatBuffer.get(9), 0.0F,
+            floatBuffer.get(2), floatBuffer.get(6), floatBuffer.get(10), 0.0F,
+            floatBuffer.get(3), floatBuffer.get(7), floatBuffer.get(11), 1.0F
+        );
+    }
+
+    /**
+     * Convert a {@link DoubleBuffer} containing a row-major 3x4 matrix to
+     * a column-major {@link Matrix4d}.
+     *
+     * @see Utils#convertRM34ToCM44(FloatBuffer, Matrix4f)
+     */
+    public static Matrix4d convertRM34ToCM44(@NotNull DoubleBuffer doubleBuffer, @NotNull Matrix4d dest) {
+        return dest.set(
+            doubleBuffer.get(0), doubleBuffer.get(4), doubleBuffer.get(8), 0.0F,
+            doubleBuffer.get(1), doubleBuffer.get(5), doubleBuffer.get(9), 0.0F,
+            doubleBuffer.get(2), doubleBuffer.get(6), doubleBuffer.get(10), 0.0F,
+            doubleBuffer.get(3), doubleBuffer.get(7), doubleBuffer.get(11), 1.0F
+        );
     }
 }

@@ -430,13 +430,13 @@ public class VREffectsHelper {
                 renderPhysicalKeyboard(partialTicks, poseStack);
             } else {
                 render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
-                    KeyboardHandler.Rotation_room, depthAlways, poseStack);
+                    KeyboardHandler.Rotation_room.transpose(new Matrix4f()), depthAlways, poseStack);
             }
         }
 
         if (RadialHandler.isShowing()) {
             render2D(partialTicks, RadialHandler.Framebuffer, RadialHandler.Pos_room,
-                RadialHandler.Rotation_room, depthAlways, poseStack);
+                RadialHandler.Rotation_room.transpose(new Matrix4f()), depthAlways, poseStack);
         }
     }
 
@@ -571,16 +571,13 @@ public class VREffectsHelper {
 
             //convert previously calculated coords to world coords
             Vec3 guiPos = VRPlayer.room_to_world_pos(KeyboardHandler.Pos_room, dataHolder.vrPlayer.vrdata_world_render);
-            Matrix4f matrix4f = new Matrix4f();
-            Matrix4f rot = matrix4f.setTransposed(new Matrix4f().rotationY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians));
-            Matrix4f dest = new Matrix4f();
-            Matrix4f guiRot = dest.setTransposed(rot.transpose(new Matrix4f()).mul0(KeyboardHandler.Rotation_room.transpose(new Matrix4f())));
+            Matrix4f guiRot = KeyboardHandler.Rotation_room.transpose(new Matrix4f()).rotateLocalY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians);
 
             RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
 
             // offset from eye to gui pos
             poseStack.translate((float) (guiPos.x - eye.x), (float) (guiPos.y - eye.y), (float) (guiPos.z - eye.z));
-            poseStack.mulPoseMatrix(guiRot.transpose(new Matrix4f()));
+            poseStack.mulPoseMatrix(guiRot);
 
             float scale = dataHolder.vrPlayer.vrdata_world_render.worldScale;
             poseStack.scale(scale, scale, scale);
@@ -732,13 +729,10 @@ public class VREffectsHelper {
             Vec3 eye = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
 
             Vec3 guiPos = VRPlayer.room_to_world_pos(pos, dataHolder.vrPlayer.vrdata_world_render);
-            Matrix4f matrix4f = new Matrix4f();
-            Matrix4f yRot = matrix4f.setTransposed(new Matrix4f().rotationY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians));
-            Matrix4f dest = new Matrix4f();
-            Matrix4f guiRot = dest.setTransposed(yRot.transpose(new Matrix4f()).mul0(rot.transpose(new Matrix4f())));
 
-            poseStack.translate((float) (guiPos.x - eye.x), (float) (guiPos.y - eye.y), (float) (guiPos.z - eye.z));
-            poseStack.mulPoseMatrix(guiRot.transpose(new Matrix4f()));
+            poseStack.last().pose()
+                .translate((float) (guiPos.x - eye.x), (float) (guiPos.y - eye.y), (float) (guiPos.z - eye.z))
+                .mul(rot.rotateLocalY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians, new Matrix4f()));
 
             float scale = GuiHandler.guiScale * dataHolder.vrPlayer.vrdata_world_render.worldScale;
             poseStack.scale(scale, scale, scale);

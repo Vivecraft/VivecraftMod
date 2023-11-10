@@ -3,6 +3,7 @@ package org.vivecraft.common.network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -24,13 +25,13 @@ public record VrPlayerState(boolean seated, Pose hmd, boolean reverseHands, Pose
 
     private static Pose hmdPose(VRPlayer vrPlayer) {
         Vec3 vec3 = vrPlayer.vrdata_world_post.getEye(RenderPass.CENTER).getPosition().subtract(Minecraft.getInstance().player.position());
-        Quaternionf quaternion = new Quaternionf().setFromNormalized(vrPlayer.vrdata_world_post.hmd.getMatrix());
+        Quaternionf quaternion = new Quaternionf().setFromNormalized(vrPlayer.vrdata_world_post.hmd.getMatrix(new Matrix4f()).transpose());
         return new Pose(vec3, quaternion);
     }
 
     private static Pose controllerPose(VRPlayer vrPlayer, int i) {
         Vec3 position = vrPlayer.vrdata_world_post.getController(i).getPosition().subtract(Minecraft.getInstance().player.position());
-        Quaternionf orientation = new Quaternionf().setFromNormalized(vrPlayer.vrdata_world_post.getController(i).getMatrix());
+        Quaternionf orientation = new Quaternionf().setFromNormalized(vrPlayer.vrdata_world_post.getController(i).getMatrix(new Matrix4f()).transpose());
         return new Pose(position, orientation);
     }
 

@@ -575,12 +575,12 @@ public class MCOpenVR extends MCVR {
         return !arraylist.isEmpty();
     }
 
-    public Matrix4f getControllerComponentTransform(int controllerIndex, String componenetName) {
-        return this.controllerComponentTransforms != null && this.controllerComponentTransforms.containsKey(componenetName) && ((Matrix4f[]) this.controllerComponentTransforms.get(componenetName))[controllerIndex] != null ? (this.controllerComponentTransforms.get(componenetName))[controllerIndex] : new Matrix4f();
+    public Matrix4f getControllerComponentTransform(int controllerIndex, String componenetName, Matrix4f dest) {
+        return this.controllerComponentTransforms != null && this.controllerComponentTransforms.containsKey(componenetName) && ((Matrix4f[]) this.controllerComponentTransforms.get(componenetName))[controllerIndex] != null ? dest.set(this.controllerComponentTransforms.get(componenetName)[controllerIndex]) : dest.identity();
     }
 
-    private Matrix4f getControllerComponentTransformFromButton(int controllerIndex, long button) {
-        return this.controllerComponentNames != null && this.controllerComponentNames.containsKey(button) ? this.getControllerComponentTransform(controllerIndex, this.controllerComponentNames.get(button)) : new Matrix4f();
+    private Matrix4f getControllerComponentTransformFromButton(int controllerIndex, long button, Matrix4f dest) {
+        return this.controllerComponentNames != null && this.controllerComponentNames.containsKey(button) ? this.getControllerComponentTransform(controllerIndex, this.controllerComponentNames.get(button), dest) : dest.identity();
     }
 
     private int getError() {
@@ -678,10 +678,8 @@ public class MCOpenVR extends MCVR {
 
                                     if (!flag && j == 0) {
                                         try {
-                                            Matrix4f matrix4f1 = this.getControllerComponentTransform(0, "tip");
-                                            Matrix4f matrix4f2 = this.getControllerComponentTransform(0, "handgrip");
-                                            Vector3f vector3 = matrix4f1.transpose(new org.joml.Matrix4f()).transformProject(this.forward, new Vector3f());
-                                            Vector3f vector31 = matrix4f2.transpose(new org.joml.Matrix4f()).transformProject(this.forward, new Vector3f());
+                                            Vector3f vector3 = this.getControllerComponentTransform(0, "tip", new Matrix4f()).transpose().transformProject(this.forward, new Vector3f());
+                                            Vector3f vector31 = this.getControllerComponentTransform(0, "handgrip", new Matrix4f()).transpose().transformProject(this.forward, new Vector3f());
                                             double d0 = Math.abs(vector3.normalize(new Vector3f()).dot(vector31.normalize(new Vector3f())));
                                             double d1 = Math.acos(d0);
                                             double d2 = Math.toDegrees(d1);
@@ -1042,7 +1040,6 @@ public class MCOpenVR extends MCVR {
                     TrackedDevicePose trackeddevicepose = this.poseData.pose();
 
                     if (trackeddevicepose.bPoseIsValid()) {
-                        Utils.convertSteamVRMatrix3ToMatrix4f(trackeddevicepose.mDeviceToAbsoluteTracking().m(), this.poseMatrices[i]);
                         this.deviceVelocity[i] = new Vec3(trackeddevicepose.vVelocity().v(0), trackeddevicepose.vVelocity().v(1), trackeddevicepose.vVelocity().v(2));
                         this.controllerPose[controller].set(this.poseMatrices[i]);
                         this.controllerTracking[controller] = true;
@@ -1058,7 +1055,7 @@ public class MCOpenVR extends MCVR {
     }
 
     private void updatePose() {
-        if (OpenVR.VRSystem != null && OpenVR.VRSystem != null) {
+        if (OpenVR.VRSystem != null && OpenVR.VRCompositor != null) {
             int i = VRCompositor_WaitGetPoses(this.hmdTrackedDevicePoses, null);
 
             if (i > 0) {
@@ -1104,16 +1101,8 @@ public class MCOpenVR extends MCVR {
             this.TPose = false;
 
             if (this.TPose) {
-                this.TPose_Right.setTransposed(this.TPose_Right.transpose(new org.joml.Matrix4f()).setTranslation(0.0F, 0.0F, 0.0F));
-                Matrix4f matrix4f = this.TPose_Right;
-                Matrix4f matrix4f2 = new Matrix4f();
-                this.TPose_Right.set(matrix4f2.setTransposed(new org.joml.Matrix4f().rotationY(-120.0F)));
-                this.TPose_Right.setTransposed(this.TPose_Right.transpose(new org.joml.Matrix4f()).setTranslation(0.5F, 1.0F, -0.5F));
-                this.TPose_Left.setTransposed(this.TPose_Left.transpose(new org.joml.Matrix4f()).setTranslation(0.0F, 0.0F, 0.0F));
-                matrix4f = this.TPose_Left;
-                Matrix4f matrix4f1 = new Matrix4f();
-                this.TPose_Left.set(matrix4f1.setTransposed(new org.joml.Matrix4f().rotationY(120.0F)));
-                this.TPose_Left.setTransposed(this.TPose_Left.transpose(new org.joml.Matrix4f()).setTranslation(-0.5F, 1.0F, -0.5F));
+                this.TPose_Right.rotationY(-120.0F).setTranslation(0.5F, 1.0F, -0.5F).transpose();
+                this.TPose_Left.rotationY(120.0F).setTranslation(-0.5F, 1.0F, -0.5F).transpose();
                 this.Neutral_HMD.m03(0.0F);
                 this.Neutral_HMD.m13(1.8F);
                 this.hmdPose.set(this.Neutral_HMD);

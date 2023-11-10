@@ -52,7 +52,7 @@ public class RenderHelper {
                 .averageRotation(dataHolder.vrSettings.displayMirrorCenterSmooth));
         } else {
             modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
-                .getMatrix().transpose(new Matrix4f()).transpose();
+                .getMatrix(new Matrix4f()).transpose().transpose();
         }
         poseStack.last().pose().mul(modelView);
         poseStack.last().normal().mul(new Matrix3f(modelView));
@@ -126,15 +126,17 @@ public class RenderHelper {
         matrix.translate(aimSource.x, aimSource.y, aimSource.z);
         float sc = dataHolder.vrPlayer.vrdata_world_render.worldScale;
         if (mc.level != null && TelescopeTracker.isTelescope(mc.player.getUseItem())) {
-            Matrix4f matrix4f = dataHolder.vrPlayer.vrdata_world_render.hmd.getMatrix();
-            matrix.mulPoseMatrix(matrix4f.setTransposed(matrix4f.transpose(new Matrix4f()).invert())
-                .transpose(new Matrix4f()).transpose());
+            matrix.mulPoseMatrix(
+                dataHolder.vrPlayer.vrdata_world_render.hmd.getMatrix(new Matrix4f()).transpose().invert()
+                    .transpose().transpose().transpose()
+            );
             MethodHolder.rotateDegXp(matrix, 90);
             matrix.translate(controller == 0 ? 0.075 * sc : -0.075 * sc, -0.025 * sc, 0.0325 * sc);
         } else {
-            Matrix4f matrix4f = dataHolder.vrPlayer.vrdata_world_render.getController(controller)
-                .getMatrix();
-            matrix.mulPoseMatrix(matrix4f.setTransposed(matrix4f.transpose(new Matrix4f()).invert()).transpose(new Matrix4f()).transpose());
+            matrix.mulPoseMatrix(
+                dataHolder.vrPlayer.vrdata_world_render.getController(controller).getMatrix(new Matrix4f()).transpose().invert()
+                    .transpose().transpose().transpose()
+            );
         }
 
         matrix.scale(sc, sc, sc);

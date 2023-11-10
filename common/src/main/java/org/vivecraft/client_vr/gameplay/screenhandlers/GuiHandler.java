@@ -204,9 +204,9 @@ public class GuiHandler {
         Vector3f vector3 = new Vector3f().set(vec3.x, vec3.y, vec3.z);
         Vec3 vec31 = controller.getDirection();
         Vector3f vector31 = new Vector3f((float) vec31.x, (float) vec31.y, (float) vec31.z);
-        Vector3f vector33 = guiRotation_room.transpose(new org.joml.Matrix4f()).transformProject(0.0F, 0.0F, 1.0F, new Vector3f());
-        Vector3f vector34 = guiRotation_room.transpose(new org.joml.Matrix4f()).transformProject(1.0F, 0.0F, 0.0F, new Vector3f());
-        Vector3f vector35 = guiRotation_room.transpose(new org.joml.Matrix4f()).transformProject(0.0F, 1.0F, 0.0F, new Vector3f());
+        Vector3f vector33 = guiRotation_room.transpose(new Matrix4f()).transformProject(0.0F, 0.0F, 1.0F, new Vector3f());
+        Vector3f vector34 = guiRotation_room.transpose(new Matrix4f()).transformProject(1.0F, 0.0F, 0.0F, new Vector3f());
+        Vector3f vector35 = guiRotation_room.transpose(new Matrix4f()).transformProject(0.0F, 1.0F, 0.0F, new Vector3f());
         float f = vector33.dot(vector31);
 
         if (Math.abs(f) > 1.0E-5F) {
@@ -410,8 +410,7 @@ public class GuiHandler {
                 );
                 float pitch = (float) Math.asin((look.y() / look.length()));
                 float yaw = (float) (Math.PI + Math.atan2(look.x(), look.z()));
-                guiRotation_room = new Matrix4f().setTransposed(new org.joml.Matrix4f().rotationY(yaw));
-                guiRotation_room = new Matrix4f().setTransposed(guiRotation_room.transpose(new org.joml.Matrix4f()).mul0(new Matrix4f().setTransposed(new Matrix4f().rotationX(pitch)).transpose(new org.joml.Matrix4f())));
+                guiRotation_room = new Matrix4f().rotationY(yaw).rotateX(pitch).transpose();
             }
 
             KeyboardHandler.orientOverlay(newScreen != null);
@@ -438,12 +437,11 @@ public class GuiHandler {
         }
 
         Vec3 guipos = guiPos_room;
-        Matrix4f guirot = guiRotation_room;
+        Matrix4f guirot = new Matrix4f();
         Vec3 guilocal = new Vec3(0.0D, 0.0D, 0.0D);
         float scale = guiScale;
 
         if (guipos == null) {
-            guirot = null;
             scale = 1.0F;
 
             if (mc.level != null && (mc.screen == null || !dh.vrSettings.floatInventory)) {
@@ -453,45 +451,52 @@ public class GuiHandler {
                     i = -1;
                 }
 
-                if (!dh.vrSettings.seated && dh.vrSettings.vrHudLockMode != VRSettings.HUDLock.HEAD) {
-                    if (dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
-                        guirot = new Matrix4f().setTransposed(new Matrix4f().setTransposed(new Matrix4f().setTransposed(new Matrix4f().setTransposed(new Matrix4f().rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians)).transpose(new Matrix4f()).mul0(dh.vr.getAimRotation(1).transpose(new Matrix4f()))).transpose(new org.joml.Matrix4f()).mul0(new Matrix4f().setTransposed(new Matrix4f().rotationX((-(float) Math.PI / 5F))).transpose(new org.joml.Matrix4f()))).transpose(new org.joml.Matrix4f()).mul0(new Matrix4f().setTransposed(new Matrix4f().rotationY(((float) Math.PI / 10F) * (float) i)).transpose(new org.joml.Matrix4f())));
+                guirot.rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians);
+
+                switch (dh.vrSettings.seated ? VRSettings.HUDLock.HEAD : dh.vrSettings.vrHudLockMode) {
+                    case HAND -> {
+                        guirot.mul0(dh.vr.getAimRotation(1, new Matrix4f()).transpose())
+                            .rotateX((-(float) Math.PI / 5F))
+                            .rotateY(((float) Math.PI / 10F) * (float) i)
+                        ;
                         scale = 0.58823526F;
                         guilocal = new Vec3(guilocal.x, 0.32D * (double) dh.vrPlayer.vrdata_world_render.worldScale, guilocal.z);
                         guipos = RenderHelper.getControllerRenderPos(1);
                         dh.vr.hudPopup = true;
-                    } else if (dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST) {
-                        guirot = new Matrix4f().setTransposed(new Matrix4f().setTransposed(new Matrix4f().setTransposed(new Matrix4f().setTransposed(new Matrix4f().rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians)).transpose(new org.joml.Matrix4f()).mul0(dh.vr.getAimRotation(1).transpose(new org.joml.Matrix4f()))).transpose(new org.joml.Matrix4f()).mul0(new Matrix4f().setTransposed(new Matrix4f().rotationZ(((float) Math.PI / 2F) * (float) i)).transpose(new org.joml.Matrix4f()))).transpose(new org.joml.Matrix4f()).mul0(new Matrix4f().setTransposed(new Matrix4f().rotationY(0.9424779F * (float) i)).transpose(new org.joml.Matrix4f())));
+                    }
+                    case WRIST -> {
+                        guirot.mul0(dh.vr.getAimRotation(1, new Matrix4f()).transpose())
+                            .rotateZ(((float) Math.PI / 2F) * (float) i)
+                            .rotateY(0.9424779F * (float) i)
+                            .rotateY(((float) Math.PI / 5F) * (float) i)
+                        ;
                         guipos = RenderHelper.getControllerRenderPos(1);
                         dh.vr.hudPopup = true;
                         boolean flag = mc.player.getModelName().equals("slim");
                         scale = 0.4F;
                         guilocal = new Vec3((float) i * -0.136F * dh.vrPlayer.vrdata_world_render.worldScale, (flag ? 0.13D : 0.12D) * (double) dh.vrPlayer.vrdata_world_render.worldScale, 0.06D * (double) dh.vrPlayer.vrdata_world_render.worldScale);
-                        guirot = new Matrix4f().setTransposed(guirot.transpose(new org.joml.Matrix4f()).mul0(new Matrix4f().setTransposed(new Matrix4f().rotationY(((float) Math.PI / 5F) * (float) i)).transpose(new org.joml.Matrix4f())));
                     }
-                } else {
-                    Matrix4f matrix4f2;
+                    case HEAD -> {
                     Vec3 vec33 = dh.vrPlayer.vrdata_world_render.hmd.getPosition();
                     Vec3 vec34;
 
                     if (dh.vrSettings.seated && dh.vrSettings.seatedHudAltMode) {
                         vec34 = dh.vrPlayer.vrdata_world_render.getController(0).getDirection();
-                        matrix4f2 = new Matrix4f().setTransposed(new Matrix4f().setTransposed(new Matrix4f().rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians)).transpose(new org.joml.Matrix4f()).mul0(dh.vr.getAimRotation(0).transpose(new org.joml.Matrix4f())));
+                        guirot.mul0(dh.vr.getAimRotation(0, new Matrix4f()).transpose());
                     } else {
                         vec34 = dh.vrPlayer.vrdata_world_render.hmd.getDirection();
-                        matrix4f2 = new Matrix4f().setTransposed(new Matrix4f().setTransposed(new Matrix4f().rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians)).transpose(new org.joml.Matrix4f()).mul0(dh.vr.hmdRotation.transpose(new org.joml.Matrix4f())));
+                        guirot.mul0(dh.vr.hmdRotation.transpose(new Matrix4f()));
                     }
 
                     guipos = new Vec3(vec33.x + vec34.x * (double) dh.vrPlayer.vrdata_world_render.worldScale * (double) dh.vrSettings.hudDistance, vec33.y + vec34.y * (double) dh.vrPlayer.vrdata_world_render.worldScale * (double) dh.vrSettings.hudDistance, vec33.z + vec34.z * (double) dh.vrPlayer.vrdata_world_render.worldScale * (double) dh.vrSettings.hudDistance);
-                    Quaternionf quaternion = new Quaternionf().setFromNormalized(matrix4f2.transpose(new org.joml.Matrix4f()).normalize3x3(new Matrix3f()));
-                    Matrix4f matrix4f3 = new Matrix4f();
-                    guirot = matrix4f3.setTransposed(matrix4f3.transpose(new org.joml.Matrix4f()).rotation(quaternion));
+                    guirot.rotation(new Quaternionf().setFromNormalized(guirot.normalize3x3(new Matrix3f())));
                     scale = dh.vrSettings.hudScale;
+                    }
                 }
             }
         } else {
             guipos = VRPlayer.room_to_world_pos(guipos, dh.vrPlayer.vrdata_world_render);
-            guirot = new Matrix4f().setTransposed(new Matrix4f().setTransposed(new Matrix4f().rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians)).transpose(new org.joml.Matrix4f()).mul0(guirot.transpose(new org.joml.Matrix4f())));
+            guiRotation_room.transpose(guirot).rotateLocalY(dh.vrPlayer.vrdata_world_render.rotation_radians);
         }
 
         if ((dh.vrSettings.seated || dh.vrSettings.menuAlwaysFollowFace) && ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom()) {
@@ -515,10 +520,9 @@ public class GuiHandler {
             float f4 = ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
             Vec3 vec39 = vec35.add(new Vec3(vec38.x * (double) f4, vec38.y * (double) f4, vec38.z * (double) f4));
             Vec3 vec310 = new Vec3(vec39.x, vec39.y, vec39.z);
-            Matrix4f matrix4f3 = new Matrix4f().setTransposed(new org.joml.Matrix4f().rotationY((float) Math.PI - f1));
-            guirot = new Matrix4f().setTransposed(matrix4f3.transpose(new org.joml.Matrix4f()).mul0(new Matrix4f().setTransposed(new Matrix4f().rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians)).transpose(new org.joml.Matrix4f())));
+            guiRotation_room = new Matrix4f().rotationY((float) Math.PI - f1).transpose();
+            guiRotation_room.transpose(guirot).rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
             guipos = VRPlayer.room_to_world_pos(vec310, dh.vrPlayer.vrdata_world_render);
-            guiRotation_room = matrix4f3;
             guiScale = 2.0F;
             guiPos_room = vec310;
         }
@@ -531,13 +535,12 @@ public class GuiHandler {
             guiPos_room = new Vec3(0, 0, 0);
             guipos = VRPlayer.room_to_world_pos(guiPos_room, dh.vrPlayer.vrdata_world_render);
             guiRotation_room = new Matrix4f();
-            guirot = new Matrix4f();
             guiScale = 1.0F;
         }
 
         Vec3 vec36 = guipos.subtract(vec3);
         pMatrixStack.translate(vec36.x, vec36.y, vec36.z);
-        pMatrixStack.mulPoseMatrix(guirot.transpose(new org.joml.Matrix4f()));
+        pMatrixStack.mulPoseMatrix(guirot);
         pMatrixStack.translate(guilocal.x, guilocal.y, guilocal.z);
         float f2 = scale * dh.vrPlayer.vrdata_world_render.worldScale;
         pMatrixStack.scale(f2, f2, f2);

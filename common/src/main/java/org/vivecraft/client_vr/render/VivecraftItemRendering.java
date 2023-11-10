@@ -14,6 +14,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -175,7 +176,7 @@ public class VivecraftItemRendering {
             }
 
             pMatrixStack.translate(0.0D, 0.0D, 0.1D);
-            pMatrixStack.last().pose().mul(dh.vrPlayer.vrdata_world_render.getController(1).getMatrix().transpose(new org.joml.Matrix4f()).transpose());
+            pMatrixStack.last().pose().mul(dh.vrPlayer.vrdata_world_render.getController(1).getMatrix(new Matrix4f()).transpose());
             rotation.mul(Axis.YP.rotationDegrees(f1));
             rotation.mul(Axis.XP.rotationDegrees(-f));
             rotation.mul(Axis.ZP.rotationDegrees(-f3));

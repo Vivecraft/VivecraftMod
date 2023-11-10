@@ -92,9 +92,9 @@ public class NullVR extends MCVR {
 
             this.updateAim();
 
-            this.controllerPose[0].setTransposed(this.controllerPose[0].transpose(new org.joml.Matrix4f()).setTranslation(0.3F, 1.2F, -0.5F));
+            this.controllerPose[0].transpose().setTranslation(0.3F, 1.2F, -0.5F).transpose();
 
-            this.controllerPose[1].setTransposed(this.controllerPose[1].transpose(new org.joml.Matrix4f()).setTranslation(-0.3F, 1.2F, -0.5F));
+            this.controllerPose[1].transpose().setTranslation(-0.3F, 1.2F, -0.5F).transpose();
 
             this.dh.vrSettings.xSensitivity = xSens;
             this.dh.vrSettings.keyholeX = xKey;
@@ -102,11 +102,11 @@ public class NullVR extends MCVR {
 
             // point head in cursor direction
 
-            this.hmdRotation.setTransposed(this.hmdRotation.transpose(new org.joml.Matrix4f()).set3x3(this.handRotation[0].transpose(new org.joml.Matrix4f())));
+            this.hmdRotation.transpose3x3().set3x3(this.handRotation[0].transpose(new Matrix4f())).transpose3x3();
 
             if (GuiHandler.guiRotation_room != null) {
                 // look at screen, so that it's centered
-                this.hmdRotation.setTransposed(this.hmdRotation.transpose(new org.joml.Matrix4f()).set3x3(GuiHandler.guiRotation_room.transpose(new org.joml.Matrix4f())));
+                this.hmdRotation.transpose3x3().set3x3(GuiHandler.guiRotation_room.transpose(new Matrix4f())).transpose3x3();
             }
             this.mc.getProfiler().popPush("hmdSampling");
             this.hmdSampling();
@@ -130,7 +130,7 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public Matrix4f getControllerComponentTransform(int controllerIndex, String componenetName) {
+    public Matrix4f getControllerComponentTransform(int controllerIndex, String componenetName, Matrix4f dest) {
         return new Matrix4f();
     }
 

@@ -70,12 +70,12 @@ public class OpenVRStereoRenderer extends VRRenderer {
         }
     }
 
-    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
+    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip, Matrix4f dest) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (eyeType == 0) {
-                return new Matrix4f().setTransposed(VRSystem_GetProjectionMatrix(0, nearClip, farClip, HmdMatrix44.calloc(stack)).m());
+                return dest.setTransposed(VRSystem_GetProjectionMatrix(0, nearClip, farClip, HmdMatrix44.calloc(stack)).m());
             } else {
-                return new Matrix4f().setTransposed(VRSystem_GetProjectionMatrix(1, nearClip, farClip, HmdMatrix44.calloc(stack)).m());
+                return dest.setTransposed(VRSystem_GetProjectionMatrix(1, nearClip, farClip, HmdMatrix44.calloc(stack)).m());
             }
         }
     }

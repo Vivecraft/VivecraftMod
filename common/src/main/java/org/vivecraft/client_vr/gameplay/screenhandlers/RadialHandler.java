@@ -134,12 +134,7 @@ public class RadialHandler {
             );
             float f1 = (float) Math.asin(vector3.y() / vector3.length());
             float f2 = (float) ((double) (float) Math.PI + Math.atan2(vector3.x(), vector3.z()));
-            Matrix4f matrix4f2 = new Matrix4f();
-            Rotation_room = matrix4f2.setTransposed(new org.joml.Matrix4f().rotationY(f2));
-            Matrix4f matrix4f1 = new Matrix4f();
-            Matrix4f matrix4f = matrix4f1.setTransposed(new org.joml.Matrix4f().rotationX(f1));
-            Matrix4f dest = new Matrix4f();
-            Rotation_room = dest.setTransposed(Rotation_room.transpose(new org.joml.Matrix4f()).mul0(matrix4f.transpose(new org.joml.Matrix4f())));
+            Rotation_room = new Matrix4f().rotationY(f2).rotateX(f1).transpose();
         }
     }
 

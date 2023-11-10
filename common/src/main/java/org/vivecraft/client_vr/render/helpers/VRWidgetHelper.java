@@ -102,7 +102,7 @@ public class VRWidgetHelper {
         Vec3 widgetOffset = widgetPosition.subtract(eye);
 
         poseStack.translate(widgetOffset.x, widgetOffset.y, widgetOffset.z);
-        poseStack.mulPoseMatrix(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().transpose(new Matrix4f()));
+        poseStack.mulPoseMatrix(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix(new Matrix4f()).transpose());
         scale = scale * dataholder.vrPlayer.vrdata_world_render.worldScale;
         poseStack.scale(scale, scale, scale);
 
@@ -135,7 +135,7 @@ public class VRWidgetHelper {
         PoseStack poseStack2 = new PoseStack();
         RenderHelper.applyVRModelView(dataholder.currentPass, poseStack2);
         poseStack2.last().pose().identity();
-        poseStack2.last().normal().mul(new Matrix3f(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().transpose(new Matrix4f())));
+        poseStack2.last().normal().mul(new Matrix3f(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix(new Matrix4f()).transpose()));
 
         minecraft.getBlockRenderer().getModelRenderer().renderModel(poseStack2.last(), bufferbuilder, null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
         tesselator.end();

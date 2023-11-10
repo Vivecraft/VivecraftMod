@@ -41,7 +41,7 @@ public class ServerVivePlayer {
         var controllerPose = controller == 0 ? this.vrPlayerState.controller0() : this.vrPlayerState.controller1();
 
         if (controllerPose != null) {
-            Vector3f vector3 = controllerPose.orientation().transformInverse(direction, new Vector3f());
+            Vector3f vector3 = controllerPose.orientation().transformUnit(direction, new Vector3f());
             return Utils.toVec3(vector3);
         } else {
             return this.player.getLookAngle();
@@ -54,7 +54,7 @@ public class ServerVivePlayer {
 
     public Vec3 getHMDDir() {
         if (this.vrPlayerState != null) {
-            Vector3f vector3 = this.vrPlayerState.hmd().orientation().transformInverse(this.forward, new Vector3f());
+            Vector3f vector3 = this.vrPlayerState.hmd().orientation().transformUnit(this.forward, new Vector3f());
             return new Vec3(vector3.x(), vector3.y(), vector3.z());
         }
         return this.player.getLookAngle();
