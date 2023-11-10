@@ -144,8 +144,9 @@ public class GuiHandler {
             controllerMouseX *= (double) guiWidth / oldWidth;
             controllerMouseY *= (double) guiHeight / oldHeight;
             return true;
-        } else
-			return oldGuiScale != guiScaleFactor;
+        } else {
+            return oldGuiScale != guiScaleFactor;
+        }
     }
 
     public static void processGui() {
