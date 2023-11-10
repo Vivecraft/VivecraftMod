@@ -2,6 +2,7 @@ package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -36,19 +37,14 @@ public class VRState {
                 dh.vr = new NullVR(Minecraft.getInstance(), dh);
             }
             if (!dh.vr.init()) {
-                throw new RenderConfigException("VR init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus, dh.vr.getName()));
+                throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus, dh.vr.getName()));
             }
 
             dh.vrRenderer = dh.vr.createVRRenderer();
             dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
-            try {
-                dh.vrRenderer.setupRenderConfiguration();
-                RenderPassManager.setVanillaRenderPass();
-            } catch (RenderConfigException renderConfigException) {
-                throw new RenderConfigException("VR Render Error", Component.translatable("vivecraft.messages.rendersetupfailed", renderConfigException.error, dh.vr.getName()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            dh.vrRenderer.setupRenderConfiguration();
+            RenderPassManager.setVanillaRenderPass();
 
             dh.vrPlayer = new VRPlayer();
             dh.vrPlayer.registerTracker(dh.backpackTracker);
@@ -77,6 +73,15 @@ public class VRState {
             vrEnabled = false;
             destroyVR(true);
             Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
+        } catch (Throwable e) {
+            vrEnabled = false;
+            destroyVR(true);
+            e.printStackTrace();
+            MutableComponent component = Component.literal(e.getClass().getName() + (e.getMessage() == null ? "" : ": " + e.getMessage()));
+            for (StackTraceElement element : e.getStackTrace()) {
+                component.append(Component.literal("\n" + element.toString()));
+            }
+            Minecraft.getInstance().setScreen(new ErrorScreen("VR Init Error", component));
         }
     }
 
