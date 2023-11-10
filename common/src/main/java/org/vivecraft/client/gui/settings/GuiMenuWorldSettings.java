@@ -31,7 +31,8 @@ public class GuiMenuWorldSettings extends GuiVROptionsBase {
         }
 
         return true;
-    })
+    }),
+        new VROptionEntry(VRSettings.VrOptions.MENU_WORLD_FALLBACK),
     };
 
     public GuiMenuWorldSettings(Screen guiScreen) {
