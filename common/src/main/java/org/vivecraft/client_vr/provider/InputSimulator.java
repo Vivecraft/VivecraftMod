@@ -3,12 +3,11 @@ package org.vivecraft.client_vr.provider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class InputSimulator {
     private static final Set<Integer> pressedKeys = new HashSet<>();
@@ -77,6 +76,7 @@ public class InputSimulator {
     }
 
     private static long airTypingWarningTime;
+
     public static void pressKeyForBind(int code) {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();

@@ -60,8 +60,6 @@ public class ClientDataHolderVR {
     // showed chat notifications
     public boolean showedUpdateNotification;
 
-    public boolean skipStupidGoddamnChunkBoundaryClipping;
-
 
     public static ClientDataHolderVR getInstance() {
         if (INSTANCE == null) {

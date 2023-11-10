@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "RenderSectionManagerVRMixin",
+    "SodiumLeavesBlockMixin",
     "SodiumWorldRendererVRMixin"
   ],
   "minVersion": "0.8.4"

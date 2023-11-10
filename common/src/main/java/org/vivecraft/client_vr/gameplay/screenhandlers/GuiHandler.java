@@ -117,11 +117,11 @@ public class GuiHandler {
 
         guiScaleFactorMax = maxScale;
 
-        scaledWidth =  Mth.ceil(framebufferWidth / (float) scale);
-        scaledWidthMax =  Mth.ceil(framebufferWidth / (float) maxScale);
+        scaledWidth = Mth.ceil(framebufferWidth / (float) scale);
+        scaledWidthMax = Mth.ceil(framebufferWidth / (float) maxScale);
 
-        scaledHeight =  Mth.ceil(framebufferHeight / (float) scale);
-        scaledHeightMax =  Mth.ceil(framebufferHeight / (float) maxScale);
+        scaledHeight = Mth.ceil(framebufferHeight / (float) scale);
+        scaledHeightMax = Mth.ceil(framebufferHeight / (float) maxScale);
 
         return scale;
     }
@@ -143,10 +143,8 @@ public class GuiHandler {
             controllerMouseX *= (double) guiWidth / oldWidth;
             controllerMouseY *= (double) guiHeight / oldHeight;
             return true;
-        } else if (oldGuiScale != guiScaleFactor) {
-            return true;
         } else {
-            return false;
+            return oldGuiScale != guiScaleFactor;
         }
     }
 
