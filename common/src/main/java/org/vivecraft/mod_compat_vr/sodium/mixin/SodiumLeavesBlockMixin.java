@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = LeavesBlock.class, priority = 1100)
 public class SodiumLeavesBlockMixin {
     // fix menu world leaves rendering issue on sodium
-    @Inject(method = "skipRendering", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "Lnet/minecraft/world/level/block/state/BlockBehaviour;skipRendering(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;)Z", at = @At("HEAD"), cancellable = true)
     void vivecraft$sodiumLeavesFix(CallbackInfoReturnable<Boolean> cir) {
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread())
             cir.setReturnValue(false);
