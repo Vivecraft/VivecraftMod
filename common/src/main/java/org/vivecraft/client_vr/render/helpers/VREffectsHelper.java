@@ -208,7 +208,8 @@ public class VREffectsHelper {
             .uv(1, 1).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
         bufferbuilder.vertex(matrix, 100, 0, 0)
             .uv(1, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
 
         // up
         RenderSystem.setShaderTexture(0, cubeUp);
@@ -221,7 +222,8 @@ public class VREffectsHelper {
             .uv(1, 1).color(255, 255, 255, 255).normal(0, -1, 0).endVertex();
         bufferbuilder.vertex(matrix, 100, 100, 100)
             .uv(1, 0).color(255, 255, 255, 255).normal(0, -1, 0).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
 
         // left
         RenderSystem.setShaderTexture(0, cubeLeft);
@@ -234,7 +236,8 @@ public class VREffectsHelper {
             .uv(0, 0).color(255, 255, 255, 255).normal(1, 0, 0).endVertex();
         bufferbuilder.vertex(matrix, 0, 0, 100)
             .uv(0, 1).color(255, 255, 255, 255).normal(1, 0, 0).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
 
         // right
         RenderSystem.setShaderTexture(0, cubeRight);
@@ -247,7 +250,8 @@ public class VREffectsHelper {
             .uv(1, 0).color(255, 255, 255, 255).normal(-1, 0, 0).endVertex();
         bufferbuilder.vertex(matrix, 100, 100, 0)
             .uv(0, 0).color(255, 255, 255, 255).normal(-1, 0, 0).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
 
         // front
         RenderSystem.setShaderTexture(0, cubeFront);
@@ -260,7 +264,8 @@ public class VREffectsHelper {
             .uv(1, 0).color(255, 255, 255, 255).normal(0, 0, 1).endVertex();
         bufferbuilder.vertex(matrix, 0, 100, 0)
             .uv(0, 0).color(255, 255, 255, 255).normal(0, 0, 1).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
 
         //back
         RenderSystem.setShaderTexture(0, cubeBack);
@@ -273,7 +278,8 @@ public class VREffectsHelper {
             .uv(0, 0).color(255, 255, 255, 255).normal(0, 0, -1).endVertex();
         bufferbuilder.vertex(matrix, 100, 0, 100)
             .uv(0, 1).color(255, 255, 255, 255).normal(0, 0, -1).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
 
         poseStack.popPose();
 
@@ -326,7 +332,8 @@ public class VREffectsHelper {
                 .color(r, g, b, 255)
                 .normal(0, 1, 0).endVertex();
 
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            bufferbuilder.end();
+            BufferUploader.end(bufferbuilder);
             poseStack.popPose();
         }
     }

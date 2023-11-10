@@ -43,6 +43,7 @@ import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mixin.client.blaze3d.BufferBuilderAccessor;
 import org.vivecraft.mixin.client.renderer.RenderStateShardAccessor;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
@@ -358,7 +359,7 @@ public class MenuWorldRenderer {
             BlockRenderDispatcher blockRenderer = mc.getBlockRenderer();
             BufferBuilder vertBuffer = bufferBuilders.get(pair);
             BlockPos.MutableBlockPos pos = currentPositions.get(pair);
-            RandomSource randomSource = RandomSource.create();
+            Random random = new Random();
 
             int count = 0;
             while (Utils.milliTime() - startTime < maxTime && pos.getY() < Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int) blockAccess.getGround()) && building) {
@@ -378,14 +379,14 @@ public class MenuWorldRenderer {
                         }
 
                         if (state.getRenderShape() != RenderShape.INVISIBLE && ItemBlockRenderTypes.getChunkRenderType(state) == layer) {
-                            for (var quad : mc.getModelManager().getBlockModelShaper().getBlockModel(state).getQuads(state, null, randomSource)) {
+                            for (var quad : mc.getModelManager().getBlockModelShaper().getBlockModel(state).getQuads(state, null, random)) {
                                 if (quad.getSprite().getUniqueFrames().sum() > 1) {
                                     animatedSprites.add(quad.getSprite());
                                 }
                             }
                             thisPose.pushPose();
                             thisPose.translate(pos.getX(), pos.getY(), pos.getZ());
-                            blockRenderer.renderBatched(state, pos, blockAccess, thisPose, vertBuffer, true, randomSource);
+                            blockRenderer.renderBatched(state, pos, blockAccess, thisPose, vertBuffer, true, random);
                             count++;
                             thisPose.popPose();
                         }
@@ -441,10 +442,14 @@ public class MenuWorldRenderer {
             if (layer == RenderType.translucent()) {
                 vertBuffer.setQuadSortOrigin(0, Mth.frac(blockAccess.getGround()), 0);
             }
-            BufferBuilder.RenderedBuffer renderedBuffer = vertBuffer.end();
-            if (!renderedBuffer.isEmpty()) {
-                uploadGeometry(layer, renderedBuffer);
+            if (((BufferBuilderAccessor) vertBuffer).getVertices() > 0) {
+                vertBuffer.end();
+                uploadGeometry(layer, vertBuffer);
                 count++;
+            } else {
+                // discard empty buffers
+                vertBuffer.end();
+                vertBuffer.discard();
             }
             totalMemory += ((BufferBuilderExtension) vertBuffer).vivecraft$getBufferSize();
             ((BufferBuilderExtension) vertBuffer).vivecraft$freeBuffer();
@@ -482,10 +487,10 @@ public class MenuWorldRenderer {
         builderError = null;
     }
 
-    private void uploadGeometry(RenderType layer, BufferBuilder.RenderedBuffer renderedBuffer) {
+    private void uploadGeometry(RenderType layer, BufferBuilder bufferBuilder) {
         VertexBuffer buffer = new VertexBuffer();
         buffer.bind();
-        buffer.upload(renderedBuffer);
+        buffer.upload(bufferBuilder);
         VertexBuffer.unbind();
         vertexBuffers.get(layer).add(buffer);
     }

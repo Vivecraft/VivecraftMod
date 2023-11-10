@@ -1,8 +1,9 @@
 package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -37,7 +38,7 @@ public class VRState {
                 dh.vr = new NullVR(Minecraft.getInstance(), dh);
             }
             if (!dh.vr.init()) {
-                throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus, dh.vr.getName()));
+                throw new RenderConfigException("VR Init Error", new TranslatableComponent("vivecraft.messages.rendersetupfailed", dh.vr.initStatus, dh.vr.getName()));
             }
 
             dh.vrRenderer = dh.vr.createVRRenderer();
@@ -77,9 +78,9 @@ public class VRState {
             vrEnabled = false;
             destroyVR(true);
             e.printStackTrace();
-            MutableComponent component = Component.literal(e.getClass().getName() + (e.getMessage() == null ? "" : ": " + e.getMessage()));
+            MutableComponent component = new TextComponent(e.getClass().getName() + (e.getMessage() == null ? "" : ": " + e.getMessage()));
             for (StackTraceElement element : e.getStackTrace()) {
-                component.append(Component.literal("\n" + element.toString()));
+                component.append(new TextComponent("\n" + element.toString()));
             }
             Minecraft.getInstance().setScreen(new ErrorScreen("VR Init Error", component));
         }

@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "client.ResourceLoadStateTrackerMixin",
+    "client.blaze3d.BufferBuilderAccessor",
     "client.blaze3d.BufferBuilderMixin",
     "client.blaze3d.MemoryTrackerAccessor",
     "client.blaze3d.RenderSystemAccessor",

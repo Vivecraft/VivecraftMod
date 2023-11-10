@@ -12,7 +12,6 @@ import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.openvr.*;
 import org.lwjgl.system.MemoryStack;
