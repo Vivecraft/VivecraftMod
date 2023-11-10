@@ -139,7 +139,7 @@ public abstract class MCVR {
     }
 
     public Matrix4f getAimRotation(int controller, Matrix4f dest) {
-        return dest.set(this.controllerRotation[controller]);
+        return dest.set(this.controllerRotation[controller]).transpose();
     }
 
     public Vec3 getAimSource(int controller) {
@@ -192,7 +192,7 @@ public abstract class MCVR {
     }
 
     public Matrix4f getHandRotation(int controller, Matrix4f dest) {
-        return dest.set(this.handRotation[controller]);
+        return dest.set(this.handRotation[controller]).transpose();
     }
 
     public Vec3 getHandVector(int controller) {
@@ -251,7 +251,7 @@ public abstract class MCVR {
     }
 
     public Vec3 getHmdVector() {
-        Vector3f vector3 = this.hmdRotation.transpose(new Matrix4f()).transformProject(this.forward, new Vector3f());
+        Vector3f vector3 = this.hmdRotation.transformProject(this.forward, new Vector3f());
         return Utils.toVec3(vector3);
     }
 
@@ -267,7 +267,7 @@ public abstract class MCVR {
         }
 
         if (matrix4f != null) {
-            return dest.set(this.hmdRotation).transpose().mul0(new Matrix4f().set3x3(matrix4f).transpose3x3()).transpose();
+            return this.hmdRotation.mul(new Matrix4f().set3x3(matrix4f).transpose3x3(), dest);
         } else {
             return dest.set(this.hmdRotation);
         }
@@ -345,15 +345,13 @@ public abstract class MCVR {
         }
 
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST) {
-            Matrix4f matrix4f1 = this.getAimRotation(1, new Matrix4f());
-            barStartPos = Utils.toVec3(matrix4f1.transpose(new Matrix4f()).transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.26F), new Vector3f()));
             Matrix4f matrix4f = this.getAimRotation(1, new Matrix4f());
-            barEndPos = Utils.toVec3(matrix4f.transpose(new Matrix4f()).transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.01F), new Vector3f()));
+            barStartPos = Utils.toVec3(matrix4f.transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.26F), new Vector3f()));
+            barEndPos = Utils.toVec3(matrix4f.transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.01F), new Vector3f()));
         } else if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
-            Matrix4f matrix4f1 = this.getAimRotation(1, new Matrix4f());
-            barStartPos = Utils.toVec3(matrix4f1.transpose(new Matrix4f()).transformProject(new Vector3f((float) i * -0.18F, 0.08F, -0.01F), new Vector3f()));
             Matrix4f matrix4f = this.getAimRotation(1, new Matrix4f());
-            barEndPos = Utils.toVec3(matrix4f.transpose(new Matrix4f()).transformProject(new Vector3f((float) i * 0.19F, 0.04F, -0.08F), new Vector3f()));
+            barStartPos = Utils.toVec3(matrix4f.transformProject(new Vector3f((float) i * -0.18F, 0.08F, -0.01F), new Vector3f()));
+            barEndPos = Utils.toVec3(matrix4f.transformProject(new Vector3f((float) i * 0.19F, 0.04F, -0.08F), new Vector3f()));
         } else {
             return; //how did u get here
         }
@@ -470,12 +468,12 @@ public abstract class MCVR {
 
 
         if (this.mc != null) {
-            this.hmdRotation.identity().set3x3(this.hmdPose.transpose(new Matrix4f())).transpose3x3();
+            this.hmdRotation.identity().set3x3(this.hmdPose.transpose(new Matrix4f()));
             Vec3 vec3 = this.getCenterEyePosition();
             this.hmdHistory.add(vec3);
-            Vector3f vector3 = this.hmdRotation.transpose(new Matrix4f()).transformProject(0.0F, -0.1F, 0.1F, new Vector3f());
+            Vector3f vector3 = this.hmdRotation.transformProject(0.0F, -0.1F, 0.1F, new Vector3f());
             this.hmdPivotHistory.add(new Vec3((double) vector3.x() + vec3.x, (double) vector3.y() + vec3.y, (double) vector3.z() + vec3.z));
-            this.hmdRotHistory.add(new Quaternionf().setFromNormalized(this.hmdRotation.transpose(new Matrix4f()).transpose().rotateY((float) -Math.toRadians(this.dh.vrSettings.worldRotation))));
+            this.hmdRotHistory.add(new Quaternionf().setFromNormalized(new Matrix4f(this.hmdRotation).rotateY(-Math.toRadians(this.dh.vrSettings.worldRotation))));
 
             if (this.dh.vrSettings.seated) {
                 this.controllerPose[1].set(this.controllerPose[0].set(this.hmdPose.transpose(new Matrix4f()).invert().invert()));

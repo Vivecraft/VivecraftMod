@@ -222,11 +222,11 @@ public class TeleportTracker extends Tracker {
         if (dh.vrSettings.seated) {
             vec3 = RenderHelper.getControllerRenderPos(0);
             vec31 = dh.vrPlayer.vrdata_world_render.getController(0).getDirection();
-            matrix4f = dh.vr.getAimRotation(0, new Matrix4f()).transpose();
+            matrix4f = dh.vr.getAimRotation(0, new Matrix4f());
         } else {
             vec3 = dh.vrPlayer.vrdata_world_render.getController(1).getPosition();
             vec31 = dh.vrPlayer.vrdata_world_render.getController(1).getDirection();
-            matrix4f = dh.vr.getAimRotation(1, new Matrix4f()).transpose();
+            matrix4f = dh.vr.getAimRotation(1, new Matrix4f());
         }
 
         matrix4f.rotateLocalY(dh.vrPlayer.vrdata_world_render.rotation_radians);

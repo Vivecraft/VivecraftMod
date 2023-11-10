@@ -455,7 +455,7 @@ public class GuiHandler {
 
                 switch (dh.vrSettings.seated ? VRSettings.HUDLock.HEAD : dh.vrSettings.vrHudLockMode) {
                     case HAND -> {
-                        guirot.mul0(dh.vr.getAimRotation(1, new Matrix4f()).transpose())
+                        guirot.mul(dh.vr.getAimRotation(1, new Matrix4f()))
                             .rotateX((-(float) Math.PI / 5F))
                             .rotateY(((float) Math.PI / 10F) * (float) i)
                         ;
@@ -465,7 +465,7 @@ public class GuiHandler {
                         dh.vr.hudPopup = true;
                     }
                     case WRIST -> {
-                        guirot.mul0(dh.vr.getAimRotation(1, new Matrix4f()).transpose())
+                        guirot.mul(dh.vr.getAimRotation(1, new Matrix4f()))
                             .rotateZ(((float) Math.PI / 2F) * (float) i)
                             .rotateY(0.9424779F * (float) i)
                             .rotateY(((float) Math.PI / 5F) * (float) i)
@@ -482,10 +482,10 @@ public class GuiHandler {
 
                     if (dh.vrSettings.seated && dh.vrSettings.seatedHudAltMode) {
                         vec34 = dh.vrPlayer.vrdata_world_render.getController(0).getDirection();
-                        guirot.mul0(dh.vr.getAimRotation(0, new Matrix4f()).transpose());
+                        guirot.mul(dh.vr.getAimRotation(0, new Matrix4f()));
                     } else {
                         vec34 = dh.vrPlayer.vrdata_world_render.hmd.getDirection();
-                        guirot.mul0(dh.vr.hmdRotation.transpose(new Matrix4f()));
+                        guirot.mul(dh.vr.hmdRotation);
                     }
 
                     guipos = new Vec3(vec33.x + vec34.x * (double) dh.vrPlayer.vrdata_world_render.worldScale * (double) dh.vrSettings.hudDistance, vec33.y + vec34.y * (double) dh.vrPlayer.vrdata_world_render.worldScale * (double) dh.vrSettings.hudDistance, vec33.z + vec34.z * (double) dh.vrPlayer.vrdata_world_render.worldScale * (double) dh.vrSettings.hudDistance);
@@ -520,8 +520,8 @@ public class GuiHandler {
             float f4 = ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
             Vec3 vec39 = vec35.add(new Vec3(vec38.x * (double) f4, vec38.y * (double) f4, vec38.z * (double) f4));
             Vec3 vec310 = new Vec3(vec39.x, vec39.y, vec39.z);
-            guiRotation_room = new Matrix4f().rotationY((float) Math.PI - f1).transpose();
-            guiRotation_room.transpose(guirot).rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
+            guirot.rotationY((float) Math.PI - f1).transpose(guiRotation_room = new Matrix4f());
+            guirot.rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
             guipos = VRPlayer.room_to_world_pos(vec310, dh.vrPlayer.vrdata_world_render);
             guiScale = 2.0F;
             guiPos_room = vec310;
