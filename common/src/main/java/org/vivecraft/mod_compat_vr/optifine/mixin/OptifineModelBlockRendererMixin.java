@@ -20,7 +20,7 @@ public class OptifineModelBlockRendererMixin {
     @Inject(at = @At(value = "HEAD"), method = "fixAoLightValue(F)F", remap = false, cancellable = true)
     private static void vivecraft$optifineNoAOoverride(float ao, CallbackInfoReturnable<Float> cir) {
         if (ao == 0.2F && ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread()) {
-            cir.setReturnValue(1.0F - (float)OptifineHelper.getAoLevel() * 0.8F);
+            cir.setReturnValue(1.0F - (float) OptifineHelper.getAoLevel() * 0.8F);
         }
     }
 }

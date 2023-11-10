@@ -575,11 +575,12 @@ public class Utils {
         try {
             Process process = Runtime.getRuntime().exec("reg query \"" + key.substring(0, key.lastIndexOf('\\')) + "\" /v \"" + key.substring(key.lastIndexOf('\\') + 1) + "\"");
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-               for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                   String[] split = line.split("REG_SZ|REG_DWORD");
-                   if (split.length > 1)
-                       return split[1].trim();
-               }
+                for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                    String[] split = line.split("REG_SZ|REG_DWORD");
+                    if (split.length > 1) {
+                        return split[1].trim();
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

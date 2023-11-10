@@ -118,8 +118,8 @@ public class MenuWorldRenderer {
     private Map<Pair<RenderType, BlockPos>, BlockPos.MutableBlockPos> currentPositions;
     private Map<Pair<RenderType, BlockPos>, Integer> blockCounts;
     private Map<Pair<RenderType, BlockPos>, Long> renderTimes;
-    private List<CompletableFuture<Void>> builderFutures = new ArrayList<>();
-    private Queue<Thread> builderThreads = new ConcurrentLinkedQueue<>();
+    private final List<CompletableFuture<Void>> builderFutures = new ArrayList<>();
+    private final Queue<Thread> builderThreads = new ConcurrentLinkedQueue<>();
     private Throwable builderError;
 
     private static boolean firstRenderDone;
@@ -160,8 +160,9 @@ public class MenuWorldRenderer {
     }
 
     public void checkTask() {
-        if (getWorldTask == null || !getWorldTask.isDone())
+        if (getWorldTask == null || !getWorldTask.isDone()) {
             return;
+        }
 
         try {
             FakeBlockAccess world = getWorldTask.get();
@@ -247,7 +248,9 @@ public class MenuWorldRenderer {
 
     private void renderChunkLayer(RenderType layer, Matrix4f modelView, Matrix4f Projection) {
         List<VertexBuffer> buffers = vertexBuffers.get(layer);
-        if (buffers.size() == 0) return;
+        if (buffers.size() == 0) {
+            return;
+        }
 
         layer.setupRenderState();
         ShaderInstance shaderInstance = RenderSystem.getShader();
@@ -313,26 +316,28 @@ public class MenuWorldRenderer {
     }
 
     public void buildNext() {
-        if (!builderFutures.stream().allMatch(CompletableFuture::isDone) || builderError != null)
+        if (!builderFutures.stream().allMatch(CompletableFuture::isDone) || builderError != null) {
             return;
+        }
         builderFutures.clear();
 
-        if (currentPositions.entrySet().stream().allMatch(entry -> entry.getValue().getY() >= Math.min(segmentSize.getY() + entry.getKey().getRight().getY(), blockAccess.getYSize() - (int)blockAccess.getGround()))) {
+        if (currentPositions.entrySet().stream().allMatch(entry -> entry.getValue().getY() >= Math.min(segmentSize.getY() + entry.getKey().getRight().getY(), blockAccess.getYSize() - (int) blockAccess.getGround()))) {
             finishBuilding();
             return;
         }
 
         long startTime = Utils.milliTime();
         for (var pair : bufferBuilders.keySet()) {
-            if (currentPositions.get(pair).getY() < Math.min(segmentSize.getY() + pair.getRight().getY(), blockAccess.getYSize() - (int)blockAccess.getGround())) {
+            if (currentPositions.get(pair).getY() < Math.min(segmentSize.getY() + pair.getRight().getY(), blockAccess.getYSize() - (int) blockAccess.getGround())) {
                 if (firstRenderDone || !SodiumHelper.isLoaded() || !SodiumHelper.hasIssuesWithParallelBlockBuilding()) {
                     // generate the data in parallel
                     builderFutures.add(CompletableFuture.runAsync(() -> buildGeometry(pair, startTime, renderMaxTime), Util.backgroundExecutor()));
                 } else {
                     // generate first data in series to avoid weird class loading error
                     buildGeometry(pair, startTime, renderMaxTime);
-                    if (blockCounts.getOrDefault(pair, 0) > 0)
+                    if (blockCounts.getOrDefault(pair, 0) > 0) {
                         firstRenderDone = true;
+                    }
                 }
             }
         }
@@ -341,8 +346,9 @@ public class MenuWorldRenderer {
     }
 
     private void buildGeometry(Pair<RenderType, BlockPos> pair, long startTime, int maxTime) {
-        if (Utils.milliTime() - startTime >= maxTime)
+        if (Utils.milliTime() - startTime >= maxTime) {
             return;
+        }
 
         RenderType layer = pair.getLeft();
         BlockPos offset = pair.getRight();
@@ -358,7 +364,7 @@ public class MenuWorldRenderer {
             RandomSource randomSource = RandomSource.create();
 
             int count = 0;
-            while (Utils.milliTime() - startTime < maxTime && pos.getY() < Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int)blockAccess.getGround()) && building) {
+            while (Utils.milliTime() - startTime < maxTime && pos.getY() < Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int) blockAccess.getGround()) && building) {
                 // only build blocks not obscured by fog
                 if (Mth.abs(pos.getY()) <= renderDistance + 1 && Mth.lengthSquared(pos.getX(), pos.getZ()) <= renderDistSquare) {
                     BlockState state = blockAccess.getBlockState(pos);
@@ -405,10 +411,10 @@ public class MenuWorldRenderer {
             blockCounts.put(pair, blockCounts.getOrDefault(pair, 0) + count);
             renderTimes.put(pair, renderTimes.getOrDefault(pair, 0L) + (Utils.milliTime() - realStartTime));
 
-            if (pos.getY() >= Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int)blockAccess.getGround())) {
+            if (pos.getY() >= Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int) blockAccess.getGround())) {
                 VRSettings.logger.debug("MenuWorlds: Built {} blocks on {} layer at {},{},{} in {} ms",
                     blockCounts.get(pair),
-                    ((RenderStateShardAccessor)layer).getName(),
+                    ((RenderStateShardAccessor) layer).getName(),
                     offset.getX(), offset.getY(), offset.getZ(),
                     renderTimes.get(pair));
             }
@@ -443,8 +449,8 @@ public class MenuWorldRenderer {
                 uploadGeometry(layer, renderedBuffer);
                 count++;
             }
-            totalMemory += ((BufferBuilderExtension)vertBuffer).vivecraft$getBufferSize();
-            ((BufferBuilderExtension)vertBuffer).vivecraft$freeBuffer();
+            totalMemory += ((BufferBuilderExtension) vertBuffer).vivecraft$getBufferSize();
+            ((BufferBuilderExtension) vertBuffer).vivecraft$freeBuffer();
         }
 
         bufferBuilders = null;
@@ -465,7 +471,9 @@ public class MenuWorldRenderer {
     }
 
     private void handleError() {
-        if (builderError == null) return;
+        if (builderError == null) {
+            return;
+        }
         if (builderError instanceof OutOfMemoryError || builderError.getCause() instanceof OutOfMemoryError) {
             VRSettings.logger.error("OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?");
         } else {
@@ -489,7 +497,7 @@ public class MenuWorldRenderer {
         building = false;
         if (bufferBuilders != null) {
             for (BufferBuilder vertBuffer : bufferBuilders.values()) {
-                ((BufferBuilderExtension)vertBuffer).vivecraft$freeBuffer();
+                ((BufferBuilderExtension) vertBuffer).vivecraft$freeBuffer();
             }
             bufferBuilders = null;
         }

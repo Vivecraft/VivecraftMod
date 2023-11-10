@@ -1,11 +1,11 @@
 package org.vivecraft.mod_compat_vr.optifine.mixin;
 
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import net.minecraft.client.renderer.block.LiquidBlockRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 @Mixin(LiquidBlockRenderer.class)
 public class OptifineLiquidBlockRendererMixin {

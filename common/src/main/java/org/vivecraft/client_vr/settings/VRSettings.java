@@ -1187,6 +1187,7 @@ public class VRSettings {
                     }
                 }
             }
+
             @Override
             void onOptionChange() {
                 if (VRState.vrEnabled) {

@@ -513,8 +513,9 @@ public class MCOpenVR extends MCVR {
             if (language != null) {
                 gotRegistryValue = true;
                 VRSettings.logger.info("Steam language setting: {}", language);
-                if (!language.equals("english") && steamLanguages.containsKey(language))
+                if (!language.equals("english") && steamLanguages.containsKey(language)) {
                     languages.add(steamLanguages.get(language));
+                }
             } else {
                 VRSettings.logger.warn("Unable to read Steam language setting");
             }
@@ -538,7 +539,9 @@ public class MCOpenVR extends MCVR {
             // Load the language
             List<String> langs = new ArrayList<>();
             langs.add("en_us");
-            if (!langCode.equals("en_US")) langs.add(langCode.toLowerCase());
+            if (!langCode.equals("en_US")) {
+                langs.add(langCode.toLowerCase());
+            }
             Language lang = ClientLanguage.loadFrom(mc.getResourceManager(), langs, false);
 
             for (VRInputAction action : sortedActions) {
