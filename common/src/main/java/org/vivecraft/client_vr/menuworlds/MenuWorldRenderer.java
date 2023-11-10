@@ -442,7 +442,7 @@ public class MenuWorldRenderer {
             RenderType layer = entry.getKey().getLeft();
             BufferBuilder vertBuffer = entry.getValue();
             if (layer == RenderType.translucent()) {
-                vertBuffer.setQuadSorting(VertexSorting.byDistance(0, Mth.frac(blockAccess.getGround()), 0));
+                vertBuffer.setQuadSortOrigin(0, Mth.frac(blockAccess.getGround()), 0);
             }
             BufferBuilder.RenderedBuffer renderedBuffer = vertBuffer.end();
             if (!renderedBuffer.isEmpty()) {
