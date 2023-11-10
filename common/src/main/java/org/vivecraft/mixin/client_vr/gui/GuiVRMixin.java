@@ -233,10 +233,10 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         float f1 = 0.00390625F;
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex((double) ((float) centreX - width / 2.0F), (double) ((float) centreY + height / 2.0F), (double) this.getBlitOffset()).uv((float) (u + 0) * f, (float) (v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double) ((float) centreX + width / 2.0F), (double) ((float) centreY + height / 2.0F), (double) this.getBlitOffset()).uv((float) (u + texWidth) * f, (float) (v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((double) ((float) centreX + width / 2.0F), (double) ((float) centreY - height / 2.0F), (double) this.getBlitOffset()).uv((float) (u + texWidth) * f, (float) (v + 0) * f1).endVertex();
-        bufferbuilder.vertex((double) ((float) centreX - width / 2.0F), (double) ((float) centreY - height / 2.0F), (double) this.getBlitOffset()).uv((float) (u + 0) * f, (float) (v + 0) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY + height / 2.0F, this.getBlitOffset()).uv((float) (u) * f, (float) (v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY + height / 2.0F, this.getBlitOffset()).uv((float) (u + texWidth) * f, (float) (v + texHeight) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY - height / 2.0F, this.getBlitOffset()).uv((float) (u + texWidth) * f, (float) (v) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY - height / 2.0F, this.getBlitOffset()).uv((float) (u) * f, (float) (v) * f1).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
     }
 }

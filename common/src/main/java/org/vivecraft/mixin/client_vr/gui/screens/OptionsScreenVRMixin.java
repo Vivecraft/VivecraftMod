@@ -80,6 +80,5 @@ public class OptionsScreenVRMixin extends Screen {
                 button.setWidth(150);
             }
         }
-        ;
-    }
+	}
 }
