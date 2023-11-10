@@ -23,10 +23,7 @@ public class GuiMenuWorldSettings extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.DUMMY), new VROptionEntry("vivecraft.gui.menuworld.loadnew", (button, mousePos) -> {
         if (this.dataholder.menuWorldRenderer != null) {
             try {
-                if (this.dataholder.menuWorldRenderer.isReady()) {
-                    this.dataholder.menuWorldRenderer.destroy();
-                }
-
+                this.dataholder.menuWorldRenderer.destroy();
                 this.dataholder.menuWorldRenderer.init();
             } catch (Exception exception) {
                 exception.printStackTrace();
