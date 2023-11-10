@@ -17,22 +17,20 @@ public class GuiMenuWorldSettings extends GuiVROptionsBase {
                     exception.printStackTrace();
                 }
             }
-
             return true;
         }),
-        new VROptionEntry(VRSettings.VrOptions.DUMMY), new VROptionEntry("vivecraft.gui.menuworld.loadnew", (button, mousePos) -> {
-        if (this.dataholder.menuWorldRenderer != null) {
-            try {
-                this.dataholder.menuWorldRenderer.destroy();
-                this.dataholder.menuWorldRenderer.init();
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        }
-
-        return true;
-    }),
         new VROptionEntry(VRSettings.VrOptions.MENU_WORLD_FALLBACK),
+        new VROptionEntry("vivecraft.gui.menuworld.loadnew", (button, mousePos) -> {
+            if (this.dataholder.menuWorldRenderer != null) {
+                try {
+                    this.dataholder.menuWorldRenderer.destroy();
+                    this.dataholder.menuWorldRenderer.init();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+            return true;
+        })
     };
 
     public GuiMenuWorldSettings(Screen guiScreen) {
