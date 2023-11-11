@@ -495,6 +495,8 @@ public class MenuWorldRenderer {
 
     public void cancelBuilding() {
         building = false;
+        builderFutures.forEach(CompletableFuture::join);
+        builderFutures.clear();
         if (bufferBuilders != null) {
             for (BufferBuilder vertBuffer : bufferBuilders.values()) {
                 ((BufferBuilderExtension) vertBuffer).vivecraft$freeBuffer();
