@@ -106,7 +106,7 @@ public class NullVR extends MCVR {
 
             if (GuiHandler.guiRotation_room != null) {
                 // look at screen, so that it's centered
-                this.hmdRotation.set3x3(GuiHandler.guiRotation_room.transpose(new Matrix4f()));
+                this.hmdRotation.set3x3(GuiHandler.guiRotation_room);
             }
             this.mc.getProfiler().popPush("hmdSampling");
             this.hmdSampling();

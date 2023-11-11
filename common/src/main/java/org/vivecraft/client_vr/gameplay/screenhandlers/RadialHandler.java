@@ -18,7 +18,7 @@ public class RadialHandler {
     private static boolean Showing = false;
     public static GuiRadial UI = new GuiRadial();
     public static Vec3 Pos_room = new Vec3(0.0D, 0.0D, 0.0D);
-    public static Matrix4f Rotation_room = new Matrix4f();
+    public static final Matrix4f Rotation_room = new Matrix4f();
     private static boolean PointedL;
     private static boolean PointedR;
     public static RenderTarget Framebuffer = null;
@@ -56,53 +56,49 @@ public class RadialHandler {
         PointedL = false;
         PointedR = false;
 
-        if (isShowing()) {
-            if (!dh.vrSettings.seated) {
-                if (Rotation_room != null) {
-                    Vec2 vec2 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, mc.screen, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(1));
-                    Vec2 vec21 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, mc.screen, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(0));
-                    float f = vec21.x;
-                    float f1 = vec21.y;
+        if (isShowing() && !dh.vrSettings.seated) {
+            Vec2 vec2 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, mc.screen, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(1));
+            Vec2 vec21 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, mc.screen, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(0));
+            float f = vec21.x;
+            float f1 = vec21.y;
 
-                    if (!(f < 0.0F) && !(f1 < 0.0F) && !(f > 1.0F) && !(f1 > 1.0F)) {
-                        if (UI.cursorX2 == -1.0F) {
-                            UI.cursorX2 = (float) ((int) (f * GuiHandler.guiWidth));
-                            UI.cursorY2 = (float) ((int) (f1 * GuiHandler.guiHeight));
-                            PointedR = true;
-                        } else {
-                            float f2 = (float) ((int) (f * GuiHandler.guiWidth));
-                            float f3 = (float) ((int) (f1 * GuiHandler.guiHeight));
-                            UI.cursorX2 = UI.cursorX2 * 0.7F + f2 * 0.3F;
-                            UI.cursorY2 = UI.cursorY2 * 0.7F + f3 * 0.3F;
-                            PointedR = true;
-                        }
-                    } else {
-                        UI.cursorX2 = -1.0F;
-                        UI.cursorY2 = -1.0F;
-                        PointedR = false;
-                    }
-
-                    f = vec2.x;
-                    f1 = vec2.y;
-
-                    if (!(f < 0.0F) && !(f1 < 0.0F) && !(f > 1.0F) && !(f1 > 1.0F)) {
-                        if (UI.cursorX1 == -1.0F) {
-                            UI.cursorX1 = (float) ((int) (f * GuiHandler.guiWidth));
-                            UI.cursorY1 = (float) ((int) (f1 * GuiHandler.guiHeight));
-                            PointedL = true;
-                        } else {
-                            float f4 = (float) ((int) (f * GuiHandler.guiWidth));
-                            float f5 = (float) ((int) (f1 * GuiHandler.guiHeight));
-                            UI.cursorX1 = UI.cursorX1 * 0.7F + f4 * 0.3F;
-                            UI.cursorY1 = UI.cursorY1 * 0.7F + f5 * 0.3F;
-                            PointedL = true;
-                        }
-                    } else {
-                        UI.cursorX1 = -1.0F;
-                        UI.cursorY1 = -1.0F;
-                        PointedL = false;
-                    }
+            if (!(f < 0.0F) && !(f1 < 0.0F) && !(f > 1.0F) && !(f1 > 1.0F)) {
+                if (UI.cursorX2 == -1.0F) {
+                    UI.cursorX2 = (float) ((int) (f * GuiHandler.guiWidth));
+                    UI.cursorY2 = (float) ((int) (f1 * GuiHandler.guiHeight));
+                    PointedR = true;
+                } else {
+                    float f2 = (float) ((int) (f * GuiHandler.guiWidth));
+                    float f3 = (float) ((int) (f1 * GuiHandler.guiHeight));
+                    UI.cursorX2 = UI.cursorX2 * 0.7F + f2 * 0.3F;
+                    UI.cursorY2 = UI.cursorY2 * 0.7F + f3 * 0.3F;
+                    PointedR = true;
                 }
+            } else {
+                UI.cursorX2 = -1.0F;
+                UI.cursorY2 = -1.0F;
+                PointedR = false;
+            }
+
+            f = vec2.x;
+            f1 = vec2.y;
+
+            if (!(f < 0.0F) && !(f1 < 0.0F) && !(f > 1.0F) && !(f1 > 1.0F)) {
+                if (UI.cursorX1 == -1.0F) {
+                    UI.cursorX1 = (float) ((int) (f * GuiHandler.guiWidth));
+                    UI.cursorY1 = (float) ((int) (f1 * GuiHandler.guiHeight));
+                    PointedL = true;
+                } else {
+                    float f4 = (float) ((int) (f * GuiHandler.guiWidth));
+                    float f5 = (float) ((int) (f1 * GuiHandler.guiHeight));
+                    UI.cursorX1 = UI.cursorX1 * 0.7F + f4 * 0.3F;
+                    UI.cursorY1 = UI.cursorY1 * 0.7F + f5 * 0.3F;
+                    PointedL = true;
+                }
+            } else {
+                UI.cursorX1 = -1.0F;
+                UI.cursorY1 = -1.0F;
+                PointedL = false;
             }
         }
     }
@@ -134,7 +130,7 @@ public class RadialHandler {
             );
             float f1 = (float) Math.asin(vector3.y() / vector3.length());
             float f2 = (float) ((double) (float) Math.PI + Math.atan2(vector3.x(), vector3.z()));
-            Rotation_room = new Matrix4f().rotationY(f2).rotateX(f1).transpose();
+            Rotation_room.rotationY(f2).rotateX(f1);
         }
     }
 

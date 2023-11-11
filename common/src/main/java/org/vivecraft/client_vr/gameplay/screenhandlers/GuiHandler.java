@@ -199,14 +199,14 @@ public class GuiHandler {
         }
     }
 
-    public static Vec2 getTexCoordsForCursor(Vec3 guiPos_room, Matrix4f guiRotation_room, Screen screen, float guiScale, VRData.VRDevicePose controller) {
+    public static Vec2 getTexCoordsForCursor(Vec3 guiPos_room, Matrix4fc guiRotation_room, Screen screen, float guiScale, VRData.VRDevicePose controller) {
         Vec3 vec3 = controller.getPosition();
         Vector3f vector3 = new Vector3f().set(vec3.x, vec3.y, vec3.z);
         Vec3 vec31 = controller.getDirection();
         Vector3f vector31 = new Vector3f((float) vec31.x, (float) vec31.y, (float) vec31.z);
-        Vector3f vector33 = guiRotation_room.transpose(new Matrix4f()).transformProject(0.0F, 0.0F, 1.0F, new Vector3f());
-        Vector3f vector34 = guiRotation_room.transpose(new Matrix4f()).transformProject(1.0F, 0.0F, 0.0F, new Vector3f());
-        Vector3f vector35 = guiRotation_room.transpose(new Matrix4f()).transformProject(0.0F, 1.0F, 0.0F, new Vector3f());
+        Vector3f vector33 = guiRotation_room.transformProject(0.0F, 0.0F, 1.0F, new Vector3f());
+        Vector3f vector34 = guiRotation_room.transformProject(1.0F, 0.0F, 0.0F, new Vector3f());
+        Vector3f vector35 = guiRotation_room.transformProject(0.0F, 1.0F, 0.0F, new Vector3f());
         float f = vector33.dot(vector31);
 
         if (Math.abs(f) > 1.0E-5F) {
@@ -410,7 +410,7 @@ public class GuiHandler {
                 );
                 float pitch = (float) Math.asin((look.y() / look.length()));
                 float yaw = (float) (Math.PI + Math.atan2(look.x(), look.z()));
-                guiRotation_room = new Matrix4f().rotationY(yaw).rotateX(pitch).transpose();
+                guiRotation_room = new Matrix4f().rotationY(yaw).rotateX(pitch);
             }
 
             KeyboardHandler.orientOverlay(newScreen != null);
@@ -496,7 +496,7 @@ public class GuiHandler {
             }
         } else {
             guipos = VRPlayer.room_to_world_pos(guipos, dh.vrPlayer.vrdata_world_render);
-            guiRotation_room.transpose(guirot).rotateLocalY(dh.vrPlayer.vrdata_world_render.rotation_radians);
+            guiRotation_room.rotateLocalY(dh.vrPlayer.vrdata_world_render.rotation_radians, guirot);
         }
 
         if ((dh.vrSettings.seated || dh.vrSettings.menuAlwaysFollowFace) && ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom()) {
@@ -520,8 +520,8 @@ public class GuiHandler {
             float f4 = ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
             Vec3 vec39 = vec35.add(new Vec3(vec38.x * (double) f4, vec38.y * (double) f4, vec38.z * (double) f4));
             Vec3 vec310 = new Vec3(vec39.x, vec39.y, vec39.z);
-            guirot.rotationY((float) Math.PI - f1).transpose(guiRotation_room = new Matrix4f());
-            guirot.rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians);
+            (guiRotation_room = new Matrix4f()).rotationY((float) Math.PI - f1)
+                .rotateY(dh.vrPlayer.vrdata_world_render.rotation_radians, guirot);
             guipos = VRPlayer.room_to_world_pos(vec310, dh.vrPlayer.vrdata_world_render);
             guiScale = 2.0F;
             guiPos_room = vec310;

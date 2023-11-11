@@ -27,6 +27,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Vector2f;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.VivecraftVRMod;
@@ -430,13 +431,13 @@ public class VREffectsHelper {
                 renderPhysicalKeyboard(partialTicks, poseStack);
             } else {
                 render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
-                    KeyboardHandler.Rotation_room.transpose(new Matrix4f()), depthAlways, poseStack);
+                    KeyboardHandler.Rotation_room, depthAlways, poseStack);
             }
         }
 
         if (RadialHandler.isShowing()) {
             render2D(partialTicks, RadialHandler.Framebuffer, RadialHandler.Pos_room,
-                RadialHandler.Rotation_room.transpose(new Matrix4f()), depthAlways, poseStack);
+                RadialHandler.Rotation_room, depthAlways, poseStack);
         }
     }
 
@@ -571,7 +572,7 @@ public class VREffectsHelper {
 
             //convert previously calculated coords to world coords
             Vec3 guiPos = VRPlayer.room_to_world_pos(KeyboardHandler.Pos_room, dataHolder.vrPlayer.vrdata_world_render);
-            Matrix4f guiRot = KeyboardHandler.Rotation_room.transpose(new Matrix4f()).rotateLocalY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians);
+            Matrix4f guiRot = KeyboardHandler.Rotation_room.rotateLocalY(dataHolder.vrPlayer.vrdata_world_render.rotation_radians, new Matrix4f());
 
             RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
 
@@ -720,7 +721,7 @@ public class VREffectsHelper {
         }
     }
 
-    public static void render2D(float partialTicks, RenderTarget framebuffer, Vec3 pos, Matrix4f rot, boolean depthAlways, PoseStack poseStack) {
+    public static void render2D(float partialTicks, RenderTarget framebuffer, Vec3 pos, Matrix4fc rot, boolean depthAlways, PoseStack poseStack) {
         if (!dataHolder.bowTracker.isDrawing) {
             setupScreenRendering(poseStack, partialTicks);
 

@@ -371,7 +371,7 @@ public abstract class GameRendererVRMixin
                     VREffectsHelper.renderPhysicalKeyboard(partialTicks, pMatrixStack);
                 } else {
                     VREffectsHelper.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
-                        KeyboardHandler.Rotation_room.transpose(new Matrix4f()), vivecraft$DATA_HOLDER.vrSettings.menuAlwaysFollowFace && vivecraft$isInMenuRoom(), pMatrixStack);
+                        KeyboardHandler.Rotation_room, vivecraft$DATA_HOLDER.vrSettings.menuAlwaysFollowFace && vivecraft$isInMenuRoom(), pMatrixStack);
                 }
             }
 
