@@ -131,7 +131,7 @@ public class NullVR extends MCVR {
 
     @Override
     public Matrix4f getControllerComponentTransform(int controllerIndex, String componenetName, Matrix4f dest) {
-        return new Matrix4f();
+        return dest;
     }
 
     @Override

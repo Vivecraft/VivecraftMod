@@ -485,7 +485,7 @@ public abstract class MCVR {
             if (this.dh.vrSettings.seated) {
                 amatrix4f1[0].set(this.controllerPose[0]);
             } else {
-                this.controllerPose[0].transpose(amatrix4f1[0]).mul0(this.getControllerComponentTransform(0, "handgrip", new Matrix4f()).transpose()).transpose();
+                this.controllerPose[0].transpose(amatrix4f1[0]).mul0(this.getControllerComponentTransform(0, "handgrip", new Matrix4f())).transpose();
             }
 
             this.handRotation[0].identity().set3x3(amatrix4f1[0].transpose(new Matrix4f())).transpose();
@@ -493,7 +493,7 @@ public abstract class MCVR {
             if (this.dh.vrSettings.seated) {
                 amatrix4f[0].set(this.controllerPose[0]);
             } else {
-                this.controllerPose[0].transpose(amatrix4f[0]).mul0(this.getControllerComponentTransform(0, "tip", new Matrix4f()).transpose()).transpose();
+                this.controllerPose[0].transpose(amatrix4f[0]).mul0(this.getControllerComponentTransform(0, "tip", new Matrix4f())).transpose();
             }
 
             this.aimSource[0] = Utils.toVec3(amatrix4f[0].transpose(new Matrix4f()).getTranslation(new Vector3f()));
@@ -563,7 +563,7 @@ public abstract class MCVR {
             if (this.dh.vrSettings.seated) {
                 amatrix4f1[1].set(this.controllerPose[1]);
             } else {
-                this.controllerPose[1].transpose(amatrix4f1[1]).mul0(this.getControllerComponentTransform(1, "handgrip", new Matrix4f()).transpose()).transpose();
+                this.controllerPose[1].transpose(amatrix4f1[1]).mul0(this.getControllerComponentTransform(1, "handgrip", new Matrix4f())).transpose();
             }
 
             this.handRotation[1].identity().set3x3(amatrix4f1[1].transpose(new Matrix4f())).transpose3x3();
@@ -571,7 +571,7 @@ public abstract class MCVR {
             if (this.dh.vrSettings.seated) {
                 amatrix4f[1].set(this.controllerPose[1]);
             } else {
-                this.controllerPose[1].transpose(amatrix4f[1]).mul0(this.getControllerComponentTransform(1, "tip", new Matrix4f()).transpose()).transpose();
+                this.controllerPose[1].transpose(amatrix4f[1]).mul0(this.getControllerComponentTransform(1, "tip", new Matrix4f())).transpose();
             }
 
             this.aimSource[1] = Utils.toVec3(amatrix4f[1].transpose(new Matrix4f()).getTranslation(new Vector3f()));

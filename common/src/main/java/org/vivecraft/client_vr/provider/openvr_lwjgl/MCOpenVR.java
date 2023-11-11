@@ -631,7 +631,7 @@ public class MCOpenVR extends MCVR {
             boolean flag = false;
 
             for (String s : list) {
-                this.controllerComponentTransforms.put(s, new Matrix4f[2]);
+                this.controllerComponentTransforms.put(s, new Matrix4f[]{new Matrix4f(), new Matrix4f()});
 
                 for (int j = 0; j < 2; ++j) {
                     if (this.controllerDeviceIndex[j] == -1) {
@@ -646,10 +646,7 @@ public class MCOpenVR extends MCVR {
                             boolean flag1 = inputProfilePath.contains("holographic");
                             boolean flag2 = inputProfilePath.contains("rifts");
 
-                            var componentName = s;
-                            if (flag1 && s.equals("handgrip")) {
-                                componentName = "body";
-                            }
+                            String componentName = flag1 && s.equals("handgrip") ? "body" : s;
 
                             long k = VRRenderModels_GetComponentButtonMask(renderModelName, componentName);
 
@@ -662,24 +659,22 @@ public class MCOpenVR extends MCVR {
                             if (l == 0L) {
                                 flag = true;
                             } else {
-                                var renderModelComponentState = RenderModelComponentState.calloc(stack);
+                                RenderModelComponentState renderModelComponentState = RenderModelComponentState.calloc(stack);
                                 boolean b0 = VRRenderModels_GetComponentStateForDevicePath(renderModelName, componentName, l, RenderModelControllerModeState.calloc(stack), renderModelComponentState);
 
                                 if (!b0) {
                                     flag = true;
                                 } else {
-                                    Matrix4f matrix4f = new Matrix4f();
-                                    Utils.convertSteamVRMatrix3ToMatrix4f(renderModelComponentState.mTrackingToComponentLocal().m(), matrix4f);
-                                    (this.controllerComponentTransforms.get(s))[j] = matrix4f;
+                                    Utils.convertRM34ToCM44(renderModelComponentState.mTrackingToComponentLocal().m(), this.controllerComponentTransforms.get(s)[j]);
 
                                     if (j == 1 && flag2 && s.equals("handgrip")) {
-                                        (this.controllerComponentTransforms.get(s))[1] = (this.controllerComponentTransforms.get(s))[0];
+                                        this.controllerComponentTransforms.get(s)[1].set(this.controllerComponentTransforms.get(s)[0]);
                                     }
 
                                     if (!flag && j == 0) {
                                         try {
-                                            Vector3f vector3 = this.getControllerComponentTransform(0, "tip", new Matrix4f()).transpose().transformProject(this.forward, new Vector3f());
-                                            Vector3f vector31 = this.getControllerComponentTransform(0, "handgrip", new Matrix4f()).transpose().transformProject(this.forward, new Vector3f());
+                                            Vector3f vector3 = this.getControllerComponentTransform(0, "tip", new Matrix4f()).transformProject(this.forward, new Vector3f());
+                                            Vector3f vector31 = this.getControllerComponentTransform(0, "handgrip", new Matrix4f()).transformProject(this.forward, new Vector3f());
                                             double d0 = Math.abs(vector3.normalize(new Vector3f()).dot(vector31.normalize(new Vector3f())));
                                             double d1 = Math.acos(d0);
                                             double d2 = Math.toDegrees(d1);
