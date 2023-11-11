@@ -139,7 +139,7 @@ public abstract class MCVR {
     }
 
     public Matrix4f getAimRotation(int controller, Matrix4f dest) {
-        return dest.set(this.controllerRotation[controller]).transpose();
+        return dest.set(this.controllerRotation[controller]);
     }
 
     public Vec3 getAimSource(int controller) {
@@ -155,7 +155,7 @@ public abstract class MCVR {
     }
 
     public Vec3 getAimVector(int controller) {
-        Vector3f vector3 = this.controllerRotation[controller].transpose(new Matrix4f()).transformProject(this.forward, new Vector3f());
+        Vector3f vector3 = this.controllerRotation[controller].transformProject(this.forward, new Vector3f());
         return Utils.toVec3(vector3);
     }
 
@@ -499,7 +499,7 @@ public abstract class MCVR {
 
             this.aimSource[0] = Utils.toVec3(controllerTip0.getTranslation(new Vector3f()));
             this.controllerHistory[0].add(this.getAimSource(0));
-            this.controllerRotation[0].identity().set3x3(controllerTip0).transpose3x3();
+            this.controllerRotation[0].identity().set3x3(controllerTip0);
             Vec3 vec31 = this.getHmdVector();
 
             if (this.dh.vrSettings.seated && this.mc.screen == null && this.mc.mouseHandler.isMouseGrabbed()) {
@@ -551,14 +551,14 @@ public abstract class MCVR {
                         .transpose();
                 }
 
-                this.controllerRotation[0].set3x3(matrix4f).transpose3x3();
+                this.controllerRotation[0].set3x3(matrix4f);
                 this.handRotation[0].set3x3(matrix4f).transpose3x3();
             }
 
             Vec3 vec32 = this.getAimVector(0);
             this.aimPitch = (float) Math.toDegrees(Math.asin(vec32.y / vec32.length()));
             this.controllerForwardHistory[0].add(vec32);
-            Vec3 vec33 = Utils.toVec3(this.controllerRotation[0].transpose(new Matrix4f()).transformProject(this.up, new Vector3f()));
+            Vec3 vec33 = Utils.toVec3(this.controllerRotation[0].transformProject(this.up, new Vector3f()));
             this.controllerUpHistory[0].add(vec33);
 
             Matrix4f controllerGrip1;
@@ -581,10 +581,10 @@ public abstract class MCVR {
 
             this.aimSource[1] = Utils.toVec3(controllerTip1.getTranslation(new Vector3f()));
             this.controllerHistory[1].add(this.getAimSource(1));
-            this.controllerRotation[1].identity().set3x3(controllerTip1).transpose3x3();
+            this.controllerRotation[1].identity().set3x3(controllerTip1);
             vec31 = this.getAimVector(1);
             this.controllerForwardHistory[1].add(vec31);
-            vec32 = Utils.toVec3(this.controllerRotation[1].transpose(new Matrix4f()).transformProject(this.up, new Vector3f()));
+            vec32 = Utils.toVec3(this.controllerRotation[1].transformProject(this.up, new Vector3f()));
             this.controllerUpHistory[1].add(vec32);
 
             if (this.dh.vrSettings.seated) {
@@ -598,7 +598,7 @@ public abstract class MCVR {
                 this.controllerPose[2].set(this.controllerPose[0]);
             }
 
-            this.controllerRotation[2].identity().set3x3(this.controllerPose[2].transpose(new Matrix4f())).transpose();
+            this.controllerRotation[2].identity().set3x3(this.controllerPose[2].transpose(new Matrix4f()));
 
             if ((!this.hasThirdController() || this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY && this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.THIRD_PERSON) && !flag) {
                 this.mrMovingCamActive = false;
