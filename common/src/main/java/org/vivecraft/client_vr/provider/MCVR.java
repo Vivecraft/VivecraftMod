@@ -479,26 +479,27 @@ public abstract class MCVR {
                 this.controllerPose[1].set(this.controllerPose[0].set(this.hmdPose.transpose(new Matrix4f()).invert().invert()));
             }
 
-            Matrix4f[] amatrix4f = new Matrix4f[]{new Matrix4f(), new Matrix4f()};
-            Matrix4f[] amatrix4f1 = new Matrix4f[]{new Matrix4f(), new Matrix4f()};
+            Matrix4f controllerGrip0;
 
             if (this.dh.vrSettings.seated) {
-                amatrix4f1[0].set(this.controllerPose[0]);
+                controllerGrip0 = this.controllerPose[0].transpose(new Matrix4f());
             } else {
-                this.controllerPose[0].transpose(amatrix4f1[0]).mul0(this.getControllerComponentTransform(0, "handgrip", new Matrix4f())).transpose();
+                controllerGrip0 = this.controllerPose[0].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(0, "handgrip", new Matrix4f()));
             }
 
-            this.handRotation[0].identity().set3x3(amatrix4f1[0].transpose(new Matrix4f())).transpose();
+            this.handRotation[0].identity().set3x3(controllerGrip0).transpose3x3();
+
+            Matrix4f controllerTip0;
 
             if (this.dh.vrSettings.seated) {
-                amatrix4f[0].set(this.controllerPose[0]);
+                controllerTip0 = this.controllerPose[0].transpose(new Matrix4f());
             } else {
-                this.controllerPose[0].transpose(amatrix4f[0]).mul0(this.getControllerComponentTransform(0, "tip", new Matrix4f())).transpose();
+                controllerTip0 = this.controllerPose[0].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(0, "tip", new Matrix4f()));
             }
 
-            this.aimSource[0] = Utils.toVec3(amatrix4f[0].transpose(new Matrix4f()).getTranslation(new Vector3f()));
+            this.aimSource[0] = Utils.toVec3(controllerTip0.getTranslation(new Vector3f()));
             this.controllerHistory[0].add(this.getAimSource(0));
-            this.controllerRotation[0].identity().set3x3(amatrix4f[0].transpose(new Matrix4f())).transpose3x3();
+            this.controllerRotation[0].identity().set3x3(controllerTip0).transpose3x3();
             Vec3 vec31 = this.getHmdVector();
 
             if (this.dh.vrSettings.seated && this.mc.screen == null && this.mc.mouseHandler.isMouseGrabbed()) {
@@ -560,23 +561,27 @@ public abstract class MCVR {
             Vec3 vec33 = Utils.toVec3(this.controllerRotation[0].transpose(new Matrix4f()).transformProject(this.up, new Vector3f()));
             this.controllerUpHistory[0].add(vec33);
 
-            if (this.dh.vrSettings.seated) {
-                amatrix4f1[1].set(this.controllerPose[1]);
-            } else {
-                this.controllerPose[1].transpose(amatrix4f1[1]).mul0(this.getControllerComponentTransform(1, "handgrip", new Matrix4f())).transpose();
-            }
-
-            this.handRotation[1].identity().set3x3(amatrix4f1[1].transpose(new Matrix4f())).transpose3x3();
+            Matrix4f controllerGrip1;
 
             if (this.dh.vrSettings.seated) {
-                amatrix4f[1].set(this.controllerPose[1]);
+                controllerGrip1 = this.controllerPose[1].transpose(new Matrix4f());
             } else {
-                this.controllerPose[1].transpose(amatrix4f[1]).mul0(this.getControllerComponentTransform(1, "tip", new Matrix4f())).transpose();
+                controllerGrip1 = this.controllerPose[1].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(1, "handgrip", new Matrix4f()));
             }
 
-            this.aimSource[1] = Utils.toVec3(amatrix4f[1].transpose(new Matrix4f()).getTranslation(new Vector3f()));
+            this.handRotation[1].identity().set3x3(controllerGrip1.transpose(new Matrix4f())).transpose3x3();
+
+            Matrix4f controllerTip1;
+
+            if (this.dh.vrSettings.seated) {
+                controllerTip1 = this.controllerPose[1].transpose(new Matrix4f());
+            } else {
+                controllerTip1 = this.controllerPose[1].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(1, "tip", new Matrix4f()));
+            }
+
+            this.aimSource[1] = Utils.toVec3(controllerTip1.getTranslation(new Vector3f()));
             this.controllerHistory[1].add(this.getAimSource(1));
-            this.controllerRotation[1].identity().set3x3(amatrix4f[1].transpose(new Matrix4f())).transpose3x3();
+            this.controllerRotation[1].identity().set3x3(controllerTip1).transpose3x3();
             vec31 = this.getAimVector(1);
             this.controllerForwardHistory[1].add(vec31);
             vec32 = Utils.toVec3(this.controllerRotation[1].transpose(new Matrix4f()).transformProject(this.up, new Vector3f()));
