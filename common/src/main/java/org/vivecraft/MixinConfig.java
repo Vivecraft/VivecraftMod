@@ -1,20 +1,21 @@
 package org.vivecraft;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_11;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_8;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_9;
 import org.vivecraft.mod_compat_vr.sodium.mixin.RenderSectionManagerVRMixin;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MixinConfig implements IMixinConfigPlugin {
 
@@ -47,12 +48,26 @@ public class MixinConfig implements IMixinConfigPlugin {
     public void onLoad(String mixinPackage) {
     }
 
+    private final Set<String> appliedModFixes = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (!Xplat.isModLoadedSuccess()) {
-            LogManager.getLogger().log(Level.WARN, "not loading '" + mixinClassName + "' because mod failed to load completely");
+            VRSettings.logger.info("not loading '{}' because mod failed to load completely", mixinClassName);
             return false;
+        }
+
+        // only try to apply mod mixins if the target class was found
+        if (mixinClassName.startsWith("org.vivecraft.mod_compat_vr")) {
+            try {
+                MixinService.getService().getBytecodeProvider().getClassNode(targetClassName);
+            } catch (ClassNotFoundException | IOException e) {
+                return false;
+            }
+            String mod = mixinClassName.split("\\.")[3];
+            if (appliedModFixes.add(mod)) {
+                VRSettings.logger.info("Vivecraft: applying '{}' fixes", mod);
+            }
         }
 
         String neededClass = "";
@@ -79,7 +94,7 @@ public class MixinConfig implements IMixinConfigPlugin {
                 MixinService.getService().getBytecodeProvider().getClassNode(neededClass);
                 return true;
             } catch (ClassNotFoundException | IOException e) {
-                LogManager.getLogger().log(Level.INFO, "Vivecraft: skipping mixin '" + mixinClassName + "'");
+                VRSettings.logger.info("Vivecraft: skipping mixin '{}'", mixinClassName);
                 return false;
             }
         }
