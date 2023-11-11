@@ -1,6 +1,5 @@
 package org.vivecraft.server;
 
-import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
