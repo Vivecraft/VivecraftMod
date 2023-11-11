@@ -24,21 +24,21 @@ public class SeasonColorHandlersMixin {
     private static ColorResolver originalFoliageColorResolver;
 
     @Inject(at = @At("HEAD"), method = "lambda$registerGrassAndFoliageColorHandlers$1", cancellable = true)
-    private static void grassColor(Biome biome, double x, double y, CallbackInfoReturnable<Integer> cir) {
+    private static void vivecraft$grassColor(Biome biome, double x, double y, CallbackInfoReturnable<Integer> cir) {
         if (Minecraft.getInstance().level == null) {
             cir.setReturnValue(originalGrassColorResolver.getColor(biome, x, y));
         }
     }
 
     @Inject(at = @At("HEAD"), method = "lambda$registerGrassAndFoliageColorHandlers$3", cancellable = true)
-    private static void foliageColor(Biome biome, double x, double y, CallbackInfoReturnable<Integer> cir) {
+    private static void vivecraft$foliageColor(Biome biome, double x, double y, CallbackInfoReturnable<Integer> cir) {
         if (Minecraft.getInstance().level == null) {
             cir.setReturnValue(originalFoliageColorResolver.getColor(biome, x, y));
         }
     }
 
     @Inject(at = @At("HEAD"), method = "lambda$registerBirchColorHandler$4", cancellable = true)
-    private static void birchColor(BlockState blockState, BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, int tintIndex, CallbackInfoReturnable<Integer> cir) {
+    private static void vivecraft$birchColor(BlockState blockState, BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, int tintIndex, CallbackInfoReturnable<Integer> cir) {
         if (Minecraft.getInstance().level == null) {
             cir.setReturnValue(FoliageColor.getBirchColor());
         }

@@ -31,9 +31,7 @@
   },
   "mixins": [
     "vivecraft.mixins.json",
-    "vivecraft.alexmobs.mixins.json",
     "vivecraft.blur.mixins.json",
-    "vivecraft.cataclysm.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.fabric.sodium.mixins.json",

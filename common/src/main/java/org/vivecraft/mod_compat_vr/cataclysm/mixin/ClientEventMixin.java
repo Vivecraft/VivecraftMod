@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "com.github.L_Ender.cataclysm.client.event.ClientEvent")
 public class ClientEventMixin {
     @Inject(at = @At("HEAD"), method = "onGetFluidRenderType", remap = false, cancellable = true)
-    private void stacktrace(CallbackInfo ci) {
+    private void vivecraft$fixNoPlayer(CallbackInfo ci) {
         if (Minecraft.getInstance().player == null) {
             ci.cancel();
         }
