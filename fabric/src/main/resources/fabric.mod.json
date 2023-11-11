@@ -31,6 +31,7 @@
   },
   "mixins": [
     "vivecraft.mixins.json",
+    "vivecraft.blur.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.fabric.sodium.mixins.json",
@@ -39,6 +40,7 @@
     "vivecraft.physicsmod.mixins.json",
     "vivecraft.rei.mixins.json",
     "vivecraft.resolutioncontrol.mixins.json",
+    "vivecraft.sereneseasons.mixins.json",
     "vivecraft.fabric.mixins.json"
   ],
   "depends": {

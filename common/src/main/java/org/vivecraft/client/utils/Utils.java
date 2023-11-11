@@ -19,10 +19,10 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
 import org.lwjgl.openvr.HmdMatrix44;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.LoaderUtils;
 import org.vivecraft.common.utils.lwjgl.*;
 import org.vivecraft.common.utils.math.Quaternion;
@@ -644,7 +644,7 @@ public class Utils {
             try {
                 minecraft.level.addParticle(type, position.x + d0, position.y + d1, position.z + d2, d3, d4, d5);
             } catch (Throwable throwable) {
-                LogManager.getLogger().warn("Could not spawn particle effect {}", type);
+                VRSettings.logger.warn("Could not spawn particle effect {}", type);
                 return;
             }
         }
