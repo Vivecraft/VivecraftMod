@@ -8,7 +8,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Pseudo
-@Mixin(targets = "com.tterrag.blur.Blur")
+@Mixin(targets = {
+    "com.tterrag.blur.Blur",
+    "de.cheaterpaul.blur.BlurClient"
+})
 public class BlurMixin {
     @Inject(at = @At("HEAD"), method = "getProgress", cancellable = true, remap = false)
     private static void vivecraft$noBlurInVR(CallbackInfoReturnable<Float> cir) {
