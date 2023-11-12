@@ -1086,11 +1086,11 @@ public class MCOpenVR extends MCVR {
             }
 
             if (this.hmdTrackedDevicePoses.get(0).bPoseIsValid()) {
-                this.hmdPose.set(this.poseMatrices[0]);
+                this.poseMatrices[0].transpose(this.hmdPose);
                 this.headIsTracking = true;
             } else {
                 this.headIsTracking = false;
-                this.hmdPose.identity().m13(1.62F);
+                this.hmdPose.identity().m31(1.62F);
             }
 
             this.TPose = false;
@@ -1098,8 +1098,8 @@ public class MCOpenVR extends MCVR {
             if (this.TPose) {
                 this.TPose_Right.rotationY(-120.0F).setTranslation(0.5F, 1.0F, -0.5F).transpose();
                 this.TPose_Left.rotationY(120.0F).setTranslation(-0.5F, 1.0F, -0.5F).transpose();
-                this.Neutral_HMD.m03(0.0F);
-                this.Neutral_HMD.m13(1.8F);
+                this.Neutral_HMD.m30(0.0F);
+                this.Neutral_HMD.m31(1.8F);
                 this.hmdPose.set(this.Neutral_HMD);
                 this.headIsTracking = true;
             }

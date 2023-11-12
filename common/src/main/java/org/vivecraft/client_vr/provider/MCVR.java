@@ -200,7 +200,7 @@ public abstract class MCVR {
     }
 
     public Vec3 getCenterEyePosition() {
-        Vector3f vector3 = this.hmdPose.transpose(new Matrix4f()).getTranslation(new Vector3f());
+        Vector3f vector3 = this.hmdPose.getTranslation(new Vector3f());
 
         if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
             if (this.dh.vr.isHMDTracking()) {
@@ -223,7 +223,7 @@ public abstract class MCVR {
         }
 
         if (matrix4f == null) {
-            Vector3f vector31 = this.hmdPose.transpose(new Matrix4f()).getTranslation(new Vector3f());
+            Vector3f vector31 = this.hmdPose.getTranslation(new Vector3f());
 
             if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
                 if (this.dh.vr.isHMDTracking()) {
@@ -233,7 +233,7 @@ public abstract class MCVR {
 
             return Utils.toVec3(vector31);
         } else {
-            Matrix4f dest = this.hmdPose.transpose(new Matrix4f()).mul0(matrix4f.transpose(new Matrix4f()));
+            Matrix4f dest = this.hmdPose.mul0(matrix4f.transpose(new Matrix4f()));
             Vector3f vector3 = dest.getTranslation(new Vector3f());
 
             if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
@@ -468,7 +468,7 @@ public abstract class MCVR {
 
 
         if (this.mc != null) {
-            this.hmdRotation.identity().set3x3(this.hmdPose.transpose(new Matrix4f()));
+            this.hmdRotation.identity().set3x3(this.hmdPose);
             Vec3 vec3 = this.getCenterEyePosition();
             this.hmdHistory.add(vec3);
             Vector3f vector3 = this.hmdRotation.transformProject(0.0F, -0.1F, 0.1F, new Vector3f());
@@ -476,7 +476,7 @@ public abstract class MCVR {
             this.hmdRotHistory.add(new Quaternionf().setFromNormalized(new Matrix4f(this.hmdRotation).rotateY(-Math.toRadians(this.dh.vrSettings.worldRotation))));
 
             if (this.dh.vrSettings.seated) {
-                this.controllerPose[1].set(this.controllerPose[0].set(this.hmdPose.transpose(new Matrix4f()).invert().invert()));
+                this.controllerPose[1].set(this.hmdPose.invert(this.controllerPose[0]).invert());
             }
 
             Matrix4f controllerGrip0;

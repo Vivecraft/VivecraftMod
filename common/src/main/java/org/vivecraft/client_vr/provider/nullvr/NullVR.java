@@ -64,7 +64,7 @@ public class NullVR extends MCVR {
 
             this.headIsTracking = false;
             this.hmdPose.identity();
-            this.hmdPose.m13(1.62F);
+            this.hmdPose.m31(1.62F);
 
             // eye offset, 10cm total distance
             this.hmdPoseLeftEye.m03(-0.05F);
