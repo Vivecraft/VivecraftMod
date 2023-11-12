@@ -192,11 +192,11 @@ public abstract class MCVR {
     }
 
     public Matrix4f getHandRotation(int controller, Matrix4f dest) {
-        return dest.set(this.handRotation[controller]).transpose();
+        return dest.set(this.handRotation[controller]);
     }
 
     public Vec3 getHandVector(int controller) {
-        return Utils.toVec3(this.handRotation[controller].transpose(new Matrix4f()).transformProject(0.0F, 0.0F, -1.0F, new Vector3f()));
+        return Utils.toVec3(this.handRotation[controller].transformProject(0.0F, 0.0F, -1.0F, new Vector3f()));
     }
 
     public Vec3 getCenterEyePosition() {
@@ -487,7 +487,7 @@ public abstract class MCVR {
                 controllerGrip0 = this.controllerPose[0].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(0, "handgrip", new Matrix4f()));
             }
 
-            this.handRotation[0].identity().set3x3(controllerGrip0).transpose3x3();
+            this.handRotation[0].identity().set3x3(controllerGrip0);
 
             Matrix4f controllerTip0;
 
@@ -552,7 +552,7 @@ public abstract class MCVR {
                 }
 
                 this.controllerRotation[0].set3x3(matrix4f);
-                this.handRotation[0].set3x3(matrix4f).transpose3x3();
+                this.handRotation[0].set3x3(matrix4f);
             }
 
             Vec3 vec32 = this.getAimVector(0);
@@ -569,7 +569,7 @@ public abstract class MCVR {
                 controllerGrip1 = this.controllerPose[1].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(1, "handgrip", new Matrix4f()));
             }
 
-            this.handRotation[1].identity().set3x3(controllerGrip1.transpose(new Matrix4f())).transpose3x3();
+            this.handRotation[1].identity().set3x3(controllerGrip1);
 
             Matrix4f controllerTip1;
 

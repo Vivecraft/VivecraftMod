@@ -102,7 +102,7 @@ public class NullVR extends MCVR {
 
             // point head in cursor direction
 
-            this.hmdRotation.set3x3(this.handRotation[0].transpose(new Matrix4f()));
+            this.hmdRotation.set3x3(this.handRotation[0]);
 
             if (GuiHandler.guiRotation_room != null) {
                 // look at screen, so that it's centered
