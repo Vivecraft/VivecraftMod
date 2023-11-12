@@ -41,8 +41,8 @@ public class CameraTracker extends Tracker {
     public void doProcess(LocalPlayer player) {
         if (this.startControllerPose != null) {
             VRData.VRDevicePose vrDevPose = this.dh.vrPlayer.vrdata_world_render.getController(this.startController);
-            Vector3f vrOldPosition = Utils.convertVector(this.startControllerPose.getPosition(), new Vector3f());
-            Vector3f vrDevPosition = Utils.convertVector(vrDevPose.getPosition(), new Vector3f()).sub(vrOldPosition);
+            Vector3f vrOldPosition = Utils.convertToVector3f(this.startControllerPose.getPosition(), new Vector3f());
+            Vector3f vrDevPosition = Utils.convertToVector3f(vrDevPose.getPosition(), new Vector3f()).sub(vrOldPosition);
             Matrix4f matrix4f = vrDevPose.getMatrix(new Matrix4f()).mul(this.startControllerPose.getMatrix(new Matrix4f()).invert());
             matrix4f.transformProject(this.startPosition.sub(vrOldPosition, vrOldPosition), this.position).sub(vrOldPosition).add(vrDevPosition).add(this.startPosition);
             this.rotation.setFromUnnormalized(matrix4f).mul(this.startRotation);
@@ -52,7 +52,7 @@ public class CameraTracker extends Tracker {
             this.visible = false;
         }
 
-        if (Utils.convertVector(this.dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition(), new Vector3f()).distance(this.position) > (double) (this.mc.options.getEffectiveRenderDistance() * 12)) {
+        if (Utils.convertToVector3f(this.dh.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition(), new Vector3f()).distance(this.position) > (double) (this.mc.options.getEffectiveRenderDistance() * 12)) {
             this.visible = false;
         }
     }
@@ -76,11 +76,11 @@ public class CameraTracker extends Tracker {
     }
 
     public Vec3 getPosition() {
-        return Utils.convertToVector3d(this.position);
+        return Utils.convertToVec3(this.position);
     }
 
     public void setPosition(Vec3 position) {
-        Utils.convertVector(position, this.position);
+        Utils.convertToVector3f(position, this.position);
     }
 
     public Quaternionf getRotation() {

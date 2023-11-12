@@ -237,8 +237,8 @@ public class TeleportTracker extends Tracker {
         float angle = Math.toRadians(-(float) Math.toDegrees(Math.atan2(2.0F * (quaternion.x * quaternion.y + quaternion.w * quaternion.z), quaternion.w * quaternion.w - quaternion.x * quaternion.x + quaternion.y * quaternion.y - quaternion.z * quaternion.z)));
         // TODO: unused rotation X
         // Matrix4f matrix4f3 = new Matrix4f().rotationX(-2.5132742F);
-        Vector3f vector31 = matrix4f.rotateZ(angle).transformProject(0.0F, 1.0F, 0.0F, new Vector3f());
-        Vec3 vec32 = Utils.toVec3(vector31.negate(new Vector3f()).mul(0.098F));
+        Vector3f vector31 = matrix4f.rotateZ(angle).transformProject(Utils.YAW, new Vector3f());
+        Vec3 vec32 = Utils.convertToVec3(vector31.negate(new Vector3f()).mul(0.098F));
         float f1 = 0.5F;
         Vec3 vec33 = new Vec3(vec31.x * (double) f1, vec31.y * (double) f1, vec31.z * (double) f1);
         Vec3 vec34 = new Vec3(vec3.x, vec3.y, vec3.z);

@@ -39,7 +39,7 @@ public class Debug {
     }
 
     public void drawPoint(Vec3 point, Color color) {
-        point = Utils.toVec3(this.rotation.transformUnit(new Vector3f((float) point.x, (float) point.y, (float) point.z), new Vector3f()));
+        point = Utils.convertToVec3(this.rotation.transformUnit(new Vector3f((float) point.x, (float) point.y, (float) point.z), new Vector3f()));
         Vec3 vec3 = this.root.add(point);
         Polygon debug$polygon = cross.offset(vec3);
 
@@ -54,17 +54,16 @@ public class Debug {
 
     public void drawVector(Vec3 start, Vec3 direction, Color color) {
         Polygon debug$polygon = new Polygon(2);
-        start = Utils.toVec3(this.rotation.transformUnit(new Vector3f((float) start.x, (float) start.y, (float) start.z), new Vector3f()));
-        direction = Utils.toVec3(this.rotation.transformUnit(new Vector3f((float) direction.x, (float) direction.y, (float) direction.z), new Vector3f()));
+        start = Utils.convertToVec3(this.rotation.transformUnit(new Vector3f((float) start.x, (float) start.y, (float) start.z), new Vector3f()));
+        direction = Utils.convertToVec3(this.rotation.transformUnit(new Vector3f((float) direction.x, (float) direction.y, (float) direction.z), new Vector3f()));
         debug$polygon.vertices[0] = this.root.add(start);
         debug$polygon.colors[0] = new Color(0, 0, 0, 0);
         debug$polygon.vertices[1] = this.root.add(start).add(direction);
         debug$polygon.colors[1] = color;
         Vec3 normalized = direction.normalize();
-        Vector3f from = new Vector3f(0.0F, 1.0F, 0.0F);
         Vector3f to = new Vector3f((float) normalized.x(), (float) normalized.y(), (float) normalized.z());
-        Vector3f vector3 = from.cross(to, new Vector3f());
-        float f = (float) (Math.sqrt(pow(from.length(), 2.0D) * pow(to.length(), 2.0D)) + (double) from.dot(to));
+        Vector3f vector3 = Utils.up.cross(to, new Vector3f());
+        float f = (float) (Math.sqrt(pow(Utils.up.length(), 2.0D) * pow(to.length(), 2.0D)) + (double) Utils.up.dot(to));
         Quaternionf quaternion1 = (new Quaternionf(vector3.x, vector3.y, vector3.z, f));
         Quaternionf dest = new Quaternionf();
         float f4 = Math.sqrt(quaternion1.lengthSquared());
@@ -89,8 +88,8 @@ public class Debug {
     }
 
     public void drawLine(Vec3 start, Vec3 end, Color color) {
-        start = Utils.toVec3(this.rotation.transformUnit(new Vector3f((float) start.x, (float) start.y, (float) start.z), new Vector3f()));
-        end = Utils.toVec3(this.rotation.transformUnit(new Vector3f((float) end.x, (float) end.y, (float) end.z), new Vector3f()));
+        start = Utils.convertToVec3(this.rotation.transformUnit(new Vector3f((float) start.x, (float) start.y, (float) start.z), new Vector3f()));
+        end = Utils.convertToVec3(this.rotation.transformUnit(new Vector3f((float) end.x, (float) end.y, (float) end.z), new Vector3f()));
         Polygon debug$polygon = new Polygon(2);
         debug$polygon.vertices[0] = this.root.add(start);
         debug$polygon.colors[0] = new Color(0, 0, 0, 0);
@@ -114,8 +113,8 @@ public class Debug {
         avec31[3] = new Vec3(box.maxX, box.maxY, box.minZ);
 
         for (int j = 0; j < 4; ++j) {
-            avec3[j] = this.root.add(Utils.toVec3(this.rotation.transformUnit(new Vector3f((float) avec3[j].x, (float) avec3[j].y, (float) avec3[j].z), new Vector3f())));
-            avec31[j] = this.root.add(Utils.toVec3(this.rotation.transformUnit(new Vector3f((float) avec31[j].x, (float) avec31[j].y, (float) avec31[j].z), new Vector3f())));
+            avec3[j] = this.root.add(Utils.convertToVec3(this.rotation.transformUnit(new Vector3f((float) avec3[j].x, (float) avec3[j].y, (float) avec3[j].z), new Vector3f())));
+            avec31[j] = this.root.add(Utils.convertToVec3(this.rotation.transformUnit(new Vector3f((float) avec31[j].x, (float) avec31[j].y, (float) avec31[j].z), new Vector3f())));
         }
 
         for (int k = 0; k < 5; ++k) {
@@ -244,7 +243,7 @@ public class Debug {
             Polygon debug$polygon = new Polygon(this.vertices.length);
 
             for (int i = 0; i < this.vertices.length; ++i) {
-                debug$polygon.vertices[i] = Utils.toVec3(quat.transformUnit(new Vector3f((float) this.vertices[i].x, (float) this.vertices[i].y, (float) this.vertices[i].z), new Vector3f()));
+                debug$polygon.vertices[i] = Utils.convertToVec3(quat.transformUnit(new Vector3f((float) this.vertices[i].x, (float) this.vertices[i].y, (float) this.vertices[i].z), new Vector3f()));
                 debug$polygon.colors[i] = this.colors[i];
             }
 

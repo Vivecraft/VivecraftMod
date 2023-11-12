@@ -142,7 +142,7 @@ public class KeyboardHandler {
                     .mul(GuiHandler.guiRotation_room)
                     .rotate((float) Math.toRadians(30.0F), -1.0F, 0.0F, 0.0F)
                 ;
-                Pos_room = Utils.toVec3(Rotation_room.getTranslation(new Vector3f()));
+                Pos_room = Utils.convertToVec3(Rotation_room.getTranslation(new Vector3f()));
                 Rotation_room.setTranslation(0.0F, 0.0F, 0.0F);
             } else {
                 Vec3 vec33 = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();

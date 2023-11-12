@@ -43,20 +43,20 @@ public class VRData {
         } else {
             Matrix4f matrix4f = this.getSmoothedRotation(0, 0.2F, new Matrix4f());
             Matrix4f matrix4f1 = this.getSmoothedRotation(1, 0.2F, new Matrix4f());
-            this.t0 = new VRDevicePose(this, matrix4f, dataholder.vr.getAimSource(0).subtract(vec3).add(vec31), Utils.toVec3(matrix4f.transformProject(Utils.forward(), new Vector3f())));
-            this.t1 = new VRDevicePose(this, matrix4f1, dataholder.vr.getAimSource(1).subtract(vec3).add(vec31), Utils.toVec3(matrix4f1.transformProject(Utils.forward(), new Vector3f())));
+            this.t0 = new VRDevicePose(this, matrix4f, dataholder.vr.getAimSource(0).subtract(vec3).add(vec31), Utils.convertToVec3(matrix4f.transformProject(Utils.forward, new Vector3f())));
+            this.t1 = new VRDevicePose(this, matrix4f1, dataholder.vr.getAimSource(1).subtract(vec3).add(vec31), Utils.convertToVec3(matrix4f1.transformProject(Utils.forward, new Vector3f())));
         }
 
         Matrix4f matrix4f2 = new Matrix4f().rotation(dataholder.cameraTracker.getRotation()).rotateLocalY(-rotation);
         float inverseWorldScale = 1.0F / worldScale;
-        this.cam = new VRDevicePose(this, matrix4f2, dataholder.cameraTracker.getPosition().subtract(origin).yRot(-rotation).multiply(inverseWorldScale, inverseWorldScale, inverseWorldScale).subtract(vec3).add(vec31), Utils.toVec3(matrix4f2.transformProject(Utils.forward(), new Vector3f())));
+        this.cam = new VRDevicePose(this, matrix4f2, dataholder.cameraTracker.getPosition().subtract(origin).yRot(-rotation).multiply(inverseWorldScale, inverseWorldScale, inverseWorldScale).subtract(vec3).add(vec31), Utils.convertToVec3(matrix4f2.transformProject(Utils.forward, new Vector3f())));
 
         if (dataholder.vr.mrMovingCamActive) {
             this.c2 = new VRDevicePose(this, dataholder.vr.getAimRotation(2, new Matrix4f()), dataholder.vr.getAimSource(2).subtract(vec3).add(vec31), dataholder.vr.getAimVector(2));
         } else {
             Matrix4f matrix4f3 = new Matrix4f().rotation(dataholder.vrSettings.vrFixedCamrotQuat);
-            Vec3 vec32 = Utils.toVec3(dataholder.vrSettings.vrFixedCampos);
-            Vec3 vec33 = Utils.toVec3(matrix4f3.transformProject(Utils.forward(), new Vector3f()));
+            Vec3 vec32 = Utils.convertToVec3(dataholder.vrSettings.vrFixedCampos);
+            Vec3 vec33 = Utils.convertToVec3(matrix4f3.transformProject(Utils.forward, new Vector3f()));
             this.c2 = new VRDevicePose(this, matrix4f3, vec32.subtract(vec3).add(vec31), vec33);
         }
     }
@@ -180,7 +180,7 @@ public class VRData {
         }
 
         public Vec3 getCustomVector(Vec3 axis) {
-            return Utils.toVec3(this.matrix.transformProject(new Vector3f((float) axis.x(), (float) axis.y(), (float) axis.z())).rotateY(this.data.rotation_radians));
+            return Utils.convertToVec3(this.matrix.transformProject(new Vector3f((float) axis.x(), (float) axis.y(), (float) axis.z())).rotateY(this.data.rotation_radians));
         }
 
         public float getYaw() {

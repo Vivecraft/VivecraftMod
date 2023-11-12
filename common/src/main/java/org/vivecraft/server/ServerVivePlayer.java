@@ -21,7 +21,6 @@ public class ServerVivePlayer {
     private boolean isVR = false;
     public Vec3 offset = new Vec3(0.0D, 0.0D, 0.0D);
     public ServerPlayer player;
-    final Vector3f forward = new Vector3f(0.0F, 0.0F, -1.0F);
 
     public int networkVersion = CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION;
 
@@ -42,19 +41,19 @@ public class ServerVivePlayer {
 
         if (controllerPose != null) {
             Vector3f vector3 = controllerPose.orientation().transformUnit(direction, new Vector3f());
-            return Utils.toVec3(vector3);
+            return Utils.convertToVec3(vector3);
         } else {
             return this.player.getLookAngle();
         }
     }
 
     public Vec3 getControllerDir(int controller) {
-        return this.getControllerVectorCustom(controller, this.forward);
+        return this.getControllerVectorCustom(controller, new Vector3f(Utils.forward));
     }
 
     public Vec3 getHMDDir() {
         if (this.vrPlayerState != null) {
-            Vector3f vector3 = this.vrPlayerState.hmd().orientation().transformUnit(this.forward, new Vector3f());
+            Vector3f vector3 = this.vrPlayerState.hmd().orientation().transformUnit(Utils.forward, new Vector3f());
             return new Vec3(vector3.x(), vector3.y(), vector3.z());
         }
         return this.player.getLookAngle();

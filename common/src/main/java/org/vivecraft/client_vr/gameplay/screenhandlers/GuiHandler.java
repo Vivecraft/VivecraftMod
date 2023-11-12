@@ -28,6 +28,7 @@ import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 
 import java.lang.Math;
 
@@ -204,9 +205,9 @@ public class GuiHandler {
         Vector3f vector3 = new Vector3f().set(vec3.x, vec3.y, vec3.z);
         Vec3 vec31 = controller.getDirection();
         Vector3f vector31 = new Vector3f((float) vec31.x, (float) vec31.y, (float) vec31.z);
-        Vector3f vector33 = guiRotation_room.transformProject(0.0F, 0.0F, 1.0F, new Vector3f());
-        Vector3f vector34 = guiRotation_room.transformProject(1.0F, 0.0F, 0.0F, new Vector3f());
-        Vector3f vector35 = guiRotation_room.transformProject(0.0F, 1.0F, 0.0F, new Vector3f());
+        Vector3f vector33 = guiRotation_room.transformProject(Utils.ROLL, new Vector3f());
+        Vector3f vector34 = guiRotation_room.transformProject(Utils.PITCH, new Vector3f());
+        Vector3f vector35 = guiRotation_room.transformProject(Utils.YAW, new Vector3f());
         float f = vector33.dot(vector31);
 
         if (Math.abs(f) > 1.0E-5F) {

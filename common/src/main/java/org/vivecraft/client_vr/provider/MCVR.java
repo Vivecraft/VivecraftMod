@@ -72,8 +72,6 @@ public abstract class MCVR {
     protected Matrix4f[] poseMatrices;
     protected Vec3[] deviceVelocity;
     protected Vec3[] aimSource = new Vec3[3];
-    public Vector3f forward = new Vector3f(0.0F, 0.0F, -1.0F);
-    public Vector3f up = new Vector3f(0.0F, 1.0F, 0.0F);
     public int hmdAvgLength = 90;
     public LinkedList<Vec3> hmdPosSamples = new LinkedList<>();
     public LinkedList<Float> hmdYawSamples = new LinkedList<>();
@@ -155,8 +153,8 @@ public abstract class MCVR {
     }
 
     public Vec3 getAimVector(int controller) {
-        Vector3f vector3 = this.controllerRotation[controller].transformProject(this.forward, new Vector3f());
-        return Utils.toVec3(vector3);
+        Vector3f vector3 = this.controllerRotation[controller].transformProject(Utils.forward, new Vector3f());
+        return Utils.convertToVec3(vector3);
     }
 
     public void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude) {
@@ -196,7 +194,7 @@ public abstract class MCVR {
     }
 
     public Vec3 getHandVector(int controller) {
-        return Utils.toVec3(this.handRotation[controller].transformProject(0.0F, 0.0F, -1.0F, new Vector3f()));
+        return Utils.convertToVec3(this.handRotation[controller].transformProject(0.0F, 0.0F, -1.0F, new Vector3f()));
     }
 
     public Vec3 getCenterEyePosition() {
@@ -208,7 +206,7 @@ public abstract class MCVR {
             }
         }
 
-        return Utils.toVec3(vector3);
+        return Utils.convertToVec3(vector3);
     }
 
     public Vec3 getEyePosition(RenderPass eye) {
@@ -231,7 +229,7 @@ public abstract class MCVR {
                 }
             }
 
-            return Utils.toVec3(vector31);
+            return Utils.convertToVec3(vector31);
         } else {
             Matrix4f dest = this.hmdPose.mul(matrix4f);
             Vector3f vector3 = dest.getTranslation(new Vector3f());
@@ -242,7 +240,7 @@ public abstract class MCVR {
                 }
             }
 
-            return Utils.toVec3(vector3);
+            return Utils.convertToVec3(vector3);
         }
     }
 
@@ -251,8 +249,8 @@ public abstract class MCVR {
     }
 
     public Vec3 getHmdVector() {
-        Vector3f vector3 = this.hmdRotation.transformProject(this.forward, new Vector3f());
-        return Utils.toVec3(vector3);
+        Vector3f vector3 = this.hmdRotation.transformProject(Utils.forward, new Vector3f());
+        return Utils.convertToVec3(vector3);
     }
 
     public Matrix4f getEyeRotation(RenderPass eye, Matrix4f dest) {
@@ -310,7 +308,7 @@ public abstract class MCVR {
     }
 
     public void clearOffset() {
-        this.dh.vrSettings.originOffset = new Vector3f(0.0F, 0.0F, 0.0F);
+        this.dh.vrSettings.originOffset.zero();
     }
 
     public boolean isHMDTracking() {
@@ -346,12 +344,12 @@ public abstract class MCVR {
 
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST) {
             Matrix4f matrix4f = this.getAimRotation(1, new Matrix4f());
-            barStartPos = Utils.toVec3(matrix4f.transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.26F), new Vector3f()));
-            barEndPos = Utils.toVec3(matrix4f.transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.01F), new Vector3f()));
+            barStartPos = Utils.convertToVec3(matrix4f.transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.26F), new Vector3f()));
+            barEndPos = Utils.convertToVec3(matrix4f.transformProject(new Vector3f((float) i * 0.02F, 0.05F, 0.01F), new Vector3f()));
         } else if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
             Matrix4f matrix4f = this.getAimRotation(1, new Matrix4f());
-            barStartPos = Utils.toVec3(matrix4f.transformProject(new Vector3f((float) i * -0.18F, 0.08F, -0.01F), new Vector3f()));
-            barEndPos = Utils.toVec3(matrix4f.transformProject(new Vector3f((float) i * 0.19F, 0.04F, -0.08F), new Vector3f()));
+            barStartPos = Utils.convertToVec3(matrix4f.transformProject(new Vector3f((float) i * -0.18F, 0.08F, -0.01F), new Vector3f()));
+            barEndPos = Utils.convertToVec3(matrix4f.transformProject(new Vector3f((float) i * 0.19F, 0.04F, -0.08F), new Vector3f()));
         } else {
             return; //how did u get here
         }
@@ -497,7 +495,7 @@ public abstract class MCVR {
                 controllerTip0 = this.controllerPose[0].mul(this.getControllerComponentTransform(0, "tip", new Matrix4f()));
             }
 
-            this.aimSource[0] = Utils.toVec3(controllerTip0.getTranslation(new Vector3f()));
+            this.aimSource[0] = Utils.convertToVec3(controllerTip0.getTranslation(new Vector3f()));
             this.controllerHistory[0].add(this.getAimSource(0));
             this.controllerRotation[0].identity().set3x3(controllerTip0);
             Vec3 vec31 = this.getHmdVector();
@@ -557,7 +555,7 @@ public abstract class MCVR {
             Vec3 vec32 = this.getAimVector(0);
             this.aimPitch = (float) Math.toDegrees(Math.asin(vec32.y / vec32.length()));
             this.controllerForwardHistory[0].add(vec32);
-            Vec3 vec33 = Utils.toVec3(this.controllerRotation[0].transformProject(this.up, new Vector3f()));
+            Vec3 vec33 = Utils.convertToVec3(this.controllerRotation[0].transformProject(Utils.up, new Vector3f()));
             this.controllerUpHistory[0].add(vec33);
 
             Matrix4f controllerGrip1;
@@ -578,12 +576,12 @@ public abstract class MCVR {
                 controllerTip1 = this.controllerPose[1].mul(this.getControllerComponentTransform(1, "tip", new Matrix4f()));
             }
 
-            this.aimSource[1] = Utils.toVec3(controllerTip1.getTranslation(new Vector3f()));
+            this.aimSource[1] = Utils.convertToVec3(controllerTip1.getTranslation(new Vector3f()));
             this.controllerHistory[1].add(this.getAimSource(1));
             this.controllerRotation[1].identity().set3x3(controllerTip1);
             vec31 = this.getAimVector(1);
             this.controllerForwardHistory[1].add(vec31);
-            vec32 = Utils.toVec3(this.controllerRotation[1].transformProject(this.up, new Vector3f()));
+            vec32 = Utils.convertToVec3(this.controllerRotation[1].transformProject(Utils.up, new Vector3f()));
             this.controllerUpHistory[1].add(vec32);
 
             if (this.dh.vrSettings.seated) {
@@ -601,10 +599,10 @@ public abstract class MCVR {
 
             if ((!this.hasThirdController() || this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY && this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.THIRD_PERSON) && !flag) {
                 this.mrMovingCamActive = false;
-                this.aimSource[2] = Utils.toVec3(this.dh.vrSettings.vrFixedCampos);
+                this.aimSource[2] = Utils.convertToVec3(this.dh.vrSettings.vrFixedCampos);
             } else {
                 this.mrMovingCamActive = true;
-                this.aimSource[2] = Utils.toVec3(this.controllerPose[2].getTranslation(new Vector3f()));
+                this.aimSource[2] = Utils.convertToVec3(this.controllerPose[2].getTranslation(new Vector3f()));
             }
         }
     }

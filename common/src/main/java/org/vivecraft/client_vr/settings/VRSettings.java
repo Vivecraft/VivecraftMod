@@ -287,7 +287,7 @@ public class VRSettings {
     @SettingField(VrOptions.AUTO_SPRINT_THRESHOLD)
     public float autoSprintThreshold = 0.9f;
     @SettingField
-    public Vector3f originOffset = new Vector3f(0.0F, 0.0F, 0.0F);
+    public Vector3f originOffset = new Vector3f();
     @SettingField(VrOptions.ALLOW_STANDING_ORIGIN_OFFSET)
     public boolean allowStandingOriginOffset = false;
     @SettingField(VrOptions.SEATED_FREE_MOVE)

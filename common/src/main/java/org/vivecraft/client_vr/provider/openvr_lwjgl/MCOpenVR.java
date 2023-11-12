@@ -673,12 +673,12 @@ public class MCOpenVR extends MCVR {
 
                                     if (!flag && j == 0) {
                                         try {
-                                            Vector3f vector3 = this.getControllerComponentTransform(0, "tip", new Matrix4f()).transformProject(this.forward, new Vector3f());
-                                            Vector3f vector31 = this.getControllerComponentTransform(0, "handgrip", new Matrix4f()).transformProject(this.forward, new Vector3f());
+                                            Vector3f vector3 = this.getControllerComponentTransform(0, "tip", new Matrix4f()).transformProject(Utils.forward, new Vector3f());
+                                            Vector3f vector31 = this.getControllerComponentTransform(0, "handgrip", new Matrix4f()).transformProject(Utils.forward, new Vector3f());
                                             double d0 = Math.abs(vector3.normalize(new Vector3f()).dot(vector31.normalize(new Vector3f())));
                                             double d1 = Math.acos(d0);
                                             double d2 = Math.toDegrees(d1);
-                                            double d3 = Math.acos(vector3.normalize(new Vector3f()).dot(this.forward.normalize(new Vector3f())));
+                                            double d3 = Math.acos(vector3.normalize(new Vector3f()).dot(Utils.forward.normalize(new Vector3f())));
                                             double d4 = Math.toDegrees(d3);
                                             this.gunStyle = d2 > 10.0D;
                                             this.gunAngle = d2;

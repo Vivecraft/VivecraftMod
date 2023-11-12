@@ -72,7 +72,7 @@ public class VRHotkeys {
             }
 
             if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_HOME && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                Utils.convertVector(dataholder.vrPlayer.vrdata_room_pre.getController(0).getPosition(), dataholder.vrSettings.vrFixedCampos);
+                Utils.convertToVector3f(dataholder.vrPlayer.vrdata_room_pre.getController(0).getPosition(), dataholder.vrSettings.vrFixedCampos);
                 dataholder.vrSettings.vrFixedCamrotQuat.setFromNormalized(dataholder.vrPlayer.vrdata_room_pre.getController(0).getMatrix(new Matrix4f()));
                 gotKey = true;
             }
@@ -210,8 +210,8 @@ public class VRHotkeys {
 
         if (startControllerPose != null) {
             VRData.VRDevicePose vrDevPose = dataholder.vrPlayer.vrdata_room_pre.getController(startController);
-            Vector3f vrOldPosition = Utils.convertVector(startControllerPose.getPosition(), new Vector3f());
-            Vector3f vrDevPosition = Utils.convertVector(vrDevPose.getPosition(), new Vector3f()).sub(vrOldPosition);
+            Vector3f vrOldPosition = Utils.convertToVector3f(startControllerPose.getPosition(), new Vector3f());
+            Vector3f vrDevPosition = Utils.convertToVector3f(vrDevPose.getPosition(), new Vector3f()).sub(vrOldPosition);
             Matrix4f matrix4f = vrDevPose.getMatrix(new Matrix4f()).mul(startControllerPose.getMatrix(new Matrix4f()).invert());
             matrix4f.transformProject(startCampos.sub(vrOldPosition, vrOldPosition), dataholder.vrSettings.vrFixedCampos).sub(vrOldPosition).add(vrDevPosition).add(startCampos);
             dataholder.vrSettings.vrFixedCamrotQuat.setFromNormalized(matrix4f).mul(startCamrotQuat);
