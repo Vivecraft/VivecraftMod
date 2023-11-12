@@ -67,8 +67,8 @@ public class NullVR extends MCVR {
             this.hmdPose.m31(1.62F);
 
             // eye offset, 10cm total distance
-            this.hmdPoseLeftEye.m03(-0.05F);
-            this.hmdPoseRightEye.m03(0.05F);
+            this.hmdPoseLeftEye.m30(-0.05F);
+            this.hmdPoseRightEye.m30(0.05F);
 
             this.initialized = true;
             this.initSuccess = true;
@@ -92,9 +92,9 @@ public class NullVR extends MCVR {
 
             this.updateAim();
 
-            this.controllerPose[0].transpose().setTranslation(0.3F, 1.2F, -0.5F).transpose();
+            this.controllerPose[0].setTranslation(0.3F, 1.2F, -0.5F);
 
-            this.controllerPose[1].transpose().setTranslation(-0.3F, 1.2F, -0.5F).transpose();
+            this.controllerPose[1].setTranslation(-0.3F, 1.2F, -0.5F);
 
             this.dh.vrSettings.xSensitivity = xSens;
             this.dh.vrSettings.keyholeX = xKey;

@@ -1073,20 +1073,20 @@ public class MCOpenVR extends MCVR {
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 var hmdmatrix34 = HmdMatrix34.calloc(stack);
-                Utils.convertSteamVRMatrix3ToMatrix4f(VRSystem_GetEyeToHeadTransform(0, hmdmatrix34).m(), this.hmdPoseLeftEye);
-                Utils.convertSteamVRMatrix3ToMatrix4f(VRSystem_GetEyeToHeadTransform(1, hmdmatrix34).m(), this.hmdPoseRightEye);
+                Utils.convertRM34ToCM44(VRSystem_GetEyeToHeadTransform(0, hmdmatrix34).m(), this.hmdPoseLeftEye);
+                Utils.convertRM34ToCM44(VRSystem_GetEyeToHeadTransform(1, hmdmatrix34).m(), this.hmdPoseRightEye);
             }
 
-            for (int j = 0; j < 64; ++j) {
-
-                if (this.hmdTrackedDevicePoses.get(j).bPoseIsValid()) {
-                    Utils.convertSteamVRMatrix3ToMatrix4f(this.hmdTrackedDevicePoses.get(j).mDeviceToAbsoluteTracking().m(), this.poseMatrices[j]);
-                    this.deviceVelocity[j] = new Vec3(this.hmdTrackedDevicePoses.get(j).vVelocity().v(0), this.hmdTrackedDevicePoses.get(j).vVelocity().v(1), this.hmdTrackedDevicePoses.get(j).vVelocity().v(2));
+            for (int j = 0; j < this.poseMatrices.length; ++j) {
+                TrackedDevicePose trackedDevicePose = this.hmdTrackedDevicePoses.get(j);
+                if (trackedDevicePose.bPoseIsValid()) {
+                    Utils.convertRM34ToCM44(trackedDevicePose.mDeviceToAbsoluteTracking().m(), this.poseMatrices[j]);
+                    this.deviceVelocity[j] = new Vec3(trackedDevicePose.vVelocity().v(0), trackedDevicePose.vVelocity().v(1), trackedDevicePose.vVelocity().v(2));
                 }
             }
 
             if (this.hmdTrackedDevicePoses.get(0).bPoseIsValid()) {
-                this.poseMatrices[0].transpose(this.hmdPose);
+                this.hmdPose.set(this.poseMatrices[0]);
                 this.headIsTracking = true;
             } else {
                 this.headIsTracking = false;
@@ -1096,8 +1096,8 @@ public class MCOpenVR extends MCVR {
             this.TPose = false;
 
             if (this.TPose) {
-                this.TPose_Right.rotationY(-120.0F).setTranslation(0.5F, 1.0F, -0.5F).transpose();
-                this.TPose_Left.rotationY(120.0F).setTranslation(-0.5F, 1.0F, -0.5F).transpose();
+                this.TPose_Right.rotationY(-120.0F).setTranslation(0.5F, 1.0F, -0.5F);
+                this.TPose_Left.rotationY(120.0F).setTranslation(-0.5F, 1.0F, -0.5F);
                 this.Neutral_HMD.m30(0.0F);
                 this.Neutral_HMD.m31(1.8F);
                 this.hmdPose.set(this.Neutral_HMD);

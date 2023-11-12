@@ -88,11 +88,11 @@ public abstract class MCVR {
     protected HapticScheduler hapticScheduler;
     public float seatedRot;
     public float aimPitch = 0.0F;
-    protected final Matrix4f Neutral_HMD = new Matrix4f().setTranslation(0.0F, 1.62F, 0.0F).transpose();
+    protected final Matrix4f Neutral_HMD = new Matrix4f().setTranslation(0.0F, 1.62F, 0.0F);
 
-    protected final Matrix4f TPose_Left = new Matrix4f().setTranslation(0.25F, 1.62F, 0.25F).transpose();
+    protected final Matrix4f TPose_Left = new Matrix4f().setTranslation(0.25F, 1.62F, 0.25F);
 
-    protected final Matrix4f TPose_Right = new Matrix4f().setTranslation(0.75F, 1.62F, 0.75F).transpose();
+    protected final Matrix4f TPose_Right = new Matrix4f().setTranslation(0.75F, 1.62F, 0.75F);
 
     protected boolean TPose = false;
     public boolean hudPopup = true;
@@ -233,7 +233,7 @@ public abstract class MCVR {
 
             return Utils.toVec3(vector31);
         } else {
-            Matrix4f dest = this.hmdPose.mul0(matrix4f.transpose(new Matrix4f()));
+            Matrix4f dest = this.hmdPose.mul(matrix4f);
             Vector3f vector3 = dest.getTranslation(new Vector3f());
 
             if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
@@ -267,7 +267,7 @@ public abstract class MCVR {
         }
 
         if (matrix4f != null) {
-            return this.hmdRotation.mul(new Matrix4f().set3x3(matrix4f).transpose3x3(), dest);
+            return this.hmdRotation.mul(new Matrix4f().set3x3(matrix4f), dest);
         } else {
             return dest.set(this.hmdRotation);
         }
@@ -482,9 +482,9 @@ public abstract class MCVR {
             Matrix4f controllerGrip0;
 
             if (this.dh.vrSettings.seated) {
-                controllerGrip0 = this.controllerPose[0].transpose(new Matrix4f());
+                controllerGrip0 = this.controllerPose[0];
             } else {
-                controllerGrip0 = this.controllerPose[0].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(0, "handgrip", new Matrix4f()));
+                controllerGrip0 = this.controllerPose[0].mul(this.getControllerComponentTransform(0, "handgrip", new Matrix4f()));
             }
 
             this.handRotation[0].identity().set3x3(controllerGrip0);
@@ -492,9 +492,9 @@ public abstract class MCVR {
             Matrix4f controllerTip0;
 
             if (this.dh.vrSettings.seated) {
-                controllerTip0 = this.controllerPose[0].transpose(new Matrix4f());
+                controllerTip0 = this.controllerPose[0];
             } else {
-                controllerTip0 = this.controllerPose[0].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(0, "tip", new Matrix4f()));
+                controllerTip0 = this.controllerPose[0].mul(this.getControllerComponentTransform(0, "tip", new Matrix4f()));
             }
 
             this.aimSource[0] = Utils.toVec3(controllerTip0.getTranslation(new Vector3f()));
@@ -503,20 +503,18 @@ public abstract class MCVR {
             Vec3 vec31 = this.getHmdVector();
 
             if (this.dh.vrSettings.seated && this.mc.screen == null && this.mc.mouseHandler.isMouseGrabbed()) {
-                Matrix4f matrix4f = new Matrix4f();
-                float f = 110.0F;
-                float f1 = 180.0F;
-                double d0 = this.mc.mouseHandler.xpos() / (double) this.mc.getWindow().getScreenWidth() * (double) f - (double) (f / 2.0F);
-                int i = this.mc.getWindow().getScreenHeight();
-
-                if (i % 2 != 0) {
-                    --i;
-                }
-
-                double d1 = -this.mc.mouseHandler.ypos() / (double) i * (double) f1 + (double) (f1 / 2.0F);
-                double d2 = -d1;
-
                 if (this.mc.isWindowActive()) {
+                    float f = 110.0F;
+                    float f1 = 180.0F;
+                    double d0 = this.mc.mouseHandler.xpos() / (double) this.mc.getWindow().getScreenWidth() * (double) f - (double) (f / 2.0F);
+                    int i = this.mc.getWindow().getScreenHeight();
+
+                    if (i % 2 != 0) {
+                        --i;
+                    }
+
+                    double d1 = -this.mc.mouseHandler.ypos() / (double) i * (double) f1 + (double) (f1 / 2.0F);
+                    double d2 = -d1;
                     float f2 = this.dh.vrSettings.keyholeX;
                     float f3 = 20.0F * this.dh.vrSettings.xSensitivity;
                     int j = (int) ((double) (-f2 + f / 2.0F) * (double) this.mc.getWindow().getScreenWidth() / (double) f) + 1;
@@ -545,14 +543,15 @@ public abstract class MCVR {
                     double screenY = (i * 0.5F) * (((WindowExtension) (Object) this.mc.getWindow()).vivecraft$getActualScreenHeight() / (double) this.mc.getWindow().getScreenHeight());
                     InputSimulator.setMousePos(screenX, screenY);
                     GLFW.glfwSetCursorPos(this.mc.getWindow().getWindow(), screenX, screenY);
-                    matrix4f
-                        .rotateX((float) Math.toRadians(-d2))
+                    this.controllerRotation[0].set3x3(this.controllerRotation[0]
+                        .rotationX((float) Math.toRadians(-d2))
                         .rotateY((float) Math.toRadians(-180.0D + d0 - (double) this.hmdForwardYaw))
-                        .transpose();
+                        .transpose(this.handRotation[0])
+                    );
+                } else {
+                    this.controllerRotation[0].identity();
+                    this.handRotation[0].identity();
                 }
-
-                this.controllerRotation[0].set3x3(matrix4f);
-                this.handRotation[0].set3x3(matrix4f);
             }
 
             Vec3 vec32 = this.getAimVector(0);
@@ -564,9 +563,9 @@ public abstract class MCVR {
             Matrix4f controllerGrip1;
 
             if (this.dh.vrSettings.seated) {
-                controllerGrip1 = this.controllerPose[1].transpose(new Matrix4f());
+                controllerGrip1 = this.controllerPose[1];
             } else {
-                controllerGrip1 = this.controllerPose[1].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(1, "handgrip", new Matrix4f()));
+                controllerGrip1 = this.controllerPose[1].mul(this.getControllerComponentTransform(1, "handgrip", new Matrix4f()));
             }
 
             this.handRotation[1].identity().set3x3(controllerGrip1);
@@ -574,9 +573,9 @@ public abstract class MCVR {
             Matrix4f controllerTip1;
 
             if (this.dh.vrSettings.seated) {
-                controllerTip1 = this.controllerPose[1].transpose(new Matrix4f());
+                controllerTip1 = this.controllerPose[1];
             } else {
-                controllerTip1 = this.controllerPose[1].transpose(new Matrix4f()).mul(this.getControllerComponentTransform(1, "tip", new Matrix4f()));
+                controllerTip1 = this.controllerPose[1].mul(this.getControllerComponentTransform(1, "tip", new Matrix4f()));
             }
 
             this.aimSource[1] = Utils.toVec3(controllerTip1.getTranslation(new Vector3f()));
@@ -598,14 +597,14 @@ public abstract class MCVR {
                 this.controllerPose[2].set(this.controllerPose[0]);
             }
 
-            this.controllerRotation[2].identity().set3x3(this.controllerPose[2].transpose(new Matrix4f()));
+            this.controllerRotation[2].identity().set3x3(this.controllerPose[2]);
 
             if ((!this.hasThirdController() || this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY && this.dh.vrSettings.displayMirrorMode != VRSettings.MirrorMode.THIRD_PERSON) && !flag) {
                 this.mrMovingCamActive = false;
                 this.aimSource[2] = Utils.toVec3(this.dh.vrSettings.vrFixedCampos);
             } else {
                 this.mrMovingCamActive = true;
-                this.aimSource[2] = Utils.toVec3(this.controllerPose[2].transpose(new Matrix4f()).getTranslation(new Vector3f()));
+                this.aimSource[2] = Utils.toVec3(this.controllerPose[2].getTranslation(new Vector3f()));
             }
         }
     }

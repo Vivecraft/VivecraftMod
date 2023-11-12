@@ -404,15 +404,6 @@ public class Utils {
         return new Vec3(vector3fc.x(), vector3fc.y(), vector3fc.z());
     }
 
-    public static Matrix4f convertSteamVRMatrix3ToMatrix4f(@NotNull FloatBuffer floatBuffer, @NotNull Matrix4f mat) {
-        return mat.set(
-            floatBuffer.get(0), floatBuffer.get(4), floatBuffer.get(8), 0.0F,
-            floatBuffer.get(1), floatBuffer.get(5), floatBuffer.get(9), 0.0F,
-            floatBuffer.get(2), floatBuffer.get(6), floatBuffer.get(10), 0.0F,
-            floatBuffer.get(3), floatBuffer.get(7), floatBuffer.get(11), 1.0F
-        ).transpose();
-    }
-
     /**
      * Convert a {@link FloatBuffer} containing a row-major 3x4 matrix,
      * like {@link org.lwjgl.openvr.HmdMatrix34},
