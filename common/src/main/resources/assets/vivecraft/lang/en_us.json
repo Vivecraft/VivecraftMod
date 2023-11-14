@@ -355,6 +355,8 @@
   "vivecraft.gui.movethirdpersoncam": "Move Third Cam",
   "vivecraft.gui.social": "Social",
   "vivecraft.gui.downloadfrom": "Download from %s",
+  "vivecraft.gui.dontshowagain": "Don't Show Again",
+  "vivecraft.gui.openguide": "Open Guide",
   "_comment9": "Items",
   "vivecraft.item.jumpboots": "Jump Boots",
   "vivecraft.item.climbclaws": "Climb Claws",
@@ -386,6 +388,8 @@
   "vivecraft.messages.angles": "Pitch: %.1f Yaw: %.1f Roll: %.1f",
   "vivecraft.messages.heightset": "User height set to %d%%",
   "vivecraft.messages.airtypingwarning": "You are typing without a screen open. If you're trying to use key bindings, enable \"Keyboard Presses Bindings\" in the VR settings.",
+  "vivecraft.messages.gctitle": "Non-optimal Garbage Collector",
+  "vivecraft.messages.gcinfo": "Your current garbage collector is %s, which is not optimal for Vivecraft and will likely cause hitching and frame drops.\n\nYour system appears sufficient to use %s and %s GB or more of heap memory, which is recommended for the smoothest experience. Add %s to your Java arguments to use it.\n\nIf you're unsure how to modify your Java arguments, press \"%s\" below.",
 
   "_comment_m": "mixin version exclusive strings",
   "vivecraft.options.screen.settings": "Vivecraft Settings",
