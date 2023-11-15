@@ -246,8 +246,9 @@ public abstract class VRRenderer {
 
             // Clean up time
             VRShaders.lanczosShader.clear();
-            Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
+            this.fsaaLastPassResultFBO.unbindWrite();
             RenderSystem.depthFunc(GL43.GL_LEQUAL);
+            RenderSystem.enableBlend();
         }
     }
 

@@ -581,7 +581,9 @@ public class PhysicalKeyboard {
 
     public void unpressAllKeys() {
         for (KeyButton key : this.keys) {
-            if(key.pressed) key.unpress();
+            if (key.pressed) {
+                key.unpress();
+            }
         }
     }
 
@@ -665,7 +667,9 @@ public class PhysicalKeyboard {
         }
 
         public abstract void onPressed();
-        public void onReleased() {}
+
+        public void onReleased() {
+        }
     }
 
     public enum KeyboardTheme implements OptionEnum<KeyboardTheme> {

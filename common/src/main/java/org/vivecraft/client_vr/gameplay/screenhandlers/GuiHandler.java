@@ -116,11 +116,11 @@ public class GuiHandler {
 
         guiScaleFactorMax = maxScale;
 
-        scaledWidth =  Mth.ceil(framebufferWidth / (float) scale);
-        scaledWidthMax =  Mth.ceil(framebufferWidth / (float) maxScale);
+        scaledWidth = Mth.ceil(framebufferWidth / (float) scale);
+        scaledWidthMax = Mth.ceil(framebufferWidth / (float) maxScale);
 
-        scaledHeight =  Mth.ceil(framebufferHeight / (float) scale);
-        scaledHeightMax =  Mth.ceil(framebufferHeight / (float) maxScale);
+        scaledHeight = Mth.ceil(framebufferHeight / (float) scale);
+        scaledHeightMax = Mth.ceil(framebufferHeight / (float) maxScale);
 
         return scale;
     }
@@ -142,10 +142,8 @@ public class GuiHandler {
             controllerMouseX *= (double) guiWidth / oldWidth;
             controllerMouseY *= (double) guiHeight / oldHeight;
             return true;
-        } else if (oldGuiScale != guiScaleFactor) {
-            return true;
         } else {
-            return false;
+            return oldGuiScale != guiScaleFactor;
         }
     }
 
@@ -531,7 +529,7 @@ public class GuiHandler {
         //GL11.glMultMatrixf(dh.vrPlayer.vrdata_world_render.getEye(currentPass).getMatrix().toFloatBuffer());
 
         if (guipos == null) {
-            VRSettings.logger.error("guipos was null, how did that happen. vrRunning: {}", VRState.vrRunning);
+            Utils.logger.error("guipos was null, how did that happen. vrRunning: {}", VRState.vrRunning);
             new RuntimeException().printStackTrace();
             guiPos_room = new Vec3(0, 0, 0);
             guipos = VRPlayer.room_to_world_pos(guiPos_room, dh.vrPlayer.vrdata_world_render);

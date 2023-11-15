@@ -597,6 +597,23 @@ public class Utils {
         return s;
     }
 
+    public static String readWinRegistry(String key) {
+        try {
+            Process process = java.lang.Runtime.getRuntime().exec("reg query \"" + key.substring(0, key.lastIndexOf('\\')) + "\" /v \"" + key.substring(key.lastIndexOf('\\') + 1) + "\"");
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                    String[] split = line.split("REG_SZ|REG_DWORD");
+                    if (split.length > 1) {
+                        return split[1].trim();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static Vec3 vecLerp(Vec3 start, Vec3 end, double fraction) {
         double d0 = start.x + (end.x - start.x) * fraction;
         double d1 = start.y + (end.y - start.y) * fraction;

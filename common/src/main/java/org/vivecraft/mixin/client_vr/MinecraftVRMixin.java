@@ -322,6 +322,16 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (VRState.vrRunning) {
             ClientDataHolderVR.getInstance().vrPlayer.preTick();
         }
+        if (VRState.vrEnabled) {
+            if (ClientDataHolderVR.getInstance().menuWorldRenderer != null) {
+                ClientDataHolderVR.getInstance().menuWorldRenderer.checkTask();
+                if (ClientDataHolderVR.getInstance().menuWorldRenderer.isBuilding()) {
+                    this.profiler.push("Build Menu World");
+                    ClientDataHolderVR.getInstance().menuWorldRenderer.buildNext();
+                    this.profiler.pop();
+                }
+            }
+        }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V", shift = At.Shift.AFTER), method = "runTick")
@@ -501,7 +511,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             try {
                 ClientDataHolderVR.getInstance().vrRenderer.endFrame();
             } catch (RenderConfigException exception) {
-                VRSettings.logger.error(exception.toString());
+                Utils.logger.error(exception.toString());
             }
             this.profiler.pop();
             this.vivecraft$checkGLError("post submit ");
@@ -697,8 +707,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     final File file2 = new File(file1, "world" + i + ".mmw");
 
                     if (!file2.exists()) {
-                        VRSettings.logger.info("Exporting world... area size: " + size);
-                        VRSettings.logger.info("Saving to " + file2.getAbsolutePath());
+                        Utils.logger.info("Exporting world... area size: " + size);
+                        Utils.logger.info("Saving to " + file2.getAbsolutePath());
 
                         if (isLocalServer()) {
                             final Level level = getSingleplayerServer().getLevel(player.level().dimension());

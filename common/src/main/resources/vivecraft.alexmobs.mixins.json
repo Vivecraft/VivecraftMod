@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "org.vivecraft.mod_compat_vr.alexmobs.mixin",
+  "plugin": "org.vivecraft.MixinConfig",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ClientEventsMixin"
+  ],
+  "minVersion": "0.8.4"
+}

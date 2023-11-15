@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.client.extensions.RenderLayerExtension;
 import org.vivecraft.client.utils.RenderLayerTypes;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -100,7 +100,7 @@ public abstract class PlayerRendererMixin<T extends LivingEntity, M extends Enti
     @Unique
     private void vivecraft$addLayerClone(RenderLayer<T, M> renderLayer, LivingEntityRenderer<T, M> target) {
         try {
-            VRSettings.logger.warn("Copying layer: {} with Object.copy, this could cause issues", renderLayer.getClass());
+            Utils.logger.warn("Copying layer: {} with Object.copy, this could cause issues", renderLayer.getClass());
             RenderLayer<T, M> newLayer = (RenderLayer<T, M>) ((RenderLayerExtension) renderLayer).clone();
             newLayer.renderer = target;
             target.addLayer(newLayer);
