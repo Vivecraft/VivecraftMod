@@ -471,7 +471,7 @@ public abstract class MCVR {
             this.hmdHistory.add(vec3);
             Vector3f vector3 = this.hmdRotation.transformProject(0.0F, -0.1F, 0.1F, new Vector3f());
             this.hmdPivotHistory.add(new Vec3((double) vector3.x() + vec3.x, (double) vector3.y() + vec3.y, (double) vector3.z() + vec3.z));
-            this.hmdRotHistory.add(new Quaternionf().setFromNormalized(this.hmdRotation).invert().rotateY(-Math.toRadians(this.dh.vrSettings.worldRotation)));
+            this.hmdRotHistory.add(new Quaternionf().setFromNormalized(this.hmdRotation).conjugate().rotateY(-Math.toRadians(this.dh.vrSettings.worldRotation)));
 
             if (this.dh.vrSettings.seated) {
                 this.controllerPose[1].set(this.hmdPose.invert(this.controllerPose[0]).invert());
