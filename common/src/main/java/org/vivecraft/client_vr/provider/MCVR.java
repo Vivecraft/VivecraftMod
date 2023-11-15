@@ -231,7 +231,7 @@ public abstract class MCVR {
 
             return Utils.convertToVec3(vector31);
         } else {
-            Matrix4f dest = this.hmdPose.mul(matrix4f);
+            Matrix4f dest = this.hmdPose.mul(matrix4f, new Matrix4f());
             Vector3f vector3 = dest.getTranslation(new Vector3f());
 
             if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
