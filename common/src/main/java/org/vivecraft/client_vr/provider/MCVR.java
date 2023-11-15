@@ -482,7 +482,7 @@ public abstract class MCVR {
             if (this.dh.vrSettings.seated) {
                 controllerGrip0 = this.controllerPose[0];
             } else {
-                controllerGrip0 = this.controllerPose[0].mul(this.getControllerComponentTransform(0, "handgrip", new Matrix4f()));
+                controllerGrip0 = this.controllerPose[0].mul(this.getControllerComponentTransform(0, "handgrip", new Matrix4f()), new Matrix4f());
             }
 
             this.handRotation[0].identity().set3x3(controllerGrip0);
@@ -492,7 +492,7 @@ public abstract class MCVR {
             if (this.dh.vrSettings.seated) {
                 controllerTip0 = this.controllerPose[0];
             } else {
-                controllerTip0 = this.controllerPose[0].mul(this.getControllerComponentTransform(0, "tip", new Matrix4f()));
+                controllerTip0 = this.controllerPose[0].mul(this.getControllerComponentTransform(0, "tip", new Matrix4f()), new Matrix4f());
             }
 
             this.aimSource[0] = Utils.convertToVec3(controllerTip0.getTranslation(new Vector3f()));
@@ -563,7 +563,7 @@ public abstract class MCVR {
             if (this.dh.vrSettings.seated) {
                 controllerGrip1 = this.controllerPose[1];
             } else {
-                controllerGrip1 = this.controllerPose[1].mul(this.getControllerComponentTransform(1, "handgrip", new Matrix4f()));
+                controllerGrip1 = this.controllerPose[1].mul(this.getControllerComponentTransform(1, "handgrip", new Matrix4f()), new Matrix4f());
             }
 
             this.handRotation[1].identity().set3x3(controllerGrip1);
@@ -573,7 +573,7 @@ public abstract class MCVR {
             if (this.dh.vrSettings.seated) {
                 controllerTip1 = this.controllerPose[1];
             } else {
-                controllerTip1 = this.controllerPose[1].mul(this.getControllerComponentTransform(1, "tip", new Matrix4f()));
+                controllerTip1 = this.controllerPose[1].mul(this.getControllerComponentTransform(1, "tip", new Matrix4f()), new Matrix4f());
             }
 
             this.aimSource[1] = Utils.convertToVec3(controllerTip1.getTranslation(new Vector3f()));
