@@ -4,6 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 
 public class CommonNetworkHelper {
 
@@ -42,11 +43,11 @@ public class CommonNetworkHelper {
         buffer.writeFloat((float) vec3.z);
     }
 
-    public static void serialize(FriendlyByteBuf buffer, Quaternionf quat) {
-        buffer.writeFloat(quat.x);
-        buffer.writeFloat(quat.y);
-        buffer.writeFloat(quat.z);
-        buffer.writeFloat(quat.w);
+    public static void serialize(FriendlyByteBuf buffer, Quaternionfc quat) {
+        buffer.writeFloat(quat.w());
+        buffer.writeFloat(quat.x());
+        buffer.writeFloat(quat.y());
+        buffer.writeFloat(quat.z());
     }
 
     public static Vec3 deserializeFVec3(FriendlyByteBuf buffer) {
@@ -54,6 +55,11 @@ public class CommonNetworkHelper {
     }
 
     public static Quaternionf deserializeQuaternionf(FriendlyByteBuf buffer) {
-        return new Quaternionf(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+        Quaternionf q = new Quaternionf();
+        q.w = buffer.readFloat();
+        q.x = buffer.readFloat();
+        q.y = buffer.readFloat();
+        q.z = buffer.readFloat();
+        return q;
     }
 }
