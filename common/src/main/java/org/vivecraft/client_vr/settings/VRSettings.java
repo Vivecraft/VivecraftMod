@@ -446,6 +446,8 @@ public class VRSettings {
     public boolean vrSettingsButtonEnabled = true;
     @SettingField
     public boolean vrSettingsButtonPositionLeft = true;
+    @SettingField
+    public boolean disableGarbageCollectorMessage = false;
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
