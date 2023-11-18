@@ -34,6 +34,7 @@ dependencies {
     modCompileOnly "maven.modrinth:lithium:mc1.20.1-0.11.2"
     modCompileOnly "maven.modrinth:indium:1.0.21+mc1.20.1"
     modCompileOnly "maven.modrinth:resolution-control-plus:1.20-3.0.0"
+    modCompileOnly "maven.modrinth:better-combat:1.8.3+1.20.1-fabric"
 
     // for immersive portals compat
     modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v3.3.1-mc1.20.1') {

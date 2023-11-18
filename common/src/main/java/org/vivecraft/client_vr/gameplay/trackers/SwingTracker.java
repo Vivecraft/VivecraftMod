@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
@@ -18,12 +19,14 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.BlockTags;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.Vec3History;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mod_compat_vr.bettercombat.BetterCombatHelper;
 
 import java.util.List;
 
@@ -126,15 +129,27 @@ public class SwingTracker extends Tracker {
                 float weaponLength;
                 float entityReachAdd;
 
+                double playerEntityReach = Xplat.getItemEntityReach(3.0, itemstack, c == 0 ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+                if (Xplat.isModLoaded("bettercombat")) {
+                    // better combat overrides the player reach
+                    playerEntityReach = BetterCombatHelper.getItemRange(playerEntityReach, itemstack);
+                }
+
+                // subtract arm length and clamp it to 6 meters
+                playerEntityReach = Math.min(playerEntityReach, 6.0) - 0.5;
+
                 if (isSword) {
-                    entityReachAdd = 1.9F;
                     weaponLength = 0.6F;
+                    // in default situations a total reach of 2.5
+                    entityReachAdd = (float) playerEntityReach - weaponLength;
                 } else if (isTool) {
-                    entityReachAdd = 1.2F;
                     weaponLength = 0.35F;
+                    // in default situations a total reach of 1.55
+                    entityReachAdd = (float) playerEntityReach * 0.62F - weaponLength;
                 } else if (!itemstack.isEmpty()) {
                     weaponLength = 0.1F;
-                    entityReachAdd = 0.3F;
+                    // in default situations a total reach of 0.4
+                    entityReachAdd = (float) playerEntityReach * 0.16F - weaponLength;
                 } else {
                     weaponLength = 0.0F;
                     entityReachAdd = 0.3F;
