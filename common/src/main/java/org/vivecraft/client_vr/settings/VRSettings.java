@@ -448,6 +448,8 @@ public class VRSettings {
     public boolean vrSettingsButtonPositionLeft = true;
     @SettingField
     public boolean disableGarbageCollectorMessage = false;
+    @SettingField
+    public boolean selfButtSparklesInFirstPerson = false;
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
