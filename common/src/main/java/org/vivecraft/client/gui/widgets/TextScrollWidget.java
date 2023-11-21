@@ -30,7 +30,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, String text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedChars = ComponentRenderUtils.wrapComponents(Component.literal(text), width - scrollBarWidth * 2, Minecraft.getInstance().font);
+        formattedChars = Minecraft.getInstance().font.split(Component.literal(text), width - scrollBarWidth * 2);
 
         initScroll();
     }
@@ -38,7 +38,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedChars = ComponentRenderUtils.wrapComponents(text, width - scrollBarWidth * 2, Minecraft.getInstance().font);
+        formattedChars = Minecraft.getInstance().font.split(text, width - scrollBarWidth * 2);
         initScroll();
     }
 
