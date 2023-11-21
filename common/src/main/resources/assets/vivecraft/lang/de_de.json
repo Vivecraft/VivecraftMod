@@ -356,6 +356,8 @@
   "vivecraft.gui.movethirdpersoncam": "Bewege 3. Kamera",
   "vivecraft.gui.social": "Sozial",
   "vivecraft.gui.downloadfrom": "Von %s herunterladen",
+  "vivecraft.gui.dontshowagain": "Nicht mehr anzeigen",
+  "vivecraft.gui.openguide": "Anleitung öffnen",
   "_comment13": "Items",
   "vivecraft.item.jumpboots": "Sprung-Schuhe",
   "vivecraft.item.climbclaws": "Kletterkrallen",
@@ -387,6 +389,8 @@
   "vivecraft.messages.angles": "Längsachse: %.1f Querachse: %.1f Vertikalachse: %.1f",
   "vivecraft.messages.heightset": "Körpergröße gesetzt auf %d%%",
   "vivecraft.messages.airtypingwarning": "Du tipps ohne einen Bildschirm offen zu haben. Wenn du eine Tastenbindung aktivieren wolltest, aktiviere \"Tastatur aktiviert Bindungen\" in den VR Einstellungen.",
+  "vivecraft.messages.gctitle": "Nicht optimaler Garbage Collector",
+  "vivecraft.messages.gcinfo": "Ihr derzeitiger Garbage Collector ist %s, welcher nicht optimal for Vivecraft ist und Ruckler oder verringerte Bildraten verursachen kann. \n\nIhr System scheint für %s und %s GB oder mehr Heap Speicher auszureichen. Dies ist empfohlen für das flüssigste Spielerlebnis. Fügen Sie %s zu ihren Java Argumenten um diese zu nutzen.\n\nWenn Sie unsicher sind wie Sie die Java Argumente anpassen können, klicken Sie unten auf \"%s\".",
 
   "_comment_m": "mixin version exclusive strings",
   "_comment_m0": "Option values",

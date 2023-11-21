@@ -74,6 +74,30 @@ public class VRState {
             dh.menuWorldRenderer = new MenuWorldRenderer();
 
             dh.menuWorldRenderer.init();
+
+            try {
+                String garbageCollector = StringUtils.getCommonPrefix(ManagementFactory.getGarbageCollectorMXBeans().stream().map(MemoryManagerMXBean::getName).toArray(String[]::new)).trim();
+                if (garbageCollector.isEmpty()) {
+                    garbageCollector = ManagementFactory.getGarbageCollectorMXBeans().get(0).getName();
+                }
+                VRSettings.logger.info("Garbage collector: {}", garbageCollector);
+
+                // Fully qualified name here to avoid any ambiguity
+                com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+                // Might as well log this stuff since we have it, could be useful for technical support
+                VRSettings.logger.info("Available CPU threads: {}", Runtime.getRuntime().availableProcessors());
+                VRSettings.logger.info("Total physical memory: {} GiB", String.format("%.01f", os.getTotalMemorySize() / 1073741824.0F));
+                VRSettings.logger.info("Free physical memory: {} GiB", String.format("%.01f", os.getFreeMemorySize() / 1073741824.0F));
+
+                if (!garbageCollector.equals("ZGC") && !ClientDataHolderVR.getInstance().vrSettings.disableGarbageCollectorMessage) {
+                    // At least 12 GiB RAM (minus 256 MiB for possible reserved) and 8 CPU threads
+                    if (os.getTotalMemorySize() >= 1073741824L * 12L - 1048576L * 256L && Runtime.getRuntime().availableProcessors() >= 8) {
+                        Minecraft.getInstance().setScreen(new GarbageCollectorScreen(garbageCollector));
+                    }
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         } catch (RenderConfigException renderConfigException) {
             vrEnabled = false;
             destroyVR(true);
@@ -87,30 +111,6 @@ public class VRState {
                 component.append(Component.literal("\n" + element.toString()));
             }
             Minecraft.getInstance().setScreen(new ErrorScreen("VR Init Error", component));
-        }
-
-        try {
-            String garbageCollector = StringUtils.getCommonPrefix(ManagementFactory.getGarbageCollectorMXBeans().stream().map(MemoryManagerMXBean::getName).toArray(String[]::new)).trim();
-            if (garbageCollector.isEmpty()) {
-                garbageCollector = ManagementFactory.getGarbageCollectorMXBeans().get(0).getName();
-            }
-            VRSettings.logger.info("Garbage collector: {}", garbageCollector);
-
-            // Fully qualified name here to avoid any ambiguity
-            com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-            // Might as well log this stuff since we have it, could be useful for technical support
-            VRSettings.logger.info("Available CPU threads: {}", Runtime.getRuntime().availableProcessors());
-            VRSettings.logger.info("Total physical memory: {} GiB", String.format("%.01f", os.getTotalMemorySize() / 1073741824.0F));
-            VRSettings.logger.info("Free physical memory: {} GiB", String.format("%.01f", os.getFreeMemorySize() / 1073741824.0F));
-
-            if (!garbageCollector.equals("ZGC") && !ClientDataHolderVR.getInstance().vrSettings.disableGarbageCollectorMessage) {
-                // At least 12 GiB RAM (minus 256 MiB for possible reserved) and 8 CPU threads
-                if (os.getTotalMemorySize() >= 1073741824L * 12L - 1048576L * 256L && Runtime.getRuntime().availableProcessors() >= 8) {
-                    Minecraft.getInstance().setScreen(new GarbageCollectorScreen(garbageCollector));
-                }
-            }
-        } catch (Throwable e) {
-            e.printStackTrace();
         }
     }
 
