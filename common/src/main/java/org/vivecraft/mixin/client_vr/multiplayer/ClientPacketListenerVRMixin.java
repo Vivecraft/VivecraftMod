@@ -7,6 +7,7 @@ import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -125,8 +127,21 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
         ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
     }
 
-    @Inject(at = @At("HEAD"), method = "handleCustomPayload", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    @Group(name = "handleCustomPayload", min = 1, max = 1)
+    @Inject(at = @At("HEAD"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;)V", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, require = 0, expect = 0)
     public void vivecraft$handlepacket(CustomPacketPayload customPacketPayload, CallbackInfo info) {
+        if (customPacketPayload instanceof VivecraftDataPacket dataPacket) {
+            FriendlyByteBuf buffer = dataPacket.buffer();
+            var packetID = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
+            ClientNetworking.handlePacket(packetID, buffer);
+            buffer.release();
+            info.cancel();
+        }
+    }
+
+    @Group(name = "handleCustomPayload", min = 1, max = 1)
+    @Inject(at = @At("HEAD"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/ClientboundCustomPayloadPacket;Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;)V", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, require = 0, expect = 0)
+    public void vivecraft$handlepacketNeoForge(ClientboundCustomPayloadPacket packet, CustomPacketPayload customPacketPayload, CallbackInfo info) {
         if (customPacketPayload instanceof VivecraftDataPacket dataPacket) {
             FriendlyByteBuf buffer = dataPacket.buffer();
             var packetID = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
