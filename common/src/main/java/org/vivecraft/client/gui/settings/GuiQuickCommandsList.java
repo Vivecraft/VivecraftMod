@@ -14,7 +14,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
     private final Minecraft mc;
 
     public GuiQuickCommandsList(GuiQuickCommandEditor parent, Minecraft mc) {
-        super(mc, parent.width, parent.height, 32, parent.height - 32, 20);
+        super(mc, parent.width, parent.height - 64, 32, 20);
         this.parent = parent;
         this.mc = mc;
         String[] astring = this.dataholder.vrSettings.vrQuickCommands;

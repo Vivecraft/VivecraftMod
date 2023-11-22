@@ -27,7 +27,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     int maxNameWidth;
 
     public SettingsList(Screen parent, Minecraft minecraft, List<SettingsList.BaseEntry> entries) {
-        super(minecraft, parent.width + 45, parent.height, 20, parent.height - 32, 20);
+        super(minecraft, parent.width + 45, parent.height - 52, 20, 20);
         this.parent = parent;
         for (SettingsList.BaseEntry entry : entries) {
             int i;

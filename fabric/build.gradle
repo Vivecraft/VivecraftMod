@@ -26,18 +26,18 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
+    //modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modRuntimeOnly "maven.modrinth:sodium:mc1.20.2-0.5.4"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.20.3-0.5.4"
 
     // for iris compat
-    modRuntimeOnly "maven.modrinth:iris:1.6.11+1.20.2"
+    modRuntimeOnly "maven.modrinth:iris:1.6.13+1.20.4"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
     // for REI compat
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:13.0.661"
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:13.0.661"
 
     // for Pehkui compat
     modCompileOnly("com.github.Virtuoel:Pehkui:3.7.7", { exclude group: "net.fabricmc.fabric-api" })
@@ -48,7 +48,7 @@ dependencies {
     modCompileOnly "maven.modrinth:indium:1.0.27+mc1.20.1"
 
     //mod menu
-    modApi("com.terraformersmc:modmenu:8.0.0")
+    modCompileOnly("com.terraformersmc:modmenu:8.0.0")
 
     // for immersive portals compat
     modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v3.3.1-mc1.20.1') {
