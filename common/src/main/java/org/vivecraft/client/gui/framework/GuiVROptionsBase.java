@@ -184,7 +184,7 @@ public abstract class GuiVROptionsBase extends Screen {
             this.init();
         }
 
-        this.renderBackground(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
 
         if (this.visibleList != null) {
             this.visibleList.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
@@ -200,7 +200,6 @@ public abstract class GuiVROptionsBase extends Screen {
             this.btnDone.visible = this.drawDefaultButtons;
         }
 
-        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
         renderTooltip(guiGraphics, pMouseX, pMouseY);
     }
 
