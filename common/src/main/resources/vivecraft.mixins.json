@@ -19,6 +19,7 @@
     "client.renderer.entity.EntityRenderDispatcherMixin",
     "client.renderer.entity.ItemRendererVRMixin",
     "client.renderer.entity.PlayerRendererMixin",
+    "client.renderer.entity.layers.ItemInHandLayerMixin",
     "client.renderer.entity.layers.RenderLayerMixin",
     "client_vr.ClientBrandRetrieverVRMixin",
     "client_vr.KeyboardHandlerVRMixin",
