@@ -121,10 +121,10 @@ public class UpdateChecker {
             this.fullVersion = version;
             this.changelog = changelog;
             String[] parts = version_number.split("-");
-            int viveVersionIndex = parts.length - 1;
-            // parts should be [mc version]-(pre/rc)-[vive version]-[vive a/b/test]
-            if (!parts[parts.length - 1].contains(".")) {
-                viveVersionIndex = parts.length - 2;
+            int viveVersionIndex = parts.length - 2;
+            // parts should be [mc version]-(pre/rc)-[vive version]-(vive a/b/test)-[mod loader]
+            if (!parts[viveVersionIndex].contains(".")) {
+                viveVersionIndex = parts.length - 3;
                 // prerelease
                 if (parts[parts.length - 1].matches("a\\d+")) {
                     alpha = Integer.parseInt(parts[parts.length - 1].replaceAll("\\D+", ""));
