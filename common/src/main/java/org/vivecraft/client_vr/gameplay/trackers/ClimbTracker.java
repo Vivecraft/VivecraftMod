@@ -2,6 +2,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
@@ -28,6 +29,7 @@ import org.vivecraft.common.network.CommonNetworkHelper;
 import java.util.*;
 
 public class ClimbTracker extends Tracker {
+    public static final ModelResourceLocation clawsModel = new ModelResourceLocation("vivecraft", "climb_claws", "inventory");
     private final boolean[] latched = new boolean[2];
     private final boolean[] wasinblock = new boolean[2];
     private final boolean[] wasbutton = new boolean[2];

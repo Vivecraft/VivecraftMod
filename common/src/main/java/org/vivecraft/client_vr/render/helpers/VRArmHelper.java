@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.network.ClientNetworking;
@@ -143,8 +142,8 @@ public class VRArmHelper {
             item = override;
         }
 
-        if (dataHolder.climbTracker.isClimbeyClimb() && item.getItem() != Items.SHEARS) {
-            item = override == null ? mc.player.getOffhandItem() : override;
+        if (dataHolder.climbTracker.isClimbeyClimb() && !dataHolder.climbTracker.isClaws(item) && override == null) {
+            item = mc.player.getOffhandItem();
         }
 
         if (BowTracker.isHoldingBow(mc.player, InteractionHand.MAIN_HAND)) {
@@ -206,8 +205,7 @@ public class VRArmHelper {
             item = override;
         }
 
-        if (dataHolder.climbTracker.isClimbeyClimb()
-            && (item == null || item.getItem() != Items.SHEARS)) {
+        if (dataHolder.climbTracker.isClimbeyClimb() && !dataHolder.climbTracker.isClaws(item) && override == null) {
             item = mc.player.getMainHandItem();
         }
 
