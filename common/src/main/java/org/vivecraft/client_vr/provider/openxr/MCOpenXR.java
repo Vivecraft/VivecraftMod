@@ -78,6 +78,7 @@ public class MCOpenXR extends MCVR {
     );
     public boolean shouldRender = true;
     public long[] haptics = new long[2];
+    public String runtimeName;
 
 
     public MCOpenXR(Minecraft mc, ClientDataHolderVR dh) {
@@ -680,6 +681,9 @@ public class MCOpenXR extends MCVR {
                 this.isActive = false;
                 XR10.xrEndSession(session);
             }
+            case XR10.XR_SESSION_STATE_VISIBLE: {
+                this.isActive = false;
+            }
             case XR10.XR_SESSION_STATE_EXITING: {
                 break;
             }
@@ -799,6 +803,13 @@ public class MCOpenXR extends MCVR {
             }
             instance = new XrInstance(instancePtr.get(0), createInfo);
 
+            XrInstanceProperties instanceProperties = XrInstanceProperties.calloc(stack).type$Default();
+            XR10.xrGetInstanceProperties(instance, instanceProperties);
+            this.runtimeName = instanceProperties.runtimeNameString();
+            System.out.println(this.runtimeName);
+            //runtimeVersion = instanceProperties.runtimeVersion();
+            //runtimeVersionString = XR10.XR_VERSION_MAJOR(runtimeVersion) + "." + XR10.XR_VERSION_MINOR(runtimeVersion) + "." + XR10.XR_VERSION_PATCH(runtimeVersion);
+
             this.poseMatrices = new Matrix4f[64];
 
             for (int i = 0; i < this.poseMatrices.length; ++i) {
@@ -849,7 +860,7 @@ public class MCOpenXR extends MCVR {
             sessionBeginInfo.next(NULL);
             sessionBeginInfo.primaryViewConfigurationType(XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO);
 
-            XR10.xrBeginSession(session, sessionBeginInfo);
+            //XR10.xrBeginSession(session, sessionBeginInfo);
             this.isActive = true;
 
         }
@@ -1118,6 +1129,7 @@ public class MCOpenXR extends MCVR {
 
     @Override
     public boolean isActive() {
+        pollVREvents();
         return isActive;
     }
 
