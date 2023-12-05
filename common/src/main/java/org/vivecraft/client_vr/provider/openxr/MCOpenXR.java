@@ -1094,7 +1094,18 @@ public class MCOpenXR extends MCVR {
             buf = stack.callocInt(size);
             LongBuffer longbuf = stack.callocLong(size);
             XR10.xrEnumerateBoundSourcesForAction(session, info, buf, longbuf);
-            return Arrays.stream(longbuf.array()).boxed().toList();
+            long[] array;
+            if (longbuf.hasArray()) { //TODO really?
+                array = longbuf.array();
+            } else {
+                longbuf.rewind();
+                array = new long[longbuf.remaining()];
+                int index = 0;
+                while (longbuf.hasRemaining()) {
+                    array[index++] = longbuf.get();
+                }
+            }
+            return Arrays.stream(array).boxed().toList();
         }
     }
 

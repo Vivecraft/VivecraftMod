@@ -17,11 +17,11 @@ public class XRBindings {
         return set;
     }
 
-    private static HashSet<Pair<String, String>> viveBindings() {
+    private static HashSet<Pair<String, String>> quest2Bindings() {
         HashSet<Pair<String, String>> set = new HashSet<>();
 
-        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.ingameMenuButton", "/user/hand/left/input/y/click"));
-        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.toggleKeyboard", "/user/hand/left/input/menu/click"));
+        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.ingameMenuButton", "/user/hand/left/input/y/touch"));
+        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.toggleKeyboard", "/user/hand/left/input/y/click"));
         set.add(new MutablePair<>("/actions/global/in/key.inventory", "/user/hand/left/input/x/click"));
 
         set.add(new MutablePair<>("/actions/gui/in/vivecraft.key.guiShift", "/user/hand/left/input/squeeze/click"));
@@ -49,11 +49,9 @@ public class XRBindings {
         return set;
     }
 
-    private static HashSet<Pair<String, String>> quest2Bindings() {
+    private static HashSet<Pair<String, String>> viveBindings() {
         HashSet<Pair<String, String>> set = new HashSet<>();
 
-        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.ingameMenuButton", "/user/hand/left/input/menu/click"));
-        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.ingameMenuButton", "/user/hand/left/input/menu/click"));
         set.add(new MutablePair<>("/actions/global/in/vivecraft.key.ingameMenuButton", "/user/hand/left/input/menu/click"));
         set.add(new MutablePair<>("/actions/global/in/vivecraft.key.toggleKeyboard", "/user/hand/left/input/squeeze/click"));
         set.add(new MutablePair<>("/actions/global/in/key.inventory", "/user/hand/right/input/trackpad/click"));
