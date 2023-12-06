@@ -297,7 +297,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (!VRState.vrInitialized) {
             return;
         }
-        boolean vrActive = !ClientDataHolderVR.getInstance().vrSettings.vrHotswitchingEnabled || ClientDataHolderVR.getInstance().vr.isActive();
+        boolean vrActive = ClientDataHolderVR.getInstance().vr.isActive() || !ClientDataHolderVR.getInstance().vrSettings.vrHotswitchingEnabled;
         if (VRState.vrRunning != vrActive && (ClientNetworking.serverAllowsVrSwitching || player == null)) {
             vivecraft$switchVRState(vrActive);
         }
