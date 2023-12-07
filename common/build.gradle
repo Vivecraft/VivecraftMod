@@ -7,6 +7,7 @@ loom {
 }
 
 dependencies {
+    compileOnly project(':stubs')
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
@@ -14,10 +15,7 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.2"
-    modCompileOnly "maven.modrinth:sodium:mc1.20-0.4.10"
-    modCompileOnly "883067831485366304:1080535317733462076:sodium-fabric-mc1.19.4-pre2-0.4.11rev.9a2a2ea-dirty:jar"
-    modCompileOnly("maven.modrinth:rubidium:0.6.4")
+    modCompileOnly "maven.modrinth:sodium:mc1.20.2-0.5.4"
 
     // for iris compat
     modCompileOnly "maven.modrinth:iris:1.6.8+1.20.1"
@@ -51,7 +49,6 @@ dependencies {
 
     //LaunchPopup
     implementation 'com.github.fayer3:LaunchPopup:master-SNAPSHOT'
-
 }
 // extract the LaunchPopup classes
 jar {

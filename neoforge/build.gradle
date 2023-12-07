@@ -30,8 +30,6 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
-    modCompileOnly "maven.modrinth:iris:1.6.9+1.20.2"
-
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
