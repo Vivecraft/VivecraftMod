@@ -4,8 +4,10 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.opengl.GL31;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -23,6 +25,9 @@ public class OpenXRStereoRenderer extends VRRenderer {
     private VRTextureTarget[] rightFramebuffers;
     private boolean render;
     private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
+    private VRTextureTarget rightFramebuffer;
+    private VRTextureTarget leftFramebuffer;
+
 
     public OpenXRStereoRenderer(MCOpenXR vr) {
         super(vr);
@@ -56,6 +61,9 @@ public class OpenXRStereoRenderer extends VRRenderer {
                 rightFramebuffers[i] = new VRTextureTarget("R Eye " + i, width, height, openxrImage.image(), 1);
                 this.checkGLError("Right Eye framebuffer setup");
             }
+
+            this.rightFramebuffer = new VRTextureTarget("R Eye mirror", width, height, true, false, -1, true, true, ClientDataHolderVR.getInstance().vrSettings.vrUseStencil);
+            this.leftFramebuffer = new VRTextureTarget("L Eye mirror", width, height, true, false, -1, true, true, ClientDataHolderVR.getInstance().vrSettings.vrUseStencil);
         }
     }
 
@@ -108,6 +116,14 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
     @Override
     public void endFrame() throws RenderConfigException {
+        GL31.glBindFramebuffer(GL31.GL_READ_FRAMEBUFFER, getLeftEyeTarget().frameBufferId);
+        GL31.glBindFramebuffer(GL31.GL_DRAW_FRAMEBUFFER, leftFramebuffers[swapIndex].frameBufferId);
+        GL31.glBlitFramebuffer(0,0, getLeftEyeTarget().viewWidth, getLeftEyeTarget().viewHeight, 0,0, leftFramebuffers[swapIndex].viewWidth, leftFramebuffers[swapIndex].viewHeight, GL31.GL_STENCIL_BUFFER_BIT | GL31.GL_COLOR_BUFFER_BIT, GL31.GL_NEAREST);
+
+        GL31.glBindFramebuffer(GL31.GL_READ_FRAMEBUFFER, getRightEyeTarget().frameBufferId);
+        GL31.glBindFramebuffer(GL31.GL_DRAW_FRAMEBUFFER, rightFramebuffers[swapIndex].frameBufferId);
+        GL31.glBlitFramebuffer(0,0, getRightEyeTarget().viewWidth, getRightEyeTarget().viewHeight, 0,0, rightFramebuffers[swapIndex].viewWidth, rightFramebuffers[swapIndex].viewHeight, GL31.GL_STENCIL_BUFFER_BIT | GL31.GL_COLOR_BUFFER_BIT, GL31.GL_NEAREST);
+
         try (MemoryStack stack = MemoryStack.stackPush()){
             PointerBuffer layers = stack.callocPointer(1);
             if (this.openxr.shouldRender) {
@@ -152,12 +168,12 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
     @Override
     public RenderTarget getLeftEyeTarget() {
-        return leftFramebuffers[swapIndex];
+        return leftFramebuffer;
     }
 
     @Override
     public RenderTarget getRightEyeTarget() {
-        return rightFramebuffers[swapIndex];
+        return rightFramebuffer;
     }
 
     @Override
