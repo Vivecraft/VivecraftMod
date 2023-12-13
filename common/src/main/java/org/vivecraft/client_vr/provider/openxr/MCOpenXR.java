@@ -683,10 +683,12 @@ public class MCOpenXR extends MCVR {
                 this.isActive = false;
                 XR10.xrEndSession(session);
             }
-            case XR10.XR_SESSION_STATE_VISIBLE: {
-                this.isActive = false;
+            case XR10.XR_SESSION_STATE_VISIBLE, XR10.XR_SESSION_STATE_FOCUSED: {
+                this.isActive = true;
+                break;
             }
-            case XR10.XR_SESSION_STATE_EXITING: {
+            case XR10.XR_SESSION_STATE_EXITING, XR10.XR_SESSION_STATE_IDLE, XR10.XR_SESSION_STATE_SYNCHRONIZED: {
+                this.isActive = false;
                 break;
             }
             case XR10.XR_SESSION_STATE_LOSS_PENDING: {
@@ -1135,7 +1137,7 @@ public class MCOpenXR extends MCVR {
 
     @Override
     public boolean isActive() {
-        pollVREvents();
+        this.pollVREvents();
         return isActive;
     }
 
