@@ -17,8 +17,8 @@ public class InputSimulator {
     }
 
     public static void pressKey(int key, int modifiers) {
-        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 1, modifiers);
         pressedKeys.add(key);
+        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 1, modifiers);
     }
 
     public static void pressKey(int key) {
@@ -26,8 +26,8 @@ public class InputSimulator {
     }
 
     public static void releaseKey(int key, int modifiers) {
-        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 0, modifiers);
         pressedKeys.remove(key);
+        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 0, modifiers);
     }
 
     public static void releaseKey(int key) {
