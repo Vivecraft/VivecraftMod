@@ -919,6 +919,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             Minecraft.getInstance().getSoundManager().reload();
         }
         resizeDisplay();
+        window.updateVsync(options.enableVsync().get());
     }
 
     @Unique
