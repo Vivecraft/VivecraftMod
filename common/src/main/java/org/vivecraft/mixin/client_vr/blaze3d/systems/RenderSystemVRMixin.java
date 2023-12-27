@@ -22,7 +22,7 @@ public class RenderSystemVRMixin {
 
     @Inject(at = @At("HEAD"), method = "limitDisplayFPS", cancellable = true, remap = false)
     private static void vivecraft$noFPSlimit(CallbackInfo ci) {
-        if (VRState.vrRunning && MCVR.get().capFPS()) {
+        if (VRState.vrRunning && !MCVR.get().capFPS()) {
             ci.cancel();
         }
     }
