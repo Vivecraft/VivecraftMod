@@ -383,7 +383,7 @@
   "vivecraft.messages.teleportenabled": "Bewegungseinschränkung deaktiviert (Teleportation erlaubt)",
   "vivecraft.messages.walkupblocks": "Blöcke hochlaufen (RCTRL+B): %s",
   "vivecraft.messages.showaim": "Ziel zeigen (RCTRL+RSHIFT): aktiviert",
-  "vivecraft.messages.playerinertia": "Spieler Bewegungsträgheit (LCTRL+I): %s",
+  "vivecraft.messages.playerinertia": "Spieler Bewegungsträgheit (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "Bewegungsmodus gewechselt zu: %s",
   "vivecraft.messages.coords": "X: %.2f Y: %.2f Z: %.2f",
   "vivecraft.messages.angles": "Längsachse: %.1f Querachse: %.1f Vertikalachse: %.1f",
