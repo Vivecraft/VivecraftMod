@@ -3,7 +3,11 @@ package org.vivecraft.server.config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
+import org.vivecraft.client.gui.settings.GuiArrayValueEditScreen;
 import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
+import org.vivecraft.client.gui.widgets.QuadWidget;
+import org.vivecraft.client.gui.widgets.VectorWidget;
+import org.vivecraft.common.ConfigBuilder;
 
 import java.util.function.Supplier;
 
@@ -89,6 +93,37 @@ public class WidgetBuilder {
                     ))
             .size(width, height)
             .tooltip(Tooltip.create(Component.literal(listValue.getComment())))
+            .build();
+    }
+
+    public static <T extends Enum<T>> Supplier<AbstractWidget> getEnumWidget(ConfigBuilder.EnumValue<T> enumValue, int width, int height) {
+        return () -> CycleButton
+            .<T>builder(newValue -> Component.literal(newValue.toString()))
+            .withInitialValue(enumValue.get())
+            .withValues(enumValue.get().getDeclaringClass().getEnumConstants())
+            .displayOnlyValue()
+            .withTooltip((bool) -> enumValue.getComment() != null ? Tooltip.create(Component.literal(enumValue.getComment())) : null)
+            .create(0, 0, width, height, Component.empty(), (button, newValue) -> enumValue.set(newValue));
+    }
+
+    public static Supplier<AbstractWidget> getQuatWidget(ConfigBuilder.QuatValue quatValue, int width, int height) {
+        return () -> new QuadWidget(0,0, width, height, Component.literal(quatValue.get().toString()), quatValue);
+    }
+
+    public static Supplier<AbstractWidget> getVectorWidget(ConfigBuilder.VectorValue vectorValue, int width, int height) {
+        return () -> new VectorWidget(0,0, width, height, Component.literal(vectorValue.get().toString()), vectorValue);
+    }
+
+    public static <T> Supplier<AbstractWidget> getArrayWidget(ConfigBuilder.ArrayValue<T> arrayValue, int width, int height) {
+        return () -> Button
+            .builder(
+                Component.translatable("vivecraft.options.editarray"),
+                button -> Minecraft.getInstance()
+                    .setScreen(
+                        new GuiArrayValueEditScreen<>(Component.literal(arrayValue.getPath().substring(arrayValue.getPath().lastIndexOf("."))), Minecraft.getInstance().screen, arrayValue, arrayValue.fromString)
+                    ))
+            .size(width, height)
+            .tooltip(Tooltip.create(Component.literal(arrayValue.getComment())))
             .build();
     }
 }

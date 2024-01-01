@@ -19,7 +19,7 @@ import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.server.AimFixHandler;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
-import org.vivecraft.server.config.ServerConfig;
+import org.vivecraft.server.ServerConfig;
 
 import static org.vivecraft.common.network.CommonNetworkHelper.PacketDiscriminators.CLIMBING;
 

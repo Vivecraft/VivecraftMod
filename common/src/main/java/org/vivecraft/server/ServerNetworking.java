@@ -17,7 +17,6 @@ import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
-import org.vivecraft.server.config.ServerConfig;
 
 import java.util.*;
 

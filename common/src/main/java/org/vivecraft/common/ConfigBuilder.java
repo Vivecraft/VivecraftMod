@@ -1,11 +1,17 @@
-package org.vivecraft.server.config;
+package org.vivecraft.common;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import com.electronwill.nightconfig.core.EnumGetMethod;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.util.Mth;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.vivecraft.server.config.WidgetBuilder;
 
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -63,6 +69,24 @@ public class ConfigBuilder {
         String oldComment = config.getComment(path);
         config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
             + new Formatter(Locale.US).format("default: %.2f, min: %.2f, max: %.2f", defaultValue, min, max));
+    }
+
+    private <T extends Enum<T>> void addDefaultValueComment(List<String> path, T defaultValue) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+            + new Formatter(Locale.US).format("default: %s", defaultValue.name()));
+    }
+
+    private void addDefaultValueComment(List<String> path, Quaternionf defaultValue) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+            + "x: %.2f, y %.2f, z: %.2f, w: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z, defaultValue.w));
+    }
+
+    private void addDefaultValueComment(List<String> path, Vector3f defaultValue) {
+        String oldComment = config.getComment(path);
+        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
+            + "x: %.2f, y: %.2f, z: %.2f".formatted(defaultValue.x, defaultValue.y, defaultValue.z));
     }
 
     /**
@@ -174,6 +198,72 @@ public class ConfigBuilder {
         return value;
     }
 
+    public <T extends Enum<T>> EnumValue<T> define(T defaultValue) {
+        List<String> path = stack.stream().toList();
+        spec.defineEnum(path, defaultValue, EnumGetMethod.NAME);
+        stack.removeLast();
+        addDefaultValueComment(path, defaultValue);
+
+        EnumValue<T> value = new EnumValue<>(config, path, defaultValue);
+        configValues.add(value);
+        return value;
+    }
+
+    public QuatValue define(Quaternionf defaultValue) {
+        List<String> path = stack.stream().toList();
+        stack.add("x");
+        spec.define(stack.stream().toList(), (double) defaultValue.x);
+        stack.removeLast();
+        stack.add("y");
+        spec.define(stack.stream().toList(), (double) defaultValue.y);
+        stack.removeLast();
+        stack.add("z");
+        spec.define(stack.stream().toList(), (double) defaultValue.z);
+        stack.removeLast();
+        stack.add("w");
+        spec.define(stack.stream().toList(), (double) defaultValue.w);
+        stack.removeLast();
+        stack.removeLast();
+
+        addDefaultValueComment(path, defaultValue);
+        QuatValue value = new QuatValue(config, path, defaultValue);
+        configValues.add(value);
+        return value;
+    }
+
+    public VectorValue define(Vector3f defaultValue) {
+        List<String> path = stack.stream().toList();
+        stack.add("x");
+        spec.define(stack.stream().toList(), (double) defaultValue.x);
+        stack.removeLast();
+        stack.add("y");
+        spec.define(stack.stream().toList(), (double) defaultValue.y);
+        stack.removeLast();
+        stack.add("z");
+        spec.define(stack.stream().toList(), (double) defaultValue.z);
+        stack.removeLast();
+        stack.removeLast();
+
+        addDefaultValueComment(path, defaultValue);
+        VectorValue value = new VectorValue(config, path, defaultValue);
+        configValues.add(value);
+        return value;
+    }
+
+    public <T> ArrayValue<T> define(T[] defaultValue, Class<T> clazz, Function<String, T> fromString) {
+        List<String> path = stack.stream().toList();
+        for (int i = 0; i < defaultValue.length; i++) {
+            stack.add(i + "");
+            spec.define(stack.stream().toList(), defaultValue[i]);
+            stack.removeLast();
+        }
+        stack.removeLast();
+
+        ArrayValue value = new ArrayValue<>(config, path, defaultValue, clazz, fromString);
+        configValues.add(value);
+        return value;
+    }
+
     /**
      * same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
      */
@@ -206,11 +296,11 @@ public class ConfigBuilder {
     public static class ConfigValue<T> {
 
         // the config, this setting is part of
-        private final CommentedConfig config;
-        private final List<String> path;
-        private final T defaultValue;
+        protected final CommentedConfig config;
+        protected final List<String> path;
+        protected final T defaultValue;
         // cache te value to minimize config lookups
-        private T cachedValue = null;
+        protected T cachedValue = null;
 
         public ConfigValue(CommentedConfig config, List<String> path, T defaultValue) {
             this.config = config;
@@ -237,6 +327,9 @@ public class ConfigBuilder {
         }
 
         public boolean isDefault() {
+            if (get() instanceof Object[]) {
+                return Arrays.equals((Object[]) get(), (Object[]) defaultValue);
+            }
             return Objects.equals(get(), defaultValue);
         }
 
@@ -359,6 +452,197 @@ public class ConfigBuilder {
         public void fromNormalized(double value) {
             double newValue = this.getMin() + (this.getMax() - this.getMin()) * value;
             this.set(Math.round(newValue * 100.0) / 100.0);
+        }
+    }
+
+    public static class EnumValue<T extends Enum<T>> extends ConfigValue<T> {
+
+        public EnumValue(CommentedConfig config, List<String> path, T defaultValue) {
+            super(config, path, defaultValue);
+        }
+
+        @Override
+        public T get() {
+            if (cachedValue == null) {
+                cachedValue = config.getEnumOrElse(path, defaultValue);
+            }
+            return cachedValue;
+        }
+
+        @Override
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getEnumWidget(this, width, height);
+        }
+    }
+
+    public static class QuatValue extends ConfigValue<Quaternionf> {
+
+        public QuatValue(CommentedConfig config, List<String> path, Quaternionf defaultValue) {
+            super(config, path, defaultValue);
+        }
+
+        @Override
+        public Quaternionf get() {
+            if (cachedValue == null) {
+                List<String> path2 = new ArrayList<>(path);
+                path2.add("x");
+                double x = config.get(path2);
+                path2.set(path.size(), "y");
+                double y = config.get(path2);
+                path2.set(path.size(), "z");
+                double z = config.get(path2);
+                path2.set(path.size(), "w");
+                double w = config.get(path2);
+                cachedValue = new Quaternionf(x, y, z, w);
+            }
+            return new Quaternionf(cachedValue);
+        }
+
+        @Override
+        public void set(Quaternionf newValue) {
+            cachedValue = newValue;
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("x");
+            config.set(path2, (double) newValue.x);
+            path2.set(path.size(), "y");
+            config.set(path2, (double) newValue.y);
+            path2.set(path.size(), "z");
+            config.set(path2, (double) newValue.z);
+            path2.set(path.size(), "w");
+            config.set(path2, (double) newValue.w);
+        }
+
+        @Override
+        public Quaternionf reset() {
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("x");
+            config.set(path2, (double) defaultValue.x);
+            path2.set(path.size(), "y");
+            config.set(path2, (double) defaultValue.y);
+            path2.set(path.size(), "z");
+            config.set(path2, (double) defaultValue.z);
+            path2.set(path.size(), "w");
+            config.set(path2, (double) defaultValue.w);
+            cachedValue = defaultValue;
+            return defaultValue;
+        }
+
+        @Override
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getQuatWidget(this, width, height);
+        }
+    }
+
+    public static class VectorValue extends ConfigValue<Vector3f> {
+
+        public VectorValue(CommentedConfig config, List<String> path, Vector3f defaultValue) {
+            super(config, path, defaultValue);
+        }
+
+        @Override
+        public Vector3f get() {
+            if (cachedValue == null) {
+                List<String> path2 = new ArrayList<>(path);
+                path2.add("x");
+                double x = config.get(path2);
+                path2.set(path.size(), "y");
+                double y = config.get(path2);
+                path2.set(path.size(), "z");
+                double z = config.get(path2);
+                cachedValue = new Vector3f((float) x, (float) y, (float) z);
+            }
+            return new Vector3f(cachedValue);
+        }
+
+        @Override
+        public void set(Vector3f newValue) {
+            cachedValue = newValue;
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("x");
+            config.set(path2, (double) newValue.x);
+            path2.set(path.size(), "y");
+            config.set(path2, (double) newValue.y);
+            path2.set(path.size(), "z");
+            config.set(path2, (double) newValue.z);
+        }
+
+        @Override
+        public Vector3f reset() {
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("x");
+            config.set(path2, (double) defaultValue.x);
+            path2.set(path.size(), "y");
+            config.set(path2, (double) defaultValue.y);
+            path2.set(path.size(), "z");
+            config.set(path2, (double) defaultValue.z);
+            cachedValue = defaultValue;
+            return defaultValue;
+        }
+
+        @Override
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getVectorWidget(this, width, height);
+        }
+    }
+
+    public static class ArrayValue<T> extends ConfigValue<T[]> {
+
+        private final Class<T> clazz;
+        public final Function<String, T> fromString;
+
+        public ArrayValue(CommentedConfig config, List<String> path, T[] defaultValue, Class<T> clazz, Function<String, T> fromString) {
+            super(config, path, defaultValue);
+            this.clazz = clazz;
+            this.fromString = fromString;
+        }
+
+        @Override
+        public T[] get() {
+            if (cachedValue == null) {
+                List<String> path2 = new ArrayList<>(path);
+                path2.add("0");
+                T[] array = (T[]) Array.newInstance(clazz, defaultValue.length);
+                for (int i = 0; i < defaultValue.length; i++) {
+                    path2.set(path.size(), i + "");
+                    T value = config.get(path2);
+                    array[i] = value;
+                }
+                cachedValue = array;
+            }
+            return cachedValue;
+        }
+
+        @Override
+        public void set(T[] newValue) {
+            cachedValue = newValue;
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("0");
+            for (int i = 0; i < newValue.length; i++) {
+                path2.set(path.size(), i + "");
+                config.set(path2, newValue[i]);
+            }
+        }
+
+        @Override
+        public T[] reset() {
+            List<String> path2 = new ArrayList<>(path);
+            path2.add("0");
+            config.set(path2, defaultValue.length);
+            for (int i = 0; i < defaultValue.length; i++) {
+                path2.set(path.size(), i + "");
+                config.set(path2, defaultValue[i]);
+            }
+            cachedValue = defaultValue;
+            return defaultValue;
+        }
+
+        public T[] getDefault() {
+            return defaultValue;
+        }
+
+        @Override
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getArrayWidget(this, width, height);
         }
     }
 }

@@ -12,7 +12,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.widgets.SettingsList;
-import org.vivecraft.server.config.ConfigBuilder;
+import org.vivecraft.common.ConfigBuilder;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -100,7 +100,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
 
         @Override
         public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            this.valueWidget.setX(k + -50);
+            this.valueWidget.setX(k - 50);
             this.valueWidget.setY(j);
             this.valueWidget.render(guiGraphics, n, o, f);
             this.deleteButton.setX(k + 230);
