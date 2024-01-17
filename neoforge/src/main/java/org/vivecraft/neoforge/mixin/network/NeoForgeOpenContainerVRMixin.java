@@ -1,17 +1,18 @@
 package org.vivecraft.neoforge.mixin.network;
 
-import net.neoforged.neoforge.network.NetworkEvent;
-import net.neoforged.neoforge.network.PlayMessages;
+import net.neoforged.neoforge.network.handlers.ClientPayloadHandler;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.payload.AdvancedOpenScreenPayload;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 
-@Mixin(PlayMessages.OpenContainer.class)
+@Mixin(ClientPayloadHandler.class)
 public class NeoForgeOpenContainerVRMixin {
-    @Inject(at = @At("HEAD"), method = "handle", remap = false)
-    private static void vivecraft$markScreenActiveNeoForge(PlayMessages.OpenContainer msg, NetworkEvent.Context ctx, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(at = @At("HEAD"), method = "handle(Lnet/neoforged/neoforge/network/payload/AdvancedOpenScreenPayload;Lnet/neoforged/neoforge/network/handling/PlayPayloadContext;)V", remap = false)
+    private void vivecraft$markScreenActiveNeoForge(AdvancedOpenScreenPayload msg, PlayPayloadContext context, CallbackInfo ci) {
         GuiHandler.guiAppearOverBlockActive = true;
     }
 }

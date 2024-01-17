@@ -1,5 +1,7 @@
 package org.vivecraft.mixin.server;
 
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
@@ -22,16 +24,22 @@ public abstract class ServerCommonPacketListenerImplMixin {
     @Final
     protected MinecraftServer server;
 
+
+    /**
+     * handle server bound vivecraft packets
+     * on neoforge those are handled in {@link org.vivecraft.neoforge.event.ServerEvents#handleVivePacket}
+     * if connected to spigot they are still handled here
+     */
     @Inject(at = @At("TAIL"), method = "handleCustomPayload")
     public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket payloadPacket, CallbackInfo ci) {
         if (payloadPacket.payload() instanceof VivecraftDataPacket dataPacket
             && (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener) {
-            var buffer = dataPacket.buffer();
             PacketUtils.ensureRunningOnSameThread(payloadPacket, (ServerCommonPacketListenerImpl) (Object) this, server);
-            CommonNetworkHelper.PacketDiscriminators packetDiscriminator = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
-            ServerNetworking.handlePacket(packetDiscriminator, buffer, gamePacketListener);
+            var buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(dataPacket.buffer());
+            ServerNetworking.handlePacket(dataPacket.packetid(), buffer, gamePacketListener.player, gamePacketListener::send);
+            buffer.release();
 
-            if (packetDiscriminator == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
+            if (dataPacket.packetid() == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
                 gamePacketListener.aboveGroundTickCount = 0;
             }
         }
