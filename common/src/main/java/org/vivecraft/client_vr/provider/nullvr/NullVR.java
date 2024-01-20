@@ -197,4 +197,9 @@ public class NullVR extends MCVR {
     public ControllerType getOriginControllerType(long i) {
         return ControllerType.LEFT;
     }
+
+    @Override
+    public boolean capFPS() {
+        return true;
+    }
 }

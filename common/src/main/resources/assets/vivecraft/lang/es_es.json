@@ -363,7 +363,7 @@
   "vivecraft.messages.serverplugin": "Detectado mod de servidor Vivecraft: %s",
   "vivecraft.messages.noserverplugin": "Mod de servidor Vivecraft no detectado. Este servidor podría no soportar teletransporte. Se ha activado el Movimiento Restringido (alternativa a movimiento libre).",
   "vivecraft.messages.calibrateheight": "Por favor calibra tu altura en el menú de pausa.",
-  "vivecraft.messages.rendersetupfailed": "Inicialización de Renderizado fallida: %s",
+  "vivecraft.messages.rendersetupfailed": "Inicialización de Renderizado fallida: %s\nVR provider: %s",
   "vivecraft.messages.intelgraphics": "No se soporta las Gráficas Integradas de Intel. Si estás usando un portátil, por favor use la GPU de gran-rendimiento. GPU Detectada: %s",
   "vivecraft.messages.nosteamvr": "Componente OpenVR no detectado. ¿Ha instalado SteamVR?",
   "vivecraft.messages.menuworldexportcomplete.1": "Exportación de Mundo completada... tamaño de área: %d",

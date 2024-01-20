@@ -363,7 +363,7 @@
   "vivecraft.messages.serverplugin": "检测到Vivecraft服务器适应插件(MOD)%s",
   "vivecraft.messages.noserverplugin": "没有检测到Vivecraft服务器适应插件(MOD)，这个服务器也许不支持使用传送移动！已启用有限移动模式！（如果完全无法传送，将切换到备用的自由移动模式！）",
   "vivecraft.messages.calibrateheight": "请在按下菜单键呼出的暂停菜单中校准您的身高。",
-  "vivecraft.messages.rendersetupfailed": "客户端启动/渲染失败(Render setup failed)：%s",
+  "vivecraft.messages.rendersetupfailed": "客户端启动/渲染失败(Render setup failed)：%s\nVR provider: %s",
   "vivecraft.messages.intelgraphics": "不支持Intel核芯显卡！如果你使用的使笔记本电脑，请在设置中强制JAVA程序使用“高性能GPU”！已检测到的GPU有：%s",
   "vivecraft.messages.nosteamvr": "未检测到OpenVR. 您安装SteamVR了吗？",
   "vivecraft.messages.menuworldexportcomplete.1": "世界文件导出完成！区域大小：%d",

@@ -1,15 +1,16 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.sun.jna.NativeLibrary;
+import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.ClientLanguage;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2f;
 import org.lwjgl.openvr.*;
@@ -91,6 +92,49 @@ public class MCOpenVR extends MCVR {
     final Texture texType1 = Texture.calloc();
     InputDigitalActionData digital = InputDigitalActionData.calloc();
     InputAnalogActionData analog = InputAnalogActionData.calloc();
+
+    // Last updated 10/29/2023
+    // Hard-coded list of languages Steam supports
+    private static final Map<String, String> steamLanguages = Map.ofEntries(
+        Map.entry("english", "en_US"),
+        Map.entry("bulgarian", "bg_BG"),
+        Map.entry("schinese", "zh_CN"),
+        Map.entry("tchinese", "zh_TW"),
+        Map.entry("czech", "cs_CZ"),
+        Map.entry("danish", "da_DK"),
+        Map.entry("dutch", "nl_NL"),
+        Map.entry("finnish", "fi_FI"),
+        Map.entry("french", "fr_FR"),
+        Map.entry("german", "de_DE"),
+        Map.entry("greek", "el_GR"),
+        Map.entry("hungarian", "hu_HU"),
+        Map.entry("indonesian", "id_ID"),
+        Map.entry("italian", "it_IT"),
+        Map.entry("japanese", "ja_JP"),
+        Map.entry("koreana", "ko_KR"),
+        Map.entry("norwegian", "no_NO"),
+        Map.entry("polish", "pl_PL"),
+        Map.entry("portuguese", "pt_PT"),
+        Map.entry("brazilian", "pt_BR"),
+        Map.entry("romanian", "ro_RO"),
+        Map.entry("russian", "ru_RU"),
+        Map.entry("spanish", "es_ES"),
+        Map.entry("latam", "es_MX"),
+        Map.entry("swedish", "sv_SE"),
+        Map.entry("thai", "th_TH"),
+        Map.entry("turkish", "tr_TR"),
+        Map.entry("ukrainian", "uk_UA"),
+        Map.entry("vietnamese", "vi_VN")
+    );
+
+    // Steam uses some incorrect language codes, this remaps to those
+    // SteamVR itself is also not translated into all languages Steam supports yet, so in those cases English may be used regardless
+    private static final Map<String, String> steamLanguageWrongMappings = Map.ofEntries(
+        Map.entry("cs_CZ", "cs_CS"),
+        Map.entry("da_DK", "da_DA"),
+        Map.entry("el_GR", "el_EL"),
+        Map.entry("sv_SE", "sv_SV")
+    );
 
     public MCOpenVR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -381,63 +425,107 @@ public class MCOpenVR extends MCVR {
 
     private void generateActionManifest() {
         Map<String, Object> map = new HashMap<>();
-        List<Map<String, Object>> list = new ArrayList<>();
+        List<Map<String, Object>> actionSets = new ArrayList<>();
 
-        for (VRInputActionSet vrinputactionset : VRInputActionSet.values()) {
-            String s = vrinputactionset.usage;
+        for (VRInputActionSet actionSet : VRInputActionSet.values()) {
+            String usage = actionSet.usage;
 
-            if (vrinputactionset.advanced && !this.dh.vrSettings.allowAdvancedBindings) {
-                s = "hidden";
+            if (actionSet.advanced && !this.dh.vrSettings.allowAdvancedBindings) {
+                usage = "hidden";
             }
 
-            list.add(ImmutableMap.<String, Object>builder().put("name", vrinputactionset.name).put("usage", s).build());
+            actionSets.add(ImmutableMap.<String, Object>builder().put("name", actionSet.name).put("usage", usage).build());
         }
 
-        map.put("action_sets", list);
-        List<VRInputAction> list1 = new ArrayList<>(this.inputActions.values());
-        list1.sort(Comparator.comparing((action) ->
+        map.put("action_sets", actionSets);
+        List<VRInputAction> sortedActions = new ArrayList<>(this.inputActions.values());
+        sortedActions.sort(Comparator.comparing((action) ->
         {
             return action.keyBinding;
         }));
-        List<Map<String, Object>> list2 = new ArrayList<>();
+        List<Map<String, Object>> actions = new ArrayList<>();
 
-        for (VRInputAction vrinputaction : list1) {
-            list2.add(ImmutableMap.<String, Object>builder().put("name", vrinputaction.name).put("requirement", vrinputaction.requirement).put("type", vrinputaction.type).build());
+        for (VRInputAction action : sortedActions) {
+            actions.add(ImmutableMap.<String, Object>builder().put("name", action.name).put("requirement", action.requirement).put("type", action.type).build());
         }
 
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAND).put("requirement", "suggested").put("type", "pose").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAND).put("requirement", "suggested").put("type", "pose").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_EXTERNAL_CAMERA).put("requirement", "optional").put("type", "pose").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
-        list2.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
-        map.put("actions", list2);
-        Map<String, Object> map1 = new HashMap<>();
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAND).put("requirement", "suggested").put("type", "pose").build());
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAND).put("requirement", "suggested").put("type", "pose").build());
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_EXTERNAL_CAMERA).put("requirement", "optional").put("type", "pose").build());
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_LEFT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
+        actions.add(ImmutableMap.<String, Object>builder().put("name", ACTION_RIGHT_HAPTIC).put("requirement", "suggested").put("type", "vibration").build());
+        map.put("actions", actions);
 
-        for (VRInputAction vrinputaction1 : list1) {
-            MutableComponent component = Component.translatable(vrinputaction1.keyBinding.getCategory()).append(" - ").append(Component.translatable(vrinputaction1.keyBinding.getName()));
-            map1.put(vrinputaction1.name, component.getString());
+        // TODO: revert to exporting all Steam languages when Valve fixes the crash with large action manifests
+        List<String> languages = new ArrayList<>();
+        languages.add("en_US");
+
+        boolean gotRegistryValue = false;
+        if (Util.getPlatform() == Util.OS.WINDOWS) {
+            // Try to read the user's Steam language setting from the registry
+            String language = Utils.readWinRegistry("HKCU\\SOFTWARE\\Valve\\Steam\\Language");
+            if (language != null) {
+                gotRegistryValue = true;
+                VRSettings.logger.info("Steam language setting: {}", language);
+                if (!language.equals("english") && steamLanguages.containsKey(language)) {
+                    languages.add(steamLanguages.get(language));
+                }
+            } else {
+                VRSettings.logger.warn("Unable to read Steam language setting");
+            }
         }
 
-        for (VRInputActionSet vrinputactionset1 : VRInputActionSet.values()) {
-            MutableComponent component = Component.translatable(vrinputactionset1.localizedName);
-            map1.put(vrinputactionset1.name, component.getString());
+        if (!gotRegistryValue && !mc.options.languageCode.startsWith("en_")) {
+            // Try to find a Steam language matching the user's in-game language selection
+            String ucLanguageCode = mc.options.languageCode.substring(0, mc.options.languageCode.indexOf('_')) + mc.options.languageCode.substring(mc.options.languageCode.indexOf('_')).toUpperCase();
+            if (steamLanguages.containsValue(ucLanguageCode)) {
+                languages.add(ucLanguageCode);
+            } else {
+                Optional<String> langCode = steamLanguages.values().stream().filter(s -> ucLanguageCode.substring(0, ucLanguageCode.indexOf('_')).equals(s.substring(0, s.indexOf('_')))).findFirst();
+                langCode.ifPresent(languages::add);
+            }
         }
 
-        map1.put(ACTION_LEFT_HAND, "Left Hand Pose");
-        map1.put(ACTION_RIGHT_HAND, "Right Hand Pose");
-        map1.put(ACTION_EXTERNAL_CAMERA, "External Camera");
-        map1.put(ACTION_LEFT_HAPTIC, "Left Hand Haptic");
-        map1.put(ACTION_RIGHT_HAPTIC, "Right Hand Haptic");
-        map1.put("language_tag", "en_US");
-        map.put("localization", ImmutableList.<Map<String, Object>>builder().add(map1).build());
-        List<Map<String, Object>> list3 = new ArrayList<>();
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_controller").put("binding_url", "vive_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "oculus_touch").put("binding_url", "oculus_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "holographic_controller").put("binding_url", "wmr_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "knuckles").put("binding_url", "knuckles_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_cosmos_controller").put("binding_url", "cosmos_defaults.json").build());
-        list3.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_tracker_camera").put("binding_url", "tracker_defaults.json").build());
-        map.put("default_bindings", list3);
+        List<Map<String, Object>> localeList = new ArrayList<>();
+        for (String langCode : languages) {
+            Map<String, Object> localeMap = new HashMap<>();
+
+            // Load the language
+            List<String> langs = new ArrayList<>();
+            langs.add("en_us");
+            if (!langCode.equals("en_US")) {
+                langs.add(langCode.toLowerCase());
+            }
+            Language lang = ClientLanguage.loadFrom(mc.getResourceManager(), langs, false);
+
+            for (VRInputAction action : sortedActions) {
+                localeMap.put(action.name, lang.getOrDefault(action.keyBinding.getCategory()) + " - " + lang.getOrDefault(action.keyBinding.getName()));
+            }
+
+            for (VRInputActionSet actionSet : VRInputActionSet.values()) {
+                localeMap.put(actionSet.name, lang.getOrDefault(actionSet.localizedName));
+            }
+
+            // We don't really care about localizing these
+            localeMap.put(ACTION_LEFT_HAND, "Left Hand Pose");
+            localeMap.put(ACTION_RIGHT_HAND, "Right Hand Pose");
+            localeMap.put(ACTION_EXTERNAL_CAMERA, "External Camera");
+            localeMap.put(ACTION_LEFT_HAPTIC, "Left Hand Haptic");
+            localeMap.put(ACTION_RIGHT_HAPTIC, "Right Hand Haptic");
+
+            localeMap.put("language_tag", steamLanguageWrongMappings.getOrDefault(langCode, langCode));
+            localeList.add(localeMap);
+        }
+        map.put("localization", localeList);
+
+        List<Map<String, Object>> defaults = new ArrayList<>();
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_controller").put("binding_url", "vive_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "oculus_touch").put("binding_url", "oculus_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "holographic_controller").put("binding_url", "wmr_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "knuckles").put("binding_url", "knuckles_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_cosmos_controller").put("binding_url", "cosmos_defaults.json").build());
+        defaults.add(ImmutableMap.<String, Object>builder().put("controller_type", "vive_tracker_camera").put("binding_url", "tracker_defaults.json").build());
+        map.put("default_bindings", defaults);
 
         try {
             (new File("openvr/input")).mkdirs();
@@ -449,12 +537,12 @@ public class MCOpenVR extends MCVR {
             throw new RuntimeException("Failed to write action manifest", exception);
         }
 
-        String s1 = this.dh.vrSettings.reverseHands ? "_reversed" : "";
-        Utils.loadAssetToFile("input/vive_defaults" + s1 + ".json", new File("openvr/input/vive_defaults.json"), false);
-        Utils.loadAssetToFile("input/oculus_defaults" + s1 + ".json", new File("openvr/input/oculus_defaults.json"), false);
-        Utils.loadAssetToFile("input/wmr_defaults" + s1 + ".json", new File("openvr/input/wmr_defaults.json"), false);
-        Utils.loadAssetToFile("input/knuckles_defaults" + s1 + ".json", new File("openvr/input/knuckles_defaults.json"), false);
-        Utils.loadAssetToFile("input/cosmos_defaults" + s1 + ".json", new File("openvr/input/cosmos_defaults.json"), false);
+        String rev = this.dh.vrSettings.reverseHands ? "_reversed" : "";
+        Utils.loadAssetToFile("input/vive_defaults" + rev + ".json", new File("openvr/input/vive_defaults.json"), false);
+        Utils.loadAssetToFile("input/oculus_defaults" + rev + ".json", new File("openvr/input/oculus_defaults.json"), false);
+        Utils.loadAssetToFile("input/wmr_defaults" + rev + ".json", new File("openvr/input/wmr_defaults.json"), false);
+        Utils.loadAssetToFile("input/knuckles_defaults" + rev + ".json", new File("openvr/input/knuckles_defaults.json"), false);
+        Utils.loadAssetToFile("input/cosmos_defaults" + rev + ".json", new File("openvr/input/cosmos_defaults.json"), false);
         Utils.loadAssetToFile("input/tracker_defaults.json", new File("openvr/input/tracker_defaults.json"), false);
     }
 
@@ -724,6 +812,26 @@ public class MCOpenVR extends MCVR {
         System.out.println("OpenVR Compositor initialized OK.");
     }
 
+    private void checkPathValid(String path, String knownError, boolean alwaysThrow) throws RenderConfigException {
+        String pathFormatted = "";
+        boolean hasInvalidChars = false;
+        for (char c : path.toCharArray()) {
+            if (c > 127) {
+                hasInvalidChars = true;
+                pathFormatted += "§c" + c + "§r";
+            } else {
+                pathFormatted += c;
+            }
+        }
+
+        if (hasInvalidChars || alwaysThrow) {
+            String error = knownError + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
+            System.out.println(error + path);
+            throw new RenderConfigException(knownError, Component.empty().append(error).append(pathFormatted));
+        }
+    }
+
+
     private void installApplicationManifest(boolean force) throws RenderConfigException {
         File file1 = new File("openvr/vivecraft.vrmanifest");
         Utils.loadAssetToFile("vivecraft.vrmanifest", file1, true);
@@ -747,6 +855,9 @@ public class MCOpenVR extends MCVR {
 
             System.out.println("Appkey: " + s);
 
+            // check if path is valid always, since if the application was already installed, it will not check it again
+            checkPathValid(file1.getAbsolutePath(), "Failed to install application manifest", false);
+
             if (!force && VRApplications_IsApplicationInstalled(s)) {
                 System.out.println("Application manifest already installed");
             } else {
@@ -754,21 +865,7 @@ public class MCOpenVR extends MCVR {
 
                 if (i != 0) {
                     // application needs to be installed, so abort
-                    String pathFormatted = "";
-                    boolean hasInvalidChars = false;
-                    for (char c : file1.getAbsolutePath().toCharArray()) {
-                        if (c > 127) {
-                            hasInvalidChars = true;
-                            pathFormatted += "§c" + c + "§r";
-                        } else {
-                            pathFormatted += c;
-                        }
-                    }
-
-                    String error = VRApplications_GetApplicationsErrorNameFromEnum(i) + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
-                    System.out.println("Failed to install application manifest: " + error + file1.getAbsolutePath());
-
-                    throw new RenderConfigException("Failed to install application manifest", Component.empty().append(error).append(pathFormatted));
+                    checkPathValid(file1.getAbsolutePath(), "Failed to install application manifest: " + VRApplications_GetApplicationsErrorNameFromEnum(i), true);
                 }
 
                 System.out.println("Application manifest installed successfully");
@@ -830,11 +927,14 @@ public class MCOpenVR extends MCVR {
         }
     }
 
-    private void loadActionManifest() {
-        int i = VRInput_SetActionManifestPath((new File("openvr/input/action_manifest.json")).getAbsolutePath());
+    private void loadActionManifest() throws RenderConfigException {
+        String actionsPath = (new File("openvr/input/action_manifest.json")).getAbsolutePath();
+        // check if path is valid for steamvr, since it would just silently fail
+        checkPathValid(actionsPath, "Failed to install action manifest", false);
+        int i = VRInput_SetActionManifestPath(actionsPath);
 
         if (i != 0) {
-            throw new RuntimeException("Failed to load action manifest: " + getInputErrorName(i));
+            throw new RenderConfigException("Failed to load action manifest", Component.literal(getInputErrorName(i)));
         }
     }
 

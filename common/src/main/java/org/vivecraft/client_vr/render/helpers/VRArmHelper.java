@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.network.ClientNetworking;
@@ -143,8 +142,8 @@ public class VRArmHelper {
             item = override;
         }
 
-        if (dataHolder.climbTracker.isClimbeyClimb() && item.getItem() != Items.SHEARS) {
-            item = override == null ? mc.player.getOffhandItem() : override;
+        if (dataHolder.climbTracker.isClimbeyClimb() && !dataHolder.climbTracker.isClaws(item) && override == null) {
+            item = mc.player.getOffhandItem();
         }
 
         if (BowTracker.isHoldingBow(mc.player, InteractionHand.MAIN_HAND)) {
@@ -206,8 +205,7 @@ public class VRArmHelper {
             item = override;
         }
 
-        if (dataHolder.climbTracker.isClimbeyClimb()
-            && (item == null || item.getItem() != Items.SHEARS)) {
+        if (dataHolder.climbTracker.isClimbeyClimb() && !dataHolder.climbTracker.isClaws(item) && override == null) {
             item = mc.player.getMainHandItem();
         }
 
@@ -353,6 +351,7 @@ public class VRArmHelper {
 
             double segmentProgress = 1.0D / (double) segments;
 
+            Vec3 cameraPosition = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.getVRDataWorld());
             // arc
             for (int i = 0; i < segments; ++i) {
                 double progress = (double) i / (double) segments + VOffset * segmentProgress;
@@ -361,10 +360,10 @@ public class VRArmHelper {
 
                 Vec3 start = dataHolder.teleportTracker
                     .getInterpolatedArcPosition((float) (progress - segmentProgress * (double) 0.4F))
-                    .subtract(mc.getCameraEntity().position());
+                    .subtract(cameraPosition);
 
                 Vec3 end = dataHolder.teleportTracker.getInterpolatedArcPosition((float) progress)
-                    .subtract(mc.getCameraEntity().position());
+                    .subtract(cameraPosition);
                 float shift = (float) progress * 2.0F;
                 RenderHelper.renderBox(tesselator, start, end, -segmentHalfWidth, segmentHalfWidth, (-1.0F + shift) * segmentHalfWidth, (1.0F + shift) * segmentHalfWidth, color, alpha, poseStack);
             }
@@ -374,7 +373,7 @@ public class VRArmHelper {
             // hit indicator
             if (validLocation && dataHolder.teleportTracker.movementTeleportProgress >= 1.0D) {
                 RenderSystem.disableCull();
-                Vec3 vec34 = (new Vec3(dest.x, dest.y, dest.z)).subtract(mc.getCameraEntity().position());
+                Vec3 vec34 = (new Vec3(dest.x, dest.y, dest.z)).subtract(cameraPosition);
                 float offset = 0.01F;
                 double x = 0.0D;
                 double y = 0.0D;

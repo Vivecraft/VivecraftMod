@@ -8,17 +8,14 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,6 +34,7 @@ import org.vivecraft.client_vr.render.VRArmRenderer;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.VivecraftItemRendering;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
+import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
 public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {
@@ -117,7 +115,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
             boolean useLeftHandModelinLeftHand = false;
 
             ItemDisplayContext itemDisplayContext;
-            if (dh.vrSettings.thirdPersonItems) {
+            if ((dh.vrSettings.thirdPersonItems && !(BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer))) || dh.climbTracker.isClaws(pStack)) {
                 useLeftHandModelinLeftHand = true; //test
                 VivecraftItemRendering.applyThirdPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
                 itemDisplayContext = mainHand ? ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);
@@ -135,9 +133,8 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                 if (dh.currentPass != RenderPass.SCOPEL && dh.currentPass != RenderPass.SCOPER) {
                     pMatrixStack.pushPose();
                     pMatrixStack.scale(0.625F, 0.625F, 0.625F);
-                    pMatrixStack.translate(mainHand ? -0.53D : -0.47D, -0.5D, -0.6D);
-                    //pMatrixStack.mulPose(Axis.XP.rotationDegrees(180.0F));
-                    this.minecraft.getBlockRenderer().getModelRenderer().renderModel(pMatrixStack.last(), pBuffer.getBuffer(Sheets.solidBlockSheet()), null, this.minecraft.getModelManager().getModel(TelescopeTracker.scopeModel), 0.5F, 0.5F, 1.0F, pCombinedLight, OverlayTexture.NO_OVERLAY);
+                    pMatrixStack.translate(mainHand ? -0.03D : 0.03D, 0.0D, -0.1D);
+                    this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
                     pMatrixStack.popPose();
                 }
 
@@ -146,8 +143,15 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                 pMatrixStack.mulPose(Axis.XP.rotationDegrees(90.0F));
                 pMatrixStack.mulPose(Axis.YP.rotationDegrees(180.0F));
                 pMatrixStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
+                if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+                    // this messes stuff up when rendering the quads
+                    OptifineHelper.endEntities();
+                }
                 VREffectsHelper.drawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
                 pMatrixStack.popPose();
+                if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+                    OptifineHelper.beginEntities();
+                }
             } else {
                 this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
             }

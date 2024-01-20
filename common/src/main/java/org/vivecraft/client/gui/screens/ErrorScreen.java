@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.vivecraft.client.gui.widgets.TextScrollWidget;
 
-
 public class ErrorScreen extends Screen {
 
     private final Screen lastScreen;
@@ -29,8 +28,8 @@ public class ErrorScreen extends Screen {
             .pos(this.width / 2 + 5, this.height - 32)
             .size(150, 20)
             .build());
-        this.addRenderableWidget(new Button.Builder(Component.translatable("chat.copy"), (p) ->
-            Minecraft.getInstance().keyboardHandler.setClipboard(error.getString()))
+        this.addRenderableWidget(new Button.Builder(Component.translatable("chat.copy.click"), (p) ->
+            Minecraft.getInstance().keyboardHandler.setClipboard(this.title.getString() + "\n" + error.getString()))
             .pos(this.width / 2 - 155, this.height - 32)
             .size(150, 20)
             .build());

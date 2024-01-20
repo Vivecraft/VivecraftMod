@@ -53,6 +53,9 @@ public class ShapedRecipeMixin {
                 itemStack.setHoverName(Component.translatable(jsonObject.get("name").getAsString()));
                 itemStack.getOrCreateTag().putBoolean("Unbreakable", GsonHelper.getAsBoolean(jsonObject, "unbreakable", false));
                 itemStack.getOrCreateTag().putInt("HideFlags", GsonHelper.getAsInt(jsonObject, "hideflags", 0));
+                if (jsonObject.has("color")) {
+                    itemStack.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, GsonHelper.getAsInt(jsonObject, "color", 0));
+                }
                 return itemStack;
             }
         }

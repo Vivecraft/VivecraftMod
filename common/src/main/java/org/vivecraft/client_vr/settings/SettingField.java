@@ -31,4 +31,13 @@ public @interface SettingField {
      * @return whether to separate keys
      */
     boolean separate() default false;
+
+    /**
+     * If true, arrays will always be kept the same size when loading. If false,
+     * the size of the array can vary. If {@link #separate} is true, setting this
+     * to false will have no effect and the array will always be the same size.
+     *
+     * @return whether to separate keys
+     */
+    boolean fixedSize() default true;
 }

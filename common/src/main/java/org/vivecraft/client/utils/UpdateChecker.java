@@ -3,9 +3,11 @@ package org.vivecraft.client.utils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.logging.LogUtils;
 import net.minecraft.SharedConstants;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.server.config.ServerConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,6 +30,20 @@ public class UpdateChecker {
 
     public static boolean checkForUpdates() {
         System.out.println("Checking for Vivecraft Updates");
+
+        char updateType;
+        if (Xplat.isDedicatedServer()) {
+            // server
+            updateType = ServerConfig.checkForUpdateType.get().charAt(0);
+        } else {
+            // client
+            updateType = switch (ClientDataHolderVR.getInstance().vrSettings.updateType) {
+                case RELEASE -> 'r';
+                case BETA -> 'b';
+                case ALPHA -> 'a';
+            };
+        }
+
         try {
             String apiURL = "https://api.modrinth.com/v2/project/vivecraft/version?loaders=[%22" + Xplat.getModloader() + "%22]&game_versions=[%22" + SharedConstants.VERSION_STRING + "%22]";
             HttpURLConnection conn = (HttpURLConnection) new URL(apiURL).openConnection();
@@ -38,7 +54,7 @@ public class UpdateChecker {
             conn.connect();
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                LogUtils.getLogger().error("Error " + conn.getResponseCode() + " fetching Vivecraft updates");
+                VRSettings.logger.error("Error " + conn.getResponseCode() + " fetching Vivecraft updates");
                 return false;
             }
 
@@ -64,7 +80,7 @@ public class UpdateChecker {
             Version current = new Version(currentVersionNumber, currentVersionNumber, "");
 
             for (Version v : versions) {
-                if (current.compareTo(v) > 0) {
+                if (v.isVersionType(updateType) && current.compareTo(v) > 0) {
                     changelog += "§a" + v.fullVersion + "§r" + ": \n" + v.changelog + "\n\n";
                     if (newestVersion.isEmpty()) {
                         newestVersion = v.fullVersion;
@@ -75,7 +91,7 @@ public class UpdateChecker {
             // no carriage returns please
             changelog = changelog.replaceAll("\\r", "");
             if (hasUpdate) {
-                LogUtils.getLogger().info("Vivecraft update found: " + newestVersion);
+                VRSettings.logger.info("Vivecraft update found: " + newestVersion);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,19 +121,20 @@ public class UpdateChecker {
             this.fullVersion = version;
             this.changelog = changelog;
             String[] parts = version_number.split("-");
-            if (parts.length > 3) {
+            int viveVersionIndex = parts.length - 2;
+            // parts should be [mc version]-(pre/rc)-[vive version]-(vive a/b/test)-[mod loader]
+            if (!parts[viveVersionIndex].contains(".")) {
+                viveVersionIndex = parts.length - 3;
                 // prerelease
-                if (parts[2].matches("a\\d+")) {
-                    alpha = Integer.parseInt(parts[2].replaceAll("\\D+", ""));
-                } else if (parts[2].matches("b\\d+\"")) {
-                    beta = Integer.parseInt(parts[2].replaceAll("\\D+", ""));
+                if (parts[parts.length - 1].matches("a\\d+")) {
+                    alpha = Integer.parseInt(parts[parts.length - 1].replaceAll("\\D+", ""));
+                } else if (parts[parts.length - 1].matches("b\\d+")) {
+                    beta = Integer.parseInt(parts[parts.length - 1].replaceAll("\\D+", ""));
                 } else {
                     featureTest = true;
                 }
             }
-            // account for old version, without MC version prefix
-            int index = parts.length > 1 ? 1 : 0;
-            String[] ints = parts[index].split("\\.");
+            String[] ints = parts[viveVersionIndex].split("\\.");
             // remove all letters, since stupid me put a letter in one version
             major = Integer.parseInt(ints[0].replaceAll("\\D+", ""));
             minor = Integer.parseInt(ints[1].replaceAll("\\D+", ""));
@@ -133,6 +150,15 @@ public class UpdateChecker {
                 return 0;
             }
             return -1;
+        }
+
+        public boolean isVersionType(char versionType) {
+            return switch (versionType) {
+                case 'r' -> beta == 0 && alpha == 0 && !featureTest;
+                case 'b' -> beta >= 0 && alpha == 0 && !featureTest;
+                case 'a' -> alpha >= 0 && !featureTest;
+                default -> false;
+            };
         }
 
         // two digits per segment, should be enough right?

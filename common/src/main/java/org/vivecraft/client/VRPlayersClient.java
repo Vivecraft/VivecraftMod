@@ -35,7 +35,11 @@ public class VRPlayersClient {
     }
 
     public static void clear() {
-        instance = null;
+        if (instance != null) {
+            instance.vivePlayers.clear();
+            instance.vivePlayersLast.clear();
+            instance.vivePlayersReceived.clear();
+        }
     }
 
     private VRPlayersClient() {

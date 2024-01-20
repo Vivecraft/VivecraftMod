@@ -87,7 +87,7 @@ public class TelescopeTracker extends Tracker {
     }
 
     private static float viewPercent(int controller, int e) {
-        if (e == -1) {
+        if (e == -1 || ClientDataHolderVR.getInstance().vrPlayer == null) {
             return 0.0F;
         } else {
             VRData.VRDevicePose eye = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.values()[e]);

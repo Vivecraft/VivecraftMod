@@ -19,10 +19,10 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
 import org.lwjgl.openvr.HmdMatrix44;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.LoaderUtils;
 import org.vivecraft.common.utils.lwjgl.*;
 import org.vivecraft.common.utils.math.Quaternion;
@@ -32,7 +32,6 @@ import org.vivecraft.common.utils.math.Vector3;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -572,6 +571,23 @@ public class Utils {
         return bytearrayoutputstream.toByteArray();
     }
 
+    public static String readWinRegistry(String key) {
+        try {
+            Process process = Runtime.getRuntime().exec("reg query \"" + key.substring(0, key.lastIndexOf('\\')) + "\" /v \"" + key.substring(key.lastIndexOf('\\') + 1) + "\"");
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                    String[] split = line.split("REG_SZ|REG_DWORD");
+                    if (split.length > 1) {
+                        return split[1].trim();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static Quaternion slerp(Quaternion start, Quaternion end, float alpha) {
         float f = start.x * end.x + start.y * end.y + start.z * end.z + start.w * end.w;
         float f1 = f < 0.0F ? -f : f;
@@ -628,7 +644,7 @@ public class Utils {
             try {
                 minecraft.level.addParticle(type, position.x + d0, position.y + d1, position.z + d2, d3, d4, d5);
             } catch (Throwable throwable) {
-                LogManager.getLogger().warn("Could not spawn particle effect {}", type);
+                VRSettings.logger.warn("Could not spawn particle effect {}", type);
                 return;
             }
         }

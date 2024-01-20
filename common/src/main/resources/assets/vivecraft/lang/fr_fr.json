@@ -363,7 +363,7 @@
   "vivecraft.messages.serverplugin": "Mod/Plugin Vivecraft détecté sur le serveur: %s",
   "vivecraft.messages.noserverplugin": "Vivecraft pour serveurs non détecté. Ce serveur pourrait ne pas supporter la téléportation. Dans le doute, on va restreindre vos déplacements. Ne le prenez pas mal hein, c'est pas contre vous.",
   "vivecraft.messages.calibrateheight": "Calibrez votre hauteur dans le menu pause.",
-  "vivecraft.messages.rendersetupfailed": "Erreur d'affichage! (Render setup failed: %s) ",
+  "vivecraft.messages.rendersetupfailed": "Erreur d'affichage! (Render setup failed: %s\nVR provider: %s) ",
   "vivecraft.messages.intelgraphics": "Les graphismes intégrés d'Intel ne sont pas supportés. Si ceci est un PC portable, veuillez forcer l'utilisation de la carte vidéo. Carte vidéo détectée: %s",
   "vivecraft.messages.nosteamvr": "Runtime d'OpenVR non détecté, avez vous installé SteamVR?",
   "vivecraft.messages.menuworldexportcomplete.1": "Exportation du monde finie... Taille de la zone: %d",
