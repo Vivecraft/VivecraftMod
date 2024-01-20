@@ -51,7 +51,7 @@ public class VRState {
             dh.vrRenderer = dh.vr.createVRRenderer();
             dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
 
-            dh.vrRenderer.setupRenderConfiguration();
+            dh.vrRenderer.setupRenderConfiguration(false); //TODO look into why I have the boolean
             RenderPassManager.setVanillaRenderPass();
 
             dh.vrPlayer = new VRPlayer();
