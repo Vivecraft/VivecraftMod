@@ -181,7 +181,14 @@ public abstract class GuiVROptionsBase extends Screen {
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
         if (this.reinit) {
             this.reinit = false;
+            VRSettings.VrOptions selected = this.getFocused() instanceof GuiVROptionButton option ? option.getOption() : null;
             this.init();
+            if (selected != null) {
+                List<?> items = this.children().stream().filter(listener -> listener instanceof GuiVROptionButton o && o.getOption() == selected).toList();
+                if (!items.isEmpty()) {
+                    this.setFocused((GuiEventListener) items.get(0));
+                }
+            }
         }
 
         this.renderBackground(guiGraphics);
@@ -252,7 +259,14 @@ public abstract class GuiVROptionsBase extends Screen {
 
             return true;
         } else {
-            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers) || super.keyPressed(pKeyCode, pScanCode, pModifiers);
+            if (super.keyPressed(pKeyCode, pScanCode, pModifiers)) {
+                if (this.getFocused() instanceof AbstractWidget widget) {
+                    this.actionPerformed(widget);
+                }
+                return true;
+            } else {
+            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers);
+            }
         }
     }
 
@@ -261,11 +275,18 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     private void renderTooltip(GuiGraphics guiGraphics, int pMouseX, int pMouseY) {
-        AbstractWidget hover = null;
+        GuiEventListener hover = null;
+
+        if (this.minecraft.getLastInputType().isKeyboard()) {
+            // only show focused tooltip when navigating with keyboard, so a click with the mouse removes it
+            hover = this.getFocused();
+        }
         // find active button
-        for (GuiEventListener child : children()) {
-            if (child instanceof AbstractWidget && child.isMouseOver(pMouseX, pMouseY)) {
-                hover = (AbstractWidget) child;
+        if (hover == null) {
+            for (GuiEventListener child : children()) {
+                if (child instanceof AbstractWidget && child.isMouseOver(pMouseX, pMouseY)) {
+                    hover = child;
+                }
             }
         }
         if (hover != null) {
