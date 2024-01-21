@@ -157,7 +157,7 @@ public class VRSettings {
     @SettingField
     public int version = UNKNOWN_VERSION;
 
-    @SettingField
+    @SettingField(VrOptions.STEREOPLUGIN)
     public VRProvider stereoProviderPluginID = VRProvider.OPENVR;
     public boolean storeDebugAim = false;
     @SettingField
@@ -1713,7 +1713,16 @@ public class VRSettings {
             }
         },
         INGAME_BINDINGS_IN_GUI(false, true),
-        RIGHT_CLICK_DELAY(false, false); // Right Click Repeat
+        RIGHT_CLICK_DELAY(false, false), // Right Click Repeat
+        STEREOPLUGIN(false, true) {
+            @Override
+            void onOptionChange() {
+                if (VRState.vrRunning) {
+                    VRState.destroyVR(false);
+                    VRState.vrEnabled = true;
+                }
+            }
+        };
 //        ANISOTROPIC_FILTERING("options.anisotropicFiltering", true, false, 1.0F, 16.0F, 0.0F)
 //                {
 //                    private static final String __OBFID = "CL_00000654";
