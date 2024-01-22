@@ -396,6 +396,8 @@ public class VRSettings {
     public boolean seatedHudAltMode = true;
     @SettingField(VrOptions.AUTO_OPEN_KEYBOARD)
     public boolean autoOpenKeyboard = false;
+    @SettingField(VrOptions.AUTO_CLOSE_KEYBOARD)
+    public boolean autoCloseKeyboard = true;
     @SettingField
     public int forceHardwareDetection = 0; // 0 = off, 1 = vive, 2 = oculus
     @SettingField(VrOptions.RADIAL_MODE_HOLD)
@@ -1161,6 +1163,7 @@ public class VRSettings {
         SHOW_PLUGIN_MISSING(false, true, "vivecraft.options.always", "vivecraft.options.once"),
         CHAT_MESSAGE_STENCIL(false, true), // warning for other mod using stencil
         AUTO_OPEN_KEYBOARD(false, true), // Always Open Keyboard
+        AUTO_CLOSE_KEYBOARD(false, true), // Close Keyboard on Screenchange
         RADIAL_MODE_HOLD(false, true, "vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
         PHYSICAL_KEYBOARD(false, true, "vivecraft.options.keyboard.physical", "vivecraft.options.keyboard.pointer"), // Keyboard Type
         PHYSICAL_KEYBOARD_SCALE(true, false, 0.75f, 1.5f, 0.01f, -1) { // Keyboard Size

@@ -74,6 +74,7 @@ public class VivecraftVRMod {
             this.userKeyBindingSet.add(this.keyTogglePlayerList);
             this.userKeyBindingSet.add(this.keyToggleHandheldCam);
             this.userKeyBindingSet.add(this.keyQuickHandheldCam);
+            this.userKeyBindingSet.add(this.keyToggleKeyboard);
 
             this.hiddenKeyBindingSet.add(GuiHandler.keyLeftClick);
             this.hiddenKeyBindingSet.add(GuiHandler.keyRightClick);
@@ -90,7 +91,6 @@ public class VivecraftVRMod {
             this.hiddenKeyBindingSet.add(this.keyClimbeyJump);
             this.hiddenKeyBindingSet.add(this.keyMenuButton);
             this.hiddenKeyBindingSet.add(this.keyRadialMenu);
-            this.hiddenKeyBindingSet.add(this.keyToggleKeyboard);
             this.hiddenKeyBindingSet.add(this.keyHotbarSwipeX);
             this.hiddenKeyBindingSet.add(this.keyHotbarSwipeY);
             this.hiddenKeyBindingSet.add(this.keyTrackpadTouch);

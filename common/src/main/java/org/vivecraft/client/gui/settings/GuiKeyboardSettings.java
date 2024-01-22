@@ -14,9 +14,10 @@ public class GuiKeyboardSettings extends GuiVROptionsBase {
             KeyboardHandler.setOverlayShowing(false);
             return false;
         }),
-        new VROptionEntry(VRSettings.VrOptions.AUTO_OPEN_KEYBOARD),
-        new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_SCALE),
         new VROptionEntry(VRSettings.VrOptions.KEYBOARD_PRESS_BINDS),
+        new VROptionEntry(VRSettings.VrOptions.AUTO_OPEN_KEYBOARD),
+        new VROptionEntry(VRSettings.VrOptions.AUTO_CLOSE_KEYBOARD),
+        new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_SCALE),
         new VROptionEntry(VRSettings.VrOptions.PHYSICAL_KEYBOARD_THEME)
     };
 
