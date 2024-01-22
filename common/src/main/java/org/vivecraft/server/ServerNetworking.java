@@ -112,7 +112,10 @@ public class ServerNetworking {
                     byteBuf.writeUtf("teleportLimitHoriz");
                     byteBuf.writeUtf("" + ServerConfig.teleportHorizontalLimit.get());
 
-                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, byteBuf.readByteArray()));
+                    byte[] array = new byte[byteBuf.readableBytes()];
+                    byteBuf.readBytes(array);
+                    byteBuf.release();
+                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
                 }
 
                 if (ServerConfig.worldscaleLimited.get()) {
@@ -123,7 +126,10 @@ public class ServerNetworking {
                     byteBuf.writeUtf("worldScale.max");
                     byteBuf.writeUtf("" + ServerConfig.worldscaleMax.get());
 
-                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, byteBuf.readByteArray()));
+                    byte[] array = new byte[byteBuf.readableBytes()];
+                    byteBuf.readBytes(array);
+                    byteBuf.release();
+                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
                 }
 
                 if (ServerConfig.crawlingEnabled.get()) {
