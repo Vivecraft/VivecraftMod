@@ -462,6 +462,8 @@
   "vivecraft.messages.3options": "%s > %s > %s",
   "vivecraft.messages.openSettings": "Click to open settings",
   "vivecraft.message.kofi": "Support us on Ko-Fi",
+  "vivecraft.message.overriddenbyserver": "§6Setting overridden by server.§r\n",
+  "vivecraft.message.limitedbyserver": "§6Setting range limited by server (%s - %s)§r\n",
 
   "vivecraft.gui.update": "§aⓘ§r Update",
   "vivecraft.gui.vr": "VR: %s",

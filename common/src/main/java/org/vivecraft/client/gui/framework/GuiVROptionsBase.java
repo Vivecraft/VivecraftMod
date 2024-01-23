@@ -284,7 +284,7 @@ public abstract class GuiVROptionsBase extends Screen {
         // find active button
         if (hover == null) {
             for (GuiEventListener child : children()) {
-                if (child instanceof AbstractWidget && child.isMouseOver(pMouseX, pMouseY)) {
+                if (child instanceof AbstractWidget widget && this.isMouseOver(widget, pMouseX, pMouseY)) {
                     hover = child;
                 }
             }
@@ -293,9 +293,21 @@ public abstract class GuiVROptionsBase extends Screen {
             if (hover instanceof GuiVROption guiHover) {
                 if (guiHover.getOption() != null) {
                     String tooltipString = "vivecraft.options." + guiHover.getOption().name() + ".tooltip";
+                    String tooltip = "";
                     // check if it has a tooltip
                     if (I18n.exists(tooltipString)) {
-                        String tooltip = I18n.get(tooltipString, (Object) null);
+                        tooltip = I18n.get(tooltipString, (Object) null);
+                    }
+
+                    if (dataholder.vrSettings.overrides.hasSetting(guiHover.getOption())) {
+                        VRSettings.ServerOverrides.Setting setting = dataholder.vrSettings.overrides.getSetting(guiHover.getOption());
+                        if (setting.isValueOverridden()) {
+                            tooltip = I18n.get("vivecraft.message.overriddenbyserver") + tooltip;
+                        } else if (setting.isFloat() && (setting.isValueMinOverridden() || setting.isValueMaxOverridden())) {
+                            tooltip = I18n.get("vivecraft.message.limitedbyserver", setting.getValueMin(), setting.getValueMax()) + tooltip;
+                        }
+                    }
+                    if (!tooltip.isEmpty()) {
                         // add format reset at line ends
                         tooltip = tooltip.replace("\n", "§r\n");
 
@@ -313,5 +325,9 @@ public abstract class GuiVROptionsBase extends Screen {
                 }
             }
         }
+    }
+
+    private boolean isMouseOver(AbstractWidget widget, double x, double y) {
+        return widget.visible && x >= widget.getX() && y >= widget.getY() && x < (widget.getX() + widget.getWidth()) && y < (widget.getY() + widget.getHeight());
     }
 }

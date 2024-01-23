@@ -65,17 +65,16 @@ public class ClientPacketListenerVRMixin {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "onDisconnect")
-    public void vivecraft$disconnect(Component component, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "close")
+    public void vivecraft$cleanup(CallbackInfo ci) {
         VRServerPerms.INSTANCE.setTeleportSupported(false);
         if (VRState.vrInitialized) {
             ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
         }
         ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
-    }
-
-    @Inject(at = @At("TAIL"), method = "close")
-    public void vivecraft$cleanup(CallbackInfo ci) {
+        ClientNetworking.resetServerSettings();
+        ClientNetworking.displayedChatMessage = false;
+        ClientNetworking.displayedChatWarning = false;
         ClientNetworking.needsReset = true;
     }
 
