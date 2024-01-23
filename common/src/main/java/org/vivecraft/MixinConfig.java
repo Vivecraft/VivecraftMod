@@ -8,6 +8,7 @@ import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_11;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_9;
+import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 import org.vivecraft.mod_compat_vr.sodium.mixin.RenderSectionManagerVRMixin;
 
 import java.io.IOException;
@@ -96,6 +97,6 @@ public class MixinConfig implements IMixinConfigPlugin {
             }
         }
 
-        return !mixinClassName.contains("NoSodium") || (!Xplat.isModLoaded("sodium") && !Xplat.isModLoaded("rubidium"));
+        return !mixinClassName.contains("NoSodium") || !SodiumHelper.isLoaded();
     }
 }
