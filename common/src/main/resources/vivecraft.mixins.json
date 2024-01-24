@@ -45,6 +45,7 @@
     "client_vr.gui.screens.inventory.AbstractSignEditScreenVRMixin",
     "client_vr.gui.screens.inventory.BookEditScreenVRMixin",
     "client_vr.gui.screens.inventory.CreativeModeInventoryScreenVRMixin",
+    "client_vr.lwjgl.OpenVRMixin",
     "client_vr.multiplayer.ClientPacketListenerVRMixin",
     "client_vr.multiplayer.MultiPlayerGameModeVRMixin",
     "client_vr.particle.ItemPickupParticleVRMixin",
