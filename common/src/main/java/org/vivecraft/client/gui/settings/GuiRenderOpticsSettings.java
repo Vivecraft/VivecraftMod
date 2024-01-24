@@ -44,6 +44,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.MIXED_REALITY_FOV,
         VRSettings.VrOptions.MIXED_REALITY_RENDER_CAMERA_MODEL
     };
+    static VRSettings.VrOptions[] CROPOptions = new VRSettings.VrOptions[]{
+        VRSettings.VrOptions.MIRROR_CROP
+    };
     private float prevRenderScaleFactor = this.settings.renderScaleFactor;
     private float prevHandCameraResScale = this.settings.handCameraResScale;
 
@@ -104,6 +107,8 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
             super.init(UDOptions, false);
         } else if (this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
             super.init(TUDOptions, false);
+        } else if (this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.CROPPED) {
+            super.init(CROPOptions, false);
         }
 
         super.addDefaultButtons();
