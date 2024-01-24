@@ -689,6 +689,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         VRPlayersClient.getInstance().tick();
 
+        this.profiler.popPush("Vivecraft Keybindings");
+        vivecraft$processAlwaysAvailableKeybindings();
+
+        this.profiler.pop();
+    }
+
+    @Unique
+    private void vivecraft$processAlwaysAvailableKeybindings() {
+        // menuworld export
         if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && level != null && player != null) {
             Throwable error = null;
             try {
@@ -743,7 +752,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
         }
 
-        this.profiler.pop();
+        // quick commands
+        for (int i = 0; i < VivecraftVRMod.INSTANCE.keyQuickCommands.length; i++) {
+            if (VivecraftVRMod.INSTANCE.keyQuickCommands[i].consumeClick()) {
+                String command = ClientDataHolderVR.getInstance().vrSettings.vrQuickCommands[i];
+                if (command.startsWith("/")) {
+                    this.player.connection.sendCommand(command.substring(1));
+                } else {
+                    this.player.connection.sendChat(command);
+                }
+            }
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "tick")
