@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_11;
 import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_9;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
@@ -53,7 +53,7 @@ public class MixinConfig implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (!Xplat.isModLoadedSuccess()) {
-            VRSettings.logger.info("not loading '{}' because mod failed to load completely", mixinClassName);
+            Utils.logger.info("not loading '{}' because mod failed to load completely", mixinClassName);
             return false;
         }
 
@@ -66,7 +66,7 @@ public class MixinConfig implements IMixinConfigPlugin {
             }
             String mod = mixinClassName.split("\\.")[3];
             if (appliedModFixes.add(mod)) {
-                VRSettings.logger.info("Vivecraft: applying '{}' fixes", mod);
+                Utils.logger.info("Vivecraft: applying '{}' fixes", mod);
             }
         }
 
@@ -92,7 +92,7 @@ public class MixinConfig implements IMixinConfigPlugin {
                 MixinService.getService().getBytecodeProvider().getClassNode(neededClass);
                 return true;
             } catch (ClassNotFoundException | IOException e) {
-                VRSettings.logger.info("Vivecraft: skipping mixin '{}'", mixinClassName);
+                Utils.logger.info("Vivecraft: skipping mixin '{}'", mixinClassName);
                 return false;
             }
         }

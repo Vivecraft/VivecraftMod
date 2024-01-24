@@ -241,9 +241,9 @@ public abstract class GameRendererVRMixin
         PoseStack posestack = new PoseStack();
         vivecraft$setupClipPlanes();
         if (vivecraft$DATA_HOLDER.currentPass == RenderPass.LEFT) {
-            posestack.mulPoseMatrix(vivecraft$DATA_HOLDER.vrRenderer.eyeproj[0]);
+            posestack.mulPoseMatrix(vivecraft$DATA_HOLDER.vrRenderer.eyeproj0);
         } else if (vivecraft$DATA_HOLDER.currentPass == RenderPass.RIGHT) {
-            posestack.mulPoseMatrix(vivecraft$DATA_HOLDER.vrRenderer.eyeproj[1]);
+            posestack.mulPoseMatrix(vivecraft$DATA_HOLDER.vrRenderer.eyeproj1);
         } else if (vivecraft$DATA_HOLDER.currentPass == RenderPass.THIRD) {
             if (vivecraft$DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
                 posestack.mulPoseMatrix(

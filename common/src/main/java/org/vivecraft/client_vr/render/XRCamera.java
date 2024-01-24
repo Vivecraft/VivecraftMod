@@ -39,7 +39,7 @@ public class XRCamera extends Camera {
         Vec3 left = eye.getCustomVector(new Vec3(1.0D, 0.0D, 0.0D));
         this.getLeftVector().set((float) left.x, (float) left.y, (float) left.z);
 
-        this.rotation().set(0.0F, 0.0F, 0.0F, 1.0F);
+        this.rotation().identity();
         this.rotation().mul(Axis.YP.rotationDegrees(-this.yRot));
         this.rotation().mul(Axis.XP.rotationDegrees(this.xRot));
     }

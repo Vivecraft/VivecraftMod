@@ -19,8 +19,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -28,6 +28,7 @@ import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 
 import java.util.function.Function;
 
@@ -102,7 +103,7 @@ public class VRWidgetHelper {
         Vec3 widgetOffset = widgetPosition.subtract(eye);
 
         poseStack.translate(widgetOffset.x, widgetOffset.y, widgetOffset.z);
-        poseStack.mulPoseMatrix(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix());
+        poseStack.mulPoseMatrix(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix(new Matrix4f()));
         scale = scale * dataholder.vrPlayer.vrdata_world_render.worldScale;
         poseStack.scale(scale, scale, scale);
 
@@ -116,7 +117,7 @@ public class VRWidgetHelper {
         RenderSystem.applyModelViewMatrix();
 
         BlockPos blockpos = BlockPos.containing(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
-        int i = Utils.getCombinedLightWithMin(minecraft.level, blockpos, 0);
+        int i = VREffectsHelper.getCombinedLightWithMin(minecraft.level, blockpos, 0);
 
         RenderSystem.enableDepthTest();
         RenderSystem.defaultBlendFunc();
@@ -135,7 +136,7 @@ public class VRWidgetHelper {
         PoseStack poseStack2 = new PoseStack();
         RenderHelper.applyVRModelView(dataholder.currentPass, poseStack2);
         poseStack2.last().pose().identity();
-        poseStack2.last().normal().mul(new Matrix3f(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix()));
+        poseStack2.last().normal().mul(new Matrix3f(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix(new Matrix4f())));
 
         minecraft.getBlockRenderer().getModelRenderer().renderModel(poseStack2.last(), bufferbuilder, null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
         tesselator.end();
@@ -153,7 +154,7 @@ public class VRWidgetHelper {
                 boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == DisplayFace.MIRROR;
                 // make normals point up, so they are always bright
                 // TODO: might break with shaders?
-                Vector3f normal = poseStack.last().normal().transform(new Vector3f(0.0F, 1.0F, 0.0F));
+                Vector3f normal = poseStack.last().normal().transform(Utils.up, new Vector3f());
                 int j = LightTexture.pack(15, 15);
                 int step = vertexList.length / 4;
                 bufferbuilder1.vertex(

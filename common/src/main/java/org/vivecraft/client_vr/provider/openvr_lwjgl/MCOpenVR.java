@@ -12,12 +12,13 @@ import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.lwjgl.openvr.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -30,8 +31,7 @@ import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jinfinadeck;
 import org.vivecraft.client_vr.utils.external.jkatvr;
-import org.vivecraft.common.utils.math.Matrix4f;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.common.utils.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -512,12 +512,12 @@ public class MCOpenVR extends MCVR {
             String language = Utils.readWinRegistry("HKCU\\SOFTWARE\\Valve\\Steam\\Language");
             if (language != null) {
                 gotRegistryValue = true;
-                VRSettings.logger.info("Steam language setting: {}", language);
+                Utils.logger.info("Steam language setting: {}", language);
                 if (!language.equals("english") && steamLanguages.containsKey(language)) {
                     languages.add(steamLanguages.get(language));
                 }
             } else {
-                VRSettings.logger.warn("Unable to read Steam language setting");
+                Utils.logger.warn("Unable to read Steam language setting");
             }
         }
 
@@ -644,12 +644,12 @@ public class MCOpenVR extends MCVR {
         return !arraylist.isEmpty();
     }
 
-    public Matrix4f getControllerComponentTransform(int controllerIndex, String componenetName) {
-        return this.controllerComponentTransforms != null && this.controllerComponentTransforms.containsKey(componenetName) && ((Matrix4f[]) this.controllerComponentTransforms.get(componenetName))[controllerIndex] != null ? (this.controllerComponentTransforms.get(componenetName))[controllerIndex] : Utils.Matrix4fSetIdentity(new Matrix4f());
+    public Matrix4f getControllerComponentTransform(int controllerIndex, String componenetName, Matrix4f dest) {
+        return this.controllerComponentTransforms != null && this.controllerComponentTransforms.containsKey(componenetName) && ((Matrix4f[]) this.controllerComponentTransforms.get(componenetName))[controllerIndex] != null ? dest.set(this.controllerComponentTransforms.get(componenetName)[controllerIndex]) : dest.identity();
     }
 
-    private Matrix4f getControllerComponentTransformFromButton(int controllerIndex, long button) {
-        return this.controllerComponentNames != null && this.controllerComponentNames.containsKey(button) ? this.getControllerComponentTransform(controllerIndex, this.controllerComponentNames.get(button)) : new Matrix4f();
+    private Matrix4f getControllerComponentTransformFromButton(int controllerIndex, long button, Matrix4f dest) {
+        return this.controllerComponentNames != null && this.controllerComponentNames.containsKey(button) ? this.getControllerComponentTransform(controllerIndex, this.controllerComponentNames.get(button), dest) : dest.identity();
     }
 
     private int getError() {
@@ -700,7 +700,7 @@ public class MCOpenVR extends MCVR {
             boolean flag = false;
 
             for (String s : list) {
-                this.controllerComponentTransforms.put(s, new Matrix4f[2]);
+                this.controllerComponentTransforms.put(s, new Matrix4f[]{new Matrix4f(), new Matrix4f()});
 
                 for (int j = 0; j < 2; ++j) {
                     if (this.controllerDeviceIndex[j] == -1) {
@@ -715,10 +715,7 @@ public class MCOpenVR extends MCVR {
                             boolean flag1 = inputProfilePath.contains("holographic");
                             boolean flag2 = inputProfilePath.contains("rifts");
 
-                            var componentName = s;
-                            if (flag1 && s.equals("handgrip")) {
-                                componentName = "body";
-                            }
+                            String componentName = flag1 && s.equals("handgrip") ? "body" : s;
 
                             long k = VRRenderModels_GetComponentButtonMask(renderModelName, componentName);
 
@@ -731,30 +728,26 @@ public class MCOpenVR extends MCVR {
                             if (l == 0L) {
                                 flag = true;
                             } else {
-                                var renderModelComponentState = RenderModelComponentState.calloc(stack);
+                                RenderModelComponentState renderModelComponentState = RenderModelComponentState.calloc(stack);
                                 boolean b0 = VRRenderModels_GetComponentStateForDevicePath(renderModelName, componentName, l, RenderModelControllerModeState.calloc(stack), renderModelComponentState);
 
                                 if (!b0) {
                                     flag = true;
                                 } else {
-                                    Matrix4f matrix4f = new Matrix4f();
-                                    OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(renderModelComponentState.mTrackingToComponentLocal(), matrix4f);
-                                    (this.controllerComponentTransforms.get(s))[j] = matrix4f;
+                                    Utils.convertRM34ToCM44(renderModelComponentState.mTrackingToComponentLocal().m(), this.controllerComponentTransforms.get(s)[j]);
 
                                     if (j == 1 && flag2 && s.equals("handgrip")) {
-                                        (this.controllerComponentTransforms.get(s))[1] = (this.controllerComponentTransforms.get(s))[0];
+                                        this.controllerComponentTransforms.get(s)[1].set(this.controllerComponentTransforms.get(s)[0]);
                                     }
 
                                     if (!flag && j == 0) {
                                         try {
-                                            Matrix4f matrix4f1 = this.getControllerComponentTransform(0, "tip");
-                                            Matrix4f matrix4f2 = this.getControllerComponentTransform(0, "handgrip");
-                                            Vector3 vector3 = matrix4f1.transform(this.forward);
-                                            Vector3 vector31 = matrix4f2.transform(this.forward);
-                                            double d0 = Math.abs(vector3.normalized().dot(vector31.normalized()));
+                                            Vector3f vector3 = this.getControllerComponentTransform(0, "tip", new Matrix4f()).transformProject(Utils.forward, new Vector3f());
+                                            Vector3f vector31 = this.getControllerComponentTransform(0, "handgrip", new Matrix4f()).transformProject(Utils.forward, new Vector3f());
+                                            double d0 = Math.abs(vector3.normalize(new Vector3f()).dot(vector31.normalize(new Vector3f())));
                                             double d1 = Math.acos(d0);
                                             double d2 = Math.toDegrees(d1);
-                                            double d3 = Math.acos(vector3.normalized().dot(this.forward.normalized()));
+                                            double d3 = Math.acos(vector3.normalize(new Vector3f()).dot(Utils.forward.normalize(new Vector3f())));
                                             double d4 = Math.toDegrees(d3);
                                             this.gunStyle = d2 > 10.0D;
                                             this.gunAngle = d2;
@@ -1014,8 +1007,8 @@ public class MCOpenVR extends MCVR {
     private void processScrollInput(KeyMapping keyBinding, Runnable upCallback, Runnable downCallback) {
         VRInputAction vrinputaction = this.getInputAction(keyBinding);
 
-        if (vrinputaction.isEnabled() && vrinputaction.getLastOrigin() != 0L && vrinputaction.getAxis2D(true).getY() != 0.0F) {
-            float f = vrinputaction.getAxis2D(false).getY();
+        if (vrinputaction.isEnabled() && vrinputaction.getLastOrigin() != 0L && vrinputaction.getAxis2D(true).y() != 0.0F) {
+            float f = vrinputaction.getAxis2D(false).y();
 
             if (f > 0.0F) {
                 upCallback.run();
@@ -1100,9 +1093,9 @@ public class MCOpenVR extends MCVR {
     private void updateControllerPose(int controller, long actionHandle) {
         if (this.TPose) {
             if (controller == 0) {
-                Utils.Matrix4fCopy(this.TPose_Right, this.controllerPose[controller]);
+                this.controllerPose[controller].set(this.TPose_Right);
             } else if (controller == 1) {
-                Utils.Matrix4fCopy(this.TPose_Left, this.controllerPose[controller]);
+                this.controllerPose[controller].set(this.TPose_Left);
             }
 
             this.controllerTracking[controller] = true;
@@ -1123,9 +1116,8 @@ public class MCOpenVR extends MCVR {
                     TrackedDevicePose trackeddevicepose = this.poseData.pose();
 
                     if (trackeddevicepose.bPoseIsValid()) {
-                        OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(trackeddevicepose.mDeviceToAbsoluteTracking(), this.poseMatrices[i]);
                         this.deviceVelocity[i] = new Vec3(trackeddevicepose.vVelocity().v(0), trackeddevicepose.vVelocity().v(1), trackeddevicepose.vVelocity().v(2));
-                        Utils.Matrix4fCopy(this.poseMatrices[i], this.controllerPose[controller]);
+                        this.controllerPose[controller].set(this.poseMatrices[i]);
                         this.controllerTracking[controller] = true;
                         return;
                     }
@@ -1139,7 +1131,7 @@ public class MCOpenVR extends MCVR {
     }
 
     private void updatePose() {
-        if (OpenVR.VRSystem != null && OpenVR.VRSystem != null) {
+        if (OpenVR.VRSystem != null && OpenVR.VRCompositor != null) {
             int i = VRCompositor_WaitGetPoses(this.hmdTrackedDevicePoses, null);
 
             if (i > 0) {
@@ -1162,49 +1154,34 @@ public class MCOpenVR extends MCVR {
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 var hmdmatrix34 = HmdMatrix34.calloc(stack);
-                OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(VRSystem_GetEyeToHeadTransform(0, hmdmatrix34), this.hmdPoseLeftEye);
-                OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(VRSystem_GetEyeToHeadTransform(1, hmdmatrix34), this.hmdPoseRightEye);
+                Utils.convertRM34ToCM44(VRSystem_GetEyeToHeadTransform(0, hmdmatrix34).m(), this.hmdPoseLeftEye);
+                Utils.convertRM34ToCM44(VRSystem_GetEyeToHeadTransform(1, hmdmatrix34).m(), this.hmdPoseRightEye);
             }
 
-            for (int j = 0; j < 64; ++j) {
-
-                if (this.hmdTrackedDevicePoses.get(j).bPoseIsValid()) {
-                    OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(this.hmdTrackedDevicePoses.get(j).mDeviceToAbsoluteTracking(), this.poseMatrices[j]);
-                    this.deviceVelocity[j] = new Vec3(this.hmdTrackedDevicePoses.get(j).vVelocity().v(0), this.hmdTrackedDevicePoses.get(j).vVelocity().v(1), this.hmdTrackedDevicePoses.get(j).vVelocity().v(2));
+            for (int j = 0; j < this.poseMatrices.length; ++j) {
+                TrackedDevicePose trackedDevicePose = this.hmdTrackedDevicePoses.get(j);
+                if (trackedDevicePose.bPoseIsValid()) {
+                    Utils.convertRM34ToCM44(trackedDevicePose.mDeviceToAbsoluteTracking().m(), this.poseMatrices[j]);
+                    this.deviceVelocity[j] = new Vec3(trackedDevicePose.vVelocity().v(0), trackedDevicePose.vVelocity().v(1), trackedDevicePose.vVelocity().v(2));
                 }
             }
 
             if (this.hmdTrackedDevicePoses.get(0).bPoseIsValid()) {
-                Utils.Matrix4fCopy(this.poseMatrices[0], this.hmdPose);
+                this.hmdPose.set(this.poseMatrices[0]);
                 this.headIsTracking = true;
             } else {
                 this.headIsTracking = false;
-                Utils.Matrix4fSetIdentity(this.hmdPose);
-                this.hmdPose.M[1][3] = 1.62F;
+                this.hmdPose.identity().m31(1.62F);
             }
 
             this.TPose = false;
 
             if (this.TPose) {
-                this.TPose_Right.M[0][3] = 0.0F;
-                this.TPose_Right.M[1][3] = 0.0F;
-                this.TPose_Right.M[2][3] = 0.0F;
-                Matrix4f matrix4f = this.TPose_Right;
-                Utils.Matrix4fCopy(Matrix4f.rotationY(-120.0F), this.TPose_Right);
-                this.TPose_Right.M[0][3] = 0.5F;
-                this.TPose_Right.M[1][3] = 1.0F;
-                this.TPose_Right.M[2][3] = -0.5F;
-                this.TPose_Left.M[0][3] = 0.0F;
-                this.TPose_Left.M[1][3] = 0.0F;
-                this.TPose_Left.M[2][3] = 0.0F;
-                matrix4f = this.TPose_Left;
-                Utils.Matrix4fCopy(Matrix4f.rotationY(120.0F), this.TPose_Left);
-                this.TPose_Left.M[0][3] = -0.5F;
-                this.TPose_Left.M[1][3] = 1.0F;
-                this.TPose_Left.M[2][3] = -0.5F;
-                this.Neutral_HMD.M[0][3] = 0.0F;
-                this.Neutral_HMD.M[1][3] = 1.8F;
-                Utils.Matrix4fCopy(this.Neutral_HMD, this.hmdPose);
+                this.TPose_Right.rotationY(-120.0F).setTranslation(0.5F, 1.0F, -0.5F);
+                this.TPose_Left.rotationY(120.0F).setTranslation(-0.5F, 1.0F, -0.5F);
+                this.Neutral_HMD.m30(0.0F);
+                this.Neutral_HMD.m31(1.8F);
+                this.hmdPose.set(this.Neutral_HMD);
                 this.headIsTracking = true;
             }
 

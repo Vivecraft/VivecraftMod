@@ -3,8 +3,8 @@ package org.vivecraft.client_vr.provider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.common.utils.Utils;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,12 +1,10 @@
 package org.vivecraft.client_vr;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import org.joml.*;
+import org.joml.Math;
 import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.utils.math.Matrix4f;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.common.utils.Utils;
 
 public class VRData {
     public VRDevicePose hmd;
@@ -32,47 +30,50 @@ public class VRData {
         Vec3 vec3 = dataholder.vr.getCenterEyePosition();
         Vec3 vec31 = new Vec3(vec3.x * (double) walkMul, vec3.y, vec3.z * (double) walkMul);
         this.hmd = new VRDevicePose(this, dataholder.vr.hmdRotation, vec31, dataholder.vr.getHmdVector());
-        this.eye0 = new VRDevicePose(this, dataholder.vr.getEyeRotation(RenderPass.LEFT), dataholder.vr.getEyePosition(RenderPass.LEFT).subtract(vec3).add(vec31), dataholder.vr.getHmdVector());
-        this.eye1 = new VRDevicePose(this, dataholder.vr.getEyeRotation(RenderPass.RIGHT), dataholder.vr.getEyePosition(RenderPass.RIGHT).subtract(vec3).add(vec31), dataholder.vr.getHmdVector());
-        this.c0 = new VRDevicePose(this, dataholder.vr.getAimRotation(0), dataholder.vr.getAimSource(0).subtract(vec3).add(vec31), dataholder.vr.getAimVector(0));
-        this.c1 = new VRDevicePose(this, dataholder.vr.getAimRotation(1), dataholder.vr.getAimSource(1).subtract(vec3).add(vec31), dataholder.vr.getAimVector(1));
-        this.h0 = new VRDevicePose(this, dataholder.vr.getHandRotation(0), dataholder.vr.getAimSource(0).subtract(vec3).add(vec31), dataholder.vr.getHandVector(0));
-        this.h1 = new VRDevicePose(this, dataholder.vr.getHandRotation(1), dataholder.vr.getAimSource(1).subtract(vec3).add(vec31), dataholder.vr.getHandVector(1));
+        this.eye0 = new VRDevicePose(this, dataholder.vr.getEyeRotation(RenderPass.LEFT, new Matrix4f()), dataholder.vr.getEyePosition(RenderPass.LEFT).subtract(vec3).add(vec31), dataholder.vr.getHmdVector());
+        this.eye1 = new VRDevicePose(this, dataholder.vr.getEyeRotation(RenderPass.RIGHT, new Matrix4f()), dataholder.vr.getEyePosition(RenderPass.RIGHT).subtract(vec3).add(vec31), dataholder.vr.getHmdVector());
+        this.c0 = new VRDevicePose(this, dataholder.vr.getAimRotation(0, new Matrix4f()), dataholder.vr.getAimSource(0).subtract(vec3).add(vec31), dataholder.vr.getAimVector(0));
+        this.c1 = new VRDevicePose(this, dataholder.vr.getAimRotation(1, new Matrix4f()), dataholder.vr.getAimSource(1).subtract(vec3).add(vec31), dataholder.vr.getAimVector(1));
+        this.h0 = new VRDevicePose(this, dataholder.vr.getHandRotation(0, new Matrix4f()), dataholder.vr.getAimSource(0).subtract(vec3).add(vec31), dataholder.vr.getHandVector(0));
+        this.h1 = new VRDevicePose(this, dataholder.vr.getHandRotation(1, new Matrix4f()), dataholder.vr.getAimSource(1).subtract(vec3).add(vec31), dataholder.vr.getHandVector(1));
 
         if (dataholder.vrSettings.seated) {
             this.t0 = eye0;
             this.t1 = eye1;
         } else {
-            Matrix4f matrix4f = this.getSmoothedRotation(0, 0.2F);
-            Matrix4f matrix4f1 = this.getSmoothedRotation(1, 0.2F);
-            this.t0 = new VRDevicePose(this, matrix4f, dataholder.vr.getAimSource(0).subtract(vec3).add(vec31), matrix4f.transform(Vector3.forward()).toVector3d());
-            this.t1 = new VRDevicePose(this, matrix4f1, dataholder.vr.getAimSource(1).subtract(vec3).add(vec31), matrix4f1.transform(Vector3.forward()).toVector3d());
+            Matrix4f matrix4f = this.getSmoothedRotation(0, 0.2F, new Matrix4f());
+            Matrix4f matrix4f1 = this.getSmoothedRotation(1, 0.2F, new Matrix4f());
+            this.t0 = new VRDevicePose(this, matrix4f, dataholder.vr.getAimSource(0).subtract(vec3).add(vec31), Utils.convertToVec3(matrix4f.transformProject(Utils.forward, new Vector3f())));
+            this.t1 = new VRDevicePose(this, matrix4f1, dataholder.vr.getAimSource(1).subtract(vec3).add(vec31), Utils.convertToVec3(matrix4f1.transformProject(Utils.forward, new Vector3f())));
         }
 
-        Matrix4f matrix4f2 = Matrix4f.multiply(Matrix4f.rotationY(-rotation), (new Matrix4f(ClientDataHolderVR.getInstance().cameraTracker.getRotation())).transposed());
+        Matrix4f matrix4f2 = new Matrix4f().rotation(dataholder.cameraTracker.getRotation()).rotateLocalY(-rotation);
         float inverseWorldScale = 1.0F / worldScale;
-        this.cam = new VRData.VRDevicePose(this, matrix4f2, ClientDataHolderVR.getInstance().cameraTracker.getPosition().subtract(origin).yRot(-rotation).multiply(inverseWorldScale, inverseWorldScale, inverseWorldScale).subtract(vec3).add(vec31), matrix4f2.transform(Vector3.forward()).toVector3d());
+        this.cam = new VRDevicePose(this, matrix4f2, dataholder.cameraTracker.getPosition().subtract(origin).yRot(-rotation).multiply(inverseWorldScale, inverseWorldScale, inverseWorldScale).subtract(vec3).add(vec31), Utils.convertToVec3(matrix4f2.transformProject(Utils.forward, new Vector3f())));
 
         if (dataholder.vr.mrMovingCamActive) {
-            this.c2 = new VRDevicePose(this, dataholder.vr.getAimRotation(2), dataholder.vr.getAimSource(2).subtract(vec3).add(vec31), dataholder.vr.getAimVector(2));
+            this.c2 = new VRDevicePose(this, dataholder.vr.getAimRotation(2, new Matrix4f()), dataholder.vr.getAimSource(2).subtract(vec3).add(vec31), dataholder.vr.getAimVector(2));
         } else {
-            VRSettings vrsettings = ClientDataHolderVR.getInstance().vrSettings;
-            Matrix4f matrix4f3 = (new Matrix4f(vrsettings.vrFixedCamrotQuat)).transposed();
-            Vec3 vec32 = new Vec3(vrsettings.vrFixedCamposX, vrsettings.vrFixedCamposY, vrsettings.vrFixedCamposZ);
-            Vec3 vec33 = matrix4f3.transform(Vector3.forward()).toVector3d();
+            Matrix4f matrix4f3 = new Matrix4f().rotation(dataholder.vrSettings.vrFixedCamrotQuat);
+            Vec3 vec32 = Utils.convertToVec3(dataholder.vrSettings.vrFixedCampos);
+            Vec3 vec33 = Utils.convertToVec3(matrix4f3.transformProject(Utils.forward, new Vector3f()));
             this.c2 = new VRDevicePose(this, matrix4f3, vec32.subtract(vec3).add(vec31), vec33);
         }
     }
 
-    private Matrix4f getSmoothedRotation(int c, float lenSec) {
-        Minecraft minecraft = Minecraft.getInstance();
+    private Matrix4f getSmoothedRotation(int c, float lenSec, Matrix4f dest) {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         Vec3 vec3 = dataholder.vr.controllerHistory[c].averagePosition(lenSec);
         Vec3 vec31 = dataholder.vr.controllerForwardHistory[c].averagePosition(lenSec);
         Vec3 vec32 = dataholder.vr.controllerUpHistory[c].averagePosition(lenSec);
         Vec3 vec33 = vec31.cross(vec32);
-        return new Matrix4f((float) vec33.x, (float) vec31.x, (float) vec32.x, (float) vec33.y, (float) vec31.y, (float) vec32.y, (float) vec33.z, (float) vec31.z, (float) vec32.z);
+        return dest.set(
+            (float) vec33.x, (float) vec33.y, (float) vec33.z, 0,
+            (float) vec31.x, (float) vec31.y, (float) vec31.z, 0,
+            (float) vec32.x, (float) vec32.y, (float) vec32.z, 0,
+            0, 0, 0, 1
+        );
     }
 
     public VRDevicePose getController(int c) {
@@ -111,14 +112,16 @@ public class VRData {
     public Vec3 getHeadPivot() {
         Vec3 vec3 = this.hmd.getPosition();
         // scale pivot point with world scale, to prevent unwanted player movement
-        Vector3 vector3 = this.hmd.getMatrix().transform(new Vector3(0.0F, -0.1F * worldScale, 0.1F * worldScale));
-        return new Vec3((double) vector3.getX() + vec3.x, (double) vector3.getY() + vec3.y, (double) vector3.getZ() + vec3.z);
+        Matrix4f matrix4f = this.hmd.getMatrix(new Matrix4f());
+        Vector3f vector3 = matrix4f.transformProject(new Vector3f(0.0F, -0.1F * worldScale, 0.1F * worldScale), new Vector3f());
+        return new Vec3((double) vector3.x() + vec3.x, (double) vector3.y() + vec3.y, (double) vector3.z() + vec3.z);
     }
 
     public Vec3 getHeadRear() {
         Vec3 vec3 = this.hmd.getPosition();
-        Vector3 vector3 = this.hmd.getMatrix().transform(new Vector3(0.0F, -0.2F, 0.2F));
-        return new Vec3((double) vector3.getX() + vec3.x, (double) vector3.getY() + vec3.y, (double) vector3.getZ() + vec3.z);
+        Matrix4f matrix4f = this.hmd.getMatrix(new Matrix4f());
+        Vector3f vector3 = matrix4f.transformProject(new Vector3f(0.0F, -0.2F, 0.2F), new Vector3f());
+        return new Vec3((double) vector3.x() + vec3.x, (double) vector3.y() + vec3.y, (double) vector3.z() + vec3.z);
     }
 
     public VRDevicePose getEye(RenderPass pass) {
@@ -153,25 +156,21 @@ public class VRData {
         return "data:\r\n \t\t origin: " + this.origin + "\r\n \t\t rotation: " + String.format("%.2f", this.rotation_radians) + "\r\n \t\t scale: " + String.format("%.2f", this.worldScale) + "\r\n \t\t hmd " + this.hmd + "\r\n \t\t c0 " + this.c0 + "\r\n \t\t c1 " + this.c1 + "\r\n \t\t c2 " + this.c2;
     }
 
-    protected Vec3 vecMult(Vec3 in, float factor) {
-        return new Vec3(in.x * (double) factor, in.y * (double) factor, in.z * (double) factor);
-    }
-
     public class VRDevicePose {
-        final VRData data;
-        final Vec3 pos;
-        final Vec3 dir;
-        final Matrix4f matrix;
+        public final VRData data;
+        public final Vec3 pos;
+        public final Vec3 dir;
+        public final Matrix4fc matrix;
 
         public VRDevicePose(VRData data, Matrix4f matrix, Vec3 pos, Vec3 dir) {
             this.data = data;
-            this.matrix = matrix.transposed().transposed();
+            this.matrix = matrix;
             this.pos = new Vec3(pos.x, pos.y, pos.z);
             this.dir = new Vec3(dir.x, dir.y, dir.z);
         }
 
         public Vec3 getPosition() {
-            Vec3 vec3 = this.pos.scale(VRData.this.worldScale);
+            Vec3 vec3 = this.pos.scale(this.data.worldScale);
             vec3 = vec3.yRot(this.data.rotation_radians);
             return vec3.add(this.data.origin.x, this.data.origin.y, this.data.origin.z);
         }
@@ -181,8 +180,7 @@ public class VRData {
         }
 
         public Vec3 getCustomVector(Vec3 axis) {
-            Vector3 vector3 = this.matrix.transform(new Vector3((float) axis.x, (float) axis.y, (float) axis.z));
-            return vector3.toVector3d().yRot(this.data.rotation_radians);
+            return Utils.convertToVec3(this.matrix.transformProject(new Vector3f((float) axis.x(), (float) axis.y(), (float) axis.z())).rotateY(this.data.rotation_radians));
         }
 
         public float getYaw() {
@@ -196,12 +194,11 @@ public class VRData {
         }
 
         public float getRoll() {
-            return (float) (-Math.toDegrees(Math.atan2(this.matrix.M[1][0], this.matrix.M[1][1])));
+            return (float) (-Math.toDegrees(Math.atan2(this.matrix.m01(), this.matrix.m11())));
         }
 
-        public Matrix4f getMatrix() {
-            Matrix4f matrix4f = Matrix4f.rotationY(VRData.this.rotation_radians);
-            return Matrix4f.multiply(matrix4f, this.matrix);
+        public Matrix4f getMatrix(Matrix4f dest) {
+            return this.matrix.rotateLocalY(this.data.rotation_radians, dest);
         }
 
         public String toString() {

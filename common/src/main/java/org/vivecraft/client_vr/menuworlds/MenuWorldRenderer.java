@@ -43,9 +43,9 @@ import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.mixin.client.renderer.RenderStateShardAccessor;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
@@ -136,25 +136,25 @@ public class MenuWorldRenderer {
 
     public void init() {
         if (ClientDataHolderVR.getInstance().vrSettings.menuWorldSelection == VRSettings.MenuWorld.NONE) {
-            //VRSettings.logger.info("Main menu worlds disabled.");
+            //Utils.logger.info("Main menu worlds disabled.");
             return;
         }
 
         try {
-            VRSettings.logger.info("MenuWorlds: Initializing main menu world renderer...");
+            Utils.logger.info("MenuWorlds: Initializing main menu world renderer...");
             loadRenderers();
             getWorldTask = CompletableFuture.supplyAsync(() -> {
                 try (InputStream inputStream = MenuWorldDownloader.getRandomWorld()) {
-                    VRSettings.logger.info("MenuWorlds: Loading world data...");
+                    Utils.logger.info("MenuWorlds: Loading world data...");
                     return inputStream != null ? MenuWorldExporter.loadWorld(inputStream) : null;
                 } catch (Exception e) {
-                    VRSettings.logger.error("Exception thrown when loading main menu world, falling back to old menu room. \n {}", e.getMessage());
+                    Utils.logger.error("Exception thrown when loading main menu world, falling back to old menu room. \n {}", e.getMessage());
                     e.printStackTrace();
                     return null;
                 }
             }, Util.backgroundExecutor());
         } catch (Exception e) {
-            VRSettings.logger.error("Exception thrown when initializing main menu world renderer, falling back to old menu room. \n {}", e.getMessage());
+            Utils.logger.error("Exception thrown when initializing main menu world renderer, falling back to old menu room. \n {}", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -170,7 +170,7 @@ public class MenuWorldRenderer {
                 setWorld(world);
                 prepare();
             } else {
-                VRSettings.logger.warn("Failed to load any main menu world, falling back to old menu room");
+                Utils.logger.warn("Failed to load any main menu world, falling back to old menu room");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -265,7 +265,7 @@ public class MenuWorldRenderer {
 
     public void prepare() {
         if (vertexBuffers == null && !building) {
-            VRSettings.logger.info("MenuWorlds: Building geometry...");
+            Utils.logger.info("MenuWorlds: Building geometry...");
 
             // random offset to make the player fly
             if (rand.nextInt(1000) == 0) {
@@ -301,7 +301,7 @@ public class MenuWorldRenderer {
                     }
                 }
             } catch (OutOfMemoryError e) {
-                VRSettings.logger.error("OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?");
+                Utils.logger.error("OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?");
                 destroy();
                 return;
             }
@@ -407,12 +407,12 @@ public class MenuWorldRenderer {
                 }
             }
 
-            //VRSettings.logger.info("MenuWorlds: Built segment of " + count + " blocks in " + ((RenderStateShardAccessor)layer).getName() + " layer.");
+            //Utils.logger.info("MenuWorlds: Built segment of " + count + " blocks in " + ((RenderStateShardAccessor)layer).getName() + " layer.");
             blockCounts.put(pair, blockCounts.getOrDefault(pair, 0) + count);
             renderTimes.put(pair, renderTimes.getOrDefault(pair, 0L) + (Utils.milliTime() - realStartTime));
 
             if (pos.getY() >= Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int) blockAccess.getGround())) {
-                VRSettings.logger.debug("MenuWorlds: Built {} blocks on {} layer at {},{},{} in {} ms",
+                Utils.logger.debug("MenuWorlds: Built {} blocks on {} layer at {},{},{} in {} ms",
                     blockCounts.get(pair),
                     ((RenderStateShardAccessor) layer).getName(),
                     offset.getX(), offset.getY(), offset.getZ(),
@@ -456,11 +456,11 @@ public class MenuWorldRenderer {
         bufferBuilders = null;
         currentPositions = null;
         ready = true;
-        VRSettings.logger.info("MenuWorlds: Built {} blocks in {} ms ({} ms CPU time)",
+        Utils.logger.info("MenuWorlds: Built {} blocks in {} ms ({} ms CPU time)",
             blockCounts.values().stream().reduce(Integer::sum).orElse(0),
             Utils.milliTime() - buildStartTime,
             renderTimes.values().stream().reduce(Long::sum).orElse(0L));
-        VRSettings.logger.info("MenuWorlds: Used {} temporary buffers ({} MiB), uploaded {} non-empty buffers",
+        Utils.logger.info("MenuWorlds: Used {} temporary buffers ({} MiB), uploaded {} non-empty buffers",
             entryList.size(),
             totalMemory / 1048576,
             count);
@@ -475,9 +475,9 @@ public class MenuWorldRenderer {
             return;
         }
         if (builderError instanceof OutOfMemoryError || builderError.getCause() instanceof OutOfMemoryError) {
-            VRSettings.logger.error("OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?");
+            Utils.logger.error("OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?");
         } else {
-            VRSettings.logger.error("Exception thrown when building main menu world, falling back to old menu room. \n {}", builderError.getMessage());
+            Utils.logger.error("Exception thrown when building main menu world, falling back to old menu room. \n {}", builderError.getMessage());
         }
         builderError.printStackTrace();
         destroy();

@@ -5,7 +5,7 @@ import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 
 import java.lang.reflect.Field;
 
@@ -49,7 +49,7 @@ public class SodiumHelper {
             } catch (ClassNotFoundException ignored) {
                 return;
             } catch (NoSuchFieldException e) {
-                VRSettings.logger.error("sodium version has ModelCuboids, but field was not found. VR hands will probably look wrong");
+                Utils.logger.error("sodium version has ModelCuboids, but field was not found. VR hands will probably look wrong");
                 return;
             }
         }
@@ -63,7 +63,7 @@ public class SodiumHelper {
                     destQuad.textures[i].y = sourceQuad.textures[i].y;
                 }
             } catch (IllegalAccessException | ClassCastException ignored) {
-                VRSettings.logger.error("sodium version has ModelCuboids, but field has wrong type. VR hands will probably look wrong");
+                Utils.logger.error("sodium version has ModelCuboids, but field has wrong type. VR hands will probably look wrong");
                 hasModelCuboid = false;
             }
         }

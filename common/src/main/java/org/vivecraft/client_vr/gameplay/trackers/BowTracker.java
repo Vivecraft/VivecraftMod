@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -19,7 +20,6 @@ import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.network.CommonNetworkHelper;
-import org.vivecraft.common.utils.math.Vector3;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
 import java.nio.ByteBuffer;
@@ -139,9 +139,9 @@ public class BowTracker extends Tracker {
             double d0 = vec3.distanceTo(vec33);
             this.aim = vec3.subtract(vec31).normalize();
             Vec3 vec34 = vrdata.getController(0).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D));
-            Vector3 vector3 = new Vector3((float) vec34.x, (float) vec34.y, (float) vec34.z);
+            Vector3f vector3 = new Vector3f((float) vec34.x, (float) vec34.y, (float) vec34.z);
             Vec3 vec35 = vrdata.getHand(1).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
-            Vector3 vector31 = new Vector3((float) vec35.x, (float) vec35.y, (float) vec35.z);
+            Vector3f vector31 = new Vector3f((float) vec35.x, (float) vec35.y, (float) vec35.z);
             this.controllersDot = (180D / Math.PI) * Math.acos(vector31.dot(vector3));
             this.pressed = this.mc.options.keyAttack.isDown();
             float f = 0.15F * vrdata.worldScale;

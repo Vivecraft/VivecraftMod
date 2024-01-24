@@ -4,11 +4,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import org.joml.Math;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.utils.math.Quaternion;
+import org.vivecraft.common.utils.Utils;
 
 public class HorseTracker extends Tracker {
     double boostTrigger = 1.4D;
@@ -52,13 +54,26 @@ public class HorseTracker extends Tracker {
             this.boost();
         }
 
-        Quaternion quaternion = new Quaternion(0.0F, -this.horse.yBodyRot, 0.0F);
-        Vec3 vec32 = quaternion.multiply(new Vec3(0.0D, 0.0D, -1.0D));
-        Vec3 vec33 = quaternion.multiply(new Vec3(1.0D, 0.0D, 0.0D));
-        Vec3 vec34 = quaternion.multiply(new Vec3(-1.0D, 0.0D, 0.0D));
-        Quaternion quaternion1 = new Quaternion(0.0F, VRSettings.inst.worldRotation, 0.0F);
-        Vec3 vec35 = VRPlayer.get().roomOrigin.add(quaternion1.multiply(this.dh.vr.controllerHistory[1].latest()));
-        Vec3 vec36 = VRPlayer.get().roomOrigin.add(quaternion1.multiply(this.dh.vr.controllerHistory[0].latest()));
+        Quaternionf quaternion41 = new Quaternionf();
+        float yaw = Math.toRadians(-this.horse.yBodyRot);
+        Quaternionf quaternion5 = new Quaternionf().fromAxisAngleRad(Utils.PITCH, 0.0F);
+        Quaternionf quaternion12 = new Quaternionf().fromAxisAngleRad(Utils.YAW, yaw);
+        Quaternionf quaternion22 = new Quaternionf().fromAxisAngleRad(Utils.ROLL, 0.0F);
+        Quaternionf quaternion31 = quaternion12.mul(quaternion5, new Quaternionf()).mul(quaternion22, new Quaternionf());
+        Quaternionf quaternion = quaternion41.set(quaternion31);
+        Vec3 vec32 = Utils.convertToVec3(quaternion.transformUnit(Utils.forward, new Vector3f()));
+        Vec3 vec33 = Utils.convertToVec3(quaternion.transformUnit(Utils.right, new Vector3f()));
+        Vec3 vec34 = Utils.convertToVec3(quaternion.transformUnit(Utils.left, new Vector3f()));
+        Quaternionf quaternion4 = new Quaternionf();
+        Quaternionf quaternion21 = new Quaternionf().fromAxisAngleRad(Utils.PITCH, 0.0F);
+        Quaternionf quaternion11 = new Quaternionf().fromAxisAngleRad(Utils.YAW, Math.toRadians(VRSettings.inst.worldRotation));
+        Quaternionf quaternion2 = new Quaternionf().fromAxisAngleRad(Utils.ROLL, 0.0F);
+        Quaternionf quaternion3 = quaternion11.mul(quaternion21, new Quaternionf()).mul(quaternion2, new Quaternionf());
+        Quaternionf quaternion1 = quaternion4.set(quaternion3);
+        Vec3 vec2 = this.dh.vr.controllerHistory[1].latest();
+        Vec3 vec35 = VRPlayer.get().roomOrigin.add(Utils.convertToVec3(quaternion1.transformUnit(new Vector3f((float) vec2.x, (float) vec2.y, (float) vec2.z), new Vector3f())));
+        Vec3 vec1 = this.dh.vr.controllerHistory[0].latest();
+        Vec3 vec36 = VRPlayer.get().roomOrigin.add(Utils.convertToVec3(quaternion1.transformUnit(new Vector3f((float) vec1.x, (float) vec1.y, (float) vec1.z), new Vector3f())));
         double d1 = vec35.subtract(this.info.leftReinPos).dot(vec32) + vec35.subtract(this.info.leftReinPos).dot(vec33);
         double d2 = vec36.subtract(this.info.rightReinPos).dot(vec32) + vec36.subtract(this.info.rightReinPos).dot(vec34);
 
@@ -87,9 +102,10 @@ public class HorseTracker extends Tracker {
             this.horse.setYRot((float) ((double) f + (d4 - d3) * this.turnspeed));
         }
 
-        this.horse.yBodyRot = (float) Utils.lerpMod(f1, f, this.bodyturnspeed, 360.0D);
+        this.horse.yBodyRot = (float) (Math.abs((double) f - (double) f1) < 360.0D / 2.0D ? (double) f1 + ((double) f - (double) f1) * this.bodyturnspeed : (double) f1 + ((double) f - (double) f1 - Math.signum((double) f - (double) f1) * 360.0D) * this.bodyturnspeed);
         this.horse.yHeadRot = f;
-        Vec3 vec37 = quaternion.multiply(new Vec3(0.0D, 0.0D, (double) this.speedLevel * this.baseSpeed));
+        Vec3 vec = new Vec3(0.0D, 0.0D, (double) this.speedLevel * this.baseSpeed);
+        Vec3 vec37 = Utils.convertToVec3(quaternion.transformUnit(new Vector3f((float) vec.x, (float) vec.y, (float) vec.z), new Vector3f()));
         this.horse.setDeltaMovement(vec37.x, this.horse.getDeltaMovement().y, vec37.z);
     }
 

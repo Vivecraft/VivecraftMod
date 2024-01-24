@@ -6,7 +6,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -61,10 +61,10 @@ public class OptifineHelper {
             // check for optifine with a class search
             try {
                 Class.forName("net.optifine.Config");
-                VRSettings.logger.info("Vivecraft: Optifine detected");
+                Utils.logger.info("Vivecraft: Optifine detected");
                 optifineLoaded = true;
             } catch (ClassNotFoundException ignore) {
-                VRSettings.logger.info("Vivecraft: Optifine not detected");
+                Utils.logger.info("Vivecraft: Optifine not detected");
                 optifineLoaded = false;
             }
             if (optifineLoaded) {
@@ -348,13 +348,13 @@ public class OptifineHelper {
                 vertexRenderPositions = null;
             }
         } catch (ClassNotFoundException e) {
-            VRSettings.logger.error("Optifine detected, but couldn't load class: {}", e.getMessage());
+            Utils.logger.error("Optifine detected, but couldn't load class: {}", e.getMessage());
             optifineLoaded = false;
         } catch (NoSuchMethodException e) {
-            VRSettings.logger.error("Optifine detected, but couldn't load Method: {}", e.getMessage());
+            Utils.logger.error("Optifine detected, but couldn't load Method: {}", e.getMessage());
             optifineLoaded = false;
         } catch (NoSuchFieldException e) {
-            VRSettings.logger.error("Optifine detected, but couldn't load Field: {}", e.getMessage());
+            Utils.logger.error("Optifine detected, but couldn't load Field: {}", e.getMessage());
         }
     }
 }

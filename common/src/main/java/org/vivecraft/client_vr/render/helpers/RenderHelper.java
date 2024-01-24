@@ -17,6 +17,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43C;
@@ -46,16 +47,15 @@ public class RenderHelper {
     private static final Minecraft mc = Minecraft.getInstance();
 
     public static void applyVRModelView(RenderPass currentPass, PoseStack poseStack) {
-        Matrix4f modelView;
         if (currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
-            modelView = new Matrix4f().rotation(MCVR.get().hmdRotHistory
-                .averageRotation(dataHolder.vrSettings.displayMirrorCenterSmooth));
+            Quaternionf rot = MCVR.get().hmdRotHistory.averageRotation(dataHolder.vrSettings.displayMirrorCenterSmooth);
+            poseStack.last().pose().rotate(rot);
+            poseStack.last().normal().rotate(rot);
         } else {
-            modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
-                .getMatrix().transposed().toMCMatrix();
+            Matrix4f modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass).getMatrix(new Matrix4f()).transpose();
+            poseStack.last().pose().mul(modelView);
+            poseStack.last().normal().mul(new Matrix3f(modelView));
         }
-        poseStack.last().pose().mul(modelView);
-        poseStack.last().normal().mul(new Matrix3f(modelView));
     }
 
     public static Vec3 getSmoothCameraPosition(RenderPass renderpass, VRData vrData) {
@@ -126,13 +126,15 @@ public class RenderHelper {
         matrix.translate(aimSource.x, aimSource.y, aimSource.z);
         float sc = dataHolder.vrPlayer.vrdata_world_render.worldScale;
         if (mc.level != null && TelescopeTracker.isTelescope(mc.player.getUseItem())) {
-            matrix.mulPoseMatrix(dataHolder.vrPlayer.vrdata_world_render.hmd.getMatrix().inverted()
-                .transposed().toMCMatrix());
+            matrix.mulPoseMatrix(
+                dataHolder.vrPlayer.vrdata_world_render.hmd.getMatrix(new Matrix4f()).invert().transpose()
+            );
             MethodHolder.rotateDegXp(matrix, 90);
             matrix.translate(controller == 0 ? 0.075 * sc : -0.075 * sc, -0.025 * sc, 0.0325 * sc);
         } else {
-            matrix.mulPoseMatrix(dataHolder.vrPlayer.vrdata_world_render.getController(controller)
-                .getMatrix().inverted().transposed().toMCMatrix());
+            matrix.mulPoseMatrix(
+                dataHolder.vrPlayer.vrdata_world_render.getController(controller).getMatrix(new Matrix4f()).invert().transpose()
+            );
         }
 
         matrix.scale(sc, sc, sc);

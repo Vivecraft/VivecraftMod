@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import net.minecraft.SharedConstants;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 import org.vivecraft.server.config.ServerConfig;
 
 import java.io.BufferedReader;
@@ -54,7 +54,7 @@ public class UpdateChecker {
             conn.connect();
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                VRSettings.logger.error("Error " + conn.getResponseCode() + " fetching Vivecraft updates");
+                Utils.logger.error("Error " + conn.getResponseCode() + " fetching Vivecraft updates");
                 return false;
             }
 
@@ -91,7 +91,7 @@ public class UpdateChecker {
             // no carriage returns please
             changelog = changelog.replaceAll("\\r", "");
             if (hasUpdate) {
-                VRSettings.logger.info("Vivecraft update found: " + newestVersion);
+                Utils.logger.info("Vivecraft update found: " + newestVersion);
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -3,7 +3,8 @@ package org.vivecraft.common.network;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.common.utils.math.Quaternion;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 
 public class CommonNetworkHelper {
 
@@ -42,18 +43,23 @@ public class CommonNetworkHelper {
         buffer.writeFloat((float) vec3.z);
     }
 
-    public static void serialize(FriendlyByteBuf buffer, Quaternion quat) {
-        buffer.writeFloat(quat.w);
-        buffer.writeFloat(quat.x);
-        buffer.writeFloat(quat.y);
-        buffer.writeFloat(quat.z);
+    public static void serialize(FriendlyByteBuf buffer, Quaternionfc quat) {
+        buffer.writeFloat(quat.w());
+        buffer.writeFloat(quat.x());
+        buffer.writeFloat(quat.y());
+        buffer.writeFloat(quat.z());
     }
 
     public static Vec3 deserializeFVec3(FriendlyByteBuf buffer) {
         return new Vec3(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
     }
 
-    public static Quaternion deserializeVivecraftQuaternion(FriendlyByteBuf buffer) {
-        return new Quaternion(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+    public static Quaternionf deserializeQuaternionf(FriendlyByteBuf buffer) {
+        Quaternionf q = new Quaternionf();
+        q.w = buffer.readFloat();
+        q.x = buffer.readFloat();
+        q.y = buffer.readFloat();
+        q.z = buffer.readFloat();
+        return q;
     }
 }

@@ -13,7 +13,6 @@ import org.lwjgl.openvr.OpenVR;
 import org.lwjgl.openvr.VR;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -71,12 +70,12 @@ public class OpenVRStereoRenderer extends VRRenderer {
         }
     }
 
-    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
+    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip, Matrix4f dest) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (eyeType == 0) {
-                return Utils.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(0, nearClip, farClip, HmdMatrix44.calloc(stack)));
+                return dest.setTransposed(VRSystem_GetProjectionMatrix(0, nearClip, farClip, HmdMatrix44.calloc(stack)).m());
             } else {
-                return Utils.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(1, nearClip, farClip, HmdMatrix44.calloc(stack)));
+                return dest.setTransposed(VRSystem_GetProjectionMatrix(1, nearClip, farClip, HmdMatrix44.calloc(stack)).m());
             }
         }
     }

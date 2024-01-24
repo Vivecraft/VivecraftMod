@@ -15,20 +15,17 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Math;
+import org.joml.*;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.BlockTags;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRMovementStyle;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.OpenVRUtil;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.common.utils.math.Angle;
-import org.vivecraft.common.utils.math.Matrix4f;
-import org.vivecraft.common.utils.math.Quaternion;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.common.utils.Utils;
 
 import java.util.Random;
 
@@ -218,31 +215,30 @@ public class TeleportTracker extends Tracker {
     }
 
     private void updateTeleportArc(Minecraft mc, LocalPlayer player) {
-        Vec3 vec3 = dh.vrPlayer.vrdata_world_render.getController(1).getPosition();
-        Vec3 vec31 = dh.vrPlayer.vrdata_world_render.getController(1).getDirection();
-        Matrix4f matrix4f = dh.vr.getAimRotation(1);
+        Vec3 vec3;
+        Vec3 vec31;
+        Matrix4f matrix4f;
 
         if (dh.vrSettings.seated) {
             vec3 = RenderHelper.getControllerRenderPos(0);
             vec31 = dh.vrPlayer.vrdata_world_render.getController(0).getDirection();
-            matrix4f = dh.vr.getAimRotation(0);
+            matrix4f = dh.vr.getAimRotation(0, new Matrix4f());
+        } else {
+            vec3 = dh.vrPlayer.vrdata_world_render.getController(1).getPosition();
+            vec31 = dh.vrPlayer.vrdata_world_render.getController(1).getDirection();
+            matrix4f = dh.vr.getAimRotation(1, new Matrix4f());
         }
 
-        Matrix4f matrix4f1 = Matrix4f.rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians);
-        matrix4f = Matrix4f.multiply(matrix4f1, matrix4f);
-        Quaternion quaternion = OpenVRUtil.convertMatrix4ftoRotationQuat(matrix4f);
-        Angle angle = quaternion.toEuler();
+        matrix4f.rotateLocalY(dh.vrPlayer.vrdata_world_render.rotation_radians);
+        Quaternionf quaternion = new Quaternionf().setFromNormalized(matrix4f.normalize3x3(new Matrix3f()));
         int i = 50;
         this.movementTeleportArc[0] = new Vec3(vec3.x, vec3.y, vec3.z);
         this.movementTeleportArcSteps = 1;
-        float f = 0.098F;
-        Matrix4f matrix4f2 = Utils.rotationZMatrix((float) Math.toRadians(-angle.getRoll()));
-        Matrix4f matrix4f3 = Utils.rotationXMatrix(-2.5132742F);
-        Matrix4f matrix4f4 = Matrix4f.multiply(matrix4f, matrix4f2);
-        Vector3 vector3 = new Vector3(0.0F, 1.0F, 0.0F);
-        Vector3 vector31 = matrix4f4.transform(vector3);
-        Vec3 vec32 = vector31.negate().toVector3d();
-        vec32 = vec32.scale(f);
+        float angle = Math.toRadians(-(float) Math.toDegrees(Math.atan2(2.0F * (quaternion.x * quaternion.y + quaternion.w * quaternion.z), quaternion.w * quaternion.w - quaternion.x * quaternion.x + quaternion.y * quaternion.y - quaternion.z * quaternion.z)));
+        // TODO: unused rotation X
+        // Matrix4f matrix4f3 = new Matrix4f().rotationX(-2.5132742F);
+        Vector3f vector31 = matrix4f.rotateZ(angle).transformProject(Utils.YAW, new Vector3f());
+        Vec3 vec32 = Utils.convertToVec3(vector31.negate(new Vector3f()).mul(0.098F));
         float f1 = 0.5F;
         Vec3 vec33 = new Vec3(vec31.x * (double) f1, vec31.y * (double) f1, vec31.z * (double) f1);
         Vec3 vec34 = new Vec3(vec3.x, vec3.y, vec3.z);

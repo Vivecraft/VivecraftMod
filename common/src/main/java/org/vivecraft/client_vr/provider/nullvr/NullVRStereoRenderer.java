@@ -30,8 +30,8 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
-        return new Matrix4f().setPerspective(90.0F, 1.0F, nearClip, farClip);
+    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip, Matrix4f dest) {
+        return dest.setPerspective(90.0F, 1.0F, nearClip, farClip);
     }
 
     @Override

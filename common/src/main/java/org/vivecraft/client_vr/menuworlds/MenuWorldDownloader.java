@@ -1,9 +1,9 @@
 package org.vivecraft.client_vr.menuworlds;
 
 import net.minecraft.SharedConstants;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,11 +38,11 @@ public class MenuWorldDownloader {
             String localSha1 = Utils.getFileChecksum(file, "SHA-1");
             String remoteSha1 = Utils.httpReadLine(baseUrl + "checksum.php?file=" + path);
             if (localSha1.equals(remoteSha1)) {
-                VRSettings.logger.info("MenuWorlds: SHA-1 matches for " + path);
+                Utils.logger.info("MenuWorlds: SHA-1 matches for " + path);
                 return;
             }
         }
-        VRSettings.logger.info("MenuWorlds: Downloading world " + path);
+        Utils.logger.info("MenuWorlds: Downloading world " + path);
         Utils.httpReadToFile(baseUrl + path, file, true);
     }
 
@@ -86,11 +86,11 @@ public class MenuWorldDownloader {
 
     private static InputStream getStreamForWorld(MenuWorldItem world) throws IOException, NoSuchAlgorithmException {
         if (world.file != null) {
-            VRSettings.logger.info("MenuWorlds: Using world " + world.file.getName());
+            Utils.logger.info("MenuWorlds: Using world " + world.file.getName());
             return new FileInputStream(world.file);
         } else if (world.path != null) {
             downloadWorld(world.path);
-            VRSettings.logger.info("MenuWorlds: Using official world " + world.path);
+            Utils.logger.info("MenuWorlds: Using official world " + world.path);
             return new FileInputStream(world.path);
         } else {
             throw new IllegalArgumentException("File or path must be assigned");
@@ -115,7 +115,7 @@ public class MenuWorldDownloader {
     }
 
     private static InputStream getRandomWorldFallback() throws IOException, NoSuchAlgorithmException {
-        VRSettings.logger.info("MenuWorlds: Couldn't find a world, trying random file from directory");
+        Utils.logger.info("MenuWorlds: Couldn't find a world, trying random file from directory");
         File dir = new File("menuworlds");
         if (dir.exists()) {
             MenuWorldItem world = getRandomWorldFromList(getWorldsInDirectory(dir));
