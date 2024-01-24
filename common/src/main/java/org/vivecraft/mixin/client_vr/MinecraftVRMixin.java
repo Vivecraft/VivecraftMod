@@ -254,16 +254,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         "lambda$new$4"} // forge
         , remap = false)
     public void vivecraft$initVROnLaunch(CallbackInfo ci) {
-        // init vr after resource loading
-        try {
-            if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled) {
-                VRState.vrEnabled = true;
-                VRState.initializeVR();
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
         // set initial resourcepacks
         vivecraft$resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
 
