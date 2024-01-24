@@ -307,6 +307,8 @@ public class VRSettings {
     public float renderScaleFactor = 1.0f;
     @SettingField(VrOptions.MIRROR_DISPLAY)
     public MirrorMode displayMirrorMode = MirrorMode.CROPPED;
+    @SettingField(VrOptions.MIRROR_CROP)
+    public float mirrorCrop = 0.15F;
     @SettingField(VrOptions.MIRROR_EYE)
     public boolean displayMirrorLeftEye = false;
     @SettingField(VrOptions.MIRROR_CENTER_SMOOTH)
@@ -1230,6 +1232,7 @@ public class VRSettings {
                 }
             }
         },
+        MIRROR_CROP(true, false, 0.0f, 0.25f, 0.01f, -1), // crop amount for mirror,
         MIRROR_EYE(false, true, "vivecraft.options.left", "vivecraft.options.right"), // Mirror Eye
         MIRROR_CENTER_SMOOTH(true, false, 0.0f, 1.0f, 0.1f, 1) {
             @Override

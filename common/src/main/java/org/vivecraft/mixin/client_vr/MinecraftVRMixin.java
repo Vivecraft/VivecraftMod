@@ -1008,8 +1008,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     source = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1;
                 }
 
-                xcrop = 0.15F;
-                ycrop = 0.15F;
+                xcrop = ClientDataHolderVR.getInstance().vrSettings.mirrorCrop;
+                ycrop = ClientDataHolderVR.getInstance().vrSettings.mirrorCrop;
                 ar = true;
             }
             // Debug
