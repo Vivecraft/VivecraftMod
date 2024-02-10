@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -70,15 +71,17 @@ public class VREffectsHelper {
     }
 
     public static Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 in, double dist) {
-        if (mc.level == null) {
+        // Prefer mc.player.level() to prevent getting the head stuck in block with ImmersivePortals.
+        Level level = mc.player != null && mc.player.level() != null ? mc.player.level() : mc.level;
+        if (level == null) {
             return null;
         } else {
             AABB aabb = new AABB(in.subtract(dist, dist, dist), in.add(dist, dist, dist));
             Stream<BlockPos> stream = BlockPos.betweenClosedStream(aabb).filter((bp) ->
-                mc.level.getBlockState(bp).isSolidRender(mc.level, bp));
+                level.getBlockState(bp).isSolidRender(level, bp));
             Optional<BlockPos> optional = stream.findFirst();
             return optional.isPresent()
-                   ? Triple.of(1.0F, mc.level.getBlockState(optional.get()), optional.get())
+                   ? Triple.of(1.0F, level.getBlockState(optional.get()), optional.get())
                    : null;
         }
     }
