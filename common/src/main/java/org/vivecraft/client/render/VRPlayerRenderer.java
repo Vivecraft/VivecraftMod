@@ -10,8 +10,10 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
 
 import java.util.UUID;
 
@@ -36,7 +38,10 @@ public class VRPlayerRenderer extends PlayerRenderer {
 
     @Override
     public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight) {
-
+        if (Xplat.isModLoaded("immersive_portals") && entityIn == Minecraft.getInstance().player
+            && ImmersivePortalsHelper.isStandingInPortal()) {
+            return;
+        }
         VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entityIn.getUUID());
 
         if (playermodelcontroller$rotinfo != null) {

@@ -16,6 +16,10 @@ public class McHelperMixin {
     private static void updateBoundingBox(Entity player, CallbackInfo ci) {
         if (VRPlayer.get() != null) {
             Vec3 newPos = player.position();
+            Vec3 offset = newPos.subtract(VRPlayer.get().roomOrigin);
+            VRPlayer.get().vrdata_world_render.origin = VRPlayer.get().vrdata_world_render.origin.add(offset);
+            VRPlayer.get().vrdata_world_pre.origin = VRPlayer.get().vrdata_world_pre.origin.add(offset);
+            VRPlayer.get().vrdata_world_post.origin = VRPlayer.get().vrdata_world_post.origin.add(offset);
             VRPlayer.get().setRoomOrigin(newPos.x, newPos.y, newPos.z, true);
         }
     }
