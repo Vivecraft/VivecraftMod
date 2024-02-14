@@ -132,6 +132,17 @@ public class ServerNetworking {
                     listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
                 }
 
+                if (ServerConfig.forceThirdPersonItems.get()) {
+                    FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
+                    byteBuf.writeUtf("thirdPersonItems");
+                    byteBuf.writeUtf("" + true);
+
+                    byte[] array = new byte[byteBuf.readableBytes()];
+                    byteBuf.readBytes(array);
+                    byteBuf.release();
+                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
+                }
+
                 if (ServerConfig.crawlingEnabled.get()) {
                     listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[0]));
                 }

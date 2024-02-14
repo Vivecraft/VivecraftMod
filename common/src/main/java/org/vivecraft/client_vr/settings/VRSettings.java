@@ -2112,6 +2112,7 @@ public class VRSettings {
             registerSetting(VrOptions.TELEPORT_DOWN_LIMIT, "teleportLimitDown", () -> vrTeleportDownLimit);
             registerSetting(VrOptions.TELEPORT_HORIZ_LIMIT, "teleportLimitHoriz", () -> vrTeleportHorizLimit);
             registerSetting(VrOptions.WORLD_SCALE, "worldScale", () -> worldScale);
+            registerSetting(VrOptions.THIRDPERSON_ITEMTRANSFORMS, "thirdPersonItems", () -> thirdPersonItems);
         }
 
         private void registerSetting(VrOptions option, String networkName, Supplier<Object> originalValue) {

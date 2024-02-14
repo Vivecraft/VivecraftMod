@@ -159,6 +159,10 @@ public class ClientNetworking {
         connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, headBuffer));
     }
 
+    public static boolean isThirdPersonItems() {
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS).getBoolean();
+    }
+
     public static boolean isLimitedSurvivalTeleport() {
         return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.LIMIT_TELEPORT).getBoolean();
     }
