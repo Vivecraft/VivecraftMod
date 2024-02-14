@@ -115,6 +115,11 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
             boolean useLeftHandModelinLeftHand = false;
 
+            // swap hand for claws, since it's backwards else wise
+            if (dh.climbTracker.isClaws(pStack) && dh.vrSettings.reverseHands) {
+                mainHand = !mainHand;
+            }
+
             ItemDisplayContext itemDisplayContext;
             if ((ClientNetworking.isThirdPersonItems() && !(BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer))) || dh.climbTracker.isClaws(pStack)) {
                 useLeftHandModelinLeftHand = true; //test
