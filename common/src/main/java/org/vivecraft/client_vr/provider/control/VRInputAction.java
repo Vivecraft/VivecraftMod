@@ -1,13 +1,12 @@
-package org.vivecraft.client_vr.provider.openvr_lwjgl;
+package org.vivecraft.client_vr.provider.control;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HandedKeyBinding;
 import org.vivecraft.client_vr.provider.InputSimulator;
-import org.vivecraft.client_vr.provider.MCVR;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.common.utils.math.Vector2;
 import org.vivecraft.common.utils.math.Vector3;
 
@@ -219,17 +218,17 @@ public class VRInputAction {
     public boolean isEnabled() {
         if (!this.isEnabledRaw(this.currentHand)) {
             return false;
-        } else if (MCOpenVR.get() == null) {
+        } else if (ClientDataHolderVR.getInstance().vr == null) {
             return false;
         } else {
             long i = this.getLastOrigin();
-            ControllerType controllertype = MCOpenVR.get().getOriginControllerType(i);
+            ControllerType controllertype = ClientDataHolderVR.getInstance().vr.getOriginControllerType(i);
 
             if (controllertype == null && this.isHanded()) {
                 return false;
             } else {
-                for (VRInputAction vrinputaction : MCOpenVR.get().getInputActions()) {
-                    if (vrinputaction != this && vrinputaction.isEnabledRaw(controllertype) && vrinputaction.isActive() && vrinputaction.getPriority() > this.getPriority() && MCVR.get().getOrigins(vrinputaction).contains(i)) {
+                for (VRInputAction vrinputaction : ClientDataHolderVR.getInstance().vr.getInputActions()) {
+                    if (vrinputaction != this && vrinputaction.isEnabledRaw(controllertype) && vrinputaction.isActive() && vrinputaction.getPriority() > this.getPriority() && ClientDataHolderVR.getInstance().vr.getOrigins(vrinputaction).contains(i)) {
                         if (vrinputaction.isHanded()) {
                             return !((HandedKeyBinding) vrinputaction.keyBinding).isPriorityOnController(controllertype);
                         }

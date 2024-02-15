@@ -138,6 +138,7 @@ public class VRSettings {
 
     public enum VRProvider implements OptionEnum<VRProvider> {
         OPENVR,
+        OPENXR,
         NULLVR
     }
 
@@ -156,7 +157,7 @@ public class VRSettings {
     @SettingField
     public int version = UNKNOWN_VERSION;
 
-    @SettingField
+    @SettingField(VrOptions.STEREOPLUGIN)
     public VRProvider stereoProviderPluginID = VRProvider.OPENVR;
     public boolean storeDebugAim = false;
     @SettingField
@@ -1529,7 +1530,7 @@ public class VRSettings {
             @Override
             String getDisplayString(String prefix, Object value) {
                 if (VRState.vrEnabled) {
-                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
+                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.getLeftEyeTarget();
                     return prefix + Math.round((float) value * 100) + "% (" + (int) Math.ceil(eye0.viewWidth * Math.sqrt((float) value)) + "x" + (int) Math.ceil(eye0.viewHeight * Math.sqrt((float) value)) + ")";
                 } else {
                     return prefix + Math.round((float) value * 100) + "%";
@@ -1718,7 +1719,16 @@ public class VRSettings {
             }
         },
         INGAME_BINDINGS_IN_GUI(false, true),
-        RIGHT_CLICK_DELAY(false, false); // Right Click Repeat
+        RIGHT_CLICK_DELAY(false, false), // Right Click Repeat
+        STEREOPLUGIN(false, true) {
+            @Override
+            void onOptionChange() {
+                if (VRState.vrRunning) {
+                    VRState.destroyVR(false);
+                    VRState.vrEnabled = true;
+                }
+            }
+        };
 //        ANISOTROPIC_FILTERING("options.anisotropicFiltering", true, false, 1.0F, 16.0F, 0.0F)
 //                {
 //                    private static final String __OBFID = "CL_00000654";

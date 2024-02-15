@@ -1,5 +1,6 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -14,7 +15,8 @@ import org.lwjgl.openvr.VR;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.client.utils.Utils;
-import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.RenderPass;
@@ -26,10 +28,14 @@ import static org.lwjgl.openvr.VRSystem.*;
 public class OpenVRStereoRenderer extends VRRenderer {
     private final HiddenAreaMesh[] hiddenMeshes = new HiddenAreaMesh[2];
     private final MCOpenVR openvr;
+    protected int LeftEyeTextureId = -1;
+    protected int RightEyeTextureId = -1;
+    public RenderTarget framebufferEye0;
+    public RenderTarget framebufferEye1;
 
-    public OpenVRStereoRenderer(MCVR vr) {
+    public OpenVRStereoRenderer(MCOpenVR vr) {
         super(vr);
-        this.openvr = (MCOpenVR) vr;
+        this.openvr = vr;
         hiddenMeshes[0] = HiddenAreaMesh.calloc();
         hiddenMeshes[1] = HiddenAreaMesh.calloc();
     }
@@ -85,7 +91,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
         return "";
     }
 
-    public void createRenderTexture(int lwidth, int lheight) {
+    public void createRenderTexture(int lwidth, int lheight) throws RenderConfigException {
         this.LeftEyeTextureId = GlStateManager._genTexture();
         int i = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
         RenderSystem.bindTexture(this.LeftEyeTextureId);
@@ -107,6 +113,25 @@ public class OpenVRStereoRenderer extends VRRenderer {
         this.openvr.texType1.handle(this.RightEyeTextureId);
         this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
         this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
+
+        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        if (this.LeftEyeTextureId == -1) {
+            throw new RenderConfigException("Failed to initialise stereo rendering plugin: " + this.getName(), Component.literal(this.getLastError()));
+        }
+
+        this.checkGLError("Render Texture setup");
+
+        if (this.framebufferEye0 == null) {
+            this.framebufferEye0 = new VRTextureTarget("L Eye", lwidth, lheight, false, false, this.LeftEyeTextureId, false, true, false);
+            dataholder.print(this.framebufferEye0.toString());
+            this.checkGLError("Left Eye framebuffer setup");
+        }
+
+        if (this.framebufferEye1 == null) {
+            this.framebufferEye1 = new VRTextureTarget("R Eye", lwidth, lheight, false, false, this.RightEyeTextureId, false, true, false);
+            dataholder.print(this.framebufferEye1.toString());
+            this.checkGLError("Right Eye framebuffer setup");
+        }
     }
 
     public boolean endFrame(RenderPass eye) {
@@ -169,6 +194,16 @@ public class OpenVRStereoRenderer extends VRRenderer {
         return true;
     }
 
+    @Override
+    public RenderTarget getLeftEyeTarget() {
+        return framebufferEye0;
+    }
+
+    @Override
+    public RenderTarget getRightEyeTarget() {
+        return framebufferEye1;
+    }
+
     public float[] getStencilMask(RenderPass eye) {
         if (this.hiddenMesheVertecies != null && (eye == RenderPass.LEFT || eye == RenderPass.RIGHT)) {
             return eye == RenderPass.LEFT ? this.hiddenMesheVertecies[0] : this.hiddenMesheVertecies[1];
@@ -192,6 +227,15 @@ public class OpenVRStereoRenderer extends VRRenderer {
     @Override
     public void destroy() {
         super.destroy();
+        if (this.framebufferEye0 != null) {
+            this.framebufferEye0.destroyBuffers();
+            this.framebufferEye0 = null;
+        }
+
+        if (this.framebufferEye1 != null) {
+            this.framebufferEye1.destroyBuffers();
+            this.framebufferEye1 = null;
+        }
         if (this.LeftEyeTextureId > -1) {
             TextureUtil.releaseTextureId(this.LeftEyeTextureId);
             this.LeftEyeTextureId = -1;

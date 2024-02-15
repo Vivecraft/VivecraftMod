@@ -31,6 +31,11 @@ subprojects {
         implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
         implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
         implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
+
+        implementation("org.lwjgl:lwjgl-openxr:3.3.1")
+        implementation("org.lwjgl:lwjgl-openxr:3.3.1:natives-linux")
+        //implementation("org.lwjgl:lwjgl-openxr:3.3.1:natives-macos")
+        implementation("org.lwjgl:lwjgl-openxr:3.3.1:natives-windows")
     }
 
     tasks.withType(JavaCompile) {
