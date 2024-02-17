@@ -156,7 +156,7 @@ public class VRSettings {
     @SettingField
     public int version = UNKNOWN_VERSION;
 
-    @SettingField
+    @SettingField(VrOptions.VR_PLUGIN)
     public VRProvider stereoProviderPluginID = VRProvider.OPENVR;
     public boolean storeDebugAim = false;
     @SettingField
@@ -440,15 +440,17 @@ public class VRSettings {
     public boolean showServerPluginMissingMessageAlways = true;
     @SettingField(VrOptions.CHAT_MESSAGE_STENCIL)
     public boolean showChatMessageStencil = true;
-    @SettingField
+    @SettingField(value = VrOptions.VR_ENABLED, config = "vrEnabled")
     public boolean vrEnabled = false;
+    @SettingField(VrOptions.VR_REMEMBER_ENABLED)
+    public boolean rememberVr = true;
     @SettingField(VrOptions.VR_HOTSWITCH)
     public boolean vrHotswitchingEnabled = true;
-    @SettingField
+    @SettingField(value = VrOptions.VR_TOGGLE_BUTTON_VISIBLE, config = "vrToggleButtonEnabled")
     public boolean vrToggleButtonEnabled = true;
-    @SettingField
+    @SettingField(value = VrOptions.VR_SETTINGS_BUTTON_VISIBLE, config = "vrSettingsButtonEnabled")
     public boolean vrSettingsButtonEnabled = true;
-    @SettingField
+    @SettingField(value = VrOptions.VR_SETTINGS_BUTTON_POSITION, config = "vrSettingsButtonPositionLeft")
     public boolean vrSettingsButtonPositionLeft = true;
     @SettingField
     public boolean disableGarbageCollectorMessage = false;
@@ -889,11 +891,19 @@ public class VRSettings {
     }
 
     public String getButtonDisplayString(VrOptions par1EnumOptions) {
+        return getButtonDisplayString(par1EnumOptions, false);
+    }
+
+    public String getButtonDisplayString(VrOptions par1EnumOptions, boolean valueOnly) {
         String var2 = I18n.get("vivecraft.options." + par1EnumOptions.name());
 
         String var3 = var2 + ": ";
         String var4 = var3;
         String var5;
+
+        if (valueOnly) {
+            var4 = "";
+        }
 
         try {
             var mapping = fieldEnumMap.get(par1EnumOptions);
@@ -1036,6 +1046,14 @@ public class VRSettings {
 
     public enum VrOptions {
         DUMMY(false, true), // Dummy
+        VR_PLUGIN(false, true), // vr plugin to use
+        VR_ENABLED(false, true) { // vr or nonvr
+            @Override
+            void onOptionChange() {
+                VRState.vrEnabled = ClientDataHolderVR.getInstance().vrSettings.vrEnabled;
+            }
+        },
+        VR_REMEMBER_ENABLED(false, true), // restore vr state on startup
         HUD_SCALE(true, false, 0.35f, 2.5f, 0.01f, -1), // Head HUD Size
         HUD_DISTANCE(true, false, 0.25f, 5.0f, 0.01f, 2) { // Head HUD Distance
 
@@ -1203,6 +1221,9 @@ public class VRSettings {
             }
         },
         HUD_MAX_GUI_SCALE(false, true), // force HUD to render with max GUI scale
+        VR_TOGGLE_BUTTON_VISIBLE(false, true), // toggle in main menu
+        VR_SETTINGS_BUTTON_VISIBLE(false, true), // setting button in options
+        VR_SETTINGS_BUTTON_POSITION(false, true, "vivecraft.options.left", "vivecraft.options.right"), // setting button position
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
         LOW_HEALTH_INDICATOR(false, true), // red low health pulse

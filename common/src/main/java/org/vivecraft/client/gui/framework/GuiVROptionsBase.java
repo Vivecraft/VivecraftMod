@@ -265,7 +265,7 @@ public abstract class GuiVROptionsBase extends Screen {
                 }
                 return true;
             } else {
-            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers);
+                return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers);
             }
         }
     }

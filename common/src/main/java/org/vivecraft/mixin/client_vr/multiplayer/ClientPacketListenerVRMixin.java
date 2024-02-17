@@ -9,7 +9,6 @@ import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
