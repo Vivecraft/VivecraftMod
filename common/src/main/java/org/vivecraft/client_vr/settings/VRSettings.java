@@ -110,6 +110,12 @@ public class VRSettings {
         AUTO // only for flying
     }
 
+    public enum RealisticJump implements OptionEnum<RealisticJump> {
+        OFF,
+        ON,
+        AUTO
+    }
+
     public enum MenuWorld implements OptionEnum<MenuWorld> {
         BOTH,
         CUSTOM,
@@ -251,7 +257,7 @@ public class VRSettings {
     @SettingField
     public float crawlThreshold = 0.82f;
     @SettingField(VrOptions.REALISTIC_JUMP)
-    public boolean realisticJumpEnabled = true;
+    public RealisticJump realisticJumpEnabled = RealisticJump.AUTO;
     @SettingField(VrOptions.REALISTIC_SNEAK)
     public boolean realisticSneakEnabled = true;
     @SettingField(VrOptions.REALISTIC_CLIMB)
