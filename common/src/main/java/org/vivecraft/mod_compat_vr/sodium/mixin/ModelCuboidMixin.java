@@ -1,7 +1,8 @@
 package org.vivecraft.mod_compat_vr.sodium.mixin;
 
 import me.jellysquid.mods.sodium.client.render.immediate.model.ModelCuboid;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.vivecraft.mod_compat_vr.sodium.extensions.ModelCuboidExtension;
 
 @Mixin(ModelCuboid.class)
