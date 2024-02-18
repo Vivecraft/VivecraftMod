@@ -16,7 +16,7 @@ public class UpdateScreen extends Screen {
     private final Screen lastScreen;
 
     public UpdateScreen() {
-        super(Component.literal("New Update Available"));
+        super(Component.translatable("vivecraft.messages.updateTitle"));
         lastScreen = Minecraft.getInstance().screen;
     }
 
@@ -24,13 +24,13 @@ public class UpdateScreen extends Screen {
 
         this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, UpdateChecker.changelog));
 
-        this.addRenderableWidget(new Button.Builder(Component.literal("Download from Modrinth"),
+        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.downloadfrom", Component.literal("Modrinth")),
             ConfirmLinkScreen.confirmLink("https://modrinth.com/mod/vivecraft", this, true))
             .pos(this.width / 2 - 155, this.height - 56)
             .size(150, 20)
             .build());
 
-        this.addRenderableWidget(new Button.Builder(Component.literal("Download from Curseforge"),
+        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.downloadfrom", Component.literal("CurseForge")),
             ConfirmLinkScreen.confirmLink("https://www.curseforge.com/minecraft/mc-mods/vivecraft", this, true))
             .pos(this.width / 2 + 5, this.height - 56)
             .size(150, 20)

@@ -14,6 +14,8 @@ import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -98,6 +100,10 @@ public class XplatImpl {
 
     public static BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return biome.getSpecialEffects();
+    }
+
+    public static double getItemEntityReach(double baseRange, ItemStack itemStack, EquipmentSlot slot) {
+        return baseRange;
     }
 
     public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {

@@ -14,8 +14,12 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
+import org.vivecraft.client.gui.framework.GuiVROptionSlider;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.server.config.ConfigBuilder;
 
 import java.util.Collections;
@@ -51,6 +55,56 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
     public static BaseEntry ConfigToEntry(ConfigBuilder.ConfigValue<?> configValue, Component name) {
         AbstractWidget widget = configValue.getWidget(ResettableEntry.valueButtonWidth, 20).get();
         return new ResettableEntry(name, widget, configValue);
+    }
+
+    public static BaseEntry vrOptionToEntry(VRSettings.VrOptions option) {
+        ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
+        String optionString = "vivecraft.options." + option.name();
+        String tooltipString = optionString + ".tooltip";
+        Tooltip tooltip;
+        // check if it has a tooltip
+        if (I18n.exists(tooltipString)) {
+            String tooltipPrefix = "";
+            if (dh.vrSettings.overrides.hasSetting(option)) {
+                // add override prefix
+                VRSettings.ServerOverrides.Setting setting = dh.vrSettings.overrides.getSetting(option);
+                if (setting.isValueOverridden()) {
+                    tooltipPrefix = I18n.get("vivecraft.message.overriddenbyserver");
+                } else if (setting.isFloat() && (setting.isValueMinOverridden() || setting.isValueMaxOverridden())) {
+                    tooltipPrefix = I18n.get("vivecraft.message.limitedbyserver", setting.getValueMin(), setting.getValueMax());
+                }
+            }
+            tooltip = Tooltip.create(Component.literal(tooltipPrefix + I18n.get(tooltipString, (Object) null)));
+        } else {
+            tooltip = null;
+        }
+
+        AbstractWidget widget;
+
+        if (option.getEnumFloat()) {
+            // slider button
+            widget = new GuiVROptionSlider(option.returnEnumOrdinal(),
+                0, 0,
+                WidgetEntry.valueButtonWidth, 20,
+                option, true);
+            widget.setTooltip(tooltip);
+        } else {
+            // regular button
+            widget = Button.builder(Component.literal(dh.vrSettings.getButtonDisplayString(option, true))
+                    , button -> {
+                        dh.vrSettings.setOptionValue(option);
+                        button.setMessage(Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
+                    })
+                .size(WidgetEntry.valueButtonWidth, 20)
+                .tooltip(tooltip)
+                .build();
+        }
+
+        BaseEntry entry = new WidgetEntry(Component.translatable(optionString), widget);
+        if (dh.vrSettings.overrides.hasSetting(option) && dh.vrSettings.overrides.getSetting(option).isValueOverridden()) {
+            entry.setActive(false);
+        }
+        return entry;
     }
 
     public static class CategoryEntry extends BaseEntry {
@@ -129,6 +183,12 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         public List<? extends NarratableEntry> narratables() {
             return ImmutableList.of(this.valueWidget, this.resetButton);
         }
+
+        @Override
+        public void setActive(boolean active) {
+            super.setActive(active);
+            this.resetButton.active = active;
+        }
     }
 
     public static class WidgetEntry extends BaseEntry {
@@ -158,14 +218,30 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         public List<? extends NarratableEntry> narratables() {
             return ImmutableList.of(this.valueWidget);
         }
+
+        @Override
+        public void setActive(boolean active) {
+            super.setActive(active);
+            this.valueWidget.active = active;
+        }
     }
 
     public static abstract class BaseEntry extends Entry<BaseEntry> {
 
         protected final Component name;
+        private boolean active = true;
 
         public BaseEntry(Component name) {
             this.name = name;
+        }
+
+
+        public boolean isActive() {
+            return active;
+        }
+
+        public void setActive(boolean active) {
+            this.active = active;
         }
     }
 }

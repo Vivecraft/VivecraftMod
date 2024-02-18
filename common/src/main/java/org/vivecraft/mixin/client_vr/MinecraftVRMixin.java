@@ -254,16 +254,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         "lambda$new$6"} // forge
         , remap = false)
     public void vivecraft$initVROnLaunch(CallbackInfo ci) {
-        // init vr after resource loading
-        try {
-            if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled) {
-                VRState.vrEnabled = true;
-                VRState.initializeVR();
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
         // set initial resourcepacks
         vivecraft$resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
 
@@ -690,6 +680,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         VRPlayersClient.getInstance().tick();
 
+        this.profiler.popPush("Vivecraft Keybindings");
+        vivecraft$processAlwaysAvailableKeybindings();
+
+        this.profiler.pop();
+    }
+
+    @Unique
+    private void vivecraft$processAlwaysAvailableKeybindings() {
+        // menuworld export
         if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && level != null && player != null) {
             Throwable error = null;
             try {
@@ -744,7 +743,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
         }
 
-        this.profiler.pop();
+        // quick commands
+        for (int i = 0; i < VivecraftVRMod.INSTANCE.keyQuickCommands.length; i++) {
+            if (VivecraftVRMod.INSTANCE.keyQuickCommands[i].consumeClick()) {
+                String command = ClientDataHolderVR.getInstance().vrSettings.vrQuickCommands[i];
+                if (command.startsWith("/")) {
+                    this.player.connection.sendCommand(command.substring(1));
+                } else {
+                    this.player.connection.sendChat(command);
+                }
+            }
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "tick")
@@ -920,6 +929,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             Minecraft.getInstance().getSoundManager().reload();
         }
         resizeDisplay();
+        window.updateVsync(options.enableVsync().get());
     }
 
     @Unique
@@ -989,8 +999,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     source = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1;
                 }
 
-                xcrop = 0.15F;
-                ycrop = 0.15F;
+                xcrop = ClientDataHolderVR.getInstance().vrSettings.mirrorCrop;
+                ycrop = ClientDataHolderVR.getInstance().vrSettings.mirrorCrop;
                 ar = true;
             }
             // Debug

@@ -150,8 +150,7 @@ public abstract class GuiVRMixin implements GuiExtension {
         }
     }
 
-    // do remap because of forge
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V"), method = "renderHotbar")
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V", remap = false), method = "renderHotbar")
     public void vivecraft$renderVive(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
         if (VRState.vrRunning) {
             this.vivecraft$renderViveHudIcons(guiGraphics);

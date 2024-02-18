@@ -9,12 +9,16 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.DiscardedPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -82,6 +86,27 @@ public class XplatImpl {
 
     public static BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return biome.getModifiedSpecialEffects();
+    }
+
+    public static double getItemEntityReach(double baseRange, ItemStack itemStack, EquipmentSlot slot) {
+        var attributes = itemStack.getAttributeModifiers(slot).get(ForgeMod.ENTITY_REACH.get());
+        for (var a : attributes) {
+            if (a.getOperation() == AttributeModifier.Operation.ADDITION) {
+                baseRange += a.getAmount();
+            }
+        }
+        double totalRange = baseRange;
+        for (var a : attributes) {
+            if (a.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE) {
+                totalRange += baseRange * a.getAmount();
+            }
+        }
+        for (var a : attributes) {
+            if (a.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL) {
+                totalRange *= 1.0 + a.getAmount();
+            }
+        }
+        return totalRange;
     }
 
     public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {

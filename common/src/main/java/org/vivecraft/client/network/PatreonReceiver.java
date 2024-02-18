@@ -30,7 +30,7 @@ public class PatreonReceiver {
                         try {
                             String[] astring1 = s1.split(":");
                             int i = Integer.parseInt(astring1[1]);
-                            hashmap.put(astring1[0], i);
+                            hashmap.put(astring1[0].toLowerCase(), i);
 
                             for (Player player : queuedPlayers) {
                                 if (astring1[0].equalsIgnoreCase(player.getGameProfile().getName())) {
@@ -64,7 +64,7 @@ public class PatreonReceiver {
 
                     if (!downloadStarted) {
                         downloadStarted = true;
-                        String s = "http://www.vivecraft.org/patreon/current.txt";
+                        String s = "https://www.vivecraft.org/patreon/current.txt";
                         new Thread(() -> {
                             try {
                                 String value = IOUtils.toString(new URL(s), StandardCharsets.UTF_8);
@@ -75,7 +75,7 @@ public class PatreonReceiver {
                         }).start();
                     }
                 } else {
-                    VRPlayersClient.getInstance().setHMD(p.getUUID(), cache.getOrDefault(p.getGameProfile().getName(), 0));
+                    VRPlayersClient.getInstance().setHMD(p.getUUID(), cache.getOrDefault(p.getGameProfile().getName().toLowerCase(), 0));
                 }
             }
         }

@@ -16,7 +16,9 @@
     "item": "vivecraft:jumpboots",
     "vanillaitem": "minecraft:leather_boots",
     "name": "vivecraft.item.jumpboots",
+    "fallbackname": "Jump Boots",
     "hideflags": 4,
-    "unbreakable": true
+    "unbreakable": true,
+    "color": 9233775
   }
 }
