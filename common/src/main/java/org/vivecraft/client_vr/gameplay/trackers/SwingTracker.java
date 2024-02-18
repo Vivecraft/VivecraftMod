@@ -24,6 +24,7 @@ import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.Vec3History;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.mod_compat_vr.epicfight.EpicFightHelper;
 
 import java.util.List;
 
@@ -168,12 +169,18 @@ public class SwingTracker extends Tracker {
                     if (entity.isPickable() && entity != this.mc.getCameraEntity().getVehicle()) {
                         if (flag3) {
                             //Minecraft.getInstance().physicalGuiManager.preClickAction();
-                            this.mc.gameMode.attack(player, entity);
+                            if (!EpicFightHelper.isLoaded() || !EpicFightHelper.attack()) {
+                                // only attack if epic fight didn't trigger
+                                this.mc.gameMode.attack(player, entity);
+                            } else {
+                                // only attack once with epic fight
+                                flag3 = false;
+                            }
                             this.dh.vr.triggerHapticPulse(i, 1000);
                             this.lastWeaponSolid[i] = true;
                         }
 
-                        flag2 = true;
+                            flag2 = true;
                     }
                 }
 
