@@ -154,7 +154,7 @@ public class VRPlayersClient {
 
                         if (particle != null) {
                             particle.setColor(0.5F + this.rand.nextFloat() / 2.0F, 0.5F + this.rand.nextFloat() / 2.0F, 0.5F + this.rand.nextFloat() / 2.0F);
-                            ((SparkParticleExtension)particle).vivecraft$setPlayerUUID(player.getUUID());
+                            ((SparkParticleExtension) particle).vivecraft$setPlayerUUID(player.getUUID());
                         }
                     }
                 }

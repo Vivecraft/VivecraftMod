@@ -1056,6 +1056,7 @@ public class VRSettings {
         DUMMY(false, true), // Dummy
         VR_PLUGIN(false, true), // vr plugin to use
         VR_ENABLED(false, true) { // vr or nonvr
+
             @Override
             void onOptionChange() {
                 VRState.vrEnabled = ClientDataHolderVR.getInstance().vrSettings.vrEnabled;
