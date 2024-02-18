@@ -3,7 +3,6 @@ package org.vivecraft.client.gui.widgets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -30,7 +29,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, String text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedChars = ComponentRenderUtils.wrapComponents(Component.literal(text), width - scrollBarWidth * 2, Minecraft.getInstance().font);
+        formattedChars = Minecraft.getInstance().font.split(Component.literal(text), width - scrollBarWidth * 2);
 
         initScroll();
     }
@@ -38,7 +37,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedChars = ComponentRenderUtils.wrapComponents(text, width - scrollBarWidth * 2, Minecraft.getInstance().font);
+        formattedChars = Minecraft.getInstance().font.split(text, width - scrollBarWidth * 2);
         initScroll();
     }
 

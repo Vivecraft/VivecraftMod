@@ -858,6 +858,26 @@ public class MCOpenVR extends MCVR {
         System.out.println("OpenVR Compositor initialized OK.");
     }
 
+    private void checkPathValid(String path, String knownError, boolean alwaysThrow) throws RenderConfigException {
+        String pathFormatted = "";
+        boolean hasInvalidChars = false;
+        for (char c : path.toCharArray()) {
+            if (c > 127) {
+                hasInvalidChars = true;
+                pathFormatted += "§c" + c + "§r";
+            } else {
+                pathFormatted += c;
+            }
+        }
+
+        if (hasInvalidChars || alwaysThrow) {
+            String error = knownError + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
+            System.out.println(error + path);
+            throw new RenderConfigException(knownError, Component.empty().append(error).append(pathFormatted));
+        }
+    }
+
+
     private void installApplicationManifest(boolean force) throws RenderConfigException {
         File file1 = new File("openvr/vivecraft.vrmanifest");
         Utils.loadAssetToFile("vivecraft.vrmanifest", file1, true);
@@ -881,6 +901,9 @@ public class MCOpenVR extends MCVR {
 
             System.out.println("Appkey: " + s);
 
+            // check if path is valid always, since if the application was already installed, it will not check it again
+            checkPathValid(file1.getAbsolutePath(), "Failed to install application manifest", false);
+
             if (!force && VRApplications_IsApplicationInstalled(s)) {
                 System.out.println("Application manifest already installed");
             } else {
@@ -888,21 +911,7 @@ public class MCOpenVR extends MCVR {
 
                 if (i != 0) {
                     // application needs to be installed, so abort
-                    String pathFormatted = "";
-                    boolean hasInvalidChars = false;
-                    for (char c : file1.getAbsolutePath().toCharArray()) {
-                        if (c > 127) {
-                            hasInvalidChars = true;
-                            pathFormatted += "§c" + c + "§r";
-                        } else {
-                            pathFormatted += c;
-                        }
-                    }
-
-                    String error = VRApplications_GetApplicationsErrorNameFromEnum(i) + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
-                    System.out.println("Failed to install application manifest: " + error + file1.getAbsolutePath());
-
-                    throw new RenderConfigException("Failed to install application manifest", Component.empty().append(error).append(pathFormatted));
+                    checkPathValid(file1.getAbsolutePath(), "Failed to install application manifest: " + VRApplications_GetApplicationsErrorNameFromEnum(i), true);
                 }
 
                 System.out.println("Application manifest installed successfully");
@@ -964,11 +973,14 @@ public class MCOpenVR extends MCVR {
         }
     }
 
-    private void loadActionManifest() {
-        int i = VRInput_SetActionManifestPath((new File("openvr/input/action_manifest.json")).getAbsolutePath());
+    private void loadActionManifest() throws RenderConfigException {
+        String actionsPath = (new File("openvr/input/action_manifest.json")).getAbsolutePath();
+        // check if path is valid for steamvr, since it would just silently fail
+        checkPathValid(actionsPath, "Failed to install action manifest", false);
+        int i = VRInput_SetActionManifestPath(actionsPath);
 
         if (i != 0) {
-            throw new RuntimeException("Failed to load action manifest: " + getInputErrorName(i));
+            throw new RenderConfigException("Failed to load action manifest", Component.literal(getInputErrorName(i)));
         }
     }
 

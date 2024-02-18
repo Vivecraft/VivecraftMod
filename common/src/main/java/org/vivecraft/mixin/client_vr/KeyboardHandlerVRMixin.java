@@ -35,7 +35,9 @@ public class KeyboardHandlerVRMixin {
     public void vivecraft$screenHandler(long l, int i, int j, int k, int m, CallbackInfo ci) {
         if (i == 256 && k == 1) {
             if (org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.Showing) {
-                org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.setOverlayShowing(false);
+                if (ClientDataHolderVR.getInstance().vrSettings.autoCloseKeyboard) {
+                    org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.setOverlayShowing(false);
+                }
                 if (this.minecraft.screen instanceof ChatScreen) {
                     minecraft.screen.onClose();
                 }

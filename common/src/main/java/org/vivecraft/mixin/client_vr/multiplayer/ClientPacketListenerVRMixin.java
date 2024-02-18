@@ -9,7 +9,6 @@ import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
@@ -65,17 +64,16 @@ public class ClientPacketListenerVRMixin {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "onDisconnect")
-    public void vivecraft$disconnect(Component component, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "close")
+    public void vivecraft$cleanup(CallbackInfo ci) {
         VRServerPerms.INSTANCE.setTeleportSupported(false);
         if (VRState.vrInitialized) {
             ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
         }
         ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
-    }
-
-    @Inject(at = @At("TAIL"), method = "close")
-    public void vivecraft$cleanup(CallbackInfo ci) {
+        ClientNetworking.resetServerSettings();
+        ClientNetworking.displayedChatMessage = false;
+        ClientNetworking.displayedChatWarning = false;
         ClientNetworking.needsReset = true;
     }
 

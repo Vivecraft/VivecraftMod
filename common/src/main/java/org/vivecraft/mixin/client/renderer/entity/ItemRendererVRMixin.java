@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
 @Mixin(ItemRenderer.class)
@@ -20,8 +22,14 @@ public class ItemRendererVRMixin {
     private ItemModelShaper itemModelShaper;
 
     @ModifyVariable(at = @At(value = "STORE"), method = "getModel")
-    public BakedModel vivecraft$spyglassOverride(BakedModel bakedModel, ItemStack itemStack) {
-        return itemStack.is(Items.SPYGLASS) ? itemModelShaper.getModelManager().getModel(TelescopeTracker.scopeModel) : bakedModel;
+    public BakedModel vivecraft$modelOverride(BakedModel bakedModel, ItemStack itemStack) {
+        if (itemStack.is(Items.SPYGLASS)) {
+            return itemModelShaper.getModelManager().getModel(TelescopeTracker.scopeModel);
+        }
+        if (ClientDataHolderVR.getInstance().climbTracker.isClaws(itemStack)) {
+            return itemModelShaper.getModelManager().getModel(ClimbTracker.clawsModel);
+        }
+        return bakedModel;
     }
 
 // hand item fade
