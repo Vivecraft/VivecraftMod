@@ -30,7 +30,6 @@ public class GlStateManagerVRMixin {
      * @author
      * @reason
      */
-    // do remap because of forge
     @Overwrite(remap = false)
     public static void _blendFuncSeparate(int i, int j, int k, int l) {
         RenderSystem.assertOnRenderThread();

@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
@@ -114,8 +115,13 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
             boolean useLeftHandModelinLeftHand = false;
 
+            // swap hand for claws, since it's backwards else wise
+            if (dh.climbTracker.isClaws(pStack) && dh.vrSettings.reverseHands) {
+                mainHand = !mainHand;
+            }
+
             ItemDisplayContext itemDisplayContext;
-            if (dh.vrSettings.thirdPersonItems && !(BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer))) {
+            if ((ClientNetworking.isThirdPersonItems() && !(BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer))) || dh.climbTracker.isClaws(pStack)) {
                 useLeftHandModelinLeftHand = true; //test
                 VivecraftItemRendering.applyThirdPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
                 itemDisplayContext = mainHand ? ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);

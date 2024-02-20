@@ -39,6 +39,19 @@ public class VivecraftVRMod {
     public final KeyMapping keyMenuButton = new KeyMapping("vivecraft.key.ingameMenuButton", -1, "key.categories.ui");
     public final KeyMapping keyMoveThirdPersonCam = new KeyMapping("vivecraft.key.moveThirdPersonCam", -1, "key.categories.misc");
     public final KeyMapping keyQuickHandheldCam = new KeyMapping("vivecraft.key.quickHandheldCam", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand1 = new KeyMapping("vivecraft.key.quickcommand1", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand2 = new KeyMapping("vivecraft.key.quickcommand2", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand3 = new KeyMapping("vivecraft.key.quickcommand3", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand4 = new KeyMapping("vivecraft.key.quickcommand4", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand5 = new KeyMapping("vivecraft.key.quickcommand5", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand6 = new KeyMapping("vivecraft.key.quickcommand6", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand7 = new KeyMapping("vivecraft.key.quickcommand7", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand8 = new KeyMapping("vivecraft.key.quickcommand8", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand9 = new KeyMapping("vivecraft.key.quickcommand9", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand10 = new KeyMapping("vivecraft.key.quickcommand10", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand11 = new KeyMapping("vivecraft.key.quickcommand11", -1, "key.categories.misc");
+    public final KeyMapping keyQuickCommand12 = new KeyMapping("vivecraft.key.quickcommand12", -1, "key.categories.misc");
+    public final KeyMapping[] keyQuickCommands = new KeyMapping[]{keyQuickCommand1, keyQuickCommand2, keyQuickCommand3, keyQuickCommand4, keyQuickCommand5, keyQuickCommand6, keyQuickCommand7, keyQuickCommand8, keyQuickCommand9, keyQuickCommand10, keyQuickCommand11, keyQuickCommand12};
     public final KeyMapping keyQuickTorch = new KeyMapping("vivecraft.key.quickTorch", -1, "key.categories.gameplay");
     public final KeyMapping keyRadialMenu = new KeyMapping("vivecraft.key.radialMenu", -1, "key.categories.ui");
     public final KeyMapping keyRotateAxis = new KeyMapping("vivecraft.key.rotateAxis", -1, "key.categories.movement");
@@ -74,6 +87,19 @@ public class VivecraftVRMod {
             this.userKeyBindingSet.add(this.keyTogglePlayerList);
             this.userKeyBindingSet.add(this.keyToggleHandheldCam);
             this.userKeyBindingSet.add(this.keyQuickHandheldCam);
+            this.userKeyBindingSet.add(this.keyToggleKeyboard);
+            this.userKeyBindingSet.add(this.keyQuickCommand1);
+            this.userKeyBindingSet.add(this.keyQuickCommand2);
+            this.userKeyBindingSet.add(this.keyQuickCommand3);
+            this.userKeyBindingSet.add(this.keyQuickCommand4);
+            this.userKeyBindingSet.add(this.keyQuickCommand5);
+            this.userKeyBindingSet.add(this.keyQuickCommand6);
+            this.userKeyBindingSet.add(this.keyQuickCommand7);
+            this.userKeyBindingSet.add(this.keyQuickCommand8);
+            this.userKeyBindingSet.add(this.keyQuickCommand9);
+            this.userKeyBindingSet.add(this.keyQuickCommand10);
+            this.userKeyBindingSet.add(this.keyQuickCommand11);
+            this.userKeyBindingSet.add(this.keyQuickCommand12);
 
             this.hiddenKeyBindingSet.add(GuiHandler.keyLeftClick);
             this.hiddenKeyBindingSet.add(GuiHandler.keyRightClick);
@@ -90,7 +116,6 @@ public class VivecraftVRMod {
             this.hiddenKeyBindingSet.add(this.keyClimbeyJump);
             this.hiddenKeyBindingSet.add(this.keyMenuButton);
             this.hiddenKeyBindingSet.add(this.keyRadialMenu);
-            this.hiddenKeyBindingSet.add(this.keyToggleKeyboard);
             this.hiddenKeyBindingSet.add(this.keyHotbarSwipeX);
             this.hiddenKeyBindingSet.add(this.keyHotbarSwipeY);
             this.hiddenKeyBindingSet.add(this.keyTrackpadTouch);

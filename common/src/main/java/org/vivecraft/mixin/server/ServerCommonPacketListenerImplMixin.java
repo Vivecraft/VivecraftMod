@@ -30,7 +30,7 @@ public abstract class ServerCommonPacketListenerImplMixin {
      * on neoforge those are handled in {@link org.vivecraft.neoforge.event.ServerEvents#handleVivePacket}
      * if connected to spigot they are still handled here
      */
-    @Inject(at = @At("TAIL"), method = "handleCustomPayload")
+    @Inject(at = @At("HEAD"), method = "handleCustomPayload", cancellable = true)
     public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket payloadPacket, CallbackInfo ci) {
         if (payloadPacket.payload() instanceof VivecraftDataPacket dataPacket
             && (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener) {
@@ -42,6 +42,7 @@ public abstract class ServerCommonPacketListenerImplMixin {
             if (dataPacket.packetid() == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
                 gamePacketListener.aboveGroundTickCount = 0;
             }
+            ci.cancel();
         }
     }
 }

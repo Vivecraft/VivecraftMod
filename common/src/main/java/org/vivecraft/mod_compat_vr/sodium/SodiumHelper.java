@@ -14,7 +14,7 @@ import java.lang.reflect.Field;
 public class SodiumHelper {
 
     public static boolean isLoaded() {
-        return Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium");
+        return Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium") || Xplat.isModLoaded("embeddium");
     }
 
     public static boolean hasIssuesWithParallelBlockBuilding() {

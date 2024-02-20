@@ -112,7 +112,10 @@ public class ServerNetworking {
                     byteBuf.writeUtf("teleportLimitHoriz");
                     byteBuf.writeUtf("" + ServerConfig.teleportHorizontalLimit.get());
 
-                    packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, byteBuf.readByteArray()));
+                    byte[] array = new byte[byteBuf.readableBytes()];
+                    byteBuf.readBytes(array);
+                    byteBuf.release();
+                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
                 }
 
                 if (ServerConfig.worldscaleLimited.get()) {
@@ -123,7 +126,21 @@ public class ServerNetworking {
                     byteBuf.writeUtf("worldScale.max");
                     byteBuf.writeUtf("" + ServerConfig.worldscaleMax.get());
 
-                    packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, byteBuf.readByteArray()));
+                    byte[] array = new byte[byteBuf.readableBytes()];
+                    byteBuf.readBytes(array);
+                    byteBuf.release();
+                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
+                }
+
+                if (ServerConfig.forceThirdPersonItems.get()) {
+                    FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
+                    byteBuf.writeUtf("thirdPersonItems");
+                    byteBuf.writeUtf("" + true);
+
+                    byte[] array = new byte[byteBuf.readableBytes()];
+                    byteBuf.readBytes(array);
+                    byteBuf.release();
+                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
                 }
 
                 if (ServerConfig.crawlingEnabled.get()) {

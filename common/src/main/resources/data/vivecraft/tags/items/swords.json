@@ -26,6 +26,8 @@
     {
       "id": "tconstruct:cleaver",
       "required": false
-    }
+    },
+
+    "#vivecraft:moditems/mvw_weapons"
   ]
 }

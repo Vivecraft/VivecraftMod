@@ -93,7 +93,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     @Redirect(method = "addGbufferOrShadowSamplers", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0, slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/coderbot/iris/samplers/IrisSamplers;hasShadowSamplers(Lnet/coderbot/iris/gl/sampler/SamplerHolder;)Z")))
     private Object vivecraft$rerouteShadowTarget(Object obj) {
         if (!RenderPassType.isVanilla()) {
-            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(),  obj));
+            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj));
         } else {
             return Objects.requireNonNull(obj);
         }
@@ -109,7 +109,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0)
     private Object vivecraft$rerouteShadowTarget131(Object obj) {
         if (!RenderPassType.isVanilla()) {
-            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(),  obj));
+            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj));
         } else {
             return Objects.requireNonNull(obj);
         }
@@ -125,7 +125,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0)
     private Object vivecraft$rerouteShadowTarget140(Object obj) {
         if (!RenderPassType.isVanilla()) {
-            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(),  obj));
+            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj));
         } else {
             return Objects.requireNonNull(obj);
         }
@@ -141,7 +141,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0)
     private Object rvivecraft$erouteShadowTarget150(Object obj) {
         if (!RenderPassType.isVanilla()) {
-            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(),  obj));
+            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj));
         } else {
             return Objects.requireNonNull(obj);
         }
@@ -157,7 +157,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0)
     private Object vivecraft$rerouteShadowTarget160(Object obj) {
         if (!RenderPassType.isVanilla()) {
-            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(),  obj));
+            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj));
         } else {
             return Objects.requireNonNull(obj);
         }

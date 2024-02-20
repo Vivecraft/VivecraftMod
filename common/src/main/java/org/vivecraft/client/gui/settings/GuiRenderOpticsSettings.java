@@ -44,6 +44,9 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.MIXED_REALITY_FOV,
         VRSettings.VrOptions.MIXED_REALITY_RENDER_CAMERA_MODEL
     };
+    static VRSettings.VrOptions[] CROPOptions = new VRSettings.VrOptions[]{
+        VRSettings.VrOptions.MIRROR_CROP
+    };
     private float prevRenderScaleFactor = this.settings.renderScaleFactor;
     private float prevHandCameraResScale = this.settings.handCameraResScale;
 
@@ -104,6 +107,8 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
             super.init(UDOptions, false);
         } else if (this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
             super.init(TUDOptions, false);
+        } else if (this.dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.CROPPED) {
+            super.init(CROPOptions, false);
         }
 
         super.addDefaultButtons();
@@ -136,11 +141,13 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
     protected void actionPerformed(AbstractWidget widget) {
         if (widget instanceof GuiVROption guivroption) {
 
-            if (VRState.vrRunning && (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || guivroption.getId() == VRSettings.VrOptions.FSAA.ordinal() || guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal())) {
-                if (guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal() || (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() && ShadersHelper.isShaderActive())) {
-                    this.dataholder.vrRenderer.resizeFrameBuffers("Render Setting Changed");
-                } else {
-                    this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
+            if (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() || VRState.vrRunning && (guivroption.getId() == VRSettings.VrOptions.FSAA.ordinal() || guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal())) {
+                if (VRState.vrRunning) {
+                    if (guivroption.getId() == VRSettings.VrOptions.STENCIL_ON.ordinal() || (guivroption.getId() == VRSettings.VrOptions.MIRROR_DISPLAY.ordinal() && ShadersHelper.isShaderActive())) {
+                        this.dataholder.vrRenderer.resizeFrameBuffers("Render Setting Changed");
+                    } else {
+                        this.dataholder.vrRenderer.reinitFrameBuffers("Render Setting Changed");
+                    }
                 }
                 this.reinit = true;
             }

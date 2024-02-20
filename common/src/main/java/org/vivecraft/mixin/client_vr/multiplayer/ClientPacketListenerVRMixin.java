@@ -27,6 +27,8 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.VRServerPerms;
+import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.packets.VivecraftDataPacket;
 
 @Mixin(ClientPacketListener.class)
@@ -65,6 +67,14 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
 
     @Inject(at = @At("TAIL"), method = "close")
     public void vivecraft$cleanup(CallbackInfo ci) {
+        VRServerPerms.INSTANCE.setTeleportSupported(false);
+        if (VRState.vrInitialized) {
+            ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
+        }
+        ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
+        ClientNetworking.resetServerSettings();
+        ClientNetworking.displayedChatMessage = false;
+        ClientNetworking.displayedChatWarning = false;
         ClientNetworking.needsReset = true;
     }
 
