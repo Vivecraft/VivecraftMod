@@ -26,6 +26,7 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.VRServerPerms;
+import org.vivecraft.common.network.BufferSerializable;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packets.VivecraftDataPacket;
@@ -53,17 +54,11 @@ public class ClientNetworking {
     public static boolean needsReset = true;
 
     public static ServerboundCustomPayloadPacket getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators command, byte[] payload) {
-        FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
-        friendlybytebuf.writeByte(command.ordinal());
-        friendlybytebuf.writeBytes(payload);
-        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(friendlybytebuf));
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(command, payload));
     }
 
     public static ServerboundCustomPayloadPacket createVRActivePacket(boolean vrActive) {
-        var buffer = new FriendlyByteBuf(Unpooled.buffer());
-        buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE.ordinal());
-        buffer.writeBoolean(vrActive);
-        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(buffer));
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE, new byte[]{(byte) (vrActive ? 1 : 0)}));
     }
 
     public static void resetServerSettings() {
@@ -129,34 +124,28 @@ public class ClientNetworking {
         VRPlayersClient.getInstance().Update(Minecraft.getInstance().player.getGameProfile().getId(), vrPlayerState, worldScale, f1 / 1.52F, true);
     }
 
+    private static byte[] serializeToArray(BufferSerializable object) {
+        FriendlyByteBuf tempBuffer = new FriendlyByteBuf(Unpooled.buffer());
+        object.serialize(tempBuffer);
+        byte[] buffer = new byte[tempBuffer.readableBytes()];
+        tempBuffer.readBytes(buffer);
+        tempBuffer.release();
+        return buffer;
+    }
+
     public static ServerboundCustomPayloadPacket createVrPlayerStatePacket(VrPlayerState vrPlayerState) {
-        var buffer = new FriendlyByteBuf(Unpooled.buffer());
-        buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.VR_PLAYER_STATE.ordinal());
-        vrPlayerState.serialize(buffer);
-        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(buffer));
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.VR_PLAYER_STATE, serializeToArray(vrPlayerState)));
     }
 
     public static void sendLegacyPackets(ClientPacketListener connection, VrPlayerState vrPlayerState) {
         // left controller packet
-        FriendlyByteBuf controller0Buffer = new FriendlyByteBuf(Unpooled.buffer());
-        controller0Buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA.ordinal());
-        controller0Buffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.reverseHands);
-        vrPlayerState.controller0().serialize(controller0Buffer);
-        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(controller0Buffer)));
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA, serializeToArray(vrPlayerState.controller0()))));
 
         // right controller packet
-        FriendlyByteBuf controller1Buffer = new FriendlyByteBuf(Unpooled.buffer());
-        controller1Buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.CONTROLLER1DATA.ordinal());
-        controller1Buffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.reverseHands);
-        vrPlayerState.controller1().serialize(controller1Buffer);
-        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(controller1Buffer)));
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA, serializeToArray(vrPlayerState.controller1()))));
 
         // hmd packet
-        FriendlyByteBuf headBuffer = new FriendlyByteBuf(Unpooled.buffer());
-        headBuffer.writeByte(CommonNetworkHelper.PacketDiscriminators.HEADDATA.ordinal());
-        headBuffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.seated);
-        vrPlayerState.hmd().serialize(headBuffer);
-        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(headBuffer)));
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA, serializeToArray(vrPlayerState.hmd()))));
     }
 
     public static boolean isThirdPersonItems() {

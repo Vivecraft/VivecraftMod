@@ -13,7 +13,7 @@ import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
 public record VrPlayerState(boolean seated, Pose hmd, boolean reverseHands, Pose controller0,
-                            boolean reverseHands1legacy, Pose controller1) {
+                            boolean reverseHands1legacy, Pose controller1) implements BufferSerializable {
 
     public static VrPlayerState create(VRPlayer vrPlayer) {
         return new VrPlayerState(

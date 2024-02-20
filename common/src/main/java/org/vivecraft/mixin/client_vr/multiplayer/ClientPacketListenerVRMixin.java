@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client_vr.multiplayer;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -27,7 +28,6 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.VRServerPerms;
-import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.packets.VivecraftDataPacket;
 
 @Mixin(ClientPacketListener.class)
@@ -138,23 +138,20 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
     @Inject(at = @At("HEAD"), method = "handleCustomPayload", cancellable = true)
     public void vivecraft$handlepacket(CustomPacketPayload customPacketPayload, CallbackInfo info) {
         if (customPacketPayload instanceof VivecraftDataPacket dataPacket) {
-            FriendlyByteBuf buffer = dataPacket.buffer();
-            var packetID = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
-            ClientNetworking.handlePacket(packetID, buffer);
+            FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(dataPacket.buffer());
+            ClientNetworking.handlePacket(dataPacket.packetid(), buffer);
             buffer.release();
             info.cancel();
         }
     }
 
+    /**
+     * this is just needed so that neoforge doesn't crash.
+     * packets are handled with their events.
+     * {@link org.vivecraft.neoforge.event.ClientEvents#handleVivePacket}
+     */
     @Surrogate
     public void vivecraft$handlepacket(ClientboundCustomPayloadPacket packet, CustomPacketPayload customPacketPayload, CallbackInfo info) {
-        if (customPacketPayload instanceof VivecraftDataPacket dataPacket) {
-            FriendlyByteBuf buffer = dataPacket.buffer();
-            var packetID = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
-            ClientNetworking.handlePacket(packetID, buffer);
-            buffer.release();
-            info.cancel();
-        }
     }
 
     @Inject(at = @At("HEAD"), method = "handleOpenScreen")
