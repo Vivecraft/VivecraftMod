@@ -23,11 +23,11 @@ public class CommonModEvents {
             .optional();
         registrar.play(CommonNetworkHelper.CHANNEL,
             VivecraftDataPacket::new,
-            (packet, contex) -> {
-                if (contex.flow().isClientbound()) {
-                    handleClientVivePacket(packet, contex);
+            (packet, context) -> {
+                if (context.flow().isClientbound()) {
+                    handleClientVivePacket(packet, context);
                 } else {
-                    handleServerVivePacket(packet, contex);
+                    handleServerVivePacket(packet, context);
                 }
             });
     }
