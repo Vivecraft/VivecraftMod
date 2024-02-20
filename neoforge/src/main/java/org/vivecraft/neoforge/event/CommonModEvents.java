@@ -39,6 +39,7 @@ public class CommonModEvents {
             buffer.release();
         });
     }
+
     public static void handleServerVivePacket(VivecraftDataPacket packet, IPayloadContext context) {
         context.workHandler().execute(() -> {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(packet.buffer());

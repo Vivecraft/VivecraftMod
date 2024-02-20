@@ -58,7 +58,7 @@ public class ClientNetworking {
     }
 
     public static ServerboundCustomPayloadPacket createVRActivePacket(boolean vrActive) {
-        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE, new byte[]{(byte)(vrActive ? 1 : 0)}));
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE, new byte[]{(byte) (vrActive ? 1 : 0)}));
     }
 
     public static void resetServerSettings() {

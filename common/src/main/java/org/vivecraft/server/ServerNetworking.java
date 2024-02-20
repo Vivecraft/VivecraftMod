@@ -115,7 +115,7 @@ public class ServerNetworking {
                     byte[] array = new byte[byteBuf.readableBytes()];
                     byteBuf.readBytes(array);
                     byteBuf.release();
-                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
+                    packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
                 }
 
                 if (ServerConfig.worldscaleLimited.get()) {
@@ -129,7 +129,7 @@ public class ServerNetworking {
                     byte[] array = new byte[byteBuf.readableBytes()];
                     byteBuf.readBytes(array);
                     byteBuf.release();
-                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
+                    packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
                 }
 
                 if (ServerConfig.forceThirdPersonItems.get()) {
@@ -140,7 +140,7 @@ public class ServerNetworking {
                     byte[] array = new byte[byteBuf.readableBytes()];
                     byteBuf.readBytes(array);
                     byteBuf.release();
-                    listener.send(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
+                    packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
                 }
 
                 if (ServerConfig.crawlingEnabled.get()) {
@@ -301,7 +301,7 @@ public class ServerNetworking {
             // no block list
             friendlybytebuf.writeByte(0);
         }
-        ClientboundCustomPayloadPacket p =  new ClientboundCustomPayloadPacket(new VivecraftDataPacket(friendlybytebuf));
+        ClientboundCustomPayloadPacket p = new ClientboundCustomPayloadPacket(new VivecraftDataPacket(friendlybytebuf));
         friendlybytebuf.release();
         return p;
     }
