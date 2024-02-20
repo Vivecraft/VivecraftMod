@@ -22,7 +22,7 @@ public abstract class ServerCommonPacketListenerImplMixin {
     @Final
     protected MinecraftServer server;
 
-    @Inject(at = @At("TAIL"), method = "handleCustomPayload")
+    @Inject(at = @At("HEAD"), method = "handleCustomPayload", cancellable = true)
     public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket payloadPacket, CallbackInfo ci) {
         if (payloadPacket.payload() instanceof VivecraftDataPacket dataPacket
             && (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener) {
@@ -34,6 +34,7 @@ public abstract class ServerCommonPacketListenerImplMixin {
             if (packetDiscriminator == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
                 gamePacketListener.aboveGroundTickCount = 0;
             }
+            ci.cancel();
         }
     }
 }
