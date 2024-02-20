@@ -5,7 +5,6 @@ import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,22 +25,25 @@ public abstract class TutorialToastVRMixin implements Toast {
     @Final
     private Component message;
 
-    @Shadow
-    @Final
-    private static ResourceLocation BACKGROUND_SPRITE;
     @Unique
     private int vivecraft$offset;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V", shift = At.Shift.AFTER), method = "render")
+    @Inject(at = @At("HEAD"), method = "render")
     private void vivecraft$extendToast(GuiGraphics guiGraphics, ToastComponent toastComponent, long l, CallbackInfoReturnable<Visibility> cir) {
         int width = Math.max(toastComponent.getMinecraft().font.width(this.title), message != null ? toastComponent.getMinecraft().font.width(this.message) : 0) + 34;
         vivecraft$offset = Math.min(this.width() - width, 0);
-        if (vivecraft$offset < 0) {
-            // draw a bigger toast from right to left, to override the left border
-            for (int i = vivecraft$offset - (this.width() - 8) * (vivecraft$offset / (this.width() - 8)); i >= vivecraft$offset; i -= this.width() - 8) {
-                guiGraphics.blit(BACKGROUND_SPRITE, i, 0, 0, 96, this.width() - 4, this.height());
-            }
-        }
+    }
+
+    // change toast size
+    // the texture gets stretched, but there seems to be no way to cut it in pieces, so that is probably the best option
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V"), method = "render", index = 1)
+    private int vivecraft$offsetToast(int x) {
+        return x + vivecraft$offset;
+    }
+
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V"), method = "render", index = 3)
+    private int vivecraft$changeToastWidth(int width) {
+        return width - vivecraft$offset;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;render(Lnet/minecraft/client/gui/GuiGraphics;II)V"), method = "render", index = 1)

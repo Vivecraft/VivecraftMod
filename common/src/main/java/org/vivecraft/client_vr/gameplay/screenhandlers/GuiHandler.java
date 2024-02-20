@@ -329,7 +329,7 @@ public class GuiHandler {
             guiRotation_room = null;
             guiScale = 1.0F;
 
-            if (KeyboardHandler.keyboardForGui) {
+            if (KeyboardHandler.keyboardForGui && dh.vrSettings.autoCloseKeyboard) {
                 KeyboardHandler.setOverlayShowing(false);
             }
         } else {

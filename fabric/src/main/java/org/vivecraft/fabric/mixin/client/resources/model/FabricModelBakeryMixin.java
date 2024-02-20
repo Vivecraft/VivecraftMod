@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
 import java.util.Map;
@@ -23,6 +24,7 @@ public abstract class FabricModelBakeryMixin {
     @Inject(method = "<init>", at = @At(value = "CONSTANT", args = "stringValue=special"))
     private void loadModels(BlockColors blockColors, ProfilerFiller profilerFiller, Map map, Map map2, CallbackInfo ci) {
         this.loadTopLevel(TelescopeTracker.scopeModel);
+        this.loadTopLevel(ClimbTracker.clawsModel);
         this.loadTopLevel(ClientDataHolderVR.thirdPersonCameraModel);
         this.loadTopLevel(ClientDataHolderVR.thirdPersonCameraDisplayModel);
         this.loadTopLevel(CameraTracker.cameraModel);
