@@ -23,7 +23,7 @@ public class CustomShapedRecipe {
                 .strictOptionalField(ComponentSerialization.CODEC, "name", Component.empty())
                 .forGetter(ItemStack::getHoverName),
             ExtraCodecs
-                .strictOptionalField(ExtraCodecs.COMPONENT, "fallbackname", Component.empty())
+                .strictOptionalField(ComponentSerialization.CODEC, "fallbackname", Component.empty())
                 .forGetter(ItemStack::getHoverName),
             ExtraCodecs
                 .strictOptionalField(Codec.BOOL, "unbreakable", false)

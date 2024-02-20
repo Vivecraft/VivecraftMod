@@ -59,7 +59,7 @@ public class GarbageCollectorScreen extends Screen {
             .build());
 
         this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.openguide"),
-            ConfirmLinkScreen.confirmLink(guideURL, this, true))
+            ConfirmLinkScreen.confirmLink(this, guideURL))
             .pos(this.width / 2 - 75, this.height - 32)
             .size(150, 20)
             .build());
