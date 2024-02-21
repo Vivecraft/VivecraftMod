@@ -13,8 +13,7 @@ import net.minecraft.client.*;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Overlay;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -55,6 +54,7 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.screens.ErrorScreen;
+import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
 import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.UpdateChecker;
@@ -265,6 +265,19 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 // if there was an error, just reload everything
                 reloadResourcePacks();
             }
+        }
+    }
+
+    @Inject(at = @At("TAIL"), method = "onGameLoadFinished")
+    private void vivecraft$showGarbageCollectorScreen(CallbackInfo ci) {
+        // set the Garbage collector screen here, when it got reset after loading, but don't set it when using quickplay, because it would be removed after loading has finished
+        if (VRState.vrEnabled && !ClientDataHolderVR.getInstance().incorrectGarbageCollector.isEmpty()
+            && !(screen instanceof LevelLoadingScreen
+            || screen instanceof ReceivingLevelScreen
+            || screen instanceof ConnectScreen
+            || screen instanceof GarbageCollectorScreen)) {
+            Minecraft.getInstance().setScreen(new GarbageCollectorScreen(ClientDataHolderVR.getInstance().incorrectGarbageCollector));
+            ClientDataHolderVR.getInstance().incorrectGarbageCollector = "";
         }
     }
 
@@ -624,6 +637,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         // VR enabled only chat notifications
         if (VRState.vrInitialized && this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
+            if (!ClientDataHolderVR.getInstance().incorrectGarbageCollector.isEmpty()) {
+                // set the Garbage collector screen here, quickplay is used, this shouldn't be triggered in other cases, since the GarbageCollectorScreen resets the string on closing
+                Minecraft.getInstance().setScreen(new GarbageCollectorScreen(ClientDataHolderVR.getInstance().incorrectGarbageCollector));
+                ClientDataHolderVR.getInstance().incorrectGarbageCollector = "";
+            }
             if (ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer == 0) {
                 boolean showMessage = !ClientNetworking.displayedChatWarning || ClientDataHolderVR.getInstance().vrSettings.showServerPluginMissingMessageAlways;
 

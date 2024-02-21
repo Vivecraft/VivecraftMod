@@ -53,7 +53,7 @@ public class GarbageCollectorScreen extends Screen {
             .build());
 
         this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.ok"), (p) ->
-            Minecraft.getInstance().setScreen(this.lastScreen))
+            onClose())
             .pos(this.width / 2 + 5, this.height - 56)
             .size(150, 20)
             .build());
@@ -74,6 +74,7 @@ public class GarbageCollectorScreen extends Screen {
 
     @Override
     public void onClose() {
+        ClientDataHolderVR.getInstance().incorrectGarbageCollector = "";
         this.minecraft.setScreen(lastScreen);
     }
 }
