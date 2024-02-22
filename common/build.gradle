@@ -15,10 +15,10 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.20.3-0.5.4"
+    modCompileOnly "maven.modrinth:sodium:mc1.20.4-0.5.8"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.6.13+1.20.4"
+    modCompileOnly "maven.modrinth:iris:1.6.17+1.20.4"
 
     // for REI compat
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:12.0.634"
@@ -35,11 +35,7 @@ dependencies {
     modCompileOnly "maven.modrinth:better-combat:1.8.3+1.20.1-fabric"
 
     // for immersive portals compat
-    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v3.3.1-mc1.20.1') {
-        exclude(group: "net.fabricmc.fabric-api")
-        transitive(false)
-    }
-    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v3.3.1-mc1.20.1') {
+    modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }

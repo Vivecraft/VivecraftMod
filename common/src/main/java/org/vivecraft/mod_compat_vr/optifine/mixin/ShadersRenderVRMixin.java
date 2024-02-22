@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
 @Mixin(targets = "net.optifine.shaders.ShadersRender")
 public class ShadersRenderVRMixin {
 
-    @Shadow
+    @Shadow(remap = false)
     public static void updateActiveRenderInfo(Camera activeRenderInfo, Minecraft mc, float partialTicks) {
     }
 

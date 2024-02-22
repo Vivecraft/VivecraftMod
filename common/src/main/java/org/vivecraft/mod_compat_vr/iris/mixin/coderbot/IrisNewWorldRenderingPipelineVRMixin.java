@@ -1,4 +1,4 @@
-package org.vivecraft.mod_compat_vr.iris.mixin;
+package org.vivecraft.mod_compat_vr.iris.mixin.coderbot;
 
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.ShadowRenderer;
@@ -41,7 +41,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     @Inject(target = @Desc(value = "lambda$new$1", owner = NewWorldRenderingPipeline.class, ret = ShadowRenderTargets.class, args = PackShadowDirectives.class), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
     private void vivecraft$onlyOneShadowTargetSupplier131(CallbackInfoReturnable<ShadowRenderTargets> cir) {
         if (!RenderPassType.isVanilla() && ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null) {
-            cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
+            cir.setReturnValue((ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
         }
     }
 
@@ -49,7 +49,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     @Inject(target = @Desc(value = "lambda$new$0", owner = NewWorldRenderingPipeline.class, ret = ShadowRenderTargets.class, args = PackShadowDirectives.class), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
     private void vivecraft$onlyOneShadowTargetSupplier140(CallbackInfoReturnable<ShadowRenderTargets> cir) {
         if (!RenderPassType.isVanilla() && ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null) {
-            cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
+            cir.setReturnValue((ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
         }
     }
 
@@ -57,7 +57,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     @Inject(target = @Desc(value = "lambda$new$3", owner = NewWorldRenderingPipeline.class, ret = ShadowRenderTargets.class, args = PackShadowDirectives.class), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
     private void vivecraft$onlyOneShadowTargetSupplier150(CallbackInfoReturnable<ShadowRenderTargets> cir) {
         if (!RenderPassType.isVanilla() && ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null) {
-            cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
+            cir.setReturnValue((ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
         }
     }
 
@@ -65,7 +65,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     @Inject(target = @Desc(value = "lambda$new$4", owner = NewWorldRenderingPipeline.class, ret = ShadowRenderTargets.class, args = PackShadowDirectives.class), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
     private void vivecraft$onlyOneShadowTargetSupplier160(CallbackInfoReturnable<ShadowRenderTargets> cir) {
         if (!RenderPassType.isVanilla() && ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null) {
-            cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
+            cir.setReturnValue((ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
         }
     }
 
@@ -74,7 +74,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     @Inject(target = @Desc(value = "lambda$new$1", owner = NewWorldRenderingPipeline.class, ret = ShadowRenderTargets.class, args = {}), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
     private void vivecraft$onlyOneShadowTargetSupplierOculus(CallbackInfoReturnable<ShadowRenderTargets> cir) {
         if (!RenderPassType.isVanilla() && ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null) {
-            cir.setReturnValue(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
+            cir.setReturnValue((ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
         }
     }
 

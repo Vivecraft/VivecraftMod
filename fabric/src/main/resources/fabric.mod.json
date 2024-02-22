@@ -48,6 +48,9 @@
     "minecraft": ["1.20.3", "1.20.4"],
     "java": ">=17"
   },
+  "breaks": {
+    "sodium": ["0.4.11+build.25", "0.4.11+build.26"]
+  },
   "suggests": {
     "another-mod": "*"
   },
