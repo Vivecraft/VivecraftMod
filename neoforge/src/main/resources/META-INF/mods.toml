@@ -41,6 +41,8 @@ config = "vivecraft.alexmobs.mixins.json"
 [[mixins]]
 config = "vivecraft.blur.mixins.json"
 [[mixins]]
+config = "vivecraft.bedrockify.mixins.json"
+[[mixins]]
 config = "vivecraft.cataclysm.mixins.json"
 [[mixins]]
 config = "vivecraft.dynamicfps.mixins.json"
