@@ -45,7 +45,7 @@ public class VivecraftItemRendering {
                 }
             } else if (item instanceof MapItem || pStack.is(ItemTags.VIVECRAFT_MAPS)) {
                 rendertype = VivecraftItemTransformType.Map;
-            } else if (pStack.getUseAnimation() == UseAnim.BOW) {
+            } else if (pStack.getUseAnimation() == UseAnim.BOW && !pStack.is(ItemTags.VIVECRAFT_BOW_EXCLUSION)) {
                 rendertype = VivecraftItemTransformType.Bow_Seated;
 
                 if (dh.bowTracker.isActive((LocalPlayer) pPlayer)) {
