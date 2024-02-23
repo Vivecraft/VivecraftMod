@@ -37,18 +37,18 @@ dependencies {
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
     // for REI compat
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:13.0.661"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:14.0.688"
 
     // for Pehkui compat
-    modCompileOnly("com.github.Virtuoel:Pehkui:3.7.7", { exclude group: "net.fabricmc.fabric-api" })
+    modCompileOnly("com.github.Virtuoel:Pehkui:3.7.12", { exclude group: "net.fabricmc.fabric-api" })
 
     // other mods
     // modRuntimeOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
-    modCompileOnly "maven.modrinth:lithium:mc1.20.2-0.12.0"
-    modCompileOnly "maven.modrinth:indium:1.0.27+mc1.20.1"
+    // modCompileOnly "maven.modrinth:lithium:mc1.20.4-0.12.1"
+    // modCompileOnly "maven.modrinth:indium:1.0.30+mc1.20.4"
 
     //mod menu
-    modCompileOnly("com.terraformersmc:modmenu:8.0.0")
+    modApi("com.terraformersmc:modmenu:9.0.0")
 
     // for immersive portals compat
     modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') {
