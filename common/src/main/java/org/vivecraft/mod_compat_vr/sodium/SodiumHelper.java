@@ -67,47 +67,48 @@ public class SodiumHelper {
 //    }
 
     public static void copyModelCuboidUV(ModelPart source, ModelPart dest, int sourcePoly, int destPoly) {
+        if (init()) {
+            if (hasModelCuboidQuads) {
+                try {
+                    Object sourceQuad = ((Object[]) ModelCuboid_Quads.get(((Object[]) ModelCuboid_Sodium$cuboids.get(source))[0]))[sourcePoly];
+                    Object destQuad = ((Object[]) ModelCuboid_Quads.get(((Object[]) ModelCuboid_Sodium$cuboids.get(dest))[0]))[destPoly];
 
-        if (hasModelCuboidQuads) {
-            try {
-                Object sourceQuad = ((Object[]) ModelCuboid_Quads.get(((Object[]) ModelCuboid_Sodium$cuboids.get(source))[0]))[sourcePoly];
-                Object destQuad = ((Object[]) ModelCuboid_Quads.get(((Object[]) ModelCuboid_Sodium$cuboids.get(dest))[0]))[destPoly];
+                    Vector2f[] sourceTextures = (Vector2f[]) ModelCuboid$Quad_Textures.get(sourceQuad);
+                    Vector2f[] destTextures = (Vector2f[]) ModelCuboid$Quad_Textures.get(destQuad);
 
-                Vector2f[] sourceTextures = (Vector2f[]) ModelCuboid$Quad_Textures.get(sourceQuad);
-                Vector2f[] destTextures = (Vector2f[]) ModelCuboid$Quad_Textures.get(destQuad);
-
-                for (int i = 0; i < sourceTextures.length; i++) {
-                    destTextures[i].x = sourceTextures[i].x;
-                    destTextures[i].y = sourceTextures[i].y;
+                    for (int i = 0; i < sourceTextures.length; i++) {
+                        destTextures[i].x = sourceTextures[i].x;
+                        destTextures[i].y = sourceTextures[i].y;
+                    }
+                } catch (IllegalAccessException | ClassCastException ignored) {
+                    VRSettings.logger.error("Vivecraft: sodium version has ModelCuboids, but field has wrong type. VR hands will probably look wrong");
+                    hasModelCuboidQuads = false;
                 }
-            } catch (IllegalAccessException | ClassCastException ignored) {
-                VRSettings.logger.error("Vivecraft: sodium version has ModelCuboids, but field has wrong type. VR hands will probably look wrong");
-                hasModelCuboidQuads = false;
-            }
-        } else if (hasModelCuboidFloats) {
-            try {
-                Object sourceQuad = ((Object[]) ModelCuboid_Sodium$cuboids.get(source))[0];
-                float[][] UVs = new float[][]{{
-                    (float) ModelCuboid_u0.get(sourceQuad),
-                    (float) ModelCuboid_u1.get(sourceQuad),
-                    (float) ModelCuboid_u2.get(sourceQuad),
-                    (float) ModelCuboid_u3.get(sourceQuad),
-                    (float) ModelCuboid_u4.get(sourceQuad),
-                    (float) ModelCuboid_u5.get(sourceQuad)
-                }, {
-                    (float) ModelCuboid_v0.get(sourceQuad),
-                    (float) ModelCuboid_v1.get(sourceQuad),
-                    (float) ModelCuboid_v2.get(sourceQuad)
-                }};
+            } else if (hasModelCuboidFloats) {
+                try {
+                    Object sourceQuad = ((Object[]) ModelCuboid_Sodium$cuboids.get(source))[0];
+                    float[][] UVs = new float[][]{{
+                        (float) ModelCuboid_u0.get(sourceQuad),
+                        (float) ModelCuboid_u1.get(sourceQuad),
+                        (float) ModelCuboid_u2.get(sourceQuad),
+                        (float) ModelCuboid_u3.get(sourceQuad),
+                        (float) ModelCuboid_u4.get(sourceQuad),
+                        (float) ModelCuboid_u5.get(sourceQuad)
+                    }, {
+                        (float) ModelCuboid_v0.get(sourceQuad),
+                        (float) ModelCuboid_v1.get(sourceQuad),
+                        (float) ModelCuboid_v2.get(sourceQuad)
+                    }};
 
-                ((ModelCuboidExtension) ((Object[]) ModelCuboid_Sodium$cuboids.get(dest))[0]).vivecraft$addOverrides(
-                    mapDirection(destPoly),
-                    mapDirection(sourcePoly),
-                    UVs
-                );
-            } catch (IllegalAccessException | ClassCastException ignored) {
-                VRSettings.logger.error("Vivecraft: sodium version has ModelCuboids, but field has wrong type. VR hands will probably look wrong");
-                hasModelCuboidFloats = false;
+                    ((ModelCuboidExtension) ((Object[]) ModelCuboid_Sodium$cuboids.get(dest))[0]).vivecraft$addOverrides(
+                        mapDirection(destPoly),
+                        mapDirection(sourcePoly),
+                        UVs
+                    );
+                } catch (IllegalAccessException | ClassCastException ignored) {
+                    VRSettings.logger.error("Vivecraft: sodium version has ModelCuboids, but field has wrong type. VR hands will probably look wrong");
+                    hasModelCuboidFloats = false;
+                }
             }
         }
     }
