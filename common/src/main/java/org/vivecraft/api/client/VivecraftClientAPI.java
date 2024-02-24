@@ -5,6 +5,7 @@ import net.minecraft.world.InteractionHand;
 import org.vivecraft.api.client.data.VRPoseHistory;
 import org.vivecraft.api.data.VRData;
 import org.vivecraft.client.api_impl.ClientAPIImpl;
+import org.vivecraft.client_vr.render.RenderPass;
 
 import javax.annotation.Nullable;
 
@@ -125,12 +126,6 @@ public interface VivecraftClientAPI {
     boolean isVrActive();
 
     /**
-     * @return Whether the current render pass is a vanilla render pass.
-     */
-    @Beta
-    boolean isVanillaRenderPass();
-
-    /**
      * @return The currently active world scale.
      */
     float getWorldScale();
@@ -196,4 +191,22 @@ public interface VivecraftClientAPI {
      * @return Whether the keyboard is currently showing after attempting to open/close it.
      */
     boolean setKeyboardState(boolean isNowOpen);
+
+    /**
+     * @return Whether the current render pass is a vanilla render pass.
+     */
+    @Beta
+    boolean isVanillaRenderPass();
+
+    /**
+     * @return The current render pass Vivecraft is performing.
+     */
+    @Beta
+    RenderPass getCurrentRenderPass();
+
+    /**
+     * @return Whether the current render pass is the first one it performed for this render cycle.
+     */
+    @Beta
+    boolean isFirstRenderPass();
 }

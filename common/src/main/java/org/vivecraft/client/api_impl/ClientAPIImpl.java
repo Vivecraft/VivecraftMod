@@ -10,6 +10,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
@@ -121,11 +122,6 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
     }
 
     @Override
-    public boolean isVanillaRenderPass() {
-        return RenderPassType.isVanilla();
-    }
-
-    @Override
     public float getWorldScale() {
         if (isVrActive()) {
             return ClientDataHolderVR.getInstance().vrPlayer.worldScale;
@@ -165,5 +161,20 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
             return KeyboardHandler.setOverlayShowing(isNowOpen);
         }
         return false;
+    }
+
+    @Override
+    public boolean isVanillaRenderPass() {
+        return RenderPassType.isVanilla();
+    }
+
+    @Override
+    public RenderPass getCurrentRenderPass() {
+        return ClientDataHolderVR.getInstance().currentPass;
+    }
+
+    @Override
+    public boolean isFirstRenderPass() {
+        return ClientDataHolderVR.getInstance().isFirstPass;
     }
 }
