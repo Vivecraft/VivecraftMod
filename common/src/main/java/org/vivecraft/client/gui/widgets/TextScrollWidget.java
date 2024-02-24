@@ -142,9 +142,9 @@ public class TextScrollWidget extends AbstractWidget {
 
     @Override
     public boolean mouseScrolled(double x, double y, double scrollAmountX, double scrollAmountY) {
-        if (scrollAmountX < 0.0 && currentLine < scrollSteps) {
+        if (scrollAmountY < 0.0 && currentLine < scrollSteps) {
             currentLine++;
-        } else if (scrollAmountX > 0.0 && currentLine > 0) {
+        } else if (scrollAmountY > 0.0 && currentLine > 0) {
             currentLine--;
         } else {
             // scroll bar on limit, didn't consume the input
