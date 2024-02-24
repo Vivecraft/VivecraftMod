@@ -156,7 +156,7 @@ public class TextScrollWidget extends AbstractWidget {
     @Override
     public boolean keyPressed(int key, int scancode, int mods) {
         if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN) {
-            if (mouseScrolled(0, 0, key == GLFW.GLFW_KEY_UP ? 1 : -1, 0)) {
+            if (mouseScrolled(0, 0, 0, key == GLFW.GLFW_KEY_UP ? 1 : -1)) {
                 return true;
             }
         }
