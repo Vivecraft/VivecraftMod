@@ -266,6 +266,8 @@ public class VRSettings {
     public boolean realisticSwimEnabled = true;
     @SettingField(VrOptions.REALISTIC_ROW)
     public boolean realisticRowEnabled = true;
+    @SettingField(VrOptions.REALISTIC_DISMOUNT)
+    public boolean realisticDismountEnabled = true;
     @SettingField(VrOptions.BACKPACK_SWITCH)
     public boolean backpackSwitching = true;
     @SettingField(VrOptions.PHYSICAL_GUI)
@@ -1618,6 +1620,7 @@ public class VRSettings {
         REALISTIC_CLIMB(false, true), // Roomscale Climbing
         REALISTIC_SWIM(false, true), // Roomscale Swimming
         REALISTIC_ROW(false, true), // Roomscale Rowing
+        REALISTIC_DISMOUNT(false, true), // Roomscale Dismounting
         WALK_MULTIPLIER(true, false, 1f, 10f, 0.1f, 1), // Walking Multiplier
         FREEMOVE_MODE(false, true) { // Free Move Type
 
