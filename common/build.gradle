@@ -21,10 +21,10 @@ dependencies {
     modCompileOnly "maven.modrinth:iris:1.6.17+1.20.4"
 
     // for REI compat
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:14.0.688"
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:14.0.688") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
-    modApi("com.github.Virtuoel:Pehkui:3.7.12", { exclude group: "net.fabricmc.fabric-api" })
+    modApi("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // other mods
     modCompileOnly "maven.modrinth:dynamic-fps:3.4.1"
@@ -35,10 +35,7 @@ dependencies {
     modCompileOnly "maven.modrinth:better-combat:1.8.3+1.20.1-fabric"
 
     // for immersive portals compat
-    modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') {
-        exclude(group: "net.fabricmc.fabric-api")
-        transitive(false)
-    }
+    modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     //for epic fight compat
     modCompileOnly("maven.modrinth:epic-fight:20.6.3")
