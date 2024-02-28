@@ -7,6 +7,7 @@ import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_11;
+import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_8;
 import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_9;
 import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixinSodium_0_6;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;

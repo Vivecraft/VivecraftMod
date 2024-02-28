@@ -15,13 +15,14 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.19.4-0.4.10"
+    modCompileOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
+    modCompileOnly 'org.joml:joml:1.10.4'
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.6.11+1.19.4"
+    modCompileOnly "maven.modrinth:iris:1.6.11+1.19.2"
 
     // for REI compat
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:11.0.683") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:9.1.682") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
     modApi("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
@@ -29,16 +30,16 @@ dependencies {
     // other mods
     modCompileOnly "maven.modrinth:dynamic-fps:3.4.2"
     // modCompileOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
-    // modCompileOnly "maven.modrinth:lithium:mc1.19.4-0.11.1"
-    // modCompileOnly "maven.modrinth:indium:1.0.19+mc1.19.4"
+    // modCompileOnly "maven.modrinth:lithium:mc1.19.2-0.11.1"
+    // modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
     modCompileOnly "maven.modrinth:resolution-control-plus:1.19.4-3.0.0"
-    modCompileOnly "maven.modrinth:better-combat:1.7.1+1.19.4-fabric"
+    modCompileOnly "maven.modrinth:better-combat:1.7.1+1.19-fabric"
 
     // for immersive portals compat
-    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.7.5-mc1.19.4') { transitive false }
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.3.1-1.19') { transitive false }
 
     //for epic fight compat
-    modCompileOnly("maven.modrinth:epic-fight:20.6.3")
+    modCompileOnly("maven.modrinth:epic-fight:19.5.22")
 
     // needed dependencies
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")

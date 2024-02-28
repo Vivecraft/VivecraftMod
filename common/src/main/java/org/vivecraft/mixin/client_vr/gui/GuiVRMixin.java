@@ -231,13 +231,13 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
     public void vivecraft$drawCentredTexturedModalRect(int centreX, int centreY, float width, float height, float uMin, float vMin, float uMax, float vMax) {
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY + height / 2.0F, 0)
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY + height / 2.0F, this.getBlitOffset())
             .uv(uMin, vMin).endVertex();
-        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY + height / 2.0F, 0)
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY + height / 2.0F, this.getBlitOffset())
             .uv(uMin, vMax).endVertex();
-        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY - height / 2.0F, 0)
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY - height / 2.0F, this.getBlitOffset())
             .uv(uMax, vMax).endVertex();
-        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY - height / 2.0F, 0)
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY - height / 2.0F, this.getBlitOffset())
             .uv(uMax, vMin).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
     }

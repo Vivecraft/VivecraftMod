@@ -2,6 +2,7 @@ package org.vivecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -42,26 +43,34 @@ public class GarbageCollectorScreen extends Screen {
                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, guideURL))));
         this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, message));
 
-        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.dontshowagain"), (p) -> {
-            ClientDataHolderVR.getInstance().vrSettings.disableGarbageCollectorMessage = true;
-            ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-            Minecraft.getInstance().setScreen(this.lastScreen);
-        })
-            .pos(this.width / 2 - 155, this.height - 56)
-            .size(150, 20)
-            .build());
+        this.addRenderableWidget(new Button(
+            this.width / 2 - 155, this.height - 56,
+            150, 20,
+            Component.translatable("vivecraft.gui.dontshowagain"),
+            (p) -> {
+                ClientDataHolderVR.getInstance().vrSettings.disableGarbageCollectorMessage = true;
+                ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+                Minecraft.getInstance().setScreen(this.lastScreen);
+            }));
 
-        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.ok"), (p) ->
-            onClose())
-            .pos(this.width / 2 + 5, this.height - 56)
-            .size(150, 20)
-            .build());
+        this.addRenderableWidget(new Button(
+            this.width / 2 + 5, this.height - 56,
+            150, 20,
+            Component.translatable("vivecraft.gui.ok"),
+            (p) -> onClose()));
 
-        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.openguide"),
-            ConfirmLinkScreen.confirmLink(guideURL, this, true))
-            .pos(this.width / 2 - 75, this.height - 32)
-            .size(150, 20)
-            .build());
+        this.addRenderableWidget(new Button(
+            this.width / 2 - 75, this.height - 32,
+            150, 20,
+            Component.translatable("vivecraft.gui.openguide"),
+            (p) -> {
+                this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+                    if (bl) {
+                        Util.getPlatform().openUri(guideURL);
+                    }
+                    this.minecraft.setScreen(this);
+                }, guideURL, true));
+            }));
     }
 
     @Override

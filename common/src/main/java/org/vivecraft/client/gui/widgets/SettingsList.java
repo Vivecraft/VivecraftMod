@@ -57,7 +57,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
         String optionString = "vivecraft.options." + option.name();
         String tooltipString = optionString + ".tooltip";
-        Tooltip tooltip;
+        Component tooltip;
         // check if it has a tooltip
         if (I18n.exists(tooltipString)) {
             String tooltipPrefix = "";
@@ -70,7 +70,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                     tooltipPrefix = I18n.get("vivecraft.message.limitedbyserver", setting.getValueMin(), setting.getValueMax());
                 }
             }
-            tooltip = Tooltip.create(Component.literal(tooltipPrefix + I18n.get(tooltipString, (Object) null)));
+            tooltip = Component.literal(tooltipPrefix + I18n.get(tooltipString, (Object) null));
         } else {
             tooltip = null;
         }
@@ -82,18 +82,29 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             widget = new GuiVROptionSlider(option.returnEnumOrdinal(),
                 0, 0,
                 WidgetEntry.valueButtonWidth, 20,
-                option, true);
-            widget.setTooltip(tooltip);
+                option, true) {
+                @Override
+                public void renderButton(PoseStack poseStack, int x, int y, float f) {
+                    super.renderButton(poseStack, x, y, f);
+                    if (this.isHovered && tooltip != null) {
+                        Minecraft.getInstance().screen.renderTooltip(poseStack, Minecraft.getInstance().font.split(tooltip, 200), x, y);
+                    }
+                }
+            };
         } else {
             // regular button
-            widget = Button.builder(Component.literal(dh.vrSettings.getButtonDisplayString(option, true))
-                    , button -> {
-                        dh.vrSettings.setOptionValue(option);
-                        button.setMessage(Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
-                    })
-                .size(WidgetEntry.valueButtonWidth, 20)
-                .tooltip(tooltip)
-                .build();
+            widget = new Button(
+                0, 0, WidgetEntry.valueButtonWidth, 20,
+                Component.literal(dh.vrSettings.getButtonDisplayString(option, true)),
+                button -> {
+                    dh.vrSettings.setOptionValue(option);
+                    button.setMessage(Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
+                },
+                (button, poseStack, x, y) -> {
+                    if (tooltip != null) {
+                        Minecraft.getInstance().screen.renderTooltip(poseStack, Minecraft.getInstance().font.split(tooltip, 200), x, y);
+                    }
+                });
         }
 
         BaseEntry entry = new WidgetEntry(Component.translatable(optionString), widget);

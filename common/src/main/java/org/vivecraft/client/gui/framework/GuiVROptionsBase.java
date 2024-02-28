@@ -272,10 +272,6 @@ public abstract class GuiVROptionsBase extends Screen {
     private void renderTooltip(PoseStack pMatrixStack, int pMouseX, int pMouseY) {
         GuiEventListener hover = null;
 
-        if (this.minecraft.getLastInputType().isKeyboard()) {
-            // only show focused tooltip when navigating with keyboard, so a click with the mouse removes it
-            hover = this.getFocused();
-        }
         // find active button
         if (hover == null) {
             for (GuiEventListener child : children()) {
@@ -323,6 +319,6 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     private boolean isMouseOver(AbstractWidget widget, double x, double y) {
-        return widget.visible && x >= widget.getX() && y >= widget.getY() && x < (widget.getX() + widget.getWidth()) && y < (widget.getY() + widget.getHeight());
+        return widget.visible && x >= widget.x && y >= widget.y && x < (widget.x + widget.getWidth()) && y < (widget.y + widget.getHeight());
     }
 }

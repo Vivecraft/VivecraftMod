@@ -269,6 +269,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             vivecraft$showGarbageCollectorScreen();
         }
     }
+
     @Inject(at = @At("TAIL"), method = "lambda$new$2", remap = false, require = 0, expect = 0)
     private void vivecraft$showGarbageCollectorScreenForge(CallbackInfo ci) {
         if ("forge".equals(Xplat.getModloader())) {
@@ -773,9 +774,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             if (VivecraftVRMod.INSTANCE.keyQuickCommands[i].consumeClick()) {
                 String command = ClientDataHolderVR.getInstance().vrSettings.vrQuickCommands[i];
                 if (command.startsWith("/")) {
-                    this.player.connection.sendCommand(command.substring(1));
+                    this.player.commandSigned(command.substring(1), Component.empty());
                 } else {
-                    this.player.connection.sendChat(command);
+                    this.player.chatSigned(command, Component.empty());
                 }
             }
         }

@@ -2,11 +2,11 @@ package org.vivecraft.mixin.client.renderer.entity.layers;
 
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,7 +21,7 @@ import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 @Mixin(ItemInHandLayer.class)
 public abstract class ItemInHandLayerMixin {
     @ModifyVariable(at = @At("HEAD"), method = "renderArmWithItem", argsOnly = true)
-    private ItemStack vivecraft$climbClawsOverride(ItemStack itemStack, LivingEntity livingEntity, ItemStack itemStack2, ItemDisplayContext itemDisplayContext, HumanoidArm humanoidArm) {
+    private ItemStack vivecraft$climbClawsOverride(ItemStack itemStack, LivingEntity livingEntity, ItemStack itemStack2, ItemTransforms.TransformType transformType, HumanoidArm humanoidArm) {
         ClimbTracker tracker = ClientDataHolderVR.getInstance().climbTracker;
         if (ClientNetworking.serverAllowsClimbey && livingEntity instanceof Player && !tracker.isClaws(itemStack)) {
             ItemStack otherStack = humanoidArm == livingEntity.getMainArm() ? livingEntity.getOffhandItem() : livingEntity.getMainHandItem();

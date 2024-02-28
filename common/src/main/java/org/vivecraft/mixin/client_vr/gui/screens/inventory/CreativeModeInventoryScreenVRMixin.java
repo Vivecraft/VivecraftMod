@@ -33,7 +33,7 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
         vivecraft$addCreativeSearch(this.searchBox.getValue(), this.menu.items);
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;addAll(Ljava/util/Collection;)Z", ordinal = 1, shift = At.Shift.AFTER), method = "selectTab")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CreativeModeTab;fillItemList(Lnet/minecraft/core/NonNullList;)V", shift = At.Shift.AFTER), method = "selectTab")
     public void vivecraft$fill(CreativeModeTab creativeModeTab, CallbackInfo ci) {
         vivecraft$addCreativeItems(creativeModeTab, this.menu.items);
     }
@@ -50,13 +50,13 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
 
         if (tab == CreativeModeTab.TAB_TOOLS || tab == null) {
             ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-            boots.setHoverName(Component.translatableWithFallback("vivecraft.item.jumpboots", "Jump Boots"));
+            boots.setHoverName(Component.translatable("vivecraft.item.jumpboots"));
             boots.getTag().putBoolean("Unbreakable", true);
             boots.getTag().putInt("HideFlags", 4);
             boots.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, 9233775);
 
             ItemStack claws = new ItemStack(Items.SHEARS);
-            claws.setHoverName(Component.translatableWithFallback("vivecraft.item.climbclaws", "Climb Claws"));
+            claws.setHoverName(Component.translatable("vivecraft.item.climbclaws"));
             claws.getTag().putBoolean("Unbreakable", true);
             claws.getTag().putInt("HideFlags", 4);
 

@@ -51,9 +51,8 @@ public class ShapedRecipeMixin {
             } else {
                 ItemStack itemStack = new ItemStack(vanillaItem, i);
                 if (jsonObject.has("fallbackname")) {
-                    itemStack.setHoverName(Component.translatableWithFallback(
-                        jsonObject.get("name").getAsString(),
-                        jsonObject.get("fallbackname").getAsString()));
+                    itemStack.setHoverName(Component.translatable(
+                        jsonObject.get("name").getAsString()));
                 } else {
                     itemStack.setHoverName(Component.translatable(jsonObject.get("name").getAsString()));
                 }

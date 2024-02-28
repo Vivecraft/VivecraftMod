@@ -94,7 +94,6 @@ public class SwingTracker extends Tracker {
             item == Items.STICK ||
             item == Items.DEBUG_STICK ||
             item instanceof FlintAndSteelItem ||
-            item instanceof BrushItem ||
             item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
     }
 
@@ -226,7 +225,7 @@ public class SwingTracker extends Tracker {
                     continue;
                 }
 
-                BlockPos blockpos = BlockPos.containing(this.miningPoint[c]);
+                BlockPos blockpos = new BlockPos(this.miningPoint[c]);
                 BlockState blockstate = this.mc.level.getBlockState(blockpos);
 
                 // every time end of weapon enters a solid for the first time, trace from our previous air position
@@ -262,12 +261,6 @@ public class SwingTracker extends Tracker {
                                 // some scythes just need to be used
                                 this.mc.gameMode.useItem(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                             }
-                        }
-                        // roomscale brushes
-                        else if ((item instanceof BrushItem /*|| itemstack.is(ItemTags.VIVECRAFT_BRUSHES*/)) {
-                            ((BrushItem) item).spawnDustParticles(player.level, blockHit, blockstate, player.getViewVector(0.0F));
-                            player.level.playSound(player, blockHit.getBlockPos(), SoundEvents.BRUSH_BRUSHING, SoundSource.PLAYERS);
-                            this.mc.gameMode.useItemOn(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit);
                         }
                         // roomscale noteblocks
                         else if (blockstate.getBlock() instanceof NoteBlock || blockstate.is(BlockTags.VIVECRAFT_MUSIC_BLOCKS)) {
