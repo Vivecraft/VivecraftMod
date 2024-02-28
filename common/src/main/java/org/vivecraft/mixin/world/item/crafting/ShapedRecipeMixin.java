@@ -50,9 +50,18 @@ public class ShapedRecipeMixin {
                 throw new JsonSyntaxException("Invalid output count: " + i);
             } else {
                 ItemStack itemStack = new ItemStack(vanillaItem, i);
-                itemStack.setHoverName(Component.translatable(jsonObject.get("name").getAsString()));
+                if (jsonObject.has("fallbackname")) {
+                    itemStack.setHoverName(Component.translatableWithFallback(
+                        jsonObject.get("name").getAsString(),
+                        jsonObject.get("fallbackname").getAsString()));
+                } else {
+                    itemStack.setHoverName(Component.translatable(jsonObject.get("name").getAsString()));
+                }
                 itemStack.getOrCreateTag().putBoolean("Unbreakable", GsonHelper.getAsBoolean(jsonObject, "unbreakable", false));
                 itemStack.getOrCreateTag().putInt("HideFlags", GsonHelper.getAsInt(jsonObject, "hideflags", 0));
+                if (jsonObject.has("color")) {
+                    itemStack.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, GsonHelper.getAsInt(jsonObject, "color", 0));
+                }
                 return itemStack;
             }
         }

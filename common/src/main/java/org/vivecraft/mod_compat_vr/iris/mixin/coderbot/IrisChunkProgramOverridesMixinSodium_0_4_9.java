@@ -1,4 +1,4 @@
-package org.vivecraft.mod_compat_vr.iris.mixin;
+package org.vivecraft.mod_compat_vr.iris.mixin.coderbot;
 
 import me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType;
 import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkProgramOverrides;

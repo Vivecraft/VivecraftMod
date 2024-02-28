@@ -12,8 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.screens.Overlay;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -53,6 +52,7 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.screens.ErrorScreen;
+import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
 import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.UpdateChecker;
@@ -248,16 +248,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         "lambda$new$3"} // forge
         , remap = false)
     public void vivecraft$initVROnLaunch(CallbackInfo ci) {
-        // init vr after resource loading
-        try {
-            if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled) {
-                VRState.vrEnabled = true;
-                VRState.initializeVR();
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
         // set initial resourcepacks
         vivecraft$resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
 
@@ -269,6 +259,19 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 // if there was an error, just reload everything
                 reloadResourcePacks();
             }
+        }
+    }
+
+    @Inject(at = @At("TAIL"), method = "setInitialScreen")
+    private void vivecraft$showGarbageCollectorScreen(CallbackInfo ci) {
+        // set the Garbage collector screen here, when it got reset after loading, but don't set it when using quickplay, because it would be removed after loading has finished
+        if (VRState.vrEnabled && !ClientDataHolderVR.getInstance().incorrectGarbageCollector.isEmpty()
+            && !(screen instanceof LevelLoadingScreen
+            || screen instanceof ReceivingLevelScreen
+            || screen instanceof ConnectScreen
+            || screen instanceof GarbageCollectorScreen)) {
+            Minecraft.getInstance().setScreen(new GarbageCollectorScreen(ClientDataHolderVR.getInstance().incorrectGarbageCollector));
+            ClientDataHolderVR.getInstance().incorrectGarbageCollector = "";
         }
     }
 
@@ -625,6 +628,13 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         // VR enabled only chat notifications
         if (VRState.vrInitialized && this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
+            if (!ClientDataHolderVR.getInstance().incorrectGarbageCollector.isEmpty()) {
+                if (!(screen instanceof GarbageCollectorScreen)) {
+                    // set the Garbage collector screen here, quickplay is used, this shouldn't be triggered in other cases, since the GarbageCollectorScreen resets the string on closing
+                    Minecraft.getInstance().setScreen(new GarbageCollectorScreen(ClientDataHolderVR.getInstance().incorrectGarbageCollector));
+                }
+                ClientDataHolderVR.getInstance().incorrectGarbageCollector = "";
+            }
             if (ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer == 0) {
                 boolean showMessage = !ClientNetworking.displayedChatWarning || ClientDataHolderVR.getInstance().vrSettings.showServerPluginMissingMessageAlways;
 
@@ -681,6 +691,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         VRPlayersClient.getInstance().tick();
 
+        this.profiler.popPush("Vivecraft Keybindings");
+        vivecraft$processAlwaysAvailableKeybindings();
+
+        this.profiler.pop();
+    }
+
+    @Unique
+    private void vivecraft$processAlwaysAvailableKeybindings() {
+        // menuworld export
         if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && level != null && player != null) {
             Throwable error = null;
             try {
@@ -735,7 +754,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
         }
 
-        this.profiler.pop();
+        // quick commands
+        for (int i = 0; i < VivecraftVRMod.INSTANCE.keyQuickCommands.length; i++) {
+            if (VivecraftVRMod.INSTANCE.keyQuickCommands[i].consumeClick()) {
+                String command = ClientDataHolderVR.getInstance().vrSettings.vrQuickCommands[i];
+                if (command.startsWith("/")) {
+                    this.player.connection.sendCommand(command.substring(1));
+                } else {
+                    this.player.connection.sendChat(command);
+                }
+            }
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "tick")
@@ -910,6 +939,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             Minecraft.getInstance().getSoundManager().reload();
         }
         resizeDisplay();
+        window.updateVsync(options.enableVsync().get());
     }
 
     @Unique
@@ -977,8 +1007,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     source = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1;
                 }
 
-                xcrop = 0.15F;
-                ycrop = 0.15F;
+                xcrop = ClientDataHolderVR.getInstance().vrSettings.mirrorCrop;
+                ycrop = ClientDataHolderVR.getInstance().vrSettings.mirrorCrop;
                 ar = true;
             }
             // Debug

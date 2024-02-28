@@ -32,6 +32,7 @@
   "mixins": [
     "vivecraft.mixins.json",
     "vivecraft.blur.mixins.json",
+    "vivecraft.bedrockify.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.fabric.sodium.mixins.json",
@@ -47,6 +48,9 @@
     "fabricloader": ">=0.14.14",
     "minecraft": "1.19.4",
     "java": ">=17"
+  },
+  "breaks": {
+    "sodium": ["0.4.11+build.25", "0.4.11+build.26"]
   },
   "suggests": {
     "another-mod": "*"

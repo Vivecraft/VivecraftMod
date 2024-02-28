@@ -1,0 +1,346 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "mvw:wooden_double_axe",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_knife",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_katana",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_hammer",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_scythe",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_spade",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_rapier",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_lance",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_halberd",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_long_sword",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_mace",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_pole",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_warhammer",
+      "required": false
+    },
+    {
+      "id": "mvw:wooden_spear",
+      "required": false
+    },
+
+    {
+      "id": "mvw:stone_double_axe",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_knife",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_katana",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_hammer",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_scythe",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_spade",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_rapier",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_lance",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_halberd",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_long_sword",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_mace",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_pole",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_warhammer",
+      "required": false
+    },
+    {
+      "id": "mvw:stone_spear",
+      "required": false
+    },
+
+    {
+      "id": "mvw:iron_double_axe",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_knife",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_katana",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_hammer",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_scythe",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_spade",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_rapier",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_lance",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_halberd",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_long_sword",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_mace",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_pole",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_warhammer",
+      "required": false
+    },
+    {
+      "id": "mvw:iron_spear",
+      "required": false
+    },
+
+    {
+      "id": "mvw:gold_double_axe",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_knife",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_katana",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_hammer",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_scythe",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_spade",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_rapier",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_lance",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_halberd",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_long_sword",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_mace",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_pole",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_warhammer",
+      "required": false
+    },
+    {
+      "id": "mvw:gold_spear",
+      "required": false
+    },
+
+    {
+      "id": "mvw:diamond_double_axe",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_knife",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_katana",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_hammer",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_scythe",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_spade",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_rapier",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_lance",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_halberd",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_long_sword",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_mace",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_pole",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_warhammer",
+      "required": false
+    },
+    {
+      "id": "mvw:diamond_spear",
+      "required": false
+    },
+
+    {
+      "id": "mvw:netherite_double_axe",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_knife",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_katana",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_hammer",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_scythe",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_spade",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_rapier",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_lance",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_halberd",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_long_sword",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_mace",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_pole",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_warhammer",
+      "required": false
+    },
+    {
+      "id": "mvw:netherite_spear",
+      "required": false
+    }
+  ]
+}

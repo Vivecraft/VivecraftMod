@@ -10,6 +10,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import org.vivecraft.client.gui.settings.VivecraftMainSettings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.forge.Vivecraft;
 
@@ -18,6 +19,7 @@ public class ClientEvents {
     @SubscribeEvent
     public static void registerModels(ModelEvent.RegisterAdditional event) {
         event.register(TelescopeTracker.scopeModel);
+        event.register(ClimbTracker.clawsModel);
         event.register(ClientDataHolderVR.thirdPersonCameraModel);
         event.register(ClientDataHolderVR.thirdPersonCameraDisplayModel);
         event.register(CameraTracker.cameraModel);

@@ -192,4 +192,9 @@ public class NullVR extends MCVR {
         }
         return vrActive;
     }
+
+    @Override
+    public boolean capFPS() {
+        return true;
+    }
 }

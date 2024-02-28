@@ -305,6 +305,20 @@ public abstract class GameRendererVRMixin
         RenderSystem.applyModelViewMatrix();
     }
 
+    @Inject(at = @At("HEAD"), method = "shouldRenderBlockOutline", cancellable = true)
+    public void vivecraft$shouldDrawBlockOutline(CallbackInfoReturnable<Boolean> cir) {
+        if (VRState.vrRunning) {
+            if (vivecraft$DATA_HOLDER.teleportTracker.isAiming() || vivecraft$DATA_HOLDER.vrSettings.renderBlockOutlineMode == VRSettings.RenderPointerElement.NEVER) {
+                // don't render outline when aiming with tp, or the user disabled it
+                cir.setReturnValue(false);
+            } else if (vivecraft$DATA_HOLDER.vrSettings.renderBlockOutlineMode == VRSettings.RenderPointerElement.ALWAYS) {
+                // skip vanilla check and always render the outline
+                cir.setReturnValue(true);
+            }
+            // VRSettings.RenderPointerElement.WITH_HUD uses the vanilla behaviour
+        }
+    }
+
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"), method = "render")
     public PoseStack vivecraft$newStack(PoseStack poseStack) {
         this.vivecraft$stack = poseStack;

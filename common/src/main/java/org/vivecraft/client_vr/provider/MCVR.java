@@ -1173,4 +1173,8 @@ public abstract class MCVR {
     public abstract VRRenderer createVRRenderer();
 
     public abstract boolean isActive();
+
+    public boolean capFPS() {
+        return false;
+    }
 }

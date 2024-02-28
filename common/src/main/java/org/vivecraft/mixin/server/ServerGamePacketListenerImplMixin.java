@@ -8,7 +8,6 @@ import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.server.network.ServerPlayerConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,10 +20,8 @@ import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.config.ServerConfig;
 
-import static org.vivecraft.common.network.CommonNetworkHelper.PacketDiscriminators.CLIMBING;
-
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerConnection, ServerGamePacketListener {
+public abstract class ServerGamePacketListenerImplMixin implements ServerGamePacketListener {
 
     @Shadow
     @Final
@@ -40,7 +37,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
     @Shadow
     private int aboveGroundTickCount;
 
-    @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;)V")
+    @Inject(at = @At("TAIL"), method = "<init>")
     public void vivecraft$init(MinecraftServer p_9770_, Connection p_9771_, ServerPlayer p_9772_, CallbackInfo info) {
         // Vivecraft
         if (this.connection.channel != null && this.connection.channel.pipeline().get("packet_handler") != null) { //fake player fix
@@ -54,18 +51,22 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerPlayerC
         ServerNetworking.sendVrPlayerStateToClients(this.player);
     }
 
-    @Inject(at = @At("TAIL"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/game/ServerboundCustomPayloadPacket;)V")
-    public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket pPacket, CallbackInfo info) {
-        var buffer = pPacket.getData();
-        var channelID = pPacket.getIdentifier();
+    /**
+     * handle server bound vivecraft packets
+     */
+    @Inject(at = @At("HEAD"), method = "handleCustomPayload", cancellable = true)
+    public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket payloadPacket, CallbackInfo ci) {
+        if (CommonNetworkHelper.CHANNEL.equals(payloadPacket.getIdentifier())) {
+            PacketUtils.ensureRunningOnSameThread(payloadPacket, this, this.player.serverLevel());
 
-        if (channelID.equals(CommonNetworkHelper.CHANNEL)) {
-            PacketUtils.ensureRunningOnSameThread(pPacket, this, this.player.getLevel());
-            CommonNetworkHelper.PacketDiscriminators packetDiscriminator = CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()];
-            ServerNetworking.handlePacket(packetDiscriminator, buffer, (ServerGamePacketListenerImpl) (Object) this);
-            if (packetDiscriminator == CLIMBING) {
+            CommonNetworkHelper.PacketDiscriminators packetId = CommonNetworkHelper.PacketDiscriminators.values()[payloadPacket.getData().readByte()];
+
+            ServerNetworking.handlePacket(packetId, payloadPacket.getData(), this.player, ((ServerGamePacketListenerImpl) (Object) this)::send);
+
+            if (packetId == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
                 this.aboveGroundTickCount = 0;
             }
+            ci.cancel();
         }
     }
 

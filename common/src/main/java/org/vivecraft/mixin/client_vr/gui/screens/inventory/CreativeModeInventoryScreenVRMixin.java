@@ -34,7 +34,7 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
         vivecraft$addCreativeSearch(this.searchBox.getValue(), this.menu.items);
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;addAll(Ljava/util/Collection;)Z", ordinal = 1), method = "selectTab")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;addAll(Ljava/util/Collection;)Z", ordinal = 1, shift = At.Shift.AFTER), method = "selectTab")
     public void vivecraft$fill(CreativeModeTab creativeModeTab, CallbackInfo ci) {
         vivecraft$addCreativeItems(creativeModeTab, this.menu.items);
     }
@@ -50,14 +50,19 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
         }
 
         if (tab == CreativeModeTabs.TOOLS_AND_UTILITIES || tab == null) {
-            ItemStack itemstack3 = (new ItemStack(Items.LEATHER_BOOTS)).setHoverName(Component.translatable("vivecraft.item.jumpboots"));
-            itemstack3.getTag().putBoolean("Unbreakable", true);
-            itemstack3.getTag().putInt("HideFlags", 4);
-            ItemStack itemstack4 = (new ItemStack(Items.SHEARS)).setHoverName(Component.translatable("vivecraft.item.climbclaws"));
-            itemstack4.getTag().putBoolean("Unbreakable", true);
-            itemstack4.getTag().putInt("HideFlags", 4);
-            list.add(itemstack3);
-            list.add(itemstack4);
+            ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
+            boots.setHoverName(Component.translatableWithFallback("vivecraft.item.jumpboots", "Jump Boots"));
+            boots.getTag().putBoolean("Unbreakable", true);
+            boots.getTag().putInt("HideFlags", 4);
+            boots.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, 9233775);
+
+            ItemStack claws = new ItemStack(Items.SHEARS);
+            claws.setHoverName(Component.translatableWithFallback("vivecraft.item.climbclaws", "Climb Claws"));
+            claws.getTag().putBoolean("Unbreakable", true);
+            claws.getTag().putInt("HideFlags", 4);
+
+            list.add(boots);
+            list.add(claws);
         }
     }
 

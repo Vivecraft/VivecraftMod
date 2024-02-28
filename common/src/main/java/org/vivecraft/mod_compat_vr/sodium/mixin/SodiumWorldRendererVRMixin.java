@@ -1,6 +1,5 @@
 package org.vivecraft.mod_compat_vr.sodium.mixin;
 
-import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -10,7 +9,10 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 
 @Pseudo
-@Mixin(SodiumWorldRenderer.class)
+@Mixin(targets = {
+    "me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer",
+    "net.caffeinemc.mods.sodium.client.render.SodiumWorldRenderer"
+})
 public class SodiumWorldRendererVRMixin {
 
     @Group(name = "forceChunkUpdate", min = 1, max = 1)
