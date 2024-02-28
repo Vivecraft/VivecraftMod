@@ -27,8 +27,6 @@ public abstract class ServerCommonPacketListenerImplMixin {
 
     /**
      * handle server bound vivecraft packets
-     * on neoforge those are handled in {@link org.vivecraft.neoforge.event.ServerEvents#handleVivePacket}
-     * if connected to spigot they are still handled here
      */
     @Inject(at = @At("HEAD"), method = "handleCustomPayload", cancellable = true)
     public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket payloadPacket, CallbackInfo ci) {

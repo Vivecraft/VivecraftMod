@@ -5,9 +5,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipeCodecs;
 
 public class CustomShapedRecipe {
 
@@ -20,10 +20,10 @@ public class CustomShapedRecipe {
                 .strictOptionalField(ExtraCodecs.POSITIVE_INT, "count", 1)
                 .forGetter(ItemStack::getCount),
             ExtraCodecs
-                .strictOptionalField(ComponentSerialization.CODEC, "name", Component.empty())
+                .strictOptionalField(ExtraCodecs.COMPONENT, "name", Component.empty())
                 .forGetter(ItemStack::getHoverName),
             ExtraCodecs
-                .strictOptionalField(ComponentSerialization.CODEC, "fallbackname", Component.empty())
+                .strictOptionalField(ExtraCodecs.COMPONENT, "fallbackname", Component.empty())
                 .forGetter(ItemStack::getHoverName),
             ExtraCodecs
                 .strictOptionalField(Codec.BOOL, "unbreakable", false)
@@ -54,6 +54,6 @@ public class CustomShapedRecipe {
         })
     );
 
-    public static final Codec<ItemStack> CODEC = ExtraCodecs.either(VIVECRAFT_ITEMSTACK_OBJECT_CODEC, ItemStack.ITEM_WITH_COUNT_CODEC)
+    public static final Codec<ItemStack> CODEC = ExtraCodecs.either(VIVECRAFT_ITEMSTACK_OBJECT_CODEC, CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC)
         .xmap(itemStackItemStackEither -> itemStackItemStackEither.map(stack -> stack, stack -> stack), Either::right);
 }

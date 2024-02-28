@@ -5,8 +5,7 @@ license = "LGPLv3"
 
 [[mods]]
 modId = "vivecraft"
-version = "${version}"
-displayName = "Vivecraft"
+version = "${version}"displayName = "Vivecraft"
 displayURL = "https://modrinth.com/mod/vivecraft"
 logoFile = "vivecraft_icon.png"
 authors = "fayer3, Ferri_Arnus, IMS, jrbudda, minecraft player, Techjar"
@@ -22,15 +21,15 @@ updateJSONURL = "https://raw.githubusercontent.com/Vivecraft/VivecraftMod/forge-
 
 [[dependencies.vivecraft]]
 modId = "neoforge"
-type = "required"
-versionRange = "[20.4.70-beta,)"
+mandatory = true
+versionRange = "[20.2.88,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.vivecraft]]
 modId = "minecraft"
-type = "required"
-versionRange = "[1.20.4]"
+mandatory = true
+versionRange = "[1.20.2,1.20.3)"
 ordering = "NONE"
 side = "BOTH"
 

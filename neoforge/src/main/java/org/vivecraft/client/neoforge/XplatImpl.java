@@ -4,6 +4,9 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -98,7 +101,18 @@ public class XplatImpl implements Xplat {
     }
 
     public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
-        // neoforge does that automatically, since we use their networking system
-        // at least I have been told this
+        listener.send(new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
+            public static final ResourceLocation ID = new ResourceLocation("minecraft:register");
+
+            @Override
+            public void write(FriendlyByteBuf friendlyByteBuf) {
+                friendlyByteBuf.writeBytes(resourceLocation.toString().getBytes());
+            }
+
+            @Override
+            public ResourceLocation id() {
+                return ID;
+            }
+        }));
     }
 }

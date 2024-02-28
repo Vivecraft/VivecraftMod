@@ -140,12 +140,16 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
     }
 
     /**
-     * this is just needed so that neoforge doesn't crash.
-     * packets are handled with their events.
-     * {@link org.vivecraft.neoforge.event.ClientEvents#handleVivePacket}
+     * this is just needed for neoforge.
      */
     @Surrogate
     public void vivecraft$handlepacket(ClientboundCustomPayloadPacket packet, CustomPacketPayload customPacketPayload, CallbackInfo info) {
+        if (customPacketPayload instanceof VivecraftDataPacket dataPacket) {
+            FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(dataPacket.buffer());
+            ClientNetworking.handlePacket(dataPacket.packetid(), buffer);
+            buffer.release();
+            info.cancel();
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "handleOpenScreen")
