@@ -12,7 +12,6 @@ extendable method net/minecraft/client/renderer/entity/player/PlayerRenderer set
 
 # modded layer supports
 accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
-extendable method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
 mutable field net/minecraft/client/renderer/entity/layers/RenderLayer renderer Lnet/minecraft/client/renderer/entity/RenderLayerParent;
 accessible field net/minecraft/client/renderer/entity/layers/RenderLayer renderer Lnet/minecraft/client/renderer/entity/RenderLayerParent;
 
@@ -28,7 +27,7 @@ accessible field net/minecraft/network/Connection channel Lio/netty/channel/Chan
 # for quicktorch
 accessible method net/minecraft/client/Minecraft startUseItem ()V
 
-# to switch rendrtargetrs for VR passes
+# to switch rendertargets for VR passes
 mutable field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
 accessible field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
 
@@ -102,3 +101,7 @@ accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
 accessible field net/minecraft/world/level/biome/AmbientParticleSettings probability F
 extendable class net/minecraft/world/level/material/FluidState
 accessible field net/minecraft/world/level/block/state/StateHolder propertiesCodec Lcom/mojang/serialization/MapCodec;
+
+# to init VR
+accessible class net/minecraft/client/ResourceLoadStateTracker$ReloadState
+accessible field net/minecraft/client/ResourceLoadStateTracker$ReloadState reloadReason Lnet/minecraft/client/ResourceLoadStateTracker$ReloadReason;

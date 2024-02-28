@@ -223,20 +223,22 @@ public abstract class GuiVRMixin extends GuiComponent implements GuiExtension {
         RenderSystem.setShaderTexture(0, Screen.GUI_ICONS_LOCATION);
         float f = 16.0F * ClientDataHolderVR.getInstance().vrSettings.menuCrosshairScale;
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-        this.vivecraft$drawCentredTexturedModalRect(mouseX, mouseY, f, f, 0, 0, 15, 15);
+        this.vivecraft$drawCentredTexturedModalRect(mouseX, mouseY, f, f, 0, 0, 15F / 256F, 15F / 256F);
         RenderSystem.disableBlend();
     }
 
     @Unique
-    public void vivecraft$drawCentredTexturedModalRect(int centreX, int centreY, float width, float height, int u, int v, int texWidth, int texHeight) {
-        float f = 0.00390625F;
-        float f1 = 0.00390625F;
+    public void vivecraft$drawCentredTexturedModalRect(int centreX, int centreY, float width, float height, float uMin, float vMin, float uMax, float vMax) {
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY + height / 2.0F, this.getBlitOffset()).uv((float) (u) * f, (float) (v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY + height / 2.0F, this.getBlitOffset()).uv((float) (u + texWidth) * f, (float) (v + texHeight) * f1).endVertex();
-        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY - height / 2.0F, this.getBlitOffset()).uv((float) (u + texWidth) * f, (float) (v) * f1).endVertex();
-        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY - height / 2.0F, this.getBlitOffset()).uv((float) (u) * f, (float) (v) * f1).endVertex();
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY + height / 2.0F, 0)
+            .uv(uMin, vMin).endVertex();
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY + height / 2.0F, 0)
+            .uv(uMin, vMax).endVertex();
+        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY - height / 2.0F, 0)
+            .uv(uMax, vMax).endVertex();
+        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY - height / 2.0F, 0)
+            .uv(uMax, vMin).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
     }
 }

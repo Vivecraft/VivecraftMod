@@ -1,4 +1,4 @@
-package org.vivecraft.mod_compat_vr.iris.mixin;
+package org.vivecraft.mod_compat_vr.iris.mixin.coderbot;
 
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.PipelineManager;
@@ -50,8 +50,8 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Override
     @Unique
-    public void vivecraft$setShadowRenderTargets(ShadowRenderTargets targets) {
-        vivecraft$shadowRenderTargets = targets;
+    public void vivecraft$setShadowRenderTargets(Object targets) {
+        vivecraft$shadowRenderTargets = (ShadowRenderTargets) targets;
     }
 
     @Unique
@@ -185,13 +185,13 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Override
     @Unique
-    public WorldRenderingPipeline vivecraft$getVRPipeline(RenderPass pass) {
+    public Object vivecraft$getVRPipeline(RenderPass pass) {
         return vivecraft$vrPipelinesCurrentDimension.get(pass);
     }
 
     @Override
     @Unique
-    public WorldRenderingPipeline vivecraft$getVanillaPipeline() {
+    public Object vivecraft$getVanillaPipeline() {
         return vivecraft$vanillaPipeline;
     }
 }

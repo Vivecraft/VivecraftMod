@@ -15,12 +15,10 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
-import org.vivecraft.client_vr.provider.ControllerType;
 
 public class VivecraftItemRendering {
     private static final ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
@@ -47,7 +45,7 @@ public class VivecraftItemRendering {
                 }
             } else if (item instanceof MapItem || pStack.is(ItemTags.VIVECRAFT_MAPS)) {
                 rendertype = VivecraftItemTransformType.Map;
-            } else if (pStack.getUseAnimation() == UseAnim.BOW) {
+            } else if (pStack.getUseAnimation() == UseAnim.BOW && !pStack.is(ItemTags.VIVECRAFT_BOW_EXCLUSION)) {
                 rendertype = VivecraftItemTransformType.Bow_Seated;
 
                 if (dh.bowTracker.isActive((LocalPlayer) pPlayer)) {
@@ -95,6 +93,10 @@ public class VivecraftItemRendering {
         double translateY = 0.05;
         double translateZ = 0;
         boolean useLeftHandModelinLeftHand = false;
+
+        if (dh.climbTracker.isClaws(pStack)) {
+            scale = 0.4D;
+        }
 
 //        pMatrixStack.mulPose(preRotation);
         pMatrixStack.translate(translateX, translateY, translateZ);
@@ -329,20 +331,6 @@ public class VivecraftItemRendering {
                     rotation.mul(Vector3f.XP.rotationDegrees(40.0F));
                     scale = 0.8F;
                 } else if (rendertype == VivecraftItemTransformType.Tool) {
-                    boolean isClaws = dh.climbTracker.isClaws(pStack) && dh.climbTracker.isClimbeyClimb();
-
-                    if (isClaws) {
-                        rotation.mul(Vector3f.XP.rotationDegrees((float) (-gunAngle)));
-                        scale = 0.3F;
-                        translateZ += 0.075F;
-                        translateY += 0.02F;
-                        translateX += 0.03F;
-
-                        if (VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT) && mainHand || VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.LEFT) && !mainHand) {
-                            translateZ += -0.2F;
-                        }
-                    }
-
                     if (pStack.getItem() instanceof ArrowItem || pStack.is(ItemTags.VIVECRAFT_ARROWS)) {
                         preRotation = Vector3f.ZP.rotationDegrees(-180.0F);
                         rotation.mul(Vector3f.XP.rotationDegrees((float) (-gunAngle)));

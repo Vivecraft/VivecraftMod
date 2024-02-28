@@ -19,7 +19,7 @@ public class UpdateScreen extends Screen {
     private TextScrollWidget text;
 
     public UpdateScreen() {
-        super(Component.literal("New Update Available"));
+        super(Component.translatable("vivecraft.messages.updateTitle"));
         lastScreen = Minecraft.getInstance().screen;
     }
 
@@ -27,29 +27,17 @@ public class UpdateScreen extends Screen {
 
         text = this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, UpdateChecker.changelog));
 
-        this.addRenderableWidget(new Button(
-            this.width / 2 - 155, this.height - 56, 150, 20,
-            Component.literal("Download from Modrinth"),
-            button ->
-                this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-                    if (bl) {
-                        Util.getPlatform().openUri("https://modrinth.com/mod/vivecraft");
-                    }
-                    this.minecraft.setScreen(this);
-                }, "https://modrinth.com/mod/vivecraft", true))
-        ));
+        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.downloadfrom", Component.literal("Modrinth")),
+            ConfirmLinkScreen.confirmLink("https://modrinth.com/mod/vivecraft", this, true))
+            .pos(this.width / 2 - 155, this.height - 56)
+            .size(150, 20)
+            .build());
 
-        this.addRenderableWidget(new Button(
-            this.width / 2 + 5, this.height - 56, 150, 20,
-            Component.literal("Download from Curseforge"),
-            button ->
-                this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-                    if (bl) {
-                        Util.getPlatform().openUri("https://www.curseforge.com/minecraft/mc-mods/vivecraft");
-                    }
-                    this.minecraft.setScreen(this);
-                }, "https://www.curseforge.com/minecraft/mc-mods/vivecraft", true))
-        ));
+        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.downloadfrom", Component.literal("CurseForge")),
+            ConfirmLinkScreen.confirmLink("https://www.curseforge.com/minecraft/mc-mods/vivecraft", this, true))
+            .pos(this.width / 2 + 5, this.height - 56)
+            .size(150, 20)
+            .build());
 
         this.addRenderableWidget(new Button(
             this.width / 2 - 75, this.height - 32,

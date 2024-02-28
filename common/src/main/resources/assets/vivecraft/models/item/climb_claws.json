@@ -1,0 +1,153 @@
+{
+  "textures": {
+    "claws": "vivecraft:item/climb_claws"
+  },
+  "elements": [
+    {
+      "from": [5.5, 9.5, 12],
+      "to": [10.5, 10.5, 13],
+      "faces": {
+        "up": {
+          "uv": [5, 12, 10, 13],
+          "texture": "#claws"
+        },
+        "down": {
+          "uv": [5, 14, 10, 15],
+          "texture": "#claws"
+        },
+        "south": {
+          "uv": [5, 13, 10, 14],
+          "texture": "#claws"
+        },
+        "west": {
+          "uv": [4, 12, 5, 13],
+          "texture": "#claws",
+          "rotation": 270
+        },
+        "east": {
+          "uv": [10, 12, 11, 13],
+          "texture": "#claws",
+          "rotation": 90
+        }
+      }
+    },
+    {
+      "from": [5.5, 8.5, 9],
+      "to": [10.5, 10.5, 12],
+      "faces": {
+        "up": {
+          "uv": [5, 9, 10, 12],
+          "texture": "#claws"
+        },
+        "down": {
+          "uv": [5, 4, 10, 7],
+          "texture": "#claws"
+        },
+        "north": {
+          "uv": [10, 9, 5, 7],
+          "texture": "#claws"
+        },
+        "south": {
+          "uv": [5, 14, 10, 16],
+          "texture": "#claws"
+        },
+        "west": {
+          "uv": [3, 9, 5, 12],
+          "texture": "#claws",
+          "rotation": 270
+        },
+        "east": {
+          "uv": [10, 9, 12, 12],
+          "texture": "#claws",
+          "rotation": 90
+        }
+      }
+    },
+    {
+      "from": [6.5, 9.5, 5],
+      "to": [7.5, 10.5, 9],
+      "faces": {
+        "up": {
+          "uv": [1, 2, 2, 6],
+          "texture": "#claws"
+        },
+        "down": {
+          "uv": [4, 6, 3, 2],
+          "texture": "#claws"
+        },
+        "north": {
+          "uv": [2, 2, 1, 1],
+          "texture": "#claws"
+        },
+        "west": {
+          "uv": [0, 2, 1, 6],
+          "texture": "#claws",
+          "rotation": 270
+        },
+        "east": {
+          "uv": [2, 2, 3, 6],
+          "texture": "#claws",
+          "rotation": 90
+        }
+      }
+    },
+    {
+      "from": [8.5, 9.5, 5],
+      "to": [9.5, 10.5, 9],
+      "faces": {
+        "up": {
+          "uv": [13, 2, 14, 6],
+          "texture": "#claws"
+        },
+        "down": {
+          "uv": [16, 6, 15, 2],
+          "texture": "#claws"
+        },
+        "north": {
+          "uv": [14, 2, 13, 1],
+          "texture": "#claws"
+        },
+        "west": {
+          "uv": [12, 2, 13, 6],
+          "texture": "#claws",
+          "rotation": 270
+        },
+        "east": {
+          "uv": [14, 2, 15, 6],
+          "texture": "#claws",
+          "rotation": 90
+        }
+      }
+    }
+  ],
+  "gui_light": "front",
+  "display": {
+    "firstperson_righthand": {
+      "rotation": [30, -15, -15],
+      "scale": [0.68, 0.68, 0.68],
+      "translation": [-2, 4, 0]
+    },
+    "fixed": {
+      "rotation": [270, 180, 0],
+      "translation": [0, 0, 2]
+    },
+    "ground": {
+      "rotation": [90, 0, 0],
+      "scale": [0.5, 0.5, 0.5],
+      "translation": [0, 3, 0]
+    },
+    "gui": {
+      "rotation": [90, 0, 0],
+      "translation": [-0.5, 1, 0]
+    },
+    "head": {
+      "scale": [3, 3, 3],
+      "translation": [0, 0, -8]
+    },
+    "thirdperson_righthand": {
+      "rotation": [0, 0, 270],
+      "scale": [0.94, 0.94, 0.94],
+      "translation": [0.09, -2, 0]
+    }
+  }
+}

@@ -44,6 +44,7 @@ public class ClientDataHolderVR {
     public VRSettings vrSettings;
     public boolean integratedServerLaunchInProgress = false;
     public boolean grabScreenShot = false;
+    public String incorrectGarbageCollector = "";
     public long frameIndex = 0L;
     public RenderPass currentPass;
     public int tickCounter;

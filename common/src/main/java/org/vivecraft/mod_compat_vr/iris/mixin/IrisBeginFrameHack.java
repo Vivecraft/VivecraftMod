@@ -11,7 +11,9 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 @Pseudo
 @Mixin(targets = {
     "net.coderbot.iris.uniforms.SystemTimeUniforms$FrameCounter",
-    "net.coderbot.iris.uniforms.SystemTimeUniforms$Timer"
+    "net.coderbot.iris.uniforms.SystemTimeUniforms$Timer",
+    "net.irisshaders.iris.uniforms.SystemTimeUniforms$FrameCounter",
+    "net.irisshaders.iris.uniforms.SystemTimeUniforms$Timer"
 })
 public class IrisBeginFrameHack {
     // only count frames from the first RenderPass, so that all RenderPasses have the same frame counter

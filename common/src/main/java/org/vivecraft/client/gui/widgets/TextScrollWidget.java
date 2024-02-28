@@ -3,7 +3,6 @@ package org.vivecraft.client.gui.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -30,7 +29,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, String text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedChars = ComponentRenderUtils.wrapComponents(Component.literal(text), width - scrollBarWidth * 2, Minecraft.getInstance().font);
+        formattedChars = Minecraft.getInstance().font.split(Component.literal(text), width - scrollBarWidth * 2);
 
         initScroll();
     }
@@ -38,7 +37,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedChars = ComponentRenderUtils.wrapComponents(text, width - scrollBarWidth * 2, Minecraft.getInstance().font);
+        formattedChars = Minecraft.getInstance().font.split(text, width - scrollBarWidth * 2);
         initScroll();
     }
 
@@ -140,10 +139,10 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseScrolled(double x, double y, double scrollAmount) {
-        if (scrollAmount < 0.0 && currentLine < scrollSteps) {
+    public boolean mouseScrolled(double x, double y, double scrollAmountY) {
+        if (scrollAmountY < 0.0 && currentLine < scrollSteps) {
             currentLine++;
-        } else if (scrollAmount > 0.0 && currentLine > 0) {
+        } else if (scrollAmountY > 0.0 && currentLine > 0) {
             currentLine--;
         } else {
             // scroll bar on limit, didn't consume the input

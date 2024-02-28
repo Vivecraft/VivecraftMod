@@ -297,11 +297,26 @@ public abstract class GameRendererVRMixin
         }
     }
 
+    // do remap because of forge
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
     public void vivecraft$matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
         this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov().get()));
         RenderSystem.getModelViewStack().setIdentity();
         RenderSystem.applyModelViewMatrix();
+    }
+
+    @Inject(at = @At("HEAD"), method = "shouldRenderBlockOutline", cancellable = true)
+    public void vivecraft$shouldDrawBlockOutline(CallbackInfoReturnable<Boolean> cir) {
+        if (VRState.vrRunning) {
+            if (vivecraft$DATA_HOLDER.teleportTracker.isAiming() || vivecraft$DATA_HOLDER.vrSettings.renderBlockOutlineMode == VRSettings.RenderPointerElement.NEVER) {
+                // don't render outline when aiming with tp, or the user disabled it
+                cir.setReturnValue(false);
+            } else if (vivecraft$DATA_HOLDER.vrSettings.renderBlockOutlineMode == VRSettings.RenderPointerElement.ALWAYS) {
+                // skip vanilla check and always render the outline
+                cir.setReturnValue(true);
+            }
+            // VRSettings.RenderPointerElement.WITH_HUD uses the vanilla behaviour
+        }
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"), method = "render")

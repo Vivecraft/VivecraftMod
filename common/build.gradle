@@ -7,44 +7,38 @@ loom {
 }
 
 dependencies {
+    compileOnly project(':stubs')
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-    modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
+    modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modCompileOnly "maven.modrinth:sodium:mc1.19.2-0.4.4"
-    modCompileOnly "maven.modrinth:sodium:mc1.19.3-0.4.9"
-    modCompileOnly "883067831485366304:1076634925077364786:sodium-fabric-mc1.19.3-0.4.10rev.c131708-dirty:jar"
-    modCompileOnly("maven.modrinth:rubidium:0.6.1")
-    compileOnly 'org.joml:joml:1.10.4' //temp sodium
+    modCompileOnly "maven.modrinth:sodium:mc1.19.4-0.4.10"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.6.5+1.19.2"
+    modCompileOnly "maven.modrinth:iris:1.6.11+1.19.4"
 
     // for REI compat
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:9.1.619"
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:11.0.683") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
-    modApi("com.github.Virtuoel:Pehkui:3.7.7", { exclude group: "net.fabricmc.fabric-api" })
+    modApi("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // other mods
-    modCompileOnly "maven.modrinth:dynamic-fps:3.2.0"
+    modCompileOnly "maven.modrinth:dynamic-fps:3.4.2"
     // modCompileOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
-    modCompileOnly "maven.modrinth:lithium:mc1.19.2-0.11.1"
-    modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
-    modCompileOnly "maven.modrinth:resolution-control-plus:1.20-3.0.0"
+    // modCompileOnly "maven.modrinth:lithium:mc1.19.4-0.11.1"
+    // modCompileOnly "maven.modrinth:indium:1.0.19+mc1.19.4"
+    modCompileOnly "maven.modrinth:resolution-control-plus:1.19.4-3.0.0"
+    modCompileOnly "maven.modrinth:better-combat:1.7.1+1.19.4-fabric"
 
     // for immersive portals compat
-    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.3.1-1.19') {
-        exclude(group: "net.fabricmc.fabric-api")
-        transitive(false)
-    }
-    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.3.1-1.19') {
-        exclude(group: "net.fabricmc.fabric-api")
-        transitive(false)
-    }
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.7.5-mc1.19.4') { transitive false }
+
+    //for epic fight compat
+    modCompileOnly("maven.modrinth:epic-fight:20.6.3")
 
     // needed dependencies
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
@@ -52,7 +46,6 @@ dependencies {
 
     //LaunchPopup
     implementation 'com.github.fayer3:LaunchPopup:master-SNAPSHOT'
-
 }
 // extract the LaunchPopup classes
 jar {

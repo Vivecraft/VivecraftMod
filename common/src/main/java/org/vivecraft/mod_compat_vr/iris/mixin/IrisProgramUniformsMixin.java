@@ -1,6 +1,5 @@
 package org.vivecraft.mod_compat_vr.iris.mixin;
 
-import net.coderbot.iris.gl.program.ProgramUniforms;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,7 +11,10 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Pseudo
-@Mixin(ProgramUniforms.class)
+@Mixin(targets = {
+    "net.coderbot.iris.gl.program.ProgramUniforms",
+    "net.irisshaders.iris.gl.program.ProgramUniforms"
+})
 public class IrisProgramUniformsMixin {
 
     @Shadow(remap = false)

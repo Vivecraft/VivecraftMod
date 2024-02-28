@@ -1,12 +1,12 @@
-package org.vivecraft.mod_compat_vr.iris.mixin;
+package org.vivecraft.mod_compat_vr.iris.mixin.irisshaders;
 
-import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkProgramOverrides;
-import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkShaderInterface;
-import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisTerrainPass;
-import net.coderbot.iris.pipeline.SodiumTerrainPipeline;
-import net.coderbot.iris.pipeline.WorldRenderingPipeline;
+import net.caffeinemc.mods.sodium.client.gl.shader.GlProgram;
+import net.irisshaders.iris.Iris;
+import net.irisshaders.iris.compat.sodium.impl.shader_overrides.IrisChunkProgramOverrides;
+import net.irisshaders.iris.compat.sodium.impl.shader_overrides.IrisChunkShaderInterface;
+import net.irisshaders.iris.compat.sodium.impl.shader_overrides.IrisTerrainPass;
+import net.irisshaders.iris.pipeline.SodiumTerrainPipeline;
+import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -38,16 +39,16 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
 
     @Override
     @Unique
-    public void vivecraft$createAllPipelinesShadersSodiumProcessing(SodiumTerrainPipeline sodiumTerrainPipeline, Object chunkVertexType, Method createShadersMethod) throws InvocationTargetException, IllegalAccessException {
+    public void vivecraft$createAllPipelinesShadersSodiumProcessing(Object sodiumTerrainPipeline, Object chunkVertexType, Method createShadersMethod) throws InvocationTargetException, IllegalAccessException {
         if (VRState.vrInitialized) {
             WorldRenderPass current = RenderPassManager.wrp;
             RenderPass currentPass = ClientDataHolderVR.getInstance().currentPass;
 
             RenderPassManager.renderPassType = RenderPassType.WORLD_ONLY;
             for (RenderPass renderPass : RenderPass.values()) {
-                Iris.logger.info("Creating VR sodium shaders for RenderPass {}", renderPass);
+                VRSettings.logger.info("Creating VR sodium shaders for RenderPass {}", renderPass);
 
-                WorldRenderingPipeline worldPipeline = ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getVRPipeline(renderPass);
+                WorldRenderingPipeline worldPipeline = (WorldRenderingPipeline) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getVRPipeline(renderPass);
                 // GUI and unused renderPasses don't have a pipeline
                 if (worldPipeline != null) {
                     SodiumTerrainPipeline sodiumPipeline = worldPipeline.getSodiumTerrainPipeline();
@@ -62,8 +63,8 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
             }
 
             RenderPassManager.setVanillaRenderPass();
-            Iris.logger.info("Creating sodium shaders for vanilla RenderPass");
-            createShadersMethod.invoke(this, ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getVanillaPipeline().getSodiumTerrainPipeline(), chunkVertexType);
+            VRSettings.logger.info("Creating sodium shaders for vanilla RenderPass");
+            createShadersMethod.invoke(this, ((WorldRenderingPipeline) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getVanillaPipeline()).getSodiumTerrainPipeline(), chunkVertexType);
             if (current != null) {
                 RenderPassManager.setWorldRenderPass(current);
                 ClientDataHolderVR.getInstance().currentPass = currentPass;

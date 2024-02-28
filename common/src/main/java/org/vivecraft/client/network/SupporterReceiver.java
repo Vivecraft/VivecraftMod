@@ -12,28 +12,35 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class PatreonReceiver {
+public class SupporterReceiver {
     private static final Object lock = new Object();
     private static final List<Player> queuedPlayers = new LinkedList<>();
     private static Map<String, Integer> cache;
     private static boolean downloadStarted;
     private static boolean downloadFailed;
 
-    private static void fileDownloadFinished(String url, String data) {
+    private static void fileDownloadFinished(String url, String data, boolean addData) {
         synchronized (lock) {
             if (data != null) {
                 try {
-                    HashMap<String, Integer> hashmap = new HashMap<>();
-                    String[] astring = data.split("\\r?\\n");
+                    Map<String, Integer> userMap = new HashMap<>();
+                    if (addData) {
+                        userMap = cache;
+                    }
 
-                    for (String s1 : astring) {
+                    String[] lines = data.split("\\r?\\n");
+
+                    for (String user : lines) {
+                        if (user.isEmpty()) {
+                            continue;
+                        }
                         try {
-                            String[] astring1 = s1.split(":");
-                            int i = Integer.parseInt(astring1[1]);
-                            hashmap.put(astring1[0], i);
+                            String[] bits = user.split(":");
+                            int i = Integer.parseInt(bits[1]);
+                            userMap.put(bits[0].toLowerCase(), i);
 
                             for (Player player : queuedPlayers) {
-                                if (astring1[0].equalsIgnoreCase(player.getGameProfile().getName())) {
+                                if (bits[0].equalsIgnoreCase(player.getGameProfile().getName())) {
                                     VRPlayersClient.getInstance().setHMD(player.getUUID(), i);
                                 }
                             }
@@ -42,7 +49,7 @@ public class PatreonReceiver {
                         }
                     }
 
-                    cache = hashmap;
+                    cache = userMap;
                 } catch (Exception exception1) {
                     System.out.println("Error parsing data: " + url + ", " + exception1.getClass().getName() + ": " + exception1.getMessage());
                     downloadFailed = true;
@@ -64,18 +71,21 @@ public class PatreonReceiver {
 
                     if (!downloadStarted) {
                         downloadStarted = true;
-                        String s = "http://www.vivecraft.org/patreon/current.txt";
+                        String url1 = "https://www.vivecraft.org/patreon/current.txt";
+                        String url2 = "https://raw.githubusercontent.com/Vivecraft/VivecraftSupporters/supporters/supporters.txt";
                         new Thread(() -> {
                             try {
-                                String value = IOUtils.toString(new URL(s), StandardCharsets.UTF_8);
-                                fileDownloadFinished(s, value);
+                                String value1 = IOUtils.toString(new URL(url1), StandardCharsets.UTF_8);
+                                String value2 = IOUtils.toString(new URL(url2), StandardCharsets.UTF_8);
+                                fileDownloadFinished(url1, value1, false);
+                                fileDownloadFinished(url2, value2, true);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
                         }).start();
                     }
                 } else {
-                    VRPlayersClient.getInstance().setHMD(p.getUUID(), cache.getOrDefault(p.getGameProfile().getName(), 0));
+                    VRPlayersClient.getInstance().setHMD(p.getUUID(), cache.getOrDefault(p.getGameProfile().getName().toLowerCase(), 0));
                 }
             }
         }

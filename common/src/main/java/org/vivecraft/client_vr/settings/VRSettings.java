@@ -110,6 +110,12 @@ public class VRSettings {
         AUTO // only for flying
     }
 
+    public enum RealisticJump implements OptionEnum<RealisticJump> {
+        OFF,
+        ON,
+        AUTO
+    }
+
     public enum MenuWorld implements OptionEnum<MenuWorld> {
         BOTH,
         CUSTOM,
@@ -156,7 +162,7 @@ public class VRSettings {
     @SettingField
     public int version = UNKNOWN_VERSION;
 
-    @SettingField
+    @SettingField(VrOptions.VR_PLUGIN)
     public VRProvider stereoProviderPluginID = VRProvider.OPENVR;
     public boolean storeDebugAim = false;
     @SettingField
@@ -251,7 +257,7 @@ public class VRSettings {
     @SettingField
     public float crawlThreshold = 0.82f;
     @SettingField(VrOptions.REALISTIC_JUMP)
-    public boolean realisticJumpEnabled = true;
+    public RealisticJump realisticJumpEnabled = RealisticJump.AUTO;
     @SettingField(VrOptions.REALISTIC_SNEAK)
     public boolean realisticSneakEnabled = true;
     @SettingField(VrOptions.REALISTIC_CLIMB)
@@ -260,6 +266,8 @@ public class VRSettings {
     public boolean realisticSwimEnabled = true;
     @SettingField(VrOptions.REALISTIC_ROW)
     public boolean realisticRowEnabled = true;
+    @SettingField(VrOptions.REALISTIC_DISMOUNT)
+    public boolean realisticDismountEnabled = true;
     @SettingField(VrOptions.BACKPACK_SWITCH)
     public boolean backpackSwitching = true;
     @SettingField(VrOptions.PHYSICAL_GUI)
@@ -307,6 +315,8 @@ public class VRSettings {
     public float renderScaleFactor = 1.0f;
     @SettingField(VrOptions.MIRROR_DISPLAY)
     public MirrorMode displayMirrorMode = MirrorMode.CROPPED;
+    @SettingField(VrOptions.MIRROR_CROP)
+    public float mirrorCrop = 0.15F;
     @SettingField(VrOptions.MIRROR_EYE)
     public boolean displayMirrorLeftEye = false;
     @SettingField(VrOptions.MIRROR_CENTER_SMOOTH)
@@ -396,6 +406,8 @@ public class VRSettings {
     public boolean seatedHudAltMode = true;
     @SettingField(VrOptions.AUTO_OPEN_KEYBOARD)
     public boolean autoOpenKeyboard = false;
+    @SettingField(VrOptions.AUTO_CLOSE_KEYBOARD)
+    public boolean autoCloseKeyboard = true;
     @SettingField
     public int forceHardwareDetection = 0; // 0 = off, 1 = vive, 2 = oculus
     @SettingField(VrOptions.RADIAL_MODE_HOLD)
@@ -436,16 +448,22 @@ public class VRSettings {
     public boolean showServerPluginMissingMessageAlways = true;
     @SettingField(VrOptions.CHAT_MESSAGE_STENCIL)
     public boolean showChatMessageStencil = true;
-    @SettingField
+    @SettingField(value = VrOptions.VR_ENABLED, config = "vrEnabled")
     public boolean vrEnabled = false;
+    @SettingField(VrOptions.VR_REMEMBER_ENABLED)
+    public boolean rememberVr = true;
     @SettingField(VrOptions.VR_HOTSWITCH)
     public boolean vrHotswitchingEnabled = true;
-    @SettingField
+    @SettingField(value = VrOptions.VR_TOGGLE_BUTTON_VISIBLE, config = "vrToggleButtonEnabled")
     public boolean vrToggleButtonEnabled = true;
-    @SettingField
+    @SettingField(value = VrOptions.VR_SETTINGS_BUTTON_VISIBLE, config = "vrSettingsButtonEnabled")
     public boolean vrSettingsButtonEnabled = true;
-    @SettingField
+    @SettingField(value = VrOptions.VR_SETTINGS_BUTTON_POSITION, config = "vrSettingsButtonPositionLeft")
     public boolean vrSettingsButtonPositionLeft = true;
+    @SettingField
+    public boolean disableGarbageCollectorMessage = false;
+    @SettingField
+    public boolean selfButtSparklesInFirstPerson = false;
 
     /**
      * This isn't actually used, it's only a dummy field to save the value from vanilla Options.
@@ -883,11 +901,19 @@ public class VRSettings {
     }
 
     public String getButtonDisplayString(VrOptions par1EnumOptions) {
+        return getButtonDisplayString(par1EnumOptions, false);
+    }
+
+    public String getButtonDisplayString(VrOptions par1EnumOptions, boolean valueOnly) {
         String var2 = I18n.get("vivecraft.options." + par1EnumOptions.name());
 
         String var3 = var2 + ": ";
         String var4 = var3;
         String var5;
+
+        if (valueOnly) {
+            var4 = "";
+        }
 
         try {
             var mapping = fieldEnumMap.get(par1EnumOptions);
@@ -1030,6 +1056,15 @@ public class VRSettings {
 
     public enum VrOptions {
         DUMMY(false, true), // Dummy
+        VR_PLUGIN(false, true), // vr plugin to use
+        VR_ENABLED(false, true) { // vr or nonvr
+
+            @Override
+            void onOptionChange() {
+                VRState.vrEnabled = ClientDataHolderVR.getInstance().vrSettings.vrEnabled;
+            }
+        },
+        VR_REMEMBER_ENABLED(false, true), // restore vr state on startup
         HUD_SCALE(true, false, 0.35f, 2.5f, 0.01f, -1), // Head HUD Size
         HUD_DISTANCE(true, false, 0.25f, 5.0f, 0.01f, 2) { // Head HUD Distance
 
@@ -1159,6 +1194,7 @@ public class VRSettings {
         SHOW_PLUGIN_MISSING(false, true, "vivecraft.options.always", "vivecraft.options.once"),
         CHAT_MESSAGE_STENCIL(false, true), // warning for other mod using stencil
         AUTO_OPEN_KEYBOARD(false, true), // Always Open Keyboard
+        AUTO_CLOSE_KEYBOARD(false, true), // Close Keyboard on Screenchange
         RADIAL_MODE_HOLD(false, true, "vivecraft.options.hold", "vivecraft.options.press"), // Radial Menu Mode
         PHYSICAL_KEYBOARD(false, true, "vivecraft.options.keyboard.physical", "vivecraft.options.keyboard.pointer"), // Keyboard Type
         PHYSICAL_KEYBOARD_SCALE(true, false, 0.75f, 1.5f, 0.01f, -1) { // Keyboard Size
@@ -1196,6 +1232,9 @@ public class VRSettings {
             }
         },
         HUD_MAX_GUI_SCALE(false, true), // force HUD to render with max GUI scale
+        VR_TOGGLE_BUTTON_VISIBLE(false, true), // toggle in main menu
+        VR_SETTINGS_BUTTON_VISIBLE(false, true), // setting button in options
+        VR_SETTINGS_BUTTON_POSITION(false, true, "vivecraft.options.left", "vivecraft.options.right"), // setting button position
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
         LOW_HEALTH_INDICATOR(false, true), // red low health pulse
@@ -1225,6 +1264,7 @@ public class VRSettings {
                 }
             }
         },
+        MIRROR_CROP(true, false, 0.0f, 0.25f, 0.01f, -1), // crop amount for mirror,
         MIRROR_EYE(false, true, "vivecraft.options.left", "vivecraft.options.right"), // Mirror Eye
         MIRROR_CENTER_SMOOTH(true, false, 0.0f, 1.0f, 0.1f, 1) {
             @Override
@@ -1580,6 +1620,7 @@ public class VRSettings {
         REALISTIC_CLIMB(false, true), // Roomscale Climbing
         REALISTIC_SWIM(false, true), // Roomscale Swimming
         REALISTIC_ROW(false, true), // Roomscale Rowing
+        REALISTIC_DISMOUNT(false, true), // Roomscale Dismounting
         WALK_MULTIPLIER(true, false, 1f, 10f, 0.1f, 1), // Walking Multiplier
         FREEMOVE_MODE(false, true) { // Free Move Type
 
@@ -2104,6 +2145,7 @@ public class VRSettings {
             registerSetting(VrOptions.TELEPORT_DOWN_LIMIT, "teleportLimitDown", () -> vrTeleportDownLimit);
             registerSetting(VrOptions.TELEPORT_HORIZ_LIMIT, "teleportLimitHoriz", () -> vrTeleportHorizLimit);
             registerSetting(VrOptions.WORLD_SCALE, "worldScale", () -> worldScale);
+            registerSetting(VrOptions.THIRDPERSON_ITEMTRANSFORMS, "thirdPersonItems", () -> thirdPersonItems);
         }
 
         private void registerSetting(VrOptions option, String networkName, Supplier<Object> originalValue) {

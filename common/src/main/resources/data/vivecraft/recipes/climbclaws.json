@@ -16,6 +16,7 @@
     "item": "vivecraft:climbclaws",
     "vanillaitem": "minecraft:shears",
     "name": "vivecraft.item.climbclaws",
+    "fallbackname": "Climb Claws",
     "hideflags": 4,
     "unbreakable": true
   }

@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.provider.MCVR;
 
 import static com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate;
 
@@ -22,7 +23,7 @@ public class RenderSystemVRMixin {
 
     @Inject(at = @At("HEAD"), method = "limitDisplayFPS", cancellable = true)
     private static void vivecraft$noFPSlimit(CallbackInfo ci) {
-        if (VRState.vrRunning) {
+        if (VRState.vrRunning && !MCVR.get().capFPS()) {
             ci.cancel();
         }
     }
