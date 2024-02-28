@@ -10,7 +10,7 @@ import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 @Mixin(LiquidBlockRenderer.class)
 public class OptifineLiquidBlockRendererMixin {
     // needed for menuworlds water rendering
-    @Redirect(method = "tesselate", at = @At(value = "INVOKE", target = "Lnet/optifine/Config;isRenderRegions()Z"))
+    @Redirect(method = "tesselate", at = @At(value = "INVOKE", target = "Lnet/optifine/Config;isRenderRegions()Z", remap = false), remap = true)
     private boolean vivecraft$optifineChunkClipping() {
         return OptifineHelper.isRenderRegions() && (ClientDataHolderVR.getInstance().menuWorldRenderer == null || !ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread());
     }

@@ -317,7 +317,7 @@ public class VRPlayer {
 
             VRData tempVrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
 
-            if (dataholder.vehicleTracker.canRoomscaleDismount(minecraft.player)) {
+            if (dataholder.vrSettings.realisticDismountEnabled && dataholder.vehicleTracker.canRoomscaleDismount(minecraft.player)) {
                 Vec3 mountpos = minecraft.player.getVehicle().position();
                 Vec3 head = tempVrdata.getHeadPivot();
                 double distance = Math.sqrt((head.x - mountpos.x) * (head.x - mountpos.x) + (head.z - mountpos.z) * (head.z - mountpos.z));

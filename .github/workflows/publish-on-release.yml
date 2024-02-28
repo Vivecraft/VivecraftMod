@@ -18,7 +18,7 @@ jobs:
           fileNames=(${{ github.event.release.assets[0].name }} ${{ github.event.release.assets[1].name }} ${{ github.event.release.assets[2].name }})
           filePaths=(${{ github.event.release.assets[0].browser_download_url }} ${{ github.event.release.assets[1].browser_download_url }} ${{ github.event.release.assets[2].browser_download_url }})
           
-          for i in 0 1 2
+          for i in 0 1 2 3
           do
             echo "${fileNames[i]}"
             echo "${filePaths[i]}"
@@ -29,18 +29,20 @@ jobs:
             if [[ "${fileNames[i]}" == *"fabric"* ]]; then
               echo "FABRIC_FILE_NAME=${fileNames[i]}" >> $GITHUB_OUTPUT
               echo "FABRIC_FILE_PATH=./${fileNames[i]}" >> $GITHUB_OUTPUT
-            fi
-            if [[ "${fileNames[i]}" == *"forge"* ]]; then
+            elif [[ "${fileNames[i]}" == *"neoforge"* ]]; then
+              echo "NEOFORGE_FILE_NAME=${fileNames[i]}" >> $GITHUB_OUTPUT
+              echo "NEOFORGE_FILE_PATH=./${fileNames[i]}" >> $GITHUB_OUTPUT
+            elif  [[ "${fileNames[i]}" == *"forge"* ]]; then
               echo "FORGE_FILE_NAME=${fileNames[i]}" >> $GITHUB_OUTPUT
               echo "FORGE_FILE_PATH=./${fileNames[i]}" >> $GITHUB_OUTPUT
-            fi
-            if [[ "${fileNames[i]}" == *"quilt"* ]]; then
+            elif [[ "${fileNames[i]}" == *"quilt"* ]]; then
               echo "QUILT_FILE_NAME=${fileNames[i]}" >> $GITHUB_OUTPUT
               echo "QUILT_FILE_PATH=./${fileNames[i]}" >> $GITHUB_OUTPUT
             fi
           done
           ls -l
       - run: echo "fabric is ${{ steps.assets.outputs.FABRIC_FILE_NAME }}"
+      - run: echo "neoforge is ${{ steps.assets.outputs.NEOFORGE_FILE_NAME }}"
       - run: echo "forge is ${{ steps.assets.outputs.FORGE_FILE_NAME }}"
       - run: echo "quilt is ${{ steps.assets.outputs.QUILT_FILE_NAME }}"
 
@@ -49,7 +51,7 @@ jobs:
         shell: bash
         run: |
           parse_fabric () {
-            unzip -j "$1" "$2" -d ./fabric
+            unzip -o -j "$1" "$2" -d ./fabric
             deps=false
             bracket=false
             parsedVersion=""
@@ -75,11 +77,29 @@ jobs:
               fi
             done < ./fabric/$2
           }
+          parse_forge () {
+            unzip -o -j "$1" "META-INF/mods.toml" -d ./forge
+            minecraftDep=false
+            minecraftIdReg='modId\s+=\s+"minecraft"'
+            versionRangeReg='versionRange\s+=\s+"(.+?)"'
+            while read -r; do
+              if [[ $REPLY =~ $minecraftIdReg ]]; then
+                minecraftDep=true
+                echo "$REPLY"
+              elif [[ $REPLY =~ $versionRangeReg && $minecraftDep == "true" ]]; then
+                parsedVersion="${BASH_REMATCH[1]}"
+                echo "${BASH_REMATCH[0]}"
+                echo "${BASH_REMATCH[1]}"
+              fi
+            done < ./forge/mods.toml
+          }
           file=""
           if [ -n "${{ steps.assets.outputs.FABRIC_FILE_NAME }}" ]; then
             file="${{ steps.assets.outputs.FABRIC_FILE_NAME }}"
           elif [ -n "${{ steps.assets.outputs.FORGE_FILE_NAME }}" ]; then
             file="${{ steps.assets.outputs.FORGE_FILE_NAME }}"
+          elif [ -n "${{ steps.assets.outputs.NEOFORGE_FILE_NAME }}" ]; then
+            file="${{ steps.assets.outputs.NEOFORGE_FILE_NAME }}"
           else
             file="${{ steps.assets.outputs.QUILT_FILE_NAME }}"
           fi
@@ -120,26 +140,19 @@ jobs:
             loaders_quilt="quilt"
           fi
           loaders_forge="forge"
+          loaders_neoforge="neoforge"
           
           if [ -n "${{ steps.assets.outputs.FABRIC_FILE_NAME }}" ]; then
             parse_fabric ${{ steps.assets.outputs.FABRIC_FILE_NAME }} "fabric.mod.json"
             echo "FABRIC_MC_VERSIONS="${parsedVersion}"" >> $GITHUB_OUTPUT
           fi
           if [ -n "${{ steps.assets.outputs.FORGE_FILE_NAME }}" ]; then
-            unzip -j "${{ steps.assets.outputs.FORGE_FILE_NAME }}" "META-INF/mods.toml" -d ./forge
-            minecraftDep=false
-            minecraftIdReg='modId\s+=\s+"minecraft"'
-            versionRangeReg='versionRange\s+=\s+"(.+?)"'
-            while read -r; do
-              if [[ $REPLY =~ $minecraftIdReg ]]; then
-                minecraftDep=true
-                echo "$REPLY"
-              elif [[ $REPLY =~ $versionRangeReg && $minecraftDep == "true" ]]; then
-                echo "FORGE_MC_VERSIONS="${BASH_REMATCH[1]}"" >> $GITHUB_OUTPUT
-                echo "${BASH_REMATCH[0]}"
-                echo "${BASH_REMATCH[1]}"
-              fi
-            done < ./forge/mods.toml
+            parse_forge ${{ steps.assets.outputs.FORGE_FILE_NAME }}
+            echo "FORGE_MC_VERSIONS="${parsedVersion}"" >> $GITHUB_OUTPUT
+          fi
+          if [ -n "${{ steps.assets.outputs.NEOFORGE_FILE_NAME }}" ]; then
+            parse_forge ${{ steps.assets.outputs.NEOFORGE_FILE_NAME }}
+            echo "NEOFORGE_MC_VERSIONS="${parsedVersion}"" >> $GITHUB_OUTPUT
           fi
           if [ -n "${{ steps.assets.outputs.QUILT_FILE_NAME }}" ]; then
             parse_fabric ${{ steps.assets.outputs.QUILT_FILE_NAME }} "quilt.mod.json"
@@ -151,6 +164,8 @@ jobs:
           
           echo "loaders forge: ${loaders_forge}"
           echo "LOADERS_FORGE=${loaders_forge}" >> $GITHUB_OUTPUT
+          echo "loaders neoforge: ${loaders_neoforge}"
+          echo "LOADERS_NEOFORGE=${loaders_neoforge}" >> $GITHUB_OUTPUT
           
           echo "loaders quilt: ${loaders_quilt}"
           echo "LOADERS_QUILT=${loaders_quilt}" >> $GITHUB_OUTPUT
@@ -160,6 +175,8 @@ jobs:
           echo "VERSION_NAME_FABRIC=${mod_name}-fabric" >> $GITHUB_OUTPUT
           echo "file name forge: '${mod_name}-forge'"
           echo "VERSION_NAME_FORGE=${mod_name}-forge" >> $GITHUB_OUTPUT
+          echo "file name neoforge: '${mod_name}-neoforge'"
+          echo "VERSION_NAME_NEOFORGE=${mod_name}-neoforge" >> $GITHUB_OUTPUT
           echo "file name quilt: '${mod_name}-quilt'"
           echo "VERSION_NAME_QUILT=${mod_name}-quilt" >> $GITHUB_OUTPUT
           
@@ -167,6 +184,7 @@ jobs:
           base_version="$mc_version-${array[2]}"
           echo "MOD_VERSION_FABRIC=${base_version}-fabric" >> $GITHUB_OUTPUT
           echo "MOD_VERSION_FORGE=${base_version}-forge" >> $GITHUB_OUTPUT
+          echo "MOD_VERSION_NEOFORGE=${base_version}-neoforge" >> $GITHUB_OUTPUT
           echo "MOD_VERSION_QUILT=${base_version}-quilt" >> $GITHUB_OUTPUT
           echo "MOD_VERSION=${base_version}" >> $GITHUB_OUTPUT
 
@@ -177,6 +195,9 @@ jobs:
 
       - run: echo "forge mc versions are ${{ steps.version.outputs.FORGE_MC_VERSIONS }}"
       - run: echo "forge mod version ${{ steps.version.outputs.MOD_VERSION_FORGE }}"
+
+      - run: echo "neoforge mc versions are ${{ steps.version.outputs.NEOFORGE_MC_VERSIONS }}"
+      - run: echo "neoforge mod version ${{ steps.version.outputs.MOD_VERSION_NEOFORGE }}"
 
       - run: echo "quilt mc versions are ${{ steps.version.outputs.QUILT_MC_VERSIONS }}"
       - run: echo "quilt mod version ${{ steps.version.outputs.MOD_VERSION_QUILT }}"
@@ -221,6 +242,26 @@ jobs:
           loaders: "${{ steps.version.outputs.LOADERS_FORGE}}"
           #game-versions: "${{ steps.version.outputs.FORGE_MC_VERSIONS }}"
 
+      - name: publish neoforge
+        if: steps.assets.outputs.NEOFORGE_FILE_PATH != ''
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: wGoQDPN5
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: false
+
+          curseforge-id: 667903
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: ${{ steps.assets.outputs.NEOFORGE_FILE_PATH }}
+
+          name: "${{ steps.version.outputs.VERSION_NAME_NEOFORGE }}"
+          version: "${{ steps.version.outputs.MOD_VERSION_NEOFORGE }}"
+          version-type: "${{ steps.version.outputs.RELEASE_TYPE }}"
+
+          loaders: "${{ steps.version.outputs.LOADERS_NEOFORGE}}"
+          #game-versions: "${{ steps.version.outputs.FORGE_MC_VERSIONS }}"
+
       - name: publish quilt
         if: steps.assets.outputs.QUILT_FILE_PATH != ''
         uses: Kir-Antipov/mc-publish@v3.3
@@ -243,18 +284,18 @@ jobs:
 
       # update forge versions json
       - name: checkout repo forge-versions
-        if: steps.assets.outputs.FORGE_FILE_PATH != ''
+        if: steps.assets.outputs.FORGE_FILE_PATH != '' || steps.assets.outputs.NEOFORGE_FILE_PATH != ''
         uses: actions/checkout@v4
         with:
           ref: 'forge-versions'
 
       - name: setup python
-        if: steps.assets.outputs.FORGE_FILE_PATH != ''
+        if: steps.assets.outputs.FORGE_FILE_PATH != '' || steps.assets.outputs.NEOFORGE_FILE_PATH != ''
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: execute py script to update json
+      - name: execute py script to update forge json
         if: steps.assets.outputs.FORGE_FILE_PATH != ''
         run: |
           python -c "
@@ -278,9 +319,49 @@ jobs:
           with open('forge_updates.json', 'w') as outfile:
             outfile.write(json.dumps(jsonContent, indent='\t'))
           " "${{ steps.version.outputs.FORGE_MC_VERSIONS }}" "${{ steps.version.outputs.MOD_VERSION }}" "${{ steps.version.outputs.RELEASE_TYPE }}"
-      - name: push new update json
-        if: steps.assets.outputs.FORGE_FILE_PATH != ''
+
+      - name: execute py script to update neoforge json
+        if: steps.assets.outputs.NEOFORGE_FILE_PATH != ''
+        run: |
+          python -c "
+          import sys, json
+          print(sys.argv)
+          mc_version = sys.argv[1]
+          mod_version = sys.argv[2]
+          release_type = sys.argv[3]
+          jsonContent = {}
+          with open('neoforge_updates.json', 'r') as infile:
+            jsonContent = json.load(infile)
+          for str in mc_version.split(','):
+            version = str.strip('[]\" ')
+            if version != '' and version[-1:] != ')' and version[:1] != '(':
+              jsonContent['promos'][version + '-latest'] = mod_version
+              print('added ' + version + '-latest:' + mod_version)
+              if release_type == 'release':
+                jsonContent['promos'][version + '-recommended'] = mod_version
+                print('added ' + version + '-recommended:' + mod_version)
+          print(json.dumps(jsonContent, indent='\t'))
+          with open('neoforge_updates.json', 'w') as outfile:
+            outfile.write(json.dumps(jsonContent, indent='\t'))
+          " "${{ steps.version.outputs.NEOFORGE_MC_VERSIONS }}" "${{ steps.version.outputs.MOD_VERSION }}" "${{ steps.version.outputs.RELEASE_TYPE }}"
+
+      - name: push new update json forge
+        if: steps.assets.outputs.FORGE_FILE_PATH != '' && steps.assets.outputs.NEOFORGE_FILE_PATH == ''
         uses: EndBug/add-and-commit@v9
         with:
-          message: 'update ${{ steps.version.outputs.FORGE_MC_VERSIONS }} to ${{ steps.version.outputs.MOD_VERSION }}'
+          message: 'update forge ${{ steps.version.outputs.FORGE_MC_VERSIONS }} to ${{ steps.version.outputs.MOD_VERSION }}'
+          push: true
+
+      - name: push new update json neoforge
+        if: steps.assets.outputs.FORGE_FILE_PATH == '' && steps.assets.outputs.NEOFORGE_FILE_PATH != ''
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update neoforge ${{ steps.version.outputs.NEOFORGE_MC_VERSIONS }} to ${{ steps.version.outputs.MOD_VERSION }}'
+          push: true
+
+      - name: push new update json forge+neoforge
+        if: steps.assets.outputs.FORGE_FILE_PATH != '' && steps.assets.outputs.NEOFORGE_FILE_PATH != ''
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'update forge ${{ steps.version.outputs.FORGE_MC_VERSIONS }} to ${{ steps.version.outputs.MOD_VERSION }} and update neoforge ${{ steps.version.outputs.NEOFORGE_MC_VERSIONS }} to ${{ steps.version.outputs.MOD_VERSION }}'
           push: true

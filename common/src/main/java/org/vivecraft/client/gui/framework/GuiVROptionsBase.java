@@ -181,7 +181,14 @@ public abstract class GuiVROptionsBase extends Screen {
     public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
         if (this.reinit) {
             this.reinit = false;
+            VRSettings.VrOptions selected = this.getFocused() instanceof GuiVROptionButton option ? option.getOption() : null;
             this.init();
+            if (selected != null) {
+                List<?> items = this.children().stream().filter(listener -> listener instanceof GuiVROptionButton o && o.getOption() == selected).toList();
+                if (!items.isEmpty()) {
+                    this.setFocused((GuiEventListener) items.get(0));
+                }
+            }
         }
 
         this.renderBackground(poseStack);
@@ -235,12 +242,13 @@ public abstract class GuiVROptionsBase extends Screen {
         return this.visibleList != null ? this.visibleList.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton) : super.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton);
     }
 
-    public boolean mouseScrolled(double pMouseX, double p_94735_, double pMouseY) {
+    @Override
+    public boolean mouseScrolled(double x, double y, double scrollAmountY) {
         if (this.visibleList != null) {
-            this.visibleList.mouseScrolled(pMouseX, p_94735_, pMouseY);
+            this.visibleList.mouseScrolled(x, y, scrollAmountY);
         }
 
-        return super.mouseScrolled(pMouseX, p_94735_, pMouseY);
+        return super.mouseScrolled(x, y, scrollAmountY);
     }
 
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
@@ -252,7 +260,14 @@ public abstract class GuiVROptionsBase extends Screen {
 
             return true;
         } else {
-            return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers) || super.keyPressed(pKeyCode, pScanCode, pModifiers);
+            if (super.keyPressed(pKeyCode, pScanCode, pModifiers)) {
+                if (this.getFocused() instanceof AbstractWidget widget) {
+                    this.actionPerformed(widget);
+                }
+                return true;
+            } else {
+                return this.visibleList != null && this.visibleList.keyPressed(pKeyCode, pScanCode, pModifiers);
+            }
         }
     }
 
@@ -261,20 +276,39 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     private void renderTooltip(PoseStack pMatrixStack, int pMouseX, int pMouseY) {
-        AbstractWidget hover = null;
+        GuiEventListener hover = null;
+
+        if (this.minecraft.getLastInputType().isKeyboard()) {
+            // only show focused tooltip when navigating with keyboard, so a click with the mouse removes it
+            hover = this.getFocused();
+        }
         // find active button
-        for (GuiEventListener child : children()) {
-            if (child instanceof AbstractWidget && child.isMouseOver(pMouseX, pMouseY)) {
-                hover = (AbstractWidget) child;
+        if (hover == null) {
+            for (GuiEventListener child : children()) {
+                if (child instanceof AbstractWidget widget && this.isMouseOver(widget, pMouseX, pMouseY)) {
+                    hover = child;
+                }
             }
         }
         if (hover != null) {
             if (hover instanceof GuiVROption guiHover) {
                 if (guiHover.getOption() != null) {
                     String tooltipString = "vivecraft.options." + guiHover.getOption().name() + ".tooltip";
+                    String tooltip = "";
                     // check if it has a tooltip
                     if (I18n.exists(tooltipString)) {
-                        String tooltip = I18n.get(tooltipString, (Object) null);
+                        tooltip = I18n.get(tooltipString, (Object) null);
+                    }
+
+                    if (dataholder.vrSettings.overrides.hasSetting(guiHover.getOption())) {
+                        VRSettings.ServerOverrides.Setting setting = dataholder.vrSettings.overrides.getSetting(guiHover.getOption());
+                        if (setting.isValueOverridden()) {
+                            tooltip = I18n.get("vivecraft.message.overriddenbyserver") + tooltip;
+                        } else if (setting.isFloat() && (setting.isValueMinOverridden() || setting.isValueMaxOverridden())) {
+                            tooltip = I18n.get("vivecraft.message.limitedbyserver", setting.getValueMin(), setting.getValueMax()) + tooltip;
+                        }
+                    }
+                    if (!tooltip.isEmpty()) {
                         // add format reset at line ends
                         tooltip = tooltip.replace("\n", "§r\n");
 
@@ -292,5 +326,9 @@ public abstract class GuiVROptionsBase extends Screen {
                 }
             }
         }
+    }
+
+    private boolean isMouseOver(AbstractWidget widget, double x, double y) {
+        return widget.visible && x >= widget.getX() && y >= widget.getY() && x < (widget.getX() + widget.getWidth()) && y < (widget.getY() + widget.getHeight());
     }
 }

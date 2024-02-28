@@ -19,7 +19,7 @@ public class UpdateScreen extends Screen {
     private TextScrollWidget text;
 
     public UpdateScreen() {
-        super(Component.literal("New Update Available"));
+        super(Component.translatable("vivecraft.messages.updateTitle"));
         lastScreen = Minecraft.getInstance().screen;
     }
 
@@ -27,7 +27,7 @@ public class UpdateScreen extends Screen {
 
         text = this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, UpdateChecker.changelog));
 
-        this.addRenderableWidget(new Button.Builder(Component.literal("Download from Modrinth"),
+        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.downloadfrom", Component.literal("Modrinth")),
             button ->
                 this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
                     if (bl) {
@@ -39,7 +39,7 @@ public class UpdateScreen extends Screen {
             .size(150, 20)
             .build());
 
-        this.addRenderableWidget(new Button.Builder(Component.literal("Download from Curseforge"),
+        this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.downloadfrom", Component.literal("CurseForge")),
             button ->
                 this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
                     if (bl) {

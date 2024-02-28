@@ -4,7 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.common.utils.math.Quaternion;
 
-public record Pose(Vec3 position, Quaternion orientation) {
+public record Pose(Vec3 position, Quaternion orientation) implements BufferSerializable {
 
     public static Pose deserialize(FriendlyByteBuf byteBuf) {
         return new Pose(CommonNetworkHelper.deserializeFVec3(byteBuf), CommonNetworkHelper.deserializeVivecraftQuaternion(byteBuf));

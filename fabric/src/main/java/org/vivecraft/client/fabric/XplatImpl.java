@@ -9,6 +9,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -93,5 +95,9 @@ public class XplatImpl {
 
     public static BiomeSpecialEffects getBiomeEffects(Biome biome) {
         return biome.getSpecialEffects();
+    }
+
+    public static double getItemEntityReach(double baseRange, ItemStack itemStack, EquipmentSlot slot) {
+        return baseRange;
     }
 }

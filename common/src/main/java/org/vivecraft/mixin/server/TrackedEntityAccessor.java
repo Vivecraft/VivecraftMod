@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Set;
 
-@Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
+@Mixin(targets = "net.minecraft.server.level.ChunkMap$TrackedEntity")
 public interface TrackedEntityAccessor {
 
     @Accessor("seenBy")
