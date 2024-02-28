@@ -52,8 +52,8 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    // modCompileOnly("maven.modrinth:rubidium:0.6.2c")
-    // modCompileOnly("maven.modrinth:oculus:1.19.2-1.6.9")
+    // modCompileOnly("maven.modrinth:rubidium:0.5.6")
+    // modCompileOnly("maven.modrinth:oculus:1.18.2-1.6.4")
 
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.2.2")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.2.2:natives-linux")

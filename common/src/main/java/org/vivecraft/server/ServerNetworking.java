@@ -65,7 +65,7 @@ public class ServerNetworking {
                         }
                     } else {
                         // unsupported version, send notification, and disregard
-                        player.sendSystemMessage(Component.literal("Unsupported vivecraft version, VR features will not work"));
+                        player.sendMessage(new TextComponent("Unsupported vivecraft version, VR features will not work"), Util.NIL_UUID);
                         if (ServerConfig.debug.get()) {
                             LOGGER.info("{} networking not supported. client range [{},{}], server range [{},{}]",
                                 player.getName().getString(),

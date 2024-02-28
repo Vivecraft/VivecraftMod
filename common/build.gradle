@@ -20,10 +20,10 @@ dependencies {
 
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.6.11+1.19.2"
+    modCompileOnly "maven.modrinth:iris:1.6.11+1.18.2"
 
     // for REI compat
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:9.1.682") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:8.3.681") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
     modApi("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
@@ -31,16 +31,16 @@ dependencies {
     // other mods
     modCompileOnly "maven.modrinth:dynamic-fps:3.4.2"
     // modCompileOnly("com.simibubi.create:create-fabric-1.19.2:0.5.0.i-969+1.19.2")
-    // modCompileOnly "maven.modrinth:lithium:mc1.19.2-0.11.1"
-    // modCompileOnly "maven.modrinth:indium:1.0.9+mc1.19.2"
+    // modCompileOnly "maven.modrinth:lithium:mc1.18.2-0.10.3"
+    // modCompileOnly "maven.modrinth:indium:1.0.7+mc1.18.2"
     modCompileOnly "maven.modrinth:resolution-control-plus:1.19.4-3.0.0"
-    modCompileOnly "maven.modrinth:better-combat:1.7.1+1.19-fabric"
+    modCompileOnly "maven.modrinth:better-combat:1.6.2+1.18.2-fabric"
 
     // for immersive portals compat
-    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.3.1-1.19') { transitive false }
+    modCompileOnly('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v1.4.11-1.18') { transitive false }
 
     //for epic fight compat
-    modCompileOnly("maven.modrinth:epic-fight:19.5.22")
+    modCompileOnly("maven.modrinth:epic-fight:18.5.22")
 
     // needed dependencies
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")

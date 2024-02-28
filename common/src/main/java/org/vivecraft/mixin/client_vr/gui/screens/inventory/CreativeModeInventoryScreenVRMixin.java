@@ -52,13 +52,13 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
 
         if (tab == CreativeModeTab.TAB_TOOLS || tab == null) {
             ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-            boots.setHoverName(Component.translatable("vivecraft.item.jumpboots"));
+            boots.setHoverName(new TranslatableComponent("vivecraft.item.jumpboots"));
             boots.getTag().putBoolean("Unbreakable", true);
             boots.getTag().putInt("HideFlags", 4);
             boots.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, 9233775);
 
             ItemStack claws = new ItemStack(Items.SHEARS);
-            claws.setHoverName(Component.translatable("vivecraft.item.climbclaws"));
+            claws.setHoverName(new TranslatableComponent("vivecraft.item.climbclaws"));
             claws.getTag().putBoolean("Unbreakable", true);
             claws.getTag().putInt("HideFlags", 4);
 

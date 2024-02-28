@@ -257,10 +257,10 @@ public class SwingTracker extends Tracker {
                                 || item.useOn(new UseOnContext(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit)).shouldSwing())) {
                             // don't try to break crops with hoes
                             // actually use the item on the block
-                            boolean useSuccessful = this.mc.gameMode.useItemOn(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit).shouldSwing();
+                            boolean useSuccessful = this.mc.gameMode.useItemOn(player, (ClientLevel) player.level, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit).shouldSwing();
                             if (itemstack.is(ItemTags.VIVECRAFT_SCYTHES) && !useSuccessful) {
                                 // some scythes just need to be used
-                                this.mc.gameMode.useItem(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+                                this.mc.gameMode.useItem(player, player.level, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
                             }
                         }
                         // roomscale noteblocks

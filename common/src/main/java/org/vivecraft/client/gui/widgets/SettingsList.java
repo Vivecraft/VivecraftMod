@@ -13,6 +13,8 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.vivecraft.client.gui.framework.GuiVROptionSlider;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -70,7 +72,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                     tooltipPrefix = I18n.get("vivecraft.message.limitedbyserver", setting.getValueMin(), setting.getValueMax());
                 }
             }
-            tooltip = Component.literal(tooltipPrefix + I18n.get(tooltipString, (Object) null));
+            tooltip = new TextComponent(tooltipPrefix + I18n.get(tooltipString, (Object) null));
         } else {
             tooltip = null;
         }
@@ -95,10 +97,10 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             // regular button
             widget = new Button(
                 0, 0, WidgetEntry.valueButtonWidth, 20,
-                Component.literal(dh.vrSettings.getButtonDisplayString(option, true)),
+                new TextComponent(dh.vrSettings.getButtonDisplayString(option, true)),
                 button -> {
                     dh.vrSettings.setOptionValue(option);
-                    button.setMessage(Component.literal(dh.vrSettings.getButtonDisplayString(option, true)));
+                    button.setMessage(new TextComponent(dh.vrSettings.getButtonDisplayString(option, true)));
                 },
                 (button, poseStack, x, y) -> {
                     if (tooltip != null) {
@@ -107,7 +109,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
                 });
         }
 
-        BaseEntry entry = new WidgetEntry(Component.translatable(optionString), widget);
+        BaseEntry entry = new WidgetEntry(new TranslatableComponent(optionString), widget);
         if (dh.vrSettings.overrides.hasSetting(option) && dh.vrSettings.overrides.getSetting(option).isValueOverridden()) {
             entry.setActive(false);
         }

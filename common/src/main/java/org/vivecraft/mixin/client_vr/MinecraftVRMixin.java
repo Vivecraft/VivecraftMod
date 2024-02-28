@@ -271,7 +271,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "lambda$new$2", remap = false, require = 0, expect = 0)
+    @Inject(at = @At("TAIL"), method = "lambda$new$1", remap = false, require = 0, expect = 0)
     private void vivecraft$showGarbageCollectorScreenForge(CallbackInfo ci) {
         if ("forge".equals(Xplat.getModloader())) {
             vivecraft$showGarbageCollectorScreen();
@@ -777,11 +777,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         for (int i = 0; i < VivecraftVRMod.INSTANCE.keyQuickCommands.length; i++) {
             if (VivecraftVRMod.INSTANCE.keyQuickCommands[i].consumeClick()) {
                 String command = ClientDataHolderVR.getInstance().vrSettings.vrQuickCommands[i];
-                if (command.startsWith("/")) {
-                    this.player.commandSigned(command.substring(1), Component.empty());
-                } else {
-                    this.player.chatSigned(command, Component.empty());
-                }
+                this.player.chat(command);
             }
         }
     }
@@ -958,7 +954,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             Minecraft.getInstance().getSoundManager().reload();
         }
         resizeDisplay();
-        window.updateVsync(options.enableVsync().get());
+        window.updateVsync(options.enableVsync);
     }
 
     @Unique

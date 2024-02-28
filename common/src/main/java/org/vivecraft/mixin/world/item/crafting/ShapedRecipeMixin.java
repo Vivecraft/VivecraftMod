@@ -51,10 +51,10 @@ public class ShapedRecipeMixin {
             } else {
                 ItemStack itemStack = new ItemStack(vanillaItem, i);
                 if (jsonObject.has("fallbackname")) {
-                    itemStack.setHoverName(Component.translatable(
+                    itemStack.setHoverName(new TranslatableComponent(
                         jsonObject.get("name").getAsString()));
                 } else {
-                    itemStack.setHoverName(Component.translatable(jsonObject.get("name").getAsString()));
+                    itemStack.setHoverName(new TranslatableComponent(jsonObject.get("name").getAsString()));
                 }
                 itemStack.getOrCreateTag().putBoolean("Unbreakable", GsonHelper.getAsBoolean(jsonObject, "unbreakable", false));
                 itemStack.getOrCreateTag().putInt("HideFlags", GsonHelper.getAsInt(jsonObject, "hideflags", 0));

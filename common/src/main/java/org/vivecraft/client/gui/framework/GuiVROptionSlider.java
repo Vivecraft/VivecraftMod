@@ -15,7 +15,7 @@ public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROpti
 
     public GuiVROptionSlider(int id, int x, int y, int width, int height, VRSettings.VrOptions option, boolean valueOnly) {
         super(x, y, width, height,
-            Component.literal(ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(option, valueOnly)),
+            new TextComponent(ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(option, valueOnly)),
             option.normalizeValue(ClientDataHolderVR.getInstance().vrSettings.getOptionFloatValue(option)));
 
         this.id = id;
@@ -34,7 +34,7 @@ public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROpti
 
     @Override
     protected void updateMessage() {
-        this.setMessage(Component.literal(ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(this.enumOptions, valueOnly)));
+        this.setMessage(new TextComponent(ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(this.enumOptions, valueOnly)));
     }
 
     @Override

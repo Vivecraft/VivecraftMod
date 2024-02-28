@@ -873,7 +873,7 @@ public class MCOpenVR extends MCVR {
         if (hasInvalidChars || alwaysThrow) {
             String error = knownError + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
             System.out.println(error + path);
-            throw new RenderConfigException(knownError, Component.empty().append(error).append(pathFormatted));
+            throw new RenderConfigException(knownError, new TextComponent(error).append(pathFormatted));
         }
     }
 
@@ -980,7 +980,7 @@ public class MCOpenVR extends MCVR {
         int i = VRInput_SetActionManifestPath(actionsPath);
 
         if (i != 0) {
-            throw new RenderConfigException("Failed to load action manifest", Component.literal(getInputErrorName(i)));
+            throw new RenderConfigException("Failed to load action manifest", new TextComponent(getInputErrorName(i)));
         }
     }
 

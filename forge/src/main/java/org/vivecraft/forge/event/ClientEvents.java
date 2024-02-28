@@ -18,13 +18,13 @@ import org.vivecraft.forge.Vivecraft;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD, modid = Vivecraft.MODID)
 public class ClientEvents {
     @SubscribeEvent
-    public static void registerModels(ModelEvent.RegisterAdditional event) {
-        event.register(TelescopeTracker.scopeModel);
-        event.register(ClimbTracker.clawsModel);
-        event.register(ClientDataHolderVR.thirdPersonCameraModel);
-        event.register(ClientDataHolderVR.thirdPersonCameraDisplayModel);
-        event.register(CameraTracker.cameraModel);
-        event.register(CameraTracker.cameraDisplayModel);
+    public static void registerModels(ModelRegistryEvent event) {
+        ForgeModelBakery.addSpecialModel(TelescopeTracker.scopeModel);
+        ForgeModelBakery.addSpecialModel(ClimbTracker.clawsModel);
+        ForgeModelBakery.addSpecialModel(ClientDataHolderVR.thirdPersonCameraModel);
+        ForgeModelBakery.addSpecialModel(ClientDataHolderVR.thirdPersonCameraDisplayModel);
+        ForgeModelBakery.addSpecialModel(CameraTracker.cameraModel);
+        ForgeModelBakery.addSpecialModel(CameraTracker.cameraDisplayModel);
     }
 
     @SubscribeEvent

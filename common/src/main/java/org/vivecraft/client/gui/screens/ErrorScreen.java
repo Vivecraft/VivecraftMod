@@ -35,7 +35,7 @@ public class ErrorScreen extends Screen {
         this.addRenderableWidget(new Button(
             this.width / 2 - 155, this.height - 32,
             150, 20,
-            Component.translatable("chat.copy.click"),
+            new TranslatableComponent("chat.copy.click"),
             (p) -> Minecraft.getInstance().keyboardHandler.setClipboard(this.title.getString() + "\n" + error.getString())));
     }
 
