@@ -70,7 +70,16 @@ public class ClientNetworking {
         serverAllowsCrawling = false;
         serverAllowsVrSwitching = false;
         usedNetworkVersion = -1;
-        //DataHolder.getInstance().vrSettings.overrides.resetAll(); move to mixin
+
+        // clear VR player data
+        VRPlayersClient.clear();
+        // clear teleport
+        VRServerPerms.INSTANCE.setTeleportSupported(false);
+        if (VRState.vrInitialized) {
+            ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
+        }
+        // clear server overrides
+        ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
     }
 
     public static void sendVersionInfo() {
