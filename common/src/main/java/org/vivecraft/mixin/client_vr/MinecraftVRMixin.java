@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.screens.ErrorScreen;
@@ -262,8 +263,21 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "setInitialScreen")
-    private void vivecraft$showGarbageCollectorScreen(CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "<init>")
+    private void vivecraft$showGarbageCollectorScreenFabric(CallbackInfo ci) {
+        if ("fabric".equals(Xplat.getModloader())) {
+            vivecraft$showGarbageCollectorScreen();
+        }
+    }
+    @Inject(at = @At("TAIL"), method = "lambda$new$2", remap = false, require = 0, expect = 0)
+    private void vivecraft$showGarbageCollectorScreenForge(CallbackInfo ci) {
+        if ("forge".equals(Xplat.getModloader())) {
+            vivecraft$showGarbageCollectorScreen();
+        }
+    }
+
+    @Unique
+    private void vivecraft$showGarbageCollectorScreen() {
         // set the Garbage collector screen here, when it got reset after loading, but don't set it when using quickplay, because it would be removed after loading has finished
         if (VRState.vrEnabled && !ClientDataHolderVR.getInstance().incorrectGarbageCollector.isEmpty()
             && !(screen instanceof LevelLoadingScreen

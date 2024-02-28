@@ -57,7 +57,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     @Inject(at = @At("HEAD"), method = "handleCustomPayload", cancellable = true)
     public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket payloadPacket, CallbackInfo ci) {
         if (CommonNetworkHelper.CHANNEL.equals(payloadPacket.getIdentifier())) {
-            PacketUtils.ensureRunningOnSameThread(payloadPacket, this, this.player.serverLevel());
+            PacketUtils.ensureRunningOnSameThread(payloadPacket, this, this.player.getLevel());
 
             CommonNetworkHelper.PacketDiscriminators packetId = CommonNetworkHelper.PacketDiscriminators.values()[payloadPacket.getData().readByte()];
 

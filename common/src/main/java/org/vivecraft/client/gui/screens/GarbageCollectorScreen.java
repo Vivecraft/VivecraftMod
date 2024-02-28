@@ -1,13 +1,12 @@
 package org.vivecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +38,7 @@ public class GarbageCollectorScreen extends Screen {
             Component.translatable("vivecraft.gui.openguide").withStyle(style -> style
                 .withUnderlined(true)
                 .withColor(ChatFormatting.GREEN)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommonComponents.GUI_OPEN_IN_BROWSER))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.link.open")))
                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, guideURL))));
         this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, message));
 
@@ -66,10 +65,10 @@ public class GarbageCollectorScreen extends Screen {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderBackground(guiGraphics);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
-        super.render(guiGraphics, i, j, f);
+    public void render(@NotNull PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
+        super.render(poseStack, i, j, f);
     }
 
     @Override
