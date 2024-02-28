@@ -11,18 +11,20 @@ import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import org.vivecraft.client.gui.settings.VivecraftMainSettings;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.forge.Vivecraft;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD, modid = Vivecraft.MODID)
 public class ClientEvents {
     @SubscribeEvent
-    public static void registerModels(ModelRegistryEvent event) {
-        ForgeModelBakery.addSpecialModel(TelescopeTracker.scopeModel);
-        ForgeModelBakery.addSpecialModel(ClientDataHolderVR.thirdPersonCameraModel);
-        ForgeModelBakery.addSpecialModel(ClientDataHolderVR.thirdPersonCameraDisplayModel);
-        ForgeModelBakery.addSpecialModel(CameraTracker.cameraModel);
-        ForgeModelBakery.addSpecialModel(CameraTracker.cameraDisplayModel);
+    public static void registerModels(ModelEvent.RegisterAdditional event) {
+        event.register(TelescopeTracker.scopeModel);
+        event.register(ClimbTracker.clawsModel);
+        event.register(ClientDataHolderVR.thirdPersonCameraModel);
+        event.register(ClientDataHolderVR.thirdPersonCameraDisplayModel);
+        event.register(CameraTracker.cameraModel);
+        event.register(CameraTracker.cameraDisplayModel);
     }
 
     @SubscribeEvent

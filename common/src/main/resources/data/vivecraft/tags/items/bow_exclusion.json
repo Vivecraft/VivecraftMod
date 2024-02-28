@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#pokecube:pokecubes",
+      "required": false
+    },
+
+    "#vivecraft:moditems/irons_spellbooks"
+  ]
+}

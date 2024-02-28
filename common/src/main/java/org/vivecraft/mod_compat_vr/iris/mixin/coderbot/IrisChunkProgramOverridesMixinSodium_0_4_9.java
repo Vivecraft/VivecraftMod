@@ -1,6 +1,6 @@
-package org.vivecraft.mod_compat_vr.iris.mixin;
+package org.vivecraft.mod_compat_vr.iris.mixin.coderbot;
 
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
+import me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType;
 import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkProgramOverrides;
 import net.coderbot.iris.pipeline.SodiumTerrainPipeline;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,11 +14,11 @@ import java.lang.reflect.InvocationTargetException;
 
 @Pseudo
 @Mixin(IrisChunkProgramOverrides.class)
-public class IrisChunkProgramOverridesMixinSodium_0_4_11 {
+public class IrisChunkProgramOverridesMixinSodium_0_4_9 {
 
     @Group(name = "create sodium shaders", min = 1, max = 1)
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/coderbot/iris/compat/sodium/impl/shader_overrides/IrisChunkProgramOverrides;createShaders(Lnet/coderbot/iris/pipeline/SodiumTerrainPipeline;Lme/jellysquid/mods/sodium/client/render/chunk/vertex/format/ChunkVertexType;)V"), method = "getProgramOverride", remap = false, expect = 0)
-    public void vivecraft$createAllPipelinesShadersSodium_0_4_11(IrisChunkProgramOverrides instance, SodiumTerrainPipeline sodiumTerrainPipeline, ChunkVertexType chunkVertexType) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/coderbot/iris/compat/sodium/impl/shader_overrides/IrisChunkProgramOverrides;createShaders(Lnet/coderbot/iris/pipeline/SodiumTerrainPipeline;Lme/jellysquid/mods/sodium/client/render/vertex/type/ChunkVertexType;)V"), method = "getProgramOverride", remap = false, expect = 0)
+    public void vivecraft$createAllPipelinesShadersSodium_0_4_9(IrisChunkProgramOverrides instance, SodiumTerrainPipeline sodiumTerrainPipeline, ChunkVertexType chunkVertexType) {
         try {
             ((IrisChunkProgramOverridesExtension) this).vivecraft$createAllPipelinesShadersSodiumProcessing(
                 sodiumTerrainPipeline,

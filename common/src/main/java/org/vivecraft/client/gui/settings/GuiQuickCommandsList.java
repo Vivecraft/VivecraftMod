@@ -45,6 +45,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
 
         private CommandEntry(String command, GuiQuickCommandsList parent) {
             this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, new TextComponent(""));
+            this.txt.setMaxLength(256);
             this.txt.setValue(command);
             this.btnDelete = new Button(0, 0, 18, 18, new TextComponent("X"), (p) ->
             {
@@ -83,11 +84,11 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
             }
         }
 
-        public boolean mouseScrolled(double pMouseX, double p_94735_, double pMouseY) {
-            if (this.btnDelete.mouseScrolled(pMouseX, p_94735_, pMouseY)) {
+        public boolean mouseScrolled(double x, double y, double scrollAmountY) {
+            if (this.btnDelete.mouseScrolled(x, y, scrollAmountY)) {
                 return true;
             } else {
-                return this.txt.mouseScrolled(pMouseX, p_94735_, pMouseY) || super.mouseScrolled(pMouseX, p_94735_, pMouseY);
+                return this.txt.mouseScrolled(x, y, scrollAmountY) || super.mouseScrolled(x, y, scrollAmountY);
             }
         }
 

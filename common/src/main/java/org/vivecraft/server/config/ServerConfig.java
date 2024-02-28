@@ -62,6 +62,8 @@ public class ServerConfig {
     public static ConfigBuilder.DoubleValue worldscaleMax;
     public static ConfigBuilder.DoubleValue worldscaleMin;
 
+    public static ConfigBuilder.BooleanValue forceThirdPersonItems;
+
     public static ConfigBuilder.BooleanValue vrSwitchingEnabled;
 
     private static CommentedFileConfig config;
@@ -305,6 +307,16 @@ public class ServerConfig {
             .comment("Upper limit of range")
             .defineInRange(2.0, 0.1, 100.0);
         // end worldScale
+        builder.pop();
+
+        builder
+            .push("settingOverrides")
+            .comment("Other client settings to override");
+        forceThirdPersonItems = builder
+            .push("thirdPersonItems")
+            .comment("Forces players to use the raw item position setting")
+            .define(false);
+        // end settingOverrides
         builder.pop();
 
         builder

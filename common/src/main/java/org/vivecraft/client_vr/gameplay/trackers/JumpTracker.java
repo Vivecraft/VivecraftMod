@@ -13,6 +13,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.AutoCalibration;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 public class JumpTracker extends Tracker {
     public Vec3[] latchStart = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
@@ -38,7 +39,7 @@ public class JumpTracker extends Tracker {
             return false;
         } else if (!ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling) {
             return false;
-        } else if (!ClientDataHolderVR.getInstance().vrSettings.realisticJumpEnabled) {
+        } else if (ClientDataHolderVR.getInstance().vrSettings.realisticJumpEnabled == VRSettings.RealisticJump.OFF) {
             return false;
         } else if (p != null && p.isAlive()) {
             if (this.mc.gameMode == null) {
@@ -67,7 +68,8 @@ public class JumpTracker extends Tracker {
     }
 
     public void doProcess(LocalPlayer player) {
-        if (this.isClimbeyJumpEquipped()) {
+        boolean climbeyEquipped = this.isClimbeyJumpEquipped();
+        if (climbeyEquipped) {
             VRPlayer vrplayer = this.dh.vrPlayer;
             boolean[] aboolean = new boolean[2];
 
@@ -155,7 +157,8 @@ public class JumpTracker extends Tracker {
                 Vec3 vec36 = this.latchStartOrigin[0].subtract(this.latchStartPlayer[0]).add(this.mc.player.position()).subtract(vec33);
                 this.dh.vrPlayer.setRoomOrigin(vec36.x, vec36.y, vec36.z, false);
             }
-        } else if (this.dh.vr.hmdPivotHistory.netMovement(0.25D).y > 0.1D && this.dh.vr.hmdPivotHistory.latest().y - (double) AutoCalibration.getPlayerHeight() > (double) this.dh.vrSettings.jumpThreshold) {
+        }
+        if ((!climbeyEquipped || ClientDataHolderVR.getInstance().vrSettings.realisticJumpEnabled == VRSettings.RealisticJump.ON) && this.dh.vr.hmdPivotHistory.netMovement(0.25D).y > 0.1D && this.dh.vr.hmdPivotHistory.latest().y - (double) AutoCalibration.getPlayerHeight() > (double) this.dh.vrSettings.jumpThreshold) {
             player.jumpFromGround();
         }
     }

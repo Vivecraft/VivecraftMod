@@ -69,7 +69,7 @@ public class BowTracker extends Tracker {
         } else if (ClientDataHolderVR.getInstance().vrSettings.bowMode == VRSettings.BowMode.VANILLA) {
             return itemStack.getItem() == Items.BOW;
         } else {
-            return itemStack.getItem().getUseAnimation(itemStack) == UseAnim.BOW;
+            return itemStack.getItem().getUseAnimation(itemStack) == UseAnim.BOW && !itemStack.is(org.vivecraft.client_vr.ItemTags.VIVECRAFT_BOW_EXCLUSION);
         }
     }
 
