@@ -191,7 +191,7 @@ public abstract class GuiVROptionsBase extends Screen {
             }
         }
 
-        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+        this.renderBackground(guiGraphics);
 
         if (this.visibleList != null) {
             this.visibleList.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
@@ -207,6 +207,7 @@ public abstract class GuiVROptionsBase extends Screen {
             this.btnDone.visible = this.drawDefaultButtons;
         }
 
+        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
         renderTooltip(guiGraphics, pMouseX, pMouseY);
     }
 
@@ -242,12 +243,12 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double x, double y, double scrollAmountX, double scrollAmountY) {
+    public boolean mouseScrolled(double x, double y, double scrollAmountY) {
         if (this.visibleList != null) {
-            this.visibleList.mouseScrolled(x, y, scrollAmountX, scrollAmountY);
+            this.visibleList.mouseScrolled(x, y, scrollAmountY);
         }
 
-        return super.mouseScrolled(x, y, scrollAmountX, scrollAmountY);
+        return super.mouseScrolled(x, y, scrollAmountY);
     }
 
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {

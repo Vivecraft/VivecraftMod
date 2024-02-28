@@ -188,8 +188,8 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
         boolean flag = humanoidArm != HumanoidArm.LEFT;
         float h = flag ? 1.0F : -1.0F;
         AbstractClientPlayer abstractclientplayer = this.minecraft.player;
-        RenderSystem.setShaderTexture(0, abstractclientplayer.getSkin().texture());
-        VRArmRenderer vrarmrenderer = ((EntityRenderDispatcherVRExtension) entityRenderDispatcher).vivecraft$getArmSkinMap().get(abstractclientplayer.getSkin().model().id());
+        RenderSystem.setShaderTexture(0, abstractclientplayer.getSkinTextureLocation());
+        VRArmRenderer vrarmrenderer = ((EntityRenderDispatcherVRExtension) entityRenderDispatcher).vivecraft$getArmSkinMap().get(abstractclientplayer.getModelName());
         poseStack.pushPose();
 
         if (abstractclientplayer.swingingArm == InteractionHand.MAIN_HAND && flag) {
@@ -201,7 +201,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
         }
 
         poseStack.scale(0.4f, 0.4F, 0.4F);
-        boolean slim = abstractclientplayer.getSkin().model().id().equals("slim");
+        boolean slim = abstractclientplayer.getModelName().equals("slim");
 
             /*
              x offset: (arm x origin + arm x offset + arm x dimension * 0.5) / 16

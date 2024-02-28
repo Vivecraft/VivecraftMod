@@ -81,7 +81,7 @@ accessible field net/minecraft/world/item/CreativeModeTabs TOOLS_AND_UTILITIES L
 accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/minecraft/resources/ResourceKey;
 
 # to render crosshair
-accessible field net/minecraft/client/gui/Gui CROSSHAIR_SPRITE Lnet/minecraft/resources/ResourceLocation;
+accessible field net/minecraft/client/gui/Gui GUI_ICONS_LOCATION Lnet/minecraft/resources/ResourceLocation;
 
 # for menuworlds
 accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData isFlat Z
@@ -94,9 +94,3 @@ accessible field net/minecraft/world/level/block/state/StateHolder propertiesCod
 # to init VR
 accessible class net/minecraft/client/ResourceLoadStateTracker$ReloadState
 accessible field net/minecraft/client/ResourceLoadStateTracker$ReloadState reloadReason Lnet/minecraft/client/ResourceLoadStateTracker$ReloadReason;
-
-# to spawn brush particles
-accessible method net/minecraft/world/item/BrushItem spawnDustParticles (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/entity/HumanoidArm;)V
-
-# do not kick climbing players
-accessible field net/minecraft/server/network/ServerGamePacketListenerImpl aboveGroundTickCount I

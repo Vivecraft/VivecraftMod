@@ -3,7 +3,7 @@ package org.vivecraft.server;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerPlayerConnection;
@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
-import org.vivecraft.common.network.packets.VivecraftDataPacket;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
 import org.vivecraft.server.config.ServerConfig;
 
@@ -259,29 +258,28 @@ public class ServerNetworking {
     }
 
     public static ClientboundCustomPayloadPacket createVRActivePlayerPacket(boolean vrActive, UUID playerID) {
-        FriendlyByteBuf tempBuffer = new FriendlyByteBuf(Unpooled.buffer());
-        tempBuffer.writeByte(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE.ordinal());
-        tempBuffer.writeBoolean(vrActive);
-        tempBuffer.writeUUID(playerID);
-        ClientboundCustomPayloadPacket p = new ClientboundCustomPayloadPacket(new VivecraftDataPacket(tempBuffer));
-        tempBuffer.release();
-        return p;
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+        buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE.ordinal());
+        buffer.writeBoolean(vrActive);
+        buffer.writeUUID(playerID);
+        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
     }
 
     public static ClientboundCustomPayloadPacket createUberPacket(Player player, VrPlayerState vrPlayerState, float worldScale, float heightScale) {
-        FriendlyByteBuf tempBuffer = new FriendlyByteBuf(Unpooled.buffer());
-        tempBuffer.writeByte(CommonNetworkHelper.PacketDiscriminators.UBERPACKET.ordinal());
-        tempBuffer.writeUUID(player.getUUID());
-        vrPlayerState.serialize(tempBuffer);
-        tempBuffer.writeFloat(worldScale);
-        tempBuffer.writeFloat(heightScale);
-        ClientboundCustomPayloadPacket p = new ClientboundCustomPayloadPacket(new VivecraftDataPacket(tempBuffer));
-        tempBuffer.release();
-        return p;
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+        buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.UBERPACKET.ordinal());
+        buffer.writeUUID(player.getUUID());
+        vrPlayerState.serialize(buffer);
+        buffer.writeFloat(worldScale);
+        buffer.writeFloat(heightScale);
+        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
     }
 
     public static ClientboundCustomPayloadPacket getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators command, byte[] payload) {
-        return new ClientboundCustomPayloadPacket(new VivecraftDataPacket(command, payload));
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+        buffer.writeByte(command.ordinal());
+        buffer.writeBytes(payload);
+        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
     }
 
     public static ClientboundCustomPayloadPacket getClimbeyServerPacket() {
@@ -301,18 +299,14 @@ public class ServerNetworking {
             // no block list
             friendlybytebuf.writeByte(0);
         }
-        ClientboundCustomPayloadPacket p = new ClientboundCustomPayloadPacket(new VivecraftDataPacket(friendlybytebuf));
-        friendlybytebuf.release();
-        return p;
+        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, friendlybytebuf);
     }
 
     public static ClientboundCustomPayloadPacket getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators command, String payload) {
-        FriendlyByteBuf tempBuffer = new FriendlyByteBuf(Unpooled.buffer());
-        tempBuffer.writeByte(command.ordinal());
-        tempBuffer.writeUtf(payload);
-        ClientboundCustomPayloadPacket p = new ClientboundCustomPayloadPacket(new VivecraftDataPacket(tempBuffer));
-        tempBuffer.release();
-        return p;
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+        buffer.writeByte(command.ordinal());
+        buffer.writeUtf(payload);
+        return new ClientboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
     }
 
     public static void sendVrPlayerStateToClients(ServerPlayer vrPlayerEntity) {

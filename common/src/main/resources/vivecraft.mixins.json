@@ -79,11 +79,8 @@
   ],
   "minVersion": "0.8.4",
   "mixins": [
-    "network.ClientboundCustomPayloadPacketMixin",
-    "network.ServerboundCustomPayloadPacketMixin",
     "server.ChunkMapAccessor",
     "server.MinecraftServerMixin",
-    "server.ServerCommonPacketListenerImplMixin",
     "server.ServerGamePacketListenerImplMixin",
     "server.ServerPlayerMixin",
     "server.TrackedEntityAccessor",

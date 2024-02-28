@@ -2,33 +2,43 @@ package org.vivecraft.mixin.server;
 
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.PacketUtils;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.CommonListenerCookie;
-import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.server.AimFixHandler;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.config.ServerConfig;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPacketListenerImpl {
+public abstract class ServerGamePacketListenerImplMixin implements ServerGamePacketListener {
+
+    @Shadow
+    @Final
+    private Connection connection;
+
+    @Shadow
+    @Final
+    private MinecraftServer server;
 
     @Shadow
     public ServerPlayer player;
 
-    public ServerGamePacketListenerImplMixin(MinecraftServer minecraftServer, Connection connection, CommonListenerCookie commonListenerCookie) {
-        super(minecraftServer, connection, commonListenerCookie);
-    }
+    @Shadow
+    private int aboveGroundTickCount;
 
     @Inject(at = @At("TAIL"), method = "<init>")
-    public void vivecraft$init(MinecraftServer minecraftServer, Connection connection, ServerPlayer serverPlayer, CommonListenerCookie commonListenerCookie, CallbackInfo ci) {
+    public void vivecraft$init(MinecraftServer p_9770_, Connection p_9771_, ServerPlayer p_9772_, CallbackInfo info) {
         // Vivecraft
         if (this.connection.channel != null && this.connection.channel.pipeline().get("packet_handler") != null) { //fake player fix
             this.connection.channel.pipeline().addBefore("packet_handler", "vr_aim_fix",
@@ -39,6 +49,25 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Inject(at = @At("TAIL"), method = "tick()V")
     public void vivecraft$afterTick(CallbackInfo info) {
         ServerNetworking.sendVrPlayerStateToClients(this.player);
+    }
+
+    /**
+     * handle server bound vivecraft packets
+     */
+    @Inject(at = @At("HEAD"), method = "handleCustomPayload", cancellable = true)
+    public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket payloadPacket, CallbackInfo ci) {
+        if (CommonNetworkHelper.CHANNEL.equals(payloadPacket.getIdentifier())) {
+            PacketUtils.ensureRunningOnSameThread(payloadPacket, this, this.player.serverLevel());
+
+            CommonNetworkHelper.PacketDiscriminators packetId = CommonNetworkHelper.PacketDiscriminators.values()[payloadPacket.getData().readByte()];
+
+            ServerNetworking.handlePacket(packetId, payloadPacket.getData(), this.player, ((ServerGamePacketListenerImpl) (Object) this)::send);
+
+            if (packetId == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
+                this.aboveGroundTickCount = 0;
+            }
+            ci.cancel();
+        }
     }
 
     @Inject(at = @At("TAIL"), method = "onDisconnect")

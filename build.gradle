@@ -107,11 +107,6 @@ allprojects {
             }
         }
 
-        maven {
-            name = "neoforge"
-            url = "https://maven.neoforged.net/releases/"
-        }
-
         maven { url = "https://hephaestus.dev/release" }
         maven { url = "https://cursemaven.com" }
         maven { url = "https://maven.parchmentmc.org" }

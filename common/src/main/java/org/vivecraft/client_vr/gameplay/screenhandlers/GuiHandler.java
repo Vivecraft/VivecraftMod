@@ -481,7 +481,7 @@ public class GuiHandler {
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY(0.9424779F * (float) i));
                         guipos = RenderHelper.getControllerRenderPos(1);
                         dh.vr.hudPopup = true;
-                        boolean flag = mc.player.getSkin().model().id().equals("slim");
+                        boolean flag = mc.player.getModelName().equals("slim");
                         scale = 0.4F;
                         guilocal = new Vec3((float) i * -0.136F * dh.vrPlayer.vrdata_world_render.worldScale, (flag ? 0.13D : 0.12D) * (double) dh.vrPlayer.vrdata_world_render.worldScale, 0.06D * (double) dh.vrPlayer.vrdata_world_render.worldScale);
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY(((float) Math.PI / 5F) * (float) i));

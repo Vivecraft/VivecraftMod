@@ -1,14 +1,8 @@
 package org.vivecraft.client.forge;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import io.netty.buffer.Unpooled;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.DiscardedPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
@@ -107,13 +101,5 @@ public class XplatImpl {
             }
         }
         return totalRange;
-    }
-
-    public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
-        // Forge I really don't know why you are insisting on this being a DiscardedPayload
-        listener.send(new ServerboundCustomPayloadPacket(new DiscardedPayload(
-            new ResourceLocation("minecraft:register"),
-            new FriendlyByteBuf(Unpooled.buffer())
-                .writeBytes(resourceLocation.toString().getBytes()))));
     }
 }

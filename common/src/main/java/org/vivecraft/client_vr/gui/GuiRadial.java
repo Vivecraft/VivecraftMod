@@ -104,7 +104,7 @@ public class GuiRadial extends TwoHandedScreen {
     }
 
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
-        this.renderBackground(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+        this.renderBackground(guiGraphics);
         super.render(guiGraphics, 0, 0, pPartialTicks);
     }
 }
