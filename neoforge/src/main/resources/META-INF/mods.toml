@@ -5,7 +5,8 @@ license = "LGPLv3"
 
 [[mods]]
 modId = "vivecraft"
-version = "${version}"displayName = "Vivecraft"
+version = "${version}"
+displayName = "Vivecraft"
 displayURL = "https://modrinth.com/mod/vivecraft"
 logoFile = "vivecraft_icon.png"
 authors = "fayer3, Ferri_Arnus, IMS, jrbudda, minecraft player, Techjar"
