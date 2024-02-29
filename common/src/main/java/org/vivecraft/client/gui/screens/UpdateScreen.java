@@ -43,7 +43,7 @@ public class UpdateScreen extends Screen {
             button ->
                 this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
                     if (bl) {
-                        Util.getPlatform().openUri("https://modrinth.com/mod/vivecraft");
+                        Util.getPlatform().openUri("https://www.curseforge.com/minecraft/mc-mods/vivecraft");
                     }
                     this.minecraft.setScreen(this);
                 }, "https://www.curseforge.com/minecraft/mc-mods/vivecraft", true)))

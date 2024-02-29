@@ -83,7 +83,7 @@ public class XplatImpl {
     }
 
     public static double getItemEntityReach(double baseRange, ItemStack itemStack, EquipmentSlot slot) {
-        var attributes = itemStack.getAttributeModifiers(slot).get(ForgeMod.ENTITY_REACH.get());
+        var attributes = itemStack.getAttributeModifiers(slot).get(ForgeMod.ATTACK_RANGE.get());
         for (var a : attributes) {
             if (a.getOperation() == AttributeModifier.Operation.ADDITION) {
                 baseRange += a.getAmount();

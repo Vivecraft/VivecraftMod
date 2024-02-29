@@ -269,6 +269,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             vivecraft$showGarbageCollectorScreen();
         }
     }
+
     @Inject(at = @At("TAIL"), method = "lambda$new$2", remap = false, require = 0, expect = 0)
     private void vivecraft$showGarbageCollectorScreenForge(CallbackInfo ci) {
         if ("forge".equals(Xplat.getModloader())) {

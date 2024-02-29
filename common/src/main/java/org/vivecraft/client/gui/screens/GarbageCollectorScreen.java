@@ -2,6 +2,7 @@ package org.vivecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -58,7 +59,13 @@ public class GarbageCollectorScreen extends Screen {
             .build());
 
         this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.openguide"),
-            ConfirmLinkScreen.confirmLink(guideURL, this, true))
+            button ->
+                this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+                    if (bl) {
+                        Util.getPlatform().openUri(guideURL);
+                    }
+                    this.minecraft.setScreen(this);
+                }, guideURL, true)))
             .pos(this.width / 2 - 75, this.height - 32)
             .size(150, 20)
             .build());

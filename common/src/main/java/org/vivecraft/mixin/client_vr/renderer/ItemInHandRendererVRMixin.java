@@ -120,7 +120,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
                 mainHand = !mainHand;
             }
 
-            ItemDisplayContext itemDisplayContext;
+            ItemTransforms.TransformType transformType;
             if ((ClientNetworking.isThirdPersonItems() && !(BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer))) || dh.climbTracker.isClaws(pStack)) {
                 useLeftHandModelinLeftHand = true; //test
                 VivecraftItemRendering.applyThirdPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
