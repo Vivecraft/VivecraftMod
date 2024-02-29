@@ -154,10 +154,10 @@ public class ClientNetworking {
         connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA, serializeToArray(vrPlayerState.controller0(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0)}))));
 
         // right controller packet
-        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA, serializeToArray(vrPlayerState.controller1(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0)}))));
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER1DATA, serializeToArray(vrPlayerState.controller1(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0)}))));
 
         // hmd packet
-        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA, serializeToArray(vrPlayerState.hmd(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.seated ? 1 : 0)}))));
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.HEADDATA, serializeToArray(vrPlayerState.hmd(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.seated ? 1 : 0)}))));
     }
 
     public static boolean isThirdPersonItems() {
