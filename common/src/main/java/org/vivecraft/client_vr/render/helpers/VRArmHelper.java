@@ -17,6 +17,7 @@ import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -142,7 +143,8 @@ public class VRArmHelper {
             item = override;
         }
 
-        if (dataHolder.climbTracker.isClimbeyClimb() && !dataHolder.climbTracker.isClaws(item) && override == null) {
+        if (dataHolder.climbTracker.isClimbeyClimb() && ((PlayerExtension) mc.player).vivecraft$isClimbeyClimbEquipped() &&
+            !dataHolder.climbTracker.isClaws(item) && override == null) {
             item = mc.player.getOffhandItem();
         }
 
@@ -205,7 +207,8 @@ public class VRArmHelper {
             item = override;
         }
 
-        if (dataHolder.climbTracker.isClimbeyClimb() && !dataHolder.climbTracker.isClaws(item) && override == null) {
+        if (dataHolder.climbTracker.isClimbeyClimb() && ((PlayerExtension) mc.player).vivecraft$isClimbeyClimbEquipped() &&
+            !dataHolder.climbTracker.isClaws(item) && override == null) {
             item = mc.player.getMainHandItem();
         }
 

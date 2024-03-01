@@ -25,6 +25,7 @@ import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.mod_compat_vr.origins.OriginsHelper;
 
 import java.util.*;
 
@@ -115,7 +116,7 @@ public class ClimbTracker extends Tracker {
     }
 
     public boolean isClimbeyClimbEquipped() {
-        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) this.mc.player).vivecraft$isClimbeyClimbEquipped();
+        return ClientNetworking.serverAllowsClimbey && (((PlayerExtension) this.mc.player).vivecraft$isClimbeyClimbEquipped() || (OriginsHelper.isLoaded() && OriginsHelper.hasClimbingPower(this.mc.player)));
     }
 
     private boolean canstand(BlockPos bp, LocalPlayer p) {
