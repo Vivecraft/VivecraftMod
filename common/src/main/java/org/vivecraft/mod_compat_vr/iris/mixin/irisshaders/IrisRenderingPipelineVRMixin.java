@@ -3,10 +3,10 @@ package org.vivecraft.mod_compat_vr.iris.mixin.irisshaders;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.program.ProgramImages;
 import net.irisshaders.iris.gl.program.ProgramSamplers;
-import net.irisshaders.iris.pipeline.ShadowRenderer;
-import net.irisshaders.iris.pipeline.newshader.NewWorldRenderingPipeline;
-import net.irisshaders.iris.shaderpack.PackShadowDirectives;
-import net.irisshaders.iris.shaderpack.ProgramSet;
+import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
+import net.irisshaders.iris.shaderpack.properties.PackShadowDirectives;
+import net.irisshaders.iris.shaderpack.programs.ProgramSet;
+import net.irisshaders.iris.shadows.ShadowRenderer;
 import net.irisshaders.iris.shadows.ShadowRenderTargets;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,8 +21,8 @@ import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
 import java.util.Objects;
 
 @Pseudo
-@Mixin(NewWorldRenderingPipeline.class)
-public class IrisNewWorldRenderingPipelineVRMixin {
+@Mixin(IrisRenderingPipeline.class)
+public class IrisRenderingPipelineVRMixin {
     @Shadow(remap = false)
     private ShadowRenderTargets shadowRenderTargets;
 
@@ -40,7 +40,7 @@ public class IrisNewWorldRenderingPipelineVRMixin {
 
     // return main shadowRenderTargets, instead of own
     @Group(name = "one shadowRenderTargets", min = 1, max = 1)
-    @Inject(target = @Desc(value = "lambda$new$4", owner = NewWorldRenderingPipeline.class, ret = ShadowRenderTargets.class, args = PackShadowDirectives.class), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
+    @Inject(target = @Desc(value = "lambda$new$4", owner = IrisRenderingPipeline.class, ret = ShadowRenderTargets.class, args = PackShadowDirectives.class), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
     private void vivecraft$onlyOneShadowTargetSupplier160(CallbackInfoReturnable<ShadowRenderTargets> cir) {
         if (!RenderPassType.isVanilla() && ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null) {
             cir.setReturnValue((ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
@@ -71,10 +71,10 @@ public class IrisNewWorldRenderingPipelineVRMixin {
     // iris 1.6.0+
     @Group(name = "reroute shadowRenderTargets", min = 6, max = 6)
     @Redirect(target = {
-        @Desc(value = "lambda$new$6", owner = NewWorldRenderingPipeline.class, ret = ProgramSamplers.class, args = {java.util.function.Supplier.class, int.class}),
-        @Desc(value = "lambda$new$7", owner = NewWorldRenderingPipeline.class, ret = ProgramImages.class, args = {java.util.function.Supplier.class, int.class}),
-        @Desc(value = "lambda$new$9", owner = NewWorldRenderingPipeline.class, ret = ProgramSamplers.class, args = int.class),
-        @Desc(value = "lambda$new$11", owner = NewWorldRenderingPipeline.class, ret = ProgramImages.class, args = int.class)
+        @Desc(value = "lambda$new$6", owner = IrisRenderingPipeline.class, ret = ProgramSamplers.class, args = {java.util.function.Supplier.class, int.class}),
+        @Desc(value = "lambda$new$7", owner = IrisRenderingPipeline.class, ret = ProgramImages.class, args = {java.util.function.Supplier.class, int.class}),
+        @Desc(value = "lambda$new$9", owner = IrisRenderingPipeline.class, ret = ProgramSamplers.class, args = int.class),
+        @Desc(value = "lambda$new$11", owner = IrisRenderingPipeline.class, ret = ProgramImages.class, args = int.class)
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0)
     private Object vivecraft$rerouteShadowTarget160(Object obj) {
         if (!RenderPassType.isVanilla()) {

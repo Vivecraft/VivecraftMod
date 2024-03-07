@@ -17,9 +17,10 @@
     "coderbot.IrisNewWorldRenderingPipelineVRMixin",
     "coderbot.IrisPipelineManagerVRMixin",
     "irisshaders.IrisChunkProgramOverridesMixin",
+    "irisshaders.IrisChunkProgramOverridesMixinSodium_0_5_8",
     "irisshaders.IrisChunkProgramOverridesMixinSodium_0_6",
-    "irisshaders.IrisNewWorldRenderingPipelineVRMixin",
-    "irisshaders.IrisPipelineManagerVRMixin"
+    "irisshaders.IrisPipelineManagerVRMixin",
+    "irisshaders.IrisRenderingPipelineVRMixin"
   ],
   "minVersion": "0.8.4",
   "mixins": [
