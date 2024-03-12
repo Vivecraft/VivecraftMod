@@ -57,8 +57,6 @@ public class SupporterReceiver {
             } else {
                 downloadFailed = true;
             }
-
-            queuedPlayers.clear();
         }
     }
 
@@ -79,6 +77,9 @@ public class SupporterReceiver {
                                 String value2 = IOUtils.toString(new URL(url2), StandardCharsets.UTF_8);
                                 fileDownloadFinished(url1, value1, false);
                                 fileDownloadFinished(url2, value2, true);
+                                synchronized (lock) {
+                                    queuedPlayers.clear();
+                                }
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
