@@ -89,7 +89,7 @@ public class VRState {
                 VRSettings.logger.info("Total physical memory: {} GiB", String.format("%.01f", os.getTotalMemorySize() / 1073741824.0F));
                 VRSettings.logger.info("Free physical memory: {} GiB", String.format("%.01f", os.getFreeMemorySize() / 1073741824.0F));
 
-                if (!garbageCollector.equals("ZGC") && !ClientDataHolderVR.getInstance().vrSettings.disableGarbageCollectorMessage) {
+                if (!garbageCollector.startsWith("ZGC") && !ClientDataHolderVR.getInstance().vrSettings.disableGarbageCollectorMessage) {
                     // At least 12 GiB RAM (minus 256 MiB for possible reserved) and 8 CPU threads
                     if (os.getTotalMemorySize() >= 1073741824L * 12L - 1048576L * 256L && Runtime.getRuntime().availableProcessors() >= 6) {
                         // store the garbage collector, as indicator, that the GarbageCollectorScreen should be shown, if it would be discarded
