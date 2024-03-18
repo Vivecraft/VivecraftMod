@@ -382,6 +382,7 @@
   "vivecraft.messages.seatedmode": "Switching to Seated Mode will disable controller input. Continue?",
   "vivecraft.messages.radialmenubind.1": "Make sure Open Radial Menu is bound.",
   "vivecraft.messages.radialmenubind.2": "Hold (Keyboard Shift) with the radial menu open to switch to this set.",
+  "vivecraft.messages.radialmenubind.3": "This is bound to the grip of the pointing controller by default.",
   "vivecraft.messages.controls.1": "Bindings are handled by SteamVR Input.",
   "vivecraft.messages.controls.2": "Go to Settings > Controllers > Manage Controller Bindings in the dashboard.",
   "vivecraft.messages.controls.3": "§6Steam must be running §obefore§r§6 SteamVR is started, or bindings will not save.",

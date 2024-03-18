@@ -383,6 +383,7 @@
   "vivecraft.messages.seatedmode": "Das Umschalten in den Sitzmodus deaktiviert die Controller-Eingabe. Fortfahren?",
   "vivecraft.messages.radialmenubind.1": "Stelle sicher das 'Kreismenü öffnen' gebunden ist.",
   "vivecraft.messages.radialmenubind.2": "Drücken Sie (Tastatur Shift) bei geöffnetem Kreismenü, um zu diesem Set zu wechseln.",
+  "vivecraft.messages.radialmenubind.3": "Dies ist standardmäßig die Grip Taste des zeigenden Controllers.",
   "vivecraft.messages.controls.1": "Belegungen werden von SteamVR Input verwaltet.",
   "vivecraft.messages.controls.2": "Gehen Sie zu Einstellungen > Controller > Controllerkonfiguration verwalten.",
   "vivecraft.messages.controls.3": "§6Steam muss §ovor§r§6 SteamVR gestartet werden, sonst werden Änderungen nicht gespeichert.",
