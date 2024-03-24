@@ -393,6 +393,7 @@
   "vivecraft.messages.intelgraphics1": "Intel Graphics are not supported on Windows because of bad drivers.\n\nCurrently used GPU: %s\n\nAvailable GPUs: %s\n\n%s",
   "vivecraft.messages.intelgraphics2": "See here how to change the used gpu: %s",
   "vivecraft.messages.nosteamvr": "OpenVR runtime not detected. Did you install SteamVR?",
+  "vivecraft.messages.outdatedsteamvr": "OpenVR failed to initialize needed components. Make sure you are using the latest version of SteamVR.",
   "vivecraft.messages.menuworldexportcomplete.1": "World export complete... area size: %d",
   "vivecraft.messages.menuworldexportcomplete.2": "Saved to %s",
   "vivecraft.messages.menuworldexportclientwarning": "WARNING: Saving menu world using a client world. Data may be incomplete. It is recommended to save menu worlds in singleplayer.",
