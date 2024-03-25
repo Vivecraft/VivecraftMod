@@ -7,12 +7,13 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
 
-public class TelescopeTracker extends Tracker {
+public class TelescopeTracker implements Tracker {
     //public static final ResourceLocation scopeResource = new ResourceLocation("vivecraft:trashbin");
     public static final ModelResourceLocation scopeModel = new ModelResourceLocation("vivecraft", "spyglass_in_hand", "inventory");
     private static final double lensDistMax = 0.05D;
@@ -20,8 +21,7 @@ public class TelescopeTracker extends Tracker {
     private static final double lensDotMax = 0.9D;
     private static final double lensDotMin = 0.75D;
 
-    public TelescopeTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+    public TelescopeTracker() {
     }
 
     public boolean isActive(LocalPlayer player) {
@@ -29,6 +29,11 @@ public class TelescopeTracker extends Tracker {
     }
 
     public void doProcess(LocalPlayer player) {
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 
     public static boolean isTelescope(ItemStack i) {

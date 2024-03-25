@@ -1,6 +1,8 @@
 package org.vivecraft.common.utils.math;
 
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.vivecraft.common.utils.lwjgl.Matrix3f;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.common.utils.lwjgl.Matrix3f;
 
@@ -329,6 +331,10 @@ public class Quaternion {
 
     public Vec3 multiply(Vec3 vec) {
         return this.multiply(new Vector3(vec)).toVector3d();
+    }
+
+    public Quaternionf asJOMLQuaternion() {
+        return new Quaternionf(this.x, this.y, this.z, this.w);
     }
 
     public String toString() {

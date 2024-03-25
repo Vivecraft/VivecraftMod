@@ -1,24 +1,29 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 
-public class SneakTracker extends Tracker {
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+
+public class SneakTracker implements Tracker {
     public boolean sneakOverride = false;
     public int sneakCounter = 0;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public SneakTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer p) {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated) {
+        if (this.dh.vrSettings.seated) {
             return false;
-        } else if (!ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling) {
+        } else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
             return false;
-        } else if (!ClientDataHolderVR.getInstance().vrSettings.realisticSneakEnabled) {
+        } else if (!this.dh.vrSettings.realisticSneakEnabled) {
             return false;
         } else if (this.mc.gameMode == null) {
             return false;
@@ -39,5 +44,10 @@ public class SneakTracker extends Tracker {
         }
 
         this.sneakOverride = (double) AutoCalibration.getPlayerHeight() - this.dh.vr.hmdPivotHistory.latest().y > (double) this.dh.vrSettings.sneakThreshold;
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 }

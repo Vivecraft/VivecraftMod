@@ -1,10 +1,26 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+import net.minecraft.network.chat.contents.TranslatableContents;
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.BlockTags;
+import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
+import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.provider.ControllerType;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
@@ -17,19 +33,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.client_vr.BlockTags;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.common.network.CommonNetworkHelper;
 
-import java.util.*;
-
-public class ClimbTracker extends Tracker {
+public class ClimbTracker implements Tracker {
     public static final ModelResourceLocation clawsModel = new ModelResourceLocation("vivecraft", "climb_claws", "inventory");
+
     private final boolean[] latched = new boolean[2];
     private final boolean[] wasinblock = new boolean[2];
     private final boolean[] wasbutton = new boolean[2];
@@ -55,9 +62,12 @@ public class ClimbTracker extends Tracker {
     private final AABB fullBB = new AABB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
     private final Random rand = new Random();
     boolean unsetflag;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public ClimbTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isGrabbingLadder() {
@@ -93,7 +103,7 @@ public class ClimbTracker extends Tracker {
     public boolean isActive(LocalPlayer p) {
         if (this.dh.vrSettings.seated) {
             return false;
-        } else if (!this.dh.vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling) {
+        } else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
             return false;
         } else if (!this.dh.vrSettings.realisticClimbEnabled) {
             return false;
@@ -473,12 +483,12 @@ public class ClimbTracker extends Tracker {
                         if (j == 4 || j == 5) {
                             d0 = d8 - vec36.z;
                             d10 = (float) blockpos2.getX() + 0.5F;
-                            d10 += (1.0 - Math.min(ClientDataHolderVR.getInstance().vrPlayer.worldScale, 1.0)) * (j == 4 ? 0.5 : -0.5);
+                            d10 += (1.0 - Math.min(this.dh.vrPlayer.worldScale, 1.0)) * (j == 4 ? 0.5 : -0.5);
                         }
                     } else {
                         d10 = d4 - vec36.x;
                         d0 = (float) blockpos2.getZ() + 0.5F;
-                        d0 += (1.0 - Math.min(ClientDataHolderVR.getInstance().vrPlayer.worldScale, 1.0)) * (j == 2 ? 0.5 : -0.5);
+                        d0 += (1.0 - Math.min(this.dh.vrPlayer.worldScale, 1.0)) * (j == 2 ? 0.5 : -0.5);
                     }
                 }
 
@@ -602,6 +612,11 @@ public class ClimbTracker extends Tracker {
                 this.mc.player.causeFoodExhaustion(0.3F);
             }
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 
     private boolean allowed(BlockState bs) {
