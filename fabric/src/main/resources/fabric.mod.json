@@ -36,6 +36,7 @@
     "vivecraft.dynamicfps.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.fabric.sodium.mixins.json",
+    "vivecraft.immersiveportals.mixins.json",
     "vivecraft.iris.mixins.json",
     "vivecraft.modmenu.mixins.json",
     "vivecraft.physicsmod.mixins.json",
