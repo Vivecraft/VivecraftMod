@@ -26,7 +26,6 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.HANDHELD_CAMERA_FOV,
         VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA,
         VRSettings.VrOptions.MIRROR_EYE,
-        VRSettings.VrOptions.STEREOPLUGIN
     };
     static VRSettings.VrOptions[] MROptions = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.MIXED_REALITY_UNITY_LIKE,

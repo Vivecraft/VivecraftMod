@@ -23,8 +23,8 @@ public class XRBindings {
     private static HashSet<Pair<String, String>> quest2Bindings() {
         HashSet<Pair<String, String>> set = new HashSet<>();
 
-        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.ingameMenuButton", "/user/hand/left/input/y/touch"));
-        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.toggleKeyboard", "/user/hand/left/input/y/click"));
+        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.ingameMenuButton", "/user/hand/left/input/y/click"));
+        set.add(new MutablePair<>("/actions/global/in/vivecraft.key.toggleKeyboard", "/user/hand/left/input/squeeze"));
         set.add(new MutablePair<>("/actions/global/in/key.inventory", "/user/hand/left/input/x/click"));
 
         set.add(new MutablePair<>("/actions/gui/in/vivecraft.key.guiShift", "/user/hand/left/input/squeeze"));
@@ -41,7 +41,9 @@ public class XRBindings {
         set.add(new MutablePair<>("/actions/ingame/in/key.use", "/user/hand/right/input/a/click"));
         set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.teleportFallback", "/user/hand/left/input/trigger/value"));
         set.add(new MutablePair<>("/actions/ingame/in/key.jump", "/user/hand/left/input/thumbstick"));
+        set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.freeMoveStrafe", "/user/hand/left/input/thumbstick"));
         set.add(new MutablePair<>("/actions/ingame/in/key.sneak", "/user/hand/right/input/thumbstick"));
+        set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.rotateAxis", "/user/hand/right/input/thumbstick"));
 
         set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardShift", "/user/hand/left/input/squeeze"));
         set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardShift", "/user/hand/right/input/squeeze"));
@@ -71,7 +73,9 @@ public class XRBindings {
         set.add(new MutablePair<>("/actions/ingame/in/key.use", "/user/hand/right/input/trackpad/click"));
         set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.teleportFallback", "/user/hand/left/input/trigger/value"));
         set.add(new MutablePair<>("/actions/ingame/in/key.jump", "/user/hand/left/input/trackpad/x"));
+        set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.freeMoveStrafe", "/user/hand/left/input/trackpad"));
         set.add(new MutablePair<>("/actions/ingame/in/key.sneak", "/user/hand/left/input/trackpad/y"));
+        set.add(new MutablePair<>("/actions/ingame/in/vivecraft.key.rotateAxis", "/user/hand/right/input/trackpad"));
 
         set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardShift", "/user/hand/left/input/squeeze/click"));
         set.add(new MutablePair<>("/actions/keyboard/in/vivecraft.key.keyboardClick", "/user/hand/left/input/trigger/click"));
