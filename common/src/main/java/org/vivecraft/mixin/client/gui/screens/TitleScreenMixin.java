@@ -71,7 +71,7 @@ public abstract class TitleScreenMixin extends Screen {
         vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
         if (vivecraft$vrModeButton.visible && vivecraft$vrModeButton.isMouseOver(i, j)) {
-            guiGraphics.renderTooltip(font, font.split(Component.translatable("vivecraft.options.VR_MODE.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
+            guiGraphics.renderTooltip(font, font.split(Component.translatable("vivecraft.options.VR_ENABLED.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
         }
         if (VRState.vrInitialized && !VRState.vrRunning) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");

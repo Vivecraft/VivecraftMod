@@ -3,7 +3,6 @@ package org.vivecraft.client.gui.widgets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -142,10 +141,10 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseScrolled(double x, double y, double scrollAmount) {
-        if (scrollAmount < 0.0 && currentLine < scrollSteps) {
+    public boolean mouseScrolled(double x, double y, double scrollAmountX, double scrollAmountY) {
+        if (scrollAmountY < 0.0 && currentLine < scrollSteps) {
             currentLine++;
-        } else if (scrollAmount > 0.0 && currentLine > 0) {
+        } else if (scrollAmountY > 0.0 && currentLine > 0) {
             currentLine--;
         } else {
             // scroll bar on limit, didn't consume the input
@@ -157,7 +156,7 @@ public class TextScrollWidget extends AbstractWidget {
     @Override
     public boolean keyPressed(int key, int scancode, int mods) {
         if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN) {
-            if (mouseScrolled(0, 0, key == GLFW.GLFW_KEY_UP ? 1 : -1)) {
+            if (mouseScrolled(0, 0, 0, key == GLFW.GLFW_KEY_UP ? 1 : -1)) {
                 return true;
             }
         }

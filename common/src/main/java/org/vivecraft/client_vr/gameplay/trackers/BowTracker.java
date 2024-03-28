@@ -3,7 +3,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -69,7 +69,7 @@ public class BowTracker extends Tracker {
         } else if (ClientDataHolderVR.getInstance().vrSettings.bowMode == VRSettings.BowMode.VANILLA) {
             return itemStack.getItem() == Items.BOW;
         } else {
-            return itemStack.getItem().getUseAnimation(itemStack) == UseAnim.BOW;
+            return itemStack.getItem().getUseAnimation(itemStack) == UseAnim.BOW && !itemStack.is(org.vivecraft.client_vr.ItemTags.VIVECRAFT_BOW_EXCLUSION);
         }
     }
 

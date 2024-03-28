@@ -1,0 +1,10 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.vivecraft'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}

@@ -26,6 +26,12 @@
     {
       "id": "tconstruct:cleaver",
       "required": false
-    }
+    },
+    {
+      "id": "tetra:modular_sword",
+      "required": false
+    },
+
+    "#vivecraft:moditems/mvw_weapons"
   ]
 }

@@ -79,6 +79,14 @@
     {
       "id": "#tconstruct:modifiable",
       "required": false
+    },
+    {
+      "id": "tetra:modular_single",
+      "required": false
+    },
+    {
+      "id": "tetra:modular_double",
+      "required": false
     }
   ]
 }

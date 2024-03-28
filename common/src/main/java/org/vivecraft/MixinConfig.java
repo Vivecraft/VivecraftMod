@@ -6,9 +6,12 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_11;
-import org.vivecraft.mod_compat_vr.iris.mixin.IrisChunkProgramOverridesMixinSodium_0_4_9;
-import org.vivecraft.mod_compat_vr.sodium.mixin.RenderSectionManagerVRMixin;
+import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_11;
+import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_9;
+import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixin;
+import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixinSodium_0_5_8;
+import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixinSodium_0_6;
+import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -73,17 +76,13 @@ public class MixinConfig implements IMixinConfigPlugin {
         // apply iris sodium version specific mixins only when the right class is there
         if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_9.class.getName())) {
             neededClass = "me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType";
-        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_11.class.getName())) {
+        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_11.class.getName()) || mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_5_8.class.getName())
+        ) {
             neededClass = "me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType";
-        } else if (mixinClassName.equals(RenderSectionManagerVRMixin.class.getName())) {
-            neededClass = "me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList";
-            try {
-                MixinService.getService().getBytecodeProvider().getClassNode(neededClass);
-                ClassNode node = MixinService.getService().getBytecodeProvider().getClassNode(targetClassName);
-                return node.fields.stream().anyMatch(field -> field.name.equals("chunkRenderList"));
-            } catch (ClassNotFoundException | IOException e) {
-                return false;
-            }
+        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_6.class.getName())) {
+            neededClass = "net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType";
+        }else if (mixinClassName.equals(IrisChunkProgramOverridesMixin.class.getName())) {
+            neededClass = "net.caffeinemc.mods.sodium.client.gl.shader.GlProgram";
         }
 
         if (!neededClass.isEmpty()) {
@@ -96,6 +95,6 @@ public class MixinConfig implements IMixinConfigPlugin {
             }
         }
 
-        return !mixinClassName.contains("NoSodium") || (!Xplat.isModLoaded("sodium") && !Xplat.isModLoaded("rubidium"));
+        return !mixinClassName.contains("NoSodium") || !SodiumHelper.isLoaded();
     }
 }

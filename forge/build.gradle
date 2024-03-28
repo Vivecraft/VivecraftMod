@@ -16,6 +16,7 @@ loom {
         mixinConfig "vivecraft.mixins.json"
         mixinConfig "vivecraft.alexmobs.mixins.json"
         mixinConfig "vivecraft.blur.mixins.json"
+        mixinConfig "vivecraft.bedrockify.mixins.json"
         mixinConfig "vivecraft.cataclysm.mixins.json"
         mixinConfig "vivecraft.dynamicfps.mixins.json"
         mixinConfig "vivecraft.sodium.mixins.json"
@@ -51,8 +52,8 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    modRuntimeOnly("maven.modrinth:rubidium:0.6.5")
-    modRuntimeOnly("maven.modrinth:oculus:1.20-1.6.4")
+    // modCompileOnly("maven.modrinth:rubidium:0.6.5")
+    // modCompileOnly("maven.modrinth:oculus:1.20-1.6.4")
 
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")

@@ -6,6 +6,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.client.extensions.SparkParticleExtension;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
@@ -153,6 +154,7 @@ public class VRPlayersClient {
 
                         if (particle != null) {
                             particle.setColor(0.5F + this.rand.nextFloat() / 2.0F, 0.5F + this.rand.nextFloat() / 2.0F, 0.5F + this.rand.nextFloat() / 2.0F);
+                            ((SparkParticleExtension) particle).vivecraft$setPlayerUUID(player.getUUID());
                         }
                     }
                 }

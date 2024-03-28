@@ -41,14 +41,18 @@ public abstract class GuiListScreen extends Screen {
     }
 
     @Override
+    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderDirtBackground(guiGraphics);
+    }
+
+    @Override
     public void render(GuiGraphics guiGraphics, int i, int j, float f) {
         if (reinit) {
             init();
             reinit = false;
         }
-        this.renderBackground(guiGraphics);
+        super.render(guiGraphics, i, j, f);
         list.render(guiGraphics, i, j, f);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
-        super.render(guiGraphics, i, j, f);
     }
 }

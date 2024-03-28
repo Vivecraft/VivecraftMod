@@ -5,6 +5,10 @@
       "id": "#forge:tools/shields",
       "required": false
     },
+    {
+      "id": "tetra:modular_shield",
+      "required": false
+    },
     "minecraft:shield"
   ]
 }

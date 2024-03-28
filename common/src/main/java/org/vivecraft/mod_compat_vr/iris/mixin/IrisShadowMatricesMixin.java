@@ -14,7 +14,11 @@ import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
 @Pseudo
-@Mixin(targets = {"net.coderbot.iris.shadow.ShadowMatrices", "net.coderbot.iris.shadows.ShadowMatrices"})
+@Mixin(targets = {
+    "net.coderbot.iris.shadow.ShadowMatrices",
+    "net.coderbot.iris.shadows.ShadowMatrices",
+    "net.irisshaders.iris.shadows.ShadowMatrices"
+})
 public class IrisShadowMatricesMixin {
 
     @Unique

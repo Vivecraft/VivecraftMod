@@ -9,7 +9,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Pose;
@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -25,8 +26,10 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.VRServerPerms;
+import org.vivecraft.common.network.BufferSerializable;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
+import org.vivecraft.common.network.packets.VivecraftDataPacket;
 
 import java.util.UUID;
 
@@ -51,17 +54,11 @@ public class ClientNetworking {
     public static boolean needsReset = true;
 
     public static ServerboundCustomPayloadPacket getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators command, byte[] payload) {
-        FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
-        friendlybytebuf.writeByte(command.ordinal());
-        friendlybytebuf.writeBytes(payload);
-        return new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, friendlybytebuf);
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(command, payload));
     }
 
     public static ServerboundCustomPayloadPacket createVRActivePacket(boolean vrActive) {
-        var buffer = new FriendlyByteBuf(Unpooled.buffer());
-        buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE.ordinal());
-        buffer.writeBoolean(vrActive);
-        return new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE, new byte[]{(byte) (vrActive ? 1 : 0)}));
     }
 
     public static void resetServerSettings() {
@@ -73,14 +70,21 @@ public class ClientNetworking {
         serverAllowsCrawling = false;
         serverAllowsVrSwitching = false;
         usedNetworkVersion = -1;
-        //DataHolder.getInstance().vrSettings.overrides.resetAll(); move to mixin
+
+        // clear VR player data
+        VRPlayersClient.clear();
+        // clear teleport
+        VRServerPerms.INSTANCE.setTeleportSupported(false);
+        if (VRState.vrInitialized) {
+            ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
+        }
+        // clear server overrides
+        ClientDataHolderVR.getInstance().vrSettings.overrides.resetAll();
     }
 
     public static void sendVersionInfo() {
-        String s = CommonNetworkHelper.CHANNEL.toString();
-        FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
-        friendlybytebuf.writeBytes(s.getBytes());
-        Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new ResourceLocation("minecraft:register"), friendlybytebuf));
+        //Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new ChannelRegisterPacket(CommonNetworkHelper.CHANNEL.toString())));
+        Xplat.addNetworkChannel(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL);
         // send version string, with currently running
         Minecraft.getInstance().getConnection().send(getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.VERSION,
             (CommonDataHolder.getInstance().versionIdentifier + (VRState.vrRunning ? " VR" : " NONVR")
@@ -129,34 +133,35 @@ public class ClientNetworking {
         VRPlayersClient.getInstance().Update(Minecraft.getInstance().player.getGameProfile().getId(), vrPlayerState, worldScale, f1 / 1.52F, true);
     }
 
+    private static byte[] serializeToArray(BufferSerializable object, byte[] additionalData) {
+        FriendlyByteBuf tempBuffer = new FriendlyByteBuf(Unpooled.buffer());
+        if (additionalData != null) {
+            tempBuffer.writeBytes(additionalData);
+        }
+        object.serialize(tempBuffer);
+        byte[] buffer = new byte[tempBuffer.readableBytes()];
+        tempBuffer.readBytes(buffer);
+        tempBuffer.release();
+        return buffer;
+    }
+
     public static ServerboundCustomPayloadPacket createVrPlayerStatePacket(VrPlayerState vrPlayerState) {
-        var buffer = new FriendlyByteBuf(Unpooled.buffer());
-        buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.VR_PLAYER_STATE.ordinal());
-        vrPlayerState.serialize(buffer);
-        return new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, buffer);
+        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.VR_PLAYER_STATE, serializeToArray(vrPlayerState, null)));
     }
 
     public static void sendLegacyPackets(ClientPacketListener connection, VrPlayerState vrPlayerState) {
-        // left controller packet
-        FriendlyByteBuf controller0Buffer = new FriendlyByteBuf(Unpooled.buffer());
-        controller0Buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA.ordinal());
-        controller0Buffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.reverseHands);
-        vrPlayerState.controller0().serialize(controller0Buffer);
-        connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, controller0Buffer));
+        // main controller packet
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA, serializeToArray(vrPlayerState.controller0(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0)}))));
 
-        // right controller packet
-        FriendlyByteBuf controller1Buffer = new FriendlyByteBuf(Unpooled.buffer());
-        controller1Buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.CONTROLLER1DATA.ordinal());
-        controller1Buffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.reverseHands);
-        vrPlayerState.controller1().serialize(controller1Buffer);
-        connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, controller1Buffer));
+        // offhand controller packet
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER1DATA, serializeToArray(vrPlayerState.controller1(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0)}))));
 
         // hmd packet
-        FriendlyByteBuf headBuffer = new FriendlyByteBuf(Unpooled.buffer());
-        headBuffer.writeByte(CommonNetworkHelper.PacketDiscriminators.HEADDATA.ordinal());
-        headBuffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.seated);
-        vrPlayerState.hmd().serialize(headBuffer);
-        connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, headBuffer));
+        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.HEADDATA, serializeToArray(vrPlayerState.hmd(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.seated ? 1 : 0)}))));
+    }
+
+    public static boolean isThirdPersonItems() {
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS).getBoolean();
     }
 
     public static boolean isLimitedSurvivalTeleport() {

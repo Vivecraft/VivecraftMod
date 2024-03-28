@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
@@ -39,8 +40,8 @@ public abstract class AbstractArrowMixin extends Entity {
     @Shadow
     private double baseDamage;
 
-    @Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V")
-    public void vivecraft$pickup(EntityType<? extends AbstractArrow> p_36717_, LivingEntity p_36718_, Level p_36719_, CallbackInfo info) {
+    @Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;)V")
+    public void vivecraft$pickup(EntityType<? extends AbstractArrow> p_36717_, LivingEntity p_36718_, Level p_36719_, ItemStack itemStack, CallbackInfo info) {
         if (p_36718_ instanceof ServerPlayer player) {
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);
             if (serverviveplayer != null && serverviveplayer.isVR()) {

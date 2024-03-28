@@ -9,6 +9,7 @@ import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.ClientLanguage;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
@@ -735,19 +736,30 @@ public class MCOpenVR extends MCVR {
             OpenVR.create(token);
         }
 
-        if (OpenVR.VRSystem != null && !this.isError()) {
-            System.out.println("OpenVR System Initialized OK.");
-            this.hmdTrackedDevicePoses = TrackedDevicePose.calloc(64);
-            this.poseMatrices = new Matrix4f[64];
-
-            for (int i = 0; i < this.poseMatrices.length; ++i) {
-                this.poseMatrices[i] = new Matrix4f();
+        // check that the needed openvr stuff actually initialized, those can fail when using outdated steamvr
+        if (OpenVR.VRApplications == null ||
+            OpenVR.VRCompositor == null ||
+            OpenVR.VRInput == null ||
+            OpenVR.VRRenderModels == null ||
+            OpenVR.VRSystem == null ||
+            this.isError())
+        {
+            if (this.isError()) {
+                throw new RuntimeException(VR.VR_GetVRInitErrorAsEnglishDescription(this.getError()));
+            } else {
+                throw new RuntimeException(I18n.get("vivecraft.messages.outdatedsteamvr"));
             }
-
-            this.initSuccess = true;
-        } else {
-            throw new RuntimeException(VR.VR_GetVRInitErrorAsEnglishDescription(this.getError()));
         }
+
+        VRSettings.logger.info("OpenVR System Initialized OK.");
+        this.hmdTrackedDevicePoses = TrackedDevicePose.calloc(64);
+        this.poseMatrices = new Matrix4f[64];
+
+        for (int i = 0; i < this.poseMatrices.length; ++i) {
+            this.poseMatrices[i] = new Matrix4f();
+        }
+
+        this.initSuccess = true;
     }
 
     public boolean postinit() throws RenderConfigException {
@@ -781,23 +793,17 @@ public class MCOpenVR extends MCVR {
 //    }
 
     private void initOpenVRCompositor() {
-        if (OpenVR.VRSystem != null) {
-            VRCompositor_SetTrackingSpace(1);
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                var pointer = stack.calloc(20);
-                System.out.println("TrackingSpace: " + VRCompositor_GetTrackingSpace());
-                VRSystem_GetStringTrackedDeviceProperty(0, 1005, pointer, this.hmdErrorStore);
-                String s = memUTF8NullTerminated(pointer);
-                System.out.println("Device manufacturer is: " + s);
-                this.detectedHardware = HardwareType.fromManufacturer(s);
-            }
-            this.dh.vrSettings.loadOptions();
-            VRHotkeys.loadExternalCameraConfig();
+        VRCompositor_SetTrackingSpace(1);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            var pointer = stack.calloc(20);
+            VRSettings.logger.info("TrackingSpace: {}", VRCompositor_GetTrackingSpace());
+            VRSystem_GetStringTrackedDeviceProperty(0, 1005, pointer, this.hmdErrorStore);
+            String s = memUTF8NullTerminated(pointer);
+            VRSettings.logger.info("Device manufacturer is: {}", s);
+            this.detectedHardware = HardwareType.fromManufacturer(s);
         }
-
-        if (OpenVR.VRCompositor == null) {
-            System.out.println("Skipping VR Compositor...");
-        }
+        this.dh.vrSettings.loadOptions();
+        VRHotkeys.loadExternalCameraConfig();
 
         this.texBounds.uMax(1.0F);
         this.texBounds.uMin(0.0F);
@@ -809,7 +815,7 @@ public class MCOpenVR extends MCVR {
         this.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
         this.texType1.eType(VR.ETextureType_TextureType_OpenGL);
         this.texType1.handle(-1);
-        System.out.println("OpenVR Compositor initialized OK.");
+        VRSettings.logger.info("OpenVR Compositor initialized OK.");
     }
 
     private void checkPathValid(String path, String knownError, boolean alwaysThrow) throws RenderConfigException {

@@ -13,8 +13,7 @@ import net.minecraft.client.*;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Overlay;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -55,6 +54,7 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.screens.ErrorScreen;
+import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
 import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.UpdateChecker;
@@ -96,7 +96,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     private boolean vivecraft$lastClick;
 
     @Unique
-    private ItemStack vivecraft$itemInHand; //Captured item
+    private int vivecraft$currentHand = 0;
 
     @Unique
     private long vivecraft$mirroNotifyStart;
@@ -250,31 +250,34 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     // on first resource load finished
     @Inject(at = @At("HEAD"), method = {
-        "method_24040", // fabric
-        "lambda$new$4"} // forge
+        "method_53522", // fabric
+        "lambda$new$6"} // forge
         , remap = false)
     public void vivecraft$initVROnLaunch(CallbackInfo ci) {
-        // init vr after resource loading
-        try {
-            if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled) {
-                VRState.vrEnabled = true;
-                VRState.initializeVR();
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
         // set initial resourcepacks
         vivecraft$resourcepacks = resourceManager.listPacks().map(PackResources::packId).toList();
 
         if (OptifineHelper.isOptifineLoaded() && ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
             // with optifine this texture somehow fails to load, so manually reload it
             try {
-                textureManager.getTexture(Gui.GUI_ICONS_LOCATION).load(resourceManager);
+                textureManager.getTexture(Gui.CROSSHAIR_SPRITE).load(resourceManager);
             } catch (IOException e) {
                 // if there was an error, just reload everything
                 reloadResourcePacks();
             }
+        }
+    }
+
+    @Inject(at = @At("TAIL"), method = "onGameLoadFinished")
+    private void vivecraft$showGarbageCollectorScreen(CallbackInfo ci) {
+        // set the Garbage collector screen here, when it got reset after loading, but don't set it when using quickplay, because it would be removed after loading has finished
+        if (VRState.vrEnabled && !ClientDataHolderVR.getInstance().incorrectGarbageCollector.isEmpty()
+            && !(screen instanceof LevelLoadingScreen
+            || screen instanceof ReceivingLevelScreen
+            || screen instanceof ConnectScreen
+            || screen instanceof GarbageCollectorScreen)) {
+            Minecraft.getInstance().setScreen(new GarbageCollectorScreen(ClientDataHolderVR.getInstance().incorrectGarbageCollector));
+            ClientDataHolderVR.getInstance().incorrectGarbageCollector = "";
         }
     }
 
@@ -583,22 +586,23 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
-    @ModifyVariable(at = @At(value = "STORE", ordinal = 0), method = "startUseItem")
-    public ItemStack vivecraft$handItemStore(ItemStack itemInHand) {
-        this.vivecraft$itemInHand = itemInHand;
-        return itemInHand;
-    }
-
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$activeHandSend(CallbackInfo ci, InteractionHand[] var1, int var2, int var3, InteractionHand interactionHand) {
-        if (VRState.vrRunning && (ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(vivecraft$itemInHand))) {
-            ClientNetworking.sendActiveHand((byte) interactionHand.ordinal());
-        }
+    @Inject(at = @At("HEAD"), method = "startUseItem")
+    private void vivecraft$resetHand(CallbackInfo ci) {
+        vivecraft$currentHand = 0;
     }
 
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "startUseItem")
-    public HitResult vivecraft$activeHand2(Minecraft instance) {
-        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().vrSettings.seated || !TelescopeTracker.isTelescope(vivecraft$itemInHand)) {
+    public HitResult vivecraft$activeHand(Minecraft instance) {
+        boolean isTelescope = false;
+        if (VRState.vrRunning) {
+            InteractionHand interactionHand = InteractionHand.values()[vivecraft$currentHand++];
+            ItemStack itemInHand = this.player.getItemInHand(interactionHand);
+            isTelescope = TelescopeTracker.isTelescope(itemInHand);
+            if (ClientDataHolderVR.getInstance().vrSettings.seated || !isTelescope) {
+                ClientNetworking.sendActiveHand((byte) interactionHand.ordinal());
+            }
+        }
+        if (!VRState.vrRunning || ClientDataHolderVR.getInstance().vrSettings.seated || !isTelescope) {
             return instance.hitResult;
         }
         return null;
@@ -633,6 +637,13 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         // VR enabled only chat notifications
         if (VRState.vrInitialized && this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
+            if (!ClientDataHolderVR.getInstance().incorrectGarbageCollector.isEmpty()) {
+                if (!(screen instanceof GarbageCollectorScreen)) {
+                    // set the Garbage collector screen here, quickplay is used, this shouldn't be triggered in other cases, since the GarbageCollectorScreen resets the string on closing
+                    Minecraft.getInstance().setScreen(new GarbageCollectorScreen(ClientDataHolderVR.getInstance().incorrectGarbageCollector));
+                }
+                ClientDataHolderVR.getInstance().incorrectGarbageCollector = "";
+            }
             if (ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer >= 0 && --ClientDataHolderVR.getInstance().vrPlayer.chatWarningTimer == 0) {
                 boolean showMessage = !ClientNetworking.displayedChatWarning || ClientDataHolderVR.getInstance().vrSettings.showServerPluginMissingMessageAlways;
 
@@ -689,6 +700,15 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         VRPlayersClient.getInstance().tick();
 
+        this.profiler.popPush("Vivecraft Keybindings");
+        vivecraft$processAlwaysAvailableKeybindings();
+
+        this.profiler.pop();
+    }
+
+    @Unique
+    private void vivecraft$processAlwaysAvailableKeybindings() {
+        // menuworld export
         if (VivecraftVRMod.INSTANCE.keyExportWorld.consumeClick() && level != null && player != null) {
             Throwable error = null;
             try {
@@ -743,7 +763,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
         }
 
-        this.profiler.pop();
+        // quick commands
+        for (int i = 0; i < VivecraftVRMod.INSTANCE.keyQuickCommands.length; i++) {
+            if (VivecraftVRMod.INSTANCE.keyQuickCommands[i].consumeClick()) {
+                String command = ClientDataHolderVR.getInstance().vrSettings.vrQuickCommands[i];
+                if (command.startsWith("/")) {
+                    this.player.connection.sendCommand(command.substring(1));
+                } else {
+                    this.player.connection.sendChat(command);
+                }
+            }
+        }
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"), method = "tick")
@@ -989,8 +1019,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     source = ClientDataHolderVR.getInstance().vrRenderer.getRightEyeTarget();
                 }
 
-                xcrop = 0.15F;
-                ycrop = 0.15F;
+                xcrop = ClientDataHolderVR.getInstance().vrSettings.mirrorCrop;
+                ycrop = ClientDataHolderVR.getInstance().vrSettings.mirrorCrop;
                 ar = true;
             }
             // Debug

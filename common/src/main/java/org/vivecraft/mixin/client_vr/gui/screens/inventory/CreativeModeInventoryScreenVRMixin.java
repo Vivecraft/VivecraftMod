@@ -26,13 +26,19 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
     @Shadow
     private EditBox searchBox;
 
+    @Shadow
+    private static CreativeModeTab selectedTab;
+
     public CreativeModeInventoryScreenVRMixin(CreativeModeInventoryScreen.ItemPickerMenu abstractContainerMenu, Inventory inventory, Component component) {
         super(abstractContainerMenu, inventory, component);
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen;scrollOffs:F", shift = At.Shift.BEFORE), method = "refreshSearchResults")
     public void vivecraft$search(CallbackInfo ci) {
-        vivecraft$addCreativeSearch(this.searchBox.getValue(), this.menu.items);
+        // only add to actual search
+        if (selectedTab == null || selectedTab.getType() == CreativeModeTab.Type.SEARCH) {
+            vivecraft$addCreativeSearch(this.searchBox.getValue(), this.menu.items);
+        }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;addAll(Ljava/util/Collection;)Z", ordinal = 1, shift = At.Shift.AFTER), method = "selectTab")
@@ -51,13 +57,17 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
         }
 
         if (tab == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.TOOLS_AND_UTILITIES) || tab == null) {
-            ItemStack boots = (new ItemStack(Items.LEATHER_BOOTS)).setHoverName(Component.translatable("vivecraft.item.jumpboots"));
+            ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
+            boots.setHoverName(Component.translatableWithFallback("vivecraft.item.jumpboots", "Jump Boots"));
             boots.getTag().putBoolean("Unbreakable", true);
             boots.getTag().putInt("HideFlags", 4);
             boots.getOrCreateTagElement(ItemStack.TAG_DISPLAY).putInt(ItemStack.TAG_COLOR, 9233775);
-            ItemStack claws = (new ItemStack(Items.SHEARS)).setHoverName(Component.translatable("vivecraft.item.climbclaws"));
+
+            ItemStack claws = new ItemStack(Items.SHEARS);
+            claws.setHoverName(Component.translatableWithFallback("vivecraft.item.climbclaws", "Climb Claws"));
             claws.getTag().putBoolean("Unbreakable", true);
             claws.getTag().putInt("HideFlags", 4);
+
             list.add(boots);
             list.add(claws);
         }

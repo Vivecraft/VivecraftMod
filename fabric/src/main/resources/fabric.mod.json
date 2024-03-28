@@ -32,6 +32,7 @@
   "mixins": [
     "vivecraft.mixins.json",
     "vivecraft.blur.mixins.json",
+    "vivecraft.bedrockify.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
     "vivecraft.sodium.mixins.json",
     "vivecraft.fabric.sodium.mixins.json",
@@ -45,8 +46,11 @@
   ],
   "depends": {
     "fabricloader": ">=0.14.14",
-    "minecraft": ["1.20", "1.20.1"],
+    "minecraft": ["1.20.3", "1.20.4"],
     "java": ">=17"
+  },
+  "breaks": {
+    "sodium": ["0.4.11+build.25", "0.4.11+build.26"]
   },
   "suggests": {
     "another-mod": "*"
@@ -57,6 +61,11 @@
     "sources": "https://github.com/Vivecraft/VivecraftMod"
   },
   "custom": {
+    "mc-publish": {
+      "dependencies": [
+        "sodium(incompatible)#(ignore)"
+      ]
+    },
     "modmenu": {
       "links": {
         "modmenu.discord": "https://discord.gg/jYyyv7zhSW",
