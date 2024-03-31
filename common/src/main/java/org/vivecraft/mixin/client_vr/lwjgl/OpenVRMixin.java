@@ -56,7 +56,7 @@ public abstract class OpenVRMixin {
     }
 
     /**
-     * @author CADIndie
+     * @author thejudge156 / The Judge
      * @reason Open Composite doesn't implement all function tables, so trying to assign them will make it crash
      */
     @Overwrite
