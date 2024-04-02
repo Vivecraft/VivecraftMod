@@ -20,4 +20,18 @@ public abstract class ScreenVRMixin extends AbstractContainerEventHandler implem
             ci.cancel();
         }
     }
+
+    @Inject(at = @At("HEAD"), method = "renderBlurredBackground", cancellable = true)
+    public void vivecraft$noGuiBlur(CallbackInfo ci) {
+        // TODO make blur work in VR
+        if (VRState.vrRunning) {
+            ci.cancel();
+        }
+    }
+    @Inject(at = @At("HEAD"), method = "renderPanorama", cancellable = true)
+    public void vivecraft$noPanorama(CallbackInfo ci) {
+        if (VRState.vrRunning && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() || ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama)) {
+            ci.cancel();
+        }
+    }
 }

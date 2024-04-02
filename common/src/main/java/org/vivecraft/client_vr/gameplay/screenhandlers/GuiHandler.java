@@ -427,7 +427,7 @@ public class GuiHandler {
         }
     }
 
-    public static Vec3 applyGUIModelView(RenderPass currentPass, PoseStack pMatrixStack) {
+    public static Vec3 applyGUIModelView(RenderPass currentPass, org.joml.Matrix4f pMatrixStack) {
         mc.getProfiler().push("applyGUIModelView");
         Vec3 vec3 = RenderHelper.getSmoothCameraPosition(currentPass, dh.vrPlayer.vrdata_world_render);
 
@@ -553,9 +553,9 @@ public class GuiHandler {
         }
 
         Vec3 vec36 = guipos.subtract(vec3);
-        pMatrixStack.translate(vec36.x, vec36.y, vec36.z);
-        pMatrixStack.mulPoseMatrix(guirot.toMCMatrix());
-        pMatrixStack.translate(guilocal.x, guilocal.y, guilocal.z);
+        pMatrixStack.translate((float) vec36.x, (float) vec36.y, (float) vec36.z);
+        pMatrixStack.mul(guirot.toMCMatrix());
+        pMatrixStack.translate((float) guilocal.x,(float) guilocal.y, (float) guilocal.z);
         float f2 = scale * dh.vrPlayer.vrdata_world_render.worldScale;
         pMatrixStack.scale(f2, f2, f2);
         guiScaleApplied = f2;

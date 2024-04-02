@@ -9,6 +9,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.sounds.SoundEvent;
@@ -189,12 +190,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 double d3 = this.getZ();
                 super.move(pType, pPos);
 
+                // TODO fix that shit with a custom attribute modifier
+                /*
                 if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
                     this.setMaxUpStep(this.getBlockJumpFactor() == 1.0F ? 1.0F : 0.6F);
                 } else {
                     this.setMaxUpStep(0.6F);
                     this.updateAutoJump((float) (this.getX() - d2), (float) (this.getZ() - d3));
-                }
+                }*/
 
                 double d4 = this.getY() + this.vivecraft$getRoomYOffsetFromPose();
                 VRPlayer.get().setRoomOrigin(this.getX() + d0, d4, this.getZ() + d1, false);
@@ -236,7 +239,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public ItemStack eat(Level level, ItemStack itemStack) {
-        if (VRState.vrRunning && itemStack.isEdible() && (Object) this == Minecraft.getInstance().player && itemStack.getHoverName().getString().equals("EAT ME")) {
+        if (VRState.vrRunning && itemStack.get(DataComponents.FOOD) != null && (Object) this == Minecraft.getInstance().player && itemStack.getHoverName().getString().equals("EAT ME")) {
             ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
             ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
         }
@@ -497,12 +500,11 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Unique
     public void vivecraft$stepSound(BlockPos blockforNoise, Vec3 soundPos) {
         BlockState blockstate = this.level().getBlockState(blockforNoise);
-        Block block = blockstate.getBlock();
-        SoundType soundtype = block.getSoundType(blockstate);
+        SoundType soundtype = blockstate.getSoundType();
         BlockState blockstate1 = this.level().getBlockState(blockforNoise.above());
 
         if (blockstate1.getBlock() == Blocks.SNOW) {
-            soundtype = Blocks.SNOW.getSoundType(blockstate1);
+            soundtype = Blocks.SNOW.defaultBlockState().getSoundType();
         }
 
         float f = soundtype.getVolume();
@@ -510,7 +512,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         SoundEvent soundevent = soundtype.getStepSound();
 
         // TODO: liquid is deprecated
-        if (!this.isSilent() && !block.defaultBlockState().liquid()) {
+        if (!this.isSilent() && !blockstate.liquid()) {
             this.level().playSound(null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
         }
     }

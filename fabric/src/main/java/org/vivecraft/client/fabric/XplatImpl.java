@@ -107,7 +107,8 @@ public class XplatImpl {
     }
 
     public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
-        listener.send(new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
+        // TODO potato
+        /*listener.send(new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
             public static final ResourceLocation ID = new ResourceLocation("minecraft:register");
 
             @Override
@@ -119,6 +120,6 @@ public class XplatImpl {
             public ResourceLocation id() {
                 return ID;
             }
-        }));
+        }));*/
     }
 }

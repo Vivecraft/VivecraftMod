@@ -15,6 +15,7 @@
     "minecraft:diamond_sword",
     "minecraft:golden_sword",
     "minecraft:netherite_sword",
+    "minecraft:potato_peeler",
     {
       "id": "tconstruct:dagger",
       "required": false

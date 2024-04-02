@@ -358,7 +358,7 @@ public class VRPlayer {
                         || (dataholder.climbTracker.isGrabbingLadder() && dataholder.vrSettings.realisticClimbEnabled)) && player.fallDistance == 0.0F) {
 
                     // is the player significantly inside a block?
-                    float climbShrink = player.getDimensions(player.getPose()).width * 0.45F;
+                    float climbShrink = player.getDimensions(player.getPose()).width() * 0.45F;
                     double shrunkClimbHalfWidth = playerHalfWidth - climbShrink;
 
                     AABB bbClimb = new AABB(

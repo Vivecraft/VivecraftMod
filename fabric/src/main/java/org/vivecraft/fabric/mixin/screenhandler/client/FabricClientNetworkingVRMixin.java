@@ -1,5 +1,6 @@
 package org.vivecraft.fabric.mixin.screenhandler.client;
 
+import net.fabricmc.fabric.impl.screenhandler.Networking;
 import net.fabricmc.fabric.impl.screenhandler.client.ClientNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -12,8 +13,8 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 
 @Mixin(ClientNetworking.class)
 public class FabricClientNetworkingVRMixin {
-    @Inject(at = @At("HEAD"), method = "openScreen")
-    private void markScreenActiveForge(ResourceLocation typeId, int syncId, Component title, FriendlyByteBuf buf, CallbackInfo ci) {
+    @Inject(at = @At("HEAD"), method = "openScreen", remap = false)
+    private <D> void markScreenActiveForge(Networking.OpenScreenPayload<D> payload, CallbackInfo ci) {
         GuiHandler.guiAppearOverBlockActive = true;
     }
 }

@@ -29,9 +29,4 @@ public class NoSodiumLevelRendererVRMixin {
             sectionOcclusionGraph.invalidate();
         }
     }
-
-    @ModifyConstant(method = "renderSectionLayer", constant = @Constant(intValue = 12))
-    public int vivecraft$moreTextures(int constant) {
-        return RenderSystemAccessor.getShaderTextures().length;
-    }
 }

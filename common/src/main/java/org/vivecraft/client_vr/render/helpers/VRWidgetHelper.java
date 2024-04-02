@@ -19,6 +19,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -92,27 +93,27 @@ public class VRWidgetHelper {
     public static void renderVRCameraWidget(float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, ModelResourceLocation model, ModelResourceLocation displayModel, Runnable displayBindFunc, Function<Direction, DisplayFace> displayFaceFunc) {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        PoseStack poseStack = RenderSystem.getModelViewStack();
-        poseStack.pushPose();
-        poseStack.setIdentity();
-        RenderHelper.applyVRModelView(dataholder.currentPass, poseStack);
+        Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
+        modelViewStack.identity();
+        RenderHelper.applyVRModelView(dataholder.currentPass, modelViewStack);
 
         Vec3 widgetPosition = dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
         Vec3 eye = RenderHelper.getSmoothCameraPosition(dataholder.currentPass, dataholder.vrPlayer.vrdata_world_render);
         Vec3 widgetOffset = widgetPosition.subtract(eye);
 
-        poseStack.translate(widgetOffset.x, widgetOffset.y, widgetOffset.z);
-        poseStack.mulPoseMatrix(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix());
+        modelViewStack.translate((float) widgetOffset.x, (float) widgetOffset.y, (float) widgetOffset.z);
+        modelViewStack.mul(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix());
         scale = scale * dataholder.vrPlayer.vrdata_world_render.worldScale;
-        poseStack.scale(scale, scale, scale);
+        modelViewStack.scale(scale, scale, scale);
 
         if (debug) {
-            MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
+            MethodHolder.rotateDeg(modelViewStack, 180.0F, 0.0F, 1.0F, 0.0F);
             RenderHelper.renderDebugAxes(0, 0, 0, 0.08F);
-            MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
+            MethodHolder.rotateDeg(modelViewStack, 180.0F, 0.0F, 1.0F, 0.0F);
         }
 
-        poseStack.translate(offsetX, offsetY, offsetZ);
+        modelViewStack.translate(offsetX, offsetY, offsetZ);
         RenderSystem.applyModelViewMatrix();
 
         BlockPos blockpos = BlockPos.containing(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
@@ -124,7 +125,7 @@ public class VRWidgetHelper {
         if (minecraft.level != null) {
             RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
         } else {
-            RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         }
         minecraft.gameRenderer.lightTexture().turnOnLightLayer();
 
@@ -153,7 +154,7 @@ public class VRWidgetHelper {
                 boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == DisplayFace.MIRROR;
                 // make normals point up, so they are always bright
                 // TODO: might break with shaders?
-                Vector3f normal = poseStack.last().normal().transform(new Vector3f(0.0F, 1.0F, 0.0F));
+                Vector3f normal = new Matrix3f(modelViewStack).transform(new Vector3f(0.0F, 1.0F, 0.0F));
                 int j = LightTexture.pack(15, 15);
                 int step = vertexList.length / 4;
                 bufferbuilder1.vertex(
@@ -199,7 +200,7 @@ public class VRWidgetHelper {
         tesselator.end();
         minecraft.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.enableBlend();
-        poseStack.popPose();
+        modelViewStack.popMatrix();
         RenderSystem.applyModelViewMatrix();
     }
 

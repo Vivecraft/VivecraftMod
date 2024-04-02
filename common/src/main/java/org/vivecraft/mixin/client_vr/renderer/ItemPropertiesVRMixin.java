@@ -14,7 +14,7 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(ItemProperties.class)
 public class ItemPropertiesVRMixin {
 
-    @Inject(at = @At("HEAD"), method = "method_43611", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "method_59385", cancellable = true)
     private static void vivecraft$noHornUseAnimFabric(ItemStack itemStack, ClientLevel clientLevel, LivingEntity livingEntity, int i, CallbackInfoReturnable<Float> cir) {
         if (VRState.vrRunning && livingEntity == Minecraft.getInstance().player) {
             cir.setReturnValue(0.0F);

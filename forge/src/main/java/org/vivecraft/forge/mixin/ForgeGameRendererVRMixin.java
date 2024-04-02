@@ -22,26 +22,26 @@ public class ForgeGameRendererVRMixin {
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V", ordinal = 2), method = "renderLevel")
-    public void forgeMulposZ(PoseStack poseStack, Quaternionf quaternion) {
-        if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass != RenderPass.LEFT && ClientDataHolderVR.getInstance().currentPass != RenderPass.RIGHT) {
-            poseStack.mulPose(quaternion);
-        }
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotationXYZ(FFF)Lorg/joml/Matrix4f;"), method = "renderLevel", index = 0)
+    public float vivecraft$nullifyXRotation(float xRot) {
+        return RenderPassType.isVanilla() ? xRot : 0F;
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V ", ordinal = 3), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
-    public void removeMulposeX(PoseStack s, Quaternionf quaternion) {
-        if (RenderPassType.isVanilla()) {
-            s.mulPose(quaternion);
-        }
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotationXYZ(FFF)Lorg/joml/Matrix4f;"), method = "renderLevel", index = 1)
+    public float vivecraft$nullifyYRotation(float yRot) {
+        return RenderPassType.isVanilla() ? yRot : 0F;
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V ", ordinal = 4), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
-    public void removeMulposeY(PoseStack s, Quaternionf quaternion) {
-        if (RenderPassType.isVanilla()) {
-            s.mulPose(quaternion);
-        } else {
-            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, s);
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotationXYZ(FFF)Lorg/joml/Matrix4f;"), method = "renderLevel", index = 2)
+    public float vivecraft$nullifyZRotation(float zRot) {
+        return RenderPassType.isVanilla() ? zRot : 0F;
+    }
+
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;prepareCullFrustum(Lnet/minecraft/world/phys/Vec3;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"), method = "renderLevel", index = 1)
+    public Matrix4f removeMulposeY(Matrix4f matrix) {
+        if (!RenderPassType.isVanilla()) {
+            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, matrix);
         }
+        return matrix;
     }
 }

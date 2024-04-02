@@ -39,6 +39,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.lwjgl.glfw.GLFW;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -382,7 +383,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
             // draw screen/gui to buffer
             // push pose so we can pop it later
-            RenderSystem.getModelViewStack().pushPose();
+            RenderSystem.getModelViewStack().pushMatrix();
             ((GameRendererExtension) this.gameRenderer).vivecraft$setShouldDrawScreen(true);
             // only draw the gui when the level was rendered once, since some mods expect that
             ((GameRendererExtension) this.gameRenderer).vivecraft$setShouldDrawGui(renderLevel && this.entityRenderDispatcher.camera != null);
@@ -401,9 +402,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
             // draw cursor on Gui Layer
             if (this.screen != null || !mouseHandler.isMouseGrabbed()) {
-                PoseStack poseStack = RenderSystem.getModelViewStack();
-                poseStack.pushPose();
-                poseStack.setIdentity();
+                Matrix4fStack poseStack = RenderSystem.getModelViewStack();
+                poseStack.pushMatrix();
+                poseStack.identity();
                 poseStack.translate(0.0f, 0.0f, -2000.0f);
                 RenderSystem.applyModelViewMatrix();
 
@@ -411,7 +412,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
                 ((GuiExtension) this.gui).vivecraft$drawMouseMenuQuad(x, y);
 
-                poseStack.popPose();
+                poseStack.popMatrix();
                 RenderSystem.applyModelViewMatrix();
             }
 
@@ -421,7 +422,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             fpsPieResults = null;
 
             // pop pose that we pushed before the gui
-            RenderSystem.getModelViewStack().popPose();
+            RenderSystem.getModelViewStack().popMatrix();
             RenderSystem.applyModelViewMatrix();
 
             // generate mipmaps
@@ -875,8 +876,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float) screenX,
                 screenY, 0.0F, 1000.0F, 3000.0F);
             RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-            RenderSystem.getModelViewStack().pushPose();
-            RenderSystem.getModelViewStack().setIdentity();
+            RenderSystem.getModelViewStack().pushMatrix();
+            RenderSystem.getModelViewStack().identity();
             RenderSystem.getModelViewStack().translate(0, 0, -2000);
             RenderSystem.applyModelViewMatrix();
             RenderSystem.setShaderFogStart(Float.MAX_VALUE);
@@ -905,7 +906,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 j += 12;
             }
             guiGraphics.flush();
-            RenderSystem.getModelViewStack().popPose();
+            RenderSystem.getModelViewStack().popMatrix();
         }
     }
 

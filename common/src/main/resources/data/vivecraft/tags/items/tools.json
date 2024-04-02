@@ -54,6 +54,7 @@
     "minecraft:soul_torch",
     "minecraft:flint_and_steel",
     "minecraft:debug_stick",
+    "minecraft:lashing_potato",
 
     "minecraft:wooden_shovel",
     "minecraft:stone_shovel",
@@ -75,6 +76,9 @@
     "minecraft:diamond_pickaxe",
     "minecraft:golden_pickaxe",
     "minecraft:netherite_pickaxe",
+
+    "minecraft:potato_hammer",
+    "minecraft:potato_staff",
 
     {
       "id": "#tconstruct:modifiable",

@@ -42,7 +42,7 @@ public abstract class GuiListScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderDirtBackground(guiGraphics);
+        this.renderMenuBackground(guiGraphics);
     }
 
     @Override

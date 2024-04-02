@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import org.joml.AxisAngle4f;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.provider.InputSimulator;
@@ -26,7 +27,7 @@ public abstract class MethodHolder {
         pose.mulPose(new Quaternionf(new AxisAngle4f(angle * 0.017453292F, x, y, z)));
     }
 
-    public static void rotateDegXp(PoseStack matrix, int i) {
-        matrix.mulPose(Axis.XP.rotationDegrees(i));
+    public static void rotateDeg(Matrix4f pose, float angle, float x, float y, float z) {
+        pose.rotate(new Quaternionf(new AxisAngle4f(angle * 0.017453292F, x, y, z)));
     }
 }

@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
@@ -273,7 +273,7 @@ public class FakeBlockAccess implements LevelReader {
     }
 
     @Override
-    public ChunkAccess getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull) {
+    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
         return null; // �\_(?)_/�
     }
 
@@ -317,6 +317,11 @@ public class FakeBlockAccess implements LevelReader {
     @Override
     public boolean isEmptyBlock(BlockPos pos) {
         return this.getBlockState(pos).isAir();
+    }
+
+    @Override
+    public boolean isPotato() {
+        return false;
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -39,11 +40,11 @@ public class TelescopeTracker extends Tracker {
     public static boolean isLegacyTelescope(ItemStack i) {
         if (i.isEmpty()) {
             return false;
-        } else if (!i.hasCustomHoverName()) {
+        } else if (!i.has(DataComponents.CUSTOM_NAME)) {
             return false;
         } else if (i.getItem() != Items.ENDER_EYE) {
             return false;
-        } else if (!i.hasTag() || !i.getTag().getBoolean("Unbreakable")) {
+        } else if (!i.has(DataComponents.UNBREAKABLE)) {
             return false;
         } else {
             return i.getHoverName().getContents() instanceof TranslatableContents && ((TranslatableContents) i.getHoverName().getContents()).getKey().equals("vivecraft.item.telescope") || i.getHoverName().getString().equals("Eye of the Farseer");
