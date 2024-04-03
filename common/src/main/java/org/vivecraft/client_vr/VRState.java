@@ -69,11 +69,6 @@ public class VRState {
             dh.vrPlayer.registerTracker(dh.crawlTracker);
             dh.vrPlayer.registerTracker(dh.cameraTracker);
 
-            // set the timer here aswell, to account for the case enabling vr mid game
-            dh.vrPlayer.chatWarningTimer = 200;
-            dh.vrPlayer.teleportWarning = true;
-            dh.vrPlayer.vrSwitchWarning = false;
-
             dh.vr.postinit();
 
             dh.menuWorldRenderer = new MenuWorldRenderer();

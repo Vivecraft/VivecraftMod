@@ -2,6 +2,7 @@ package org.vivecraft.mixin.client_vr.renderer;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
@@ -31,6 +32,7 @@ import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -292,7 +294,14 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
 
         if (!vivecraft$guiRendered && transparencyChain == null) {
+            RenderSystem.getModelViewStack().pushMatrix().identity();
+            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, RenderSystem.getModelViewStack());
+            RenderSystem.applyModelViewMatrix();
+
             VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft);
+
+            RenderSystem.getModelViewStack().popMatrix();
+            RenderSystem.applyModelViewMatrix();
             vivecraft$guiRendered = true;
         }
     }

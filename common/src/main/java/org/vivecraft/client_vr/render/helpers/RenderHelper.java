@@ -59,6 +59,18 @@ public class RenderHelper {
         poseStack.mulPose(modelView);
     }
 
+    public static void applyVRModelViewInverse(RenderPass currentPass, PoseStack poseStack) {
+        Matrix4f modelView;
+        if (currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
+            modelView = new Matrix4f().rotation(MCVR.get().hmdRotHistory
+                .averageRotation(dataHolder.vrSettings.displayMirrorCenterSmooth));
+        } else {
+            modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
+                .getMatrix().transposed().toMCMatrix();
+        }
+        poseStack.mulPose(modelView.invert());
+    }
+
     public static void applyVRModelView(RenderPass currentPass, Matrix4f poseStack) {
         Matrix4f modelView;
         if (currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {

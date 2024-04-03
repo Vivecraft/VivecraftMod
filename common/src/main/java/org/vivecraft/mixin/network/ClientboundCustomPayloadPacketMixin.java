@@ -35,7 +35,7 @@ public class ClientboundCustomPayloadPacketMixin {
 
     @WrapOperation(at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList([Ljava/lang/Object;)Ljava/util/ArrayList;", ordinal = 0), method = "<clinit>")
     private static <E> ArrayList<E> vivecraft$addPacket(E[] elements, Operation<ArrayList<E>> original) {
-        return (ArrayList<E>) Lists.newArrayList(ArrayUtils.add(elements,
-            new CustomPacketPayload.TypeAndCodec<>(VivecraftDataPacket.TYPE, VivecraftDataPacket.STREAM_CODEC)));
+        return original.call(new Object[]{ArrayUtils.add(elements,
+            new CustomPacketPayload.TypeAndCodec<>(VivecraftDataPacket.TYPE, VivecraftDataPacket.STREAM_CODEC))});
     }
 }

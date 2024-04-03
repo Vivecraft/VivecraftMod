@@ -493,8 +493,6 @@ public class VREffectsHelper {
         if (ClientDataHolderVR.getInstance().currentPass == RenderPass.SCOPEL || ClientDataHolderVR.getInstance().currentPass == RenderPass.SCOPER) {
             return;
         }
-        RenderSystem.getModelViewStack().pushMatrix().identity();
-        RenderSystem.applyModelViewMatrix();
 
         mc.getProfiler().popPush("VR");
         renderCrosshairAtDepth(!ClientDataHolderVR.getInstance().vrSettings.useCrosshairOcclusion);
@@ -530,9 +528,6 @@ public class VREffectsHelper {
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1, 1, 1, 1);
         mc.getMainRenderTarget().bindWrite(true);
-
-        RenderSystem.getModelViewStack().popMatrix();
-        RenderSystem.applyModelViewMatrix();
     }
 
     public static void renderVrFast(float partialTicks, boolean secondPass, boolean menuHandRight, boolean menuHandLeft) {
@@ -541,8 +536,6 @@ public class VREffectsHelper {
             return;
         }
         mc.getProfiler().popPush("VR");
-        RenderSystem.getModelViewStack().pushMatrix().identity();
-        RenderSystem.applyModelViewMatrix();
         mc.gameRenderer.lightTexture().turnOffLightLayer();
 
         if (!secondPass) {
@@ -561,9 +554,6 @@ public class VREffectsHelper {
             VRArmHelper.renderVRHands(partialTicks, VRArmHelper.shouldRenderHands(), VRArmHelper.shouldRenderHands(), menuHandRight, menuHandLeft);
         }
         renderVRSelfEffects(partialTicks);
-
-        RenderSystem.getModelViewStack().popMatrix();
-        RenderSystem.applyModelViewMatrix();
     }
 
     private static boolean shouldOccludeGui() {
@@ -618,7 +608,6 @@ public class VREffectsHelper {
                             Matrix4f modelView = new Matrix4f();
                             RenderSystem.disableCull();
 
-                            RenderHelper.applyVRModelView(dataHolder.currentPass, modelView);
                             Vec3 vec3 = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
                             Vec3 interpolatedPlayerPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(partialTicks);
                             Vec3 pos = interpolatedPlayerPos.subtract(vec3).add(0.0D, 0.005D, 0.0D);
@@ -659,7 +648,6 @@ public class VREffectsHelper {
 
     public static void renderFireInFirstPerson() {
         PoseStack posestack = new PoseStack();
-        RenderHelper.applyVRModelView(dataHolder.currentPass, posestack);
         RenderHelper.applyStereo(dataHolder.currentPass, posestack);
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.depthFunc(GL11C.GL_ALWAYS);
@@ -738,8 +726,6 @@ public class VREffectsHelper {
 
             Matrix4fStack modelView = new Matrix4fStack(3);
 
-            RenderHelper.applyVRModelView(dataHolder.currentPass, modelView);
-
             // offset from eye to gui pos
             modelView.translate((float) (guiPos.x - eye.x), (float) (guiPos.y - eye.y), (float) (guiPos.z - eye.z));
             modelView.mul(guiRot.toMCMatrix());
@@ -756,17 +742,9 @@ public class VREffectsHelper {
     private static void setupScreenRendering(float partialTicks) {
         // remove nausea effect from projection matrix, for vanilla, and poseStack for iris
         ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTicks);
-
-        Matrix4fStack modelView = RenderSystem.getModelViewStack();
-        modelView.pushMatrix();
-        modelView.identity();
-        RenderSystem.applyModelViewMatrix();
     }
 
-    private static void finishScreenRendering() {
-        RenderSystem.getModelViewStack().popMatrix();
-        RenderSystem.applyModelViewMatrix();
-    }
+    private static void finishScreenRendering() {}
 
     private static void renderScreen(Matrix4f poseStack, RenderTarget screenFramebuffer, boolean depthAlways, boolean noFog, Vec3 screenPos) {
         screenFramebuffer.bindRead();
@@ -839,7 +817,6 @@ public class VREffectsHelper {
                     mc.getProfiler().push("GuiLayer");
 
                     Matrix4fStack modelView = new Matrix4fStack(8);
-                    RenderHelper.applyVRModelView(dataHolder.currentPass, modelView);
                     setupScreenRendering(partialTicks);
 
                     // MAIN MENU ENVIRONMENT
@@ -1008,7 +985,6 @@ public class VREffectsHelper {
             crosshairRenderPos = crosshairRenderPos.add(aim.normalize().scale(-0.01D));
 
             Matrix4f modelView = new Matrix4f();
-            RenderHelper.applyVRModelView(dataHolder.currentPass, modelView);
 
             Vec3 translate = crosshairRenderPos.subtract(mc.getCameraEntity().position());
             modelView.translate((float) translate.x, (float) translate.y, (float) translate.z);

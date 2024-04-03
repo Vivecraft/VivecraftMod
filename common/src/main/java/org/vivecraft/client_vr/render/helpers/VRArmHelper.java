@@ -56,10 +56,7 @@ public class VRArmHelper {
                 renderMainMenuHand(0, partialTicks, false);
             } else {
                 ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTicks);
-                PoseStack newPoseStack = new PoseStack();
-                newPoseStack.last().pose().identity();
-                RenderHelper.applyVRModelView(dataHolder.currentPass, newPoseStack);
-                renderVRHand_Main(newPoseStack, partialTicks);
+                renderVRHand_Main(new PoseStack(), partialTicks);
             }
 
             ClientDataHolderVR.ismainhand = false;
@@ -70,10 +67,7 @@ public class VRArmHelper {
                 renderMainMenuHand(1, partialTicks, false);
             } else {
                 ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTicks);
-                PoseStack newPoseStack = new PoseStack();
-                newPoseStack.last().pose().identity();
-                RenderHelper.applyVRModelView(dataHolder.currentPass, newPoseStack);
-                renderVRHand_Offhand(partialTicks, true, newPoseStack);
+                renderVRHand_Offhand(partialTicks, true, new PoseStack());
             }
         }
 
@@ -89,7 +83,6 @@ public class VRArmHelper {
 
         Matrix4f modelView = new Matrix4f();
 
-        RenderHelper.applyVRModelView(dataHolder.currentPass, modelView);
         RenderHelper.setupRenderingAtController(c, modelView);
 
         if (mc.getOverlay() == null) {
@@ -244,9 +237,6 @@ public class VRArmHelper {
         poseStack.popPose();
 
         if (renderTeleport) {
-            poseStack.pushPose();
-            poseStack.setIdentity();
-            RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
 //			net.optifine.shaders.Program program = Shaders.activeProgram; TODO
 
 //			if (Config.isShaders()) {
@@ -302,8 +292,6 @@ public class VRArmHelper {
 //			if (Config.isShaders()) {
 //				Shaders.useProgram(program);
 //			}
-
-            poseStack.popPose();
         }
     }
 

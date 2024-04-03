@@ -31,10 +31,11 @@ public class ServerboundCustomPayloadPacketMixin {
         }
     }*/
     @WrapOperation(at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList([Ljava/lang/Object;)Ljava/util/ArrayList;", ordinal = 0), method = "<clinit>")
-    private static <E> ArrayList<E> bypassExpensiveCalculationIfNecessary(E[] elements, Operation<ArrayList<E>> original) {
-        /*return original.call(ArrayUtils.add(elements,
-            new CustomPacketPayload.TypeAndCodec<>(VivecraftDataPacket.TYPE, VivecraftDataPacket.STREAM_CODEC)));*/
-        return (ArrayList<E>) Lists.newArrayList(ArrayUtils.add(elements,
-            new CustomPacketPayload.TypeAndCodec<>(VivecraftDataPacket.TYPE, VivecraftDataPacket.STREAM_CODEC)));
+    private static <E> ArrayList<E> vivecraft$addPacket(E[] elements, Operation<ArrayList<E>> original) {
+        return original.call(new Object[]{
+            ArrayUtils.addAll(
+                elements,
+                new CustomPacketPayload.TypeAndCodec<>(VivecraftDataPacket.TYPE, VivecraftDataPacket.STREAM_CODEC))
+        });
     }
 }

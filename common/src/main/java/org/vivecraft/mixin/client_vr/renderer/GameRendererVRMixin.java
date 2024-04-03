@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -197,6 +198,15 @@ public abstract class GameRendererVRMixin
         }
     }
 
+    @ModifyVariable(at = @At("STORE"), method = "pick(Lnet/minecraft/world/entity/Entity;DDF)Lnet/minecraft/world/phys/HitResult;", ordinal = 0)
+    public Vec3 vivecraft$rayTrace(Vec3 original) {
+        if (!VRState.vrRunning) {
+            return original;
+        } else {
+            return vivecraft$DATA_HOLDER.vrPlayer.vrdata_world_render.getController(0).getPosition();
+        }
+    }
+
     @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;distanceToSqr(Lnet/minecraft/world/phys/Vec3;)D"), method = "pick(Lnet/minecraft/world/entity/Entity;DDF)Lnet/minecraft/world/phys/HitResult;", ordinal = 0)
     public HitResult vivecraft$rayTrace(HitResult original) {
         if (!VRState.vrRunning) {
@@ -370,6 +380,10 @@ public abstract class GameRendererVRMixin
             this.minecraft.getProfiler().push("MainMenu");
             GL11.glDisable(GL11.GL_STENCIL_TEST);
 
+            RenderSystem.getModelViewStack().pushMatrix().identity();
+            RenderHelper.applyVRModelView(vivecraft$DATA_HOLDER.currentPass, RenderSystem.getModelViewStack());
+            RenderSystem.applyModelViewMatrix();
+
             VREffectsHelper.renderGuiLayer(partialTicks, true);
 
             if (KeyboardHandler.Showing) {
@@ -386,6 +400,8 @@ public abstract class GameRendererVRMixin
                 && vivecraft$DATA_HOLDER.currentPass != RenderPass.CAMERA) {
                 VRArmHelper.renderVRHands(partialTicks, true, true, true, true);
             }
+            RenderSystem.getModelViewStack().popMatrix();
+            RenderSystem.applyModelViewMatrix();
         }
         this.minecraft.getProfiler().pop();
         info.cancel();
@@ -427,6 +443,14 @@ public abstract class GameRendererVRMixin
         }
     }
 
+    @Inject(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"))
+    private void vivecraft$rotateBeforeTranslate(int i, int j, float f, CallbackInfo ci, @Local PoseStack poseStack) {
+        if (!RenderPassType.isVanilla()) {
+            RenderHelper.applyStereo(ClientDataHolderVR.getInstance().currentPass, poseStack);
+            RenderHelper.applyVRModelViewInverse(ClientDataHolderVR.getInstance().currentPass, poseStack);
+        }
+    }
+
     @Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
     private void vivecraft$noScaleItem(PoseStack poseStack, float x, float y, float z, int width, int height, float partialTicks) {
         if (RenderPassType.isVanilla()) {
@@ -444,11 +468,8 @@ public abstract class GameRendererVRMixin
             if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD) {
                 sinN *= (float) (ClientDataHolderVR.getInstance().vrSettings.mixedRealityFov / 70.0);
             }
-            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, poseStack);
-            RenderHelper.applyStereo(ClientDataHolderVR.getInstance().currentPass, poseStack);
             poseStack.scale(sinN, sinN, sinN);
-            poseStack.mulPose(Axis.YP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getYaw()));
-            poseStack.mulPose(Axis.XP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPitch()));
+
         }
     }
 

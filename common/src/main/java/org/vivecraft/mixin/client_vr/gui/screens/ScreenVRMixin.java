@@ -14,13 +14,6 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(Screen.class)
 public abstract class ScreenVRMixin extends AbstractContainerEventHandler implements Renderable {
 
-    @Inject(at = @At("HEAD"), method = "renderTransparentBackground", cancellable = true)
-    public void vivecraft$vrBackground(GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VRState.vrRunning && ClientDataHolderVR.getInstance().vrSettings != null && !ClientDataHolderVR.getInstance().vrSettings.menuBackground) {
-            ci.cancel();
-        }
-    }
-
     @Inject(at = @At("HEAD"), method = "renderBlurredBackground", cancellable = true)
     public void vivecraft$noGuiBlur(CallbackInfo ci) {
         // TODO make blur work in VR
@@ -28,8 +21,8 @@ public abstract class ScreenVRMixin extends AbstractContainerEventHandler implem
             ci.cancel();
         }
     }
-    @Inject(at = @At("HEAD"), method = "renderPanorama", cancellable = true)
-    public void vivecraft$noPanorama(CallbackInfo ci) {
+    @Inject(at = @At("HEAD"), method = {"renderBackground", "renderPanorama", "renderTransparentBackground"}, cancellable = true)
+    public void vivecraft$noBackground(CallbackInfo ci) {
         if (VRState.vrRunning && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() || ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama)) {
             ci.cancel();
         }
