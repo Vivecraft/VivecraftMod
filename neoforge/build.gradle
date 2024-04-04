@@ -35,11 +35,19 @@ dependencies {
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
     forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
 
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openxr:3.3.1")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openxr:3.3.1:natives-linux")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openxr:3.3.1:natives-windows")
+
     // shadow the natives
     bundle("org.lwjgl:lwjgl-openvr:3.3.1") { transitive = false }
     bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux") { transitive = false }
     bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos") { transitive = false }
     bundle("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows") { transitive = false }
+
+    bundle("org.lwjgl:lwjgl-openxr:3.3.1") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openxr:3.3.1:natives-linux") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openxr:3.3.1:natives-windows") { transitive = false }
 }
 
 processResources {
