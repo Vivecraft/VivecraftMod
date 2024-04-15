@@ -32,9 +32,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 import org.vivecraft.server.config.ServerConfig;
+
+import java.util.IllegalFormatException;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player {
@@ -219,6 +222,34 @@ public abstract class ServerPlayerMixin extends Player {
                     other.sendSystemMessage(Component.literal(blockedDamageCase));
                 }
                 cir.setReturnValue(false);
+            }
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "die")
+    private void vivecraft$customDeathMessage(CallbackInfo ci) {
+        // only when enabled
+        if (ServerConfig.messagesEnabled.get()) {
+            ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer((ServerPlayer) (Object) this);
+            String message;
+            // get the right message
+            if (vivePlayer == null) {
+                message = ServerConfig.messagesDeathVanilla.get();
+            } else if (!vivePlayer.isVR()) {
+                message = ServerConfig.messagesDeathNonVR.get();
+            } else if (vivePlayer.isSeated()) {
+                message = ServerConfig.messagesDeathSeated.get();
+            } else {
+                message = ServerConfig.messagesDeathVR.get();
+            }
+            // actually send the message, if there is one set
+            if (!message.isEmpty()) {
+                try {
+                    this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(getName().getString())), false);
+                } catch (IllegalFormatException e) {
+                    // catch errors users might put into the messages, to not crash other stuff
+                    ServerNetworking.LOGGER.error("Death message '{}' has errors: {}", message, e.toString());
+                }
             }
         }
     }

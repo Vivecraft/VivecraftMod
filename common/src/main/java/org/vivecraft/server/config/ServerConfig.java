@@ -28,6 +28,10 @@ public class ServerConfig {
     public static ConfigBuilder.StringValue messagesWelcomeNonVR;
     public static ConfigBuilder.StringValue messagesWelcomeSeated;
     public static ConfigBuilder.StringValue messagesWelcomeVanilla;
+    public static ConfigBuilder.StringValue messagesDeathVR;
+    public static ConfigBuilder.StringValue messagesDeathNonVR;
+    public static ConfigBuilder.StringValue messagesDeathSeated;
+    public static ConfigBuilder.StringValue messagesDeathVanilla;
     public static ConfigBuilder.StringValue messagesLeaveMessage;
     public static ConfigBuilder.StringValue messagesKickViveOnly;
     public static ConfigBuilder.StringValue messagesKickVROnly;
@@ -146,7 +150,7 @@ public class ServerConfig {
             .define(false);
         messagesWelcomeVR = builder
             .push("welcomeVR")
-            .comment("set message to nothing to not send. ex: leaveMessage = \"\"")
+            .comment("set message to nothing to not send. ex: leaveMessage = \"\"\n put '%s' anywhere for the player name")
             .define("%s has joined with standing VR!");
         messagesWelcomeNonVR = builder
             .push("welcomeNonVR")
@@ -157,6 +161,18 @@ public class ServerConfig {
         messagesWelcomeVanilla = builder
             .push("welcomeVanilla")
             .define("%s has joined as a Muggle!");
+        messagesDeathVR = builder
+            .push("deathVR")
+            .define("%s died in standing VR!");
+        messagesDeathNonVR = builder
+            .push("deathNonVR")
+            .define("%s died in Non-VR companion!");
+        messagesDeathSeated = builder
+            .push("deathSeated")
+            .define("%s died in seated VR!");
+        messagesDeathVanilla = builder
+            .push("deathVanilla")
+            .define("%s died as a Muggle!");
         messagesLeaveMessage = builder
             .push("leaveMessage")
             .define("%s has disconnected from the server!");

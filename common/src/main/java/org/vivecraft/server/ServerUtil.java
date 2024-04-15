@@ -10,6 +10,7 @@ import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
 
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -63,7 +64,12 @@ public class ServerUtil {
                         }
                         // actually send the message, if there is one set
                         if (!message.isEmpty()) {
-                            serverPlayer.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(serverPlayer.getName().getString())), false);
+                            try {
+                                serverPlayer.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(serverPlayer.getName().getString())), false);
+                            } catch (IllegalFormatException e) {
+                                // catch errors users might put into the messages, to not crash other stuff
+                                ServerNetworking.LOGGER.error("Welcome message '{}' has errors: {}", message, e.toString());
+                            }
                         }
                     }
                 }
