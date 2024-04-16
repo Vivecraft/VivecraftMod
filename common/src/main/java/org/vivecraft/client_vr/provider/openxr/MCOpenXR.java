@@ -1282,7 +1282,7 @@ public class MCOpenXR extends MCVR {
         try (MemoryStack stack = MemoryStack.stackPush()){
             String s = name.split("/")[name.split("/").length -1].toLowerCase();
             XrActionCreateInfo hands = XrActionCreateInfo.calloc(stack);
-            hands.actionType(XR10.XR_TYPE_ACTION_CREATE_INFO);
+            hands.type(XR10.XR_TYPE_ACTION_CREATE_INFO);
             hands.next(NULL);
             hands.actionName(memUTF8(s));
             switch (type) {
