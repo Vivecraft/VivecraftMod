@@ -40,7 +40,8 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
             //Get amount of views in the swapchain
             IntBuffer intBuffer = stack.ints(0); //Set value to 0
-            XR10.xrEnumerateSwapchainImages(openxr.swapchain, intBuffer, null);
+            int error = XR10.xrEnumerateSwapchainImages(openxr.swapchain, intBuffer, null);
+            this.openxr.logError(error, "xrEnumerateSwapchainImages", "get count");
 
             //Now we know the amount, create the image buffer
             int imageCount = intBuffer.get(0);
@@ -49,7 +50,8 @@ public class OpenXRStereoRenderer extends VRRenderer {
                 image.type(KHROpenGLEnable.XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR);
             }
 
-            XR10.xrEnumerateSwapchainImages(openxr.swapchain, intBuffer, XrSwapchainImageBaseHeader.create(swapchainImageBuffer.address(), swapchainImageBuffer.capacity()));
+            error = XR10.xrEnumerateSwapchainImages(openxr.swapchain, intBuffer, XrSwapchainImageBaseHeader.create(swapchainImageBuffer.address(), swapchainImageBuffer.capacity()));
+            this.openxr.logError(error, "xrEnumerateSwapchainImages", "get images");
 
             this.leftFramebuffers = new VRTextureTarget[imageCount];
             this.rightFramebuffers = new VRTextureTarget[imageCount];
@@ -79,15 +81,17 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
             IntBuffer intBuf2 = stack.callocInt(1);
 
-            XR10.xrAcquireSwapchainImage(
+            int error = XR10.xrAcquireSwapchainImage(
                 openxr.swapchain,
                 XrSwapchainImageAcquireInfo.calloc(stack).type(XR10.XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO),
                 intBuf2);
+            this.openxr.logError(error, "xrAcquireSwapchainImage", "");
 
-            XR10.xrWaitSwapchainImage(openxr.swapchain,
+            error = XR10.xrWaitSwapchainImage(openxr.swapchain,
                 XrSwapchainImageWaitInfo.calloc(stack)
                     .type(XR10.XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO)
                     .timeout(XR10.XR_INFINITE_DURATION));
+            this.openxr.logError(error, "xrWaitSwapchainImage", "");
 
             this.swapIndex = intBuf2.get(0);
 
@@ -126,11 +130,13 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
         try (MemoryStack stack = MemoryStack.stackPush()){
             PointerBuffer layers = stack.callocPointer(1);
+            int error;
             if (this.openxr.shouldRender) {
-                XR10.xrReleaseSwapchainImage(
+                error = XR10.xrReleaseSwapchainImage(
                     openxr.swapchain,
                     XrSwapchainImageReleaseInfo.calloc(stack)
                         .type(XR10.XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO));
+                this.openxr.logError(error, "xrReleaseSwapchainImage", "");
 
                 XrCompositionLayerProjection compositionLayerProjection = XrCompositionLayerProjection.calloc(stack)
                     .type(XR10.XR_TYPE_COMPOSITION_LAYER_PROJECTION)
@@ -141,21 +147,14 @@ public class OpenXRStereoRenderer extends VRRenderer {
             }
             layers.flip();
 
-            int i = XR10.xrEndFrame(
+            error = XR10.xrEndFrame(
                 openxr.session,
                 XrFrameEndInfo.calloc(stack)
                     .type(XR10.XR_TYPE_FRAME_END_INFO)
                     .displayTime(openxr.time)
                     .environmentBlendMode(XR10.XR_ENVIRONMENT_BLEND_MODE_OPAQUE)
                     .layers(layers));
-
-            if (i != XR10.XR_SUCCESS) {
-                ByteBuffer str = stack.calloc(XR10.XR_MAX_RESULT_STRING_SIZE);
-
-                if (XR10.xrResultToString(openxr.instance, i, str) >= 0) {
-                    System.out.println(memUTF8(memAddress(str)));
-                }
-            }
+            this.openxr.logAll(error, "xrEndFrame", "");
 
             projectionLayerViews.close();
         }

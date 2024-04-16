@@ -100,27 +100,34 @@ public class MCOpenXR extends MCVR {
 
     @Override
     public void destroy() {
+        int error;
         //Not sure if we need the action sets one here, as we are shutting down
         for (Long inputActionSet : actionSetHandles.values()){
-            XR10.xrDestroyActionSet(new XrActionSet(inputActionSet, instance));
+            error = XR10.xrDestroyActionSet(new XrActionSet(inputActionSet, instance));
+            logError(error, "xrDestroyActionSet", "");
         }
         if (swapchain != null) {
-            XR10.xrDestroySwapchain(swapchain);
+            error = XR10.xrDestroySwapchain(swapchain);
+            logError(error, "xrDestroySwapchain", "");
         }
         if (viewBuffer != null) {
             viewBuffer.close();
         }
         if (xrAppSpace != null) {
-            XR10.xrDestroySpace(xrAppSpace);
+            error = XR10.xrDestroySpace(xrAppSpace);
+            logError(error, "xrDestroySpace", "xrAppSpace");
         }
         if (xrViewSpace != null) {
-            XR10.xrDestroySpace(xrViewSpace);
+            error = XR10.xrDestroySpace(xrViewSpace);
+            logError(error, "xrDestroySpace", "xrViewSpace");
         }
         if (session != null){
-            XR10.xrDestroySession(session);
+            error = XR10.xrDestroySession(session);
+            logError(error, "xrDestroySession", "");
         }
         if (instance != null){
-            XR10.xrDestroyInstance(instance);
+            error = XR10.xrDestroyInstance(instance);
+            logError(error, "xrDestroyInstance", "");
         }
         eventDataBuffer.close();
     }
@@ -142,7 +149,8 @@ public class MCOpenXR extends MCVR {
             long path = this.getInputAction(binding).getLastOrigin();
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 IntBuffer buf = stack.callocInt(1);
-                XR10.xrPathToString(instance, path, buf, null);
+                int error = XR10.xrPathToString(instance, path, buf, null);
+                logError(error, "xrPathToString", "get string length for", binding.getName());
 
                 int size = buf.get();
                 if (size <= 0) {
@@ -151,7 +159,8 @@ public class MCOpenXR extends MCVR {
 
                 buf = stack.callocInt(size);
                 ByteBuffer byteBuffer = stack.calloc(size);
-                XR10.xrPathToString(instance, path, buf, byteBuffer);
+                error = XR10.xrPathToString(instance, path, buf, byteBuffer);
+                logError(error, "xrPathToString", "get string for", binding.getName());
                 byte[] bytes = new byte[byteBuffer.remaining()];
                 byteBuffer.get(bytes);
                 String name = new String(bytes);
@@ -202,17 +211,19 @@ public class MCOpenXR extends MCVR {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             XrFrameState frameState = XrFrameState.calloc(stack).type(XR10.XR_TYPE_FRAME_STATE);
 
-            XR10.xrWaitFrame(
+            int error = XR10.xrWaitFrame(
                 session,
                 XrFrameWaitInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_WAIT_INFO),
                 frameState);
+            logError(error, "xrWaitFrame", "");
 
             time = frameState.predictedDisplayTime();
             this.shouldRender = frameState.shouldRender();
 
-            XR10.xrBeginFrame(
+            error = XR10.xrBeginFrame(
                 session,
                 XrFrameBeginInfo.calloc(stack).type(XR10.XR_TYPE_FRAME_BEGIN_INFO));
+            logError(error, "xrBeginFrame", "");
 
 
             XrViewState viewState = XrViewState.calloc(stack).type(XR10.XR_TYPE_VIEW_STATE);
@@ -226,12 +237,14 @@ public class MCOpenXR extends MCVR {
                 xrAppSpace
             );
 
-            XR10.xrLocateViews(session, viewLocateInfo, viewState, intBuf, viewBuffer);
+            error = XR10.xrLocateViews(session, viewLocateInfo, viewState, intBuf, viewBuffer);
+            logError(error, "xrLocateViews", "");
 
             XrSpaceLocation space_location = XrSpaceLocation.calloc(stack).type(XR10.XR_TYPE_SPACE_LOCATION);
 
             //HMD pose
-            int error = XR10.xrLocateSpace(xrViewSpace, xrAppSpace, time, space_location);
+            error = XR10.xrLocateSpace(xrViewSpace, xrAppSpace, time, space_location);
+            logError(error, "xrLocateSpace", "xrViewSpace");
             if (error >= 0) {
                 OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.hmdPose);
                 OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.hmdRotation);
@@ -261,16 +274,19 @@ public class MCOpenXR extends MCVR {
 
             //Controller aim and grip poses
             error = XR10.xrLocateSpace(gripSpace[0], xrAppSpace, time, space_location);
+            logError(error, "xrLocateSpace", "gripSpace[0]");
             if (error >= 0) {
                 OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.handRotation[0]);
             }
 
             error = XR10.xrLocateSpace(gripSpace[1], xrAppSpace, time, space_location);
+            logError(error, "xrLocateSpace", "gripSpace[1]");
             if (error >= 0) {
                 OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.handRotation[1]);
             }
 
             error = XR10.xrLocateSpace(aimSpace[0], xrAppSpace, time, space_location);
+            logError(error, "xrLocateSpace", "aimSpace[0]");
             if (error >= 0) {
                 OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[0]);
                 OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[0]);
@@ -285,6 +301,7 @@ public class MCOpenXR extends MCVR {
             }
 
             error = XR10.xrLocateSpace(aimSpace[1], xrAppSpace, time, space_location);
+            logError(error, "xrLocateSpace", "aimSpace[1]");
             if (error >= 0) {
                 OpenXRUtil.openXRPoseToMarix(space_location.pose(), this.controllerPose[1]);
                 OpenXRUtil.openXRPoseToMarix(space_location.pose().orientation(), this.controllerRotation[1]);
@@ -386,7 +403,8 @@ public class MCOpenXR extends MCVR {
                     XrActionsSyncInfo syncInfo = XrActionsSyncInfo.calloc(stack)
                         .type(XR10.XR_TYPE_ACTIONS_SYNC_INFO)
                         .activeActionSets(activeActionSetsBuffer);
-                    XR10.xrSyncActions(session, syncInfo);
+                    error = XR10.xrSyncActions(session, syncInfo);
+                    logError(error, "xrSyncActions", "");
                 }
 
                 this.inputActions.values().forEach(this::readNewData);
@@ -526,7 +544,8 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle, new XrActionSet(actionSetHandles.get(action.actionSet), instance)));
             XrActionStateBoolean state = XrActionStateBoolean.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_BOOLEAN);
-            XR10.xrGetActionStateBoolean(session, info, state);
+            int error = XR10.xrGetActionStateBoolean(session, info, state);
+            logError(error, "xrGetActionStateBoolean",  action.name);
 
             action.digitalData[i].state = state.currentState();
             action.digitalData[i].isActive = state.isActive();
@@ -546,7 +565,8 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle, new XrActionSet(actionSetHandles.get(action.actionSet), instance)));
             XrActionStateFloat state = XrActionStateFloat.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_FLOAT);
-            XR10.xrGetActionStateFloat(session, info, state);
+            int error = XR10.xrGetActionStateFloat(session, info, state);
+            logError(error, "xrGetActionStateFloat",  action.name);
 
             action.analogData[i].deltaX = action.analogData[i].x - state.currentState();
             action.analogData[i].x = state.currentState();
@@ -567,7 +587,8 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action.handle, new XrActionSet(actionSetHandles.get(action.actionSet), instance)));
             XrActionStateVector2f state = XrActionStateVector2f.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_VECTOR2F);
-            XR10.xrGetActionStateVector2f(session, info, state);
+            int error = XR10.xrGetActionStateVector2f(session, info, state);
+            logError(error, "xrGetActionStateVector2f",  action.name);
 
             action.analogData[i].deltaX = action.analogData[i].x - state.currentState().x();
             action.analogData[i].deltaY = action.analogData[i].y - state.currentState().y();
@@ -585,7 +606,8 @@ public class MCOpenXR extends MCVR {
             info.type(XR10.XR_TYPE_ACTION_STATE_GET_INFO);
             info.action(new XrAction(action, set));
             XrActionStatePose state = XrActionStatePose.calloc(stack).type(XR10.XR_TYPE_ACTION_STATE_POSE);
-            XR10.xrGetActionStatePose(session, info, state);
+            int error = XR10.xrGetActionStatePose(session, info, state);
+            logError(error, "xrGetActionStatePose",  "");
         }
     }
 
@@ -641,6 +663,7 @@ public class MCOpenXR extends MCVR {
             eventDataBuffer.clear();
             eventDataBuffer.type(XR10.XR_TYPE_EVENT_DATA_BUFFER);
             int error = XR10.xrPollEvent(instance, eventDataBuffer);
+            logError(error, "xrPollEvent",  "");
             if (error != XR10.XR_SUCCESS) {
                 break;
             }
@@ -674,14 +697,16 @@ public class MCOpenXR extends MCVR {
                     sessionBeginInfo.next(NULL);
                     sessionBeginInfo.primaryViewConfigurationType(XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO);
 
-                    XR10.xrBeginSession(session, sessionBeginInfo);
+                    int error = XR10.xrBeginSession(session, sessionBeginInfo);
+                    logError(error, "xrBeginSession",  "XR_SESSION_STATE_READY");
                 }
                 this.isActive = true;
                 break;
             }
             case XR10.XR_SESSION_STATE_STOPPING: {
                 this.isActive = false;
-                XR10.xrEndSession(session);
+                int error = XR10.xrEndSession(session);
+                logError(error, "xrEndSession",  "XR_SESSION_STATE_STOPPING");
             }
             case XR10.XR_SESSION_STATE_VISIBLE, XR10.XR_SESSION_STATE_FOCUSED: {
                 this.isActive = true;
@@ -703,7 +728,8 @@ public class MCOpenXR extends MCVR {
     public Vector2f getPlayAreaSize() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             XrExtent2Df vec = XrExtent2Df.calloc(stack);
-            XR10.xrGetReferenceSpaceBoundsRect(session, XR10.XR_REFERENCE_SPACE_TYPE_STAGE, vec);
+            int error = XR10.xrGetReferenceSpaceBoundsRect(session, XR10.XR_REFERENCE_SPACE_TYPE_STAGE, vec);
+            logError(error, "xrGetReferenceSpaceBoundsRect",  "");
             return new Vector2f(vec.width(), vec.height());
         }
     }
@@ -749,14 +775,16 @@ public class MCOpenXR extends MCVR {
 
             //Check extensions
             IntBuffer numExtensions = stack.callocInt(1);
-            XR10.xrEnumerateInstanceExtensionProperties((ByteBuffer) null, numExtensions, null);
+            int error = XR10.xrEnumerateInstanceExtensionProperties((ByteBuffer) null, numExtensions, null);
+            logError(error, "xrEnumerateInstanceExtensionProperties",  "get count");
 
             XrExtensionProperties.Buffer properties = new XrExtensionProperties.Buffer(
                 bufferStack(numExtensions.get(0), XrExtensionProperties.SIZEOF, XR10.XR_TYPE_EXTENSION_PROPERTIES)
             );
 
             //Load extensions
-            XR10.xrEnumerateInstanceExtensionProperties((ByteBuffer) null, numExtensions, properties);
+            error = XR10.xrEnumerateInstanceExtensionProperties((ByteBuffer) null, numExtensions, properties);
+            logError(error, "xrEnumerateInstanceExtensionProperties",  "get extensions");
 
             //get needed extensions
             boolean missingOpenGL = true;
@@ -830,7 +858,8 @@ public class MCOpenXR extends MCVR {
             system.formFactor(XR10.XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY);
 
             LongBuffer longBuffer = stack.callocLong(1);
-            XR10.xrGetSystem(instance, system, longBuffer);
+            int error = XR10.xrGetSystem(instance, system, longBuffer);
+            logError(error, "xrGetSystem",  "");
             this.systemID = longBuffer.get(0);
 
             if (systemID == 0) {
@@ -848,7 +877,8 @@ public class MCOpenXR extends MCVR {
             info.systemId(systemID);
 
             PointerBuffer sessionPtr = stack.callocPointer(1);
-            XR10.xrCreateSession(instance, info, sessionPtr);
+            error = XR10.xrCreateSession(instance, info, sessionPtr);
+            logError(error, "xrCreateSession",  "");
 
             session = new XrSession(sessionPtr.get(0), instance);
 
@@ -857,7 +887,8 @@ public class MCOpenXR extends MCVR {
             sessionBeginInfo.next(NULL);
             sessionBeginInfo.primaryViewConfigurationType(XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO);
 
-            XR10.xrBeginSession(session, sessionBeginInfo);
+            error = XR10.xrBeginSession(session, sessionBeginInfo);
+            logError(error, "xrBeginSession",  "");
             this.isActive = true;
 
         }
@@ -878,11 +909,13 @@ public class MCOpenXR extends MCVR {
             referenceSpaceCreateInfo.poseInReferenceSpace(identityPose);
 
             PointerBuffer pp = stack.callocPointer(1);
-            XR10.xrCreateReferenceSpace(session, referenceSpaceCreateInfo, pp);
+            int error = XR10.xrCreateReferenceSpace(session, referenceSpaceCreateInfo, pp);
             xrAppSpace = new XrSpace(pp.get(0), session);
+            logError(error, "xrCreateReferenceSpace",  "XR_REFERENCE_SPACE_TYPE_STAGE");
 
             referenceSpaceCreateInfo.referenceSpaceType(XR10.XR_REFERENCE_SPACE_TYPE_VIEW);
-            XR10.xrCreateReferenceSpace(session, referenceSpaceCreateInfo, pp);
+            error = XR10.xrCreateReferenceSpace(session, referenceSpaceCreateInfo, pp);
+            logError(error, "xrCreateReferenceSpace",  "XR_REFERENCE_SPACE_TYPE_VIEW");
             xrViewSpace = new XrSpace(pp.get(0), session);
         }
     }
@@ -891,23 +924,27 @@ public class MCOpenXR extends MCVR {
         try (MemoryStack stack = stackPush()) {
             //Check amount of views
             IntBuffer intBuf = stack.callocInt(1);
-            XR10.xrEnumerateViewConfigurationViews(instance, systemID,  XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, intBuf, null);
+            int error = XR10.xrEnumerateViewConfigurationViews(instance, systemID,  XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, intBuf, null);
+            logError(error, "xrEnumerateViewConfigurationViews",  "get count");
 
             //Get all views
             ByteBuffer viewConfBuffer = bufferStack(intBuf.get(0), XrViewConfigurationView.SIZEOF, XR10.XR_TYPE_VIEW_CONFIGURATION_VIEW);
             XrViewConfigurationView.Buffer views = new XrViewConfigurationView.Buffer(viewConfBuffer);
-            XR10.xrEnumerateViewConfigurationViews(instance, systemID,  XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, intBuf, views);
+            error = XR10.xrEnumerateViewConfigurationViews(instance, systemID,  XR10.XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, intBuf, views);
+            logError(error, "xrEnumerateViewConfigurationViews",  "get views");
             int viewCountNumber = intBuf.get(0);
 
             this.viewBuffer = new XrView.Buffer(
                 bufferHeap(viewCountNumber, XrView.SIZEOF, XR10.XR_TYPE_VIEW)
             );
             //Check swapchain formats
-            XR10.xrEnumerateSwapchainFormats(session, intBuf, null);
+            error = XR10.xrEnumerateSwapchainFormats(session, intBuf, null);
+            logError(error, "xrEnumerateSwapchainFormats",  "get count");
 
             //Get swapchain formats
             LongBuffer swapchainFormats = stack.callocLong(intBuf.get(0));
-            XR10.xrEnumerateSwapchainFormats(session, intBuf, swapchainFormats);
+            error = XR10.xrEnumerateSwapchainFormats(session, intBuf, swapchainFormats);
+            logError(error, "xrEnumerateSwapchainFormats",  "get formats");
 
             long[] desiredSwapchainFormats = {
                 //SRGB formats
@@ -964,7 +1001,8 @@ public class MCOpenXR extends MCVR {
             swapchainCreateInfo.mipCount(1);
 
             PointerBuffer handlePointer = stack.callocPointer(1);
-            XR10.xrCreateSwapchain(session, swapchainCreateInfo, handlePointer);
+            error = XR10.xrCreateSwapchain(session, swapchainCreateInfo, handlePointer);
+            logError(error, "xrCreateSwapchain",  "format: " + chosenFormat);
             swapchain = new XrSwapchain(handlePointer.get(0), session);
             this.width = swapchainCreateInfo.width();
             this.height = swapchainCreateInfo.height();
@@ -976,7 +1014,8 @@ public class MCOpenXR extends MCVR {
         KHROpenGLEnable.xrGetOpenGLGraphicsRequirementsKHR(instance, systemID, graphicsRequirements);
 
         XrSystemProperties systemProperties = XrSystemProperties.calloc(stack).type(XR10.XR_TYPE_SYSTEM_PROPERTIES);
-        XR10.xrGetSystemProperties(instance, systemID, systemProperties);
+        int error = XR10.xrGetSystemProperties(instance, systemID, systemProperties);
+        logError(error, "xrGetSystemProperties",  "");
         XrSystemTrackingProperties trackingProperties = systemProperties.trackingProperties();
         XrSystemGraphicsProperties graphicsProperties = systemProperties.graphicsProperties();
 
@@ -988,11 +1027,11 @@ public class MCOpenXR extends MCVR {
         int maxHeight = graphicsProperties.maxSwapchainImageHeight();
         int maxLayerCount = graphicsProperties.maxLayerCount();
 
-        System.out.println(String.format("Found device with id: %d", systemID));
-        System.out.println(String.format("Headset Name:%s Vendor:%d ", systemName, vendor));
-        System.out.println(String.format("Headset Orientation Tracking:%b Position Tracking:%b ", orientationTracking, positionTracking));
-        System.out.println(String.format("Headset Max Width:%d Max Height:%d Max Layer Count:%d ", maxWidth, maxHeight, maxLayerCount));
-        
+        VRSettings.logger.info("Found device with id:  {}", systemID);
+        VRSettings.logger.info("Headset Name: {}, Vendor: {}", systemName, vendor);
+        VRSettings.logger.info("Headset Orientation Tracking: {}, Position Tracking: {}", orientationTracking, positionTracking);
+        VRSettings.logger.info("Headset Max Width: {}, Max Height: {}, Max Layer Count: {}", maxWidth, maxHeight, maxLayerCount);
+
         //Bind the OpenGL context to the OpenXR instance and create the session
         Window window = mc.getWindow();
         long windowHandle = window.getWindow();
@@ -1060,7 +1099,7 @@ public class MCOpenXR extends MCVR {
         this.loadDefaultBindings();
         //this.installApplicationManifest(false);
         this.inputInitialized = true;
-        
+
     }
 
     @Override
@@ -1081,7 +1120,8 @@ public class MCOpenXR extends MCVR {
             info.next(NULL);
             info.action(new XrAction(var1.handle, new XrActionSet(actionSetHandles.get(var1.actionSet), instance)));
             IntBuffer buf = stack.callocInt(1);
-            XR10.xrEnumerateBoundSourcesForAction(session, info, buf, null);
+            int error = XR10.xrEnumerateBoundSourcesForAction(session, info, buf, null);
+            logError(error, "xrEnumerateBoundSourcesForAction",  var1.name);
 
             int size = buf.get();
             if (size <= 0) {
@@ -1090,7 +1130,8 @@ public class MCOpenXR extends MCVR {
 
             buf = stack.callocInt(size);
             LongBuffer longbuf = stack.callocLong(size);
-            XR10.xrEnumerateBoundSourcesForAction(session, info, buf, longbuf);
+            error = XR10.xrEnumerateBoundSourcesForAction(session, info, buf, longbuf);
+            logError(error, "xrEnumerateBoundSourcesForAction",  var1.name);
             long[] array;
             if (longbuf.hasArray()) { //TODO really?
                 array = longbuf.array();
@@ -1116,7 +1157,8 @@ public class MCOpenXR extends MCVR {
             info.whichComponents(XR10.XR_INPUT_SOURCE_LOCALIZED_NAME_COMPONENT_BIT);
 
             IntBuffer buf = stack.callocInt(1);
-            XR10.xrGetInputSourceLocalizedName(session, info, buf, null);
+            int error = XR10.xrGetInputSourceLocalizedName(session, info, buf, null);
+            logError(error, "xrGetInputSourceLocalizedName",  "get length");
 
             int size = buf.get();
             if (size <= 0) {
@@ -1125,7 +1167,8 @@ public class MCOpenXR extends MCVR {
 
             buf = stack.callocInt(size);
             ByteBuffer byteBuffer = stack.calloc(size);
-            XR10.xrGetInputSourceLocalizedName(session, info, buf, byteBuffer);
+            error = XR10.xrGetInputSourceLocalizedName(session, info, buf, byteBuffer);
+            logError(error, "xrGetInputSourceLocalizedName",  "get String");
             return new String(byteBuffer.array());
         }
     }
@@ -1179,14 +1222,19 @@ public class MCOpenXR extends MCVR {
 
     private void loadDefaultBindings() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-
+            int error;
             for (String headset: XRBindings.supportedHeadsets()) {
+                VRSettings.logger.info("loading defaults for {}", headset);
                 Pair<String, String>[] defaultBindings = XRBindings.getBinding(headset).toArray(new Pair[0]);
                 XrActionSuggestedBinding.Buffer bindings = XrActionSuggestedBinding.calloc(defaultBindings.length + 6, stack); //TODO different way of adding controller poses
 
                 for (int i = 0; i < defaultBindings.length; i++) {
                     Pair<String, String> pair = defaultBindings[i];
                     VRInputAction binding = this.getInputActionByName(pair.getLeft());
+                    if (binding.handle == 0L) {
+                        VRSettings.logger.error("Handle for '{}'/'{}' is null", pair.getLeft(), pair.getRight());
+                        continue;
+                    }
                     bindings.get(i).set(
                         new XrAction(binding.handle, new XrActionSet(actionSetHandles.get(binding.actionSet), instance)),
                         getPath(pair.getRight())
@@ -1228,7 +1276,8 @@ public class MCOpenXR extends MCVR {
                 suggested_binds.interactionProfile(getPath(headset));
                 suggested_binds.suggestedBindings(bindings);
 
-                int i = XR10.xrSuggestInteractionProfileBindings(instance, suggested_binds);
+                error = XR10.xrSuggestInteractionProfileBindings(instance, suggested_binds);
+                logError(error, "xrSuggestInteractionProfileBindings",  headset);
             }
 
 
@@ -1237,7 +1286,8 @@ public class MCOpenXR extends MCVR {
             attach_info.next(NULL);
             attach_info.actionSets(stackPointers(actionSetHandles.values().stream().mapToLong(value -> value).toArray()));
 
-            XR10.xrAttachSessionActionSets(session, attach_info);
+            error = XR10.xrAttachSessionActionSets(session, attach_info);
+            logError(error, "xrAttachSessionActionSets",  "");
 
             XrActionSet actionSet = new XrActionSet(this.actionSetHandles.get(VRInputActionSet.GLOBAL), instance);
             XrActionSpaceCreateInfo grip_left = XrActionSpaceCreateInfo.calloc(stack);
@@ -1247,22 +1297,26 @@ public class MCOpenXR extends MCVR {
             grip_left.subactionPath(getPath("/user/hand/right"));
             grip_left.poseInActionSpace(POSE_IDENTITY);
             PointerBuffer pp = stackCallocPointer(1);
-            XR10.xrCreateActionSpace(session, grip_left, pp);
+            error = XR10.xrCreateActionSpace(session, grip_left, pp);
+            logError(error, "xrCreateActionSpace",  "grip: /user/hand/right");
             this.gripSpace[0] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(grip[1], actionSet));
             grip_left.subactionPath(getPath("/user/hand/left"));
-            XR10.xrCreateActionSpace(session, grip_left, pp);
+            error = XR10.xrCreateActionSpace(session, grip_left, pp);
+            logError(error, "xrCreateActionSpace",  "grip: /user/hand/left");
             this.gripSpace[1] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(aim[0], actionSet));
             grip_left.subactionPath(getPath("/user/hand/right"));
-            XR10.xrCreateActionSpace(session, grip_left, pp);
+            error = XR10.xrCreateActionSpace(session, grip_left, pp);
+            logError(error, "xrCreateActionSpace",  "aim: /user/hand/right");
             this.aimSpace[0] = new XrSpace(pp.get(0), session);
 
             grip_left.action(new XrAction(aim[1], actionSet));
             grip_left.subactionPath(getPath("/user/hand/left"));
-            XR10.xrCreateActionSpace(session, grip_left, pp);
+            error = XR10.xrCreateActionSpace(session, grip_left, pp);
+            logError(error, "xrCreateActionSpace",  "aim: /user/hand/left");
             this.aimSpace[1] = new XrSpace(pp.get(0), session);
 
         }
@@ -1272,7 +1326,8 @@ public class MCOpenXR extends MCVR {
         return this.paths.computeIfAbsent(pathString, s -> {
             try (MemoryStack ignored = stackPush()) {
                 LongBuffer buf = stackCallocLong(1);
-                int xrResult = XR10.xrStringToPath(instance, pathString, buf);
+                int error = XR10.xrStringToPath(instance, pathString, buf);
+                logError(error, "getPath",  pathString);
                 return buf.get();
             }
         });
@@ -1296,7 +1351,9 @@ public class MCOpenXR extends MCVR {
             hands.subactionPaths(null);
             hands.localizedActionName(memUTF8(s));
             PointerBuffer buffer = stackCallocPointer(1);
-            int i = XR10.xrCreateAction(actionSet, hands, buffer);
+
+            int error = XR10.xrCreateAction(actionSet, hands, buffer);
+            logError(error, "xrCreateAction",  "name:", name, "type:", type);
             return buffer.get(0);
         }
     }
@@ -1310,8 +1367,9 @@ public class MCOpenXR extends MCVR {
             info.localizedActionSetName(memUTF8(localisedName.toLowerCase()));
             info.priority(priority);
             PointerBuffer buffer = stack.callocPointer(1);
-            //Handle error
-            int i = XR10.xrCreateActionSet(instance, info, buffer);
+
+            int error = XR10.xrCreateActionSet(instance, info, buffer);
+            logError(error, "makeActionSet", localisedName.toLowerCase());
             return buffer.get(0);
         }
     }
@@ -1325,5 +1383,105 @@ public class MCOpenXR extends MCVR {
         }
         b.rewind();
         return b;
+    }
+
+    /**
+     * gets the String for the given xrResult
+     */
+    private String getResultName(int xrResult) {
+        String resultString = switch (xrResult) {
+            case 1 -> "XR_TIMEOUT_EXPIRED";
+            case 3 -> "XR_SESSION_LOSS_PENDING";
+            case 4 -> "XR_EVENT_UNAVAILABLE";
+            case 7 -> "XR_SPACE_BOUNDS_UNAVAILABLE";
+            case 8 -> "XR_SESSION_NOT_FOCUSED";
+            case 9 -> "XR_FRAME_DISCARDED";
+            case -1 -> "XR_ERROR_VALIDATION_FAILURE";
+            case -2 -> "XR_ERROR_RUNTIME_FAILURE";
+            case -3 -> "XR_ERROR_OUT_OF_MEMORY";
+            case -4 -> "XR_ERROR_API_VERSION_UNSUPPORTED";
+            case -6 -> "XR_ERROR_INITIALIZATION_FAILED";
+            case -7 -> "XR_ERROR_FUNCTION_UNSUPPORTED";
+            case -8 -> "XR_ERROR_FEATURE_UNSUPPORTED";
+            case -9 -> "XR_ERROR_EXTENSION_NOT_PRESENT";
+            case -10 -> "XR_ERROR_LIMIT_REACHED";
+            case -11 -> "XR_ERROR_SIZE_INSUFFICIENT";
+            case -12 -> "XR_ERROR_HANDLE_INVALID";
+            case -13 -> "XR_ERROR_INSTANCE_LOST";
+            case -14 -> "XR_ERROR_SESSION_RUNNING";
+            case -16 -> "XR_ERROR_SESSION_NOT_RUNNING";
+            case -17 -> "XR_ERROR_SESSION_LOST";
+            case -18 -> "XR_ERROR_SYSTEM_INVALID";
+            case -19 -> "XR_ERROR_PATH_INVALID";
+            case -20 -> "XR_ERROR_PATH_COUNT_EXCEEDED";
+            case -21 -> "XR_ERROR_PATH_FORMAT_INVALID";
+            case -22 -> "XR_ERROR_PATH_UNSUPPORTED";
+            case -23 -> "XR_ERROR_LAYER_INVALID";
+            case -24 -> "XR_ERROR_LAYER_LIMIT_EXCEEDED";
+            case -25 -> "XR_ERROR_SWAPCHAIN_RECT_INVALID";
+            case -26 -> "XR_ERROR_SWAPCHAIN_FORMAT_UNSUPPORTED";
+            case -27 -> "XR_ERROR_ACTION_TYPE_MISMATCH";
+            case -28 -> "XR_ERROR_SESSION_NOT_READY";
+            case -29 -> "XR_ERROR_SESSION_NOT_STOPPING";
+            case -30 -> "XR_ERROR_TIME_INVALID";
+            case -31 -> "XR_ERROR_REFERENCE_SPACE_UNSUPPORTED";
+            case -32 -> "XR_ERROR_FILE_ACCESS_ERROR";
+            case -33 -> "XR_ERROR_FILE_CONTENTS_INVALID";
+            case -34 -> "XR_ERROR_FORM_FACTOR_UNSUPPORTED";
+            case -35 -> "XR_ERROR_FORM_FACTOR_UNAVAILABLE";
+            case -36 -> "XR_ERROR_API_LAYER_NOT_PRESENT";
+            case -37 -> "XR_ERROR_CALL_ORDER_INVALID";
+            case -38 -> "XR_ERROR_GRAPHICS_DEVICE_INVALID";
+            case -39 -> "XR_ERROR_POSE_INVALID";
+            case -40 -> "XR_ERROR_INDEX_OUT_OF_RANGE";
+            case -41 -> "XR_ERROR_VIEW_CONFIGURATION_TYPE_UNSUPPORTED";
+            case -42 -> "XR_ERROR_ENVIRONMENT_BLEND_MODE_UNSUPPORTED";
+            case -44 -> "XR_ERROR_NAME_DUPLICATED";
+            case -45 -> "XR_ERROR_NAME_INVALID";
+            case -46 -> "XR_ERROR_ACTIONSET_NOT_ATTACHED";
+            case -47 -> "XR_ERROR_ACTIONSETS_ALREADY_ATTACHED";
+            case -48 -> "XR_ERROR_LOCALIZED_NAME_DUPLICATED";
+            case -49 -> "XR_ERROR_LOCALIZED_NAME_INVALID";
+            case -50 -> "XR_ERROR_GRAPHICS_REQUIREMENTS_CALL_MISSING";
+            case -51 -> "XR_ERROR_RUNTIME_UNAVAILABLE";
+            default -> null;
+        };
+        if (resultString == null) {
+            // ask the runtime for the xrResult name
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                ByteBuffer str = stack.calloc(XR10.XR_MAX_RESULT_STRING_SIZE);
+
+                if (XR10.xrResultToString(instance, xrResult, str) == XR10.XR_SUCCESS) {
+                    resultString = (memUTF8(memAddress(str)));
+                } else {
+                    resultString = "Unknown Error: " + xrResult;
+                }
+            }
+        }
+        return resultString;
+    }
+
+    /**
+     * logs only errors
+     * @param xrResult result to check
+     * @param caller where the xrResult came from
+     * @param args arguments may be helpful in locating the error
+     */
+    protected void logError(int xrResult, String caller, String... args) {
+        if (xrResult < 0) {
+            VRSettings.logger.error("{} for {} errored: {}", caller, String.join(" ", args), getResultName(xrResult));
+        }
+    }
+
+    /**
+     * logs all results except XR_SUCCESS
+     * @param xrResult result to check
+     * @param caller where the xrResult came from
+     * @param args arguments may be helpful in locating the error
+     */
+    protected void logAll(int xrResult, String caller, String... args) {
+        if (xrResult != XR10.XR_SUCCESS) {
+            VRSettings.logger.error("{} for {} errored: {}", caller, String.join(" ", args), getResultName(xrResult));
+        }
     }
 }

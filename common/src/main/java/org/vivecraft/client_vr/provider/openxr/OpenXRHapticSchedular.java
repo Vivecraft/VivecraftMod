@@ -32,7 +32,8 @@ public class OpenXRHapticSchedular extends HapticScheduler {
             vibration.frequency(frequency);
             vibration.amplitude(amplitude);
 
-            XR10.xrApplyHapticFeedback(MCOpenXR.get().session, info, XrHapticBaseHeader.create(vibration));
+            int error = XR10.xrApplyHapticFeedback(MCOpenXR.get().session, info, XrHapticBaseHeader.create(vibration));
+            MCOpenXR.get().logError(error, "xrApplyHapticFeedback", "");
         }
     }
 
