@@ -9,7 +9,7 @@ public class XRBindings {
 
     public static HashSet<String> supportedHeadsets() {
         HashSet<String> set = new HashSet<>();
-        if (MCOpenXR.get().systemName.contains("oculus")) {
+        if (MCOpenXR.get().systemName.toLowerCase().contains("oculus") || MCOpenXR.get().systemName.toLowerCase().contains("meta")) {
             set.add("/interaction_profiles/oculus/touch_controller");
             return set;
         }
