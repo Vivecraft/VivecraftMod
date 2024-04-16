@@ -227,25 +227,45 @@ public abstract class ServerPlayerMixin extends Player {
     }
 
     @Inject(at = @At("HEAD"), method = "die")
-    private void vivecraft$customDeathMessage(CallbackInfo ci) {
+    private void vivecraft$customDeathMessage(DamageSource damageSource, CallbackInfo ci) {
         // only when enabled
         if (ServerConfig.messagesEnabled.get()) {
             ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer((ServerPlayer) (Object) this);
-            String message;
+            String message = "";
+            String entity = "";
+
             // get the right message
-            if (vivePlayer == null) {
-                message = ServerConfig.messagesDeathVanilla.get();
-            } else if (!vivePlayer.isVR()) {
-                message = ServerConfig.messagesDeathNonVR.get();
-            } else if (vivePlayer.isSeated()) {
-                message = ServerConfig.messagesDeathSeated.get();
-            } else {
-                message = ServerConfig.messagesDeathVR.get();
+            if (damageSource.getEntity() != null) {
+                entity = damageSource.getEntity().getName().plainCopy().getString();
+                // death by mob
+                if (vivePlayer == null) {
+                    message = ServerConfig.messagesDeathByMobVanilla.get();
+                } else if (!vivePlayer.isVR()) {
+                    message = ServerConfig.messagesDeathByMobNonVR.get();
+                } else if (vivePlayer.isSeated()) {
+                    message = ServerConfig.messagesDeathByMobSeated.get();
+                } else {
+                    message = ServerConfig.messagesDeathByMobVR.get();
+                }
             }
+
+            if (message.isEmpty()) {
+                // general death, of if the mob one isn't set
+                if (vivePlayer == null) {
+                    message = ServerConfig.messagesDeathVanilla.get();
+                } else if (!vivePlayer.isVR()) {
+                    message = ServerConfig.messagesDeathNonVR.get();
+                } else if (vivePlayer.isSeated()) {
+                    message = ServerConfig.messagesDeathSeated.get();
+                } else {
+                    message = ServerConfig.messagesDeathVR.get();
+                }
+            }
+
             // actually send the message, if there is one set
             if (!message.isEmpty()) {
                 try {
-                    this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(getName().getString())), false);
+                    this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(getName().getString(), entity)), false);
                 } catch (IllegalFormatException e) {
                     // catch errors users might put into the messages, to not crash other stuff
                     ServerNetworking.LOGGER.error("Death message '{}' has errors: {}", message, e.toString());

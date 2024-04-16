@@ -38,14 +38,28 @@ public class ServerUtil {
                     // kick non VR players
                     if (!isOpAndAllowed && ServerConfig.vr_only.get()
                         && (vivePlayer == null || !vivePlayer.isVR())) {
-                        serverPlayer.connection.disconnect(Component.literal(ServerConfig.messagesKickVROnly.get()));
+                        String kickMessage = ServerConfig.messagesKickVROnly.get();
+                        try {
+                            kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
+                        } catch (IllegalFormatException e) {
+                            // catch errors users might put into the messages, to not crash other stuff
+                            ServerNetworking.LOGGER.error("KickVROnly message '{}' has errors: {}", kickMessage, e.toString());
+                        }
+                        serverPlayer.connection.disconnect(Component.literal(kickMessage));
                         return;
                     }
 
                     // kick non vivecraft players
                     if (!isOpAndAllowed && ServerConfig.vive_only.get()
                         && (vivePlayer == null)) {
-                        serverPlayer.connection.disconnect(Component.literal(ServerConfig.messagesKickViveOnly.get()));
+                        String kickMessage = ServerConfig.messagesKickViveOnly.get();
+                        try {
+                            kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
+                        } catch (IllegalFormatException e) {
+                            // catch errors users might put into the messages, to not crash other stuff
+                            ServerNetworking.LOGGER.error("KickViveOnly message '{}' has errors: {}", kickMessage, e.toString());
+                        }
+                        serverPlayer.connection.disconnect(Component.literal(kickMessage));
                         return;
                     }
 
