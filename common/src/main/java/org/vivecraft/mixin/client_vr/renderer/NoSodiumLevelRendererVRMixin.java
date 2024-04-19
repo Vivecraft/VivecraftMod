@@ -27,6 +27,7 @@ public class NoSodiumLevelRendererVRMixin {
         if (VRState.vrRunning) {
             // if VR is on, always update the frustum, to fix flickering chunks between eyes
             sectionOcclusionGraph.invalidate();
+            ((SectionOcclusionGraphAccessor) sectionOcclusionGraph).getNeedsFrustumUpdate().set(true);
         }
     }
 
