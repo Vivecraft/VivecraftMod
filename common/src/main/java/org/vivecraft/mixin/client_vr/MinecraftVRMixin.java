@@ -417,8 +417,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
             // draw debug pie
             vivecraft$drawProfiler();
-            // reset that, do not draw it again on something else
-            fpsPieResults = null;
 
             // pop pose that we pushed before the gui
             RenderSystem.getModelViewStack().popPose();
@@ -515,6 +513,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             this.profiler.pop();
             this.vivecraft$checkGLError("post submit ");
         }
+    }
+
+    @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;fpsPieResults:Lnet/minecraft/util/profiling/ProfileResults;"), method = "runTick")
+    public ProfileResults vivecraft$cancelRegularFpsPie(Minecraft instance) {
+        return VRState.vrRunning ? null : fpsPieResults;
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen(II)V"), method = "runTick")
