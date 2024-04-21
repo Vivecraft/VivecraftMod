@@ -525,7 +525,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         if (!VRState.vrRunning) {
             instance.blitToScreen(width, height);
         } else {
-            this.profiler.push("mirror");
+            this.profiler.popPush("vrMirror");
             this.vivecraft$copyToMirror();
             this.vivecraft$drawNotifyMirror();
             this.vivecraft$checkGLError("post-mirror ");
@@ -754,7 +754,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         break;
                     }
 
-                    ++i;
+                    i++;
                 }
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
