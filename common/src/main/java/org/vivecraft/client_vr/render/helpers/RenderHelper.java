@@ -226,7 +226,7 @@ public class RenderHelper {
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
         posestack.setIdentity();
-        posestack.translate(0.0D, 0.0D, -2000.0D);
+        posestack.translate(0.0D, 0.0D, -11000.0D);
         RenderSystem.applyModelViewMatrix();
 
         RenderSystem.blendFuncSeparate(

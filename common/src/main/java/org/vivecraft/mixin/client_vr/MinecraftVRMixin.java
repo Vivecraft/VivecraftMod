@@ -404,7 +404,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 PoseStack poseStack = RenderSystem.getModelViewStack();
                 poseStack.pushPose();
                 poseStack.setIdentity();
-                poseStack.translate(0.0f, 0.0f, -2000.0f);
+                poseStack.translate(0.0f, 0.0f, -11000.0f);
                 RenderSystem.applyModelViewMatrix();
 
                 int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
