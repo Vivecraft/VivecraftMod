@@ -14,6 +14,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
@@ -138,25 +139,30 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
             } else if (rendertype == VivecraftItemRendering.VivecraftItemTransformType.Telescope) {
                 if (dh.currentPass != RenderPass.SCOPEL && dh.currentPass != RenderPass.SCOPER) {
                     pMatrixStack.pushPose();
-                    pMatrixStack.scale(0.625F, 0.625F, 0.625F);
-                    pMatrixStack.translate(mainHand ? -0.03D : 0.03D, 0.0D, -0.1D);
-                    this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
-                    pMatrixStack.popPose();
-                }
 
-                pMatrixStack.pushPose();
-                pMatrixStack.translate(mainHand ? -0.01875D : 0.01875D, 0.215D, -0.0626D);
-                pMatrixStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-                pMatrixStack.mulPose(Axis.YP.rotationDegrees(180.0F));
-                pMatrixStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
-                if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-                    // this messes stuff up when rendering the quads
-                    OptifineHelper.endEntities();
-                }
-                VREffectsHelper.drawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
-                pMatrixStack.popPose();
-                if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
-                    OptifineHelper.beginEntities();
+                    // render item
+                    renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
+
+                    if (ClientNetworking.isThirdPersonItems()) {
+                        // account for the -2/16 offset of the third person spyglass transform
+                        pMatrixStack.translate(0.0F, 0.219F, 0.0F);
+                    } else {
+                        pMatrixStack.translate(0.0F, 0.344F, 0.0F);
+                    }
+
+                    pMatrixStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+                    if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+                        // this messes stuff up when rendering the quads
+                        OptifineHelper.endEntities();
+                    }
+                    // render scope view
+                    VREffectsHelper.drawScopeFB(pMatrixStack, pHand == InteractionHand.MAIN_HAND ? 0 : 1);
+
+                    if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive()) {
+                        OptifineHelper.beginEntities();
+                    }
+
+                    pMatrixStack.popPose();
                 }
             } else {
                 this.renderItem(pPlayer, pStack, itemDisplayContext, !mainHand && useLeftHandModelinLeftHand, pMatrixStack, pBuffer, pCombinedLight);
@@ -227,8 +233,8 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
 
     @Override
     @Unique
-    public void vivecraft$setSwingType(VRFirstPersonArmSwing interact) {
-        this.vivecraft$swingType = interact;
+    public void vivecraft$setSwingType(VRFirstPersonArmSwing swingType) {
+        this.vivecraft$swingType = swingType;
     }
 
     @Unique

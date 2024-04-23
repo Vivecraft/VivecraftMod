@@ -152,7 +152,7 @@ public class Angle {
     }
 
     public String toString() {
-        return "Angle{pitch=" + this.pitch + ", yaw=" + this.yaw + ", roll=" + this.roll + '}';
+        return "Angle{pitch=%f, yaw=%f, roll=%f}".formatted(this.pitch, this.yaw, this.roll);
     }
 
     public enum Order {

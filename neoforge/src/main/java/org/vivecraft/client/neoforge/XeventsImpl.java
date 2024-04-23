@@ -10,23 +10,23 @@ import net.neoforged.neoforge.event.EventHooks;
 
 public class XeventsImpl {
 
-    public static boolean renderBlockOverlay(Player player, PoseStack mat, BlockState state, BlockPos pos) {
-        return ClientHooks.renderBlockOverlay(player, mat, RenderBlockScreenEffectEvent.OverlayType.BLOCK, state, pos);
+    public static boolean renderBlockOverlay(Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos) {
+        return ClientHooks.renderBlockOverlay(player, poseStack, RenderBlockScreenEffectEvent.OverlayType.BLOCK, blockState, blockPos);
     }
 
-    public static boolean renderWaterOverlay(Player player, PoseStack mat) {
-        return ClientHooks.renderWaterOverlay(player, mat);
+    public static boolean renderWaterOverlay(Player player, PoseStack poseStack) {
+        return ClientHooks.renderWaterOverlay(player, poseStack);
     }
 
-    public static boolean renderFireOverlay(Player player, PoseStack mat) {
-        return ClientHooks.renderFireOverlay(player, mat);
+    public static boolean renderFireOverlay(Player player, PoseStack poseStack) {
+        return ClientHooks.renderFireOverlay(player, poseStack);
     }
 
-    public static void onRenderTickStart(float f) {
-        EventHooks.onRenderTickStart(f);
+    public static void onRenderTickStart(float partialTicks) {
+        EventHooks.onRenderTickStart(partialTicks);
     }
 
-    public static void onRenderTickEnd(float f) {
-        EventHooks.onRenderTickEnd(f);
+    public static void onRenderTickEnd(float partialTicks) {
+        EventHooks.onRenderTickEnd(partialTicks);
     }
 }

@@ -6,14 +6,17 @@ import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class InputSimulator {
     private static final Set<Integer> pressedKeys = new HashSet<>();
+    private static final Map<Integer, Integer> pressedModifiers = new HashMap<>();
 
     public static boolean isKeyDown(int key) {
-        return pressedKeys.contains(key);
+        return pressedKeys.contains(key) || (pressedModifiers.getOrDefault(key, 0) > 0);
     }
 
     public static void pressKey(int key, int modifiers) {
@@ -32,6 +35,24 @@ public class InputSimulator {
 
     public static void releaseKey(int key) {
         releaseKey(key, 0);
+    }
+
+    public static void pressModifier(int key, int modifiers) {
+        pressedModifiers.merge(key, 1, Integer::sum);
+        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 1, modifiers);
+    }
+
+    public static void pressModifier(int key) {
+        pressModifier(key, 0);
+    }
+
+    public static void releaseModifier(int key, int modifiers) {
+        pressedModifiers.merge(key, -1, Integer::sum);
+        Minecraft.getInstance().keyboardHandler.keyPress(Minecraft.getInstance().getWindow().getWindow(), key, 0, 0, modifiers);
+    }
+
+    public static void releaseModifier(int key) {
+        releaseModifier(key, 0);
     }
 
     public static void typeChar(char character, int modifiers) {
@@ -67,11 +88,9 @@ public class InputSimulator {
     }
 
     public static void typeChars(CharSequence characters) {
-        int i = characters.length();
-
-        for (int j = 0; j < i; ++j) {
-            char c0 = characters.charAt(j);
-            typeChar(c0);
+        for (int i = 0; i < characters.length(); i++) {
+            char character = characters.charAt(i);
+            typeChar(character);
         }
     }
 

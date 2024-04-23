@@ -204,10 +204,15 @@ public class Matrix3f extends Matrix {
     }
 
     public String toString() {
-        String stringbuilder = String.valueOf(this.m00) + ' ' + this.m10 + ' ' + this.m20 + ' ' + '\n' +
-            this.m01 + ' ' + this.m11 + ' ' + this.m21 + ' ' + '\n' +
-            this.m02 + ' ' + this.m12 + ' ' + this.m22 + ' ' + '\n';
-        return stringbuilder;
+        return """
+            Matrix3f:
+            %f %f %f
+            %f %f %f
+            %f %f %f"""
+            .formatted(
+                this.m00, this.m10, this.m20,
+                this.m01, this.m11, this.m21,
+                this.m02, this.m12, this.m22);
     }
 
     public Matrix invert() {

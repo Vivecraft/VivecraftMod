@@ -58,26 +58,26 @@ public class KeyboardInputVRMixin extends Input {
         if (climbing || !this.options.keyUp.isDown() && !VivecraftVRMod.INSTANCE.keyTeleportFallback.isDown()) {
             this.up = false;
         } else {
-            ++this.forwardImpulse;
+            this.forwardImpulse++;
             this.up = true;
         }
 
         if (!climbing && this.options.keyDown.isDown()) {
-            --this.forwardImpulse;
+            this.forwardImpulse--;
             this.down = true;
         } else {
             this.down = false;
         }
 
         if (!climbing && this.options.keyLeft.isDown()) {
-            ++this.leftImpulse;
+            this.leftImpulse++;
             this.left = true;
         } else {
             this.left = false;
         }
 
         if (!climbing && this.options.keyRight.isDown()) {
-            --this.leftImpulse;
+            this.leftImpulse--;
             this.right = true;
         } else {
             this.right = false;

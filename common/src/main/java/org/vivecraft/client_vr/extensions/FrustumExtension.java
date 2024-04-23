@@ -4,7 +4,7 @@ import net.minecraft.world.phys.AABB;
 
 public interface FrustumExtension {
 
-    void vivecraft$setCameraPosition(double var1, double var3, double var5);
+    void vivecraft$setCameraPosition(double camX, double camY, double camZ);
 
-    boolean vivecraft$isBoundingBoxInFrustum(AABB var1);
+    boolean vivecraft$isBoundingBoxInFrustum(AABB bb);
 }

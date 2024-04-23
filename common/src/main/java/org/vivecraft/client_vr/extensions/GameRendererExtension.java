@@ -21,9 +21,9 @@ public interface GameRendererExtension {
 
     void vivecraft$setupRVE();
 
-    void vivecraft$cacheRVEPos(LivingEntity e);
+    void vivecraft$cacheRVEPos(LivingEntity entity);
 
-    void vivecraft$restoreRVEPos(LivingEntity e);
+    void vivecraft$restoreRVEPos(LivingEntity entity);
 
     double vivecraft$getRveY();
 

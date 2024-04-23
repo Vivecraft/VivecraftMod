@@ -490,8 +490,7 @@ public abstract class GameRendererVRMixin
             }
 
             if (this.minecraft.screen == null) {
-                vivecraft$DATA_HOLDER.teleportTracker.updateTeleportDestinations((GameRenderer) (Object) this, this.minecraft,
-                    this.minecraft.player);
+                vivecraft$DATA_HOLDER.teleportTracker.updateTeleportDestinations(this.minecraft.player);
             }
         }
 
@@ -579,23 +578,23 @@ public abstract class GameRendererVRMixin
 
     @Override
     @Unique
-    public void vivecraft$cacheRVEPos(LivingEntity e) {
+    public void vivecraft$cacheRVEPos(LivingEntity entity) {
         if (this.minecraft.getCameraEntity() != null) {
             if (!this.vivecraft$cached) {
-                this.vivecraft$rveX = e.getX();
-                this.vivecraft$rveY = e.getY();
-                this.vivecraft$rveZ = e.getZ();
-                this.vivecraft$rvelastX = e.xOld;
-                this.vivecraft$rvelastY = e.yOld;
-                this.vivecraft$rvelastZ = e.zOld;
-                this.vivecraft$rveprevX = e.xo;
-                this.vivecraft$rveprevY = e.yo;
-                this.vivecraft$rveprevZ = e.zo;
-                this.vivecraft$rveyaw = e.yHeadRot;
-                this.vivecraft$rvepitch = e.getXRot();
-                this.vivecraft$rvelastyaw = e.yHeadRotO;
-                this.vivecraft$rvelastpitch = e.xRotO;
-                this.vivecraft$rveHeight = e.getEyeHeight();
+                this.vivecraft$rveX = entity.getX();
+                this.vivecraft$rveY = entity.getY();
+                this.vivecraft$rveZ = entity.getZ();
+                this.vivecraft$rvelastX = entity.xOld;
+                this.vivecraft$rvelastY = entity.yOld;
+                this.vivecraft$rvelastZ = entity.zOld;
+                this.vivecraft$rveprevX = entity.xo;
+                this.vivecraft$rveprevY = entity.yo;
+                this.vivecraft$rveprevZ = entity.zo;
+                this.vivecraft$rveyaw = entity.yHeadRot;
+                this.vivecraft$rvepitch = entity.getXRot();
+                this.vivecraft$rvelastyaw = entity.yHeadRotO;
+                this.vivecraft$rvelastpitch = entity.xRotO;
+                this.vivecraft$rveHeight = entity.getEyeHeight();
                 this.vivecraft$cached = true;
             }
         }
@@ -603,22 +602,22 @@ public abstract class GameRendererVRMixin
 
     @Override
     @Unique
-    public void vivecraft$restoreRVEPos(LivingEntity e) {
-        if (e != null) {
-            e.setPosRaw(this.vivecraft$rveX, this.vivecraft$rveY, this.vivecraft$rveZ);
-            e.xOld = this.vivecraft$rvelastX;
-            e.yOld = this.vivecraft$rvelastY;
-            e.zOld = this.vivecraft$rvelastZ;
-            e.xo = this.vivecraft$rveprevX;
-            e.yo = this.vivecraft$rveprevY;
-            e.zo = this.vivecraft$rveprevZ;
-            e.setYRot(this.vivecraft$rveyaw);
-            e.setXRot(this.vivecraft$rvepitch);
-            e.yRotO = this.vivecraft$rvelastyaw;
-            e.xRotO = this.vivecraft$rvelastpitch;
-            e.yHeadRot = this.vivecraft$rveyaw;
-            e.yHeadRotO = this.vivecraft$rvelastyaw;
-            e.eyeHeight = this.vivecraft$rveHeight;
+    public void vivecraft$restoreRVEPos(LivingEntity entity) {
+        if (entity != null) {
+            entity.setPosRaw(this.vivecraft$rveX, this.vivecraft$rveY, this.vivecraft$rveZ);
+            entity.xOld = this.vivecraft$rvelastX;
+            entity.yOld = this.vivecraft$rvelastY;
+            entity.zOld = this.vivecraft$rvelastZ;
+            entity.xo = this.vivecraft$rveprevX;
+            entity.yo = this.vivecraft$rveprevY;
+            entity.zo = this.vivecraft$rveprevZ;
+            entity.setYRot(this.vivecraft$rveyaw);
+            entity.setXRot(this.vivecraft$rvepitch);
+            entity.yRotO = this.vivecraft$rvelastyaw;
+            entity.xRotO = this.vivecraft$rvelastpitch;
+            entity.yHeadRot = this.vivecraft$rveyaw;
+            entity.yHeadRotO = this.vivecraft$rvelastyaw;
+            entity.eyeHeight = this.vivecraft$rveHeight;
             this.vivecraft$cached = false;
         }
     }

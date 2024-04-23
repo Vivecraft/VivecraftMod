@@ -173,6 +173,12 @@ public class ServerConfig {
         messagesWelcomeVanilla = builder
             .push("welcomeVanilla")
             .define("%s has joined as a Muggle!");
+
+        messagesLeaveMessage = builder
+            .push("leaveMessage")
+            .define("%s has disconnected from the server!");
+
+        // general death messages
         messagesDeathVR = builder
             .push("deathVR")
             .define("%s died in standing VR!");

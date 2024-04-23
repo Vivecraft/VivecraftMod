@@ -36,21 +36,24 @@ public class GuiHUDSettings extends GuiVROptionsBase {
         }),
     };
 
-    public GuiHUDSettings(Screen guiScreen) {
-        super(guiScreen);
+    public GuiHUDSettings(Screen lastScreen) {
+        super(lastScreen);
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.gui";
         super.init(this.hudOptions, true);
         super.addDefaultButtons();
     }
 
+    @Override
     protected void loadDefaults() {
         super.loadDefaults();
         this.minecraft.options.hideGui = false;
     }
 
+    @Override
     protected void actionPerformed(AbstractWidget widget) {
         if (widget instanceof GuiVROption button) {
             if (button.getId() == VRSettings.VrOptions.MENU_ALWAYS_FOLLOW_FACE.ordinal()) {
@@ -59,7 +62,7 @@ public class GuiHUDSettings extends GuiVROptionsBase {
             if ((button.getId() == VRSettings.VrOptions.DOUBLE_GUI_RESOLUTION.ordinal()
                 || button.getId() == VRSettings.VrOptions.GUI_SCALE.ordinal())
                 && VRState.vrEnabled) {
-                this.dataholder.vrRenderer.resizeFrameBuffers("GUI Setting Changed");
+                this.dataHolder.vrRenderer.resizeFrameBuffers("GUI Setting Changed");
                 this.reinit = true;
             }
         }

@@ -19,7 +19,7 @@ public class GarbageCollectorScreen extends Screen {
 
     private final Screen lastScreen;
     private final String currentGarbageCollector;
-    private final static String guideURL = "https://github.com/Vivecraft/VivecraftMod/wiki/Memory-and-GC-Setup";
+    private static final String guideURL = "https://github.com/Vivecraft/VivecraftMod/wiki/Memory-and-GC-Setup";
 
     public GarbageCollectorScreen(String currentGarbageCollector) {
         super(Component.translatable("vivecraft.messages.gctitle"));
@@ -27,9 +27,10 @@ public class GarbageCollectorScreen extends Screen {
         this.currentGarbageCollector = currentGarbageCollector;
     }
 
+    @Override
     protected void init() {
         Component message = Component.translatable("vivecraft.messages.gcinfo",
-            Component.literal(currentGarbageCollector).withStyle(s -> s.withColor(ChatFormatting.RED)),
+            Component.literal(this.currentGarbageCollector).withStyle(s -> s.withColor(ChatFormatting.RED)),
             Component.literal("ZGC"),
             Component.literal(Integer.toString(6)),
             Component.literal("-XX:+UseZGC").withStyle(s -> s
@@ -66,15 +67,15 @@ public class GarbageCollectorScreen extends Screen {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderBackground(guiGraphics, i, j, f);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
-        super.render(guiGraphics, i, j, f);
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
     public void onClose() {
         ClientDataHolderVR.getInstance().incorrectGarbageCollector = "";
-        this.minecraft.setScreen(lastScreen);
+        this.minecraft.setScreen(this.lastScreen);
     }
 }

@@ -25,14 +25,16 @@ public class VRTextureTarget extends RenderTarget {
 
     @Override
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append("\n");
-        if (this.name != null) {
-            stringbuilder.append("Name:   " + this.name).append("\n");
-        }
-        stringbuilder.append("Size:   " + this.viewWidth + " x " + this.viewHeight).append("\n");
-        stringbuilder.append("FB ID:  " + this.frameBufferId).append("\n");
-        stringbuilder.append("Tex ID: " + this.colorTextureId).append("\n");
-        return stringbuilder.toString();
+        return """
+            
+            Vivecraft RenderTarget: %s
+            Size: %s x %s
+            FB ID: %s
+            Tex ID: %s"""
+        .formatted(
+            this.name,
+            this.viewWidth, this.viewHeight,
+            this.frameBufferId,
+            this.colorTextureId);
     }
 }

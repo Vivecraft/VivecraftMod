@@ -61,15 +61,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         this.vivecraft$linearFilter = linearFilter;
     }
 
-    @Override
-    public String toString() {
-        String stringbuilder = "\n" +
-            "Size:   " + this.viewWidth + " x " + this.viewHeight + "\n" +
-            "FB ID:  " + this.frameBufferId + "\n" +
-            "Tex ID: " + this.colorTextureId + "\n";
-        return stringbuilder;
-    }
-
     @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I", remap = false, ordinal = 0), method = "createBuffers")
     public int vivecraft$genTextureId() {
         if (this.vivecraft$texid == -1) {
@@ -129,7 +120,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
             instance = minecraft.gameRenderer.blitShader;
             instance.setSampler("DiffuseSampler", this.colorTextureId);
         } else {
-            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
+            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; k++) {
                 int l = RenderSystem.getShaderTexture(k);
                 instance.setSampler("Sampler" + k, l);
             }
@@ -214,7 +205,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
             instance = minecraft.gameRenderer.blitShader;
             instance.setSampler("DiffuseSampler", this.colorTextureId);
         } else {
-            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; ++k) {
+            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; k++) {
                 int l = RenderSystem.getShaderTexture(k);
                 instance.setSampler("Sampler" + k, l);
             }

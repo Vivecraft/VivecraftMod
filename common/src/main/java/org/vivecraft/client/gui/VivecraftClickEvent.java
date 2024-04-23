@@ -10,7 +10,7 @@ public class VivecraftClickEvent extends ClickEvent {
     public VivecraftClickEvent(VivecraftAction action, Object value) {
         // dummy action, in case our check fails
         super(Action.RUN_COMMAND, "");
-        vivecraftAction = action;
+        this.vivecraftAction = action;
         this.value = value;
     }
 
@@ -20,7 +20,7 @@ public class VivecraftClickEvent extends ClickEvent {
     }
 
     public Object getVivecraftValue() {
-        return value;
+        return this.value;
     }
 
     public enum VivecraftAction {
@@ -28,8 +28,8 @@ public class VivecraftClickEvent extends ClickEvent {
 
         private final String name;
 
-        VivecraftAction(String string2) {
-            this.name = string2;
+        VivecraftAction(String name) {
+            this.name = name;
         }
 
         public String getName() {

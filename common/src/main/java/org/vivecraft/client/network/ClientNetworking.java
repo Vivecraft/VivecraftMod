@@ -83,7 +83,6 @@ public class ClientNetworking {
     }
 
     public static void sendVersionInfo() {
-        //Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new ChannelRegisterPacket(CommonNetworkHelper.CHANNEL.toString())));
         Xplat.addNetworkChannel(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL);
         // send version string, with currently running
         Minecraft.getInstance().getConnection().send(getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.VERSION,
@@ -102,25 +101,27 @@ public class ClientNetworking {
         float worldScale = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_post.worldScale;
 
         if (worldScale != worldScallast) {
-            ByteBuf bytebuf = Unpooled.buffer();
-            bytebuf.writeFloat(worldScale);
-            byte[] abyte = new byte[bytebuf.readableBytes()];
-            bytebuf.readBytes(abyte);
-            ServerboundCustomPayloadPacket serverboundcustompayloadpacket = getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.WORLDSCALE, abyte);
-            Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
+            ByteBuf payload = Unpooled.buffer();
+            payload.writeFloat(worldScale);
+            byte[] out = new byte[payload.readableBytes()];
+            payload.readBytes(out);
+            ServerboundCustomPayloadPacket packet = getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.WORLDSCALE, out);
+            connection.send(packet);
+
             worldScallast = worldScale;
         }
 
-        float f1 = AutoCalibration.getPlayerHeight();
+        float userHeight = AutoCalibration.getPlayerHeight();
 
-        if (f1 != heightlast) {
-            ByteBuf bytebuf2 = Unpooled.buffer();
-            bytebuf2.writeFloat(f1 / 1.52F);
-            byte[] abyte3 = new byte[bytebuf2.readableBytes()];
-            bytebuf2.readBytes(abyte3);
-            ServerboundCustomPayloadPacket serverboundcustompayloadpacket1 = getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.HEIGHT, abyte3);
-            Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket1);
-            heightlast = f1;
+        if (userHeight != heightlast) {
+            ByteBuf payload = Unpooled.buffer();
+            payload.writeFloat(userHeight / AutoCalibration.defaultHeight);
+            byte[] out = new byte[payload.readableBytes()];
+            payload.readBytes(out);
+            ServerboundCustomPayloadPacket packet = getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.HEIGHT, out);
+            connection.send(packet);
+
+            heightlast = userHeight;
         }
 
         var vrPlayerState = VrPlayerState.create(vrPlayer);
@@ -130,7 +131,7 @@ public class ClientNetworking {
         } else {
             sendLegacyPackets(connection, vrPlayerState);
         }
-        VRPlayersClient.getInstance().Update(Minecraft.getInstance().player.getGameProfile().getId(), vrPlayerState, worldScale, f1 / 1.52F, true);
+        VRPlayersClient.getInstance().update(Minecraft.getInstance().player.getGameProfile().getId(), vrPlayerState, worldScale, userHeight / AutoCalibration.defaultHeight, true);
     }
 
     private static byte[] serializeToArray(BufferSerializable object, byte[] additionalData) {
@@ -160,6 +161,8 @@ public class ClientNetworking {
         connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.HEADDATA, serializeToArray(vrPlayerState.hmd(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.seated ? 1 : 0)}))));
     }
 
+    // ServerSetting override checks
+
     public static boolean isThirdPersonItems() {
         return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS).getBoolean();
     }
@@ -182,10 +185,10 @@ public class ClientNetworking {
 
     public static void sendActiveHand(byte c) {
         if (serverWantsData) {
-            ServerboundCustomPayloadPacket serverboundcustompayloadpacket = getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.ACTIVEHAND, new byte[]{c});
+            ServerboundCustomPayloadPacket packet = getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.ACTIVEHAND, new byte[]{c});
 
             if (Minecraft.getInstance().getConnection() != null) {
-                Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
+                Minecraft.getInstance().getConnection().send(packet);
             }
         }
     }
@@ -197,14 +200,14 @@ public class ClientNetworking {
     }
 
     public static void overrideLook(Player player, Vec3 view) {
-        if (!serverWantsData) {
-            capturedPitch = player.getXRot();
-            capturedYaw = player.getYRot();
-            float f = (float) Math.toDegrees(Math.asin(-view.y / view.length()));
-            float f1 = (float) Math.toDegrees(Math.atan2(-view.x, view.z));
-            ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(f1, f, player.onGround()));
-            overrideActive = true;
-        }
+        if (serverWantsData) return; // shouldn't be needed, don't tease the anti-cheat.
+
+        capturedPitch = player.getXRot();
+        capturedYaw = player.getYRot();
+        float pitch = (float) Math.toDegrees(Math.asin(-view.y / view.length()));
+        float yaw = (float) Math.toDegrees(Math.atan2(-view.x, view.z));
+        ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(yaw, pitch, player.onGround()));
+        overrideActive = true;
     }
 
     public static void restoreLook(Player player) {
@@ -221,7 +224,7 @@ public class ClientNetworking {
         Minecraft mc = Minecraft.getInstance();
         switch (packetID) {
             case VERSION -> {
-                String s11 = buffer.readUtf(1024);
+                String version = buffer.readUtf(1024);
                 VRServerPerms.INSTANCE.setTeleportSupported(true);
                 if (VRState.vrInitialized) {
                     dataholder.vrPlayer.teleportWarning = false;
@@ -231,7 +234,7 @@ public class ClientNetworking {
                     && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
                     || (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()))) {
                     ClientNetworking.displayedChatMessage = true;
-                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
+                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", version));
                 }
                 if (VRState.vrEnabled && dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
                     mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibrateheight"));
@@ -246,12 +249,12 @@ public class ClientNetworking {
             case CLIMBING -> {
                 ClientNetworking.serverAllowsClimbey = buffer.readBoolean();
                 if (buffer.readableBytes() > 0) {
-                    dataholder.climbTracker.serverblockmode = buffer.readByte();
+                    dataholder.climbTracker.serverBlockmode = buffer.readByte();
                     dataholder.climbTracker.blocklist.clear();
 
                     while (buffer.readableBytes() > 0) {
-                        String s12 = buffer.readUtf(16384);
-                        Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s12));
+                        String name = buffer.readUtf(16384);
+                        Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(name));
 
                         // if the block is not there AIR is returned
                         if (block != Blocks.AIR) {
@@ -266,45 +269,43 @@ public class ClientNetworking {
                 var vrPlayerState = VrPlayerState.deserialize(buffer);
                 float worldScale = buffer.readFloat();
                 float heightScale = buffer.readFloat();
-                VRPlayersClient.getInstance().Update(uuid, vrPlayerState, worldScale, heightScale);
+                VRPlayersClient.getInstance().update(uuid, vrPlayerState, worldScale, heightScale);
             }
             case SETTING_OVERRIDE -> {
                 while (buffer.readableBytes() > 0) {
-                    String s13 = buffer.readUtf(16384);
-                    String s14 = buffer.readUtf(16384);
-                    String[] astring = s13.split("\\.", 2);
+                    String settingName = buffer.readUtf(16384);
+                    String value = buffer.readUtf(16384);
+                    String[] split = settingName.split("\\.", 2);
 
-                    if (dataholder.vrSettings.overrides.hasSetting(astring[0])) {
-                        VRSettings.ServerOverrides.Setting vrsettings$serveroverrides$setting = dataholder.vrSettings.overrides.getSetting(astring[0]);
+                    if (dataholder.vrSettings.overrides.hasSetting(split[0])) {
+                        VRSettings.ServerOverrides.Setting setting = dataholder.vrSettings.overrides.getSetting(split[0]);
 
                         try {
-                            if (astring.length > 1) {
-                                String s15 = astring[1];
+                            if (split.length > 1) {
+                                String s15 = split[1];
                                 switch (s15) {
                                     case "min":
-                                        vrsettings$serveroverrides$setting.setValueMin(Float.parseFloat(s14));
+                                        setting.setValueMin(Float.parseFloat(value));
                                         break;
 
                                     case "max":
-                                        vrsettings$serveroverrides$setting.setValueMax(Float.parseFloat(s14));
+                                        setting.setValueMax(Float.parseFloat(value));
                                 }
                             } else {
-                                Object object = vrsettings$serveroverrides$setting.getOriginalValue();
+                                Object origValue = setting.getOriginalValue();
 
-                                if (object instanceof Boolean) {
-                                    vrsettings$serveroverrides$setting.setValue(s14.equals("true"));
-                                } else if (!(object instanceof Integer) && !(object instanceof Byte) && !(object instanceof Short)) {
-                                    if (!(object instanceof Float) && !(object instanceof Double)) {
-                                        vrsettings$serveroverrides$setting.setValue(s14);
-                                    } else {
-                                        vrsettings$serveroverrides$setting.setValue(Float.parseFloat(s14));
-                                    }
+                                if (origValue instanceof Boolean) {
+                                    setting.setValue(value.equals("true"));
+                                } else if (origValue instanceof Integer || origValue instanceof Byte || origValue instanceof Short) {
+                                    setting.setValue(Integer.parseInt(value));
+                                } else if (origValue instanceof Float || origValue instanceof Double) {
+                                    setting.setValue(Float.parseFloat(value));
                                 } else {
-                                    vrsettings$serveroverrides$setting.setValue(Integer.parseInt(s14));
+                                    setting.setValue(value);
                                 }
                             }
 
-                            System.out.println("Server setting override: " + s13 + " = " + s14);
+                            VRSettings.logger.info("Server setting override: {}={}", settingName, value);
                         } catch (Exception exception) {
                             exception.printStackTrace();
                         }

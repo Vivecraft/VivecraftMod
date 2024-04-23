@@ -6,5 +6,5 @@ import java.util.concurrent.ScheduledExecutorService;
 public abstract class HapticScheduler {
     protected ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-    public abstract void queueHapticPulse(ControllerType var1, float var2, float var3, float var4, float var5);
+    public abstract void queueHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude, float delaySeconds);
 }

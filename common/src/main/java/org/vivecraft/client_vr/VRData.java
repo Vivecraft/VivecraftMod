@@ -150,7 +150,25 @@ public class VRData {
     }
 
     public String toString() {
-        return "data:\r\n \t\t origin: " + this.origin + "\r\n \t\t rotation: " + String.format("%.2f", this.rotation_radians) + "\r\n \t\t scale: " + String.format("%.2f", this.worldScale) + "\r\n \t\t hmd " + this.hmd + "\r\n \t\t c0 " + this.c0 + "\r\n \t\t c1 " + this.c1 + "\r\n \t\t c2 " + this.c2;
+        return """
+            VRData:
+                origin: %s
+                rotation: %.2f
+                scale: %.2f
+                hmd: %s
+                c0: %s
+                c1: %s
+                c2: %s
+            """
+            .formatted(
+                this.origin,
+                this.rotation_radians,
+                this.worldScale,
+                this.hmd,
+                this.c0,
+                this.c1,
+                this.c2
+                );
     }
 
     protected Vec3 vecMult(Vec3 in, float factor) {

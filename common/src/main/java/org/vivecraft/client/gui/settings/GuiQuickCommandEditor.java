@@ -6,10 +6,11 @@ import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 public class GuiQuickCommandEditor extends GuiVROptionsBase {
     private GuiQuickCommandsList guiList;
 
-    public GuiQuickCommandEditor(Screen par1Screen) {
-        super(par1Screen);
+    public GuiQuickCommandEditor(Screen lastScreen) {
+        super(lastScreen);
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.quickcommands";
         this.guiList = new GuiQuickCommandsList(this, this.minecraft);
@@ -18,15 +19,17 @@ public class GuiQuickCommandEditor extends GuiVROptionsBase {
         this.visibleList = this.guiList;
     }
 
+    @Override
     protected void loadDefaults() {
         super.loadDefaults();
-        this.dataholder.vrSettings.vrQuickCommands = this.dataholder.vrSettings.getQuickCommandsDefaults();
+        this.dataHolder.vrSettings.vrQuickCommands = this.dataHolder.vrSettings.getQuickCommandsDefaults();
     }
 
+    @Override
     protected boolean onDoneClicked() {
-        for (int i = 0; i < 12; ++i) {
-            String s = (this.guiList.children().get(i)).txt.getValue();
-            this.dataholder.vrSettings.vrQuickCommands[i] = s;
+        for (int i = 0; i < this.dataHolder.vrSettings.vrQuickCommands.length; i++) {
+            String command = (this.guiList.children().get(i)).txt.getValue();
+            this.dataHolder.vrSettings.vrQuickCommands[i] = command;
         }
 
         return super.onDoneClicked();

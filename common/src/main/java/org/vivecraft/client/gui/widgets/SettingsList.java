@@ -116,13 +116,13 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            guiGraphics.drawString(Minecraft.getInstance().font, this.name, Minecraft.getInstance().screen.width / 2 - this.width / 2, j + m - Minecraft.getInstance().font.lineHeight - 1, 0xFFFFFF);
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTicks) {
+            guiGraphics.drawString(Minecraft.getInstance().font, this.name, Minecraft.getInstance().screen.width / 2 - this.width / 2, top + height - Minecraft.getInstance().font.lineHeight - 1, 0xFFFFFF);
         }
 
         @Override
         @Nullable
-        public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
+        public ComponentPath nextFocusPath(FocusNavigationEvent event) {
             return null;
         }
 
@@ -166,12 +166,12 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            super.render(guiGraphics, i, j, k, l, m, n, o, bl, f);
-            this.resetButton.setX(k + 230);
-            this.resetButton.setY(j);
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTicks) {
+            super.render(guiGraphics, index, top, left, width, height, mouseX, mouseY, hovering, partialTicks);
+            this.resetButton.setX(left + 230);
+            this.resetButton.setY(top);
             this.resetButton.active = canReset.getAsBoolean();
-            this.resetButton.render(guiGraphics, n, o, f);
+            this.resetButton.render(guiGraphics, mouseX, mouseY, partialTicks);
         }
 
         @Override
@@ -202,11 +202,11 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            guiGraphics.drawString(Minecraft.getInstance().font, this.name, k + 90 - 140, j + m / 2 - Minecraft.getInstance().font.lineHeight / 2, 0xFFFFFF);
-            this.valueWidget.setX(k + 105);
-            this.valueWidget.setY(j);
-            this.valueWidget.render(guiGraphics, n, o, f);
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTicks) {
+            guiGraphics.drawString(Minecraft.getInstance().font, this.name, left + 90 - 140, top + height / 2 - Minecraft.getInstance().font.lineHeight / 2, 0xFFFFFF);
+            this.valueWidget.setX(left + 105);
+            this.valueWidget.setY(top);
+            this.valueWidget.render(guiGraphics, mouseX, mouseY, partialTicks);
         }
 
         @Override
@@ -237,7 +237,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
 
 
         public boolean isActive() {
-            return active;
+            return this.active;
         }
 
         public void setActive(boolean active) {

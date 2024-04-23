@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 public class NullVRStereoRenderer extends VRRenderer {
     public NullVRStereoRenderer(MCVR vr) {
@@ -21,9 +22,9 @@ public class NullVRStereoRenderer extends VRRenderer {
             return this.resolution;
         } else {
             this.resolution = new Tuple<>(2048, 2048);
-            System.out.println("NullVR Render Res " + this.resolution.getA() + " x " + this.resolution.getB());
+            VRSettings.logger.info("NullVR Render Res {}x{}", this.resolution.getA(), this.resolution.getB());
             this.ss = -1.0F;
-            System.out.println("NullVR Supersampling: " + this.ss);
+            VRSettings.logger.info("NullVR Supersampling: {}", this.ss);
 
             return this.resolution;
         }
@@ -32,11 +33,6 @@ public class NullVRStereoRenderer extends VRRenderer {
     @Override
     public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
         return new Matrix4f().setPerspective(90.0F, 1.0F, nearClip, farClip);
-    }
-
-    @Override
-    public String getLastError() {
-        return "";
     }
 
     @Override
@@ -59,8 +55,7 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public void endFrame() {
-    }
+    public void endFrame() {}
 
     @Override
     public boolean providesStencilMask() {
@@ -89,8 +84,8 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void destroyBuffers() {
+        super.destroyBuffers();
         if (this.LeftEyeTextureId > -1) {
             TextureUtil.releaseTextureId(this.LeftEyeTextureId);
             this.LeftEyeTextureId = -1;

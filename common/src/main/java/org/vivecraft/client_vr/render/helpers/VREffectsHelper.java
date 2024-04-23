@@ -10,7 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -19,6 +21,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -33,9 +39,9 @@ import org.vivecraft.client.Xplat;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.settings.GuiOtherHUDSettings;
 import org.vivecraft.client.gui.settings.GuiRenderOpticsSettings;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
@@ -46,6 +52,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.VivecraftItemRendering;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.mod_compat_vr.immersiveportals.ImmersivePortalsHelper;
@@ -60,113 +67,121 @@ public class VREffectsHelper {
     private static final ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
     private static final Minecraft mc = Minecraft.getInstance();
 
-    public static boolean isInsideOpaqueBlock(Vec3 in) {
+    /**
+     * checks if the given position is inside a block that blocks vision
+     * @param pos position to check
+     * @return if vision is blocked
+     */
+    public static boolean isInsideOpaqueBlock(Vec3 pos) {
         if (mc.level == null) {
             return false;
         } else {
-            BlockPos blockpos = BlockPos.containing(in);
+            BlockPos blockpos = BlockPos.containing(pos);
             return mc.level.getBlockState(blockpos).isSolidRender(mc.level, blockpos);
         }
     }
 
-    public static Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 in, double dist) {
+    /**
+     * check if the given position is 'dist' near a block that blocks vision
+     * @param pos position to check
+     * @param dist distance where it should still count as inside the block
+     * @return null if there is no block, else a triple containing 1.0F,
+     *          BlockState and BlockPos of the blocking block
+     */
+    public static Triple<Float, BlockState, BlockPos> getNearOpaqueBlock(Vec3 pos, double dist) {
         if (mc.level == null) {
             return null;
         } else {
-            AABB aabb = new AABB(in.subtract(dist, dist, dist), in.add(dist, dist, dist));
+            AABB aabb = new AABB(pos.subtract(dist, dist, dist), pos.add(dist, dist, dist));
             Stream<BlockPos> stream = BlockPos.betweenClosedStream(aabb).filter((bp) ->
                 mc.level.getBlockState(bp).isSolidRender(mc.level, bp));
             Optional<BlockPos> optional = stream.findFirst();
-            return optional.isPresent()
-                   ? Triple.of(1.0F, mc.level.getBlockState(optional.get()), optional.get())
-                   : null;
+            return optional.map(blockPos -> Triple.of(1.0F, mc.level.getBlockState(blockPos), blockPos)).orElse(null);
         }
     }
 
-    public static void drawScopeFB(PoseStack matrixStackIn, int i) {
-        if (dataHolder.currentPass != RenderPass.SCOPEL && dataHolder.currentPass != RenderPass.SCOPER) {
-            // TODO wasn't there
-            mc.gameRenderer.lightTexture().turnOffLightLayer();
-            matrixStackIn.pushPose();
-            RenderSystem.enableDepthTest();
+    /**
+     * draws the spyglass view of the given controller
+     * @param poseStack PoseStack for positioning
+     * @param c controller index for the scope
+     */
+    public static void drawScopeFB(PoseStack poseStack, int c) {
+        poseStack.pushPose();
+        RenderSystem.enableDepthTest();
 
-            if (i == 0) {
-                dataHolder.vrRenderer.telescopeFramebufferR.bindRead();
-                RenderSystem.setShaderTexture(0, dataHolder.vrRenderer.telescopeFramebufferR.getColorTextureId());
-            } else {
-                dataHolder.vrRenderer.telescopeFramebufferL.bindRead();
-                RenderSystem.setShaderTexture(0, dataHolder.vrRenderer.telescopeFramebufferL.getColorTextureId());
-            }
-
-            float scale = 0.0785F;
-            //actual framebuffer
-            float alpha = TelescopeTracker.viewPercent(i);
-            RenderHelper.drawSizedQuadSolid(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1}, matrixStackIn.last().pose());
-
-            RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
-            RenderSystem.enableBlend();
-            matrixStackIn.translate(0.0D, 0.0D, 0.00001D);
-            int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(dataHolder.vrPlayer.vrdata_world_render.getController(i).getPosition()));
-            RenderHelper.drawSizedQuadWithLightmapCutout(720.0F, 720.0F, scale, light, matrixStackIn.last().pose(), true);
-
-            matrixStackIn.popPose();
-            mc.gameRenderer.lightTexture().turnOnLightLayer();
+        if (c == 0) {
+            dataHolder.vrRenderer.telescopeFramebufferR.bindRead();
+            RenderSystem.setShaderTexture(0, dataHolder.vrRenderer.telescopeFramebufferR.getColorTextureId());
+        } else {
+            dataHolder.vrRenderer.telescopeFramebufferL.bindRead();
+            RenderSystem.setShaderTexture(0, dataHolder.vrRenderer.telescopeFramebufferL.getColorTextureId());
         }
+
+        // size of the back of the spyglass 2/16
+        float scale = 0.125F;
+
+        float alpha = TelescopeTracker.viewPercent(c);
+        // draw spyglass view
+        RenderHelper.drawSizedQuadFullbrightSolid(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1}, poseStack.last().pose());
+
+        // draw spyglass overlay
+        RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
+        RenderSystem.enableBlend();
+        // slight offset to not cause z fighting
+        poseStack.translate(0.0F, 0.0F, 0.00001F);
+        // get light at the controller position
+        int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(dataHolder.vrPlayer.vrdata_world_render.getController(c).getPosition()));
+        // draw the overlay, and flip it vertically
+        RenderHelper.drawSizedQuadWithLightmapCutout(720.0F, 720.0F, scale, light, poseStack.last().pose(), true);
+
+        poseStack.popPose();
     }
 
     private static boolean wasStencilOn;
 
     private static boolean showedStencilMessage = false;
 
-    public static void drawEyeStencil(boolean flag1) {
-        wasStencilOn = GL11C.glIsEnabled(GL11C.GL_STENCIL_TEST);
+    /**
+     * enables stencil test, and draws the stencil, if enabled for the current RenderPass
+     */
+    public static void drawEyeStencil() {
+        if (dataHolder.vrSettings.vrUseStencil) {
+            wasStencilOn = GL11C.glIsEnabled(GL11C.GL_STENCIL_TEST);
+            if (wasStencilOn && !showedStencilMessage && dataHolder.vrSettings.showChatMessageStencil) {
+                showedStencilMessage = true;
+                mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.stencil",
+                    Component.translatable("vivecraft.messages.3options",
+                            Component.translatable("options.title"),
+                            Component.translatable("vivecraft.options.screen.main"),
+                            Component.translatable("vivecraft.options.screen.stereorendering"))
+                        .withStyle(style -> style.withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new GuiRenderOpticsSettings(null)))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("vivecraft.messages.openSettings")))
+                            .withColor(ChatFormatting.GREEN)
+                            .withItalic(true)),
+                    Component.translatable("vivecraft.messages.3options",
+                            Component.translatable("options.title"),
+                            Component.translatable("vivecraft.options.screen.main"),
+                            Component.translatable("vivecraft.options.screen.guiother"))
+                        .withStyle(style -> style.withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new GuiOtherHUDSettings(null)))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("vivecraft.messages.openSettings")))
+                            .withColor(ChatFormatting.GREEN)
+                            .withItalic(true))
+                ));
+            }
 
-        if (wasStencilOn && !showedStencilMessage && dataHolder.vrSettings.vrUseStencil && dataHolder.vrSettings.showChatMessageStencil) {
-            showedStencilMessage = true;
-            mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.stencil",
-                Component.translatable("vivecraft.messages.3options",
-                        Component.translatable("options.title"),
-                        Component.translatable("vivecraft.options.screen.main"),
-                        Component.translatable("vivecraft.options.screen.stereorendering"))
-                    .withStyle(style -> style.withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new GuiRenderOpticsSettings(null)))
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("vivecraft.messages.openSettings")))
-                        .withColor(ChatFormatting.GREEN)
-                        .withItalic(true)),
-                Component.translatable("vivecraft.messages.3options",
-                        Component.translatable("options.title"),
-                        Component.translatable("vivecraft.options.screen.main"),
-                        Component.translatable("vivecraft.options.screen.guiother"))
-                    .withStyle(style -> style.withClickEvent(new VivecraftClickEvent(VivecraftClickEvent.VivecraftAction.OPEN_SCREEN, new GuiOtherHUDSettings(null)))
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("vivecraft.messages.openSettings")))
-                        .withColor(ChatFormatting.GREEN)
-                        .withItalic(true))
-            ));
-        }
-
-        // don't touch the stencil if we don't use it
-        // stencil only for left/right VR view
-        if ((dataHolder.currentPass == RenderPass.LEFT
-            || dataHolder.currentPass == RenderPass.RIGHT)
-            && dataHolder.vrSettings.vrUseStencil
-            && (!Xplat.isModLoaded("immersive_portals") || !ImmersivePortalsHelper.isRenderingPortal())) {
-//				net.optifine.shaders.Program program = Shaders.activeProgram;
-//
-//				if (shaders && Shaders.dfb != null) {
-//					Shaders.dfb.bindFramebuffer();
-//					Shaders.useProgram(Shaders.ProgramNone);
-//
-//					for (int i = 0; i < Shaders.usedDepthBuffers; ++i) {
-//						GlStateManager._bindTexture(Shaders.dfb.depthTextures.get(i));
-//						this.minecraft.vrRenderer.doStencil(false);
-//					}
-//
-//					Shaders.useProgram(program);
-//				} else {
-            dataHolder.vrRenderer.doStencil(false);
-//				}
+            // don't touch the stencil if we don't use it
+            // stencil only for left/right VR view
+            if ((dataHolder.currentPass == RenderPass.LEFT || dataHolder.currentPass == RenderPass.RIGHT) &&
+                !Xplat.isModLoaded("immersive_portals") || !ImmersivePortalsHelper.isRenderingPortal())
+            {
+                dataHolder.vrRenderer.doStencil(false);
+            }
         }
     }
 
+    /**
+     * disables the stencil pass if it was enabled by us
+     */
     public static void disableStencilTest() {
         // if we did enable the stencil test, disable it
         if (!wasStencilOn) {
@@ -174,6 +189,7 @@ public class VREffectsHelper {
         }
     }
 
+    // textures for the panorama menu
     private static final ResourceLocation cubeFront = new ResourceLocation("textures/gui/title/background/panorama_0.png");
     private static final ResourceLocation cubeRight = new ResourceLocation("textures/gui/title/background/panorama_1.png");
     private static final ResourceLocation cubeBack = new ResourceLocation("textures/gui/title/background/panorama_2.png");
@@ -183,17 +199,24 @@ public class VREffectsHelper {
     private static final ResourceLocation dirt = new ResourceLocation("minecraft:textures/block/dirt.png");
     private static final ResourceLocation grass = new ResourceLocation("minecraft:textures/block/grass_block_top.png");
 
+    /**
+     * renders a 100^3 cubemap and a dirt/grass floor
+     * @param poseStack PoseStack to use for positioning
+     */
     public static void renderMenuPanorama(PoseStack poseStack) {
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT | GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         RenderSystem.depthMask(true);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1, 1, 1, 1);
+
         poseStack.pushPose();
 
+        // translate by half of the cube size
         poseStack.translate(-50F, -50F, -50.0F);
+
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 
         Matrix4f matrix = poseStack.last().pose();
 
@@ -277,10 +300,12 @@ public class VREffectsHelper {
 
         poseStack.popPose();
 
+        // render floor
         Vector2f area = dataHolder.vr.getPlayAreaSize();
         if (area == null) {
             area = new Vector2f(2, 2);
         }
+        // render two floors, grass at room size, and dirt a bit bigger
         for (int i = 0; i < 2; i++) {
             float width = area.x + i * 2;
             float length = area.y + i * 2;
@@ -299,29 +324,32 @@ public class VREffectsHelper {
                 RenderSystem.setShaderTexture(0, dirt);
                 r = g = b = 128;
             }
-            Matrix4f matrix4f = poseStack.last().pose();
             bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-            poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
+
+            // offset so the floor is centered
+            poseStack.translate(-width * 0.5F, 0.0F, -length * 0.5F);
+
+            matrix = poseStack.last().pose();
 
             final int repeat = 4; // texture wraps per meter
 
             bufferbuilder
-                .vertex(matrix4f, 0, 0.005f * -i, 0)
+                .vertex(matrix, 0, 0.005f * -i, 0)
                 .uv(0, 0)
                 .color(r, g, b, 255)
                 .normal(0, 1, 0).endVertex();
             bufferbuilder
-                .vertex(matrix4f, 0, 0.005f * -i, length)
+                .vertex(matrix, 0, 0.005f * -i, length)
                 .uv(0, repeat * length)
                 .color(r, g, b, 255)
                 .normal(0, 1, 0).endVertex();
             bufferbuilder
-                .vertex(matrix4f, width, 0.005f * -i, length)
+                .vertex(matrix, width, 0.005f * -i, length)
                 .uv(repeat * width, repeat * length)
                 .color(r, g, b, 255)
                 .normal(0, 1, 0).endVertex();
             bufferbuilder
-                .vertex(matrix4f, width, 0.005f * -i, 0)
+                .vertex(matrix, width, 0.005f * -i, 0)
                 .uv(repeat * width, 0)
                 .color(r, g, b, 255)
                 .normal(0, 1, 0).endVertex();
@@ -331,37 +359,47 @@ public class VREffectsHelper {
         }
     }
 
-    public static void renderJrbuddasAwesomeMainMenuRoomNew(PoseStack pMatrixStack) {
+    /**
+     * renders a dirt cube, slightly bigger than the room size
+     * @param poseStack PoseStack to use for positioning
+     */
+    public static void renderJrbuddasAwesomeMainMenuRoomNew(PoseStack poseStack) {
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT | GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        RenderSystem.depthMask(true);
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1, 1, 1, 1);
+        RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
+
         int repeat = 4; // texture wraps per meter
         float height = 2.5F;
-        float oversize = 1.3F;
+        float oversize = 1.3F; // how much bigger than the room
+
         Vector2f area = dataHolder.vr.getPlayAreaSize();
         if (area == null) {
             area = new Vector2f(2, 2);
         }
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.depthFunc(GL11C.GL_ALWAYS);
-        RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT | GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-        pMatrixStack.pushPose();
-
         float width = area.x + oversize;
         float length = area.y + oversize;
-        pMatrixStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
-
-        Matrix4f matrix = pMatrixStack.last().pose();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
 
         float r, g, b, a;
         r = g = b = 0.8f;
         a = 1.0f;
 
+        poseStack.pushPose();
+
+        // offset so the room is centered
+        poseStack.translate(-width * 0.5F, 0.0F, -length * 0.5F);
+
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+
+        Matrix4f matrix = poseStack.last().pose();
+
+        // floor
         bufferbuilder.vertex(matrix, 0, 0, 0)
             .uv(0, 0).color(r, g, b, a).normal(0, 1, 0).endVertex();
         bufferbuilder.vertex(matrix, 0, 0, length)
@@ -371,6 +409,7 @@ public class VREffectsHelper {
         bufferbuilder.vertex(matrix, width, 0, 0)
             .uv(repeat * width, 0).color(r, g, b, a).normal(0, 1, 0).endVertex();
 
+        // ceiling
         bufferbuilder.vertex(matrix, 0, height, length)
             .uv(0, 0).color(r, g, b, a).normal(0, -1, 0).endVertex();
         bufferbuilder.vertex(matrix, 0, height, 0)
@@ -380,6 +419,7 @@ public class VREffectsHelper {
         bufferbuilder.vertex(matrix, width, height, length)
             .uv(repeat * width, 0).color(r, g, b, a).normal(0, -1, 0).endVertex();
 
+        // left
         bufferbuilder.vertex(matrix, 0, 0, 0)
             .uv(0, 0).color(r, g, b, a).normal(1, 0, 0).endVertex();
         bufferbuilder.vertex(matrix, 0, height, 0)
@@ -389,6 +429,7 @@ public class VREffectsHelper {
         bufferbuilder.vertex(matrix, 0, 0, length)
             .uv(repeat * length, 0).color(r, g, b, a).normal(1, 0, 0).endVertex();
 
+        // right
         bufferbuilder.vertex(matrix, width, 0, 0)
             .uv(0, 0).color(r, g, b, a).normal(-1, 0, 0).endVertex();
         bufferbuilder.vertex(matrix, width, 0, length)
@@ -398,6 +439,7 @@ public class VREffectsHelper {
         bufferbuilder.vertex(matrix, width, height, 0)
             .uv(0, repeat * height).color(r, g, b, a).normal(-1, 0, 0).endVertex();
 
+        // front
         bufferbuilder.vertex(matrix, 0, 0, 0)
             .uv(0, 0).color(r, g, b, a).normal(0, 0, 1).endVertex();
         bufferbuilder.vertex(matrix, width, 0, 0)
@@ -407,6 +449,7 @@ public class VREffectsHelper {
         bufferbuilder.vertex(matrix, 0, height, 0)
             .uv(0, repeat * height).color(r, g, b, a).normal(0, 0, 1).endVertex();
 
+        // back
         bufferbuilder.vertex(matrix, 0, 0, length).
             uv(0, 0).color(r, g, b, a).normal(0, 0, -1).endVertex();
         bufferbuilder.vertex(matrix, 0, height, length)
@@ -417,96 +460,122 @@ public class VREffectsHelper {
             .uv(repeat * width, 0).color(r, g, b, a).normal(0, 0, -1).endVertex();
 
         BufferUploader.drawWithShader(bufferbuilder.end());
-        pMatrixStack.popPose();
+        poseStack.popPose();
     }
 
+    /**
+     * renders the loaded menuworld and a room floor quad
+     * @param poseStack PoseStack to use for positioning
+     */
     public static void renderTechjarsAwesomeMainMenuRoom(PoseStack poseStack) {
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-
-        RenderSystem.enableDepthTest();
-        //RenderSystem.enableTexture();
         RenderSystem.enableBlend();
         RenderSystem.enableCull();
+        RenderSystem.enableDepthTest();
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
-        poseStack.pushPose();
-
+        // use irl time for sky, or fast forward
         int tzOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
-        dataHolder.menuWorldRenderer.time = dataHolder.menuWorldRenderer.fastTime
-                                            ? (long) (dataHolder.menuWorldRenderer.ticks * 10L + 10 * mc.getFrameTime())
-                                            : (long) ((System.currentTimeMillis() + tzOffset - 21600000) / 86400000D * 24000D);
+        dataHolder.menuWorldRenderer.time = dataHolder.menuWorldRenderer.fastTime ?
+            (long) (dataHolder.menuWorldRenderer.ticks * 10L + 10.0F * mc.getFrameTime()) :
+            (long) ((System.currentTimeMillis() + tzOffset - 21600000) / 86400000D * 24000D);
 
+        // clear sky
         dataHolder.menuWorldRenderer.fogRenderer.setupFogColor();
         RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT | GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
 
         dataHolder.menuWorldRenderer.updateLightmap();
+        // render world
         dataHolder.menuWorldRenderer.render(poseStack);
 
+        // render room floor
         Vector2f area = dataHolder.vr.getPlayAreaSize();
-        if (area != null) {
-            poseStack.pushPose();
-            float width = area.x;//(float)Math.ceil(area.x);
-            float length = area.y;//(float)Math.ceil(area.y);
-
-            RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
-            RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
-            float sun = dataHolder.menuWorldRenderer.getSkyDarken();
-            RenderSystem.setShaderColor(sun, sun, sun, 0.3f);
-
-
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.enableBlend();
-            Matrix4f matrix4f = poseStack.last().pose();
-            BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-            poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
-            bufferbuilder
-                .vertex(matrix4f, 0, 0.005f, 0)
-                .uv(0, 0)
-                .color(1f, 1f, 1f, 1f)
-                .normal(0, 1, 0).endVertex();
-            bufferbuilder
-                .vertex(matrix4f, 0, 0.005f, length)
-                .uv(0, 4 * length)
-                .color(1f, 1f, 1f, 1f)
-                .normal(0, 1, 0).endVertex();
-            bufferbuilder
-                .vertex(matrix4f, width, 0.005f, length)
-                .uv(4 * width, 4 * length)
-                .color(1f, 1f, 1f, 1f)
-                .normal(0, 1, 0).endVertex();
-            bufferbuilder
-                .vertex(matrix4f, width, 0.005f, 0)
-                .uv(4 * width, 0)
-                .color(1f, 1f, 1f, 1f)
-                .normal(0, 1, 0).endVertex();
-
-            BufferUploader.drawWithShader(bufferbuilder.end());
-
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            poseStack.popPose();
+        if (area == null) {
+            area = new Vector2f(2, 2);
         }
 
+        float width = area.x;
+        float length = area.y;
+
+        RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+        RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
+        float sun = dataHolder.menuWorldRenderer.getSkyDarken();
+        RenderSystem.setShaderColor(sun, sun, sun, 0.3f);
+
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.enableBlend();
+
+        poseStack.pushPose();
+
+        poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
+
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+
+        Matrix4f matrix = poseStack.last().pose();
+
+        bufferbuilder
+            .vertex(matrix, 0, 0.005f, 0)
+            .uv(0, 0)
+            .color(1f, 1f, 1f, 1f)
+            .normal(0, 1, 0).endVertex();
+        bufferbuilder
+            .vertex(matrix, 0, 0.005f, length)
+            .uv(0, 4 * length)
+            .color(1f, 1f, 1f, 1f)
+            .normal(0, 1, 0).endVertex();
+        bufferbuilder
+            .vertex(matrix, width, 0.005f, length)
+            .uv(4 * width, 4 * length)
+            .color(1f, 1f, 1f, 1f)
+            .normal(0, 1, 0).endVertex();
+        bufferbuilder
+            .vertex(matrix, width, 0.005f, 0)
+            .uv(4 * width, 0)
+            .color(1f, 1f, 1f, 1f)
+            .normal(0, 1, 0).endVertex();
+
+        BufferUploader.drawWithShader(bufferbuilder.end());
+
         poseStack.popPose();
+
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.defaultBlendFunc();
     }
 
+    /**
+     * renders the vivecraft stuff into separate buffers for the fabulous settings
+     * this includes hands, vr shadow, gui, camera widgets and other stuff
+     * @param partialTicks current partial ticks
+     * @param levelRenderer LevelRenderer that holds the framebuffers for rendering
+     * @param menuHandRight if the right hand should be a menu hand
+     * @param menuHandLeft if the left hand should be a menu hand
+     * @param poseStack PoseStack to use for positioning
+     */
     public static void renderVRFabulous(float partialTicks, LevelRenderer levelRenderer, boolean menuHandRight, boolean menuHandLeft, PoseStack poseStack) {
-        if (ClientDataHolderVR.getInstance().currentPass == RenderPass.SCOPEL || ClientDataHolderVR.getInstance().currentPass == RenderPass.SCOPER) {
+        if (dataHolder.currentPass == RenderPass.SCOPEL || dataHolder.currentPass == RenderPass.SCOPER) {
+            // skip for spyglass
             return;
         }
+
         mc.getProfiler().popPush("VR");
-        renderCrosshairAtDepth(!ClientDataHolderVR.getInstance().vrSettings.useCrosshairOcclusion, poseStack);
+        renderCrosshairAtDepth(!dataHolder.vrSettings.useCrosshairOcclusion, poseStack);
+
+        // switch to VR Occluded buffer, and copy main depth for occlusion
         mc.getMainRenderTarget().unbindWrite();
-        ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVROccludedFramebuffer().clear(Minecraft.ON_OSX);
-        ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVROccludedFramebuffer().copyDepthFrom(mc.getMainRenderTarget());
-        ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVROccludedFramebuffer().bindWrite(true);
+        RenderTarget occluded = ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVROccludedFramebuffer();
+        occluded.clear(Minecraft.ON_OSX);
+        occluded.copyDepthFrom(mc.getMainRenderTarget());
+        occluded.bindWrite(true);
 
         if (shouldOccludeGui()) {
             renderGuiAndShadow(poseStack, partialTicks, false, false);
         }
 
-        ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRUnoccludedFramebuffer().clear(Minecraft.ON_OSX);
-        ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRUnoccludedFramebuffer().bindWrite(true);
+        // switch to VR UnOccluded buffer, no depth copy
+        RenderTarget unOccluded = ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRUnoccludedFramebuffer();
+        unOccluded.clear(Minecraft.ON_OSX);
+        unOccluded.bindWrite(true);
 
         if (!shouldOccludeGui()) {
             renderGuiAndShadow(poseStack, partialTicks, false, false);
@@ -515,25 +584,38 @@ public class VREffectsHelper {
         renderVRSelfEffects(partialTicks);
         VRWidgetHelper.renderVRThirdPersonCamWidget();
         VRWidgetHelper.renderVRHandheldCameraWidget();
-        boolean renderHands = VRArmHelper.shouldRenderHands();
 
+        boolean renderHands = VRArmHelper.shouldRenderHands();
         VRArmHelper.renderVRHands(partialTicks, renderHands && menuHandRight, renderHands && menuHandLeft, true, true, poseStack);
 
-        ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRHandsFramebuffer().clear(Minecraft.ON_OSX);
-        ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRHandsFramebuffer().copyDepthFrom(mc.getMainRenderTarget());
-        ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRHandsFramebuffer().bindWrite(true);
+        // switch to VR hands buffer
+        RenderTarget hands = ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRUnoccludedFramebuffer();
+        hands.clear(Minecraft.ON_OSX);
+        hands.copyDepthFrom(mc.getMainRenderTarget());
+        hands.bindWrite(true);
 
         VRArmHelper.renderVRHands(partialTicks, renderHands && !menuHandRight, renderHands && !menuHandLeft, false, false, poseStack);
 
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1, 1, 1, 1);
+        // rebind the original buffer
         mc.getMainRenderTarget().bindWrite(true);
     }
 
+    /**
+     * renders the vivecraft stuff, for fast and fancy setting, separated into 2 passes
+     * one before and one after translucents.
+     * this includes hands, vr shadow, gui, camera widgets and other stuff
+     * @param partialTicks current partial ticks
+     * @param secondPass if it's the second pass. first pass renders opaque stuff, second translucent stuff
+     * @param menuHandRight if the right hand should be a menu hand
+     * @param menuHandLeft if the left hand should be a menu hand
+     * @param poseStack PoseStack to use for positioning
+     */
     public static void renderVrFast(float partialTicks, boolean secondPass, boolean menuHandRight, boolean menuHandLeft,
         PoseStack poseStack) {
-        if (dataHolder.currentPass == RenderPass.SCOPEL
-            || dataHolder.currentPass == RenderPass.SCOPER) {
+        if (dataHolder.currentPass == RenderPass.SCOPEL || dataHolder.currentPass == RenderPass.SCOPER) {
+            // skip for spyglass
             return;
         }
         mc.getProfiler().popPush("VR");
@@ -554,23 +636,34 @@ public class VREffectsHelper {
             // only render the hands only once
             VRArmHelper.renderVRHands(partialTicks, VRArmHelper.shouldRenderHands(), VRArmHelper.shouldRenderHands(), menuHandRight, menuHandLeft, poseStack);
         }
+
         renderVRSelfEffects(partialTicks);
     }
 
+    /**
+     * @return if the gui should be occluded
+     */
     private static boolean shouldOccludeGui() {
-        Vec3 pos = dataHolder.vrPlayer.vrdata_world_render.getEye(dataHolder.currentPass)
-            .getPosition();
-
-        if (dataHolder.currentPass != RenderPass.THIRD
-            && dataHolder.currentPass != RenderPass.CAMERA) {
-            return !((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() && mc.screen == null && !KeyboardHandler.Showing
-                && !RadialHandler.isShowing() && dataHolder.vrSettings.hudOcclusion
-                && !isInsideOpaqueBlock(pos);
-        } else {
+        if (dataHolder.currentPass == RenderPass.THIRD || dataHolder.currentPass == RenderPass.CAMERA) {
             return true;
+        } else {
+            Vec3 pos = dataHolder.vrPlayer.vrdata_world_render.getEye(dataHolder.currentPass).getPosition();
+            return dataHolder.vrSettings.hudOcclusion &&
+                !((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() &&
+                mc.screen == null &&
+                !KeyboardHandler.Showing &&
+                !RadialHandler.isShowing() &&
+                !isInsideOpaqueBlock(pos);
         }
     }
 
+    /**
+     *
+     * @param poseStack PoseStack to use for positioning
+     * @param partialTicks current partial ticks
+     * @param depthAlways if stuff should be rendered on top of everything
+     * @param shadowFirst if the player shadow should be rendered first
+     */
     private static void renderGuiAndShadow(PoseStack poseStack, float partialTicks, boolean depthAlways, boolean shadowFirst) {
         if (shadowFirst) {
             VREffectsHelper.renderVrShadow(partialTicks, depthAlways, poseStack);
@@ -597,57 +690,75 @@ public class VREffectsHelper {
         }
     }
 
+    /**
+     *
+     * @param partialTicks current partial ticks
+     * @param depthAlways if the shadow should be rendered on top of everything
+     * @param poseStack PoseStack to use for positioning
+     */
     public static void renderVrShadow(float partialTicks, boolean depthAlways, PoseStack poseStack) {
-        if (dataHolder.currentPass != RenderPass.THIRD && dataHolder.currentPass != RenderPass.CAMERA) {
-            if (mc.player.isAlive()) {
-                if (!(((PlayerExtension) mc.player).vivecraft$getRoomYOffsetFromPose() < 0.0D)) {
-                    if (mc.player.getVehicle() == null) {
-                        mc.getProfiler().push("vr shadow");
-                        AABB aabb = mc.player.getBoundingBox();
-
-                        if (dataHolder.vrSettings.vrShowBlueCircleBuddy && aabb != null) {
-                            poseStack.pushPose();
-                            poseStack.setIdentity();
-                            RenderSystem.disableCull();
-
-                            RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
-                            Vec3 vec3 = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
-                            Vec3 interpolatedPlayerPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(partialTicks);
-                            Vec3 pos = interpolatedPlayerPos.subtract(vec3).add(0.0D, 0.005D, 0.0D);
-                            RenderHelper.setupPolyRendering(true);
-                            RenderSystem.enableDepthTest();
-
-                            if (depthAlways) {
-                                RenderSystem.depthFunc(GL11C.GL_ALWAYS);
-                            } else {
-                                RenderSystem.depthFunc(GL11C.GL_LEQUAL);
-                            }
-
-                            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                            mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
-                            RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
-
-                            RenderHelper.renderFlatQuad(pos, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
-                                0.0F, 0, 0, 0, 64, poseStack);
-
-                            RenderSystem.depthFunc(GL11C.GL_LEQUAL);
-                            RenderHelper.setupPolyRendering(false);
-                            poseStack.popPose();
-                            RenderSystem.enableCull();
-                        }
-                        mc.getProfiler().pop();
-                    }
-                }
-            }
+        if (dataHolder.currentPass == RenderPass.THIRD || dataHolder.currentPass == RenderPass.CAMERA) {
+            return;
         }
+        if (!mc.player.isAlive()) return;
+        if (((PlayerExtension) mc.player).vivecraft$getRoomYOffsetFromPose() < 0.0D) return;
+        if (mc.player.getVehicle() != null) return;
+
+        mc.getProfiler().push("vr shadow");
+        AABB aabb = mc.player.getBoundingBox();
+
+        if (dataHolder.vrSettings.vrShowBlueCircleBuddy && aabb != null) {
+            // disable culling to show it from below and above
+            RenderSystem.disableCull();
+
+            poseStack.pushPose();
+            poseStack.setIdentity();
+            RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
+
+            Vec3 cameraPos = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
+
+            Vec3 interpolatedPlayerPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(partialTicks);
+
+            Vec3 pos = interpolatedPlayerPos.subtract(cameraPos).add(0.0D, 0.005D, 0.0D);
+
+            RenderHelper.setupPolyRendering(true);
+            RenderSystem.enableDepthTest();
+
+            if (depthAlways) {
+                RenderSystem.depthFunc(GL11C.GL_ALWAYS);
+            } else {
+                RenderSystem.depthFunc(GL11C.GL_LEQUAL);
+            }
+
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
+            RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+
+            RenderHelper.renderFlatQuad(pos, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
+                0.0F, 0, 0, 0, 64, poseStack);
+
+            // reset render state
+            RenderSystem.depthFunc(GL11C.GL_LEQUAL);
+            RenderSystem.enableCull();
+            RenderHelper.setupPolyRendering(false);
+            poseStack.popPose();
+        }
+        mc.getProfiler().pop();
     }
 
-    private static void renderVRSelfEffects(float par1) {
-        if (((GameRendererExtension) mc.gameRenderer).vivecraft$isOnFire() && dataHolder.currentPass != RenderPass.THIRD
-            && dataHolder.currentPass != RenderPass.CAMERA) {
+    /**
+     * renders effects around the player, includes burning animation and totem of undying
+     * @param partialTicks current partial ticks
+     */
+    private static void renderVRSelfEffects(float partialTicks) {
+        // only render the fire in first person, other views have the burning entity
+        if (((GameRendererExtension) mc.gameRenderer).vivecraft$isOnFire() &&
+            dataHolder.currentPass != RenderPass.THIRD && dataHolder.currentPass != RenderPass.CAMERA) {
             VREffectsHelper.renderFireInFirstPerson();
         }
-        mc.gameRenderer.renderItemActivationAnimation(0, 0, par1);
+
+        // totem of undying
+        mc.gameRenderer.renderItemActivationAnimation(0, 0, partialTicks);
     }
 
     public static void renderFireInFirstPerson() {
@@ -693,7 +804,7 @@ public class VREffectsHelper {
         float a = 0.3F;
         float b = (float) (dataHolder.vrPlayer.vrdata_world_render.getHeadPivot().y - ((GameRendererExtension) mc.gameRenderer).vivecraft$getRveY());
 
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; i++) {
             posestack.pushPose();
             posestack.mulPose(Axis.YP.rotationDegrees(
                 i * 90.0F - dataHolder.vrPlayer.vrdata_world_render.getBodyYaw()));
@@ -1013,28 +1124,29 @@ public class VREffectsHelper {
 
                 switch (blockhitresult.getDirection()) {
                     case DOWN -> {
-                        MethodHolder.rotateDeg(poseStack,
-                            dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F,
-                            0.0F);
-                        MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
+                        poseStack.mulPose(Axis.YP.rotationDegrees(dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw()));
+                        poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+                        // MethodHolder.rotateDeg(poseStack, dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F, 0.0F);
+                        // MethodHolder.rotateDeg(poseStack, -90.0F, 1.0F, 0.0F, 0.0F);
                     }
                     case UP -> {
-                        MethodHolder.rotateDeg(poseStack,
-                            -dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F,
-                            1.0F, 0.0F);
-                        MethodHolder.rotateDeg(poseStack, 90.0F, 1.0F, 0.0F, 0.0F);
+                        poseStack.mulPose(Axis.YP.rotationDegrees(-dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw()));
+                        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+                        // MethodHolder.rotateDeg(poseStack, -dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F, 0.0F);
+                        // MethodHolder.rotateDeg(poseStack, 90.0F, 1.0F, 0.0F, 0.0F);
                     }
-                    case WEST -> MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
-                    case EAST -> MethodHolder.rotateDeg(poseStack, -90.0F, 0.0F, 1.0F, 0.0F);
-                    case SOUTH -> MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
+                    case WEST -> poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+                    case EAST -> poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
+                    case SOUTH -> poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+                    // case WEST -> MethodHolder.rotateDeg(poseStack, 90.0F, 0.0F, 1.0F, 0.0F);
+                    // case EAST -> MethodHolder.rotateDeg(poseStack, -90.0F, 0.0F, 1.0F, 0.0F);
+                    // case SOUTH -> MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
                 }
             } else {
-                MethodHolder.rotateDeg(poseStack,
-                    -dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F,
-                    0.0F);
-                MethodHolder.rotateDeg(poseStack,
-                    -dataHolder.vrPlayer.vrdata_world_render.getController(0).getPitch(), 1.0F, 0.0F,
-                    0.0F);
+                poseStack.mulPose(Axis.YP.rotationDegrees(-dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw()));
+                poseStack.mulPose(Axis.XP.rotationDegrees(-dataHolder.vrPlayer.vrdata_world_render.getController(0).getPitch()));
+                // MethodHolder.rotateDeg(poseStack, -dataHolder.vrPlayer.vrdata_world_render.getController(0).getYaw(), 0.0F, 1.0F, 0.0F);
+                // MethodHolder.rotateDeg(poseStack, -dataHolder.vrPlayer.vrdata_world_render.getController(0).getPitch(), 1.0F, 0.0F, 0.0F);
             }
 
             if (dataHolder.vrSettings.crosshairScalesWithDistance) {

@@ -59,7 +59,7 @@ public class VRPassHelper {
                 }
                 RenderSystem.clear(16384, Minecraft.ON_OSX);
                 mc.getProfiler().push("fsaa");
-                dataHolder.vrRenderer.doFSAA(false);
+                dataHolder.vrRenderer.doFSAA();
                 rendertarget = dataHolder.vrRenderer.fsaaLastPassResultFBO;
                 checkGLError("fsaa " + eye.name());
                 mc.getProfiler().pop();

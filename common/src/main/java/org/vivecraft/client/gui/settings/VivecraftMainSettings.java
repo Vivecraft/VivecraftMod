@@ -20,7 +20,7 @@ public class VivecraftMainSettings extends GuiListScreen {
         List<SettingsList.BaseEntry> entries = new LinkedList<>();
 
         SettingsList.BaseEntry vrButton = SettingsList.vrOptionToEntry(VRSettings.VrOptions.VR_ENABLED);
-        vrButton.setActive(vrButton.isActive() && (ClientNetworking.serverAllowsVrSwitching || minecraft.player == null));
+        vrButton.setActive(vrButton.isActive() && (ClientNetworking.serverAllowsVrSwitching || this.minecraft.player == null));
         entries.add(vrButton);
 
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.VR_REMEMBER_ENABLED));

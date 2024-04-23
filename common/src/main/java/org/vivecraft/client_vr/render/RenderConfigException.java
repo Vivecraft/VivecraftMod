@@ -12,6 +12,6 @@ public class RenderConfigException extends Exception {
     }
 
     public String toString() {
-        return this.error.getString();
+        return this.getClass().getName() + ": " + this.error.getString();
     }
 }

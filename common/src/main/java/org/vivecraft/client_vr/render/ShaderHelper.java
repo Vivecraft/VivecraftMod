@@ -34,16 +34,24 @@ public class ShaderHelper {
     }
 
     public static int checkGLError(String par1Str) {
-        int i = GL11.glGetError();
+        int error = GlStateManager._getError();
 
-        if (i != 0) {
-            String s = "";
+        if (error != 0) {
+            String errorString = switch (error) {
+                case GL11.GL_INVALID_ENUM -> "invalid enum";
+                case GL11.GL_INVALID_VALUE -> "invalid value";
+                case GL11.GL_INVALID_OPERATION -> "invalid operation";
+                case GL11.GL_STACK_OVERFLOW -> "stack overflow";
+                case GL11.GL_STACK_UNDERFLOW -> "stack underflow";
+                case GL11.GL_OUT_OF_MEMORY -> "out of memory";
+                default -> "unknown error";
+            };
             System.out.println("########## GL ERROR ##########");
             System.out.println("@ " + par1Str);
-            System.out.println(i + ": " + s);
+            System.out.println(error + ": " + errorString);
         }
 
-        return i;
+        return error;
     }
 
     public static int initShaders(String vertexShaderGLSL, String fragmentShaderGLSL, boolean doAttribs) {

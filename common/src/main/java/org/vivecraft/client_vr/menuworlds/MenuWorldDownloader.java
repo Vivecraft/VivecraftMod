@@ -55,7 +55,7 @@ public class MenuWorldDownloader {
             if (settings.menuWorldSelection == VRSettings.MenuWorld.BOTH || settings.menuWorldSelection == VRSettings.MenuWorld.CUSTOM) {
                 worldList.addAll(getCustomWorlds());
             }
-            if (settings.menuWorldSelection == VRSettings.MenuWorld.BOTH || settings.menuWorldSelection == VRSettings.MenuWorld.OFFICIAL || worldList.size() == 0) {
+            if (settings.menuWorldSelection == VRSettings.MenuWorld.BOTH || settings.menuWorldSelection == VRSettings.MenuWorld.OFFICIAL || worldList.isEmpty()) {
                 worldList.addAll(getOfficialWorlds());
             }
 
@@ -64,7 +64,7 @@ public class MenuWorldDownloader {
                 worldList.removeIf(world -> lastWorld.equals(world.path) || (world.file != null && lastWorld.equals(world.file.getPath())));
             }
 
-            if (worldList.size() == 0) {
+            if (worldList.isEmpty()) {
                 return getRandomWorldFallback();
             }
 
@@ -138,7 +138,7 @@ public class MenuWorldDownloader {
     }
 
     private static MenuWorldItem getRandomWorldFromList(List<MenuWorldItem> list) {
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             return list.get(rand.nextInt(list.size()));
         }
         return null;

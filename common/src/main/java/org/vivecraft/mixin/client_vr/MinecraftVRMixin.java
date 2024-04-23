@@ -300,7 +300,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             vivecraft$switchVRState(vrActive);
         }
         if (VRState.vrRunning) {
-            ++ClientDataHolderVR.getInstance().frameIndex;
+            ClientDataHolderVR.getInstance().frameIndex++;
             RenderPassManager.setGUIRenderPass();
             // reset camera position, if there is one, since it only gets set at the start of rendering, and the last renderpass can be anywhere
             if (gameRenderer != null && gameRenderer.getMainCamera() != null && level != null && this.getCameraEntity() != null) {
@@ -357,14 +357,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 this.vivecraft$checkGLError("pre render setup ");
                 ClientDataHolderVR.getInstance().vrRenderer.setupRenderConfiguration();
                 this.vivecraft$checkGLError("post render setup ");
-            } catch (RenderConfigException renderConfigException) {
+            } catch (Exception exception) {
                 vivecraft$switchVRState(false);
                 VRState.destroyVR(true);
-                Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", renderConfigException.error));
+                exception.printStackTrace();
+                if (exception instanceof RenderConfigException renderConfigException) {
+                    Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
+                } else {
+                    Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", Utils.throwableToComponent(exception)));
+                }
                 this.profiler.pop();
                 return renderLevel;
-            } catch (Exception exception2) {
-                exception2.printStackTrace();
             }
             this.profiler.pop();
 
@@ -494,7 +497,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Inject(at = @At("HEAD"), method = "tick()V")
     public void vivecraft$vrTick(CallbackInfo info) {
-        ++ClientDataHolderVR.getInstance().tickCounter;
+        ClientDataHolderVR.getInstance().tickCounter++;
 
         // general chat notifications
         if (this.level != null) {
@@ -776,7 +779,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             int k = 12;
 
             for (String s : arraylist) {
-                guiGraphics.drawString(this.font, s, 1, j, 16777215);
+                guiGraphics.drawString(this.font, s, 1, j, 0xFFFFFF);
                 j += 12;
             }
             guiGraphics.flush();

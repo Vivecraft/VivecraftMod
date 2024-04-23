@@ -2,6 +2,7 @@ package org.vivecraft.client;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -107,6 +108,20 @@ public interface Xplat {
     }
 
     @ExpectPlatform
-    static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
+    static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {}
+
+    @ExpectPlatform
+    static boolean hasKeyModifier(KeyMapping keyMapping) {
+        return false;
+    }
+
+    @ExpectPlatform
+    static int getKeyModifier(KeyMapping keyMapping) {
+        return 0;
+    }
+
+    @ExpectPlatform
+    static int getKeyModifierKey(KeyMapping keyMapping) {
+        return -1;
     }
 }

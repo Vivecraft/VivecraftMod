@@ -1,6 +1,7 @@
 package org.vivecraft.client.neoforge;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -16,8 +17,10 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.LoadingModList;
+import net.neoforged.neoforge.client.settings.KeyModifier;
 import net.neoforged.neoforge.client.textures.FluidSpriteCache;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.Xplat;
 
 import java.nio.file.Path;
@@ -100,5 +103,27 @@ public class XplatImpl implements Xplat {
     public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
         // neoforge does that automatically, since we use their networking system
         // at least I have been told this
+    }
+
+    public static boolean hasKeyModifier(KeyMapping keyMapping) {
+        return keyMapping.getKeyModifier() != KeyModifier.NONE;
+    }
+
+    public static int getKeyModifier(KeyMapping keyMapping) {
+        return switch (keyMapping.getKeyModifier()) {
+            case SHIFT -> GLFW.GLFW_MOD_SHIFT;
+            case ALT -> GLFW.GLFW_MOD_ALT;
+            case CONTROL -> GLFW.GLFW_MOD_CONTROL;
+            default -> 0;
+        };
+    }
+
+    public static int getKeyModifierKey(KeyMapping keyMapping) {
+        return switch (keyMapping.getKeyModifier()) {
+            case SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT;
+            case ALT -> GLFW.GLFW_KEY_RIGHT_ALT;
+            case CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL;
+            default -> -1;
+        };
     }
 }

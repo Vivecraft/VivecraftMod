@@ -178,12 +178,12 @@ public class VRHotkeys {
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_INSERT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            ++dataholder.vrSettings.mixedRealityFov;
+            dataholder.vrSettings.mixedRealityFov++;
             flag = true;
         }
 
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DELETE) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            --dataholder.vrSettings.mixedRealityFov;
+            dataholder.vrSettings.mixedRealityFov--;
             flag = true;
         }
 

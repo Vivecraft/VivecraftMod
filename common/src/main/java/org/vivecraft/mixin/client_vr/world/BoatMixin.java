@@ -118,7 +118,7 @@ public abstract class BoatMixin extends Entity {
                     this.inputRight = true;
                 }
 
-                f = 0.06f * clientDataHolderVR.rowTracker.Foar;
+                f = 0.06f * clientDataHolderVR.rowTracker.FOar;
                 if (f > 0) {
                     this.inputUp = true;
                 }

@@ -186,6 +186,7 @@ public class VRSettings {
     //Control
     @SettingField(VrOptions.REVERSE_HANDS)
     public boolean reverseHands = false;
+    //@SettingField(VrOptions.REVERSE_BOW)
     public boolean reverseShootingEye = false;
     @SettingField(value = VrOptions.WORLD_SCALE)
     public float worldScale = 1.0f;
@@ -1378,6 +1379,7 @@ public class VRSettings {
         ALLOW_CRAWLING(false, true), // Roomscale Crawling
         LIMIT_TELEPORT(false, true), // Limit in Survival
         REVERSE_HANDS(false, true), // Reverse Hands
+        REVERSE_BOW(false, true), // Reverses Roomscale Bow Aiming
         STENCIL_ON(false, true), // Use Eye Stencil
         BCB_ON(false, true), // Show Body Position
         WORLD_SCALE(true, false, 0, 29, 1, 2) { // World Scale

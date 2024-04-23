@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -121,5 +122,17 @@ public class XplatImpl {
                 return ID;
             }
         }));
+    }
+
+    public static boolean hasKeyModifier(KeyMapping keyMapping) {
+        return false;
+    }
+
+    public static int getKeyModifier(KeyMapping keyMapping) {
+        return 0;
+    }
+
+    public static int getKeyModifierKey(KeyMapping keyMapping) {
+        return -1;
     }
 }

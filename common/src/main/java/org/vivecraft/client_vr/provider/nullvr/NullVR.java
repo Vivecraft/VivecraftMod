@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -13,6 +12,7 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.math.Matrix4f;
 
 import java.util.List;
@@ -42,11 +42,6 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public String getID() {
-        return "nullDriver";
-    }
-
-    @Override
     public String getName() {
         return "nullDriver";
     }
@@ -62,11 +57,11 @@ public class NullVR extends MCVR {
             this.mc = Minecraft.getInstance();
 
             // only supports seated mode
-            System.out.println("NullDriver. Forcing seated mode.");
+            VRSettings.logger.info("NullDriver. Forcing seated mode.");
             this.dh.vrSettings.seated = true;
 
             this.headIsTracking = false;
-            Utils.Matrix4fSetIdentity(this.hmdPose);
+            this.hmdPose.SetIdentity();
             this.hmdPose.M[1][3] = 1.62F;
 
             // eye offset, 10cm total distance
@@ -108,27 +103,27 @@ public class NullVR extends MCVR {
 
 
             // point head in cursor direction
-            hmdRotation.M[0][0] = handRotation[0].M[0][0];
-            hmdRotation.M[0][1] = handRotation[0].M[0][1];
-            hmdRotation.M[0][2] = handRotation[0].M[0][2];
-            hmdRotation.M[1][0] = handRotation[0].M[1][0];
-            hmdRotation.M[1][1] = handRotation[0].M[1][1];
-            hmdRotation.M[1][2] = handRotation[0].M[1][2];
-            hmdRotation.M[2][0] = handRotation[0].M[2][0];
-            hmdRotation.M[2][1] = handRotation[0].M[2][1];
-            hmdRotation.M[2][2] = handRotation[0].M[2][2];
+            this.hmdRotation.M[0][0] = this.handRotation[0].M[0][0];
+            this.hmdRotation.M[0][1] = this.handRotation[0].M[0][1];
+            this.hmdRotation.M[0][2] = this.handRotation[0].M[0][2];
+            this.hmdRotation.M[1][0] = this.handRotation[0].M[1][0];
+            this.hmdRotation.M[1][1] = this.handRotation[0].M[1][1];
+            this.hmdRotation.M[1][2] = this.handRotation[0].M[1][2];
+            this.hmdRotation.M[2][0] = this.handRotation[0].M[2][0];
+            this.hmdRotation.M[2][1] = this.handRotation[0].M[2][1];
+            this.hmdRotation.M[2][2] = this.handRotation[0].M[2][2];
 
             if (GuiHandler.guiRotation_room != null) {
                 // look at screen, so that it's centered
-                hmdRotation.M[0][0] = GuiHandler.guiRotation_room.M[0][0];
-                hmdRotation.M[0][1] = GuiHandler.guiRotation_room.M[0][1];
-                hmdRotation.M[0][2] = GuiHandler.guiRotation_room.M[0][2];
-                hmdRotation.M[1][0] = GuiHandler.guiRotation_room.M[1][0];
-                hmdRotation.M[1][1] = GuiHandler.guiRotation_room.M[1][1];
-                hmdRotation.M[1][2] = GuiHandler.guiRotation_room.M[1][2];
-                hmdRotation.M[2][0] = GuiHandler.guiRotation_room.M[2][0];
-                hmdRotation.M[2][1] = GuiHandler.guiRotation_room.M[2][1];
-                hmdRotation.M[2][2] = GuiHandler.guiRotation_room.M[2][2];
+                this.hmdRotation.M[0][0] = GuiHandler.guiRotation_room.M[0][0];
+                this.hmdRotation.M[0][1] = GuiHandler.guiRotation_room.M[0][1];
+                this.hmdRotation.M[0][2] = GuiHandler.guiRotation_room.M[0][2];
+                this.hmdRotation.M[1][0] = GuiHandler.guiRotation_room.M[1][0];
+                this.hmdRotation.M[1][1] = GuiHandler.guiRotation_room.M[1][1];
+                this.hmdRotation.M[1][2] = GuiHandler.guiRotation_room.M[1][2];
+                this.hmdRotation.M[2][0] = GuiHandler.guiRotation_room.M[2][0];
+                this.hmdRotation.M[2][1] = GuiHandler.guiRotation_room.M[2][1];
+                this.hmdRotation.M[2][2] = GuiHandler.guiRotation_room.M[2][2];
             }
             this.mc.getProfiler().popPush("hmdSampling");
             this.hmdSampling();
@@ -138,26 +133,24 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public void processInputs() {
-    }
+    public void processInputs() {}
 
     @Override
     @Deprecated
-    protected void triggerBindingHapticPulse(KeyMapping binding, int duration) {
-    }
+    protected void triggerBindingHapticPulse(KeyMapping keyMapping, int strength) {}
 
     @Override
-    protected ControllerType findActiveBindingControllerType(KeyMapping binding) {
+    protected ControllerType findActiveBindingControllerType(KeyMapping keyMapping) {
         return null;
     }
 
     @Override
-    public Matrix4f getControllerComponentTransform(int controllerIndex, String componenetName) {
+    public Matrix4f getControllerComponentTransform(int controllerIndex, String componentName) {
         return new Matrix4f();
     }
 
     @Override
-    public String getOriginName(long handle) {
+    public String getOriginName(long origin) {
         return "NullDriver";
     }
 
@@ -168,12 +161,12 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public boolean hasThirdController() {
+    public boolean hasCameraTracker() {
         return false;
     }
 
     @Override
-    public List<Long> getOrigins(VRInputAction var1) {
+    public List<Long> getOrigins(VRInputAction action) {
         return null;
     }
 
@@ -185,14 +178,14 @@ public class NullVR extends MCVR {
     @Override
     public boolean isActive() {
         if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_F6)) {
-            if (!vrActiveChangedLastFrame) {
-                vrActive = !vrActive;
-                vrActiveChangedLastFrame = true;
+            if (!this.vrActiveChangedLastFrame) {
+                this.vrActive = !this.vrActive;
+                this.vrActiveChangedLastFrame = true;
             }
         } else {
-            vrActiveChangedLastFrame = false;
+            this.vrActiveChangedLastFrame = false;
         }
-        return vrActive;
+        return this.vrActive;
     }
 
     @Override

@@ -18,7 +18,7 @@ public class GuiMainVRSettings extends GuiVROptionsBase {
         new VROptionLayout(VRSettings.VrOptions.PLAY_MODE_SEATED, (button, mousePos) -> {
             this.reinit = true;
 
-            if (!this.dataholder.vrSettings.seated) {
+            if (!this.dataHolder.vrSettings.seated) {
                 this.isConfirm = true;
                 return true;
             } else {
@@ -48,8 +48,8 @@ public class GuiMainVRSettings extends GuiVROptionsBase {
             return false;
         }, VROptionLayout.Position.POS_RIGHT, 2.0F, true, "gui.cancel"),
         new VROptionLayout((button, mousePos) -> {
-            this.dataholder.vrSettings.seated = true;
-            this.settings.saveOptions();
+            this.dataHolder.vrSettings.seated = true;
+            this.vrSettings.saveOptions();
             this.reinit = true;
             this.isConfirm = false;
             return false;
@@ -61,16 +61,17 @@ public class GuiMainVRSettings extends GuiVROptionsBase {
         super(lastScreen);
     }
 
+    @Override
     protected void init() {
         if (!this.isConfirm) {
             this.vrTitle = "vivecraft.options.screen.main";
 
-            if (this.dataholder.vrSettings.seated) {
+            if (this.dataHolder.vrSettings.seated) {
                 super.init(this.vrSeatedOptions, true);
             } else {
                 super.init(this.vrStandingOptions, true);
 
-                if (this.dataholder.vrSettings.allowStandingOriginOffset) {
+                if (this.dataHolder.vrSettings.allowStandingOriginOffset) {
                     super.init(new VROptionLayout[]{new VROptionLayout(VRSettings.VrOptions.RESET_ORIGIN, (button, mousePos) -> {
                         this.resetOrigin();
                         return true;
@@ -87,6 +88,7 @@ public class GuiMainVRSettings extends GuiVROptionsBase {
         }
     }
 
+    @Override
     protected void loadDefaults() {
         super.loadDefaults();
         if (VRState.vrInitialized) {
@@ -97,7 +99,7 @@ public class GuiMainVRSettings extends GuiVROptionsBase {
 
     protected void resetOrigin() {
         MCVR.get().resetPosition();
-        this.settings.saveOptions();
+        this.vrSettings.saveOptions();
         this.minecraft.setScreen(null);
     }
 }

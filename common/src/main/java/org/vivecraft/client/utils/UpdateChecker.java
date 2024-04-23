@@ -29,7 +29,7 @@ public class UpdateChecker {
     public static String newestVersion = "";
 
     public static boolean checkForUpdates() {
-        System.out.println("Checking for Vivecraft Updates");
+        VRSettings.logger.info("Checking for Vivecraft Updates");
 
         char updateType;
         if (Xplat.isDedicatedServer()) {
@@ -54,7 +54,7 @@ public class UpdateChecker {
             conn.connect();
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                VRSettings.logger.error("Error " + conn.getResponseCode() + " fetching Vivecraft updates");
+                VRSettings.logger.error("Error '{}' fetching Vivecraft updates", conn.getResponseCode());
                 return false;
             }
 
@@ -91,7 +91,7 @@ public class UpdateChecker {
             // no carriage returns please
             changelog = changelog.replaceAll("\\r", "");
             if (hasUpdate) {
-                VRSettings.logger.info("Vivecraft update found: " + newestVersion);
+                VRSettings.logger.info("Vivecraft update found: {}", newestVersion);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -127,18 +127,18 @@ public class UpdateChecker {
                 viveVersionIndex = parts.length - 3;
                 // prerelease
                 if (parts[parts.length - 1].matches("a\\d+")) {
-                    alpha = Integer.parseInt(parts[parts.length - 1].replaceAll("\\D+", ""));
+                    this.alpha = Integer.parseInt(parts[parts.length - 1].replaceAll("\\D+", ""));
                 } else if (parts[parts.length - 1].matches("b\\d+")) {
-                    beta = Integer.parseInt(parts[parts.length - 1].replaceAll("\\D+", ""));
+                    this.beta = Integer.parseInt(parts[parts.length - 1].replaceAll("\\D+", ""));
                 } else {
-                    featureTest = true;
+                    this.featureTest = true;
                 }
             }
             String[] ints = parts[viveVersionIndex].split("\\.");
             // remove all letters, since stupid me put a letter in one version
-            major = Integer.parseInt(ints[0].replaceAll("\\D+", ""));
-            minor = Integer.parseInt(ints[1].replaceAll("\\D+", ""));
-            patch = Integer.parseInt(ints[2].replaceAll("\\D+", ""));
+            this.major = Integer.parseInt(ints[0].replaceAll("\\D+", ""));
+            this.minor = Integer.parseInt(ints[1].replaceAll("\\D+", ""));
+            this.patch = Integer.parseInt(ints[2].replaceAll("\\D+", ""));
         }
 
         @Override
@@ -154,16 +154,16 @@ public class UpdateChecker {
 
         public boolean isVersionType(char versionType) {
             return switch (versionType) {
-                case 'r' -> beta == 0 && alpha == 0 && !featureTest;
-                case 'b' -> beta >= 0 && alpha == 0 && !featureTest;
-                case 'a' -> alpha >= 0 && !featureTest;
+                case 'r' -> this.beta == 0 && this.alpha == 0 && !this.featureTest;
+                case 'b' -> this.beta >= 0 && this.alpha == 0 && !this.featureTest;
+                case 'a' -> this.alpha >= 0 && !this.featureTest;
                 default -> false;
             };
         }
 
         // two digits per segment, should be enough right?
         private long compareNumber() {
-            return alpha + beta * 100L + (alpha + beta == 0 || featureTest ? 1000L : 0L) + patch * 100000L + minor * 10000000L + major * 1000000000L;
+            return this.alpha + this.beta * 100L + (this.alpha + this.beta == 0 || this.featureTest ? 1000L : 0L) + this.patch * 100000L + this.minor * 10000000L + this.major * 1000000000L;
         }
     }
 }

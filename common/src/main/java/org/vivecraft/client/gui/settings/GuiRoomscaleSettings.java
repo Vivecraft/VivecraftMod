@@ -5,7 +5,7 @@ import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiRoomscaleSettings extends GuiVROptionsBase {
-    static VRSettings.VrOptions[] roomscaleSettings = new VRSettings.VrOptions[]{
+    private static final VRSettings.VrOptions[] roomscaleSettings = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.WEAPON_COLLISION,
         VRSettings.VrOptions.REALISTIC_JUMP,
         VRSettings.VrOptions.REALISTIC_SNEAK,
@@ -18,10 +18,11 @@ public class GuiRoomscaleSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.REALISTIC_DISMOUNT
     };
 
-    public GuiRoomscaleSettings(Screen guiScreen) {
-        super(guiScreen);
+    public GuiRoomscaleSettings(Screen lastScreen) {
+        super(lastScreen);
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.roomscale";
         super.init(roomscaleSettings, true);

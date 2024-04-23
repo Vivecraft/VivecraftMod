@@ -23,7 +23,7 @@ public enum HardwareType {
     }
 
     public static HardwareType fromManufacturer(String name) {
-        return map.containsKey(name) ? map.get(name) : VIVE;
+        return map.getOrDefault(name, VIVE);
     }
 
     static {

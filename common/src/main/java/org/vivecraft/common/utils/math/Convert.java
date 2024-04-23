@@ -11,7 +11,7 @@ public class Convert {
     public static Matrix matrix(float[][] float2Array) {
         float[] afloat = new float[float2Array.length * float2Array[0].length];
 
-        for (int i = 0; i < float2Array.length; ++i) {
+        for (int i = 0; i < float2Array.length; i++) {
             System.arraycopy(float2Array[i], 0, afloat, i * float2Array[0].length, float2Array[0].length);
         }
 
@@ -58,7 +58,7 @@ public class Convert {
 
         private void needFloats() {
             if (!this.floatFilled) {
-                for (int i = 0; i < this.floatArray.length; ++i) {
+                for (int i = 0; i < this.floatArray.length; i++) {
                     if (this.doubleFilled) {
                         this.floatArray[i] = (float) this.doubleArray[i];
                     } else if (this.intFilled) {
@@ -72,7 +72,7 @@ public class Convert {
 
         private void needDoubles() {
             if (!this.doubleFilled) {
-                for (int i = 0; i < this.doubleArray.length; ++i) {
+                for (int i = 0; i < this.doubleArray.length; i++) {
                     if (this.floatFilled) {
                         this.doubleArray[i] = this.floatArray[i];
                     } else if (this.intFilled) {
@@ -86,7 +86,7 @@ public class Convert {
 
         private void needInts() {
             if (!this.intFilled) {
-                for (int i = 0; i < this.intArray.length; ++i) {
+                for (int i = 0; i < this.intArray.length; i++) {
                     if (this.doubleFilled) {
                         this.intArray[i] = (int) this.doubleArray[i];
                     } else if (this.floatFilled) {

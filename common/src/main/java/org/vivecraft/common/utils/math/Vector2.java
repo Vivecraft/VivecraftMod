@@ -135,6 +135,6 @@ public class Vector2 {
     }
 
     public String toString() {
-        return "Vector2{x=" + this.x + ", y=" + this.y + '}';
+        return "Vector2(%.2f, %.2f)".formatted(this.x, this.y);
     }
 }

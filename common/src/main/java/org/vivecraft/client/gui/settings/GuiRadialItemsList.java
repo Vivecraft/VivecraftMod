@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class GuiRadialItemsList extends ObjectSelectionList<GuiRadialItemsList.BaseEntry> {
     private final GuiRadialConfiguration parent;
-    private final static int maxListLabelWidth = 90;
+    private static final int maxListLabelWidth = 300;
 
     public GuiRadialItemsList(GuiRadialConfiguration parent, Minecraft mc) {
         super(mc, parent.width, parent.height - 77, 49, 20);
@@ -40,25 +40,26 @@ public class GuiRadialItemsList extends ObjectSelectionList<GuiRadialItemsList.B
         }
     }
 
-    public class CategoryEntry extends BaseEntry {
+    public static class CategoryEntry extends BaseEntry {
         private final String labelText;
         private final int labelWidth;
 
         public CategoryEntry(String name) {
             this.labelText = I18n.get(name);
-            this.labelWidth = minecraft.font.width(this.labelText);
+            this.labelWidth = Minecraft.getInstance().font.width(this.labelText);
         }
 
+        @Override
         public void render(
-            GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY,
-            boolean pIsMouseOver, float pPartialTicks)
+            GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY,
+            boolean hovering, float partialTicks)
         {
-            guiGraphics.drawString(minecraft.font, this.labelText, (minecraft.screen.width / 2 - this.labelWidth / 2),
-                (pTop + pHeight - 9 - 1), 6777215);
+            guiGraphics.drawString(Minecraft.getInstance().font, this.labelText, (Minecraft.getInstance().screen.width / 2 - this.labelWidth / 2),
+                (top + height - 9 - 1), 0x67697F);
         }
     }
 
-    public class MappingEntry extends BaseEntry {
+    public static class MappingEntry extends BaseEntry {
         private final KeyMapping myKey;
         private final GuiRadialConfiguration parentScreen;
 
@@ -67,20 +68,22 @@ public class GuiRadialItemsList extends ObjectSelectionList<GuiRadialItemsList.B
             this.parentScreen = parent;
         }
 
+        @Override
         public void render(
-            GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY,
-            boolean pIsMouseOver, float pPartialTicks)
+            GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY,
+            boolean hovering, float partialTicks)
         {
             ChatFormatting chatformatting = ChatFormatting.WHITE;
 
-            if (pIsMouseOver) {
+            if (hovering) {
                 chatformatting = ChatFormatting.GREEN;
             }
 
-            guiGraphics.drawString(minecraft.font, chatformatting + I18n.get(this.myKey.getName()),
-                (minecraft.screen.width / 2 - maxListLabelWidth / 2), (pTop + pHeight / 2 - 9 / 2), 16777215);
+            guiGraphics.drawString(Minecraft.getInstance().font, chatformatting + I18n.get(this.myKey.getName()),
+                (Minecraft.getInstance().screen.width / 2 - maxListLabelWidth / 2), (top + height / 2 - 9 / 2), 0xFFFFFF);
         }
 
+        @Override
         public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY) {
             this.parentScreen.setKey(this.myKey);
             return true;

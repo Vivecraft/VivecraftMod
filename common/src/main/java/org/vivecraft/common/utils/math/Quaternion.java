@@ -332,6 +332,6 @@ public class Quaternion {
     }
 
     public String toString() {
-        return "Quaternion{w=" + this.w + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z + '}';
+        return "Quaternion{w=%f, x=%f, y=%f, z=%f}".formatted(this.w, this.x, this.y, this.z);
     }
 }

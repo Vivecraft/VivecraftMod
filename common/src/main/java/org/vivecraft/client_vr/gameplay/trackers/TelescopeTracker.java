@@ -24,10 +24,12 @@ public class TelescopeTracker extends Tracker {
         super(mc, dh);
     }
 
+    @Override
     public boolean isActive(LocalPlayer player) {
         return false;
     }
 
+    @Override
     public void doProcess(LocalPlayer player) {
     }
 
@@ -36,23 +38,25 @@ public class TelescopeTracker extends Tracker {
     }
 
     // TODO: old eye of the farseer, remove this eventually
-    public static boolean isLegacyTelescope(ItemStack i) {
-        if (i.isEmpty()) {
+    public static boolean isLegacyTelescope(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
             return false;
-        } else if (!i.hasCustomHoverName()) {
+        } else if (!itemStack.hasCustomHoverName()) {
             return false;
-        } else if (i.getItem() != Items.ENDER_EYE) {
+        } else if (itemStack.getItem() != Items.ENDER_EYE) {
             return false;
-        } else if (!i.hasTag() || !i.getTag().getBoolean("Unbreakable")) {
+        } else if (!itemStack.hasTag() || !itemStack.getTag().getBoolean("Unbreakable")) {
             return false;
         } else {
-            return i.getHoverName().getContents() instanceof TranslatableContents && ((TranslatableContents) i.getHoverName().getContents()).getKey().equals("vivecraft.item.telescope") || i.getHoverName().getString().equals("Eye of the Farseer");
+            return itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContents
+                && translatableContents.getKey().equals("vivecraft.item.telescope")
+                || itemStack.getHoverName().getString().equals("Eye of the Farseer");
         }
     }
 
     private static Vec3 getLensOrigin(int controller) {
-        VRData.VRDevicePose vrdata$vrdevicepose = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getController(controller);
-        return vrdata$vrdevicepose.getPosition().add(getViewVector(controller).scale(-0.2D).add(vrdata$vrdevicepose.getDirection().scale(0.05F)));
+        VRData.VRDevicePose con = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getController(controller);
+        return con.getPosition().add(getViewVector(controller).scale(-0.2D).add(con.getDirection().scale(0.05F)));
     }
 
     private static Vec3 getViewVector(int controller) {
@@ -64,9 +68,10 @@ public class TelescopeTracker extends Tracker {
     }
 
     public static float viewPercent(int controller) {
-        LocalPlayer p = Minecraft.getInstance().player;
-        if (p != null && ClientDataHolderVR.getInstance().vrSettings.seated) {
-            if (isTelescope(p.getUseItem())) {
+        // seated doesn't have a fadeout
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null && ClientDataHolderVR.getInstance().vrSettings.seated) {
+            if (isTelescope(player.getUseItem())) {
                 return 1;
             } else {
                 return 0;
@@ -75,7 +80,7 @@ public class TelescopeTracker extends Tracker {
 
         float out = 0.0F;
 
-        for (int e = 0; e < 2; ++e) {
+        for (int e = 0; e < 2; e++) {
             float tmp = viewPercent(controller, e);
 
             if (tmp > out) {

@@ -81,8 +81,32 @@ public class Matrix4f {
         this.M[0][3] = this.M[1][3] = this.M[2][1] = this.M[3][0] = 0.0F;
     }
 
-    Matrix4f(Matrix4f c) {
-        for (int i = 0; i < 4; ++i) {
+    public void Set3x3(Matrix4f other) {
+        this.M[0][0] = other.M[0][0];
+        this.M[0][1] = other.M[0][1];
+        this.M[0][2] = other.M[0][2];
+        this.M[1][0] = other.M[1][0];
+        this.M[1][1] = other.M[1][1];
+        this.M[1][2] = other.M[1][2];
+        this.M[2][0] = other.M[2][0];
+        this.M[2][1] = other.M[2][1];
+        this.M[2][2] = other.M[2][2];
+    }
+
+    public void Set3x3(org.vivecraft.common.utils.lwjgl.Matrix4f other) {
+        this.M[0][0] = other.m00;
+        this.M[0][1] = other.m01;
+        this.M[0][2] = other.m02;
+        this.M[1][0] = other.m10;
+        this.M[1][1] = other.m11;
+        this.M[1][2] = other.m12;
+        this.M[2][0] = other.m20;
+        this.M[2][1] = other.m21;
+        this.M[2][2] = other.m22;
+    }
+
+    public Matrix4f(Matrix4f c) {
+        for (int i = 0; i < 4; i++) {
             System.arraycopy(c.M[i], 0, this.M[i], 0, 4);
         }
     }
@@ -95,8 +119,8 @@ public class Matrix4f {
     Matrix4f Multiply(float s) {
         Matrix4f matrix4f = new Matrix4f(this);
 
-        for (int i = 0; i < 4; ++i) {
-            for (int j = 0; j < 4; ++j) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
                 float[] afloat = matrix4f.M[i];
                 afloat[j] *= s;
             }
@@ -114,7 +138,7 @@ public class Matrix4f {
             matrix4f.M[i][1] = a.M[i][0] * b.M[0][1] + a.M[i][1] * b.M[1][1] + a.M[i][2] * b.M[2][1] + a.M[i][3] * b.M[3][1];
             matrix4f.M[i][2] = a.M[i][0] * b.M[0][2] + a.M[i][1] * b.M[1][2] + a.M[i][2] * b.M[2][2] + a.M[i][3] * b.M[3][2];
             matrix4f.M[i][3] = a.M[i][0] * b.M[0][3] + a.M[i][1] * b.M[1][3] + a.M[i][2] * b.M[2][3] + a.M[i][3] * b.M[3][3];
-            ++i;
+            i++;
         }
         while (i < 4);
 
@@ -198,10 +222,16 @@ public class Matrix4f {
     }
 
     public String toString() {
-        String stringbuilder = String.valueOf(this.M[0][0]) + ' ' + this.M[1][0] + ' ' + this.M[2][0] + ' ' + this.M[3][0] + '\n' +
-            this.M[0][1] + ' ' + this.M[1][1] + ' ' + this.M[2][1] + ' ' + this.M[3][1] + '\n' +
-            this.M[0][2] + ' ' + this.M[1][2] + ' ' + this.M[2][2] + ' ' + this.M[3][2] + '\n' +
-            this.M[0][3] + ' ' + this.M[1][3] + ' ' + this.M[2][3] + ' ' + this.M[3][3] + '\n';
-        return stringbuilder;
+        return """
+            Matrix4f:
+            %f %f %f %f
+            %f %f %f %f
+            %f %f %f %f
+            %f %f %f %f"""
+            .formatted(
+                this.M[0][0], this.M[1][0], this.M[2][0], this.M[3][0],
+                this.M[0][1], this.M[1][1], this.M[2][1], this.M[3][1],
+                this.M[0][2], this.M[1][2], this.M[2][2], this.M[3][2],
+                this.M[0][3], this.M[1][3], this.M[2][3], this.M[3][3]);
     }
 }

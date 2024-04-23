@@ -19,7 +19,7 @@ public class GuiServerSettings extends GuiListScreen {
     protected List<SettingsList.BaseEntry> getEntries() {
         List<SettingsList.BaseEntry> entries = new LinkedList<>();
         String lastCategory = null;
-        for (ConfigBuilder.ConfigValue cv : ServerConfig.getConfigValues()) {
+        for (ConfigBuilder.ConfigValue<?> cv : ServerConfig.getConfigValues()) {
             String path = cv.getPath();
             String category = path.substring(0, path.lastIndexOf("."));
             String name = path.substring(path.lastIndexOf(".") + 1);

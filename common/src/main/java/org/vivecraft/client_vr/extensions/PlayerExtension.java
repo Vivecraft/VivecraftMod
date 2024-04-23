@@ -14,17 +14,15 @@ public interface PlayerExtension {
 
     void vivecraft$setTeleported(boolean teleported);
 
-    void vivecraft$setItemInUseClient(ItemStack itemstack1, InteractionHand interactionhand);
+    void vivecraft$setItemInUseClient(ItemStack itemStack, InteractionHand interactionHand);
 
-    void vivecraft$setItemInUseCountClient(int i);
+    void vivecraft$setItemInUseCountClient(int count);
 
     boolean vivecraft$isClimbeyClimbEquipped();
 
-    void vivecraft$stepSound(BlockPos blockpos, Vec3 vec3);
+    void vivecraft$stepSound(BlockPos blockPos, Vec3 soundPos);
 
-    void vivecraft$swingArm(InteractionHand interactionhand, VRFirstPersonArmSwing interact);
-
-    boolean vivecraft$isClimbeyJumpEquipped();
+    void vivecraft$swingArm(InteractionHand interactionHand, VRFirstPersonArmSwing swingType);
 
     float vivecraft$getMuhJumpFactor();
 

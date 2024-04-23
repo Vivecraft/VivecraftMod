@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -107,9 +108,9 @@ public class VRWidgetHelper {
         poseStack.scale(scale, scale, scale);
 
         if (debug) {
-            MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
+            poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
             RenderHelper.renderDebugAxes(0, 0, 0, 0.08F);
-            MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
+            poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         }
 
         poseStack.translate(offsetX, offsetY, offsetZ);

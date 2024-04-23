@@ -171,7 +171,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     public void vivecraft$stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
         if (!RenderPassType.isVanilla()) {
             this.minecraft.getProfiler().popPush("stencil");
-            VREffectsHelper.drawEyeStencil(false);
+            VREffectsHelper.drawEyeStencil();
         }
     }
 

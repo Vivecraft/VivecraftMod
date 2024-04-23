@@ -24,15 +24,15 @@ public abstract class FrustumVRMixin implements FrustumExtension {
 
     @Override
     @Unique
-    public void vivecraft$setCameraPosition(double var1, double var3, double var5) {
-        this.camX = var1;
-        this.camY = var3;
-        this.camZ = var5;
+    public void vivecraft$setCameraPosition(double camX, double camY, double camZ) {
+        this.camX = camX;
+        this.camY = camY;
+        this.camZ = camZ;
     }
 
     @Override
     @Unique
-    public boolean vivecraft$isBoundingBoxInFrustum(AABB var1) {
-        return this.cubeInFrustum(var1.minX, var1.minY, var1.minZ, var1.maxX, var1.maxY, var1.maxZ);
+    public boolean vivecraft$isBoundingBoxInFrustum(AABB bb) {
+        return this.cubeInFrustum(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
     }
 }

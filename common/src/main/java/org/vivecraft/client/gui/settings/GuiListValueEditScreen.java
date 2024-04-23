@@ -32,14 +32,14 @@ public class GuiListValueEditScreen extends GuiListScreen {
     @Override
     protected void init() {
         clearWidgets();
-        double scrollAmount = list != null ? list.getScrollAmount() : 0.0D;
+        double scrollAmount = this.list != null ? this.list.getScrollAmount() : 0.0D;
 
-        this.list = new SettingsList(this, minecraft, getEntries());
-        list.setScrollAmount(scrollAmount);
+        this.list = new SettingsList(this, this.minecraft, getEntries());
+        this.list.setScrollAmount(scrollAmount);
         this.addWidget(this.list);
 
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
-            listValue.set(getCurrentValues());
+            this.listValue.set(getCurrentValues());
             this.minecraft.setScreen(this.lastScreen);
         }).bounds(this.width / 2 - 155, this.height - 27, 150, 20).build());
 
@@ -50,7 +50,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
     }
 
     private List<String> getCurrentValues() {
-        return list.children().stream().map(entry -> {
+        return this.list.children().stream().map(entry -> {
             if (entry instanceof ListValueEntry listValueEntry) {
                 return listValueEntry.getString();
             } else {
@@ -62,24 +62,24 @@ public class GuiListValueEditScreen extends GuiListScreen {
     @Override
     protected List<SettingsList.BaseEntry> getEntries() {
         List<SettingsList.BaseEntry> entries = new LinkedList<>();
-        if (elements == null) {
-            elements = new ArrayList<>(listValue.get());
+        if (this.elements == null) {
+            this.elements = new ArrayList<>(this.listValue.get());
         }
         int i = 0;
-        for (String item : elements) {
+        for (String item : this.elements) {
             EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, ListValueEntry.valueButtonWidth - 1, 20, Component.literal(item));
             box.setMaxLength(1000);
             box.setValue(item);
             int index = i++;
             entries.add(new ListValueEntry(Component.empty(), box, button -> {
-                elements.remove(index);
-                reinit = true;
+                this.elements.remove(index);
+                this.reinit = true;
             }));
         }
         entries.add(new SettingsList.WidgetEntry(Component.translatable("vivecraft.options.addnew"), Button.builder(Component.literal("+"), button -> {
-            elements = getCurrentValues();
-            elements.add("");
-            reinit = true;
+            this.elements = getCurrentValues();
+            this.elements.add("");
+            this.reinit = true;
         }).size(20, 20).build()));
         return entries;
     }
@@ -99,13 +99,13 @@ public class GuiListValueEditScreen extends GuiListScreen {
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            this.valueWidget.setX(k + -50);
-            this.valueWidget.setY(j);
-            this.valueWidget.render(guiGraphics, n, o, f);
-            this.deleteButton.setX(k + 230);
-            this.deleteButton.setY(j);
-            this.deleteButton.render(guiGraphics, n, o, f);
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTicks) {
+            this.valueWidget.setX(left - 50);
+            this.valueWidget.setY(top);
+            this.valueWidget.render(guiGraphics, mouseX, mouseY, partialTicks);
+            this.deleteButton.setX(left + 230);
+            this.deleteButton.setY(top);
+            this.deleteButton.render(guiGraphics, mouseX, mouseY, partialTicks);
         }
 
         @Override
@@ -119,7 +119,7 @@ public class GuiListValueEditScreen extends GuiListScreen {
         }
 
         public String getString() {
-            return ((EditBox) valueWidget).getValue();
+            return ((EditBox) this.valueWidget).getValue();
         }
     }
 }

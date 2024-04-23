@@ -19,6 +19,7 @@ public class CrawlTracker extends Tracker {
         super(mc, dh);
     }
 
+    @Override
     public boolean isActive(LocalPlayer player) {
         if (this.dh.vrSettings.seated) {
             return false;
@@ -37,18 +38,20 @@ public class CrawlTracker extends Tracker {
         }
     }
 
+    @Override
     public void reset(LocalPlayer player) {
         this.crawling = false;
         this.crawlsteresis = false;
         this.updateState(player);
     }
 
+    @Override
     public void doProcess(LocalPlayer player) {
         double scaleMultiplier = 1.0;
         if (Xplat.isModLoaded("pehkui")) {
             scaleMultiplier /= PehkuiHelper.getPlayerScale(player, mc.getFrameTime());
         }
-        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * (double) this.dh.vrPlayer.worldScale * scaleMultiplier + (double) 0.1F < (double) this.dh.vrSettings.crawlThreshold;
+        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * this.dh.vrPlayer.worldScale * scaleMultiplier + 0.1F < this.dh.vrSettings.crawlThreshold;
         this.updateState(player);
     }
 
@@ -60,10 +63,10 @@ public class CrawlTracker extends Tracker {
             }
 
             if (ClientNetworking.serverAllowsCrawling) {
-                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[]{(byte) (this.crawling ? 1 : 0)});
+                ServerboundCustomPayloadPacket packet = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[]{(byte) (this.crawling ? 1 : 0)});
 
                 if (this.mc.getConnection() != null) {
-                    this.mc.getConnection().send(serverboundcustompayloadpacket);
+                    this.mc.getConnection().send(packet);
                 }
             }
 

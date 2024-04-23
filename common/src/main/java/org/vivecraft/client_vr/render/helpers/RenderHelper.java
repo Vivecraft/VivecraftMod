@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -22,7 +23,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43C;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.MCVR;
@@ -45,99 +45,138 @@ public class RenderHelper {
     private static final ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
     private static final Minecraft mc = Minecraft.getInstance();
 
-    public static void applyVRModelView(RenderPass currentPass, PoseStack poseStack) {
+    /**
+     * Applies the rotation from the given RenderPass to the given PoseStack
+     * @param renderPass RenderPass rotation to use
+     * @param poseStack PoseStack to apply the rotation to
+     */
+    public static void applyVRModelView(RenderPass renderPass, PoseStack poseStack) {
         Matrix4f modelView;
-        if (currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
+        if (renderPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
             modelView = new Matrix4f().rotation(MCVR.get().hmdRotHistory
                 .averageRotation(dataHolder.vrSettings.displayMirrorCenterSmooth));
         } else {
-            modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass)
+            modelView = dataHolder.vrPlayer.vrdata_world_render.getEye(renderPass)
                 .getMatrix().transposed().toMCMatrix();
         }
         poseStack.last().pose().mul(modelView);
         poseStack.last().normal().mul(new Matrix3f(modelView));
     }
 
-    public static Vec3 getSmoothCameraPosition(RenderPass renderpass, VRData vrData) {
+    /**
+     * Gets the camera position of the given RenderPass.
+     * If the RenderPass is CENTER the position is smoothed over time if that setting is on
+     * @param renderPass pass to get the camera position for
+     * @param vrData vrData to get it from
+     * @return camera position
+     */
+    public static Vec3 getSmoothCameraPosition(RenderPass renderPass, VRData vrData) {
         if (dataHolder.currentPass == RenderPass.CENTER && dataHolder.vrSettings.displayMirrorCenterSmooth > 0.0F) {
             return MCVR.get().hmdHistory.averagePosition(dataHolder.vrSettings.displayMirrorCenterSmooth)
                 .scale(vrData.worldScale)
                 .yRot(vrData.rotation_radians)
                 .add(vrData.origin);
         } else {
-            return vrData.getEye(renderpass).getPosition();
+            return vrData.getEye(renderPass).getPosition();
         }
     }
 
-    public static void applyStereo(RenderPass currentPass, PoseStack matrix) {
-        if (currentPass == RenderPass.LEFT || currentPass == RenderPass.RIGHT) {
-            Vec3 eye = dataHolder.vrPlayer.vrdata_world_render.getEye(currentPass).getPosition()
+    /**
+     * Applies the offset for the LEFT and RIGHT RenderPass from the headset position
+     * Other RenderPasses do nothing
+     * @param renderPass RenderPass to apply the offset for
+     * @param poseStack PoseStack to apply the offset to
+     */
+    public static void applyStereo(RenderPass renderPass, PoseStack poseStack) {
+        if (renderPass == RenderPass.LEFT || renderPass == RenderPass.RIGHT) {
+            Vec3 eye = dataHolder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition()
                 .subtract(dataHolder.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER)
                     .getPosition());
-            matrix.translate(-eye.x, -eye.y, -eye.z);
+            poseStack.translate(-eye.x, -eye.y, -eye.z);
         }
     }
 
+    /**
+     * Gets the position of the given controller/tracker in world space.
+     * For controllers (0, 1), this positions the seated controllers.
+     * Other stuff is just forwarded to the world_render vrData
+     * @param c controller/tracker to get the position for
+     * @return position of the given controller
+     */
     public static Vec3 getControllerRenderPos(int c) {
-        if (!dataHolder.vrSettings.seated) {
-            return dataHolder.vrPlayer.vrdata_world_render.getController(c).getPosition();
-        } else {
-            Vec3 out = null;
+        if (dataHolder.vrSettings.seated && c < 2) {
+            // only do the seated override for the controllers, not trackers
+
             int mainHand = InteractionHand.MAIN_HAND.ordinal();
             if (dataHolder.vrSettings.reverseHands) {
                 c = 1 - c;
                 mainHand = InteractionHand.OFF_HAND.ordinal();
             }
 
-            if (mc.getCameraEntity() != null && mc.level != null) {
-                Vec3 dir = dataHolder.vrPlayer.vrdata_world_render.hmd.getDirection();
-                dir = dir.yRot((float) Math.toRadians(c == 0 ? -35.0D : 35.0D));
-                dir = new Vec3(dir.x, 0.0D, dir.z);
-                dir = dir.normalize();
-                if (TelescopeTracker.isTelescope(mc.player.getUseItem()) && TelescopeTracker.isTelescope(c == mainHand ? mc.player.getMainHandItem() : mc.player.getOffhandItem())) {
-                    // move the controller in front of the eye when using the spyglass
-                    VRData.VRDevicePose eye = c == 0 ? dataHolder.vrPlayer.vrdata_world_render.eye0 :
-                                              dataHolder.vrPlayer.vrdata_world_render.eye1;
+            // handle telescopes, allow for double scoping
+            if (mc.player != null && mc.level != null &&
+                TelescopeTracker.isTelescope(mc.player.getUseItem()) &&
+                TelescopeTracker.isTelescope(c == mainHand ? mc.player.getMainHandItem() : mc.player.getOffhandItem()))
+            {
+                // move the controller in front of the eye when using the spyglass
+                VRData.VRDevicePose eye = c == 0 ? dataHolder.vrPlayer.vrdata_world_render.eye0 :
+                    dataHolder.vrPlayer.vrdata_world_render.eye1;
 
-                    out = eye.getPosition()
-                        .add(dataHolder.vrPlayer.vrdata_world_render.hmd.getDirection()
-                            .scale(0.2 * dataHolder.vrPlayer.vrdata_world_render.worldScale));
-                }
-                if (out == null) {
-                    out = dataHolder.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().add(
-                        dir.x * 0.3D * dataHolder.vrPlayer.vrdata_world_render.worldScale,
-                        -0.4D * dataHolder.vrPlayer.vrdata_world_render.worldScale,
-                        dir.z * 0.3D * dataHolder.vrPlayer.vrdata_world_render.worldScale);
-                }
-            } else { //main menu
+                return eye.getPosition()
+                    .add(dataHolder.vrPlayer.vrdata_world_render.hmd.getDirection()
+                        .scale(0.2 * dataHolder.vrPlayer.vrdata_world_render.worldScale));
+            } else {
+                // general case
+                // no worldScale in the main menu
+                float worldScale = mc.player != null && mc.level != null ?
+                    dataHolder.vrPlayer.vrdata_world_render.worldScale : 1.0F;
+
                 Vec3 dir = dataHolder.vrPlayer.vrdata_world_render.hmd.getDirection();
                 dir = dir.yRot((float) Math.toRadians(c == 0 ? -35.0D : 35.0D));
                 dir = new Vec3(dir.x, 0.0D, dir.z);
                 dir = dir.normalize();
-                out = dataHolder.vrPlayer.vrdata_world_render.hmd.getPosition().add(dir.x * 0.3D, -0.4D,
-                    dir.z * 0.3D);
+                return dataHolder.vrPlayer.vrdata_world_render.hmd.getPosition().add(
+                    dir.x * 0.3D * worldScale,
+                    -0.4D * worldScale,
+                    dir.z * 0.3D * worldScale);
             }
-            return out;
+        } else {
+            return dataHolder.vrPlayer.vrdata_world_render.getController(c).getPosition();
         }
     }
 
-    public static void setupRenderingAtController(int controller, PoseStack matrix) {
-        Vec3 aimSource = getControllerRenderPos(controller);
+    /**
+     * sets up the poseStack to render at the given controller/tracker
+     * @param c controller/tracker to render at
+     * @param poseStack PoseStack to apply the position to
+     */
+    public static void setupRenderingAtController(int c, PoseStack poseStack) {
+        Vec3 aimSource = getControllerRenderPos(c);
         aimSource = aimSource.subtract(
             getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.getVRDataWorld()));
-        matrix.translate(aimSource.x, aimSource.y, aimSource.z);
+        //move from head to hand origin.
+        poseStack.translate(aimSource.x, aimSource.y, aimSource.z);
+
         float sc = dataHolder.vrPlayer.vrdata_world_render.worldScale;
-        if (dataHolder.vrSettings.seated && mc.level != null && TelescopeTracker.isTelescope(mc.player.getUseItem()) && TelescopeTracker.isTelescope(controller == 0 ? mc.player.getMainHandItem() : mc.player.getOffhandItem())) {
-            matrix.mulPoseMatrix(dataHolder.vrPlayer.vrdata_world_render.hmd.getMatrix().inverted()
+
+        // handle telescopes in seated, allow for double scoping
+        if (dataHolder.vrSettings.seated && mc.player != null && mc.level != null &&
+            TelescopeTracker.isTelescope(mc.player.getUseItem()) &&
+            TelescopeTracker.isTelescope(c == 0 ? mc.player.getMainHandItem() : mc.player.getOffhandItem()))
+        {
+            poseStack.mulPoseMatrix(dataHolder.vrPlayer.vrdata_world_render.hmd.getMatrix().inverted()
                 .transposed().toMCMatrix());
-            MethodHolder.rotateDegXp(matrix, 90);
-            matrix.translate(controller == (dataHolder.vrSettings.reverseHands ? 1 : 0) ? 0.075 * sc : -0.075 * sc, -0.025 * sc, 0.0325 * sc);
+            poseStack.mulPose(Axis.XP.rotationDegrees(90F));
+            // move to the eye center, seems to be magic numbers that work for the vive at least
+            poseStack.translate((c == (dataHolder.vrSettings.reverseHands ? 1 : 0) ? 0.075F : -0.075F) * sc,
+                -0.025F * sc,
+                0.0325F * sc);
         } else {
-            matrix.mulPoseMatrix(dataHolder.vrPlayer.vrdata_world_render.getController(controller)
+            poseStack.mulPoseMatrix(dataHolder.vrPlayer.vrdata_world_render.getController(c)
                 .getMatrix().inverted().transposed().toMCMatrix());
         }
 
-        matrix.scale(sc, sc, sc);
+        poseStack.scale(sc, sc, sc);
     }
 
     public static void renderDebugAxes(int r, int g, int b, float radius) {
@@ -150,33 +189,50 @@ public class RenderHelper {
         setupPolyRendering(false);
     }
 
+    /**
+     * renders a circle at the given position
+     * @param pos position ot render the circle at
+     * @param radius size of the circle
+     * @param edges edge count of the circle
+     * @param r g b a: color of the circle
+     * @param side direction the circle faces, 0/1: y-axis, 2/3: z-axis, 4/5: x-axis
+     */
     public static void renderCircle(Vec3 pos, float radius, int edges, int r, int g, int b, int a, int side) {
-        Tesselator tesselator = Tesselator.getInstance();
-        tesselator.getBuilder().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-        tesselator.getBuilder().vertex(pos.x, pos.y, pos.z).color(r, g, b, a).endVertex();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
 
+        // put middle vertex
+        bufferBuilder.vertex(pos.x, pos.y, pos.z).color(r, g, b, a).endVertex();
+
+        // put outer vertices
         for (int i = 0; i < edges + 1; i++) {
             float startAngle = (float) i / (float) edges * (float) Math.PI * 2.0F;
             if (side == 0 || side == 1) { //y
                 float x = (float) pos.x + (float) Math.cos(startAngle) * radius;
                 float y = (float) pos.y;
                 float z = (float) pos.z + (float) Math.sin(startAngle) * radius;
-                tesselator.getBuilder().vertex(x, y, z).color(r, g, b, a).endVertex();
+                bufferBuilder.vertex(x, y, z).color(r, g, b, a).endVertex();
             } else if (side == 2 || side == 3) { //z
                 float x = (float) pos.x + (float) Math.cos(startAngle) * radius;
                 float y = (float) pos.y + (float) Math.sin(startAngle) * radius;
                 float z = (float) pos.z;
-                tesselator.getBuilder().vertex(x, y, z).color(r, g, b, a).endVertex();
+                bufferBuilder.vertex(x, y, z).color(r, g, b, a).endVertex();
             } else if (side == 4 || side == 5) { //x
                 float x = (float) pos.x;
                 float y = (float) pos.y + (float) Math.cos(startAngle) * radius;
                 float z = (float) pos.z + (float) Math.sin(startAngle) * radius;
-                tesselator.getBuilder().vertex(x, y, z).color(r, g, b, a).endVertex();
+                bufferBuilder.vertex(x, y, z).color(r, g, b, a).endVertex();
             }
         }
-        tesselator.end();
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
+    /**
+     * stores the current render state and sets it up for polygon rendering
+     * TODO: remove legacy stuff
+     * @param enable if true: stores the old state and sets up polyrending.
+     *               if false: restores the previously stored render state.
+     */
     public static void setupPolyRendering(boolean enable) {
 //		boolean flag = Config.isShaders(); TODO
         boolean flag = false;
@@ -224,11 +280,18 @@ public class RenderHelper {
         }
     }
 
-    public static void drawScreen(float f, Screen screen, GuiGraphics guiGraphics) {
+    /**
+     * renders the given screen to the current main target and generates mipmaps for it
+     * @param partialTicks partial ticks for the screen rendering
+     * @param screen the Screen to render
+     * @param guiGraphics GuiGraphics to render with, is not flushed after rendering
+     */
+    public static void drawScreen(float partialTicks, Screen screen, GuiGraphics guiGraphics) {
+        // setup modelview for screen rendering
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
         posestack.setIdentity();
-        posestack.translate(0.0D, 0.0D, -11000.0D);
+        posestack.translate(0.0F, 0.0F, -11000.0F);
         RenderSystem.applyModelViewMatrix();
 
         Matrix4f guiProjection = (new Matrix4f()).setOrtho(
@@ -243,7 +306,7 @@ public class RenderHelper {
             GlStateManager.SourceFactor.ONE,
             GlStateManager.DestFactor.ONE);
 
-        screen.render(guiGraphics, 0, 0, f);
+        screen.render(guiGraphics, 0, 0, partialTicks);
 
         RenderSystem.blendFuncSeparate(
             GlStateManager.SourceFactor.SRC_ALPHA,
@@ -254,89 +317,104 @@ public class RenderHelper {
         posestack.popPose();
         RenderSystem.applyModelViewMatrix();
 
+        // update mipmaps for Gui layer
         RenderTarget main = mc.getMainRenderTarget();
         main.bindRead();
         ((RenderTargetExtension) main).vivecraft$genMipMaps();
         main.unbindRead();
     }
 
-
-    public static void drawSizedQuad(float displayWidth, float displayHeight, float size) {
-        drawSizedQuad(displayWidth, displayHeight, size, new float[]{1, 1, 1, 1});
-    }
-
-    public static void drawSizedQuad(float displayWidth, float displayHeight, float size, float[] color) {
-        float aspect = displayHeight / displayWidth;
-
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-        bufferbuilder.vertex((-(size / 2.0F)), (-(size * aspect) / 2.0F), 0.0D)
-            .uv(0.0F, 0.0F)
-            .color(color[0], color[1], color[2], color[3])
-            .normal(0.0F, 0.0F, 1.0F)
-            .endVertex();
-        bufferbuilder.vertex((size / 2.0F), (-(size * aspect) / 2.0F), 0.0D)
-            .uv(1.0F, 0.0F)
-            .color(color[0], color[1], color[2], color[3])
-            .normal(0.0F, 0.0F, 1.0F)
-            .endVertex();
-        bufferbuilder.vertex((size / 2.0F), (size * aspect / 2.0F), 0.0D)
-            .uv(1.0F, 1.0F)
-            .color(color[0], color[1], color[2], color[3])
-            .normal(0.0F, 0.0F, 1.0F)
-            .endVertex();
-        bufferbuilder.vertex((-(size / 2.0F)), (size * aspect / 2.0F), 0.0D)
-            .uv(0.0F, 1.0F)
-            .color(color[0], color[1], color[2], color[3])
-            .normal(0.0F, 0.0F, 1.0F)
-            .endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
-    }
-
-    public static void drawSizedQuad(float displayWidth, float displayHeight, float size, float[] color, Matrix4f pMatrix) {
-        float aspect = displayHeight / displayWidth;
+    /**
+     * draws a quad with the PositionTex shader, to be used when <b>not</b> in a world
+     * @param displayWidth texture width
+     * @param displayHeight texture height
+     * @param size size of the quad
+     * @param color color of the quad, expects an array of length 4 for: r, g, b, a
+     * @param matrix matrix to position the screen with
+     */
+    public static void drawSizedQuad(float displayWidth, float displayHeight, float size, float[] color, Matrix4f matrix) {
+        float sizeX = size * 0.5F;
+        float sizeY = sizeX * displayHeight / displayWidth;
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(color[0], color[1], color[2], color[3]);
+
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferbuilder
-            .vertex(pMatrix, (-(size / 2.0F)), (-(size * aspect) / 2.0F), 0)
+            .vertex(matrix, -sizeX, -sizeY, 0)
             .uv(0.0F, 0.0F)
             .endVertex();
         bufferbuilder
-            .vertex(pMatrix, (size / 2.0F), (-(size * aspect) / 2.0F), 0)
+            .vertex(matrix, sizeX, -sizeY, 0)
             .uv(1.0F, 0.0F)
             .endVertex();
         bufferbuilder
-            .vertex(pMatrix, (size / 2.0F), (size * aspect / 2.0F), 0)
+            .vertex(matrix, sizeX, sizeY, 0)
             .uv(1.0F, 1.0F)
             .endVertex();
         bufferbuilder
-            .vertex(pMatrix, (-(size / 2.0F)), (size * aspect / 2.0F), 0)
+            .vertex(matrix, -sizeX, sizeY, 0)
             .uv(0.0F, 1.0F)
             .endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
-    public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int lighti, Matrix4f pMatrix, boolean flipY) {
-        drawSizedQuadWithLightmapCutout(displayWidth, displayHeight, size, lighti, new float[]{1, 1, 1, 1}, pMatrix, flipY);
+    /**
+     * draws a quad with the EntityCutout shader and no color modifier, to be used when <b>in</b> a world
+     * @param displayWidth texture width
+     * @param displayHeight texture height
+     * @param size size of the quad
+     * @param packedLight block and sky light packed into an int
+     * @param matrix matrix to use to
+     * @param flipY if the texture should be flipped vertically
+     */
+    public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int packedLight, Matrix4f matrix, boolean flipY) {
+        drawSizedQuadWithLightmapCutout(displayWidth, displayHeight, size, packedLight, new float[]{1, 1, 1, 1}, matrix, flipY);
     }
 
-    public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int lighti,
-        float[] color, Matrix4f pMatrix, boolean flipY) {
-        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, lighti, color, pMatrix, GameRenderer::getRendertypeEntityCutoutNoCullShader, flipY);
+    /**
+     * draws a quad with the EntityCutout shader, to be used when <b>in</b> a world
+     * @param displayWidth texture width
+     * @param displayHeight texture height
+     * @param size size of the quad
+     * @param packedLight block and sky light packed into an int
+     * @param color color of the quad, expects an array of length 4 for: r, g, b, a
+     * @param matrix matrix to use to
+     * @param flipY if the texture should be flipped vertically
+     */
+    public static void drawSizedQuadWithLightmapCutout(float displayWidth, float displayHeight, float size, int packedLight, float[] color, Matrix4f matrix, boolean flipY) {
+        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, packedLight, color, matrix, GameRenderer::getRendertypeEntityCutoutNoCullShader, flipY);
     }
 
-    public static void drawSizedQuadSolid(float displayWidth, float displayHeight, float size,
-        float[] color, Matrix4f pMatrix) {
-        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.pack(15, 15), color, pMatrix, GameRenderer::getRendertypeEntitySolidShader, false);
+    /**
+     * draws a quad with the EntitySolid shader at full brightness, to be used when <b>in</b> a world
+     * @param displayWidth texture width
+     * @param displayHeight texture height
+     * @param size size of the quad
+     * @param color color of the quad, expects an array of length 4 for: r, g, b, a
+     * @param matrix matrix to use to
+     */
+    public static void drawSizedQuadFullbrightSolid(float displayWidth, float displayHeight, float size, float[] color, Matrix4f matrix) {
+        drawSizedQuadWithLightmap(displayWidth, displayHeight, size, LightTexture.pack(15, 15), color, matrix, GameRenderer::getRendertypeEntitySolidShader, false);
     }
 
-    public static void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int lighti,
-        float[] color, Matrix4f pMatrix, Supplier<ShaderInstance> shader, boolean flipY) {
-        float aspect = displayHeight / displayWidth;
+    /**
+     * draws a quad with the EntityCutout shader, to be used when <b>in</b> a world
+     * @param displayWidth texture width
+     * @param displayHeight texture height
+     * @param size size of the quad
+     * @param packedLight block and sky light packed into an int
+     * @param color color of the quad, expects an array of length 4 for: r, g, b, a
+     * @param matrix matrix to use to
+     * @param shader a shader supplier dor what shader to use, needs to be one of the entity shaders
+     * @param flipY if the texture should be flipped vertically
+     */
+    public static void drawSizedQuadWithLightmap(float displayWidth, float displayHeight, float size, int packedLight, float[] color, Matrix4f matrix, Supplier<ShaderInstance> shader, boolean flipY) {
+        float sizeX = size * 0.5F;
+        float sizeY = sizeX * displayHeight / displayWidth;
+
         RenderSystem.setShader(shader);
         mc.gameRenderer.lightTexture().turnOnLightLayer();
         mc.gameRenderer.overlayTexture().setupOverlayColor();
@@ -351,28 +429,28 @@ public class RenderHelper {
         RenderSystem.setShaderLights(new Vector3f(0, 0, 1), new Vector3f(0, 0, 1));
         RenderSystem.setupShaderLights(RenderSystem.getShader());
 
-        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * aspect) / 2.0F), 0)
+        bufferbuilder.vertex(matrix, -sizeX, -sizeY, 0)
             .color(color[0], color[1], color[2], color[3])
             .uv(0.0F, flipY ? 1.0F : 0.0F)
-            .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
+            .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight)
             .normal(0, 0, 1)
             .endVertex();
-        bufferbuilder.vertex(pMatrix, (size / 2.0F), (-(size * aspect) / 2.0F), 0)
+        bufferbuilder.vertex(matrix, sizeX, -sizeY, 0)
             .color(color[0], color[1], color[2], color[3])
             .uv(1.0F, flipY ? 1.0F : 0.0F)
-            .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
+            .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight)
             .normal(0, 0, 1)
             .endVertex();
-        bufferbuilder.vertex(pMatrix, (size / 2.0F), (size * aspect / 2.0F), 0)
+        bufferbuilder.vertex(matrix, sizeX, sizeY, 0)
             .color(color[0], color[1], color[2], color[3])
             .uv(1.0F, flipY ? 0.0F : 1.0F)
-            .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
+            .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight)
             .normal(0, 0, 1)
             .endVertex();
-        bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (size * aspect / 2.0F), 0)
+        bufferbuilder.vertex(matrix, -sizeX, sizeY, 0)
             .color(color[0], color[1], color[2], color[3])
             .uv(0.0F, flipY ? 0.0F : 1.0F)
-            .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(lighti)
+            .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight)
             .normal(0, 0, 1)
             .endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
@@ -386,25 +464,51 @@ public class RenderHelper {
         }
     }
 
+    /**
+     * draws a
+     * @param pos center position of the quad
+     * @param width width of the quad
+     * @param height height of the quad
+     * @param yaw y rotation of the quad
+     * @param r red 0-255
+     * @param g green 0-255
+     * @param b blue 0-255
+     * @param a alpha 0-255
+     * @param poseStack PoseStack to use for positioning
+     */
     public static void renderFlatQuad(Vec3 pos, float width, float height, float yaw, int r, int g, int b, int a, PoseStack poseStack) {
         Tesselator tesselator = Tesselator.getInstance();
         tesselator.getBuilder().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
-        Vec3 offset = (new Vec3((width / 2.0F), 0.0, height / 2.0F))
+        Vec3 offset = (new Vec3(width * 0.5F, 0.0, height * 0.5F))
             .yRot((float) Math.toRadians(-yaw));
 
-        Matrix4f mat = poseStack.last().pose();
-        tesselator.getBuilder().vertex(mat, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
+        Matrix4f matrix = poseStack.last().pose();
+
+        tesselator.getBuilder().vertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z + offset.z))
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.getBuilder().vertex(mat, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z - offset.z))
+        tesselator.getBuilder().vertex(matrix, (float) (pos.x + offset.x), (float) pos.y, (float) (pos.z - offset.z))
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.getBuilder().vertex(mat, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z - offset.z))
+        tesselator.getBuilder().vertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z - offset.z))
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
-        tesselator.getBuilder().vertex(mat, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z + offset.z))
+        tesselator.getBuilder().vertex(matrix, (float) (pos.x - offset.x), (float) pos.y, (float) (pos.z + offset.z))
             .color(r, g, b, a).normal(0.0F, 1.0F, 0.0F).endVertex();
         tesselator.end();
     }
 
+    /**
+     * adds a box to the given Tesselator
+     * @param tes Tesselator to use
+     * @param start start of the box, combined with end gives the axis the box is on
+     * @param end end of the box, combined with start gives the axis the box is on
+     * @param minX X- size of the box
+     * @param maxX X+ size of the box
+     * @param minY Y- size of the box
+     * @param maxY Y+ size of the box
+     * @param color color of the box 0-255 per component
+     * @param alpha transparency of the box 0-255
+     * @param poseStack PoseStack to use for positioning
+     */
     public static void renderBox(Tesselator tes, Vec3 start, Vec3 end, float minX, float maxX, float minY, float maxY, Vec3i color, byte alpha, PoseStack poseStack) {
         Vec3 forward = start.subtract(end).normalize();
         Vec3 right = forward.cross(new Vec3(0.0D, 1.0D, 0.0D));
@@ -466,8 +570,17 @@ public class RenderHelper {
         addVertex(bufferbuilder, mat, frontRightBottom, color, alpha, upNormal);
     }
 
-    private static void addVertex(BufferBuilder buff, Matrix4f mat, Vec3 pos, Vec3i color, int alpha, Vec3 normal) {
-        buff.vertex(mat, (float) pos.x, (float) pos.y, (float) pos.z)
+    /**
+     * adds a Vertex with the DefaultVertexFormat.POSITION_COLOR_NORMAL format to the buffer builder
+     * @param buff BufferBuilder to add the vertex to
+     * @param matrix matrix to use for positioning the vertex
+     * @param pos position of the vertex
+     * @param color color of the vertex 0-255
+     * @param alpha transparency of the vertex 0-255
+     * @param normal normal of the vertex
+     */
+    private static void addVertex(BufferBuilder buff, Matrix4f matrix, Vec3 pos, Vec3i color, int alpha, Vec3 normal) {
+        buff.vertex(matrix, (float) pos.x, (float) pos.y, (float) pos.z)
             .color(color.getX(), color.getY(), color.getZ(), alpha)
             .normal((float) normal.x, (float) normal.y, (float) normal.z)
             .endVertex();

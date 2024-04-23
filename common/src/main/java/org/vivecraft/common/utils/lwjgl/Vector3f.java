@@ -132,14 +132,7 @@ public class Vector3f extends Vector {
     }
 
     public String toString() {
-        String stringbuilder = "Vector3f[" +
-            this.x +
-            ", " +
-            this.y +
-            ", " +
-            this.z +
-            ']';
-        return stringbuilder;
+        return "Vector3f[%f, %f, %f]".formatted(this.x, this.y, this.z);
     }
 
     public final float getX() {

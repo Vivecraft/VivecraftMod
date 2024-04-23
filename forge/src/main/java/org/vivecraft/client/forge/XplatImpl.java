@@ -2,6 +2,7 @@ package org.vivecraft.client.forge;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import io.netty.buffer.Unpooled;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -18,11 +19,13 @@ import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.Xplat;
 
 import java.nio.file.Path;
@@ -116,5 +119,27 @@ public class XplatImpl {
             new ResourceLocation("minecraft:register"),
             new FriendlyByteBuf(Unpooled.buffer())
                 .writeBytes(resourceLocation.toString().getBytes()))));
+    }
+
+    public static boolean hasKeyModifier(KeyMapping keyMapping) {
+        return keyMapping.getKeyModifier() != KeyModifier.NONE;
+    }
+
+    public static int getKeyModifier(KeyMapping keyMapping) {
+        return switch (keyMapping.getKeyModifier()) {
+            case SHIFT -> GLFW.GLFW_MOD_SHIFT;
+            case ALT -> GLFW.GLFW_MOD_ALT;
+            case CONTROL -> GLFW.GLFW_MOD_CONTROL;
+            default -> 0;
+        };
+    }
+
+    public static int getKeyModifierKey(KeyMapping keyMapping) {
+        return switch (keyMapping.getKeyModifier()) {
+            case SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT;
+            case ALT -> GLFW.GLFW_KEY_RIGHT_ALT;
+            case CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL;
+            default -> -1;
+        };
     }
 }

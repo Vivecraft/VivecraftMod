@@ -6,7 +6,7 @@ import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 
 public class VivecraftMovementInput {
     public static float getMovementAxisValue(KeyMapping keyBinding) {
-        VRInputAction vrinputaction = MCVR.get().getInputAction(keyBinding);
-        return Math.abs(vrinputaction.getAxis1DUseTracked());
+        VRInputAction action = MCVR.get().getInputAction(keyBinding);
+        return Math.abs(action.getAxis1DUseTracked());
     }
 }

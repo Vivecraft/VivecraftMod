@@ -21,6 +21,9 @@ import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
 public class VivecraftItemRendering {
+
+    public static final float THIRD_PERSON_ITEM_SCALE = 0.525F;
+
     private static final ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 
     public static VivecraftItemTransformType getTransformType(ItemStack pStack, AbstractClientPlayer pPlayer, ItemRenderer itemRenderer) {
@@ -134,16 +137,16 @@ public class VivecraftItemRendering {
         } else if (rendertype == VivecraftItemTransformType.Bow_Roomscale_Drawing) {
             rotation = Axis.YP.rotationDegrees(0.0F);
             scale = 1.0D;
-            int i = 0;
+            int i = 1;
 
             if (dh.vrSettings.reverseShootingEye) {
-                i = 1;
+                i = 0;
             }
 
             Vec3 vec3 = dh.bowTracker.getAimVector();
             Vec3 vec31 = new Vec3(vec3.x, vec3.y, vec3.z);
-            Vec3 vec32 = dh.vrPlayer.vrdata_world_render.getHand(1).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
-            Vec3 vec33 = dh.vrPlayer.vrdata_world_render.getHand(1).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D));
+            Vec3 vec32 = dh.vrPlayer.vrdata_world_render.getHand(i).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
+            Vec3 vec33 = dh.vrPlayer.vrdata_world_render.getHand(i).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D));
             vec31.cross(vec32);
             double d4 = (180D / Math.PI) * Math.acos(vec31.dot(vec32));
             float f = (float) Math.toDegrees(Math.asin(vec31.y / vec31.length()));
@@ -177,7 +180,7 @@ public class VivecraftItemRendering {
             }
 
             pMatrixStack.translate(0.0D, 0.0D, 0.1D);
-            pMatrixStack.last().pose().mul(dh.vrPlayer.vrdata_world_render.getController(1).getMatrix().transposed().toMCMatrix());
+            pMatrixStack.last().pose().mul(dh.vrPlayer.vrdata_world_render.getController(i).getMatrix().transposed().toMCMatrix());
             rotation.mul(Axis.YP.rotationDegrees(f1));
             rotation.mul(Axis.XP.rotationDegrees(-f));
             rotation.mul(Axis.ZP.rotationDegrees(-f3));
@@ -338,9 +341,10 @@ public class VivecraftItemRendering {
                 } else if (rendertype == VivecraftItemTransformType.Telescope) {
                     preRotation = Axis.XP.rotationDegrees(0.0F);
                     rotation = Axis.XP.rotationDegrees(0.0F);
-                    translateZ = 0.0D;
-                    translateY = 0.0D;
-                    translateX = 0.0D;
+                    scale *= 0.625F;
+                    translateZ = -0.1F * scale;
+                    translateY = 0.0F;
+                    translateX = (mainHand ? -0.03F : 0.03F) * scale;
                 }
             }
         } else {

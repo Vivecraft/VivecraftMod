@@ -8,17 +8,16 @@ import java.util.concurrent.TimeUnit;
 
 public class OpenVRHapticScheduler extends HapticScheduler {
     private void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude) {
-        int i = VRInput.VRInput_TriggerHapticVibrationAction(MCOpenVR.get().getHapticHandle(controller), 0.0F, durationSeconds, frequency, amplitude, 0L);
+        int error = VRInput.VRInput_TriggerHapticVibrationAction(MCOpenVR.get().getHapticHandle(controller), 0.0F, durationSeconds, frequency, amplitude, 0L);
 
-        if (i != 0) {
-            System.out.println("Error triggering haptic: " + MCOpenVR.getInputErrorName(i));
+        if (error != 0) {
+            System.out.println("Error triggering haptic: " + MCOpenVR.getInputErrorName(error));
         }
     }
 
+    @Override
     public void queueHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude, float delaySeconds) {
         this.executor.schedule(() ->
-        {
-            this.triggerHapticPulse(controller, durationSeconds, frequency, amplitude);
-        }, (long) (delaySeconds * 1000000.0F), TimeUnit.MICROSECONDS);
+            this.triggerHapticPulse(controller, durationSeconds, frequency, amplitude), (long) (delaySeconds * 1000000.0F), TimeUnit.MICROSECONDS);
     }
 }

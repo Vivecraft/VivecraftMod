@@ -27,26 +27,28 @@ public class GuiFreeMoveSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.FOV_REDUCTION_OFFSET
     };
 
-    public GuiFreeMoveSettings(Screen guiScreen) {
-        super(guiScreen);
+    public GuiFreeMoveSettings(Screen lastScreen) {
+        super(lastScreen);
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.freemove";
 
-        if (this.dataholder.vrSettings.seated) {
+        if (this.dataHolder.vrSettings.seated) {
             super.init(seatedSettings, true);
         } else {
             super.init(standingSettings, true);
         }
 
-        if (this.dataholder.vrSettings.useFOVReduction) {
+        if (this.dataHolder.vrSettings.useFOVReduction) {
             super.init(fovRed, false);
         }
 
         super.addDefaultButtons();
     }
 
+    @Override
     protected void actionPerformed(AbstractWidget widget) {
         if (widget instanceof GuiVROption guivroption) {
             if (guivroption.getId() == VRSettings.VrOptions.FOV_REDUCTION.ordinal()) {

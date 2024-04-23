@@ -3,12 +3,12 @@ package org.vivecraft.client_vr;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
+import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
@@ -56,7 +56,6 @@ public class VRState {
             }
 
             dh.vrRenderer = dh.vr.createVRRenderer();
-            dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
 
             dh.vrRenderer.setupRenderConfiguration();
             RenderPassManager.setVanillaRenderPass();
@@ -110,19 +109,17 @@ public class VRState {
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-        } catch (RenderConfigException renderConfigException) {
+        } catch (Throwable exception) {
             vrEnabled = false;
             destroyVR(true);
-            Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
-        } catch (Throwable e) {
-            vrEnabled = false;
-            destroyVR(true);
-            e.printStackTrace();
-            MutableComponent component = Component.literal(e.getClass().getName() + (e.getMessage() == null ? "" : ": " + e.getMessage()));
-            for (StackTraceElement element : e.getStackTrace()) {
-                component.append(Component.literal("\n" + element.toString()));
+            exception.printStackTrace();
+            if (exception instanceof RenderConfigException renderConfigException) {
+                Minecraft.getInstance()
+                    .setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
+            } else {
+                Minecraft.getInstance()
+                    .setScreen(new ErrorScreen("VR Init Error", Utils.throwableToComponent(exception)));
             }
-            Minecraft.getInstance().setScreen(new ErrorScreen("VR Init Error", component));
         }
     }
 
@@ -139,8 +136,8 @@ public class VRState {
         dh.vrPlayer = null;
         if (dh.vrRenderer != null) {
             dh.vrRenderer.destroy();
+            dh.vrRenderer = null;
         }
-        dh.vrRenderer = null;
         if (dh.menuWorldRenderer != null) {
             dh.menuWorldRenderer.completeDestroy();
             dh.menuWorldRenderer = null;
