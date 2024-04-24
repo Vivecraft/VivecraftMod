@@ -879,7 +879,11 @@ public class MCOpenVR extends MCVR {
         if (hasInvalidChars || alwaysThrow) {
             String error = knownError + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
             System.out.println(error + path);
-            throw new RenderConfigException(knownError, Component.empty().append(error).append(pathFormatted));
+            if (hasInvalidChars) {
+                throw new RenderConfigException(knownError, Component.translatable("vivecraft.messages.steamvrInvalidCharacters", pathFormatted));
+            } else {
+                throw new RenderConfigException(knownError, Component.empty().append(error).append(pathFormatted));
+            }
         }
     }
 

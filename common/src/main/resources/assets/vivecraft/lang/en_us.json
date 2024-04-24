@@ -394,6 +394,7 @@
   "vivecraft.messages.intelgraphics2": "See here how to change the used gpu: %s",
   "vivecraft.messages.nosteamvr": "OpenVR runtime not detected. Did you install SteamVR?",
   "vivecraft.messages.outdatedsteamvr": "OpenVR failed to initialize needed components. Make sure you are using the latest version of SteamVR.",
+  "vivecraft.messages.steamvrInvalidCharacters": "Invalid characters in path: \n%s\n\nTo fix this error, change your Minecraft game directory to somewhere outside the folder with marked characters.",
   "vivecraft.messages.invalidlwjgl": "Unsupported LWJGL version loaded.\nLoaded version: §c%s§r\nRequired version: §2%s§r",
   "vivecraft.messages.menuworldexportcomplete.1": "World export complete... area size: %d",
   "vivecraft.messages.menuworldexportcomplete.2": "Saved to %s",
