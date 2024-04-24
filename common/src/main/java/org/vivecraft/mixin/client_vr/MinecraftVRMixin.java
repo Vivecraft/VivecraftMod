@@ -702,7 +702,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
 
             VRSettings.ServerOverrides.Setting worldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE);
-            if (this.level != null /*&& isLocalServer()*/ && (worldScale.isValueMinOverridden() || worldScale.isValueMaxOverridden())) {
+            if (this.level != null && isLocalServer() && (worldScale.isValueMinOverridden() || worldScale.isValueMaxOverridden())) {
                 float measuredIPD = (float) ClientDataHolderVR.getInstance().vr.getEyePosition(RenderPass.LEFT).subtract(ClientDataHolderVR.getInstance().vr.getEyePosition(RenderPass.RIGHT)).length();
                 float queriedIPD = ClientDataHolderVR.getInstance().vr.getIPD();
 
