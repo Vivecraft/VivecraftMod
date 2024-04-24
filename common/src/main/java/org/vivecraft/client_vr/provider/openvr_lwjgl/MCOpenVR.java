@@ -1394,4 +1394,17 @@ public class MCOpenVR extends MCVR {
         int activityLevel = VRSystem_GetTrackedDeviceActivityLevel(0);
         return activityLevel == EDeviceActivityLevel_k_EDeviceActivityLevel_UserInteraction || activityLevel == EDeviceActivityLevel_k_EDeviceActivityLevel_UserInteraction_Timeout;
     }
+
+    @Override
+    public float getIPD() {
+        return VRSystem_GetFloatTrackedDeviceProperty(k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty_Prop_UserIpdMeters_Float, this.hmdErrorStore);
+    }
+
+    /**
+     * this should query the actual name from the runtime, but openvr doesn't seem to have an api for that
+     */
+    @Override
+    public String getRuntimeName() {
+        return "SteamVR";
+    }
 }

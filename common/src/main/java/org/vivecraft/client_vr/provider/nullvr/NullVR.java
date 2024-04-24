@@ -20,6 +20,8 @@ import java.util.List;
 public class NullVR extends MCVR {
     protected static NullVR ome;
 
+    private static final float ipd = 0.1F;
+
     private boolean vrActive = true;
     private boolean vrActiveChangedLastFrame = false;
 
@@ -68,8 +70,8 @@ public class NullVR extends MCVR {
             this.hmdPose.M[1][3] = 1.62F;
 
             // eye offset, 10cm total distance
-            this.hmdPoseLeftEye.M[0][3] = -0.05F;
-            this.hmdPoseRightEye.M[0][3] = 0.05F;
+            this.hmdPoseLeftEye.M[0][3] = -ipd * 0.5F;
+            this.hmdPoseRightEye.M[0][3] = ipd * 0.5F;
 
             this.initialized = true;
             this.initSuccess = true;
@@ -196,5 +198,15 @@ public class NullVR extends MCVR {
     @Override
     public boolean capFPS() {
         return true;
+    }
+
+    @Override
+    public float getIPD() {
+        return ipd;
+    }
+
+    @Override
+    public String getRuntimeName() {
+        return "Null";
     }
 }

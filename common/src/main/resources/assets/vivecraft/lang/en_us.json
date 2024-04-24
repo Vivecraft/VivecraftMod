@@ -491,6 +491,8 @@
   "vivecraft.message.kofi": "Support us on Ko-Fi",
   "vivecraft.message.overriddenbyserver": "§6Setting overridden by server.§r\n",
   "vivecraft.message.limitedbyserver": "§6Setting range limited by server (%s - %s)§r\n",
+  "vivecraft.message.worldscaleOutOfRange.title": "Total VR world scale out of range",
+  "vivecraft.message.worldscaleOutOfRange": "World Scale is limited by the server from %1$s to %2$s.\nTo play on this server, reset the world scale in %3$s to §a1x§r.",
 
   "vivecraft.gui.update": "§aⓘ§r Update",
   "vivecraft.gui.vr": "VR: %s",

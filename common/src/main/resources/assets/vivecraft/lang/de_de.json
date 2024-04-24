@@ -489,6 +489,8 @@
   "vivecraft.message.kofi": "Unterstütze uns auf Ko-Fi",
   "vivecraft.message.overriddenbyserver": "§6Einstellung überschrieben vom Server.§r\n",
   "vivecraft.message.limitedbyserver": "§6Einstellungsbereich vom Server limitiert (%s - %s)§r\n",
+  "vivecraft.message.worldscaleOutOfRange.title": "Finale VR Welt Skalierung nicht im zulässigen Bereich",
+  "vivecraft.message.worldscaleOutOfRange": "Welt Skalierung ist auf diesem Server von %1$s bis %2$s limitiert.\nUm auf diesem Server zu spielen, setze die Welt Skalierung in %3$s auf §a1x§r zurück.",
 
   "vivecraft.gui.update": "§aⓘ§r Update",
   "vivecraft.gui.vr": "VR: %s",
