@@ -14,7 +14,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.*;
-import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -224,9 +223,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
     @Shadow
     public abstract void resizeDisplay();
-
-    @Shadow
-    public abstract void disconnect(Screen screen);
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"), method = "<init>", index = 0)
     public Overlay vivecraft$initVivecraft(Overlay overlay) {
@@ -699,27 +695,6 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
             if (this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
                 ClientDataHolderVR.getInstance().vrPlayer.updateFreeMove();
-            }
-
-            VRSettings.ServerOverrides.Setting worldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE);
-            if (this.level != null && isLocalServer() && (worldScale.isValueMinOverridden() || worldScale.isValueMaxOverridden())) {
-                float measuredIPD = (float) ClientDataHolderVR.getInstance().vr.getEyePosition(RenderPass.LEFT).subtract(ClientDataHolderVR.getInstance().vr.getEyePosition(RenderPass.RIGHT)).length();
-                float queriedIPD = ClientDataHolderVR.getInstance().vr.getIPD();
-
-                // worldscale is limited, check that nobody tries to bypass it with a runtime worldscale
-                float runtimeWorldScale = queriedIPD / measuredIPD;
-                float actualWorldScale = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().worldScale * runtimeWorldScale;
-                // check with slight wiggle room in case there is some imprecision
-                if (actualWorldScale < worldScale.getValueMin() * 0.99F || actualWorldScale > worldScale.getValueMax() * 1.01F) {
-                    VRSettings.logger.info("VIVECRAFT: disconnected user from server. runtime IPD: {}, measured IPD: {}, runtime worldscale: {}", queriedIPD, measuredIPD, runtimeWorldScale);
-                    this.level.disconnect();
-                    disconnect(new DisconnectedScreen(new JoinMultiplayerScreen(new TitleScreen()),
-                        Component.translatable("vivecraft.message.worldscaleOutOfRange.title"),
-                        Component.translatable("vivecraft.message.worldscaleOutOfRange",
-                            Component.literal("%.2fx".formatted(worldScale.getValueMin())).withStyle(style -> style.withColor(ChatFormatting.GREEN)),
-                            Component.literal("%.2fx".formatted(worldScale.getValueMax())).withStyle(style -> style.withColor(ChatFormatting.GREEN)),
-                            Component.literal(ClientDataHolderVR.getInstance().vr.getRuntimeName()).withStyle(style -> style.withColor(ChatFormatting.GOLD)))));
-                }
             }
 
             this.profiler.pop();
