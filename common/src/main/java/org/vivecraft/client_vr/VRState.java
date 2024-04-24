@@ -1,9 +1,11 @@
 package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
@@ -37,6 +39,15 @@ public class VRState {
             vrInitialized = true;
             ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
             if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
+                // make sure the lwjgl version is the right one
+                // TODO: move this into the init, does mean all callocs need to be done later
+                VRSettings.logger.error(I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), "3.3.2"));
+
+                // check that the right lwjgl version is loaded that we ship the openvr part of
+                if (!Version.getVersion().startsWith("3.3.2")) {
+                    throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), "3.3.2"), "OpenVR_LWJGL"));
+                }
+
                 dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
             } else {
                 dh.vr = new NullVR(Minecraft.getInstance(), dh);

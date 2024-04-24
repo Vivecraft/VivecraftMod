@@ -395,6 +395,7 @@
   "vivecraft.messages.intelgraphics2": "Siehe hier wie die verwendete Grafikkarte geändert werden kann: %s",
   "vivecraft.messages.nosteamvr": "OpenVR runtime nicht erkannt. Ist SteamVR installiert?",
   "vivecraft.messages.outdatedsteamvr": "OpenVR konnte nicht alle benötigten Komponenten initialisieren. Vergewissern Sie sich, dass Sie die neuesten Version von SteamVR verwenden.",
+  "vivecraft.messages.invalidlwjgl": "Nicht unterstützte LWJGL Version geladen.\nGeladene Version: §c%s§r\nBenötigte Version: §2%s§r",
   "vivecraft.messages.menuworldexportcomplete.1": "Weltexport abgeschlossen... Flächengröße: %d",
   "vivecraft.messages.menuworldexportcomplete.2": "Gespeichert unter %s",
   "vivecraft.messages.menuworldexportclientwarning": "WARNUNG: Speichern der Menüwelt mithilfe einer Clientwelt. Daten können unvollständig sein. Es wird empfohlen, Menüwelten im Einzelspielermodus zu speichern.",
