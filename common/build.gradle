@@ -18,7 +18,7 @@ dependencies {
     modCompileOnly "maven.modrinth:sodium:mc1.20.4-0.5.8"
 
     // for iris compat
-    modCompileOnly "maven.modrinth:iris:1.6.17+1.20.4"
+    modCompileOnly "maven.modrinth:iris:1.7.0+1.20.4"
 
     // for REI compat
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:14.0.688") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }

@@ -16,6 +16,7 @@ import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import java.lang.management.ManagementFactory;
@@ -153,6 +154,8 @@ public class VRState {
             dh.vrSettings.vrEnabled = false;
             dh.vrSettings.saveOptions();
         }
+        // fixes an issue with DH shaders where the depth texture gets stuck
+        ShadersHelper.maybeReloadShaders();
     }
 
     public static void pauseVR() {
