@@ -153,7 +153,9 @@ public class VRState {
             dh.vrSettings.saveOptions();
         }
         // fixes an issue with DH shaders where the depth texture gets stuck
-        ShadersHelper.maybeReloadShaders();
+        if (disableVRSetting) {
+            ShadersHelper.maybeReloadShaders();
+        }
     }
 
     public static void pauseVR() {
