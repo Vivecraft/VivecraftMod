@@ -1,6 +1,6 @@
 package net.coderbot.iris;
 
-import net.irisshaders.iris.pipeline.PipelineManager;
+import net.coderbot.iris.pipeline.PipelineManager;
 import org.jetbrains.annotations.NotNull;
 
 public class Iris {
