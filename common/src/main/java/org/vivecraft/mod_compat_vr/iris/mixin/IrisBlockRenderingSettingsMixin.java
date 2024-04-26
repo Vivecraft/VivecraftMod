@@ -10,7 +10,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 @Pseudo
 @Mixin(targets = {
     "net.coderbot.iris.block_rendering.BlockRenderingSettings",
-    "net.irisshaders.iris.block_rendering.BlockRenderingSettings"
+    "net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings"
 })
 public class IrisBlockRenderingSettingsMixin {
     @Inject(at = @At("HEAD"), method = "getAmbientOcclusionLevel", remap = false, cancellable = true)

@@ -17,7 +17,6 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 @Mixin(targets = {
     "net.coderbot.iris.shadow.ShadowMatrices",
     "net.coderbot.iris.shadows.ShadowMatrices",
-    "net.irisshaders.iris.shadow.ShadowMatrices",
     "net.irisshaders.iris.shadows.ShadowMatrices"
 })
 public class IrisShadowMatricesMixin {

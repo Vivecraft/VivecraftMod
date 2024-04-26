@@ -1,9 +1,9 @@
-package net.irisshaders.iris.pipeline.newshader;
+package net.irisshaders.iris.pipeline;
 
-import net.irisshaders.iris.pipeline.ShadowRenderer;
+import net.irisshaders.iris.shadows.ShadowRenderer;
 import net.irisshaders.iris.shadows.ShadowRenderTargets;
 
-public class NewWorldRenderingPipeline {
+public class IrisRenderingPipeline {
     private ShadowRenderTargets shadowRenderTargets;
 
     private final ShadowRenderer shadowRenderer = null;

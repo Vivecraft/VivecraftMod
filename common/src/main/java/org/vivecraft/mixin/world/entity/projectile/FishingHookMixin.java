@@ -33,21 +33,30 @@ public abstract class FishingHookMixin extends Entity {
 
     @ModifyVariable(at = @At(value = "STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 0)
     private float vivecraft$modifyXrot(float xRot, Player player) {
-        vivecraft$serverviveplayer = ServerVRPlayers.getVivePlayer((ServerPlayer) player);
-        if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
-            vivecraft$controllerDir = vivecraft$serverviveplayer.getControllerDir(vivecraft$serverviveplayer.activeHand);
-            vivecraft$controllerPos = vivecraft$serverviveplayer.getControllerPos(vivecraft$serverviveplayer.activeHand, player);
-            return -((float) Math.toDegrees(Math.asin(vivecraft$controllerDir.y / vivecraft$controllerDir.length())));
+        // some mods like Aquaculture create a FishingHook on the client with a LocalPlayer
+        // this is nonsense, so just ignore it
+        if (player instanceof ServerPlayer serverPlayer) {
+            vivecraft$serverviveplayer = ServerVRPlayers.getVivePlayer(serverPlayer);
+            if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
+                vivecraft$controllerDir = vivecraft$serverviveplayer.getControllerDir(vivecraft$serverviveplayer.activeHand);
+                vivecraft$controllerPos = vivecraft$serverviveplayer.getControllerPos(vivecraft$serverviveplayer.activeHand, serverPlayer);
+            }
         }
-        return xRot;
+
+        if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
+            return -((float) Math.toDegrees(Math.asin(vivecraft$controllerDir.y / vivecraft$controllerDir.length())));
+        } else {
+            return xRot;
+        }
     }
 
     @ModifyVariable(at = @At(value = "STORE"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V", ordinal = 1)
     private float vivecraft$modifyYrot(float yRot) {
         if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
             return (float) Math.toDegrees(Math.atan2(-vivecraft$controllerDir.x, vivecraft$controllerDir.z));
+        } else {
+            return yRot;
         }
-        return yRot;
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;moveTo(DDDFF)V"), method = "<init>(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;II)V")
