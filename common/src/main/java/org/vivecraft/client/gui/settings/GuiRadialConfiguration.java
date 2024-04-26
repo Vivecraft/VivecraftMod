@@ -56,33 +56,24 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
         this.clearWidgets();
 
         if (this.isselectmode) {
-            this.addRenderableWidget(new Button.Builder(Component.translatable("gui.cancel"),
-                (p) -> {
-                    this.isselectmode = false;
-                    this.reinit = true;
-                    this.visibleList = null;
-                })
-                .size(150, 20)
-                .pos(this.width / 2 - 155, this.height - 25)
-                .build());
+            this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 25, 150, 20,
+                Component.translatable("gui.cancel"), (p) -> {
+                this.isselectmode = false;
+                this.reinit = true;
+                this.visibleList = null;
+            }));
 
-            this.addRenderableWidget(new Button.Builder(Component.translatable("vivecraft.gui.clear"),
-                (p) -> this.setKey(null))
-                .size(150, 20)
-                .pos(this.width / 2 - 155, 26)
-                .build());
+            this.addRenderableWidget(new Button(this.width / 2 - 155, 26, 150, 20,
+                Component.translatable("vivecraft.gui.clear"), (p) -> this.setKey(null)));
         } else {
-            this.addRenderableWidget(new Button.Builder(
+            this.addRenderableWidget(new Button(this.width / 2 + 2, this.height / 6 - 10, 150, 20,
                 this.isShift ?
                     Component.translatable("vivecraft.gui.radialmenu.mainset") :
                     Component.translatable("vivecraft.gui.radialmenu.alternateset"),
                 (p) -> {
                     this.isShift = !this.isShift;
                     this.reinit = true;
-                })
-                .size(150, 20)
-                .pos(this.width / 2 + 2, this.height / 6 - 10)
-                .build());
+                }));
 
             super.init(options, false);
 
@@ -135,16 +126,14 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
                 x *= i > numButtons / 2 ? -1 : 1;
 
                 int index = i;
-                this.addRenderableWidget(new Button.Builder(Component.translatable(label),
+                this.addRenderableWidget(new Button(centerX + x - buttonWidth / 2, centerY + y,
+                    buttonWidth, 20, Component.translatable(label),
                     (p) -> {
                         this.selectedIndex = index;
                         this.isselectmode = true;
                         this.reinit = true;
                         this.visibleList = this.list;
-                    })
-                    .size(buttonWidth, 20)
-                    .pos(centerX + x - buttonWidth / 2, centerY + y)
-                    .build());
+                    }));
             }
 
             this.addRenderableWidget(

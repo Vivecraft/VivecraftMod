@@ -25,7 +25,7 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
     private EditBox searchBox;
 
     @Shadow
-    private static CreativeModeTab selectedTab;
+    private static int selectedTab;
 
     public CreativeModeInventoryScreenVRMixin(CreativeModeInventoryScreen.ItemPickerMenu abstractContainerMenu, Inventory inventory, Component component) {
         super(abstractContainerMenu, inventory, component);
@@ -34,7 +34,7 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen;scrollOffs:F", shift = At.Shift.BEFORE), method = "refreshSearchResults")
     public void vivecraft$search(CallbackInfo ci) {
         // only add to actual search
-        if (selectedTab == null || selectedTab.getType() == CreativeModeTab.Type.SEARCH) {
+        if (selectedTab == CreativeModeTab.TAB_SEARCH.getId()) {
             vivecraft$addCreativeSearch(this.searchBox.getValue(), this.menu.items);
         }
     }
