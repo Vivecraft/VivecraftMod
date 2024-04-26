@@ -267,7 +267,7 @@ public abstract class ServerPlayerMixin extends Player {
             // actually send the message, if there is one set
             if (!message.isEmpty()) {
                 try {
-                    this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(getName().getString(), entity)), false);
+                    this.server.getPlayerList().broadcastMessage(new TextComponent(message.formatted(getName().getString(), entity)), ChatType.SYSTEM, Util.NIL_UUID);
                 } catch (IllegalFormatException e) {
                     // catch errors users might put into the messages, to not crash other stuff
                     ServerNetworking.LOGGER.error("Death message '{}' has errors: {}", message, e.toString());

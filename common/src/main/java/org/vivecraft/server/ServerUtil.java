@@ -47,7 +47,7 @@ public class ServerUtil {
                             // catch errors users might put into the messages, to not crash other stuff
                             ServerNetworking.LOGGER.error("KickVROnly message '{}' has errors: {}", kickMessage, e.toString());
                         }
-                        serverPlayer.connection.disconnect(Component.literal(kickMessage));
+                        serverPlayer.connection.disconnect(new TextComponent(kickMessage));
                         return;
                     }
 
@@ -61,7 +61,7 @@ public class ServerUtil {
                             // catch errors users might put into the messages, to not crash other stuff
                             ServerNetworking.LOGGER.error("KickViveOnly message '{}' has errors: {}", kickMessage, e.toString());
                         }
-                        serverPlayer.connection.disconnect(Component.literal(kickMessage));
+                        serverPlayer.connection.disconnect(new TextComponent(kickMessage));
                         return;
                     }
 
@@ -81,7 +81,7 @@ public class ServerUtil {
                         // actually send the message, if there is one set
                         if (!message.isEmpty()) {
                             try {
-                                serverPlayer.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(serverPlayer.getName().getString())), false);
+                                serverPlayer.server.getPlayerList().broadcastMessage(new TextComponent(message.formatted(serverPlayer.getName().getString())), ChatType.SYSTEM, Util.NIL_UUID);
                             } catch (IllegalFormatException e) {
                                 // catch errors users might put into the messages, to not crash other stuff
                                 ServerNetworking.LOGGER.error("Welcome message '{}' has errors: {}", message, e.toString());

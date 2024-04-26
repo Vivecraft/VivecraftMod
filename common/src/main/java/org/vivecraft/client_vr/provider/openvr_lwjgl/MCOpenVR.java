@@ -13,6 +13,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.openvr.*;
 import org.lwjgl.system.MemoryStack;
@@ -880,9 +881,9 @@ public class MCOpenVR extends MCVR {
             String error = knownError + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
             System.out.println(error + path);
             if (hasInvalidChars) {
-                throw new RenderConfigException(knownError, Component.translatable("vivecraft.messages.steamvrInvalidCharacters", pathFormatted));
+                throw new RenderConfigException(knownError, new TranslatableComponent("vivecraft.messages.steamvrInvalidCharacters", pathFormatted));
             } else {
-                throw new RenderConfigException(knownError, Component.empty().append(error).append(pathFormatted));
+                throw new RenderConfigException(knownError, new TextComponent(error).append(pathFormatted));
             }
         }
     }
