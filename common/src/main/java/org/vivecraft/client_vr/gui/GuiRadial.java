@@ -15,82 +15,68 @@ public class GuiRadial extends TwoHandedScreen {
 
     public void init() {
         this.arr = this.dataholder.vrSettings.vrRadialItems;
-        String[] astring = this.dataholder.vrSettings.vrRadialItemsAlt;
+        String[] altSet = this.dataholder.vrSettings.vrRadialItemsAlt;
         this.clearWidgets();
-        int i = 8;
-        int j = 120;
-        int k = 360 / i;
-        int l = 48;
-        int i1 = this.width / 2;
-        int j1 = this.height / 2;
+
+        int numButtons = this.dataholder.vrSettings.vrRadialButtons;
+        int buttonWidthMin = 120;
+        // distance from the center, with 14 buttons, move them closer together
+        float dist = numButtons * (numButtons >= 14 ? 5F : 5.5F);
+        int centerX = this.width / 2;
+        int centerY = this.height / 2;
 
         if (this.isShift) {
-            this.arr = astring;
+            this.arr = altSet;
         }
 
-        for (int k1 = 0; k1 < i; ++k1) {
+        for (int i = 0; i < numButtons; i++) {
             KeyMapping keymapping = null;
 
             for (KeyMapping keymapping1 : this.minecraft.options.keyMappings) {
-                if (keymapping1.getName().equalsIgnoreCase(this.arr[k1])) {
+                if (i < this.arr.length && keymapping1.getName().equalsIgnoreCase(this.arr[i])) {
                     keymapping = keymapping1;
                 }
             }
 
-            String s = "?";
+            String label = "?";
 
             if (keymapping != null) {
-                s = I18n.get(keymapping.getName());
+                label = I18n.get(keymapping.getName());
             }
 
-            int i2 = Math.max(j, this.font.width(s));
-            int j2 = 0;
-            int k2 = 0;
+            int buttonWidth = Math.max(buttonWidthMin, this.font.width(label));
+            // coords of the button, button 0 is at the top with x = 0, y = -dist
+            float distX = numButtons * 4 + buttonWidth * 0.5F;
 
-            if (k1 == 0) {
-                j2 = 0;
-                k2 = -l;
-            } else if (k1 == 1) {
-                j2 = i2 / 2 + 8;
-                k2 = -l / 2;
-            } else if (k1 == 2) {
-                j2 = i2 / 2 + 32;
-                k2 = 0;
-            } else if (k1 == 3) {
-                j2 = i2 / 2 + 8;
-                k2 = l / 2;
-            } else if (k1 == 4) {
-                j2 = 0;
-                k2 = l;
-            } else if (k1 == 5) {
-                j2 = -i2 / 2 - 8;
-                k2 = l / 2;
-            } else if (k1 == 6) {
-                j2 = -i2 / 2 - 32;
-                k2 = 0;
-            } else if (k1 == 7) {
-                j2 = -i2 / 2 - 8;
-                k2 = -l / 2;
+            // position buttons on equal y spacing
+            float btnIndex = (i < numButtons / 2 ? i  : numButtons - i) / (float) (numButtons / 2);
+            int y = (int) (2.0F * dist * btnIndex - dist);
+
+            // position x so the buttons produce an ellipse
+            int x = (int) (distX * (Math.sqrt(1.0F - (y*y) / (dist*dist))));
+
+            // move in between buttons closer to the middle
+            if (Math.abs(y) > 20) {
+                x = (int) (x * 0.87F);
             }
 
-            int l1 = k1;
+            // second half of buttons should be on the left side
+            x *= i > numButtons / 2 ? -1 : 1;
 
-            if (s != "?") {
-                this.addRenderableWidget(new Button.Builder(Component.translatable(s), (p) ->
-                {
-                    if (l1 < 200) {
-                        VRInputAction vrinputaction = MCVR.get().getInputAction(this.arr[l1]);
+            int index = i;
+
+            if (!"?".equals(label)) {
+                this.addRenderableWidget(new Button.Builder(Component.translatable(label),
+                    (p) -> {
+                        VRInputAction vrinputaction = MCVR.get().getInputAction(this.arr[index]);
 
                         if (vrinputaction != null) {
                             vrinputaction.pressBinding();
                             vrinputaction.unpressBinding(2);
                         }
-                    } else if (l1 == 201) {
-                        this.setShift(!this.isShift);
-                    }
-                })
-                    .size(i2, 20)
-                    .pos(i1 + j2 - i2 / 2, j1 + k2 - 10)
+                    })
+                    .size(buttonWidth, 20)
+                    .pos(centerX + x - buttonWidth / 2, centerY + y - 10)
                     .build());
             }
         }

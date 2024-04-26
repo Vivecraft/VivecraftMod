@@ -11,7 +11,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 @Pseudo
 @Mixin(targets = {
     "net.coderbot.iris.pipeline.HandRenderer",
-    "net.irisshaders.iris.pipeline.HandRenderer"
+    "net.irisshaders.iris.pathways.HandRenderer"
 })
 public class IrisHandRendererVRMixin {
 

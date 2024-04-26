@@ -11,7 +11,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 @Pseudo
 @Mixin(targets = {
     "net.coderbot.iris.pipeline.ShadowRenderer",
-    "net.irisshaders.iris.pipeline.ShadowRenderer"
+    "net.irisshaders.iris.shadows.ShadowRenderer"
 })
 public class IrisShadowRendererMixin {
 

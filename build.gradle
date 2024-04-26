@@ -27,10 +27,10 @@ subprojects {
         mappings loom.officialMojangMappings()
         // The following line declares the yarn mappings you may select this one as well.
         // mappings "net.fabricmc:yarn:1.18.2+build.4:v2"
-        implementation("org.lwjgl:lwjgl-openvr:3.3.1")
-        implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
-        implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
-        implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
+        implementation("org.lwjgl:lwjgl-openvr:3.3.2")
+        implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux")
+        implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos")
+        implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows")
     }
 
     tasks.withType(JavaCompile) {

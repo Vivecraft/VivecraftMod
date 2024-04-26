@@ -1,6 +1,7 @@
 package org.vivecraft.mod_compat_vr.iris;
 
 import net.irisshaders.iris.api.v0.IrisApi;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 
@@ -17,6 +18,16 @@ public class IrisHelper {
     private static Method Iris_getPipelineManager;
     private static Method PipelineManager_getPipeline;
     private static Method WorldRenderingPipeline_shouldRenderUnderwaterOverlay;
+
+    // for iris/dh compat
+    private static boolean dhPresent = false;
+    private static Object dhOverrideInjector;
+    private static Method OverrideInjector_unbind;
+    private static Class<?> IDhApiFramebuffer;
+    private static Method Pipeline_getDHCompat;
+    private static Method DHCompatInternal_getInstance;
+    private static Method DHCompatInternal_getShadowFBWrapper;
+    private static Method DHCompatInternal_getSolidFBWrapper;
 
     public static void setShadersActive(boolean bl) {
         IrisApi.getInstance().getConfig().setShadersEnabledAndApply(bl);
@@ -58,6 +69,25 @@ public class IrisHelper {
         return IrisApi.getInstance().isShaderPackInUse();
     }
 
+    public static void unregisterDHIfThere(Object pipeline) {
+        if (init() && dhPresent) {
+            try {
+                Object dhCompat = Pipeline_getDHCompat.invoke(pipeline);
+                // check if the shader even has a dh part
+                if (dhCompat != null) {
+                    Object dhCompatInstance = DHCompatInternal_getInstance.invoke(dhCompat);
+                    if (dhCompatInstance != null) {
+                        // now disable the overrides
+                        OverrideInjector_unbind.invoke(dhOverrideInjector, IDhApiFramebuffer, DHCompatInternal_getShadowFBWrapper.invoke(dhCompatInstance));
+                        OverrideInjector_unbind.invoke(dhOverrideInjector, IDhApiFramebuffer, DHCompatInternal_getSolidFBWrapper.invoke(dhCompatInstance));
+                    }
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                VRSettings.logger.error("Vivecraft: Iris DH reset failed: {}", e.getMessage());
+            }
+        }
+    }
+
     private static boolean init() {
         if (initialized) {
             return !initFailed;
@@ -80,6 +110,28 @@ public class IrisHelper {
                 "net.irisshaders.iris.pipeline.WorldRenderingPipeline");
 
             WorldRenderingPipeline_shouldRenderUnderwaterOverlay = worldRenderingPipeline.getMethod("shouldRenderUnderwaterOverlay");
+
+            // distant horizon compat
+            if (Xplat.isModLoaded("distanthorizons")) {
+                try {
+                    Class<?> OverrideInjector = Class.forName("com.seibel.distanthorizons.coreapi.DependencyInjection.OverrideInjector");
+                    dhOverrideInjector = OverrideInjector.getDeclaredField("INSTANCE").get(null);
+
+                    OverrideInjector_unbind = OverrideInjector.getMethod("unbind", Class.class, Class.forName("com.seibel.distanthorizons.api.interfaces.override.IDhApiOverrideable"));
+
+                    IDhApiFramebuffer = Class.forName("com.seibel.distanthorizons.api.interfaces.override.rendering.IDhApiFramebuffer");
+
+                    Pipeline_getDHCompat = Class.forName("net.irisshaders.iris.pipeline.WorldRenderingPipeline").getMethod("getDHCompat");
+
+                    DHCompatInternal_getInstance = Class.forName("net.irisshaders.iris.compat.dh.DHCompat").getMethod("getInstance");
+                    Class<?> DHCompatInternal = Class.forName("net.irisshaders.iris.compat.dh.DHCompatInternal");
+                    DHCompatInternal_getShadowFBWrapper = DHCompatInternal.getMethod("getShadowFBWrapper");
+                    DHCompatInternal_getSolidFBWrapper = DHCompatInternal.getMethod("getSolidFBWrapper");
+                    dhPresent = true;
+                } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException e) {
+                    dhPresent = false;
+                }
+            }
         } catch (ClassNotFoundException | NoSuchMethodException e) {
             initFailed = true;
         }

@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -45,7 +46,7 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
 
             RenderPassManager.renderPassType = RenderPassType.WORLD_ONLY;
             for (RenderPass renderPass : RenderPass.values()) {
-                Iris.logger.info("Creating VR sodium shaders for RenderPass {}", renderPass);
+                VRSettings.logger.info("Creating VR sodium shaders for RenderPass {}", renderPass);
 
                 WorldRenderingPipeline worldPipeline = (WorldRenderingPipeline) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getVRPipeline(renderPass);
                 // GUI and unused renderPasses don't have a pipeline
@@ -62,7 +63,7 @@ public class IrisChunkProgramOverridesMixin implements IrisChunkProgramOverrides
             }
 
             RenderPassManager.setVanillaRenderPass();
-            Iris.logger.info("Creating sodium shaders for vanilla RenderPass");
+            VRSettings.logger.info("Creating sodium shaders for vanilla RenderPass");
             createShadersMethod.invoke(this, ((WorldRenderingPipeline) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getVanillaPipeline()).getSodiumTerrainPipeline(), chunkVertexType);
             if (current != null) {
                 RenderPassManager.setWorldRenderPass(current);

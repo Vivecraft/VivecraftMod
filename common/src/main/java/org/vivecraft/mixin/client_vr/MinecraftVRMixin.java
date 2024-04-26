@@ -395,16 +395,21 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 4, shift = At.Shift.AFTER), method = "runTick", locals = LocalCapture.CAPTURE_FAILHARD)
     public void vivecraft$renderVRPasses(boolean renderLevel, CallbackInfo ci, long nanoTime) {
         if (VRState.vrRunning) {
+            // still rendering
+            this.profiler.push("gameRenderer");
+
+            this.profiler.push("VR guis");
 
             // some mods mess with the depth mask?
             RenderSystem.depthMask(true);
 
+            this.profiler.push("gui cursor");
             // draw cursor on Gui Layer
             if (this.screen != null || !mouseHandler.isMouseGrabbed()) {
                 PoseStack poseStack = RenderSystem.getModelViewStack();
                 poseStack.pushPose();
                 poseStack.setIdentity();
-                poseStack.translate(0.0f, 0.0f, -2000.0f);
+                poseStack.translate(0.0f, 0.0f, -11000.0f);
                 RenderSystem.applyModelViewMatrix();
 
                 int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
@@ -415,10 +420,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 RenderSystem.applyModelViewMatrix();
             }
 
+            this.profiler.popPush("fps pie");
             // draw debug pie
             vivecraft$drawProfiler();
-            // reset that, do not draw it again on something else
-            fpsPieResults = null;
 
             // pop pose that we pushed before the gui
             RenderSystem.getModelViewStack().popPose();
@@ -430,7 +434,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             ((RenderTargetExtension) mainRenderTarget).vivecraft$genMipMaps();
             mainRenderTarget.unbindRead();
 
-            this.profiler.push("2D Keyboard");
+            this.profiler.popPush("2D Keyboard");
             float actualPartialTicks = this.pause ? this.pausePartialTick : this.timer.partialTick;
             GuiGraphics guiGraphics = new GuiGraphics((Minecraft) (Object) this, renderBuffers.bufferSource());
             if (KeyboardHandler.Showing
@@ -452,6 +456,9 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             }
             this.profiler.pop();
             this.vivecraft$checkGLError("post 2d ");
+
+            // done with guis
+            this.profiler.pop();
 
             // render the different vr passes
             List<RenderPass> list = ClientDataHolderVR.getInstance().vrRenderer.getRenderPasses();
@@ -503,6 +510,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
                 ClientDataHolderVR.getInstance().isFirstPass = false;
             }
+            // now we are done with rendering
+            this.profiler.pop();
 
             ClientDataHolderVR.getInstance().vrPlayer.postRender(actualPartialTicks);
             this.profiler.push("Display/Reproject");
@@ -517,12 +526,17 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
     }
 
+    @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;fpsPieResults:Lnet/minecraft/util/profiling/ProfileResults;"), method = "runTick")
+    public ProfileResults vivecraft$cancelRegularFpsPie(Minecraft instance) {
+        return VRState.vrRunning ? null : fpsPieResults;
+    }
+
     @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen(II)V"), method = "runTick")
     public void vivecraft$blitMirror(RenderTarget instance, int width, int height) {
         if (!VRState.vrRunning) {
             instance.blitToScreen(width, height);
         } else {
-            this.profiler.push("mirror");
+            this.profiler.popPush("vrMirror");
             this.vivecraft$copyToMirror();
             this.vivecraft$drawNotifyMirror();
             this.vivecraft$checkGLError("post-mirror ");
@@ -692,6 +706,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             if (this.level != null && ClientDataHolderVR.getInstance().vrPlayer != null) {
                 ClientDataHolderVR.getInstance().vrPlayer.updateFreeMove();
             }
+
             this.profiler.pop();
         }
 
@@ -750,7 +765,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         break;
                     }
 
-                    ++i;
+                    i++;
                 }
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
