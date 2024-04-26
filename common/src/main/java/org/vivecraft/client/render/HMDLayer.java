@@ -24,33 +24,23 @@ public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abst
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer entity, float f, float g, float h, float j, float k, float l) {
-        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entity.getUUID());
-        ResourceLocation hmd = null; //this.BLACK_HMD;
-        switch (rotinfo.hmd) {
-            case 0:
-                break;
+        if (this.getParentModel() instanceof VRPlayerModel<?> vrPlayerModel) {
+            VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entity.getUUID());
+            ResourceLocation hmd;
+            switch (rotinfo.hmd) {
+                default -> hmd = null;
+                case 1 -> hmd = this.BLACK_HMD;
+                case 2 -> hmd = this.GOLD_HMD;
+                case 3, 4 -> hmd = this.DIAMOND_HMD;
+            }
 
-            case 1:
-                hmd = this.BLACK_HMD;
-                break;
-
-            case 2:
-                hmd = this.GOLD_HMD;
-                break;
-
-            case 3:
-                hmd = this.DIAMOND_HMD;
-                break;
-
-            case 4:
-                hmd = this.DIAMOND_HMD;
+            if (hmd == null) {
+                return;
+            }
+            poseStack.pushPose();
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(hmd));
+            vrPlayerModel.renderHMDR(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
+            poseStack.popPose();
         }
-        if (hmd == null) {
-            return;
-        }
-        poseStack.pushPose();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(hmd));
-        ((VRPlayerModel) this.getParentModel()).renderHMDR(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
-        poseStack.popPose();
     }
 }

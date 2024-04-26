@@ -61,6 +61,11 @@
     "sources": "https://github.com/Vivecraft/VivecraftMod"
   },
   "custom": {
+    "mc-publish": {
+      "dependencies": [
+        "sodium(incompatible)#(ignore)"
+      ]
+    },
     "modmenu": {
       "links": {
         "modmenu.discord": "https://discord.gg/jYyyv7zhSW",

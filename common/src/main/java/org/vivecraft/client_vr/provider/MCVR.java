@@ -1177,4 +1177,11 @@ public abstract class MCVR {
     public boolean capFPS() {
         return false;
     }
+
+    /**
+     * @return the ipd in meters
+     */
+    public abstract float getIPD();
+
+    public abstract String getRuntimeName();
 }
