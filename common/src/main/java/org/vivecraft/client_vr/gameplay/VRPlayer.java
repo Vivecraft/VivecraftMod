@@ -172,7 +172,7 @@ public class VRPlayer {
                 if (actualWorldScale < worldScaleOverride.getValueMin() * 0.99F || actualWorldScale > worldScaleOverride.getValueMax() * 1.01F) {
                     VRSettings.logger.info("VIVECRAFT: disconnected user from server. runtime IPD: {}, measured IPD: {}, runtime worldscale: {}", queriedIPD, measuredIPD, runtimeWorldScale);
                     this.mc.level.disconnect();
-                    this.mc.disconnect(new DisconnectedScreen(new JoinMultiplayerScreen(new TitleScreen()),
+                    this.mc.clearLevel(new DisconnectedScreen(new JoinMultiplayerScreen(new TitleScreen()),
                         Component.translatable("vivecraft.message.worldscaleOutOfRange.title"),
                         Component.translatable("vivecraft.message.worldscaleOutOfRange",
                             Component.literal("%.2fx".formatted(worldScaleOverride.getValueMin())).withStyle(style -> style.withColor(ChatFormatting.GREEN)),

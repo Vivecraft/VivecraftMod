@@ -16,7 +16,7 @@ public class GuiRadialItemsList extends ObjectSelectionList<GuiRadialItemsList.B
     private final static int maxListLabelWidth = 90;
 
     public GuiRadialItemsList(GuiRadialConfiguration parent, Minecraft mc) {
-        super(mc, parent.width, parent.height - 77, 49, 20);
+        super(mc, parent.width, parent.height, 49, parent.height - 28, 20);
         this.parent = parent;
         this.buildList();
     }
