@@ -31,9 +31,7 @@ public class VRPassHelper {
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
         RenderSystem.clear(16384, Minecraft.ON_OSX);
         RenderSystem.enableDepthTest();
-        mc.getProfiler().push("gameRenderer");
         mc.gameRenderer.render(partialTicks, nanoTime, renderWorld);
-        mc.getProfiler().pop();
         checkGLError("post game render " + eye.name());
 
         if (dataHolder.currentPass == RenderPass.LEFT || dataHolder.currentPass == RenderPass.RIGHT) {
