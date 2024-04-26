@@ -26,13 +26,19 @@ public abstract class CreativeModeInventoryScreenVRMixin extends EffectRendering
     @Shadow
     private EditBox searchBox;
 
+    @Shadow
+    private static int selectedTab;
+
     public CreativeModeInventoryScreenVRMixin(CreativeModeInventoryScreen.ItemPickerMenu abstractContainerMenu, Inventory inventory, Component component) {
         super(abstractContainerMenu, inventory, component);
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen;scrollOffs:F", shift = At.Shift.BEFORE), method = "refreshSearchResults")
     public void vivecraft$search(CallbackInfo ci) {
-        vivecraft$addCreativeSearch(this.searchBox.getValue(), this.menu.items);
+        // only add to actual search
+        if (selectedTab == CreativeModeTab.TAB_SEARCH.getId()) {
+            vivecraft$addCreativeSearch(this.searchBox.getValue(), this.menu.items);
+        }
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CreativeModeTab;fillItemList(Lnet/minecraft/core/NonNullList;)V", shift = At.Shift.AFTER), method = "selectTab")

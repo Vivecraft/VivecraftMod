@@ -28,6 +28,14 @@ public class ServerConfig {
     public static ConfigBuilder.StringValue messagesWelcomeNonVR;
     public static ConfigBuilder.StringValue messagesWelcomeSeated;
     public static ConfigBuilder.StringValue messagesWelcomeVanilla;
+    public static ConfigBuilder.StringValue messagesDeathVR;
+    public static ConfigBuilder.StringValue messagesDeathNonVR;
+    public static ConfigBuilder.StringValue messagesDeathSeated;
+    public static ConfigBuilder.StringValue messagesDeathVanilla;
+    public static ConfigBuilder.StringValue messagesDeathByMobVR;
+    public static ConfigBuilder.StringValue messagesDeathByMobNonVR;
+    public static ConfigBuilder.StringValue messagesDeathByMobSeated;
+    public static ConfigBuilder.StringValue messagesDeathByMobVanilla;
     public static ConfigBuilder.StringValue messagesLeaveMessage;
     public static ConfigBuilder.StringValue messagesKickViveOnly;
     public static ConfigBuilder.StringValue messagesKickVROnly;
@@ -144,9 +152,11 @@ public class ServerConfig {
             .push("enabled")
             .comment("Enable or disable all messages.")
             .define(false);
+
+        // welcome messages
         messagesWelcomeVR = builder
             .push("welcomeVR")
-            .comment("set message to nothing to not send. ex: leaveMessage = \"\"")
+            .comment("set message to nothing to not send. ex: leaveMessage = \"\"\n put '%s' in any message for the player name")
             .define("%s has joined with standing VR!");
         messagesWelcomeNonVR = builder
             .push("welcomeNonVR")
@@ -154,12 +164,44 @@ public class ServerConfig {
         messagesWelcomeSeated = builder
             .push("welcomeSeated")
             .define("%s has joined with seated VR!");
-        messagesWelcomeVanilla = builder
-            .push("welcomeVanilla")
-            .define("%s has joined as a Muggle!");
+
         messagesLeaveMessage = builder
             .push("leaveMessage")
             .define("%s has disconnected from the server!");
+
+        // general death messages
+        messagesWelcomeVanilla = builder
+            .push("welcomeVanilla")
+            .define("%s has joined as a Muggle!");
+        messagesDeathVR = builder
+            .push("deathVR")
+            .define("%s died in standing VR!");
+        messagesDeathNonVR = builder
+            .push("deathNonVR")
+            .define("%s died in Non-VR companion!");
+        messagesDeathSeated = builder
+            .push("deathSeated")
+            .define("%s died in seated VR!");
+        messagesDeathVanilla = builder
+            .push("deathVanilla")
+            .define("%s died as a Muggle!");
+
+        // death messages by mobs
+        messagesDeathByMobVR = builder
+            .push("deathByMobVR")
+            .comment("death by mob messages use '%1$s' for the player name and '%2$s' for the mob name")
+            .define("%1$s was slain by %2$s in standing VR!");
+        messagesDeathByMobNonVR = builder
+            .push("deathByMobNonVR")
+            .define("%1$s was slain by %2$s in Non-VR companion!");
+        messagesDeathByMobSeated = builder
+            .push("deathByMobSeated")
+            .define("%1$s was slain by %2$s in seated VR!");
+        messagesDeathByMobVanilla = builder
+            .push("deathByMobVanilla")
+            .define("%1$s was slain by %2$s as a Muggle!");
+
+        // kick messages
         messagesKickViveOnly = builder
             .push("KickViveOnly")
             .comment("The message to show kicked non vivecraft players.")

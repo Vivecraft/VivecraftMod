@@ -12,6 +12,7 @@ import org.vivecraft.client.utils.UpdateChecker;
 import org.vivecraft.server.config.ConfigBuilder;
 import org.vivecraft.server.config.ServerConfig;
 
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,14 +40,28 @@ public class ServerUtil {
                     // kick non VR players
                     if (!isOpAndAllowed && ServerConfig.vr_only.get()
                         && (vivePlayer == null || !vivePlayer.isVR())) {
-                        serverPlayer.connection.disconnect(new TextComponent(ServerConfig.messagesKickVROnly.get()));
+                        String kickMessage = ServerConfig.messagesKickVROnly.get();
+                        try {
+                            kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
+                        } catch (IllegalFormatException e) {
+                            // catch errors users might put into the messages, to not crash other stuff
+                            ServerNetworking.LOGGER.error("KickVROnly message '{}' has errors: {}", kickMessage, e.toString());
+                        }
+                        serverPlayer.connection.disconnect(Component.literal(kickMessage));
                         return;
                     }
 
                     // kick non vivecraft players
                     if (!isOpAndAllowed && ServerConfig.vive_only.get()
                         && (vivePlayer == null)) {
-                        serverPlayer.connection.disconnect(new TextComponent(ServerConfig.messagesKickViveOnly.get()));
+                        String kickMessage = ServerConfig.messagesKickViveOnly.get();
+                        try {
+                            kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
+                        } catch (IllegalFormatException e) {
+                            // catch errors users might put into the messages, to not crash other stuff
+                            ServerNetworking.LOGGER.error("KickViveOnly message '{}' has errors: {}", kickMessage, e.toString());
+                        }
+                        serverPlayer.connection.disconnect(Component.literal(kickMessage));
                         return;
                     }
 
@@ -65,7 +80,12 @@ public class ServerUtil {
                         }
                         // actually send the message, if there is one set
                         if (!message.isEmpty()) {
-                            serverPlayer.server.getPlayerList().broadcastMessage(new TextComponent(message.formatted(serverPlayer.getName().getString())), ChatType.SYSTEM, Util.NIL_UUID);
+                            try {
+                                serverPlayer.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(serverPlayer.getName().getString())), false);
+                            } catch (IllegalFormatException e) {
+                                // catch errors users might put into the messages, to not crash other stuff
+                                ServerNetworking.LOGGER.error("Welcome message '{}' has errors: {}", message, e.toString());
+                            }
                         }
                     }
                 }

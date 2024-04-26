@@ -177,6 +177,9 @@ public class VRSettings {
     public String[] vrRadialItems = getRadialItemsDefault();
     @SettingField(config = "RADIALALT", separate = true)
     public String[] vrRadialItemsAlt = getRadialItemsAltDefault();
+
+    @SettingField(VrOptions.RADIAL_NUMBER)
+    public int vrRadialButtons = 8;
     @SettingField(fixedSize = false)
     public int[] keyboardCodes = getKeyboardCodesDefault();
 
@@ -1773,6 +1776,7 @@ public class VRSettings {
             }
         },
         INGAME_BINDINGS_IN_GUI(false, true),
+        RADIAL_NUMBER(false, false,4, 14, 2, 0),
         RIGHT_CLICK_DELAY(false, false); // Right Click Repeat
 //        ANISOTROPIC_FILTERING("options.anisotropicFiltering", true, false, 1.0F, 16.0F, 0.0F)
 //                {
@@ -2065,7 +2069,7 @@ public class VRSettings {
     }
 
     public String[] getRadialItemsDefault() {
-        String[] out = new String[8];
+        String[] out = new String[14];
         out[0] = "key.drop";
         out[1] = "key.chat";
         out[2] = "vivecraft.key.rotateRight";
@@ -2074,20 +2078,18 @@ public class VRSettings {
         out[5] = "vivecraft.key.togglePlayerList";
         out[6] = "vivecraft.key.rotateLeft";
         out[7] = "vivecraft.key.quickTorch";
+        for (int i = 8; i < 14; i++) {
+            out[i] = "";
+        }
 
         return out;
     }
 
     public String[] getRadialItemsAltDefault() {
-        String[] out = new String[8];
-        out[0] = "";
-        out[1] = "";
-        out[2] = "";
-        out[3] = "";
-        out[4] = "";
-        out[5] = "";
-        out[6] = "";
-        out[7] = "";
+        String[] out = new String[14];
+        for (int i = 0; i < 14; i++) {
+            out[i] = "";
+        }
 
         return out;
     }

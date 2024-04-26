@@ -159,14 +159,14 @@ public class ClientNetworking {
     }
 
     public static void sendLegacyPackets(ClientPacketListener connection, VrPlayerState vrPlayerState) {
-        // left controller packet
+        // main controller packet
         FriendlyByteBuf controller0Buffer = new FriendlyByteBuf(Unpooled.buffer());
         controller0Buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA.ordinal());
         controller0Buffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.reverseHands);
         vrPlayerState.controller0().serialize(controller0Buffer);
         connection.send(new ServerboundCustomPayloadPacket(CommonNetworkHelper.CHANNEL, controller0Buffer));
 
-        // right controller packet
+        // offhand controller packet
         FriendlyByteBuf controller1Buffer = new FriendlyByteBuf(Unpooled.buffer());
         controller1Buffer.writeByte(CommonNetworkHelper.PacketDiscriminators.CONTROLLER1DATA.ordinal());
         controller1Buffer.writeBoolean(ClientDataHolderVR.getInstance().vrSettings.reverseHands);

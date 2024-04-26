@@ -37,6 +37,8 @@ import java.util.HashSet;
 public class InteractTracker extends Tracker {
     public boolean[] bukkit = new boolean[2];
     public int hotbar = -1;
+    // indicates if the bow can be drawn
+    private final boolean[] inBow = new boolean[2];
     public BlockHitResult[] inBlockHit = new BlockHitResult[2];
     BlockPos[] inBlockPos = new BlockPos[2];
     Entity[] inEntity = new Entity[2];
@@ -66,10 +68,8 @@ public class InteractTracker extends Tracker {
 
             if (dataholder.vrSettings.seated) {
                 return false;
-            } else if (p.isBlocking() && this.hotbar < 0) {
-                return false;
             } else {
-                return !dataholder.bowTracker.isNotched();
+                return !(p.isBlocking() && this.hotbar < 0);
             }
         }
     }
@@ -89,6 +89,7 @@ public class InteractTracker extends Tracker {
             this.dh.cameraTracker.stopMoving();
         }
 
+        this.inBow[c] = false;
         this.inBlockPos[c] = null;
         this.inBlockHit[c] = null;
         this.inEntity[c] = null;
@@ -144,10 +145,16 @@ public class InteractTracker extends Tracker {
         Vec3 vec34 = new Vec3(0.0D, 0.0D, -1.0D);
 
         for (int j = 0; j < 2; ++j) {
-            if (!this.inCamera[j] && !this.inHandheldCamera[j] || !VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.values()[j])) {
+            if (!this.inCamera[j] && !this.inHandheldCamera[j] && !this.inBow[j] || !VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.values()[j])) {
                 this.reset(player, j);
 
                 if (j == 0 && this.hotbar >= 0) {
+                    this.active[j] = true;
+                }
+
+                // roomscale Bow shooting, only activate for the hand with the arrow
+                if (!this.active[j] && this.dh.bowTracker.isNotched() && j == 0) {
+                    this.inBow[j] = true;
                     this.active[j] = true;
                 }
 

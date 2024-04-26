@@ -9,6 +9,8 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_11;
 import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_8;
 import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_9;
+import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixin;
+import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixinSodium_0_5_8;
 import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixinSodium_0_6;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
@@ -77,10 +79,13 @@ public class MixinConfig implements IMixinConfigPlugin {
             neededClass = "me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType";
         } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_9.class.getName())) {
             neededClass = "me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType";
-        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_11.class.getName())) {
+        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_11.class.getName()) || mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_5_8.class.getName())
+        ) {
             neededClass = "me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType";
         } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_6.class.getName())) {
             neededClass = "net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType";
+        }else if (mixinClassName.equals(IrisChunkProgramOverridesMixin.class.getName())) {
+            neededClass = "net.caffeinemc.mods.sodium.client.gl.shader.GlProgram";
         }
 
         if (!neededClass.isEmpty()) {

@@ -25,9 +25,9 @@ import java.util.function.Consumer;
 public class ServerNetworking {
 
     // temporarily stores the packets from legacy clients to assemble a complete VrPlayerState
-    private final static Map<UUID, Map<CommonNetworkHelper.PacketDiscriminators, FriendlyByteBuf>> legacyDataMap = new HashMap<>();
+    private static final Map<UUID, Map<CommonNetworkHelper.PacketDiscriminators, FriendlyByteBuf>> legacyDataMap = new HashMap<>();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("VivecraftServer");
+    public static final Logger LOGGER = LoggerFactory.getLogger("VivecraftServer");
 
     public static void handlePacket(CommonNetworkHelper.PacketDiscriminators packetID, FriendlyByteBuf buffer, ServerPlayer player, Consumer<ClientboundCustomPayloadPacket> packetConsumer) {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(player);
