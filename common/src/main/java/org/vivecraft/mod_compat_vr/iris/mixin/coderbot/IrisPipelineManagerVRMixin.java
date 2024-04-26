@@ -1,6 +1,5 @@
 package org.vivecraft.mod_compat_vr.iris.mixin.coderbot;
 
-import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.PipelineManager;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.DimensionId;
