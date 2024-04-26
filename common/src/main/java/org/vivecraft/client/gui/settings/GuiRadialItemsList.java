@@ -50,10 +50,10 @@ public class GuiRadialItemsList extends ObjectSelectionList<GuiRadialItemsList.B
         }
 
         public void render(
-            GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY,
+            PoseStack poseStack, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY,
             boolean pIsMouseOver, float pPartialTicks)
         {
-            guiGraphics.drawString(minecraft.font, this.labelText, (minecraft.screen.width / 2 - this.labelWidth / 2),
+            minecraft.font.draw(poseStack, this.labelText, (minecraft.screen.width / 2 - this.labelWidth / 2),
                 (pTop + pHeight - 9 - 1), 6777215);
         }
     }
@@ -68,7 +68,7 @@ public class GuiRadialItemsList extends ObjectSelectionList<GuiRadialItemsList.B
         }
 
         public void render(
-            GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY,
+            PoseStack poseStack, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY,
             boolean pIsMouseOver, float pPartialTicks)
         {
             ChatFormatting chatformatting = ChatFormatting.WHITE;
@@ -77,7 +77,7 @@ public class GuiRadialItemsList extends ObjectSelectionList<GuiRadialItemsList.B
                 chatformatting = ChatFormatting.GREEN;
             }
 
-            guiGraphics.drawString(minecraft.font, chatformatting + I18n.get(this.myKey.getName()),
+            minecraft.font.draw(poseStack, chatformatting + I18n.get(this.myKey.getName()),
                 (minecraft.screen.width / 2 - maxListLabelWidth / 2), (pTop + pHeight / 2 - 9 / 2), 16777215);
         }
 

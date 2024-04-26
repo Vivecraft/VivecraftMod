@@ -186,15 +186,15 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
         super.render(poseStack, pMouseX, pMouseY, pPartialTicks);
 
         if (this.visibleList == null) {
-            guiGraphics.drawCenteredString(this.minecraft.font,
+            drawCenteredString(poseStack, this.minecraft.font,
                 Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50,
                 5635925);
 
             if (this.isShift) {
-                guiGraphics.drawCenteredString(this.minecraft.font,
+                drawCenteredString(poseStack, this.minecraft.font,
                     Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36,
                     13777015);
-                guiGraphics.drawCenteredString(this.minecraft.font,
+                drawCenteredString(poseStack, this.minecraft.font,
                     Component.translatable("vivecraft.messages.radialmenubind.3"), this.width / 2, this.height - 22,
                     13777015);
             }
