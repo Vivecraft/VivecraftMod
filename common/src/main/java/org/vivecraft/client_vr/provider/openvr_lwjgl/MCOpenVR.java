@@ -879,7 +879,11 @@ public class MCOpenVR extends MCVR {
         if (hasInvalidChars || alwaysThrow) {
             String error = knownError + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
             System.out.println(error + path);
-            throw new RenderConfigException(knownError, Component.empty().append(error).append(pathFormatted));
+            if (hasInvalidChars) {
+                throw new RenderConfigException(knownError, Component.translatable("vivecraft.messages.steamvrInvalidCharacters", pathFormatted));
+            } else {
+                throw new RenderConfigException(knownError, Component.empty().append(error).append(pathFormatted));
+            }
         }
     }
 
@@ -1393,5 +1397,18 @@ public class MCOpenVR extends MCVR {
     public boolean isActive() {
         int activityLevel = VRSystem_GetTrackedDeviceActivityLevel(0);
         return activityLevel == EDeviceActivityLevel_k_EDeviceActivityLevel_UserInteraction || activityLevel == EDeviceActivityLevel_k_EDeviceActivityLevel_UserInteraction_Timeout;
+    }
+
+    @Override
+    public float getIPD() {
+        return VRSystem_GetFloatTrackedDeviceProperty(k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty_Prop_UserIpdMeters_Float, this.hmdErrorStore);
+    }
+
+    /**
+     * this should query the actual name from the runtime, but openvr doesn't seem to have an api for that
+     */
+    @Override
+    public String getRuntimeName() {
+        return "SteamVR";
     }
 }

@@ -1,6 +1,5 @@
 package org.vivecraft.mod_compat_vr.iris.mixin.coderbot;
 
-import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.PipelineManager;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.DimensionId;
@@ -16,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
@@ -98,7 +98,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                 vivecraft$shadowRenderTargets = null;
 
                 for (RenderPass renderPass : RenderPass.values()) {
-                    Iris.logger.info("Creating VR pipeline for dimension {}, RenderPass {}", newDimension, renderPass);
+                    VRSettings.logger.info("Creating VR pipeline for dimension {}, RenderPass {}", newDimension, renderPass);
                     WorldRenderPass worldRenderPass = null;
                     switch (renderPass) {
                         case LEFT, RIGHT -> worldRenderPass = WorldRenderPass.stereoXR;
@@ -108,7 +108,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                         case SCOPER -> worldRenderPass = WorldRenderPass.rightTelescope;
                         case CAMERA -> worldRenderPass = WorldRenderPass.camera;
                         default -> {
-                            Iris.logger.info("skipped VR pipeline for dimension {}, RenderPass {}, not used", newDimension, renderPass);
+                            VRSettings.logger.info("skipped VR pipeline for dimension {}, RenderPass {}, not used", newDimension, renderPass);
                             continue;
                         }
                     }
@@ -168,19 +168,17 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Inject(method = "destroyPipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V"), remap = false)
     private void vivecraft$destroyVRPipelines(CallbackInfo ci) {
-        if (VRState.vrInitialized) {
-            vivecraft$vrPipelinesPerDimension.forEach((dimID, map) -> {
-                map.forEach((renderPass, pipeline) -> {
-                    Iris.logger.info("Destroying VR pipeline {}", renderPass);
-                    resetTextureState();
-                    pipeline.destroy();
-                });
-                map.clear();
+        vivecraft$vrPipelinesPerDimension.forEach((dimID, map) -> {
+            map.forEach((renderPass, pipeline) -> {
+                VRSettings.logger.info("Destroying VR pipeline {}", renderPass);
+                resetTextureState();
+                pipeline.destroy();
             });
-            vivecraft$shadowRenderTargets = null;
-            vivecraft$vrPipelinesPerDimension.clear();
-            vivecraft$vanillaPipeline = null;
-        }
+            map.clear();
+        });
+        vivecraft$shadowRenderTargets = null;
+        vivecraft$vrPipelinesPerDimension.clear();
+        vivecraft$vanillaPipeline = null;
     }
 
     @Override

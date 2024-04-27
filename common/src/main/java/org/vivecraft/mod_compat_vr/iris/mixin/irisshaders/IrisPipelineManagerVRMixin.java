@@ -17,6 +17,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.client_xr.render_pass.WorldRenderPass;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
 
 import java.util.HashMap;
@@ -61,6 +62,13 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Unique
     private WorldRenderPass vivecraft$currentWorldRenderPass = null;
+
+    @Inject(method = "preparePipeline", at = @At(value = "HEAD"), remap = false)
+    private void vivecraft$disableDHOverrideOnChange(CallbackInfoReturnable<WorldRenderingPipeline> cir) {
+        if (VRState.vrInitialized && pipeline != null) {
+            IrisHelper.unregisterDHIfThere(pipeline);
+        }
+    }
 
     @Inject(method = "preparePipeline", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;", shift = At.Shift.BEFORE), remap = false)
     private void vivecraft$generateVanillaPipeline(CallbackInfoReturnable<WorldRenderingPipeline> cir) {
@@ -151,19 +159,20 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
 
     @Inject(method = "destroyPipeline", at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V"), remap = false)
     private void vivecraft$destroyVRPipelines(CallbackInfo ci) {
-        if (VRState.vrInitialized) {
-            vivecraft$vrPipelinesPerDimension.forEach((dimID, map) -> {
-                map.forEach((renderPass, pipeline) -> {
-                    VRSettings.logger.info("Destroying VR pipeline {}", renderPass);
-                    resetTextureState();
-                    pipeline.destroy();
-                });
-                map.clear();
-            });
-            vivecraft$shadowRenderTargets = null;
-            vivecraft$vrPipelinesPerDimension.clear();
-            vivecraft$vanillaPipeline = null;
+        if (pipeline != null) {
+            IrisHelper.unregisterDHIfThere(pipeline);
         }
+        vivecraft$vrPipelinesPerDimension.forEach((dimID, map) -> {
+            map.forEach((renderPass, pipeline) -> {
+                VRSettings.logger.info("Destroying VR pipeline {}", renderPass);
+                resetTextureState();
+                pipeline.destroy();
+            });
+            map.clear();
+        });
+        vivecraft$shadowRenderTargets = null;
+        vivecraft$vrPipelinesPerDimension.clear();
+        vivecraft$vanillaPipeline = null;
     }
 
     @Override

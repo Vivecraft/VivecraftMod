@@ -251,7 +251,7 @@ public class RenderHelper {
         Matrix4fStack posestack = RenderSystem.getModelViewStack();
         posestack.pushMatrix();
         posestack.identity();
-        posestack.translate(0.0F, 0.0F, -2000.0F);
+        posestack.translate(0.0F, 0.0F, -11000.0F);
         RenderSystem.applyModelViewMatrix();
 
         RenderSystem.blendFuncSeparate(
