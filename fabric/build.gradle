@@ -21,7 +21,7 @@ configurations {
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modCompileOnly "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
@@ -30,9 +30,11 @@ dependencies {
 
     // for sodium compat
     modCompileOnly "maven.modrinth:sodium:mc1.20.4-0.5.8"
+    //modRuntimeOnly files("../sodium.jar")
 
     // for iris compat
     modCompileOnly "maven.modrinth:iris:1.6.17+1.20.4"
+    //modRuntimeOnly files("../iris.jar")
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 

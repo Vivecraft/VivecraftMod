@@ -428,6 +428,10 @@ public class VREffectsHelper {
         RenderSystem.enableCull();
 
         poseStack.pushMatrix();
+        // transfer the  rotation
+        RenderSystem.getModelViewStack().mul(poseStack, poseStack);
+        RenderSystem.getModelViewStack().pushMatrix().identity();
+        RenderSystem.applyModelViewMatrix();
 
         int tzOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
         dataHolder.menuWorldRenderer.time = dataHolder.menuWorldRenderer.fastTime
@@ -487,6 +491,9 @@ public class VREffectsHelper {
 
         poseStack.popMatrix();
         RenderSystem.defaultBlendFunc();
+
+        RenderSystem.getModelViewStack().popMatrix();
+        RenderSystem.applyModelViewMatrix();
     }
 
     public static void renderVRFabulous(float partialTicks, LevelRenderer levelRenderer, boolean menuHandRight, boolean menuHandLeft) {

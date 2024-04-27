@@ -24,12 +24,12 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43C;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
 
 import java.util.function.Supplier;
 
@@ -360,8 +360,15 @@ public class RenderHelper {
         Vector3f light0Old = RenderSystemAccessor.getShaderLightDirections()[0];
         Vector3f light1Old = RenderSystemAccessor.getShaderLightDirections()[1];
 
+        Vector3f normal = new Vector3f(0, 0, 1);
+
+        // weird iris behaviour
+        if (ShadersHelper.isShaderActive()) {
+            normal = new Matrix3f(pMatrix).transform(normal);
+        }
+
         // set lights to front
-        RenderSystem.setShaderLights(new Vector3f(0, 0, 1), new Vector3f(0, 0, 1));
+        RenderSystem.setShaderLights(normal, normal);
         RenderSystem.setupShaderLights(RenderSystem.getShader());
 
         bufferbuilder.vertex(pMatrix, (-(size / 2.0F)), (-(size * aspect) / 2.0F), 0)
