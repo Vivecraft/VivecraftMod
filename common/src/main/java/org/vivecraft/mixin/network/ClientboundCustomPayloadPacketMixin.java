@@ -18,10 +18,11 @@ public class ClientboundCustomPayloadPacketMixin {
      * catches the vivecraft client bound packets so that they don't get discarded.
      * Neoforge handles that with the network events in {@link org.vivecraft.neoforge.event.ClientEvents#handleVivePacket}
      */
-    @Inject(at = @At("HEAD"), method = "readPayload(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/network/FriendlyByteBuf;)Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;", cancellable = true)
+    // TODO 1.20.5
+    /*@Inject(at = @At("HEAD"), method = "readPayload(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/network/FriendlyByteBuf;)Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;", cancellable = true)
     private static void vivecraft$catchVivecraftPackets(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf, CallbackInfoReturnable<CustomPacketPayload> cir) {
         if (CommonNetworkHelper.CHANNEL.equals(resourceLocation)) {
             cir.setReturnValue(new VivecraftDataPacket(friendlyByteBuf));
         }
-    }
+    }*/
 }

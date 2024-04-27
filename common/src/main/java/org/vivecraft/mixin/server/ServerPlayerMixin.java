@@ -2,6 +2,7 @@ package org.vivecraft.mixin.server;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -18,7 +19,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -56,13 +57,12 @@ public abstract class ServerPlayerMixin extends Player {
         if (ServerConfig.vrFun.get() && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
             ItemStack itemstack;
             if (this.random.nextInt(2) == 1) {
-                itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
+                itemstack = new ItemStack(Items.PUMPKIN_PIE);
+                itemstack.set(DataComponents.CUSTOM_NAME, Component.literal("EAT ME"));
             } else {
-                itemstack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)
-                    .setHoverName(Component.literal("DRINK ME"));
+                itemstack = PotionContents.createItemStack(Items.POTION, Potions.WATER);
+                itemstack.set(DataComponents.CUSTOM_NAME, Component.literal("DRINK ME"));
             }
-
-            itemstack.getTag().putInt("HideFlags", 32);
 
             if (this.getInventory().add(itemstack)) {
                 this.inventoryMenu.broadcastChanges();

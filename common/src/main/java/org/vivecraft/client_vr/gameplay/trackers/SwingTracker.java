@@ -130,7 +130,8 @@ public class SwingTracker extends Tracker {
                 float weaponLength;
                 float entityReachAdd;
 
-                double playerEntityReach = Xplat.getItemEntityReach(3.0, itemstack, c == 0 ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+                // TODO 1.20.5 check
+                double playerEntityReach = player.entityInteractionRange();
                 if (Xplat.isModLoaded("bettercombat")) {
                     // better combat overrides the player reach
                     playerEntityReach = BetterCombatHelper.getItemRange(playerEntityReach, itemstack);

@@ -6,8 +6,10 @@ import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.level.block.Blocks;
 import org.lwjgl.opengl.GL13C;
 import org.vivecraft.client.Xplat;
@@ -124,7 +126,7 @@ public class VRPassHelper {
                 ItemStack itemstack = mc.player.getInventory().getArmor(3);
 
                 if (itemstack.getItem() == Blocks.CARVED_PUMPKIN.asItem()
-                    && (!itemstack.hasTag() || itemstack.getTag().getInt("CustomModelData") == 0)) {
+                    && (itemstack.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.DEFAULT).value() == 0)) {
                     dataHolder.pumpkineffect = 1.0F;
                 } else {
                     dataHolder.pumpkineffect = 0.0F;

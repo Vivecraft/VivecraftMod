@@ -69,7 +69,7 @@ public class VRPlayerRenderer extends PlayerRenderer {
     }
 
     @Override
-    protected void setupRotations(AbstractClientPlayer pEntityLiving, PoseStack pMatrixStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks) {
+    protected void setupRotations(AbstractClientPlayer pEntityLiving, PoseStack pMatrixStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks, float entityScale) {
         UUID uuid = pEntityLiving.getUUID();
         if (ClientDataHolderVR.getInstance().currentPass != RenderPass.GUI && VRPlayersClient.getInstance().isTracked(uuid)) {
             VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(uuid);
@@ -77,6 +77,6 @@ public class VRPlayerRenderer extends PlayerRenderer {
         }
 
         //vanilla below here
-        super.setupRotations(pEntityLiving, pMatrixStack, pAgeInTicks, pRotationYaw, pPartialTicks);
+        super.setupRotations(pEntityLiving, pMatrixStack, pAgeInTicks, pRotationYaw, pPartialTicks, entityScale);
     }
 }

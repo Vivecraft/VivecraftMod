@@ -2,6 +2,7 @@ package org.vivecraft.mod_compat_vr.iris.mixin;
 
 import net.irisshaders.iris.uniforms.CapturedRenderingState;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,7 +22,7 @@ public class IrisDHCompatVRMixin {
                 ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT) {
                 // VR projections are not centered
 
-                Matrix4f vrProjection = CapturedRenderingState.INSTANCE.getGbufferProjection();
+                Matrix4fc vrProjection = CapturedRenderingState.INSTANCE.getGbufferProjection();
                 Matrix4f dhProjection = cir.getReturnValue();
                 dhProjection.m20(vrProjection.m20());
                 dhProjection.m21(vrProjection.m21());

@@ -22,8 +22,8 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(FenceGateBlock.class)
 public class FenceGateBlockVRMixin {
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"), method = "use", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$hapticFeedbackOnClose1(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir, boolean opening) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"), method = "useWithoutItem", locals = LocalCapture.CAPTURE_FAILHARD)
+    public void vivecraft$hapticFeedbackOnClose1(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir, boolean opening) {
         if (VRState.vrRunning && !opening && Minecraft.getInstance().player != null && Minecraft.getInstance().player.isAlive() && Minecraft.getInstance().player.blockPosition().distSqr(blockPos) < 25.0D) {
             ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
         }

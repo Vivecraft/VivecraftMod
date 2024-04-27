@@ -27,6 +27,7 @@ import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
@@ -112,7 +113,7 @@ public class VRPlayer {
 
         float f = worldScaleOverride.getFloat();
 
-        if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom()) {
+        if (MethodHolder.isInMenuRoom()) {
             this.worldScale = 1.0F;
         } else {
             if (this.wfCount > 0 && !this.mc.isPaused()) {
@@ -182,7 +183,7 @@ public class VRPlayer {
             }
         }
 
-        if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom()) {
+        if (this.dh.vrSettings.seated && !MethodHolder.isInMenuRoom()) {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
         }
     }
@@ -392,7 +393,7 @@ public class VRPlayer {
                         || (dataholder.climbTracker.isGrabbingLadder() && dataholder.vrSettings.realisticClimbEnabled)) && player.fallDistance == 0.0F) {
 
                     // is the player significantly inside a block?
-                    float climbShrink = player.getDimensions(player.getPose()).width * 0.45F;
+                    float climbShrink = player.getDimensions(player.getPose()).width() * 0.45F;
                     double shrunkClimbHalfWidth = playerHalfWidth - climbShrink;
 
                     AABB bbClimb = new AABB(

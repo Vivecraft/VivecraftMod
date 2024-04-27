@@ -1,6 +1,8 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
@@ -25,11 +27,13 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -167,8 +171,8 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
      */
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getRenderDistance()F", shift = Shift.BEFORE),
-        method = "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;FJZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;)V ")
-    public void vivecraft$stencil(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
+        method = "renderLevel")
+    public void vivecraft$stencil(CallbackInfo ci) {
         if (!RenderPassType.isVanilla()) {
             this.minecraft.getProfiler().popPush("stencil");
             VREffectsHelper.drawEyeStencil(false);
@@ -203,7 +207,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "renderLevel")
-    public void vivecraft$interactOutline(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+    public void vivecraft$interactOutline(float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci, @Local PoseStack poseStack) {
         if (!RenderPassType.isVanilla()) {
             this.level.getProfiler().popPush("interact outline");
             vivecraft$selR = vivecraft$selG = vivecraft$selB = 1f;
@@ -244,40 +248,40 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     private boolean vivecraft$guiRendered = false;
 
     @Inject(at = @At("HEAD"), method = "renderLevel")
-    public void vivecraft$resetGuiRendered(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+    public void vivecraft$resetGuiRendered(CallbackInfo ci) {
         vivecraft$guiRendered = false;
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = Shift.AFTER), method = "renderLevel")
-    public void vivecraft$renderVrStuffPart1(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+    public void vivecraft$renderVrStuffPart1(float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;
         }
-        vivecraft$menuHandleft = ((GameRendererExtension) gameRenderer).vivecraft$isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
+        vivecraft$menuHandleft = MethodHolder.isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
         vivecraft$menuhandright = vivecraft$menuHandleft || ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar;
 
         if (transparencyChain != null) {
-            VREffectsHelper.renderVRFabulous(f, (LevelRenderer) (Object) this, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+            VREffectsHelper.renderVRFabulous(f, (LevelRenderer) (Object) this, vivecraft$menuhandright, vivecraft$menuHandleft);
         } else {
-            VREffectsHelper.renderVrFast(f, false, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+            VREffectsHelper.renderVrFast(f, false, vivecraft$menuhandright, vivecraft$menuHandleft);
             if (ShadersHelper.isShaderActive() && ClientDataHolderVR.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID) {
                 // shaders active, and render gui before translucents
-                VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+                VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft);
                 vivecraft$guiRendered = true;
             }
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = Shift.BEFORE, ordinal = 3),
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;getCloudsType()Lnet/minecraft/client/CloudStatus;", shift = Shift.BEFORE),
         method = "renderLevel")
-    public void vivecraft$renderVrStuffPart2(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo ci) {
+    public void vivecraft$renderVrStuffPart2(float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;
         }
 
         if (transparencyChain == null && (!ShadersHelper.isShaderActive() || ClientDataHolderVR.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.AFTER_TRANSLUCENT)) {
             // no shaders, or shaders, and gui after translucents
-            VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+            VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft);
             vivecraft$guiRendered = true;
         }
     }
@@ -285,13 +289,21 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     // if the gui didn't render yet, and something canceled the level renderer, render it now.
     // or if shaders are on, and option AFTER_SHADER is selected
     @Inject(at = @At("RETURN"), method = "renderLevel")
-    public void vivecraft$renderVrStuffFinal(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, CallbackInfo info) {
+    public void vivecraft$renderVrStuffFinal(float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;
         }
 
         if (!vivecraft$guiRendered && transparencyChain == null) {
-            VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft, poseStack);
+            RenderSystem.getModelViewStack().pushMatrix().identity();
+            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, RenderSystem.getModelViewStack());
+            RenderSystem.applyModelViewMatrix();
+
+            VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft);
+
+            RenderSystem.getModelViewStack().popMatrix();
+            RenderSystem.applyModelViewMatrix();
+
             vivecraft$guiRendered = true;
         }
     }

@@ -57,6 +57,8 @@ public class VivecraftItemRendering {
                 }
             } else if (pStack.getUseAnimation() == UseAnim.TOOT_HORN) {
                 rendertype = VivecraftItemTransformType.Horn;
+            } else if (item instanceof MaceItem || pStack.is(ItemTags.VIVECRAFT_MACES)) {
+                rendertype = VivecraftItemTransformType.Mace;
             } else if (item instanceof SwordItem || pStack.is(ItemTags.VIVECRAFT_SWORDS)) {
                 rendertype = VivecraftItemTransformType.Sword;
             } else if (item instanceof ShieldItem || pStack.is(ItemTags.VIVECRAFT_SHIELDS)) {
@@ -341,6 +343,10 @@ public class VivecraftItemRendering {
                     translateZ = 0.0D;
                     translateY = 0.0D;
                     translateX = 0.0D;
+                } else if (rendertype == VivecraftItemTransformType.Mace) {
+                    translateX = 0.00D;
+                    translateY = 0.02D;
+                    translateZ = -0.07D;
                 }
             }
         } else {
@@ -375,6 +381,7 @@ public class VivecraftItemRendering {
         Crossbow,
         Telescope,
         Compass,
-        Horn
+        Horn,
+        Mace
     }
 }

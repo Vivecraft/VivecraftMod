@@ -17,6 +17,7 @@ import net.minecraft.world.phys.*;
 import org.joml.Vector2f;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -347,7 +348,7 @@ public class GuiHandler {
         }
 
         // check if the new screen is meant to show the MenuRoom, instead of the current screen
-        boolean staticScreen = mc.gameRenderer == null || (((GameRendererExtension) mc.gameRenderer).vivecraft$willBeInMenuRoom(newScreen));
+        boolean staticScreen = MethodHolder.willBeInMenuRoom(newScreen);
         staticScreen = staticScreen & (!dh.vrSettings.seated && !dh.vrSettings.menuAlwaysFollowFace);
 
         if (staticScreen) {
@@ -427,7 +428,7 @@ public class GuiHandler {
         }
     }
 
-    public static Vec3 applyGUIModelView(RenderPass currentPass, PoseStack pMatrixStack) {
+    public static Vec3 applyGUIModelView(RenderPass currentPass, org.joml.Matrix4f pMatrixStack) {
         mc.getProfiler().push("applyGUIModelView");
         Vec3 vec3 = RenderHelper.getSmoothCameraPosition(currentPass, dh.vrPlayer.vrdata_world_render);
 
@@ -510,7 +511,7 @@ public class GuiHandler {
             guirot = Matrix4f.multiply(matrix4f4, guirot);
         }
 
-        if ((dh.vrSettings.seated || dh.vrSettings.menuAlwaysFollowFace) && ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom()) {
+        if ((dh.vrSettings.seated || dh.vrSettings.menuAlwaysFollowFace) && MethodHolder.isInMenuRoom()) {
             scale = 2.0F;
             Vec3 vec35 = new Vec3(0.0D, 0.0D, 0.0D);
 
@@ -528,7 +529,7 @@ public class GuiHandler {
             f1 = f1 / (float) dh.vr.hmdYawSamples.size();
             f1 = (float) Math.toRadians(f1);
             Vec3 vec38 = new Vec3(-Math.sin(f1), 0.0D, Math.cos(f1));
-            float f4 = ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
+            float f4 = MethodHolder.isInMenuRoom() ? 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
             Vec3 vec39 = vec35.add(new Vec3(vec38.x * (double) f4, vec38.y * (double) f4, vec38.z * (double) f4));
             Vec3 vec310 = new Vec3(vec39.x, vec39.y, vec39.z);
             Matrix4f matrix4f3 = Matrix4f.rotationY((float) Math.PI - f1);
@@ -553,9 +554,9 @@ public class GuiHandler {
         }
 
         Vec3 vec36 = guipos.subtract(vec3);
-        pMatrixStack.translate(vec36.x, vec36.y, vec36.z);
-        pMatrixStack.mulPoseMatrix(guirot.toMCMatrix());
-        pMatrixStack.translate(guilocal.x, guilocal.y, guilocal.z);
+        pMatrixStack.translate((float) vec36.x, (float) vec36.y, (float) vec36.z);
+        pMatrixStack.mul(guirot.toMCMatrix());
+        pMatrixStack.translate((float) guilocal.x, (float) guilocal.y, (float) guilocal.z);
         float f2 = scale * dh.vrPlayer.vrdata_world_render.worldScale;
         pMatrixStack.scale(f2, f2, f2);
         guiScaleApplied = f2;

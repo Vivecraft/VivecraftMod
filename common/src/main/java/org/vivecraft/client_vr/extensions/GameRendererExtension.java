@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.extensions;
 
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -28,10 +27,6 @@ public interface GameRendererExtension {
     double vivecraft$getRveY();
 
     Vec3 vivecraft$getRvePos(float partialTicks);
-
-    boolean vivecraft$isInMenuRoom();
-
-    boolean vivecraft$willBeInMenuRoom(Screen newScreen);
 
     Vec3 vivecraft$getCrossVec();
 

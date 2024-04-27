@@ -9,6 +9,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.sounds.SoundEvent;
@@ -19,9 +20,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,6 +47,8 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jinfinadeck;
 import org.vivecraft.client_vr.utils.external.jkatvr;
 import org.vivecraft.common.network.CommonNetworkHelper;
+
+import java.util.UUID;
 
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements PlayerExtension {
@@ -159,6 +164,9 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         }
     }
 
+    @Unique
+    private static final UUID WALK_UP_BLOCKS_MODIFIER_UUID = UUID.fromString("eeec861f-4e0f-4b53-a102-2a6123f53d38");
+
     @Inject(at = @At("HEAD"), method = "move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V", cancellable = true)
     public void vivecraft$overwriteMove(MoverType pType, Vec3 pPos, CallbackInfo info) {
         if (!VRState.vrRunning || !vivecraft$isLocalPlayer(this)) {
@@ -189,11 +197,25 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 double d3 = this.getZ();
                 super.move(pType, pPos);
 
-                if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
-                    this.setMaxUpStep(this.getBlockJumpFactor() == 1.0F ? 1.0F : 0.6F);
-                } else {
-                    this.setMaxUpStep(0.6F);
-                    this.updateAutoJump((float) (this.getX() - d2), (float) (this.getZ() - d3));
+                // TODO 1.20.5
+                AttributeInstance attributeInstance = this.getAttribute(Attributes.STEP_HEIGHT);
+                if (attributeInstance != null) {
+                    if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
+                        if (this.getBlockJumpFactor() == 1.0F) {
+                            if (attributeInstance.getModifier(WALK_UP_BLOCKS_MODIFIER_UUID) == null) {
+                                attributeInstance.addTransientModifier(new AttributeModifier(WALK_UP_BLOCKS_MODIFIER_UUID, "walk up block", 0.4F, AttributeModifier.Operation.ADD_VALUE));
+                            }
+                        } else {
+                            if (attributeInstance.getModifier(WALK_UP_BLOCKS_MODIFIER_UUID) != null) {
+                                attributeInstance.removeModifier(WALK_UP_BLOCKS_MODIFIER_UUID);
+                            }
+                        }
+                    } else {
+                        if (attributeInstance.getModifier(WALK_UP_BLOCKS_MODIFIER_UUID) != null) {
+                            attributeInstance.removeModifier(WALK_UP_BLOCKS_MODIFIER_UUID);
+                        }
+                        this.updateAutoJump((float) (this.getX() - d2), (float) (this.getZ() - d3));
+                    }
                 }
 
                 double d4 = this.getY() + this.vivecraft$getRoomYOffsetFromPose();
@@ -236,7 +258,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     public ItemStack eat(Level level, ItemStack itemStack) {
-        if (VRState.vrRunning && itemStack.isEdible() && (Object) this == Minecraft.getInstance().player && itemStack.getHoverName().getString().equals("EAT ME")) {
+        if (VRState.vrRunning && itemStack.get(DataComponents.FOOD) != null && (Object) this == Minecraft.getInstance().player && itemStack.getHoverName().getString().equals("EAT ME")) {
             ClientDataHolderVR.getInstance().vrPlayer.wfMode = 0.5D;
             ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
         }
@@ -497,12 +519,11 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Unique
     public void vivecraft$stepSound(BlockPos blockforNoise, Vec3 soundPos) {
         BlockState blockstate = this.level().getBlockState(blockforNoise);
-        Block block = blockstate.getBlock();
-        SoundType soundtype = block.getSoundType(blockstate);
+        SoundType soundtype = blockstate.getSoundType();
         BlockState blockstate1 = this.level().getBlockState(blockforNoise.above());
 
         if (blockstate1.getBlock() == Blocks.SNOW) {
-            soundtype = Blocks.SNOW.getSoundType(blockstate1);
+            soundtype = Blocks.SNOW.defaultBlockState().getSoundType();
         }
 
         float f = soundtype.getVolume();
@@ -510,7 +531,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         SoundEvent soundevent = soundtype.getStepSound();
 
         // TODO: liquid is deprecated
-        if (!this.isSilent() && !block.defaultBlockState().liquid()) {
+        if (!this.isSilent() && !blockstate.liquid()) {
             this.level().playSound(null, soundPos.x, soundPos.y, soundPos.z, soundevent, this.getSoundSource(), f, f1);
         }
     }

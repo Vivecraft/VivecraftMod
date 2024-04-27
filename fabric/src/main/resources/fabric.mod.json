@@ -25,6 +25,9 @@
     "main": [
       "org.vivecraft.fabric.VivecraftMod"
     ],
+    "client": [
+      "org.vivecraft.fabric.VivecraftModClientOnly"
+    ],
     "modmenu": [
       "org.vivecraft.client.fabric.VivecraftModMenuApiImpl"
     ]
@@ -45,9 +48,9 @@
     "vivecraft.fabric.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.14",
-    "minecraft": ["1.20.3", "1.20.4"],
-    "java": ">=17"
+    "fabricloader": ">=0.15.6",
+    "minecraft": ["1.20.5", "1.20.6"],
+    "java": ">=21"
   },
   "breaks": {
     "sodium": ["0.4.11+build.25", "0.4.11+build.26"]

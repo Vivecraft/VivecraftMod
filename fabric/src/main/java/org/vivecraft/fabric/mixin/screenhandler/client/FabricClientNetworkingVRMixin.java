@@ -12,8 +12,8 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 
 @Mixin(ClientNetworking.class)
 public class FabricClientNetworkingVRMixin {
-    @Inject(at = @At("HEAD"), method = "openScreen")
-    private void markScreenActiveForge(ResourceLocation typeId, int syncId, Component title, FriendlyByteBuf buf, CallbackInfo ci) {
+    @Inject(at = @At("HEAD"), method = "openScreen", remap = false)
+    private void markScreenActiveFabric(CallbackInfo ci) {
         GuiHandler.guiAppearOverBlockActive = true;
     }
 }

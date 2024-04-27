@@ -88,27 +88,6 @@ public class XplatImpl {
         return biome.getModifiedSpecialEffects();
     }
 
-    public static double getItemEntityReach(double baseRange, ItemStack itemStack, EquipmentSlot slot) {
-        var attributes = itemStack.getAttributeModifiers(slot).get(ForgeMod.ENTITY_REACH.get());
-        for (var a : attributes) {
-            if (a.getOperation() == AttributeModifier.Operation.ADDITION) {
-                baseRange += a.getAmount();
-            }
-        }
-        double totalRange = baseRange;
-        for (var a : attributes) {
-            if (a.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE) {
-                totalRange += baseRange * a.getAmount();
-            }
-        }
-        for (var a : attributes) {
-            if (a.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL) {
-                totalRange *= 1.0 + a.getAmount();
-            }
-        }
-        return totalRange;
-    }
-
     public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
         // Forge I really don't know why you are insisting on this being a DiscardedPayload
         listener.send(new ServerboundCustomPayloadPacket(new DiscardedPayload(

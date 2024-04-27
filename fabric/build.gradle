@@ -29,15 +29,15 @@ dependencies {
     modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for sodium compat
-    modRuntimeOnly "maven.modrinth:sodium:mc1.20.4-0.5.8"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.20.5-0.5.8"
 
     // for iris compat
-    modRuntimeOnly "maven.modrinth:iris:1.7.0+1.20.4"
+    modRuntimeOnly "maven.modrinth:iris:1.7.0+1.20.5"
     modRuntimeOnly 'org.anarres:jcpp:1.4.14' //temp iris
     modRuntimeOnly 'io.github.douira:glsl-transformer:2.0.0-pre13' //temp iris
 
     // for REI compat
-    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:14.0.688") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:14.0.688") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" exclude group: "dev.architectury" }
 
     // for Pehkui compat
     modCompileOnly("com.github.Virtuoel:Pehkui:3.7.12") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
@@ -48,7 +48,7 @@ dependencies {
     // modCompileOnly "maven.modrinth:indium:1.0.30+mc1.20.4"
 
     //mod menu
-    modApi("com.terraformersmc:modmenu:9.0.0") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    modApi("com.terraformersmc:modmenu:10.0.0-beta.1") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for immersive portals compat
     modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
@@ -58,14 +58,16 @@ dependencies {
     // commands also needs base
     include(modImplementation(fabricApi.module("fabric-api-base", rootProject.fabric_api_version)))
     include(modImplementation(fabricApi.module("fabric-command-api-v2", rootProject.fabric_api_version)))
+    // network registry// network registry
+    include(modImplementation(fabricApi.module("fabric-networking-api-v1", rootProject.fabric_api_version)))
 
     include(implementation('com.electronwill.night-config:toml:3.6.6'))
     include(implementation('com.electronwill.night-config:core:3.6.6'))
 
-    include(implementation("org.lwjgl:lwjgl-openvr:3.3.2"))
-    include(implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux"))
-    include(implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos"))
-    include(implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-openvr:3.3.3"))
+    include(implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux"))
+    include(implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos"))
+    include(implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows"))
 
 }
 

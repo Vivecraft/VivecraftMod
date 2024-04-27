@@ -162,8 +162,8 @@ public abstract class VRRenderer {
         RenderTarget fb = minecraft.getMainRenderTarget();
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, fb.viewWidth, 0.0F, fb.viewHeight, 0.0F, 20.0F), VertexSorting.ORTHOGRAPHIC_Z);
-        RenderSystem.getModelViewStack().pushPose();
-        RenderSystem.getModelViewStack().setIdentity();
+        RenderSystem.getModelViewStack().pushMatrix();
+        RenderSystem.getModelViewStack().identity();
         if (inverse) //draw on far clip
         {
             RenderSystem.getModelViewStack().translate(0, 0, -20);
@@ -178,7 +178,7 @@ public abstract class VRRenderer {
         }
 
         RenderSystem.restoreProjectionMatrix();
-        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.getModelViewStack().popMatrix();
 
         RenderSystem.depthMask(true); // Do write to depth buffer
         RenderSystem.colorMask(true, true, true, true);

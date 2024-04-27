@@ -30,22 +30,22 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2")
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux")
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos")
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.3")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows")
 
     // shadow the natives
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.3") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows") { transitive = false }
 }
 
 processResources {
     inputs.property "version", project.version
 
-    filesMatching("META-INF/mods.toml") {
+    filesMatching("META-INF/neoforge.mods.toml") {
         expand "version": project.version
     }
 }

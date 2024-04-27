@@ -55,16 +55,16 @@ dependencies {
     // modCompileOnly("maven.modrinth:rubidium:0.6.5")
     // modCompileOnly("maven.modrinth:oculus:1.20-1.6.4")
 
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2")
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux")
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos")
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.3")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows")
 
     // shadow the natives
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.3") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows") { transitive = false }
 }
 
 processResources {
