@@ -78,7 +78,7 @@ jobs:
             done < ./fabric/$2
           }
           parse_forge () {
-            unzip -o -j "$1" "META-INF/mods.toml" -d ./forge
+            unzip -o -j "$1" "META-INF/$2" -d ./forge
             minecraftDep=false
             minecraftIdReg='modId\s+=\s+"minecraft"'
             versionRangeReg='versionRange\s+=\s+"(.+?)"'
@@ -91,7 +91,7 @@ jobs:
                 echo "${BASH_REMATCH[0]}"
                 echo "${BASH_REMATCH[1]}"
               fi
-            done < ./forge/mods.toml
+            done < ./forge/$2
           }
           file=""
           if [ -n "${{ steps.assets.outputs.FABRIC_FILE_NAME }}" ]; then
@@ -147,11 +147,11 @@ jobs:
             echo "FABRIC_MC_VERSIONS="${parsedVersion}"" >> $GITHUB_OUTPUT
           fi
           if [ -n "${{ steps.assets.outputs.FORGE_FILE_NAME }}" ]; then
-            parse_forge ${{ steps.assets.outputs.FORGE_FILE_NAME }}
+            parse_forge ${{ steps.assets.outputs.FORGE_FILE_NAME }} "mods.toml"
             echo "FORGE_MC_VERSIONS="${parsedVersion}"" >> $GITHUB_OUTPUT
           fi
           if [ -n "${{ steps.assets.outputs.NEOFORGE_FILE_NAME }}" ]; then
-            parse_forge ${{ steps.assets.outputs.NEOFORGE_FILE_NAME }}
+            parse_forge ${{ steps.assets.outputs.NEOFORGE_FILE_NAME }} "neoforge.mods.toml"
             echo "NEOFORGE_MC_VERSIONS="${parsedVersion}"" >> $GITHUB_OUTPUT
           fi
           if [ -n "${{ steps.assets.outputs.QUILT_FILE_NAME }}" ]; then
