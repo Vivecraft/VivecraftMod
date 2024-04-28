@@ -44,7 +44,7 @@ public class VRState {
                 // TODO: move this into the init, does mean all callocs need to be done later
                 // check that the right lwjgl version is loaded that we ship the openvr part of
                 if (!Version.getVersion().startsWith("3.3.3")) {
-                    throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), "3.3.2"), "OpenVR_LWJGL"));
+                    throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), "3.3.3"), "OpenVR_LWJGL"));
                 }
 
                 dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
