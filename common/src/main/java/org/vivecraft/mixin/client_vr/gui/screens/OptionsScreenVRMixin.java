@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -22,9 +23,15 @@ public class OptionsScreenVRMixin extends Screen {
         super(component);
     }
 
-    // replace FOV slider
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vivecraft$addVivecraftSettings(CallbackInfo ci, @Local GridLayout.RowHelper rowHelper) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;Ljava/util/function/Consumer;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 0), method = "init")
+    private void vivecraft$addVivecraftSettingsSpacer(CallbackInfo ci, @Local(ordinal = 0) LinearLayout header) {
+        if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
+            header.addChild(new SpacerElement(150, 4), header.newCellSettings());
+        }
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 2, shift = At.Shift.AFTER), method = "init")
+    private void vivecraft$addVivecraftSettings(CallbackInfo ci, @Local(ordinal = 0) LinearLayout header) {
         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
             Button button = new Button.Builder(Component.translatable("vivecraft.options.screen.main.button"), (p) ->
             {
@@ -32,17 +39,17 @@ public class OptionsScreenVRMixin extends Screen {
                 Minecraft.getInstance().setScreen(new GuiMainVRSettings(this));
             })
                 .build();
+
             if (!ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonPositionLeft) {
-                // TODO 1.20.5 not sure if that does the right thing
-                rowHelper.addChild(button, rowHelper.newCellSettings().alignHorizontallyRight());
+                header.addChild(button, header.newCellSettings().alignHorizontallyRight().paddingTop(-4));
             } else {
-                rowHelper.addChild(button, 2, rowHelper.newCellSettings().alignHorizontallyLeft());
+                header.addChild(button, header.newCellSettings().paddingTop(-4));
             }
         }
     }
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/HeaderAndFooterLayout;visitWidgets(Ljava/util/function/Consumer;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vivecraft$noBigButtonsPlease(CallbackInfo ci, LinearLayout linearLayout, LinearLayout linearLayout2, GridLayout gridLayout) {
+    private void vivecraft$noBigButtonsPlease(CallbackInfo ci, @Local GridLayout gridLayout) {
         gridLayout.visitChildren(child -> {
             if (child.getWidth() > 150 && child instanceof Button button) {
                 button.setWidth(150);

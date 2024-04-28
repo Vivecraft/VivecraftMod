@@ -25,9 +25,7 @@ public abstract class ScreenVRMixin extends AbstractContainerEventHandler implem
 
     @Inject(at = @At("HEAD"), method = {"renderBackground", "renderPanorama", "renderTransparentBackground"}, cancellable = true)
     public void vivecraft$noBackground(CallbackInfo ci) {
-        if (VRState.vrRunning &&
-            (MethodHolder.willBeInMenuRoom((Screen) (Object) this) && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() || ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama)) ||
-            (!MethodHolder.willBeInMenuRoom((Screen) (Object) this) && !ClientDataHolderVR.getInstance().vrSettings.menuBackground)) {
+        if (VRState.vrRunning && ((MethodHolder.willBeInMenuRoom((Screen) (Object) this) && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() || ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama)) || (!MethodHolder.willBeInMenuRoom((Screen) (Object) this) && !ClientDataHolderVR.getInstance().vrSettings.menuBackground))) {
             ci.cancel();
         }
     }
