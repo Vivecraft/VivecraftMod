@@ -3,6 +3,11 @@
   "package": "org.vivecraft.neoforge.mixin",
   "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
-  "client": ["NeoForgeGameRendererVRMixin", "NeoForgeIngameGuiVRMixin", "network.NeoForgeOpenContainerVRMixin"],
+  "client": [
+    "NeoForgeGameRendererVRMixin",
+    "NeoForgeIngameGuiVRMixin",
+    "NeoForgeMinecraftVRMixin",
+    "network.NeoForgeOpenContainerVRMixin"
+  ],
   "minVersion": "0.8.4"
 }
