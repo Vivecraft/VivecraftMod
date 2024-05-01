@@ -231,6 +231,12 @@ public class RenderHelper {
         posestack.translate(0.0D, 0.0D, -11000.0D);
         RenderSystem.applyModelViewMatrix();
 
+        Matrix4f guiProjection = (new Matrix4f()).setOrtho(
+            0.0F, (float) (mc.getWindow().getWidth() / mc.getWindow().getGuiScale()),
+                (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale()), 0.0F,
+                1000.0F, 21000.0F);
+        RenderSystem.setProjectionMatrix(guiProjection, VertexSorting.ORTHOGRAPHIC_Z);
+
         RenderSystem.blendFuncSeparate(
             GlStateManager.SourceFactor.SRC_ALPHA,
             GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
