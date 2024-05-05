@@ -25,9 +25,6 @@
     "main": [
       "org.vivecraft.fabric.VivecraftMod"
     ],
-    "client": [
-      "org.vivecraft.fabric.VivecraftModClientOnly"
-    ],
     "modmenu": [
       "org.vivecraft.client.fabric.VivecraftModMenuApiImpl"
     ]
