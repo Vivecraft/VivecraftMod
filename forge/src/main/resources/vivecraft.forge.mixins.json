@@ -3,6 +3,7 @@
   "package": "org.vivecraft.forge.mixin",
   "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
-  "client": ["ForgeGameRendererVRMixin", "ForgeIngameGuiVRMixin", "network.ForgeOpenContainerVRMixin"],
-  "minVersion": "0.8.4"
+  "client": ["ForgeGameRendererVRMixin", "network.ForgeOpenContainerVRMixin"],
+  "minVersion": "0.8.4",
+  "mixins": ["ForgeConnectionMixin"]
 }

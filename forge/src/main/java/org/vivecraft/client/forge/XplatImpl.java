@@ -65,15 +65,7 @@ public class XplatImpl {
     }
 
     public static String getUseMethodName() {
-        return ObfuscationReflectionHelper.findMethod(
-            net.minecraft.world.level.block.state.BlockBehaviour.class,
-            "m_6227_",
-            net.minecraft.world.level.block.state.BlockState.class,
-            net.minecraft.world.level.Level.class,
-            net.minecraft.core.BlockPos.class,
-            net.minecraft.world.entity.player.Player.class,
-            net.minecraft.world.InteractionHand.class,
-            net.minecraft.world.phys.BlockHitResult.class).getName();
+        return "useWithoutItem";
     }
 
     public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn) {
@@ -89,10 +81,11 @@ public class XplatImpl {
     }
 
     public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
+        /*
         // Forge I really don't know why you are insisting on this being a DiscardedPayload
         listener.send(new ServerboundCustomPayloadPacket(new DiscardedPayload(
             new ResourceLocation("minecraft:register"),
             new FriendlyByteBuf(Unpooled.buffer())
-                .writeBytes(resourceLocation.toString().getBytes()))));
+                .writeBytes(resourceLocation.toString().getBytes()))));*/
     }
 }

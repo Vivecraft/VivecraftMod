@@ -24,6 +24,7 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.system.MemoryUtil;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
@@ -492,6 +493,9 @@ public abstract class VRRenderer {
             // main render target
             ((RenderTargetExtension) WorldRenderPass.stereoXR.target).vivecraft$setUseStencil(dataholder.vrSettings.vrUseStencil);
             WorldRenderPass.stereoXR.resize(eyeFBWidth, eyeFBHeight);
+            if (dataholder.vrSettings.vrUseStencil) {
+                Xplat.enableRenderTargetStencil(WorldRenderPass.stereoXR.target);
+            }
             if (dataholder.vrSettings.useFsaa) {
                 this.fsaaFirstPassResultFBO.resize(eyew, eyeFBHeight, Minecraft.ON_OSX);
             }

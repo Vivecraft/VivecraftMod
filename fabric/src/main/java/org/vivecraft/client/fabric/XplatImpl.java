@@ -63,12 +63,11 @@ public class XplatImpl {
     public static String getUseMethodName() {
         return FabricLoader.getInstance().getMappingResolver().mapMethodName(
             "intermediary",
-            "net.minecraft.class_4970", "method_9534",
+            "net.minecraft.class_4970", "method_55766",
             "(Lnet/minecraft/class_2680;" +
                 "Lnet/minecraft/class_1937;" +
                 "Lnet/minecraft/class_2338;" +
                 "Lnet/minecraft/class_1657;" +
-                "Lnet/minecraft/class_1268;" +
                 "Lnet/minecraft/class_3965;)" +
                 "Lnet/minecraft/class_1269;");
     }

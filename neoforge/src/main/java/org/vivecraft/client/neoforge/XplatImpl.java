@@ -57,7 +57,7 @@ public class XplatImpl implements Xplat {
     }
 
     public static String getUseMethodName() {
-        return "use";
+        return "useWithoutItem";
     }
 
     public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn) {

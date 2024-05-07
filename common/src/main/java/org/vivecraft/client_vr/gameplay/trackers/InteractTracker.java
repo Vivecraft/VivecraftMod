@@ -108,30 +108,26 @@ public class InteractTracker extends Tracker {
                 Class<?> oclass = object.getClass();
 
                 try {
-                    if (oclass.getMethod(name,
+                    oclass.getDeclaredMethod(name,
                         BlockState.class,
                         net.minecraft.world.level.Level.class,
                         BlockPos.class,
                         net.minecraft.world.entity.player.Player.class,
-                        InteractionHand.class,
-                        BlockHitResult.class).getDeclaringClass() == oclass) {
-                        this.rightClickable.add(oclass);
-                    }
+                        BlockHitResult.class);
+                    this.rightClickable.add(oclass);
                 } catch (Throwable throwable1) {
                 }
 
                 oclass = oclass.getSuperclass();
 
                 try {
-                    if (oclass.getMethod(name,
+                    oclass.getDeclaredMethod(name,
                         BlockState.class,
                         net.minecraft.world.level.Level.class,
                         BlockPos.class,
                         net.minecraft.world.entity.player.Player.class,
-                        InteractionHand.class,
-                        BlockHitResult.class).getDeclaringClass() == oclass) {
-                        this.rightClickable.add(oclass);
-                    }
+                        BlockHitResult.class);
+                    this.rightClickable.add(oclass);
                 } catch (Throwable throwable) {
                 }
             }
@@ -265,7 +261,8 @@ public class InteractTracker extends Tracker {
 
                     flag = this.mc.gameMode.interactAt(this.mc.player, this.inEntity[i], this.inEntityHit[i], interactionhand).consumesAction() || this.mc.gameMode.interact(this.mc.player, this.inEntity[i], interactionhand).consumesAction();
                 } else if (this.inBlockHit[i] != null) {
-                    flag = this.mc.gameMode.useItemOn(this.mc.player, interactionhand, this.inBlockHit[i]).consumesAction();
+                    // force main hand, since 1.20.5 only checks no item interactions for the main hand
+                    flag = this.mc.gameMode.useItemOn(this.mc.player, InteractionHand.MAIN_HAND, this.inBlockHit[i]).consumesAction();
                 } else if (this.bukkit[i]) {
                     flag = this.mc.gameMode.useItem(this.mc.player, interactionhand).consumesAction();
                 }

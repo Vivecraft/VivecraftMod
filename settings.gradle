@@ -11,7 +11,7 @@ pluginManagement {
 include("common")
 include("stubs")
 include("fabric")
-//include("forge")
+include("forge")
 include("neoForge")
 
 rootProject.name = "vivecraft"
