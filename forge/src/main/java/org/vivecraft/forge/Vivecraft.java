@@ -5,7 +5,6 @@ import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.EventNetworkChannel;
-import net.minecraftforge.network.NetworkDirection;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.server.ServerNetworking;
@@ -15,17 +14,19 @@ import org.vivecraft.server.config.ServerConfig;
 public class Vivecraft {
     public static final String MODID = "vivecraft";
 
-    public Vivecraft() {
-        // init server config
-        ServerConfig.init(null);
-
-        EventNetworkChannel channel = ChannelBuilder.named(CommonNetworkHelper.CHANNEL)
+    public static final EventNetworkChannel VIVECRAFT_NETWORK_CHANNEL =
+        ChannelBuilder.named(CommonNetworkHelper.CHANNEL)
             .acceptedVersions((status, version) -> true)
             .optional()
             .networkProtocolVersion(0)
             .eventNetworkChannel();
-        channel.addListener(event  -> {
-            if (event.getSource().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
+
+    public Vivecraft() {
+        // init server config
+        ServerConfig.init(null);
+
+        VIVECRAFT_NETWORK_CHANNEL.addListener(event  -> {
+            if (event.getSource().isServerSide()) {
                 handleServerVivePacket(event.getPayload(), event.getSource());
             } else {
                 handleClientVivePacket(event.getPayload(), event.getSource());

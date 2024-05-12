@@ -23,7 +23,7 @@ updateJSONURL = "https://raw.githubusercontent.com/Vivecraft/VivecraftMod/forge-
 [[dependencies.vivecraft]]
 modId = "forge"
 mandatory = true
-versionRange = "[50.0.7,)"
+versionRange = "[50.0.9,)"
 ordering = "NONE"
 side = "BOTH"
 

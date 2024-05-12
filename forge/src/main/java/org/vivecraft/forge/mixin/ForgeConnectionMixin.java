@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.common.network.packets.VivecraftDataPacket;
+import org.vivecraft.forge.Vivecraft;
 
 @Mixin(Connection.class)
 public class ForgeConnectionMixin {
@@ -21,11 +22,11 @@ public class ForgeConnectionMixin {
         if (packet instanceof ClientboundCustomPayloadPacket clientPacket && clientPacket.payload() instanceof VivecraftDataPacket vivecraftDataPacket) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             vivecraftDataPacket.write(buffer);
-            packet = NetworkDirection.PLAY_TO_CLIENT.buildPacket(buffer, vivecraftDataPacket.type().id()).getThis();
+            packet = NetworkDirection.PLAY_TO_CLIENT.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer).getThis();
         } else if (packet instanceof ServerboundCustomPayloadPacket serverPacket && serverPacket.payload() instanceof VivecraftDataPacket vivecraftDataPacket) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             vivecraftDataPacket.write(buffer);
-            packet = NetworkDirection.PLAY_TO_SERVER.buildPacket(buffer, vivecraftDataPacket.type().id()).getThis();
+            packet = NetworkDirection.PLAY_TO_SERVER.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer).getThis();
         }
         return packet;
     }
