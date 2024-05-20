@@ -22,11 +22,11 @@ public class ForgeConnectionMixin {
         if (packet instanceof ClientboundCustomPayloadPacket clientPacket && clientPacket.payload() instanceof VivecraftDataPacket vivecraftDataPacket) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             vivecraftDataPacket.write(buffer);
-            packet = NetworkDirection.PLAY_TO_CLIENT.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer).getThis();
+            packet = NetworkDirection.PLAY_TO_CLIENT.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer);
         } else if (packet instanceof ServerboundCustomPayloadPacket serverPacket && serverPacket.payload() instanceof VivecraftDataPacket vivecraftDataPacket) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             vivecraftDataPacket.write(buffer);
-            packet = NetworkDirection.PLAY_TO_SERVER.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer).getThis();
+            packet = NetworkDirection.PLAY_TO_SERVER.buildPacket(Vivecraft.VIVECRAFT_NETWORK_CHANNEL, buffer);
         }
         return packet;
     }

@@ -25,12 +25,13 @@ public class Vivecraft {
         // init server config
         ServerConfig.init(null);
 
-        VIVECRAFT_NETWORK_CHANNEL.addListener(event  -> {
+        VIVECRAFT_NETWORK_CHANNEL.addListener(event -> {
             if (event.getSource().isServerSide()) {
                 handleServerVivePacket(event.getPayload(), event.getSource());
             } else {
                 handleClientVivePacket(event.getPayload(), event.getSource());
             }
+            event.getSource().setPacketHandled(true);
         });
     }
 
