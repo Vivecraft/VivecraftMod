@@ -23,6 +23,9 @@ public class IrisDHCompatVRMixin {
 
                 Matrix4f vrProjection = CapturedRenderingState.INSTANCE.getGbufferProjection();
                 Matrix4f dhProjection = cir.getReturnValue();
+
+                dhProjection.m00(vrProjection.m00());
+                dhProjection.m11(vrProjection.m11());
                 dhProjection.m20(vrProjection.m20());
                 dhProjection.m21(vrProjection.m21());
                 cir.setReturnValue(dhProjection);
