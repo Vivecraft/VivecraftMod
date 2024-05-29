@@ -391,16 +391,6 @@ public class MCOpenVR extends MCVR {
         this.ignorePressesNextFrame = false;
     }
 
-    @Deprecated
-    @Override
-    protected void triggerBindingHapticPulse(KeyMapping keyMapping, int strength) {
-        ControllerType controller = this.findActiveBindingControllerType(keyMapping);
-
-        if (controller != null) {
-            this.triggerHapticPulse(controller, strength);
-        }
-    }
-
     private boolean isError() {
         return this.hmdErrorStore.get(0) != EVRInitError_VRInitError_None;
     }
@@ -795,7 +785,7 @@ public class MCOpenVR extends MCVR {
     }
 
     @Override
-    public boolean postinit() throws RenderConfigException {
+    public boolean postInit() throws RenderConfigException {
         //y is this called later, I forget.
         this.initInputAndApplication();
         return this.inputInitialized;

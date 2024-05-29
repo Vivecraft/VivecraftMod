@@ -22,6 +22,4 @@ public interface RenderTargetExtension {
     boolean vivecraft$getUseStencil();
 
     void vivecraft$isLinearFilter(boolean linearFilter);
-
-    void vivecraft$blitFovReduction(ShaderInstance instance, int width, int height);
 }

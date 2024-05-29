@@ -9,7 +9,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
@@ -35,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.Xevents;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -71,8 +71,6 @@ public abstract class GameRendererVRMixin
     public boolean vivecraft$wasinwater;
     @Unique
     public boolean vivecraft$inportal;
-    @Unique
-    public boolean vivecraft$onfire;
     @Unique
     public float vivecraft$inBlock = 0.0F;
     @Unique
@@ -230,7 +228,7 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At("HEAD"), method = "getFov(Lnet/minecraft/client/Camera;FZ)D", cancellable = true)
     public void vivecraft$fov(Camera camera, float f, boolean bl, CallbackInfoReturnable<Double> info) {
-        if (this.minecraft.level == null || vivecraft$isInMenuRoom()) { // Vivecraft: using this on the main menu
+        if (this.minecraft.level == null || MethodHolder.isInMenuRoom()) { // Vivecraft: using this on the main menu
             info.setReturnValue(Double.valueOf(this.minecraft.options.fov().get()));
         }
     }
@@ -243,9 +241,9 @@ public abstract class GameRendererVRMixin
         PoseStack posestack = new PoseStack();
         vivecraft$setupClipPlanes();
         if (vivecraft$DATA_HOLDER.currentPass == RenderPass.LEFT) {
-            posestack.mulPoseMatrix(vivecraft$DATA_HOLDER.vrRenderer.eyeproj[0]);
+            posestack.mulPoseMatrix(vivecraft$DATA_HOLDER.vrRenderer.eyeProj[0]);
         } else if (vivecraft$DATA_HOLDER.currentPass == RenderPass.RIGHT) {
-            posestack.mulPoseMatrix(vivecraft$DATA_HOLDER.vrRenderer.eyeproj[1]);
+            posestack.mulPoseMatrix(vivecraft$DATA_HOLDER.vrRenderer.eyeProj[1]);
         } else if (vivecraft$DATA_HOLDER.currentPass == RenderPass.THIRD) {
             if (vivecraft$DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
                 posestack.mulPoseMatrix(
@@ -255,8 +253,8 @@ public abstract class GameRendererVRMixin
             } else {
                 posestack.mulPoseMatrix(
                     new Matrix4f().setPerspective(vivecraft$DATA_HOLDER.vrSettings.mixedRealityFov * 0.01745329238474369F,
-                        (float) this.minecraft.getWindow().getScreenWidth()
-                            / (float) this.minecraft.getWindow().getScreenHeight(),
+                        (float) this.minecraft.getWindow().getWidth()
+                            / (float) this.minecraft.getWindow().getHeight(),
                         this.vivecraft$minClipDistance, this.vivecraft$clipDistance));
             }
             this.vivecraft$thirdPassProjectionMatrix = new Matrix4f(posestack.last().pose());
@@ -273,8 +271,8 @@ public abstract class GameRendererVRMixin
                 posestack.translate(this.zoomX, -this.zoomY, 0.0D);
                 posestack.scale(this.zoom, this.zoom, 1.0F);
             }
-            posestack.mulPoseMatrix(new Matrix4f().setPerspective((float) d * 0.01745329238474369F, (float) this.minecraft.getWindow().getScreenWidth()
-                / (float) this.minecraft.getWindow().getScreenHeight(), this.vivecraft$minClipDistance, this.vivecraft$clipDistance));
+            posestack.mulPoseMatrix(new Matrix4f().setPerspective((float) d * 0.01745329238474369F, (float) this.minecraft.getWindow().getWidth()
+                / (float) this.minecraft.getWindow().getHeight(), this.vivecraft$minClipDistance, this.vivecraft$clipDistance));
         }
         info.setReturnValue(posestack.last().pose());
     }
@@ -342,7 +340,7 @@ public abstract class GameRendererVRMixin
 
     @Inject(at = @At("HEAD"), method = "takeAutoScreenshot", cancellable = true)
     public void vivecraft$noScreenshotInMenu(Path path, CallbackInfo ci) {
-        if (VRState.vrRunning && vivecraft$isInMenuRoom()) {
+        if (VRState.vrRunning && MethodHolder.isInMenuRoom()) {
             ci.cancel();
         }
     }
@@ -379,7 +377,7 @@ public abstract class GameRendererVRMixin
             }
             return;
         }
-        if (!renderWorldIn || this.minecraft.level == null || vivecraft$isInMenuRoom()) {
+        if (!renderWorldIn || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
             if (!renderWorldIn || this.minecraft.level == null) {
                 // no "level" got pushed so do a manual push
                 this.minecraft.getProfiler().push("MainMenu");
@@ -398,7 +396,7 @@ public abstract class GameRendererVRMixin
                     VREffectsHelper.renderPhysicalKeyboard(partialTicks, pMatrixStack);
                 } else {
                     VREffectsHelper.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
-                        KeyboardHandler.Rotation_room, vivecraft$DATA_HOLDER.vrSettings.menuAlwaysFollowFace && vivecraft$isInMenuRoom(), pMatrixStack);
+                        KeyboardHandler.Rotation_room, vivecraft$DATA_HOLDER.vrSettings.menuAlwaysFollowFace && MethodHolder.isInMenuRoom(), pMatrixStack);
                 }
             }
 
@@ -642,9 +640,8 @@ public abstract class GameRendererVRMixin
     private void vivecraft$setupOverlayStatus(float partialTicks) {
         this.vivecraft$inBlock = 0.0F;
         this.vivecraft$inwater = false;
-        this.vivecraft$onfire = false;
 
-        if (!this.minecraft.player.isSpectator() && !this.vivecraft$isInMenuRoom() && this.minecraft.player.isAlive()) {
+        if (!this.minecraft.player.isSpectator() && !MethodHolder.isInMenuRoom() && this.minecraft.player.isAlive()) {
             Vec3 vec3 = RenderHelper.getSmoothCameraPosition(vivecraft$DATA_HOLDER.currentPass, vivecraft$DATA_HOLDER.vrPlayer.vrdata_world_render);
             Triple<Float, BlockState, BlockPos> triple = VREffectsHelper.getNearOpaqueBlock(vec3, this.vivecraft$minClipDistance);
 
@@ -655,8 +652,6 @@ public abstract class GameRendererVRMixin
             }
 
             this.vivecraft$inwater = this.minecraft.player.isEyeInFluid(FluidTags.WATER) && !Xevents.renderWaterOverlay(this.minecraft.player, new PoseStack());
-            this.vivecraft$onfire = vivecraft$DATA_HOLDER.currentPass != RenderPass.THIRD
-                && vivecraft$DATA_HOLDER.currentPass != RenderPass.CAMERA && this.minecraft.player.isOnFire() && !Xevents.renderFireOverlay(this.minecraft.player, new PoseStack());
         }
     }
 
@@ -680,12 +675,6 @@ public abstract class GameRendererVRMixin
 
     @Override
     @Unique
-    public boolean vivecraft$isOnFire() {
-        return vivecraft$onfire;
-    }
-
-    @Override
-    @Unique
     public boolean vivecraft$isInPortal() {
         return this.vivecraft$inportal;
     }
@@ -694,30 +683,6 @@ public abstract class GameRendererVRMixin
     @Unique
     public float vivecraft$isInBlock() {
         return vivecraft$inBlock;
-    }
-
-    @Override
-    @Unique
-    public boolean vivecraft$isInMenuRoom() {
-        return this.minecraft.level == null ||
-            this.minecraft.screen instanceof WinScreen ||
-            this.minecraft.screen instanceof ReceivingLevelScreen ||
-            this.minecraft.screen instanceof ProgressScreen ||
-            this.minecraft.screen instanceof GenericDirtMessageScreen ||
-            ClientDataHolderVR.getInstance().integratedServerLaunchInProgress ||
-            this.minecraft.getOverlay() != null;
-    }
-
-    @Override
-    @Unique
-    public boolean vivecraft$willBeInMenuRoom(Screen newScreen) {
-        return this.minecraft.level == null ||
-            newScreen instanceof WinScreen ||
-            newScreen instanceof ReceivingLevelScreen ||
-            newScreen instanceof ProgressScreen ||
-            newScreen instanceof GenericDirtMessageScreen ||
-            ClientDataHolderVR.getInstance().integratedServerLaunchInProgress ||
-            this.minecraft.getOverlay() != null;
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.render.helpers;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -363,7 +364,7 @@ public class VRArmHelper {
     }
 
     /**
-     * redners the teleport arc
+     * renders the teleport arc
      * @param poseStack PoseStack for positioning
      */
     public static void renderTeleportArc(PoseStack poseStack) {
@@ -401,7 +402,7 @@ public class VRArmHelper {
                     color = tpUnlimitedColor;
                 }
 
-                VOffset = dataHolder.vrRenderer.getCurrentTimeSecs()
+                VOffset = Util.getMillis() * 0.001D
                     * (double) dataHolder.teleportTracker.vrMovementStyle.textureScrollSpeed * 0.6D;
                 dataHolder.teleportTracker.lastTeleportArcDisplayOffset = VOffset;
             }

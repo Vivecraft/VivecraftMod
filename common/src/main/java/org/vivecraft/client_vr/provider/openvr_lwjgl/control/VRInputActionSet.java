@@ -13,9 +13,25 @@ public enum VRInputActionSet {
     MIXED_REALITY("/actions/mixedreality", "vivecraft.actionset.mixedReality", "single", true),
     TECHNICAL("/actions/technical", "vivecraft.actionset.technical", "leftright", true);
 
+    /**
+     * ActionSet path for the VR runtime
+     */
     public final String name;
+    /**
+     * translation key for the human-readable name
+     */
     public final String localizedName;
+    /**
+     * one off: <br>
+     * leftright: set has separate bindings for left and right hand <br>
+     * single: left and right hand have the same bindings <br>
+     * hidden: This action set will not be shown to the user
+     */
     public final String usage;
+
+    /**
+     * advanced action sets are hidden by default
+     */
     public final boolean advanced;
 
     VRInputActionSet(String name, String localizedName, String usage, boolean advanced) {
@@ -25,6 +41,11 @@ public enum VRInputActionSet {
         this.advanced = advanced;
     }
 
+    /**
+     * converts the KeyMappings category to an Actionset
+     * @param keyBinding KeyMapping to get the ActionSet for
+     * @return ActionSet the KeyMapping should  be put in
+     */
     public static VRInputActionSet fromKeyBinding(KeyMapping keyBinding) {
         return switch (keyBinding.getCategory()) {
             case "vivecraft.key.category.gui" -> GUI;

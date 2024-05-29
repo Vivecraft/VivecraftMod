@@ -31,6 +31,7 @@ void main()
     twoStepsLeftTextureCoordinate = textCoord - secondOffset;
     threeStepsLeftTextureCoordinate = textCoord - thirdOffset;
     fourStepsLeftTextureCoordinate = textCoord - fourthOffset;
+
     oneStepRightTextureCoordinate = textCoord + firstOffset;
     twoStepsRightTextureCoordinate = textCoord + secondOffset;
     threeStepsRightTextureCoordinate = textCoord + thirdOffset;

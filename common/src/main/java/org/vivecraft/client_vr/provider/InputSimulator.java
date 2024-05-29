@@ -11,6 +11,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Simulates GLFW inputs and keeps track of them
+ */
 public class InputSimulator {
     private static final Set<Integer> pressedKeys = new HashSet<>();
     private static final Map<Integer, Integer> pressedModifiers = new HashMap<>();

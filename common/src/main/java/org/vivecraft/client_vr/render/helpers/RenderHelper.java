@@ -19,14 +19,15 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL43C;
+import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL30C;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 
 import java.util.function.Supplier;
@@ -242,7 +243,7 @@ public class RenderHelper {
             polyBlendDstA = GlStateManager.BLEND.dstAlpha;
             polyBlendSrcRGB = GlStateManager.BLEND.srcRgb;
             polyBlendDstRGB = GlStateManager.BLEND.dstRgb;
-            polyBlend = GL43C.glIsEnabled(GL11.GL_BLEND);
+            polyBlend = GL11C.glIsEnabled(GL11C.GL_BLEND);
             polyTex = true;
             polyLight = false;
             polyCull = true;
@@ -584,5 +585,32 @@ public class RenderHelper {
             .color(color.getX(), color.getY(), color.getZ(), alpha)
             .normal((float) normal.x, (float) normal.y, (float) normal.z)
             .endVertex();
+    }
+
+    /**
+     * checks if there were any opengl errors since this was last called
+     * @param errorSection name of the section that is checked, this gets logged if there are any errors
+     * @return error string if there was one
+     */
+    public static String checkGLError(String errorSection) {
+        int error = GlStateManager._getError();
+        if (error != 0) {
+            String errorString = switch (error) {
+                case GL11C.GL_INVALID_ENUM -> "invalid enum";
+                case GL11C.GL_INVALID_VALUE -> "invalid value";
+                case GL11C.GL_INVALID_OPERATION -> "invalid operation";
+                case GL11C.GL_STACK_OVERFLOW -> "stack overflow";
+                case GL11C.GL_STACK_UNDERFLOW -> "stack underflow";
+                case GL11C.GL_OUT_OF_MEMORY -> "out of memory";
+                case GL30C.GL_INVALID_FRAMEBUFFER_OPERATION -> "framebuffer is not complete";
+                default -> "unknown error";
+            };
+            VRSettings.logger.error("########## GL ERROR ##########");
+            VRSettings.logger.error("@ {}", errorSection);
+            VRSettings.logger.error("{}: {}", error, errorString);
+            return errorString;
+        } else {
+            return "";
+        }
     }
 }

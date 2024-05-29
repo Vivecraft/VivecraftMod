@@ -175,6 +175,10 @@ public class KeyboardHandler {
         }
     }
 
+    /**
+     * checks if the given controller points at the keyboard
+     * @param type controller to check
+     */
     public static boolean isUsingController(ControllerType type) {
         return type == ControllerType.LEFT ? PointedL : PointedR;
     }

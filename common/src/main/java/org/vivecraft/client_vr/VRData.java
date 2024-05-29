@@ -29,7 +29,7 @@ public class VRData {
         this.origin = origin;
         this.worldScale = worldScale;
         this.rotation_radians = rotation;
-        Vec3 vec3 = dataholder.vr.getCenterEyePosition();
+        Vec3 vec3 = dataholder.vr.getEyePosition(RenderPass.CENTER);
         Vec3 vec31 = new Vec3(vec3.x * (double) walkMul, vec3.y, vec3.z * (double) walkMul);
         this.hmd = new VRDevicePose(this, dataholder.vr.hmdRotation, vec31, dataholder.vr.getHmdVector());
         this.eye0 = new VRDevicePose(this, dataholder.vr.getEyeRotation(RenderPass.LEFT), dataholder.vr.getEyePosition(RenderPass.LEFT).subtract(vec3).add(vec31), dataholder.vr.getHmdVector());

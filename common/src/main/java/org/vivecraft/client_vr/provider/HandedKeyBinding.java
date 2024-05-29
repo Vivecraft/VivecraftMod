@@ -4,12 +4,15 @@ import net.minecraft.client.KeyMapping;
 
 import java.util.Arrays;
 
+/**
+ * extension of a regular KeyMapping, that keeps track of which hand pressed it
+ */
 public class HandedKeyBinding extends KeyMapping {
     private final boolean[] pressed = new boolean[ControllerType.values().length];
     private final int[] pressTime = new int[ControllerType.values().length];
 
-    public HandedKeyBinding(String name, int key, String category) {
-        super(name, key, category);
+    public HandedKeyBinding(String name, int keyCode, String category) {
+        super(name, keyCode, category);
     }
 
     @Override
@@ -45,6 +48,10 @@ public class HandedKeyBinding extends KeyMapping {
         this.pressed[hand.ordinal()] = false;
     }
 
+    /**
+     * if the binding has priority, by default always true, some override it to have it based on a condition
+     * @param type controller to check
+     */
     public boolean isPriorityOnController(ControllerType type) {
         return true;
     }

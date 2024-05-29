@@ -25,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
@@ -253,7 +254,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         if (RenderPassType.isVanilla()) {
             return;
         }
-        vivecraft$menuHandleft = ((GameRendererExtension) gameRenderer).vivecraft$isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
+        vivecraft$menuHandleft = MethodHolder.isInMenuRoom() || this.minecraft.screen != null || KeyboardHandler.Showing;
         vivecraft$menuhandright = vivecraft$menuHandleft || ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar;
 
         if (transparencyChain != null) {

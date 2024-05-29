@@ -136,10 +136,6 @@ public class NullVR extends MCVR {
     public void processInputs() {}
 
     @Override
-    @Deprecated
-    protected void triggerBindingHapticPulse(KeyMapping keyMapping, int strength) {}
-
-    @Override
     protected ControllerType findActiveBindingControllerType(KeyMapping keyMapping) {
         return null;
     }
@@ -155,7 +151,7 @@ public class NullVR extends MCVR {
     }
 
     @Override
-    public boolean postinit() {
+    public boolean postInit() {
         this.populateInputActions();
         return true;
     }

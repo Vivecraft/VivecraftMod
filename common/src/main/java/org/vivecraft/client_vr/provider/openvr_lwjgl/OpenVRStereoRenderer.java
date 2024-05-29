@@ -16,7 +16,7 @@ import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderConfigException;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import static org.lwjgl.openvr.VRCompositor.VRCompositor_PostPresentHandoff;
@@ -39,6 +39,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
     @Override
     public Tuple<Integer, Integer> getRenderTextureSizes() {
         if (this.resolution == null) {
+            // get texture size
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 var renderSizeX = stack.callocInt(1);
                 var renderSizeY = stack.callocInt(1);
@@ -51,7 +52,8 @@ public class OpenVRStereoRenderer extends VRRenderer {
                 VRSettings.logger.info("OpenVR Supersampling: {}", this.ss);
             }
 
-            for (int eye = 0; eye < 2; ++eye) {
+            // get stencil meshes
+            for (int eye = 0; eye < 2; eye++) {
                 VRSystem_GetHiddenAreaMesh(eye, VR.EHiddenAreaMeshType_k_eHiddenAreaMesh_Standard,
                     this.hiddenMeshes[eye]);
                 int count = this.hiddenMeshes[eye].unTriangleCount();
@@ -59,13 +61,13 @@ public class OpenVRStereoRenderer extends VRRenderer {
                 if (count <= 0) {
                     VRSettings.logger.info("No stencil mesh found for eye '{}'", eye);
                 } else {
-                    this.hiddenMesheVertecies[eye] = new float[count * 3 * 2];
+                    this.hiddenMeshVertices[eye] = new float[count * 3 * 2];
                     MemoryUtil.memFloatBuffer(MemoryUtil.memAddress(this.hiddenMeshes[eye].pVertexData()),
-                        this.hiddenMesheVertecies[eye].length).get(this.hiddenMesheVertecies[eye]);
+                        this.hiddenMeshVertices[eye].length).get(this.hiddenMeshVertices[eye]);
 
-                    for (int vertex = 0; vertex < this.hiddenMesheVertecies[eye].length; vertex += 2) {
-                        this.hiddenMesheVertecies[eye][vertex] *= (float) this.resolution.getA();
-                        this.hiddenMesheVertecies[eye][vertex + 1] *= (float) this.resolution.getB();
+                    for (int vertex = 0; vertex < this.hiddenMeshVertices[eye].length; vertex += 2) {
+                        this.hiddenMeshVertices[eye][vertex] *= (float) this.resolution.getA();
+                        this.hiddenMeshVertices[eye][vertex + 1] *= (float) this.resolution.getB();
                     }
 
                     VRSettings.logger.info("Stencil mesh loaded for eye '{}'", eye);
@@ -84,11 +86,6 @@ public class OpenVRStereoRenderer extends VRRenderer {
                 return Utils.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Right, nearClip, farClip, HmdMatrix44.calloc(stack)));
             }
         }
-    }
-
-    @Override
-    public String getLastError() {
-        return "";
     }
 
     @Override
@@ -116,6 +113,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
         this.openvr.texType1.handle(this.RightEyeTextureId);
         this.openvr.texType1.eColorSpace(VR.EColorSpace_ColorSpace_Gamma);
         this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
+        lastError = RenderHelper.checkGLError("create VR textures");
     }
 
     @Override
@@ -158,31 +156,12 @@ public class OpenVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public float[] getStencilMask(RenderPass eye) {
-        if (this.hiddenMesheVertecies != null && (eye == RenderPass.LEFT || eye == RenderPass.RIGHT)) {
-            return eye == RenderPass.LEFT ? this.hiddenMesheVertecies[0] : this.hiddenMesheVertecies[1];
-        } else {
-            return null;
-        }
-    }
-
-    @Override
     public String getName() {
         return "OpenVR";
     }
 
     @Override
-    public boolean isInitialized() {
-        return this.vr.initSuccess;
-    }
-
-    @Override
-    public String getinitError() {
-        return this.vr.initStatus;
-    }
-
-    @Override
-    public void destroyBuffers() {
+    protected void destroyBuffers() {
         super.destroyBuffers();
         if (this.LeftEyeTextureId > -1) {
             TextureUtil.releaseTextureId(this.LeftEyeTextureId);

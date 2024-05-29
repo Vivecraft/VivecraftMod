@@ -9,13 +9,13 @@
   "attributes": ["Position", "UV0"],
   "samplers": [
     {
+      "name": "firstPersonColor"
+    },
+    {
       "name": "thirdPersonColor"
     },
     {
       "name": "thirdPersonDepth"
-    },
-    {
-      "name": "firstPersonColor"
     }
   ],
   "uniforms": [

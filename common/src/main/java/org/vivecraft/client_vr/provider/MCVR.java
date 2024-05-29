@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.TorchBlock;
@@ -113,11 +114,12 @@ public abstract class MCVR {
         mod = vrMod;
         me = this;
 
-        for (int i = 0; i < 3; i++) {
-            this.aimSource[i] = new Vec3(0.0D, 0.0D, 0.0D);
-            this.controllerPose[i] = new org.vivecraft.common.utils.math.Matrix4f();
-            this.controllerRotation[i] = new org.vivecraft.common.utils.math.Matrix4f();
-            this.handRotation[i] = new org.vivecraft.common.utils.math.Matrix4f();
+        // initialize all controller/tracker fields
+        for (int c = 0; c < 3; c++) {
+            this.aimSource[c] = new Vec3(0.0D, 0.0D, 0.0D);
+            this.controllerPose[c] = new org.vivecraft.common.utils.math.Matrix4f();
+            this.controllerRotation[c] = new org.vivecraft.common.utils.math.Matrix4f();
+            this.handRotation[c] = new org.vivecraft.common.utils.math.Matrix4f();
         }
     }
 
@@ -131,18 +133,42 @@ public abstract class MCVR {
     /**
      * initializes the api connection, and sets everything up.
      * any static allocations needed by this MCVR should be allocated here
-     * @return if init was successfull
+     * @return if init was successful
      */
     public abstract boolean init();
 
-    public abstract boolean postinit() throws RenderConfigException;
+    /**
+     * sets up InputActions, and other stuff that needs to be done a bit later.
+     * this is called after the VRRenderer is initialized and all trackers set up
+     * @return if postInit was successful
+     * @throws RenderConfigException if there was a critical error
+     */
+    public abstract boolean postInit() throws RenderConfigException;
 
+    /**
+     * stops the api connection and releases any allocated objects
+     */
     public abstract void destroy();
 
+    /**
+     * triggers a haptic pulse on the give controller, as soon as possible
+     * @param controller controller to trigger on
+     * @param durationSeconds duration in seconds
+     * @param frequency frequency in Hz
+     * @param amplitude strength 0.0 - 1.0
+     */
     public void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude) {
         this.triggerHapticPulse(controller, durationSeconds, frequency, amplitude, 0.0F);
     }
 
+    /**
+     * triggers a haptic pulse on the give controller, after the specified delay
+     * @param controller controller to trigger on
+     * @param durationSeconds duration in seconds
+     * @param frequency frequency in Hz
+     * @param amplitude strength 0.0 - 1.0
+     * @param delaySeconds delay for when to trigger in seconds
+     */
     public void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude, float delaySeconds) {
         if (this.dh.vrSettings.seated) return;
         if (this.dh.vrSettings.reverseHands) {
@@ -151,6 +177,13 @@ public abstract class MCVR {
         this.hapticScheduler.queueHapticPulse(controller, durationSeconds, frequency, amplitude, delaySeconds);
     }
 
+    /**
+     * triggers a haptic pulse on the give controller
+     * uses a fixed frequency and amplitude, just changes duration
+     * legacy method for simplicity
+     * @param controller controller to trigger on
+     * @param strength how long to trigger in microseconds
+     */
     @Deprecated
     public void triggerHapticPulse(ControllerType controller, int strength) {
         if (strength >= 1) {
@@ -161,6 +194,13 @@ public abstract class MCVR {
         }
     }
 
+    /**
+     * triggers a haptic pulse on the give controller
+     * uses a fixed frequency and amplitude, just changes duration
+     * legacy method for simplicity
+     * @param controller controller to trigger on
+     * @param strength how long to trigger in microseconds
+     */
     @Deprecated
     public void triggerHapticPulse(int controller, int strength) {
         if (controller >= 0 && controller < ControllerType.values().length) {
@@ -168,38 +208,75 @@ public abstract class MCVR {
         }
     }
 
+    /**
+     * finds the controller that has the given KeyMapping bound, and triggers a haptic there
+     * legacy method for simplicity
+     * @param keyMapping the KeyMapping to trigger for
+     * @param strength how long to trigger in microseconds
+     */
     @Deprecated
-    protected abstract void triggerBindingHapticPulse(KeyMapping keyMapping, int strength);
+    protected void triggerBindingHapticPulse(KeyMapping keyMapping, int strength) {
+        ControllerType controller = this.findActiveBindingControllerType(keyMapping);
+        if (controller != null) {
+            this.triggerHapticPulse(controller, strength);
+        }
+    }
 
+    /**
+     * @return the angle at which stuff is hold in the hand
+     */
     public double getGunAngle() {
         return this.gunAngle;
     }
 
+    /**
+     * @param controller controller/tracker to get the aim rotation for
+     * @return aim rotation of the specified controller/tracker in room space
+     */
     public org.vivecraft.common.utils.math.Matrix4f getAimRotation(int controller) {
         return this.controllerRotation[controller];
     }
 
+    /**
+     * @param controller controller/tracker to get the aim position for
+     * @return aim position of the specified controller/tracker in room space
+     */
     public Vec3 getAimSource(int controller) {
         Vec3 out = new Vec3(this.aimSource[controller].x, this.aimSource[controller].y, this.aimSource[controller].z);
 
         if (!this.dh.vrSettings.seated && this.dh.vrSettings.allowStandingOriginOffset) {
             if (this.dh.vr.isHMDTracking()) {
-                out = out.add(this.dh.vrSettings.originOffset.getX(), this.dh.vrSettings.originOffset.getY(), this.dh.vrSettings.originOffset.getZ());
+                out = out.add(
+                    this.dh.vrSettings.originOffset.getX(),
+                    this.dh.vrSettings.originOffset.getY(),
+                    this.dh.vrSettings.originOffset.getZ());
             }
         }
 
         return out;
     }
 
+    /**
+     * @param controller controller/tracker to get the aim direction vector for
+     * @return forward aim direction of the specified controller/tracker in room space
+     */
     public Vec3 getAimVector(int controller) {
         Vector3 aim = this.controllerRotation[controller].transform(forward);
         return aim.toVector3d();
     }
 
+    /**
+     * @param controller controller/tracker to get the visual hand rotation for
+     * @return visual hand rotation of the specified controller/tracker in room space
+     */
     public org.vivecraft.common.utils.math.Matrix4f getHandRotation(int controller) {
         return this.handRotation[controller];
     }
 
+    /**
+     * @param controller controller/tracker to get the visual hand direction vector for
+     * @return visual hand forward direction of the specified controller/tracker in room space
+     */
     public Vec3 getHandVector(int controller) {
         Vector3 forward = new Vector3(0.0F, 0.0F, -1.0F);
         org.vivecraft.common.utils.math.Matrix4f aimRotation = this.handRotation[controller];
@@ -208,33 +285,15 @@ public abstract class MCVR {
     }
 
     /**
-     * @return The coordinate of the 'center' eye position relative to the head yaw plane
-     */
-    public Vec3 getCenterEyePosition() {
-        Vector3 pos = Utils.convertMatrix4ftoTranslationVector(this.hmdPose);
-
-        if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
-            if (this.dh.vr.isHMDTracking()) {
-                pos = pos.add(this.dh.vrSettings.originOffset);
-            }
-        }
-
-        return pos.toVector3d();
-    }
-
-    /**
-     * @return The coordinate of the left or right eye position relative to the head yaw plane
+     * @param eye LEFT, RIGHT or CENTER eye
+     * @return position of the given eye, in room space
      */
     public Vec3 getEyePosition(RenderPass eye) {
-        org.vivecraft.common.utils.math.Matrix4f pose;
-
-        if (eye == RenderPass.LEFT) {
-            pose = org.vivecraft.common.utils.math.Matrix4f.multiply(this.hmdPose, this.hmdPoseLeftEye);
-        } else if (eye == RenderPass.RIGHT) {
-            pose = org.vivecraft.common.utils.math.Matrix4f.multiply(this.hmdPose, this.hmdPoseRightEye);
-        } else {
-            pose = this.hmdPose;
-        }
+        org.vivecraft.common.utils.math.Matrix4f pose = switch (eye) {
+            case LEFT -> org.vivecraft.common.utils.math.Matrix4f.multiply(this.hmdPose, this.hmdPoseLeftEye);
+            case RIGHT -> org.vivecraft.common.utils.math.Matrix4f.multiply(this.hmdPose, this.hmdPoseRightEye);
+            default -> this.hmdPose;
+        };
 
         Vector3 pos = Utils.convertMatrix4ftoTranslationVector(pose);
 
@@ -247,16 +306,16 @@ public abstract class MCVR {
         return pos.toVector3d();
     }
 
+    /**
+     * @param eye LEFT, RIGHT or CENTER eye
+     * @return rotation of the given eye, in room space
+     */
     public org.vivecraft.common.utils.math.Matrix4f getEyeRotation(RenderPass eye) {
-        org.vivecraft.common.utils.math.Matrix4f hmdToEye;
-
-        if (eye == RenderPass.LEFT) {
-            hmdToEye = this.hmdPoseLeftEye;
-        } else if (eye == RenderPass.RIGHT) {
-            hmdToEye = this.hmdPoseRightEye;
-        } else {
-            hmdToEye = null;
-        }
+        org.vivecraft.common.utils.math.Matrix4f hmdToEye = switch (eye) {
+            case LEFT -> this.hmdPoseLeftEye;
+            case RIGHT -> this.hmdPoseRightEye;
+            default -> null;
+        };
 
         if (hmdToEye != null) {
             org.vivecraft.common.utils.math.Matrix4f eyeRot = new org.vivecraft.common.utils.math.Matrix4f();
@@ -267,6 +326,9 @@ public abstract class MCVR {
         }
     }
 
+    /**
+     * @return forward vector of the headset, in room space
+     */
     public Vec3 getHmdVector() {
         Vector3 look = this.hmdRotation.transform(forward);
         return look.toVector3d();
@@ -274,7 +336,7 @@ public abstract class MCVR {
 
     /**
      * @param keyMapping KeyMapping to get the VRInputAction for
-     * @return the VRInputAction that is linked to the given KeyMapping
+     * @return VRInputAction that is linked to the given KeyMapping
      */
     public VRInputAction getInputAction(KeyMapping keyMapping) {
         return this.getInputAction(keyMapping.getName());
@@ -282,7 +344,7 @@ public abstract class MCVR {
 
     /**
      * @param name name of the KeyMapping to get the VRInputAction for
-     * @return the VRInputAction that is linked to the given KeyMapping
+     * @return VRInputAction that is linked to the given KeyMapping
      */
     public VRInputAction getInputAction(String name) {
         return this.inputActionsByKeyBinding.get(name);
@@ -291,14 +353,14 @@ public abstract class MCVR {
     /**
      * gets the VRInputAction by name, a VRInputAction name is built like "(action set)/in/(keyMapping name)"
      * @param name name of the VRInputAction to get
-     * @return the VRInputAction that is linked to the given action name
+     * @return VRInputAction that is linked to the given action name
      */
     public VRInputAction getInputActionByName(String name) {
         return this.inputActions.get(name);
     }
 
     /**
-     * @return an unmodifiable collection of all loaded VRInputAction
+     * @return unmodifiable collection of all loaded VRInputActions
      */
     public Collection<VRInputAction> getInputActions() {
         return Collections.unmodifiableCollection(this.inputActions.values());
@@ -306,37 +368,59 @@ public abstract class MCVR {
 
     /**
      * @param set VRInputActionSet to get the VRInputActions for
-     * @return an unmodifiable collection of all VRInputActions in the given set
+     * @return unmodifiable collection of all VRInputActions in the given set
      */
     public Collection<VRInputAction> getInputActionsInSet(VRInputActionSet set) {
         return Collections.unmodifiableCollection(this.inputActions.values().stream().filter((action) ->
             action.actionSet == set).collect(Collectors.toList()));
     }
 
+    /**
+     * @param controller controller to check
+     * @return if the controller is currently tracking
+     */
     public boolean isControllerTracking(ControllerType controller) {
         return this.isControllerTracking(controller.ordinal());
     }
 
+    /**
+     * @param controller controller/tracker to check
+     * @return if the controller/tracker is currently tracking
+     */
     public boolean isControllerTracking(int controller) {
         return this.controllerTracking[controller];
     }
 
+    /**
+     * @return if the headset is currently tracking
+     */
     public boolean isHMDTracking() {
         return this.headIsTracking;
     }
 
+    /**
+     * sets the room origin to the current headset position. assumes a 1.62 meter headset height
+     */
     public void resetPosition() {
-        Vec3 pos = this.getCenterEyePosition().scale(-1.0D)
+        // get the center position, and remove the old origin offset from it
+        Vec3 pos = this.getEyePosition(RenderPass.CENTER).scale(-1.0D)
             .add(this.dh.vrSettings.originOffset.getX(),
                 this.dh.vrSettings.originOffset.getY(),
                 this.dh.vrSettings.originOffset.getZ());
         this.dh.vrSettings.originOffset = new Vector3((float) pos.x, (float) pos.y + 1.62F, (float) pos.z);
     }
 
+    /**
+     * clears the room origin offset
+     */
     public void clearOffset() {
         this.dh.vrSettings.originOffset = new Vector3(0.0F, 0.0F, 0.0F);
     }
 
+    /**
+     * changes teh selected hotbar slot in the given direction.
+     * @param dir direction to change to, negative is right, positive is left
+     */
     protected void changeHotbar(int dir) {
         if (this.mc.player != null &&
             // never let go, jack.
@@ -352,6 +436,9 @@ public abstract class MCVR {
         }
     }
 
+    /**
+     * processes the interactive hotbar
+     */
     protected void processHotbar() {
         int previousSlot = this.dh.interactTracker.hotbar;
         this.dh.interactTracker.hotbar = -1;
@@ -369,9 +456,11 @@ public abstract class MCVR {
 
         float offsetDir = this.dh.vrSettings.reverseHands ? -1F : 1F;
 
+        // hotbar position based on settings
         if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.WRIST) {
-            barStartPos = this.getAimRotation(1).transform(new Vector3(offsetDir * 0.02F, 0.05F, 0.26F)).toVector3d();
-            barEndPos = this.getAimRotation(1).transform(new Vector3(offsetDir * 0.02F, 0.05F, 0.01F)).toVector3d();
+            float offset = this.mc.player.getMainArm().getOpposite() == (this.dh.vrSettings.reverseHands ? HumanoidArm.LEFT : HumanoidArm.RIGHT) ? 0.03F : 0.0F;
+            barStartPos = this.getAimRotation(1).transform(new Vector3(offsetDir * 0.02F, 0.05F, 0.26F + offset)).toVector3d();
+            barEndPos = this.getAimRotation(1).transform(new Vector3(offsetDir * 0.02F, 0.05F, 0.01F + offset)).toVector3d();
         } else if (this.dh.vrSettings.vrHudLockMode == VRSettings.HUDLock.HAND) {
             barStartPos = this.getAimRotation(1).transform(new Vector3(offsetDir * -0.18F, 0.08F, -0.01F)).toVector3d();
             barEndPos = this.getAimRotation(1).transform(new Vector3(offsetDir * 0.19F, 0.04F, -0.08F)).toVector3d();
@@ -393,50 +482,61 @@ public abstract class MCVR {
             Mth.lerp(guiScaleFactor, barMidPos.z, barEndPos.z));
 
 
-        Vec3 u = barStart.subtract(barEnd);
-        Vec3 pq = barStart.subtract(main);
-        float dist = (float) (pq.cross(u).length() / u.length());
+        Vec3 barLine = barStart.subtract(barEnd);
+        Vec3 handToBar = barStart.subtract(main);
 
+        // check if the hand is close enough
+        float dist = (float) (handToBar.cross(barLine).length() / barLine.length());
         if (dist > 0.06) return;
 
-        float fact = (float) (pq.dot(u) / (u.x * u.x + u.y * u.y + u.z * u.z));
-
+        // check that the controller is to the right of the offhand slot, and how far it's to the right
+        float fact = (float) (handToBar.dot(barLine) / (barLine.x * barLine.x + barLine.y * barLine.y + barLine.z * barLine.z));
         if (fact < -1) return;
 
-        Vec3 w2 = u.scale(fact).subtract(pq);
-
+        // get the closest point from the hand to the hotbar
+        Vec3 w2 = barLine.scale(fact).subtract(handToBar);
         Vec3 point = main.subtract(w2);
-        float linelen = (float) u.length();
+
+        float barSize = (float) barLine.length();
         float ilen = (float) barStart.subtract(point).length();
         if (fact < 0) {
             ilen *= -1;
         }
-        float pos = ilen / linelen * 9;
+        float pos = ilen / barSize * 9;
 
         if (this.dh.vrSettings.reverseHands) {
             pos = 9 - pos;
         }
 
+        // actual slot that is selected
         int box = (int) Math.floor(pos);
 
         if (box > 8) {
-            return;
-        }
-        if (box < 0) {
-            if (pos <= -0.5 && pos >= -1.5) //TODO fix reversed hands situation.
-            {
+            if (this.mc.player.getMainArm().getOpposite() == HumanoidArm.RIGHT && pos >= 9.5 && pos <= 10.5) {
+                box = 9;
+            } else {
+                return;
+            }
+        } else if (box < 0) {
+            if (this.mc.player.getMainArm().getOpposite() == HumanoidArm.LEFT && pos <= -0.5 && pos >= -1.5) {
                 box = 9;
             } else {
                 return;
             }
         }
-        //all that maths for this.
+
+        // all that maths for this.
         this.dh.interactTracker.hotbar = box;
         if (previousSlot != this.dh.interactTracker.hotbar) {
             triggerHapticPulse(0, 750);
         }
     }
 
+    /**
+     * searches a KeyMapping by name
+     * @param name name to search the KeyMapping for
+     * @return found KeyMapping or null if none was found
+     */
     protected KeyMapping findKeyBinding(String name) {
         return Stream.concat(Arrays.stream(this.mc.options.keyMappings), mod.getHiddenKeyBindings().stream())
             .filter((kb) -> name.equals(kb.getName())).findFirst().orElse(null);
@@ -494,7 +594,7 @@ public abstract class MCVR {
         this.hmdRotation.SetIdentity();
         this.hmdRotation.Set3x3(this.hmdPose);
 
-        Vec3 eye = this.getCenterEyePosition();
+        Vec3 eye = this.getEyePosition(RenderPass.CENTER);
         this.hmdHistory.add(eye);
 
         Vector3 pivot = this.hmdRotation.transform(new Vector3(0.0F, -0.1F, 0.1F));
@@ -502,6 +602,7 @@ public abstract class MCVR {
 
         this.hmdRotHistory.add(new Quaternionf().setFromNormalized(this.hmdRotation.transposed().toMCMatrix()
             .rotateY((float) -Math.toRadians(this.dh.vrSettings.worldRotation))));
+
 
         // controllers
         for (int c = 0; c < 2; c++) {
@@ -609,6 +710,7 @@ public abstract class MCVR {
                 // controller 0 determines seated aim
                 this.aimPitch = (float) Math.toDegrees(Math.asin(aimDir.y / aimDir.length()));
             }
+
             this.controllerForwardHistory[c].add(aimDir);
             Vec3 upDir = this.controllerRotation[c].transform(up).toVector3d();
             this.controllerUpHistory[c].add(upDir);
@@ -616,9 +718,9 @@ public abstract class MCVR {
 
 
         if (this.dh.vrSettings.seated) {
-            // seated uses head as aimsource
-            this.aimSource[0] = this.getCenterEyePosition();
-            this.aimSource[1] = this.getCenterEyePosition();
+            // seated uses head as aim source
+            this.aimSource[0] = this.getEyePosition(RenderPass.CENTER);
+            this.aimSource[1] = this.getEyePosition(RenderPass.CENTER);
         }
 
         // trackers
@@ -945,7 +1047,7 @@ public abstract class MCVR {
         // iterate over all minecraft keys, and our hidden keys
         for (KeyMapping keyMapping : Stream.concat(Arrays.stream(this.mc.options.keyMappings), mod.getHiddenKeyBindings().stream()).toList()) {
             ActionParams params = actionParams.getOrDefault(keyMapping.getName(), new ActionParams("optional", "boolean", null));
-            VRInputAction action = new VRInputAction(keyMapping, params.requirement, params.type, params.actionSetOverride);
+            VRInputAction action = new VRInputAction(keyMapping, params.requirement(), params.type(), params.actionSetOverride());
             this.inputActions.put(action.name, action);
         }
 

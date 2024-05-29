@@ -106,60 +106,6 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         }
     }
 
-    @Override
-    public void vivecraft$blitFovReduction(ShaderInstance instance, int width, int height) {
-        RenderSystem.assertOnRenderThread();
-        RenderSystem.colorMask(true, true, true, false);
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.viewport(0, 0, width, height);
-        RenderSystem.disableBlend();
-        Minecraft minecraft = Minecraft.getInstance();
-        RenderSystem.setShaderTexture(0, this.colorTextureId);
-        if (instance == null) {
-            instance = minecraft.gameRenderer.blitShader;
-            instance.setSampler("DiffuseSampler", this.colorTextureId);
-        } else {
-            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; k++) {
-                int l = RenderSystem.getShaderTexture(k);
-                instance.setSampler("Sampler" + k, l);
-            }
-        }
-        Matrix4f matrix4f = new Matrix4f().setOrtho(0, width, height, 0, 1000.0f, 3000.0f);
-        RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-        if (instance.MODEL_VIEW_MATRIX != null) {
-            instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0f, 0.0f, -2000.0f));
-        }
-        if (instance.PROJECTION_MATRIX != null) {
-            instance.PROJECTION_MATRIX.set(matrix4f);
-        }
-        instance.apply();
-        float f = width;
-        float g = height;
-        float h = (float) this.viewWidth / (float) this.width;
-        float k = (float) this.viewHeight / (float) this.height;
-        Tesselator tesselator = RenderSystem.renderThreadTesselator();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
-        if (instance.getVertexFormat() == DefaultVertexFormat.POSITION_TEX) {
-            bufferBuilder.vertex(0.0, g, 0.0).uv(0.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0f).endVertex();
-            bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).endVertex();
-            bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, k).endVertex();
-        } else if (instance.getVertexFormat() == DefaultVertexFormat.POSITION_TEX_COLOR) {
-            bufferBuilder.vertex(0.0, g, 0.0).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
-            bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0f).color(255, 255, 255, 255).endVertex();
-            bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).color(255, 255, 255, 255).endVertex();
-            bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, k).color(255, 255, 255, 255).endVertex();
-        } else {
-            throw new IllegalStateException("Unexpected vertex format " + instance.getVertexFormat());
-        }
-        BufferUploader.draw(bufferBuilder.end());
-        instance.clear();
-        RenderSystem.depthMask(true);
-        RenderSystem.colorMask(true, true, true, true);
-    }
-
     @Unique
     private void vivecraft$_blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean bl, float xCropFactor, float yCropFactor, boolean keepAspect) {
         RenderSystem.assertOnGameThreadOrInit();

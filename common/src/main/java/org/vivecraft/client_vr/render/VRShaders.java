@@ -6,13 +6,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 
 public class VRShaders {
+    // FSAA shader and its uniforms
     public static ShaderInstance lanczosShader;
     public static AbstractUniform _Lanczos_texelWidthOffsetUniform;
     public static AbstractUniform _Lanczos_texelHeightOffsetUniform;
-    public static AbstractUniform _Lanczos_inputImageTextureUniform;
-    public static AbstractUniform _Lanczos_inputDepthTextureUniform;
-    public static AbstractUniform _Lanczos_projectionUniform;
-    public static AbstractUniform _Lanczos_modelViewUniform;
+
+    // mixed reality shader and its uniforms
     public static ShaderInstance depthMaskShader;
     public static AbstractUniform _DepthMask_hmdViewPosition;
     public static AbstractUniform _DepthMask_hmdPlaneNormal;
@@ -21,11 +20,12 @@ public class VRShaders {
     public static AbstractUniform _DepthMask_firstPersonPassUniform;
     public static AbstractUniform _DepthMask_keyColorUniform;
     public static AbstractUniform _DepthMask_alphaModeUniform;
-    public static int _FOVReduction_Enabled;
+
+    // vr post shader and its uniforms
+    public static ShaderInstance fovReductionShader;
     public static AbstractUniform _FOVReduction_RadiusUniform;
     public static AbstractUniform _FOVReduction_OffsetUniform;
     public static AbstractUniform _FOVReduction_BorderUniform;
-    public static ShaderInstance fovReductionShader;
     public static AbstractUniform _Overlay_HealthAlpha;
     public static AbstractUniform _Overlay_FreezeAlpha;
     public static AbstractUniform _Overlay_waterAmplitude;
@@ -35,6 +35,7 @@ public class VRShaders {
     public static AbstractUniform _Overlay_BlackAlpha;
     public static AbstractUniform _Overlay_eye;
 
+    // end portal shaders
     public static ShaderInstance rendertypeEndPortalShaderVR;
     public static ShaderInstance rendertypeEndGatewayShaderVR;
 
@@ -46,8 +47,7 @@ public class VRShaders {
         return rendertypeEndGatewayShaderVR;
     }
 
-    private VRShaders() {
-    }
+    private VRShaders() {}
 
     public static void setupDepthMask() throws Exception {
         depthMaskShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "mixedreality", DefaultVertexFormat.POSITION_TEX);
@@ -64,18 +64,12 @@ public class VRShaders {
     public static void setupFSAA() throws Exception {
         lanczosShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "lanczos", DefaultVertexFormat.POSITION_TEX);
 
-
         _Lanczos_texelWidthOffsetUniform = lanczosShader.safeGetUniform("texelWidthOffset");
         _Lanczos_texelHeightOffsetUniform = lanczosShader.safeGetUniform("texelHeightOffset");
-        _Lanczos_inputImageTextureUniform = lanczosShader.safeGetUniform("inputImageTexture");
-        _Lanczos_inputDepthTextureUniform = lanczosShader.safeGetUniform("inputDepthTexture");
-        _Lanczos_projectionUniform = lanczosShader.safeGetUniform("projection");
-        _Lanczos_modelViewUniform = lanczosShader.safeGetUniform("modelView");
     }
 
     public static void setupFOVReduction() throws Exception {
         fovReductionShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "fovreduction", DefaultVertexFormat.POSITION_TEX);
-
 
         _FOVReduction_RadiusUniform = fovReductionShader.safeGetUniform("circle_radius");
         _FOVReduction_OffsetUniform = fovReductionShader.safeGetUniform("circle_offset");

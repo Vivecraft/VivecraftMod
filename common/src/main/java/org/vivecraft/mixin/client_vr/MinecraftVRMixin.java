@@ -5,7 +5,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
@@ -70,6 +69,7 @@ import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.VRShaders;
+import org.vivecraft.client_vr.render.helpers.ShaderHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
@@ -857,7 +857,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             this.vivecraft$notifyMirror("Mirror is OFF", true, 1000);
         } else if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
             if (VRShaders.depthMaskShader != null) {
-                this.vivecraft$doMixedRealityMirror();
+                ShaderHelper.doMixedRealityMirror();
             } else {
                 this.vivecraft$notifyMirror("Shader compile failed, see log", true, 10000);
             }
@@ -911,79 +911,5 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight(), 0, true, xcrop, ycrop, ar);
             }
         }
-    }
-
-    @Unique
-    private void vivecraft$doMixedRealityMirror() {
-        // set viewport to fullscreen, since it would be still on the one from the last pass
-        RenderSystem.viewport(0, 0,
-            ((WindowExtension) (Object) this.window).vivecraft$getActualScreenWidth(),
-            ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight());
-
-        Vec3 camPlayer = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getHeadPivot()
-            .subtract(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getPosition());
-        Matrix4f viewMatrix = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD)
-            .getMatrix().transposed().toMCMatrix();
-        Vector3 cameraLook = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.getEye(RenderPass.THIRD).getMatrix()
-            .transform(Vector3.forward());
-
-        // set uniforms
-        VRShaders._DepthMask_projectionMatrix.set(((GameRendererExtension) this.gameRenderer).vivecraft$getThirdPassProjectionMatrix());
-        VRShaders._DepthMask_viewMatrix.set(viewMatrix);
-
-        VRShaders._DepthMask_hmdViewPosition.set((float) camPlayer.x, (float) camPlayer.y, (float) camPlayer.z);
-        VRShaders._DepthMask_hmdPlaneNormal.set(-cameraLook.getX(), 0.0F, -cameraLook.getZ());
-
-        boolean alphaMask = ClientDataHolderVR.getInstance().vrSettings.mixedRealityUnityLike
-            && ClientDataHolderVR.getInstance().vrSettings.mixedRealityAlphaMask;
-        if (!alphaMask) {
-            VRShaders._DepthMask_keyColorUniform.set(
-                (float) ClientDataHolderVR.getInstance().vrSettings.mixedRealityKeyColor.getRed() / 255.0F,
-                (float) ClientDataHolderVR.getInstance().vrSettings.mixedRealityKeyColor.getGreen() / 255.0F,
-                (float) ClientDataHolderVR.getInstance().vrSettings.mixedRealityKeyColor.getBlue() / 255.0F);
-        } else {
-            VRShaders._DepthMask_keyColorUniform.set(0F, 0F, 0F);
-        }
-        VRShaders._DepthMask_alphaModeUniform.set(alphaMask ? 1 : 0);
-
-        VRShaders._DepthMask_firstPersonPassUniform.set(
-            ClientDataHolderVR.getInstance().vrSettings.mixedRealityUnityLike ? 1 : 0);
-
-        // bind textures
-        RenderSystem.setShaderTexture(0, ClientDataHolderVR.getInstance().vrRenderer.framebufferMR.getColorTextureId());
-        RenderSystem.setShaderTexture(1, ClientDataHolderVR.getInstance().vrRenderer.framebufferMR.getDepthTextureId());
-
-        VRShaders.depthMaskShader.setSampler("thirdPersonColor", RenderSystem.getShaderTexture(0));
-        VRShaders.depthMaskShader.setSampler("thirdPersonDepth", RenderSystem.getShaderTexture(1));
-
-        if (ClientDataHolderVR.getInstance().vrSettings.mixedRealityUnityLike) {
-            if (ClientDataHolderVR.getInstance().vrSettings.mixedRealityUndistorted) {
-                RenderSystem.setShaderTexture(2,
-                    ClientDataHolderVR.getInstance().vrRenderer.framebufferUndistorted.getColorTextureId());
-            } else {
-                if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorLeftEye) {
-                    RenderSystem.setShaderTexture(2,
-                        ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0.getColorTextureId());
-                } else {
-                    RenderSystem.setShaderTexture(2,
-                        ClientDataHolderVR.getInstance().vrRenderer.framebufferEye1.getColorTextureId());
-                }
-            }
-            VRShaders.depthMaskShader.setSampler("firstPersonColor", RenderSystem.getShaderTexture(2));
-        }
-
-        VRShaders.depthMaskShader.apply();
-
-        Tesselator tesselator = RenderSystem.renderThreadTesselator();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, VRShaders.depthMaskShader.getVertexFormat());
-        bufferbuilder.vertex(-1, -1, 0.0).uv(0, 0).endVertex();
-        bufferbuilder.vertex(1, -1, 0.0).uv(2, 0).endVertex();
-        bufferbuilder.vertex(1, 1, 0.0).uv(2, 2).endVertex();
-        bufferbuilder.vertex(-1, 1, 0.0).uv(0, 2).endVertex();
-        BufferUploader.draw(bufferbuilder.end());
-        VRShaders.depthMaskShader.clear();
-
-        ProgramManager.glUseProgram(0);
     }
 }

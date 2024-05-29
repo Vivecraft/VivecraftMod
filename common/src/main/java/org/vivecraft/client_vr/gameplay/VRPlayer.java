@@ -10,7 +10,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
@@ -26,6 +25,7 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
@@ -151,7 +151,7 @@ public class VRPlayer {
         // adjust world scale
         float scaleSetting = worldScaleOverride.getFloat();
 
-        if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom()) {
+        if (MethodHolder.isInMenuRoom()) {
             this.worldScale = 1.0F;
         } else {
             if (this.wfCount > 0 && !this.mc.isPaused()) {
@@ -225,7 +225,7 @@ public class VRPlayer {
             }
         }
 
-        if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom()) {
+        if (this.dh.vrSettings.seated && !MethodHolder.isInMenuRoom()) {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
         }
     }
@@ -399,8 +399,8 @@ public class VRPlayer {
             System.out.println("Room origin: " + this.vrdata_world_pre.origin);
             System.out.println("Hmd position room: " + this.vrdata_room_pre.hmd.getPosition());
             System.out.println("Hmd position world: " + this.vrdata_world_pre.hmd.getPosition());
-            System.out.println("Hmd Projection Left: " + this.dh.vrRenderer.eyeproj[0]);
-            System.out.println("Hmd Projection Right: " + this.dh.vrRenderer.eyeproj[1]);
+            System.out.println("Hmd Projection Left: " + this.dh.vrRenderer.eyeProj[0]);
+            System.out.println("Hmd Projection Right: " + this.dh.vrRenderer.eyeProj[1]);
             System.out.println("<Debug info end>");
             this.initDone = true;
         }

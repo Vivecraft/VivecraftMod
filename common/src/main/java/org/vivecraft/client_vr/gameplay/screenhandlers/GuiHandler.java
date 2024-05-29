@@ -12,15 +12,16 @@ import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.*;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;
@@ -133,6 +134,10 @@ public class GuiHandler {
         return scale;
     }
 
+    /**
+     * updates the gui resolution, and scales the cursor position
+     * @return if the gui scale/size changed
+     */
     public static boolean updateResolution() {
         int oldWidth = guiWidth;
         int oldHeight = guiHeight;
@@ -155,6 +160,9 @@ public class GuiHandler {
         }
     }
 
+    /**
+     * calculates and sets the cursor position
+     */
     public static void processGui() {
         if (guiRotation_room == null) return;
         if (dh.vrSettings.seated) return;
@@ -170,40 +178,37 @@ public class GuiHandler {
             // offscreen
             controllerMouseX = -1.0f;
             controllerMouseY = -1.0f;
-        } else if (controllerMouseX == -1.0f) {
+            controllerMouseValid = false;
+        } else if (!controllerMouseValid) {
             controllerMouseX = (int) (u * mc.getWindow().getWidth());
             controllerMouseY = (int) (v * mc.getWindow().getHeight());
+            controllerMouseValid = true;
         } else {
             // apply some smoothing between mouse positions
             float newX = (int) (u * mc.getWindow().getWidth());
             float newY = (int) (v * mc.getWindow().getHeight());
             controllerMouseX = controllerMouseX * 0.7f + newX * 0.3f;
             controllerMouseY = controllerMouseY * 0.7f + newY * 0.3f;
+            controllerMouseValid = true;
         }
 
-        if (controllerMouseX >= 0.0D && controllerMouseX < mc.getWindow().getScreenWidth() &&
-            controllerMouseY >= 0.0D && controllerMouseY < mc.getWindow().getScreenHeight())
-        {
+        if (controllerMouseValid) {
             // mouse on screen
-            double mouseX = Math.min(Math.max((int) controllerMouseX, 0), mc.getWindow().getScreenWidth());
-            double mouseY = Math.min(Math.max((int) controllerMouseY, 0), mc.getWindow().getScreenHeight());
-
             InputSimulator.setMousePos(
-                mouseX * (((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenWidth() / (double) mc.getWindow().getScreenWidth()),
-                mouseY * (((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenHeight() / (double) mc.getWindow().getScreenHeight()));
-            controllerMouseValid = true;
-        } else {
-            // mouse off screen
-            if (controllerMouseTicks == 0) {
-                controllerMouseValid = false;
-            }
-
-            if (controllerMouseTicks > 0) {
-                controllerMouseTicks--;
-            }
+                controllerMouseX * (((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenWidth() / (double) mc.getWindow().getScreenWidth()),
+                controllerMouseY * (((WindowExtension) (Object) mc.getWindow()).vivecraft$getActualScreenHeight() / (double) mc.getWindow().getScreenHeight()));
         }
     }
 
+    /**
+     * calculates the relative cursor position on the gui
+     * @param guiPos_room position of the gui
+     * @param guiRotation_room orientation of the gui
+     * @param guiScale size of the gui layer
+     * @param controller device pose to get the cursor for
+     * @return relative position on the gui, anchored top left.<br>
+     *  If offscreen returns Vec2(-1,-1)
+     */
     public static Vec2 getTexCoordsForCursor(Vec3 guiPos_room, Matrix4f guiRotation_room, float guiScale, VRData.VRDevicePose controller) {
         Vec3 con = controller.getPosition();
         Vector3 controllerPos = new Vector3(con);
@@ -248,6 +253,9 @@ public class GuiHandler {
         return new Vec2(-1.0F, -1.0F);
     }
 
+    /**
+     * processes key presses for the GUI
+     */
     public static void processBindingsGui() {
         // only click mouse keys, when cursor is on screen
         boolean mouseValid = controllerMouseX >= 0.0D && controllerMouseX < mc.getWindow().getScreenWidth() &&
@@ -361,7 +369,7 @@ public class GuiHandler {
         }
 
         // check if the new screen is meant to show the MenuRoom, instead of the current screen
-        boolean staticScreen = mc.gameRenderer == null || (((GameRendererExtension) mc.gameRenderer).vivecraft$willBeInMenuRoom(newScreen));
+        boolean staticScreen = MethodHolder.willBeInMenuRoom(newScreen);
         staticScreen &= !dh.vrSettings.seated && !dh.vrSettings.menuAlwaysFollowFace;
 
         if (staticScreen) {
@@ -370,10 +378,6 @@ public class GuiHandler {
             // slight offset to center of the room, to prevent z fighting
             guiPos_room = new Vec3(0.02D, 1.3F, -Math.max(playArea != null ? playArea.y / 2.0F : 0.0F, 1.5F));
             guiRotation_room = new Matrix4f();
-            guiRotation_room.M[0][0] = guiRotation_room.M[1][1] = guiRotation_room.M[2][2] = guiRotation_room.M[3][3] = 1.0F;
-            guiRotation_room.M[0][1] = guiRotation_room.M[1][0] = guiRotation_room.M[2][3] = guiRotation_room.M[3][1] = 0.0F;
-            guiRotation_room.M[0][2] = guiRotation_room.M[1][2] = guiRotation_room.M[2][0] = guiRotation_room.M[3][2] = 0.0F;
-            guiRotation_room.M[0][3] = guiRotation_room.M[1][3] = guiRotation_room.M[2][1] = guiRotation_room.M[3][0] = 0.0F;
             return;
         }
         if ((previousGuiScreen == null && newScreen != null) ||
@@ -510,8 +514,8 @@ public class GuiHandler {
                         // hud on hand
                         Matrix4f out = dh.vr.getAimRotation(1);
                         Matrix4f rot = Matrix4f.rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians);
-                        Matrix4f MguiRotationPose = Matrix4f.multiply(rot, out);
-                        guirot = Matrix4f.multiply(MguiRotationPose, Utils.rotationXMatrix(((float) Math.PI * -0.2F)));
+                        Matrix4f guiRotationPose = Matrix4f.multiply(rot, out);
+                        guirot = Matrix4f.multiply(guiRotationPose, Utils.rotationXMatrix(((float) Math.PI * -0.2F)));
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY((float) Math.PI * 0.1F * i));
                         scale = 0.58823526F;
 
@@ -534,8 +538,9 @@ public class GuiHandler {
 
                         boolean slim = mc.player.getSkin().model().id().equals("slim");
                         scale = 0.4F;
+                        float offset = mc.player.getMainArm().getOpposite() == (dh.vrSettings.reverseHands ? HumanoidArm.LEFT : HumanoidArm.RIGHT) ? -0.166F : -0.136F;
                         guilocal = new Vec3(
-                            i * -0.136F * dh.vrPlayer.vrdata_world_render.worldScale,
+                            i * offset * dh.vrPlayer.vrdata_world_render.worldScale,
                             (slim ? 0.13D : 0.12D) * dh.vrPlayer.vrdata_world_render.worldScale,
                             0.06D * dh.vrPlayer.vrdata_world_render.worldScale);
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY((float) Math.PI * 0.2F * i));
@@ -549,9 +554,7 @@ public class GuiHandler {
             guirot = Matrix4f.multiply(rot, guirot);
         }
 
-        if ((dh.vrSettings.seated || dh.vrSettings.menuAlwaysFollowFace) &&
-            ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom())
-        {
+        if ((dh.vrSettings.seated || dh.vrSettings.menuAlwaysFollowFace) && MethodHolder.isInMenuRoom()) {
             // main menu slow yaw tracking thing
             scale = 2.0F;
             Vec3 posAvg = new Vec3(0.0D, 0.0D, 0.0D);
@@ -575,7 +578,7 @@ public class GuiHandler {
             yawAvg = (float) Math.toRadians(yawAvg);
 
             Vec3 dir = new Vec3(-Math.sin(yawAvg), 0.0D, Math.cos(yawAvg));
-            float dist = ((GameRendererExtension) mc.gameRenderer).vivecraft$isInMenuRoom() ?
+            float dist = MethodHolder.isInMenuRoom() ?
                 2.5F * dh.vrPlayer.vrdata_world_render.worldScale : dh.vrSettings.hudDistance;
 
             Vec3 pos = posAvg.add(new Vec3(dir.x * dist, dir.y * dist, dir.z * dist));

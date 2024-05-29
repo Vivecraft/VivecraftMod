@@ -27,7 +27,7 @@ import org.vivecraft.fabric.mixin.world.level.biome.BiomeAccessor;
 
 import java.nio.file.Path;
 
-public class XplatImpl {
+public class XplatImpl implements Xplat {
 
     public static boolean isModLoaded(String name) {
         return FabricLoader.getInstance().isModLoaded(name);

@@ -155,7 +155,7 @@ public class SwingTracker extends Tracker {
 
                 this.miningPoint[c] = handPos.add(handDirection.scale(weaponLength));
 
-                //do speed calc in actual room coords
+                // do speed calc in actual room coords
                 Vec3 tip = this.dh.vrPlayer.vrdata_room_pre.getController(c).getPosition().add(this.dh.vrPlayer.vrdata_room_pre.getHand(c).getCustomVector(this.forward).scale(0.3D));
                 this.tipHistory[c].add(tip);
 
@@ -164,7 +164,7 @@ public class SwingTracker extends Tracker {
                 boolean inAnEntity = false;
                 this.canAct[c] = (double) speed > this.speedThresh && !this.lastWeaponSolid[c];
 
-                //Check EntityCollisions first
+                // Check EntityCollisions first
                 boolean entityAct = this.canAct[c];
 
                 // no hitting around corners, to not trigger anticheat
@@ -196,7 +196,7 @@ public class SwingTracker extends Tracker {
                 for (Entity entity : mobs) {
                     if (entity.isPickable() && entity != this.mc.getCameraEntity().getVehicle()) {
                         if (entityAct) {
-                            //Minecraft.getInstance().physicalGuiManager.preClickAction();
+                            // Minecraft.getInstance().physicalGuiManager.preClickAction();
 
                             if (!EpicFightHelper.isLoaded() || !EpicFightHelper.attack()) {
                                 // only attack if epic fight didn't trigger
@@ -226,7 +226,7 @@ public class SwingTracker extends Tracker {
                 BlockPos blockpos = BlockPos.containing(this.miningPoint[c]);
                 BlockState blockstate = this.mc.level.getBlockState(blockpos);
 
-                // every time end of weapon enters a solid for the first time, trace from our previous air position
+                // every time the end of a weapon enters a solid for the first time, trace from our previous air position
                 // and damage the block it collides with...
                 BlockHitResult blockHit = this.mc.level.clip(new ClipContext(this.lastWeaponEndAir[c], this.miningPoint[c], ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.mc.player));
 

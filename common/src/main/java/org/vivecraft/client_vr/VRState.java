@@ -78,7 +78,7 @@ public class VRState {
             dh.vrPlayer.registerTracker(dh.crawlTracker);
             dh.vrPlayer.registerTracker(dh.cameraTracker);
 
-            dh.vr.postinit();
+            dh.vr.postInit();
 
             dh.menuWorldRenderer = new MenuWorldRenderer();
 

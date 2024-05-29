@@ -924,14 +924,4 @@ public class Utils {
         dest.M[3][2] = source.M[3][2];
         dest.M[3][3] = source.M[3][3];
     }
-
-    public static org.vivecraft.common.utils.math.Matrix4f Matrix4fSetIdentity(
-        org.vivecraft.common.utils.math.Matrix4f mat)
-    {
-        mat.M[0][0] = mat.M[1][1] = mat.M[2][2] = mat.M[3][3] = 1.0F;
-        mat.M[0][1] = mat.M[1][0] = mat.M[2][3] = mat.M[3][1] = 0.0F;
-        mat.M[0][2] = mat.M[1][2] = mat.M[2][0] = mat.M[3][2] = 0.0F;
-        mat.M[0][3] = mat.M[1][3] = mat.M[2][1] = mat.M[3][0] = 0.0F;
-        return mat;
-    }
 }
