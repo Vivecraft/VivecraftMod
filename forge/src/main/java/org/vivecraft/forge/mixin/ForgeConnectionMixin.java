@@ -15,7 +15,7 @@ import org.vivecraft.forge.Vivecraft;
 
 @Mixin(Connection.class)
 public class ForgeConnectionMixin {
-    @ModifyVariable(at = @At("HEAD"), method = "send(Lnet/minecraft/network/protocol/Packet;)V", argsOnly = true)
+    @ModifyVariable(at = @At("HEAD"), method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V", argsOnly = true)
     private Packet<?> vivecraft$convertPacket(Packet<?> packet) {
         // stupid forge doesn't register packets, so these wouldn't actually be sent correctly on the client
         // need to convert them to forge packets
