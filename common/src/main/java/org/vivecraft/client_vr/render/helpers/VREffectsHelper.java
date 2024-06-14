@@ -104,7 +104,7 @@ public class VREffectsHelper {
             float alpha = TelescopeTracker.viewPercent(i);
             RenderHelper.drawSizedQuadSolid(720.0F, 720.0F, scale, new float[]{alpha, alpha, alpha, 1}, matrixStackIn.last().pose());
 
-            RenderSystem.setShaderTexture(0, new ResourceLocation("textures/misc/spyglass_scope.png"));
+            RenderSystem.setShaderTexture(0, ResourceLocation.withDefaultNamespace("textures/misc/spyglass_scope.png"));
             RenderSystem.enableBlend();
             matrixStackIn.translate(0.0D, 0.0D, 0.00001D);
             int light = LevelRenderer.getLightColor(mc.level, BlockPos.containing(dataHolder.vrPlayer.vrdata_world_render.getController(i).getPosition()));
@@ -175,17 +175,16 @@ public class VREffectsHelper {
         }
     }
 
-    private static final ResourceLocation cubeFront = new ResourceLocation("textures/gui/title/background/panorama_0.png");
-    private static final ResourceLocation cubeRight = new ResourceLocation("textures/gui/title/background/panorama_1.png");
-    private static final ResourceLocation cubeBack = new ResourceLocation("textures/gui/title/background/panorama_2.png");
-    private static final ResourceLocation cubeLeft = new ResourceLocation("textures/gui/title/background/panorama_3.png");
-    private static final ResourceLocation cubeUp = new ResourceLocation("textures/gui/title/background/panorama_4.png");
-    private static final ResourceLocation cubeDown = new ResourceLocation("textures/gui/title/background/panorama_5.png");
-    private static final ResourceLocation dirt = new ResourceLocation("minecraft:textures/block/dirt.png");
-    private static final ResourceLocation grass = new ResourceLocation("minecraft:textures/block/grass_block_top.png");
+    private static final ResourceLocation cubeFront = ResourceLocation.withDefaultNamespace("textures/gui/title/background/panorama_0.png");
+    private static final ResourceLocation cubeRight = ResourceLocation.withDefaultNamespace("textures/gui/title/background/panorama_1.png");
+    private static final ResourceLocation cubeBack = ResourceLocation.withDefaultNamespace("textures/gui/title/background/panorama_2.png");
+    private static final ResourceLocation cubeLeft = ResourceLocation.withDefaultNamespace("textures/gui/title/background/panorama_3.png");
+    private static final ResourceLocation cubeUp = ResourceLocation.withDefaultNamespace("textures/gui/title/background/panorama_4.png");
+    private static final ResourceLocation cubeDown = ResourceLocation.withDefaultNamespace("textures/gui/title/background/panorama_5.png");
+    private static final ResourceLocation dirt = ResourceLocation.withDefaultNamespace("textures/block/dirt.png");
+    private static final ResourceLocation grass = ResourceLocation.withDefaultNamespace("textures/block/grass_block_top.png");
 
     public static void renderMenuPanorama(Matrix4fStack poseStack) {
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT | GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         RenderSystem.depthMask(true);
@@ -198,81 +197,81 @@ public class VREffectsHelper {
 
         // down
         RenderSystem.setShaderTexture(0, cubeDown);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 0, 0)
-            .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 0, 100)
-            .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 100)
-            .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 0)
-            .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferbuilder.addVertex(poseStack, 0, 0, 0)
+            .setUv(0, 0).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 0, 0, 100)
+            .setUv(0, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 0, 100)
+            .setUv(1, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 0, 0)
+            .setUv(1, 0).setColor(255, 255, 255, 255);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
         // up
         RenderSystem.setShaderTexture(0, cubeUp);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 100, 100)
-            .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 0)
-            .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 0)
-            .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 100)
-            .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferbuilder.addVertex(poseStack, 0, 100, 100)
+            .setUv(0, 0).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 0, 100, 0)
+            .setUv(0, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 100, 0)
+            .setUv(1, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 100, 100)
+            .setUv(1, 0).setColor(255, 255, 255, 255);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
         // left
         RenderSystem.setShaderTexture(0, cubeLeft);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 0, 0)
-            .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 0)
-            .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 100)
-            .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 0, 100)
-            .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferbuilder.addVertex(poseStack, 0, 0, 0)
+            .setUv(1, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 0, 100, 0)
+            .setUv(1, 0).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 0, 100, 100)
+            .setUv(0, 0).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 0, 0, 100)
+            .setUv(0, 1).setColor(255, 255, 255, 255);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
         // right
         RenderSystem.setShaderTexture(0, cubeRight);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 100, 0, 0)
-            .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 100)
-            .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 100)
-            .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 0)
-            .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferbuilder.addVertex(poseStack, 100, 0, 0)
+            .setUv(0, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 0, 100)
+            .setUv(1, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 100, 100)
+            .setUv(1, 0).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 100, 0)
+            .setUv(0, 0).setColor(255, 255, 255, 255);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
         // front
         RenderSystem.setShaderTexture(0, cubeFront);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 0, 0)
-            .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 0)
-            .uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 0)
-            .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 0)
-            .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferbuilder.addVertex(poseStack, 0, 0, 0)
+            .setUv(0, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 0, 0)
+            .setUv(1, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 100, 0)
+            .setUv(1, 0).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 0, 100, 0)
+            .setUv(0, 0).setColor(255, 255, 255, 255);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
         //back
         RenderSystem.setShaderTexture(0, cubeBack);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(poseStack, 0, 0, 100).
-            uv(1, 1).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 0, 100, 100)
-            .uv(1, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 100, 100)
-            .uv(0, 0).color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(poseStack, 100, 0, 100)
-            .uv(0, 1).color(255, 255, 255, 255).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferbuilder.addVertex(poseStack, 0, 0, 100)
+            .setUv(1, 1).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 0, 100, 100)
+            .setUv(1, 0).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 100, 100)
+            .setUv(0, 0).setColor(255, 255, 255, 255);
+        bufferbuilder.addVertex(poseStack, 100, 0, 100)
+            .setUv(0, 1).setColor(255, 255, 255, 255);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
         poseStack.popMatrix();
 
@@ -299,33 +298,33 @@ public class VREffectsHelper {
                 r = g = b = 128;
             }
 
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
 
             final int repeat = 4; // texture wraps per meter
 
             bufferbuilder
-                .vertex(poseStack, 0, 0.005f * -i, 0)
-                .uv(0, 0)
-                .color(r, g, b, 255)
-                .normal(0, 1, 0).endVertex();
+                .addVertex(poseStack, 0, 0.005f * -i, 0)
+                .setUv(0, 0)
+                .setColor(r, g, b, 255)
+                .setNormal(0, 1, 0);
             bufferbuilder
-                .vertex(poseStack, 0, 0.005f * -i, length)
-                .uv(0, repeat * length)
-                .color(r, g, b, 255)
-                .normal(0, 1, 0).endVertex();
+                .addVertex(poseStack, 0, 0.005f * -i, length)
+                .setUv(0, repeat * length)
+                .setColor(r, g, b, 255)
+                .setNormal(0, 1, 0);
             bufferbuilder
-                .vertex(poseStack, width, 0.005f * -i, length)
-                .uv(repeat * width, repeat * length)
-                .color(r, g, b, 255)
-                .normal(0, 1, 0).endVertex();
+                .addVertex(poseStack, width, 0.005f * -i, length)
+                .setUv(repeat * width, repeat * length)
+                .setColor(r, g, b, 255)
+                .setNormal(0, 1, 0);
             bufferbuilder
-                .vertex(poseStack, width, 0.005f * -i, 0)
-                .uv(repeat * width, 0)
-                .color(r, g, b, 255)
-                .normal(0, 1, 0).endVertex();
+                .addVertex(poseStack, width, 0.005f * -i, 0)
+                .setUv(repeat * width, 0)
+                .setColor(r, g, b, 255)
+                .setNormal(0, 1, 0);
 
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
             poseStack.popMatrix();
         }
     }
@@ -339,7 +338,6 @@ public class VREffectsHelper {
             area = new Vector2f(2, 2);
         }
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.depthFunc(GL11C.GL_ALWAYS);
         RenderSystem.clear(GL11C.GL_COLOR_BUFFER_BIT | GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
@@ -354,67 +352,67 @@ public class VREffectsHelper {
         float length = area.y + oversize;
         pMatrixStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
 
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
         float r, g, b, a;
         r = g = b = 0.8f;
         a = 1.0f;
 
-        bufferbuilder.vertex(pMatrixStack, 0, 0, 0)
-            .uv(0, 0).color(r, g, b, a).normal(0, 1, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, 0, 0, length)
-            .uv(0, repeat * length).color(r, g, b, a).normal(0, 1, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, 0, length)
-            .uv(repeat * width, repeat * length).color(r, g, b, a).normal(0, 1, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, 0, 0)
-            .uv(repeat * width, 0).color(r, g, b, a).normal(0, 1, 0).endVertex();
+        bufferbuilder.addVertex(pMatrixStack, 0, 0, 0)
+            .setUv(0, 0).setColor(r, g, b, a).setNormal(0, 1, 0);
+        bufferbuilder.addVertex(pMatrixStack, 0, 0, length)
+            .setUv(0, repeat * length).setColor(r, g, b, a).setNormal(0, 1, 0);
+        bufferbuilder.addVertex(pMatrixStack, width, 0, length)
+            .setUv(repeat * width, repeat * length).setColor(r, g, b, a).setNormal(0, 1, 0);
+        bufferbuilder.addVertex(pMatrixStack, width, 0, 0)
+            .setUv(repeat * width, 0).setColor(r, g, b, a).setNormal(0, 1, 0);
 
-        bufferbuilder.vertex(pMatrixStack, 0, height, length)
-            .uv(0, 0).color(r, g, b, a).normal(0, -1, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, 0, height, 0)
-            .uv(0, repeat * length).color(r, g, b, a).normal(0, -1, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, height, 0)
-            .uv(repeat * width, repeat * length).color(r, g, b, a).normal(0, -1, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, height, length)
-            .uv(repeat * width, 0).color(r, g, b, a).normal(0, -1, 0).endVertex();
+        bufferbuilder.addVertex(pMatrixStack, 0, height, length)
+            .setUv(0, 0).setColor(r, g, b, a).setNormal(0, -1, 0);
+        bufferbuilder.addVertex(pMatrixStack, 0, height, 0)
+            .setUv(0, repeat * length).setColor(r, g, b, a).setNormal(0, -1, 0);
+        bufferbuilder.addVertex(pMatrixStack, width, height, 0)
+            .setUv(repeat * width, repeat * length).setColor(r, g, b, a).setNormal(0, -1, 0);
+        bufferbuilder.addVertex(pMatrixStack, width, height, length)
+            .setUv(repeat * width, 0).setColor(r, g, b, a).setNormal(0, -1, 0);
 
-        bufferbuilder.vertex(pMatrixStack, 0, 0, 0)
-            .uv(0, 0).color(r, g, b, a).normal(1, 0, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, 0, height, 0)
-            .uv(0, repeat * height).color(r, g, b, a).normal(1, 0, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, 0, height, length)
-            .uv(repeat * length, repeat * height).color(r, g, b, a).normal(1, 0, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, 0, 0, length)
-            .uv(repeat * length, 0).color(r, g, b, a).normal(1, 0, 0).endVertex();
+        bufferbuilder.addVertex(pMatrixStack, 0, 0, 0)
+            .setUv(0, 0).setColor(r, g, b, a).setNormal(1, 0, 0);
+        bufferbuilder.addVertex(pMatrixStack, 0, height, 0)
+            .setUv(0, repeat * height).setColor(r, g, b, a).setNormal(1, 0, 0);
+        bufferbuilder.addVertex(pMatrixStack, 0, height, length)
+            .setUv(repeat * length, repeat * height).setColor(r, g, b, a).setNormal(1, 0, 0);
+        bufferbuilder.addVertex(pMatrixStack, 0, 0, length)
+            .setUv(repeat * length, 0).setColor(r, g, b, a).setNormal(1, 0, 0);
 
-        bufferbuilder.vertex(pMatrixStack, width, 0, 0)
-            .uv(0, 0).color(r, g, b, a).normal(-1, 0, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, 0, length)
-            .uv(repeat * length, 0).color(r, g, b, a).normal(-1, 0, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, height, length)
-            .uv(repeat * length, repeat * height).color(r, g, b, a).normal(-1, 0, 0).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, height, 0)
-            .uv(0, repeat * height).color(r, g, b, a).normal(-1, 0, 0).endVertex();
+        bufferbuilder.addVertex(pMatrixStack, width, 0, 0)
+            .setUv(0, 0).setColor(r, g, b, a).setNormal(-1, 0, 0);
+        bufferbuilder.addVertex(pMatrixStack, width, 0, length)
+            .setUv(repeat * length, 0).setColor(r, g, b, a).setNormal(-1, 0, 0);
+        bufferbuilder.addVertex(pMatrixStack, width, height, length)
+            .setUv(repeat * length, repeat * height).setColor(r, g, b, a).setNormal(-1, 0, 0);
+        bufferbuilder.addVertex(pMatrixStack, width, height, 0)
+            .setUv(0, repeat * height).setColor(r, g, b, a).setNormal(-1, 0, 0);
 
-        bufferbuilder.vertex(pMatrixStack, 0, 0, 0)
-            .uv(0, 0).color(r, g, b, a).normal(0, 0, 1).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, 0, 0)
-            .uv(repeat * width, 0).color(r, g, b, a).normal(0, 0, 1).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, height, 0)
-            .uv(repeat * width, repeat * height).color(r, g, b, a).normal(0, 0, 1).endVertex();
-        bufferbuilder.vertex(pMatrixStack, 0, height, 0)
-            .uv(0, repeat * height).color(r, g, b, a).normal(0, 0, 1).endVertex();
+        bufferbuilder.addVertex(pMatrixStack, 0, 0, 0)
+            .setUv(0, 0).setColor(r, g, b, a).setNormal(0, 0, 1);
+        bufferbuilder.addVertex(pMatrixStack, width, 0, 0)
+            .setUv(repeat * width, 0).setColor(r, g, b, a).setNormal(0, 0, 1);
+        bufferbuilder.addVertex(pMatrixStack, width, height, 0)
+            .setUv(repeat * width, repeat * height).setColor(r, g, b, a).setNormal(0, 0, 1);
+        bufferbuilder.addVertex(pMatrixStack, 0, height, 0)
+            .setUv(0, repeat * height).setColor(r, g, b, a).setNormal(0, 0, 1);
 
-        bufferbuilder.vertex(pMatrixStack, 0, 0, length).
-            uv(0, 0).color(r, g, b, a).normal(0, 0, -1).endVertex();
-        bufferbuilder.vertex(pMatrixStack, 0, height, length)
-            .uv(0, repeat * height).color(r, g, b, a).normal(0, 0, -1).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, height, length)
-            .uv(repeat * width, repeat * height).color(r, g, b, a).normal(0, 0, -1).endVertex();
-        bufferbuilder.vertex(pMatrixStack, width, 0, length)
-            .uv(repeat * width, 0).color(r, g, b, a).normal(0, 0, -1).endVertex();
+        bufferbuilder.addVertex(pMatrixStack, 0, 0, length)
+            .setUv(0, 0).setColor(r, g, b, a).setNormal(0, 0, -1);
+        bufferbuilder.addVertex(pMatrixStack, 0, height, length)
+            .setUv(0, repeat * height).setColor(r, g, b, a).setNormal(0, 0, -1);
+        bufferbuilder.addVertex(pMatrixStack, width, height, length)
+            .setUv(repeat * width, repeat * height).setColor(r, g, b, a).setNormal(0, 0, -1);
+        bufferbuilder.addVertex(pMatrixStack, width, 0, length)
+            .setUv(repeat * width, 0).setColor(r, g, b, a).setNormal(0, 0, -1);
 
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
         pMatrixStack.popMatrix();
     }
 
@@ -434,7 +432,7 @@ public class VREffectsHelper {
 
         int tzOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
         dataHolder.menuWorldRenderer.time = dataHolder.menuWorldRenderer.fastTime
-                                            ? (long) (dataHolder.menuWorldRenderer.ticks * 10L + 10 * mc.getFrameTime())
+                                            ? (long) (dataHolder.menuWorldRenderer.ticks * 10L + 10 * mc.getTimer().getGameTimeDeltaPartialTick(false))
                                             : (long) ((System.currentTimeMillis() + tzOffset - 21600000) / 86400000D * 24000D);
 
         dataHolder.menuWorldRenderer.fogRenderer.setupFogColor();
@@ -457,31 +455,26 @@ public class VREffectsHelper {
 
             RenderSystem.defaultBlendFunc();
             RenderSystem.enableBlend();
-            BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             poseStack.translate(-width / 2.0F, 0.0F, -length / 2.0F);
             bufferbuilder
-                .vertex(poseStack, 0, 0.005f, 0)
-                .uv(0, 0)
-                .color(1f, 1f, 1f, 1f)
-                .endVertex();
+                .addVertex(poseStack, 0, 0.005f, 0)
+                .setUv(0, 0)
+                .setColor(1f, 1f, 1f, 1f);
             bufferbuilder
-                .vertex(poseStack, 0, 0.005f, length)
-                .uv(0, 4 * length)
-                .color(1f, 1f, 1f, 1f)
-                .endVertex();
+                .addVertex(poseStack, 0, 0.005f, length)
+                .setUv(0, 4 * length)
+                .setColor(1f, 1f, 1f, 1f);
             bufferbuilder
-                .vertex(poseStack, width, 0.005f, length)
-                .uv(4 * width, 4 * length)
-                .color(1f, 1f, 1f, 1f)
-                .endVertex();
+                .addVertex(poseStack, width, 0.005f, length)
+                .setUv(4 * width, 4 * length)
+                .setColor(1f, 1f, 1f, 1f);
             bufferbuilder
-                .vertex(poseStack, width, 0.005f, 0)
-                .uv(4 * width, 0)
-                .color(1f, 1f, 1f, 1f)
-                .endVertex();
+                .addVertex(poseStack, width, 0.005f, 0)
+                .setUv(4 * width, 0)
+                .setColor(1f, 1f, 1f, 1f);
 
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             poseStack.popMatrix();
@@ -625,8 +618,8 @@ public class VREffectsHelper {
                             }
 
                             RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                            mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
-                            RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+                            mc.getTextureManager().bindForSetup(ResourceLocation.parse("vivecraft:textures/white.png"));
+                            RenderSystem.setShaderTexture(0, ResourceLocation.parse("vivecraft:textures/white.png"));
 
                             RenderHelper.renderFlatQuad(pos, (float) (aabb.maxX - aabb.minX), (float) (aabb.maxZ - aabb.minZ),
                                 0.0F, 0, 0, 0, 64, modelView);
@@ -647,14 +640,13 @@ public class VREffectsHelper {
             && dataHolder.currentPass != RenderPass.CAMERA) {
             VREffectsHelper.renderFireInFirstPerson();
         }
-        mc.gameRenderer.renderItemActivationAnimation(0, 0, par1);
+        mc.gameRenderer.renderItemActivationAnimation(null, par1);
     }
 
     public static void renderFireInFirstPerson() {
         PoseStack posestack = new PoseStack();
         RenderHelper.applyVRModelView(dataHolder.currentPass, posestack);
         RenderHelper.applyStereo(dataHolder.currentPass, posestack);
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.depthFunc(GL11C.GL_ALWAYS);
 
         if (dataHolder.currentPass == RenderPass.THIRD
@@ -699,16 +691,16 @@ public class VREffectsHelper {
                 i * 90.0F - dataHolder.vrPlayer.vrdata_world_render.getBodyYaw()));
             posestack.translate(0.0D, -b, 0.0D);
             Matrix4f matrix4f = posestack.last().pose();
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferbuilder.vertex(matrix4f, -a, 0.0F, -a)
-                .uv(u1, v1).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
-            bufferbuilder.vertex(matrix4f, a, 0.0F, -a)
-                .uv(u0, v1).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
-            bufferbuilder.vertex(matrix4f, a, b, -a)
-                .uv(u0, v0).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
-            bufferbuilder.vertex(matrix4f, -a, b, -a)
-                .uv(u1, v0).color(1.0F, 1.0F, 1.0F, 0.9F).endVertex();
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            bufferbuilder.addVertex(matrix4f, -a, 0.0F, -a)
+                .setUv(u1, v1).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+            bufferbuilder.addVertex(matrix4f, a, 0.0F, -a)
+                .setUv(u0, v1).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+            bufferbuilder.addVertex(matrix4f, a, b, -a)
+                .setUv(u0, v0).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+            bufferbuilder.addVertex(matrix4f, -a, b, -a)
+                .setUv(u1, v0).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
             posestack.popPose();
         }
@@ -900,8 +892,6 @@ public class VREffectsHelper {
     }
 
     public static void renderFaceInBlock() {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionShader);
         RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0f);
 
@@ -917,12 +907,13 @@ public class VREffectsHelper {
         RenderSystem.depthMask(true);
         RenderSystem.enableBlend();
         RenderSystem.disableCull();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        bufferbuilder.vertex(mat, -1.5F, -1.5F, 0.0F).endVertex();
-        bufferbuilder.vertex(mat, 1.5F, -1.5F, 0.0F).endVertex();
-        bufferbuilder.vertex(mat, 1.5F, 1.5F, 0.0F).endVertex();
-        bufferbuilder.vertex(mat, -1.5F, 1.5F, 0.0F).endVertex();
-        tesselator.end();
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        bufferbuilder.addVertex(mat, -1.5F, -1.5F, 0.0F);
+        bufferbuilder.addVertex(mat, 1.5F, -1.5F, 0.0F);
+        bufferbuilder.addVertex(mat, 1.5F, 1.5F, 0.0F);
+        bufferbuilder.addVertex(mat, -1.5F, 1.5F, 0.0F);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+
         RenderSystem.depthFunc(GL11C.GL_LEQUAL);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
@@ -1047,21 +1038,19 @@ public class VREffectsHelper {
             float uMax = 15.0F / 256.0F;
             float vMax = 15.0F / 256.0F;
 
-            BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-
             RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+            BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
-            bufferbuilder.vertex(modelView, -1.0F, 1.0F, 0.0F).color(brightness, brightness, brightness, 1.0F)
-                .uv(crosshairSprite.getU0(), crosshairSprite.getV1()).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
-            bufferbuilder.vertex(modelView, 1.0F, 1.0F, 0.0F).color(brightness, brightness, brightness, 1.0F)
-                .uv(crosshairSprite.getU1(), crosshairSprite.getV1()).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
-            bufferbuilder.vertex(modelView, 1.0F, -1.0F, 0.0F).color(brightness, brightness, brightness, 1.0F)
-                .uv(crosshairSprite.getU1(), crosshairSprite.getV0()).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
-            bufferbuilder.vertex(modelView, -1.0F, -1.0F, 0.0F).color(brightness, brightness, brightness, 1.0F)
-                .uv(crosshairSprite.getU0(), crosshairSprite.getV0()).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0.0F, 0.0F, 1.0F).endVertex();
+            bufferbuilder.addVertex(modelView, -1.0F, 1.0F, 0.0F).setColor(brightness, brightness, brightness, 1.0F)
+                .setUv(crosshairSprite.getU0(), crosshairSprite.getV1()).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0.0F, 0.0F, 1.0F);
+            bufferbuilder.addVertex(modelView, 1.0F, 1.0F, 0.0F).setColor(brightness, brightness, brightness, 1.0F)
+                .setUv(crosshairSprite.getU1(), crosshairSprite.getV1()).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0.0F, 0.0F, 1.0F);
+            bufferbuilder.addVertex(modelView, 1.0F, -1.0F, 0.0F).setColor(brightness, brightness, brightness, 1.0F)
+                .setUv(crosshairSprite.getU1(), crosshairSprite.getV0()).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0.0F, 0.0F, 1.0F);
+            bufferbuilder.addVertex(modelView, -1.0F, -1.0F, 0.0F).setColor(brightness, brightness, brightness, 1.0F)
+                .setUv(crosshairSprite.getU0(), crosshairSprite.getV0()).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0.0F, 0.0F, 1.0F);
 
-            BufferUploader.drawWithShader(bufferbuilder.end());
+            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();

@@ -5,43 +5,26 @@ import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.RenderPass;
-import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
-@Mixin(value = GameRenderer.class, priority = 900)
+@Mixin(value = GameRenderer.class)
 public class NeoForgeGameRendererVRMixin {
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setAnglesInternal(FF)V", remap = false), method = "renderLevel")
-    public void vivecraft$neoForgeInternal(Camera camera, float yaw, float pitch) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setAnglesInternal(FF)V"), method = "renderLevel")
+    public void vivecraft$neoforgeCameraRotation(Camera instance, float yaw, float pitch) {
         if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass != RenderPass.LEFT && ClientDataHolderVR.getInstance().currentPass != RenderPass.RIGHT) {
-            camera.setAnglesInternal(yaw, pitch);
+            instance.setAnglesInternal(yaw, pitch);
         }
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotationXYZ(FFF)Lorg/joml/Matrix4f;", remap = false), method = "renderLevel", index = 0, remap = true)
-    public float vivecraft$nullifyXRotation(float xRot) {
-        return RenderPassType.isVanilla() ? xRot : 0F;
-    }
-
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotationXYZ(FFF)Lorg/joml/Matrix4f;", remap = false), method = "renderLevel", index = 1, remap = true)
-    public float vivecraft$nullifyYRotation(float yRot) {
-        return RenderPassType.isVanilla() ? yRot : 0F;
-    }
-
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotationXYZ(FFF)Lorg/joml/Matrix4f;", remap = false), method = "renderLevel", index = 2, remap = true)
-    public float vivecraft$nullifyZRotation(float zRot) {
-        return RenderPassType.isVanilla() ? zRot : 0F;
-    }
-
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;prepareCullFrustum(Lnet/minecraft/world/phys/Vec3;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"), method = "renderLevel", index = 1)
-    public Matrix4f vivecraft$applyModelView(Matrix4f matrix) {
-        if (!RenderPassType.isVanilla()) {
-            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, matrix);
+    @Redirect(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotationZ(F)Lorg/joml/Matrix4f;"), method = "renderLevel")
+    private Matrix4f vivecraft$neoforgeCameraRoll(Matrix4f instance, float roll) {
+        if (RenderPassType.isVanilla() || ClientDataHolderVR.getInstance().currentPass != RenderPass.LEFT && ClientDataHolderVR.getInstance().currentPass != RenderPass.RIGHT) {
+            instance.rotationZ(roll);
         }
-        return matrix;
+        return instance;
     }
 }

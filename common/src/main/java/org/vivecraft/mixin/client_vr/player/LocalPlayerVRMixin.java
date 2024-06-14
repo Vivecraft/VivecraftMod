@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -165,7 +166,7 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @Unique
-    private static final UUID WALK_UP_BLOCKS_MODIFIER_UUID = UUID.fromString("eeec861f-4e0f-4b53-a102-2a6123f53d38");
+    private static final ResourceLocation WALK_UP_BLOCKS_MODIFIER_ID = ResourceLocation.parse("vivecraft:walk_up_blocks");
 
     @Inject(at = @At("HEAD"), method = "move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V", cancellable = true)
     public void vivecraft$overwriteMove(MoverType pType, Vec3 pPos, CallbackInfo info) {
@@ -202,17 +203,17 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
                 if (attributeInstance != null) {
                     if (ClientDataHolderVR.getInstance().vrSettings.walkUpBlocks) {
                         if (this.getBlockJumpFactor() == 1.0F) {
-                            if (attributeInstance.getModifier(WALK_UP_BLOCKS_MODIFIER_UUID) == null) {
-                                attributeInstance.addTransientModifier(new AttributeModifier(WALK_UP_BLOCKS_MODIFIER_UUID, "walk up block", 0.4F, AttributeModifier.Operation.ADD_VALUE));
+                            if (attributeInstance.getModifier(WALK_UP_BLOCKS_MODIFIER_ID) == null) {
+                                attributeInstance.addTransientModifier(new AttributeModifier(WALK_UP_BLOCKS_MODIFIER_ID, 0.4F, AttributeModifier.Operation.ADD_VALUE));
                             }
                         } else {
-                            if (attributeInstance.getModifier(WALK_UP_BLOCKS_MODIFIER_UUID) != null) {
-                                attributeInstance.removeModifier(WALK_UP_BLOCKS_MODIFIER_UUID);
+                            if (attributeInstance.getModifier(WALK_UP_BLOCKS_MODIFIER_ID) != null) {
+                                attributeInstance.removeModifier(WALK_UP_BLOCKS_MODIFIER_ID);
                             }
                         }
                     } else {
-                        if (attributeInstance.getModifier(WALK_UP_BLOCKS_MODIFIER_UUID) != null) {
-                            attributeInstance.removeModifier(WALK_UP_BLOCKS_MODIFIER_UUID);
+                        if (attributeInstance.getModifier(WALK_UP_BLOCKS_MODIFIER_ID) != null) {
+                            attributeInstance.removeModifier(WALK_UP_BLOCKS_MODIFIER_ID);
                         }
                         this.updateAutoJump((float) (this.getX() - d2), (float) (this.getZ() - d3));
                     }

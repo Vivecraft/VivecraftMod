@@ -3,6 +3,7 @@ package org.vivecraft.mixin.client_vr.gui;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -99,7 +100,7 @@ public abstract class GuiVRMixin implements GuiExtension {
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V", ordinal = 1, shift = At.Shift.AFTER), method = "renderItemHotbar")
-    public void vivecraft$hotbarContext(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
+    public void vivecraft$hotbarContext(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (VRState.vrRunning && ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().interactTracker.hotbar < 9 && this.getCameraPlayer().getInventory().selected != ClientDataHolderVR.getInstance().interactTracker.hotbar && ClientDataHolderVR.getInstance().interactTracker.isActive(minecraft.player)) {
             int i = guiGraphics.guiWidth() / 2;
             RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 1.0F);
@@ -149,7 +150,7 @@ public abstract class GuiVRMixin implements GuiExtension {
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V", remap = false), method = "renderItemHotbar")
-    public void vivecraft$renderVive(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
+    public void vivecraft$renderVive(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (VRState.vrRunning) {
             this.vivecraft$renderViveHudIcons(guiGraphics);
         }
@@ -234,16 +235,15 @@ public abstract class GuiVRMixin implements GuiExtension {
 
     @Unique
     public void vivecraft$drawCentredTexturedModalRect(int centreX, int centreY, float width, float height, float uMin, float vMin, float uMax, float vMax) {
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY + height / 2.0F, 0)
-            .uv(uMin, vMin).endVertex();
-        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY + height / 2.0F, 0)
-            .uv(uMin, vMax).endVertex();
-        bufferbuilder.vertex((float) centreX + width / 2.0F, (float) centreY - height / 2.0F, 0)
-            .uv(uMax, vMax).endVertex();
-        bufferbuilder.vertex((float) centreX - width / 2.0F, (float) centreY - height / 2.0F, 0)
-            .uv(uMax, vMin).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.addVertex((float) centreX - width / 2.0F, (float) centreY + height / 2.0F, 0)
+            .setUv(uMin, vMin);
+        bufferbuilder.addVertex((float) centreX + width / 2.0F, (float) centreY + height / 2.0F, 0)
+            .setUv(uMin, vMax);
+        bufferbuilder.addVertex((float) centreX + width / 2.0F, (float) centreY - height / 2.0F, 0)
+            .setUv(uMax, vMax);
+        bufferbuilder.addVertex((float) centreX - width / 2.0F, (float) centreY - height / 2.0F, 0)
+            .setUv(uMax, vMin);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
     }
 }

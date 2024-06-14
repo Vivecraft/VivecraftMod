@@ -42,6 +42,6 @@ public class ItemTags {
     public final static TagKey<Item> VIVECRAFT_BOW_EXCLUSION = tag("bow_exclusion");
 
     private static TagKey<Item> tag(String name) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation("vivecraft", name));
+        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("vivecraft", name));
     }
 }

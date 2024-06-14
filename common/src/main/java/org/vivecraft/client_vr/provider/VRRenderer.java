@@ -253,18 +253,17 @@ public abstract class VRRenderer {
     }
 
     private void drawCircle(float width, float height) {
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        builder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
         int i = 32;
         float f = width / 2;
-        builder.vertex(width / 2, width / 2, 0.0F).endVertex();
+        builder.addVertex(width / 2, width / 2, 0.0F);
         for (int j = 0; j < i + 1; ++j) {
             float f1 = (float) j / (float) i * (float) Math.PI * 2.0F;
             float f2 = (float) ((double) (width / 2) + Math.cos(f1) * (double) f);
             float f3 = (float) ((double) (width / 2) + Math.sin(f1) * (double) f);
-            builder.vertex(f2, f3, 0.0F).endVertex();
+            builder.addVertex(f2, f3, 0.0F);
         }
-        BufferUploader.drawWithShader(builder.end());
+        BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
     private void drawMask() {
@@ -275,28 +274,26 @@ public abstract class VRRenderer {
             return;
         }
 
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
 
-        mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/black.png"));
+        mc.getTextureManager().bindForSetup(ResourceLocation.parse("vivecraft:textures/black.png"));
 
         for (int i = 0; i < verts.length; i += 2) {
-            builder.vertex(verts[i] * dh.vrRenderer.renderScale, verts[i + 1] * dh.vrRenderer.renderScale, 0.0F).endVertex();
+            builder.addVertex(verts[i] * dh.vrRenderer.renderScale, verts[i + 1] * dh.vrRenderer.renderScale, 0.0F);
         }
 
         RenderSystem.setShader(GameRenderer::getPositionShader);
-        BufferUploader.drawWithShader(builder.end());
+        BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
     private void drawQuad() {
         //RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        builder.vertex(-1.0F, -1.0F, 0.0F).uv(0.0F, 0.0F).endVertex();
-        builder.vertex(1.0F, -1.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
-        builder.vertex(1.0F, 1.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
-        builder.vertex(-1.0F, 1.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
-        BufferUploader.draw(builder.end());
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        builder.addVertex(-1.0F, -1.0F, 0.0F).setUv(0.0F, 0.0F);
+        builder.addVertex(1.0F, -1.0F, 0.0F).setUv(1.0F, 0.0F);
+        builder.addVertex(1.0F, 1.0F, 0.0F).setUv(1.0F, 1.0F);
+        builder.addVertex(-1.0F, 1.0F, 0.0F).setUv(0.0F, 1.0F);
+        BufferUploader.draw(builder.buildOrThrow());
     }
 
     public double getCurrentTimeSecs() {
@@ -704,6 +701,8 @@ public abstract class VRRenderer {
 
             try {
                 minecraft.mainRenderTarget = this.framebufferVrRender;
+                VRShaders.setupBlitAspect();
+                ShaderHelper.checkGLError("init blit aspect shader");
                 VRShaders.setupDepthMask();
                 ShaderHelper.checkGLError("init depth shader");
                 VRShaders.setupFOVReduction();

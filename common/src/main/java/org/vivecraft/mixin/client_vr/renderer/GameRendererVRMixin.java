@@ -6,10 +6,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
@@ -23,6 +23,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -140,7 +142,7 @@ public abstract class GameRendererVRMixin
     public abstract void resetProjectionMatrix(Matrix4f projectionMatrix);
 
     @Shadow
-    protected abstract void renderItemActivationAnimation(int i, int j, float par1);
+    public abstract void renderItemActivationAnimation(GuiGraphics guiGraphics, float f);
 
     @Shadow
     public abstract void pick(float f);
@@ -306,8 +308,8 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", remap = false, shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
-    public void vivecraft$matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", remap = false, shift = Shift.AFTER), method = "render(Lnet/minecraft/client/DeltaTracker;Z)V")
+    public void vivecraft$matrix(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci) {
         this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov().get()));
         RenderSystem.getModelViewStack().identity();
         RenderSystem.applyModelViewMatrix();
@@ -327,11 +329,11 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJ)V", shift = Shift.AFTER), method = "render(FJZ)V")
-    public void vivecraft$renderoverlay(float f, long l, boolean bl, CallbackInfo ci) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;)V", shift = Shift.AFTER), method = "render(Lnet/minecraft/client/DeltaTracker;Z)V")
+    public void vivecraft$renderoverlay(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci) {
         if (VRState.vrRunning && vivecraft$DATA_HOLDER.currentPass != RenderPass.THIRD
             && vivecraft$DATA_HOLDER.currentPass != RenderPass.CAMERA) {
-            VREffectsHelper.renderFaceOverlay(f);
+            VREffectsHelper.renderFaceOverlay(deltaTracker.getGameTimeDeltaPartialTick(false));
         }
     }
 
@@ -364,8 +366,8 @@ public abstract class GameRendererVRMixin
         this.vivecraft$shouldDrawGui = shouldDrawGui;
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.BEFORE, ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
-    public void vivecraft$mainMenu(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.BEFORE, ordinal = 6), method = "render(Lnet/minecraft/client/DeltaTracker;Z)V", cancellable = true)
+    public void vivecraft$mainMenu(DeltaTracker deltaTracker, boolean renderWorldIn, CallbackInfo info) {
         if (RenderPassType.isVanilla()) {
             return;
         }
@@ -380,6 +382,7 @@ public abstract class GameRendererVRMixin
             return;
         }
         if (!renderWorldIn || this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
+            float partialTicks = deltaTracker.getGameTimeDeltaPartialTick(false);
             if (!renderWorldIn || this.minecraft.level == null) {
                 // no "level" got pushed so do a manual push
                 this.minecraft.getProfiler().push("MainMenu");
@@ -417,7 +420,7 @@ public abstract class GameRendererVRMixin
         info.cancel();
     }
 
-    @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.AFTER, ordinal = 6), method = "render(FJZ)V", ordinal = 0, argsOnly = true)
+    @ModifyVariable(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.AFTER, ordinal = 6), method = "render(Lnet/minecraft/client/DeltaTracker;Z)V", ordinal = 0, argsOnly = true)
     private boolean vivecraft$renderGui(boolean doRender) {
         if (RenderPassType.isVanilla()) {
             return doRender;
@@ -425,17 +428,17 @@ public abstract class GameRendererVRMixin
         return vivecraft$shouldDrawGui;
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemActivationAnimation(IIF)V"), method = "render(FJZ)V")
-    private void vivecraft$noItemActivationAnimationOnGUI(GameRenderer instance, int i, int j, float f) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemActivationAnimation(Lnet/minecraft/client/gui/GuiGraphics;F)V"), method = "render(Lnet/minecraft/client/DeltaTracker;Z)V")
+    private void vivecraft$noItemActivationAnimationOnGUI(GameRenderer instance, GuiGraphics guiGraphics, float f) {
         if (RenderPassType.isVanilla()) {
-            renderItemActivationAnimation(i, j, f);
+            renderItemActivationAnimation(guiGraphics, f);
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V"), method = "render(FJZ)V")
-    private void vivecraft$noGUIwithViewOnly(Gui instance, GuiGraphics guiGraphics, float f) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V"), method = "render(Lnet/minecraft/client/DeltaTracker;Z)V")
+    private void vivecraft$noGUIwithViewOnly(Gui instance, GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         if (RenderPassType.isVanilla() || !ClientDataHolderVR.viewonly) {
-            instance.render(guiGraphics, f);
+            instance.render(guiGraphics, deltaTracker);
         }
     }
 
@@ -454,7 +457,7 @@ public abstract class GameRendererVRMixin
     }
 
     @Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
-    private void vivecraft$noScaleItem(PoseStack poseStack, float x, float y, float z, int width, int height, float partialTicks) {
+    private void vivecraft$noScaleItem(PoseStack poseStack, float x, float y, float z, GuiGraphics guiGraphics, float partialTicks) {
         if (RenderPassType.isVanilla()) {
             poseStack.scale(x, y, z);
         } else {
@@ -527,7 +530,7 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @ModifyVariable(at = @At(value = "STORE", ordinal = 1), ordinal = 3, method = "renderLevel")
+    @ModifyVariable(at = @At(value = "STORE", ordinal = 1), ordinal = 4, method = "renderLevel")
     public float vivecraft$reduceNauseaAffect(float oldVal) {
         if (!RenderPassType.isVanilla()) {
             // scales down the effect from (1,0.65) to (1,0.9)
@@ -535,6 +538,19 @@ public abstract class GameRendererVRMixin
         } else {
             return oldVal;
         }
+    }
+
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), method = "renderLevel", index = 0, remap = true)
+    public Quaternionfc vivecraft$nullifyCameraRotation(Quaternionfc quat) {
+        return RenderPassType.isVanilla() ? quat : new Quaternionf();
+    }
+
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;prepareCullFrustum(Lnet/minecraft/world/phys/Vec3;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"), method = "renderLevel", index = 1)
+    public Matrix4f vivecraft$applyModelView(Matrix4f matrix) {
+        if (!RenderPassType.isVanilla()) {
+            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, matrix);
+        }
+        return matrix;
     }
 
     @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"), method = "renderLevel")

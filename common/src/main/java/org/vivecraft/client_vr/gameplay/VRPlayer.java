@@ -149,7 +149,7 @@ public class VRPlayer {
 
             if (Xplat.isModLoaded("pehkui")) {
                 // scale world with player size
-                this.worldScale *= PehkuiHelper.getPlayerScale(mc.player, mc.getFrameTime());
+                this.worldScale *= PehkuiHelper.getPlayerScale(mc.player, mc.getTimer().getGameTimeDeltaPartialTick(false));
                 // limit scale
                 if (this.worldScale > 100F) {
                     this.worldScale = 100F;

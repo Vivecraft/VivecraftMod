@@ -180,7 +180,7 @@ public class VRPlayersClient {
         if (playermodelcontroller$rotinfo != null && this.vivePlayersLast.containsKey(uuid)) {
             RotInfo playermodelcontroller$rotinfo1 = this.vivePlayersLast.get(uuid);
             RotInfo playermodelcontroller$rotinfo2 = new RotInfo();
-            float f = Minecraft.getInstance().getFrameTime();
+            float f = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
             playermodelcontroller$rotinfo2.reverse = playermodelcontroller$rotinfo.reverse;
             playermodelcontroller$rotinfo2.seated = playermodelcontroller$rotinfo.seated;
             playermodelcontroller$rotinfo2.hmd = playermodelcontroller$rotinfo.hmd;

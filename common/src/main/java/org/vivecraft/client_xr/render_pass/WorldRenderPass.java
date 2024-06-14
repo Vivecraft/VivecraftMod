@@ -28,11 +28,11 @@ public class WorldRenderPass implements AutoCloseable {
     public WorldRenderPass(VRTextureTarget target) throws IOException {
         this.target = target;
         if (Minecraft.useShaderTransparency()) {
-            this.transparencyChain = createPostChain(new ResourceLocation("shaders/post/vrtransparency.json"), this.target);
+            this.transparencyChain = createPostChain(ResourceLocation.withDefaultNamespace("shaders/post/vrtransparency.json"), this.target);
         } else {
             this.transparencyChain = null;
         }
-        this.outlineChain = createPostChain(new ResourceLocation("shaders/post/entity_outline.json"), this.target);
+        this.outlineChain = createPostChain(ResourceLocation.withDefaultNamespace("shaders/post/entity_outline.json"), this.target);
     }
 
     public static PostChain createPostChain(ResourceLocation resourceLocation, RenderTarget target) throws IOException {

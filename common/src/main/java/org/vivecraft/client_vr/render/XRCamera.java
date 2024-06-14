@@ -1,6 +1,5 @@
 package org.vivecraft.client_vr.render;
 
-import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
@@ -33,15 +32,17 @@ public class XRCamera extends Camera {
         }
         this.xRot = -eye.getPitch();
         this.yRot = eye.getYaw();
-        this.getLookVector().set((float) eye.getDirection().x, (float) eye.getDirection().y, (float) eye.getDirection().z);
+        Vec3 fwd = eye.getCustomVector(new Vec3(0.0D, 0.0D, -1.0D));
+        this.getLookVector().set((float) fwd.x, (float) fwd.y, (float) fwd.z);
         Vec3 up = eye.getCustomVector(new Vec3(0.0D, 1.0D, 0.0D));
         this.getUpVector().set((float) up.x, (float) up.y, (float) up.z);
-        Vec3 left = eye.getCustomVector(new Vec3(1.0D, 0.0D, 0.0D));
+        Vec3 left = eye.getCustomVector(new Vec3(-1.0D, 0.0D, 0.0D));
         this.getLeftVector().set((float) left.x, (float) left.y, (float) left.z);
 
-        this.rotation().set(0.0F, 0.0F, 0.0F, 1.0F);
-        this.rotation().mul(Axis.YP.rotationDegrees(-this.yRot));
-        this.rotation().mul(Axis.XP.rotationDegrees(this.xRot));
+        this.rotation().rotationYXZ(
+            3.1415927F - this.yRot * 0.017453292F,
+            -this.xRot * 0.017453292F,
+            0.0F);
     }
 
     public void tick() {

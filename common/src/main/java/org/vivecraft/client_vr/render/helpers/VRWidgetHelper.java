@@ -1,16 +1,14 @@
 package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -81,7 +79,7 @@ public class VRWidgetHelper {
                     dataholder.vrRenderer.cameraFramebuffer.bindRead();
                     RenderSystem.setShaderTexture(0, dataholder.vrRenderer.cameraFramebuffer.getColorTextureId());
                 } else {
-                    RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/black.png"));
+                    RenderSystem.setShaderTexture(0, ResourceLocation.parse("vivecraft:textures/black.png"));
                 }
             }, (face) ->
             {
@@ -127,9 +125,7 @@ public class VRWidgetHelper {
         }
         minecraft.gameRenderer.lightTexture().turnOnLightLayer();
 
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
         PoseStack poseStack2 = new PoseStack();
         RenderHelper.applyVRModelView(dataholder.currentPass, poseStack2);
@@ -137,17 +133,16 @@ public class VRWidgetHelper {
         poseStack2.last().normal().mul(new Matrix3f(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix()));
 
         minecraft.getBlockRenderer().getModelRenderer().renderModel(poseStack2.last(), bufferbuilder, null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
-        tesselator.end();
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
         RenderSystem.disableBlend();
         displayBindFunc.run();
         RenderSystem.setShader(GameRenderer::getRendertypeEntitySolidShader);
 
-        BufferBuilder bufferbuilder1 = tesselator.getBuilder();
-        bufferbuilder1.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+        bufferbuilder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
 
         for (BakedQuad bakedquad : minecraft.getModelManager().getModel(displayModel).getQuads(null, null, random)) {
-            if (displayFaceFunc.apply(bakedquad.getDirection()) != DisplayFace.NONE && bakedquad.getSprite().contents().name().equals(new ResourceLocation("vivecraft:transparent"))) {
+            if (displayFaceFunc.apply(bakedquad.getDirection()) != DisplayFace.NONE && bakedquad.getSprite().contents().name().equals(ResourceLocation.parse("vivecraft:transparent"))) {
                 int[] vertexList = bakedquad.getVertices();
                 boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == DisplayFace.MIRROR;
                 // make normals point up, so they are always bright
@@ -155,47 +150,45 @@ public class VRWidgetHelper {
                 Vector3f normal = new Matrix3f(poseStack).transform(new Vector3f(0.0F, 1.0F, 0.0F));
                 int j = LightTexture.pack(15, 15);
                 int step = vertexList.length / 4;
-                bufferbuilder1.vertex(
+                bufferbuilder.addVertex(
                         Float.intBitsToFloat(vertexList[0]),
                         Float.intBitsToFloat(vertexList[1]),
                         Float.intBitsToFloat(vertexList[2]))
-                    .color(1.0F, 1.0F, 1.0F, 1.0F)
-                    .uv(flag ? 1.0F : 0.0F, 1.0F)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY)
-                    .uv2(j)
-                    .normal(normal.x, normal.y, normal.z)
-                    .endVertex();
-                bufferbuilder1.vertex(
+                    .setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(flag ? 1.0F : 0.0F, 1.0F)
+                    .setOverlay(OverlayTexture.NO_OVERLAY)
+                    .setLight(j)
+                    .setNormal(normal.x, normal.y, normal.z);
+                bufferbuilder.addVertex(
                         Float.intBitsToFloat(vertexList[step]),
                         Float.intBitsToFloat(vertexList[step + 1]),
                         Float.intBitsToFloat(vertexList[step + 2]))
-                    .color(1.0F, 1.0F, 1.0F, 1.0F)
-                    .uv(flag ? 1.0F : 0.0F, 0.0F)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY)
-                    .uv2(j)
-                    .normal(normal.x, normal.y, normal.z).endVertex();
-                bufferbuilder1.vertex(
+                    .setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(flag ? 1.0F : 0.0F, 0.0F)
+                    .setOverlay(OverlayTexture.NO_OVERLAY)
+                    .setLight(j)
+                    .setNormal(normal.x, normal.y, normal.z);
+                bufferbuilder.addVertex(
                         Float.intBitsToFloat(vertexList[step * 2]),
                         Float.intBitsToFloat(vertexList[step * 2 + 1]),
                         Float.intBitsToFloat(vertexList[step * 2 + 2]))
-                    .color(1.0F, 1.0F, 1.0F, 1.0F)
-                    .uv(flag ? 0.0F : 1.0F, 0.0F)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY)
-                    .uv2(j)
-                    .normal(normal.x, normal.y, normal.z).endVertex();
-                bufferbuilder1.vertex(
+                    .setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(flag ? 0.0F : 1.0F, 0.0F)
+                    .setOverlay(OverlayTexture.NO_OVERLAY)
+                    .setLight(j)
+                    .setNormal(normal.x, normal.y, normal.z);
+                bufferbuilder.addVertex(
                         Float.intBitsToFloat(vertexList[step * 3]),
                         Float.intBitsToFloat(vertexList[step * 3 + 1]),
                         Float.intBitsToFloat(vertexList[step * 3 + 2]))
-                    .color(1.0F, 1.0F, 1.0F, 1.0F)
-                    .uv(flag ? 0.0F : 1.0F, 1.0F)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY)
-                    .uv2(j)
-                    .normal(normal.x, normal.y, normal.z).endVertex();
+                    .setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(flag ? 0.0F : 1.0F, 1.0F)
+                    .setOverlay(OverlayTexture.NO_OVERLAY)
+                    .setLight(j)
+                    .setNormal(normal.x, normal.y, normal.z);
             }
         }
-
-        tesselator.end();
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
         minecraft.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.enableBlend();
         poseStack.popMatrix();

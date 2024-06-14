@@ -130,7 +130,7 @@ public class BowTracker extends Tracker {
 
             if (Xplat.isModLoaded("pehkui")) {
                 // this is meant to be relative to the base Bb height, not the scaled one
-                this.maxDraw /= PehkuiHelper.getPlayerBbScale(player, mc.getFrameTime());
+                this.maxDraw /= PehkuiHelper.getPlayerBbScale(player, mc.getTimer().getGameTimeDeltaPartialTick(false));
             }
 
             Vec3 vec3 = vrdata.getController(0).getPosition();
@@ -163,8 +163,8 @@ public class BowTracker extends Tracker {
                 itemstack1 = player.getOffhandItem();
             }
 
-            int i = itemstack1.getUseDuration();
-            int j = itemstack1.getUseDuration() - 15;
+            int i = itemstack1.getUseDuration(player);
+            int j = itemstack1.getUseDuration(player) - 15;
             int k = 0;
 
             if (itemstack != ItemStack.EMPTY && d0 <= (double) f && this.controllersDot <= 20.0D) {
@@ -224,7 +224,7 @@ public class BowTracker extends Tracker {
                     j1 = (int) (this.getDrawPercent() * 500.0F) + 700;
                 }
 
-                int l = (int) ((float) itemstack1.getUseDuration() - this.getDrawPercent() * (float) this.maxDrawMillis);
+                int l = (int) ((float) itemstack1.getUseDuration(player) - this.getDrawPercent() * (float) this.maxDrawMillis);
                 ((PlayerExtension) player).vivecraft$setItemInUseClient(itemstack1, interactionhand);
                 double d1 = this.getDrawPercent();
 

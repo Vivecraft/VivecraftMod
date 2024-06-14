@@ -2,15 +2,16 @@ package org.vivecraft.mixin.client_vr.gui.screens;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.gui.components.OptionsList;
+import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.SoundOptionsScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.options.OptionsSubScreen;
+import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -18,12 +19,14 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(SoundOptionsScreen.class)
-public class SoundOptionsScreenVRMixin {
+public abstract class SoundOptionsScreenVRMixin extends OptionsSubScreen {
 
-    @Shadow
-    private OptionsList list;
+    public SoundOptionsScreenVRMixin(
+        Screen screen, Options options, Component component) {
+        super(screen, options, component);
+    }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/OptionsList;addSmall([Lnet/minecraft/client/OptionInstance;)V", ordinal = 1, shift = At.Shift.AFTER))
+    @Inject(method = "addOptions", at = @At(value = "TAIL"))
     private void vivecraft$addVivecraftSettings(CallbackInfo ci) {
         this.list.addSmall(OptionInstance.createBoolean(
                 "vivecraft.options.HRTF_SELECTION",

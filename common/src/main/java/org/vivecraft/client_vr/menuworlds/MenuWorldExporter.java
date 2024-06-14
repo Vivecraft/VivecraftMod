@@ -192,7 +192,7 @@ public class MenuWorldExporter {
                 default -> BuiltinDimensionTypes.OVERWORLD_EFFECTS;
             };
         } else {
-            dimName = new ResourceLocation(dis.readUTF());
+            dimName = ResourceLocation.parse(dis.readUTF());
         }
 
         boolean isFlat;
@@ -461,7 +461,7 @@ public class MenuWorldExporter {
                 decodeEnum(BiomeSpecialEffects.GrassColorModifier.class, dis.readUTF()).ifPresent(effectsBuilder::grassColorModifier);
 
                 if (dis.readBoolean()) {
-                    ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation(dis.readUTF()));
+                    ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(ResourceLocation.parse(dis.readUTF()));
                     float probability = dis.readFloat();
                     if (particleType instanceof ParticleOptions) {
                         effectsBuilder.ambientParticle(new AmbientParticleSettings((ParticleOptions) particleType, probability));
@@ -676,13 +676,13 @@ public class MenuWorldExporter {
             // bamboo_jungle_hills
             map.put(169, new Biome.BiomeBuilder().hasPrecipitation(true).temperature(0.950000f).downfall(0.900000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(12638463).waterColor(4159204).waterFogColor(329011).skyColor(7842047).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
             // soul_sand_valley
-            map.put(170, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(1787717).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation("minecraft:ash")), 0.006250f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
+            map.put(170, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(1787717).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(ResourceLocation.parse("minecraft:ash")), 0.006250f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
             // crimson_forest
-            map.put(171, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(3343107).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation("minecraft:crimson_spore")), 0.025000f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
+            map.put(171, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(3343107).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(ResourceLocation.parse("minecraft:crimson_spore")), 0.025000f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
             // warped_forest
-            map.put(172, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(1705242).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation("minecraft:warped_spore")), 0.014280f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
+            map.put(172, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(1705242).waterColor(4159204).waterFogColor(329011).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(ResourceLocation.parse("minecraft:warped_spore")), 0.014280f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
             // basalt_deltas
-            map.put(173, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(6840176).waterColor(4159204).waterFogColor(4341314).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(new ResourceLocation("minecraft:white_ash")), 0.118093f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
+            map.put(173, new Biome.BiomeBuilder().hasPrecipitation(false).temperature(2.000000f).downfall(0.000000f).specialEffects(new BiomeSpecialEffects.Builder().fogColor(6840176).waterColor(4159204).waterFogColor(4341314).skyColor(7254527).ambientParticle(new AmbientParticleSettings((ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(ResourceLocation.parse("minecraft:white_ash")), 0.118093f)).build()).generationSettings(dummyGenerationSettings).mobSpawnSettings(dummyMobSpawnSettings).build());
         }
 
         private LegacyBiomeMapper() {

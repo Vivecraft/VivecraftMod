@@ -1,6 +1,7 @@
 package org.vivecraft.client.fabric;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,11 +20,11 @@ public class XeventsImpl {
         return false;
     }
 
-    public static void onRenderTickStart(float f) {
+    public static void onRenderTickStart(DeltaTracker partialTick) {
 
     }
 
-    public static void onRenderTickEnd(float f) {
+    public static void onRenderTickEnd(DeltaTracker partialTick) {
 
     }
 }

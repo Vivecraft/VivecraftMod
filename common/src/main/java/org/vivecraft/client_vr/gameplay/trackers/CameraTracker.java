@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -13,8 +14,8 @@ import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
 
 public class CameraTracker extends Tracker {
-    public static final ModelResourceLocation cameraModel = new ModelResourceLocation("vivecraft", "camera", "");
-    public static final ModelResourceLocation cameraDisplayModel = new ModelResourceLocation("vivecraft", "camera_display", "");
+    public static final ModelResourceLocation cameraModel = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "camera"), "standalone");
+    public static final ModelResourceLocation cameraDisplayModel = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "camera_display"), "standalone");
     private boolean visible = false;
     private Vec3 position = new Vec3(0.0D, 0.0D, 0.0D);
     private Quaternion rotation = new Quaternion();

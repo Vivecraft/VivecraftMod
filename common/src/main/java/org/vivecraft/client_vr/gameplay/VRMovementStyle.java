@@ -28,7 +28,7 @@ public class VRMovementStyle {
     public boolean teleportOnRelease;
     public boolean arcAiming;
     public ClientDataHolderVR dataholder;
-    private static final ResourceLocation beamPng = new ResourceLocation("textures/entity/endercrystal/endercrystal_beam.png");
+    private static final ResourceLocation beamPng = ResourceLocation.withDefaultNamespace("textures/entity/endercrystal/endercrystal_beam.png");
 
     public VRMovementStyle(ClientDataHolderVR dataholder) {
         this.dataholder = dataholder;

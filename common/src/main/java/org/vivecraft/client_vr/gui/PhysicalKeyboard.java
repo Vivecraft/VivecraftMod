@@ -2,10 +2,7 @@ package org.vivecraft.client_vr.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -449,33 +446,34 @@ public class PhysicalKeyboard {
     private void drawBox(BufferBuilder buf, AABB box, RGBAColor color, org.joml.Matrix4f matrix) {
         float minX = (float) box.minX, minY = (float) box.minY, minZ = (float) box.minZ;
         float maxX = (float) box.maxX, maxY = (float) box.maxY, maxZ = (float) box.maxZ;
-        buf.vertex(matrix, minX, minY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, maxY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, maxY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, minY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, minY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, minY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, minY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, minY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, minY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, minY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, maxY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, maxY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, maxY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, maxY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, minY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, minY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, maxY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, maxY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, maxY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, minX, maxY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, maxY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, minY, maxZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, minY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
-        buf.vertex(matrix, maxX, maxY, minZ).uv(0, 0).color(color.r, color.g, color.b, color.a).endVertex();
+        buf.addVertex(matrix, minX, minY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, maxY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, maxY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, minY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, minY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, minY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, minY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, minY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, minY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, minY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, maxY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, maxY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, maxY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, maxY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, minY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, minY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, maxY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, maxY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, maxY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, minX, maxY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, maxY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, minY, maxZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, minY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
+        buf.addVertex(matrix, maxX, maxY, minZ).setUv(0, 0).setColor(color.r, color.g, color.b, color.a);
     }
 
     public void render(Matrix4fStack poseStack) {
+        if (this.keys.isEmpty()) return;
         poseStack.pushMatrix();
         Vector3f center = this.getCenterPos();
         poseStack.translate(-center.x, -center.y, -center.z);
@@ -485,7 +483,7 @@ public class PhysicalKeyboard {
         if (this.easterEggActive) {
             // https://qimg.techjargaming.com/i/UkG1cWAh.png
             for (KeyButton button : this.keys) {
-                RGBAColor color = RGBAColor.fromHSB(((float) this.dh.tickCounter + this.mc.getFrameTime()) / 100.0F + (float) (button.boundingBox.minX + (button.boundingBox.maxX - button.boundingBox.minX) / 2.0D) / 2.0F, 1.0F, 1.0F);
+                RGBAColor color = RGBAColor.fromHSB(((float) this.dh.tickCounter + this.mc.getTimer().getGameTimeDeltaPartialTick(false)) / 100.0F + (float) (button.boundingBox.minX + (button.boundingBox.maxX - button.boundingBox.minX) / 2.0D) / 2.0F, 1.0F, 1.0F);
                 button.color.r = color.r;
                 button.color.g = color.g;
                 button.color.b = color.b;
@@ -508,8 +506,8 @@ public class PhysicalKeyboard {
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 
         // TODO: does this still do the right thing for shaders?
-        mc.getTextureManager().bindForSetup(new ResourceLocation("vivecraft:textures/white.png"));
-        RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/white.png"));
+        mc.getTextureManager().bindForSetup(ResourceLocation.parse("vivecraft:textures/white.png"));
+        RenderSystem.setShaderTexture(0, ResourceLocation.parse("vivecraft:textures/white.png"));
 
         // We need to ignore depth so we can see the back faces and text
         RenderSystem.depthFunc(GL11.GL_ALWAYS);
@@ -521,9 +519,7 @@ public class PhysicalKeyboard {
         float textScale = 0.002F * this.scale;
 
         // Start building vertices for key boxes
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
         for (KeyButton physicalkeyboard$keybutton1 : this.keys) {
             AABB box = physicalkeyboard$keybutton1.getRenderBoundingBox();
@@ -544,25 +540,25 @@ public class PhysicalKeyboard {
         }
 
         // Draw all the key boxes
-        tesselator.end();
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
         RenderSystem.depthFunc(GL11.GL_LEQUAL);
         //GlStateManager._disableLighting();
 
         // Start building vertices for text
-        MultiBufferSource.BufferSource multibuffersource$buffersource = MultiBufferSource.immediate(tesselator.getBuilder());
+        mc.renderBuffers().bufferSource();
 
         // Build all the text
         for (Tuple<String, Vector3f> label : labels) {
             poseStack.pushMatrix();
             poseStack.translate((label.getB()).x, (label.getB()).y, (label.getB()).z);
             poseStack.scale(textScale, textScale, 1.0F);
-            font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack, multibuffersource$buffersource, Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional());
+            font.drawInBatch(label.getA(), 0.0F, 0.0F, 0xFFFFFFFF, false, poseStack, mc.renderBuffers().bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional());
             poseStack.popMatrix();
         }
 
         // Draw all the labels
-        multibuffersource$buffersource.endBatch();
+        mc.renderBuffers().bufferSource().endBatch();
         //GlStateManager._enableLighting();
 
         RenderSystem.enableBlend();

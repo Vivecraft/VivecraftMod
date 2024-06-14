@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class MenuWorldDownloader {
     private static final String baseUrl = "https://cache.techjargaming.com/vivecraft/115/";
-    public static final String customWorldFolder = "menuworlds/custom_120";
+    public static final String customWorldFolder = "menuworlds/custom_121";
 
     private static String lastWorld = "";
     private static boolean init;

@@ -1,6 +1,7 @@
 package org.vivecraft.mixin.server;
 
 import net.minecraft.network.Connection;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,7 +43,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     }
 
     @Inject(at = @At("TAIL"), method = "onDisconnect")
-    public void vivecraft$doLeaveMessage(Component component, CallbackInfo ci) {
+    public void vivecraft$doLeaveMessage(DisconnectionDetails disconnectionDetails, CallbackInfo ci) {
         if (ServerConfig.messagesEnabled.get()) {
             String message = ServerConfig.messagesLeaveMessage.get();
             if (!message.isEmpty()) {

@@ -251,7 +251,7 @@ public class ClientNetworking {
 
                     while (buffer.readableBytes() > 0) {
                         String s12 = buffer.readUtf(16384);
-                        Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s12));
+                        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(s12));
 
                         // if the block is not there AIR is returned
                         if (block != Blocks.AIR) {

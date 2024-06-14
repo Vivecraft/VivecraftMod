@@ -161,8 +161,8 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         Vec3 vec32 = rotinfo.rightArmPos;
         if (Xplat.isModLoaded("pehkui")) {
             // remove pehkui scale from that, since the whole entity is scaled
-            vec3 = vec3.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getFrameTime()));
-            vec32 = vec32.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getFrameTime()));
+            vec3 = vec3.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false)));
+            vec32 = vec32.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false)));
         }
         vec3 = vec3.add(0.0D, d0, 0.0D);
         vec3 = vec3.yRot((float) (-Math.PI + d1));

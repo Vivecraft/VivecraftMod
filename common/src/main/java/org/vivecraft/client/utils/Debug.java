@@ -1,9 +1,7 @@
 package org.vivecraft.client.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.DebugRenderer;
@@ -169,9 +167,7 @@ public class Debug {
             //GlStateManager._disableLighting();
             RenderSystem.depthMask(false);
             RenderSystem.disableDepthTest();
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder bufferbuilder = tesselator.getBuilder();
-            //bufferbuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
             for (Polygon debug$polygon : this.toDraw) {
                 for (int i = 0; i < debug$polygon.vertices.length; ++i) {
@@ -179,7 +175,7 @@ public class Debug {
                 }
             }
 
-            tesselator.end();
+            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
             RenderSystem.depthMask(true);
             //GlStateManager._enableLighting();
             RenderSystem.enableDepthTest();
@@ -194,7 +190,7 @@ public class Debug {
         }
 
         void renderVertex(BufferBuilder buffer, Vec3 vert, Color color, double offX, double offY, double offZ) {
-            buffer.vertex(vert.x - offX, vert.y - offY, vert.z - offZ).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.addVertex((float) (vert.x - offX), (float) (vert.y - offY), (float) (vert.z - offZ)).setColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
         }
 
         public void render(PoseStack pMatrixStack, MultiBufferSource pBuffer, double pCamX, double p_113510_, double pCamY) {

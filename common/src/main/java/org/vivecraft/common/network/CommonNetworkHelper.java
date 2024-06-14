@@ -7,7 +7,7 @@ import org.vivecraft.common.utils.math.Quaternion;
 
 public class CommonNetworkHelper {
 
-    public static final ResourceLocation CHANNEL = new ResourceLocation("vivecraft:data");
+    public static final ResourceLocation CHANNEL = ResourceLocation.parse("vivecraft:data");
 
     // maximum supported network version
     public static final int MAX_SUPPORTED_NETWORK_VERSION = 0;

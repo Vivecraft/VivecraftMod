@@ -1,0 +1,11 @@
+{
+  "vertex": "blit_aspect",
+  "fragment": "blit_aspect",
+  "attributes": ["Position", "UV0"],
+  "samplers": [
+    {
+      "name": "DiffuseSampler"
+    }
+  ],
+  "uniforms": []
+}

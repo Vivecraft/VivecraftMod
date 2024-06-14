@@ -260,7 +260,7 @@ public class Utils {
 
         try {
             try {
-                Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation("vivecraft", name));
+                Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath("vivecraft", name));
                 if (resource.isPresent()) {
                     inputstream = resource.get().open();
                 }

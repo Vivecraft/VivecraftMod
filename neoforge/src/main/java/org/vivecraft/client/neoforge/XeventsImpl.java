@@ -1,12 +1,12 @@
 package org.vivecraft.client.neoforge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.event.RenderBlockScreenEffectEvent;
-import net.neoforged.neoforge.event.EventHooks;
 
 public class XeventsImpl {
 
@@ -22,11 +22,11 @@ public class XeventsImpl {
         return ClientHooks.renderFireOverlay(player, mat);
     }
 
-    public static void onRenderTickStart(float f) {
+    public static void onRenderTickStart(DeltaTracker partialTick) {
         ClientHooks.fireClientTickPre();
     }
 
-    public static void onRenderTickEnd(float f) {
-        ClientHooks.fireRenderFramePost(f);
+    public static void onRenderTickEnd(DeltaTracker partialTick) {
+        ClientHooks.fireRenderFramePost(partialTick);
     }
 }

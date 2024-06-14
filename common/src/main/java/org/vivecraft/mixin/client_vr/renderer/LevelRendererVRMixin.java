@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
@@ -207,7 +208,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;hitResult:Lnet/minecraft/world/phys/HitResult;", ordinal = 1), method = "renderLevel")
-    public void vivecraft$interactOutline(float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci, @Local PoseStack poseStack) {
+    public void vivecraft$interactOutline(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci, @Local PoseStack poseStack) {
         if (!RenderPassType.isVanilla()) {
             this.level.getProfiler().popPush("interact outline");
             vivecraft$selR = vivecraft$selG = vivecraft$selB = 1f;
@@ -253,7 +254,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = Shift.AFTER), method = "renderLevel")
-    public void vivecraft$renderVrStuffPart1(float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    public void vivecraft$renderVrStuffPart1(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;
         }
@@ -261,12 +262,12 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         vivecraft$menuhandright = vivecraft$menuHandleft || ClientDataHolderVR.getInstance().interactTracker.hotbar >= 0 && ClientDataHolderVR.getInstance().vrSettings.vrTouchHotbar;
 
         if (transparencyChain != null) {
-            VREffectsHelper.renderVRFabulous(f, (LevelRenderer) (Object) this, vivecraft$menuhandright, vivecraft$menuHandleft);
+            VREffectsHelper.renderVRFabulous(deltaTracker.getGameTimeDeltaPartialTick(false), (LevelRenderer) (Object) this, vivecraft$menuhandright, vivecraft$menuHandleft);
         } else {
-            VREffectsHelper.renderVrFast(f, false, vivecraft$menuhandright, vivecraft$menuHandleft);
+            VREffectsHelper.renderVrFast(deltaTracker.getGameTimeDeltaPartialTick(false), false, vivecraft$menuhandright, vivecraft$menuHandleft);
             if (ShadersHelper.isShaderActive() && ClientDataHolderVR.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.BEFORE_TRANSLUCENT_SOLID) {
                 // shaders active, and render gui before translucents
-                VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft);
+                VREffectsHelper.renderVrFast(deltaTracker.getGameTimeDeltaPartialTick(false), true, vivecraft$menuhandright, vivecraft$menuHandleft);
                 vivecraft$guiRendered = true;
             }
         }
@@ -274,14 +275,14 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;getCloudsType()Lnet/minecraft/client/CloudStatus;", shift = Shift.BEFORE),
         method = "renderLevel")
-    public void vivecraft$renderVrStuffPart2(float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    public void vivecraft$renderVrStuffPart2(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;
         }
 
         if (transparencyChain == null && (!ShadersHelper.isShaderActive() || ClientDataHolderVR.getInstance().vrSettings.shaderGUIRender == VRSettings.ShaderGUIRender.AFTER_TRANSLUCENT)) {
             // no shaders, or shaders, and gui after translucents
-            VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft);
+            VREffectsHelper.renderVrFast(deltaTracker.getGameTimeDeltaPartialTick(false), true, vivecraft$menuhandright, vivecraft$menuHandleft);
             vivecraft$guiRendered = true;
         }
     }
@@ -289,7 +290,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
     // if the gui didn't render yet, and something canceled the level renderer, render it now.
     // or if shaders are on, and option AFTER_SHADER is selected
     @Inject(at = @At("RETURN"), method = "renderLevel")
-    public void vivecraft$renderVrStuffFinal(float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    public void vivecraft$renderVrStuffFinal(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
         if (RenderPassType.isVanilla()) {
             return;
         }
@@ -299,7 +300,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
             RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, RenderSystem.getModelViewStack());
             RenderSystem.applyModelViewMatrix();
 
-            VREffectsHelper.renderVrFast(f, true, vivecraft$menuhandright, vivecraft$menuHandleft);
+            VREffectsHelper.renderVrFast(deltaTracker.getGameTimeDeltaPartialTick(false), true, vivecraft$menuhandright, vivecraft$menuHandleft);
 
             RenderSystem.getModelViewStack().popMatrix();
             RenderSystem.applyModelViewMatrix();

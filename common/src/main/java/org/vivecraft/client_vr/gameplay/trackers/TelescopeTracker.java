@@ -5,6 +5,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
@@ -15,7 +16,7 @@ import org.vivecraft.client_vr.render.RenderPass;
 
 public class TelescopeTracker extends Tracker {
     //public static final ResourceLocation scopeResource = new ResourceLocation("vivecraft:trashbin");
-    public static final ModelResourceLocation scopeModel = new ModelResourceLocation("vivecraft", "spyglass_in_hand", "inventory");
+    public static final ModelResourceLocation scopeModel = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath("vivecraft", "item/spyglass_in_hand"), "standalone");
     private static final double lensDistMax = 0.05D;
     private static final double lensDistMin = 0.185D;
     private static final double lensDotMax = 0.9D;

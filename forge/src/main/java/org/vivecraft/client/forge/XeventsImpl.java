@@ -1,12 +1,13 @@
 package org.vivecraft.client.forge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.event.ForgeEventFactoryClient;
 import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
-import net.minecraftforge.event.ForgeEventFactory;
 
 public class XeventsImpl {
 
@@ -22,11 +23,11 @@ public class XeventsImpl {
         return ForgeHooksClient.renderFireOverlay(player, mat);
     }
 
-    public static void onRenderTickStart(float f) {
-        ForgeEventFactory.onRenderTickStart(f);
+    public static void onRenderTickStart(DeltaTracker partialTick) {
+        ForgeEventFactoryClient.onRenderTickStart(partialTick);
     }
 
-    public static void onRenderTickEnd(float f) {
-        ForgeEventFactory.onRenderTickEnd(f);
+    public static void onRenderTickEnd(DeltaTracker partialTick) {
+        ForgeEventFactoryClient.onRenderTickEnd(partialTick);
     }
 }

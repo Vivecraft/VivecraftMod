@@ -1,6 +1,6 @@
 {
   "variants": {
-    "": {
+    "standalone": {
       "model": "vivecraft:camera"
     }
   }

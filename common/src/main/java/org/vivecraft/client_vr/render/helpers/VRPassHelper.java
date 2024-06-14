@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
@@ -29,11 +30,11 @@ public class VRPassHelper {
 
     private static float fovReduction = 1.0F;
 
-    public static void renderSingleView(RenderPass eye, float partialTicks, long nanoTime, boolean renderWorld) {
+    public static void renderSingleView(RenderPass eye, DeltaTracker timer, boolean renderWorld) {
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
         RenderSystem.clear(16384, Minecraft.ON_OSX);
         RenderSystem.enableDepthTest();
-        mc.gameRenderer.render(partialTicks, nanoTime, renderWorld);
+        mc.gameRenderer.render(timer, renderWorld);
         checkGLError("post game render " + eye.name());
 
         if (dataHolder.currentPass == RenderPass.LEFT || dataHolder.currentPass == RenderPass.RIGHT) {
@@ -132,7 +133,7 @@ public class VRPassHelper {
                     dataHolder.pumpkineffect = 0.0F;
                 }
 
-                float hurtTimer = (float) mc.player.hurtTime - partialTicks;
+                float hurtTimer = (float) mc.player.hurtTime - timer.getGameTimeDeltaPartialTick(false);
                 float healthPercent = 1.0F - mc.player.getHealth() / mc.player.getMaxHealth();
                 healthPercent = (healthPercent - 0.5F) * 0.75F;
 
