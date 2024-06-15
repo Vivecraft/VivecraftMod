@@ -1,10 +1,14 @@
 package org.vivecraft.mod_compat_vr.iris;
 
+import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.api.v0.IrisApi;
+import net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings;
+import net.minecraft.client.Minecraft;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -28,6 +32,10 @@ public class IrisHelper {
     private static Method DHCompatInternal_getInstance;
     private static Method DHCompatInternal_getShadowFBWrapper;
     private static Method DHCompatInternal_getSolidFBWrapper;
+
+    public static boolean isIrisLoaded() {
+        return Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus");
+    }
 
     public static void setShadersActive(boolean bl) {
         IrisApi.getInstance().getConfig().setShadersEnabledAndApply(bl);
@@ -67,6 +75,17 @@ public class IrisHelper {
 
     public static boolean isShaderActive() {
         return IrisApi.getInstance().isShaderPackInUse();
+    }
+
+    public static void toggleShaders(Minecraft mc, boolean enabled) {
+        try {
+            Iris.toggleShaders(mc, enabled);
+            if (!enabled) {
+                WorldRenderingSettings.INSTANCE.setUseExtendedVertexFormat(false);
+            }
+        } catch (IOException e) {
+            VRSettings.logger.error("Vivecraft: error Toggling Iris shader to '{}': {}", enabled, e.getMessage());
+        }
     }
 
     public static void unregisterDHIfThere(Object pipeline) {

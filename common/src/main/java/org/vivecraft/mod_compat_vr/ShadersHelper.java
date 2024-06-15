@@ -1,6 +1,5 @@
 package org.vivecraft.mod_compat_vr;
 
-import org.vivecraft.client.Xplat;
 import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
@@ -14,7 +13,7 @@ public class ShadersHelper {
     }
 
     public static boolean isShaderActive() {
-        boolean irisActive = ((Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) && IrisHelper.isShaderActive());
+        boolean irisActive = IrisHelper.isIrisLoaded() && IrisHelper.isShaderActive();
         boolean optifineActive = OptifineHelper.isOptifineLoaded() && OptifineHelper.isShaderActive();
 
         return irisActive || optifineActive;
@@ -29,7 +28,7 @@ public class ShadersHelper {
     }
 
     public static void maybeReloadShaders() {
-        if (Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus")) {
+        if (IrisHelper.isIrisLoaded()) {
             IrisHelper.reload();
         }
     }

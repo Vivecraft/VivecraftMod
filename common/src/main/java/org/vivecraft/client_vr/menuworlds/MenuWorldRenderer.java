@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
@@ -51,6 +52,8 @@ import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mixin.client.renderer.RenderStateShardAccessor;
+import org.vivecraft.mod_compat_vr.ShadersHelper;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
@@ -117,6 +120,7 @@ public class MenuWorldRenderer {
     public Vec3i segmentSize = new Vec3i(64, 64, 64);
 
     private boolean building = false;
+    private boolean shadersEnabled = false;
     private long buildStartTime;
     private Map<Pair<RenderType, BlockPos>, BufferBuilder> bufferBuilders;
     private Map<Pair<RenderType, BlockPos>, BlockPos.MutableBlockPos> currentPositions;
@@ -279,6 +283,11 @@ public class MenuWorldRenderer {
             animatedSprites = ConcurrentHashMap.newKeySet();
             blockCounts = new ConcurrentHashMap<>();
             renderTimes = new ConcurrentHashMap<>();
+            if (IrisHelper.isIrisLoaded() && IrisHelper.isShaderActive()) {
+                shadersEnabled = true;
+                mc.gui.getChat().addMessage(Component.literal("Vivecraft: temporarily disabling shaders to build Menuworld"));
+                IrisHelper.toggleShaders(mc, false);
+            }
 
             try {
                 vertexBuffers = new HashMap<>();
@@ -470,6 +479,10 @@ public class MenuWorldRenderer {
             entryList.size(),
             totalMemory / 1048576,
             count);
+        if (shadersEnabled) {
+            shadersEnabled = false;
+            IrisHelper.toggleShaders(mc, true);
+        }
     }
 
     public boolean isOnBuilderThread() {
