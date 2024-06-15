@@ -79,6 +79,13 @@ public class UpdateChecker {
             String currentVersionNumber = Xplat.getModVersion() + "-" + Xplat.getModloader();
             Version current = new Version(currentVersionNumber, currentVersionNumber, "");
 
+            // enforce update notifications if using a non release
+            if (current.alpha > 0 && updateType != 'a') {
+                updateType = 'a';
+            } else if (current.beta > 0 && updateType != 'a') {
+                updateType = 'b';
+            }
+
             for (Version v : versions) {
                 if (v.isVersionType(updateType) && current.compareTo(v) > 0) {
                     changelog += "§a" + v.fullVersion + "§r" + ": \n" + v.changelog + "\n\n";
