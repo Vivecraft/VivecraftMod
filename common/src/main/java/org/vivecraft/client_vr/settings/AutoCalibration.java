@@ -2,34 +2,36 @@ package org.vivecraft.client_vr.settings;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import org.vivecraft.client.utils.LangHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class AutoCalibration {
     public static final float defaultHeight = 1.52F;
 
+    /**
+     * sets the player height for how they are standing right now
+     */
     public static void calibrateManual() {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        dataholder.vrSettings.manualCalibration = (float) dataholder.vr.hmdPivotHistory.averagePosition(0.5D).y;
-        int i = (int) ((float) ((double) Math.round(100.0D * (double) getPlayerHeight() / (double) 1.52F)));
-        minecraft.gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.heightset", i)));
-        dataholder.vrSettings.saveOptions();
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
+
+        dataHolder.vrSettings.manualCalibration = (float) dataHolder.vr.hmdPivotHistory.averagePosition(0.5D).y;
+        // round to nearest %
+        int percentHeight = Math.round(100.0F * getPlayerHeight() / defaultHeight);
+
+        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.heightset", percentHeight));
+        dataHolder.vrSettings.saveOptions();
     }
 
     public static float getPlayerHeight() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        float f = 1.52F;
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
+        float height = defaultHeight;
 
-        if (dataholder.vrSettings.seated) {
-            return f;
-        } else {
-            if (dataholder.vrSettings.manualCalibration != -1.0F) {
-                f = dataholder.vrSettings.manualCalibration;
+        // you cant do roomscale crap or calibrate your height in seated, anyway.
+        if (!dataHolder.vrSettings.seated) {
+            if (dataHolder.vrSettings.manualCalibration != -1.0F) {
+                height = dataHolder.vrSettings.manualCalibration;
             }
-
-            return f;
         }
+        return height;
     }
 }

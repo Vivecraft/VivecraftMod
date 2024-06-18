@@ -24,12 +24,12 @@ public interface Xevents {
     }
 
     @ExpectPlatform
-    static void onRenderTickStart(float partialTicks) {
+    static void onRenderTickStart(float partialTick) {
 
     }
 
     @ExpectPlatform
-    static void onRenderTickEnd(float partialTicks) {
+    static void onRenderTickEnd(float partialTick) {
 
     }
 }

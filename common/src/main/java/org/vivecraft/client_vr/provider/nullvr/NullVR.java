@@ -17,6 +17,9 @@ import org.vivecraft.common.utils.math.Matrix4f;
 
 import java.util.List;
 
+/**
+ * MCVR implementation that does not interact with any runtime.
+ */
 public class NullVR extends MCVR {
     protected static NullVR ome;
 
@@ -68,11 +71,13 @@ public class NullVR extends MCVR {
             this.hmdPoseLeftEye.M[0][3] = -ipd * 0.5F;
             this.hmdPoseRightEye.M[0][3] = ipd * 0.5F;
 
+            this.populateInputActions();
+
             this.initialized = true;
             this.initSuccess = true;
         }
 
-        return true;
+        return initialized;
     }
 
     @Override
@@ -148,12 +153,6 @@ public class NullVR extends MCVR {
     @Override
     public String getOriginName(long origin) {
         return "NullDriver";
-    }
-
-    @Override
-    public boolean postInit() {
-        this.populateInputActions();
-        return true;
     }
 
     @Override

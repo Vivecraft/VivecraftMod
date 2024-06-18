@@ -4,8 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
+import org.vivecraft.client.Xevents;
 
-public class XeventsImpl {
+public class XeventsImpl implements Xevents {
 
     public static boolean renderBlockOverlay(Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos) {
         return false;
@@ -19,11 +20,11 @@ public class XeventsImpl {
         return false;
     }
 
-    public static void onRenderTickStart(float partialTicks) {
+    public static void onRenderTickStart(float partialTick) {
 
     }
 
-    public static void onRenderTickEnd(float partialTicks) {
+    public static void onRenderTickEnd(float partialTick) {
 
     }
 }

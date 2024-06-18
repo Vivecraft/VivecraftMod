@@ -21,7 +21,6 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.IOUtils;
-import org.lwjgl.openvr.HmdMatrix44;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -777,13 +776,6 @@ public class Utils {
         if (print) {
             Thread.dumpStack();
         }
-    }
-
-    public static org.joml.Matrix4f Matrix4fFromOpenVR(HmdMatrix44 in) {
-        return new org.joml.Matrix4f(in.m(0), in.m(4), in.m(8), in.m(12),
-            in.m(1), in.m(5), in.m(9), in.m(13),
-            in.m(2), in.m(6), in.m(10), in.m(14),
-            in.m(3), in.m(7), in.m(11), in.m(15));
     }
 
     public static Quaternion convertMatrix4ftoRotationQuat(

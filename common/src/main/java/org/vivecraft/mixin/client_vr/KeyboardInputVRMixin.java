@@ -1,5 +1,6 @@
 package org.vivecraft.mixin.client_vr;
 
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.player.Input;
@@ -16,10 +17,9 @@ import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
+import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.common.utils.math.Vector2;
-
-import static org.vivecraft.client_vr.provider.openvr_lwjgl.control.VivecraftMovementInput.getMovementAxisValue;
 
 @Mixin(KeyboardInput.class)
 public class KeyboardInputVRMixin extends Input {
@@ -39,6 +39,11 @@ public class KeyboardInputVRMixin extends Input {
         } else {
             return value < -0.5F ? -1.0F : 0.0F;
         }
+    }
+
+    @Unique
+    private float vivecraft$getMovementAxisValue(KeyMapping keyBinding) {
+        return Math.abs(MCVR.get().getInputAction(keyBinding).getAxis1DUseTracked());
     }
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
@@ -100,8 +105,8 @@ public class KeyboardInputVRMixin extends Input {
                     if (dataholder.vrSettings.analogMovement) {
                         this.forwardImpulse = vector21.getY();
                         this.leftImpulse = 0.0F;
-                        this.leftImpulse -= getMovementAxisValue(this.options.keyRight);
-                        this.leftImpulse += getMovementAxisValue(this.options.keyLeft);
+                        this.leftImpulse -= vivecraft$getMovementAxisValue(this.options.keyRight);
+                        this.leftImpulse += vivecraft$getMovementAxisValue(this.options.keyLeft);
                     } else {
                         this.forwardImpulse = this.vivecraft$axisToDigitalMovement(vector21.getY());
                     }
@@ -109,17 +114,17 @@ public class KeyboardInputVRMixin extends Input {
                     flag1 = true;
                     this.forwardImpulse = 0.0F;
                     this.leftImpulse = 0.0F;
-                    float f1 = getMovementAxisValue(this.options.keyUp);
+                    float f1 = vivecraft$getMovementAxisValue(this.options.keyUp);
 
                     if (f1 == 0.0F) {
-                        f1 = getMovementAxisValue(VivecraftVRMod.INSTANCE.keyTeleportFallback);
+                        f1 = vivecraft$getMovementAxisValue(VivecraftVRMod.INSTANCE.keyTeleportFallback);
                     }
 
                     f = f1;
                     this.forwardImpulse += f1;
-                    this.forwardImpulse -= getMovementAxisValue(this.options.keyDown);
-                    this.leftImpulse -= getMovementAxisValue(this.options.keyRight);
-                    this.leftImpulse += getMovementAxisValue(this.options.keyLeft);
+                    this.forwardImpulse -= vivecraft$getMovementAxisValue(this.options.keyDown);
+                    this.leftImpulse -= vivecraft$getMovementAxisValue(this.options.keyRight);
+                    this.leftImpulse += vivecraft$getMovementAxisValue(this.options.keyLeft);
                     float f2 = 0.05F;
                     this.forwardImpulse = Utils.applyDeadzone(this.forwardImpulse, f2);
                     this.leftImpulse = Utils.applyDeadzone(this.leftImpulse, f2);

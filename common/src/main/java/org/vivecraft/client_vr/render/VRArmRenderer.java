@@ -12,39 +12,64 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.provider.ControllerType;
 
 public class VRArmRenderer extends PlayerRenderer {
-    public VRArmRenderer(EntityRendererProvider.Context p_117733_, boolean p_117734_) {
-        super(p_117733_, p_117734_);
+    public VRArmRenderer(EntityRendererProvider.Context context, boolean useSlimModel) {
+        super(context, useSlimModel);
     }
 
-    public void renderRightHand(PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, AbstractClientPlayer pPlayer) {
-        this.renderItem(ControllerType.RIGHT, pMatrixStack, pBuffer, pCombinedLight, pPlayer, (this.model).rightArm, (this.model).rightSleeve);
+    @Override
+    public void renderRightHand(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, AbstractClientPlayer player) {
+        this.renderHand(ControllerType.RIGHT, poseStack, buffer, combinedLight, player, this.model.rightArm, this.model.rightSleeve);
     }
 
-    public void renderLeftHand(PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, AbstractClientPlayer pPlayer) {
-        this.renderItem(ControllerType.LEFT, pMatrixStack, pBuffer, pCombinedLight, pPlayer, (this.model).leftArm, (this.model).leftSleeve);
+    @Override
+    public void renderLeftHand(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, AbstractClientPlayer player) {
+        this.renderHand(ControllerType.LEFT, poseStack, buffer, combinedLight, player, this.model.leftArm, this.model.leftSleeve);
     }
 
-    private void renderItem(ControllerType side, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, AbstractClientPlayer playerIn, ModelPart rendererArmIn, ModelPart rendererArmwearIn) {
-        PlayerModel<AbstractClientPlayer> playermodel = this.getModel();
-        this.setModelProperties(playerIn);
+    /**
+     * renders the player hand<br>
+     * copy of {@link PlayerRenderer#renderHand}
+     * @param side controller this hand belongs to
+     * @param poseStack PoseStack top use for rendering
+     * @param buffer MultiBufferSource to use
+     * @param combinedLight brightness of the hand
+     * @param player Player the hand is from
+     * @param rendererArm Arm to render
+     * @param rendererArmwear Armor to render
+     */
+    private void renderHand(ControllerType side, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, AbstractClientPlayer player, ModelPart rendererArm, ModelPart rendererArmwear) {
+        PlayerModel<AbstractClientPlayer> playerModel = this.getModel();
+        this.setModelProperties(player);
+
+        // blending, since we render the arm translucent
         RenderSystem.enableBlend();
         RenderSystem.enableCull();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        playermodel.attackTime = 0.0F;
-        playermodel.crouching = false;
-        playermodel.swimAmount = 0.0F;
-        rendererArmIn.xRot = 0.0F;
-        playermodel.leftSleeve.copyFrom(playermodel.leftArm);
-        playermodel.rightSleeve.copyFrom(playermodel.rightArm);
-        float f = SwingTracker.getItemFade((LocalPlayer) playerIn, ItemStack.EMPTY);
-        rendererArmIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.entityTranslucent(playerIn.getSkin().texture())), combinedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, f);
-        rendererArmwearIn.xRot = 0.0F;
-        rendererArmwearIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.entityTranslucent(playerIn.getSkin().texture())), combinedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, f);
+
+        playerModel.attackTime = 0.0F;
+        playerModel.crouching = false;
+        playerModel.swimAmount = 0.0F;
+
+        rendererArm.xRot = 0.0F;
+
+        // make sure they have the same state
+        rendererArmwear.copyFrom(rendererArm);
+
+        float alpha = SwingTracker.getItemFade((LocalPlayer) player, ItemStack.EMPTY);
+        ResourceLocation playerSkin = player.getSkin().texture();
+
+        // render hand
+        rendererArm.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(playerSkin)), combinedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, alpha);
+
+        // render armor
+        rendererArmwear.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(playerSkin)), combinedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, alpha);
+
         RenderSystem.disableBlend();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }

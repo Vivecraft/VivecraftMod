@@ -185,8 +185,8 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
     protected abstract void renderPlayerArm(PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, float pEquippedProgress, float pSwingProgress, HumanoidArm humanoidarm);
 
     @Unique
-    private float vivecraft$getEquipProgress(InteractionHand hand, float partialTicks) {
-        return hand == InteractionHand.MAIN_HAND ? 1.0F - (this.oMainHandHeight + (this.mainHandHeight - this.oMainHandHeight) * partialTicks) : 1.0F - (this.oOffHandHeight + (this.offHandHeight - this.oOffHandHeight) * partialTicks);
+    private float vivecraft$getEquipProgress(InteractionHand hand, float partialTick) {
+        return hand == InteractionHand.MAIN_HAND ? 1.0F - (this.oMainHandHeight + (this.mainHandHeight - this.oMainHandHeight) * partialTick) : 1.0F - (this.oOffHandHeight + (this.offHandHeight - this.oOffHandHeight) * partialTick);
     }
 
     @Unique

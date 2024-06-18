@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 
+import java.io.IOException;
+
 public class VRShaders {
     // FSAA shader and its uniforms
     public static ShaderInstance lanczosShader;
@@ -49,7 +51,7 @@ public class VRShaders {
 
     private VRShaders() {}
 
-    public static void setupDepthMask() throws Exception {
+    public static void setupDepthMask() throws IOException {
         depthMaskShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "mixedreality", DefaultVertexFormat.POSITION_TEX);
 
         _DepthMask_hmdViewPosition = depthMaskShader.safeGetUniform("hmdViewPosition");
@@ -61,14 +63,14 @@ public class VRShaders {
         _DepthMask_alphaModeUniform = depthMaskShader.safeGetUniform("alphaMode");
     }
 
-    public static void setupFSAA() throws Exception {
+    public static void setupFSAA() throws IOException {
         lanczosShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "lanczos", DefaultVertexFormat.POSITION_TEX);
 
         _Lanczos_texelWidthOffsetUniform = lanczosShader.safeGetUniform("texelWidthOffset");
         _Lanczos_texelHeightOffsetUniform = lanczosShader.safeGetUniform("texelHeightOffset");
     }
 
-    public static void setupFOVReduction() throws Exception {
+    public static void setupFOVReduction() throws IOException {
         fovReductionShader = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "fovreduction", DefaultVertexFormat.POSITION_TEX);
 
         _FOVReduction_RadiusUniform = fovReductionShader.safeGetUniform("circle_radius");
@@ -84,7 +86,7 @@ public class VRShaders {
         _Overlay_BlackAlpha = fovReductionShader.safeGetUniform("blackalpha");
     }
 
-    public static void setupPortalShaders() throws Exception {
+    public static void setupPortalShaders() throws IOException {
         rendertypeEndPortalShaderVR = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "rendertype_end_portal_vr", DefaultVertexFormat.POSITION);
         rendertypeEndGatewayShaderVR = new ShaderInstance(Minecraft.getInstance().getResourceManager(), "rendertype_end_gateway_vr", DefaultVertexFormat.POSITION);
     }

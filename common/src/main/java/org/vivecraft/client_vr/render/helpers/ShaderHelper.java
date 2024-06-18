@@ -88,9 +88,9 @@ public class ShaderHelper {
      * water and portal wobbles
      * @param eye RenderPass that is being post processed, LEFT or RIGHT
      * @param source RenderTarget that holds the rendered image
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      */
-    public static void doVrPostProcess(RenderPass eye, RenderTarget source, float partialTicks) {
+    public static void doVrPostProcess(RenderPass eye, RenderTarget source, float partialTick) {
         if (eye == RenderPass.LEFT) {
             // only update these once per frame, or the effects are twice as fast
             // and could be out of sync between the eyes
@@ -149,7 +149,7 @@ public class ShaderHelper {
                     dataHolder.pumpkineffect = 0.0F;
                 }
 
-                float hurtTimer = (float) mc.player.hurtTime - partialTicks;
+                float hurtTimer = (float) mc.player.hurtTime - partialTick;
                 float healthPercent = 1.0F - mc.player.getHealth() / mc.player.getMaxHealth();
                 healthPercent = (healthPercent - 0.5F) * 0.75F;
 

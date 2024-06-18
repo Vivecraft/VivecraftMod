@@ -116,7 +116,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTicks) {
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
             guiGraphics.drawString(Minecraft.getInstance().font, this.name, Minecraft.getInstance().screen.width / 2 - this.width / 2, top + height - Minecraft.getInstance().font.lineHeight - 1, 0xFFFFFF);
         }
 
@@ -166,12 +166,12 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTicks) {
-            super.render(guiGraphics, index, top, left, width, height, mouseX, mouseY, hovering, partialTicks);
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
+            super.render(guiGraphics, index, top, left, width, height, mouseX, mouseY, hovering, partialTick);
             this.resetButton.setX(left + 230);
             this.resetButton.setY(top);
             this.resetButton.active = canReset.getAsBoolean();
-            this.resetButton.render(guiGraphics, mouseX, mouseY, partialTicks);
+            this.resetButton.render(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         @Override
@@ -202,11 +202,11 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTicks) {
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
             guiGraphics.drawString(Minecraft.getInstance().font, this.name, left + 90 - 140, top + height / 2 - Minecraft.getInstance().font.lineHeight / 2, 0xFFFFFF);
             this.valueWidget.setX(left + 105);
             this.valueWidget.setY(top);
-            this.valueWidget.render(guiGraphics, mouseX, mouseY, partialTicks);
+            this.valueWidget.render(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         @Override

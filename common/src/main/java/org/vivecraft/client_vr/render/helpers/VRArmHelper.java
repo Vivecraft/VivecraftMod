@@ -48,14 +48,14 @@ public class VRArmHelper {
 
     /**
      * renders the VR hands
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param renderRight if the right hand should be rendered
      * @param renderLeft if the left hand should be rendered
      * @param menuHandRight if the right hand should render as the menu hand
      * @param menuHandLeft if the left hand should render as the menu hand
      * @param poseStack PoseStack to use for positioning
      */
-    public static void renderVRHands(float partialTicks, boolean renderRight, boolean renderLeft, boolean menuHandRight,
+    public static void renderVRHands(float partialTick, boolean renderRight, boolean renderLeft, boolean menuHandRight,
         boolean menuHandLeft, PoseStack poseStack) {
         mc.getProfiler().push("hands");
 
@@ -66,7 +66,7 @@ public class VRArmHelper {
             // set main hand active, for the attack cooldown transparency
             ClientDataHolderVR.ismainhand = true;
 
-            ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTicks);
+            ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
 
             if (menuHandRight) {
                 renderMainMenuHand(0, false, poseStack);
@@ -74,21 +74,21 @@ public class VRArmHelper {
                 PoseStack newPoseStack = new PoseStack();
                 newPoseStack.last().pose().identity();
                 RenderHelper.applyVRModelView(dataHolder.currentPass, newPoseStack);
-                renderVRHand_Main(newPoseStack, partialTicks);
+                renderVRHand_Main(newPoseStack, partialTick);
             }
 
             ClientDataHolderVR.ismainhand = false;
         }
 
         if (renderLeft) {
-            ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTicks);
+            ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
             if (menuHandLeft) {
                 renderMainMenuHand(1, false, poseStack);
             } else {
                 PoseStack newPoseStack = new PoseStack();
                 newPoseStack.last().pose().identity();
                 RenderHelper.applyVRModelView(dataHolder.currentPass, newPoseStack);
-                renderVRHand_Offhand(newPoseStack, partialTicks, true);
+                renderVRHand_Offhand(newPoseStack, partialTick, true);
             }
         }
 
@@ -164,9 +164,9 @@ public class VRArmHelper {
     /**
      * renders the main minecraft hand
      * @param poseStack PoseStack for positioning
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      */
-    public static void renderVRHand_Main(PoseStack poseStack, float partialTicks) {
+    public static void renderVRHand_Main(PoseStack poseStack, float partialTick) {
         poseStack.pushPose();
         RenderHelper.setupRenderingAtController(0, poseStack);
         ItemStack item = mc.player.getMainHandItem();
@@ -192,10 +192,10 @@ public class VRArmHelper {
         mc.gameRenderer.lightTexture().turnOnLightLayer();
 
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        mc.gameRenderer.itemInHandRenderer.renderArmWithItem(mc.player, partialTicks,
-            0.0F, InteractionHand.MAIN_HAND, mc.player.getAttackAnim(partialTicks), item, 0.0F,
+        mc.gameRenderer.itemInHandRenderer.renderArmWithItem(mc.player, partialTick,
+            0.0F, InteractionHand.MAIN_HAND, mc.player.getAttackAnim(partialTick), item, 0.0F,
             poseStack, bufferSource,
-            mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, partialTicks));
+            mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, partialTick));
 
         bufferSource.endBatch();
 
@@ -212,10 +212,10 @@ public class VRArmHelper {
     /**
      * renders the offhand minecraft hand
      * @param poseStack PoseStack for positioning
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param renderTeleport if the teleport arc should be rendered
      */
-    public static void renderVRHand_Offhand(PoseStack poseStack, float partialTicks, boolean renderTeleport) {
+    public static void renderVRHand_Offhand(PoseStack poseStack, float partialTick, boolean renderTeleport) {
         poseStack.pushPose();
         RenderHelper.setupRenderingAtController(1, poseStack);
         ItemStack item = mc.player.getOffhandItem();
@@ -241,10 +241,10 @@ public class VRArmHelper {
         mc.gameRenderer.lightTexture().turnOnLightLayer();
 
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        mc.gameRenderer.itemInHandRenderer.renderArmWithItem(mc.player, partialTicks,
-            0.0F, InteractionHand.OFF_HAND, mc.player.getAttackAnim(partialTicks), item, 0.0F,
+        mc.gameRenderer.itemInHandRenderer.renderArmWithItem(mc.player, partialTick,
+            0.0F, InteractionHand.OFF_HAND, mc.player.getAttackAnim(partialTick), item, 0.0F,
             poseStack, bufferSource,
-            mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, partialTicks));
+            mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, partialTick));
 
         bufferSource.endBatch();
 

@@ -1,11 +1,12 @@
 package org.vivecraft;
 
 import org.objectweb.asm.tree.ClassNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_11;
 import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_9;
 import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixin;
@@ -52,10 +53,12 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     private final Set<String> appliedModFixes = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
+    private static final Logger logger = LoggerFactory.getLogger("VivecraftMixin");
+
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (!Xplat.isModLoadedSuccess()) {
-            VRSettings.logger.info("not loading '{}' because mod failed to load completely", mixinClassName);
+            logger.info("not loading '{}' because mod failed to load completely", mixinClassName);
             return false;
         }
 
@@ -68,7 +71,7 @@ public class MixinConfig implements IMixinConfigPlugin {
             }
             String mod = mixinClassName.split("\\.")[3];
             if (appliedModFixes.add(mod)) {
-                VRSettings.logger.info("Vivecraft: applying '{}' fixes", mod);
+                logger.info("Vivecraft: applying '{}' fixes", mod);
             }
         }
 
@@ -90,7 +93,7 @@ public class MixinConfig implements IMixinConfigPlugin {
                 MixinService.getService().getBytecodeProvider().getClassNode(neededClass);
                 return true;
             } catch (ClassNotFoundException | IOException e) {
-                VRSettings.logger.info("Vivecraft: skipping mixin '{}'", mixinClassName);
+                logger.info("Vivecraft: skipping mixin '{}'", mixinClassName);
                 return false;
             }
         }

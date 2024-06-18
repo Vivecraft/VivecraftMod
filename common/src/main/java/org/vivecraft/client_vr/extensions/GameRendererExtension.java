@@ -24,11 +24,11 @@ public interface GameRendererExtension {
 
     double vivecraft$getRveY();
 
-    Vec3 vivecraft$getRvePos(float partialTicks);
+    Vec3 vivecraft$getRvePos(float partialTick);
 
     Vec3 vivecraft$getCrossVec();
 
-    void vivecraft$resetProjectionMatrix(float partialTicks);
+    void vivecraft$resetProjectionMatrix(float partialTick);
 
     Matrix4f vivecraft$getThirdPassProjectionMatrix();
 

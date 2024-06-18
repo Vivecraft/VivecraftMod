@@ -79,11 +79,11 @@ public class BezierCurve {
         }
     }
 
-    public void render(int vertexCount, Color c, float partialTicks) {
+    public void render(int vertexCount, Color c, float partialTick) {
         Player player = Minecraft.getInstance().player;
-        double x = player.xOld + (player.getX() - player.xOld) * partialTicks;
-        double y = player.yOld + (player.getY() - player.yOld) * partialTicks;
-        double z = player.zOld + (player.getZ() - player.zOld) * partialTicks;
+        double x = player.xOld + (player.getX() - player.xOld) * partialTick;
+        double y = player.yOld + (player.getY() - player.yOld) * partialTick;
+        double z = player.zOld + (player.getZ() - player.zOld) * partialTick;
         //GlStateManager._disableLighting();
         RenderSystem.depthMask(false);
         Tesselator tesselator = Tesselator.getInstance();

@@ -183,8 +183,8 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         if (this.visibleList == null) {
             guiGraphics.drawCenteredString(this.minecraft.font,

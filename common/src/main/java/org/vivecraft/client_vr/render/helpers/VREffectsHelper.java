@@ -540,13 +540,13 @@ public class VREffectsHelper {
     /**
      * renders the vivecraft stuff into separate buffers for the fabulous settings
      * this includes hands, vr shadow, gui, camera widgets and other stuff
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param levelRenderer LevelRenderer that holds the framebuffers for rendering
      * @param menuHandRight if the right hand should be a menu hand
      * @param menuHandLeft if the left hand should be a menu hand
      * @param poseStack PoseStack to use for positioning
      */
-    public static void renderVRFabulous(float partialTicks, LevelRenderer levelRenderer, boolean menuHandRight, boolean menuHandLeft, PoseStack poseStack) {
+    public static void renderVRFabulous(float partialTick, LevelRenderer levelRenderer, boolean menuHandRight, boolean menuHandLeft, PoseStack poseStack) {
         if (dataHolder.currentPass == RenderPass.SCOPEL || dataHolder.currentPass == RenderPass.SCOPER) {
             // skip for spyglass
             return;
@@ -563,7 +563,7 @@ public class VREffectsHelper {
         occluded.bindWrite(true);
 
         if (shouldOccludeGui()) {
-            renderGuiAndShadow(poseStack, partialTicks, false, false);
+            renderGuiAndShadow(poseStack, partialTick, false, false);
         }
 
         // switch to VR UnOccluded buffer, no depth copy
@@ -572,15 +572,15 @@ public class VREffectsHelper {
         unOccluded.bindWrite(true);
 
         if (!shouldOccludeGui()) {
-            renderGuiAndShadow(poseStack, partialTicks, false, false);
+            renderGuiAndShadow(poseStack, partialTick, false, false);
         }
 
-        renderVRSelfEffects(partialTicks);
+        renderVRSelfEffects(partialTick);
         VRWidgetHelper.renderVRThirdPersonCamWidget();
         VRWidgetHelper.renderVRHandheldCameraWidget();
 
         boolean renderHands = VRArmHelper.shouldRenderHands();
-        VRArmHelper.renderVRHands(partialTicks, renderHands && menuHandRight, renderHands && menuHandLeft, true, true, poseStack);
+        VRArmHelper.renderVRHands(partialTick, renderHands && menuHandRight, renderHands && menuHandLeft, true, true, poseStack);
 
         // switch to VR hands buffer
         RenderTarget hands = ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRUnoccludedFramebuffer();
@@ -588,7 +588,7 @@ public class VREffectsHelper {
         hands.copyDepthFrom(mc.getMainRenderTarget());
         hands.bindWrite(true);
 
-        VRArmHelper.renderVRHands(partialTicks, renderHands && !menuHandRight, renderHands && !menuHandLeft, false, false, poseStack);
+        VRArmHelper.renderVRHands(partialTick, renderHands && !menuHandRight, renderHands && !menuHandLeft, false, false, poseStack);
 
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -600,13 +600,13 @@ public class VREffectsHelper {
      * renders the vivecraft stuff, for fast and fancy setting, separated into 2 passes
      * one before and one after translucents.
      * this includes hands, vr shadow, gui, camera widgets and other stuff
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param secondPass if it's the second pass. first pass renders opaque stuff, second translucent stuff
      * @param menuHandRight if the right hand should be a menu hand
      * @param menuHandLeft if the left hand should be a menu hand
      * @param poseStack PoseStack to use for positioning
      */
-    public static void renderVrFast(float partialTicks, boolean secondPass, boolean menuHandRight, boolean menuHandLeft,
+    public static void renderVrFast(float partialTick, boolean secondPass, boolean menuHandRight, boolean menuHandLeft,
         PoseStack poseStack) {
         if (dataHolder.currentPass == RenderPass.SCOPEL || dataHolder.currentPass == RenderPass.SCOPER) {
             // skip for spyglass
@@ -620,7 +620,7 @@ public class VREffectsHelper {
             VRWidgetHelper.renderVRThirdPersonCamWidget();
             VRWidgetHelper.renderVRHandheldCameraWidget();
         } else {
-            renderGuiAndShadow(poseStack, partialTicks, !shouldOccludeGui(), true);
+            renderGuiAndShadow(poseStack, partialTick, !shouldOccludeGui(), true);
         }
 
         // render hands in second pass when gui is open
@@ -628,10 +628,10 @@ public class VREffectsHelper {
         if (secondPass == renderHandsSecond) {
             // should render hands in second pass if menus are open, else in the first pass
             // only render the hands only once
-            VRArmHelper.renderVRHands(partialTicks, VRArmHelper.shouldRenderHands(), VRArmHelper.shouldRenderHands(), menuHandRight, menuHandLeft, poseStack);
+            VRArmHelper.renderVRHands(partialTick, VRArmHelper.shouldRenderHands(), VRArmHelper.shouldRenderHands(), menuHandRight, menuHandLeft, poseStack);
         }
 
-        renderVRSelfEffects(partialTicks);
+        renderVRSelfEffects(partialTick);
     }
 
     /**
@@ -654,43 +654,43 @@ public class VREffectsHelper {
     /**
      * renders the guis (current screen/hud, radial and keyboard) and player shadow in the correct order
      * @param poseStack PoseStack to use for positioning
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param depthAlways if the depth test should be disabled
      * @param shadowFirst if the player shadow should be rendered first
      */
-    private static void renderGuiAndShadow(PoseStack poseStack, float partialTicks, boolean depthAlways, boolean shadowFirst) {
+    private static void renderGuiAndShadow(PoseStack poseStack, float partialTick, boolean depthAlways, boolean shadowFirst) {
         if (shadowFirst) {
-            VREffectsHelper.renderVrShadow(partialTicks, depthAlways, poseStack);
+            VREffectsHelper.renderVrShadow(partialTick, depthAlways, poseStack);
         }
         if (Minecraft.getInstance().screen != null || !KeyboardHandler.Showing) {
-            renderGuiLayer(partialTicks, depthAlways, poseStack);
+            renderGuiLayer(partialTick, depthAlways, poseStack);
         }
         if (!shadowFirst) {
-            VREffectsHelper.renderVrShadow(partialTicks, depthAlways, poseStack);
+            VREffectsHelper.renderVrShadow(partialTick, depthAlways, poseStack);
         }
 
         if (KeyboardHandler.Showing) {
             if (dataHolder.vrSettings.physicalKeyboard) {
-                renderPhysicalKeyboard(partialTicks, poseStack);
+                renderPhysicalKeyboard(partialTick, poseStack);
             } else {
-                render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
+                render2D(partialTick, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
                     KeyboardHandler.Rotation_room, depthAlways, poseStack);
             }
         }
 
         if (RadialHandler.isShowing()) {
-            render2D(partialTicks, RadialHandler.Framebuffer, RadialHandler.Pos_room,
+            render2D(partialTick, RadialHandler.Framebuffer, RadialHandler.Pos_room,
                 RadialHandler.Rotation_room, depthAlways, poseStack);
         }
     }
 
     /**
      * renders the player position indicator
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param depthAlways if the depth test should be disabled
      * @param poseStack PoseStack to use for positioning
      */
-    public static void renderVrShadow(float partialTicks, boolean depthAlways, PoseStack poseStack) {
+    public static void renderVrShadow(float partialTick, boolean depthAlways, PoseStack poseStack) {
         if (dataHolder.currentPass == RenderPass.THIRD || dataHolder.currentPass == RenderPass.CAMERA) {
             return;
         }
@@ -712,7 +712,7 @@ public class VREffectsHelper {
 
             Vec3 cameraPos = RenderHelper.getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.vrdata_world_render);
 
-            Vec3 interpolatedPlayerPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(partialTicks);
+            Vec3 interpolatedPlayerPos = ((GameRendererExtension) mc.gameRenderer).vivecraft$getRvePos(partialTick);
 
             Vec3 pos = interpolatedPlayerPos.subtract(cameraPos).add(0.0D, 0.005D, 0.0D);
 
@@ -743,9 +743,9 @@ public class VREffectsHelper {
 
     /**
      * renders effects around the player, includes burning animation and totem of undying
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      */
-    private static void renderVRSelfEffects(float partialTicks) {
+    private static void renderVRSelfEffects(float partialTick) {
         // only render the fire in first person, other views have the burning entity
         if (dataHolder.currentPass != RenderPass.THIRD && dataHolder.currentPass != RenderPass.CAMERA &&
             !mc.player.isSpectator() && mc.player.isOnFire() && !Xevents.renderFireOverlay(mc.player, new PoseStack()))
@@ -754,7 +754,7 @@ public class VREffectsHelper {
         }
 
         // totem of undying
-        mc.gameRenderer.renderItemActivationAnimation(0, 0, partialTicks);
+        mc.gameRenderer.renderItemActivationAnimation(0, 0, partialTick);
     }
 
     /**
@@ -831,14 +831,14 @@ public class VREffectsHelper {
 
     /**
      * renders the physical touch keyboard
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param poseStack PoseStack to use for positioning
      */
-    public static void renderPhysicalKeyboard(float partialTicks, PoseStack poseStack) {
+    public static void renderPhysicalKeyboard(float partialTick, PoseStack poseStack) {
         if (dataHolder.bowTracker.isDrawing) return;
 
         mc.getProfiler().push("renderPhysicalKeyboard");
-        ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTicks);
+        ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
         poseStack.pushPose();
         poseStack.setIdentity();
 
@@ -874,12 +874,12 @@ public class VREffectsHelper {
     /**
      * sets up the render state to render screens into the world.
      * this resets the given PoseStack, the ModelViewStack and projection matrix
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param poseStack PoseStack to reset
      */
-    private static void setupScreenRendering(float partialTicks, PoseStack poseStack) {
+    private static void setupScreenRendering(float partialTick, PoseStack poseStack) {
         // remove nausea effect from projection matrix, for vanilla, and poseStack for iris
-        ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTicks);
+        ((GameRendererExtension) mc.gameRenderer).vivecraft$resetProjectionMatrix(partialTick);
         poseStack.pushPose();
         poseStack.setIdentity();
         RenderHelper.applyVRModelView(dataHolder.currentPass, poseStack);
@@ -977,18 +977,18 @@ public class VREffectsHelper {
 
     /**
      * renders the GUI/HUD buffer into the world
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param depthAlways if the depth test should be disabled
      * @param poseStack PoseStack to use for positioning
      */
-    public static void renderGuiLayer(float partialTicks, boolean depthAlways, PoseStack poseStack) {
+    public static void renderGuiLayer(float partialTick, boolean depthAlways, PoseStack poseStack) {
         if (dataHolder.bowTracker.isDrawing) return;
         if (mc.screen == null && mc.options.hideGui) return;
         if (RadialHandler.isShowing()) return;
 
         mc.getProfiler().push("GuiLayer");
 
-        setupScreenRendering(partialTicks, poseStack);
+        setupScreenRendering(partialTick, poseStack);
 
         // MAIN MENU ENVIRONMENT
         if (MethodHolder.isInMenuRoom()) {
@@ -1032,19 +1032,19 @@ public class VREffectsHelper {
 
     /**
      * renders the given RenderTarget into the world, ath the given location with the give rotation
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param framebuffer RenderTarget to render into the world
      * @param pos position to render the RenderTarget at, in VR room space
      * @param rot rotation to rotate the screen, in VR room space
      * @param depthAlways if the depth test should be disabled
      * @param poseStack PoseStack to use for positioning
      */
-    public static void render2D(float partialTicks, RenderTarget framebuffer, Vec3 pos, org.vivecraft.common.utils.math.Matrix4f rot, boolean depthAlways, PoseStack poseStack) {
+    public static void render2D(float partialTick, RenderTarget framebuffer, Vec3 pos, org.vivecraft.common.utils.math.Matrix4f rot, boolean depthAlways, PoseStack poseStack) {
         if (dataHolder.bowTracker.isDrawing) return;
 
         mc.getProfiler().push("render2D");
 
-        setupScreenRendering(partialTicks, poseStack);
+        setupScreenRendering(partialTick, poseStack);
 
         mc.getProfiler().push("apply2DModelView");
 
@@ -1073,16 +1073,16 @@ public class VREffectsHelper {
 
     /**
      * if the face is inside a block, this renders a black square, and rerenders the gui and hands
-     * @param partialTicks current partial ticks
+     * @param partialTick current partial tick
      * @param poseStack PoseStack to use for positioning
      */
-    public static void renderFaceOverlay(float partialTicks, PoseStack poseStack) {
+    public static void renderFaceOverlay(float partialTick, PoseStack poseStack) {
         if (((GameRendererExtension) mc.gameRenderer).vivecraft$isInBlock() > 0.0F) {
             renderFaceInBlock();
 
-            renderGuiAndShadow(poseStack, partialTicks, true, true);
+            renderGuiAndShadow(poseStack, partialTick, true, true);
 
-            VRArmHelper.renderVRHands(partialTicks, true, true, true, true, poseStack);
+            VRArmHelper.renderVRHands(partialTick, true, true, true, true, poseStack);
         }
     }
 

@@ -31,17 +31,17 @@ public class VRPassHelper {
     /**
      * renders a single RenderPass view
      * @param eye RenderPass to render
-     * @param partialTicks current partial ticks for this frame
+     * @param partialTick current partial tick for this frame
      * @param nanoTime time of this frame in nanoseconds
      * @param renderLevel if the level should be rendered, or just the screen
      */
-    public static void renderSingleView(RenderPass eye, float partialTicks, long nanoTime, boolean renderLevel) {
+    public static void renderSingleView(RenderPass eye, float partialTick, long nanoTime, boolean renderLevel) {
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
         RenderSystem.clear(GL13C.GL_COLOR_BUFFER_BIT | GL13C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         RenderSystem.enableDepthTest();
 
         // THIS IS WHERE EVERYTHING IS RENDERED
-        mc.gameRenderer.render(partialTicks, nanoTime, renderLevel);
+        mc.gameRenderer.render(partialTick, nanoTime, renderLevel);
 
         RenderHelper.checkGLError("post game render " + eye);
 
@@ -67,7 +67,7 @@ public class VRPassHelper {
             }
 
             // do post-processing
-            ShaderHelper.doVrPostProcess(eye, rendertarget, partialTicks);
+            ShaderHelper.doVrPostProcess(eye, rendertarget, partialTick);
 
             RenderHelper.checkGLError("post overlay" + eye);
             mc.getProfiler().pop();
@@ -136,7 +136,6 @@ public class VRPassHelper {
         RenderSystem.applyModelViewMatrix();
 
         // generate mipmaps
-        // TODO: does this do anything?
         mc.mainRenderTarget.bindRead();
         ((RenderTargetExtension) mc.mainRenderTarget).vivecraft$genMipMaps();
         mc.mainRenderTarget.unbindRead();

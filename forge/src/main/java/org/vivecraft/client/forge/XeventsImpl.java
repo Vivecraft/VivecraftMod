@@ -7,8 +7,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
 import net.minecraftforge.event.ForgeEventFactory;
+import org.vivecraft.client.Xevents;
 
-public class XeventsImpl {
+public class XeventsImpl implements Xevents {
 
     public static boolean renderBlockOverlay(Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos) {
         return ForgeHooksClient.renderBlockOverlay(player, poseStack, RenderBlockScreenEffectEvent.OverlayType.BLOCK, blockState, blockPos);
@@ -22,11 +23,11 @@ public class XeventsImpl {
         return ForgeHooksClient.renderFireOverlay(player, poseStack);
     }
 
-    public static void onRenderTickStart(float partialTicks) {
-        ForgeEventFactory.onRenderTickStart(partialTicks);
+    public static void onRenderTickStart(float partialTick) {
+        ForgeEventFactory.onRenderTickStart(partialTick);
     }
 
-    public static void onRenderTickEnd(float partialTicks) {
-        ForgeEventFactory.onRenderTickEnd(partialTicks);
+    public static void onRenderTickEnd(float partialTick) {
+        ForgeEventFactory.onRenderTickEnd(partialTick);
     }
 }

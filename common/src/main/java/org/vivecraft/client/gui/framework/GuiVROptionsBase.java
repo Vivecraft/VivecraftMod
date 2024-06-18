@@ -185,7 +185,7 @@ public abstract class GuiVROptionsBase extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (this.reinit) {
             this.reinit = false;
             // remember selected option
@@ -198,10 +198,10 @@ public abstract class GuiVROptionsBase extends Screen {
             }
         }
 
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         if (this.visibleList != null) {
-            this.visibleList.render(guiGraphics, mouseX, mouseY, partialTicks);
+            this.visibleList.render(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         guiGraphics.drawCenteredString(this.font, Component.translatable(this.vrTitle), this.width / 2, 15, 0xFFFFFF);

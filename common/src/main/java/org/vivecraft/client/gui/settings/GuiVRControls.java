@@ -34,8 +34,8 @@ public class GuiVRControls extends GuiVROptionsBase {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         int middle = 240 / 2 - this.minecraft.font.lineHeight / 2 - 24;
         int lineHeight = this.minecraft.font.lineHeight + 3;

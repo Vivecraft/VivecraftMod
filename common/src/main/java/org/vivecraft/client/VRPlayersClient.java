@@ -195,25 +195,25 @@ public class VRPlayersClient {
         if (rotInfo != null && this.vivePlayersLast.containsKey(uuid)) {
             RotInfo lastRotInfo = this.vivePlayersLast.get(uuid);
             RotInfo lerpRotInfo = new RotInfo();
-            float partialTicks = Minecraft.getInstance().getFrameTime();
+            float partialTick = Minecraft.getInstance().getFrameTime();
 
             lerpRotInfo.reverse = rotInfo.reverse;
             lerpRotInfo.seated = rotInfo.seated;
             lerpRotInfo.hmd = rotInfo.hmd;
-            lerpRotInfo.leftArmPos = Utils.vecLerp(lastRotInfo.leftArmPos, rotInfo.leftArmPos, partialTicks);
-            lerpRotInfo.rightArmPos = Utils.vecLerp(lastRotInfo.rightArmPos, rotInfo.rightArmPos, partialTicks);
-            lerpRotInfo.Headpos = Utils.vecLerp(lastRotInfo.Headpos, rotInfo.Headpos, partialTicks);
+            lerpRotInfo.leftArmPos = Utils.vecLerp(lastRotInfo.leftArmPos, rotInfo.leftArmPos, partialTick);
+            lerpRotInfo.rightArmPos = Utils.vecLerp(lastRotInfo.rightArmPos, rotInfo.rightArmPos, partialTick);
+            lerpRotInfo.Headpos = Utils.vecLerp(lastRotInfo.Headpos, rotInfo.Headpos, partialTick);
             lerpRotInfo.leftArmQuat = rotInfo.leftArmQuat;
             lerpRotInfo.rightArmQuat = rotInfo.rightArmQuat;
             lerpRotInfo.headQuat = rotInfo.headQuat;
 
             Vector3 forward = new Vector3(0.0F, 0.0F, -1.0F);
             lerpRotInfo.leftArmRot = Utils.vecLerp(lastRotInfo.leftArmRot,
-                Utils.convertToVector3d(lerpRotInfo.leftArmQuat.multiply(forward)), partialTicks);
+                Utils.convertToVector3d(lerpRotInfo.leftArmQuat.multiply(forward)), partialTick);
             lerpRotInfo.rightArmRot = Utils.vecLerp(lastRotInfo.rightArmRot,
-                Utils.convertToVector3d(lerpRotInfo.rightArmQuat.multiply(forward)), partialTicks);
+                Utils.convertToVector3d(lerpRotInfo.rightArmQuat.multiply(forward)), partialTick);
             lerpRotInfo.headRot = Utils.vecLerp(lastRotInfo.headRot,
-                Utils.convertToVector3d(lerpRotInfo.headQuat.multiply(forward)), partialTicks);
+                Utils.convertToVector3d(lerpRotInfo.headQuat.multiply(forward)), partialTick);
             lerpRotInfo.heightScale = rotInfo.heightScale;
             lerpRotInfo.worldScale = rotInfo.worldScale;
             return lerpRotInfo;

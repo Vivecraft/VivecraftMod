@@ -134,7 +134,7 @@ public abstract class GameRendererVRMixin
     public abstract Matrix4f getProjectionMatrix(double fov);
 
     @Shadow
-    protected abstract double getFov(Camera mainCamera2, float partialTicks, boolean b);
+    protected abstract double getFov(Camera mainCamera2, float partialTick, boolean b);
 
     @Shadow
     public abstract void resetProjectionMatrix(Matrix4f projectionMatrix);
@@ -299,7 +299,7 @@ public abstract class GameRendererVRMixin
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;viewport(IIII)V", remap = false, shift = Shift.AFTER), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V")
-    public void vivecraft$matrix(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
+    public void vivecraft$matrix(float partialTick, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
         this.resetProjectionMatrix(this.getProjectionMatrix(minecraft.options.fov().get()));
         RenderSystem.getModelViewStack().setIdentity();
         RenderSystem.applyModelViewMatrix();
@@ -363,7 +363,7 @@ public abstract class GameRendererVRMixin
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.BEFORE, ordinal = 6), method = "Lnet/minecraft/client/renderer/GameRenderer;render(FJZ)V", cancellable = true)
-    public void vivecraft$mainMenu(float partialTicks, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
+    public void vivecraft$mainMenu(float partialTick, long nanoTime, boolean renderWorldIn, CallbackInfo info) {
         if (RenderPassType.isVanilla()) {
             return;
         }
@@ -389,13 +389,13 @@ public abstract class GameRendererVRMixin
 
             PoseStack pMatrixStack = new PoseStack();
             RenderHelper.applyVRModelView(vivecraft$DATA_HOLDER.currentPass, pMatrixStack);
-            VREffectsHelper.renderGuiLayer(partialTicks, true, pMatrixStack);
+            VREffectsHelper.renderGuiLayer(partialTick, true, pMatrixStack);
 
             if (KeyboardHandler.Showing) {
                 if (vivecraft$DATA_HOLDER.vrSettings.physicalKeyboard) {
-                    VREffectsHelper.renderPhysicalKeyboard(partialTicks, pMatrixStack);
+                    VREffectsHelper.renderPhysicalKeyboard(partialTick, pMatrixStack);
                 } else {
-                    VREffectsHelper.render2D(partialTicks, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
+                    VREffectsHelper.render2D(partialTick, KeyboardHandler.Framebuffer, KeyboardHandler.Pos_room,
                         KeyboardHandler.Rotation_room, vivecraft$DATA_HOLDER.vrSettings.menuAlwaysFollowFace && MethodHolder.isInMenuRoom(), pMatrixStack);
                 }
             }
@@ -403,7 +403,7 @@ public abstract class GameRendererVRMixin
             if ((vivecraft$DATA_HOLDER.currentPass != RenderPass.THIRD
                 || vivecraft$DATA_HOLDER.vrSettings.mixedRealityRenderHands)
                 && vivecraft$DATA_HOLDER.currentPass != RenderPass.CAMERA) {
-                VRArmHelper.renderVRHands(partialTicks, true, true, true, true, pMatrixStack);
+                VRArmHelper.renderVRHands(partialTick, true, true, true, true, pMatrixStack);
             }
         }
         // pop the "level" push, since that would happen after this
@@ -448,13 +448,13 @@ public abstract class GameRendererVRMixin
     }
 
     @Redirect(method = "renderItemActivationAnimation", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
-    private void vivecraft$noScaleItem(PoseStack poseStack, float x, float y, float z, int width, int height, float partialTicks) {
+    private void vivecraft$noScaleItem(PoseStack poseStack, float x, float y, float z, int width, int height, float partialTick) {
         if (RenderPassType.isVanilla()) {
             poseStack.scale(x, y, z);
         } else {
             // need to do stuff twice, because redirects have no access to locals
             int i = 40 - this.itemActivationTicks;
-            float g = ((float) i + partialTicks) / 40.0f;
+            float g = ((float) i + partialTick) / 40.0f;
             float h = g * g;
             float l = g * h;
             float m = 10.25f * l * h - 24.95f * h * h + 25.5f * l - 13.8f * h + 4.0f * g;
@@ -628,16 +628,16 @@ public abstract class GameRendererVRMixin
 
     @Override
     @Unique
-    public Vec3 vivecraft$getRvePos(float partialTicks) {
+    public Vec3 vivecraft$getRvePos(float partialTick) {
         return new Vec3(
-            Mth.lerp(partialTicks, this.vivecraft$rvelastX, this.vivecraft$rveX),
-            Mth.lerp(partialTicks, this.vivecraft$rvelastY, this.vivecraft$rveY),
-            Mth.lerp(partialTicks, this.vivecraft$rvelastZ, this.vivecraft$rveZ)
+            Mth.lerp(partialTick, this.vivecraft$rvelastX, this.vivecraft$rveX),
+            Mth.lerp(partialTick, this.vivecraft$rvelastY, this.vivecraft$rveY),
+            Mth.lerp(partialTick, this.vivecraft$rvelastZ, this.vivecraft$rveZ)
         );
     }
 
     @Unique
-    private void vivecraft$setupOverlayStatus(float partialTicks) {
+    private void vivecraft$setupOverlayStatus(float partialTick) {
         this.vivecraft$inBlock = 0.0F;
         this.vivecraft$inwater = false;
 
@@ -723,7 +723,7 @@ public abstract class GameRendererVRMixin
 
     @Override
     @Unique
-    public void vivecraft$resetProjectionMatrix(float partialTicks) {
-        this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(this.mainCamera, partialTicks, true)));
+    public void vivecraft$resetProjectionMatrix(float partialTick) {
+        this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(this.mainCamera, partialTick, true)));
     }
 }

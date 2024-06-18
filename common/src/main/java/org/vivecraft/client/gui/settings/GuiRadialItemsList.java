@@ -52,7 +52,7 @@ public class GuiRadialItemsList extends ObjectSelectionList<GuiRadialItemsList.B
         @Override
         public void render(
             GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY,
-            boolean hovering, float partialTicks)
+            boolean hovering, float partialTick)
         {
             guiGraphics.drawString(Minecraft.getInstance().font, this.labelText, (Minecraft.getInstance().screen.width / 2 - this.labelWidth / 2),
                 (top + height - 9 - 1), 0x67697F);
@@ -71,7 +71,7 @@ public class GuiRadialItemsList extends ObjectSelectionList<GuiRadialItemsList.B
         @Override
         public void render(
             GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY,
-            boolean hovering, float partialTicks)
+            boolean hovering, float partialTick)
         {
             ChatFormatting chatformatting = ChatFormatting.WHITE;
 

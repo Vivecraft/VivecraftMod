@@ -99,13 +99,13 @@ public class GuiListValueEditScreen extends GuiListScreen {
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTicks) {
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
             this.valueWidget.setX(left - 50);
             this.valueWidget.setY(top);
-            this.valueWidget.render(guiGraphics, mouseX, mouseY, partialTicks);
+            this.valueWidget.render(guiGraphics, mouseX, mouseY, partialTick);
             this.deleteButton.setX(left + 230);
             this.deleteButton.setY(top);
-            this.deleteButton.render(guiGraphics, mouseX, mouseY, partialTicks);
+            this.deleteButton.render(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         @Override

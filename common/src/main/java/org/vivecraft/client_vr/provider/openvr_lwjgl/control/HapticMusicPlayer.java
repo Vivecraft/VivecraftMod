@@ -9,6 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * uses the haptics frequency feature to play music
+ */
 public class HapticMusicPlayer {
     private static final Map<String, Music> map = new HashMap<>();
 

@@ -210,11 +210,11 @@ public class Debug {
         public boolean manualClearing = false;
         private final ArrayList<Polygon> toDraw = new ArrayList<>();
 
-        public void render(float partialTicks, long finishTimeNano) {
+        public void render(float partialTick, long finishTimeNano) {
             Player player = Minecraft.getInstance().player;
-            double x = player.xOld + (player.getX() - player.xOld) * partialTicks;
-            double y = player.yOld + (player.getY() - player.yOld) * partialTicks;
-            double z = player.zOld + (player.getZ() - player.zOld) * partialTicks;
+            double x = player.xOld + (player.getX() - player.xOld) * partialTick;
+            double y = player.yOld + (player.getY() - player.yOld) * partialTick;
+            double z = player.zOld + (player.getZ() - player.zOld) * partialTick;
             // GlStateManager.lineWidth(5.0F);
             //GlStateManager._disableLighting();
             RenderSystem.depthMask(false);

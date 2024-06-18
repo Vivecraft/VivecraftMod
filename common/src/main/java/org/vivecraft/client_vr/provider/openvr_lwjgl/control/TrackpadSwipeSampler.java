@@ -3,6 +3,7 @@ package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.common.utils.lwjgl.Vector2f;
 import org.vivecraft.common.utils.math.Vector2;
 
@@ -25,9 +26,10 @@ public class TrackpadSwipeSampler {
     }
 
     public void update(ControllerType hand, Vector2 position) {
-        MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).setCurrentHand(hand);
+        VRInputAction trackpad = MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch);
+        trackpad.setCurrentHand(hand);
 
-        if (MCOpenVR.get().getInputAction(VivecraftVRMod.INSTANCE.keyTrackpadTouch).isButtonPressed()) {
+        if (trackpad.isButtonPressed()) {
             this.buffer[this.index].set(position.getX(), position.getY());
 
             if (++this.index >= this.buffer.length) {
@@ -36,14 +38,16 @@ public class TrackpadSwipeSampler {
 
             this.count++;
         } else {
+            // reset buffer
             for (Vector2f vec : this.buffer) {
                 vec.set(0.0F, 0.0F);
             }
-
             this.count = 0L;
         }
 
-        if (this.count >= (long) this.buffer.length) {
+        // wait till te buffer is full, so we start tracking where the touch started
+        if (this.count >= this.buffer.length) {
+            // the index is always at the oldest data point at this moment
             int nextIndex = (this.index + 1) % this.buffer.length;
             this.accumulator.x += this.buffer[nextIndex].x - this.buffer[this.index].x;
             this.accumulator.y += this.buffer[nextIndex].y - this.buffer[this.index].y;

@@ -31,19 +31,19 @@ public class VRPlayerRenderer extends PlayerRenderer {
     }
 
     @Override
-    public void render(AbstractClientPlayer player, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+    public void render(AbstractClientPlayer player, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
 
         VRPlayersClient.RotInfo rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(player.getUUID());
 
         if (rotInfo != null) {
             poseStack.scale(rotInfo.heightScale, rotInfo.heightScale, rotInfo.heightScale);
-            super.render(player, entityYaw, partialTicks, poseStack, buffer, packedLight);
+            super.render(player, entityYaw, partialTick, poseStack, buffer, packedLight);
             poseStack.scale(1.0F, 1.0F / rotInfo.heightScale, 1.0F);
         }
     }
 
     @Override
-    public Vec3 getRenderOffset(AbstractClientPlayer player, float partialTicks) {
+    public Vec3 getRenderOffset(AbstractClientPlayer player, float partialTick) {
         // idk why we do this anymore
         // this changes the offset to only apply when swimming, instead of crouching
         return player.isVisuallySwimming() ? new Vec3(0.0D, -0.125D, 0.0D) : Vec3.ZERO;
@@ -66,7 +66,7 @@ public class VRPlayerRenderer extends PlayerRenderer {
     }
 
     @Override
-    protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTicks) {
+    protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
         UUID uuid = player.getUUID();
         if (ClientDataHolderVR.getInstance().currentPass != RenderPass.GUI && VRPlayersClient.getInstance().isTracked(uuid)) {
             VRPlayersClient.RotInfo rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(uuid);
@@ -74,6 +74,6 @@ public class VRPlayerRenderer extends PlayerRenderer {
         }
 
         //vanilla below here
-        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTicks);
+        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick);
     }
 }

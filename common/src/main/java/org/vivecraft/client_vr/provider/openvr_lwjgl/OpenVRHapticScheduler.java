@@ -1,8 +1,10 @@
 package org.vivecraft.client_vr.provider.openvr_lwjgl;
 
+import org.lwjgl.openvr.VR;
 import org.lwjgl.openvr.VRInput;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.HapticScheduler;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.concurrent.TimeUnit;
 
@@ -10,8 +12,8 @@ public class OpenVRHapticScheduler extends HapticScheduler {
     private void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude) {
         int error = VRInput.VRInput_TriggerHapticVibrationAction(MCOpenVR.get().getHapticHandle(controller), 0.0F, durationSeconds, frequency, amplitude, 0L);
 
-        if (error != 0) {
-            System.out.println("Error triggering haptic: " + MCOpenVR.getInputErrorName(error));
+        if (error != VR.EVRInputError_VRInputError_None) {
+            VRSettings.logger.error("Error triggering haptic: {}", MCOpenVR.getInputErrorName(error));
         }
     }
 

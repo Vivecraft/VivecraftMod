@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
 public class ShadersRenderVRMixin {
 
     @Shadow(remap = false)
-    public static void updateActiveRenderInfo(Camera activeRenderInfo, Minecraft mc, float partialTicks) {
+    public static void updateActiveRenderInfo(Camera activeRenderInfo, Minecraft mc, float partialTick) {
     }
 
     @Unique
@@ -48,7 +48,7 @@ public class ShadersRenderVRMixin {
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getInstance()Lnet/minecraft/client/Minecraft;", remap = true), method = "renderShadowMap", remap = false, cancellable = true)
-    private static void vivecraft$shadowsOnlyOnce(GameRenderer gameRenderer, Camera activeRenderInfo, int pass, float partialTicks, long finishTimeNano, CallbackInfo ci) {
+    private static void vivecraft$shadowsOnlyOnce(GameRenderer gameRenderer, Camera activeRenderInfo, int pass, float partialTick, long finishTimeNano, CallbackInfo ci) {
         if (!RenderPassType.isVanilla() && ClientDataHolderVR.getInstance().currentPass != RenderPass.LEFT) {
             if (vivecraft$setCameraShadow == null) {
                 try {
@@ -58,8 +58,8 @@ public class ShadersRenderVRMixin {
                 }
             }
             try {
-                updateActiveRenderInfo(activeRenderInfo, Minecraft.getInstance(), partialTicks);
-                vivecraft$setCameraShadow.invoke(null, new PoseStack(), activeRenderInfo, partialTicks);
+                updateActiveRenderInfo(activeRenderInfo, Minecraft.getInstance(), partialTick);
+                vivecraft$setCameraShadow.invoke(null, new PoseStack(), activeRenderInfo, partialTick);
             } catch (IllegalAccessException | InvocationTargetException ignored) {
             }
             ci.cancel();

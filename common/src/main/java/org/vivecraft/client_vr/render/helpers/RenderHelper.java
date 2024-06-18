@@ -283,11 +283,11 @@ public class RenderHelper {
 
     /**
      * renders the given screen to the current main target and generates mipmaps for it
-     * @param partialTicks partial ticks for the screen rendering
+     * @param partialTick partial tick for the screen rendering
      * @param screen the Screen to render
      * @param guiGraphics GuiGraphics to render with, is not flushed after rendering
      */
-    public static void drawScreen(float partialTicks, Screen screen, GuiGraphics guiGraphics) {
+    public static void drawScreen(float partialTick, Screen screen, GuiGraphics guiGraphics) {
         // setup modelview for screen rendering
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
@@ -307,7 +307,7 @@ public class RenderHelper {
             GlStateManager.SourceFactor.ONE,
             GlStateManager.DestFactor.ONE);
 
-        screen.render(guiGraphics, 0, 0, partialTicks);
+        screen.render(guiGraphics, 0, 0, partialTick);
 
         RenderSystem.blendFuncSeparate(
             GlStateManager.SourceFactor.SRC_ALPHA,

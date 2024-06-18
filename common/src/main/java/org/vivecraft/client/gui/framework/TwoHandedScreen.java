@@ -29,7 +29,7 @@ public abstract class TwoHandedScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (this.reinit) {
             this.init();
             this.reinit = false;
@@ -50,9 +50,9 @@ public abstract class TwoHandedScreen extends Screen {
             boolean hover2 = widget.isMouseOver(x2, y2);
 
             if (hover1) {
-                widget.render(guiGraphics, (int) x1, (int) y1, partialTicks);
+                widget.render(guiGraphics, (int) x1, (int) y1, partialTick);
             } else {
-                widget.render(guiGraphics, (int) x2, (int) y2, partialTicks);
+                widget.render(guiGraphics, (int) x2, (int) y2, partialTick);
             }
 
             if (hover1) {

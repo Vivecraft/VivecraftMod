@@ -46,10 +46,10 @@ public class VRInputAction {
         this.actionSet = actionSetOverride != null ? actionSetOverride : VRInputActionSet.fromKeyBinding(keyMapping);
         this.name = this.actionSet.name + "/in/" + keyMapping.getName().replace('/', '_');
 
-        for (int i = 0; i < ControllerType.values().length; i++) {
-            this.enabled[i] = true;
-            this.analogData[i] = new AnalogData();
-            this.digitalData[i] = new DigitalData();
+        for (int c = 0; c < ControllerType.values().length; c++) {
+            this.enabled[c] = true;
+            this.analogData[c] = new AnalogData();
+            this.digitalData[c] = new DigitalData();
         }
     }
 
@@ -208,7 +208,8 @@ public class VRInputAction {
     }
 
     /**
-     * If this is a handed binding, applies to the hand from {@link VRInputAction#setCurrentHand(ControllerType)}
+     * check if the InputAction is enabled, if it is handed, checks for {@link VRInputAction#currentHand} <br>
+     * also checks if any other InputAction with higher priority is active, then this InputAction is treated as disabled
      */
     public boolean isEnabled() {
         if (!this.isEnabledRaw(this.currentHand)) return false;
@@ -221,7 +222,9 @@ public class VRInputAction {
 
         // iterate over all actions, and check if another action has a higher priority
         for (VRInputAction action : MCOpenVR.get().getInputActions()) {
-            if (action != this && action.isEnabledRaw(hand) && action.isActive() && action.getPriority() > this.getPriority() && MCVR.get().getOrigins(action).contains(lastOrigin)) {
+            if (action != this && action.isEnabledRaw(hand) && action.isActive() &&
+                action.getPriority() > this.getPriority() && MCVR.get().getOrigins(action).contains(lastOrigin))
+            {
                 if (action.isHanded()) {
                     return !((HandedKeyBinding) action.keyBinding).isPriorityOnController(hand);
                 }
@@ -277,15 +280,28 @@ public class VRInputAction {
         return this.keyBinding instanceof HandedKeyBinding;
     }
 
+    /**
+     * adds a KeyListener that gets notified for state changes
+     * @param listener KeyListener to register
+     */
     public void registerListener(KeyListener listener) {
         this.listeners.add(listener);
         this.listeners.sort(Comparator.comparingInt(KeyListener::getPriority).reversed());
     }
 
+    /**
+     * removes the specified KeyListeners
+     */
     public void unregisterListener(KeyListener listener) {
         this.listeners.remove(listener);
     }
 
+    /**
+     * notifies all registered KeyListener in priority order
+     * @param pressed if presses or released
+     * @param hand controller this was triggered by
+     * @return if any KeyListener triggered
+     */
     public boolean notifyListeners(boolean pressed, ControllerType hand) {
         for (KeyListener listener : this.listeners) {
             if (pressed) {
@@ -302,7 +318,7 @@ public class VRInputAction {
 
     public void tick() {
         if (this.isHanded()) {
-            for (int c = 0; c < ControllerType.values().length; ++c) {
+            for (int c = 0; c < ControllerType.values().length; c++) {
                 if (this.unpressInTicks[c] > 0 && --this.unpressInTicks[c] == 0) {
                     this.unpressBindingImmediately(ControllerType.values()[c]);
                 }
@@ -383,6 +399,10 @@ public class VRInputAction {
         }
     }
 
+    /**
+     * presses the KeyMapping assigned to this InputAction <br>
+     * if the KeyMapping has a modifier key also presses that
+     */
     private void pressKey() {
         InputConstants.Key key = this.keyBinding.key;
 
@@ -405,6 +425,10 @@ public class VRInputAction {
         setKeyBindState(this.keyBinding, true);
     }
 
+    /**
+     * unpresses the KeyMapping assigned to this InputAction <br>
+     * if the KeyMapping has a modifier key also unpresses that
+     */
     public void unpressKey() {
         InputConstants.Key key = this.keyBinding.key;
 
@@ -446,9 +470,9 @@ public class VRInputAction {
     }
 
     public interface KeyListener {
-        boolean onPressed(@Nullable ControllerType var1);
+        boolean onPressed(@Nullable ControllerType controllerType);
 
-        boolean onUnpressed(@Nullable ControllerType var1);
+        boolean onUnpressed(@Nullable ControllerType controllerType);
 
         int getPriority();
     }

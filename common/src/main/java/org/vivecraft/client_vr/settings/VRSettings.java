@@ -512,6 +512,9 @@ public class VRSettings {
 
         // Load settings from the file
         this.loadOptions();
+
+        // load external camera config
+        VRHotkeys.loadExternalCameraConfig();
     }
 
     private void initializeFieldInfo() {

@@ -280,10 +280,10 @@ public class SwingTracker extends Tracker {
                             // does nothing in survival if you are already hitting this block.
                             this.mc.gameMode.startDestroyBlock(blockHit.getBlockPos(), blockHit.getDirection());
 
-                            //seems to be the only way to tell it didn't instabreak.
+                            // seems to be the only way to tell it didn't instabreak.
                             if (this.getIsHittingBlock()) {
                                 for (int hit = 0; hit < totalHits; hit++) {
-                                    //send multiple ticks worth of 'holding left click' to it.
+                                    // send multiple ticks worth of 'holding left click' to it.
                                     if (this.mc.gameMode.continueDestroyBlock(blockHit.getBlockPos(), blockHit.getDirection())) {
                                         this.mc.particleEngine.crack(blockHit.getBlockPos(), blockHit.getDirection());
                                     }
@@ -291,7 +291,7 @@ public class SwingTracker extends Tracker {
                                     this.clearBlockHitDelay();
 
                                     if (!this.getIsHittingBlock()) {
-                                        //seems to be the only way to tell if it broke.
+                                        // seems to be the only way to tell if it broke.
                                         break;
                                     }
                                 }
