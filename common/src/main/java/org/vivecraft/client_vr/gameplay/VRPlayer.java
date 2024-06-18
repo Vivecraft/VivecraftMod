@@ -25,6 +25,7 @@ import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -389,19 +390,24 @@ public class VRPlayer {
     }
 
     public void tick(LocalPlayer player, Minecraft mc) {
-        if (!((PlayerExtension) player).vivecraft$getInitFromServer()) {
-            return;
-        }
+        if (!((PlayerExtension) player).vivecraft$getInitFromServer()) return;
 
         if (!this.initDone) {
-            System.out.println("<Debug info start>");
-            System.out.println("Room object: " + this);
-            System.out.println("Room origin: " + this.vrdata_world_pre.origin);
-            System.out.println("Hmd position room: " + this.vrdata_room_pre.hmd.getPosition());
-            System.out.println("Hmd position world: " + this.vrdata_world_pre.hmd.getPosition());
-            System.out.println("Hmd Projection Left: " + this.dh.vrRenderer.eyeProj[0]);
-            System.out.println("Hmd Projection Right: " + this.dh.vrRenderer.eyeProj[1]);
-            System.out.println("<Debug info end>");
+            VRSettings.logger.info("""
+                <Debug info start>
+                Room object: {}
+                Room origin: {}
+                Hmd position room: {}
+                Hmd position world: {}
+                Hmd Projection Left: {}
+                Hmd Projection Right: {}
+                <Debug info end>
+                """, this,
+                this.vrdata_world_pre.origin,
+                this.vrdata_room_pre.hmd.getPosition(),
+                this.vrdata_world_pre.hmd.getPosition(),
+                this.dh.vrRenderer.eyeProj[0],
+                this.dh.vrRenderer.eyeProj[1]);
             this.initDone = true;
         }
 
@@ -564,7 +570,7 @@ public class VRPlayer {
         for (int i = 0; i < count; i++) {
             TerrainParticle terrainparticle = new TerrainParticle(this.mc.level, x, y, z, 0.0D, 0.0D, 0.0D, bs);
             terrainparticle.setPower(velScale);
-            //TODO: check
+            // TODO: check
             // minecraft.particleEngine.add(terrainparticle.init(bp).scale(scale));
             this.mc.particleEngine.add(terrainparticle.scale(scale));
         }
@@ -633,9 +639,10 @@ public class VRPlayer {
             itemStack.getItem() instanceof SpawnEggItem ||
             itemStack.getItem() instanceof PotionItem ||
             itemStack.getItem() instanceof BowItem ||
-            (itemStack.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(itemStack))
+            (itemStack.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(itemStack)) ||
+            itemStack.is(ItemTags.VIVECRAFT_THROW_ITEMS)
         )
-        { //TODO: Check for others?
+        {
             //use r_hand aim
 
             VRData data = this.dh.vrPlayer.vrdata_world_pre;
