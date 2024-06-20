@@ -504,5 +504,23 @@
   "vivecraft.toasts.point_controller": "Zeige mit deinem %s",
   "vivecraft.toasts.point_controller.left": "linken Controller",
   "vivecraft.toasts.point_controller.right": "rechten Controller",
-  "vivecraft.toasts.teleport": "Teleportiere mit %s"
+  "vivecraft.toasts.teleport": "Teleportiere mit %s",
+
+  "tag.item.vivecraft.arrows": "Vivecraft Pfeil",
+  "tag.item.vivecraft.bow_exclusion": "Vivecraft nicht Raumskala Bogen",
+  "tag.item.vivecraft.brushes": "Vivecraft Pinsel",
+  "tag.item.vivecraft.compasses": "Vivecraft Kompass",
+  "tag.item.vivecraft.crossbows": "Vivecraft Armbrust",
+  "tag.item.vivecraft.fishing_rods": "Vivecraft Angel",
+  "tag.item.vivecraft.food_sticks": "Vivecraft Essen am Stiel",
+  "tag.item.vivecraft.hoes": "Vivecraft Hacke",
+  "tag.item.vivecraft.maces": "Vivecraft Streitkolben",
+  "tag.item.vivecraft.maps": "Vivecraft Karte",
+  "tag.item.vivecraft.scythes": "Vivecraft Sichel",
+  "tag.item.vivecraft.spears": "Vivecraft Speer",
+  "tag.item.vivecraft.shields": "Vivecraft Schild",
+  "tag.item.vivecraft.swords": "Vivecraft Schwert",
+  "tag.item.vivecraft.telescope": "Vivecraft Fernrohr",
+  "tag.item.vivecraft.throw_items": "Vivecraft werfbarer Gegenstand",
+  "tag.item.vivecraft.tools": "Vivecraft Werkzeug"
 }

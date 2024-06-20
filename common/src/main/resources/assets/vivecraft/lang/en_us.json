@@ -506,5 +506,25 @@
   "vivecraft.toasts.point_controller": "Point with your %s",
   "vivecraft.toasts.point_controller.left": "left Controller",
   "vivecraft.toasts.point_controller.right": "right Controller",
-  "vivecraft.toasts.teleport": "Teleport with %s"
+  "vivecraft.toasts.teleport": "Teleport with %s",
+
+  "tag.item.vivecraft.arrows": "Vivecraft Arrow",
+  "tag.item.vivecraft.bow_exclusion": "Vivecraft non Roomscale Bow",
+  "tag.item.vivecraft.brushes": "Vivecraft Brush",
+  "tag.item.vivecraft.compasses": "Vivecraft Compass",
+  "tag.item.vivecraft.crossbows": "Vivecraft Crossbow",
+  "tag.item.vivecraft.fishing_rods": "Vivecraft Fishing Rod",
+  "tag.item.vivecraft.food_sticks": "Vivecraft Food Stick",
+  "tag.item.vivecraft.hoes": "Vivecraft Hoe",
+  "tag.item.vivecraft.maces": "Vivecraft Mace",
+  "tag.item.vivecraft.maps": "Vivecraft Map",
+  "tag.item.vivecraft.scythes": "Vivecraft Scythe",
+  "tag.item.vivecraft.spears": "Vivecraft Spear",
+  "tag.item.vivecraft.shields": "Vivecraft Shield",
+  "tag.item.vivecraft.swords": "Vivecraft Sword",
+  "tag.item.vivecraft.telescope": "Vivecraft Telescope",
+  "tag.item.vivecraft.throw_items": "Vivecraft Throwable Item",
+  "tag.item.vivecraft.tools": "Vivecraft Tool",
+  "tag.item.vivecraft.moditems.irons_spellbooks": "Vivecraft Iron Spellbook",
+  "tag.item.vivecraft.moditems.mvw_weapons": "Vivecraft More Vanilla Weapon"
 }
