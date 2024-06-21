@@ -45,8 +45,7 @@ public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROpti
         double fullValue = this.enumOptions.denormalizeValue((float) this.value);
         dataholder.vrSettings.setOptionFloatValue(this.enumOptions, (float) fullValue);
         // with that keyboard changes don't work, if there are fewer options than pixels
-        InputType inputType = Minecraft.getInstance().getLastInputType();
-        if (inputType == InputType.MOUSE) {
+        if (Minecraft.getInstance().getLastInputType() == InputType.MOUSE) {
             this.value = this.enumOptions.normalizeValue((float) fullValue);
         }
     }
