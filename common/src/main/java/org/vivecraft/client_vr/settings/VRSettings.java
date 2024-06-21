@@ -493,7 +493,7 @@ public class VRSettings {
     private final File vrCfgFile;
 
     // holds the default settings during runtime
-    public Map<String, String> defaultsMap;
+    private final Map<String, String> defaultsMap = new HashMap<>();
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public VRSettings() {
@@ -688,7 +688,7 @@ public class VRSettings {
         }
 
         // If we get here, the object wasn't interpreted
-        logger.warn("Don't know how to save VR option " + name + " with type " + type.getSimpleName());
+        logger.warn("Don't know how to save VR option {} with type {}", name, type.getSimpleName());
         return null;
     }
 
@@ -785,8 +785,6 @@ public class VRSettings {
      * @param option setting to reset
      */
     public void loadDefault(VrOptions option) {
-        if (this.defaultsMap == null) return; // how
-
         try {
             var mapping = fieldEnumMap.get(option);
             if (mapping == null) {
@@ -819,9 +817,8 @@ public class VRSettings {
                     loadDefault(name, null, option, type, mapping.separate, defaultsMap));
                 field.set(this, obj);
             }
-        } catch (Exception ex) {
-            logger.warn("Failed to load default VR option: " + option);
-            ex.printStackTrace();
+        } catch (Exception exception) {
+            logger.warn("Failed to load default VR option: {}", option, exception);
         }
     }
 
@@ -833,24 +830,33 @@ public class VRSettings {
         Map<String, String> data = new HashMap<>();
         try {
             File legacyFile = null;
+            boolean fileExists = true;
             if (!vrCfgFile.exists()) {
                 vrCfgFile.createNewFile();
                 // check if there is a legacy file
-                VRSettings.logger.info("Checking for legacy vivecraft settings File.");
                 legacyFile = new File(Minecraft.getInstance().gameDirectory, "optionsviveprofiles.txt");
+                if (legacyFile.exists()) {
+                    VRSettings.logger.info("Legacy Vivecraft settings File found, converting.");
+                } else {
+                    fileExists = false;
+                    legacyFile = null;
+                }
             }
 
-            InputStreamReader inputstreamreader = new InputStreamReader(
-                new FileInputStream(legacyFile == null ? vrCfgFile : legacyFile), StandardCharsets.UTF_8);
+            JsonObject currentConfig = new JsonObject();
 
-            JsonObject currentConfig;
-            try {
-                currentConfig = JsonParser.parseReader(inputstreamreader).getAsJsonObject();
-            } catch (Exception exception) {
-                currentConfig = new JsonObject();
+            if (fileExists) {
+                InputStreamReader inputstreamreader = new InputStreamReader(
+                    new FileInputStream(legacyFile == null ? vrCfgFile : legacyFile), StandardCharsets.UTF_8);
+
+                try {
+                    currentConfig = JsonParser.parseReader(inputstreamreader).getAsJsonObject();
+                } catch (Exception exception) {
+                    VRSettings.logger.error("Error reading settings file:", exception);
+                }
+
+                inputstreamreader.close();
             }
-
-            inputstreamreader.close();
 
             // check for legacy settings
             if (legacyFile != null && currentConfig.has("Profiles")) {
@@ -863,9 +869,8 @@ public class VRSettings {
             for (String key : currentConfig.keySet()) {
                 data.put(key, currentConfig.get(key).getAsString());
             }
-        } catch (Exception exception1) {
-            VRSettings.logger.error("FAILED to read Vivecraft settings!");
-            exception1.printStackTrace();
+        } catch (Exception exception) {
+            VRSettings.logger.error("FAILED to read Vivecraft settings:", exception);
         }
         return data;
     }
@@ -919,8 +924,7 @@ public class VRSettings {
                     field.set(this, obj);
                 }
             } catch (Exception exception) {
-                logger.warn("Skipping bad VR option: {}:{}", name, value);
-                exception.printStackTrace();
+                logger.warn("Skipping bad VR option: {}:{}", name, value, exception);
             }
         }
 
@@ -931,16 +935,18 @@ public class VRSettings {
      * saves the current settings to disk
      */
     public synchronized void saveOptions() {
+        Map<String, String> data = new HashMap<>();
+        saveOptions(data);
+
         JsonObject jsonStorage = new JsonObject();
-        saveOptions(jsonStorage);
+        data.forEach((key, value) -> jsonStorage.add(key, new JsonPrimitive(value)));
         try {
             OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(vrCfgFile), StandardCharsets.UTF_8);
             writer.write(gson.toJson(jsonStorage));
             writer.flush();
             writer.close();
         } catch (IOException ioException) {
-            logger.error("Failed to save VR options to disk");
-            ioException.printStackTrace();
+            logger.error("Failed to save VR options to disk:", ioException);
         }
     }
 
@@ -948,26 +954,17 @@ public class VRSettings {
      * stores the current settings in the {@code defaultsMap}
      */
     private synchronized void storeDefaults() {
-        JsonObject defaultsJson = new JsonObject();
-        saveOptions(defaultsJson);
-
-        this.defaultsMap = new HashMap<>();
-        for (String key : defaultsJson.keySet()) {
-            this.defaultsMap.put(key, defaultsJson.get(key).getAsString());
-        }
+        saveOptions(defaultsMap);
     }
 
     /**
-     * writes the options to the given JsonObject
-     *
-     * @param configStorage options are stored in this
+     * writes the current settings to the given map
      */
-    private void saveOptions(JsonObject configStorage) {
+    private void saveOptions(Map<String, String> data) {
         try {
-            Map<String, String> data = new HashMap<>();
 
             if (preservedSettingMap != null) {
-                data = preservedSettingMap;
+                data.putAll(preservedSettingMap);
             }
 
             for (var entry : fieldConfigMap.entrySet()) {
@@ -1001,17 +998,12 @@ public class VRSettings {
                             saveOption(name, obj, mapping.vrOption, type, mapping.separate));
                         data.put(name, value);
                     }
-                } catch (Exception ex) {
-                    logger.error("Failed to save VR option: {}", name);
-                    ex.printStackTrace();
+                } catch (Exception exception) {
+                    logger.error("Failed to save VR option: {}", name, exception);
                 }
             }
-
-            // add all to the json
-            data.forEach((key, value) -> configStorage.add(key, new JsonPrimitive(value)));
         } catch (Exception exception) {
-            logger.error("Failed to save VR options: {}", exception.getMessage());
-            exception.printStackTrace();
+            logger.error("Failed to save VR options:", exception);
         }
     }
 
@@ -1065,9 +1057,8 @@ public class VRSettings {
             } else {
                 return label + obj.toString();
             }
-        } catch (Exception ex) {
-            logger.error("Failed to get VR option display string: {}", vrOption);
-            ex.printStackTrace();
+        } catch (Exception exception) {
+            logger.error("Failed to get VR option display string: {}", vrOption, exception);
         }
 
         return name;
@@ -1094,9 +1085,8 @@ public class VRSettings {
             }
 
             return Objects.requireNonNullElse(vrOption.getOptionFloatValue(value), value);
-        } catch (Exception ex) {
-            logger.error("Failed to get VR option float value: {}", vrOption);
-            ex.printStackTrace();
+        } catch (Exception exception) {
+            logger.error("Failed to get VR option float value: {}", vrOption, exception);
         }
 
         return 0.0F;
@@ -1130,9 +1120,8 @@ public class VRSettings {
 
             vrOption.onOptionChange();
             this.saveOptions();
-        } catch (Exception ex) {
-            logger.error("Failed to set VR option: {}", vrOption);
-            ex.printStackTrace();
+        } catch (Exception exception) {
+            logger.error("Failed to set VR option: {}", vrOption, exception);
         }
     }
 
@@ -1166,9 +1155,8 @@ public class VRSettings {
 
             vrOption.onOptionChange();
             this.saveOptions();
-        } catch (Exception ex) {
-            logger.error("Failed to set VR option float value: {}", vrOption);
-            ex.printStackTrace();
+        } catch (Exception exception) {
+            logger.error("Failed to set VR option float value: {}", vrOption, exception);
         }
     }
 
