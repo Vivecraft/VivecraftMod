@@ -13,7 +13,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.world.phys.Vec2;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.ScreenUtils;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.ArrayList;
@@ -226,9 +225,8 @@ public abstract class GuiVROptionsBase extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean success = super.mouseClicked(mouseX, mouseY, button);
-        AbstractWidget widget = ScreenUtils.getSelectedButton((int) mouseX, (int) mouseY, ScreenUtils.getButtonList(this));
 
-        if (widget != null) {
+        if (success && getFocused() instanceof AbstractWidget widget) {
             if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                 this.actionPerformed(widget);
             } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
