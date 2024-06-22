@@ -37,7 +37,7 @@ subprojects {
         implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows")
     }
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
         options.release = 17
     }
@@ -46,8 +46,17 @@ subprojects {
         withSourcesJar()
     }
 
-    task copyJarToMain(type: Copy) {
-        duplicatesStrategy = "include"
+    processResources {
+        if (project.name != "common" && project.name != "stubs") {
+            // copy resources except the mixin jsons
+            from(project(':common').sourceSets['main'].resources) {
+                exclude "vivecraft.*"
+            }
+        }
+    }
+
+    tasks.register('copyJarToMain', Copy) {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         if (project.name != "common" && project.name != "stubs") {
             from remapJar
             into "../build/libs"
@@ -55,7 +64,7 @@ subprojects {
     }
 
     remapJar {
-        // after remap, copy the final jsr to the main /build/libs folder
+        // after remap, copy the final jar to the main /build/libs folder
         finalizedBy copyJarToMain
     }
 }

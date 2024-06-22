@@ -49,7 +49,7 @@ public interface Xplat {
 
     @ExpectPlatform
     static Path getConfigPath(String fileName) {
-        return null;
+        throw new AssertionError();
     }
 
     @ExpectPlatform
@@ -79,7 +79,7 @@ public interface Xplat {
 
     @ExpectPlatform
     static Path getJarPath() {
-        return null;
+        throw new AssertionError();
     }
 
     @ExpectPlatform
@@ -94,12 +94,12 @@ public interface Xplat {
 
     @ExpectPlatform
     static Biome.ClimateSettings getBiomeClimateSettings(Biome biome) {
-        return null;
+        throw new AssertionError();
     }
 
     @ExpectPlatform
     static BiomeSpecialEffects getBiomeEffects(Biome biome) {
-        return null;
+        throw new AssertionError();
     }
 
     @ExpectPlatform

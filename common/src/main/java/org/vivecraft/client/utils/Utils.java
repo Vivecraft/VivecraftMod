@@ -2,7 +2,6 @@ package org.vivecraft.client.utils;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.ComponentCollector;
@@ -24,7 +23,6 @@ import org.apache.commons.io.IOUtils;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.client_vr.utils.LoaderUtils;
 import org.vivecraft.common.utils.lwjgl.*;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector2;
@@ -35,8 +33,10 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -289,23 +289,6 @@ public class Utils {
                 // might be called super early
                 is = VRShaders.class.getResourceAsStream("/assets/vivecraft/" + name);
             }
-
-            if (is == null) {
-                //uhh debugging?
-                Path dir = Paths.get(System.getProperty("user.dir"));
-
-                if (dir.getParent() != null) {
-                    Path path = dir.getParent().resolve("src/resources/assets/vivecraft/" + name);
-
-                    if (!path.toFile().exists() && dir.getParent().getParent() != null) {
-                        path = dir.getParent().getParent().resolve("resources/assets/vivecraft/" + name);
-                    }
-
-                    if (path.toFile().exists()) {
-                        is = new FileInputStream(path.toFile());
-                    }
-                }
-            }
         } catch (Exception exception) {
             handleAssetException(exception, name, required);
             return null;
@@ -364,65 +347,27 @@ public class Utils {
 
     public static void unpackNatives(String directory) {
         try {
-            (new File("openvr/" + directory)).mkdirs();
+            new File("openvr/" + directory).mkdirs();
 
-            // dev environment
-            try {
-                Path path = Paths.get(System.getProperty("user.dir"));
-                Path path1 = path.getParent().resolve("src/resources/natives/" + directory);
-
-                if (!path1.toFile().exists()) {
-                    path1 = path.getParent().getParent().resolve("resources/natives/" + directory);
-                }
-
-                if (path1.toFile().exists()) {
-                    VRSettings.logger.info("Copying '{}' natives...", directory);
-
-                    for (File file1 : path1.toFile().listFiles()) {
-                        VRSettings.logger.info("copying: {}", file1.getName());
-                        Files.copy(file1, new File("openvr/" + directory + "/" + file1.getName()));
-                    }
-
-                    return;
-                }
-            } catch (Exception exception) {
-            }
-            //
-
-            //Live
             VRSettings.logger.info("Unpacking '{}' natives...", directory);
 
             Path jarPath = Xplat.getJarPath();
             boolean didExtractSomething = false;
-            try (Stream<Path> natives = java.nio.file.Files.list(jarPath.resolve("natives/" + directory))) {
+            try (Stream<Path> natives = Files.list(jarPath.resolve("natives/" + directory))) {
                 for (Path file : natives.collect(Collectors.toCollection(ArrayList::new))) {
                     didExtractSomething = true;
                     VRSettings.logger.info("extracting: {}", file);
-                    java.nio.file.Files.copy(file, new File("openvr/" + directory + "/" + file.getFileName()).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(file, new File("openvr/" + directory + "/" + file.getFileName()).toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
                 }
-            } catch (IOException e) {
-                VRSettings.logger.error("Failed to unpack natives from jar");
+            } catch (IOException ioException) {
+                VRSettings.logger.error("Failed to unpack natives from jar", ioException);
             }
             if (!didExtractSomething) {
-                ZipFile zipfile = LoaderUtils.getVivecraftZip();
-                Enumeration<? extends ZipEntry> enumeration = zipfile.entries();
-
-                while (enumeration.hasMoreElements()) {
-                    ZipEntry zipentry = enumeration.nextElement();
-
-                    if (zipentry.getName().startsWith("natives/" + directory)) {
-                        String s = Paths.get(zipentry.getName()).getFileName().toString();
-                        VRSettings.logger.info("extracting: {}", s);
-                        writeStreamToFile(zipfile.getInputStream(zipentry), new File("openvr/" + directory + "/" + s));
-                    }
-                }
-
-                zipfile.close();
+                VRSettings.logger.warn("Failed to unpack natives from jar, no files");
             }
-            //
-        } catch (Exception exception1) {
-            System.out.println("Failed to unpack natives");
-            exception1.printStackTrace();
+        } catch (Exception exception) {
+            VRSettings.logger.error("Failed to unpack natives from jar", exception);
         }
     }
 

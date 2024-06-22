@@ -233,7 +233,7 @@ public class MCOpenVR extends MCVR {
                     jinfinadeck.Destroy();
                 }
             } catch (Throwable throwable) {
-                throwable.printStackTrace();
+                VRSettings.logger.error("Error destroying OpenVR:", throwable);
             }
         }
 
@@ -321,7 +321,7 @@ public class MCOpenVR extends MCVR {
                 // sets up the tracking space and generates the render textures
                 this.initOpenVRCompositor();
             } catch (Exception exception) {
-                exception.printStackTrace();
+                VRSettings.logger.error("Error initializing OpenVR:", exception);
                 this.initSuccess = false;
                 this.initStatus = exception.getLocalizedMessage();
                 return false;
@@ -343,7 +343,8 @@ public class MCOpenVR extends MCVR {
                 try {
                     VRSettings.logger.info("Waiting for KATVR....");
                     Utils.unpackNatives("katvr");
-                    NativeLibrary.addSearchPath("WalkerBase.dll", (new File("openvr/katvr")).getAbsolutePath());
+                    NativeLibrary.addSearchPath(jkatvr.KATVR_LIBRARY_NAME,
+                        new File("openvr/katvr").getAbsolutePath());
                     jkatvr.Init(1);
                     jkatvr.Launch();
 
@@ -352,8 +353,8 @@ public class MCOpenVR extends MCVR {
                     } else {
                         VRSettings.logger.error("KATVR Failed to load");
                     }
-                } catch (Exception exception1) {
-                    VRSettings.logger.error("KATVR crashed: {}", exception1.getMessage());
+                } catch (Exception exception) {
+                    VRSettings.logger.error("KATVR crashed:", exception);
                 }
             }
 
@@ -361,7 +362,8 @@ public class MCOpenVR extends MCVR {
                 try {
                     VRSettings.logger.info("Waiting for Infinadeck....");
                     Utils.unpackNatives("infinadeck");
-                    NativeLibrary.addSearchPath("InfinadeckAPI.dll", (new File("openvr/infinadeck")).getAbsolutePath());
+                    NativeLibrary.addSearchPath(jinfinadeck.INFINADECK_LIBRARY_NAME,
+                        new File("openvr/infinadeck").getAbsolutePath());
 
                     if (jinfinadeck.InitConnection()) {
                         jinfinadeck.CheckConnection();
@@ -370,7 +372,7 @@ public class MCOpenVR extends MCVR {
                         VRSettings.logger.error("Infinadeck Failed to load");
                     }
                 } catch (Exception exception) {
-                    VRSettings.logger.error("Infinadeck crashed: {}", exception.getMessage());
+                    VRSettings.logger.error("Infinadeck crashed:", exception);
                 }
             }
 
@@ -515,7 +517,7 @@ public class MCOpenVR extends MCVR {
 
                     VRSettings.logger.info(property);
                 } catch (IllegalAccessException illegalaccessexception) {
-                    illegalaccessexception.printStackTrace();
+                    VRSettings.logger.error("Error reading device property:", illegalaccessexception);
                 }
             }
             VRSettings.logger.info("******************* END VR DEVICE: {} *************************", deviceIndex);
@@ -774,7 +776,7 @@ public class MCOpenVR extends MCVR {
 
 
     /**
-     * fetches the
+     * fetches the controller poses from openvr
      */
     private void getTransforms() {
         if (this.getXforms) {
@@ -967,7 +969,6 @@ public class MCOpenVR extends MCVR {
 
         if (hasInvalidChars || alwaysThrow) {
             String error = knownError + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
-            System.out.println(error + path);
             if (hasInvalidChars) {
                 throw new RenderConfigException(knownError, Component.translatable("vivecraft.messages.steamvrInvalidCharacters", pathFormatted));
             } else {
@@ -997,12 +998,11 @@ public class MCOpenVR extends MCVR {
             appKey = ((Map<?, ?>) ((List<?>) map.get("applications")).get(0)).get("app_key").toString();
         } catch (Exception e) {
             // TODO: should we abort here?
-            VRSettings.logger.error("Error reading appkey from manifest: {}", e.getMessage());
-            e.printStackTrace();
+            VRSettings.logger.error("Error reading appkey from manifest:", e);
             return;
         }
 
-        VRSettings.logger.info("Appkey: " + appKey);
+        VRSettings.logger.info("Appkey: {}", appKey);
 
         // check if path is valid always, since if the application was already installed, it will not check it again
         checkPathValid(manifestFile.getAbsolutePath(), "Failed to install application manifest", false);
@@ -1028,8 +1028,7 @@ public class MCOpenVR extends MCVR {
             pid = Integer.parseInt(runtimeName.split("@")[0]);
         } catch (Exception e) {
             // TODO: should we abort here?
-            VRSettings.logger.error("Error getting process id: {}", e.getMessage());
-            e.printStackTrace();
+            VRSettings.logger.error("Error getting process id:", e);
             return;
         }
 
