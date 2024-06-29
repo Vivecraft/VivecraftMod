@@ -86,8 +86,9 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
                 }
                 Vec3 vec31 = entity.position().add(0.0D, entity.getBbHeight() + offset, 0.0D).subtract(vec3).normalize();
                 Quaternionf q = new Quaternionf();
-                q.mul(Axis.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
-                q.mul(Axis.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
+                q.rotationYXZ(3.1415927F - (float) Math.atan2(-vec31.x, vec31.z),
+                    (float) Math.asin(vec31.y / vec31.length()),
+                    0.0F);
                 return q;
             }
         }
