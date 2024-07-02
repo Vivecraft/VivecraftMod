@@ -43,7 +43,7 @@ public class TeleportTracker extends Tracker {
 
     public TeleportTracker(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh);
-        this.vrMovementStyle = new VRMovementStyle(dh);
+        this.vrMovementStyle = new VRMovementStyle();
     }
 
     public float getTeleportEnergy() {

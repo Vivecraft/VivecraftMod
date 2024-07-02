@@ -1,11 +1,8 @@
 package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
-import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
 import org.vivecraft.client.utils.Utils;
@@ -22,11 +19,23 @@ import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryManagerMXBean;
 
+/**
+ * this class holds the current VR states and handles starting and stopping VR
+ */
 public class VRState {
 
-    public static boolean vrRunning = false;
+    /**
+     * true when VR is enabled
+     */
     public static boolean vrEnabled = false;
+    /**
+     * true when VR is enabled, and successfully initialized
+     */
     public static boolean vrInitialized = false;
+    /**
+     * true when VR is enabled, successfully initialized and currently active
+     */
+    public static boolean vrRunning = false;
 
     public static void initializeVR() {
         if (vrInitialized) {
@@ -34,10 +43,11 @@ public class VRState {
         }
         try {
             if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isAntialiasing()) {
-                throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblesettings").getString(), Component.translatable("vivecraft.messages.optifineaa"));
+                throw new RenderConfigException(
+                    Component.translatable("vivecraft.messages.incompatiblesettings").getString(),
+                    Component.translatable("vivecraft.messages.optifineaa"));
             }
 
-            vrInitialized = true;
             ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
             if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
 
@@ -101,6 +111,9 @@ public class VRState {
             } catch (Throwable e) {
                 e.printStackTrace();
             }
+
+            vrInitialized = true;
+
         } catch (Throwable exception) {
             vrEnabled = false;
             destroyVR(true);
@@ -113,10 +126,6 @@ public class VRState {
                     .setScreen(new ErrorScreen("VR Init Error", Utils.throwableToComponent(exception)));
             }
         }
-    }
-
-    public static void startVR() {
-        GLFW.glfwSwapInterval(0);
     }
 
     public static void destroyVR(boolean disableVRSetting) {
@@ -145,9 +154,5 @@ public class VRState {
         if (disableVRSetting) {
             ShadersHelper.maybeReloadShaders();
         }
-    }
-
-    public static void pauseVR() {
-        //        GLFW.glfwSwapInterval(bl ? 1 : 0);
     }
 }

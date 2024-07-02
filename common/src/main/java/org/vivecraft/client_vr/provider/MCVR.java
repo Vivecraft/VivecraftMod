@@ -83,7 +83,7 @@ public abstract class MCVR {
     public static final Vector3 up = new Vector3(0.0F, 1.0F, 0.0F);
 
     //hmd sampling
-    private final static int HMD_AVG_MAX_SAMPLES = 90;
+    private static final int HMD_AVG_MAX_SAMPLES = 90;
     public LinkedList<Vec3> hmdPosSamples = new LinkedList<>();
     public LinkedList<Float> hmdYawSamples = new LinkedList<>();
     protected float hmdYawTotal;

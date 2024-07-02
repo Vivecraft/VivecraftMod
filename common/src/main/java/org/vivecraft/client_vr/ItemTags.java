@@ -5,6 +5,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
+/**
+ * holds Vivecrafts tags to identify Items
+ */
 public class ItemTags {
     public static final TagKey<Item> VIVECRAFT_ARROWS = tag("arrows");
 

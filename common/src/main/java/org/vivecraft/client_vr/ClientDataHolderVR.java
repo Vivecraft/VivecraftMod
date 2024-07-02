@@ -73,9 +73,4 @@ public class ClientDataHolderVR {
         // TODO Auto-generated method stub
 
     }
-
-    public void print(String string) {
-        string = string.replace("\n", "\n[Minecrift] ");
-        System.out.println("[Minecrift] " + string);
-    }
 }

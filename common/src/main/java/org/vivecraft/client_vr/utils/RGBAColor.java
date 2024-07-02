@@ -30,13 +30,22 @@ public class RGBAColor {
     }
 
     public int toIntEncoding() {
-        return (int) (this.r * 255.0F) | ((int) (this.g * 255.0F) << 8) | ((int) (this.b * 255.0F) << 16) | ((int) (this.a * 255.0F) << 24);
+        return (int) (this.r * 255.0F) |
+            ((int) (this.g * 255.0F) << 8) |
+            ((int) (this.b * 255.0F) << 16) |
+            ((int) (this.a * 255.0F) << 24);
     }
 
     public RGBAColor copy() {
         return new RGBAColor(this.r, this.g, this.b, this.a);
     }
 
+    /**
+     * HSB to RGB conversion, pinched from {@link java.awt.Color}.
+     * @param hue any floating point number, fraction of it is multiplied by 360 to produce the hue angle
+     * @param saturation (0..1.0f)
+     * @param brightness (0..1.0f)
+     */
     public static RGBAColor fromHSB(float hue, float saturation, float brightness) {
         RGBAColor color = new RGBAColor();
 

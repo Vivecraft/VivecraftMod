@@ -11,6 +11,7 @@ public abstract class MethodHolder {
         return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), i) == 1 || InputSimulator.isKeyDown(i);
     }
 
+    // TODO REMOVE
     public static void notifyMirror(String text, boolean clear, int lengthMs) {
         ClientDataHolderVR clientDataHolderVR = ClientDataHolderVR.getInstance();
         clientDataHolderVR.mirroNotifyStart = System.currentTimeMillis();
