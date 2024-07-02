@@ -44,7 +44,7 @@ public class VRState {
         try {
             if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isAntialiasing()) {
                 throw new RenderConfigException(
-                    Component.translatable("vivecraft.messages.incompatiblesettings").getString(),
+                    Component.translatable("vivecraft.messages.incompatiblesettings"),
                     Component.translatable("vivecraft.messages.optifineaa"));
             }
 
@@ -56,7 +56,8 @@ public class VRState {
                 dh.vr = new NullVR(Minecraft.getInstance(), dh);
             }
             if (!dh.vr.init()) {
-                throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus, dh.vr.getName()));
+                throw new RenderConfigException(Component.translatable("vivecraft.messages.vriniterror"),
+                    Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus, dh.vr.getName()));
             }
 
             dh.vrRenderer = dh.vr.createVRRenderer();
@@ -123,7 +124,8 @@ public class VRState {
                     .setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
             } else {
                 Minecraft.getInstance()
-                    .setScreen(new ErrorScreen("VR Init Error", Utils.throwableToComponent(exception)));
+                    .setScreen(new ErrorScreen(Component.translatable("vivecraft.messages.vriniterror"),
+                        Utils.throwableToComponent(exception)));
             }
         }
     }

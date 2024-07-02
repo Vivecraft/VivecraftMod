@@ -361,7 +361,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 if (exception instanceof RenderConfigException renderConfigException) {
                     Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
                 } else {
-                    Minecraft.getInstance().setScreen(new ErrorScreen("VR Render Error", Utils.throwableToComponent(exception)));
+                    Minecraft.getInstance().setScreen(new ErrorScreen(Component.translatable("vivecraft.messages.vrrendererror"), Utils.throwableToComponent(exception)));
                 }
                 this.profiler.pop();
                 return renderLevel;

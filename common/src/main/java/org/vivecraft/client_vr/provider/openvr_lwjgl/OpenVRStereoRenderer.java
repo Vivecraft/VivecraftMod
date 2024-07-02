@@ -122,9 +122,9 @@ public class OpenVRStereoRenderer extends VRRenderer {
         VRCompositor_PostPresentHandoff();
 
         if (leftError + rightError > VR.EVRCompositorError_VRCompositorError_None) {
-            throw new RenderConfigException("Compositor Error", Component.literal(
-                "Texture submission error: Left/Right " + getCompositorError(leftError) + "/" +
-                    getCompositorError(rightError)));
+            throw new RenderConfigException(Component.literal("Compositor Error"),
+                Component.literal("Texture submission error: Left/Right " +
+                    getCompositorError(leftError) + "/" +getCompositorError(rightError)));
         }
 
         // flush, recommended by the openvr docs

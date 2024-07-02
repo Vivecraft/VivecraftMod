@@ -47,8 +47,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class VRRenderer {
-    public static final String RENDER_SETUP_FAILURE_MESSAGE = "Failed to initialise stereo rendering plugin: ";
-
     // projection matrices
     public Matrix4f[] eyeProj = new Matrix4f[2];
 
@@ -541,8 +539,8 @@ public abstract class VRRenderer {
                     }
                     gpus.append(gpu.getVendor()).append(": ").append(gpu.getName());
                 }
-                throw new RenderConfigException("Incompatible", Component.translatable(
-                    "vivecraft.messages.intelgraphics1",
+                throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblegpu"),
+                    Component.translatable("vivecraft.messages.intelgraphics1",
                     Component.literal(GlUtil.getRenderer()).withStyle(ChatFormatting.GOLD),
                     gpus.toString(),
                     onlyIntel ? Component.empty()
@@ -554,7 +552,9 @@ public abstract class VRRenderer {
             }
 
             if (!this.isInitialized()) {
-                throw new RenderConfigException(RENDER_SETUP_FAILURE_MESSAGE + this.getName(), Component.literal(this.getInitError()));
+                throw new RenderConfigException(
+                    Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
+                    Component.literal(this.getInitError()));
             }
 
             Tuple<Integer, Integer> tuple = this.getRenderTextureSizes();
@@ -567,7 +567,9 @@ public abstract class VRRenderer {
                 this.createRenderTexture(eyew, eyeh);
 
                 if (this.LeftEyeTextureId == -1) {
-                    throw new RenderConfigException(RENDER_SETUP_FAILURE_MESSAGE + this.getName(), Component.literal(this.getLastError()));
+                    throw new RenderConfigException(
+                        Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
+                        Component.literal(this.getLastError()));
                 }
 
                 VRSettings.logger.info("VR Provider supplied render texture IDs: {}, {}", this.LeftEyeTextureId, this.RightEyeTextureId);
@@ -708,7 +710,8 @@ public abstract class VRRenderer {
                 minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
             } catch (Exception exception) {
                 VRSettings.logger.error(exception.getMessage());
-                throw new RenderConfigException(RENDER_SETUP_FAILURE_MESSAGE + this.getName(),
+                throw new RenderConfigException(
+                    Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
                     Utils.throwableToComponent(exception));
             }
 

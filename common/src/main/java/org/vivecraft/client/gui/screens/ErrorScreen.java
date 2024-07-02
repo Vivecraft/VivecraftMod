@@ -13,8 +13,8 @@ public class ErrorScreen extends Screen {
     private final Screen lastScreen;
     private final Component error;
 
-    public ErrorScreen(String title, Component error) {
-        super(Component.literal(title));
+    public ErrorScreen(Component title, Component error) {
+        super(title);
         this.lastScreen = Minecraft.getInstance().screen;
         this.error = error;
     }

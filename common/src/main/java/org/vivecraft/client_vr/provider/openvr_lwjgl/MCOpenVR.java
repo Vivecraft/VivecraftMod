@@ -185,7 +185,9 @@ public class MCOpenVR extends MCVR {
         // check that the right lwjgl version is loaded that we ship the OpenVR part of, or stuff breaks
         final String lwjglVersion = "3.3.2";
         if (!Version.getVersion().startsWith(lwjglVersion)) {
-            throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), lwjglVersion), "OpenVR_LWJGL"));
+            throw new RenderConfigException(Component.translatable("vivecraft.messages.vriniterror"),
+                Component.translatable("vivecraft.messages.rendersetupfailed",
+                    I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), lwjglVersion), "OpenVR_LWJGL"));
         }
 
         this.hapticScheduler = new OpenVRHapticScheduler();
@@ -970,9 +972,11 @@ public class MCOpenVR extends MCVR {
         if (hasInvalidChars || alwaysThrow) {
             String error = knownError + (hasInvalidChars ? "\nInvalid characters in path: \n" : "\n");
             if (hasInvalidChars) {
-                throw new RenderConfigException(knownError, Component.translatable("vivecraft.messages.steamvrInvalidCharacters", pathFormatted));
+                throw new RenderConfigException(Component.translatable("vivecraft.messages.vriniterror"),
+                    Component.translatable("vivecraft.messages.steamvrInvalidCharacters", pathFormatted));
             } else {
-                throw new RenderConfigException(knownError, Component.empty().append(error).append(pathFormatted));
+                throw new RenderConfigException(Component.translatable("vivecraft.messages.vriniterror"),
+                    Component.empty().append(error).append(pathFormatted));
             }
         }
     }
@@ -1090,7 +1094,8 @@ public class MCOpenVR extends MCVR {
         int error = VRInput_SetActionManifestPath(actionsPath);
 
         if (error != EVRInputError_VRInputError_None) {
-            throw new RenderConfigException("Failed to load action manifest", Component.literal(getInputErrorName(error)));
+            throw new RenderConfigException(Component.translatable("vivecraft.messages.vriniterror"),
+                Component.literal("Failed to load action manifest: " + getInputErrorName(error)));
         }
     }
 
