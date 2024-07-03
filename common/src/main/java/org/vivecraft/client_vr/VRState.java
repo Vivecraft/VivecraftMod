@@ -50,7 +50,6 @@ public class VRState {
 
             ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
             if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
-
                 dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
             } else {
                 dh.vr = new NullVR(Minecraft.getInstance(), dh);
@@ -61,6 +60,9 @@ public class VRState {
             }
 
             dh.vrRenderer = dh.vr.createVRRenderer();
+
+            // everything related to VR is created now
+            vrInitialized = true;
 
             dh.vrRenderer.setupRenderConfiguration();
             RenderPassManager.setVanillaRenderPass();
@@ -110,15 +112,11 @@ public class VRState {
                     }
                 }
             } catch (Throwable e) {
-                e.printStackTrace();
+                VRSettings.logger.error("Failed checking GC: ", e);
             }
-
-            vrInitialized = true;
-
         } catch (Throwable exception) {
-            vrEnabled = false;
+            VRSettings.logger.error("Failed to initialize VR: ", exception);
             destroyVR(true);
-            exception.printStackTrace();
             if (exception instanceof RenderConfigException renderConfigException) {
                 Minecraft.getInstance()
                     .setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
