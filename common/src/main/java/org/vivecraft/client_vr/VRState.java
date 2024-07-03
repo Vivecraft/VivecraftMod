@@ -3,6 +3,7 @@ package org.vivecraft.client_vr;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
 import org.vivecraft.client.utils.Utils;
@@ -151,7 +152,7 @@ public class VRState {
             dh.vrSettings.saveOptions();
         }
         // fixes an issue with DH shaders where the depth texture gets stuck
-        if (disableVRSetting) {
+        if (Xplat.isModLoaded("distanthorizons") && disableVRSetting) {
             ShadersHelper.maybeReloadShaders();
         }
     }
