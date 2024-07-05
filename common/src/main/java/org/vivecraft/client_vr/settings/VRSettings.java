@@ -439,6 +439,8 @@ public class VRSettings {
     public int guiScale = 0;
     @SettingField(VrOptions.HUD_MAX_GUI_SCALE)
     public boolean hudMaxScale = false;
+    @SettingField(VrOptions.GUI_MIPMAPS)
+    public boolean guiMipmaps;
     @SettingField(VrOptions.SHOW_UPDATES)
     public boolean alwaysShowUpdates = true;
     @SettingField
@@ -1674,6 +1676,7 @@ public class VRSettings {
         TOUCH_HOTBAR(false, true), // Touch Hotbar Enabled
         PLAY_MODE_SEATED(false, true, "vivecraft.options.seated", "vivecraft.options.standing"), // Play Mode
         VR_HOTSWITCH(false, true),
+        GUI_MIPMAPS(false, true), // gui rendering with mipmaps
         RENDER_SCALEFACTOR(true, false, 0.1f, 9f, 0.1f, 0) { // Resolution
 
             @Override

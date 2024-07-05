@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import org.lwjgl.opengl.GL13C;
+import org.lwjgl.opengl.GL30C;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -135,10 +136,12 @@ public class VRPassHelper {
         RenderSystem.getModelViewStack().popPose();
         RenderSystem.applyModelViewMatrix();
 
-        // generate mipmaps
-        mc.mainRenderTarget.bindRead();
-        ((RenderTargetExtension) mc.mainRenderTarget).vivecraft$genMipMaps();
-        mc.mainRenderTarget.unbindRead();
+        if (dataHolder.vrSettings.guiMipmaps) {
+            // update mipmaps
+            mc.mainRenderTarget.bindRead();
+            GL30C.glGenerateMipmap(GL30C.GL_TEXTURE_2D);
+            mc.mainRenderTarget.unbindRead();
+        }
 
         mc.getProfiler().popPush("2D Keyboard");
         GuiGraphics guiGraphics = new GuiGraphics(mc, mc.renderBuffers().bufferSource());

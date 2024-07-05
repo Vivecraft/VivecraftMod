@@ -318,11 +318,12 @@ public class RenderHelper {
         posestack.popPose();
         RenderSystem.applyModelViewMatrix();
 
-        // update mipmaps for Gui layer
-        RenderTarget main = mc.getMainRenderTarget();
-        main.bindRead();
-        ((RenderTargetExtension) main).vivecraft$genMipMaps();
-        main.unbindRead();
+        if (dataHolder.vrSettings.guiMipmaps) {
+            // update mipmaps for Gui layer
+            mc.mainRenderTarget.bindRead();
+            GL30C.glGenerateMipmap(GL30C.GL_TEXTURE_2D);
+            mc.mainRenderTarget.unbindRead();
+        }
     }
 
     /**

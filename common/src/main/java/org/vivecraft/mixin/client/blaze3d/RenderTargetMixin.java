@@ -23,10 +23,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     @Unique
     private boolean vivecraft$linearFilter;
     @Unique
-    private boolean vivecraft$useStencil = false;
+    private boolean vivecraft$mipmaps;
+    @Unique
+    private boolean vivecraft$stencil = false;
 
-    @Shadow
-    public int frameBufferId;
     @Shadow
     public int width;
     @Shadow
@@ -42,23 +42,33 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     public abstract void clear(boolean onMacIn);
 
     @Override
-    public void vivecraft$setUseStencil(boolean useStencil) {
-        this.vivecraft$useStencil = useStencil;
+    public void vivecraft$setStencil(boolean stencil) {
+        this.vivecraft$stencil = stencil;
     }
 
     @Override
-    public boolean vivecraft$getUseStencil() {
-        return vivecraft$useStencil;
+    public boolean vivecraft$hasStencil() {
+        return this.vivecraft$stencil;
     }
 
     @Override
-    public void vivecraft$setTextid(int texid) {
+    public void vivecraft$setTextId(int texid) {
         this.vivecraft$texid = texid;
     }
 
     @Override
-    public void vivecraft$isLinearFilter(boolean linearFilter) {
+    public void vivecraft$setLinearFilter(boolean linearFilter) {
         this.vivecraft$linearFilter = linearFilter;
+    }
+
+    @Override
+    public void vivecraft$setMipmaps(boolean mipmaps) {
+        this.vivecraft$mipmaps = mipmaps;
+    }
+
+    @Override
+    public boolean vivecraft$hasMipmaps() {
+        return this.vivecraft$mipmaps;
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I", remap = false, ordinal = 0), method = "createBuffers")
@@ -72,27 +82,36 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false, ordinal = 0), method = "createBuffers", index = 2)
     public int vivecraft$modifyTexImage2DInternalformat(int internalformat) {
-        return vivecraft$useStencil ? GL30.GL_DEPTH32F_STENCIL8 : internalformat;
+        return this.vivecraft$stencil ? GL30.GL_DEPTH32F_STENCIL8 : internalformat;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false, ordinal = 0), method = "createBuffers", index = 6)
     public int vivecraft$modifyTexImage2DFormat(int format) {
-        return vivecraft$useStencil ? GL30.GL_DEPTH_STENCIL : format;
+        return this.vivecraft$stencil ? GL30.GL_DEPTH_STENCIL : format;
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false, ordinal = 0), method = "createBuffers", index = 7)
     public int vivecraft$modifyTexImage2DType(int type) {
-        return vivecraft$useStencil ? GL30.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
+        return this.vivecraft$stencil ? GL30.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
     }
 
-    @ModifyConstant(method = "createBuffers", constant = @Constant(intValue = 9728))
+    @ModifyConstant(method = "createBuffers", constant = @Constant(intValue = 9728, ordinal = 2))
     public int vivecraft$changeTextPar(int i) {
-        return vivecraft$linearFilter ? GL11.GL_LINEAR : i;
+        return this.vivecraft$linearFilter ? GL11.GL_LINEAR : i;
+    }
+
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texParameter(III)V", remap = false, ordinal = 0), method = "setFilterMode", index = 2)
+    public int vivecraft$modifyTextureMinFilter(int attachment) {
+        if (this.vivecraft$mipmaps) {
+            return attachment == GL11.GL_LINEAR ? GL11.GL_LINEAR_MIPMAP_LINEAR : GL11.GL_NEAREST_MIPMAP_NEAREST;
+        } else {
+            return attachment;
+        }
     }
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", remap = false, ordinal = 1), method = "createBuffers", index = 1)
     public int vivecraft$modifyGlFramebufferTexture2DAttachment(int attachment) {
-        return vivecraft$useStencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
+        return this.vivecraft$stencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
     }
 
     public void vivecraft$blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect) {

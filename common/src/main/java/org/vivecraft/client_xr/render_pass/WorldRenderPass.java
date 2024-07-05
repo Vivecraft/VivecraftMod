@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceLocation;
-import org.vivecraft.client_vr.VRTextureTarget;
 
 import java.io.IOException;
 
@@ -20,12 +19,12 @@ public class WorldRenderPass implements AutoCloseable {
     public static WorldRenderPass camera;
 
 
-    public final VRTextureTarget target;
+    public final RenderTarget target;
     public final PostChain transparencyChain;
     public final PostChain outlineChain;
     public PostChain postEffect = null;
 
-    public WorldRenderPass(VRTextureTarget target) throws IOException {
+    public WorldRenderPass(RenderTarget target) throws IOException {
         this.target = target;
         if (Minecraft.useShaderTransparency()) {
             this.transparencyChain = createPostChain(new ResourceLocation("shaders/post/vrtransparency.json"), this.target);

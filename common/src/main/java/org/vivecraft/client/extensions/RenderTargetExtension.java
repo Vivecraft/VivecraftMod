@@ -1,7 +1,6 @@
 package org.vivecraft.client.extensions;
 
 import net.minecraft.client.renderer.ShaderInstance;
-import org.lwjgl.opengl.GL30C;
 
 public interface RenderTargetExtension {
 
@@ -11,15 +10,15 @@ public interface RenderTargetExtension {
 
     void vivecraft$blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect);
 
-    default void vivecraft$genMipMaps() {
-        GL30C.glGenerateMipmap(GL30C.GL_TEXTURE_2D);
-    }
+    void vivecraft$setTextId(int texid);
 
-    void vivecraft$setTextid(int texid);
+    void vivecraft$setStencil(boolean stencil);
 
-    void vivecraft$setUseStencil(boolean useStencil);
+    boolean vivecraft$hasStencil();
 
-    boolean vivecraft$getUseStencil();
+    void vivecraft$setLinearFilter(boolean linearFilter);
 
-    void vivecraft$isLinearFilter(boolean linearFilter);
+    void vivecraft$setMipmaps(boolean mipmaps);
+
+    boolean vivecraft$hasMipmaps();
 }
