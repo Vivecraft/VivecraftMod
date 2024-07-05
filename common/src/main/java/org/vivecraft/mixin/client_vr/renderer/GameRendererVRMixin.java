@@ -11,6 +11,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.PostChain;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
@@ -158,6 +160,10 @@ public abstract class GameRendererVRMixin
     @Shadow
     private int itemActivationTicks;
 
+    @Shadow
+    @Nullable
+    private PostChain postEffect;
+
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/client/Camera"))
     public Camera vivecraft$replaceCamera() {
         return new XRCamera();
@@ -175,6 +181,7 @@ public abstract class GameRendererVRMixin
     public void vivecraft$shutdownEffect(CallbackInfo ci) {
         if (VRState.vrInitialized) {
             RenderPassManager.setVanillaRenderPass();
+            RenderPassManager.INSTANCE.vanillaPostEffect = null;
             if (WorldRenderPass.stereoXR != null && WorldRenderPass.stereoXR.postEffect != null) {
                 WorldRenderPass.stereoXR.postEffect.close();
                 WorldRenderPass.stereoXR.postEffect = null;
@@ -189,6 +196,7 @@ public abstract class GameRendererVRMixin
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;resize(II)V", shift = Shift.AFTER), method = "loadEffect")
     public void vivecraft$loadEffect(ResourceLocation resourceLocation, CallbackInfo ci) throws IOException {
         if (VRState.vrInitialized) {
+            RenderPassManager.INSTANCE.vanillaPostEffect = postEffect;
             if (WorldRenderPass.stereoXR != null) {
                 WorldRenderPass.stereoXR.postEffect = WorldRenderPass.createPostChain(resourceLocation, WorldRenderPass.stereoXR.target);
             }

@@ -41,13 +41,13 @@ public class WorldRenderPass implements AutoCloseable {
     }
 
     public void resize(int width, int height) {
-        target.resize(width, height, Minecraft.ON_OSX);
-        outlineChain.resize(width, height);
-        if (transparencyChain != null) {
-            transparencyChain.resize(width, height);
+        this.target.resize(width, height, Minecraft.ON_OSX);
+        this.outlineChain.resize(width, height);
+        if (this.transparencyChain != null) {
+            this.transparencyChain.resize(width, height);
         }
-        if (postEffect != null) {
-            postEffect.resize(width, height);
+        if (this.postEffect != null) {
+            this.postEffect.resize(width, height);
         }
     }
 
@@ -58,5 +58,9 @@ public class WorldRenderPass implements AutoCloseable {
             this.transparencyChain.close();
         }
         this.outlineChain.close();
+        if (this.postEffect != null) {
+            this.postEffect.close();
+            this.postEffect = null;
+        }
     }
 }
