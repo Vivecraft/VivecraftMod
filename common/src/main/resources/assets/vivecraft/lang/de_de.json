@@ -396,7 +396,7 @@
   "vivecraft.messages.nosteamvr": "OpenVR runtime nicht erkannt. Ist SteamVR installiert?",
   "vivecraft.messages.outdatedsteamvr": "OpenVR konnte nicht alle benötigten Komponenten initialisieren. Vergewissern Sie sich, dass Sie die neuesten Version von SteamVR verwenden.",
   "vivecraft.messages.steamvrInvalidCharacters": "Ungültige Zeichen im Pfad: \n%s\n\nUm diesen Fehler zu beheben, ändere Minecrafts Spielverzeichnis zu etwas außerhalb des Ordners mit den gekennzeichneten Zeichen.",
-  "vivecraft.messages.invalidlwjgl": "Nicht unterstützte LWJGL Version geladen.\nGeladene Version: §c%s§r\nBenötigte Version: §2%s§r",
+  "vivecraft.messages.invalidlwjgl": "Nicht unterstützte LWJGL Version geladen.\nGeladene Version: §c%s§r\nBenötigte Version: §2%s§r\nFalsche LWJGL Version wurde geladen von: %s",
   "vivecraft.messages.menuworldexportcomplete.1": "Weltexport abgeschlossen... Flächengröße: %d",
   "vivecraft.messages.menuworldexportcomplete.2": "Gespeichert unter %s",
   "vivecraft.messages.menuworldexportclientwarning": "WARNUNG: Speichern der Menüwelt mithilfe einer Clientwelt. Daten können unvollständig sein. Es wird empfohlen, Menüwelten im Einzelspielermodus zu speichern.",
