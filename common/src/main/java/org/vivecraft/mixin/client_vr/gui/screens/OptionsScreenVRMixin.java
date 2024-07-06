@@ -26,7 +26,7 @@ public class OptionsScreenVRMixin extends Screen {
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;Ljava/util/function/Consumer;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 0), method = "init")
     private void vivecraft$addVivecraftSettingsSpacer(CallbackInfo ci, @Local(ordinal = 0) LinearLayout header) {
         if (ClientDataHolderVR.getInstance().vrSettings.vrSettingsButtonEnabled) {
-            header.addChild(new SpacerElement(150, 4), header.newCellSettings());
+            header.addChild(new SpacerElement(-150, 4), header.newCellSettings());
         }
     }
 
