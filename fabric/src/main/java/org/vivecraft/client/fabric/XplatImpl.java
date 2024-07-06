@@ -99,21 +99,8 @@ public class XplatImpl {
         return biome.getSpecialEffects();
     }
 
-    public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
-        /*
-        listener.send(new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
-            public static final ResourceLocation ID = new ResourceLocation("minecraft:register");
 
-            @Override
-            public void write(FriendlyByteBuf friendlyByteBuf) {
-                friendlyByteBuf.writeBytes(resourceLocation.toString().getBytes());
-            }
-
-            @Override
-            public ResourceLocation id() {
-                return ID;
-            }
-        }));
-        */
+    public static boolean serverAcceptsPacket(ClientPacketListener connection, ResourceLocation id) {
+        return true;
     }
 }

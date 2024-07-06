@@ -88,6 +88,7 @@ public interface Xplat {
     }
 
     @ExpectPlatform
-    static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
+    static boolean serverAcceptsPacket(ClientPacketListener connection, ResourceLocation id) {
+        return true;
     }
 }
