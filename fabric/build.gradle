@@ -48,7 +48,7 @@ dependencies {
     // modCompileOnly "maven.modrinth:indium:1.0.30+mc1.20.4"
 
     //mod menu
-    modApi("com.terraformersmc:modmenu:11.0.0-beta.1") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
+    modApi("com.terraformersmc:modmenu:11.0.1") { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }
 
     // for immersive portals compat
     modCompileOnly('com.github.iPortalTeam:ImmersivePortalsMod:v5.1.7-mc1.20.4') { exclude group: "net.fabricmc" exclude group: "net.fabricmc.fabric-api" }

@@ -1,5 +1,7 @@
 package org.vivecraft.mixin.client_vr.gui.screens;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -7,9 +9,12 @@ import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.multiplayer.ServerLinksScreen;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.ServerLinks;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,9 +30,16 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jkatvr;
+import org.vivecraft.mod_compat_vr.modmenu.ModMenuHelper;
+
+import java.util.function.Supplier;
 
 @Mixin(value = PauseScreen.class, priority = 900)
 public abstract class PauseScreenVRMixin extends Screen {
+
+    @Shadow
+    @Final
+    private static Component SERVER_LINKS;
 
     protected PauseScreenVRMixin(Component component) {
         super(component);
@@ -40,8 +52,10 @@ public abstract class PauseScreenVRMixin extends Screen {
         }
         // reset row to above
         try {
-            rowHelper.addChild(null, -2);
-        } catch (IllegalArgumentException e) {
+            if (!(ModMenuHelper.shouldOffsetButtons())) {
+                rowHelper.addChild(null, -2);
+            }
+        } catch (IllegalArgumentException ignored) {
         }
 
         if (!Minecraft.getInstance().isMultiplayerServer()) {
@@ -141,8 +155,20 @@ public abstract class PauseScreenVRMixin extends Screen {
     private LayoutElement vivecraft$remove2(GridLayout.RowHelper instance, LayoutElement layoutElement) {
         // report bugs button
         // don't remove, just hide, so mods that rely on it being there, still work
-        ((Button) layoutElement).visible = !VRState.vrEnabled;
+        ((Button) layoutElement).visible = !VRState.vrEnabled ||
+            (ModMenuHelper.shouldOffsetButtons() && !this.minecraft.player.connection.serverLinks().isEmpty());
         return instance.addChild(layoutElement);
+    }
+
+    @WrapOperation(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;openScreenButton(Lnet/minecraft/network/chat/Component;Ljava/util/function/Supplier;)Lnet/minecraft/client/gui/components/Button;", ordinal = 6))
+    private Button vivecraft$linksInsteadOfReport(PauseScreen instance, Component component, Supplier<Screen> supplier, Operation<Button> original) {
+        ServerLinks links = this.minecraft.player.connection.serverLinks();
+        if (VRState.vrEnabled && !ModMenuHelper.shouldOffsetButtons() && !links.isEmpty()) {
+            Supplier<Screen> sub = () -> new ServerLinksScreen(this, links);
+            return original.call(instance, Component.empty().append(SERVER_LINKS), sub);
+        } else {
+            return original.call(instance, component, supplier);
+        }
     }
 
     @Redirect(method = "addFeedbackButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;"))
