@@ -121,6 +121,7 @@ public class VRState {
         } catch (RenderConfigException renderConfigException) {
             vrEnabled = false;
             destroyVR(true);
+            renderConfigException.printStackTrace();
             Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
         } catch (Throwable e) {
             vrEnabled = false;
