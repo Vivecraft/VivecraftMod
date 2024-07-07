@@ -33,6 +33,8 @@ public class IrisLodRenderEventsVRMixin {
 
                 Matrix4f vrProjection = CapturedRenderingState.INSTANCE.getGbufferProjection();
 
+                dhProjection.m00(vrProjection.m00());
+                dhProjection.m11(vrProjection.m11());
                 dhProjection.m20(vrProjection.m20());
                 dhProjection.m21(vrProjection.m21());
             }
