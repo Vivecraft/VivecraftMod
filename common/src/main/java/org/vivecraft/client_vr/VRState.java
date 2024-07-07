@@ -53,7 +53,7 @@ public class VRState {
                         VRSettings.logger.error("couldn't check lwjgl source:", e);
                     }
 
-                    throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), "3.2.2", suppliedJar), "OpenVR_LWJGL"));
+                    throw new RenderConfigException("VR Init Error", new TranslatableComponent("vivecraft.messages.rendersetupfailed", I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), "3.2.2", suppliedJar), "OpenVR_LWJGL"));
                 }
 
                 dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
