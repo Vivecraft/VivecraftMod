@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
@@ -23,7 +24,7 @@ public class ItemRendererVRMixin {
 
     @ModifyVariable(at = @At(value = "STORE"), method = "getModel")
     public BakedModel vivecraft$modelOverride(BakedModel bakedModel, ItemStack itemStack) {
-        if (itemStack.is(Items.SPYGLASS)) {
+        if (VRState.vrRunning && itemStack.is(Items.SPYGLASS)) {
             return itemModelShaper.getModelManager().getModel(TelescopeTracker.scopeModel);
         }
         if (ClientDataHolderVR.getInstance().climbTracker.isClaws(itemStack)) {

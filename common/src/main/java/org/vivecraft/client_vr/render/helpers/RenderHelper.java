@@ -83,23 +83,25 @@ public class RenderHelper {
             return dataHolder.vrPlayer.vrdata_world_render.getController(c).getPosition();
         } else {
             Vec3 out = null;
+            int mainHand = InteractionHand.MAIN_HAND.ordinal();
+            if (dataHolder.vrSettings.reverseHands) {
+                c = 1 - c;
+                mainHand = InteractionHand.OFF_HAND.ordinal();
+            }
 
             if (mc.getCameraEntity() != null && mc.level != null) {
                 Vec3 dir = dataHolder.vrPlayer.vrdata_world_render.hmd.getDirection();
                 dir = dir.yRot((float) Math.toRadians(c == 0 ? -35.0D : 35.0D));
                 dir = new Vec3(dir.x, 0.0D, dir.z);
                 dir = dir.normalize();
-                if (TelescopeTracker.isTelescope(mc.player.getUseItem())) {
-                    if (c == 0 && mc.player.getUsedItemHand() == InteractionHand.MAIN_HAND) {
-                        out = dataHolder.vrPlayer.vrdata_world_render.eye0.getPosition()
-                            .add(dataHolder.vrPlayer.vrdata_world_render.hmd.getDirection()
-                                .scale(0.2 * dataHolder.vrPlayer.vrdata_world_render.worldScale));
-                    }
-                    if (c == 1 && mc.player.getUsedItemHand() == InteractionHand.OFF_HAND) {
-                        out = dataHolder.vrPlayer.vrdata_world_render.eye1.getPosition()
-                            .add(dataHolder.vrPlayer.vrdata_world_render.hmd.getDirection()
-                                .scale(0.2 * dataHolder.vrPlayer.vrdata_world_render.worldScale));
-                    }
+                if (TelescopeTracker.isTelescope(mc.player.getUseItem()) && TelescopeTracker.isTelescope(c == mainHand ? mc.player.getMainHandItem() : mc.player.getOffhandItem())) {
+                    // move the controller in front of the eye when using the spyglass
+                    VRData.VRDevicePose eye = c == 0 ? dataHolder.vrPlayer.vrdata_world_render.eye0 :
+                                              dataHolder.vrPlayer.vrdata_world_render.eye1;
+
+                    out = eye.getPosition()
+                        .add(dataHolder.vrPlayer.vrdata_world_render.hmd.getDirection()
+                            .scale(0.2 * dataHolder.vrPlayer.vrdata_world_render.worldScale));
                 }
                 if (out == null) {
                     out = dataHolder.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getPosition().add(
@@ -125,11 +127,11 @@ public class RenderHelper {
             getSmoothCameraPosition(dataHolder.currentPass, dataHolder.vrPlayer.getVRDataWorld()));
         matrix.translate(aimSource.x, aimSource.y, aimSource.z);
         float sc = dataHolder.vrPlayer.vrdata_world_render.worldScale;
-        if (mc.level != null && TelescopeTracker.isTelescope(mc.player.getUseItem())) {
+        if (dataHolder.vrSettings.seated && mc.level != null && TelescopeTracker.isTelescope(mc.player.getUseItem()) && TelescopeTracker.isTelescope(controller == 0 ? mc.player.getMainHandItem() : mc.player.getOffhandItem())) {
             matrix.mulPoseMatrix(dataHolder.vrPlayer.vrdata_world_render.hmd.getMatrix().inverted()
                 .transposed().toMCMatrix());
             MethodHolder.rotateDegXp(matrix, 90);
-            matrix.translate(controller == 0 ? 0.075 * sc : -0.075 * sc, -0.025 * sc, 0.0325 * sc);
+            matrix.translate(controller == (dataHolder.vrSettings.reverseHands ? 1 : 0) ? 0.075 * sc : -0.075 * sc, -0.025 * sc, 0.0325 * sc);
         } else {
             matrix.mulPoseMatrix(dataHolder.vrPlayer.vrdata_world_render.getController(controller)
                 .getMatrix().inverted().transposed().toMCMatrix());
@@ -228,6 +230,12 @@ public class RenderHelper {
         posestack.setIdentity();
         posestack.translate(0.0D, 0.0D, -11000.0D);
         RenderSystem.applyModelViewMatrix();
+
+        Matrix4f guiProjection = (new Matrix4f()).setOrtho(
+            0.0F, (float) (mc.getWindow().getWidth() / mc.getWindow().getGuiScale()),
+                (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale()), 0.0F,
+                1000.0F, 21000.0F);
+        RenderSystem.setProjectionMatrix(guiProjection, VertexSorting.ORTHOGRAPHIC_Z);
 
         RenderSystem.blendFuncSeparate(
             GlStateManager.SourceFactor.SRC_ALPHA,

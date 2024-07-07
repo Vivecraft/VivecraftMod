@@ -95,11 +95,11 @@ public class NullVR extends MCVR {
 
             this.updateAim();
 
-            this.controllerPose[0].M[0][3] = 0.3F;
+            this.controllerPose[0].M[0][3] = this.dh.vrSettings.reverseHands ? -0.3F : 0.3F;
             this.controllerPose[0].M[1][3] = 1.2F;
             this.controllerPose[0].M[2][3] = -0.5F;
 
-            this.controllerPose[1].M[0][3] = -0.3F;
+            this.controllerPose[1].M[0][3] =  this.dh.vrSettings.reverseHands ? 0.3F : -0.3F;
             this.controllerPose[1].M[1][3] = 1.2F;
             this.controllerPose[1].M[2][3] = -0.5F;
 
