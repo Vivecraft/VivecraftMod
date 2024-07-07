@@ -7,7 +7,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -244,7 +243,7 @@ public class VRPassHelper {
             PoseStack poseStack = RenderSystem.getModelViewStack();
             poseStack.pushPose();
             poseStack.setIdentity();
-            poseStack.translate(0.0f, 0.0f, -11000.0f);
+            poseStack.translate(0.0f, 0.0f, -2000.0f);
             RenderSystem.applyModelViewMatrix();
 
             int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
@@ -270,13 +269,11 @@ public class VRPassHelper {
         mc.mainRenderTarget.unbindRead();
 
         mc.getProfiler().popPush("2D Keyboard");
-        GuiGraphics guiGraphics = new GuiGraphics(mc, mc.renderBuffers().bufferSource());
         if (KeyboardHandler.Showing && !dataHolder.vrSettings.physicalKeyboard) {
             mc.mainRenderTarget = KeyboardHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTicks, KeyboardHandler.UI, guiGraphics);
-            guiGraphics.flush();
+            RenderHelper.drawScreen(actualPartialTicks, KeyboardHandler.UI, new PoseStack());
         }
 
         mc.getProfiler().popPush("Radial Menu");
@@ -284,8 +281,7 @@ public class VRPassHelper {
             mc.mainRenderTarget = RadialHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTicks, RadialHandler.UI, guiGraphics);
-            guiGraphics.flush();
+            RenderHelper.drawScreen(actualPartialTicks, RadialHandler.UI, new PoseStack());
         }
         mc.getProfiler().pop();
         checkGLError("post 2d ");

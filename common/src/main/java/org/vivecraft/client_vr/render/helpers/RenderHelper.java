@@ -233,8 +233,8 @@ public class RenderHelper {
         Matrix4f guiProjection = (new Matrix4f()).setOrtho(
             0.0F, (float) (mc.getWindow().getWidth() / mc.getWindow().getGuiScale()),
                 (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale()), 0.0F,
-                1000.0F, 21000.0F);
-        RenderSystem.setProjectionMatrix(guiProjection, VertexSorting.ORTHOGRAPHIC_Z);
+                1000.0F, 3000.0F);
+        RenderSystem.setProjectionMatrix(guiProjection);
 
         RenderSystem.blendFuncSeparate(
             GlStateManager.SourceFactor.SRC_ALPHA,
