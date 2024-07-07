@@ -72,8 +72,7 @@ public class XplatImpl implements Xplat {
         return biome.getModifiedSpecialEffects();
     }
 
-    public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
-        // neoforge does that automatically, since we use their networking system
-        // at least I have been told this
+    public static boolean serverAcceptsPacket(ClientPacketListener connection, ResourceLocation id) {
+        return connection.hasChannel(id);
     }
 }

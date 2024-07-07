@@ -83,14 +83,15 @@ public class ClientNetworking {
     }
 
     public static void sendVersionInfo() {
-        //Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new ChannelRegisterPacket(CommonNetworkHelper.CHANNEL.toString())));
-        Xplat.addNetworkChannel(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL);
         // send version string, with currently running
-        Minecraft.getInstance().getConnection().send(getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.VERSION,
-            (CommonDataHolder.getInstance().versionIdentifier + (VRState.vrRunning ? " VR" : " NONVR")
-                + "\n" + CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION
-                + "\n" + CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION
-            ).getBytes(Charsets.UTF_8)));
+        ClientPacketListener con = Minecraft.getInstance().getConnection();
+        if (con != null && Xplat.serverAcceptsPacket(con, CommonNetworkHelper.CHANNEL)) {
+            con.send(getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.VERSION,
+                (CommonDataHolder.getInstance().versionIdentifier + (VRState.vrRunning ? " VR" : " NONVR")
+                    + "\n" + CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION
+                    + "\n" + CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION
+                ).getBytes(Charsets.UTF_8)));
+        }
     }
 
     public static void sendVRPlayerPositions(VRPlayer vrPlayer) {

@@ -80,12 +80,7 @@ public class XplatImpl {
         return biome.getModifiedSpecialEffects();
     }
 
-    public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
-        /*
-        // Forge I really don't know why you are insisting on this being a DiscardedPayload
-        listener.send(new ServerboundCustomPayloadPacket(new DiscardedPayload(
-            new ResourceLocation("minecraft:register"),
-            new FriendlyByteBuf(Unpooled.buffer())
-                .writeBytes(resourceLocation.toString().getBytes()))));*/
+    public static boolean serverAcceptsPacket(ClientPacketListener connection, ResourceLocation id) {
+        return true;
     }
 }
