@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "FabricGameRendererVRMixin",
+    "FabricMinecraftVRMixin",
     "client.resources.model.FabricModelBakeryMixin",
     "screenhandler.client.FabricClientNetworkingVRMixin"
   ],

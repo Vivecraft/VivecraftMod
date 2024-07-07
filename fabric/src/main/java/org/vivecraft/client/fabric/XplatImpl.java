@@ -16,6 +16,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.mixin.client_vr.world.level.biome.BiomeAccessor;
 
 import java.nio.file.Path;
@@ -34,8 +35,8 @@ public class XplatImpl {
         return FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER);
     }
 
-    public static String getModloader() {
-        return "fabric";
+    public static Xplat.ModLoader getModloader() {
+        return Xplat.ModLoader.FABRIC;
     }
 
     public static String getModVersion() {

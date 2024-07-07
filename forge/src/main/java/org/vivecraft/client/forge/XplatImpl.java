@@ -17,6 +17,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.mixin.client_vr.world.level.biome.BiomeAccessor;
 
 import java.nio.file.Path;
@@ -35,8 +36,8 @@ public class XplatImpl {
         return FMLEnvironment.dist == Dist.DEDICATED_SERVER;
     }
 
-    public static String getModloader() {
-        return "forge";
+    public static Xplat.ModLoader getModloader() {
+        return Xplat.ModLoader.FORGE;
     }
 
     public static String getModVersion() {

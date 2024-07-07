@@ -62,7 +62,7 @@ public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerRe
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;", shift = At.Shift.AFTER),
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;"),
         method = "onResourceManagerReload(Lnet/minecraft/server/packs/resources/ResourceManager;)V", locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     public void vivecraft$reload(ResourceManager resourceManager, CallbackInfo ci, EntityRendererProvider.Context context) {
         this.vivecraft$armRenderer = new VRArmRenderer(context, false);
