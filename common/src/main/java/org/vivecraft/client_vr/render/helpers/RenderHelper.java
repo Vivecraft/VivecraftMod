@@ -232,7 +232,7 @@ public class RenderHelper {
         posestack.translate(0.0D, 0.0D, -2000.0D);
         RenderSystem.applyModelViewMatrix();
 
-        Matrix4f guiProjection = (new Matrix4f()).setOrtho(
+        Matrix4f guiProjection = Matrix4f.orthographic(
             0.0F, (float) (mc.getWindow().getWidth() / mc.getWindow().getGuiScale()),
                 (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale()), 0.0F,
                 1000.0F, 3000.0F);
