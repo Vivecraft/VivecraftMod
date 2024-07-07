@@ -145,7 +145,7 @@ public class RenderHelper {
             matrix.mul(dataHolder.vrPlayer.vrdata_world_render.hmd.getMatrix().inverted()
                 .transposed().toMCMatrix());
             matrix.rotate(Axis.XP.rotationDegrees(90));
-            matrix.translate(controller == (dataHolder.vrSettings.reverseHands ? 1 : 0) ? 0.075 * sc : -0.075 * sc, -0.025 * sc, 0.0325 * sc);
+            matrix.translate(controller == (dataHolder.vrSettings.reverseHands ? 1 : 0) ? 0.075F * sc : -0.075F * sc, -0.025F * sc, 0.0325F * sc);
         } else {
             matrix.mul(dataHolder.vrPlayer.vrdata_world_render.getController(controller)
                 .getMatrix().inverted().transposed().toMCMatrix());

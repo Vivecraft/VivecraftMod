@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,6 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.level.block.Blocks;
+import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL13C;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -243,9 +243,9 @@ public class VRPassHelper {
         mc.getProfiler().push("gui cursor");
         // draw cursor on Gui Layer
         if (mc.screen != null || !mc.mouseHandler.isMouseGrabbed()) {
-            PoseStack poseStack = RenderSystem.getModelViewStack();
-            poseStack.pushPose();
-            poseStack.setIdentity();
+            Matrix4fStack poseStack = RenderSystem.getModelViewStack();
+            poseStack.pushMatrix();
+            poseStack.identity();
             poseStack.translate(0.0f, 0.0f, -11000.0f);
             RenderSystem.applyModelViewMatrix();
 
@@ -253,7 +253,7 @@ public class VRPassHelper {
             int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
             ((GuiExtension) mc.gui).vivecraft$drawMouseMenuQuad(x, y);
 
-            poseStack.popPose();
+            poseStack.popMatrix();
             RenderSystem.applyModelViewMatrix();
         }
 
@@ -262,7 +262,7 @@ public class VRPassHelper {
         ((MinecraftExtension) mc).vivecraft$drawProfiler();
 
         // pop pose that we pushed before the gui
-        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.getModelViewStack().popMatrix();
         RenderSystem.applyModelViewMatrix();
 
         // generate mipmaps
