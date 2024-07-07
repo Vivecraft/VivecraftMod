@@ -235,7 +235,7 @@ public class VivecraftItemRendering {
                 rotation.mul(Axis.XP.rotationDegrees(-45.0F));
                 rotation.mul(Axis.XP.rotationDegrees((float) gunAngle));
             } else if (rendertype == VivecraftItemTransformType.Shield) {
-                boolean reverse = dh.vrSettings.reverseHands && !dh.vrSettings.seated;
+                boolean reverse = dh.vrSettings.reverseHands;
                 if (reverse) {
                     k *= -1;
                 }

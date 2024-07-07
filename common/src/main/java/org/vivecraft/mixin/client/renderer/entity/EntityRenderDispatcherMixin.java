@@ -96,7 +96,7 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
         vivecraft$skinMapVR.clear();
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;", shift = Shift.AFTER),
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;"),
         method = "onResourceManagerReload", locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     public void vivecraft$reload(ResourceManager p_174004_, CallbackInfo info, EntityRendererProvider.Context context) {
         this.vivecraft$playerRendererVRSeated = new VRPlayerRenderer(context, false, true);

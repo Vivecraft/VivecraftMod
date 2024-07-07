@@ -32,8 +32,8 @@ public class XplatImpl implements Xplat {
         return FMLEnvironment.dist == Dist.DEDICATED_SERVER;
     }
 
-    public static String getModloader() {
-        return "neoforge";
+    public static ModLoader getModloader() {
+        return ModLoader.NEOFORGE;
     }
 
     public static String getModVersion() {

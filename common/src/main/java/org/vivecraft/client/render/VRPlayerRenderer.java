@@ -7,6 +7,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
@@ -32,6 +33,10 @@ public class VRPlayerRenderer extends PlayerRenderer {
                  new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), slim));
 
         this.addLayer(new HMDLayer(this));
+    }
+
+    public boolean hasLayerType(RenderLayer<?,?> renderLayer) {
+        return this.layers.stream().anyMatch(layer -> layer.getClass() == renderLayer.getClass());
     }
 
     @Override

@@ -182,7 +182,7 @@ public class InteractTracker extends Tracker {
                     }
                 }
 
-                if (!this.active[j]) {
+                if (this.dh.vrSettings.realisticEntityInteractEnabled && !this.active[j]) {
                     int k = Mth.floor(vec3.x);
                     int l = Mth.floor(vec3.y);
                     int i = Mth.floor(vec3.z);
@@ -200,7 +200,7 @@ public class InteractTracker extends Tracker {
                     }
                 }
 
-                if (!this.active[j]) {
+                if (this.dh.vrSettings.realisticBlockInteractEnabled && !this.active[j]) {
                     BlockPos blockpos = null;
                     blockpos = BlockPos.containing(vec3);
                     BlockState blockstate = this.mc.level.getBlockState(blockpos);
