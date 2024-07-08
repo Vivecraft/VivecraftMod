@@ -42,7 +42,7 @@ public class VRPassHelper {
 
     private static float fovReduction = 1.0F;
 
-    public static void renderSingleView(RenderPass eye, DeltaTracker timer, boolean renderWorld) {
+    public static void renderSingleView(RenderPass eye, DeltaTracker.Timer timer, boolean renderWorld) {
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 1.0F);
         RenderSystem.clear(16384, Minecraft.ON_OSX);
         RenderSystem.enableDepthTest();
@@ -232,7 +232,7 @@ public class VRPassHelper {
         }
     }
 
-    public static void renderAndSubmit(boolean renderLevel, long nanoTime, float actualPartialTicks) {
+    public static void renderAndSubmit(boolean renderLevel, DeltaTracker.Timer timer) {
         // still rendering
         mc.getProfiler().push("gameRenderer");
 
@@ -278,7 +278,7 @@ public class VRPassHelper {
             mc.mainRenderTarget = KeyboardHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTicks, KeyboardHandler.UI, guiGraphics);
+            RenderHelper.drawScreen(timer, KeyboardHandler.UI, guiGraphics);
             guiGraphics.flush();
         }
 
@@ -287,7 +287,7 @@ public class VRPassHelper {
             mc.mainRenderTarget = RadialHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTicks, RadialHandler.UI, guiGraphics);
+            RenderHelper.drawScreen(timer, RadialHandler.UI, guiGraphics);
             guiGraphics.flush();
         }
         mc.getProfiler().pop();
@@ -315,7 +315,7 @@ public class VRPassHelper {
             mc.getProfiler().push("setup");
             mc.mainRenderTarget.bindWrite(true);
             mc.getProfiler().pop();
-            VRPassHelper.renderSingleView(renderpass, actualPartialTicks, nanoTime, renderLevel);
+            VRPassHelper.renderSingleView(renderpass, timer, renderLevel);
             mc.getProfiler().pop();
 
             if (dataHolder.grabScreenShot) {
@@ -350,7 +350,7 @@ public class VRPassHelper {
         // now we are done with rendering
         mc.getProfiler().pop();
 
-        dataHolder.vrPlayer.postRender(actualPartialTicks);
+        dataHolder.vrPlayer.postRender(timer.getRealtimeDeltaTicks());
         mc.getProfiler().push("Display/Reproject");
 
         try {

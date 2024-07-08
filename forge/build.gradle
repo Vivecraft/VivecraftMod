@@ -93,6 +93,7 @@ remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     archiveClassifier.set('forge_nonfunctional_without_changes')
+    setTargetNamespace("mojang")
 }
 
 jar {

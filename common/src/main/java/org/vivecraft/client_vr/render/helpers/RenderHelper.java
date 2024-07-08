@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -237,7 +238,7 @@ public class RenderHelper {
         }
     }
 
-    public static void drawScreen(float f, Screen screen, GuiGraphics guiGraphics) {
+    public static void drawScreen(DeltaTracker.Timer timer, Screen screen, GuiGraphics guiGraphics) {
         Matrix4fStack posestack = RenderSystem.getModelViewStack();
         posestack.pushMatrix();
         posestack.identity();
@@ -256,7 +257,7 @@ public class RenderHelper {
             GlStateManager.SourceFactor.ONE,
             GlStateManager.DestFactor.ONE);
 
-        screen.render(guiGraphics, 0, 0, f);
+        screen.render(guiGraphics, 0, 0, timer.getRealtimeDeltaTicks());
 
         RenderSystem.blendFuncSeparate(
             GlStateManager.SourceFactor.SRC_ALPHA,
