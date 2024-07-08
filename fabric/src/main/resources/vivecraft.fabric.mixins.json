@@ -4,6 +4,7 @@
   "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "FabricMinecraftVRMixin",
     "client.resources.model.FabricModelBakeryMixin",
     "screenhandler.client.FabricClientNetworkingVRMixin",
     "world.level.biome.BiomeAccessor"

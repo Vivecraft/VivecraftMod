@@ -45,7 +45,7 @@ public class UpdateChecker {
         }
 
         try {
-            String apiURL = "https://api.modrinth.com/v2/project/vivecraft/version?loaders=[%22" + Xplat.getModloader() + "%22]&game_versions=[%22" + SharedConstants.VERSION_STRING + "%22]";
+            String apiURL = "https://api.modrinth.com/v2/project/vivecraft/version?loaders=[%22" + Xplat.getModloader().name + "%22]&game_versions=[%22" + SharedConstants.VERSION_STRING + "%22]";
             HttpURLConnection conn = (HttpURLConnection) new URL(apiURL).openConnection();
             // 10 seconds read and connect timeout
             conn.setConnectTimeout(10000);
@@ -76,7 +76,7 @@ public class UpdateChecker {
             // sort the versions, modrinth doesn't guarantee them to be sorted.
             Collections.sort(versions);
 
-            String currentVersionNumber = Xplat.getModVersion() + "-" + Xplat.getModloader();
+            String currentVersionNumber = Xplat.getModVersion() + "-" + Xplat.getModloader().name;
             Version current = new Version(currentVersionNumber, currentVersionNumber, "");
 
             // enforce update notifications if using a non release

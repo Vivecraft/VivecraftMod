@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.7-SNAPSHOT" apply false
     id 'io.github.juuxel.loom-quiltflower' version '1.8.0' apply false
 }
 
@@ -53,6 +53,65 @@ subprojects {
     remapJar {
         // after remap, copy the final jsr to the main /build/libs folder
         finalizedBy copyJarToMain
+    }
+}
+
+tasks.register('fixForge', Zip) {
+    if (gradle.startParameter.taskNames.contains(name)) {
+        if (!file('./build/libs/' + archives_base_name +
+            '-' + minecraft_version +
+            '-' + mod_version +
+            '-forge_nonfunctional_without_changes.jar').exists() ||
+            !file('./build/libs/' + archives_base_name +
+                '-' + minecraft_version +
+                '-' + mod_version +
+                '-neoforge.jar').exists()) {
+            throw new GradleException("forge and neoforge need to be built to run this task")
+        }
+        doFirst {
+            println('unzipping jars')
+        }
+        copy {
+            // extract all forge files
+            from zipTree('./build/libs/' + archives_base_name +
+                '-' + minecraft_version +
+                '-' + mod_version +
+                '-forge_nonfunctional_without_changes.jar')
+            into './build/tmp/forge'
+            // remove any refmap
+            exclude "**/*-refmap.json"
+            // remove the refmap from the mixin jsons
+            eachFile { fileCopyDetails ->
+                if (fileCopyDetails.name.endsWith('.json')) {
+                    filter {
+                        line -> line.contains('"refmap": "vivecraft-common-refmap.json"') ? '"dummy": ""' : line
+                    }
+                }
+            }
+        }
+        copy {
+            // override the general classes with the neoforge ones, since those are mapped correctly
+            from zipTree('./build/libs/' + archives_base_name +
+                '-' + minecraft_version +
+                '-' + mod_version +
+                '-neoforge.jar')
+            into './build/tmp/forge'
+            include '/org/vivecraft/**'
+            exclude '**/neoforge/**', '**/Xplat*.class', '**/Xevents*.class'
+        }
+
+        // zip up the combined jar again
+        archiveFileName = archives_base_name +
+            '-' + minecraft_version +
+            '-' + mod_version +
+            '-forge.jar'
+        destinationDirectory = file('./build/libs/')
+        from './build/tmp/forge'
+
+        doLast {
+            println('removing temp files')
+            delete './build/tmp/forge'
+        }
     }
 }
 

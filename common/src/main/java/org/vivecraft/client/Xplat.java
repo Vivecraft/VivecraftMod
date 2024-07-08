@@ -27,6 +27,18 @@ public interface Xplat {
      * <a href="https://plugins.jetbrains.com/plugin/16210-architectury">You should also get the IntelliJ plugin to help with @ExpectPlatform.</a>
      */
 
+    enum ModLoader{
+        FABRIC("fabric"),
+        FORGE("forge"),
+        NEOFORGE("neoforge");
+
+        public final String name;
+
+        ModLoader(String name) {
+            this.name = name;
+        }
+    }
+
     @ExpectPlatform
     static boolean isModLoaded(String name) {
         return false;
@@ -43,8 +55,8 @@ public interface Xplat {
     }
 
     @ExpectPlatform
-    static String getModloader() {
-        return "";
+    static ModLoader getModloader() {
+        throw new AssertionError();
     }
 
     @ExpectPlatform
