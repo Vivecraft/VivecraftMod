@@ -88,12 +88,11 @@ shadowJar {
     ]
     archiveClassifier.set("dev-shadow")
 }
-// TODO remove that once archloom fixes forge
-remapJar.onlyIf { false }
+
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    archiveClassifier.set('forge')
+    archiveClassifier.set('forge_nonfunctional_without_changes')
 }
 
 jar {
