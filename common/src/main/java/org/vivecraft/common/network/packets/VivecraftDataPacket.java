@@ -5,25 +5,46 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import org.vivecraft.common.network.CommonNetworkHelper;
 
-public record VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators packetid,
+/**
+ * Vivecraft network packed fo all kinds of stuff
+ * @param packetId identifier what data this packet holds
+ * @param buffer data of the packet
+ */
+public record VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators packetId,
                                   byte[] buffer) implements CustomPacketPayload {
 
-    public VivecraftDataPacket(FriendlyByteBuf friendlyByteBuf) {
-        this(CommonNetworkHelper.PacketDiscriminators.values()[friendlyByteBuf.readByte()], readBuffer(friendlyByteBuf));
+    /**
+     * reads and creates a VivecraftDataPacket from {@code buffer}
+     * @param buffer buffer to read from
+     */
+    public VivecraftDataPacket(FriendlyByteBuf buffer) {
+        this(CommonNetworkHelper.PacketDiscriminators.values()[buffer.readByte()], readBuffer(buffer));
     }
 
-    private static byte[] readBuffer(FriendlyByteBuf friendlyByteBuf) {
-        byte[] buffer = new byte[friendlyByteBuf.readableBytes()];
-        friendlyByteBuf.readBytes(buffer);
-        return buffer;
+    /**
+     * reads all data from {@code buffer} into a byte array
+     * @param buffer buffer to read from
+     * @return byte array with the data from {@code buffer}
+     */
+    private static byte[] readBuffer(FriendlyByteBuf buffer) {
+        byte[] byteArr = new byte[buffer.readableBytes()];
+        buffer.readBytes(byteArr);
+        return byteArr;
     }
 
+    /**
+     * writes the packet to {@code buffer}
+     * @param buffer buffer to write to
+     */
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeByte(packetid.ordinal());
-        friendlyByteBuf.writeBytes(buffer);
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeByte(packetId.ordinal());
+        buffer.writeBytes(this.buffer);
     }
 
+    /**
+     * @return ResourceLocation identifying this packet
+     */
     @Override
     public ResourceLocation id() {
         return CommonNetworkHelper.CHANNEL;

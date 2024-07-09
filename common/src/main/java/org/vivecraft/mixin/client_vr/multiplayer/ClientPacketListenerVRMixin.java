@@ -133,7 +133,7 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
     public void vivecraft$handlepacket(CustomPacketPayload customPacketPayload, CallbackInfo info) {
         if (customPacketPayload instanceof VivecraftDataPacket dataPacket) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(dataPacket.buffer());
-            ClientNetworking.handlePacket(dataPacket.packetid(), buffer);
+            ClientNetworking.handlePacket(dataPacket.packetId(), buffer);
             buffer.release();
             info.cancel();
         }

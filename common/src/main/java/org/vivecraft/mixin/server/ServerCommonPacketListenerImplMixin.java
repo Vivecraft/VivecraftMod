@@ -36,10 +36,10 @@ public abstract class ServerCommonPacketListenerImplMixin {
             && (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener) {
             PacketUtils.ensureRunningOnSameThread(payloadPacket, (ServerCommonPacketListenerImpl) (Object) this, server);
             var buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(dataPacket.buffer());
-            ServerNetworking.handlePacket(dataPacket.packetid(), buffer, gamePacketListener.player, gamePacketListener::send);
+            ServerNetworking.handlePacket(dataPacket.packetId(), buffer, gamePacketListener.player, gamePacketListener::send);
             buffer.release();
 
-            if (dataPacket.packetid() == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
+            if (dataPacket.packetId() == CommonNetworkHelper.PacketDiscriminators.CLIMBING) {
                 gamePacketListener.aboveGroundTickCount = 0;
             }
             ci.cancel();

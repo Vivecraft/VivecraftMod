@@ -42,15 +42,15 @@ public class CommonNetworkHelper {
         buffer.writeFloat((float) vec3.z);
     }
 
+    public static Vec3 deserializeFVec3(FriendlyByteBuf buffer) {
+        return new Vec3(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+    }
+
     public static void serialize(FriendlyByteBuf buffer, Quaternion quat) {
         buffer.writeFloat(quat.w);
         buffer.writeFloat(quat.x);
         buffer.writeFloat(quat.y);
         buffer.writeFloat(quat.z);
-    }
-
-    public static Vec3 deserializeFVec3(FriendlyByteBuf buffer) {
-        return new Vec3(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
     }
 
     public static Quaternion deserializeVivecraftQuaternion(FriendlyByteBuf buffer) {

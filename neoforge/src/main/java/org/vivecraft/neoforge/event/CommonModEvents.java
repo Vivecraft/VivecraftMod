@@ -35,7 +35,7 @@ public class CommonModEvents {
     public static void handleClientVivePacket(VivecraftDataPacket packet, IPayloadContext context) {
         context.workHandler().execute(() -> {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(packet.buffer());
-            ClientNetworking.handlePacket(packet.packetid(), buffer);
+            ClientNetworking.handlePacket(packet.packetId(), buffer);
             buffer.release();
         });
     }
@@ -43,7 +43,7 @@ public class CommonModEvents {
     public static void handleServerVivePacket(VivecraftDataPacket packet, IPayloadContext context) {
         context.workHandler().execute(() -> {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(packet.buffer());
-            ServerNetworking.handlePacket(packet.packetid(), buffer, (ServerPlayer) context.player().get(), p -> context.replyHandler().send(p.payload()));
+            ServerNetworking.handlePacket(packet.packetId(), buffer, (ServerPlayer) context.player().get(), p -> context.replyHandler().send(p.payload()));
             buffer.release();
         });
     }
