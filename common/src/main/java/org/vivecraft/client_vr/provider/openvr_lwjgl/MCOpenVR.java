@@ -184,10 +184,15 @@ public class MCOpenVR extends MCVR {
         // make sure the lwjgl version is the right one
         // check that the right lwjgl version is loaded that we ship the OpenVR part of, or stuff breaks
         final String lwjglVersion = "3.3.2";
-        if (!Version.getVersion().startsWith(lwjglVersion)) {
-            throw new RenderConfigException(Component.translatable("vivecraft.messages.vriniterror"),
-                Component.translatable("vivecraft.messages.rendersetupfailed",
-                    I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), lwjglVersion), "OpenVR_LWJGL"));
+        if (!Version.getVersion().startsWith("3.3.2")) {
+            String suppliedJar = "";
+            try {
+                suppliedJar = new File(Version.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
+            } catch (Exception e) {
+                VRSettings.logger.error("couldn't check lwjgl source:", e);
+            }
+
+            throw new RenderConfigException(Component.translatable("vivecraft.messages.vriniterror"), Component.translatable("vivecraft.messages.rendersetupfailed", I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), "3.3.2", suppliedJar), "OpenVR_LWJGL"));
         }
 
         this.hapticScheduler = new OpenVRHapticScheduler();

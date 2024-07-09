@@ -195,7 +195,7 @@ public class InteractTracker extends Tracker {
             }
 
             // entity interaction
-            if (!this.active[c]) {
+            if (this.dh.vrSettings.realisticEntityInteractEnabled && !this.active[c]) {
                 Vec3 extWeapon = new Vec3(
                     handPos.x + handDirection.x * -0.1D,
                     handPos.y + handDirection.y * -0.1D,
@@ -214,7 +214,7 @@ public class InteractTracker extends Tracker {
             }
 
             // block interaction
-            if (!this.active[c]) {
+            if (this.dh.vrSettings.realisticBlockInteractEnabled && !this.active[c]) {
                 BlockPos blockpos = BlockPos.containing(handPos);
                 BlockState blockstate = this.mc.level.getBlockState(blockpos);
 
