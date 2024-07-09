@@ -234,8 +234,8 @@ public class RenderHelper {
 
         Matrix4f guiProjection = Matrix4f.orthographic(
             0.0F, (float) (mc.getWindow().getWidth() / mc.getWindow().getGuiScale()),
-                (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale()), 0.0F,
-                1000.0F, 3000.0F);
+            0.0F, (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale()),
+            1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(guiProjection);
 
         RenderSystem.blendFuncSeparate(
