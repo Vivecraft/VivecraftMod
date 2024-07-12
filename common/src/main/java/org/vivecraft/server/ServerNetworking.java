@@ -337,7 +337,13 @@ public class ServerNetworking {
                 friendlybytebuf.writeByte(2);
             }
             for (String block : ServerConfig.climbeyBlocklist.get()) {
-                friendlybytebuf.writeUtf(block);
+                try {
+                    Block b = BuiltInRegistries.BLOCK.get(new ResourceLocation(block));
+                    // only send valid blocks
+                    if (b != Blocks.AIR) {
+                        friendlybytebuf.writeUtf(block);
+                    }
+                } catch (ResourceLocationException ignore) {}
             }
         } else {
             // no block list

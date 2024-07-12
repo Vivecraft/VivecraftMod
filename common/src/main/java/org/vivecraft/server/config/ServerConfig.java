@@ -4,8 +4,11 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.server.ServerNetworking;
 
@@ -301,7 +304,23 @@ public class ServerConfig {
         climbeyBlocklist = builder
             .push("blocklist")
             .comment("The list of block names for use with include/exclude block mode.")
-            .defineList(Arrays.asList("white_wool", "dirt", "grass_block"), (s) -> s instanceof String && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation((String) s)));
+            .defineList(Arrays.asList("white_wool", "dirt", "grass_block"), (s) -> {
+                boolean valid = true;
+                try {
+                    // check if valid block
+                    Block b = BuiltInRegistries.BLOCK.get(new ResourceLocation((String) s));
+                    if (b == Blocks.AIR) {
+                        valid = false;
+                    }
+                } catch (ResourceLocationException e) {
+                    valid = false;
+                }
+                if (!valid) {
+                    ServerNetworking.LOGGER.error("Ignoring invalid/unknown block in climbey blocklist: {}", s);
+                }
+                // return true or the whole list would be reset
+                return true;
+            });
         // end climbey
         builder.pop();
 
