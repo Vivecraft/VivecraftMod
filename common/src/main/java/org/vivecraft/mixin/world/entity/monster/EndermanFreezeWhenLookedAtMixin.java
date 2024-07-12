@@ -27,7 +27,7 @@ public class EndermanFreezeWhenLookedAtMixin {
     public void vivecraft$vrTick(CallbackInfo ci) {
         if (this.target instanceof ServerPlayer player && ServerVRPlayers.isVRPlayer(player)) {
             ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);
-            this.enderman.getLookControl().setLookAt(data.getHMDPos(player));
+            this.enderman.getLookControl().setLookAt(data.getHMDPos());
             ci.cancel();
         }
     }

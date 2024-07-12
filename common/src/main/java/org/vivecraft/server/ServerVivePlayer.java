@@ -1,7 +1,6 @@
 package org.vivecraft.server;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.Pose;
@@ -75,50 +74,51 @@ public class ServerVivePlayer {
     }
 
     /**
-     * @param player
      * @return position of the head
      */
-    public Vec3 getHMDPos(Player player) {
+    public Vec3 getHMDPos() {
         if (this.vrPlayerState != null) {
-            return this.vrPlayerState.hmd().position().add(player.position()).add(this.offset);
+            return this.vrPlayerState.hmd().position().add(this.player.position()).add(this.offset);
         } else {
-            return player.position().add(0.0D, 1.62D, 0.0D);
+            return this.player.position().add(0.0D, 1.62D, 0.0D);
         }
     }
 
     /**
      * @param c controller to get the position for
-     * @param player player to get the controller position of
      * @param realPosition if true disables the seated override
      * @return controller position in world space
      */
-    public Vec3 getControllerPos(int c, Player player, boolean realPosition) {
+    public Vec3 getControllerPos(int c, boolean realPosition) {
         if (this.vrPlayerState != null) {
 
-            // TODO: What the fuck is this nonsense?
+            // in seated the realPosition is at the head,
+            // so reconstruct the seated position when wanting the visual position
             if (this.isSeated() && !realPosition) {
-                Vec3 vec3 = this.getHMDDir();
-                vec3 = vec3.yRot((float) Math.toRadians(c == 0 ? -35.0D : 35.0D));
-                vec3 = new Vec3(vec3.x, 0.0D, vec3.z);
-                vec3 = vec3.normalize();
-                return this.getHMDPos(player).add(vec3.x * 0.3D * (double) this.worldScale, -0.4D * (double) this.worldScale, vec3.z * 0.3D * (double) this.worldScale);
+                Vec3 dir = this.getHMDDir();
+                dir = dir.yRot((float) Math.toRadians(c == 0 ? -35.0D : 35.0D));
+                dir = new Vec3(dir.x, 0.0D, dir.z);
+                dir = dir.normalize();
+                return this.getHMDPos().add(
+                    dir.x * 0.3D * this.worldScale,
+                    -0.4D * this.worldScale,
+                    dir.z * 0.3D * this.worldScale);
             }
 
-            var controllerState = c == 0 ? this.vrPlayerState.controller0() : this.vrPlayerState.controller1();
+            Pose controllerState = c == 0 ? this.vrPlayerState.controller0() : this.vrPlayerState.controller1();
 
-            return controllerState.position().add(player.position()).add(this.offset);
+            return controllerState.position().add(this.player.position()).add(this.offset);
         } else {
-            return player.position().add(0.0D, 1.62D, 0.0D);
+            return this.player.position().add(0.0D, 1.62D, 0.0D);
         }
     }
 
     /**
      * @param c controller to get the position for
-     * @param player player to get the controller position of
      * @return controller position in world space
      */
-    public Vec3 getControllerPos(int c, Player player) {
-        return getControllerPos(c, player, false);
+    public Vec3 getControllerPos(int c) {
+        return getControllerPos(c, false);
     }
 
     /**

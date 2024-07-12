@@ -84,7 +84,7 @@ public abstract class ServerPlayerMixin extends Player {
             float f = (float) Math.toDegrees(Math.atan2(vec3.x, -vec3.z));
             double d0 = -Mth.sin(f * ((float) Math.PI / 180F));
             double d1 = Mth.cos(f * ((float) Math.PI / 180F));
-            Vec3 vec31 = serverviveplayer.getControllerPos(0, this);
+            Vec3 vec31 = serverviveplayer.getControllerPos(0);
 
             if (this.level() instanceof ServerLevel) {
                 ((ServerLevel) this.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, vec31.x + d0, vec31.y,
@@ -128,9 +128,9 @@ public abstract class ServerPlayerMixin extends Player {
                 InteractionHand interactionhand = this.getUsedItemHand();
 
                 if (interactionhand == InteractionHand.MAIN_HAND) {
-                    vec31 = serverviveplayer.getControllerPos(0, this);
+                    vec31 = serverviveplayer.getControllerPos(0);
                 } else {
-                    vec31 = serverviveplayer.getControllerPos(1, this);
+                    vec31 = serverviveplayer.getControllerPos(1);
                 }
             }
             this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, stack), vec31.x, vec31.y, vec31.z, vec3.x,
@@ -144,7 +144,7 @@ public abstract class ServerPlayerMixin extends Player {
         ItemEntity itementity) {
         ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
         if (serverviveplayer != null && serverviveplayer.isVR() && !dropAround) {
-            Vec3 vec3 = serverviveplayer.getControllerPos(0, this);
+            Vec3 vec3 = serverviveplayer.getControllerPos(0);
             Vec3 vec31 = serverviveplayer.getControllerDir(0);
             float f = 0.3F;
             itementity.setDeltaMovement(vec31.x * (double) f, vec31.y * (double) f, vec31.z * (double) f);

@@ -10,7 +10,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
@@ -45,12 +44,12 @@ public abstract class AbstractArrowMixin extends Entity {
         if (p_36718_ instanceof ServerPlayer player) {
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);
             if (serverviveplayer != null && serverviveplayer.isVR()) {
-                Vec3 vec3 = serverviveplayer.getControllerPos(serverviveplayer.activeHand, (Player) p_36718_);
+                Vec3 vec3 = serverviveplayer.getControllerPos(serverviveplayer.activeHand);
                 Vec3 vec31 = serverviveplayer.getControllerDir(serverviveplayer.activeHand);
 
                 if (!serverviveplayer.isSeated() && serverviveplayer.draw > 0.0F) {
-                    vec31 = serverviveplayer.getControllerPos(1, (Player) p_36718_).subtract(serverviveplayer.getControllerPos(0, (Player) p_36718_)).normalize();
-                    vec3 = serverviveplayer.getControllerPos(0, (Player) p_36718_);
+                    vec31 = serverviveplayer.getControllerPos(1).subtract(serverviveplayer.getControllerPos(0)).normalize();
+                    vec3 = serverviveplayer.getControllerPos(0);
                 }
 
                 this.setPos(vec3.x + vec31.x, vec3.y + vec31.y, vec3.z + vec31.z);

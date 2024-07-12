@@ -40,11 +40,11 @@ public abstract class EndermanMixin extends Monster {
         if (!itemstack.is(Items.CARVED_PUMPKIN)) { //no enderitem
             ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);
             Vec3 vector3d = data.getHMDDir();
-            Vec3 vector3d1 = new Vec3(enderman.getX() - data.getHMDPos(player).x, enderman.getEyeY() - data.getHMDPos(player).y, enderman.getZ() - data.getHMDPos(player).z);
+            Vec3 vector3d1 = new Vec3(enderman.getX() - data.getHMDPos().x, enderman.getEyeY() - data.getHMDPos().y, enderman.getZ() - data.getHMDPos().z);
             double d0 = vector3d1.length();
             vector3d1 = vector3d1.normalize();
             double d1 = vector3d.dot(vector3d1);
-            return d1 > 1.0D - 0.025D / d0 && d0 < 128.0 && vivecraft$canEntityBeSeen(enderman, data.getHMDPos(player));
+            return d1 > 1.0D - 0.025D / d0 && d0 < 128.0 && vivecraft$canEntityBeSeen(enderman, data.getHMDPos());
         }
 
         return false;

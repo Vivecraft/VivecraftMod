@@ -20,7 +20,7 @@ public class ThrownTridentMixin {
         if (entity instanceof ServerPlayer player) {
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);
             if (serverviveplayer != null && serverviveplayer.isVR()) {
-                vec3 = serverviveplayer.getControllerPos(0, (Player) entity);
+                vec3 = serverviveplayer.getControllerPos(0);
             }
         }
         return vec3;

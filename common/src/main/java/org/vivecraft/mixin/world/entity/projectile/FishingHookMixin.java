@@ -39,7 +39,7 @@ public abstract class FishingHookMixin extends Entity {
             vivecraft$serverviveplayer = ServerVRPlayers.getVivePlayer(serverPlayer);
             if (vivecraft$serverviveplayer != null && vivecraft$serverviveplayer.isVR()) {
                 vivecraft$controllerDir = vivecraft$serverviveplayer.getControllerDir(vivecraft$serverviveplayer.activeHand);
-                vivecraft$controllerPos = vivecraft$serverviveplayer.getControllerPos(vivecraft$serverviveplayer.activeHand, serverPlayer);
+                vivecraft$controllerPos = vivecraft$serverviveplayer.getControllerPos(vivecraft$serverviveplayer.activeHand);
             }
         }
 
