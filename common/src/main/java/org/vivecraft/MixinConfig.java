@@ -28,9 +28,7 @@ public class MixinConfig implements IMixinConfigPlugin {
     }
 
     @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-
-    }
+    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
 
     @Override
     public List<String> getMixins() {
@@ -38,18 +36,13 @@ public class MixinConfig implements IMixinConfigPlugin {
     }
 
     @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
-    }
+    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
 
     @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
-    }
+    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
 
     @Override
-    public void onLoad(String mixinPackage) {
-    }
+    public void onLoad(String mixinPackage) {}
 
     private final Set<String> appliedModFixes = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -84,7 +77,7 @@ public class MixinConfig implements IMixinConfigPlugin {
             neededClass = "me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType";
         } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_6.class.getName())) {
             neededClass = "net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType";
-        }else if (mixinClassName.equals(IrisChunkProgramOverridesMixin.class.getName())) {
+        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixin.class.getName())) {
             neededClass = "net.caffeinemc.mods.sodium.client.gl.shader.GlProgram";
         }
 
