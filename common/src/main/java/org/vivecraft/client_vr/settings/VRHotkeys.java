@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 public class VRHotkeys {
     static long nextRead = 0L;
     static final long COOLOFF_PERIOD_MILLIS = 500L;
-    static boolean debug = false;
+    static final boolean debug = false;
     private static int startController;
     private static VRData.VRDevicePose startControllerPose;
     private static float startCamposX;
@@ -33,65 +33,92 @@ public class VRHotkeys {
     private static Quaternion startCamrotQuat;
     private static Triggerer camTriggerer;
 
+    /**
+     * process debug keys
+     * @param key GLFW key that got pressed
+     * @param scanCode GLFW scancode of the key
+     * @param action GLFW key action (pressed/released)
+     * @param modifiers GLFW key modifier
+     * @return if a key was processed
+     */
     public static boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
+        // Support cool-off period for key presses - otherwise keys can get spammed...
         if (nextRead != 0L && System.currentTimeMillis() < nextRead) {
             return false;
         } else {
             Minecraft minecraft = Minecraft.getInstance();
             ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+
+            // Capture Minecrift key events
             boolean gotKey = false;
 
-            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_RIGHT_SHIFT && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                dataholder.vrSettings.storeDebugAim = true;
-                minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.showaim"));
-                gotKey = true;
-            }
+            if (action == GLFW.GLFW_PRESS) {
+                // control key combinations
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
+                    // Debug aim
+                    if (key == GLFW.GLFW_KEY_RIGHT_SHIFT) {
+                        dataholder.vrSettings.storeDebugAim = true;
+                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.showaim"));
+                        gotKey = true;
+                    }
 
-            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_B && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                dataholder.vrSettings.walkUpBlocks = !dataholder.vrSettings.walkUpBlocks;
-                minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.walkupblocks", dataholder.vrSettings.walkUpBlocks ? LangHelper.getYes() : LangHelper.getNo()));
-                gotKey = true;
-            }
+                    // Walk up blocks
+                    if (key == GLFW.GLFW_KEY_B) {
+                        dataholder.vrSettings.walkUpBlocks = !dataholder.vrSettings.walkUpBlocks;
+                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.walkupblocks",
+                            dataholder.vrSettings.walkUpBlocks ? LangHelper.getYes() : LangHelper.getNo()));
+                        gotKey = true;
+                    }
 
-            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_I && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                dataholder.vrSettings.inertiaFactor = dataholder.vrSettings.inertiaFactor.getNext();
-                minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.playerinertia", Component.translatable(dataholder.vrSettings.inertiaFactor.getLangKey())));
+                    // Player inertia
+                    if (key == GLFW.GLFW_KEY_I) {
+                        dataholder.vrSettings.inertiaFactor = dataholder.vrSettings.inertiaFactor.getNext();
+                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.playerinertia",
+                            Component.translatable(dataholder.vrSettings.inertiaFactor.getLangKey())));
 
-                gotKey = true;
-            }
+                        gotKey = true;
+                    }
 
-            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_R && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                if (dataholder.vrPlayer.isTeleportOverridden()) {
-                    dataholder.vrPlayer.setTeleportOverride(false);
-                    minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
-                } else {
-                    dataholder.vrPlayer.setTeleportOverride(true);
-                    minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                    // for testing restricted client mode
+                    if (key == GLFW.GLFW_KEY_R) {
+                        if (dataholder.vrPlayer.isTeleportOverridden()) {
+                            dataholder.vrPlayer.setTeleportOverride(false);
+                            minecraft.gui.getChat()
+                                .addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
+                        } else {
+                            dataholder.vrPlayer.setTeleportOverride(true);
+                            minecraft.gui.getChat()
+                                .addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                        }
+
+                        gotKey = true;
+                    }
+
+                    // snap third person cam
+                    if (key == GLFW.GLFW_KEY_HOME) {
+                        snapMRCam(0);
+                        gotKey = true;
+                    }
+
+                    // toggle VR with a keyboard shortcut
+                    if (key == GLFW.GLFW_KEY_F7) {
+                        VRState.vrEnabled = !VRState.vrEnabled;
+                        ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
+                        gotKey = true;
+                    }
                 }
 
-                gotKey = true;
-            }
+                if (key == GLFW.GLFW_KEY_F12 && debug) {
+                    minecraft.setScreen(new WinScreen(false, Runnables.doNothing()));
+                    gotKey = true;
+                }
 
-            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_HOME && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                snapMRCam(0);
-                gotKey = true;
-            }
-
-            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_F12 && debug) {
-                minecraft.setScreen(new WinScreen(false, Runnables.doNothing()));
-                gotKey = true;
-            }
-
-            if ((minecraft.level == null || minecraft.screen != null) && action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_F5) {
-                dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
-                ((MinecraftExtension) minecraft).vivecraft$notifyMirror(dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
-            }
-
-            // toggle VR with a keyboard shortcut
-            if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_F7 && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                VRState.vrEnabled = !VRState.vrEnabled;
-                ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
-                gotKey = true;
+                // toggle mirror mode
+                if (key == GLFW.GLFW_KEY_F5 && (minecraft.level == null || minecraft.screen != null)) {
+                    dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
+                    ((MinecraftExtension) minecraft).vivecraft$notifyMirror(
+                        dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
+                }
             }
 
             if (gotKey) {
@@ -102,258 +129,300 @@ public class VRHotkeys {
         }
     }
 
+    /**
+     * move third person camera with keys
+     */
     public static void handleMRKeys() {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        boolean flag = false;
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
+        boolean gotKey = false;
+        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
+            if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
+                // with shift do rotation
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP)) {
+                    adjustCamRot(Axis.PITCH, 0.5F);
+                    gotKey = true;
+                }
 
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(-0.01F, 0.0F, 0.0F));
-            flag = true;
-        }
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN)) {
+                    adjustCamRot(Axis.PITCH, -0.5F);
+                    gotKey = true;
+                }
 
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.01F, 0.0F, 0.0F));
-            flag = true;
-        }
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT)) {
+                    adjustCamRot(Axis.YAW, 0.5F);
+                    gotKey = true;
+                }
 
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.0F, 0.0F, -0.01F));
-            flag = true;
-        }
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT)) {
+                    adjustCamRot(Axis.YAW, -0.5F);
+                    gotKey = true;
+                }
 
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.0F, 0.0F, 0.01F));
-            flag = true;
-        }
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP)) {
+                    adjustCamRot(Axis.ROLL, 0.5F);
+                    gotKey = true;
+                }
 
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.0F, 0.01F, 0.0F));
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamPos(new Vector3(0.0F, -0.01F, 0.0F));
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.PITCH, 0.5F);
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.PITCH, -0.5F);
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.YAW, 0.5F);
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.YAW, -0.5F);
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.ROLL, 0.5F);
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            adjustCamRot(Axis.ROLL, -0.5F);
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_INSERT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            minecraft.options.fov().set(minecraft.options.fov().get() + 1);
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DELETE) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            minecraft.options.fov().set(minecraft.options.fov().get() - 1);
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_INSERT) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            dataholder.vrSettings.mixedRealityFov++;
-            flag = true;
-        }
-
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DELETE) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
-            dataholder.vrSettings.mixedRealityFov--;
-            flag = true;
-        }
-
-        if (flag) {
-            dataholder.vrSettings.saveOptions();
-
-            if (dataholder.vr.mrMovingCamActive) {
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.coords", dataholder.vrSettings.mrMovingCamOffsetX, dataholder.vrSettings.mrMovingCamOffsetY, dataholder.vrSettings.mrMovingCamOffsetZ)));
-                Angle angle = dataholder.vrSettings.mrMovingCamOffsetRotQuat.toEuler();
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.angles", angle.getPitch(), angle.getYaw(), angle.getRoll())));
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN)) {
+                    adjustCamRot(Axis.ROLL, -0.5F);
+                    gotKey = true;
+                }
             } else {
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.coords", dataholder.vrSettings.vrFixedCamposX, dataholder.vrSettings.vrFixedCamposY, dataholder.vrSettings.vrFixedCamposZ)));
-                Angle angle1 = dataholder.vrSettings.vrFixedCamrotQuat.toEuler();
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(LangHelper.get("vivecraft.messages.angles", angle1.getPitch(), angle1.getYaw(), angle1.getRoll())));
+                // without shift do position
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_LEFT)) {
+                    adjustCamPos(new Vector3(-0.01F, 0.0F, 0.0F));
+                    gotKey = true;
+                }
+
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT)) {
+                    adjustCamPos(new Vector3(0.01F, 0.0F, 0.0F));
+                    gotKey = true;
+                }
+
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_UP)) {
+                    adjustCamPos(new Vector3(0.0F, 0.0F, -0.01F));
+                    gotKey = true;
+                }
+
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DOWN)) {
+                    adjustCamPos(new Vector3(0.0F, 0.0F, 0.01F));
+                    gotKey = true;
+                }
+
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_UP)) {
+                    adjustCamPos(new Vector3(0.0F, 0.01F, 0.0F));
+                    gotKey = true;
+                }
+
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_PAGE_DOWN)) {
+                    adjustCamPos(new Vector3(0.0F, -0.01F, 0.0F));
+                    gotKey = true;
+                }
+            }
+
+            // change fov
+            if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_SHIFT)) {
+                // third person fov
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_INSERT)) {
+                    dataHolder.vrSettings.mixedRealityFov++;
+                    gotKey = true;
+                }
+
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DELETE)) {
+                    dataHolder.vrSettings.mixedRealityFov--;
+                    gotKey = true;
+                }
+            } else {
+                // first person fov
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_INSERT)) {
+                    minecraft.options.fov().set(minecraft.options.fov().get() + 1);
+                    gotKey = true;
+                }
+
+                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_DELETE)) {
+                    minecraft.options.fov().set(minecraft.options.fov().get() - 1);
+                    gotKey = true;
+                }
+            }
+
+        }
+
+        if (gotKey) {
+            dataHolder.vrSettings.saveOptions();
+
+            if (dataHolder.vr.mrMovingCamActive) {
+                minecraft.gui.getChat().addMessage(
+                    Component.translatable("vivecraft.messages.coords",
+                        dataHolder.vrSettings.mrMovingCamOffsetX,
+                        dataHolder.vrSettings.mrMovingCamOffsetY,
+                        dataHolder.vrSettings.mrMovingCamOffsetZ));
+                Angle angle = dataHolder.vrSettings.mrMovingCamOffsetRotQuat.toEuler();
+                minecraft.gui.getChat().addMessage(
+                    Component.translatable("vivecraft.messages.angles",
+                        angle.getPitch(), angle.getYaw(), angle.getRoll()));
+            } else {
+                minecraft.gui.getChat().addMessage(
+                    Component.translatable("vivecraft.messages.coords",
+                        dataHolder.vrSettings.vrFixedCamposX,
+                        dataHolder.vrSettings.vrFixedCamposY,
+                        dataHolder.vrSettings.vrFixedCamposZ));
+                Angle angle1 = dataHolder.vrSettings.vrFixedCamrotQuat.toEuler();
+                minecraft.gui.getChat().addMessage(
+                    Component.translatable("vivecraft.messages.angles",
+                        angle1.getPitch(), angle1.getYaw(), angle1.getRoll()));
             }
         }
     }
 
+    /**
+     * moves the camera position
+     * @param offset offset to move the camera to, local to the camera
+     */
     private static void adjustCamPos(Vector3 offset) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
-        if (dataholder.vr.mrMovingCamActive) {
-            offset = dataholder.vrSettings.mrMovingCamOffsetRotQuat.multiply(offset);
-            dataholder.vrSettings.mrMovingCamOffsetX += offset.getX();
-            dataholder.vrSettings.mrMovingCamOffsetY += offset.getY();
-            dataholder.vrSettings.mrMovingCamOffsetZ += offset.getZ();
+        if (dataHolder.vr.mrMovingCamActive) {
+            offset = dataHolder.vrSettings.mrMovingCamOffsetRotQuat.multiply(offset);
+            dataHolder.vrSettings.mrMovingCamOffsetX += offset.getX();
+            dataHolder.vrSettings.mrMovingCamOffsetY += offset.getY();
+            dataHolder.vrSettings.mrMovingCamOffsetZ += offset.getZ();
         } else {
-            offset = dataholder.vrSettings.vrFixedCamrotQuat.inverse().multiply(offset);
-            dataholder.vrSettings.vrFixedCamposX += offset.getX();
-            dataholder.vrSettings.vrFixedCamposY += offset.getY();
-            dataholder.vrSettings.vrFixedCamposZ += offset.getZ();
+            offset = dataHolder.vrSettings.vrFixedCamrotQuat.inverse().multiply(offset);
+            dataHolder.vrSettings.vrFixedCamposX += offset.getX();
+            dataHolder.vrSettings.vrFixedCamposY += offset.getY();
+            dataHolder.vrSettings.vrFixedCamposZ += offset.getZ();
         }
     }
 
+    /**
+     * rotate the camera
+     * @param axis camera local axis
+     * @param degrees degree amount to rotate around {@code axis}
+     */
     private static void adjustCamRot(Axis axis, float degrees) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
-        if (dataholder.vr.mrMovingCamActive) {
-            dataholder.vrSettings.mrMovingCamOffsetRotQuat.set(dataholder.vrSettings.mrMovingCamOffsetRotQuat.rotate(axis, degrees, true));
+        if (dataHolder.vr.mrMovingCamActive) {
+            dataHolder.vrSettings.mrMovingCamOffsetRotQuat.set(dataHolder.vrSettings.mrMovingCamOffsetRotQuat.rotate(axis, degrees, true));
         } else {
-            dataholder.vrSettings.vrFixedCamrotQuat.set(dataholder.vrSettings.vrFixedCamrotQuat.rotate(axis, degrees, false));
+            dataHolder.vrSettings.vrFixedCamrotQuat.set(dataHolder.vrSettings.vrFixedCamrotQuat.rotate(axis, degrees, false));
         }
     }
 
+    /**
+     * snaps the camera to the given controller
+     * @param controller index of the controller to snap to
+     */
     public static void snapMRCam(int controller) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        Vec3 vec3 = dataholder.vrPlayer.vrdata_room_pre.getController(controller).getPosition();
-        dataholder.vrSettings.vrFixedCamposX = (float) vec3.x;
-        dataholder.vrSettings.vrFixedCamposY = (float) vec3.y;
-        dataholder.vrSettings.vrFixedCamposZ = (float) vec3.z;
-        Quaternion quaternion = new Quaternion(Utils.convertOVRMatrix(dataholder.vrPlayer.vrdata_room_pre.getController(controller).getMatrix()));
-        dataholder.vrSettings.vrFixedCamrotQuat.set(quaternion);
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
+        Vec3 pos = dataHolder.vrPlayer.vrdata_room_pre.getController(controller).getPosition();
+        dataHolder.vrSettings.vrFixedCamposX = (float) pos.x;
+        dataHolder.vrSettings.vrFixedCamposY = (float) pos.y;
+        dataHolder.vrSettings.vrFixedCamposZ = (float) pos.z;
+        Quaternion quat = new Quaternion(Utils.convertOVRMatrix(dataHolder.vrPlayer.vrdata_room_pre.getController(controller).getMatrix()));
+        dataHolder.vrSettings.vrFixedCamrotQuat.set(quat);
     }
 
+    /**
+     *
+     */
     public static void updateMovingThirdPersonCam() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
         if (startControllerPose != null) {
-            VRData.VRDevicePose vrdata$vrdevicepose = dataholder.vrPlayer.vrdata_room_pre.getController(startController);
-            Vec3 vec3 = startControllerPose.getPosition();
-            Vec3 vec31 = vrdata$vrdevicepose.getPosition().subtract(vec3);
-            Matrix4f matrix4f = Matrix4f.multiply(vrdata$vrdevicepose.getMatrix(), startControllerPose.getMatrix().inverted());
-            Vector3 vector3 = new Vector3(startCamposX - (float) vec3.x, startCamposY - (float) vec3.y, startCamposZ - (float) vec3.z);
-            Vector3 vector31 = matrix4f.transform(vector3);
-            dataholder.vrSettings.vrFixedCamposX = startCamposX + (float) vec31.x + (vector31.getX() - vector3.getX());
-            dataholder.vrSettings.vrFixedCamposY = startCamposY + (float) vec31.y + (vector31.getY() - vector3.getY());
-            dataholder.vrSettings.vrFixedCamposZ = startCamposZ + (float) vec31.z + (vector31.getZ() - vector3.getZ());
-            dataholder.vrSettings.vrFixedCamrotQuat.set(startCamrotQuat.multiply(new Quaternion(Utils.convertOVRMatrix(matrix4f))));
+            VRData.VRDevicePose controllerPose = dataHolder.vrPlayer.vrdata_room_pre.getController(startController);
+            Vec3 startPos = startControllerPose.getPosition();
+            Vec3 deltaPos = controllerPose.getPosition().subtract(startPos);
+
+            Matrix4f deltaMatrix = Matrix4f.multiply(controllerPose.getMatrix(), startControllerPose.getMatrix().inverted());
+            Vector3 offset = new Vector3(
+                startCamposX - (float) startPos.x,
+                startCamposY - (float) startPos.y,
+                startCamposZ - (float) startPos.z);
+            Vector3 offsetRotated = deltaMatrix.transform(offset);
+
+            dataHolder.vrSettings.vrFixedCamposX = startCamposX + (float) deltaPos.x + (offsetRotated.getX() - offset.getX());
+            dataHolder.vrSettings.vrFixedCamposY = startCamposY + (float) deltaPos.y + (offsetRotated.getY() - offset.getY());
+            dataHolder.vrSettings.vrFixedCamposZ = startCamposZ + (float) deltaPos.z + (offsetRotated.getZ() - offset.getZ());
+            dataHolder.vrSettings.vrFixedCamrotQuat.set(startCamrotQuat.multiply(new Quaternion(Utils.convertOVRMatrix(deltaMatrix))));
         }
     }
 
+    /**
+     * starts moving the third person camera, stores the initial position
+     * @param controller which controller moves the camera
+     * @param triggerer what type of input caused the moving
+     */
     public static void startMovingThirdPersonCam(int controller, Triggerer triggerer) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
+
         startController = controller;
-        startControllerPose = dataholder.vrPlayer.vrdata_room_pre.getController(controller);
-        startCamposX = dataholder.vrSettings.vrFixedCamposX;
-        startCamposY = dataholder.vrSettings.vrFixedCamposY;
-        startCamposZ = dataholder.vrSettings.vrFixedCamposZ;
-        startCamrotQuat = dataholder.vrSettings.vrFixedCamrotQuat.copy();
+        startControllerPose = dataHolder.vrPlayer.vrdata_room_pre.getController(controller);
+        startCamposX = dataHolder.vrSettings.vrFixedCamposX;
+        startCamposY = dataHolder.vrSettings.vrFixedCamposY;
+        startCamposZ = dataHolder.vrSettings.vrFixedCamposZ;
+        startCamrotQuat = dataHolder.vrSettings.vrFixedCamrotQuat.copy();
         camTriggerer = triggerer;
     }
 
+    /**
+     * stops moving the third person camera
+     */
     public static void stopMovingThirdPersonCam() {
         startControllerPose = null;
     }
 
+    /**
+     * @return if the third person camera is currently being moved
+     */
     public static boolean isMovingThirdPersonCam() {
         return startControllerPose != null;
     }
 
+    /**
+     * @return which controller is moving the third person camera
+     */
     public static int getMovingThirdPersonCamController() {
         return startController;
     }
 
+    /**
+     * @return what caused the third person camera movement
+     */
     public static Triggerer getMovingThirdPersonCamTriggerer() {
         return camTriggerer;
     }
 
+    /**
+     * read camera config file and set the position/rotation
+     */
     public static void loadExternalCameraConfig() {
-        File file1 = new File("ExternalCamera.cfg");
+        File file = new File("ExternalCamera.cfg");
 
-        if (file1.exists()) {
-            float f = 0.0F;
-            float f1 = 0.0F;
-            float f2 = 0.0F;
-            float f3 = 0.0F;
-            float f4 = 0.0F;
-            float f5 = 0.0F;
-            float f6 = 40.0F;
-            String s;
+        if (file.exists()) {
+            float x = 0.0F, y = 0.0F, z = 0.0F;
+            float rx = 0.0F, ry = 0.0F, rz = 0.0F;
+            float fov = 40.0F;
 
-            try (BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(new FileInputStream(file1), StandardCharsets.UTF_8))) {
-                while ((s = bufferedreader.readLine()) != null) {
-                    String[] astring = s.split("=", 2);
-                    String s1 = astring[0];
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] tokens = line.split("=", 2);
 
-                    switch (s1) {
-                        case "x":
-                            f = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "y":
-                            f1 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "z":
-                            f2 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "rx":
-                            f3 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "ry":
-                            f4 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "rz":
-                            f5 = Float.parseFloat(astring[1]);
-                            break;
-
-                        case "fov":
-                            f6 = Float.parseFloat(astring[1]);
+                    switch (tokens[0]) {
+                        case "x" -> x = Float.parseFloat(tokens[1]);
+                        case "y" -> y = Float.parseFloat(tokens[1]);
+                        case "z" -> z = Float.parseFloat(tokens[1]);
+                        case "rx" -> rx = Float.parseFloat(tokens[1]);
+                        case "ry" -> ry = Float.parseFloat(tokens[1]);
+                        case "rz" -> rz = Float.parseFloat(tokens[1]);
+                        case "fov" -> fov = Float.parseFloat(tokens[1]);
                     }
                 }
             } catch (Exception exception) {
-                exception.printStackTrace();
+                VRSettings.logger.error("error reading camera config:", exception);
                 return;
             }
 
-            Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-            Quaternion quaternion = new Quaternion(f3, f4, f5, dataholder.vrSettings.externalCameraAngleOrder);
-            dataholder.vrSettings.mrMovingCamOffsetX = f;
-            dataholder.vrSettings.mrMovingCamOffsetY = f1;
-            dataholder.vrSettings.mrMovingCamOffsetZ = f2;
-            dataholder.vrSettings.mrMovingCamOffsetRotQuat.set(quaternion);
-            dataholder.vrSettings.vrFixedCamposX = f;
-            dataholder.vrSettings.vrFixedCamposY = f1;
-            dataholder.vrSettings.vrFixedCamposZ = f2;
-            dataholder.vrSettings.vrFixedCamrotQuat.set(quaternion);
-            dataholder.vrSettings.mixedRealityFov = f6;
+            // Eh just set everything, the fixed pos is overridden by the moving cam anyways
+            ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
+            Quaternion quaternion = new Quaternion(rx, ry, rz, dataHolder.vrSettings.externalCameraAngleOrder);
+            dataHolder.vrSettings.mrMovingCamOffsetX = x;
+            dataHolder.vrSettings.mrMovingCamOffsetY = y;
+            dataHolder.vrSettings.mrMovingCamOffsetZ = z;
+            dataHolder.vrSettings.mrMovingCamOffsetRotQuat.set(quaternion);
+            dataHolder.vrSettings.vrFixedCamposX = x;
+            dataHolder.vrSettings.vrFixedCamposY = y;
+            dataHolder.vrSettings.vrFixedCamposZ = z;
+            dataHolder.vrSettings.vrFixedCamrotQuat.set(quaternion);
+            dataHolder.vrSettings.mixedRealityFov = fov;
         }
     }
 
+    /**
+     * @return if the user has a camera config file
+     */
     public static boolean hasExternalCameraConfig() {
         return (new File("ExternalCamera.cfg")).exists();
     }

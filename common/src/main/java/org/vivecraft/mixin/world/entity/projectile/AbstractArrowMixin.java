@@ -48,7 +48,7 @@ public abstract class AbstractArrowMixin extends Entity {
                 Vec3 vec3 = serverviveplayer.getControllerPos(serverviveplayer.activeHand, (Player) p_36718_);
                 Vec3 vec31 = serverviveplayer.getControllerDir(serverviveplayer.activeHand);
 
-                if (!serverviveplayer.isSeated() && serverviveplayer.getDraw() > 0.0F) {
+                if (!serverviveplayer.isSeated() && serverviveplayer.draw > 0.0F) {
                     vec31 = serverviveplayer.getControllerPos(1, (Player) p_36718_).subtract(serverviveplayer.getControllerPos(0, (Player) p_36718_)).normalize();
                     vec3 = serverviveplayer.getControllerPos(0, (Player) p_36718_);
                 }

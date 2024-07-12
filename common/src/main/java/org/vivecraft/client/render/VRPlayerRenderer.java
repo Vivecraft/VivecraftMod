@@ -31,6 +31,10 @@ public class VRPlayerRenderer extends PlayerRenderer {
         this.addLayer(new HMDLayer(this));
     }
 
+    /**
+     * @param renderLayer RenderLayer to check
+     * @return if a layer of the given class is already registered
+     */
     public boolean hasLayerType(RenderLayer<?,?> renderLayer) {
         return this.layers.stream().anyMatch(layer -> layer.getClass() == renderLayer.getClass());
     }

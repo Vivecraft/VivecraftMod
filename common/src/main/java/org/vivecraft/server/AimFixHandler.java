@@ -21,81 +21,104 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
         this.netManager = netManager;
     }
 
+    /**
+     * checks if the {@code msg}  uses the players aim, and changes it to the right position before handling
+     * @param ctx context when not handling the message
+     * @param msg Packet to handle
+     */
+    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ServerPlayer serverplayer = ((ServerGamePacketListenerImpl) this.netManager.getPacketListener()).player;
-        boolean flag = msg instanceof ServerboundUseItemPacket || msg instanceof ServerboundUseItemOnPacket || msg instanceof ServerboundPlayerActionPacket;
+        ServerPlayer serverPlayer = ((ServerGamePacketListenerImpl) this.netManager.getPacketListener()).player;
+        boolean isCapturedPacket = msg instanceof ServerboundUseItemPacket ||
+            msg instanceof ServerboundUseItemOnPacket ||
+            msg instanceof ServerboundPlayerActionPacket;
 
-        if (!ServerVRPlayers.isVRPlayer(serverplayer) || !flag || serverplayer.getServer() == null) {
+        if (!ServerVRPlayers.isVRPlayer(serverPlayer) || !isCapturedPacket || serverPlayer.getServer() == null) {
+            // we don't need to handle this packet, just defer to the next handler in the pipeline
             ctx.fireChannelRead(msg);
             return;
         }
 
-        serverplayer.getServer().submit(() ->
-        {
-            Vec3 position = serverplayer.position();
-            Vec3 positionO = new Vec3(serverplayer.xo, serverplayer.yo, serverplayer.zo);
-            float xRot = serverplayer.getXRot();
-            float yRot = serverplayer.getYRot();
-            float yHeadRot = serverplayer.yHeadRot;
-            float xRotO = serverplayer.xRotO;
-            float yRotO = serverplayer.yRotO;
-            float yHeadRotO = serverplayer.yHeadRotO;
-            float eyeHeight = serverplayer.getEyeHeight();
+        serverPlayer.getServer().submit(() -> {
+            // Save all the current orientation data
+            Vec3 pos = serverPlayer.position();
+            Vec3 prevPos = new Vec3(serverPlayer.xo, serverPlayer.yo, serverPlayer.zo);
+            float xRot = serverPlayer.getXRot();
+            float yRot = serverPlayer.getYRot();
+            float yHeadRot = serverPlayer.yHeadRot;
+            float prevXRot = serverPlayer.xRotO;
+            float prevYRot = serverPlayer.yRotO;
+            float prevYHeadRot = serverPlayer.yHeadRotO;
+            float eyeHeight = serverPlayer.getEyeHeight();
 
-            ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(serverplayer);
+            ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
 
             Vec3 aimPos = null;
-            if (serverviveplayer != null) {
-                aimPos = serverviveplayer.getControllerPos(0, serverplayer, true);
-                Vec3 dir = serverviveplayer.getControllerDir(0);
+            // Check again in case of race condition
+            if (vivePlayer != null && vivePlayer.isVR()) {
+                aimPos = vivePlayer.getControllerPos(0, serverPlayer, true);
+                Vec3 dir = vivePlayer.getControllerDir(0);
 
-                serverplayer.setPosRaw(aimPos.x, aimPos.y, aimPos.z);
-                serverplayer.xo = aimPos.x;
-                serverplayer.yo = aimPos.y;
-                serverplayer.zo = aimPos.z;
-                serverplayer.setXRot((float) Math.toDegrees(Math.asin(-dir.y)));
-                serverplayer.setYRot((float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
-                serverplayer.xRotO = serverplayer.getXRot();
-                serverplayer.yRotO = serverplayer.yHeadRotO = serverplayer.yHeadRot = serverplayer.getYRot();
-                serverplayer.eyeHeight = 0.0001F;
-                serverviveplayer.offset = position.subtract(aimPos);
+                // Inject our custom orientation data
+                serverPlayer.setPosRaw(aimPos.x, aimPos.y, aimPos.z);
+                serverPlayer.xo = aimPos.x;
+                serverPlayer.yo = aimPos.y;
+                serverPlayer.zo = aimPos.z;
+                serverPlayer.setXRot((float) Math.toDegrees(Math.asin(-dir.y)));
+                serverPlayer.setYRot((float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                serverPlayer.xRotO = serverPlayer.getXRot();
+                serverPlayer.yRotO = serverPlayer.yHeadRotO = serverPlayer.yHeadRot = serverPlayer.getYRot();
+                // non 0 to avoid divisions by 0
+                serverPlayer.eyeHeight = 0.0001F;
+
+                // Set up offset to fix relative positions
+                vivePlayer.offset = pos.subtract(aimPos);
                 if (ServerConfig.debug.get()) {
-                    System.out.println("AimFix " + aimPos.x + " " + aimPos.y + " " + aimPos.z + " " + (float) Math.toDegrees(Math.asin(-dir.y)) + " " + (float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                    ServerNetworking.LOGGER.info("AimFix: {} {} {}, {} {}", aimPos.x, aimPos.y, aimPos.z,
+                        Math.toDegrees(Math.asin(-dir.y)), Math.toDegrees(Math.atan2(-dir.x, dir.z)));
                 }
             }
 
+            // Call the packet handler directly
+            // This is several implementation details that we have to replicate
             try {
                 if (this.netManager.isConnected()) {
                     try {
                         ((Packet) msg).handle(this.netManager.getPacketListener());
-                    } catch (RunningOnDifferentThreadException runningondifferentthreadexception) {
+                    } catch (RunningOnDifferentThreadException ignored) {
+                        // Apparently might get thrown and can be ignored
                     }
                 }
             } finally {
+                // Vanilla uses SimpleChannelInboundHandler, which automatically releases
+                // by default, so we're expected to release the packet once we're done.
                 ReferenceCountUtil.release(msg);
             }
 
             // if the packed changed the player position, use that
-            if ((aimPos != null && !serverplayer.position().equals(aimPos)) || (aimPos == null && !serverplayer.position().equals(position))) {
-                position = serverplayer.position();
+            if ((aimPos != null && !serverPlayer.position().equals(aimPos)) || (aimPos == null && !serverPlayer.position().equals(pos))) {
+                pos = serverPlayer.position();
                 if (ServerConfig.debug.get()) {
-                    System.out.println("AimFix moved Player to " + position.x + " " + position.y + " " + position.z);
+                    ServerNetworking.LOGGER.info("AimFix moved Player to: {} {} {}", pos.x, pos.y, pos.z);
                 }
             }
 
-            serverplayer.setPosRaw(position.x, position.y, position.z);
-            serverplayer.xo = positionO.x;
-            serverplayer.yo = positionO.y;
-            serverplayer.zo = positionO.z;
-            serverplayer.setXRot(xRot);
-            serverplayer.setYRot(yRot);
-            serverplayer.yHeadRot = yHeadRot;
-            serverplayer.xRotO = xRotO;
-            serverplayer.yRotO = yRotO;
-            serverplayer.yHeadRotO = yHeadRotO;
-            serverplayer.eyeHeight = eyeHeight;
-            if (serverviveplayer != null) {
-                serverviveplayer.offset = new Vec3(0.0D, 0.0D, 0.0D);
+            // Restore the original orientation data
+            serverPlayer.setPosRaw(pos.x, pos.y, pos.z);
+            serverPlayer.xo = prevPos.x;
+            serverPlayer.yo = prevPos.y;
+            serverPlayer.zo = prevPos.z;
+            serverPlayer.setXRot(xRot);
+            serverPlayer.setYRot(yRot);
+            serverPlayer.yHeadRot = yHeadRot;
+            serverPlayer.xRotO = prevXRot;
+            serverPlayer.yRotO = prevYRot;
+            serverPlayer.yHeadRotO = prevYHeadRot;
+            serverPlayer.eyeHeight = eyeHeight;
+
+            // Reset offset
+            if (vivePlayer != null) {
+                vivePlayer.offset = new Vec3(0.0D, 0.0D, 0.0D);
             }
         });
     }

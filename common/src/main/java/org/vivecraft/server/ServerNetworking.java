@@ -1,15 +1,19 @@
 package org.vivecraft.server;
 
 import io.netty.buffer.Unpooled;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerPlayerConnection;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vivecraft.common.CommonDataHolder;
@@ -17,21 +21,34 @@ import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packets.VivecraftDataPacket;
 import org.vivecraft.mixin.server.ChunkMapAccessor;
+import org.vivecraft.mixin.server.TrackedEntityAccessor;
 import org.vivecraft.server.config.ServerConfig;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ServerNetworking {
 
     // temporarily stores the packets from legacy clients to assemble a complete VrPlayerState
     private static final Map<UUID, Map<CommonNetworkHelper.PacketDiscriminators, FriendlyByteBuf>> legacyDataMap = new HashMap<>();
 
+    /**
+     * logger for messages from the server
+     */
     public static final Logger LOGGER = LoggerFactory.getLogger("VivecraftServer");
 
+    /**
+     * handles a {@link VivecraftDataPacket} sent to the server
+     * @param packetID packetId of the data packet
+     * @param buffer bytebuffer holding the data of the packet
+     * @param player ServerPlayer that sent the packet
+     * @param packetConsumer consumer to send packets back with
+     */
     public static void handlePacket(CommonNetworkHelper.PacketDiscriminators packetID, FriendlyByteBuf buffer, ServerPlayer player, Consumer<ClientboundCustomPayloadPacket> packetConsumer) {
         ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(player);
 
+        // clients are expected to send a VERSION packet first
         if (vivePlayer == null && packetID != CommonNetworkHelper.PacketDiscriminators.VERSION) {
             return;
         }
@@ -57,8 +74,9 @@ public class ServerNetworking {
                     int clientMaxVersion = Integer.parseInt(parts[1]);
                     int clientMinVersion = Integer.parseInt(parts[2]);
                     // check if client supports a supported version
-                    if (CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION <= clientMaxVersion
-                        && clientMinVersion <= CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION) {
+                    if (CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION <= clientMaxVersion &&
+                        clientMinVersion <= CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION)
+                    {
                         vivePlayer.networkVersion = Math.min(clientMaxVersion, CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION);
                         if (ServerConfig.debug.get()) {
                             LOGGER.info("{} networking supported, using version {}", player.getName().getString(), vivePlayer.networkVersion);
@@ -91,6 +109,7 @@ public class ServerNetworking {
                 packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.VERSION, CommonDataHolder.getInstance().versionIdentifier));
                 packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.REQUESTDATA, new byte[0]));
 
+                // send server settings
                 if (ServerConfig.climbeyEnabled.get()) {
                     packetConsumer.accept(getClimbeyServerPacket());
                 }
@@ -159,12 +178,9 @@ public class ServerNetworking {
                 }
                 vivePlayer.setVR(!vivePlayer.isVR());
                 if (!vivePlayer.isVR()) {
-                    for (var trackingPlayer : ServerNetworking.getTrackingPlayers(player)) {
-                        if (!ServerVRPlayers.getPlayersWithVivecraft(player.server).containsKey(trackingPlayer.getPlayer().getUUID()) || trackingPlayer.getPlayer() == player) {
-                            continue;
-                        }
-                        trackingPlayer.send(createVRActivePlayerPacket(false, player.getUUID()));
-                    }
+                    // send all nearby players that the state changed
+                    // this is only needed for OFF, to delete the clientside vr player state
+                    sendPacketToTrackingPlayers(vivePlayer, () -> createVRActivePlayerPacket(false, player.getUUID()));
                 }
                 break;
 
@@ -188,10 +204,10 @@ public class ServerNetworking {
                 break;
 
             case TELEPORT:
-                float f = buffer.readFloat();
-                float f1 = buffer.readFloat();
-                float f2 = buffer.readFloat();
-                player.absMoveTo(f, f1, f2, player.getYRot(), player.getXRot());
+                float x = buffer.readFloat();
+                float y = buffer.readFloat();
+                float z = buffer.readFloat();
+                player.absMoveTo(x, y, z, player.getYRot(), player.getXRot());
                 break;
 
             case CLIMBING:
@@ -227,6 +243,7 @@ public class ServerNetworking {
                 playerData.put(packetID, buffer);
 
                 if (playerData.size() == 3) {
+                    // we have all data
                     FriendlyByteBuf controller0Data = playerData.get(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA);
                     controller0Data.resetReaderIndex().readByte();
                     FriendlyByteBuf controller1Data = playerData.get(CommonNetworkHelper.PacketDiscriminators.CONTROLLER1DATA);
@@ -251,13 +268,22 @@ public class ServerNetworking {
         }
     }
 
-    public static Set<ServerPlayerConnection> getTrackingPlayers(Entity entity) {
-        var manager = entity.level().getChunkSource();
-        var storage = ((ServerChunkCache) manager).chunkMap;
-        var playerTracker = ((ChunkMapAccessor) storage).getTrackedEntities().get(entity.getId());
-        return playerTracker != null ? playerTracker.getPlayersTracking() : Collections.emptySet();
+    /**
+     * gets all players that can see {@code player}
+     * @param player ServerPlayer to check
+     * @return unmodifiableSet set of all other players that can see {@code player}
+     */
+    public static Set<ServerPlayerConnection> getTrackingPlayers(ServerPlayer player) {
+        ChunkMap chunkMap = player.serverLevel().getChunkSource().chunkMap;
+        TrackedEntityAccessor playerTracker = ((ChunkMapAccessor) chunkMap).getTrackedEntities().get(player.getId());
+        return playerTracker != null ? Collections.unmodifiableSet(playerTracker.getPlayersTracking()) : Collections.emptySet();
     }
 
+    /**
+     * @param vrActive if vr is now active or not
+     * @param playerID UUID of the player that switched
+     * @return IS_VR_ACTIVE packet for the given player
+     */
     public static ClientboundCustomPayloadPacket createVRActivePlayerPacket(boolean vrActive, UUID playerID) {
         FriendlyByteBuf tempBuffer = new FriendlyByteBuf(Unpooled.buffer());
         tempBuffer.writeByte(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE.ordinal());
@@ -268,6 +294,13 @@ public class ServerNetworking {
         return p;
     }
 
+    /**
+     * @param player player to make the packet for
+     * @param vrPlayerState VrPlayerState for the given player
+     * @param worldScale worldScale of the given player
+     * @param heightScale height of the given player
+     * @return UBERPACKET packet for the given player, holding all player vr data
+     */
     public static ClientboundCustomPayloadPacket createUberPacket(Player player, VrPlayerState vrPlayerState, float worldScale, float heightScale) {
         FriendlyByteBuf tempBuffer = new FriendlyByteBuf(Unpooled.buffer());
         tempBuffer.writeByte(CommonNetworkHelper.PacketDiscriminators.UBERPACKET.ordinal());
@@ -280,10 +313,19 @@ public class ServerNetworking {
         return p;
     }
 
+    /**
+     * general method to wrap the PacketDiscriminators and packet data in a VivecraftDataPacket
+     * @param command packet identifier
+     * @param payload packet data
+     * @return VivecraftDataPacket with the given data
+     */
     public static ClientboundCustomPayloadPacket getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators command, byte[] payload) {
         return new ClientboundCustomPayloadPacket(new VivecraftDataPacket(command, payload));
     }
 
+    /**
+     * @return CLIMBING packet holding mode and list of climbey blocks
+     */
     public static ClientboundCustomPayloadPacket getClimbeyServerPacket() {
         FriendlyByteBuf friendlybytebuf = new FriendlyByteBuf(Unpooled.buffer());
         friendlybytebuf.writeByte(CommonNetworkHelper.PacketDiscriminators.CLIMBING.ordinal());
@@ -306,6 +348,11 @@ public class ServerNetworking {
         return p;
     }
 
+    /**
+     * @param command packet identifier
+     * @param payload string data
+     * @return VivecraftDataPacket with one String
+     */
     public static ClientboundCustomPayloadPacket getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators command, String payload) {
         FriendlyByteBuf tempBuffer = new FriendlyByteBuf(Unpooled.buffer());
         tempBuffer.writeByte(command.ordinal());
@@ -315,23 +362,43 @@ public class ServerNetworking {
         return p;
     }
 
-    public static void sendVrPlayerStateToClients(ServerPlayer vrPlayerEntity) {
-        var playersWithVivecraft = ServerVRPlayers.getPlayersWithVivecraft(vrPlayerEntity.server);
-        var vivePlayer = playersWithVivecraft.get(vrPlayerEntity.getUUID());
+    /**
+     * send the players VR data to all other players that can see them
+     * @param player player to send the VR data for
+     */
+    public static void sendVrPlayerStateToClients(ServerPlayer player) {
+        Map<UUID, ServerVivePlayer> vivePlayers = ServerVRPlayers.getPlayersWithVivecraft(player.server);
+        ServerVivePlayer vivePlayer = vivePlayers.get(player.getUUID());
+
         if (vivePlayer == null) {
+            // don't need to send anything if this isn't a vive player
             return;
         }
         if (vivePlayer.player == null || vivePlayer.player.hasDisconnected()) {
-            playersWithVivecraft.remove(vrPlayerEntity.getUUID());
+            // if they did disconnect remove them
+            vivePlayers.remove(player.getUUID());
         }
         if (!vivePlayer.isVR() || vivePlayer.vrPlayerState == null) {
             return;
         }
-        for (var trackingPlayer : getTrackingPlayers(vrPlayerEntity)) {
-            if (!playersWithVivecraft.containsKey(trackingPlayer.getPlayer().getUUID()) || trackingPlayer.getPlayer() == vrPlayerEntity) {
+        sendPacketToTrackingPlayers(vivePlayer, () -> createUberPacket(vivePlayer.player, vivePlayer.vrPlayerState, vivePlayer.worldScale, vivePlayer.heightScale));
+
+    }
+
+    /**
+     * sends a packet to all players that see {@code vivePlayer}
+     * @param vivePlayer player that needs to be seen to get the packet
+     * @param packet packet supplier to get the packet to send
+     */
+    private static void sendPacketToTrackingPlayers(ServerVivePlayer vivePlayer, Supplier<ClientboundCustomPayloadPacket> packet) {
+        Map<UUID, ServerVivePlayer> vivePlayers = ServerVRPlayers.getPlayersWithVivecraft(vivePlayer.player.server);
+        for (var trackedPlayer : getTrackingPlayers(vivePlayer.player)) {
+            if (!vivePlayers.containsKey(trackedPlayer.getPlayer().getUUID()) ||
+                trackedPlayer.getPlayer() == vivePlayer.player)
+            {
                 continue;
             }
-            trackingPlayer.send(createUberPacket(vivePlayer.player, vivePlayer.vrPlayerState, vivePlayer.worldScale, vivePlayer.heightScale));
+            trackedPlayer.send(packet.get());
         }
     }
 }

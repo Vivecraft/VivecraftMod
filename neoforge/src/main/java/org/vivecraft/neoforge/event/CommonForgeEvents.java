@@ -9,6 +9,6 @@ import org.vivecraft.server.ServerUtil;
 public class CommonForgeEvents {
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
-        ServerUtil.registerCommands(event.getDispatcher());
+        ServerUtil.registerCommands(event.getDispatcher(), event.getBuildContext());
     }
 }

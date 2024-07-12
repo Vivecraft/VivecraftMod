@@ -2,6 +2,9 @@ package org.vivecraft.common;
 
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
+/**
+ * holds permissions of the client
+ */
 public class VRServerPerms {
 
     public static VRServerPerms INSTANCE = new VRServerPerms();

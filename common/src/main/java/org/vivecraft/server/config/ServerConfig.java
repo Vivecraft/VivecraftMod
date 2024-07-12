@@ -7,6 +7,7 @@ import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.server.ServerNetworking;
 
 import java.util.Arrays;
 import java.util.List;
@@ -95,7 +96,8 @@ public class ServerConfig {
         if (listener == null) {
             listener = (action, path, incorrectValue, correctedValue) -> {
                 if (incorrectValue != null) {
-                    System.out.println("Corrected " + String.join(".", path) + ": was " + incorrectValue + ", is now " + correctedValue);
+                    ServerNetworking.LOGGER.info("Corrected '{}': was '{}', is now '{}'", String.join(".", path),
+                        incorrectValue, correctedValue);
                 }
             };
         }

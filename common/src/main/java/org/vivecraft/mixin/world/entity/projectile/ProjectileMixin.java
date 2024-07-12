@@ -27,7 +27,7 @@ public class ProjectileMixin {
             ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(player);
             if (serverVivePlayer != null && serverVivePlayer.isVR()) {
                 this.vivecraft$controllerDir = serverVivePlayer.getControllerDir(serverVivePlayer.activeHand);
-                if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !serverVivePlayer.isSeated() && serverVivePlayer.getDraw() > 0.0F) {
+                if (((Projectile) (Object) this) instanceof AbstractArrow && !(((Projectile) (Object) this) instanceof ThrownTrident) && !serverVivePlayer.isSeated() && serverVivePlayer.draw > 0.0F) {
                     this.vivecraft$controllerDir = serverVivePlayer.getControllerPos(1, (Player) pProjectile).subtract(serverVivePlayer.getControllerPos(0, (Player) pProjectile)).normalize();
                 }
             }
