@@ -466,15 +466,14 @@ public abstract class GameRendererVRMixin
             float m = 10.25f * l * h - 24.95f * h * h + 25.5f * l - 13.8f * h + 4.0f * g;
             float n = m * (float) Math.PI;
             float sinN = Mth.sin(n) * 0.5F;
-            poseStack.translate(0, 0, sinN - 1.0);
+            RenderHelper.applyStereo(ClientDataHolderVR.getInstance().currentPass, poseStack);
+            poseStack.mulPose(Axis.YP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getYaw()));
+            poseStack.mulPose(Axis.XP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPitch()));
+            poseStack.translate(0, 0, sinN + 1.0);
             if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD) {
                 sinN *= (float) (ClientDataHolderVR.getInstance().vrSettings.mixedRealityFov / 70.0);
             }
-            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, poseStack);
-            RenderHelper.applyStereo(ClientDataHolderVR.getInstance().currentPass, poseStack);
             poseStack.scale(sinN, sinN, sinN);
-            poseStack.mulPose(Axis.YP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getYaw()));
-            poseStack.mulPose(Axis.XP.rotationDegrees(-ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPitch()));
         }
     }
 

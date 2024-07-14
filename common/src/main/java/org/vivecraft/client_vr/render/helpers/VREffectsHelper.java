@@ -652,7 +652,6 @@ public class VREffectsHelper {
 
     public static void renderFireInFirstPerson() {
         PoseStack posestack = new PoseStack();
-        RenderHelper.applyVRModelView(dataHolder.currentPass, posestack);
         RenderHelper.applyStereo(dataHolder.currentPass, posestack);
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.depthFunc(GL11C.GL_ALWAYS);
