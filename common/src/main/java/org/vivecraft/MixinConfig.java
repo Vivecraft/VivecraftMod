@@ -50,6 +50,7 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        // this is here because forge doesn't finish mod loading, if any mod fails to load, and would crash the game
         if (!Xplat.isModLoadedSuccess()) {
             logger.info("not loading '{}' because mod failed to load completely", mixinClassName);
             return false;

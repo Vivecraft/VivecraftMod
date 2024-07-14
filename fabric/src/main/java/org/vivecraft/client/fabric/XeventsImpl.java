@@ -19,12 +19,4 @@ public class XeventsImpl implements Xevents {
     public static boolean renderFireOverlay(Player player, PoseStack poseStack) {
         return false;
     }
-
-    public static void onRenderTickStart(float partialTick) {
-
-    }
-
-    public static void onRenderTickEnd(float partialTick) {
-
-    }
 }

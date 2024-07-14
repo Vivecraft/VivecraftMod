@@ -6,7 +6,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
-import net.minecraftforge.event.ForgeEventFactory;
 import org.vivecraft.client.Xevents;
 
 public class XeventsImpl implements Xevents {
@@ -21,13 +20,5 @@ public class XeventsImpl implements Xevents {
 
     public static boolean renderFireOverlay(Player player, PoseStack poseStack) {
         return ForgeHooksClient.renderFireOverlay(player, poseStack);
-    }
-
-    public static void onRenderTickStart(float partialTick) {
-        ForgeEventFactory.onRenderTickStart(partialTick);
-    }
-
-    public static void onRenderTickEnd(float partialTick) {
-        ForgeEventFactory.onRenderTickEnd(partialTick);
     }
 }
