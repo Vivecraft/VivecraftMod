@@ -8,6 +8,7 @@ import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -640,7 +641,7 @@ public class VREffectsHelper {
             && dataHolder.currentPass != RenderPass.CAMERA) {
             VREffectsHelper.renderFireInFirstPerson();
         }
-        mc.gameRenderer.renderItemActivationAnimation(null, par1);
+        mc.gameRenderer.renderItemActivationAnimation(new GuiGraphics(mc, mc.renderBuffers().bufferSource()), par1);
     }
 
     public static void renderFireInFirstPerson() {
