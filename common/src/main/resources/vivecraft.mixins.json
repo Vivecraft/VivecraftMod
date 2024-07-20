@@ -96,7 +96,6 @@
     "world.entity.projectile.ProjectileMixin",
     "world.entity.projectile.ThrowableProjectileMixin",
     "world.entity.projectile.ThrownTridentMixin",
-    "world.item.CrossbowItemMixin",
-    "world.item.crafting.ShapedRecipeMixin"
+    "world.item.CrossbowItemMixin"
   ]
 }
