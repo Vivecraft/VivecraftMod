@@ -13,11 +13,13 @@
     }
   },
   "result": {
-    "item": "vivecraft:climbclaws",
-    "vanillaitem": "minecraft:shears",
-    "name": "vivecraft.item.climbclaws",
-    "fallbackname": "Climb Claws",
-    "hideflags": 4,
-    "unbreakable": true
+    "id": "minecraft:shears",
+    "count": 1,
+    "components": {
+      "minecraft:unbreakable": {
+        "show_in_tooltip": false
+      },
+      "minecraft:custom_name": "{\"type\": \"translatable\", \"translate\": \"vivecraft.item.climbclaws\", \"fallback\": \"Climb Claws\"}"
+    }
   }
 }

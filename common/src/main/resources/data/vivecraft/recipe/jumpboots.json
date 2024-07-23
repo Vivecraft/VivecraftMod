@@ -13,12 +13,17 @@
     }
   },
   "result": {
-    "item": "vivecraft:jumpboots",
-    "vanillaitem": "minecraft:leather_boots",
-    "name": "vivecraft.item.jumpboots",
-    "fallbackname": "Jump Boots",
-    "hideflags": 4,
-    "unbreakable": true,
-    "color": 9233775
+    "id": "minecraft:leather_boots",
+    "count": 1,
+    "components": {
+      "minecraft:unbreakable": {
+        "show_in_tooltip": false
+      },
+      "minecraft:custom_name": "{\"type\": \"translatable\", \"translate\": \"vivecraft.item.jumpboots\", \"fallback\": \"Jump Boots\"}",
+      "minecraft:dyed_color": {
+        "rgb": 9233775,
+        "show_in_tooltip": false
+      }
+    }
   }
 }
