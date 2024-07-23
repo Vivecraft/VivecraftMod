@@ -24,7 +24,7 @@ public class EntityRendererVRMixin {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;cameraOrientation()Lorg/joml/Quaternionf;"), method = "renderNameTag")
     public Quaternionf vivecraft$cameraOffset(EntityRenderDispatcher instance) {
-        return ((EntityRenderDispatcherVRExtension) this.entityRenderDispatcher).vivecraft$getCameraOrientationOffset(0.5f);
+        return ((EntityRenderDispatcherVRExtension) this.entityRenderDispatcher).vivecraft$getCameraOrientation(1.0f, 0.5f);
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getRopeHoldPosition(F)Lnet/minecraft/world/phys/Vec3;"), method = "renderLeash")

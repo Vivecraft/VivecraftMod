@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface EntityRenderDispatcherVRExtension {
 
-    Quaternionf vivecraft$getCameraOrientationOffset(float offset);
+    Quaternionf vivecraft$getCameraOrientation(float scale, float offset);
 
     Map<String, VRArmRenderer> vivecraft$getArmSkinMap();
 }
