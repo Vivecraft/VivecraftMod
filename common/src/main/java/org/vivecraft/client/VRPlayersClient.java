@@ -69,9 +69,7 @@ public class VRPlayersClient {
         rotInfo.reverse = vrPlayerState.reverseHands();
         rotInfo.seated = vrPlayerState.seated();
 
-        if (this.donors.containsKey(uuid)) {
-            rotInfo.hmd = this.donors.get(uuid);
-        }
+        rotInfo.hmd = this.donors.getOrDefault(uuid, 0);
 
         rotInfo.leftArmRot = new Vec3(controller1Dir.getX(), controller1Dir.getY(), controller1Dir.getZ());
         rotInfo.rightArmRot = new Vec3(controller0Dir.getX(), controller0Dir.getY(), controller0Dir.getZ());

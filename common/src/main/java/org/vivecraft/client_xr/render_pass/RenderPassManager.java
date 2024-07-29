@@ -23,6 +23,11 @@ public class RenderPassManager {
         this.vanillaRenderTarget = vanillaRenderTarget;
     }
 
+    /**
+     * sets the current pass to {@code wrp} <br>
+     * this sets the main RenderTarget, and any post effect that is linked to that pass
+     * @param wrp WorldRenderPass to set
+     */
     public static void setWorldRenderPass(WorldRenderPass wrp) {
         RenderPassManager.wrp = wrp;
         renderPassType = RenderPassType.WORLD_ONLY;
@@ -32,6 +37,9 @@ public class RenderPassManager {
         }
     }
 
+    /**
+     * sets up rendering for the GUI, this binds the GUI RenderTarget
+     */
     public static void setGUIRenderPass() {
         ClientDataHolderVR.getInstance().currentPass = RenderPass.GUI;
         RenderPassManager.wrp = null;
@@ -39,6 +47,9 @@ public class RenderPassManager {
         mc.mainRenderTarget = GuiHandler.guiFramebuffer;
     }
 
+    /**
+     * resets back to the vanilla RenderPass
+     */
     public static void setVanillaRenderPass() {
         ClientDataHolderVR.getInstance().currentPass = null;
         RenderPassManager.wrp = null;

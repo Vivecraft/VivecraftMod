@@ -6,11 +6,14 @@ import net.minecraft.client.Minecraft;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 
+/**
+ * extension of a regular RenderTarget that sets Vivecraft features on creation
+ */
 public class VRTextureTarget extends RenderTarget {
 
     private final String name;
 
-    public VRTextureTarget(String name, int width, int height, boolean useDepth, int texId, boolean linearFilter, boolean mipmaps,  boolean useStencil) {
+    public VRTextureTarget(String name, int width, int height, boolean useDepth, int texId, boolean linearFilter, boolean mipmaps, boolean useStencil) {
         super(useDepth);
         this.name = name;
         RenderSystem.assertOnGameThreadOrInit();
