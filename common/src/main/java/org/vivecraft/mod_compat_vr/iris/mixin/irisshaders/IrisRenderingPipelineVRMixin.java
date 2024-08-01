@@ -4,10 +4,10 @@ import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.program.ProgramImages;
 import net.irisshaders.iris.gl.program.ProgramSamplers;
 import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
-import net.irisshaders.iris.shaderpack.properties.PackShadowDirectives;
 import net.irisshaders.iris.shaderpack.programs.ProgramSet;
-import net.irisshaders.iris.shadows.ShadowRenderer;
+import net.irisshaders.iris.shaderpack.properties.PackShadowDirectives;
 import net.irisshaders.iris.shadows.ShadowRenderTargets;
+import net.irisshaders.iris.shadows.ShadowRenderer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -57,19 +57,7 @@ public class IrisRenderingPipelineVRMixin {
     // needed because shadowRenderTargets never gets set for sub pipelines
     // this should give the own shadow targets, for the main pipeline and renderpass.LEFT,
     // and for all other piplines the one from renderpass.LEFT
-
-    @Group(name = "reroute shadowRenderTargets", min = 6, max = 6)
-    @Redirect(method = "addGbufferOrShadowSamplers", at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0, slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/irisshaders/iris/samplers/IrisSamplers;hasShadowSamplers(Lnet/irisshaders/iris/gl/sampler/SamplerHolder;)Z")))
-    private Object vivecraft$rerouteShadowTarget(Object obj) {
-        if (!RenderPassType.isVanilla()) {
-            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj));
-        } else {
-            return Objects.requireNonNull(obj);
-        }
-    }
-
-    // iris 1.6.0+
-    @Group(name = "reroute shadowRenderTargets", min = 6, max = 6)
+    @Group(name = "reroute shadowRenderTargets", min = 4, max = 4)
     @Redirect(target = {
         @Desc(value = "lambda$new$6", owner = IrisRenderingPipeline.class, ret = ProgramSamplers.class, args = {java.util.function.Supplier.class, int.class}),
         @Desc(value = "lambda$new$7", owner = IrisRenderingPipeline.class, ret = ProgramImages.class, args = {java.util.function.Supplier.class, int.class}),

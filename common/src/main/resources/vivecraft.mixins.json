@@ -57,6 +57,7 @@
     "client_vr.renderer.LevelRendererVRMixin",
     "client_vr.renderer.NoSodiumLevelRendererVRMixin",
     "client_vr.renderer.PostChainVRMixin",
+    "client_vr.renderer.SectionOcclusionGraphAccessor",
     "client_vr.renderer.blockentity.TheEndGatewayRendererVRMixin",
     "client_vr.renderer.blockentity.TheEndPortalRendererVRMixin",
     "client_vr.renderer.entity.EntityRenderDispatcherVRMixin",

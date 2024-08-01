@@ -145,23 +145,21 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
                     .size(buttonWidth, 20)
                     .pos(centerX + x - buttonWidth / 2, centerY + y)
                     .build());
-
-
-                this.addRenderableWidget(
-                    new GuiVROptionButton(VRSettings.VrOptions.RADIAL_NUMBER.ordinal(),
-                        centerX - 10, centerY, 20, 20,
-                        VRSettings.VrOptions.RADIAL_NUMBER, "" + this.dataholder.vrSettings.vrRadialButtons,
-                        (p) -> {
-                            this.dataholder.vrSettings.vrRadialButtons += 2;
-                            if (dataholder.vrSettings.vrRadialButtons >
-                                VRSettings.VrOptions.RADIAL_NUMBER.getValueMax())
-                            {
-                                this.dataholder.vrSettings.vrRadialButtons = (int) VRSettings.VrOptions.RADIAL_NUMBER.getValueMin();
-                            }
-                            this.reinit = true;
-                        }));
-                super.addDefaultButtons();
             }
+
+            this.addRenderableWidget(
+                new GuiVROptionButton(VRSettings.VrOptions.RADIAL_NUMBER.ordinal(),
+                    centerX - 10, centerY, 20, 20,
+                    VRSettings.VrOptions.RADIAL_NUMBER, "" + this.dataholder.vrSettings.vrRadialButtons,
+                    (p) -> {
+                        this.dataholder.vrSettings.vrRadialButtons += 2;
+                        if (dataholder.vrSettings.vrRadialButtons >
+                            VRSettings.VrOptions.RADIAL_NUMBER.getValueMax()) {
+                            this.dataholder.vrSettings.vrRadialButtons = (int) VRSettings.VrOptions.RADIAL_NUMBER.getValueMin();
+                        }
+                        this.reinit = true;
+                    }));
+            super.addDefaultButtons();
         }
     }
 

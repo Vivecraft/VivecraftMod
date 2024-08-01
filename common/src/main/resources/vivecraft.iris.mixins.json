@@ -6,7 +6,9 @@
   "client": [
     "IrisBeginFrameHack",
     "IrisBlockRenderingSettingsMixin",
+    "IrisDHCompatVRMixin",
     "IrisHandRendererVRMixin",
+    "IrisLodRenderEventsVRMixin",
     "IrisProgramUniformsMixin",
     "IrisRenderSystemVRMixin",
     "IrisShadowMatricesMixin",
