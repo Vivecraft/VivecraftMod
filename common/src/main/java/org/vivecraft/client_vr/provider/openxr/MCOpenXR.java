@@ -183,7 +183,6 @@ public class MCOpenXR extends MCVR {
                 this.mc.getProfiler().push("gui");
 
                 if (this.mc.screen == null && this.dh.vrSettings.vrTouchHotbar) {
-                    VRSettings vrsettings = this.dh.vrSettings;
 
                     if (this.dh.vrSettings.vrHudLockMode != VRSettings.HUDLock.HEAD && this.hudPopup) {
                         this.processHotbar();
@@ -423,14 +422,12 @@ public class MCOpenXR extends MCVR {
 
     @Override
     public Vec3 getEyePosition(RenderPass eye) {
-        org.vivecraft.common.utils.math.Matrix4f matrix4f = this.hmdPoseRightEye;
+        org.vivecraft.common.utils.math.Matrix4f matrix4f = null;
 
         if (eye == RenderPass.LEFT) {
             matrix4f = this.hmdPoseLeftEye;
         } else if (eye == RenderPass.RIGHT) {
             matrix4f = this.hmdPoseRightEye;
-        } else {
-            matrix4f = null;
         }
 
         if (matrix4f == null) {
@@ -1190,6 +1187,16 @@ public class MCOpenXR extends MCVR {
             return ControllerType.RIGHT;
         }
         return ControllerType.LEFT;
+    }
+
+    @Override
+    public float getIPD() {
+        return (float) (this.getEyePosition(RenderPass.RIGHT).x - this.getEyePosition(RenderPass.LEFT).x);
+    }
+
+    @Override
+    public String getRuntimeName() {
+        return "OpenXR";
     }
 
     //TODO Collect and register all actions
