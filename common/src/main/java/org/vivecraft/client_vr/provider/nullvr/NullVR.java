@@ -12,7 +12,7 @@ import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
+import org.vivecraft.client_vr.provider.control.VRInputAction;
 import org.vivecraft.common.utils.math.Matrix4f;
 
 import java.util.List;
@@ -193,6 +193,11 @@ public class NullVR extends MCVR {
             vrActiveChangedLastFrame = false;
         }
         return vrActive;
+    }
+
+    @Override
+    public ControllerType getOriginControllerType(long i) {
+        return ControllerType.LEFT;
     }
 
     @Override

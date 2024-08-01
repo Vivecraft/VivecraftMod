@@ -1,7 +1,7 @@
-package org.vivecraft.client_vr.provider.openvr_lwjgl.control;
+package org.vivecraft.client_vr.provider.control;
 
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -62,10 +62,10 @@ public class HapticMusicPlayer {
                 if (object instanceof Note hapticmusicplayer$music$note) {
 
                     if (hapticmusicplayer$music$note.controller != null) {
-                        MCOpenVR.get().triggerHapticPulse(hapticmusicplayer$music$note.controller, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
+                        ClientDataHolderVR.getInstance().vr.triggerHapticPulse(hapticmusicplayer$music$note.controller, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
                     } else {
-                        MCOpenVR.get().triggerHapticPulse(ControllerType.RIGHT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
-                        MCOpenVR.get().triggerHapticPulse(ControllerType.LEFT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
+                        ClientDataHolderVR.getInstance().vr.get().triggerHapticPulse(ControllerType.RIGHT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
+                        ClientDataHolderVR.getInstance().vr.get().triggerHapticPulse(ControllerType.LEFT, hapticmusicplayer$music$note.durationSeconds, hapticmusicplayer$music$note.frequency, hapticmusicplayer$music$note.amplitude, f);
                     }
                 } else if (object instanceof Delay hapticmusicplayer$music$delay) {
                     f += hapticmusicplayer$music$delay.durationSeconds;

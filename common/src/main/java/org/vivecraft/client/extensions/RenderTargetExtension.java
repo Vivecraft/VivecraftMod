@@ -17,6 +17,8 @@ public interface RenderTargetExtension {
 
     void vivecraft$setTextid(int texid);
 
+    void vivecraft$setColorid(int colorid);
+
     void vivecraft$setUseStencil(boolean useStencil);
 
     boolean vivecraft$getUseStencil();
