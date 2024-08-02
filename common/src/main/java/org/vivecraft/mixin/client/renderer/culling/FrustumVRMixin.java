@@ -11,24 +11,7 @@ import org.vivecraft.client_vr.extensions.FrustumExtension;
 public abstract class FrustumVRMixin implements FrustumExtension {
 
     @Shadow
-    private double camX;
-
-    @Shadow
-    private double camY;
-
-    @Shadow
-    private double camZ;
-
-    @Shadow
     protected abstract boolean cubeInFrustum(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
-
-    @Override
-    @Unique
-    public void vivecraft$setCameraPosition(double camX, double camY, double camZ) {
-        this.camX = camX;
-        this.camY = camY;
-        this.camZ = camZ;
-    }
 
     @Override
     @Unique

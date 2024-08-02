@@ -10,7 +10,11 @@ public interface RenderTargetExtension {
 
     void vivecraft$blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect);
 
-    void vivecraft$setTextId(int texid);
+    /**
+     *
+     * @param texId
+     */
+    void vivecraft$setTextId(int texId);
 
     void vivecraft$setStencil(boolean stencil);
 

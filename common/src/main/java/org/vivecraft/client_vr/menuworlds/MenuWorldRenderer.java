@@ -1465,7 +1465,7 @@ public class MenuWorldRenderer {
 			{
 				boolean flag = this.client.player.isPotionActive(MobEffects.NIGHT_VISION) || this.client.player.isPotionActive(MobEffects.CONDUIT_POWER);
 
-				if (CustomColors.updateLightmap(world, this.torchFlickerX, this.nativeImage, flag, partialTicks))
+				if (CustomColors.updateLightmap(world, this.torchFlickerX, this.nativeImage, flag, partialTick))
 				{
 					this.dynamicTexture.updateDynamicTexture();
 					this.needsUpdate = false;
@@ -1658,9 +1658,9 @@ public class MenuWorldRenderer {
             }
 
             // no boss available
-			/*if (this.gameRenderer.getDarkenWorldAmount(partialTicks) > 0.0F)
+			/*if (this.gameRenderer.getDarkenWorldAmount(partialTick) > 0.0F)
 			{
-				float f = this.gameRenderer.getDarkenWorldAmount(partialTicks);
+				float f = this.gameRenderer.getDarkenWorldAmount(partialTick);
 				fogRed = fogRed * (1.0F - f) + fogRed * 0.7F * f;
 				fogGreen = fogGreen * (1.0F - f) + fogGreen * 0.6F * f;
 				fogBlue = fogBlue * (1.0F - f) + fogBlue * 0.6F * f;

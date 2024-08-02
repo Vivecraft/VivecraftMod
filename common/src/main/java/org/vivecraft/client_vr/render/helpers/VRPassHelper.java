@@ -102,7 +102,7 @@ public class VRPassHelper {
         }
     }
 
-    public static void renderAndSubmit(boolean renderLevel, long nanoTime, float actualPartialTicks) {
+    public static void renderAndSubmit(boolean renderLevel, long nanoTime, float actualPartialTick) {
         // still rendering
         mc.getProfiler().push("gameRenderer");
 
@@ -149,7 +149,7 @@ public class VRPassHelper {
             mc.mainRenderTarget = KeyboardHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTicks, KeyboardHandler.UI, guiGraphics);
+            RenderHelper.drawScreen(actualPartialTick, KeyboardHandler.UI, guiGraphics);
             guiGraphics.flush();
         }
 
@@ -158,7 +158,7 @@ public class VRPassHelper {
             mc.mainRenderTarget = RadialHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTicks, RadialHandler.UI, guiGraphics);
+            RenderHelper.drawScreen(actualPartialTick, RadialHandler.UI, guiGraphics);
             guiGraphics.flush();
         }
         mc.getProfiler().pop();
@@ -186,7 +186,7 @@ public class VRPassHelper {
             mc.getProfiler().push("setup");
             mc.mainRenderTarget.bindWrite(true);
             mc.getProfiler().pop();
-            VRPassHelper.renderSingleView(renderpass, actualPartialTicks, nanoTime, renderLevel);
+            VRPassHelper.renderSingleView(renderpass, actualPartialTick, nanoTime, renderLevel);
             mc.getProfiler().pop();
 
             if (dataHolder.grabScreenShot) {
@@ -221,7 +221,7 @@ public class VRPassHelper {
         // now we are done with rendering
         mc.getProfiler().pop();
 
-        dataHolder.vrPlayer.postRender(actualPartialTicks);
+        dataHolder.vrPlayer.postRender(actualPartialTick);
         mc.getProfiler().push("Display/Reproject");
 
         try {

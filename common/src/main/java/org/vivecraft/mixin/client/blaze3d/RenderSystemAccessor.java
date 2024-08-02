@@ -8,12 +8,17 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(RenderSystem.class)
 public interface RenderSystemAccessor {
 
-    // needs remap because of forge
+    /**
+     * @return ShaderTextures id array, used to get the actual size of the array
+     */
     @Accessor
     static int[] getShaderTextures() {
         return null;
     }
 
+    /**
+     * @return current light vectors used for entity shading, used to restore the lights after setting custom lights
+     */
     @Accessor
     static Vector3f[] getShaderLightDirections() {
         return null;

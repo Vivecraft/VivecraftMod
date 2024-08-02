@@ -197,7 +197,7 @@ public class BowTracker extends Tracker {
 
                 if (!this.isDrawing) {
                     ((PlayerExtension) player).vivecraft$setItemInUseClient(bow, hand);
-                    ((PlayerExtension) player).vivecraft$setItemInUseCountClient(stage0);
+                    ((PlayerExtension) player).vivecraft$setItemInUseRemainingClient(stage0);
                     //Minecraft.getInstance().physicalGuiManager.preClickAction();
                 }
             } else if ((float) Util.getMillis() - this.tsNotch > 500.0F) {
@@ -259,11 +259,11 @@ public class BowTracker extends Tracker {
                 double drawPercent = this.getDrawPercent();
 
                 if (drawPercent >= 1.0D) {
-                    ((PlayerExtension) player).vivecraft$setItemInUseCountClient(stage2);
+                    ((PlayerExtension) player).vivecraft$setItemInUseRemainingClient(stage2);
                 } else if (drawPercent > 0.4D) {
-                    ((PlayerExtension) player).vivecraft$setItemInUseCountClient(stage1);
+                    ((PlayerExtension) player).vivecraft$setItemInUseRemainingClient(stage1);
                 } else {
-                    ((PlayerExtension) player).vivecraft$setItemInUseCountClient(stage0);
+                    ((PlayerExtension) player).vivecraft$setItemInUseRemainingClient(stage0);
                 }
 
                 int hapStep = (int) (drawPercent * 4.0D * 4.0D * 3.0D);

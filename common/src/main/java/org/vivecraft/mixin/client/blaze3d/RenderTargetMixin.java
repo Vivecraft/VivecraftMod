@@ -19,7 +19,7 @@ import org.vivecraft.client.extensions.RenderTargetExtension;
 public abstract class RenderTargetMixin implements RenderTargetExtension {
 
     @Unique
-    private int vivecraft$texid = -1;
+    private int vivecraft$texId = -1;
     @Unique
     private boolean vivecraft$linearFilter;
     @Unique
@@ -52,8 +52,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     }
 
     @Override
-    public void vivecraft$setTextId(int texid) {
-        this.vivecraft$texid = texid;
+    public void vivecraft$setTextId(int texId) {
+        this.vivecraft$texId = texId;
     }
 
     @Override
@@ -73,10 +73,10 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I", remap = false, ordinal = 0), method = "createBuffers")
     public int vivecraft$genTextureId() {
-        if (this.vivecraft$texid == -1) {
+        if (this.vivecraft$texId == -1) {
             return TextureUtil.generateTextureId();
         } else {
-            return this.vivecraft$texid;
+            return this.vivecraft$texId;
         }
     }
 
