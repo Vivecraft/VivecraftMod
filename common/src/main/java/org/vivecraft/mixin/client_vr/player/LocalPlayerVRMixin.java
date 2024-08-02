@@ -555,8 +555,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
 
     @Override
     @Unique
-    public void vivecraft$setItemInUseRemainingClient(int remaining) {
-        this.useItemRemaining = remaining;
+    public void vivecraft$setItemInUseRemainingClient(int count) {
+        this.useItemRemaining = count;
     }
 
     @Unique
