@@ -52,8 +52,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Unique
     private boolean vivecraft$initFromServer;
     @Unique
-    private int vivecraft$movementTeleportTimer;
-    @Unique
     private boolean vivecraft$teleported;
     @Unique
     private double vivecraft$additionX;
@@ -467,18 +465,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     @Unique
     public boolean vivecraft$getInitFromServer() {
         return this.vivecraft$initFromServer;
-    }
-
-    @Override
-    @Unique
-    public void vivecraft$setMovementTeleportTimer(int value) {
-        this.vivecraft$movementTeleportTimer = value;
-    }
-
-    @Override
-    @Unique
-    public int vivecraft$getMovementTeleportTimer() {
-        return vivecraft$movementTeleportTimer;
     }
 
     @Override

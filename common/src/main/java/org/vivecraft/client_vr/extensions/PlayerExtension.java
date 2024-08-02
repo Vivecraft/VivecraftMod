@@ -7,17 +7,6 @@ import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 public interface PlayerExtension {
-
-    /**
-     * @return current movementTeleportTimer
-     */
-    int vivecraft$getMovementTeleportTimer();
-
-    /**
-     * set current movementTeleportTimer
-     */
-    void vivecraft$setMovementTeleportTimer(int value);
-
     /**
      * sets if the player used the vivecraft teleport to move
      * @param teleported if the player teleported

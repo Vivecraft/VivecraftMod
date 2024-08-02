@@ -36,6 +36,7 @@ public class TeleportTracker extends Tracker {
     private Direction movementTeleportDestinationSideHit;
     public double movementTeleportProgress;
     public double movementTeleportDistance;
+    private int movementTeleportTimer = 0;
     private final Vec3[] movementTeleportArc = new Vec3[50];
     public int movementTeleportArcSteps = 0;
     public double lastTeleportArcDisplayOffset = 0.0D;
@@ -96,13 +97,11 @@ public class TeleportTracker extends Tracker {
         if ((bindingTeleport || seatedTeleport) && !player.isPassenger()) {
             destination = this.movementTeleportDestination;
 
-            int movementTeleportTimer = ((PlayerExtension) player).vivecraft$getMovementTeleportTimer();
-
             if (this.vrMovementStyle.teleportOnRelease
-                || (movementTeleportTimer >= 0 && (destination.x != 0.0D || destination.y != 0.0D || destination.z != 0.0D))
+                || (this.movementTeleportTimer >= 0 && (destination.x != 0.0D || destination.y != 0.0D || destination.z != 0.0D))
             ) {
                 // start tp sound
-                if (movementTeleportTimer == 0
+                if (this.movementTeleportTimer == 0
                     && this.vrMovementStyle.startTeleportingSound != null
                 ) {
                     player.playSound(this.vrMovementStyle.startTeleportingSound,
@@ -110,17 +109,16 @@ public class TeleportTracker extends Tracker {
                         1.0F / (random.nextFloat() * 0.4F + 1.2F) + 0.5F);
                 }
 
-                movementTeleportTimer++;
-                ((PlayerExtension) player).vivecraft$setMovementTeleportTimer(movementTeleportTimer);
+                this.movementTeleportTimer++;
 
                 // tp particles
-                if (movementTeleportTimer > 0) {
+                if (this.movementTeleportTimer > 0) {
                     if (this.vrMovementStyle.teleportOnRelease) {
                         this.movementTeleportProgress = 1.0D;
                     } else {
                         Vec3 playerPos = player.position();
                         double dist = destination.distanceTo(playerPos);
-                        this.movementTeleportProgress = (double) movementTeleportTimer / (dist + 3.0D);
+                        this.movementTeleportProgress = (double) this.movementTeleportTimer / (dist + 3.0D);
                     }
 
                     if (destination.x != 0.0D || destination.y != 0.0D || destination.z != 0.0D) {
@@ -183,7 +181,7 @@ public class TeleportTracker extends Tracker {
                 doTeleport = true;
             }
 
-            ((PlayerExtension) player).vivecraft$setMovementTeleportTimer(0);
+            this.movementTeleportTimer = 0;
             this.movementTeleportProgress = 0.0D;
         }
 
@@ -382,7 +380,7 @@ public class TeleportTracker extends Tracker {
         }
 
         this.mc.player.fallDistance = 0.0F;
-        ((PlayerExtension) this.mc.player).vivecraft$setMovementTeleportTimer(-1);
+        this.movementTeleportTimer = -1;
     }
 
     // look for a valid place to stand on the block that the trace collided with
