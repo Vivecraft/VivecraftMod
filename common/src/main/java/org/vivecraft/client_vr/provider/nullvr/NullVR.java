@@ -63,7 +63,7 @@ public class NullVR extends MCVR {
             VRSettings.logger.info("NullDriver. Forcing seated mode.");
             this.dh.vrSettings.seated = true;
 
-            this.headIsTracking = false;
+            this.headIsTracking = true;
             this.hmdPose.SetIdentity();
             this.hmdPose.M[1][3] = 1.62F;
 
