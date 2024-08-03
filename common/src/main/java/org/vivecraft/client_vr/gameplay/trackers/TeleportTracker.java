@@ -191,8 +191,8 @@ public class TeleportTracker extends Tracker {
 
             // execute teleport
             if (!this.dh.vrPlayer.isTeleportSupported()) {
-                String s1 = "tp " + destination.x + " " + destination.y + " " + destination.z;
-                player.connection.sendCommand(s1);
+                String command = "tp " + destination.x + " " + destination.y + " " + destination.z;
+                player.connection.sendCommand(command);
             } else {
                 if (ClientNetworking.serverSupportsDirectTeleport) {
                     ((PlayerExtension) player).vivecraft$setTeleported(true);

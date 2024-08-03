@@ -4,8 +4,8 @@
     "srcrgb": "srcalpha",
     "dstrgb": "1-srcalpha"
   },
-  "vertex": "lanczos",
-  "fragment": "lanczos",
+  "vertex": "lanczos_vr",
+  "fragment": "lanczos_vr",
   "attributes": ["Position", "UV0"],
   "samplers": [
     {

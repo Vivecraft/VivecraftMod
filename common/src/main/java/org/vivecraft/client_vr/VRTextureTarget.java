@@ -17,7 +17,7 @@ public class VRTextureTarget extends RenderTarget {
         super(useDepth);
         this.name = name;
         RenderSystem.assertOnGameThreadOrInit();
-        ((RenderTargetExtension) this).vivecraft$setTextId(texId);
+        ((RenderTargetExtension) this).vivecraft$setTexId(texId);
         ((RenderTargetExtension) this).vivecraft$setLinearFilter(linearFilter);
         ((RenderTargetExtension) this).vivecraft$setMipmaps(mipmaps);
         ((RenderTargetExtension) this).vivecraft$setStencil(useStencil);

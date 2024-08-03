@@ -4,8 +4,8 @@
     "srcrgb": "srcalpha",
     "dstrgb": "1-srcalpha"
   },
-  "vertex": "passthrough",
-  "fragment": "mixedreality",
+  "vertex": "passthrough_vr",
+  "fragment": "mixedreality_vr",
   "attributes": ["Position", "UV0"],
   "samplers": [
     {

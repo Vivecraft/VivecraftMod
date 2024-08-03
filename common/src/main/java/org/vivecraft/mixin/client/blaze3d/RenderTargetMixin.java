@@ -1,16 +1,12 @@
 package org.vivecraft.mixin.client.blaze3d;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.TextureUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client.extensions.RenderTargetExtension;
@@ -27,80 +23,68 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     @Unique
     private boolean vivecraft$stencil = false;
 
-    @Shadow
-    public int width;
-    @Shadow
-    public int height;
-    @Shadow
-    public int viewHeight;
-    @Shadow
-    public int viewWidth;
-    @Shadow
-    protected int colorTextureId;
-
-    @Shadow
-    public abstract void clear(boolean onMacIn);
-
     @Override
+    @Unique
     public void vivecraft$setStencil(boolean stencil) {
         this.vivecraft$stencil = stencil;
     }
 
     @Override
+    @Unique
     public boolean vivecraft$hasStencil() {
         return this.vivecraft$stencil;
     }
 
     @Override
-    public void vivecraft$setTextId(int texId) {
+    @Unique
+    public void vivecraft$setTexId(int texId) {
         this.vivecraft$texId = texId;
     }
 
     @Override
+    @Unique
     public void vivecraft$setLinearFilter(boolean linearFilter) {
         this.vivecraft$linearFilter = linearFilter;
     }
 
     @Override
+    @Unique
     public void vivecraft$setMipmaps(boolean mipmaps) {
         this.vivecraft$mipmaps = mipmaps;
     }
 
     @Override
+    @Unique
     public boolean vivecraft$hasMipmaps() {
         return this.vivecraft$mipmaps;
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I", remap = false, ordinal = 0), method = "createBuffers")
-    public int vivecraft$genTextureId() {
-        if (this.vivecraft$texId == -1) {
-            return TextureUtil.generateTextureId();
-        } else {
-            return this.vivecraft$texId;
-        }
+    @WrapOperation(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;generateTextureId()I", remap = false, ordinal = 0))
+    public int vivecraft$fixedTextureId(Operation<Integer> original) {
+        return this.vivecraft$texId == -1 ? original.call() : this.vivecraft$texId;
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false, ordinal = 0), method = "createBuffers", index = 2)
+    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false, ordinal = 0), index = 2)
     public int vivecraft$modifyTexImage2DInternalformat(int internalformat) {
         return this.vivecraft$stencil ? GL30.GL_DEPTH32F_STENCIL8 : internalformat;
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false, ordinal = 0), method = "createBuffers", index = 6)
+    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false, ordinal = 0), index = 6)
     public int vivecraft$modifyTexImage2DFormat(int format) {
         return this.vivecraft$stencil ? GL30.GL_DEPTH_STENCIL : format;
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false, ordinal = 0), method = "createBuffers", index = 7)
+    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false, ordinal = 0), index = 7)
     public int vivecraft$modifyTexImage2DType(int type) {
         return this.vivecraft$stencil ? GL30.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
     }
 
-    @ModifyConstant(method = "createBuffers", constant = @Constant(intValue = 9728, ordinal = 2))
-    public int vivecraft$changeTextPar(int i) {
-        return this.vivecraft$linearFilter ? GL11.GL_LINEAR : i;
+    @ModifyExpressionValue(method = "createBuffers", at = @At(value = "CONSTANT", args = "intValue=9728", ordinal = 2))
+    public int vivecraft$linearFiltering(int filterMode) {
+        return this.vivecraft$linearFilter ? GL11.GL_LINEAR : filterMode;
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texParameter(III)V", remap = false, ordinal = 0), method = "setFilterMode", index = 2)
+    @ModifyArg(method = "setFilterMode", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texParameter(III)V", remap = false, ordinal = 0), index = 2)
     public int vivecraft$modifyTextureMinFilter(int attachment) {
         if (this.vivecraft$mipmaps) {
             return attachment == GL11.GL_LINEAR ? GL11.GL_LINEAR_MIPMAP_LINEAR : GL11.GL_NEAREST_MIPMAP_NEAREST;
@@ -109,100 +93,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         }
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", remap = false, ordinal = 1), method = "createBuffers", index = 1)
+    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", remap = false, ordinal = 1), index = 1)
     public int vivecraft$modifyGlFramebufferTexture2DAttachment(int attachment) {
         return this.vivecraft$stencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
-    }
-
-    public void vivecraft$blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean disableBlend, float xCropFactor, float yCropFactor, boolean keepAspect) {
-        RenderSystem.assertOnGameThreadOrInit();
-        if (!RenderSystem.isInInitPhase()) {
-            RenderSystem.recordRenderCall(() -> {
-                this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
-            });
-        } else {
-            this.vivecraft$_blitToScreen(instance, left, width, height, top, disableBlend, xCropFactor, yCropFactor, keepAspect);
-        }
-    }
-
-    @Unique
-    private void vivecraft$_blitToScreen(ShaderInstance instance, int left, int width, int height, int top, boolean bl, float xCropFactor, float yCropFactor, boolean keepAspect) {
-        RenderSystem.assertOnGameThreadOrInit();
-        RenderSystem.colorMask(true, true, true, false);
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.viewport(left, top, width, height);
-        if (bl) {
-            RenderSystem.disableBlend();
-        }
-
-        Minecraft minecraft = Minecraft.getInstance();
-
-        float f = (float) width / (float) height;
-        float f1 = (float) this.viewWidth / (float) this.viewHeight;
-        float f2 = (float) width;
-        float f3 = (float) height;
-        float f4 = 0.0F;
-        float f5 = 0.0F;
-
-        if (keepAspect) {
-            if (f > f1) {
-                float f6 = (float) width / (float) this.viewWidth;
-                f4 = 0.0F;
-                f2 = (float) width;
-                f5 = (float) height / 2.0F - (float) this.viewHeight / 2.0F * f6;
-                f3 = (float) height / 2.0F + (float) this.viewHeight / 2.0F * f6;
-            } else {
-                float f10 = (float) height / (float) this.viewHeight;
-                f4 = (float) width / 2.0F - (float) this.viewWidth / 2.0F * f10;
-                f2 = (float) width / 2.0F + (float) this.viewWidth / 2.0F * f10;
-                f5 = 0.0F;
-                f3 = (float) height;
-            }
-        }
-
-        float f11 = (float) width;
-        float f7 = (float) height;
-        float f8 = (float) this.viewWidth / (float) this.width;
-        float f9 = (float) this.viewHeight / (float) this.height;
-
-        if (instance == null) {
-            instance = minecraft.gameRenderer.blitShader;
-            instance.setSampler("DiffuseSampler", this.colorTextureId);
-        } else {
-            for (int k = 0; k < RenderSystemAccessor.getShaderTextures().length; k++) {
-                int l = RenderSystem.getShaderTexture(k);
-                instance.setSampler("Sampler" + k, l);
-            }
-        }
-        Matrix4f matrix4f = new Matrix4f().setOrtho(0, (float) width, (float) (height), 0, 1000.0F, 3000.0F);
-        RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-
-        if (instance.MODEL_VIEW_MATRIX != null) {
-            instance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0F, 0.0F, -2000.0F));
-        }
-
-        if (instance.PROJECTION_MATRIX != null) {
-            instance.PROJECTION_MATRIX.set(matrix4f);
-        }
-
-        instance.apply();
-
-        Tesselator tesselator = RenderSystem.renderThreadTesselator();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
-        bufferbuilder.vertex(f4, f3, 0.0D).uv(xCropFactor, yCropFactor).color(255, 255, 255, 255)
-            .endVertex();
-        bufferbuilder.vertex(f2, f3, 0.0D).uv(f8 - xCropFactor, yCropFactor)
-            .color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(f2, f5, 0.0D).uv(f8 - xCropFactor, f9 - yCropFactor)
-            .color(255, 255, 255, 255).endVertex();
-        bufferbuilder.vertex(f4, f5, 0.0D).uv(xCropFactor, f9 - yCropFactor)
-            .color(255, 255, 255, 255).endVertex();
-        BufferUploader.draw(bufferbuilder.end());
-        instance.clear();
-
-        RenderSystem.depthMask(true);
-        RenderSystem.colorMask(true, true, true, true);
     }
 }

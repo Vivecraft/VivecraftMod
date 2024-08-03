@@ -220,7 +220,7 @@ public class ShaderHelper {
         // this needs to be set for each eye
         VRShaders._Overlay_eye.set(eye == RenderPass.LEFT ? 1 : -1);
 
-        ShaderHelper.renderFullscreenQuad(VRShaders.fovReductionShader, source);
+        ShaderHelper.renderFullscreenQuad(VRShaders.postProcessingShader, source);
     }
 
     public static void doMixedRealityMirror() {
@@ -237,31 +237,31 @@ public class ShaderHelper {
             .transform(Vector3.forward());
 
         // set uniforms
-        VRShaders._DepthMask_projectionMatrix.set(
+        VRShaders._MixedReality_projectionMatrix.set(
             ((GameRendererExtension) mc.gameRenderer).vivecraft$getThirdPassProjectionMatrix());
-        VRShaders._DepthMask_viewMatrix.set(viewMatrix);
+        VRShaders._MixedReality_viewMatrix.set(viewMatrix);
 
-        VRShaders._DepthMask_hmdViewPosition.set((float) camPlayer.x, (float) camPlayer.y, (float) camPlayer.z);
-        VRShaders._DepthMask_hmdPlaneNormal.set(-cameraLook.getX(), 0.0F, -cameraLook.getZ());
+        VRShaders._MixedReality_hmdViewPosition.set((float) camPlayer.x, (float) camPlayer.y, (float) camPlayer.z);
+        VRShaders._MixedReality_hmdPlaneNormal.set(-cameraLook.getX(), 0.0F, -cameraLook.getZ());
 
         boolean alphaMask = dataHolder.vrSettings.mixedRealityUnityLike && dataHolder.vrSettings.mixedRealityAlphaMask;
 
         if (!alphaMask) {
-            VRShaders._DepthMask_keyColorUniform.set(
+            VRShaders._MixedReality_keyColorUniform.set(
                 (float) dataHolder.vrSettings.mixedRealityKeyColor.getRed() / 255.0F,
                 (float) dataHolder.vrSettings.mixedRealityKeyColor.getGreen() / 255.0F,
                 (float) dataHolder.vrSettings.mixedRealityKeyColor.getBlue() / 255.0F);
         } else {
-            VRShaders._DepthMask_keyColorUniform.set(0F, 0F, 0F);
+            VRShaders._MixedReality_keyColorUniform.set(0F, 0F, 0F);
         }
-        VRShaders._DepthMask_alphaModeUniform.set(alphaMask ? 1 : 0);
+        VRShaders._MixedReality_alphaModeUniform.set(alphaMask ? 1 : 0);
 
-        VRShaders._DepthMask_firstPersonPassUniform.set(dataHolder.vrSettings.mixedRealityUnityLike ? 1 : 0);
+        VRShaders._MixedReality_firstPersonPassUniform.set(dataHolder.vrSettings.mixedRealityUnityLike ? 1 : 0);
 
         // bind textures
-        VRShaders.depthMaskShader.setSampler("thirdPersonColor",
+        VRShaders.mixedRealityShader.setSampler("thirdPersonColor",
             dataHolder.vrRenderer.framebufferMR.getColorTextureId());
-        VRShaders.depthMaskShader.setSampler("thirdPersonDepth",
+        VRShaders.mixedRealityShader.setSampler("thirdPersonDepth",
             dataHolder.vrRenderer.framebufferMR.getDepthTextureId());
 
         if (dataHolder.vrSettings.mixedRealityUnityLike) {
@@ -275,14 +275,14 @@ public class ShaderHelper {
                     source = dataHolder.vrRenderer.framebufferEye1;
                 }
             }
-            VRShaders.depthMaskShader.setSampler("firstPersonColor", source.getColorTextureId());
+            VRShaders.mixedRealityShader.setSampler("firstPersonColor", source.getColorTextureId());
         }
 
-        VRShaders.depthMaskShader.apply();
+        VRShaders.mixedRealityShader.apply();
 
-        drawFullscreenQuad(VRShaders.depthMaskShader.getVertexFormat());
+        drawFullscreenQuad(VRShaders.mixedRealityShader.getVertexFormat());
 
-        VRShaders.depthMaskShader.clear();
+        VRShaders.mixedRealityShader.clear();
     }
 
     /**
@@ -329,5 +329,69 @@ public class ShaderHelper {
             RenderSystem.depthFunc(GL43.GL_LEQUAL);
             RenderSystem.enableBlend();
         }
+    }
+
+    /**
+     * blits the given {@code source} RenderTarget to the screen/bound buffer<br>
+     * the {@code source} is drawn to the rectangle at {@code left},{@code top} with a size of {@code width},{@code height}<br>
+     * if {@code xCropFactor} or {@code yCropFactor} are non 0 the {@code source} gets zoomed in
+     * @param source RenderTarget to draw to the screen
+     * @param left left edge of the target area
+     * @param width width of the target area
+     * @param height height of the target area
+     * @param top top edge of the target area
+     * @param xCropFactor vertical crop factor for the {@code source}
+     * @param yCropFactor horizontal crop factor for the {@code source}
+     * @param keepAspect keeps the aspect ratio in takt when cropping the buffer
+     */
+    public static void blitToScreen(RenderTarget source, int left, int width, int height, int top, float xCropFactor, float yCropFactor, boolean keepAspect) {
+        RenderSystem.assertOnRenderThread();
+        RenderSystem.colorMask(true, true, true, false);
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.viewport(left, top, width, height);
+        RenderSystem.disableBlend();
+
+        float drawAspect = (float) width / (float) height;
+        float bufferAspect = (float) source.viewWidth / (float) source.viewHeight;
+
+        float xMin = xCropFactor;
+        float yMin = yCropFactor;
+        float xMax = 1.0F - xCropFactor;
+        float yMax = 1.0F - yCropFactor;
+
+        if (keepAspect) {
+            if (drawAspect > bufferAspect) {
+                // destination is wider than the buffer
+                float heightAspect = ((float) height / (float) width) * (0.5F - yCropFactor);
+
+                yMin = 0.5F - heightAspect;
+                yMax = 0.5F + heightAspect;
+            } else {
+                // destination is taller than the buffer
+                float widthAspect = drawAspect * (0.5F - xCropFactor);
+
+                xMin = 0.5F - widthAspect;
+                xMax = 0.5F + widthAspect;
+            }
+        }
+
+        ShaderInstance instance = VRShaders.blitVRShader;
+        instance.setSampler("DiffuseSampler", source.getColorTextureId());
+
+        instance.apply();
+
+        BufferBuilder bufferbuilder = RenderSystem.renderThreadTesselator().getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, instance.getVertexFormat());
+
+        bufferbuilder.vertex(-1.0F, -1.0F, 0.0F).uv(xMin, yMin).endVertex();
+        bufferbuilder.vertex(1.0F, -1.0F, 0.0F).uv(xMax, yMin).endVertex();
+        bufferbuilder.vertex(1.0F, 1.0F, 0.0F).uv(xMax, yMax).endVertex();
+        bufferbuilder.vertex(-1.0F, 1.0F, 0.0F).uv(xMin, yMax).endVertex();
+        BufferUploader.draw(bufferbuilder.end());
+        instance.clear();
+
+        RenderSystem.depthMask(true);
+        RenderSystem.colorMask(true, true, true, true);
     }
 }

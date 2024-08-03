@@ -48,7 +48,6 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.VRPlayersClient;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
@@ -854,7 +853,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             && ClientDataHolderVR.getInstance().vr.isHMDTracking()) {
             this.vivecraft$notifyMirror("Mirror is OFF", true, 1000);
         } else if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
-            if (VRShaders.depthMaskShader != null) {
+            if (VRShaders.mixedRealityShader != null) {
                 ShaderHelper.doMixedRealityMirror();
             } else {
                 this.vivecraft$notifyMirror("Shader compile failed, see log", true, 10000);
@@ -866,13 +865,11 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             int screenWidth = ((WindowExtension) (Object) this.window).vivecraft$getActualScreenWidth() / 2;
             int screenHeight = ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight();
             if (rendertarget != null) {
-                ((RenderTargetExtension) rendertarget).vivecraft$blitToScreen(0, screenWidth,
-                    screenHeight, 0, true, 0.0F, 0.0F, false);
+                ShaderHelper.blitToScreen(rendertarget, 0, screenWidth, screenHeight, 0, 0.0F, 0.0F, false);
             }
 
             if (rendertarget1 != null) {
-                ((RenderTargetExtension) rendertarget1).vivecraft$blitToScreen(screenWidth,
-                    screenWidth, screenHeight, 0, true, 0.0F, 0.0F, false);
+                ShaderHelper.blitToScreen(rendertarget1, screenWidth, screenWidth, screenHeight, 0, 0.0F, 0.0F, false);
             }
         } else {
             float xcrop = 0.0F;
@@ -905,8 +902,10 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
             // source = DataHolder.getInstance().vrRenderer.telescopeFramebufferR;
             //
             if (source != null) {
-                ((RenderTargetExtension) source).vivecraft$blitToScreen(0, ((WindowExtension) (Object) this.window).vivecraft$getActualScreenWidth(),
-                    ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight(), 0, true, xcrop, ycrop, ar);
+                ShaderHelper.blitToScreen(source,
+                    0, ((WindowExtension) (Object) this.window).vivecraft$getActualScreenWidth(),
+                    ((WindowExtension) (Object) this.window).vivecraft$getActualScreenHeight(), 0,
+                    xcrop, ycrop, ar);
             }
         }
     }

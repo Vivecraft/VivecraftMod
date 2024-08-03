@@ -711,6 +711,8 @@ public abstract class VRRenderer {
 
             try {
                 minecraft.mainRenderTarget = this.framebufferVrRender;
+                VRShaders.setupBlitAspect();
+                RenderHelper.checkGLError("init blit aspect shader");
                 VRShaders.setupDepthMask();
                 RenderHelper.checkGLError("init depth shader");
                 VRShaders.setupFOVReduction();
