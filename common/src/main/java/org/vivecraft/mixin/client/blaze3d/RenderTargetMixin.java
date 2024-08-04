@@ -1,6 +1,5 @@
 package org.vivecraft.mixin.client.blaze3d;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -79,7 +78,7 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         return this.vivecraft$stencil ? GL30.GL_FLOAT_32_UNSIGNED_INT_24_8_REV : type;
     }
 
-    @ModifyExpressionValue(method = "createBuffers", at = @At(value = "CONSTANT", args = "intValue=9728", ordinal = 2))
+    @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;setFilterMode(I)V"))
     public int vivecraft$linearFiltering(int filterMode) {
         return this.vivecraft$linearFilter ? GL11.GL_LINEAR : filterMode;
     }
