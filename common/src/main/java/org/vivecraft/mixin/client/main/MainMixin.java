@@ -1,41 +1,30 @@
 package org.vivecraft.mixin.client.main;
 
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
 import net.minecraft.client.main.Main;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(Main.class)
 public class MainMixin {
 
-    @Inject(at = @At("HEAD"), method = "main", remap = false)
+    @Inject(method = "main", at = @At("HEAD"), remap = false)
     private static void vivecraft$options(String[] strings, CallbackInfo ci) {
-        OptionParser vivecraftOptionParser = new OptionParser();
-        vivecraftOptionParser.allowsUnrecognizedOptions();
-        vivecraftOptionParser.accepts("kiosk");
-        vivecraftOptionParser.accepts("viewonly");
-        vivecraftOptionParser.accepts("katvr");
-        vivecraftOptionParser.accepts("infinadeck");
-        OptionSet optionset = vivecraftOptionParser.parse(strings);
-        ClientDataHolderVR.kiosk = optionset.has("kiosk");
+        ClientDataHolderVR.kiosk = System.getProperty("kiosk", "false").equals("true");
 
         if (ClientDataHolderVR.kiosk) {
-            System.out.println("Setting kiosk");
-        }
-
-        if (ClientDataHolderVR.kiosk) {
-            ClientDataHolderVR.viewonly = optionset.has("viewonly");
+            VRSettings.logger.info("Setting kiosk");
+            ClientDataHolderVR.viewonly = System.getProperty("viewonly", "false").equals("true");
 
             if (ClientDataHolderVR.viewonly) {
-                System.out.println("Setting viewonly");
+                VRSettings.logger.info("Setting viewonly");
             }
         }
 
-        ClientDataHolderVR.katvr = optionset.has("katvr");
-        ClientDataHolderVR.infinadeck = optionset.has("infinadeck");
+        ClientDataHolderVR.katvr = System.getProperty("katvr", "false").equals("true");
+        ClientDataHolderVR.infinadeck = System.getProperty("infinadeck", "false").equals("true");
     }
 }
