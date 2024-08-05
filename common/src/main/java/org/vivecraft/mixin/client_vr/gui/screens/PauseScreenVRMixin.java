@@ -44,24 +44,14 @@ public abstract class PauseScreenVRMixin extends Screen {
         }
 
         if (!Minecraft.getInstance().isMultiplayerServer()) {
-            rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"), (p) ->
-            {
-                this.minecraft.setScreen(new ChatScreen(""));
-                if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard) {
-                    KeyboardHandler.setOverlayShowing(true);
-                }
-            }).width(98).build());
+            rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
+                (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(98).build());
         } else {
             GridLayout gridWidgetChat_Social = new GridLayout();
             gridWidgetChat_Social.defaultCellSetting().paddingRight(1);
             GridLayout.RowHelper rowHelperChat_Social = gridWidgetChat_Social.createRowHelper(2);
-            rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"), (p) ->
-            {
-                this.minecraft.setScreen(new ChatScreen(""));
-                if (ClientDataHolderVR.getInstance().vrSettings.autoOpenKeyboard) {
-                    KeyboardHandler.setOverlayShowing(true);
-                }
-            }).width(48).build());
+            rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
+                (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(48).build());
 
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.social"), (p) -> this.minecraft.setScreen(new SocialInteractionsScreen())).width(48).pos(50, 0).build());
             rowHelper.addChild(gridWidgetChat_Social);

@@ -158,6 +158,12 @@ public class VRSettings {
         ALPHA
     }
 
+    public enum AutoOpenKeyboard implements OptionEnum<AutoOpenKeyboard> {
+        OFF,
+        CHAT,
+        ON
+    }
+
     @SettingField
     public int version = UNKNOWN_VERSION;
 
@@ -412,7 +418,7 @@ public class VRSettings {
     @SettingField(VrOptions.SEATED_HUD_XHAIR)
     public boolean seatedHudAltMode = true;
     @SettingField(VrOptions.AUTO_OPEN_KEYBOARD)
-    public boolean autoOpenKeyboard = false;
+    public AutoOpenKeyboard autoOpenKeyboard = AutoOpenKeyboard.OFF;
     @SettingField(VrOptions.AUTO_CLOSE_KEYBOARD)
     public boolean autoCloseKeyboard = true;
     @SettingField
