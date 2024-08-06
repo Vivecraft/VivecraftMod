@@ -11,8 +11,8 @@ import org.vivecraft.client_vr.provider.InputSimulator;
 @Mixin(InputConstants.class)
 public class InputConstantsVRMixin {
 
-    @Inject(at = @At("TAIL"), method = "isKeyDown", cancellable = true)
-    private static void vivecraft$keyDown(long window, int key, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "isKeyDown", at = @At("TAIL"), cancellable = true)
+    private static void vivecraft$inputSimulatorDown(long window, int key, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(cir.getReturnValueZ() || (VRState.vrRunning && InputSimulator.isKeyDown(key)));
     }
 }

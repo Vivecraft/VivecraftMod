@@ -20,34 +20,37 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
 
-    protected TitleScreenMixin(Component component) {
-        super(component);
-    }
-
     @Unique
     private Button vivecraft$vrModeButton;
     @Unique
     private Button vivecraft$updateButton;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", shift = At.Shift.AFTER, ordinal = 1), method = "createNormalMenuOptions")
+    protected TitleScreenMixin(Component title) {
+        super(title);
+    }
+
+    /**
+     * injects after the multiplayer button to be in the right spot for the tab navigation
+     */
+    @Inject(method = "createNormalMenuOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", shift = At.Shift.AFTER, ordinal = 1))
     public void vivecraft$initFullGame(CallbackInfo ci) {
         vivecraft$addVRModeButton();
     }
 
-    @Inject(at = @At("TAIL"), method = "createDemoMenuOptions")
+    @Inject(method = "createDemoMenuOptions", at = @At("TAIL"))
     public void vivecraft$initDemo(CallbackInfo ci) {
         vivecraft$addVRModeButton();
     }
 
     @Unique
     private void vivecraft$addVRModeButton() {
-
         vivecraft$vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
             VRState.vrEnabled = !VRState.vrEnabled;
             ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
             ClientDataHolderVR.getInstance().vrSettings.saveOptions();
 
-            button.setMessage(Component.translatable("vivecraft.gui.vr", VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
+            button.setMessage(Component.translatable("vivecraft.gui.vr",
+                VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
         })
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 72)
@@ -66,12 +69,15 @@ public abstract class TitleScreenMixin extends Screen {
         this.addRenderableWidget(vivecraft$updateButton);
     }
 
-    @Inject(at = @At("TAIL"), method = "render")
-    public void vivecraft$renderToolTip(GuiGraphics guiGraphics, int i, int j, float f, CallbackInfo ci) {
+    @Inject(method = "render", at = @At("TAIL"))
+    public void vivecraft$renderToolTip(
+        GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci)
+    {
         vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
-        if (vivecraft$vrModeButton.visible && vivecraft$vrModeButton.isMouseOver(i, j)) {
-            guiGraphics.renderTooltip(font, font.split(Component.translatable("vivecraft.options.VR_ENABLED.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
+        if (vivecraft$vrModeButton.visible && vivecraft$vrModeButton.isMouseOver(mouseX, mouseY)) {
+            guiGraphics.renderTooltip(font, font.split(Component.translatable("vivecraft.options.VR_ENABLED.tooltip"),
+                Math.max(width / 2 - 43, 170)), mouseX, mouseY);
         }
         if (VRState.vrInitialized && !VRState.vrRunning) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
@@ -79,8 +85,10 @@ public abstract class TitleScreenMixin extends Screen {
         }
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), method = "render", index = 1)
+    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), index = 1)
     public float vivecraft$maybeNoPanorama(float alpha) {
-        return VRState.vrRunning && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() || ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama) ? 0.0F : alpha;
+        return VRState.vrRunning && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() ||
+            ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama
+        ) ? 0.0F : alpha;
     }
 }

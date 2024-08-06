@@ -8,9 +8,9 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 
 @Mixin(LiquidBlockRenderer.class)
 public class LiquidBlockRendererMixin {
-    // needed for menuworlds water rendering
+    // needed for menuworlds water rendering, to get world space positions, and not per chunk
     @ModifyConstant(method = "tesselate", constant = @Constant(intValue = 15))
-    public int vivecraft$chunkClipping(int i) {
+    public int vivecraft$noChunkWrappingInMenuWorld(int i) {
         // -1 is 0xFFFF FFFF
         // so no change
         return ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread() ? -1 : 15;

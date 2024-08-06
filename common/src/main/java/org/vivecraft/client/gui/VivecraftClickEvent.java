@@ -2,6 +2,9 @@ package org.vivecraft.client.gui;
 
 import net.minecraft.network.chat.ClickEvent;
 
+/**
+ * Custom ClickEvent to do stuff that vanilla doesn't have an option for
+ */
 public class VivecraftClickEvent extends ClickEvent {
 
     private final VivecraftAction vivecraftAction;
