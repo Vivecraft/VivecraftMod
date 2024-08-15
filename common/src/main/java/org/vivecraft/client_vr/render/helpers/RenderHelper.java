@@ -24,6 +24,7 @@ import org.lwjgl.opengl.GL30C;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
@@ -286,8 +287,9 @@ public class RenderHelper {
      * @param partialTick partial tick for the screen rendering
      * @param screen the Screen to render
      * @param guiGraphics GuiGraphics to render with, is not flushed after rendering
+     * @param maxGuiScale if set renders the screen at max gui scale
      */
-    public static void drawScreen(float partialTick, Screen screen, GuiGraphics guiGraphics) {
+    public static void drawScreen(float partialTick, Screen screen, GuiGraphics guiGraphics, boolean maxGuiScale) {
         // setup modelview for screen rendering
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
@@ -295,9 +297,11 @@ public class RenderHelper {
         posestack.translate(0.0F, 0.0F, -11000.0F);
         RenderSystem.applyModelViewMatrix();
 
+        double guiScale = maxGuiScale ? GuiHandler.guiScaleFactorMax : mc.getWindow().getGuiScale();
+
         Matrix4f guiProjection = (new Matrix4f()).setOrtho(
-            0.0F, (float) (mc.getWindow().getWidth() / mc.getWindow().getGuiScale()),
-                (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale()), 0.0F,
+            0.0F, (float) (mc.getMainRenderTarget().width / guiScale),
+                (float) (mc.getMainRenderTarget().height / guiScale), 0.0F,
                 1000.0F, 21000.0F);
         RenderSystem.setProjectionMatrix(guiProjection, VertexSorting.ORTHOGRAPHIC_Z);
 

@@ -149,7 +149,7 @@ public class VRPassHelper {
             mc.mainRenderTarget = KeyboardHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTick, KeyboardHandler.UI, guiGraphics);
+            RenderHelper.drawScreen(actualPartialTick, KeyboardHandler.UI, guiGraphics, true);
             guiGraphics.flush();
         }
 
@@ -158,7 +158,7 @@ public class VRPassHelper {
             mc.mainRenderTarget = RadialHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTick, RadialHandler.UI, guiGraphics);
+            RenderHelper.drawScreen(actualPartialTick, RadialHandler.UI, guiGraphics, true);
             guiGraphics.flush();
         }
         mc.getProfiler().pop();
