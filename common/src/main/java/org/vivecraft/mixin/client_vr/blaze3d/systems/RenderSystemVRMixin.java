@@ -13,7 +13,7 @@ import org.vivecraft.client_vr.provider.MCVR;
 @Mixin(RenderSystem.class)
 public class RenderSystemVRMixin {
 
-    @ModifyArg(method = "defaultBlendFunc", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;blendFuncSeparate(Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;)V"), remap = false, index = 3)
+    @ModifyArg(method = "defaultBlendFunc", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;blendFuncSeparate(Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;)V", remap = true), remap = false, index = 3)
     private static GlStateManager.DestFactor vivecraft$defaultBlendFuncAlphaBlending(GlStateManager.DestFactor destFactor) {
         return GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA;
     }
