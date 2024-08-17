@@ -47,7 +47,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     }
 
     @SuppressWarnings("unchecked")
-    @Inject(at = @At("HEAD"), method = "addLayer")
+    @Inject(method = "addLayer", at = @At("HEAD"))
     public void vivecraft$copyLayer(RenderLayer<T, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {
         // check if the layer gets added from the PlayerRenderer, we don't want to copy, if we add it to the VRPlayerRenderer
         // also check that the VRPlayerRenderers were created, this method also gets called in the constructor,
@@ -59,21 +59,24 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
             Constructor<?> constructor = null;
             RenderLayerTypes.LayerType type = OTHER;
             for (Constructor<?> c : renderLayer.getClass().getConstructors()) {
-                if (c.getParameterCount() == 1
-                    && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])) {
+                if (c.getParameterCount() == 1 &&
+                    RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0]))
+                {
                     constructor = c;
                     type = PARENT_ONLY;
                     break;
-                } else if (c.getParameterCount() == 2
-                    && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])
-                    && EntityModelSet.class.isAssignableFrom(c.getParameterTypes()[1])) {
+                } else if (c.getParameterCount() == 2 &&
+                    RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0]) &&
+                    EntityModelSet.class.isAssignableFrom(c.getParameterTypes()[1]))
+                {
                     constructor = c;
                     type = PARENT_MODELSET;
-                } else if (c.getParameterCount() == 3
-                    && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])
-                    && HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[1])
-                    && HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[2])
-                    && renderLayer instanceof HumanoidArmorLayer) {
+                } else if (c.getParameterCount() == 3 &&
+                    RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0]) &&
+                    HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[1]) &&
+                    HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[2]) &&
+                    renderLayer instanceof HumanoidArmorLayer)
+                {
                     constructor = c;
                     type = PARENT_MODEL_MODEL;
                 }

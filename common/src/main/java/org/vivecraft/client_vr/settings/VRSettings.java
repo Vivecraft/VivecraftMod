@@ -339,6 +339,9 @@ public class VRSettings {
     public MenuWorld menuWorldSelection = MenuWorld.BOTH;
     @SettingField(VrOptions.MENU_WORLD_FALLBACK)
     public boolean menuWorldFallbackPanorama = true;
+    @SettingField
+    public boolean renderDebug = false;
+
     //
 
     //Mixed Reality
