@@ -322,10 +322,7 @@ public class TeleportTracker extends Tracker {
 
                 this.movementTeleportArcSteps = i + 1;
 
-                Vec3 traceDir = pos.subtract(newPos).normalize();
-                Vec3 reverseEpsilon = new Vec3(-traceDir.x * 0.02D, -traceDir.y * 0.02D, -traceDir.z * 0.02D);
-
-                this.checkAndSetTeleportDestination(player, start, blockhitresult, reverseEpsilon);
+                this.checkAndSetTeleportDestination(player, start, blockhitresult);
 
                 Vec3 diff = this.mc.player.position().subtract(this.movementTeleportDestination);
 
@@ -383,8 +380,14 @@ public class TeleportTracker extends Tracker {
         this.movementTeleportTimer = -1;
     }
 
-    // look for a valid place to stand on the block that the trace collided with
-    private boolean checkAndSetTeleportDestination(LocalPlayer player, Vec3 start, BlockHitResult collision, Vec3 reverseEpsilon) {
+    /**
+     * looks for a valid place to stand on the block that the trace collided with
+     * @param player Player to check the position for
+     * @param start aim start position, in world space
+     * @param collision block hit position to check
+     * @return if the BlockHitResult is valid to stand in
+     */
+    private boolean checkAndSetTeleportDestination(LocalPlayer player, Vec3 start, BlockHitResult collision) {
         BlockPos blockpos = collision.getBlockPos();
         BlockState blockState = player.level().getBlockState(blockpos);
 
@@ -479,7 +482,11 @@ public class TeleportTracker extends Tracker {
         return false;
     }
 
-    // rough interpolation between arc locations
+    /**
+     * does a rough interpolation between arc locations
+     * @param progress location of the point on the arc, 0-1
+     * @return interpolated point
+     */
     public Vec3 getInterpolatedArcPosition(float progress) {
         if (this.movementTeleportArcSteps == 1 || progress <= 0.0f) {
             // not enough points to interpolate or before start

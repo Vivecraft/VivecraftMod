@@ -9,6 +9,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -85,8 +86,28 @@ public class ClimbTracker extends Tracker {
         return this.wasLatched[controller];
     }
 
-    public boolean isClaws(ItemStack itemStack) {
-        if (itemStack.isEmpty()) {
+    /**
+     * @return if the main Minecraft Player can use climbing claws
+     */
+    public boolean isClimbeyClimb() {
+        return this.isActive(this.mc.player) && hasClimbeyClimbEquipped(this.mc.player);
+    }
+
+    /**
+     * @param player Player to check
+     * @return if the given {@code player} has a climbing claw item in either hand
+     */
+    public static boolean hasClimbeyClimbEquipped(Player player) {
+        return ClientNetworking.serverAllowsClimbey &&
+            (isClaws(player.getMainHandItem()) || isClaws(player.getOffhandItem()));
+    }
+
+    /**
+     * @param itemStack ItemStack to check
+     * @return if the given {@code itemStack} is a climbing claw item
+     */
+    public static boolean isClaws(ItemStack itemStack) {
+        if (itemStack == null || itemStack.isEmpty()) {
             return false;
         } else if (!itemStack.hasCustomHoverName()) {
             return false;
@@ -95,42 +116,14 @@ public class ClimbTracker extends Tracker {
         } else if (!itemStack.hasTag() || !itemStack.getTag().getBoolean("Unbreakable")) {
             return false;
         } else {
-            return (itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContent
-                && translatableContent.getKey().equals("vivecraft.item.climbclaws"))
-                || itemStack.getHoverName().getString().equals("Climb Claws");
+            return itemStack.getHoverName().getString().equals("Climb Claws") ||
+                (itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContent &&
+                    translatableContent.getKey().equals("vivecraft.item.climbclaws")
+                );
         }
     }
 
-    @Override
-    public boolean isActive(LocalPlayer player) {
-        if (this.dh.vrSettings.seated) {
-            return false;
-        } else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
-            return false;
-        } else if (!this.dh.vrSettings.realisticClimbEnabled) {
-            return false;
-        } else if (player == null && !player.isAlive()) {
-            return false;
-        } else if (this.mc.gameMode == null) {
-            return false;
-        } else if (player.isPassenger()) {
-            return false;
-        } else if (!isClimbeyClimbEquipped() && (player.zza != 0 || player.xxa != 0)) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    public boolean isClimbeyClimb() {
-        return this.isActive(this.mc.player) && this.isClimbeyClimbEquipped();
-    }
-
-    public boolean isClimbeyClimbEquipped() {
-        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) this.mc.player).vivecraft$isClimbeyClimbEquipped();
-    }
-
-    private boolean canStand(BlockPos blockPos, LocalPlayer player) {
+    private static boolean canStand(BlockPos blockPos, LocalPlayer player) {
         VoxelShape blockShape = player.level().getBlockState(blockPos).getCollisionShape(player.level(), blockPos);
         if (blockShape.isEmpty() || blockShape.bounds().maxY != 0.0D) {
             BlockPos above = blockPos.above();
@@ -148,6 +141,27 @@ public class ClimbTracker extends Tracker {
     }
 
     @Override
+    public boolean isActive(LocalPlayer player) {
+        if (this.dh.vrSettings.seated) {
+            return false;
+        } else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
+            return false;
+        } else if (!this.dh.vrSettings.realisticClimbEnabled) {
+            return false;
+        } else if (player == null && !player.isAlive()) {
+            return false;
+        } else if (this.mc.gameMode == null) {
+            return false;
+        } else if (player.isPassenger()) {
+            return false;
+        } else if (!hasClimbeyClimbEquipped(player) && (player.zza != 0 || player.xxa != 0)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
     public void idleTick(LocalPlayer player) {
         if (!this.isActive(player)) {
             this.wasLatched[0] = false;
@@ -156,7 +170,7 @@ public class ClimbTracker extends Tracker {
 
         if (this.wasGrabbingLadder() && !this.isGrabbingLadder()) {
             this.forceActivate = true;
-        } else if (this.mc.player.onGround() || this.mc.player.getAbilities().flying) {
+        } else if (player.onGround() || player.getAbilities().flying) {
             this.forceActivate = false;
         }
 
@@ -409,7 +423,7 @@ public class ClimbTracker extends Tracker {
         }
 
         if (!this.wantJump && !ladder) {
-            this.wantJump = VivecraftVRMod.INSTANCE.keyClimbeyJump.isDown() && this.dh.jumpTracker.isClimbeyJumpEquipped(player);
+            this.wantJump = VivecraftVRMod.INSTANCE.keyClimbeyJump.isDown() && JumpTracker.hasClimbeyJumpEquipped(player);
         }
 
         jump &= this.wantJump;

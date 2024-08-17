@@ -33,8 +33,14 @@ public class TelescopeTracker extends Tracker {
     public void doProcess(LocalPlayer player) {
     }
 
-    public static boolean isTelescope(ItemStack i) {
-        return i != null && (i.getItem() == Items.SPYGLASS || isLegacyTelescope(i) || i.is(ItemTags.VIVECRAFT_TELESCOPE));
+    /**
+     * @param itemStack ItemStack to check
+     * @return if the given {@code itemStack} is a telescope
+     */
+    public static boolean isTelescope(ItemStack itemStack) {
+        return itemStack != null && (itemStack.getItem() == Items.SPYGLASS || isLegacyTelescope(itemStack) ||
+            itemStack.is(ItemTags.VIVECRAFT_TELESCOPE)
+        );
     }
 
     // TODO: old eye of the farseer, remove this eventually
@@ -48,9 +54,10 @@ public class TelescopeTracker extends Tracker {
         } else if (!itemStack.hasTag() || !itemStack.getTag().getBoolean("Unbreakable")) {
             return false;
         } else {
-            return itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContents
-                && translatableContents.getKey().equals("vivecraft.item.telescope")
-                || itemStack.getHoverName().getString().equals("Eye of the Farseer");
+            return itemStack.getHoverName().getString().equals("Eye of the Farseer") ||
+                (itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContents &&
+                    translatableContents.getKey().equals("vivecraft.item.telescope")
+                );
         }
     }
 

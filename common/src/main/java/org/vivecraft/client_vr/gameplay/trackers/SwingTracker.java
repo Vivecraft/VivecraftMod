@@ -76,6 +76,10 @@ public class SwingTracker extends Tracker {
         }
     }
 
+    /**
+     * @param item Item to check
+     * @return if the given {@code item} is a Tool
+     */
     public static boolean isTool(Item item) {
         return item instanceof DiggerItem
             || item instanceof ArrowItem
@@ -325,12 +329,23 @@ public class SwingTracker extends Tracker {
         // Minecraft.getInstance().gameMode.blockBreakingCooldown = 1;
     }
 
-    public Vec3 constrain(Vec3 start, Vec3 end) {
+    /**
+     * does a raytrace to find the closest block
+     * @param start start of raytrace
+     * @param end end of raytrace
+     * @return hit position, if a Block was hit, or {@code end} otherwise
+     */
+    private Vec3 constrain(Vec3 start, Vec3 end) {
         BlockHitResult blockhitresult = this.mc.level.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.mc.player));
         return blockhitresult.getType() == HitResult.Type.BLOCK ? blockhitresult.getLocation() : end;
     }
 
-    // Get the transparency for held items to indicate attack power or sneaking.
+    /**
+     *
+     * @param player Player that is holding the item
+     * @param itemStack held item
+     * @return the transparency for held items to indicate attack power or sneaking.
+     */
     public static float getItemFade(LocalPlayer player, ItemStack itemStack) {
         float fade = player.getAttackStrengthScale(0.0F) * 0.75F + 0.25F;
 

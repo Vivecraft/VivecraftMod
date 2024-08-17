@@ -5,6 +5,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
@@ -25,12 +26,41 @@ public class JumpTracker extends Tracker {
         super(mc, dh);
     }
 
+    /**
+     * @param player Player to check
+     * @return if the given {@code player} can use climbey jump
+     */
     public boolean isClimbeyJump(LocalPlayer player) {
-        return this.isActive(player) && this.isClimbeyJumpEquipped(player);
+        return this.isActive(player) && hasClimbeyJumpEquipped(player);
     }
 
-    public boolean isClimbeyJumpEquipped(LocalPlayer player) {
+    /**
+     * @param player Player to check
+     * @return if the given {@code player} has jump boots equipped
+     */
+    public static boolean hasClimbeyJumpEquipped(Player player) {
         return ClientNetworking.serverAllowsClimbey && isBoots(player.getItemBySlot(EquipmentSlot.FEET));
+    }
+
+    /**
+     * @param itemStack ItemStack to check
+     * @return if the given {@code itemStack} is a jump boots item
+     */
+    public static boolean isBoots(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return false;
+        } else if (!itemStack.hasCustomHoverName()) {
+            return false;
+        } else if (itemStack.getItem() != Items.LEATHER_BOOTS) {
+            return false;
+        } else if (!itemStack.hasTag() || !itemStack.getTag().getBoolean("Unbreakable")) {
+            return false;
+        } else {
+            return itemStack.getHoverName().getString().equals("Jump Boots") ||
+                (itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContent &&
+                    translatableContent.getKey().equals("vivecraft.item.jumpboots")
+                );
+        }
     }
 
     @Override
@@ -58,8 +88,8 @@ public class JumpTracker extends Tracker {
 
     @Override
     public void idleTick(LocalPlayer player) {
-        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyJump).setEnabled(this.isClimbeyJumpEquipped(player)
-            && (this.isActive(player) || (this.dh.climbTracker.isClimbeyClimbEquipped() && this.dh.climbTracker.isGrabbingLadder())));
+        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyJump).setEnabled(hasClimbeyJumpEquipped(player)
+            && (this.isActive(player) || (ClimbTracker.hasClimbeyClimbEquipped(player) && this.dh.climbTracker.isGrabbingLadder())));
     }
 
     @Override
@@ -70,7 +100,7 @@ public class JumpTracker extends Tracker {
 
     @Override
     public void doProcess(LocalPlayer player) {
-        boolean climbeyEquipped = this.isClimbeyJumpEquipped(player);
+        boolean climbeyEquipped = hasClimbeyJumpEquipped(player);
 
         if (climbeyEquipped) {
             boolean[] ok = new boolean[2];
@@ -181,22 +211,6 @@ public class JumpTracker extends Tracker {
             && this.dh.vr.hmdPivotHistory.netMovement(0.25D).y > 0.1D
             && this.dh.vr.hmdPivotHistory.latest().y - AutoCalibration.getPlayerHeight() > this.dh.vrSettings.jumpThreshold) {
             player.jumpFromGround();
-        }
-    }
-
-    public boolean isBoots(ItemStack itemStack) {
-        if (itemStack.isEmpty()) {
-            return false;
-        } else if (!itemStack.hasCustomHoverName()) {
-            return false;
-        } else if (itemStack.getItem() != Items.LEATHER_BOOTS) {
-            return false;
-        } else if (!itemStack.hasTag() || !itemStack.getTag().getBoolean("Unbreakable")) {
-            return false;
-        } else {
-            return itemStack.getHoverName().getContents() instanceof TranslatableContents translatableContent
-                && translatableContent.getKey().equals("vivecraft.item.jumpboots")
-                || itemStack.getHoverName().getString().equals("Jump Boots");
         }
     }
 }

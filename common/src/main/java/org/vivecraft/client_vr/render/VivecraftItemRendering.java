@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -17,6 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
@@ -108,7 +108,7 @@ public class VivecraftItemRendering {
         boolean useLeftHandModelinLeftHand = false;
 
         // claws need the actual hand size
-        if (dh.climbTracker.isClaws(itemStack)) {
+        if (ClimbTracker.isClaws(itemStack)) {
             scale = 0.4F;
         }
 

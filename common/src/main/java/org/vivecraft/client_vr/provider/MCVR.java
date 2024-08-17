@@ -26,6 +26,7 @@ import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.control.VRInputActionSet;
 import org.vivecraft.client_vr.render.RenderConfigException;
@@ -420,9 +421,7 @@ public abstract class MCVR {
     protected void changeHotbar(int dir) {
         if (this.mc.player != null &&
             // never let go, jack.
-            (!this.dh.climbTracker.isGrabbingLadder() ||
-                !this.dh.climbTracker.isClaws(this.mc.player.getMainHandItem())
-            ))
+            (!this.dh.climbTracker.isGrabbingLadder() || !ClimbTracker.isClaws(this.mc.player.getMainHandItem())))
         {
             if (this.mc.screen == null) {
                 InputSimulator.scrollMouse(0.0D, dir * 4);
@@ -442,7 +441,7 @@ public abstract class MCVR {
         if (this.mc.player == null) return;
         // this shouldn't happen, it's final
         if (this.mc.player.getInventory() == null) return;
-        if (this.dh.climbTracker.isGrabbingLadder() && dh.climbTracker.isClaws(this.mc.player.getMainHandItem())) return;
+        if (this.dh.climbTracker.isGrabbingLadder() && ClimbTracker.isClaws(this.mc.player.getMainHandItem())) return;
         if (!this.dh.interactTracker.isActive(this.mc.player)) return;
 
         Vec3 main = this.getAimSource(0);

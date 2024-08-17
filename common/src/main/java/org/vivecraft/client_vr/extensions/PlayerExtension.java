@@ -27,11 +27,6 @@ public interface PlayerExtension {
     void vivecraft$setItemInUseRemainingClient(int remaining);
 
     /**
-     * @return if the player has a climbing claw item in either hand
-     */
-    boolean vivecraft$isClimbeyClimbEquipped();
-
-    /**
      * plays the sound of the block at {@code blockPos} at the {@code soundPos} location, in the level the player is in.
      * @param blockPos position of the block for the sound, in world space
      * @param soundPos position of where to play the sound, in world space

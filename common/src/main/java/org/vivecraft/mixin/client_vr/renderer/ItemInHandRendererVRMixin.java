@@ -30,6 +30,7 @@ import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRArmRenderer;
@@ -117,12 +118,12 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
             boolean useLeftHandModelinLeftHand = false;
 
             // swap hand for claws, since it's backwards else wise
-            if (dh.climbTracker.isClaws(pStack) && dh.vrSettings.reverseHands) {
+            if (ClimbTracker.isClaws(pStack) && dh.vrSettings.reverseHands) {
                 mainHand = !mainHand;
             }
 
             ItemDisplayContext itemDisplayContext;
-            if ((ClientNetworking.isThirdPersonItems() && !(BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer))) || dh.climbTracker.isClaws(pStack)) {
+            if ((ClientNetworking.isThirdPersonItems() && !(BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer))) || ClimbTracker.isClaws(pStack)) {
                 useLeftHandModelinLeftHand = true; //test
                 VivecraftItemRendering.applyThirdPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
                 itemDisplayContext = mainHand ? ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);

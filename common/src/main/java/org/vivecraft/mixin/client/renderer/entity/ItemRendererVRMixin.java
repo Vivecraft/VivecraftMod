@@ -27,7 +27,7 @@ public class ItemRendererVRMixin {
         if (VRState.vrRunning && itemStack.is(Items.SPYGLASS)) {
             return itemModelShaper.getModelManager().getModel(TelescopeTracker.scopeModel);
         }
-        if (ClientDataHolderVR.getInstance().climbTracker.isClaws(itemStack)) {
+        if (ClimbTracker.isClaws(itemStack)) {
             return itemModelShaper.getModelManager().getModel(ClimbTracker.clawsModel);
         }
         return bakedModel;
@@ -64,7 +64,7 @@ public class ItemRendererVRMixin {
     public int vivecraft$specialItems(int color, PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack) {
         if (ClientDataHolderVR.getInstance().jumpTracker.isBoots(itemStack)) {
             return this.vivecraft$makeColor(1, 0, 255, 0);
-        } else if (ClientDataHolderVR.getInstance().climbTracker.isClaws(itemStack)) {
+        } else if (ClimbTracker.isClaws(itemStack)) {
             return this.vivecraft$makeColor(1, 130, 0, 75);
         } else if (TelescopeTracker.isLegacyTelescope(itemStack)) {
             return this.vivecraft$makeColor(1, 190, 110, 135);

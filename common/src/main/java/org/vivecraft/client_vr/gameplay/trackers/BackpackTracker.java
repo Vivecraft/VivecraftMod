@@ -63,7 +63,7 @@ public class BackpackTracker extends Tracker {
                 if (!this.wasIn[c]) {
                     if (c == 0) {
                         //mainhand
-                        if (!this.dh.climbTracker.isGrabbingLadder() || !this.dh.climbTracker.isClaws(this.mc.player.getMainHandItem())) {
+                        if (!this.dh.climbTracker.isGrabbingLadder() || !ClimbTracker.isClaws(this.mc.player.getMainHandItem())) {
                             if (player.getInventory().selected != 0) {
                                 this.previousSlot = player.getInventory().selected;
                                 player.getInventory().selected = 0;
@@ -74,7 +74,7 @@ public class BackpackTracker extends Tracker {
                         }
                     } else {
                         //offhand
-                        if (!this.dh.climbTracker.isGrabbingLadder() || !this.dh.climbTracker.isClaws(this.mc.player.getOffhandItem())) {
+                        if (!this.dh.climbTracker.isGrabbingLadder() || !ClimbTracker.isClaws(this.mc.player.getOffhandItem())) {
                             if (this.dh.vrSettings.physicalGuiEnabled) {
                                 //minecraft.physicalGuiManager.toggleInventoryBag();
                             } else {

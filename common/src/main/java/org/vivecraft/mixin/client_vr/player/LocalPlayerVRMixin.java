@@ -502,16 +502,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     }
 
     @Override
-    @Unique
-    public boolean vivecraft$isClimbeyClimbEquipped() {
-        if (this.getMainHandItem() != null && ClientDataHolderVR.getInstance().climbTracker.isClaws(this.getMainHandItem())) {
-            return true;
-        } else {
-            return this.getOffhandItem() != null && ClientDataHolderVR.getInstance().climbTracker.isClaws(this.getOffhandItem());
-        }
-    }
-
-    @Override
     public void releaseUsingItem() {
         if (vivecraft$isLocalPlayer(this)) {
             ClientNetworking.sendActiveHand((byte) this.getUsedItemHand().ordinal());
