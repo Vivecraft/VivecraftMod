@@ -20,7 +20,7 @@ public abstract class ResourceLoadStateTrackerMixin {
     private ResourceLoadStateTracker.ReloadState reloadState;
 
     @Inject(method = "finishReload", at = @At("TAIL"))
-    void vivecraft$initializeVR(CallbackInfo ci) {
+    private void vivecraft$initializeVR(CallbackInfo ci) {
         if (reloadState != null && reloadState.reloadReason == ResourceLoadStateTracker.ReloadReason.INITIAL) {
             // init vr after first resource loading
             try {
@@ -40,7 +40,7 @@ public abstract class ResourceLoadStateTrackerMixin {
     }
 
     @Inject(method = "startReload", at = @At("HEAD"))
-    void vivecraft$cancelMenuWorld(CallbackInfo ci) {
+    private void vivecraft$cancelMenuWorld(CallbackInfo ci) {
         if (ClientDataHolderVR.getInstance().menuWorldRenderer != null) {
             ClientDataHolderVR.getInstance().menuWorldRenderer.cancelBuilding();
         }

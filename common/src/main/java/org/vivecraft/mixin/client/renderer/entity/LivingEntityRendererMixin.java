@@ -46,7 +46,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @SuppressWarnings("unchecked")
     @Inject(method = "addLayer", at = @At("HEAD"))
-    public void vivecraft$copyLayer(RenderLayer<T, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {
+    private void vivecraft$copyLayer(RenderLayer<T, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {
         // check if the layer gets added from the PlayerRenderer, we don't want to copy, if we add it to the VRPlayerRenderer
         // also check that the VRPlayerRenderers were created, this method also gets called in the constructor,
         // those default Layers already are added to the VRPlayerRenderer there

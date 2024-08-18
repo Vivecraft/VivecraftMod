@@ -72,7 +72,7 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
     }
 
     @Inject(method = "getRenderer", at = @At("HEAD"), cancellable = true)
-    public void vivecraft$getVRPlayerRenderer(
+    private void vivecraft$getVRPlayerRenderer(
         Entity entity, CallbackInfoReturnable<EntityRenderer<AbstractClientPlayer>> cir)
     {
         if (entity instanceof AbstractClientPlayer player) {
@@ -94,13 +94,13 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
     }
 
     @Inject(method = "onResourceManagerReload", at = @At(value = "HEAD"))
-    public void vivecraft$clearVRPlayerRenderer(CallbackInfo ci) {
+    private void vivecraft$clearVRPlayerRenderer(CallbackInfo ci) {
         vivecraft$skinMapVRSeated.clear();
         vivecraft$skinMapVR.clear();
     }
 
     @Inject(method = "onResourceManagerReload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;"))
-    public void vivecraft$reloadVRPlayerRenderer(CallbackInfo ci, @Local EntityRendererProvider.Context context) {
+    private void vivecraft$reloadVRPlayerRenderer(CallbackInfo ci, @Local EntityRendererProvider.Context context) {
         this.vivecraft$playerRendererVRSeated = new VRPlayerRenderer(context, false, true);
         this.vivecraft$skinMapVRSeated.put("default", vivecraft$playerRendererVRSeated);
         this.vivecraft$skinMapVRSeated.put("slim", new VRPlayerRenderer(context, true, true));

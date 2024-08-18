@@ -22,7 +22,7 @@ public class ItemRendererVRMixin {
     private ItemModelShaper itemModelShaper;
 
     @ModifyVariable(method = "getModel", at = @At(value = "STORE"))
-    public BakedModel vivecraft$modelOverride(BakedModel bakedModel, ItemStack itemStack) {
+    private BakedModel vivecraft$modelOverride(BakedModel bakedModel, ItemStack itemStack) {
         if (VRState.vrRunning && itemStack.is(Items.SPYGLASS)) {
             return itemModelShaper.getModelManager().getModel(TelescopeTracker.scopeModel);
         }
@@ -41,7 +41,7 @@ public class ItemRendererVRMixin {
     float vivecraft$manualFade = 1.0F;
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V", shift = At.Shift.AFTER))
-    public void vivecraft$fade(ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel, CallbackInfo ci) {
+    private void vivecraft$fade(ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel, CallbackInfo ci) {
         LocalPlayer localplayer = Minecraft.getInstance().player;
         this.vivecraft$fade = localplayer != null && ClientDataHolderVR.isfphand
                               ? SwingTracker.getItemFade(localplayer, itemStack)
@@ -49,7 +49,7 @@ public class ItemRendererVRMixin {
     }
 
     @ModifyVariable(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemBlockRenderTypes;getRenderType(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/client/renderer/RenderType;"), ordinal = 0)
-    public RenderType vivecraft$rendertypeFade(RenderType rendertype) {
+    private RenderType vivecraft$rendertypeFade(RenderType rendertype) {
         if (ClientDataHolderVR.isfphand && this.vivecraft$fade < 1.0F) {
             return Sheets.translucentCullBlockSheet();
         }

@@ -33,12 +33,12 @@ public abstract class TitleScreenMixin extends Screen {
      * injects after the multiplayer button to be in the right spot for the tab navigation
      */
     @Inject(method = "createNormalMenuOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", shift = At.Shift.AFTER, ordinal = 1))
-    public void vivecraft$initFullGame(CallbackInfo ci) {
+    private void vivecraft$initFullGame(CallbackInfo ci) {
         vivecraft$addVRModeButton();
     }
 
     @Inject(method = "createDemoMenuOptions", at = @At("TAIL"))
-    public void vivecraft$initDemo(CallbackInfo ci) {
+    private void vivecraft$initDemo(CallbackInfo ci) {
         vivecraft$addVRModeButton();
     }
 
@@ -70,7 +70,7 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    public void vivecraft$renderToolTip(
+    private void vivecraft$renderToolTip(
         GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci)
     {
         vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
@@ -86,7 +86,7 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), index = 1)
-    public float vivecraft$maybeNoPanorama(float alpha) {
+    private float vivecraft$maybeNoPanorama(float alpha) {
         return VRState.vrRunning && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() ||
             ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama
         ) ? 0.0F : alpha;
