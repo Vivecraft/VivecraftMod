@@ -22,13 +22,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.client.extensions.RenderLayerExtension;
-import org.vivecraft.client.utils.RenderLayerTypes;
+import org.vivecraft.client.utils.RenderLayerType;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
-import static org.vivecraft.client.utils.RenderLayerTypes.LayerType.*;
 
 /**
  * A hacky way of copying regular PlayerRenderer layers to the VRPlayerRenderers
@@ -57,20 +55,20 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
             // try to find a suitable constructor, so we can create a new Object without issues
             Constructor<?> constructor = null;
-            RenderLayerTypes.LayerType type = OTHER;
+            RenderLayerType type = RenderLayerType.OTHER;
             for (Constructor<?> c : renderLayer.getClass().getConstructors()) {
                 if (c.getParameterCount() == 1 &&
                     RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0]))
                 {
                     constructor = c;
-                    type = PARENT_ONLY;
+                    type = RenderLayerType.PARENT_ONLY;
                     break;
                 } else if (c.getParameterCount() == 2 &&
                     RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0]) &&
                     EntityModelSet.class.isAssignableFrom(c.getParameterTypes()[1]))
                 {
                     constructor = c;
-                    type = PARENT_MODELSET;
+                    type = RenderLayerType.PARENT_MODELSET;
                 } else if (c.getParameterCount() == 3 &&
                     RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0]) &&
                     HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[1]) &&
@@ -78,7 +76,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
                     renderLayer instanceof HumanoidArmorLayer)
                 {
                     constructor = c;
-                    type = PARENT_MODEL_MODEL;
+                    type = RenderLayerType.PARENT_MODEL_MODEL;
                 }
             }
 
@@ -128,7 +126,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
      */
     @SuppressWarnings("unchecked")
     @Unique
-    private void vivecraft$addLayerConstructor(Constructor<?> constructor, RenderLayerTypes.LayerType type, LivingEntityRenderer<T, M> target) {
+    private void vivecraft$addLayerConstructor(Constructor<?> constructor, RenderLayerType type, LivingEntityRenderer<T, M> target) {
         try {
             switch (type) {
                 case PARENT_ONLY -> target.addLayer((RenderLayer<T, M>) constructor.newInstance(target));
