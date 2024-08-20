@@ -583,7 +583,7 @@ public class VREffectsHelper {
         VRArmHelper.renderVRHands(partialTick, renderHands && menuHandRight, renderHands && menuHandLeft, true, true, poseStack);
 
         // switch to VR hands buffer
-        RenderTarget hands = ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRUnoccludedFramebuffer();
+        RenderTarget hands = ((LevelRendererExtension) levelRenderer).vivecraft$getAlphaSortVRHandsFramebuffer();
         hands.clear(Minecraft.ON_OSX);
         hands.copyDepthFrom(mc.getMainRenderTarget());
         hands.bindWrite(true);
