@@ -48,6 +48,7 @@ import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.StateHolderExtension;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mixin.client.renderer.RenderStateShardAccessor;
@@ -1776,9 +1777,10 @@ public class MenuWorldRenderer {
     private static class FluidStateWrapper extends FluidState {
         private final FluidState fluidState;
 
-        @SuppressWarnings("unchecked")
         public FluidStateWrapper(FluidState fluidState) {
-            super(fluidState.getType(), (Reference2ObjectArrayMap<Property<?>, Comparable<?>>) fluidState.getValues(), fluidState.propertiesCodec);
+            // need to do it this way, because FerriteCore changes the field type, which would error on a cast
+            super(fluidState.getType(), null, fluidState.propertiesCodec);
+            ((StateHolderExtension) (this)).vivecraft$setValues(fluidState.getValues());
 
             this.fluidState = fluidState;
         }
