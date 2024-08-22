@@ -90,8 +90,6 @@ accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
 accessible field net/minecraft/world/level/biome/AmbientParticleSettings probability F
 extendable class net/minecraft/world/level/material/FluidState
 accessible field net/minecraft/world/level/block/state/StateHolder propertiesCodec Lcom/mojang/serialization/MapCodec;
-# to fix an issue with FerriteCore
-mutable field net/minecraft/world/level/block/state/StateHolder values Lit/unimi/dsi/fastutil/objects/Reference2ObjectArrayMap;
 
 # to init VR
 accessible class net/minecraft/client/ResourceLoadStateTracker$ReloadState
