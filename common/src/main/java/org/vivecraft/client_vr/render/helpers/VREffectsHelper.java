@@ -552,6 +552,10 @@ public class VREffectsHelper {
             return;
         }
 
+        // make sure other stuff is finished drawing, or they will render on our buffers.
+        // mainly an issue with iris and the crumbling effect.
+        mc.renderBuffers().bufferSource().endBatch();
+
         mc.getProfiler().popPush("VR");
         renderCrosshairAtDepth(!dataHolder.vrSettings.useCrosshairOcclusion, poseStack);
 
