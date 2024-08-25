@@ -33,7 +33,7 @@ public abstract class PauseScreenVRMixin extends Screen {
     }
 
     @Inject(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 4))
-    public void vivecraft$addTopButtons(CallbackInfo ci, @Local GridLayout.RowHelper rowHelper) {
+    private void vivecraft$addTopButtons(CallbackInfo ci, @Local GridLayout.RowHelper rowHelper) {
         if (!VRState.vrEnabled || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
             return;
         }
@@ -67,7 +67,7 @@ public abstract class PauseScreenVRMixin extends Screen {
 
     // use the disconnect button as an anchor, and shift by -3 to shift before the addChild call
     @Inject(method = "createPauseMenu", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/gui/screens/PauseScreen;disconnectButton:Lnet/minecraft/client/gui/components/Button;", shift = At.Shift.BY, by = -3))
-    public void vivecraft$addLowerButtons(CallbackInfo ci, @Local GridLayout.RowHelper rowHelper) {
+    private void vivecraft$addLowerButtons(CallbackInfo ci, @Local GridLayout.RowHelper rowHelper) {
         if (!VRState.vrEnabled || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
             return;
         }

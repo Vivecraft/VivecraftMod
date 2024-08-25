@@ -73,7 +73,7 @@ public abstract class EditBoxVRMixin extends AbstractWidget {
     }
 
     @Inject(method = "onClick", at = @At(value = "HEAD"))
-    public void vivecraft$openKeyboard(CallbackInfo ci) {
+    private void vivecraft$openKeyboard(CallbackInfo ci) {
         if (VRState.vrRunning) {
             KeyboardHandler.setOverlayShowing(true);
         }
