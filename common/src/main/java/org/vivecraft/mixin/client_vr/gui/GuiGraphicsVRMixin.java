@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.VRState;
 
 @Mixin(GuiGraphics.class)
-public class GuiComponentVRMixin {
+public class GuiGraphicsVRMixin {
 
     @Inject(method = "innerBlit(Lnet/minecraft/resources/ResourceLocation;IIIIIFFFFFFFF)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;enableBlend()V", remap = false, shift = At.Shift.AFTER))
     private void vivecraft$changeAlphaBlend(CallbackInfo ci) {
