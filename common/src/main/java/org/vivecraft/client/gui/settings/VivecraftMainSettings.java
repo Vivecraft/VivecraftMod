@@ -44,6 +44,7 @@ public class VivecraftMainSettings extends GuiListScreen {
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.VR_TOGGLE_BUTTON_VISIBLE));
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.VR_SETTINGS_BUTTON_VISIBLE));
         entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.VR_SETTINGS_BUTTON_POSITION));
+        entries.add(SettingsList.vrOptionToEntry(VRSettings.VrOptions.MODIFY_PAUSE_MENU));
 
         return entries;
     }

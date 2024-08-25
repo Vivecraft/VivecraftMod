@@ -462,6 +462,7 @@
   "vivecraft.options.VR_TOGGLE_BUTTON_VISIBLE": "VR Toggle Button Visible",
   "vivecraft.options.VR_SETTINGS_BUTTON_VISIBLE": "VR Settings Button Visible",
   "vivecraft.options.VR_SETTINGS_BUTTON_POSITION": "VR Settings Button Position",
+  "vivecraft.options.MODIFY_PAUSE_MENU": "Modify Pause Menu",
   "vivecraft.options.INGAME_BINDINGS_IN_GUI": "In-Game Bindings In GUI",
   "vivecraft.options.MENU_WORLD_FALLBACK": "Fallback Method",
   "vivecraft.options.MIRROR_CROP": "Mirror Cropping",

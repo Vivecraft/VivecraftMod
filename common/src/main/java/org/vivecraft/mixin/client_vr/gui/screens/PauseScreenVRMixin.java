@@ -1,5 +1,8 @@
 package org.vivecraft.mixin.client_vr.gui.screens;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -13,13 +16,10 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client.gui.settings.GuiQuickCommandsInGame;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -32,17 +32,20 @@ public abstract class PauseScreenVRMixin extends Screen {
         super(component);
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 4), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$addInit(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper rowHelper) {
-        if (!VRState.vrEnabled) {
+    @Inject(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 4))
+    public void vivecraft$addTopButtons(CallbackInfo ci, @Local GridLayout.RowHelper rowHelper) {
+        if (!VRState.vrEnabled || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
             return;
         }
         // reset row to above
+        // we hide 2 buttons but keep them in, so need to reset the RowHelper
         try {
             rowHelper.addChild(null, -2);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
+            // RowHelper doesn't actually allow negative offsets, but it does update the index before throwing this exception
         }
 
+        // on a multiplayer server also add the social button
         if (!Minecraft.getInstance().isMultiplayerServer()) {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
                 (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(98).build());
@@ -53,59 +56,64 @@ public abstract class PauseScreenVRMixin extends Screen {
             rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.chat"),
                 (p) -> this.minecraft.setScreen(new ChatScreen(""))).width(48).build());
 
-            rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.social"), (p) -> this.minecraft.setScreen(new SocialInteractionsScreen())).width(48).pos(50, 0).build());
+            rowHelperChat_Social.addChild(new Button.Builder(Component.translatable("vivecraft.gui.social"),
+                (p) -> this.minecraft.setScreen(new SocialInteractionsScreen())).width(48).build());
             rowHelper.addChild(gridWidgetChat_Social);
         }
 
-        rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.commands"), (p) -> this.minecraft.setScreen(new GuiQuickCommandsInGame(this))).width(98).build());
+        rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.commands"),
+            (p) -> this.minecraft.setScreen(new GuiQuickCommandsInGame(this))).width(98).build());
     }
 
-    @Inject(at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/gui/screens/PauseScreen;disconnectButton:Lnet/minecraft/client/gui/components/Button;", shift = At.Shift.BY, by = -3), method = "createPauseMenu", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$addLowerButtons(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper rowHelper) {
-        if (!VRState.vrEnabled) {
+    // use the disconnect button as an anchor, and shift by -3 to shift before the addChild call
+    @Inject(method = "createPauseMenu", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/gui/screens/PauseScreen;disconnectButton:Lnet/minecraft/client/gui/components/Button;", shift = At.Shift.BY, by = -3))
+    public void vivecraft$addLowerButtons(CallbackInfo ci, @Local GridLayout.RowHelper rowHelper) {
+        if (!VRState.vrEnabled || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
             return;
         }
         GridLayout gridWidgetOverlay_Profiler = new GridLayout();
         gridWidgetOverlay_Profiler.defaultCellSetting().paddingRight(1);
         GridLayout.RowHelper rowHelperOverlay_Profiler = gridWidgetOverlay_Profiler.createRowHelper(2);
-        rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.overlay"), (p) ->
-        {
-            this.minecraft.gui.getDebugOverlay().toggleOverlay();
-            this.minecraft.setScreen(null);
-        }).width(48).build());
+        rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.overlay"),
+            (p) -> {
+                this.minecraft.gui.getDebugOverlay().toggleOverlay();
+                this.minecraft.setScreen(null);
+            }).width(48).build());
 
-        rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.profiler"), (p) ->
-        {
-            this.minecraft.gui.getDebugOverlay().toggleProfilerChart();
-            this.minecraft.setScreen(null);
-        }).width(48).pos(50, 0).build());
+        rowHelperOverlay_Profiler.addChild(new Button.Builder(Component.translatable("vivecraft.gui.profiler"),
+            (p) -> {
+                this.minecraft.gui.getDebugOverlay().toggleProfilerChart();
+                this.minecraft.setScreen(null);
+            }).width(48).build());
 
         rowHelper.addChild(gridWidgetOverlay_Profiler);
 
-        rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.screenshot"), (p) ->
-        {
-            this.minecraft.setScreen(null);
-            ClientDataHolderVR.getInstance().grabScreenShot = true;
-        }).width(98).build());
+        rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.screenshot"),
+            (p) -> {
+                this.minecraft.setScreen(null);
+                ClientDataHolderVR.getInstance().grabScreenShot = true;
+            }).width(98).build());
 
         if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
-            rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.calibrateheight"), (p) ->
-            {
-                AutoCalibration.calibrateManual();
-                ClientDataHolderVR.getInstance().vrSettings.saveOptions();
-                this.minecraft.setScreen(null);
-            }).width(98).build());
+            rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.calibrateheight"),
+                (p) -> {
+                    AutoCalibration.calibrateManual();
+                    ClientDataHolderVR.getInstance().vrSettings.saveOptions();
+                    this.minecraft.setScreen(null);
+                }).width(98).build());
         }
 
         if (ClientDataHolderVR.katvr) {
-            rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.alignkatwalk"), (p) ->
-            {
-                jkatvr.resetYaw(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.hmd.getYaw());
-                this.minecraft.setScreen(null);
-            }).width(98).build());
+            rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.alignkatwalk"),
+                (p) -> {
+                    jkatvr.resetYaw(ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_pre.hmd.getYaw());
+                    this.minecraft.setScreen(null);
+                }).width(98).build());
         }
 
-        if (!ClientDataHolderVR.getInstance().vrSettings.seated || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON || ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
+        if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON ||
+            ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY)
+        {
             rowHelper.addChild(new Button.Builder(Component.translatable("vivecraft.gui.movethirdpersoncam"), (p) ->
             {
                 if (!VRHotkeys.isMovingThirdPersonCam()) {
@@ -118,24 +126,20 @@ public abstract class PauseScreenVRMixin extends Screen {
         }
     }
 
-    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 2))
-    private LayoutElement vivecraft$remove(GridLayout.RowHelper instance, LayoutElement layoutElement) {
-        // Feedback button
-        // don't remove, just hide, so mods that rely on it being there, still work
-        ((Button) layoutElement).visible = !VRState.vrEnabled;
-        return instance.addChild(layoutElement);
+    // hide buttons that we replace
+    @WrapOperation(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 2))
+    private LayoutElement vivecraft$hideFeedback(
+        GridLayout.RowHelper rowHelper, LayoutElement child, Operation<LayoutElement> original)
+    {
+        ((Button) child).visible = !VRState.vrEnabled || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
+        return original.call(rowHelper, child);
     }
 
-    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 3))
-    private LayoutElement vivecraft$remove2(GridLayout.RowHelper instance, LayoutElement layoutElement) {
-        // report bugs button
-        // don't remove, just hide, so mods that rely on it being there, still work
-        ((Button) layoutElement).visible = !VRState.vrEnabled;
-        return instance.addChild(layoutElement);
-    }
-
-    // TODO this seems unneeded?
-    @Redirect(method = "createPauseMenu", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/Button;active:Z"))
-    private void vivecraft$remove3(Button instance, boolean value) {
+    @WrapOperation(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 3))
+    private LayoutElement vivecraft$hideReportBugs(
+        GridLayout.RowHelper rowHelper, LayoutElement child, Operation<LayoutElement> original)
+    {
+        ((Button) child).visible = !VRState.vrEnabled || !ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu;
+        return original.call(rowHelper, child);
     }
 }

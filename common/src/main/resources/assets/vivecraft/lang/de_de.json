@@ -460,6 +460,7 @@
   "vivecraft.options.VR_TOGGLE_BUTTON_VISIBLE": "VR Aktivierungsknopf Sichtbar",
   "vivecraft.options.VR_SETTINGS_BUTTON_VISIBLE": "VR Einstellungsknopf Sichtbar",
   "vivecraft.options.VR_SETTINGS_BUTTON_POSITION": "VR Einstellungsknopf Position",
+  "vivecraft.options.MODIFY_PAUSE_MENU": "Pausenmenü bearbeiten",
   "vivecraft.options.INGAME_BINDINGS_IN_GUI": "Im-Spiel Tasten im GUI",
   "vivecraft.options.MENU_WORLD_FALLBACK": "Ersatz Methode",
   "vivecraft.options.MIRROR_CROP": "Spiegel Zuschnitt",

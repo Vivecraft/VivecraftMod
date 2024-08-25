@@ -472,12 +472,14 @@ public class VRSettings {
     public boolean rememberVr = true;
     @SettingField(VrOptions.VR_HOTSWITCH)
     public boolean vrHotswitchingEnabled = true;
-    @SettingField(value = VrOptions.VR_TOGGLE_BUTTON_VISIBLE, config = "vrToggleButtonEnabled")
+    @SettingField(VrOptions.VR_TOGGLE_BUTTON_VISIBLE)
     public boolean vrToggleButtonEnabled = true;
-    @SettingField(value = VrOptions.VR_SETTINGS_BUTTON_VISIBLE, config = "vrSettingsButtonEnabled")
+    @SettingField(VrOptions.VR_SETTINGS_BUTTON_VISIBLE)
     public boolean vrSettingsButtonEnabled = true;
-    @SettingField(value = VrOptions.VR_SETTINGS_BUTTON_POSITION, config = "vrSettingsButtonPositionLeft")
+    @SettingField(VrOptions.VR_SETTINGS_BUTTON_POSITION)
     public boolean vrSettingsButtonPositionLeft = true;
+    @SettingField(VrOptions.MODIFY_PAUSE_MENU)
+    public boolean modifyPauseMenu = true;
     @SettingField
     public boolean disableGarbageCollectorMessage = false;
     @SettingField
@@ -1363,6 +1365,7 @@ public class VRSettings {
         VR_SETTINGS_BUTTON_VISIBLE(false, true), // setting button in options
         VR_SETTINGS_BUTTON_POSITION(false, true, "vivecraft.options.left",
             "vivecraft.options.right"), // setting button position
+        MODIFY_PAUSE_MENU(false, true), // if the pause menu should be altered
         //HMD/render
         FSAA(false, true), // Lanczos Scaler
         LOW_HEALTH_INDICATOR(false, true), // red low health pulse
