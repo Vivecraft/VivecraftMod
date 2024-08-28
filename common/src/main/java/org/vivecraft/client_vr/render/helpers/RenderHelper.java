@@ -1,11 +1,11 @@
 package org.vivecraft.client_vr.render.helpers;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -21,7 +21,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
-import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -284,12 +283,12 @@ public class RenderHelper {
 
     /**
      * renders the given screen to the current main target and generates mipmaps for it
+     * @param guiGraphics GuiGraphics to render with, is not flushed after rendering
      * @param partialTick partial tick for the screen rendering
      * @param screen the Screen to render
-     * @param guiGraphics GuiGraphics to render with, is not flushed after rendering
      * @param maxGuiScale if set renders the screen at max gui scale
      */
-    public static void drawScreen(float partialTick, Screen screen, GuiGraphics guiGraphics, boolean maxGuiScale) {
+    public static void drawScreen(GuiGraphics guiGraphics, float partialTick, Screen screen, boolean maxGuiScale) {
         // setup modelview for screen rendering
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
@@ -328,6 +327,28 @@ public class RenderHelper {
             GL30C.glGenerateMipmap(GL30C.GL_TEXTURE_2D);
             mc.mainRenderTarget.unbindRead();
         }
+    }
+
+
+    /**
+     * draws the crosshair at the specified location on the screen
+     * @param guiGraphics GuiGraphics to render with, is not flushed after rendering
+     * @param mouseX x coordinate in screen pixel coordinates
+     * @param mouseY y coordinate in screen pixel coordinates
+     */
+    public static void drawMouseMenuQuad(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        RenderSystem.enableBlend();
+        RenderSystem.disableDepthTest();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ZERO, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+
+        float size = 15.0F * Math.max(ClientDataHolderVR.getInstance().vrSettings.menuCrosshairScale, 1.0F / (float) mc.getWindow().getGuiScale());
+
+        guiGraphics.blitSprite(Gui.CROSSHAIR_SPRITE, (int) (mouseX - size * 0.5F + 1), (int) (mouseY - size * 0.5F + 1),
+            (int) size, (int) size);
+
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
     }
 
     /**

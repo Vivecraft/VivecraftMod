@@ -8,10 +8,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.common.utils.math.Matrix4f;
 
 public abstract class TwoHandedScreen extends Screen {
@@ -78,8 +78,8 @@ public abstract class TwoHandedScreen extends Screen {
             this.lastHoveredButtonId2 = widget2;
         }
 
-        ((GuiExtension) this.minecraft.gui).vivecraft$drawMouseMenuQuad((int) x1, (int) y1);
-        ((GuiExtension) this.minecraft.gui).vivecraft$drawMouseMenuQuad((int) x2, (int) y2);
+        RenderHelper.drawMouseMenuQuad(guiGraphics, (int) x1, (int) y1);
+        RenderHelper.drawMouseMenuQuad(guiGraphics, (int) x2, (int) y2);
     }
 
     public boolean processCursor(Vec3 Pos_room, Matrix4f Rotation_room, boolean mainCursor) {

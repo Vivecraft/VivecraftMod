@@ -8,10 +8,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import org.lwjgl.opengl.GL13C;
 import org.lwjgl.opengl.GL30C;
-import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.GuiExtension;
 import org.vivecraft.client_vr.extensions.MinecraftExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
@@ -111,6 +109,9 @@ public class VRPassHelper {
         // some mods mess with the depth mask?
         RenderSystem.depthMask(true);
 
+        // to render gui stuff
+        GuiGraphics guiGraphics = new GuiGraphics(mc, mc.renderBuffers().bufferSource());
+
         mc.getProfiler().push("gui cursor");
         // draw cursor on Gui Layer
         if (mc.screen != null || !mc.mouseHandler.isMouseGrabbed()) {
@@ -122,8 +123,9 @@ public class VRPassHelper {
 
             int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
             int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
-            ((GuiExtension) mc.gui).vivecraft$drawMouseMenuQuad(x, y);
+            RenderHelper.drawMouseMenuQuad(guiGraphics, x, y);
 
+            guiGraphics.flush();
             poseStack.popPose();
             RenderSystem.applyModelViewMatrix();
         }
@@ -144,12 +146,11 @@ public class VRPassHelper {
         }
 
         mc.getProfiler().popPush("2D Keyboard");
-        GuiGraphics guiGraphics = new GuiGraphics(mc, mc.renderBuffers().bufferSource());
         if (KeyboardHandler.Showing && !dataHolder.vrSettings.physicalKeyboard) {
             mc.mainRenderTarget = KeyboardHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTick, KeyboardHandler.UI, guiGraphics, true);
+            RenderHelper.drawScreen(guiGraphics, actualPartialTick, KeyboardHandler.UI, true);
             guiGraphics.flush();
         }
 
@@ -158,7 +159,7 @@ public class VRPassHelper {
             mc.mainRenderTarget = RadialHandler.Framebuffer;
             mc.mainRenderTarget.clear(Minecraft.ON_OSX);
             mc.mainRenderTarget.bindWrite(true);
-            RenderHelper.drawScreen(actualPartialTick, RadialHandler.UI, guiGraphics, true);
+            RenderHelper.drawScreen(guiGraphics, actualPartialTick, RadialHandler.UI, true);
             guiGraphics.flush();
         }
         mc.getProfiler().pop();
