@@ -33,6 +33,9 @@ public class RunTracker extends Tracker {
         }
     }
 
+    /**
+     * @return yaw direction the player is running at, in radians
+     */
     public double getYaw() {
         return this.direction;
     }
@@ -70,7 +73,7 @@ public class RunTracker extends Tracker {
         Vec3 v = this.dh.vrPlayer.vrdata_world_pre.getController(0).getDirection()
             .add(this.dh.vrPlayer.vrdata_world_pre.getController(1).getDirection())
             .scale(0.5D);
-        this.direction = (float) Math.toDegrees(Math.atan2(-v.x, v.z));
+        this.direction = Math.atan2(-v.x, v.z);
         double spd = (c0Move + c1Move) / 2.0D;
         this.speed = spd * 1.0D * 1.3D;
 

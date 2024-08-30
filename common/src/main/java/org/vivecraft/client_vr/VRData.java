@@ -309,26 +309,47 @@ public class VRData {
         }
 
         /**
-         * @return yaw of the device in world space
+         * @return yaw of the device in world space, in degrees
          */
         public float getYaw() {
-            Vec3 dir = this.getDirection();
-            return (float) Math.toDegrees(Math.atan2(-dir.x, dir.z));
+            return (float) Math.toDegrees(this.getYawRad());
         }
 
         /**
-         * @return pitch of the device in world space
+         * @return yaw of the device in world space, in radians
+         */
+        public float getYawRad() {
+            Vec3 dir = this.getDirection();
+            return (float) Math.atan2(-dir.x, dir.z);
+        }
+
+        /**
+         * @return pitch of the device in world space, in degrees
          */
         public float getPitch() {
-            Vec3 dir = this.getDirection();
-            return (float) Math.toDegrees(Math.asin(dir.y / dir.length()));
+            return (float) Math.toDegrees(this.getPitchRad());
         }
 
         /**
-         * @return roll of the device in world space
+         * @return pitch of the device in world space, in radians
+         */
+        public float getPitchRad() {
+            Vec3 dir = this.getDirection();
+            return (float) Math.asin(dir.y / dir.length());
+        }
+
+        /**
+         * @return roll of the device in world space, in degrees
          */
         public float getRoll() {
-            return (float) -Math.toDegrees(Math.atan2(this.matrix.M[1][0], this.matrix.M[1][1]));
+            return (float) Math.toDegrees(this.getRollRad());
+        }
+
+        /**
+         * @return pitch of the device in world space, in radians
+         */
+        public float getRollRad() {
+            return (float) -Math.atan2(this.matrix.M[1][0], this.matrix.M[1][1]);
         }
 
         /**
