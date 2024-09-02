@@ -42,13 +42,16 @@ public class VRPlayerRenderer extends PlayerRenderer {
     @Override
     public void render(AbstractClientPlayer player, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
 
-        VRPlayersClient.RotInfo rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(player.getUUID());
+        poseStack.pushPose();
 
+        VRPlayersClient.RotInfo rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(player.getUUID());
         if (rotInfo != null) {
             poseStack.scale(rotInfo.heightScale, rotInfo.heightScale, rotInfo.heightScale);
-            super.render(player, entityYaw, partialTick, poseStack, buffer, packedLight);
-            poseStack.scale(1.0F, 1.0F / rotInfo.heightScale, 1.0F);
         }
+
+        super.render(player, entityYaw, partialTick, poseStack, buffer, packedLight);
+
+        poseStack.popPose();
     }
 
     @Override
