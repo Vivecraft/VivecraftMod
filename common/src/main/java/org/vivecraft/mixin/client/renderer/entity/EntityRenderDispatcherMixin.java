@@ -53,7 +53,7 @@ public abstract class EntityRenderDispatcherMixin implements ResourceManagerRelo
 
     @Inject(method = "renderHitbox", at = @At("HEAD"))
     private static void vivecraft$renderHeadHitbox(
-        PoseStack poseStack, VertexConsumer buffer, Entity entity, float partialTicks, CallbackInfo ci)
+        PoseStack poseStack, VertexConsumer buffer, Entity entity, float partialTick, CallbackInfo ci)
     {
         AABB headBox;
         if (ClientDataHolderVR.getInstance().vrSettings.renderDebug &&
