@@ -741,11 +741,19 @@ public class VRPlayer {
         return controllerPos.add(controllerDir.x * distance, controllerDir.y * distance, controllerDir.z * distance);
     }
 
-    public HitResult rayTraceBlocksVR(VRData source, int controller, double blockReachDistance, boolean fluidCollision) {
+    /**
+     * copy of {@link Entity#pick(double, float, boolean)}, modified to use the given VRData
+     * @param source VRData to base the raytrace off
+     * @param controller controller index to trace from
+     * @param hitDistance distance to trace
+     * @param hitFluids if fluids should be hit
+     * @return hit block or miss
+     */
+    public HitResult rayTraceBlocksVR(VRData source, int controller, double hitDistance, boolean hitFluids) {
         Vec3 start = source.getController(controller).getPosition();
-        Vec3 end = this.AimedPointAtDistance(source, controller, blockReachDistance);
+        Vec3 end = this.AimedPointAtDistance(source, controller, hitDistance);
         return this.mc.level.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE,
-            fluidCollision ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, this.mc.player));
+            hitFluids ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, this.mc.player));
     }
 
     public boolean isTeleportSupported() {

@@ -74,19 +74,9 @@ public interface GameRendererExtension {
     Matrix4f vivecraft$getThirdPassProjectionMatrix();
 
     /**
-     * set's up the far clipping plane
-     */
-    void vivecraft$setupClipPlanes();
-
-    /**
      * @return min clipping plane
      */
     float vivecraft$getMinClipDistance();
-
-    /**
-     * @return far clipping plane
-     */
-    float vivecraft$getClipDistance();
 
     /**
      * sets if the GamerRenderer should run through the screen rendering part of {@code GameRenderer.render()}

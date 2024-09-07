@@ -77,7 +77,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
+    protected Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (eyeType == VR.EVREye_Eye_Left) {
                 return OpenVRUtil.Matrix4fFromOpenVR(VRSystem_GetProjectionMatrix(VR.EVREye_Eye_Left, nearClip, farClip, HmdMatrix44.calloc(stack)));

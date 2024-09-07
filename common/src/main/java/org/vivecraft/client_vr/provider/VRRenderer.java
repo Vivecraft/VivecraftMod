@@ -24,7 +24,6 @@ import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
-import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -49,6 +48,7 @@ import java.util.stream.Collectors;
 public abstract class VRRenderer {
     // projection matrices
     public Matrix4f[] eyeProj = new Matrix4f[2];
+    private float lastFarClip = 0F;
 
     // render buffers
     public RenderTarget framebufferEye0;
@@ -101,13 +101,31 @@ public abstract class VRRenderer {
     public abstract void createRenderTexture(int width, int height);
 
     /**
+     * gets the cached projection matrix if the farClip distance matches with the last, else gets a new one from the VR runtime
+     * @param eyeType which eye to get the projection matrix for, 0 = Left, 1 = Right
+     * @param nearClip near clip plane of the projection matrix
+     * @param farClip far clip plane of the projection matrix
+     * @return the projection matrix
+     */
+    public Matrix4f getCachedProjectionMatrix(int eyeType, float nearClip, float farClip) {
+        if (farClip != lastFarClip) {
+            lastFarClip = farClip;
+            // fetch both at the same time to make sure they use the same clip planes
+            this.eyeProj[0] = this.getProjectionMatrix(0, nearClip, farClip);
+            this.eyeProj[1] = this.getProjectionMatrix(1, nearClip, farClip);
+        }
+
+        return eyeProj[eyeType];
+    }
+
+    /**
      * gets the projection matrix from the vr runtime with the given parameters
      * @param eyeType which eye to get the projection matrix for, 0 = Left, 1 = Right
      * @param nearClip near clip plane of the projection matrix
      * @param farClip far clip plane of the projection matrix
      * @return the projection matrix
      */
-    public abstract Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip);
+    protected abstract Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip);
 
     /**
      * this is the last thing to call after all passes are rendered.
@@ -682,10 +700,6 @@ public abstract class VRRenderer {
             WorldRenderPass.camera = new WorldRenderPass(this.cameraRenderFramebuffer);
             VRSettings.logger.info(this.cameraRenderFramebuffer.toString());
             RenderHelper.checkGLError("Camera render framebuffer setup");
-
-            ((GameRendererExtension) minecraft.gameRenderer).vivecraft$setupClipPlanes();
-            this.eyeProj[0] = this.getProjectionMatrix(0, ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getClipDistance());
-            this.eyeProj[1] = this.getProjectionMatrix(1, ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getClipDistance());
 
             if (dataholder.vrSettings.useFsaa) {
                 try {
