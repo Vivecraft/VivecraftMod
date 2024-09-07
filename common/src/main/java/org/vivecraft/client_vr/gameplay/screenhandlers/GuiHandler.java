@@ -96,6 +96,7 @@ public class GuiHandler {
     public static int scaledHeight;
     public static int scaledWidthMax;
     public static int scaledHeightMax;
+    private static int prevGuiScale = -1;
 
     /**
      * copy of the vanilla method to calculate gui resolution and max scale
@@ -144,9 +145,15 @@ public class GuiHandler {
         int oldGuiScale = guiScaleFactor;
         guiWidth = dh.vrSettings.doubleGUIResolution ? 2560 : 1280;
         guiHeight = dh.vrSettings.doubleGUIResolution ? 1440 : 720;
-        guiScaleFactor = calculateScale(
-            dh.vrSettings.doubleGUIResolution ? dh.vrSettings.guiScale : (int) Math.ceil(dh.vrSettings.guiScale * 0.5f),
-            false, guiWidth, guiHeight);
+
+        int newGuiScale = dh.vrSettings.doubleGUIResolution ?
+            dh.vrSettings.guiScale : (int) Math.ceil(dh.vrSettings.guiScale * 0.5f);
+
+        if (oldWidth != guiWidth || prevGuiScale != newGuiScale) {
+            // only recalculate when scale or size changed
+            guiScaleFactor = calculateScale(newGuiScale, false, guiWidth, guiHeight);
+            prevGuiScale = newGuiScale;
+        }
         if (oldWidth != guiWidth) {
             // move cursor to right position
             InputSimulator.setMousePos(

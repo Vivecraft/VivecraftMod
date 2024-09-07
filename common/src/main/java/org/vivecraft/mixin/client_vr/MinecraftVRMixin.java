@@ -1,5 +1,7 @@
 package org.vivecraft.mixin.client_vr;
 
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -729,6 +731,49 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     public void vivecraft$onCloseScreen(Screen screen, CallbackInfo info) {
         if (screen == null) {
             GuiHandler.guiAppearOverBlockActive = false;
+        }
+    }
+
+    @Inject(method = "setScreen", at = @At("HEAD"))
+    public void vivecraft$checkGuiScaleChangePre(CallbackInfo ci, @Share("guiScale") LocalIntRef guiScaleRef) {
+        // cache so it can be checked after screen apply
+        guiScaleRef.set(this.options.guiScale().get());
+    }
+
+    @Inject(method = "setScreen", at = @At("RETURN"))
+    public void vivecraft$checkGuiScaleChangePost(CallbackInfo ci, @Share("guiScale") LocalIntRef guiScaleRef) {
+        if (guiScaleRef.get() != this.options.guiScale().get()) {
+            // checks if something changed the GuiScale during screen setting
+            // and tries to adjust the VR GuiScale accordingly
+
+            int maxScale = VRState.vrRunning ? GuiHandler.guiScaleFactorMax :
+                this.window.calculateScale(0, options.forceUnicodeFont().get());
+
+            // auto uses max scale
+            if (guiScaleRef.get() == 0) {
+                guiScaleRef.set(maxScale);
+            }
+
+            int newScale = this.options.guiScale().get() == 0 ? maxScale : this.options.guiScale().get();
+
+            if (newScale < guiScaleRef.get()) {
+                // if someone reduced the gui scale, try to reduce the VR gui scale by the same steps
+                int newVRScale = VRState.vrRunning ? newScale :
+                    Math.max(1, GuiHandler.guiScaleFactorMax - (guiScaleRef.get() - newScale));
+                GuiHandler.guiScaleFactor = GuiHandler.calculateScale(newVRScale, this.options.forceUnicodeFont().get(),
+                    GuiHandler.guiWidth, GuiHandler.guiHeight);
+            } else {
+                // new gui scale is bigger than before, so just reset to the default
+                VRSettings vrSettings = ClientDataHolderVR.getInstance().vrSettings;
+                GuiHandler.guiScaleFactor = GuiHandler.calculateScale(
+                    vrSettings.doubleGUIResolution ? vrSettings.guiScale : (int) Math.ceil(vrSettings.guiScale * 0.5f),
+                    this.options.forceUnicodeFont().get(), GuiHandler.guiWidth, GuiHandler.guiHeight);
+            }
+
+            // resize the screen for the new gui scale
+            if (VRState.vrRunning && this.screen != null) {
+                this.screen.resize(Minecraft.getInstance(), GuiHandler.scaledWidth, GuiHandler.scaledHeight);
+            }
         }
     }
 
