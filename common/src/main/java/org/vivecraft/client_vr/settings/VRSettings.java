@@ -144,6 +144,7 @@ public class VRSettings {
 
     public enum VRProvider implements OptionEnum<VRProvider> {
         OPENVR,
+        OPENXR,
         NULLVR
     }
 
@@ -1063,7 +1064,15 @@ public class VRSettings {
 
     public enum VrOptions {
         DUMMY(false, true), // Dummy
-        VR_PLUGIN(false, true), // vr plugin to use
+        VR_PLUGIN(false, true) { // vr plugin to use
+            @Override
+            void onOptionChange() {
+                if (VRState.vrRunning) {
+                    VRState.destroyVR(false);
+                    VRState.vrEnabled = true;
+                }
+            }
+        },
         VR_ENABLED(false, true) { // vr or nonvr
 
             @Override
@@ -1568,7 +1577,7 @@ public class VRSettings {
             @Override
             String getDisplayString(String prefix, Object value) {
                 if (VRState.vrEnabled) {
-                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.framebufferEye0;
+                    RenderTarget eye0 = ClientDataHolderVR.getInstance().vrRenderer.getLeftEyeTarget();
                     return prefix + Math.round((float) value * 100) + "% (" + (int) Math.ceil(eye0.viewWidth * Math.sqrt((float) value)) + "x" + (int) Math.ceil(eye0.viewHeight * Math.sqrt((float) value)) + ")";
                 } else {
                     return prefix + Math.round((float) value * 100) + "%";
@@ -1760,6 +1769,7 @@ public class VRSettings {
             }
         },
         INGAME_BINDINGS_IN_GUI(false, true),
+
         RADIAL_NUMBER(false, false,4, 14, 2, 0),
         RIGHT_CLICK_DELAY(false, false); // Right Click Repeat
 //        ANISOTROPIC_FILTERING("options.anisotropicFiltering", true, false, 1.0F, 16.0F, 0.0F)
