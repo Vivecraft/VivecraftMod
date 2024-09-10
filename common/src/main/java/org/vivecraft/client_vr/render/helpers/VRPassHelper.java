@@ -237,6 +237,8 @@ public class VRPassHelper {
 
         // some mods mess with the depth mask?
         RenderSystem.depthMask(true);
+        // some mods mess with the backface culling?
+        RenderSystem.enableCull();
 
         mc.getProfiler().push("gui cursor");
         // draw cursor on Gui Layer
