@@ -233,6 +233,8 @@ public class VRSettings {
     public boolean simulateFalling = true;  // VIVE if HMD is over empty space, fall
     @SettingField(value = VrOptions.WEAPON_COLLISION, config = "weaponCollisionNew")
     public WeaponCollision weaponCollision = WeaponCollision.AUTO;  // VIVE weapon hand collides with blocks/enemies
+    @SettingField(VrOptions.SWORD_BLOCK_COLLISION)
+    public boolean swordBlockCollision = true;
     @SettingField(VrOptions.MOVEMENT_MULTIPLIER)
     public float movementSpeedMultiplier = 1.0f;   // VIVE - use full speed by default
     @SettingField(VrOptions.FREEMOVE_MODE)
@@ -1377,6 +1379,7 @@ public class VRSettings {
                 }
             }
         },
+        SWORD_BLOCK_COLLISION(false, true), // lets swords hit blocks that can be mined or instabroken
         // VIVE END - new options
         //JRBUDDA VIVE
         ALLOW_CRAWLING(false, true), // Roomscale Crawling
