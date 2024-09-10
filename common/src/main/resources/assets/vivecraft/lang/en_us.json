@@ -9,6 +9,7 @@
   "vivecraft.key.rotateRight": "Rotate Right",
   "vivecraft.key.rotateAxis": "Rotate Only",
   "vivecraft.key.rotateFree": "Rotate Free",
+  "vivecraft.key.flickStick": "Flick Stick Rotate",
   "vivecraft.key.walkabout": "Walkabout",
   "vivecraft.key.teleport": "Teleport",
   "vivecraft.key.teleportFallback": "Walk Forwards When Teleport Disabled",
