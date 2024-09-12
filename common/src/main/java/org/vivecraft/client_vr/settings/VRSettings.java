@@ -330,6 +330,8 @@ public class VRSettings {
     public boolean displayMirrorLeftEye = false;
     @SettingField(VrOptions.MIRROR_CENTER_SMOOTH)
     public float displayMirrorCenterSmooth = 0.0F;
+    @SettingField(VrOptions.MIRROR_SCREENSHOT_CAMERA)
+    public boolean displayMirrorUseScreenshotCamera = false;
     public boolean shouldRenderSelf = false;
     @SettingField(VrOptions.MENU_WORLD_SELECTION)
     public MenuWorld menuWorldSelection = MenuWorld.BOTH;
@@ -1285,6 +1287,7 @@ public class VRSettings {
                 }
             }
         },
+        MIRROR_SCREENSHOT_CAMERA(false, true),
         MIXED_REALITY_KEY_COLOR(false, false) { // Key Color
             private static final List<Pair<Color, String>> colors;
             static {
@@ -1329,7 +1332,9 @@ public class VRSettings {
             @Override
             void onOptionChange() {
                 // reinit, because of maybe new first person pass
-                ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+                if (VRState.vrInitialized) {
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+                }
             }
         },
         MIXED_REALITY_UNDISTORTED(false, true) { // Undistorted Pass
@@ -1337,7 +1342,9 @@ public class VRSettings {
             @Override
             void onOptionChange() {
                 // reinit, because of maybe new first person pass
-                ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+                if (VRState.vrInitialized) {
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+                }
             }
         },
         MIXED_REALITY_ALPHA_MASK(false, true), // Alpha Mask,
