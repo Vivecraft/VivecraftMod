@@ -301,6 +301,14 @@ public class VRPassHelper {
         for (RenderPass renderpass : list) {
             dataHolder.currentPass = renderpass;
 
+            if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorUseScreenshotCamera && ClientDataHolderVR.getInstance().cameraTracker.isVisible()) {
+                if (renderpass == RenderPass.CENTER) {
+                    continue;
+                } else if (renderpass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY) {
+                    continue;
+                }
+            }
+
             switch (renderpass) {
                 case LEFT, RIGHT -> RenderPassManager.setWorldRenderPass(WorldRenderPass.stereoXR);
                 case CENTER -> RenderPassManager.setWorldRenderPass(WorldRenderPass.center);
