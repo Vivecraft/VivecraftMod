@@ -947,12 +947,7 @@ public abstract class MCVR {
                     this.dh.vrSettings.displayMirrorMode = VRSettings.MirrorMode.THIRD_PERSON;
                 }
 
-                if (!ShadersHelper.isShaderActive()) {
-                    this.dh.vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
-                } else {
-                    // in case if the last third person mirror was mixed reality
-                    this.dh.vrRenderer.resizeFrameBuffers("Mirror Setting Changed");
-                }
+                this.dh.vrRenderer.reinitWithoutShaders("Mirror Setting Changed");
             }
 
             if (mod.keyToggleKeyboard.consumeClick()) {

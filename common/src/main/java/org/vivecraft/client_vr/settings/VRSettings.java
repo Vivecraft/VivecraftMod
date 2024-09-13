@@ -1237,7 +1237,7 @@ public class VRSettings {
 
             @Override
             void onOptionChange() {
-                if (VRState.vrEnabled) {
+                if (VRState.vrInitialized) {
                     ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("");
                 }
             }
@@ -1270,8 +1270,8 @@ public class VRSettings {
 
             @Override
             void onOptionChange() {
-                if (VRState.vrRunning && !ShadersHelper.isShaderActive()) {
-                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
+                if (VRState.vrInitialized) {
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitWithoutShaders("Mirror Setting Changed");
                 }
             }
         },
@@ -1333,7 +1333,7 @@ public class VRSettings {
             void onOptionChange() {
                 // reinit, because of maybe new first person pass
                 if (VRState.vrInitialized) {
-                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitWithoutShaders("MR Setting Changed");
                 }
             }
         },
@@ -1343,7 +1343,7 @@ public class VRSettings {
             void onOptionChange() {
                 // reinit, because of maybe new first person pass
                 if (VRState.vrInitialized) {
-                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitWithoutShaders("MR Setting Changed");
                 }
             }
         },

@@ -301,10 +301,10 @@ public class VRPassHelper {
         for (RenderPass renderpass : list) {
             dataHolder.currentPass = renderpass;
 
-            if (ClientDataHolderVR.getInstance().vrSettings.displayMirrorUseScreenshotCamera && ClientDataHolderVR.getInstance().cameraTracker.isVisible()) {
+            if (dataHolder.vrSettings.displayMirrorUseScreenshotCamera && dataHolder.cameraTracker.isVisible()) {
                 if (renderpass == RenderPass.CENTER) {
                     continue;
-                } else if (renderpass == RenderPass.THIRD && ClientDataHolderVR.getInstance().vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY) {
+                } else if (renderpass == RenderPass.THIRD && dataHolder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY) {
                     continue;
                 }
             }
