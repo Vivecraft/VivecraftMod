@@ -1,10 +1,10 @@
 package org.vivecraft.client.gui.settings;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import org.vivecraft.client.gui.framework.GuiVROption;
 import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.settings.VRSettings;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 
@@ -63,8 +63,8 @@ public class GuiMixedRealitySettings extends GuiVROptionsBase {
         super.addDefaultButtons();
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
-        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+    public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
+        super.render(poseStack, pMouseX, pMouseY, pPartialTicks);
     }
 
     protected void loadDefaults() {

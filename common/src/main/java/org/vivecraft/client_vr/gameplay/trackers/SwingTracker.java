@@ -226,7 +226,7 @@ public class SwingTracker extends Tracker {
                 BlockPos blockpos = BlockPos.containing(this.miningPoint[c]);
                 BlockState blockstate = this.mc.level.getBlockState(blockpos);
 
-                boolean mineableByItem = this.dh.vrSettings.swordBlockCollision && (itemstack.isCorrectToolForDrops(blockstate) || blockstate.getDestroyProgress(player, player.level(), blockpos) == 1F);
+                boolean mineableByItem = this.dh.vrSettings.swordBlockCollision && (itemstack.isCorrectToolForDrops(blockstate) || blockstate.getDestroyProgress(player, player.level, blockpos) == 1F);
 
                 // block check
                 // don't hit blocks with swords or same time as hitting entity
