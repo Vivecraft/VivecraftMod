@@ -50,7 +50,8 @@
     "java": ">=17"
   },
   "breaks": {
-    "sodium": ["0.4.11+build.25", "0.4.11+build.26"]
+    "sodium": ["0.4.11+build.25", "0.4.11+build.26"],
+    "modmenu": ["<6.2.0"]
   },
   "suggests": {
     "another-mod": "*"
@@ -63,7 +64,8 @@
   "custom": {
     "mc-publish": {
       "dependencies": [
-        "sodium(incompatible)#(ignore)"
+        "sodium(incompatible)#(ignore)",
+        "modmenu(incompatible)#(ignore)"
       ]
     },
     "modmenu": {
