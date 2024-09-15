@@ -488,11 +488,11 @@ public abstract class VRRenderer {
             Tuple<Integer, Integer> cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
 
             // main render target
-            ((RenderTargetExtension) WorldRenderPass.stereoXR.target).vivecraft$setUseStencil(dataholder.vrSettings.vrUseStencil);
-            WorldRenderPass.stereoXR.resize(eyeFBWidth, eyeFBHeight);
             if (dataholder.vrSettings.vrUseStencil) {
-                Xplat.enableRenderTargetStencil(WorldRenderPass.stereoXR.target);
+                ((RenderTargetExtension) WorldRenderPass.stereoXR.target)
+                    .vivecraft$setUseStencil(!Xplat.enableRenderTargetStencil(WorldRenderPass.stereoXR.target));
             }
+            WorldRenderPass.stereoXR.resize(eyeFBWidth, eyeFBHeight);
             if (dataholder.vrSettings.useFsaa) {
                 this.fsaaFirstPassResultFBO.resize(eyew, eyeFBHeight, Minecraft.ON_OSX);
             }

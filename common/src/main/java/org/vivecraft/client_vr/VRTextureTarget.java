@@ -15,11 +15,16 @@ public class VRTextureTarget extends RenderTarget {
         RenderSystem.assertOnRenderThreadOrInit();
         ((RenderTargetExtension) this).vivecraft$setTextid(texid);
         ((RenderTargetExtension) this).vivecraft$isLinearFilter(linearFilter);
-        ((RenderTargetExtension) this).vivecraft$setUseStencil(useStencil);
-        this.resize(width, height, onMac);
-        if (useStencil) {
-            Xplat.enableRenderTargetStencil(this);
+
+        // need to set this first, because the forge/neoforge stencil enabled does a resize
+        this.viewWidth = width;
+        this.viewHeight = height;
+
+        if (useStencil && !Xplat.enableRenderTargetStencil(this)) {
+            // use our stencil only if the modloader doesn't support it
+            ((RenderTargetExtension) this).vivecraft$setUseStencil(true);
         }
+        this.resize(width, height, onMac);
         this.setClearColor(0, 0, 0, 0);
     }
 

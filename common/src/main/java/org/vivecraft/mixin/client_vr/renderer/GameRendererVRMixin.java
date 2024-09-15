@@ -1,6 +1,8 @@
 package org.vivecraft.mixin.client_vr.renderer;
 
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -529,13 +531,13 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @ModifyVariable(at = @At(value = "STORE", ordinal = 1), ordinal = 4, method = "renderLevel")
-    public float vivecraft$reduceNauseaAffect(float oldVal) {
+    @WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F"), method = "renderLevel")
+    public float vivecraft$reduceNauseaAffect(float partialTick, float oldVal, float newVal, Operation<Float> original) {
         if (!RenderPassType.isVanilla()) {
             // scales down the effect from (1,0.65) to (1,0.9)
-            return 1f - (1f - oldVal) * 0.25f;
+            return original.call(partialTick, oldVal, newVal) * 0.4F;
         } else {
-            return oldVal;
+            return original.call(partialTick, oldVal, newVal);
         }
     }
 

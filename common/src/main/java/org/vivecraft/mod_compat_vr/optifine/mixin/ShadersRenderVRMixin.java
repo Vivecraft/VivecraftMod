@@ -1,5 +1,6 @@
 package org.vivecraft.mod_compat_vr.optifine.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -48,7 +49,7 @@ public class ShadersRenderVRMixin {
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getInstance()Lnet/minecraft/client/Minecraft;", remap = true), method = "renderShadowMap", remap = false, cancellable = true)
-    private static void vivecraft$shadowsOnlyOnce(GameRenderer gameRenderer, Camera activeRenderInfo, int pass, float partialTicks, long finishTimeNano, CallbackInfo ci) {
+    private static void vivecraft$shadowsOnlyOnce(CallbackInfo ci, @Local(argsOnly = true) Camera activeRenderInfo, @Local(argsOnly = true) float partialTicks) {
         if (!RenderPassType.isVanilla() && ClientDataHolderVR.getInstance().currentPass != RenderPass.LEFT) {
             if (vivecraft$setCameraShadow == null) {
                 try {
