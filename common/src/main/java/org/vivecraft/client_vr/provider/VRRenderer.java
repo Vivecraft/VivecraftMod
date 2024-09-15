@@ -20,6 +20,7 @@ import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -506,7 +507,12 @@ public abstract class VRRenderer {
             Tuple<Integer, Integer> cameraSize = getCameraTextureSize(eyeFBWidth, eyeFBHeight);
 
             // main render target
-            ((RenderTargetExtension) WorldRenderPass.stereoXR.target).vivecraft$setStencil(dataholder.vrSettings.vrUseStencil);
+            if (dataholder.vrSettings.vrUseStencil) {
+                ((RenderTargetExtension) WorldRenderPass.stereoXR.target)
+                    .vivecraft$setStencil(!Xplat.enableRenderTargetStencil(WorldRenderPass.stereoXR.target));
+            } else {
+                ((RenderTargetExtension) WorldRenderPass.stereoXR.target).vivecraft$setStencil(false);
+            }
             WorldRenderPass.stereoXR.resize(eyeFBWidth, eyeFBHeight);
             if (dataholder.vrSettings.useFsaa) {
                 this.fsaaFirstPassResultFBO.resize(eyew, eyeFBHeight, Minecraft.ON_OSX);
