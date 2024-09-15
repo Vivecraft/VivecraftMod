@@ -490,13 +490,13 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @ModifyVariable(method = "renderLevel", at = @At(value = "STORE", ordinal = 1), ordinal = 3)
-    private float vivecraft$reduceNauseaAffect(float oldVal) {
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F"))
+    private float vivecraft$reduceNauseaAffect(float delta, float start, float end, Operation<Float> original) {
         if (!RenderPassType.isVanilla()) {
             // scales down the effect from (1,0.65) to (1,0.9)
-            return 1f - (1f - oldVal) * 0.25f;
+            return original.call(delta, start, end) * 0.4F;
         } else {
-            return oldVal;
+            return original.call(delta, start, end);
         }
     }
 
