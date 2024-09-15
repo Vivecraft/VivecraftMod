@@ -4,6 +4,7 @@
   "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "ModMenuEventHandlerVRMixin",
     "PauseScreenVRModMenuMixin"
   ],
   "minVersion": "0.8.4"
