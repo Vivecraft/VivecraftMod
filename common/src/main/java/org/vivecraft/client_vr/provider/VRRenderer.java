@@ -270,8 +270,8 @@ public abstract class VRRenderer {
 
         for (int i = 0; i < verts.length; i += 2) {
             builder.vertex(
-                verts[i] * dh.vrRenderer.renderScale,
-                verts[i + 1] * dh.vrRenderer.renderScale,
+                verts[i] * this.renderScale,
+                verts[i + 1] * this.renderScale,
                 0.0F).endVertex();
         }
 
@@ -422,6 +422,11 @@ public abstract class VRRenderer {
         return this.vr.initSuccess;
     }
 
+    /**
+     * method to tell the vrRenderer, that render buffers changed
+     * when shaders are active a simple resize is called, without shaders they are completely reinitialized
+     * @param cause cause that gets logged
+     */
     public void reinitWithoutShaders(String cause) {
         if (ShadersHelper.isShaderActive()) {
             // shaders have all passes created, only need a resize

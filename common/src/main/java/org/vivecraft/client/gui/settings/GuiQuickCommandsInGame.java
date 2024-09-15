@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class GuiQuickCommandsInGame extends Screen {
-    protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+    protected ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
     protected final Screen parentScreen;
 
     public GuiQuickCommandsInGame(Screen lastScreen) {
@@ -20,7 +20,7 @@ public class GuiQuickCommandsInGame extends Screen {
     public void init() {
         KeyMapping.releaseAll();
         this.clearWidgets();
-        String[] chatCommands = this.dataholder.vrSettings.vrQuickCommands;
+        String[] chatCommands = this.dataHolder.vrSettings.vrQuickCommands;
 
         for (int i = 0; i < chatCommands.length; i++) {
             int rightColumn = i > 5 ? 1 : 0;

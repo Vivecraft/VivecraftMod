@@ -1,7 +1,6 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import org.vivecraft.client.gui.framework.GuiVROption;
@@ -13,11 +12,6 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 
 public class GuiRenderOpticsSettings extends GuiVROptionsBase {
-    private static final VRSettings.VrOptions[] monoDisplayOptions = new VRSettings.VrOptions[]{
-        VRSettings.VrOptions.MONO_FOV,
-        VRSettings.VrOptions.DUMMY,
-        VRSettings.VrOptions.FSAA
-    };
     private static final VRSettings.VrOptions[] openVRDisplayOptions = new VRSettings.VrOptions[]{
         VRSettings.VrOptions.RENDER_SCALEFACTOR,
         VRSettings.VrOptions.MIRROR_DISPLAY,
@@ -99,11 +93,6 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
                 ((AbstractWidget) w).active = false;
             }
         });
-    }
-
-    @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
