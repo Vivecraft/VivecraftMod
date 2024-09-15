@@ -108,6 +108,8 @@ public class VRPassHelper {
 
         // some mods mess with the depth mask?
         RenderSystem.depthMask(true);
+        // some mods mess with the backface culling?
+        RenderSystem.enableCull();
 
         // to render gui stuff
         GuiGraphics guiGraphics = new GuiGraphics(mc, mc.renderBuffers().bufferSource());
@@ -173,6 +175,14 @@ public class VRPassHelper {
         dataHolder.isFirstPass = true;
         for (RenderPass renderpass : list) {
             dataHolder.currentPass = renderpass;
+
+            if (dataHolder.vrSettings.displayMirrorUseScreenshotCamera && dataHolder.cameraTracker.isVisible()) {
+                if (renderpass == RenderPass.CENTER) {
+                    continue;
+                } else if (renderpass == RenderPass.THIRD && dataHolder.vrSettings.displayMirrorMode != VRSettings.MirrorMode.MIXED_REALITY) {
+                    continue;
+                }
+            }
 
             switch (renderpass) {
                 case LEFT, RIGHT -> RenderPassManager.setWorldRenderPass(WorldRenderPass.stereoXR);

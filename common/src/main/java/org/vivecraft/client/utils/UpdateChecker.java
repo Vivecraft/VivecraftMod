@@ -79,6 +79,13 @@ public class UpdateChecker {
             String currentVersionNumber = Xplat.getModVersion() + "-" + Xplat.getModloader().name;
             Version current = new Version(currentVersionNumber, currentVersionNumber, "");
 
+            // enforce update notifications if using a non release
+            if (current.alpha > 0 && updateType != 'a') {
+                updateType = 'a';
+            } else if (current.beta > 0 && updateType != 'a') {
+                updateType = 'b';
+            }
+
             for (Version v : versions) {
                 if (v.isVersionType(updateType) && current.compareTo(v) > 0) {
                     changelog += "§a" + v.fullVersion + "§r" + ": \n" + v.changelog + "\n\n";
@@ -125,12 +132,15 @@ public class UpdateChecker {
             // parts should be [mc version]-(pre/rc)-[vive version]-(vive a/b/test)-[mod loader]
             if (!parts[viveVersionIndex].contains(".")) {
                 viveVersionIndex = parts.length - 3;
+                String testString = parts[parts.length - 2];
                 // prerelease
-                if (parts[parts.length - 1].matches("a\\d+")) {
-                    this.alpha = Integer.parseInt(parts[parts.length - 1].replaceAll("\\D+", ""));
-                } else if (parts[parts.length - 1].matches("b\\d+")) {
-                    this.beta = Integer.parseInt(parts[parts.length - 1].replaceAll("\\D+", ""));
-                } else {
+                if (testString.matches("a\\d+.*")) {
+                    this.alpha = Integer.parseInt(testString.replaceAll("\\D+", ""));
+                } else if (testString.matches("b\\d+.*")) {
+                    this.beta = Integer.parseInt(testString.replaceAll("\\D+", ""));
+                }
+                // if the prerelease string is not just aXX or bXX it's a feature test as well and ranked slightly higher
+                if (!testString.replaceAll("^[ab]\\d+", "").isEmpty()) {
                     this.featureTest = true;
                 }
             }
@@ -163,7 +173,16 @@ public class UpdateChecker {
 
         // two digits per segment, should be enough right?
         private long compareNumber() {
-            return this.alpha + this.beta * 100L + (this.alpha + this.beta == 0 || this.featureTest ? 1000L : 0L) + this.patch * 100000L + this.minor * 10000000L + this.major * 1000000000L;
+            // digit flag
+            // major minor patch full release beta alpha feature test
+            // 00    00    00    0            00   00    0
+            return (this.featureTest ? 1L : 0L) +
+                this.alpha * 10L +
+                this.beta * 1000L +
+                (this.alpha + this.beta == 0 ? 10000L : 0L) +
+                this.patch * 1000000L +
+                this.minor * 100000000L +
+                this.major * 10000000000L;
         }
     }
 }

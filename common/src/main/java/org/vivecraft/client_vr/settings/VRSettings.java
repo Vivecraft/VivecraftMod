@@ -239,6 +239,8 @@ public class VRSettings {
     public boolean simulateFalling = true;  // VIVE if HMD is over empty space, fall
     @SettingField(value = VrOptions.WEAPON_COLLISION, config = "weaponCollisionNew")
     public WeaponCollision weaponCollision = WeaponCollision.AUTO;  // VIVE weapon hand collides with blocks/enemies
+    @SettingField(VrOptions.SWORD_BLOCK_COLLISION)
+    public boolean swordBlockCollision = true;
     @SettingField(VrOptions.MOVEMENT_MULTIPLIER)
     public float movementSpeedMultiplier = 1.0f;   // VIVE - use full speed by default
     @SettingField(VrOptions.FREEMOVE_MODE)
@@ -334,6 +336,8 @@ public class VRSettings {
     public boolean displayMirrorLeftEye = false;
     @SettingField(VrOptions.MIRROR_CENTER_SMOOTH)
     public float displayMirrorCenterSmooth = 0.0F;
+    @SettingField(VrOptions.MIRROR_SCREENSHOT_CAMERA)
+    public boolean displayMirrorUseScreenshotCamera = false;
     public boolean shouldRenderSelf = false;
     @SettingField(VrOptions.MENU_WORLD_SELECTION)
     public MenuWorld menuWorldSelection = MenuWorld.BOTH;
@@ -1355,7 +1359,7 @@ public class VRSettings {
 
             @Override
             void onOptionChange() {
-                if (VRState.vrEnabled) {
+                if (VRState.vrInitialized) {
                     ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("");
                 }
             }
@@ -1390,8 +1394,8 @@ public class VRSettings {
 
             @Override
             void onOptionChange() {
-                if (VRState.vrRunning && !ShadersHelper.isShaderActive()) {
-                    ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
+                if (VRState.vrInitialized) {
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitWithoutShaders("Mirror Setting Changed");
                 }
             }
         },
@@ -1407,6 +1411,7 @@ public class VRSettings {
                 }
             }
         },
+        MIRROR_SCREENSHOT_CAMERA(false, true),
         MIXED_REALITY_KEY_COLOR(false, false) { // Key Color
             private static final List<Pair<Color, String>> colors;
             static {
@@ -1454,7 +1459,9 @@ public class VRSettings {
             @Override
             void onOptionChange() {
                 // reinit, because of maybe new first person pass
-                ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+                if (VRState.vrInitialized) {
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitWithoutShaders("MR Setting Changed");
+                }
             }
         },
         MIXED_REALITY_UNDISTORTED(false, true) { // Undistorted Pass
@@ -1462,7 +1469,9 @@ public class VRSettings {
             @Override
             void onOptionChange() {
                 // reinit, because of maybe new first person pass
-                ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("MR Setting Changed");
+                if (VRState.vrInitialized) {
+                    ClientDataHolderVR.getInstance().vrRenderer.reinitWithoutShaders("MR Setting Changed");
+                }
             }
         },
         MIXED_REALITY_ALPHA_MASK(false, true), // Alpha Mask,
@@ -1504,6 +1513,7 @@ public class VRSettings {
                 }
             }
         },
+        SWORD_BLOCK_COLLISION(false, true), // lets swords hit blocks that can be mined or instabroken
         // VIVE END - new options
         //JRBUDDA VIVE
         ALLOW_CRAWLING(false, true), // Roomscale Crawling

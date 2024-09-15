@@ -266,7 +266,9 @@ public class ShaderHelper {
 
         if (dataHolder.vrSettings.mixedRealityUnityLike) {
             RenderTarget source;
-            if (dataHolder.vrSettings.mixedRealityUndistorted) {
+            if (dataHolder.vrSettings.displayMirrorUseScreenshotCamera && dataHolder.cameraTracker.isVisible()) {
+                source = dataHolder.vrRenderer.cameraFramebuffer;
+            } else if (dataHolder.vrSettings.mixedRealityUndistorted) {
                 source = dataHolder.vrRenderer.framebufferUndistorted;
             } else {
                 if (dataHolder.vrSettings.displayMirrorLeftEye) {

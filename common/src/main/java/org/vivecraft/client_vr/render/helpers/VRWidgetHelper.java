@@ -44,8 +44,9 @@ public class VRWidgetHelper {
     public static void renderVRThirdPersonCamWidget() {
         if (!dataHolder.vrSettings.mixedRealityRenderCameraModel) return;
         if (dataHolder.currentPass == RenderPass.LEFT || dataHolder.currentPass == RenderPass.RIGHT) {
-            if (dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY ||
-                dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON)
+            if ((dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY ||
+                dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON
+            ) && (!dataHolder.vrSettings.displayMirrorUseScreenshotCamera || !dataHolder.cameraTracker.isVisible()))
             {
                 float scale = 0.35F;
 

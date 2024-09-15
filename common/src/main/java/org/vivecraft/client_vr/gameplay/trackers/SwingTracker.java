@@ -215,11 +215,6 @@ public class SwingTracker extends Tracker {
                         inAnEntity = true;
                     }
                 }
-
-                // block check
-                // don't hit blocks with swords or same time as hitting entity
-                this.canAct[c] = this.canAct[c] && !isSword && !inAnEntity;
-
                 // no hitting while climbey climbing
                 if (this.dh.climbTracker.isClimbeyClimb() && (!isTool ||
                     (c == 0 && VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT)) ||
@@ -230,7 +225,13 @@ public class SwingTracker extends Tracker {
                 BlockPos blockpos = BlockPos.containing(this.miningPoint[c]);
                 BlockState blockstate = this.mc.level.getBlockState(blockpos);
 
-                // every time the end of a weapon enters a solid for the first time, trace from our previous air position
+                boolean mineableByItem = this.dh.vrSettings.swordBlockCollision && (itemstack.isCorrectToolForDrops(blockstate) || blockstate.getDestroyProgress(player, player.level(), blockpos) == 1F);
+
+                // block check
+                // don't hit blocks with swords or same time as hitting entity
+                this.canAct[c] = this.canAct[c] && (!isSword || mineableByItem) && !inAnEntity;
+
+                // every time end of weapon enters a solid for the first time, trace from our previous air position
                 // and damage the block it collides with...
                 BlockHitResult blockHit = this.mc.level.clip(new ClipContext(this.lastWeaponEndAir[c], this.miningPoint[c], ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.mc.player));
 

@@ -3,16 +3,27 @@ package org.vivecraft.mixin.client.blaze3d;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.vivecraft.client.extensions.RenderTargetExtension;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client_xr.render_pass.RenderPassType;
+
+import java.util.Arrays;
 
 @Mixin(RenderTarget.class)
 public abstract class RenderTargetMixin implements RenderTargetExtension {
 
+    @Shadow
+    public int width;
+    @Shadow
+    public int height;
     @Unique
     private int vivecraft$texId = -1;
     @Unique
@@ -21,6 +32,8 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     private boolean vivecraft$mipmaps;
     @Unique
     private boolean vivecraft$stencil = false;
+    @Unique
+    private boolean vivecraft$loggedSizeError = false;
 
     @Override
     @Unique
@@ -95,5 +108,32 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
     @ModifyArg(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", remap = false, ordinal = 1), index = 1)
     private int vivecraft$modifyGlFramebufferTexture2DAttachment(int attachment) {
         return this.vivecraft$stencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : attachment;
+    }
+
+    @ModifyArg(method = "clear", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;bindWrite(Z)V"))
+    private boolean vivecraft$noViewportChangeOnClear(boolean changeViewport) {
+        // this viewport change doesn't seem to be needed in general,
+        // and removing it makes mods not break rendering when they have miss sized RenderTargets
+
+        // we don't care about resizes or buffer creations, those should happen in the Vanilla or GUI pass
+        if (RenderPassType.isWorldOnly()) {
+            if (!this.vivecraft$loggedSizeError && (this.width != Minecraft.getInstance().getMainRenderTarget().width ||
+                this.height != Minecraft.getInstance().getMainRenderTarget().height
+            ))
+            {
+                // log a limited StackTrace to find the cause, we don't need to spam the log with full StackTraces
+                VRSettings.logger.error(
+                    "Vivecraft: Mismatched RenderTarget size detected, viewport size change was blocked. MainTarget size: {}x{}, RenderTarget size: {}x{}. RenderPass: {}, Stacktrace: {}",
+                    Minecraft.getInstance().getMainRenderTarget().width,
+                    Minecraft.getInstance().getMainRenderTarget().height,
+                    this.width, this.height, ClientDataHolderVR.getInstance().currentPass, String.join("\n",
+                        Arrays.stream(Thread.currentThread().getStackTrace(), 2, 12).map(Object::toString)
+                            .toArray(String[]::new)));
+                this.vivecraft$loggedSizeError = true;
+            }
+            return false;
+        } else {
+            return changeViewport;
+        }
     }
 }

@@ -36,6 +36,7 @@ import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.lwjgl.Matrix4f;
 import org.vivecraft.common.utils.lwjgl.Vector3f;
 import org.vivecraft.common.utils.math.Quaternion;
+import org.vivecraft.common.utils.math.Vector2;
 import org.vivecraft.common.utils.math.Vector3;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 
@@ -101,6 +102,10 @@ public abstract class MCVR {
     protected int moveModeSwitchCount = 0;
     public boolean isWalkingAbout;
     protected boolean isFreeRotate;
+    protected boolean isFlickStick;
+    protected float flickStickRot;
+    protected ControllerType walkaboutController;
+    protected ControllerType freeRotateController;
     protected float walkaboutYawStart;
     protected float hmdForwardYaw = 180;
     public boolean ignorePressesNextFrame = false;
@@ -872,6 +877,23 @@ public abstract class MCVR {
             this.dh.vrSettings.worldRotation %= 360.0F;
         }
 
+        Vector2 axis = this.getInputAction(mod.keyFlickStick).getAxis2DUseTracked();
+        if (axis.getX() != 0F || axis.getY() != 0F) {
+            float rotation = (float) Math.toDegrees(Math.atan2(axis.getX(), axis.getY()));
+            if (isFlickStick) {
+                this.dh.vrSettings.worldRotation += this.flickStickRot - rotation;
+            } else {
+                isFlickStick = true;
+                this.dh.vrSettings.worldRotation -= rotation;
+            }
+
+            this.dh.vrSettings.worldRotation %= 360.0F;
+            this.flickStickRot = rotation;
+        } else {
+            this.flickStickRot = 0F;
+            isFlickStick = false;
+        }
+
         this.seatedRot = this.dh.vrSettings.worldRotation;
 
         if (mod.keyHotbarNext.consumeClick()) {
@@ -923,13 +945,7 @@ public abstract class MCVR {
             } else if (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
                 this.dh.vrSettings.displayMirrorMode = VRSettings.MirrorMode.THIRD_PERSON;
             }
-
-            if (!ShadersHelper.isShaderActive()) {
-                this.dh.vrRenderer.reinitFrameBuffers("Mirror Setting Changed");
-            } else {
-                // in case if the last third person mirror was mixed reality
-                this.dh.vrRenderer.resizeFrameBuffers("Mirror Setting Changed");
-            }
+            this.dh.vrRenderer.reinitWithoutShaders("Mirror Setting Changed");
         }
 
         // start third person cam movement
@@ -1083,6 +1099,7 @@ public abstract class MCVR {
         this.addActionParams(map, mod.keyRotateLeft, "optional", "vector1", null);
         this.addActionParams(map, mod.keyRotateRight, "optional", "vector1", null);
         this.addActionParams(map, mod.keyRotateAxis, "optional", "vector2", null);
+        this.addActionParams(map, mod.keyFlickStick, "optional", "vector2", null);
         this.addActionParams(map, mod.keyRadialMenu, "suggested", "boolean", null);
         this.addActionParams(map, mod.keySwapMirrorView, "optional", "boolean", VRInputActionSet.GLOBAL);
         this.addActionParams(map, mod.keyToggleKeyboard, "optional", "boolean", VRInputActionSet.GLOBAL);

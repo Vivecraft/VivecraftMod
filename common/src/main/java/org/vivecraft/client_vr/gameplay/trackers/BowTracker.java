@@ -200,7 +200,7 @@ public class BowTracker extends Tracker {
                     ((PlayerExtension) player).vivecraft$setItemInUseRemainingClient(stage0);
                     //Minecraft.getInstance().physicalGuiManager.preClickAction();
                 }
-            } else if ((float) Util.getMillis() - this.tsNotch > 500.0F) {
+            } else if (!this.isDrawing && (float) Util.getMillis() - this.tsNotch > 500.0F) {
                 this.canDraw = false;
 
                 ((PlayerExtension) player).vivecraft$setItemInUseClient(ItemStack.EMPTY, hand); // client draw only
