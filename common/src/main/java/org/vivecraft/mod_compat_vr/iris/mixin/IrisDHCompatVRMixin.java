@@ -23,7 +23,7 @@ public class IrisDHCompatVRMixin {
                 ClientDataHolderVR.getInstance().currentPass == RenderPass.RIGHT) {
                 // VR projections are not centered
 
-                Matrix4fc vrProjection = IrisHelper.getGbufferProjection(CapturedRenderingState.INSTANCE);
+                Matrix4fc vrProjection = (Matrix4fc) IrisHelper.getGbufferProjection(CapturedRenderingState.INSTANCE);
                 Matrix4f dhProjection = cir.getReturnValue();
 
                 dhProjection.m00(vrProjection.m00());
