@@ -12,6 +12,6 @@ include("common")
 include("stubs")
 include("fabric")
 include("forge")
-include("neoForge")
+include("neoforge")
 
 rootProject.name = "vivecraft"

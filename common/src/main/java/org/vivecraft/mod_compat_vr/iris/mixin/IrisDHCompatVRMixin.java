@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 
 @Pseudo
 @Mixin(targets = "net.irisshaders.iris.compat.dh.DHCompat")
