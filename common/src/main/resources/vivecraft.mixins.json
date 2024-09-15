@@ -74,7 +74,8 @@
     "client_vr.world.entity.projectile.FireworkRocketEntityVRMixin",
     "client_vr.world.level.block.DoorBlockVRMixin",
     "client_vr.world.level.block.FenceGateBlockVRMixin",
-    "client_vr.world.level.block.TrapDoorBlockVRMixin"
+    "client_vr.world.level.block.TrapDoorBlockVRMixin",
+    "client_vr.world.level.block.state.StateHolderVRMixin"
   ],
   "minVersion": "0.8.4",
   "mixins": [
@@ -94,6 +95,7 @@
     "world.entity.projectile.FishingHookMixin",
     "world.entity.projectile.ProjectileDeflectionMixin",
     "world.entity.projectile.ProjectileMixin",
+    "world.entity.projectile.ProjectileUtilMixin",
     "world.entity.projectile.ThrowableProjectileMixin",
     "world.entity.projectile.ThrownTridentMixin",
     "world.item.CrossbowItemMixin"

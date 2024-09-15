@@ -418,6 +418,15 @@ public abstract class VRRenderer {
         return this.vr.initSuccess;
     }
 
+    public void reinitWithoutShaders(String cause) {
+        if (ShadersHelper.isShaderActive()) {
+            // shaders have all passes created, only need a resize
+            this.resizeFrameBuffers(cause);
+        } else {
+            this.reinitFrameBuffers(cause);
+        }
+    }
+
     public void reinitFrameBuffers(String cause) {
         if (acceptReinits) {
             if (!reinitFramebuffers) {
@@ -450,16 +459,7 @@ public abstract class VRRenderer {
         }
 
         if (this.lastMirror != dataholder.vrSettings.displayMirrorMode) {
-            if (!ShadersHelper.isShaderActive()) {
-                // don't reinit with shaders, not needed
-                this.reinitFrameBuffers("Mirror Changed");
-            } else {
-                // mixed reality is half size, so a resize is needed
-                if (lastMirror == VRSettings.MirrorMode.MIXED_REALITY
-                    || dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
-                    this.resizeFrameBuffers("Mirror Changed");
-                }
-            }
+            this.reinitWithoutShaders("Mirror Changed");
             this.lastMirror = dataholder.vrSettings.displayMirrorMode;
         }
 
@@ -468,7 +468,7 @@ public abstract class VRRenderer {
         }
         if (Minecraft.getInstance().options.graphicsMode().get() != previousGraphics) {
             previousGraphics = Minecraft.getInstance().options.graphicsMode().get();
-            ClientDataHolderVR.getInstance().vrRenderer.reinitFrameBuffers("gfx setting change");
+            this.reinitFrameBuffers("gfx setting change");
         }
 
         if (this.resizeFrameBuffers && !this.reinitFramebuffers) {
