@@ -3,7 +3,7 @@ package org.vivecraft.mod_compat_vr.modmenu.mixin;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,13 +23,13 @@ public abstract class ModMenuEventHandlerVRMixin {
             Button reportBugsButton = null;
             for (GuiEventListener guiEventListener : screen.children()) {
                 if (guiEventListener instanceof Button button) {
-                    if (button.getMessage().getContents() instanceof TranslatableContents contents
+                    if (button.getMessage() instanceof TranslatableComponent contents
                         && "modmenu.title".equals(contents.getKey())) {
                         modmenuButton = button;
-                    } else if (button.getMessage().getContents() instanceof TranslatableContents contents
+                    } else if (button.getMessage() instanceof TranslatableComponent contents
                         && "vivecraft.gui.commands".equals(contents.getKey())) {
                         commandsButton = button;
-                    } else if (button.getMessage().getContents() instanceof TranslatableContents contents
+                    } else if (button.getMessage() instanceof TranslatableComponent contents
                         && "menu.reportBugs".equals(contents.getKey())) {
                         reportBugsButton = button;
                     }
