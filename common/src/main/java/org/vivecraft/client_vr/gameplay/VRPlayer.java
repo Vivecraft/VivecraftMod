@@ -22,10 +22,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.api_impl.ClientAPIImpl;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.common.VRServerPerms;
+import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
@@ -33,14 +37,10 @@ import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
-import org.vivecraft.client_vr.gameplay.trackers.Tracker;
 import org.vivecraft.client_vr.gameplay.trackers.VehicleTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.VRServerPerms;
-import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public class VRPlayer {
@@ -51,7 +51,6 @@ public class VRPlayer {
     public VRData vrdata_room_post;
     public VRData vrdata_world_post;
     public VRData vrdata_world_render;
-    ArrayList<Tracker> trackers = new ArrayList<>();
     public float worldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private float rawWorldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean teleportOverride = false;
@@ -65,10 +64,6 @@ public class VRPlayer {
     public int roomScaleMovementDelay = 0;
     boolean initdone = false;
     public boolean onTick;
-
-    public void registerTracker(Tracker tracker) {
-        this.trackers.add(tracker);
-    }
 
     public VRPlayer() {
         this.vrdata_room_pre = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
@@ -185,6 +180,8 @@ public class VRPlayer {
         if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom()) {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
         }
+
+        ClientAPIImpl.INSTANCE.addPosesToHistory(this.vrdata_world_pre.asVRData());
     }
 
     public void postTick() {
@@ -225,8 +222,8 @@ public class VRPlayer {
         Vec3 vec3 = new Vec3(this.vrdata_world_pre.origin.x + (this.vrdata_world_post.origin.x - this.vrdata_world_pre.origin.x) * (double) par1, this.vrdata_world_pre.origin.y + (this.vrdata_world_post.origin.y - this.vrdata_world_pre.origin.y) * (double) par1, this.vrdata_world_pre.origin.z + (this.vrdata_world_post.origin.z - this.vrdata_world_pre.origin.z) * (double) par1);
         this.vrdata_world_render = new VRData(vec3, dataholder.vrSettings.walkMultiplier, f, f4);
 
-        for (Tracker tracker : this.trackers) {
-            if (tracker.getEntryPoint() == Tracker.EntryPoint.SPECIAL_ITEMS) {
+        for (Tracker tracker : ClientDataHolderVR.getInstance().getTrackers()) {
+            if (tracker.tickType() == Tracker.TrackerTickType.PER_FRAME) {
                 tracker.idleTick(minecraft.player);
 
                 if (tracker.isActive(minecraft.player)) {
@@ -303,8 +300,8 @@ public class VRPlayer {
 
             this.doPlayerMoveInRoom(player);
 
-            for (Tracker tracker : this.trackers) {
-                if (tracker.getEntryPoint() == Tracker.EntryPoint.LIVING_UPDATE) {
+            for (Tracker tracker : dh.getTrackers()) {
+                if (tracker.tickType() == Tracker.TrackerTickType.PER_TICK) {
                     tracker.idleTick(mc.player);
 
                     if (tracker.isActive(mc.player)) {

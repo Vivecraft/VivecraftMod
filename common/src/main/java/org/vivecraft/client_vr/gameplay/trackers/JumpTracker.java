@@ -1,45 +1,50 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import net.minecraft.network.chat.contents.TranslatableContents;
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.PlayerExtension;
+import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.settings.AutoCalibration;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.extensions.PlayerExtension;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-public class JumpTracker extends Tracker {
+public class JumpTracker implements Tracker {
     public Vec3[] latchStart = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
     public Vec3[] latchStartOrigin = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
     public Vec3[] latchStartPlayer = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
     private boolean c0Latched = false;
     private boolean c1Latched = false;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public JumpTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isClimbeyJump() {
-        return this.isActive(Minecraft.getInstance().player) && this.isClimbeyJumpEquipped();
+        return this.isActive(this.mc.player) && this.isClimbeyJumpEquipped();
     }
 
     public boolean isClimbeyJumpEquipped() {
-        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) Minecraft.getInstance().player).vivecraft$isClimbeyJumpEquipped();
+        return ClientNetworking.serverAllowsClimbey && ((PlayerExtension) this.mc.player).vivecraft$isClimbeyJumpEquipped();
     }
 
     public boolean isActive(LocalPlayer p) {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated) {
+        if (this.dh.vrSettings.seated) {
             return false;
-        } else if (!ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling) {
+        } else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
             return false;
-        } else if (ClientDataHolderVR.getInstance().vrSettings.realisticJumpEnabled == VRSettings.RealisticJump.OFF) {
+        } else if (this.dh.vrSettings.realisticJumpEnabled == VRSettings.RealisticJump.OFF) {
             return false;
         } else if (p != null && p.isAlive()) {
             if (this.mc.gameMode == null) {
@@ -161,6 +166,11 @@ public class JumpTracker extends Tracker {
         if ((!climbeyEquipped || ClientDataHolderVR.getInstance().vrSettings.realisticJumpEnabled == VRSettings.RealisticJump.ON) && this.dh.vr.hmdPivotHistory.netMovement(0.25D).y > 0.1D && this.dh.vr.hmdPivotHistory.latest().y - (double) AutoCalibration.getPlayerHeight() > (double) this.dh.vrSettings.jumpThreshold) {
             player.jumpFromGround();
         }
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 
     public boolean isBoots(ItemStack i) {

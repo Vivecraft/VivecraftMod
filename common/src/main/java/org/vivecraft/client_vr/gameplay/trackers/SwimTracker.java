@@ -1,19 +1,24 @@
 package org.vivecraft.client_vr.gameplay.trackers;
 
+import org.vivecraft.api.client.Tracker;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.ClientDataHolderVR;
 
-public class SwimTracker extends Tracker {
+public class SwimTracker implements Tracker {
     Vec3 motion = Vec3.ZERO;
     double friction = 0.9F;
     double lastDist;
     final double riseSpeed = 0.005F;
     double swimspeed = 1.3F;
+    protected Minecraft mc;
+    protected ClientDataHolderVR dh;
 
     public SwimTracker(Minecraft mc, ClientDataHolderVR dh) {
-        super(mc, dh);
+        this.mc = mc;
+        this.dh = dh;
     }
 
     public boolean isActive(LocalPlayer p) {
@@ -59,5 +64,10 @@ public class SwimTracker extends Tracker {
         player.setSprinting(this.motion.length() > 1.0D);
         player.push(this.motion.x, this.motion.y, this.motion.z);
         this.motion = this.motion.scale(this.friction);
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
     }
 }

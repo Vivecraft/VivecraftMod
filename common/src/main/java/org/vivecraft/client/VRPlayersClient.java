@@ -10,6 +10,8 @@ import org.vivecraft.client.extensions.SparkParticleExtension;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
+import org.vivecraft.common.api_impl.data.VRDataImpl;
+import org.vivecraft.common.api_impl.data.VRPoseImpl;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
@@ -261,6 +263,18 @@ public class VRPlayersClient {
 
             Vec3 vec31 = Utils.vecLerp(vec3, this.headRot, 0.5D);
             return Math.atan2(-vec31.x, vec31.z);
+        }
+
+        public org.vivecraft.api.data.VRData asVRData(Vec3 playerPos) {
+            // Have to add the player's position here, as the RotInfo positions are player relative, rather
+            // than the in-world position.
+            return new VRDataImpl(
+                new VRPoseImpl(this.Headpos.add(playerPos), this.headRot, this.headQuat.asJOMLQuaternion()),
+                new VRPoseImpl(this.rightArmPos.add(playerPos), this.rightArmRot, this.rightArmQuat.asJOMLQuaternion()),
+                new VRPoseImpl(this.leftArmPos.add(playerPos), this.leftArmRot, this.leftArmQuat.asJOMLQuaternion()),
+                this.seated,
+                this.reverse
+            );
         }
     }
 }

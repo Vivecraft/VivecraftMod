@@ -7,9 +7,10 @@ import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.client.api_impl.ClientAPIImpl;
+import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
-import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
@@ -70,22 +71,6 @@ public class VRState {
             RenderPassManager.setVanillaRenderPass();
 
             dh.vrPlayer = new VRPlayer();
-            dh.vrPlayer.registerTracker(dh.backpackTracker);
-            dh.vrPlayer.registerTracker(dh.bowTracker);
-            dh.vrPlayer.registerTracker(dh.climbTracker);
-            dh.vrPlayer.registerTracker(dh.autoFood);
-            dh.vrPlayer.registerTracker(dh.jumpTracker);
-            dh.vrPlayer.registerTracker(dh.rowTracker);
-            dh.vrPlayer.registerTracker(dh.runTracker);
-            dh.vrPlayer.registerTracker(dh.sneakTracker);
-            dh.vrPlayer.registerTracker(dh.swimTracker);
-            dh.vrPlayer.registerTracker(dh.swingTracker);
-            dh.vrPlayer.registerTracker(dh.interactTracker);
-            dh.vrPlayer.registerTracker(dh.teleportTracker);
-            dh.vrPlayer.registerTracker(dh.horseTracker);
-            dh.vrPlayer.registerTracker(dh.vehicleTracker);
-            dh.vrPlayer.registerTracker(dh.crawlTracker);
-            dh.vrPlayer.registerTracker(dh.cameraTracker);
 
             dh.vr.postinit();
 
@@ -165,6 +150,7 @@ public class VRState {
         if (disableVRSetting) {
             ShadersHelper.maybeReloadShaders();
         }
+        ClientAPIImpl.INSTANCE.clearHistories();
     }
 
     public static void pauseVR() {
