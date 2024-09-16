@@ -17,8 +17,8 @@ public class ProjectileUtilMixin {
         if (instance instanceof ServerPlayer serverPlayer) {
             ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
             if (vivePlayer != null && vivePlayer.isVR() && !vivePlayer.isSeated() && vivePlayer.draw > 0.0) {
-                return vivePlayer.getControllerPos(1, serverPlayer, true)
-                    .subtract(vivePlayer.getControllerPos(0, serverPlayer, true))
+                return vivePlayer.getControllerPos(1, true)
+                    .subtract(vivePlayer.getControllerPos(0, true))
                     .normalize();
             }
         }
