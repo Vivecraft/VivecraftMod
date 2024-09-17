@@ -15,7 +15,7 @@ public interface RenderTargetExtension {
     void vivecraft$setStencil(boolean stencil);
 
     /**
-     * @return if the RenderTarget has a stencil active
+     * @return if the RenderTarget has a stencil added by vivecraft active
      */
     boolean vivecraft$hasStencil();
 

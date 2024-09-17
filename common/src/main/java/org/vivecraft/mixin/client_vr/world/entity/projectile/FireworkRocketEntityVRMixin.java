@@ -1,5 +1,7 @@
 package org.vivecraft.mixin.client_vr.world.entity.projectile;
 
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -9,10 +11,10 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
 
 @Mixin(FireworkRocketEntity.class)
@@ -21,34 +23,25 @@ public class FireworkRocketEntityVRMixin {
     @Shadow
     private @Nullable LivingEntity attachedToEntity;
 
-    @Unique
-    private Vec3 vivecraft$handPos = null;
-
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 1, method = "tick")
-    private double vivecraft$modifyX(double x) {
-        if (attachedToEntity instanceof LocalPlayer localPlayer && attachedToEntity == Minecraft.getInstance().player && VRState.vrRunning) {
-            var controller = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getHand(!localPlayer.getOffhandItem().is(Items.FIREWORK_ROCKET) && localPlayer.getMainHandItem().is(Items.FIREWORK_ROCKET) ? 0 : 1);
-            vivecraft$handPos = controller.getPosition().add(controller.getDirection().scale(0.25));
-            return vivecraft$handPos.x;
+    @ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 1)
+    private double vivecraft$modifyX(double x, @Share("handPos") LocalRef<Vec3> handPos) {
+        if (VRState.vrRunning && this.attachedToEntity == Minecraft.getInstance().player && this.attachedToEntity instanceof LocalPlayer localPlayer) {
+            boolean fireworkInMainHand = localPlayer.getMainHandItem().is(Items.FIREWORK_ROCKET) && !localPlayer.getOffhandItem().is(Items.FIREWORK_ROCKET);
+            VRData.VRDevicePose controller = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getHand(fireworkInMainHand ? 0 : 1);
+            handPos.set(controller.getPosition().add(controller.getDirection().scale(0.25)));
+            return handPos.get().x;
         }
         return x;
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 2, method = "tick")
-    private double vivecraft$modifyY(double y) {
-        if (vivecraft$handPos != null) {
-            return vivecraft$handPos.y;
-        }
-        return y;
+    @ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 2)
+    private double vivecraft$modifyY(double y, @Share("handPos") LocalRef<Vec3> handPos) {
+        return handPos.get() != null ? handPos.get().y : y;
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 3, method = "tick")
-    private double vivecraft$modifyZ(double z) {
-        if (vivecraft$handPos != null) {
-            z = vivecraft$handPos.z;
-            vivecraft$handPos = null;
-        }
-        return z;
+    @ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 3)
+    private double vivecraft$modifyZ(double z, @Share("handPos") LocalRef<Vec3> handPos) {
+        return handPos.get() != null ? handPos.get().z : z;
     }
 
     /*
