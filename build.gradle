@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.7-SNAPSHOT" apply false
     id 'io.github.juuxel.loom-quiltflower' version '1.8.0' apply false
 }
 
@@ -31,10 +31,10 @@ subprojects {
             // parchment mappings as backup
             parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
         }
-        implementation("org.lwjgl:lwjgl-openvr:3.3.2")
-        implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux")
-        implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos")
-        implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows")
+        implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}")
+        implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux")
+        implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos")
+        implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows")
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -138,6 +138,7 @@ allprojects {
         maven { url = "https://maven.cafeteria.dev/releases/" }
         maven { url = "https://maven.gegy.dev" }
         maven { url = "https://modmaven.dev" }
+        maven { url = "https://maven.minecraftforge.net/"}
         exclusiveContent {
             forRepository {
                 maven {
