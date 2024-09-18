@@ -284,7 +284,7 @@ public class MenuWorldRenderer {
             animatedSprites = ConcurrentHashMap.newKeySet();
             blockCounts = new ConcurrentHashMap<>();
             renderTimes = new ConcurrentHashMap<>();
-            if (IrisHelper.isIrisLoaded() && IrisHelper.isShaderActive()) {
+            if (IrisHelper.isIrisLoaded() && IrisHelper.isShaderActive() && IrisHelper.hasIssuesWithMenuWorld()) {
                 shadersEnabled = true;
                 mc.gui.getChat().addMessage(Component.literal("Vivecraft: temporarily disabling shaders to build Menuworld"));
                 IrisHelper.toggleShaders(mc, false);

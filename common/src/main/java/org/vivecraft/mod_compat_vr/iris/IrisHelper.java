@@ -40,6 +40,8 @@ public class IrisHelper {
 
     private static Method CapturedRenderingState_getGbufferProjection;
 
+    private static Method WorldRenderingSettings_setUseExtendedVertexFormat;
+
     public static boolean isIrisLoaded() {
         return Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus");
     }
@@ -84,13 +86,17 @@ public class IrisHelper {
         return IrisApi.getInstance().isShaderPackInUse();
     }
 
+    public static boolean hasIssuesWithMenuWorld() {
+        return init() && WorldRenderingSettings_setUseExtendedVertexFormat != null;
+    }
+
     public static void toggleShaders(Minecraft mc, boolean enabled) {
         try {
             Iris.toggleShaders(mc, enabled);
-            if (!enabled) {
-                WorldRenderingSettings.INSTANCE.setUseExtendedVertexFormat(false);
+            if (!enabled && hasIssuesWithMenuWorld()) {
+                WorldRenderingSettings_setUseExtendedVertexFormat.invoke(WorldRenderingSettings.INSTANCE, false);
             }
-        } catch (IOException e) {
+        } catch (IOException | InvocationTargetException | IllegalAccessException e) {
             VRSettings.logger.error("Vivecraft: error Toggling Iris shader to '{}': {}", enabled, e.getMessage());
         }
     }
@@ -155,6 +161,10 @@ public class IrisHelper {
                 "net.irisshaders.iris.pipeline.WorldRenderingPipeline");
 
             WorldRenderingPipeline_shouldRenderUnderwaterOverlay = worldRenderingPipeline.getMethod("shouldRenderUnderwaterOverlay");
+
+            try {
+                WorldRenderingSettings_setUseExtendedVertexFormat = Class.forName("net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings").getMethod("setUseExtendedVertexFormat", boolean.class);
+            } catch (ClassNotFoundException | NoSuchMethodException ignore) {}
 
             // distant horizon compat
             if (Xplat.isModLoaded("distanthorizons")) {
