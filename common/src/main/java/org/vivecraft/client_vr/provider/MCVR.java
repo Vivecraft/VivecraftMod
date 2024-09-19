@@ -1176,6 +1176,18 @@ public abstract class MCVR {
     }
 
     /**
+     * handles any keyboard inputs that are specific to this MCVR implementation
+     * @param key GLFW key that is handled
+     * @param scanCode scanCode of the handled key
+     * @param action if the key was pressed, released or repeated
+     * @param modifiers key modifiers that are active
+     * @return true if a key was handled
+     */
+    public boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
+        return false;
+    }
+
+    /**
      * @return the name of this MCVR implementation
      */
     public abstract String getName();

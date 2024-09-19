@@ -172,14 +172,6 @@ public class NullVR extends MCVR {
 
     @Override
     public boolean isActive() {
-        if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) && MethodHolder.isKeyDown(GLFW.GLFW_KEY_F6)) {
-            if (!this.vrActiveChangedLastFrame) {
-                this.vrActive = !this.vrActive;
-                this.vrActiveChangedLastFrame = true;
-            }
-        } else {
-            this.vrActiveChangedLastFrame = false;
-        }
         return this.vrActive;
     }
 
@@ -196,5 +188,14 @@ public class NullVR extends MCVR {
     @Override
     public String getRuntimeName() {
         return "Null";
+    }
+
+    @Override
+    public boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
+        if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_F6 && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
+            this.vrActive = !this.vrActive;
+            return true;
+        }
+        return false;
     }
 }

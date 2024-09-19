@@ -22,8 +22,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 public class VRHotkeys {
-    static long nextRead = 0L;
-    static final long COOLOFF_PERIOD_MILLIS = 500L;
     static final boolean debug = false;
     private static int startController;
     private static VRData.VRDevicePose startControllerPose;
@@ -42,91 +40,91 @@ public class VRHotkeys {
      * @return if a key was processed
      */
     public static boolean handleKeyboardInputs(int key, int scanCode, int action, int modifiers) {
-        // Support cool-off period for key presses - otherwise keys can get spammed...
-        if (nextRead != 0L && System.currentTimeMillis() < nextRead) {
-            return false;
-        } else {
-            Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        Minecraft minecraft = Minecraft.getInstance();
+        ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
 
-            // Capture Minecrift key events
-            boolean gotKey = false;
+        // Capture Minecrift key events
+        boolean gotKey = false;
 
-            if (action == GLFW.GLFW_PRESS) {
-                // control key combinations
-                if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                    // Debug aim
-                    if (key == GLFW.GLFW_KEY_RIGHT_SHIFT) {
-                        dataholder.vrSettings.storeDebugAim = true;
-                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.showaim"));
-                        gotKey = true;
-                    }
-
-                    // Walk up blocks
-                    if (key == GLFW.GLFW_KEY_B) {
-                        dataholder.vrSettings.walkUpBlocks = !dataholder.vrSettings.walkUpBlocks;
-                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.walkupblocks",
-                            dataholder.vrSettings.walkUpBlocks ? LangHelper.getYes() : LangHelper.getNo()));
-                        gotKey = true;
-                    }
-
-                    // Player inertia
-                    if (key == GLFW.GLFW_KEY_I) {
-                        dataholder.vrSettings.inertiaFactor = dataholder.vrSettings.inertiaFactor.getNext();
-                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.playerinertia",
-                            Component.translatable(dataholder.vrSettings.inertiaFactor.getLangKey())));
-
-                        gotKey = true;
-                    }
-
-                    // for testing restricted client mode
-                    if (key == GLFW.GLFW_KEY_R) {
-                        if (dataholder.vrPlayer.isTeleportOverridden()) {
-                            dataholder.vrPlayer.setTeleportOverride(false);
-                            minecraft.gui.getChat()
-                                .addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
-                        } else {
-                            dataholder.vrPlayer.setTeleportOverride(true);
-                            minecraft.gui.getChat()
-                                .addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
-                        }
-
-                        gotKey = true;
-                    }
-
-                    // snap third person cam
-                    if (key == GLFW.GLFW_KEY_HOME) {
-                        snapMRCam(0);
-                        gotKey = true;
-                    }
-
-                    // toggle VR with a keyboard shortcut
-                    if (key == GLFW.GLFW_KEY_F7) {
-                        VRState.vrEnabled = !VRState.vrEnabled;
-                        ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
-                        gotKey = true;
-                    }
-                }
-
-                if (key == GLFW.GLFW_KEY_F12 && debug) {
-                    minecraft.setScreen(new WinScreen(false, Runnables.doNothing()));
+        if (action == GLFW.GLFW_PRESS) {
+            // control key combinations
+            if (MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
+                // Debug aim
+                if (key == GLFW.GLFW_KEY_RIGHT_SHIFT) {
+                    dataHolder.vrSettings.storeDebugAim = true;
+                    minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.showaim"));
                     gotKey = true;
                 }
 
-                // toggle mirror mode
-                if (key == GLFW.GLFW_KEY_F5 && (minecraft.level == null || minecraft.screen != null)) {
-                    dataholder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
-                    ((MinecraftExtension) minecraft).vivecraft$notifyMirror(
-                        dataholder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
+                // Walk up blocks
+                if (key == GLFW.GLFW_KEY_B) {
+                    dataHolder.vrSettings.walkUpBlocks = !dataHolder.vrSettings.walkUpBlocks;
+                    minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.walkupblocks",
+                        dataHolder.vrSettings.walkUpBlocks ? LangHelper.getYes() : LangHelper.getNo()));
+                    gotKey = true;
+                }
+
+                // Player inertia
+                if (key == GLFW.GLFW_KEY_I) {
+                    dataHolder.vrSettings.inertiaFactor = dataHolder.vrSettings.inertiaFactor.getNext();
+                    minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.playerinertia",
+                        Component.translatable(dataHolder.vrSettings.inertiaFactor.getLangKey())));
+
+                    gotKey = true;
+                }
+
+                // for testing restricted client mode
+                if (key == GLFW.GLFW_KEY_R) {
+                    if (dataHolder.vrPlayer.isTeleportOverridden()) {
+                        dataHolder.vrPlayer.setTeleportOverride(false);
+                        minecraft.gui.getChat()
+                            .addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
+                    } else {
+                        dataHolder.vrPlayer.setTeleportOverride(true);
+                        minecraft.gui.getChat()
+                            .addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                    }
+
+                    gotKey = true;
+                }
+
+                // snap third person cam
+                if (key == GLFW.GLFW_KEY_HOME) {
+                    snapMRCam(0);
+                    gotKey = true;
+                }
+
+                // toggle VR with a keyboard shortcut
+                if (key == GLFW.GLFW_KEY_F7) {
+                    VRState.vrEnabled = !VRState.vrEnabled;
+                    ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
+                    gotKey = true;
                 }
             }
 
-            if (gotKey) {
-                dataholder.vrSettings.saveOptions();
+            if (key == GLFW.GLFW_KEY_F12 && debug) {
+                minecraft.setScreen(new WinScreen(false, Runnables.doNothing()));
+                gotKey = true;
             }
 
-            return gotKey;
+            // toggle mirror mode
+            if (key == GLFW.GLFW_KEY_F5 && (minecraft.level == null || minecraft.screen != null)) {
+                dataHolder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
+                ((MinecraftExtension) minecraft).vivecraft$notifyMirror(
+                    dataHolder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
+                gotKey = true;
+            }
         }
+
+        if (VRState.vrInitialized) {
+            gotKey |= dataHolder.vr.handleKeyboardInputs(key, scanCode, action, modifiers);
+        }
+
+        if (gotKey) {
+            dataHolder.vrSettings.saveOptions();
+        }
+
+        return gotKey;
     }
 
     /**
