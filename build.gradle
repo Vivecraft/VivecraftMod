@@ -1,7 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "1.7-SNAPSHOT" apply false
-    id 'io.github.juuxel.loom-quiltflower' version '1.8.0' apply false
 }
 
 architectury {
@@ -11,7 +10,6 @@ architectury {
 subprojects {
     apply plugin: "java"
     apply plugin: "dev.architectury.loom"
-    apply plugin: "io.github.juuxel.loom-quiltflower"
 
     archivesBaseName = rootProject.archives_base_name
     version = rootProject.minecraft_version + "-" + rootProject.mod_version
