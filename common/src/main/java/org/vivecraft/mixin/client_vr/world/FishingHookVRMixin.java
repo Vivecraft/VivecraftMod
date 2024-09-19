@@ -34,7 +34,7 @@ public abstract class FishingHookVRMixin extends Entity {
     @Unique
     private boolean vivecraft$wasNibble = false;
 
-    @Inject(at = @At(value = "HEAD"), method = "tick")
+    @Inject(method = "tick", at = @At(value = "HEAD"))
     private void vivecraft$fishhookFeedback(CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
