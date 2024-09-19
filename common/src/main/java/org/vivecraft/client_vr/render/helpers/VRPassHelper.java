@@ -4,8 +4,10 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL13C;
 import org.lwjgl.opengl.GL30C;
 import org.vivecraft.client.utils.Utils;
@@ -123,8 +125,14 @@ public class VRPassHelper {
             poseStack.translate(0.0f, 0.0f, -11000.0f);
             RenderSystem.applyModelViewMatrix();
 
-            int x = (int) (Minecraft.getInstance().mouseHandler.xpos() * (double) Minecraft.getInstance().getWindow().getGuiScaledWidth() / (double) Minecraft.getInstance().getWindow().getScreenWidth());
-            int y = (int) (Minecraft.getInstance().mouseHandler.ypos() * (double) Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getScreenHeight());
+            Matrix4f guiProjection = (new Matrix4f()).setOrtho(
+                0.0F, mc.getWindow().getGuiScaledWidth(),
+                mc.getWindow().getGuiScaledHeight(), 0.0F,
+                1000.0F, 21000.0F);
+            RenderSystem.setProjectionMatrix(guiProjection, VertexSorting.ORTHOGRAPHIC_Z);
+
+            int x = (int) (mc.mouseHandler.xpos() * (double) mc.getWindow().getGuiScaledWidth() / (double) mc.getWindow().getScreenWidth());
+            int y = (int) (mc.mouseHandler.ypos() * (double) mc.getWindow().getGuiScaledHeight() / (double) mc.getWindow().getScreenHeight());
             RenderHelper.drawMouseMenuQuad(guiGraphics, x, y);
 
             guiGraphics.flush();
