@@ -344,7 +344,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         }
     }
 
-    @Inject( method = {"initOutline", "initTransparency"}, at = @At("HEAD"))
+    @Inject(method = {"initOutline", "initTransparency"}, at = @At("HEAD"))
     private void vivecraft$restorePostChain(CallbackInfo ci) {
         if (VRState.vrInitialized) {
             vivecraft$restoreVanillaPostChains();
@@ -357,7 +357,7 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         RenderPassManager.INSTANCE.vanillaOutlineChain = entityEffect;
     }
 
-    @Inject( method = "initTransparency", at = @At("TAIL"))
+    @Inject(method = "initTransparency", at = @At("TAIL"))
     private void vivecraft$captureTransparencyChain(CallbackInfo ci) {
         RenderPassManager.INSTANCE.vanillaTransparencyChain = transparencyChain;
     }

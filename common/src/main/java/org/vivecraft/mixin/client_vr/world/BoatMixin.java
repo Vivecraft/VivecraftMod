@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 @Mixin(Boat.class)
 public abstract class BoatMixin extends Entity {
@@ -47,7 +48,9 @@ public abstract class BoatMixin extends Entity {
             // only custom boat controls in standing mode
             if (this.inputUp) {
                 //controller-based
-                float yaw = dataHolder.vrPlayer.vrdata_world_pre.getController(1).getYaw();
+                float yaw = dataHolder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.HMD ?
+                    dataHolder.vrPlayer.vrdata_world_pre.hmd.getYaw():
+                    dataHolder.vrPlayer.vrdata_world_pre.getController(1).getYaw();
                 if (dataHolder.vrSettings.vehicleRotation) {
                     //tank controls
                     float end = this.getYRot() % 360F;
@@ -77,7 +80,7 @@ public abstract class BoatMixin extends Entity {
                     // smooth out point turning a bit
                     if (Math.abs(difference) > 10F && Math.abs(difference) < 150F) {
                         this.deltaRotation -=
-                            Math.signum(difference) * Math.min(1F, Math.max(0F, Math.abs(difference) - 15F) / 40F);
+                            Math.signum(difference) * Math.min(1F, Math.max(0F, Math.abs(difference) - 25F) / 40F);
                     }
                 } else {
                     //point to move
