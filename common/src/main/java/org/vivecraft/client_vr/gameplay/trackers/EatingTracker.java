@@ -10,8 +10,6 @@ import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 
-import java.util.Random;
-
 public class EatingTracker extends Tracker {
     public boolean[] eating = new boolean[2];
     private static final float mouthToEyeDistance = 0.0F;

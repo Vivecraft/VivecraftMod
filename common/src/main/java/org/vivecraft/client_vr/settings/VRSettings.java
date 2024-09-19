@@ -26,7 +26,6 @@ import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.common.utils.math.Angle;
 import org.vivecraft.common.utils.math.Quaternion;
 import org.vivecraft.common.utils.math.Vector3;
-import org.vivecraft.mod_compat_vr.ShadersHelper;
 
 import java.awt.*;
 import java.io.*;
