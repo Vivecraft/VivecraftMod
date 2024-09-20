@@ -575,14 +575,12 @@ public class Utils {
     }
 
     public static float applyDeadzone(float axis, float deadzone) {
-        float scalar = 1.0F / (1.0F - deadzone);
-        float newAxis = 0.0F;
-
         if (Math.abs(axis) > deadzone) {
-            newAxis = (Math.abs(axis) - deadzone) * scalar * Math.signum(axis);
+            float scalar = 1.0F / (1.0F - deadzone);
+            return (Math.abs(axis) - deadzone) * scalar * Math.signum(axis);
+        } else {
+            return 0F;
         }
-
-        return newAxis;
     }
 
     public static void spawnParticles(ParticleOptions type, int count, Vec3 position, Vec3 size, double speed) {
