@@ -892,9 +892,16 @@ public class VREffectsHelper {
         if (((GameRendererExtension) mc.gameRenderer).vivecraft$isInBlock() > 0.0F) {
             renderFaceInBlock();
 
+            RenderSystem.getModelViewStack().pushMatrix().identity();
+            RenderHelper.applyVRModelView(dataHolder.currentPass, RenderSystem.getModelViewStack());
+            RenderSystem.applyModelViewMatrix();
+
             renderGuiAndShadow(partialTicks, true, true);
 
             VRArmHelper.renderVRHands(partialTicks, true, true, true, true);
+
+            RenderSystem.getModelViewStack().popMatrix();
+            RenderSystem.applyModelViewMatrix();
         }
     }
 
