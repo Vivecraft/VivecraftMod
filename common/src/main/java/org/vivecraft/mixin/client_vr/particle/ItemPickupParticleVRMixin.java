@@ -11,10 +11,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
-import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
 @Mixin(ItemPickupParticle.class)
 public class ItemPickupParticleVRMixin {
@@ -45,14 +43,7 @@ public class ItemPickupParticleVRMixin {
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(DDD)D", ordinal = 1), method = "render")
     public double vivecraft$updateY(double d, double e, double f) {
         if (VRState.vrRunning && target == vivecraft$mc.player) {
-            float offset = 0.5F;
-            if (Xplat.isModLoaded("pehkui")) {
-                // pehkui changes the offset, need to account for that
-                offset *= PehkuiHelper.getPlayerScale(target, (float) d);
-            }
-            // offset, so the particle is centered around the arm
-            offset += itemEntity.getBbHeight();
-            e = f = vivecraft$playerPos.y - offset;
+            e = f = vivecraft$playerPos.y - itemEntity.getBbHeight();
         }
 
         return Mth.lerp(d, e, f);

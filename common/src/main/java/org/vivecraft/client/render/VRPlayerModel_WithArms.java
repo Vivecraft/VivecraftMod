@@ -17,9 +17,8 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VRPlayersClient;
-import org.vivecraft.client.Xplat;
+import org.vivecraft.client_vr.utils.ScaleHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
-import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
 public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerModel<T> {
@@ -157,13 +156,11 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
             this.leftShoulder.y += 3.2F;
         }
 
-        Vec3 vec3 = rotinfo.leftArmPos;
-        Vec3 vec32 = rotinfo.rightArmPos;
-        if (Xplat.isModLoaded("pehkui")) {
-            // remove pehkui scale from that, since the whole entity is scaled
-            vec3 = vec3.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getFrameTime()));
-            vec32 = vec32.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getFrameTime()));
-        }
+        // remove entity scale from that
+        float scale = 1.0F / ScaleHelper.getEntityScale(pEntity, Minecraft.getInstance().getFrameTime());
+        Vec3 vec3 = rotinfo.leftArmPos.scale(scale);
+        Vec3 vec32 = rotinfo.rightArmPos.scale(scale);
+
         vec3 = vec3.add(0.0D, d0, 0.0D);
         vec3 = vec3.yRot((float) (-Math.PI + d1));
         vec3 = vec3.scale(16.0F / rotinfo.heightScale);
