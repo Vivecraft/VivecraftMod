@@ -36,10 +36,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
-import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jinfinadeck;
 import org.vivecraft.client_vr.utils.external.jkatvr;
@@ -554,13 +552,5 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         } else {
             return 0.0D;
         }
-    }
-
-    @Override
-    @Unique
-    public void vivecraft$swingArm(InteractionHand interactionHand, VRFirstPersonArmSwing swingType) {
-        ((ItemInHandRendererExtension) this.minecraft.getEntityRenderDispatcher().getItemInHandRenderer()
-        ).vivecraft$setSwingType(swingType);
-        this.swing(interactionHand);
     }
 }

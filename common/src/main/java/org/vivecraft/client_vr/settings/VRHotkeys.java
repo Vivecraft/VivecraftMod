@@ -12,7 +12,7 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.VRState;
-import org.vivecraft.client_vr.extensions.MinecraftExtension;
+import org.vivecraft.client_vr.render.MirrorNotification;
 import org.vivecraft.common.utils.math.*;
 
 import java.io.BufferedReader;
@@ -110,7 +110,7 @@ public class VRHotkeys {
             // toggle mirror mode
             if (key == GLFW.GLFW_KEY_F5 && (minecraft.level == null || minecraft.screen != null)) {
                 dataHolder.vrSettings.setOptionValue(VRSettings.VrOptions.MIRROR_DISPLAY);
-                ((MinecraftExtension) minecraft).vivecraft$notifyMirror(
+                MirrorNotification.notify(
                     dataHolder.vrSettings.getButtonDisplayString(VRSettings.VrOptions.MIRROR_DISPLAY), false, 3000);
                 gotKey = true;
             }
@@ -118,6 +118,10 @@ public class VRHotkeys {
 
         if (VRState.vrInitialized) {
             gotKey |= dataHolder.vr.handleKeyboardInputs(key, scanCode, action, modifiers);
+        }
+
+        if (dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {
+            gotKey |= VRHotkeys.handleMRKeys();
         }
 
         if (gotKey) {
@@ -129,8 +133,9 @@ public class VRHotkeys {
 
     /**
      * move third person camera with keys
+     * @return if a key was processed
      */
-    public static void handleMRKeys() {
+    public static boolean handleMRKeys() {
         Minecraft minecraft = Minecraft.getInstance();
         ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
         boolean gotKey = false;
@@ -251,6 +256,8 @@ public class VRHotkeys {
                         angle1.getPitch(), angle1.getYaw(), angle1.getRoll()));
             }
         }
+
+        return gotKey;
     }
 
     /**

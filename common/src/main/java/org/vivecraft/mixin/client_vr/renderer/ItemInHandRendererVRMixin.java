@@ -27,22 +27,17 @@ import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
-import org.vivecraft.client_vr.extensions.ItemInHandRendererExtension;
 import org.vivecraft.client_vr.gameplay.trackers.BowTracker;
 import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRArmRenderer;
-import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.render.VivecraftItemRendering;
 import org.vivecraft.client_vr.render.helpers.VREffectsHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 @Mixin(value = ItemInHandRenderer.class, priority = 999)
-public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExtension {
-
-    @Unique
-    private VRFirstPersonArmSwing vivecraft$swingType = VRFirstPersonArmSwing.Attack;
+public abstract class ItemInHandRendererVRMixin {
 
     @Final
     @Shadow
@@ -253,17 +248,11 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
         poseStack.popPose();
     }
 
-    @Override
-    @Unique
-    public void vivecraft$setSwingType(VRFirstPersonArmSwing swingType) {
-        this.vivecraft$swingType = swingType;
-    }
-
     @Unique
     private void vivecraft$transformFirstPersonVR(PoseStack poseStack, HumanoidArm side, float swingProgress) {
         if (swingProgress == 0.0F) return;
 
-        switch (this.vivecraft$swingType) {
+        switch (ClientDataHolderVR.getInstance().swingType) {
             case Attack -> {
                 float forwardRotation;
                 if (swingProgress > 0.5F) {

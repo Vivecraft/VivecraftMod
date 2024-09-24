@@ -299,7 +299,8 @@ public class InteractTracker extends Tracker {
 
                 if (success) {
                     // swing arm on success
-                    ((PlayerExtension) this.mc.player).vivecraft$swingArm(hand, VRFirstPersonArmSwing.Interact);
+                    this.dh.swingType = VRFirstPersonArmSwing.Interact;
+                    this.mc.player.swing(hand);
                     this.dh.vr.triggerHapticPulse(c, 750);
                 }
             }

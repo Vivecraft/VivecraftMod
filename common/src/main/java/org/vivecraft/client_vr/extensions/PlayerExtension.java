@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 public interface PlayerExtension {
     /**
@@ -32,13 +31,6 @@ public interface PlayerExtension {
      * @param soundPos position of where to play the sound, in world space
      */
     void vivecraft$stepSound(BlockPos blockPos, Vec3 soundPos);
-
-    /**
-     * sets the swingType and swings the player arm
-     * @param interactionHand hand to swing
-     * @param swingType swing animation to use
-     */
-    void vivecraft$swingArm(InteractionHand interactionHand, VRFirstPersonArmSwing swingType);
 
     /**
      * @return jump factor of the block the player is standing on, with vertical player motion applied

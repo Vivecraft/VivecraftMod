@@ -162,7 +162,7 @@ public abstract class GameRendererVRMixin
     @Inject(method = "loadEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;resize(II)V", shift = Shift.AFTER))
     private void vivecraft$loadVREffects(ResourceLocation resourceLocation, CallbackInfo ci) throws IOException {
         if (VRState.vrInitialized) {
-            RenderPassManager.INSTANCE.vanillaPostEffect = postEffect;
+            RenderPassManager.INSTANCE.vanillaPostEffect = this.postEffect;
             if (WorldRenderPass.stereoXR != null) {
                 WorldRenderPass.stereoXR.postEffect = WorldRenderPass.createPostChain(resourceLocation, WorldRenderPass.stereoXR.target);
             }
@@ -334,9 +334,9 @@ public abstract class GameRendererVRMixin
             return;
         }
 
-        if (!renderLevel && vivecraft$shouldDrawScreen) {
-            vivecraft$shouldDrawScreen = false;
-            if (vivecraft$shouldDrawGui) {
+        if (!renderLevel && this.vivecraft$shouldDrawScreen) {
+            this.vivecraft$shouldDrawScreen = false;
+            if (this.vivecraft$shouldDrawGui) {
                 // when the gui is rendered it is expected that something got pushed to the profiler before
                 // so do that now
                 this.minecraft.getProfiler().push("vanillaGuiSetup");
@@ -381,7 +381,7 @@ public abstract class GameRendererVRMixin
 
     @ModifyVariable(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.AFTER, ordinal = 6), ordinal = 0, argsOnly = true)
     private boolean vivecraft$renderGui(boolean renderLevel) {
-        return RenderPassType.isVanilla() ? renderLevel : vivecraft$shouldDrawGui;
+        return RenderPassType.isVanilla() ? renderLevel : this.vivecraft$shouldDrawGui;
     }
 
     @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemActivationAnimation(IIF)V"))
@@ -594,7 +594,7 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     public double vivecraft$getRveY() {
-        return vivecraft$rveY;
+        return this.vivecraft$rveY;
     }
 
     @Override
@@ -635,13 +635,13 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     public boolean vivecraft$isInWater() {
-        return vivecraft$inwater;
+        return this.vivecraft$inwater;
     }
 
     @Override
     @Unique
     public boolean vivecraft$wasInWater() {
-        return vivecraft$wasinwater;
+        return this.vivecraft$wasinwater;
     }
 
     @Override
@@ -659,13 +659,13 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     public float vivecraft$isInBlock() {
-        return vivecraft$inBlock;
+        return this.vivecraft$inBlock;
     }
 
     @Override
     @Unique
     public Vec3 vivecraft$getCrossVec() {
-        return vivecraft$crossVec;
+        return this.vivecraft$crossVec;
     }
 
     @Override
@@ -677,7 +677,7 @@ public abstract class GameRendererVRMixin
     @Override
     @Unique
     public Matrix4f vivecraft$getThirdPassProjectionMatrix() {
-        return vivecraft$thirdPassProjectionMatrix;
+        return this.vivecraft$thirdPassProjectionMatrix;
     }
 
     @Override
