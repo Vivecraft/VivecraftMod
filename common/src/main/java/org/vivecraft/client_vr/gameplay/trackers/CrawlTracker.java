@@ -43,7 +43,7 @@ public class CrawlTracker extends Tracker {
     }
 
     public void doProcess(LocalPlayer player) {
-        float scaleMultiplier = 1.0F / ScaleHelper.getEntityScale(player, mc.getFrameTime());
+        float scaleMultiplier = 1.0F / ScaleHelper.getEntityScale(player, mc.getTimer().getGameTimeDeltaPartialTick(false));
         this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * (double) this.dh.vrPlayer.worldScale * scaleMultiplier + (double) 0.1F < (double) this.dh.vrSettings.crawlThreshold;
         this.updateState(player);
     }

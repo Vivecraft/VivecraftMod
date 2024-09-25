@@ -147,7 +147,7 @@ public class VRPlayer {
             this.worldScale = rawWorldScale;
 
             // scale world with player size
-            this.worldScale *= ScaleHelper.getEntityScale(mc.player, mc.getFrameTime());
+            this.worldScale *= ScaleHelper.getEntityScale(mc.player, mc.getTimer().getGameTimeDeltaPartialTick(false));
             // limit scale
             if (this.worldScale > 100F) {
                 this.worldScale = 100F;

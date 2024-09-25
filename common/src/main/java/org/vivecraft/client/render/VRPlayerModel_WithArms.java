@@ -157,7 +157,7 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         }
 
         // remove entity scale from that
-        float scale = 1.0F / ScaleHelper.getEntityScale(pEntity, Minecraft.getInstance().getFrameTime());
+        float scale = 1.0F / ScaleHelper.getEntityScale(pEntity, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false));
         Vec3 vec3 = rotinfo.leftArmPos.scale(scale);
         Vec3 vec32 = rotinfo.rightArmPos.scale(scale);
 

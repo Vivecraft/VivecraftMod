@@ -127,7 +127,7 @@ public class BowTracker extends Tracker {
             this.lastcanDraw = this.canDraw;
 
             // this is meant to be relative to the base Bb height, not the scaled one
-            this.maxDraw = (double) this.mc.player.getBbHeight() * 0.22D / ScaleHelper.getEntityBbScale(player, mc.getFrameTime());
+            this.maxDraw = (double) this.mc.player.getBbHeight() * 0.22D / ScaleHelper.getEntityBbScale(player, mc.getTimer().getGameTimeDeltaPartialTick(false));
 
             Vec3 vec3 = vrdata.getController(0).getPosition();
             Vec3 vec31 = vrdata.getController(1).getPosition();
