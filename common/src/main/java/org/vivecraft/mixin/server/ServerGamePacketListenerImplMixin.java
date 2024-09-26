@@ -23,33 +23,36 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Shadow
     public ServerPlayer player;
 
-    public ServerGamePacketListenerImplMixin(MinecraftServer minecraftServer, Connection connection, CommonListenerCookie commonListenerCookie) {
-        super(minecraftServer, connection, commonListenerCookie);
+    public ServerGamePacketListenerImplMixin(
+        MinecraftServer server, Connection connection, CommonListenerCookie cookie)
+    {
+        super(server, connection, cookie);
     }
 
-    @Inject(at = @At("TAIL"), method = "<init>")
-    public void vivecraft$init(MinecraftServer minecraftServer, Connection connection, ServerPlayer serverPlayer, CommonListenerCookie commonListenerCookie, CallbackInfo ci) {
-        // Vivecraft
-        if (this.connection.channel != null && this.connection.channel.pipeline().get("packet_handler") != null) { //fake player fix
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void vivecraft$addAimFix(CallbackInfo ci) {
+        // check is to fix a crash with fake players
+        if (this.connection.channel != null && this.connection.channel.pipeline().get("packet_handler") != null) {
             this.connection.channel.pipeline().addBefore("packet_handler", "vr_aim_fix",
                 new AimFixHandler(this.connection));
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "tick()V")
-    public void vivecraft$afterTick(CallbackInfo info) {
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void vivecraft$sendVRPlayers(CallbackInfo ci) {
         ServerNetworking.sendVrPlayerStateToClients(this.player);
     }
 
-    @Inject(at = @At("TAIL"), method = "onDisconnect")
-    public void vivecraft$doLeaveMessage(Component component, CallbackInfo ci) {
+    @Inject(method = "onDisconnect", at = @At("TAIL"))
+    private void vivecraft$doPlayerLeave(CallbackInfo ci) {
         if (ServerConfig.messagesEnabled.get()) {
             String message = ServerConfig.messagesLeaveMessage.get();
             if (!message.isEmpty()) {
-                this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(this.player.getName().getString())), false);
+                this.server.getPlayerList().broadcastSystemMessage(
+                    Component.literal(message.formatted(this.player.getScoreboardName())),false);
             }
         }
-        // remove player from vivepalyer list, when they leave
+        // remove player from viveplayer list, when they leave
         ServerVRPlayers.getPlayersWithVivecraft(this.server).remove(this.player.getUUID());
     }
 }

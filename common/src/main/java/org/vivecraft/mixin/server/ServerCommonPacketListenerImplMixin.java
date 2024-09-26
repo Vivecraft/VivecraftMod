@@ -30,11 +30,11 @@ public abstract class ServerCommonPacketListenerImplMixin {
      * on neoforge those are handled in {@link org.vivecraft.neoforge.event.ServerEvents#handleVivePacket}
      * if connected to spigot they are still handled here
      */
-    @Inject(at = @At("HEAD"), method = "handleCustomPayload", cancellable = true)
-    public void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket payloadPacket, CallbackInfo ci) {
-        if (payloadPacket.payload() instanceof VivecraftDataPacket dataPacket
+    @Inject(method = "handleCustomPayload", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket packet, CallbackInfo ci) {
+        if (packet.payload() instanceof VivecraftDataPacket dataPacket
             && (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener) {
-            PacketUtils.ensureRunningOnSameThread(payloadPacket, (ServerCommonPacketListenerImpl) (Object) this, server);
+            PacketUtils.ensureRunningOnSameThread(packet, (ServerCommonPacketListenerImpl) (Object) this, this.server);
             var buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(dataPacket.buffer());
             ServerNetworking.handlePacket(dataPacket.packetId(), buffer, gamePacketListener.player, gamePacketListener::send);
             buffer.release();
