@@ -41,6 +41,7 @@ public class IrisHelper {
     private static Method CapturedRenderingState_getGbufferProjection;
 
     private static Method WorldRenderingSettings_setUseExtendedVertexFormat;
+    private static Method WorldRenderingSettings_shouldUseExtendedVertexFormat;
 
     public static boolean isIrisLoaded() {
         return Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus");
@@ -83,7 +84,11 @@ public class IrisHelper {
     }
 
     public static boolean isShaderActive() {
-        return IrisApi.getInstance().isShaderPackInUse();
+        try {
+            return IrisApi.getInstance().isShaderPackInUse() || (WorldRenderingSettings_shouldUseExtendedVertexFormat != null && (boolean) WorldRenderingSettings_shouldUseExtendedVertexFormat.invoke(WorldRenderingSettings.INSTANCE));
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            return false;
+        }
     }
 
     public static boolean hasIssuesWithMenuWorld() {
@@ -164,6 +169,7 @@ public class IrisHelper {
 
             try {
                 WorldRenderingSettings_setUseExtendedVertexFormat = Class.forName("net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings").getMethod("setUseExtendedVertexFormat", boolean.class);
+                WorldRenderingSettings_shouldUseExtendedVertexFormat = Class.forName("net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings").getMethod("shouldUseExtendedVertexFormat");
             } catch (ClassNotFoundException | NoSuchMethodException ignore) {}
 
             // distant horizon compat
