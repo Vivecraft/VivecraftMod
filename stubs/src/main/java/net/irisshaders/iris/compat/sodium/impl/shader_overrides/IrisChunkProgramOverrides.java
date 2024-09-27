@@ -1,4 +1,4 @@
 package net.irisshaders.iris.compat.sodium.impl.shader_overrides;
 
-public interface IrisChunkProgramOverrides {
+public class IrisChunkProgramOverrides {
 }
