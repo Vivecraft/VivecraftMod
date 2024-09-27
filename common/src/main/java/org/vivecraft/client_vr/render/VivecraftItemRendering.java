@@ -344,9 +344,12 @@ public class VivecraftItemRendering {
                     translateY = 0.0D;
                     translateX = 0.0D;
                 } else if (rendertype == VivecraftItemTransformType.Mace) {
-                    translateX = 0.00D;
-                    translateY = 0.02D;
-                    translateZ = -0.07D;
+                    preRotation = Axis.XP.rotationDegrees((float) gunAngle);
+                    translateX = 0.0D;
+                    translateY = 0.0125;
+                    translateZ = -0.06;
+                    rotation = rotation.mul(Axis.XP.rotationDegrees((float) -gunAngle));
+                    scale = 0.56F;
                 }
             }
         } else {
