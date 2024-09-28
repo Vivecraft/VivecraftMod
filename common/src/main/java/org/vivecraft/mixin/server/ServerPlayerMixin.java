@@ -1,24 +1,22 @@
 package org.vivecraft.mixin.server;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ItemParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
@@ -32,6 +30,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.vivecraft.mixin.world.entity.PlayerMixin;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
@@ -40,14 +39,14 @@ import org.vivecraft.server.config.ServerConfig;
 import java.util.IllegalFormatException;
 
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerMixin extends Player {
+public abstract class ServerPlayerMixin extends PlayerMixin {
 
     @Shadow
     @Final
     public MinecraftServer server;
 
-    public ServerPlayerMixin(Level level, BlockPos pos, float yRot, GameProfile gameProfile) {
-        super(level, pos, yRot, gameProfile);
+    protected ServerPlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
+        super(entityType, level);
     }
 
     @Inject(method = "initInventoryMenu", at = @At("TAIL"))
@@ -79,69 +78,31 @@ public abstract class ServerPlayerMixin extends Player {
         ServerVRPlayers.overridePose((ServerPlayer) (Object) this);
     }
 
+    /**
+     * inject into {@link Player#sweepAttack}
+     */
     @Override
-    public void sweepAttack() {
+    protected int vivecraft$modifySweepParticleSpawnPos(
+        ServerLevel instance, ParticleOptions type, double posX, double posY, double posZ, int particleCount,
+        double xOffset, double yOffset, double zOffset, double speed, Operation<Integer> original)
+    {
         ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
-
         if (serverviveplayer != null && serverviveplayer.isVR()) {
             // spawn particles at controller, have to assume controller 0
             Vec3 aim = serverviveplayer.getControllerDir(0);
-            float yaw = (float) Math.toDegrees(Math.atan2(aim.x, -aim.z));
+            float yaw = (float) Math.atan2(-aim.x, aim.z);
 
-            double xOffset = -Mth.sin(yaw * ((float) Math.PI / 180F));
-            double zOffset = Mth.cos(yaw * ((float) Math.PI / 180F));
+            xOffset = -Mth.sin(yaw);
+            zOffset = Mth.cos(yaw);
 
             Vec3 pos = serverviveplayer.getControllerPos(0);
 
-            if (this.level() instanceof ServerLevel) {
-                ((ServerLevel) this.level()).sendParticles(ParticleTypes.SWEEP_ATTACK,
-                    pos.x + xOffset, pos.y, pos.z + zOffset, 0, xOffset, 0.0D, zOffset, 0.0D);
-            }
+            return original.call(instance, type,
+                pos.x + xOffset, pos.y, pos.z + zOffset,
+                particleCount,
+                xOffset, yOffset, zOffset, speed);
         } else {
-            super.sweepAttack();
-        }
-    }
-
-    // TODO: this is not needed
-    @Override
-    protected void triggerItemUseEffects(ItemStack stack, int amount) {
-        if (!stack.isEmpty() && this.isUsingItem()) {
-            if (stack.getUseAnimation() == UseAnim.DRINK) {
-                this.playSound(this.getDrinkingSound(stack), 0.5F, this.level().random.nextFloat() * 0.1F + 0.9F);
-            }
-
-            if (stack.getUseAnimation() == UseAnim.EAT) {
-                this.vivecraft$addItemParticles(stack, amount);
-                this.playSound(this.getEatingSound(stack), 0.5F + 0.5F * (float) this.random.nextInt(2),
-                    (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-            }
-        }
-    }
-
-    // TODO: this should override "spawnItemParticles", or inject into LivingEntity
-    @Unique
-    private void vivecraft$addItemParticles(ItemStack stack, int count) {
-        ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
-        for (int i = 0; i < count; ++i) {
-            Vec3 dir = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
-            dir = dir.xRot(-this.getXRot() * ((float) Math.PI / 180F));
-            dir = dir.yRot(-this.getYRot() * ((float) Math.PI / 180F));
-            double yOffset = (double) (-this.random.nextFloat()) * 0.6D - 0.3D;
-            Vec3 pos = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.3D, yOffset, 0.6D);
-            pos = pos.xRot(-this.getXRot() * ((float) Math.PI / 180F));
-            pos = pos.yRot(-this.getYRot() * ((float) Math.PI / 180F));
-            pos = pos.add(this.getX(), this.getEyeY(), this.getZ());
-            if (serverviveplayer != null && serverviveplayer.isVR()) {
-                InteractionHand interactionhand = this.getUsedItemHand();
-
-                if (interactionhand == InteractionHand.MAIN_HAND) {
-                    pos = serverviveplayer.getControllerPos(0);
-                } else {
-                    pos = serverviveplayer.getControllerPos(1);
-                }
-            }
-            this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, stack), pos.x, pos.y, pos.z, dir.x,
-                dir.y + 0.05D, dir.z);
+            return original.call(instance, type, posX, posY, posZ, particleCount, xOffset, yOffset, zOffset, speed);
         }
     }
 
