@@ -53,6 +53,11 @@ public class ServerNetworking {
             return;
         }
 
+        // the player object changes in some circumstances, like respawning, so need to make sure it's up to date
+        if (vivePlayer != null) {
+            vivePlayer.player = player;
+        }
+
         switch (packetID) {
             case VERSION:
                 // Vivecraft client connected, send server settings
@@ -190,6 +195,7 @@ public class ServerNetworking {
 
             case VR_PLAYER_STATE:
                 vivePlayer.vrPlayerState = VrPlayerState.deserialize(buffer);
+                break;
 
             case MOVEMODE:
             case REQUESTDATA:
