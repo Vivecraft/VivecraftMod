@@ -90,6 +90,7 @@
     "server.ServerPlayerMixin",
     "server.TrackedEntityAccessor",
     "server.players.PlayerListMixin",
+    "world.entity.LivingEntityMixin",
     "world.entity.PlayerMixin",
     "world.entity.ai.goal.SwellGoalMixin",
     "world.entity.monster.EndermanFreezeWhenLookedAtMixin",
