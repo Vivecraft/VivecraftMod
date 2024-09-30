@@ -61,12 +61,14 @@ public class VRHotkeys {
             }
 
             if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_R && MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL)) {
-                if (dataholder.vrPlayer.isTeleportOverridden()) {
-                    dataholder.vrPlayer.setTeleportOverride(false);
-                    minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
-                } else {
-                    dataholder.vrPlayer.setTeleportOverride(true);
-                    minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                if (dataHolder.vrPlayer != null) {
+                    if (dataholder.vrPlayer.isTeleportOverridden()) {
+                        dataholder.vrPlayer.setTeleportOverride(false);
+                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportdisabled"));
+                    } else {
+                        dataholder.vrPlayer.setTeleportOverride(true);
+                        minecraft.gui.getChat().addMessage(Component.translatable("vivecraft.messages.teleportenabled"));
+                    }
                 }
 
                 gotKey = true;
