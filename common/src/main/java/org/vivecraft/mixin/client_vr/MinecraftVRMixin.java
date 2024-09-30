@@ -265,7 +265,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     }
 
     @Inject(method = "destroy", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;delayedCrash:Ljava/util/function/Supplier;"))
-    private void vivecraft$destroyVR(CallbackInfo info) {
+    private void vivecraft$destroyVR(CallbackInfo ci) {
         try {
             // the game crashed probably not because of us, so keep the vr choice
             VRState.destroyVR(false);
@@ -481,7 +481,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
-    private void vivecraft$vrTick(CallbackInfo info) {
+    private void vivecraft$vrTick(CallbackInfo ci) {
         ClientDataHolderVR.getInstance().tickCounter++;
 
         // general chat notifications
@@ -707,7 +707,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     }
 
     @Inject(method = "setLevel", at = @At("HEAD"))
-    private void vivecraft$resetRoomOrigin(CallbackInfo info) {
+    private void vivecraft$resetRoomOrigin(CallbackInfo ci) {
         if (VRState.vrRunning) {
             ClientDataHolderVR.getInstance().vrPlayer.setRoomOrigin(0.0D, 0.0D, 0.0D, true);
         }
@@ -719,7 +719,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     }
 
     @Inject(method = "setScreen", at = @At("HEAD"))
-    private void vivecraft$onScreenChange(Screen guiScreen, CallbackInfo info, @Share("guiScale") LocalIntRef guiScaleRef) {
+    private void vivecraft$onScreenChange(Screen guiScreen, CallbackInfo ci, @Share("guiScale") LocalIntRef guiScaleRef) {
         if (guiScreen == null) {
             GuiHandler.guiAppearOverBlockActive = false;
         }
@@ -728,7 +728,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
     }
 
     @Inject(method = "setScreen", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", ordinal = 0))
-    private void vivecraft$onScreenSet(Screen guiScreen, CallbackInfo info) {
+    private void vivecraft$onScreenSet(Screen guiScreen, CallbackInfo ci) {
         GuiHandler.onScreenChanged(this.screen, guiScreen, true);
     }
 
