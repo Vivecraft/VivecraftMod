@@ -136,7 +136,7 @@ public class PhysicalKeyboard {
                             setShift(false, false);
                         }
 
-                        if (buttonChar == '/' && mc.screen == null) {
+                        if (buttonChar == '/' && PhysicalKeyboard.this.mc.screen == null) {
                             // this is dumb but whatever
                             InputSimulator.pressKey(GLFW.GLFW_KEY_SLASH);
                             InputSimulator.releaseKey(GLFW.GLFW_KEY_SLASH);
@@ -159,22 +159,24 @@ public class PhysicalKeyboard {
             {
                 @Override
                 public void onPressed() {
-                    if (shift && !shiftSticky && Utils.milliTime() - shiftPressTime < 400L) {
+                    if (PhysicalKeyboard.this.shift && !PhysicalKeyboard.this.shiftSticky &&
+                        Utils.milliTime() - PhysicalKeyboard.this.shiftPressTime < 400L)
+                    {
                         setShift(true, true);
                     } else {
-                        setShift(!shift, false);
+                        setShift(!PhysicalKeyboard.this.shift, false);
                     }
 
-                    shiftPressTime = Utils.milliTime();
+                    PhysicalKeyboard.this.shiftPressTime = Utils.milliTime();
                 }
 
                 @Override
                 public RGBAColor getRenderColor() {
-                    if (shift) {
+                    if (PhysicalKeyboard.this.shift) {
                         RGBAColor color = new RGBAColor(this.pressed ? 1.0F : 0.5F, this.pressed ? 1.0F : 0.5F, 0.0F,
                             0.5F);
 
-                        if (!shiftSticky) {
+                        if (!PhysicalKeyboard.this.shiftSticky) {
                             color.r = 0.0F;
                         }
 
@@ -289,7 +291,7 @@ public class PhysicalKeyboard {
 
         if (this.dh.vrSettings.physicalKeyboardTheme == KeyboardTheme.CUSTOM) {
             this.customTheme.clear();
-            File themeFile = new File(mc.gameDirectory, "keyboardtheme.txt");
+            File themeFile = new File(this.mc.gameDirectory, "keyboardtheme.txt");
             if (!themeFile.exists()) {
                 // Write template theme file
                 try (PrintWriter pw = new PrintWriter(new FileWriter(themeFile, StandardCharsets.UTF_8))) {
@@ -695,11 +697,11 @@ public class PhysicalKeyboard {
         public KeyButton(int id, String label, float x, float y, float width, float height) {
             this.id = id;
             this.label = label;
-            this.boundingBox = new AABB(x, y, 0.0D, x + width, y + height, 0.028D * scale);
+            this.boundingBox = new AABB(x, y, 0.0D, x + width, y + height, 0.028D * PhysicalKeyboard.this.scale);
         }
 
         public AABB getRenderBoundingBox() {
-            return this.pressed ? this.boundingBox.move(0.0D, 0.0D, 0.012D * scale) : this.boundingBox;
+            return this.pressed ? this.boundingBox.move(0.0D, 0.0D, 0.012D * PhysicalKeyboard.this.scale) : this.boundingBox;
         }
 
         public AABB getCollisionBoundingBox() {
@@ -720,7 +722,8 @@ public class PhysicalKeyboard {
 
         public final void press(ControllerType controller, boolean isRepeat) {
             if (!isRepeat) {
-                mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                PhysicalKeyboard.this.mc.getSoundManager()
+                    .play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             }
 
             MCVR.get().triggerHapticPulse(controller, isRepeat ? 300 : 600);

@@ -451,14 +451,14 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             this.getDeltaMovement().y,
             this.getDeltaMovement().z / zFactor);
 
-        double addFactor = vivecraft$dataholder.vrSettings.inertiaFactor.getFactor();
+        double addFactor = this.vivecraft$dataholder.vrSettings.inertiaFactor.getFactor();
 
-        double boundedAdditionX = vivecraft$getBoundedAddition(vivecraft$additionX);
+        double boundedAdditionX = vivecraft$getBoundedAddition(this.vivecraft$additionX);
         double targetLimitX = (friction * boundedAdditionX) / (1f - friction);
         double multiFactorX = targetLimitX / (friction * (targetLimitX + (boundedAdditionX * addFactor)));
         xFactor *= multiFactorX;
 
-        double boundedAdditionZ = vivecraft$getBoundedAddition(vivecraft$additionZ);
+        double boundedAdditionZ = vivecraft$getBoundedAddition(this.vivecraft$additionZ);
         double targetLimitZ = (friction * boundedAdditionZ) / (1f - friction);
         double multiFactorZ = targetLimitZ / (friction * (targetLimitZ + (boundedAdditionZ * addFactor)));
         zFactor *= multiFactorZ;

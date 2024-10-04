@@ -19,7 +19,7 @@ public class PostChainVRMixin {
 
     @ModifyVariable(method = "addTempTarget", at = @At(value = "STORE"), ordinal = 0)
     private RenderTarget vivecraft$vrTargetStencil(RenderTarget renderTarget) {
-        if (((RenderTargetExtension) screenTarget).vivecraft$hasStencil()) {
+        if (((RenderTargetExtension) this.screenTarget).vivecraft$hasStencil()) {
             ((RenderTargetExtension) renderTarget).vivecraft$setStencil(true);
             renderTarget.resize(renderTarget.width, renderTarget.height, Minecraft.ON_OSX);
         }

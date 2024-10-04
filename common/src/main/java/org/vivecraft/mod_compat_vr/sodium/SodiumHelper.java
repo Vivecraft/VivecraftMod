@@ -140,12 +140,12 @@ public class SodiumHelper {
      */
     private static int mapDirection(int old) {
         return switch (old) {
-            default -> 4;
             case 1 -> 2;
             case 2 -> 0;
             case 3 -> 1;
             case 4 -> 3;
             case 5 -> 5;
+            default -> 4; // 0 case
         };
     }
 

@@ -82,7 +82,7 @@ public class MCOpenVR extends MCVR {
     // if true prints out the device info
     private boolean debugInfo = true;
     // if true prints out all device properties
-    private boolean fullDebugInfo = false;
+    private final boolean fullDebugInfo = false;
     // specifies if transforms should be refetched
     private boolean getXforms = true;
 
@@ -493,7 +493,7 @@ public class MCOpenVR extends MCVR {
      * @param deviceIndex index of the device to ge t info from
      */
     private void debugOut(int deviceIndex) {
-        if (fullDebugInfo) {
+        if (this.fullDebugInfo) {
             VRSettings.logger.info("Vivecraft: ******************* VR DEVICE: {} *************************", deviceIndex);
             // print all device properties
             for (Field field : VR.class.getDeclaredFields()) {
@@ -1003,7 +1003,7 @@ public class MCOpenVR extends MCVR {
         String appKey;
 
         try {
-            Map<?, ?> map = GSON.fromJson(new FileReader(manifestFile), Map.class);
+            Map<?, ?> map = this.GSON.fromJson(new FileReader(manifestFile), Map.class);
             appKey = ((Map<?, ?>) ((List<?>) map.get("applications")).get(0)).get("app_key").toString();
         } catch (Exception e) {
             // TODO: should we abort here?

@@ -30,10 +30,10 @@ public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abst
             VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(player.getUUID());
 
             ResourceLocation hmd = switch (rotinfo.hmd) {
-                default -> null;
                 case 1 -> BLACK_HMD;
                 case 2 -> GOLD_HMD;
                 case 3, 4 -> DIAMOND_HMD;
+                default -> null;
             };
 
             if (hmd == null) return;

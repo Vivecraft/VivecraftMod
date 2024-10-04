@@ -111,7 +111,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
         this.openvr.texType1.eType(VR.ETextureType_TextureType_OpenGL);
 
         RenderSystem.bindTexture(boundTextureId);
-        lastError = RenderHelper.checkGLError("create VR textures");
+        this.lastError = RenderHelper.checkGLError("create VR textures");
     }
 
     @Override

@@ -154,7 +154,7 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
                     VRSettings.VrOptions.RADIAL_NUMBER, "" + this.dataHolder.vrSettings.vrRadialButtons,
                     (p) -> {
                         this.dataHolder.vrSettings.vrRadialButtons += 2;
-                        if (dataHolder.vrSettings.vrRadialButtons > VRSettings.VrOptions.RADIAL_NUMBER.getValueMax()) {
+                        if (this.dataHolder.vrSettings.vrRadialButtons > VRSettings.VrOptions.RADIAL_NUMBER.getValueMax()) {
                             this.dataHolder.vrSettings.vrRadialButtons = (int) VRSettings.VrOptions.RADIAL_NUMBER.getValueMin();
                         }
                         this.reinit = true;

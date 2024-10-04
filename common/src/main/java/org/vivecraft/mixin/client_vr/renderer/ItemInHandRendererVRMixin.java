@@ -127,7 +127,8 @@ public abstract class ItemInHandRendererVRMixin {
                 this.vivecraft$transformFirstPersonVR(poseStack, side, swingProgress);
             }
 
-            VivecraftItemRendering.VivecraftItemTransformType transformType = VivecraftItemRendering.getTransformType(itemStack, player, itemRenderer);
+            VivecraftItemRendering.VivecraftItemTransformType transformType = VivecraftItemRendering.getTransformType(
+                itemStack, player, this.itemRenderer);
 
             boolean useLeftHandModelinLeftHand = false;
 
@@ -211,7 +212,8 @@ public abstract class ItemInHandRendererVRMixin {
         AbstractClientPlayer player = this.minecraft.player;
 
         RenderSystem.setShaderTexture(0, player.getSkin().texture());
-        VRArmRenderer vrArmRenderer = ((EntityRenderDispatcherVRExtension) entityRenderDispatcher).vivecraft$getArmSkinMap().get(player.getSkin().model().id());
+        VRArmRenderer vrArmRenderer = ((EntityRenderDispatcherVRExtension) this.entityRenderDispatcher).vivecraft$getArmSkinMap()
+            .get(player.getSkin().model().id());
 
         poseStack.pushPose();
 

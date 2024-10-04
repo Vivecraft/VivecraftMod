@@ -109,14 +109,14 @@ public abstract class VRRenderer {
      * @return the projection matrix
      */
     public Matrix4f getCachedProjectionMatrix(int eyeType, float nearClip, float farClip) {
-        if (farClip != lastFarClip) {
-            lastFarClip = farClip;
+        if (farClip != this.lastFarClip) {
+            this.lastFarClip = farClip;
             // fetch both at the same time to make sure they use the same clip planes
             this.eyeProj[0] = this.getProjectionMatrix(0, nearClip, farClip);
             this.eyeProj[1] = this.getProjectionMatrix(1, nearClip, farClip);
         }
 
-        return eyeProj[eyeType];
+        return this.eyeProj[eyeType];
     }
 
     /**
@@ -291,7 +291,7 @@ public abstract class VRRenderer {
      * @return String with the last error, if there was one
      */
     public String getLastError() {
-        return lastError;
+        return this.lastError;
     }
 
     /**

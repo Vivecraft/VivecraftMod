@@ -49,7 +49,7 @@ public class NullVRStereoRenderer extends VRRenderer {
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, null);
         RenderSystem.bindTexture(i);
-        lastError = RenderHelper.checkGLError("create VR textures");
+        this.lastError = RenderHelper.checkGLError("create VR textures");
     }
 
     @Override

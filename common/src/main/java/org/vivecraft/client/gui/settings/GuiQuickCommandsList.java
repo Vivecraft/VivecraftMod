@@ -45,7 +45,7 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
 
         @Override
         public void setFocused(boolean focused) {
-            txt.setFocused(focused);
+            this.txt.setFocused(focused);
         }
 
         @Override

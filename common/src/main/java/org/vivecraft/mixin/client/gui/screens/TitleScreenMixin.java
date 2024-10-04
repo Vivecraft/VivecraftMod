@@ -44,7 +44,7 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Unique
     private void vivecraft$addVRModeButton() {
-        vivecraft$vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
+        this.vivecraft$vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
             VRState.vrEnabled = !VRState.vrEnabled;
             ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
             ClientDataHolderVR.getInstance().vrSettings.saveOptions();
@@ -55,33 +55,33 @@ public abstract class TitleScreenMixin extends Screen {
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 72)
             .build();
-        vivecraft$vrModeButton.visible = ClientDataHolderVR.getInstance().vrSettings.vrToggleButtonEnabled;
+        this.vivecraft$vrModeButton.visible = ClientDataHolderVR.getInstance().vrSettings.vrToggleButtonEnabled;
 
-        this.addRenderableWidget(vivecraft$vrModeButton);
+        this.addRenderableWidget(this.vivecraft$vrModeButton);
 
-        vivecraft$updateButton = new Button.Builder(Component.translatable("vivecraft.gui.update"), (button) -> minecraft.setScreen(new UpdateScreen()))
+        this.vivecraft$updateButton = new Button.Builder(Component.translatable("vivecraft.gui.update"), (button) -> this.minecraft.setScreen(new UpdateScreen()))
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 96)
             .build();
 
-        vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
+        this.vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
-        this.addRenderableWidget(vivecraft$updateButton);
+        this.addRenderableWidget(this.vivecraft$updateButton);
     }
 
     @Inject(method = "render", at = @At("TAIL"))
     private void vivecraft$renderToolTip(
         GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci)
     {
-        vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
+        this.vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
-        if (vivecraft$vrModeButton.visible && vivecraft$vrModeButton.isMouseOver(mouseX, mouseY)) {
-            guiGraphics.renderTooltip(font, font.split(Component.translatable("vivecraft.options.VR_ENABLED.tooltip"),
-                Math.max(width / 2 - 43, 170)), mouseX, mouseY);
+        if (this.vivecraft$vrModeButton.visible && this.vivecraft$vrModeButton.isMouseOver(mouseX, mouseY)) {
+            guiGraphics.renderTooltip(this.font, this.font.split(Component.translatable("vivecraft.options.VR_ENABLED.tooltip"),
+                Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
         }
         if (VRState.vrInitialized && !VRState.vrRunning) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
-            guiGraphics.renderTooltip(font, font.split(hotswitchMessage, 280), width / 2 - 140 - 12, 17);
+            guiGraphics.renderTooltip(this.font, this.font.split(hotswitchMessage, 280), this.width / 2 - 140 - 12, 17);
         }
     }
 

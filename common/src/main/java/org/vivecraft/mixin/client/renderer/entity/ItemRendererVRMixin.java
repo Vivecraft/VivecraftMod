@@ -24,10 +24,10 @@ public class ItemRendererVRMixin {
     @ModifyVariable(method = "getModel", at = @At(value = "STORE"))
     private BakedModel vivecraft$modelOverride(BakedModel bakedModel, ItemStack itemStack) {
         if (VRState.vrRunning && itemStack.is(Items.SPYGLASS)) {
-            return itemModelShaper.getModelManager().getModel(TelescopeTracker.scopeModel);
+            return this.itemModelShaper.getModelManager().getModel(TelescopeTracker.scopeModel);
         }
         if (ClimbTracker.isClaws(itemStack)) {
-            return itemModelShaper.getModelManager().getModel(ClimbTracker.clawsModel);
+            return this.itemModelShaper.getModelManager().getModel(ClimbTracker.clawsModel);
         }
         return bakedModel;
     }

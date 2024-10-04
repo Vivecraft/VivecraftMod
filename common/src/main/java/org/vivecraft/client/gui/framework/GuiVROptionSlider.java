@@ -52,7 +52,7 @@ public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROpti
 
     @Override
     public int getId() {
-        return id;
+        return this.id;
     }
 
     @Override

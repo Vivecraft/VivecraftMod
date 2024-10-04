@@ -72,7 +72,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
         super.init(buttons, true);
 
         if (this.dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
-            super.init(MROptions, false);
+            super.init(this.MROptions, false);
         } else if (this.dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
             super.init(UDOptions, false);
         } else if (this.dataHolder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) {

@@ -21,7 +21,7 @@ public abstract class ResourceLoadStateTrackerMixin {
 
     @Inject(method = "finishReload", at = @At("TAIL"))
     private void vivecraft$initializeVR(CallbackInfo ci) {
-        if (reloadState != null && reloadState.reloadReason == ResourceLoadStateTracker.ReloadReason.INITIAL) {
+        if (this.reloadState != null && this.reloadState.reloadReason == ResourceLoadStateTracker.ReloadReason.INITIAL) {
             // init vr after first resource loading
             try {
                 if (ClientDataHolderVR.getInstance().vrSettings.vrEnabled &&

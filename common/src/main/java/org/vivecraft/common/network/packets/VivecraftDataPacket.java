@@ -38,7 +38,7 @@ public record VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators packe
      */
     @Override
     public void write(FriendlyByteBuf buffer) {
-        buffer.writeByte(packetId.ordinal());
+        buffer.writeByte(this.packetId.ordinal());
         buffer.writeBytes(this.buffer);
     }
 

@@ -215,7 +215,7 @@ public class ServerUtil {
                             try {
                                 String newValue = BuiltInRegistries.BLOCK.getKey(context.getArgument("block", BlockInput.class).getState().getBlock()).toString();
                                 List list = listConfig.get();
-                                list.add(newValue.toString());
+                                list.add(newValue);
                                 listConfig.set(list);
                                 context.getSource().sendSystemMessage(
                                     Component.literal(

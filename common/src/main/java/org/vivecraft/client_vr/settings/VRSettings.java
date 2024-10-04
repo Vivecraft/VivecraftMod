@@ -60,7 +60,7 @@ public class VRSettings {
         }
 
         public float getFactor() {
-            return factor;
+            return this.factor;
         }
     }
 
@@ -517,7 +517,7 @@ public class VRSettings {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public VRSettings() {
-        vrCfgFile = Xplat.getConfigPath("vivecraft-client-config.json").toFile();
+        this.vrCfgFile = Xplat.getConfigPath("vivecraft-client-config.json").toFile();
 
         // Need to do this in the instance because array sizes aren't known until instantiation
         initializeFieldInfo();
@@ -549,22 +549,22 @@ public class VRSettings {
                     ConfigEntry configEntry = new ConfigEntry(field, ann.value(), config, ann.separate(),
                         ann.fixedSize());
                     if (ann.value() != VrOptions.DUMMY) {
-                        if (fieldEnumMap.containsKey(ann.value())) {
+                        if (this.fieldEnumMap.containsKey(ann.value())) {
                             throw new RuntimeException("duplicate enum in setting field: " + field.getName());
                         }
-                        fieldEnumMap.put(ann.value(), configEntry);
+                        this.fieldEnumMap.put(ann.value(), configEntry);
                     }
 
                     if (ann.separate() && field.getType().isArray()) {
                         int len = Array.getLength(field.get(this));
-                        IntStream.range(0, len).forEach(i -> fieldConfigMap.put(config + "_" + i, configEntry));
+                        IntStream.range(0, len).forEach(i -> this.fieldConfigMap.put(config + "_" + i, configEntry));
                     } else if (ann.separate() && Quaternion.class.isAssignableFrom(field.getType())) {
                         Stream.of('W', 'X', 'Y', 'Z')
-                            .forEach(suffix -> fieldConfigMap.put(config + suffix, configEntry));
+                            .forEach(suffix -> this.fieldConfigMap.put(config + suffix, configEntry));
                     } else if (ann.separate() && Vector3.class.isAssignableFrom(field.getType())) {
-                        Stream.of('X', 'Y', 'Z').forEach(suffix -> fieldConfigMap.put(config + suffix, configEntry));
+                        Stream.of('X', 'Y', 'Z').forEach(suffix -> this.fieldConfigMap.put(config + suffix, configEntry));
                     } else {
-                        fieldConfigMap.put(config, configEntry);
+                        this.fieldConfigMap.put(config, configEntry);
                     }
                 }
             }
@@ -806,7 +806,7 @@ public class VRSettings {
      */
     public void loadDefault(VrOptions option) {
         try {
-            var mapping = fieldEnumMap.get(option);
+            var mapping = this.fieldEnumMap.get(option);
             if (mapping == null) {
                 return;
             }
@@ -820,21 +820,21 @@ public class VRSettings {
                 if (mapping.separate) {
                     for (int i = 0; i < len; i++) {
                         Object obj = Objects.requireNonNull(
-                            loadDefault(name + "_" + i, null, option, type.getComponentType(), false, defaultsMap));
+                            loadDefault(name + "_" + i, null, option, type.getComponentType(), false, this.defaultsMap));
                         Array.set(arr, i, obj);
                     }
                 } else {
-                    String str = defaultsMap.get(name);
+                    String str = this.defaultsMap.get(name);
                     String[] split = str.split(";", -1); // Avoid conflicting with other comma-delimited types
                     for (int i = 0; i < len; i++) {
                         Object obj = Objects.requireNonNull(
-                            loadDefault(name, split[i], option, type.getComponentType(), false, defaultsMap));
+                            loadDefault(name, split[i], option, type.getComponentType(), false, this.defaultsMap));
                         Array.set(arr, i, obj);
                     }
                 }
             } else {
                 Object obj = Objects.requireNonNull(
-                    loadDefault(name, null, option, type, mapping.separate, defaultsMap));
+                    loadDefault(name, null, option, type, mapping.separate, this.defaultsMap));
                 field.set(this, obj);
             }
         } catch (Exception exception) {
@@ -851,8 +851,8 @@ public class VRSettings {
         try {
             File legacyFile = null;
             boolean fileExists = true;
-            if (!vrCfgFile.exists()) {
-                vrCfgFile.createNewFile();
+            if (!this.vrCfgFile.exists()) {
+                this.vrCfgFile.createNewFile();
                 // check if there is a legacy file
                 legacyFile = new File(Minecraft.getInstance().gameDirectory, "optionsviveprofiles.txt");
                 if (legacyFile.exists()) {
@@ -867,7 +867,7 @@ public class VRSettings {
 
             if (fileExists) {
                 InputStreamReader inputstreamreader = new InputStreamReader(
-                    new FileInputStream(legacyFile == null ? vrCfgFile : legacyFile), StandardCharsets.UTF_8);
+                    new FileInputStream(legacyFile == null ? this.vrCfgFile : legacyFile), StandardCharsets.UTF_8);
 
                 try {
                     currentConfig = JsonParser.parseReader(inputstreamreader).getAsJsonObject();
@@ -905,7 +905,7 @@ public class VRSettings {
             String name = entry.getKey();
             String value = entry.getValue() != null ? entry.getValue() : "";
             try {
-                var mapping = fieldConfigMap.get(name);
+                var mapping = this.fieldConfigMap.get(name);
 
                 if (mapping == null) continue;
 
@@ -948,7 +948,7 @@ public class VRSettings {
             }
         }
 
-        preservedSettingMap = settings;
+        this.preservedSettingMap = settings;
     }
 
     /**
@@ -961,7 +961,7 @@ public class VRSettings {
         JsonObject jsonStorage = new JsonObject();
         data.forEach((key, value) -> jsonStorage.add(key, new JsonPrimitive(value)));
         try {
-            OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(vrCfgFile), StandardCharsets.UTF_8);
+            OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(this.vrCfgFile), StandardCharsets.UTF_8);
             writer.write(gson.toJson(jsonStorage));
             writer.flush();
             writer.close();
@@ -974,7 +974,7 @@ public class VRSettings {
      * stores the current settings in the {@code defaultsMap}
      */
     private synchronized void storeDefaults() {
-        saveOptions(defaultsMap);
+        saveOptions(this.defaultsMap);
     }
 
     /**
@@ -983,11 +983,11 @@ public class VRSettings {
     private void saveOptions(Map<String, String> data) {
         try {
 
-            if (preservedSettingMap != null) {
-                data.putAll(preservedSettingMap);
+            if (this.preservedSettingMap != null) {
+                data.putAll(this.preservedSettingMap);
             }
 
-            for (var entry : fieldConfigMap.entrySet()) {
+            for (var entry : this.fieldConfigMap.entrySet()) {
                 String name = entry.getKey();
                 var mapping = entry.getValue();
                 Field field = mapping.field;
@@ -1047,7 +1047,7 @@ public class VRSettings {
         String label = valueOnly ? "" : name + ": ";
 
         try {
-            var mapping = fieldEnumMap.get(vrOption);
+            var mapping = this.fieldEnumMap.get(vrOption);
             if (mapping == null) {
                 return name;
             }
@@ -1056,7 +1056,7 @@ public class VRSettings {
             Class<?> type = field.getType();
 
             Object obj = field.get(this);
-            if (overrides.hasSetting(vrOption)) {
+            if (this.overrides.hasSetting(vrOption)) {
                 obj = this.overrides.getSetting(vrOption).getValue();
             }
 
@@ -1092,7 +1092,7 @@ public class VRSettings {
      */
     public float getOptionFloatValue(VrOptions vrOption) {
         try {
-            var mapping = fieldEnumMap.get(vrOption);
+            var mapping = this.fieldEnumMap.get(vrOption);
             if (mapping == null) {
                 return 0.0F;
             }
@@ -1100,8 +1100,8 @@ public class VRSettings {
             Field field = mapping.field;
 
             float value = ((Number) field.get(this)).floatValue();
-            if (overrides.hasSetting(vrOption)) {
-                value = overrides.getSetting(vrOption).getFloat();
+            if (this.overrides.hasSetting(vrOption)) {
+                value = this.overrides.getSetting(vrOption).getFloat();
             }
 
             return Objects.requireNonNullElse(vrOption.getOptionFloatValue(value), value);
@@ -1119,7 +1119,7 @@ public class VRSettings {
      */
     public void setOptionValue(VrOptions vrOption) {
         try {
-            var mapping = fieldEnumMap.get(vrOption);
+            var mapping = this.fieldEnumMap.get(vrOption);
             if (mapping == null) return;
 
             Field field = mapping.field;
@@ -1153,16 +1153,16 @@ public class VRSettings {
      */
     public void setOptionFloatValue(VrOptions vrOption, float newValue) {
         try {
-            var mapping = fieldEnumMap.get(vrOption);
+            var mapping = this.fieldEnumMap.get(vrOption);
             if (mapping == null) return;
 
             Field field = mapping.field;
             Class<?> type = field.getType();
 
             float actualValue = Objects.requireNonNullElse(vrOption.setOptionFloatValue(newValue), newValue);
-            if (overrides.hasSetting(vrOption)) {
-                actualValue = Mth.clamp(actualValue, overrides.getSetting(vrOption).getValueMin(),
-                    overrides.getSetting(vrOption).getValueMax());
+            if (this.overrides.hasSetting(vrOption)) {
+                actualValue = Mth.clamp(actualValue, this.overrides.getSetting(vrOption).getValueMin(),
+                    this.overrides.getSetting(vrOption).getValueMax());
             }
 
             if (type == Integer.TYPE) {
@@ -2010,11 +2010,11 @@ public class VRSettings {
         }
 
         public int getDecimalPlaces() {
-            return decimalPlaces;
+            return this.decimalPlaces;
         }
 
         public Pair<String, String> getBooleanLangKeys() {
-            return booleanLangKeys;
+            return this.booleanLangKeys;
         }
 
         protected float snapToStep(float value) {
@@ -2152,22 +2152,28 @@ public class VRSettings {
         private final Map<String, Setting> networkNameMap = new HashMap<>();
 
         private ServerOverrides() {
-            registerSetting(VrOptions.LIMIT_TELEPORT, "limitedTeleport", () -> vrLimitedSurvivalTeleport);
-            registerSetting(VrOptions.TELEPORT_UP_LIMIT, "teleportLimitUp", () -> vrTeleportUpLimit);
-            registerSetting(VrOptions.TELEPORT_DOWN_LIMIT, "teleportLimitDown", () -> vrTeleportDownLimit);
-            registerSetting(VrOptions.TELEPORT_HORIZ_LIMIT, "teleportLimitHoriz", () -> vrTeleportHorizLimit);
-            registerSetting(VrOptions.WORLD_SCALE, "worldScale", () -> worldScale);
-            registerSetting(VrOptions.THIRDPERSON_ITEMTRANSFORMS, "thirdPersonItems", () -> thirdPersonItems);
+            registerSetting(VrOptions.LIMIT_TELEPORT, "limitedTeleport",
+                () -> VRSettings.this.vrLimitedSurvivalTeleport);
+            registerSetting(VrOptions.TELEPORT_UP_LIMIT, "teleportLimitUp",
+                () -> VRSettings.this.vrTeleportUpLimit);
+            registerSetting(VrOptions.TELEPORT_DOWN_LIMIT, "teleportLimitDown",
+                () -> VRSettings.this.vrTeleportDownLimit);
+            registerSetting(VrOptions.TELEPORT_HORIZ_LIMIT, "teleportLimitHoriz",
+                () -> VRSettings.this.vrTeleportHorizLimit);
+            registerSetting(VrOptions.WORLD_SCALE, "worldScale",
+                () -> VRSettings.this.worldScale);
+            registerSetting(VrOptions.THIRDPERSON_ITEMTRANSFORMS, "thirdPersonItems",
+                () -> VRSettings.this.thirdPersonItems);
         }
 
         private void registerSetting(VrOptions option, String networkName, Supplier<Object> originalValue) {
             Setting setting = new Setting(option, networkName, originalValue);
-            optionMap.put(option, setting);
-            networkNameMap.put(networkName, setting);
+            this.optionMap.put(option, setting);
+            this.networkNameMap.put(networkName, setting);
         }
 
         public void resetAll() {
-            for (Setting setting : optionMap.values()) {
+            for (Setting setting : this.optionMap.values()) {
                 setting.valueSet = false;
                 setting.valueMinSet = false;
                 setting.valueMaxSet = false;
@@ -2175,15 +2181,15 @@ public class VRSettings {
         }
 
         public boolean hasSetting(VrOptions option) {
-            return optionMap.containsKey(option);
+            return this.optionMap.containsKey(option);
         }
 
         public boolean hasSetting(String networkName) {
-            return networkNameMap.containsKey(networkName);
+            return this.networkNameMap.containsKey(networkName);
         }
 
         public Setting getSetting(VrOptions option) {
-            Setting setting = optionMap.get(option);
+            Setting setting = this.optionMap.get(option);
             if (setting == null) {
                 throw new IllegalArgumentException("setting not registered: " + option);
             }
@@ -2192,7 +2198,7 @@ public class VRSettings {
         }
 
         public Setting getSetting(String networkName) {
-            Setting setting = networkNameMap.get(networkName);
+            Setting setting = this.networkNameMap.get(networkName);
             if (setting == null) {
                 throw new IllegalArgumentException("setting not registered: " + networkName);
             }
@@ -2219,29 +2225,29 @@ public class VRSettings {
             }
 
             private void checkFloat() {
-                if (!option.enumFloat) {
-                    throw new IllegalArgumentException("not a float option: " + option);
+                if (!this.option.enumFloat) {
+                    throw new IllegalArgumentException("not a float option: " + this.option);
                 }
             }
 
             public boolean isFloat() {
-                return option.enumFloat;
+                return this.option.enumFloat;
             }
 
             public Object getOriginalValue() {
-                return originalValue.get();
+                return this.originalValue.get();
             }
 
             public boolean isValueOverridden() {
-                return valueSet;
+                return this.valueSet;
             }
 
             public Object getValue() {
                 Object val;
-                if (valueSet) {
-                    val = value;
+                if (this.valueSet) {
+                    val = this.value;
                 } else {
-                    val = originalValue.get();
+                    val = this.originalValue.get();
                 }
 
                 if (val instanceof Integer) {
@@ -2275,22 +2281,22 @@ public class VRSettings {
 
             public void setValue(Object value) {
                 this.value = value;
-                valueSet = true;
+                this.valueSet = true;
             }
 
             public void resetValue() {
-                valueSet = false;
+                this.valueSet = false;
             }
 
             public boolean isValueMinOverridden() {
                 checkFloat();
-                return valueMinSet;
+                return this.valueMinSet;
             }
 
             public float getValueMin() {
                 checkFloat();
-                if (valueMinSet) {
-                    return valueMin;
+                if (this.valueMinSet) {
+                    return this.valueMin;
                 } else {
                     return Float.MIN_VALUE;
                 }
@@ -2299,23 +2305,23 @@ public class VRSettings {
             public void setValueMin(float valueMin) {
                 checkFloat();
                 this.valueMin = valueMin;
-                valueMinSet = true;
+                this.valueMinSet = true;
             }
 
             public void resetValueMin() {
                 checkFloat();
-                valueMinSet = false;
+                this.valueMinSet = false;
             }
 
             public boolean isValueMaxOverridden() {
                 checkFloat();
-                return valueMaxSet;
+                return this.valueMaxSet;
             }
 
             public float getValueMax() {
                 checkFloat();
-                if (valueMaxSet) {
-                    return valueMax;
+                if (this.valueMaxSet) {
+                    return this.valueMax;
                 } else {
                     return Float.MAX_VALUE;
                 }
@@ -2324,12 +2330,12 @@ public class VRSettings {
             public void setValueMax(float valueMax) {
                 checkFloat();
                 this.valueMax = valueMax;
-                valueMaxSet = true;
+                this.valueMaxSet = true;
             }
 
             public void resetValueMax() {
                 checkFloat();
-                valueMaxSet = false;
+                this.valueMaxSet = false;
             }
         }
     }

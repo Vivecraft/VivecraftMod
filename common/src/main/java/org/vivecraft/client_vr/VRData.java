@@ -89,8 +89,8 @@ public class VRData {
 
         // telescopes
         if (dataHolder.vrSettings.seated) {
-            this.t0 = eye0;
-            this.t1 = eye1;
+            this.t0 = this.eye0;
+            this.t1 = this.eye1;
         } else {
             Matrix4f scopeMain = this.getSmoothedRotation(0, 0.2F);
             Matrix4f scopeOff = this.getSmoothedRotation(1, 0.2F);
@@ -210,7 +210,8 @@ public class VRData {
     public Vec3 getHeadPivot() {
         Vec3 eye = this.hmd.getPosition();
         // scale pivot point with world scale, to prevent unwanted player movement
-        Vector3 headPivotOffset = this.hmd.getMatrix().transform(new Vector3(0.0F, -0.1F * worldScale, 0.1F * worldScale));
+        Vector3 headPivotOffset = this.hmd.getMatrix()
+            .transform(new Vector3(0.0F, -0.1F * this.worldScale, 0.1F * this.worldScale));
         return new Vec3(headPivotOffset.getX() + eye.x, headPivotOffset.getY() + eye.y, headPivotOffset.getZ() + eye.z);
     }
 

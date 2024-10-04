@@ -31,7 +31,8 @@ public abstract class TutorialToastVRMixin implements Toast {
         GuiGraphics guiGraphics, ToastComponent toastComponent, long timeSinceLastVisible,
         CallbackInfoReturnable<Visibility> cir, @Share("offset") LocalRef<Integer> offset)
     {
-        int width = Math.max(toastComponent.getMinecraft().font.width(this.title), message != null ? toastComponent.getMinecraft().font.width(this.message) : 0) + 34;
+        int width = Math.max(toastComponent.getMinecraft().font.width(this.title),
+            this.message != null ? toastComponent.getMinecraft().font.width(this.message) : 0) + 34;
         offset.set(Math.min(this.width() - width, 0));
     }
 

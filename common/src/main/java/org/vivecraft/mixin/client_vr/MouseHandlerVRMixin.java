@@ -86,14 +86,14 @@ public class MouseHandlerVRMixin {
     @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(JIDD)V"), index = 2)
     private double vivecraft$modifyXCenter(double x) {
         return VRState.vrRunning
-               ? (double) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() / 2
+               ? (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenWidth() / 2
                : x;
     }
 
     @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(JIDD)V"), index = 3)
     private double vivecraft$modifyYCenter(double y) {
         return VRState.vrRunning
-               ? (double) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight() / 2
+               ? (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenHeight() / 2
                : y;
     }
 
@@ -101,7 +101,7 @@ public class MouseHandlerVRMixin {
     @ModifyVariable(method = "onMove", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
     private double vivecraft$modifyX(double x) {
         if (VRState.vrRunning) {
-            x *= GuiHandler.guiWidth / (double) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth();
+            x *= GuiHandler.guiWidth / (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenWidth();
         }
         return x;
     }
@@ -109,7 +109,7 @@ public class MouseHandlerVRMixin {
     @ModifyVariable(method = "onMove", at = @At(value = "HEAD"), ordinal = 1, argsOnly = true)
     private double vivecraft$modifyY(double y) {
         if (VRState.vrRunning) {
-            y *= (double) GuiHandler.guiHeight / (double) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight();
+            y *= (double) GuiHandler.guiHeight / (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenHeight();
         }
         return y;
     }

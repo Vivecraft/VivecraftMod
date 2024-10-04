@@ -37,7 +37,7 @@ public class KeyboardHandlerVRMixin {
 
                 // close chat with the keyboard
                 if (this.minecraft.screen instanceof ChatScreen) {
-                    minecraft.screen.onClose();
+                    this.minecraft.screen.onClose();
                 }
                 ci.cancel();
             }

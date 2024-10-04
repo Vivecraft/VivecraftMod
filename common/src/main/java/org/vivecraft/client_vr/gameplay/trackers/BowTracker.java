@@ -125,7 +125,7 @@ public class BowTracker extends Tracker {
 
             if (PehkuiHelper.isLoaded()) {
                 // this is meant to be relative to the base Bb height, not the scaled one
-                this.maxDraw /= PehkuiHelper.getEntityBbScale(player, mc.getFrameTime());
+                this.maxDraw /= PehkuiHelper.getEntityBbScale(player, this.mc.getFrameTime());
             }
 
             int bowHand = 1;

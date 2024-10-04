@@ -22,7 +22,7 @@ public class HorseTracker extends Tracker {
     private int speedLevel = 0;
     private long lastBoostMillis = -1L;
     private Horse horse = null;
-    private ModelInfo info = new ModelInfo();
+    private final ModelInfo info = new ModelInfo();
 
     public HorseTracker(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh);

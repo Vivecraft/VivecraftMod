@@ -102,7 +102,10 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
 
     @Inject(method = "handlePlayerChat", at = @At("TAIL"))
     private void vivecraft$chatHapticsPlayer(ClientboundPlayerChatPacket packet, CallbackInfo ci) {
-        if (VRState.vrRunning && (minecraft.player == null || this.vivecraft$lastMsg == null || packet.sender() == minecraft.player.getUUID())) {
+        if (VRState.vrRunning && (this.minecraft.player == null || this.vivecraft$lastMsg == null ||
+            packet.sender() == this.minecraft.player.getUUID()
+        ))
+        {
             vivecraft$triggerHapticSound();
         }
         this.vivecraft$lastMsg = null;
@@ -110,7 +113,7 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
 
     @Inject(method = "handleSystemChat", at = @At("TAIL"))
     private void vivecraft$chatHapticsSystem(ClientboundSystemChatPacket packet, CallbackInfo ci) {
-        if (VRState.vrRunning && (minecraft.player == null || this.vivecraft$lastMsg == null ||
+        if (VRState.vrRunning && (this.minecraft.player == null || this.vivecraft$lastMsg == null ||
             packet.content().getString().contains(this.vivecraft$lastMsg)
         ))
         {
@@ -135,7 +138,7 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
                 dataHolder.vrSettings.chatNotifications == VRSettings.ChatNotifications.BOTH)
             {
                 Vec3 controllerPos = dataHolder.vrPlayer.vrdata_world_pre.getController(1).getPosition();
-                minecraft.level.playLocalSound(
+                this.minecraft.level.playLocalSound(
                     controllerPos.x(), controllerPos.y(), controllerPos.z(),
                     BuiltInRegistries.SOUND_EVENT.get(new ResourceLocation(dataHolder.vrSettings.chatNotificationSound)),
                     SoundSource.NEUTRAL, 0.3F, 0.1F, false);

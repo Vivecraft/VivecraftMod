@@ -96,12 +96,12 @@ public abstract class WindowVRMixin implements WindowExtension {
     @Override
     @Unique
     public int vivecraft$getActualScreenHeight() {
-        return height;
+        return this.height;
     }
 
     @Override
     @Unique
     public int vivecraft$getActualScreenWidth() {
-        return width;
+        return this.width;
     }
 }

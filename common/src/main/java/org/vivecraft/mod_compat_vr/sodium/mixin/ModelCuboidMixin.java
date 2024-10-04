@@ -26,12 +26,6 @@ public class ModelCuboidMixin implements ModelCuboidExtension {
         this.vivecraft$overrides[overrideFaceIndex][0] = 1F;
         // order taken from me.jellysquid.mods.sodium.client.render.immediate.model.EntityRenderer.prepareVertices
         switch (sourceFaceIndex) {
-            default -> {
-                this.vivecraft$overrides[overrideFaceIndex][1] = source[0][1];
-                this.vivecraft$overrides[overrideFaceIndex][2] = source[1][0];
-                this.vivecraft$overrides[overrideFaceIndex][3] = source[0][2];
-                this.vivecraft$overrides[overrideFaceIndex][4] = source[1][1];
-            }
             case 1 -> {
                 this.vivecraft$overrides[overrideFaceIndex][1] = source[0][2];
                 this.vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
@@ -61,6 +55,13 @@ public class ModelCuboidMixin implements ModelCuboidExtension {
                 this.vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
                 this.vivecraft$overrides[overrideFaceIndex][3] = source[0][1];
                 this.vivecraft$overrides[overrideFaceIndex][4] = source[1][2];
+            }
+            // 0 case
+            default -> {
+                this.vivecraft$overrides[overrideFaceIndex][1] = source[0][1];
+                this.vivecraft$overrides[overrideFaceIndex][2] = source[1][0];
+                this.vivecraft$overrides[overrideFaceIndex][3] = source[0][2];
+                this.vivecraft$overrides[overrideFaceIndex][4] = source[1][1];
             }
         }
     }

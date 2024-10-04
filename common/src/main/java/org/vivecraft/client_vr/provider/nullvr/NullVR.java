@@ -26,7 +26,6 @@ public class NullVR extends MCVR {
     private static final float ipd = 0.1F;
 
     private boolean vrActive = true;
-    private boolean vrActiveChangedLastFrame = false;
 
     public NullVR(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh, VivecraftVRMod.INSTANCE);
@@ -77,7 +76,7 @@ public class NullVR extends MCVR {
             this.initSuccess = true;
         }
 
-        return initialized;
+        return this.initialized;
     }
 
     @Override
@@ -90,7 +89,8 @@ public class NullVR extends MCVR {
             float xSens = this.dh.vrSettings.xSensitivity;
             float xKey = this.dh.vrSettings.keyholeX;
 
-            this.dh.vrSettings.xSensitivity = this.dh.vrSettings.ySensitivity * 1.636F * ((float) mc.getWindow().getScreenWidth() / (float) mc.getWindow().getScreenHeight());
+            this.dh.vrSettings.xSensitivity = this.dh.vrSettings.ySensitivity * 1.636F *
+                ((float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight());
             this.dh.vrSettings.keyholeX = 1;
 
             this.updateAim();

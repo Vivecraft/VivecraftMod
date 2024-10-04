@@ -879,10 +879,10 @@ public abstract class MCVR {
         Vector2 axis = this.getInputAction(mod.keyFlickStick).getAxis2DUseTracked();
         if (axis.getX() != 0F || axis.getY() != 0F) {
             float rotation = (float) Math.toDegrees(Math.atan2(axis.getX(), axis.getY()));
-            if (isFlickStick) {
+            if (this.isFlickStick) {
                 this.dh.vrSettings.worldRotation += this.flickStickRot - rotation;
             } else {
-                isFlickStick = true;
+                this.isFlickStick = true;
                 this.dh.vrSettings.worldRotation -= rotation;
             }
 
@@ -890,7 +890,7 @@ public abstract class MCVR {
             this.flickStickRot = rotation;
         } else {
             this.flickStickRot = 0F;
-            isFlickStick = false;
+            this.isFlickStick = false;
         }
 
         this.seatedRot = this.dh.vrSettings.worldRotation;

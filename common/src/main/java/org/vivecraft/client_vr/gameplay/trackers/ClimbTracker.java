@@ -546,7 +546,6 @@ public class ClimbTracker extends Tracker {
                 double az = newZ;
 
                 switch (i) {
-                    default -> {} // 0 and 1 do the same?
                     case 2 -> ay = y;
                     case 3 -> az = z;
                     case 4 -> ax = x;
@@ -562,6 +561,7 @@ public class ClimbTracker extends Tracker {
                         ay = y;
                         az = z;
                     }
+                    default -> {} // 0 and 1 do the same?
                 }
 
                 player.setPos(ax, ay, az);

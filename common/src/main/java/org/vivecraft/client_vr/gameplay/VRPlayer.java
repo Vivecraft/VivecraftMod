@@ -191,7 +191,7 @@ public class VRPlayer {
 
             if (PehkuiHelper.isLoaded()) {
                 // scale world with player size
-                this.worldScale *= PehkuiHelper.getEntityEyeHeightScale(mc.player, mc.getFrameTime());
+                this.worldScale *= PehkuiHelper.getEntityEyeHeightScale(this.mc.player, this.mc.getFrameTime());
                 // limit scale
                 if (this.worldScale > 100F) {
                     this.worldScale = 100F;
@@ -426,7 +426,10 @@ public class VRPlayer {
             Entity entity = mc.player.getVehicle();
 
             if (entity instanceof AbstractHorse abstracthorse) {
-                if (abstracthorse.isControlledByLocalInstance() && abstracthorse.isSaddled() && !dh.horseTracker.isActive(mc.player)) {
+                if (abstracthorse.isControlledByLocalInstance() &&
+                    abstracthorse.isSaddled() &&
+                    !this.dh.horseTracker.isActive(mc.player))
+                {
                     abstracthorse.yBodyRot = this.vrdata_world_pre.getBodyYaw();
                     this.dh.vehicleTracker.rotationCooldown = 10;
                 }
@@ -686,7 +689,7 @@ public class VRPlayer {
                 player.setYHeadRot(player.getYRot());
                 player.setXRot(-data.getController(1).getPitch());
             }
-        } else if ((player.isSprinting() && (player.input.jumping || mc.options.keyJump.isDown())) ||
+        } else if ((player.isSprinting() && (player.input.jumping || this.mc.options.keyJump.isDown())) ||
             player.isFallFlying() || (player.isSwimming() && player.zza > 0.0F))
         {
             // Server-side movement
@@ -704,10 +707,10 @@ public class VRPlayer {
                 player.setYHeadRot(player.getYRot());
                 player.setXRot(-data.hmd.getPitch());
             }
-        } else if (((GameRendererExtension) mc.gameRenderer).vivecraft$getCrossVec() != null) {
+        } else if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec() != null) {
             //Look AT the crosshair by default, most compatible with mods.
             Vec3 playerToCrosshair = player.getEyePosition(1)
-                .subtract(((GameRendererExtension) mc.gameRenderer).vivecraft$getCrossVec()); //backwards
+                .subtract(((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec()); //backwards
             double what = playerToCrosshair.y / playerToCrosshair.length();
             if (what > 1) {
                 what = 1;

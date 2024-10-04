@@ -105,7 +105,7 @@ public class WidgetBuilder {
 
                 @Override
                 protected void applyValue() {
-                    numberValue.fromNormalized(value);
+                    numberValue.fromNormalized(this.value);
                 }
             };
             widget.setTooltip(Tooltip.create(Component.literal(numberValue.getComment())));
