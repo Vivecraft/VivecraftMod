@@ -90,20 +90,18 @@ public class TeleportTracker extends Tracker {
         boolean doTeleport = false;
         Vec3 destination = null;
         boolean bindingTeleport = VivecraftVRMod.INSTANCE.keyTeleport.isDown() && this.dh.vrPlayer.isTeleportEnabled();
-        boolean seatedTeleport = this.dh.vrSettings.seated
-            && !this.dh.vrPlayer.getFreeMove()
-            && (player.input.forwardImpulse != 0.0F || player.input.leftImpulse != 0.0F);
+        boolean seatedTeleport = this.dh.vrSettings.seated && !this.dh.vrPlayer.getFreeMove() &&
+            (player.input.forwardImpulse != 0.0F || player.input.leftImpulse != 0.0F);
 
         if ((bindingTeleport || seatedTeleport) && !player.isPassenger()) {
             destination = this.movementTeleportDestination;
 
-            if (this.vrMovementStyle.teleportOnRelease
-                || (this.movementTeleportTimer >= 0 && (destination.x != 0.0D || destination.y != 0.0D || destination.z != 0.0D))
-            ) {
+            if (this.vrMovementStyle.teleportOnRelease || (this.movementTeleportTimer >= 0 &&
+                (destination.x != 0.0D || destination.y != 0.0D || destination.z != 0.0D)
+            ))
+            {
                 // start tp sound
-                if (this.movementTeleportTimer == 0
-                    && this.vrMovementStyle.startTeleportingSound != null
-                ) {
+                if (this.movementTeleportTimer == 0 && this.vrMovementStyle.startTeleportingSound != null) {
                     player.playSound(this.vrMovementStyle.startTeleportingSound,
                         this.vrMovementStyle.startTeleportingSoundVolume,
                         1.0F / (random.nextFloat() * 0.4F + 1.2F) + 0.5F);
@@ -333,17 +331,19 @@ public class TeleportTracker extends Tracker {
                 boolean ok = !player.isShiftKeyDown() || !(yDiff > 0.2D);
 
                 if (!player.getAbilities().mayfly && ClientNetworking.isLimitedSurvivalTeleport()) {
-                    if (ClientNetworking.getTeleportDownLimit() > 0
-                        && yDiff > ClientNetworking.getTeleportDownLimit() + 0.2D
-                    ) {
+                    if (ClientNetworking.getTeleportDownLimit() > 0 &&
+                        yDiff > ClientNetworking.getTeleportDownLimit() + 0.2D)
+                    {
                         ok = false;
-                    } else if (ClientNetworking.getTeleportUpLimit() > 0
-                        && -yDiff > ClientNetworking.getTeleportUpLimit() * ((PlayerExtension) player).vivecraft$getMuhJumpFactor() + 0.2D
-                    ) {
+                    } else if (ClientNetworking.getTeleportUpLimit() > 0 &&
+                        -yDiff > ClientNetworking.getTeleportUpLimit() *
+                            ((PlayerExtension) player).vivecraft$getMuhJumpFactor() + 0.2D)
+                    {
                         ok = false;
-                    } else if (ClientNetworking.getTeleportHorizLimit() > 0
-                        && xzDiff > ClientNetworking.getTeleportHorizLimit() * ((PlayerExtension) player).vivecraft$getMuhSpeedFactor() + 0.2D
-                    ) {
+                    } else if (ClientNetworking.getTeleportHorizLimit() > 0 &&
+                        xzDiff > ClientNetworking.getTeleportHorizLimit() *
+                            ((PlayerExtension) player).vivecraft$getMuhSpeedFactor() + 0.2D)
+                    {
                         ok = false;
                     }
                 }
@@ -421,10 +421,10 @@ public class TeleportTracker extends Tracker {
             // sides
             // require arc hitting top of block.
             // unless ladder or vine or creative or limits off.
-            if (blockState.getBlock() instanceof LadderBlock
-                || blockState.getBlock() instanceof VineBlock
-                || blockState.is(BlockTags.VIVECRAFT_CLIMBABLE)
-            ) {
+            if (blockState.getBlock() instanceof LadderBlock ||
+                blockState.getBlock() instanceof VineBlock ||
+                blockState.is(BlockTags.VIVECRAFT_CLIMBABLE))
+            {
                 Vec3 dest = new Vec3(blockpos.getX() + 0.5D, blockpos.getY() + 0.5D, blockpos.getZ() + 0.5D);
                 Block block = this.mc.level.getBlockState(blockpos.below()).getBlock();
 
@@ -460,15 +460,15 @@ public class TeleportTracker extends Tracker {
 					ex = 0.05D;
 				}
 
-				boolean emptySpotReq = this.mc.level.noCollision(player, aabb)
-					&& !this.mc.level.noCollision(player, aabb.inflate(0.0D, 0.125D + ex, 0.0D));
+                boolean emptySpotReq = this.mc.level.noCollision(player, aabb) &&
+                    !this.mc.level.noCollision(player, aabb.inflate(0.0D, 0.125D + ex, 0.0D));
 
 				if (!emptySpotReq) {
 					Vec3 center = Vec3.upFromBottomCenterOf(hitBlock, height);
 					offset = center.subtract(player.getX(), player.getBoundingBox().minY, player.getZ());
 					aabb = player.getBoundingBox().move(offset.x, offset.y, offset.z);
-					emptySpotReq = this.mc.level.noCollision(player, aabb)
-						&& !this.mc.level.noCollision(player, aabb.inflate(0.0D, 0.125D + ex, 0.0D));
+                    emptySpotReq = this.mc.level.noCollision(player, aabb) &&
+                        !this.mc.level.noCollision(player, aabb.inflate(0.0D, 0.125D + ex, 0.0D));
 				}
 
 				if (emptySpotReq) {

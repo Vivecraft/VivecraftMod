@@ -51,8 +51,7 @@ public class ServerUtil {
                     boolean isOpAndAllowed = ServerConfig.allow_op.get() && serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile());
 
                     // kick non VR players
-                    if (!isOpAndAllowed && ServerConfig.vr_only.get()
-                        && (vivePlayer == null || !vivePlayer.isVR())) {
+                    if (!isOpAndAllowed && ServerConfig.vr_only.get() && (vivePlayer == null || !vivePlayer.isVR())) {
                         String kickMessage = ServerConfig.messagesKickVROnly.get();
                         try {
                             kickMessage = kickMessage.formatted(serverPlayer.getName().getString());

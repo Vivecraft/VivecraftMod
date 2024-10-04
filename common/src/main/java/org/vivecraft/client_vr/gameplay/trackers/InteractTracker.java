@@ -88,17 +88,19 @@ public class InteractTracker extends Tracker {
 
     private void reset(LocalPlayer player, int c) {
         // stop moving cameras
-        if (this.inCamera[c]
-            && VRHotkeys.isMovingThirdPersonCam()
-            && VRHotkeys.getMovingThirdPersonCamTriggerer() == VRHotkeys.Triggerer.INTERACTION
-            && VRHotkeys.getMovingThirdPersonCamController() == c) {
+        if (this.inCamera[c] &&
+            VRHotkeys.isMovingThirdPersonCam() &&
+            VRHotkeys.getMovingThirdPersonCamTriggerer() == VRHotkeys.Triggerer.INTERACTION &&
+            VRHotkeys.getMovingThirdPersonCamController() == c)
+        {
             VRHotkeys.stopMovingThirdPersonCam();
         }
 
-        if (this.inHandheldCamera[c]
-            && this.dh.cameraTracker.isMoving()
-            && this.dh.cameraTracker.getMovingController() == c
-            && !this.dh.cameraTracker.isQuickMode()) {
+        if (this.inHandheldCamera[c] &&
+            this.dh.cameraTracker.isMoving() &&
+            this.dh.cameraTracker.getMovingController() == c &&
+            !this.dh.cameraTracker.isQuickMode())
+        {
             this.dh.cameraTracker.stopMoving();
         }
 

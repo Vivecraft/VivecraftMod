@@ -515,10 +515,10 @@ public class ClimbTracker extends Tracker {
             double controller = this.dh.vrPlayer.vrdata_room_pre.getController(this.latchStartController).getPosition().y;
 
             // check for getting off on top
-            if (!this.wantJump // not jumping
-                && this.latchBox[this.latchStartController] != null // uhh why?
-                && controller <= hmd / 2.0D // hands down below waist
-                && this.latchStart[this.latchStartController].y > this.latchBox[this.latchStartController].maxY * 0.8D + blockPos.getY() // latched onto top 20% of block
+            if (!this.wantJump && // not jumping
+                this.latchBox[this.latchStartController] != null && // uhh why?
+                controller <= hmd / 2.0D && // hands down below waist
+                this.latchStart[this.latchStartController].y > this.latchBox[this.latchStartController].maxY * 0.8D + blockPos.getY() // latched onto top 20% of block
             ) {
                 Vec3 dir = this.dh.vrPlayer.vrdata_world_pre.hmd.getDirection().scale(0.1F);
                 Vec3 horizontalDir = (new Vec3(dir.x, 0.0D, dir.z)).normalize().scale(0.1D); // check if free spot

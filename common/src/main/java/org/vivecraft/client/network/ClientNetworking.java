@@ -230,9 +230,13 @@ public class ClientNetworking {
                     dataholder.vrPlayer.teleportWarning = false;
                     dataholder.vrPlayer.vrSwitchWarning = true;
                 }
-                if (!ClientNetworking.displayedChatMessage
-                    && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
-                    || (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()))) {
+                if (!ClientNetworking.displayedChatMessage &&
+                    (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS ||
+                        (dataholder.vrSettings.showServerPluginMessage ==
+                            VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()
+                        )
+                    ))
+                {
                     ClientNetworking.displayedChatMessage = true;
                     mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", version));
                 }

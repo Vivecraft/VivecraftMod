@@ -66,9 +66,9 @@ public class VehicleTracker extends Tracker {
             }
         } else if (entity instanceof Mob mob && mob.isControlledByLocalInstance()) {
             //pigs and striders
-            int c = (player.getMainHandItem().getItem() instanceof FoodOnAStickItem
-                || player.getMainHandItem().is(ItemTags.VIVECRAFT_FOOD_STICKS))
-                    ? 0 : 1;
+            int c = (player.getMainHandItem().getItem() instanceof FoodOnAStickItem ||
+                player.getMainHandItem().is(ItemTags.VIVECRAFT_FOOD_STICKS)
+            ) ? 0 : 1;
             VRData.VRDevicePose con = dataHolder.vrPlayer.vrdata_world_pre.getController(c);
             return con.getPosition()
                 .add(con.getDirection().scale(0.3))
@@ -230,10 +230,8 @@ public class VehicleTracker extends Tracker {
     }
 
     public boolean canRoomscaleDismount(LocalPlayer player) {
-        return player.zza == 0.0F
-            && player.xxa == 0.0F
-            && player.isPassenger()
-            && player.getVehicle().onGround()
-            && this.dismountCooldown == 0;
+        return player.zza == 0.0F && player.xxa == 0.0F &&
+            player.isPassenger() && player.getVehicle().onGround() &&
+            this.dismountCooldown == 0;
     }
 }

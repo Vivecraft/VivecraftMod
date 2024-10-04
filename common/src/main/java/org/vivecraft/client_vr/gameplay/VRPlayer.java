@@ -340,12 +340,10 @@ public class VRPlayer {
 
     // set room
     public void snapRoomOriginToPlayerEntity(LocalPlayer player, boolean reset, boolean instant) {
-        if (Thread.currentThread().getName().equals("Server thread")
-            || player == null
-            || player.position() == Vec3.ZERO
+        if (Thread.currentThread().getName().equals("Server thread") ||
+            player == null || player.position() == Vec3.ZERO ||
             // avoid relocating the view while roomscale dismounting.
-            || this.dh.sneakTracker.sneakCounter > 0
-        )
+            this.dh.sneakTracker.sneakCounter > 0)
         {
             return;
         }
@@ -447,13 +445,13 @@ public class VRPlayer {
         if (this.roomScaleMovementDelay > 0) {
             this.roomScaleMovementDelay--;
             return;
-        } else if (player == null
+        } else if (player == null ||
             // jrbudda : prevent falling off things or walking up blocks while moving in room scale.
-            || player.isShiftKeyDown()
-            || player.isSleeping()
-            || this.dh.jumpTracker.isjumping()
-            || this.dh.climbTracker.isGrabbingLadder()
-            || !player.isAlive())
+            player.isShiftKeyDown() ||
+            player.isSleeping() ||
+            this.dh.jumpTracker.isjumping() ||
+            this.dh.climbTracker.isGrabbingLadder() ||
+            !player.isAlive())
         {
             return;
         }
@@ -581,9 +579,8 @@ public class VRPlayer {
         }
 
         // during login input can be null, and can cause a weird async crash, if not checked
-        if (this.mc.player.input != null
-            && (this.mc.player.input.forwardImpulse != 0.0F || this.mc.player.input.leftImpulse != 0.0F)
-        )
+        if (this.mc.player.input != null &&
+            (this.mc.player.input.forwardImpulse != 0.0F || this.mc.player.input.leftImpulse != 0.0F))
         {
             this.isFreeMoveCurrent = true;
         }
@@ -689,17 +686,14 @@ public class VRPlayer {
                 player.setYHeadRot(player.getYRot());
                 player.setXRot(-data.getController(1).getPitch());
             }
-        } else if ((player.isSprinting() && (player.input.jumping || mc.options.keyJump.isDown()))
-            || player.isFallFlying()
-            || (player.isSwimming() && player.zza > 0.0F)
-        )
+        } else if ((player.isSprinting() && (player.input.jumping || mc.options.keyJump.isDown())) ||
+            player.isFallFlying() || (player.isSwimming() && player.zza > 0.0F))
         {
             // Server-side movement
             // when swimming/flying adjust player look according to the user setting
-            VRSettings.FreeMove freeMoveType = player.isFallFlying()
-                && this.dh.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO
-                ? this.dh.vrSettings.vrFreeMoveFlyMode
-                : this.dh.vrSettings.vrFreeMoveMode;
+            VRSettings.FreeMove freeMoveType =
+                player.isFallFlying() && this.dh.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ?
+                    this.dh.vrSettings.vrFreeMoveFlyMode : this.dh.vrSettings.vrFreeMoveMode;
 
             if (freeMoveType == VRSettings.FreeMove.CONTROLLER) {
                 player.setYRot(data.getController(1).getYaw());

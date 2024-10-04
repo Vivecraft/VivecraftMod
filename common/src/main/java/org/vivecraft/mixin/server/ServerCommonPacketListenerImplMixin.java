@@ -32,8 +32,9 @@ public abstract class ServerCommonPacketListenerImplMixin {
      */
     @Inject(method = "handleCustomPayload", at = @At("HEAD"), cancellable = true)
     private void vivecraft$handleVivecraftPackets(ServerboundCustomPayloadPacket packet, CallbackInfo ci) {
-        if (packet.payload() instanceof VivecraftDataPacket dataPacket
-            && (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener) {
+        if (packet.payload() instanceof VivecraftDataPacket dataPacket &&
+            (Object) this instanceof ServerGamePacketListenerImpl gamePacketListener)
+        {
             PacketUtils.ensureRunningOnSameThread(packet, (ServerCommonPacketListenerImpl) (Object) this, this.server);
             var buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(dataPacket.buffer());
             ServerNetworking.handlePacket(dataPacket.packetId(), buffer, gamePacketListener.player, gamePacketListener::send);

@@ -1126,13 +1126,16 @@ public class VREffectsHelper {
             return false;
         } else if (mc.screen != null) {
             return false;
-        } else if (dataHolder.vrSettings.renderInGameCrosshairMode != VRSettings.RenderPointerElement.ALWAYS
-            && (dataHolder.vrSettings.renderInGameCrosshairMode != VRSettings.RenderPointerElement.WITH_HUD
-            || mc.options.hideGui)) {
+        } else if (dataHolder.vrSettings.renderInGameCrosshairMode == VRSettings.RenderPointerElement.NEVER ||
+            (dataHolder.vrSettings.renderInGameCrosshairMode == VRSettings.RenderPointerElement.WITH_HUD &&
+                mc.options.hideGui
+            ))
+        {
             return false;
-        } else if (dataHolder.currentPass != RenderPass.LEFT
-            && dataHolder.currentPass != RenderPass.RIGHT
-            && dataHolder.currentPass != RenderPass.CENTER) {
+        } else if (dataHolder.currentPass != RenderPass.LEFT &&
+            dataHolder.currentPass != RenderPass.RIGHT &&
+            dataHolder.currentPass != RenderPass.CENTER)
+        {
             // it doesn't look very good
             return false;
         } else if (KeyboardHandler.Showing) {
@@ -1144,11 +1147,15 @@ public class VREffectsHelper {
             return false;
         } else if (dataHolder.bowTracker.isNotched()) {
             return false;
-        } else if (dataHolder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract).isEnabledRaw(ControllerType.RIGHT)
-            || VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.RIGHT)) {
+        } else if (
+            dataHolder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyVRInteract).isEnabledRaw(ControllerType.RIGHT) ||
+                VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.RIGHT))
+        {
             return false;
-        } else if (dataHolder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyGrab).isEnabledRaw(ControllerType.RIGHT)
-            || VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT)) {
+        } else if (
+            dataHolder.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyGrab).isEnabledRaw(ControllerType.RIGHT) ||
+                VivecraftVRMod.INSTANCE.keyClimbeyGrab.isDown(ControllerType.RIGHT))
+        {
             return false;
         } else if (dataHolder.teleportTracker.isAiming()) {
             return false;

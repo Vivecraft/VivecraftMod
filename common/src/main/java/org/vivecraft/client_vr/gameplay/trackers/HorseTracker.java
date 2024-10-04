@@ -89,9 +89,10 @@ public class HorseTracker extends Tracker {
             this.speedLevel = 0;
         }
 
-        if (distanceL > pullTrigger + 0.3D
-            && distanceR > pullTrigger + 0.3D
-            && Math.abs(distanceR - distanceL) < 0.1D) {
+        if (distanceL > pullTrigger + 0.3D &&
+            distanceR > pullTrigger + 0.3D &&
+            Math.abs(distanceR - distanceL) < 0.1D)
+        {
             if (this.speedLevel == 0 && System.currentTimeMillis() > this.lastBoostMillis + coolDownMillis) {
                 this.speedLevel = -1;
             } else {

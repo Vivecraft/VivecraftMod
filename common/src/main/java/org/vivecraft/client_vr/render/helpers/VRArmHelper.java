@@ -272,10 +272,11 @@ public class VRArmHelper {
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
             // TP energy
-            if (ClientNetworking.isLimitedSurvivalTeleport() && !dataHolder.vrPlayer.getFreeMove()
-                && mc.gameMode.hasMissTime()
-                && dataHolder.teleportTracker.vrMovementStyle.arcAiming
-                && !dataHolder.bowTracker.isActive(mc.player)) {
+            if (ClientNetworking.isLimitedSurvivalTeleport() && !dataHolder.vrPlayer.getFreeMove() &&
+                mc.gameMode.hasMissTime() &&
+                dataHolder.teleportTracker.vrMovementStyle.arcAiming &&
+                !dataHolder.bowTracker.isActive(mc.player))
+            {
                 poseStack.pushPose();
                 RenderHelper.setupRenderingAtController(1, poseStack);
 
@@ -369,9 +370,10 @@ public class VRArmHelper {
      * @param poseStack PoseStack for positioning
      */
     public static void renderTeleportArc(PoseStack poseStack) {
-        if (dataHolder.teleportTracker.vrMovementStyle.showBeam
-            && dataHolder.teleportTracker.isAiming()
-            && dataHolder.teleportTracker.movementTeleportArcSteps > 1) {
+        if (dataHolder.teleportTracker.vrMovementStyle.showBeam &&
+            dataHolder.teleportTracker.isAiming() &&
+            dataHolder.teleportTracker.movementTeleportArcSteps > 1)
+        {
             mc.getProfiler().push("teleportArc");
 
             RenderSystem.enableCull();

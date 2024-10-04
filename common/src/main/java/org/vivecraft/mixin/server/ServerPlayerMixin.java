@@ -157,22 +157,25 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
             boolean blockedDamage = false;
             String blockedDamageCase = "";
 
-            if ((!otherVive.isVR() && thisVive.isVR() && thisVive.isSeated())
-                || (!thisVive.isVR() && otherVive.isVR() && otherVive.isSeated())) {
+            if ((!otherVive.isVR() && thisVive.isVR() && thisVive.isSeated()) ||
+                (!thisVive.isVR() && otherVive.isVR() && otherVive.isSeated()))
+            {
                 // nonvr vs Seated
                 if (!ServerConfig.pvpSEATEDVRvsNONVR.get()) {
                     blockedDamage = true;
                     blockedDamageCase = "canceled nonvr vs seated VR damage";
                 }
-            } else if ((!otherVive.isVR() && thisVive.isVR() && !thisVive.isSeated())
-                || (!thisVive.isVR() && otherVive.isVR() && !otherVive.isSeated())) {
+            } else if ((!otherVive.isVR() && thisVive.isVR() && !thisVive.isSeated()) ||
+                (!thisVive.isVR() && otherVive.isVR() && !otherVive.isSeated()))
+            {
                 // nonvr vs Standing
                 if (!ServerConfig.pvpVRvsNONVR.get()) {
                     blockedDamage = true;
                     blockedDamageCase = "canceled nonvr vs standing VR damage";
                 }
-            } else if ((otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated())
-                || (thisVive.isVR() && thisVive.isSeated() && otherVive.isVR() && !otherVive.isSeated())) {
+            } else if ((otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated()) ||
+                (thisVive.isVR() && thisVive.isSeated() && otherVive.isVR() && !otherVive.isSeated()))
+            {
                 // Standing vs Seated
                 if (!ServerConfig.pvpVRvsSEATEDVR.get()) {
                     blockedDamage = true;

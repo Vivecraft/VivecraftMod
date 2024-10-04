@@ -81,21 +81,21 @@ public class SwingTracker extends Tracker {
      * @return if the given {@code item} is a Tool
      */
     public static boolean isTool(Item item) {
-        return item instanceof DiggerItem
-            || item instanceof ArrowItem
-            || item instanceof FishingRodItem
-            || item instanceof FoodOnAStickItem
-            || item instanceof ShearsItem
-            || item == Items.BONE
-            || item == Items.BLAZE_ROD
-            || item == Items.BAMBOO
-            || item == Items.TORCH
-            || item == Items.REDSTONE_TORCH
-            || item == Items.STICK
-            || item == Items.DEBUG_STICK
-            || item instanceof FlintAndSteelItem
-            || item instanceof BrushItem
-            || item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
+        return item instanceof DiggerItem ||
+            item instanceof ArrowItem ||
+            item instanceof FishingRodItem ||
+            item instanceof FoodOnAStickItem ||
+            item instanceof ShearsItem ||
+            item == Items.BONE ||
+            item == Items.BLAZE_ROD ||
+            item == Items.BAMBOO ||
+            item == Items.TORCH ||
+            item == Items.REDSTONE_TORCH ||
+            item == Items.STICK ||
+            item == Items.DEBUG_STICK ||
+            item instanceof FlintAndSteelItem ||
+            item instanceof BrushItem ||
+            item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
     }
 
     @Override
@@ -250,13 +250,17 @@ public class SwingTracker extends Tracker {
                         int totalHits = 3;
 
                         // roomscale hoe interaction
-                        if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES) || itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) && (
-                            blockstate.getBlock() instanceof CropBlock
-                                || blockstate.getBlock() instanceof StemBlock
-                                || blockstate.getBlock() instanceof AttachedStemBlock
-                                || blockstate.is(BlockTags.VIVECRAFT_CROPS)
+                        if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES) || itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) &&
+                            (blockstate.getBlock() instanceof CropBlock ||
+                                blockstate.getBlock() instanceof StemBlock ||
+                                blockstate.getBlock() instanceof AttachedStemBlock ||
+                                blockstate.is(BlockTags.VIVECRAFT_CROPS) ||
                                 // check if the item can use the block
-                                || item.useOn(new UseOnContext(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit)).shouldSwing())) {
+                                item.useOn(new UseOnContext(player,
+                                    c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND,
+                                    blockHit)).shouldSwing()
+                            ))
+                        {
                             // don't try to break crops with hoes
                             // actually use the item on the block
                             boolean useSuccessful = this.mc.gameMode.useItemOn(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit).shouldSwing();

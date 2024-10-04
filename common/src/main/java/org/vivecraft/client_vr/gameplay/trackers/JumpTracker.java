@@ -88,8 +88,10 @@ public class JumpTracker extends Tracker {
 
     @Override
     public void idleTick(LocalPlayer player) {
-        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyJump).setEnabled(hasClimbeyJumpEquipped(player)
-            && (this.isActive(player) || (ClimbTracker.hasClimbeyClimbEquipped(player) && this.dh.climbTracker.isGrabbingLadder())));
+        this.dh.vr.getInputAction(VivecraftVRMod.INSTANCE.keyClimbeyJump).setEnabled(hasClimbeyJumpEquipped(player) &&
+            (this.isActive(player) ||
+                (ClimbTracker.hasClimbeyClimbEquipped(player) && this.dh.climbTracker.isGrabbingLadder())
+            ));
     }
 
     @Override
@@ -207,9 +209,10 @@ public class JumpTracker extends Tracker {
                 this.dh.vrPlayer.setRoomOrigin(thing.x, thing.y, thing.z, false);
             }
         }
-        if ((!climbeyEquipped || ClientDataHolderVR.getInstance().vrSettings.realisticJumpEnabled == VRSettings.RealisticJump.ON)
-            && this.dh.vr.hmdPivotHistory.netMovement(0.25D).y > 0.1D
-            && this.dh.vr.hmdPivotHistory.latest().y - AutoCalibration.getPlayerHeight() > this.dh.vrSettings.jumpThreshold) {
+        if ((!climbeyEquipped || ClientDataHolderVR.getInstance().vrSettings.realisticJumpEnabled == VRSettings.RealisticJump.ON) &&
+            this.dh.vr.hmdPivotHistory.netMovement(0.25D).y > 0.1D &&
+            this.dh.vr.hmdPivotHistory.latest().y - AutoCalibration.getPlayerHeight() > this.dh.vrSettings.jumpThreshold)
+        {
             player.jumpFromGround();
         }
     }

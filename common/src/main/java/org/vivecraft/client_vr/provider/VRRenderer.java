@@ -312,8 +312,9 @@ public abstract class VRRenderer {
         passes.add(RenderPass.RIGHT);
 
         // only do these, if the window is not minimized
-        if (((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() > 0
-            && ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight() > 0) {
+        if (((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() > 0 &&
+            ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight() > 0)
+        {
             if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.FIRST_PERSON) {
                 passes.add(RenderPass.CENTER);
             } else if (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY) {
