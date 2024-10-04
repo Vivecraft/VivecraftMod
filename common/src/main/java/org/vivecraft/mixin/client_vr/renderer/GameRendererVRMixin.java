@@ -466,7 +466,7 @@ public abstract class GameRendererVRMixin
             original.call(instance, partialTick);
             return;
         } else if (vivecraft$DATA_HOLDER.isFirstPass &&
-            !(Xplat.isModLoaded("immersive_portals") && ImmersivePortalsHelper.isRenderingPortal()))
+            !(ImmersivePortalsHelper.isLoaded() && ImmersivePortalsHelper.isRenderingPortal()))
         {
             original.call(instance, partialTick);
 

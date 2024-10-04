@@ -16,13 +16,15 @@ import org.vivecraft.mod_compat_vr.sodium.extensions.ModelCuboidExtension;
 @Mixin(targets = "me.jellysquid.mods.sodium.client.render.immediate.model.EntityRenderer")
 public class EntityRendererMixin {
     @Shadow(remap = false)
-    private static void buildVertexTexCoord(Vector2f[] uvs, float u1, float v1, float u2, float v2) {
-    }
+    private static void buildVertexTexCoord(Vector2f[] uvs, float u1, float v1, float u2, float v2) {}
 
     @Shadow(remap = false)
     @Final
     private static Vector2f[][] VERTEX_TEXTURES;
 
+    /**
+     * 3rd person vr hand fix, we have non-standard vertex layouts, so need to do this override
+     */
     @Inject(at = @At("TAIL"), method = "prepareVertices", remap = false)
     private static void vivecraft$overrideVrHands(PoseStack.Pose matrices, ModelCuboid cuboid, CallbackInfo ci) {
         float[][] overrides = ((ModelCuboidExtension) cuboid).vivecraft$getOverrides();

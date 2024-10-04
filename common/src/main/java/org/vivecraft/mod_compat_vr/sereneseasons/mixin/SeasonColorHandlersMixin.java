@@ -23,21 +23,30 @@ public class SeasonColorHandlersMixin {
     @Shadow(remap = false)
     private static ColorResolver originalFoliageColorResolver;
 
-    @Inject(at = @At("HEAD"), method = "lambda$registerGrassAndFoliageColorHandlers$1", remap = false, cancellable = true)
+    /**
+     * menuworld fix
+     */
+    @Inject(method = "lambda$registerGrassAndFoliageColorHandlers$1", at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$grassColor(Biome biome, double x, double y, CallbackInfoReturnable<Integer> cir) {
         if (Minecraft.getInstance().level == null) {
             cir.setReturnValue(originalGrassColorResolver.getColor(biome, x, y));
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "lambda$registerGrassAndFoliageColorHandlers$3", remap = false, cancellable = true)
+    /**
+     * menuworld fix
+     */
+    @Inject(method = "lambda$registerGrassAndFoliageColorHandlers$3", at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$foliageColor(Biome biome, double x, double y, CallbackInfoReturnable<Integer> cir) {
         if (Minecraft.getInstance().level == null) {
             cir.setReturnValue(originalFoliageColorResolver.getColor(biome, x, y));
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "lambda$registerBirchColorHandler$4", remap = false, cancellable = true)
+    /**
+     * menuworld fix
+     */
+    @Inject(method = "lambda$registerBirchColorHandler$4", at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$birchColor(BlockState blockState, BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, int tintIndex, CallbackInfoReturnable<Integer> cir) {
         if (Minecraft.getInstance().level == null) {
             cir.setReturnValue(FoliageColor.getBirchColor());

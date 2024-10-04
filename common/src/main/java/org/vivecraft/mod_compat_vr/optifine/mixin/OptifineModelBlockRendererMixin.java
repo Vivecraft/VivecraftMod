@@ -10,16 +10,26 @@ import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 @Mixin(ModelBlockRenderer.class)
 public class OptifineModelBlockRendererMixin {
-    @Inject(at = @At(value = "HEAD"), method = "isSeparateAoLightValue()Z", remap = false, cancellable = true)
+    /**
+     * menuworld fix
+     */
+    @Inject(method = "isSeparateAoLightValue()Z", at = @At(value = "HEAD"), remap = false, cancellable = true)
     private static void vivecraft$optifineNoSeparateAO(CallbackInfoReturnable<Boolean> cir) {
-        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread()) {
+        if (ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
+            ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread())
+        {
             cir.setReturnValue(false);
         }
     }
 
-    @Inject(at = @At(value = "HEAD"), method = "fixAoLightValue(F)F", remap = false, cancellable = true)
-    private static void vivecraft$optifineNoAOoverride(float ao, CallbackInfoReturnable<Float> cir) {
-        if (ao == 0.2F && ClientDataHolderVR.getInstance().menuWorldRenderer != null && ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread()) {
+    /**
+     * menuworld fix
+     */
+    @Inject(method = "fixAoLightValue(F)F", at = @At(value = "HEAD"), remap = false, cancellable = true)
+    private static void vivecraft$optifineNoAOOverride(float ao, CallbackInfoReturnable<Float> cir) {
+        if (ao == 0.2F && ClientDataHolderVR.getInstance().menuWorldRenderer != null &&
+            ClientDataHolderVR.getInstance().menuWorldRenderer.isOnBuilderThread())
+        {
             cir.setReturnValue(1.0F - (float) OptifineHelper.getAoLevel() * 0.8F);
         }
     }

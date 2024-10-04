@@ -25,21 +25,41 @@ public class IrisHelper {
     private static boolean dhPresent = false;
     private static Object dhOverrideInjector;
     private static Method OverrideInjector_unbind;
+
     private static Class<?> IDhApiFramebuffer;
     private static Method Pipeline_getDHCompat;
     private static Method DHCompatInternal_getInstance;
     private static Method DHCompatInternal_getShadowFBWrapper;
     private static Method DHCompatInternal_getSolidFBWrapper;
 
+    // DH 2.2+
     private static Class<?> IDhApiGenericObjectShaderProgram;
     private static Method DHCompatInternal_getGenericShader;
 
     private static Method CapturedRenderingState_getGbufferProjection;
 
-    public static void setShadersActive(boolean bl) {
-        IrisApi.getInstance().getConfig().setShadersEnabledAndApply(bl);
+    public static boolean isLoaded() {
+        return Xplat.isModLoaded("iris") || Xplat.isModLoaded("oculus");
     }
 
+    /**
+     * @return if a shaderpack is in use
+     */
+    public static boolean isShaderActive() {
+        return IrisApi.getInstance().isShaderPackInUse();
+    }
+
+    /**
+     * enabled or disables shaders
+     * @param enabled if shaders should be on or off
+     */
+    public static void setShadersActive(boolean enabled) {
+        IrisApi.getInstance().getConfig().setShadersEnabledAndApply(enabled);
+    }
+
+    /**
+     * triggers a shader reload
+     */
     public static void reload() {
         RenderPassManager.setVanillaRenderPass();
         if (init()) {
@@ -48,11 +68,14 @@ public class IrisHelper {
                 Iris_reload.invoke(null);
             } catch (Exception e) {
                 // catch Exception, because that call can throw an IOException
-                VRSettings.logger.error("Vivecraft: Error reloading Iris shaders on Frame Buffer reinit: {}", e.getMessage());
+                VRSettings.logger.error("Vivecraft: Error reloading Iris shaders on Frame Buffer reinit:", e);
             }
         }
     }
 
+    /**
+     * @return if the active shader has the vanilla water overlay enabled or disabled
+     */
     public static boolean hasWaterEffect() {
         if (init()) {
             try {
@@ -61,21 +84,22 @@ public class IrisHelper {
                     try {
                         return WorldRenderingPipeline_shouldRenderUnderwaterOverlay.invoke(o);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        VRSettings.logger.error("Vivecraft: Iris water effect check failed: {}", e.getMessage());
+                        VRSettings.logger.error("Vivecraft: Iris water effect check failed:", e);
                         return true;
                     }
                 }).orElse(true);
             } catch (InvocationTargetException | IllegalAccessException e) {
-                VRSettings.logger.error("Vivecraft: Iris water effect check failed: {}", e.getMessage());
+                VRSettings.logger.error("Vivecraft: Iris water effect check failed:", e);
             }
         }
         return true;
     }
 
-    public static boolean isShaderActive() {
-        return IrisApi.getInstance().isShaderPackInUse();
-    }
-
+    /**
+     * removes the DH overrides from the given {@code pipeline}
+     * this is here, because iris doesn't do that on pipeline changes
+     * @param pipeline Rendering pileple to uinregister the overrides for
+     */
     public static void unregisterDHIfThere(Object pipeline) {
         if (init() && dhPresent) {
             try {
@@ -87,13 +111,14 @@ public class IrisHelper {
                         // now disable the overrides
                         OverrideInjector_unbind.invoke(dhOverrideInjector, IDhApiFramebuffer, DHCompatInternal_getShadowFBWrapper.invoke(dhCompatInstance));
                         OverrideInjector_unbind.invoke(dhOverrideInjector, IDhApiFramebuffer, DHCompatInternal_getSolidFBWrapper.invoke(dhCompatInstance));
+                        // generic override for DH 2.2+
                         if (DHCompatInternal_getGenericShader != null) {
                             OverrideInjector_unbind.invoke(dhOverrideInjector, IDhApiGenericObjectShaderProgram, DHCompatInternal_getGenericShader.invoke(dhCompatInstance));
                         }
                     }
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
-                VRSettings.logger.error("Vivecraft: Iris DH reset failed: {}", e.getMessage());
+                VRSettings.logger.error("Vivecraft: Iris DH reset failed", e);
             }
         }
     }
@@ -108,12 +133,16 @@ public class IrisHelper {
             try {
                 return (Matrix4fc) CapturedRenderingState_getGbufferProjection.invoke(source);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                VRSettings.logger.error("Vivecraft: couldn't get iris gbuffer projection matrix: {}", e.getMessage());
+                VRSettings.logger.error("Vivecraft: couldn't get iris gbuffer projection matrix:", e);
             }
         }
         return new Matrix4f();
     }
 
+    /**
+     * initializes all Reflections
+     * @return if init was successful
+     */
     private static boolean init() {
         if (initialized) {
             return !initFailed;
@@ -153,12 +182,12 @@ public class IrisHelper {
                     Class<?> DHCompatInternal = Class.forName("net.irisshaders.iris.compat.dh.DHCompatInternal");
                     DHCompatInternal_getShadowFBWrapper = DHCompatInternal.getMethod("getShadowFBWrapper");
                     DHCompatInternal_getSolidFBWrapper = DHCompatInternal.getMethod("getSolidFBWrapper");
+
+                    // DH 2.2+
                     try {
                         IDhApiGenericObjectShaderProgram = Class.forName("com.seibel.distanthorizons.api.interfaces.override.rendering.IDhApiGenericObjectShaderProgram");
                         DHCompatInternal_getGenericShader = DHCompatInternal.getMethod("getGenericShader");
-                    } catch (ClassNotFoundException | NoSuchMethodException ignored) {
-                        // only there with DH 2.2+
-                    }
+                    } catch (ClassNotFoundException | NoSuchMethodException ignored) {}
 
                     Class<?> CapturedRenderingState = Class.forName("net.irisshaders.iris.uniforms.CapturedRenderingState");
                     CapturedRenderingState_getGbufferProjection = CapturedRenderingState.getMethod("getGbufferProjection");
@@ -176,6 +205,13 @@ public class IrisHelper {
         return !initFailed;
     }
 
+    /**
+     * does a class Lookup with an alternative, for convenience, since iris changed packages
+     * @param class1 first option
+     * @param class2 alternative option
+     * @return found class
+     * @throws ClassNotFoundException if neither class exists
+     */
     private static Class<?> getClassWithAlternative(String class1, String class2) throws ClassNotFoundException {
         try {
             return Class.forName(class1);

@@ -44,7 +44,7 @@ public class MixinConfig implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {}
 
-    private final Set<String> appliedModFixes = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static final Set<String> appliedModFixes = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private static final Logger logger = LoggerFactory.getLogger("VivecraftMixin");
 
@@ -52,7 +52,7 @@ public class MixinConfig implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         // this is here because forge doesn't finish mod loading, if any mod fails to load, and would crash the game
         if (!Xplat.isModLoadedSuccess()) {
-            logger.info("not loading '{}' because mod failed to load completely", mixinClassName);
+            logger.info("Vivecraft: not loading '{}' because mod failed to load completely", mixinClassName);
             return false;
         }
 

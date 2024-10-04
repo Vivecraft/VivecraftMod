@@ -12,6 +12,10 @@ public class EpicFightHelper {
         return Xplat.isModLoaded("epicfight");
     }
 
+    /**
+     * triggers the epic fight attack
+     * @return if this handled the attack
+     */
     public static boolean attack() {
         if (ClientEngine.getInstance().controllEngine.getPlayerPatch().isBattleMode()) {
             InputConstants.Key key = EpicFightKeyMappings.ATTACK.key;

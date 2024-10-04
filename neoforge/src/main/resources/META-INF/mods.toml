@@ -49,8 +49,6 @@ config = "vivecraft.dynamicfps.mixins.json"
 [[mixins]]
 config = "vivecraft.sodium.mixins.json"
 [[mixins]]
-config = "vivecraft.forge.sodium.mixins.json"
-[[mixins]]
 config = "vivecraft.iris.mixins.json"
 [[mixins]]
 config = "vivecraft.physicsmod.mixins.json"

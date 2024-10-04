@@ -12,7 +12,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
@@ -124,9 +123,9 @@ public class BowTracker extends Tracker {
 
             this.maxDraw = (double) this.mc.player.getBbHeight() * 0.22D;
 
-            if (Xplat.isModLoaded("pehkui")) {
+            if (PehkuiHelper.isLoaded()) {
                 // this is meant to be relative to the base Bb height, not the scaled one
-                this.maxDraw /= PehkuiHelper.getPlayerBbScale(player, mc.getFrameTime());
+                this.maxDraw /= PehkuiHelper.getEntityBbScale(player, mc.getFrameTime());
             }
 
             int bowHand = 1;

@@ -19,8 +19,10 @@ public class IrisProgramUniformsMixin {
 
     @Shadow(remap = false)
     int lastFrame;
+
     @Unique
     private RenderPass vivecraft$lastPass;
+
     @Unique
     private int vivecraft$actualFrame;
 
@@ -29,11 +31,11 @@ public class IrisProgramUniformsMixin {
     @ModifyVariable(method = "update", at = @At(value = "STORE"), remap = false)
     private int vivecraft$checkNewFrame(int currentFrame) {
         if (!RenderPassType.isVanilla()) {
-            vivecraft$actualFrame = currentFrame;
-            if (lastFrame == currentFrame && vivecraft$lastPass != ClientDataHolderVR.getInstance().currentPass) {
+            this.vivecraft$actualFrame = currentFrame;
+            if (this.lastFrame == currentFrame && this.vivecraft$lastPass != ClientDataHolderVR.getInstance().currentPass) {
                 currentFrame--;
             }
-            vivecraft$lastPass = ClientDataHolderVR.getInstance().currentPass;
+            this.vivecraft$lastPass = ClientDataHolderVR.getInstance().currentPass;
         }
         return currentFrame;
     }
@@ -41,11 +43,6 @@ public class IrisProgramUniformsMixin {
     // restore actual frame counter, so stuff doesn't get messed up
     @ModifyVariable(method = "update", at = @At(value = "LOAD", ordinal = 1), remap = false)
     private int vivecraft$restoreFrame(int currentFrame) {
-        if (!RenderPassType.isVanilla()) {
-            return vivecraft$actualFrame;
-        } else {
-            return currentFrame;
-        }
-        //return !RenderPassType.isVanilla() ? actualFrame : currentFrame;
+        return RenderPassType.isVanilla() ? currentFrame : this.vivecraft$actualFrame;
     }
 }

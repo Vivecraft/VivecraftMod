@@ -4,7 +4,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.world.entity.Pose;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.common.network.CommonNetworkHelper;
@@ -48,8 +47,8 @@ public class CrawlTracker extends Tracker {
     @Override
     public void doProcess(LocalPlayer player) {
         double scaleMultiplier = 1.0;
-        if (Xplat.isModLoaded("pehkui")) {
-            scaleMultiplier /= PehkuiHelper.getPlayerScale(player, mc.getFrameTime());
+        if (PehkuiHelper.isLoaded()) {
+            scaleMultiplier /= PehkuiHelper.getEntityEyeHeightScale(player, mc.getFrameTime());
         }
         this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * this.dh.vrPlayer.worldScale * scaleMultiplier + 0.1F < this.dh.vrSettings.crawlThreshold;
         this.updateState(player);

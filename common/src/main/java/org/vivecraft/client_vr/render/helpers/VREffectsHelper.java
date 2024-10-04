@@ -166,7 +166,7 @@ public class VREffectsHelper {
             // don't touch the stencil if we don't use it
             // stencil only for left/right VR view
             if ((dataHolder.currentPass == RenderPass.LEFT || dataHolder.currentPass == RenderPass.RIGHT) &&
-                (!Xplat.isModLoaded("immersive_portals") || !ImmersivePortalsHelper.isRenderingPortal()))
+                (!ImmersivePortalsHelper.isLoaded() || !ImmersivePortalsHelper.isRenderingPortal()))
             {
                 dataHolder.vrRenderer.doStencil(false);
             }

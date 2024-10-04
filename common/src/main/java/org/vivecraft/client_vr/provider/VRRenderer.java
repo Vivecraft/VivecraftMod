@@ -487,7 +487,7 @@ public abstract class VRRenderer {
         }
         if (Minecraft.getInstance().options.graphicsMode().get() != this.previousGraphics) {
             this.previousGraphics = Minecraft.getInstance().options.graphicsMode().get();
-            this.reinitFrameBuffers("gfx setting change");
+            this.reinitFrameBuffers("gfx setting changed to: " + this.previousGraphics);
         }
 
         if (this.resizeFrameBuffers && !this.reinitFrameBuffers) {

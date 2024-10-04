@@ -22,7 +22,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
@@ -190,9 +189,9 @@ public class VRPlayer {
 
             this.worldScale = this.rawWorldScale;
 
-            if (Xplat.isModLoaded("pehkui")) {
+            if (PehkuiHelper.isLoaded()) {
                 // scale world with player size
-                this.worldScale *= PehkuiHelper.getPlayerScale(mc.player, mc.getFrameTime());
+                this.worldScale *= PehkuiHelper.getEntityEyeHeightScale(mc.player, mc.getFrameTime());
                 // limit scale
                 if (this.worldScale > 100F) {
                     this.worldScale = 100F;
