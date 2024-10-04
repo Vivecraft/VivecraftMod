@@ -1011,9 +1011,8 @@ public class VREffectsHelper {
             if (dataHolder.menuWorldRenderer.isReady()) {
                 try {
                     renderTechjarsAwesomeMainMenuRoom(poseStack);
-                } catch (Exception exception) {
-                    VRSettings.logger.error("Error rendering main menu world, unloading to prevent more errors");
-                    exception.printStackTrace();
+                } catch (Exception e) {
+                    VRSettings.logger.error("Vivecraft: Error rendering main menu world, unloading to prevent more errors: ", e);
                     dataHolder.menuWorldRenderer.destroy();
                 }
             } else {

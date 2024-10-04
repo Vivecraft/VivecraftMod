@@ -245,7 +245,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin {
                     this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(getName().getString(), entity)), false);
                 } catch (IllegalFormatException e) {
                     // catch errors users might put into the messages, to not crash other stuff
-                    ServerNetworking.LOGGER.error("Death message '{}' has errors: {}", message, e.toString());
+                    ServerNetworking.LOGGER.error("Vivecraft: Death message '{}' has errors:", message, e);
                 }
             }
         }

@@ -476,13 +476,13 @@ public class OptifineHelper {
                 Vertex_renderPositions = null;
             }
         } catch (ClassNotFoundException e) {
-            VRSettings.logger.error("Vivecraft: Optifine detected, but couldn't load class: {}", e.getMessage());
+            VRSettings.logger.error("Vivecraft: Optifine detected, but couldn't load class:", e);
             optifineLoaded = false;
         } catch (NoSuchMethodException e) {
-            VRSettings.logger.error("Vivecraft: Optifine detected, but couldn't load Method: {}", e.getMessage());
+            VRSettings.logger.error("Vivecraft: Optifine detected, but couldn't load Method:", e);
             optifineLoaded = false;
         } catch (NoSuchFieldException e) {
-            VRSettings.logger.error("Vivecraft: Optifine detected, but couldn't load Field: {}", e.getMessage());
+            VRSettings.logger.error("Vivecraft: Optifine detected, but couldn't load Field:", e);
         }
     }
 

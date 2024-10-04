@@ -100,7 +100,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                 this.vivecraft$shadowRenderTargets = null;
 
                 for (RenderPass renderPass : RenderPass.values()) {
-                    VRSettings.logger.info("Creating VR pipeline for dimension {}, RenderPass {}", newDimension, renderPass);
+                    VRSettings.logger.info("Vivecraft: Creating VR pipeline for dimension {}, RenderPass {}", newDimension, renderPass);
                     WorldRenderPass worldRenderPass = null;
                     switch (renderPass) {
                         case LEFT, RIGHT -> worldRenderPass = WorldRenderPass.stereoXR;
@@ -110,7 +110,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
                         case SCOPER -> worldRenderPass = WorldRenderPass.rightTelescope;
                         case CAMERA -> worldRenderPass = WorldRenderPass.camera;
                         default -> {
-                            VRSettings.logger.info("skipped VR pipeline for dimension {}, RenderPass {}, not used", newDimension, renderPass);
+                            VRSettings.logger.info("Vivecraft: skipped VR pipeline for dimension {}, RenderPass {}, not used", newDimension, renderPass);
                             continue;
                         }
                     }
@@ -166,7 +166,7 @@ public class IrisPipelineManagerVRMixin implements PipelineManagerExtension {
         }
         this.vivecraft$vrPipelinesPerDimension.forEach((dimID, map) -> {
             map.forEach((renderPass, pipeline) -> {
-                VRSettings.logger.info("Destroying VR pipeline {}", renderPass);
+                VRSettings.logger.info("Vivecraft: Destroying VR pipeline {}", renderPass);
                 resetTextureState();
                 pipeline.destroy();
             });

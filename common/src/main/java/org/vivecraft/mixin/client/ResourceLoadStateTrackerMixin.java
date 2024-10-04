@@ -34,7 +34,7 @@ public abstract class ResourceLoadStateTrackerMixin {
                     ClientDataHolderVR.getInstance().vrSettings.saveOptions();
                 }
             } catch (Exception exception) {
-                VRSettings.logger.error("Failed to initialize VR", exception);
+                VRSettings.logger.error("Vivecraft: Failed to initialize VR", exception);
             }
         }
     }

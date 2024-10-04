@@ -28,6 +28,7 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.InputSimulator;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.settings.OptionEnum;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.RGBAColor;
 import org.vivecraft.common.utils.lwjgl.Matrix4f;
 import org.vivecraft.common.utils.lwjgl.Vector3f;
@@ -309,7 +310,7 @@ public class PhysicalKeyboard {
                         }
                     });
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    VRSettings.logger.error("Vivecraft: error creating keyboard template: ", ex);
                 }
             } else {
                 // Load theme file
@@ -326,12 +327,11 @@ public class PhysicalKeyboard {
                                 Integer.parseInt(colorSplit[1]), Integer.parseInt(colorSplit[2]), 255);
                             this.customTheme.put(id, color);
                         } catch (Exception ex) {
-                            System.out.println("Bad theme line: " + line);
-                            ex.printStackTrace();
+                            VRSettings.logger.error("Vivecraft: error reading keyboard theme line: {}:", line, ex);
                         }
                     });
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    VRSettings.logger.error("Vivecraft: error reading keyboard theme:", ex);
                 }
             }
         }

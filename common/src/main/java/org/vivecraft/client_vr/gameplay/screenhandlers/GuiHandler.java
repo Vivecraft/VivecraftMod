@@ -601,8 +601,7 @@ public class GuiHandler {
         }
 
         if (guipos == null) {
-            VRSettings.logger.error("guipos was null, how did that happen. vrRunning: {}", VRState.vrRunning);
-            new RuntimeException().printStackTrace();
+            VRSettings.logger.error("Vivecraft: guipos was null, how did that happen. vrRunning: {}: ", VRState.vrRunning, new RuntimeException());
             guiPos_room = new Vec3(0, 0, 0);
             guipos = VRPlayer.room_to_world_pos(guiPos_room, dh.vrPlayer.vrdata_world_render);
             guiRotation_room = new Matrix4f();

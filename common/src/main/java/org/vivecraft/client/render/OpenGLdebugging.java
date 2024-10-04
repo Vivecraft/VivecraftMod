@@ -3,6 +3,7 @@ package org.vivecraft.client.render;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -364,7 +365,7 @@ public class OpenGLdebugging {
             FileOutputStream output = new FileOutputStream(filename);
             IOUtils.write(msg.getBytes(), output);
         } catch (IOException e) {
-            e.printStackTrace();
+            VRSettings.logger.error("Vivecraft: error dumping gl state: ", e);
         }
     }
 
@@ -393,7 +394,7 @@ public class OpenGLdebugging {
             FileOutputStream output = new FileOutputStream(filename);
             IOUtils.write(msg.getBytes(), output);
         } catch (IOException e) {
-            e.printStackTrace();
+            VRSettings.logger.error("Vivecraft: error dumping all gl enabled states: ", e);
         }
     }
 
@@ -422,7 +423,7 @@ public class OpenGLdebugging {
             FileOutputStream output = new FileOutputStream(filename);
             IOUtils.write(msg.getBytes(), output);
         } catch (IOException e) {
-            e.printStackTrace();
+            VRSettings.logger.error("Vivecraft: error dumping gl types: ", e);
         }
     }
 

@@ -631,9 +631,9 @@ public class RenderHelper {
                 case GL30C.GL_INVALID_FRAMEBUFFER_OPERATION -> "framebuffer is not complete";
                 default -> "unknown error";
             };
-            VRSettings.logger.error("########## GL ERROR ##########");
-            VRSettings.logger.error("@ {}", errorSection);
-            VRSettings.logger.error("{}: {}", error, errorString);
+            VRSettings.logger.error("Vivecraft: ########## GL ERROR ##########");
+            VRSettings.logger.error("Vivecraft: @ {}", errorSection);
+            VRSettings.logger.error("Vivecraft: {}: {}", error, errorString);
             return errorString;
         } else {
             return "";

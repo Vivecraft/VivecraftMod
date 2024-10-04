@@ -446,7 +446,7 @@ public abstract class VRRenderer {
         if (this.acceptReinits) {
             if (!this.reinitFrameBuffers) {
                 // only print the first cause
-                VRSettings.logger.info("Reinit Render: {}", cause);
+                VRSettings.logger.info("Vivecraft: Reinit Render: {}", cause);
             }
             this.reinitFrameBuffers = true;
         }
@@ -458,7 +458,7 @@ public abstract class VRRenderer {
      */
     public void resizeFrameBuffers(String cause) {
         if (!cause.isEmpty() && !this.resizeFrameBuffers) {
-            VRSettings.logger.info("Resizing Buffers: {}", cause);
+            VRSettings.logger.info("Vivecraft: Resizing Buffers: {}", cause);
         }
         this.resizeFrameBuffers = true;
     }
@@ -612,21 +612,21 @@ public abstract class VRRenderer {
                         Component.literal(this.getLastError()));
                 }
 
-                VRSettings.logger.info("VR Provider supplied render texture IDs: {}, {}", this.LeftEyeTextureId, this.RightEyeTextureId);
-                VRSettings.logger.info("VR Provider supplied texture resolution: {} x {}", eyew, eyeh);
+                VRSettings.logger.info("Vivecraft: VR Provider supplied render texture IDs: {}, {}", this.LeftEyeTextureId, this.RightEyeTextureId);
+                VRSettings.logger.info("Vivecraft: VR Provider supplied texture resolution: {} x {}", eyew, eyeh);
             }
 
             RenderHelper.checkGLError("Render Texture setup");
 
             if (this.framebufferEye0 == null) {
                 this.framebufferEye0 = new VRTextureTarget("L Eye", eyew, eyeh, false, this.LeftEyeTextureId, true, false, false);
-                VRSettings.logger.info(this.framebufferEye0.toString());
+                VRSettings.logger.info("Vivecraft: {}", this.framebufferEye0);
                 RenderHelper.checkGLError("Left Eye framebuffer setup");
             }
 
             if (this.framebufferEye1 == null) {
                 this.framebufferEye1 = new VRTextureTarget("R Eye", eyew, eyeh, false, this.RightEyeTextureId, true, false, false);
-                VRSettings.logger.info(this.framebufferEye1.toString());
+                VRSettings.logger.info("Vivecraft: {}", this.framebufferEye1);
                 RenderHelper.checkGLError("Right Eye framebuffer setup");
             }
 
@@ -638,43 +638,43 @@ public abstract class VRRenderer {
 
             this.framebufferVrRender = new VRTextureTarget("3D Render", eyeFBWidth, eyeFBHeight, true, -1, true, false, dataholder.vrSettings.vrUseStencil);
             WorldRenderPass.stereoXR = new WorldRenderPass(this.framebufferVrRender);
-            VRSettings.logger.info(this.framebufferVrRender.toString());
+            VRSettings.logger.info("Vivecraft: {}", this.framebufferVrRender);
             RenderHelper.checkGLError("3D framebuffer setup");
 
             getMirrorTextureSize(eyeFBWidth, eyeFBHeight, resolutionScale);
 
             List<RenderPass> list = this.getRenderPasses();
 
-            VRSettings.logger.info("Active RenderPasses: {}", list.stream().map(Enum::toString).collect(Collectors.joining(", ")));
+            VRSettings.logger.info("Vivecraft: Active RenderPasses: {}", list.stream().map(Enum::toString).collect(Collectors.joining(", ")));
 
             // only do these, if the window is not minimized
             if (this.mirrorFBWidth > 0 && this.mirrorFBHeight > 0) {
                 if (list.contains(RenderPass.THIRD) || ShadersHelper.isShaderActive()) {
                     this.framebufferMR = new VRTextureTarget("Mixed Reality Render", this.mirrorFBWidth, this.mirrorFBHeight, true, -1, true, false, false);
                     WorldRenderPass.mixedReality = new WorldRenderPass(this.framebufferMR);
-                    VRSettings.logger.info(this.framebufferMR.toString());
+                    VRSettings.logger.info("Vivecraft: {}", this.framebufferMR);
                     RenderHelper.checkGLError("Mixed reality framebuffer setup");
                 }
 
                 if (list.contains(RenderPass.CENTER) || ShadersHelper.isShaderActive()) {
                     this.framebufferUndistorted = new VRTextureTarget("Undistorted View Render", this.mirrorFBWidth, this.mirrorFBHeight, true, -1, true, false, false);
                     WorldRenderPass.center = new WorldRenderPass(this.framebufferUndistorted);
-                    VRSettings.logger.info(this.framebufferUndistorted.toString());
+                    VRSettings.logger.info("Vivecraft: {}", this.framebufferUndistorted);
                     RenderHelper.checkGLError("Undistorted view framebuffer setup");
                 }
             }
 
             GuiHandler.updateResolution();
             GuiHandler.guiFramebuffer = new VRTextureTarget("GUI", GuiHandler.guiWidth, GuiHandler.guiHeight, true, -1, true, dataholder.vrSettings.guiMipmaps, false);
-            VRSettings.logger.info(GuiHandler.guiFramebuffer.toString());
+            VRSettings.logger.info("Vivecraft: {}", GuiHandler.guiFramebuffer);
             RenderHelper.checkGLError("GUI framebuffer setup");
 
             KeyboardHandler.Framebuffer = new VRTextureTarget("Keyboard", GuiHandler.guiWidth, GuiHandler.guiHeight, true, -1, true, dataholder.vrSettings.guiMipmaps, false);
-            VRSettings.logger.info(KeyboardHandler.Framebuffer.toString());
+            VRSettings.logger.info("Vivecraft: {}", KeyboardHandler.Framebuffer);
             RenderHelper.checkGLError("Keyboard framebuffer setup");
 
             RadialHandler.Framebuffer = new VRTextureTarget("Radial Menu", GuiHandler.guiWidth, GuiHandler.guiHeight, true, -1, true, dataholder.vrSettings.guiMipmaps, false);
-            VRSettings.logger.info(RadialHandler.Framebuffer.toString());
+            VRSettings.logger.info("Vivecraft: {}", RadialHandler.Framebuffer);
             RenderHelper.checkGLError("Radial framebuffer setup");
 
 
@@ -682,14 +682,14 @@ public abstract class VRRenderer {
 
             this.telescopeFramebufferR = new VRTextureTarget("TelescopeR", telescopeSize.getA(), telescopeSize.getB(), true, -1, false, false, false);
             WorldRenderPass.rightTelescope = new WorldRenderPass(this.telescopeFramebufferR);
-            VRSettings.logger.info(this.telescopeFramebufferR.toString());
+            VRSettings.logger.info("Vivecraft: {}", this.telescopeFramebufferR);
             this.telescopeFramebufferR.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             this.telescopeFramebufferR.clear(Minecraft.ON_OSX);
             RenderHelper.checkGLError("TelescopeR framebuffer setup");
 
             this.telescopeFramebufferL = new VRTextureTarget("TelescopeL", telescopeSize.getA(), telescopeSize.getB(), true, -1, false, false, false);
             WorldRenderPass.leftTelescope = new WorldRenderPass(this.telescopeFramebufferL);
-            VRSettings.logger.info(this.telescopeFramebufferL.toString());
+            VRSettings.logger.info("Vivecraft: {}", this.telescopeFramebufferL);
             this.telescopeFramebufferL.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             this.telescopeFramebufferL.clear(Minecraft.ON_OSX);
             RenderHelper.checkGLError("TelescopeL framebuffer setup");
@@ -705,12 +705,12 @@ public abstract class VRRenderer {
             }
 
             this.cameraFramebuffer = new VRTextureTarget("Handheld Camera", cameraSize.getA(), cameraSize.getB(), true, -1, false, false, false);
-            VRSettings.logger.info(this.cameraFramebuffer.toString());
+            VRSettings.logger.info("Vivecraft: {}", this.cameraFramebuffer);
 
             RenderHelper.checkGLError("Camera framebuffer setup");
             this.cameraRenderFramebuffer = new VRTextureTarget("Handheld Camera Render", cameraRenderFBwidth, cameraRenderFBheight, true, -1, true, false, false);
             WorldRenderPass.camera = new WorldRenderPass(this.cameraRenderFramebuffer);
-            VRSettings.logger.info(this.cameraRenderFramebuffer.toString());
+            VRSettings.logger.info("Vivecraft: {}", this.cameraRenderFramebuffer);
             RenderHelper.checkGLError("Camera render framebuffer setup");
 
             if (dataholder.vrSettings.useFsaa) {
@@ -718,8 +718,8 @@ public abstract class VRRenderer {
                     RenderHelper.checkGLError("pre FSAA FBO creation");
                     this.fsaaFirstPassResultFBO = new VRTextureTarget("FSAA Pass1 FBO", eyew, eyeFBHeight, true, -1, false, false, false);
                     this.fsaaLastPassResultFBO = new VRTextureTarget("FSAA Pass2 FBO", eyew, eyeh, true, -1, false, false, false);
-                    VRSettings.logger.info(this.fsaaFirstPassResultFBO.toString());
-                    VRSettings.logger.info(this.fsaaLastPassResultFBO.toString());
+                    VRSettings.logger.info("Vivecraft: {}", this.fsaaFirstPassResultFBO);
+                    VRSettings.logger.info("Vivecraft: {}", this.fsaaLastPassResultFBO);
                     RenderHelper.checkGLError("FSAA FBO creation");
 
                     VRShaders.setupFSAA();
@@ -728,7 +728,7 @@ public abstract class VRRenderer {
                     // FSAA failed to initialize so don't use it
                     dataholder.vrSettings.useFsaa = false;
                     dataholder.vrSettings.saveOptions();
-                    VRSettings.logger.error("FSAA init failed with: {}", exception.getMessage());
+                    VRSettings.logger.error("Vivecraft: FSAA init failed: ", exception);
                     // redo the setup next frame
                     this.reinitFrameBuffers = true;
                     return;
@@ -747,7 +747,7 @@ public abstract class VRRenderer {
                 RenderHelper.checkGLError("init portal shader");
                 minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
             } catch (Exception exception) {
-                VRSettings.logger.error(exception.getMessage());
+                VRSettings.logger.error("Vivecraft: Shader creation failed:", exception);
                 throw new RenderConfigException(
                     Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
                     Utils.throwableToComponent(exception));
@@ -774,7 +774,7 @@ public abstract class VRRenderer {
             }
 
             VRSettings.logger.info("""
-
+                    Vivecraft:
                     New VR render config:
                     VR target: {}x{} [{}MP]
                     Render target: {}x{} [Render scale: {}%, {}MP]

@@ -309,9 +309,9 @@ public class ClientNetworking {
                                 }
                             }
 
-                            VRSettings.logger.info("Server setting override: {}={}", settingName, value);
+                            VRSettings.logger.info("Vivecraft: Server setting override: {}={}", settingName, value);
                         } catch (Exception exception) {
-                            exception.printStackTrace();
+                            VRSettings.logger.error("Vivecraft: error parsing server setting override: ", exception);
                         }
                     }
                 }

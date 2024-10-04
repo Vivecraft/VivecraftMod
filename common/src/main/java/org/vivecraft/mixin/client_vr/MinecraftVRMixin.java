@@ -597,8 +597,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                         break;
                 }
 
-                VRSettings.logger.info("Exporting world... area size: {}", size);
-                VRSettings.logger.info("Saving to {}", foundFile.getAbsolutePath());
+                VRSettings.logger.info("Vivecraft: Exporting world... area size: {}", size);
+                VRSettings.logger.info("Vivecraft: Saving to {}", foundFile.getAbsolutePath());
 
                 if (isLocalServer()) {
                     final Level level = getSingleplayerServer().getLevel(this.player.level().dimension());
@@ -608,7 +608,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                             MenuWorldExporter.saveAreaToFile(level, blockpos.getX() - offset, blockpos.getZ() - offset,
                                 size, size, blockpos.getY(), finalFoundFile);
                         } catch (Throwable throwable) {
-                            throwable.printStackTrace();
+                            VRSettings.logger.error("Vivecraft: error exporting menuworld:", throwable);
                             return throwable;
                         }
                         return null;
@@ -625,7 +625,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                     this.gui.getChat().addMessage(Component.translatable("vivecraft.messages.menuworldexportcomplete.2", foundFile.getAbsolutePath()));
                 }
             } catch (Throwable throwable) {
-                VRSettings.logger.error("Error exporting Menuworld:", throwable);
+                VRSettings.logger.error("Vivecraft: Error exporting Menuworld:", throwable);
                 error = throwable;
             } finally {
                 if (error != null) {

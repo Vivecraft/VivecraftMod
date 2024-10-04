@@ -104,7 +104,7 @@ public abstract class GuiVROptionsBase extends Screen {
                         this.vrSettings.saveOptions();
                         this.minecraft.setScreen(layout.getScreen().getConstructor(Screen.class).newInstance(this));
                     } catch (ReflectiveOperationException e) {
-                        e.printStackTrace();
+                        VRSettings.logger.error("Vivecraft: error setting screen: ", e);
                     }
                 }));
             } else if (layout.getCustomHandler() != null) {

@@ -568,7 +568,7 @@ public abstract class MCVR {
 
         if (Math.abs(Utils.angleNormalize(this.hmdYawTotal) - this.hmdYawLast) > 1.0F || this.hmdYawTotal > 100000.0F) {
             this.hmdYawTotal = this.hmdYawLast;
-            VRSettings.logger.info("HMD yaw desync/overflow corrected");
+            VRSettings.logger.info("Vivecraft: HMD yaw desync/overflow corrected");
         }
 
         float yawAvg = 0.0F;
@@ -1121,7 +1121,7 @@ public abstract class MCVR {
         File file = new File("customactionsets.txt");
 
         if (file.exists()) {
-            VRSettings.logger.info("Loading custom action set definitions...");
+            VRSettings.logger.info("Vivecraft: Loading custom action set definitions...");
             String line;
 
             try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
@@ -1129,15 +1129,15 @@ public abstract class MCVR {
                     String[] tokens = line.split(":", 2);
 
                     if (tokens.length < 2) {
-                        VRSettings.logger.warn("Invalid tokens: {}", line);
+                        VRSettings.logger.warn("Vivecraft: Invalid tokens: {}", line);
                         continue;
                     }
                     KeyMapping keyMapping = this.findKeyBinding(tokens[0]);
 
                     if (keyMapping == null) {
-                        VRSettings.logger.warn("Unknown key binding: {}", tokens[0]);
+                        VRSettings.logger.warn("Vivecraft: Unknown key binding: {}", tokens[0]);
                     } else if (mod.getAllKeyBindings().contains(keyMapping)) {
-                        VRSettings.logger.warn("NO! Don't touch Vivecraft bindings!: {}", keyMapping.getName());
+                        VRSettings.logger.warn("Vivecraft: NO! Don't touch Vivecraft bindings!: {}", keyMapping.getName());
                     } else {
                         VRInputActionSet actionSet = switch (tokens[1].toLowerCase()) {
                             case "ingame" -> VRInputActionSet.INGAME;
@@ -1147,14 +1147,14 @@ public abstract class MCVR {
                         };
 
                         if (actionSet == null) {
-                            VRSettings.logger.warn("Unknown action set: {}", tokens[1]);
+                            VRSettings.logger.warn("Vivecraft: Unknown action set: {}", tokens[1]);
                         } else {
                             this.addActionParams(map, keyMapping, "optional", "boolean", actionSet);
                         }
                     }
                 }
             } catch (IOException e) {
-                VRSettings.logger.error("Failed to read customactionsets.txt: {}", e.getMessage());
+                VRSettings.logger.error("Vivecraft: Failed to read customactionsets.txt: ", e);
             }
         }
 

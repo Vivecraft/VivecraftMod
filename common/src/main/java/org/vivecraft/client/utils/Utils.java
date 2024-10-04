@@ -335,10 +335,9 @@ public class Utils {
 
     private static void handleAssetException(Throwable e, String name, boolean required) {
         if (required) {
-            throw new RuntimeException("Failed to load asset: " + name, e);
+            throw new RuntimeException("Vivecraft: Failed to load asset: " + name, e);
         } else {
-            VRSettings.logger.error("Failed to load asset: {}", name);
-            e.printStackTrace();
+            VRSettings.logger.error("Vivecraft: Failed to load asset: {}: ", name, e);
         }
     }
 
@@ -346,25 +345,25 @@ public class Utils {
         try {
             new File("openvr/" + directory).mkdirs();
 
-            VRSettings.logger.info("Unpacking '{}' natives...", directory);
+            VRSettings.logger.info("Vivecraft: Unpacking '{}' natives...", directory);
 
             Path jarPath = Xplat.getJarPath();
             boolean didExtractSomething = false;
             try (Stream<Path> natives = Files.list(jarPath.resolve("natives/" + directory))) {
                 for (Path file : natives.collect(Collectors.toCollection(ArrayList::new))) {
                     didExtractSomething = true;
-                    VRSettings.logger.info("extracting: {}", file);
+                    VRSettings.logger.info("Vivecraft: extracting: {}", file);
                     Files.copy(file, new File("openvr/" + directory + "/" + file.getFileName()).toPath(),
                         StandardCopyOption.REPLACE_EXISTING);
                 }
             } catch (IOException ioException) {
-                VRSettings.logger.error("Failed to unpack natives from jar", ioException);
+                VRSettings.logger.error("Vivecraft: Failed to unpack natives from jar:", ioException);
             }
             if (!didExtractSomething) {
-                VRSettings.logger.warn("Failed to unpack natives from jar, no files");
+                VRSettings.logger.warn("Vivecraft: Failed to unpack natives from jar, no files");
             }
         } catch (Exception exception) {
-            VRSettings.logger.error("Failed to unpack natives from jar", exception);
+            VRSettings.logger.error("Vivecraft: Failed to unpack natives from jar:", exception);
         }
     }
 
@@ -525,7 +524,7 @@ public class Utils {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            VRSettings.logger.error("Vivecraft: error reading registry key: ", e);
         }
         return null;
     }
@@ -597,7 +596,7 @@ public class Utils {
             try {
                 minecraft.level.addParticle(type, position.x + d0, position.y + d1, position.z + d2, d3, d4, d5);
             } catch (Throwable throwable) {
-                VRSettings.logger.warn("Could not spawn particle effect {}", type);
+                VRSettings.logger.warn("Vivecraft: Could not spawn particle effect {}", type);
                 return;
             }
         }

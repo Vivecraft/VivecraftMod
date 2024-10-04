@@ -651,7 +651,7 @@ public class VRSettings {
         }
 
         // If we get here, the value wasn't interpreted
-        logger.warn("Don't know how to load VR option {} with type {}", name, type.getSimpleName());
+        logger.warn("Vivecraft: Don't know how to load VR option {} with type {}", name, type.getSimpleName());
         return null;
     }
 
@@ -708,7 +708,7 @@ public class VRSettings {
         }
 
         // If we get here, the object wasn't interpreted
-        logger.warn("Don't know how to save VR option {} with type {}", name, type.getSimpleName());
+        logger.warn("Vivecraft: Don't know how to save VR option {} with type {}", name, type.getSimpleName());
         return null;
     }
 
@@ -796,7 +796,7 @@ public class VRSettings {
         }
 
         // If we get here, the value wasn't interpreted
-        logger.warn("Don't know how to load default VR option {} with type {}", name, type.getSimpleName());
+        logger.warn("Vivecraft: Don't know how to load default VR option {} with type {}", name, type.getSimpleName());
         return null;
     }
 
@@ -838,7 +838,7 @@ public class VRSettings {
                 field.set(this, obj);
             }
         } catch (Exception exception) {
-            logger.warn("Failed to load default VR option: {}", option, exception);
+            logger.warn("Vivecraft: Failed to load default VR option: {}", option, exception);
         }
     }
 
@@ -856,7 +856,7 @@ public class VRSettings {
                 // check if there is a legacy file
                 legacyFile = new File(Minecraft.getInstance().gameDirectory, "optionsviveprofiles.txt");
                 if (legacyFile.exists()) {
-                    VRSettings.logger.info("Legacy Vivecraft settings File found, converting.");
+                    VRSettings.logger.info("Vivecraft: Legacy Vivecraft settings File found, converting.");
                 } else {
                     fileExists = false;
                     legacyFile = null;
@@ -872,7 +872,7 @@ public class VRSettings {
                 try {
                     currentConfig = JsonParser.parseReader(inputstreamreader).getAsJsonObject();
                 } catch (Exception exception) {
-                    VRSettings.logger.error("Error reading settings file:", exception);
+                    VRSettings.logger.error("Vivecraft: Error reading settings file:", exception);
                 }
 
                 inputstreamreader.close();
@@ -890,7 +890,7 @@ public class VRSettings {
                 data.put(key, currentConfig.get(key).getAsString());
             }
         } catch (Exception exception) {
-            VRSettings.logger.error("FAILED to read Vivecraft settings:", exception);
+            VRSettings.logger.error("Vivecraft: FAILED to read Vivecraft settings:", exception);
         }
         return data;
     }
@@ -944,7 +944,7 @@ public class VRSettings {
                     field.set(this, obj);
                 }
             } catch (Exception exception) {
-                logger.warn("Skipping bad VR option: {}:{}", name, value, exception);
+                logger.warn("Vivecraft: Skipping bad VR option: {}:{}", name, value, exception);
             }
         }
 
@@ -966,7 +966,7 @@ public class VRSettings {
             writer.flush();
             writer.close();
         } catch (IOException ioException) {
-            logger.error("Failed to save VR options to disk:", ioException);
+            logger.error("Vivecraft: Failed to save VR options to disk:", ioException);
         }
     }
 
@@ -1019,11 +1019,11 @@ public class VRSettings {
                         data.put(name, value);
                     }
                 } catch (Exception exception) {
-                    logger.error("Failed to save VR option: {}", name, exception);
+                    logger.error("Vivecraft: Failed to save VR option: {}", name, exception);
                 }
             }
         } catch (Exception exception) {
-            logger.error("Failed to save VR options:", exception);
+            logger.error("Vivecraft: Failed to save VR options:", exception);
         }
     }
 
@@ -1078,7 +1078,7 @@ public class VRSettings {
                 return label + obj.toString();
             }
         } catch (Exception exception) {
-            logger.error("Failed to get VR option display string: {}", vrOption, exception);
+            logger.error("Vivecraft: Failed to get VR option display string: {}", vrOption, exception);
         }
 
         return name;
@@ -1106,7 +1106,7 @@ public class VRSettings {
 
             return Objects.requireNonNullElse(vrOption.getOptionFloatValue(value), value);
         } catch (Exception exception) {
-            logger.error("Failed to get VR option float value: {}", vrOption, exception);
+            logger.error("Vivecraft: Failed to get VR option float value: {}", vrOption, exception);
         }
 
         return 0.0F;
@@ -1133,7 +1133,7 @@ public class VRSettings {
             } else if (OptionEnum.class.isAssignableFrom(type)) {
                 field.set(this, ((OptionEnum<?>) field.get(this)).getNext());
             } else {
-                logger.warn("Don't know how to set VR option {} with type {}", mapping.configName,
+                logger.warn("Vivecraft: Don't know how to set VR option {} with type {}", mapping.configName,
                     type.getSimpleName());
                 return;
             }
@@ -1141,7 +1141,7 @@ public class VRSettings {
             vrOption.onOptionChange();
             this.saveOptions();
         } catch (Exception exception) {
-            logger.error("Failed to set VR option: {}", vrOption, exception);
+            logger.error("Vivecraft: Failed to set VR option: {}", vrOption, exception);
         }
     }
 
@@ -1176,7 +1176,7 @@ public class VRSettings {
             vrOption.onOptionChange();
             this.saveOptions();
         } catch (Exception exception) {
-            logger.error("Failed to set VR option float value: {}", vrOption, exception);
+            logger.error("Vivecraft: Failed to set VR option float value: {}", vrOption, exception);
         }
     }
 

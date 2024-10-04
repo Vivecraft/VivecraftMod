@@ -186,14 +186,14 @@
 //
 //            if (OVR.ovr_Create(this.session, this.luid) != 0) {
 //                this.initStatus = "Couldn't create OVR!";
-//                VRSettings.logger.error(this.initStatus);
+//                VRSettings.logger.error("Vivecraft: {}", this.initStatus);
 //                return false;
 //            } else {
-//                VRSettings.logger.info("Oculus OVR loaded.");
+//                VRSettings.logger.info("Vivecraft: Oculus OVR loaded.");
 //
 //                OVR.ovr_GetHmdDesc(this.session.get(0), this.hmdDesc);
 //
-//                VRSettings.logger.info("Oculus hmd res: {}x{}", this.hmdDesc.Resolution().w(),
+//                VRSettings.logger.info("Vivecraft: Oculus hmd res: {}x{}", this.hmdDesc.Resolution().w(),
 //                    this.hmdDesc.Resolution().h());
 //
 //                OVR.ovr_GetRenderDesc(this.session.get(0), OVR.ovrEye_Left, this.hmdDesc.DefaultEyeFov(OVR.ovrEye_Left),
@@ -215,7 +215,7 @@
 //    @Override
 //    public boolean postinit() {
 //        this.populateInputActions();
-//        VRSettings.logger.info("Oculus Keybinds loaded.");
+//        VRSettings.logger.info("Vivecraft: Oculus Keybinds loaded.");
 //        this.inputInitialized = true;
 //        return this.inputInitialized;
 //    }

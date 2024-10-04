@@ -84,13 +84,13 @@ public class ServerNetworking {
                     {
                         vivePlayer.networkVersion = Math.min(clientMaxVersion, CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION);
                         if (ServerConfig.debug.get()) {
-                            LOGGER.info("{} networking supported, using version {}", player.getName().getString(), vivePlayer.networkVersion);
+                            LOGGER.info("Vivecraft: {} networking supported, using version {}", player.getName().getString(), vivePlayer.networkVersion);
                         }
                     } else {
                         // unsupported version, send notification, and disregard
                         player.sendSystemMessage(Component.literal("Unsupported vivecraft version, VR features will not work"));
                         if (ServerConfig.debug.get()) {
-                            LOGGER.info("{} networking not supported. client range [{},{}], server range [{},{}]",
+                            LOGGER.info("Vivecraft: {} networking not supported. client range [{},{}], server range [{},{}]",
                                 player.getName().getString(),
                                 clientMinVersion,
                                 clientMaxVersion,
@@ -103,7 +103,7 @@ public class ServerNetworking {
                     // client didn't send a version, so it's a legacy client
                     vivePlayer.networkVersion = -1;
                     if (ServerConfig.debug.get()) {
-                        LOGGER.info("{} using legacy networking", player.getName().getString());
+                        LOGGER.info("Vivecraft: {} using legacy networking", player.getName().getString());
                     }
                 }
 

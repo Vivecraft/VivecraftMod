@@ -189,7 +189,7 @@ public class MCOpenVR extends MCVR {
             try {
                 suppliedJar = new File(Version.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
             } catch (Exception e) {
-                VRSettings.logger.error("couldn't check lwjgl source:", e);
+                VRSettings.logger.error("Vivecraft: couldn't check lwjgl source:", e);
             }
 
             throw new RenderConfigException(Component.translatable("vivecraft.messages.vriniterror"), Component.translatable("vivecraft.messages.rendersetupfailed", I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), "3.3.2", suppliedJar), "OpenVR_LWJGL"));
@@ -240,7 +240,7 @@ public class MCOpenVR extends MCVR {
                     jinfinadeck.Destroy();
                 }
             } catch (Throwable throwable) {
-                VRSettings.logger.error("Error destroying OpenVR:", throwable);
+                VRSettings.logger.error("Vivecraft: Error destroying OpenVR:", throwable);
             }
         }
 
@@ -328,18 +328,18 @@ public class MCOpenVR extends MCVR {
                 // sets up the tracking space and generates the render textures
                 this.initOpenVRCompositor();
             } catch (Exception exception) {
-                VRSettings.logger.error("Error initializing OpenVR:", exception);
+                VRSettings.logger.error("Vivecraft: Error initializing OpenVR:", exception);
                 this.initSuccess = false;
                 this.initStatus = exception.getLocalizedMessage();
                 return false;
             }
 
             if (OpenVR.VRInput == null) {
-                VRSettings.logger.error("Controller input not available. Forcing seated mode.");
+                VRSettings.logger.error("Vivecraft: Controller input not available. Forcing seated mode.");
                 this.dh.vrSettings.seated = true;
             }
 
-            VRSettings.logger.info("OpenVR initialized & VR connected.");
+            VRSettings.logger.info("Vivecraft: OpenVR initialized & VR connected.");
 
             this.initInputAndApplication();
 
@@ -348,7 +348,7 @@ public class MCOpenVR extends MCVR {
             // initialize treadmill support, if they are enabled
             if (ClientDataHolderVR.katvr) {
                 try {
-                    VRSettings.logger.info("Waiting for KATVR....");
+                    VRSettings.logger.info("Vivecraft: Waiting for KATVR....");
                     Utils.unpackNatives("katvr");
                     NativeLibrary.addSearchPath(jkatvr.KATVR_LIBRARY_NAME,
                         new File("openvr/katvr").getAbsolutePath());
@@ -356,30 +356,30 @@ public class MCOpenVR extends MCVR {
                     jkatvr.Launch();
 
                     if (jkatvr.CheckForLaunch()) {
-                        VRSettings.logger.info("KATVR Loaded");
+                        VRSettings.logger.info("Vivecraft: KATVR Loaded");
                     } else {
-                        VRSettings.logger.error("KATVR Failed to load");
+                        VRSettings.logger.error("Vivecraft: KATVR Failed to load");
                     }
                 } catch (Exception exception) {
-                    VRSettings.logger.error("KATVR crashed:", exception);
+                    VRSettings.logger.error("Vivecraft: KATVR crashed:", exception);
                 }
             }
 
             if (ClientDataHolderVR.infinadeck) {
                 try {
-                    VRSettings.logger.info("Waiting for Infinadeck....");
+                    VRSettings.logger.info("Vivecraft: Waiting for Infinadeck....");
                     Utils.unpackNatives("infinadeck");
                     NativeLibrary.addSearchPath(jinfinadeck.INFINADECK_LIBRARY_NAME,
                         new File("openvr/infinadeck").getAbsolutePath());
 
                     if (jinfinadeck.InitConnection()) {
                         jinfinadeck.CheckConnection();
-                        VRSettings.logger.info("Infinadeck Loaded");
+                        VRSettings.logger.info("Vivecraft: Infinadeck Loaded");
                     } else {
-                        VRSettings.logger.error("Infinadeck Failed to load");
+                        VRSettings.logger.error("Vivecraft: Infinadeck Failed to load");
                     }
                 } catch (Exception exception) {
-                    VRSettings.logger.error("Infinadeck crashed:", exception);
+                    VRSettings.logger.error("Vivecraft: Infinadeck crashed:", exception);
                 }
             }
 
@@ -412,7 +412,7 @@ public class MCOpenVR extends MCVR {
             }
         }
 
-        VRSettings.logger.info("OpenVR System Initialized OK.");
+        VRSettings.logger.info("Vivecraft: OpenVR System Initialized OK.");
         this.initSuccess = true;
     }
 
@@ -494,7 +494,7 @@ public class MCOpenVR extends MCVR {
      */
     private void debugOut(int deviceIndex) {
         if (fullDebugInfo) {
-            VRSettings.logger.info("******************* VR DEVICE: {} *************************", deviceIndex);
+            VRSettings.logger.info("Vivecraft: ******************* VR DEVICE: {} *************************", deviceIndex);
             // print all device properties
             for (Field field : VR.class.getDeclaredFields()) {
                 try {
@@ -522,15 +522,15 @@ public class MCOpenVR extends MCVR {
                         default -> "(skipped)";
                     };
 
-                    VRSettings.logger.info(property);
+                    VRSettings.logger.info("Vivecraft: {}", property);
                 } catch (IllegalAccessException illegalaccessexception) {
-                    VRSettings.logger.error("Error reading device property:", illegalaccessexception);
+                    VRSettings.logger.error("Vivecraft: Error reading device property:", illegalaccessexception);
                 }
             }
-            VRSettings.logger.info("******************* END VR DEVICE: {} *************************", deviceIndex);
+            VRSettings.logger.info("Vivecraft: ******************* END VR DEVICE: {} *************************", deviceIndex);
         } else {
             // print only manufacturer and model
-            VRSettings.logger.info("VR DEVICE: {}, Manufacturer: {}, Model: {}", deviceIndex,
+            VRSettings.logger.info("Vivecraft: VR DEVICE: {}, Manufacturer: {}, Model: {}", deviceIndex,
                 VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
                     ETrackedDeviceProperty_Prop_ManufacturerName_String, this.errorBuffer),
                 VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
@@ -599,12 +599,12 @@ public class MCOpenVR extends MCVR {
             String language = Utils.readWinRegistry("HKCU\\SOFTWARE\\Valve\\Steam\\Language");
             if (language != null) {
                 gotRegistryValue = true;
-                VRSettings.logger.info("Steam language setting: {}", language);
+                VRSettings.logger.info("Vivecraft: Steam language setting: {}", language);
                 if (!language.equals("english") && steamLanguages.containsKey(language)) {
                     languages.add(steamLanguages.get(language));
                 }
             } else {
-                VRSettings.logger.warn("Unable to read Steam language setting");
+                VRSettings.logger.warn("Vivecraft: Unable to read Steam language setting");
             }
         }
 
@@ -925,7 +925,7 @@ public class MCOpenVR extends MCVR {
             case ETrackingUniverseOrigin_TrackingUniverseRawAndUncalibrated -> "raw uncalibrated";
             default -> "unknown";
         };
-        VRSettings.logger.info("TrackingSpace: {}", actualTrackingSpace);
+        VRSettings.logger.info("Vivecraft: TrackingSpace: {}", actualTrackingSpace);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             ByteBuffer stringBuffer = stack.calloc(20);
@@ -933,7 +933,7 @@ public class MCOpenVR extends MCVR {
             VRSystem_GetStringTrackedDeviceProperty(k_unTrackedDeviceIndex_Hmd, ETrackedDeviceProperty_Prop_ManufacturerName_String, stringBuffer, this.errorBuffer);
 
             String deviceName = memUTF8NullTerminated(stringBuffer);
-            VRSettings.logger.info("Device manufacturer is: {}", deviceName);
+            VRSettings.logger.info("Vivecraft: Device manufacturer is: {}", deviceName);
             this.detectedHardware = HardwareType.fromManufacturer(deviceName);
         }
 
@@ -952,7 +952,7 @@ public class MCOpenVR extends MCVR {
         this.texType1.eType(VR.ETextureType_TextureType_OpenGL);
         this.texType1.handle(-1);
 
-        VRSettings.logger.info("OpenVR Compositor initialized OK.");
+        VRSettings.logger.info("Vivecraft: OpenVR Compositor initialized OK.");
     }
 
     /**
@@ -1007,17 +1007,17 @@ public class MCOpenVR extends MCVR {
             appKey = ((Map<?, ?>) ((List<?>) map.get("applications")).get(0)).get("app_key").toString();
         } catch (Exception e) {
             // TODO: should we abort here?
-            VRSettings.logger.error("Error reading appkey from manifest:", e);
+            VRSettings.logger.error("Vivecraft: Error reading appkey from manifest:", e);
             return;
         }
 
-        VRSettings.logger.info("Appkey: {}", appKey);
+        VRSettings.logger.info("Vivecraft: Appkey: {}", appKey);
 
         // check if path is valid always, since if the application was already installed, it will not check it again
         checkPathValid(manifestFile.getAbsolutePath(), "Failed to install application manifest", false);
 
         if (!force && VRApplications_IsApplicationInstalled(appKey)) {
-            VRSettings.logger.info("Application manifest already installed");
+            VRSettings.logger.info("Vivecraft: Application manifest already installed");
         } else {
             int error = VRApplications_AddApplicationManifest(manifestFile.getAbsolutePath(), true);
             if (error != EVRApplicationError_VRApplicationError_None) {
@@ -1025,7 +1025,7 @@ public class MCOpenVR extends MCVR {
                 checkPathValid(manifestFile.getAbsolutePath(), "Failed to install application manifest: " + VRApplications_GetApplicationsErrorNameFromEnum(error), true);
             }
 
-            VRSettings.logger.info("Application manifest installed successfully");
+            VRSettings.logger.info("Vivecraft: Application manifest installed successfully");
         }
 
         // OpenVR doc says pid = 0 will use the calling process, but it actually doesn't, so we
@@ -1037,15 +1037,15 @@ public class MCOpenVR extends MCVR {
             pid = Integer.parseInt(runtimeName.split("@")[0]);
         } catch (Exception e) {
             // TODO: should we abort here?
-            VRSettings.logger.error("Error getting process id:", e);
+            VRSettings.logger.error("Vivecraft: Error getting process id:", e);
             return;
         }
 
         int error = VRApplications_IdentifyApplication(pid, appKey);
         if (error != EVRApplicationError_VRApplicationError_None) {
-            VRSettings.logger.error("Failed to identify application: {}", VRApplications_GetApplicationsErrorNameFromEnum(error));
+            VRSettings.logger.error("Vivecraft: Failed to identify application: {}", VRApplications_GetApplicationsErrorNameFromEnum(error));
         } else {
-            VRSettings.logger.info("Application identified successfully");
+            VRSettings.logger.info("Vivecraft: Application identified successfully");
         }
     }
 
@@ -1315,7 +1315,7 @@ public class MCOpenVR extends MCVR {
         int error = VRCompositor_WaitGetPoses(this.hmdTrackedDevicePoses, null);
 
         if (error > EVRCompositorError_VRCompositorError_None) {
-            VRSettings.logger.error("Compositor Error: GetPoseError {}", OpenVRStereoRenderer.getCompositorError(error));
+            VRSettings.logger.error("Vivecraft: Compositor Error: GetPoseError {}", OpenVRStereoRenderer.getCompositorError(error));
         }
 
         if (error == EVRCompositorError_VRCompositorError_DoNotHaveFocus) {

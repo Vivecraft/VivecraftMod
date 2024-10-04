@@ -74,7 +74,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
                 // Set up offset to fix relative positions
                 vivePlayer.offset = pos.subtract(aimPos);
                 if (ServerConfig.debug.get()) {
-                    ServerNetworking.LOGGER.info("AimFix: {} {} {}, {} {}", aimPos.x, aimPos.y, aimPos.z,
+                    ServerNetworking.LOGGER.info("Vivecraft: AimFix: {} {} {}, {} {}", aimPos.x, aimPos.y, aimPos.z,
                         Math.toDegrees(Math.asin(-dir.y)), Math.toDegrees(Math.atan2(-dir.x, dir.z)));
                 }
             }
@@ -99,7 +99,7 @@ public class AimFixHandler extends ChannelInboundHandlerAdapter {
             if ((aimPos != null && !serverPlayer.position().equals(aimPos)) || (aimPos == null && !serverPlayer.position().equals(pos))) {
                 pos = serverPlayer.position();
                 if (ServerConfig.debug.get()) {
-                    ServerNetworking.LOGGER.info("AimFix moved Player to: {} {} {}", pos.x, pos.y, pos.z);
+                    ServerNetworking.LOGGER.info("Vivecraft: AimFix moved Player to: {} {} {}", pos.x, pos.y, pos.z);
                 }
             }
 

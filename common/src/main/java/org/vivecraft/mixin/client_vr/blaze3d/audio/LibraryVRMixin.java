@@ -15,7 +15,7 @@ public class LibraryVRMixin {
     private boolean vivecraft$shouldDoHRTF(boolean vanillaHRTF) {
         if (VRState.vrRunning) {
             // don't force HRTF in nonvr
-            VRSettings.logger.info("enabling HRTF: {}", ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0);
+            VRSettings.logger.info("Vivecraft: enabling HRTF: {}", ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0);
             return ClientDataHolderVR.getInstance().vrSettings.hrtfSelection >= 0;
         }
         return vanillaHRTF;

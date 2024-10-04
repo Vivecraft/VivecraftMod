@@ -57,7 +57,7 @@ public class ServerUtil {
                             kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
                         } catch (IllegalFormatException e) {
                             // catch errors users might put into the messages, to not crash other stuff
-                            ServerNetworking.LOGGER.error("KickVROnly message '{}' has errors: {}", kickMessage, e.toString());
+                            ServerNetworking.LOGGER.error("Vivecraft: KickVROnly message '{}' has errors: ", kickMessage, e);
                         }
                         serverPlayer.connection.disconnect(Component.literal(kickMessage));
                         return;
@@ -71,7 +71,7 @@ public class ServerUtil {
                             kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
                         } catch (IllegalFormatException e) {
                             // catch errors users might put into the messages, to not crash other stuff
-                            ServerNetworking.LOGGER.error("KickViveOnly message '{}' has errors: {}", kickMessage, e.toString());
+                            ServerNetworking.LOGGER.error("Vivecraft: KickViveOnly message '{}' has errors: ", kickMessage, e);
                         }
                         serverPlayer.connection.disconnect(Component.literal(kickMessage));
                         return;
@@ -96,7 +96,7 @@ public class ServerUtil {
                                 serverPlayer.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(serverPlayer.getName().getString())), false);
                             } catch (IllegalFormatException e) {
                                 // catch errors users might put into the messages, to not crash other stuff
-                                ServerNetworking.LOGGER.error("Welcome message '{}' has errors: {}", message, e.toString());
+                                ServerNetworking.LOGGER.error("Vivecraft: Welcome message '{}' has errors: ", message, e);
                             }
                         }
                     }
@@ -214,7 +214,6 @@ public class ServerUtil {
                         .executes(context -> {
                             try {
                                 String newValue = BuiltInRegistries.BLOCK.getKey(context.getArgument("block", BlockInput.class).getState().getBlock()).toString();
-                                ServerNetworking.LOGGER.error(newValue.toString());
                                 List list = listConfig.get();
                                 list.add(newValue.toString());
                                 listConfig.set(list);
@@ -225,7 +224,7 @@ public class ServerUtil {
                                     Component.literal("is now '%s'".formatted(setting.get())));
                                 return 1;
                             } catch (Exception e) {
-                                ServerNetworking.LOGGER.error("error:", e);
+                                ServerNetworking.LOGGER.error("Vivecraft: error adding block to list:", e);
                                 return 0;
                             }
                         })

@@ -29,7 +29,7 @@ public class UpdateChecker {
     public static String newestVersion = "";
 
     public static boolean checkForUpdates() {
-        VRSettings.logger.info("Checking for Vivecraft Updates");
+        VRSettings.logger.info("Vivecraft: Checking for Updates");
 
         char updateType;
         if (Xplat.isDedicatedServer()) {
@@ -54,7 +54,7 @@ public class UpdateChecker {
             conn.connect();
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                VRSettings.logger.error("Error '{}' fetching Vivecraft updates", conn.getResponseCode());
+                VRSettings.logger.error("Vivecraft: Error '{}' fetching updates", conn.getResponseCode());
                 return false;
             }
 
@@ -101,7 +101,7 @@ public class UpdateChecker {
                 VRSettings.logger.info("Vivecraft update found: {}", newestVersion);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            VRSettings.logger.error("Vivecraft: fetching available vivecraft updates: ", e);
         }
         return hasUpdate;
     }

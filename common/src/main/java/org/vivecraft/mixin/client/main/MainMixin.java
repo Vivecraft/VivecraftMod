@@ -16,11 +16,11 @@ public class MainMixin {
         ClientDataHolderVR.kiosk = System.getProperty("kiosk", "false").equals("true");
 
         if (ClientDataHolderVR.kiosk) {
-            VRSettings.logger.info("Setting kiosk");
+            VRSettings.logger.info("Vivecraft: Setting kiosk");
             ClientDataHolderVR.viewonly = System.getProperty("viewonly", "false").equals("true");
 
             if (ClientDataHolderVR.viewonly) {
-                VRSettings.logger.info("Setting viewonly");
+                VRSettings.logger.info("Vivecraft: Setting viewonly");
             }
         }
 

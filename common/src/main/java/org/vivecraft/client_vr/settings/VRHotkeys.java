@@ -412,7 +412,7 @@ public class VRHotkeys {
                     }
                 }
             } catch (Exception exception) {
-                VRSettings.logger.error("error reading camera config:", exception);
+                VRSettings.logger.error("Vivecraft: error reading camera config:", exception);
                 return;
             }
 

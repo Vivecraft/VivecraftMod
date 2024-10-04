@@ -391,7 +391,7 @@ public class VRPlayer {
 
         if (!this.initDone) {
             VRSettings.logger.info("""
-                <Debug info start>
+                Vivecraft: <Debug info start>
                 Room object: {}
                 Room origin: {}
                 Hmd position room: {}

@@ -44,7 +44,7 @@ public class jkatvr implements Library {
             ismoving = is.getValue();
             yaw = yaw / 1024.0F * 360.0F;
         } catch (Exception exception) {
-            VRSettings.logger.error("KATVR Error:", exception);
+            VRSettings.logger.error("Vivecraft: KATVR Error:", exception);
         }
     }
 

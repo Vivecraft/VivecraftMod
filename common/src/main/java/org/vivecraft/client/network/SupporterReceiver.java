@@ -3,6 +3,7 @@ package org.vivecraft.client.network;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.io.IOUtils;
 import org.vivecraft.client.VRPlayersClient;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.IOException;
 import java.net.URL;
@@ -44,14 +45,14 @@ public class SupporterReceiver {
                                     VRPlayersClient.getInstance().setHMD(player.getUUID(), i);
                                 }
                             }
-                        } catch (Exception exception1) {
-                            System.out.println("error with donors txt " + exception1.getMessage());
+                        } catch (Exception e) {
+                            VRSettings.logger.error("Vivecraft: error with supporters txt: {}", user,  e);
                         }
                     }
 
                     cache = userMap;
-                } catch (Exception exception1) {
-                    System.out.println("Error parsing data: " + url + ", " + exception1.getClass().getName() + ": " + exception1.getMessage());
+                } catch (Exception e) {
+                    VRSettings.logger.error("Vivecraft: error parsing supporter data: {}", url, e);
                     downloadFailed = true;
                 }
             } else {

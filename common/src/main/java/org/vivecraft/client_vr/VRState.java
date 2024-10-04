@@ -95,14 +95,14 @@ public class VRState {
                 if (garbageCollector.isEmpty()) {
                     garbageCollector = ManagementFactory.getGarbageCollectorMXBeans().get(0).getName();
                 }
-                VRSettings.logger.info("Garbage collector: {}", garbageCollector);
+                VRSettings.logger.info("Vivecraft: Garbage collector: {}", garbageCollector);
 
                 // Fully qualified name here to avoid any ambiguity
                 com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
                 // Might as well log this stuff since we have it, could be useful for technical support
-                VRSettings.logger.info("Available CPU threads: {}", Runtime.getRuntime().availableProcessors());
-                VRSettings.logger.info("Total physical memory: {} GiB", String.format("%.01f", os.getTotalMemorySize() / 1073741824.0F));
-                VRSettings.logger.info("Free physical memory: {} GiB", String.format("%.01f", os.getFreeMemorySize() / 1073741824.0F));
+                VRSettings.logger.info("Vivecraft: Available CPU threads: {}", Runtime.getRuntime().availableProcessors());
+                VRSettings.logger.info("Vivecraft: Total physical memory: {} GiB", String.format("%.01f", os.getTotalMemorySize() / 1073741824.0F));
+                VRSettings.logger.info("Vivecraft: Free physical memory: {} GiB", String.format("%.01f", os.getFreeMemorySize() / 1073741824.0F));
 
                 if (!garbageCollector.startsWith("ZGC") && !ClientDataHolderVR.getInstance().vrSettings.disableGarbageCollectorMessage) {
                     // At least 12 GiB RAM (minus 256 MiB for possible reserved) and 8 CPU threads
@@ -113,10 +113,10 @@ public class VRState {
                     }
                 }
             } catch (Throwable e) {
-                VRSettings.logger.error("Failed checking GC: ", e);
+                VRSettings.logger.error("Vivecraft: Failed checking GC: ", e);
             }
         } catch (Throwable exception) {
-            VRSettings.logger.error("Failed to initialize VR: ", exception);
+            VRSettings.logger.error("Vivecraft: Failed to initialize VR: ", exception);
             destroyVR(true);
             if (exception instanceof RenderConfigException renderConfigException) {
                 Minecraft.getInstance()

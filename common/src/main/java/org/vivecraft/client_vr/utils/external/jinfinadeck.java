@@ -63,7 +63,7 @@ public class jinfinadeck implements Library {
             ismoving = GetTreadmillRunState();
             yaw *= 57.296F;
         } catch (Exception exception) {
-            VRSettings.logger.error("Infinadeck Error:", exception);
+            VRSettings.logger.error("Vivecraft: Infinadeck Error:", exception);
         }
     }
 

@@ -99,7 +99,7 @@ public class ServerConfig {
         if (listener == null) {
             listener = (action, path, incorrectValue, correctedValue) -> {
                 if (incorrectValue != null) {
-                    ServerNetworking.LOGGER.info("Corrected '{}': was '{}', is now '{}'", String.join(".", path),
+                    ServerNetworking.LOGGER.info("Vivecraft: Corrected setting '{}': was '{}', is now '{}'", String.join(".", path),
                         incorrectValue, correctedValue);
                 }
             };
@@ -316,7 +316,7 @@ public class ServerConfig {
                     valid = false;
                 }
                 if (!valid) {
-                    ServerNetworking.LOGGER.error("Ignoring invalid/unknown block in climbey blocklist: {}", s);
+                    ServerNetworking.LOGGER.error("Vivecraft: Ignoring invalid/unknown block in climbey blocklist: {}", s);
                 }
                 // return true or the whole list would be reset
                 return true;
