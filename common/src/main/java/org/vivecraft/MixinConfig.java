@@ -1,5 +1,6 @@
 package org.vivecraft;
 
+import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,11 +8,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
-import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_11;
-import org.vivecraft.mod_compat_vr.iris.mixin.coderbot.IrisChunkProgramOverridesMixinSodium_0_4_9;
-import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixin;
-import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixinSodium_0_5_8;
-import org.vivecraft.mod_compat_vr.iris.mixin.irisshaders.IrisChunkProgramOverridesMixinSodium_0_6;
+import org.vivecraft.client_vr.extensions.ClassDependentMixin;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
 import java.io.IOException;
@@ -48,6 +45,8 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     private static final Logger logger = LoggerFactory.getLogger("VivecraftMixin");
 
+    private static final String classDependentMixin = "L" + ClassDependentMixin.class.getName().replace(".", "/");
+
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         // this is here because forge doesn't finish mod loading, if any mod fails to load, and would crash the game
@@ -69,27 +68,21 @@ public class MixinConfig implements IMixinConfigPlugin {
             }
         }
 
-        String neededClass = "";
-        // apply iris sodium version specific mixins only when the right class is there
-        if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_9.class.getName())) {
-            neededClass = "me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType";
-        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_4_11.class.getName()) || mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_5_8.class.getName())
-        ) {
-            neededClass = "me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType";
-        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixinSodium_0_6.class.getName())) {
-            neededClass = "net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType";
-        } else if (mixinClassName.equals(IrisChunkProgramOverridesMixin.class.getName())) {
-            neededClass = "net.caffeinemc.mods.sodium.client.gl.shader.GlProgram";
-        }
-
-        if (!neededClass.isEmpty()) {
-            try {
-                MixinService.getService().getBytecodeProvider().getClassNode(neededClass);
+        // some mixins need a specific classes to be present to not throw errors on applying
+        try {
+            ClassNode mixinClass = MixinService.getService().getBytecodeProvider().getClassNode(mixinClassName);
+            if (mixinClass.visibleAnnotations != null) {
+                for (AnnotationNode annotation : mixinClass.visibleAnnotations) {
+                    if (annotation.desc.equals(classDependentMixin)) {
+                        String neededClass = (String) annotation.values.get(1);
+                        MixinService.getService().getBytecodeProvider().getClassNode(neededClass);
+                    }
+                }
                 return true;
-            } catch (ClassNotFoundException | IOException e) {
-                logger.info("Vivecraft: skipping mixin '{}'", mixinClassName);
-                return false;
             }
+        } catch (ClassNotFoundException | IOException e) {
+            logger.info("Vivecraft: skipping mixin '{}'", mixinClassName);
+            return false;
         }
 
         return !mixinClassName.contains("NoSodium") || !SodiumHelper.isLoaded();
