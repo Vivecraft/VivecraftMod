@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ContainerObjectSelectionList;
-import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -16,6 +13,7 @@ import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.vivecraft.client.gui.framework.GuiVROptionSlider;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -40,6 +38,41 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             }
             this.addEntry(entry);
         }
+    }
+
+    /**
+     * override because the vanilla implementation is buggy, and the faulty {@code getEntryAtPosition} method is final
+     */
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.isValidMouseClick(button)) {
+            this.updateScrollingState(mouseX, mouseY, button);
+            if (this.isMouseOver(mouseX, mouseY)) {
+                SettingsList.BaseEntry hovered = this.getEntryAtPositionFixed(mouseX, mouseY);
+                if (hovered != null && hovered.mouseClicked(mouseX, mouseY, button)) {
+                    if (this.getFocused() != hovered && this.getFocused() != null) {
+                        // unselect old entry
+                        this.getFocused().setFocused(null);
+                    }
+
+                    this.setFocused(hovered);
+                    this.setDragging(true);
+                    return true;
+                }
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    /**
+     * fixed version of {@link AbstractSelectionList#getEntryAtPosition(double, double)}
+     * just checks if the position is left of the scrollbar, instead of some weird left limit
+     */
+    private SettingsList.BaseEntry getEntryAtPositionFixed(double mouseX, double mouseY) {
+        int listY = Mth.floor(mouseY - this.getY()) - this.headerHeight + (int) this.getScrollAmount() - 4;
+        int hoveredItem = listY / this.itemHeight;
+        return mouseX < this.getScrollbarPosition() && hoveredItem >= 0 && listY >= 0 &&
+            hoveredItem < this.getItemCount() ? this.children().get(hoveredItem) : null;
     }
 
     @Override
@@ -170,7 +203,7 @@ public class SettingsList extends ContainerObjectSelectionList<SettingsList.Base
             super.render(guiGraphics, index, top, left, width, height, mouseX, mouseY, hovering, partialTick);
             this.resetButton.setX(left + 230);
             this.resetButton.setY(top);
-            this.resetButton.active = canReset.getAsBoolean();
+            this.resetButton.active = this.canReset.getAsBoolean();
             this.resetButton.render(guiGraphics, mouseX, mouseY, partialTick);
         }
 
