@@ -13,7 +13,6 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
 
 public class TelescopeTracker extends Tracker {
-    //public static final ResourceLocation scopeResource = new ResourceLocation("vivecraft:trashbin");
     public static final ModelResourceLocation scopeModel = new ModelResourceLocation("vivecraft", "spyglass_in_hand", "inventory");
     private static final double lensDistMax = 0.05D;
     private static final double lensDistMin = 0.185D;
