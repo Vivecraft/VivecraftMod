@@ -15,8 +15,8 @@ import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.ItemStack;
@@ -227,6 +227,16 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
         return VRState.vrRunning ? ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_pre.getBodyYaw() * ((float) Math.PI / 180) : original;
     }
 
+    @Inject(method = "handleEntityEvent", at = @At("HEAD"))
+    private void vivecraft$hapticsOnEvent(byte id, CallbackInfo ci) {
+        if (VRState.vrRunning && vivecraft$isLocalPlayer(this)) {
+            if (id == EntityEvent.DEATH) {
+                ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 2000);
+                ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 2000);
+            }
+        }
+    }
+
     /**
      Player overrides
      */
@@ -237,16 +247,6 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
             ClientDataHolderVR.getInstance().vrPlayer.wfCount = 400;
         }
         return super.eat(level, food);
-    }
-
-    @Override
-    public void die(DamageSource damageSource) {
-        super.die(damageSource);
-        if (!VRState.vrRunning || !vivecraft$isLocalPlayer(this)) {
-            return;
-        }
-        ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 2000);
-        ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 2000);
     }
 
     /**
