@@ -2,6 +2,7 @@ package org.vivecraft.server.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import com.electronwill.nightconfig.core.EnumGetMethod;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.util.Mth;
 
@@ -149,6 +150,23 @@ public class ConfigBuilder {
     }
 
     /**
+     * defines a setting with the current path, and pops the last path segment
+     *
+     * @param defaultValue default value this setting should have
+     * @return ConfigValue that accesses the setting at the path when calling this method
+     */
+    public <T extends Enum<T>> EnumValue<T> defineEnum(T defaultValue, Class<T> enumClass) {
+        List<String> path = this.stack.stream().toList();
+
+        EnumValue<T> value = new EnumValue<>(this.config, path, defaultValue, enumClass);
+        this.spec.defineInList(path, defaultValue, value.getValidValues());
+        this.stack.removeLast();
+
+        this.configValues.add(value);
+        return value;
+    }
+
+    /**
      * same as {@link #define define(T defaultValue)} but returns a {@link BooleanValue}
      */
     public BooleanValue define(boolean defaultValue) {
@@ -236,8 +254,12 @@ public class ConfigBuilder {
             return this.defaultValue;
         }
 
+        protected T getDefaultValue() {
+            return this.defaultValue;
+        }
+
         public boolean isDefault() {
-            return Objects.equals(get(), this.defaultValue);
+            return Objects.equals(get(), getDefaultValue());
         }
 
         public String getComment() {
@@ -301,7 +323,32 @@ public class ConfigBuilder {
 
         @Override
         public Supplier<AbstractWidget> getWidget(int width, int height) {
-            return WidgetBuilder.getCycleWidget(this, width, height);
+            return WidgetBuilder.getCycleWidget(this, getValidValues(), width, height);
+        }
+    }
+
+    public static class EnumValue<T extends Enum<T>> extends ConfigValue<T> {
+        private final Class<T> enumClass;
+        public EnumValue(CommentedConfig config, List<String> path, T defaultValue, Class<T> enumClass) {
+            super(config, path, defaultValue);
+            this.enumClass = enumClass;
+        }
+
+        public T getEnumValue(Object value) {
+            try {
+                return EnumGetMethod.NAME_IGNORECASE.get(value, this.enumClass);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        public Collection<? extends T> getValidValues() {
+            return EnumSet.allOf(this.enumClass);
+        }
+
+        @Override
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getCycleWidget(this, getValidValues(), width, height);
         }
     }
 

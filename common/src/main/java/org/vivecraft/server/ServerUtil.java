@@ -194,6 +194,34 @@ public class ServerUtil {
                         })
                     )
                 );
+            } else if (setting instanceof ConfigBuilder.EnumValue<?> enumValue) {
+                baseCommand.then(Commands.literal("set")
+                    .then(Commands.argument(argumentName, argument)
+                        .suggests((context, builder) -> {
+                            for (var value : enumValue.getValidValues()) {
+                                if (value.toString().toLowerCase().contains(builder.getRemainingLowerCase())) {
+                                    builder.suggest(value.toString());
+                                }
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> {
+                            Object newValue = context.getArgument(argumentName, String.class);
+                            Object newEnumValue = enumValue.getEnumValue(newValue);
+                            if (newEnumValue != null) {
+                                setting.set(newEnumValue);
+                                context.getSource().sendSystemMessage(
+                                    Component.literal(
+                                        "set §a[%s]§r to '%s'".formatted(setting.getPath(), newEnumValue)));
+                                return 1;
+                            } else {
+                                throw new CommandSyntaxException(
+                                    CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument(),
+                                    Component.literal("Unsupported value: " + newValue.toString()));
+                            }
+                        })
+                    )
+                );
             } else if (!(setting.get() instanceof List)) {
                 baseCommand.then(Commands.literal("set")
                     .then(Commands.argument(argumentName, argument)

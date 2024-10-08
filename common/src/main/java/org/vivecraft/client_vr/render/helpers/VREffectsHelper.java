@@ -30,7 +30,6 @@ import org.joml.Vector2f;
 import org.lwjgl.opengl.GL11C;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.Xevents;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.gui.VivecraftClickEvent;
 import org.vivecraft.client.gui.settings.GuiOtherHUDSettings;
 import org.vivecraft.client.gui.settings.GuiRenderOpticsSettings;

@@ -2,8 +2,6 @@ package org.vivecraft.mixin.client_vr.player;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.authlib.GameProfile;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -11,7 +9,6 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -41,7 +38,7 @@ import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_vr.utils.external.jinfinadeck;
 import org.vivecraft.client_vr.utils.external.jkatvr;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.packet.c2s.TeleportPayloadC2S;
 
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements PlayerExtension {
@@ -121,14 +118,8 @@ public abstract class LocalPlayerVRMixin extends AbstractClientPlayer implements
     private boolean vivecraft$directTeleport(boolean updateRotation) {
         if (this.vivecraft$teleported) {
             updateRotation = true;
-            ByteBuf bytebuf = Unpooled.buffer();
-            bytebuf.writeFloat((float) this.getX());
-            bytebuf.writeFloat((float) this.getY());
-            bytebuf.writeFloat((float) this.getZ());
-            byte[] abyte = new byte[bytebuf.readableBytes()];
-            bytebuf.readBytes(abyte);
-            ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.TELEPORT, abyte);
-            this.connection.send(serverboundcustompayloadpacket);
+            this.connection.send(ClientNetworking.createServerPacket(
+                new TeleportPayloadC2S((float) this.getX(), (float) this.getY(), (float) this.getZ())));
         }
         return updateRotation;
     }

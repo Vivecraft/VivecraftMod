@@ -3,10 +3,9 @@ package org.vivecraft.client;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -14,6 +13,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.FluidState;
+import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
+import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 
 import java.nio.file.Path;
 
@@ -162,12 +163,24 @@ public interface Xplat {
     }
 
     /**
-     * sends a channel register packet to the server to register the channel specified with {@code resourceLocation}
-     * @param listener server connection that is used to send the register packet
-     * @param resourceLocation channel to register
+     * wraps the given payload into the mod loader specific packet
+     * @param payload payload to wrap
+     * @return ServerboundCustomPayloadPacket
      */
     @ExpectPlatform
-    static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {}
+    static Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
+        throw new AssertionError();
+    }
+
+    /**
+     * wraps the given payload into the mod loader specific packet
+     * @param payload payload to wrap
+     * @return ClientboundCustomPayloadPacket
+     */
+    @ExpectPlatform
+    static Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
+        throw new AssertionError();
+    }
 
     /**
      * checks if the given KeyMapping uses a key modifier to trigger

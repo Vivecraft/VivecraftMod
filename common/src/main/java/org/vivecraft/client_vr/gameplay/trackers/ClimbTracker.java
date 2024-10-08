@@ -6,7 +6,6 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -26,14 +25,15 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.packet.c2s.ClimbingPayloadC2S;
+import org.vivecraft.server.config.ClimbeyBlockmode;
 
 import java.util.*;
 
 public class ClimbTracker extends Tracker {
     public static final ModelResourceLocation clawsModel = new ModelResourceLocation("vivecraft", "climb_claws", "inventory");
     public Set<Block> blocklist = new HashSet<>();
-    public byte serverBlockmode = 0;
+    public ClimbeyBlockmode serverBlockmode = ClimbeyBlockmode.DISABLED;
     public boolean forceActivate = false;
     public int latchStartController = -1;
     public Vec3[] latchStart = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
@@ -594,10 +594,8 @@ public class ClimbTracker extends Tracker {
                     }
                 }
             } else {
-                ServerboundCustomPayloadPacket packet = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CLIMBING, new byte[0]);
-
                 if (this.mc.getConnection() != null) {
-                    this.mc.getConnection().send(packet);
+                    this.mc.getConnection().send(ClientNetworking.createServerPacket(new ClimbingPayloadC2S()));
                 }
             }
         } else {
@@ -631,14 +629,10 @@ public class ClimbTracker extends Tracker {
     }
 
     private boolean allowed(BlockState bs) {
-        if (this.serverBlockmode == 0) { // none
-            return true;
-        } else if (this.serverBlockmode == 1) { // whitelist
-            return this.blocklist.contains(bs.getBlock());
-        } else if (this.serverBlockmode == 2) { // blacklist
-            return !this.blocklist.contains(bs.getBlock());
-        } else {
-            return false; //how did u get here?
-        }
+        return switch(this.serverBlockmode) {
+            case DISABLED -> true;
+            case WHITELIST -> this.blocklist.contains(bs.getBlock());
+            case BLACKLIST -> !this.blocklist.contains(bs.getBlock());
+        };
     }
 }

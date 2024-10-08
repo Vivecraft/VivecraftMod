@@ -2,11 +2,10 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.world.entity.Pose;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.packet.c2s.CrawlPayloadC2S;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
 public class CrawlTracker extends Tracker {
@@ -62,10 +61,9 @@ public class CrawlTracker extends Tracker {
             }
 
             if (ClientNetworking.serverAllowsCrawling) {
-                ServerboundCustomPayloadPacket packet = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[]{(byte) (this.crawling ? 1 : 0)});
-
                 if (this.mc.getConnection() != null) {
-                    this.mc.getConnection().send(packet);
+                    this.mc.getConnection()
+                        .send(ClientNetworking.createServerPacket(new CrawlPayloadC2S(this.crawling)));
                 }
             }
 

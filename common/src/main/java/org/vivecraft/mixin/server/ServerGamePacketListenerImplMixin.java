@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.server.AimFixHandler;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
+import org.vivecraft.server.ServerVivePlayer;
 import org.vivecraft.server.config.ServerConfig;
 
 @Mixin(ServerGamePacketListenerImpl.class)
@@ -40,7 +41,17 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void vivecraft$sendVRPlayers(CallbackInfo ci) {
-        ServerNetworking.sendVrPlayerStateToClients(this.player);
+
+        ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(this.player);
+
+        if (vivePlayer != null) {
+            if (this.player.hasDisconnected()) {
+                // if they did disconnect remove them
+                ServerVRPlayers.getPlayersWithVivecraft(this.player.server).remove(this.player.getUUID());
+            } else if (vivePlayer.isVR() && vivePlayer.vrPlayerState != null){
+                ServerNetworking.sendVrPlayerStateToClients(vivePlayer);
+            }
+        }
     }
 
     @Inject(method = "onDisconnect", at = @At("TAIL"))

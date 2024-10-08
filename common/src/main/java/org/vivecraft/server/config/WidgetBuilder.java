@@ -5,6 +5,7 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
 import org.vivecraft.client.gui.settings.GuiListValueEditScreen;
 
+import java.util.Collection;
 import java.util.function.Supplier;
 
 public class WidgetBuilder {
@@ -72,20 +73,21 @@ public class WidgetBuilder {
 
     /**
      * creates a Button that cycles through the values of the InListValue
-     * @param inListValue InListValue for this button
+     * @param configValue InListValue for this button
+     * @param values Collection of valid values
      * @param width width of the button
      * @param height height of the button
      * @return Button with the value as text, and the comment as tooltip
      */
-    public static <T> Supplier<AbstractWidget> getCycleWidget(ConfigBuilder.InListValue<T> inListValue, int width, int height) {
+    public static <T> Supplier<AbstractWidget> getCycleWidget(ConfigBuilder.ConfigValue<T> configValue, Collection<? extends T> values, int width, int height) {
         return () -> CycleButton
             .builder((newValue) -> Component.literal("" + newValue))
             // toArray is needed here, because the button uses Objects, and the collection is of other types
-            .withValues(inListValue.getValidValues().toArray())
-            .withInitialValue(inListValue.get())
+            .withValues(values.toArray())
+            .withInitialValue(configValue.get())
             .displayOnlyValue()
-            .withTooltip((bool) -> inListValue.getComment() != null ? Tooltip.create(Component.literal(inListValue.getComment())) : null)
-            .create(0, 0, width, height, Component.empty(), (button, newValue) -> inListValue.set((T) newValue));
+            .withTooltip((bool) -> configValue.getComment() != null ? Tooltip.create(Component.literal(configValue.getComment())) : null)
+            .create(0, 0, width, height, Component.empty(), (button, newValue) -> configValue.set((T) newValue));
     }
 
     /**

@@ -2,18 +2,16 @@ package org.vivecraft.client.fabric;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +21,11 @@ import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
+import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 import org.vivecraft.fabric.mixin.world.level.biome.BiomeAccessor;
+import org.vivecraft.fabric.packet.VivecraftFabricPacketC2S;
+import org.vivecraft.fabric.packet.VivecraftFabricPacketS2C;
 
 import java.nio.file.Path;
 
@@ -114,20 +116,12 @@ public class XplatImpl implements Xplat {
         return baseRange;
     }
 
-    public static void addNetworkChannel(ClientPacketListener listener, ResourceLocation resourceLocation) {
-        listener.send(new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
-            public static final ResourceLocation ID = new ResourceLocation("minecraft:register");
+    public static Packet<?> getC2SPacket(VivecraftPayloadC2S payload) {
+        return ClientPlayNetworking.createC2SPacket(new VivecraftFabricPacketC2S(payload));
+    }
 
-            @Override
-            public void write(FriendlyByteBuf friendlyByteBuf) {
-                friendlyByteBuf.writeBytes(resourceLocation.toString().getBytes());
-            }
-
-            @Override
-            public ResourceLocation id() {
-                return ID;
-            }
-        }));
+    public static Packet<?> getS2CPacket(VivecraftPayloadS2C payload) {
+        return ServerPlayNetworking.createS2CPacket(new VivecraftFabricPacketS2C(payload));
     }
 
     public static boolean hasKeyModifier(KeyMapping keyMapping) {

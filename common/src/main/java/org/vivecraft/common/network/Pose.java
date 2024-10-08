@@ -9,7 +9,7 @@ import org.vivecraft.common.utils.math.Quaternion;
  * @param position position of the device in player local space
  * @param orientation orientation of the device in world space
  */
-public record Pose(Vec3 position, Quaternion orientation) implements BufferSerializable {
+public record Pose(Vec3 position, Quaternion orientation) {
 
     /**
      * @param buffer buffer to read from

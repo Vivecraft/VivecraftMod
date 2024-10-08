@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,10 +17,8 @@ import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.settings.VRSettings;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.packet.c2s.DrawPayloadC2S;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
-
-import java.nio.ByteBuffer;
 
 public class BowTracker extends Tracker {
     private double currentDraw;
@@ -216,8 +213,8 @@ public class BowTracker extends Tracker {
                 // fire!
                 this.dh.vr.triggerHapticPulse(arrowHand, 500);
                 this.dh.vr.triggerHapticPulse(bowHand, 3000);
-                ServerboundCustomPayloadPacket packet = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(this.getDrawPercent()).array());
-                Minecraft.getInstance().getConnection().send(packet);
+                this.mc.getConnection()
+                    .send(ClientNetworking.createServerPacket(new DrawPayloadC2S(this.getDrawPercent())));
 
                 // TODO: for REVERSE_BOW
                 // ClientNetworking.sendActiveHand((byte) arrowHand);
@@ -225,8 +222,8 @@ public class BowTracker extends Tracker {
                 this.mc.gameMode.releaseUsingItem(player);
 
                 // reset to 0, in case user switches modes.
-                packet = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.DRAW, ByteBuffer.allocate(4).putFloat(0.0F).array());
-                Minecraft.getInstance().getConnection().send(packet);
+                this.mc.getConnection()
+                    .send(ClientNetworking.createServerPacket(new DrawPayloadC2S(0.0F)));
                 this.isDrawing = false;
             }
 

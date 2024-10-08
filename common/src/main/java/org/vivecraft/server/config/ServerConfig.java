@@ -59,7 +59,7 @@ public class ServerConfig {
     public static ConfigBuilder.BooleanValue pvpNotifyBlockedDamage;
 
     public static ConfigBuilder.BooleanValue climbeyEnabled;
-    public static ConfigBuilder.InListValue<String> climbeyBlockmode;
+    public static ConfigBuilder.EnumValue<ClimbeyBlockmode> climbeyBlockmode;
     public static ConfigBuilder.ListValue<String> climbeyBlocklist;
 
     public static ConfigBuilder.BooleanValue crawlingEnabled;
@@ -300,7 +300,7 @@ public class ServerConfig {
         climbeyBlockmode = builder
             .push("blockmode")
             .comment("Sets which blocks are climb-able. Options are:\n \"DISABLED\" = List ignored. All blocks are climbable.\n \"WHITELIST\" = Only blocks on the list are climbable.\n \"BLACKLIST\" = All blocks are climbable except those on the list")
-            .defineInList("DISABLED", Arrays.asList("DISABLED", "WHITELIST", "BLACKLIST"));
+            .defineEnum(ClimbeyBlockmode.DISABLED, ClimbeyBlockmode.class);
         climbeyBlocklist = builder
             .push("blocklist")
             .comment("The list of block names for use with include/exclude block mode.")
@@ -397,6 +397,13 @@ public class ServerConfig {
             .define(true);
         // end vrSwitching
         builder.pop();
+
+        // fix any enums that are loaded as strings first
+        for (ConfigBuilder.ConfigValue<?> configValue: builder.getConfigValues()) {
+            if (configValue instanceof ConfigBuilder.EnumValue enumValue) {
+                enumValue.set(enumValue.getEnumValue(enumValue.get()));
+            }
+        }
 
         // if the config is outdated, or is missing keys, re add them
         builder.correct(listener);

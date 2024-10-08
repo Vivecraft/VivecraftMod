@@ -78,6 +78,7 @@ import org.vivecraft.client_vr.render.helpers.ShaderHelper;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassManager;
+import org.vivecraft.common.network.packet.c2s.VRActivePayloadC2S;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
 import javax.annotation.Nullable;
@@ -815,7 +816,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
 
         // send new VR state to the server
         if (this.getConnection() != null) {
-            this.getConnection().send(ClientNetworking.createVRActivePacket(vrActive));
+            this.getConnection().send(ClientNetworking.createServerPacket(new VRActivePayloadC2S(vrActive)));
         }
 
         // reload sound manager, to toggle HRTF between VR and NONVR one
