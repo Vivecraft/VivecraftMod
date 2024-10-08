@@ -23,7 +23,7 @@ public abstract class PauseScreenVRModMenuMixin extends Screen {
      * the modmenu button collides in some settings with our quick commands button
      * this makes both half sized when that happens
      */
-    @Inject(at = @At("TAIL"), method = "init")
+    @Inject(method = "init", at = @At("TAIL"))
     private void vivecraft$reduceModmenuButtonSize(CallbackInfo ci) {
         if (VRState.vrInitialized && ClientDataHolderVR.getInstance().vrSettings.modifyPauseMenu) {
             Button modmenuButton = null;

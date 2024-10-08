@@ -19,13 +19,13 @@ public class SodiumWorldRendererVRMixin {
 
     @Group(name = "forceChunkUpdate", min = 1, max = 1)
     @ModifyVariable(method = "updateChunks", at = @At("STORE"), ordinal = 1, remap = false, expect = 0)
-    public boolean vivecraft$RenderUpdate(boolean dirty) {
+    private boolean vivecraft$RenderUpdate(boolean dirty) {
         return !RenderPassType.isVanilla() || dirty;
     }
 
     @Group(name = "forceChunkUpdate", min = 1, max = 1)
     @ModifyVariable(method = "setupTerrain", at = @At("STORE"), ordinal = 2, remap = false, expect = 0)
-    public boolean vivecraft$RenderUpdateSodium5(boolean dirty) {
+    private boolean vivecraft$RenderUpdateSodium5(boolean dirty) {
         return !RenderPassType.isVanilla() || dirty;
     }
 }

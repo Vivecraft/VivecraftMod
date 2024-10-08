@@ -10,8 +10,11 @@ import org.vivecraft.client.Xevents;
 
 public class XeventsImpl implements Xevents {
 
-    public static boolean renderBlockOverlay(Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos) {
-        return ForgeHooksClient.renderBlockOverlay(player, poseStack, RenderBlockScreenEffectEvent.OverlayType.BLOCK, blockState, blockPos);
+    public static boolean renderBlockOverlay(
+        Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos)
+    {
+        return ForgeHooksClient.renderBlockOverlay(player, poseStack, RenderBlockScreenEffectEvent.OverlayType.BLOCK,
+            blockState, blockPos);
     }
 
     public static boolean renderWaterOverlay(Player player, PoseStack poseStack) {

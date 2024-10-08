@@ -67,7 +67,9 @@ public class XplatImpl implements Xplat {
         return "use";
     }
 
-    public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn) {
+    public static TextureAtlasSprite[] getFluidTextures(
+        BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn)
+    {
         return FluidSpriteCache.getFluidSprites(level, pos, fluidStateIn);
     }
 

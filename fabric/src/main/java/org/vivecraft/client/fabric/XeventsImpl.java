@@ -8,7 +8,9 @@ import org.vivecraft.client.Xevents;
 
 public class XeventsImpl implements Xevents {
 
-    public static boolean renderBlockOverlay(Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos) {
+    public static boolean renderBlockOverlay(
+        Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos)
+    {
         return false;
     }
 

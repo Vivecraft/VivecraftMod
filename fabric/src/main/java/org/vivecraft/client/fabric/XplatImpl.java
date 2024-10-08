@@ -47,7 +47,8 @@ public class XplatImpl implements Xplat {
 
     public static String getModVersion() {
         if (isModLoadedSuccess()) {
-            return FabricLoader.getInstance().getModContainer("vivecraft").get().getMetadata().getVersion().getFriendlyString();
+            return FabricLoader.getInstance().getModContainer("vivecraft").get().getMetadata().getVersion()
+                .getFriendlyString();
         }
         return "no version";
     }
@@ -77,19 +78,24 @@ public class XplatImpl implements Xplat {
                 "Lnet/minecraft/class_1269;");
     }
 
-    public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn) {
+    public static TextureAtlasSprite[] getFluidTextures(
+        BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn)
+    {
         if (isModLoaded("fabric-rendering-fluids-v1")) {
-            return FluidRenderHandlerRegistry.INSTANCE.get(fluidStateIn.getType()).getFluidSprites(level, pos, fluidStateIn);
+            return FluidRenderHandlerRegistry.INSTANCE.get(fluidStateIn.getType())
+                .getFluidSprites(level, pos, fluidStateIn);
         } else {
             // return vanilla textures
             if (fluidStateIn.is(FluidTags.LAVA)) {
                 return new TextureAtlasSprite[]{
-                    Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(Blocks.LAVA.defaultBlockState()).getParticleIcon(),
+                    Minecraft.getInstance().getModelManager().getBlockModelShaper()
+                        .getBlockModel(Blocks.LAVA.defaultBlockState()).getParticleIcon(),
                     ModelBakery.LAVA_FLOW.sprite()
                 };
             } else {
                 return new TextureAtlasSprite[]{
-                    Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(Blocks.WATER.defaultBlockState()).getParticleIcon(),
+                    Minecraft.getInstance().getModelManager().getBlockModelShaper()
+                        .getBlockModel(Blocks.WATER.defaultBlockState()).getParticleIcon(),
                     ModelBakery.WATER_FLOW.sprite()
                 };
             }

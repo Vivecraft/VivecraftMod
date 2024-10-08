@@ -25,7 +25,7 @@ public class EntityRendererMixin {
     /**
      * 3rd person vr hand fix, we have non-standard vertex layouts, so need to do this override
      */
-    @Inject(at = @At("TAIL"), method = "prepareVertices", remap = false)
+    @Inject(method = "prepareVertices", at = @At("TAIL"), remap = false)
     private static void vivecraft$overrideVrHands(PoseStack.Pose matrices, ModelCuboid cuboid, CallbackInfo ci) {
         float[][] overrides = ((ModelCuboidExtension) cuboid).vivecraft$getOverrides();
         if (overrides != null) {

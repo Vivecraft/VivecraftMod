@@ -25,9 +25,13 @@ public class FireworkRocketEntityVRMixin {
 
     @ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"), index = 1)
     private double vivecraft$modifyX(double x, @Share("handPos") LocalRef<Vec3> handPos) {
-        if (VRState.vrRunning && this.attachedToEntity == Minecraft.getInstance().player && this.attachedToEntity instanceof LocalPlayer localPlayer) {
-            boolean fireworkInMainHand = localPlayer.getMainHandItem().is(Items.FIREWORK_ROCKET) && !localPlayer.getOffhandItem().is(Items.FIREWORK_ROCKET);
-            VRData.VRDevicePose controller = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getHand(fireworkInMainHand ? 0 : 1);
+        if (VRState.vrRunning && this.attachedToEntity == Minecraft.getInstance().player &&
+            this.attachedToEntity instanceof LocalPlayer localPlayer)
+        {
+            boolean fireworkInMainHand = localPlayer.getMainHandItem().is(Items.FIREWORK_ROCKET) &&
+                !localPlayer.getOffhandItem().is(Items.FIREWORK_ROCKET);
+            VRData.VRDevicePose controller = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld()
+                .getHand(fireworkInMainHand ? 0 : 1);
             handPos.set(controller.getPosition().add(controller.getDirection().scale(0.25)));
             return handPos.get().x;
         }
@@ -46,7 +50,7 @@ public class FireworkRocketEntityVRMixin {
 
     /*
     // server offset, this is wrong somehow
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getHandHoldingItemAngle(Lnet/minecraft/world/item/Item;)Lnet/minecraft/world/phys/Vec3;"), method = "tick")
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getHandHoldingItemAngle(Lnet/minecraft/world/item/Item;)Lnet/minecraft/world/phys/Vec3;"))
     private Vec3 vivecraft$redirectHandOffset(LivingEntity instance, Item item){
         if (instance instanceof ServerPlayer serverPlayer) {
             ServerVivePlayer vivePLayer = ServerVRPlayers.getVivePlayer(serverPlayer);

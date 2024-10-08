@@ -1,11 +1,12 @@
 package org.vivecraft.fabric.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
@@ -13,27 +14,27 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 @Mixin(GameRenderer.class)
 public class FabricGameRendererVRMixin {
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V ", ordinal = 2), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
-    public void removeMulposeX(PoseStack s, Quaternionf quaternion) {
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V ", ordinal = 2))
+    private void vivecraft$removeMulPoseX(PoseStack instance, Quaternionf quaternion, Operation<Void> original) {
         if (RenderPassType.isVanilla()) {
-            s.mulPose(quaternion);
+            original.call(instance, quaternion);
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V ", ordinal = 3), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V")
-    public void removeMulposeY(PoseStack s, Quaternionf quaternion) {
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V ", ordinal = 3))
+    private void vivecraft$removeMulPoseY(PoseStack instance, Quaternionf quaternion, Operation<Void> original) {
         if (RenderPassType.isVanilla()) {
-            s.mulPose(quaternion);
+            original.call(instance, quaternion);
         } else {
-            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, s);
+            RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, instance);
         }
     }
 
     //optifabric only
-    @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V ", ordinal = 4), method = "renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V", expect = 0)
-    public void removeMulposeY2(PoseStack s, Quaternionf quaternion) {
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V ", ordinal = 4), expect = 0)
+    private void vivecraft$removeMulPoseZ(PoseStack instance, Quaternionf quaternion, Operation<Void> original) {
         if (RenderPassType.isVanilla()) {
-            s.mulPose(quaternion);
+            original.call(instance, quaternion);
         }
     }
 }

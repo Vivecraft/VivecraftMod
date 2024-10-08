@@ -12,7 +12,7 @@ public class VivecraftMod implements ModInitializer {
         ServerConfig.init(null);
 
         // add server config commands
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
-            ServerUtil.registerCommands(dispatcher, registryAccess));
+        CommandRegistrationCallback.EVENT.register(
+            (dispatcher, registryAccess, environment) -> ServerUtil.registerCommands(dispatcher, registryAccess));
     }
 }

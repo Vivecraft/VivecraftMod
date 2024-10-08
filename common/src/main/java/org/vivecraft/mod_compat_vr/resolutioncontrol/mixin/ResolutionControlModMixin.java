@@ -33,14 +33,14 @@ public class ResolutionControlModMixin {
     }
 
     @Inject(method = "getCurrentWidth", at = @At("HEAD"), remap = false, cancellable = true)
-    public void vivecraft$getVRWidth(CallbackInfoReturnable<Integer> cir) {
+    private void vivecraft$getVRWidth(CallbackInfoReturnable<Integer> cir) {
         if (VRState.vrRunning) {
             cir.setReturnValue(WorldRenderPass.stereoXR.target.width);
         }
     }
 
     @Inject(method = "getCurrentHeight", at = @At("HEAD"), remap = false, cancellable = true)
-    public void vivecraft$getVRHeight(CallbackInfoReturnable<Integer> cir) {
+    private void vivecraft$getVRHeight(CallbackInfoReturnable<Integer> cir) {
         if (VRState.vrRunning) {
             cir.setReturnValue(WorldRenderPass.stereoXR.target.height);
         }

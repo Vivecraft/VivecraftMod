@@ -80,7 +80,9 @@ public class XplatImpl implements Xplat {
             net.minecraft.world.phys.BlockHitResult.class).getName();
     }
 
-    public static TextureAtlasSprite[] getFluidTextures(BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn) {
+    public static TextureAtlasSprite[] getFluidTextures(
+        BlockAndTintGetter level, BlockPos pos, FluidState fluidStateIn)
+    {
         return ForgeHooksClient.getFluidSprites(level, pos, fluidStateIn);
     }
 

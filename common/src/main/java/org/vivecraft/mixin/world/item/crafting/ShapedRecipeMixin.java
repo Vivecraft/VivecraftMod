@@ -10,7 +10,7 @@ import org.vivecraft.common.CustomShapedRecipe;
 @Mixin(targets = "net.minecraft.world.item.crafting.ShapedRecipe$Serializer")
 public abstract class ShapedRecipeMixin {
 
-    @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/ItemStack;ITEM_WITH_COUNT_CODEC:Lcom/mojang/serialization/Codec;"), method = "method_55071")
+    @Redirect(method = "method_55071", at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/ItemStack;ITEM_WITH_COUNT_CODEC:Lcom/mojang/serialization/Codec;"))
     private static Codec<ItemStack> vivecraft$handleVivecraftRecipe() {
         // CODEC needs to be external, or it isn't initialized, when the other static codec want's to access it
         return CustomShapedRecipe.CODEC;
