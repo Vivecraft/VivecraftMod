@@ -224,10 +224,10 @@ public abstract class GameRendererVRMixin
     }
 
     @Inject(method = "getFov", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$fixedFOV(CallbackInfoReturnable<Double> info) {
+    private void vivecraft$fixedFOV(CallbackInfoReturnable<Double> cir) {
         // some mods don't expect this to be called outside levels
         if (this.minecraft.level == null || MethodHolder.isInMenuRoom()) {
-            info.setReturnValue(Double.valueOf(this.minecraft.options.fov().get()));
+            cir.setReturnValue(Double.valueOf(this.minecraft.options.fov().get()));
         }
     }
 

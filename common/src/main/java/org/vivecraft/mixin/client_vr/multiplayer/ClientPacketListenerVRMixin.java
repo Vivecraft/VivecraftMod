@@ -147,12 +147,12 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
     }
 
     @Inject(method = "handleCustomPayload", at = @At("HEAD"), cancellable = true)
-    private void vivecraft$handlepacket(CustomPacketPayload customPacketPayload, CallbackInfo info) {
+    private void vivecraft$handlepacket(CustomPacketPayload customPacketPayload, CallbackInfo ci) {
         if (customPacketPayload instanceof VivecraftDataPacket dataPacket) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(dataPacket.buffer());
             ClientNetworking.handlePacket(dataPacket.packetId(), buffer);
             buffer.release();
-            info.cancel();
+            ci.cancel();
         }
     }
 
@@ -162,11 +162,11 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
      * {@link org.vivecraft.neoforge.event.ClientEvents#handleVivePacket}
      */
     @Surrogate
-    private void vivecraft$handlepacket(ClientboundCustomPayloadPacket packet, CustomPacketPayload customPacketPayload, CallbackInfo info) {
+    private void vivecraft$handlepacket(ClientboundCustomPayloadPacket packet, CustomPacketPayload customPacketPayload, CallbackInfo ci) {
     }
 
     @Inject(method = "handleOpenScreen", at = @At("HEAD"))
-    private void vivecraft$markScreenActive(ClientboundOpenScreenPacket clientboundOpenScreenPacket, CallbackInfo ci) {
+    private void vivecraft$markScreenActive(CallbackInfo ci) {
         GuiHandler.guiAppearOverBlockActive = true;
     }
 }

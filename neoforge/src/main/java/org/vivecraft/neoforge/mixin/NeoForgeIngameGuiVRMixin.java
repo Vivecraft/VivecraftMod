@@ -16,7 +16,7 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 public abstract class NeoForgeIngameGuiVRMixin {
     @Inject(method = "pre", at = @At("HEAD"), remap = false, cancellable = true)
     private void vivecraft$noStuff(
-        NamedGuiOverlay overlay, GuiGraphics guiGraphics, CallbackInfoReturnable<Boolean> info)
+        NamedGuiOverlay overlay, GuiGraphics guiGraphics, CallbackInfoReturnable<Boolean> cir)
     {
         if (RenderPassType.isGuiOnly() &&
             (overlay == VanillaGuiOverlay.VIGNETTE.type() ||
@@ -26,7 +26,7 @@ public abstract class NeoForgeIngameGuiVRMixin {
                 overlay == VanillaGuiOverlay.PORTAL.type()
             ))
         {
-            info.setReturnValue(true);
+            cir.setReturnValue(true);
         }
     }
 
