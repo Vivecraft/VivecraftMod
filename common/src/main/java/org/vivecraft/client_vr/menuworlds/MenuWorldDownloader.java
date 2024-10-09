@@ -5,10 +5,7 @@ import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +40,7 @@ public class MenuWorldDownloader {
             }
         }
         VRSettings.logger.info("Vivecraft: MenuWorlds: Downloading world {}", path);
-        Utils.httpReadToFile(baseUrl + path, file, true);
+        Utils.httpReadToFile(baseUrl + path, file);
     }
 
     public static InputStream getRandomWorld() {
@@ -73,7 +70,7 @@ public class MenuWorldDownloader {
                 lastWorld = world.file != null ? world.file.getPath() : world.path;
             }
             return getStreamForWorld(world);
-        } catch (IOException | NoSuchAlgorithmException e) {
+        } catch (IOException | UncheckedIOException | NoSuchAlgorithmException e) {
             VRSettings.logger.error("Vivecraft: error getting random menuworld:", e);
             try {
                 return getRandomWorldFallback();
@@ -105,7 +102,7 @@ public class MenuWorldDownloader {
         return new ArrayList<>();
     }
 
-    private static List<MenuWorldItem> getOfficialWorlds() throws IOException {
+    private static List<MenuWorldItem> getOfficialWorlds() throws IOException, UncheckedIOException {
         List<MenuWorldItem> list = new ArrayList<>();
         List<String> resultList = Utils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.VERSION_STRING);
         for (String str : resultList) {

@@ -349,7 +349,7 @@ public class MCOpenVR extends MCVR {
             if (ClientDataHolderVR.katvr) {
                 try {
                     VRSettings.logger.info("Vivecraft: Waiting for KATVR....");
-                    Utils.unpackNatives("katvr");
+                    Utils.unpackFolder("natives/katvr", "openvr/katvr");
                     NativeLibrary.addSearchPath(jkatvr.KATVR_LIBRARY_NAME,
                         new File("openvr/katvr").getAbsolutePath());
                     jkatvr.Init(1);
@@ -368,7 +368,7 @@ public class MCOpenVR extends MCVR {
             if (ClientDataHolderVR.infinadeck) {
                 try {
                     VRSettings.logger.info("Vivecraft: Waiting for Infinadeck....");
-                    Utils.unpackNatives("infinadeck");
+                    Utils.unpackFolder("natives/infinadeck", "openvr/infinadeck");
                     NativeLibrary.addSearchPath(jinfinadeck.INFINADECK_LIBRARY_NAME,
                         new File("openvr/infinadeck").getAbsolutePath());
 
@@ -674,12 +674,12 @@ public class MCOpenVR extends MCVR {
 
         // write defaults to disk
         String rev = this.dh.vrSettings.reverseHands ? "_reversed" : "";
-        Utils.loadAssetToFile("input/vive_defaults" + rev + ".json", new File("openvr/input/vive_defaults.json"), false);
-        Utils.loadAssetToFile("input/oculus_defaults" + rev + ".json", new File("openvr/input/oculus_defaults.json"), false);
-        Utils.loadAssetToFile("input/wmr_defaults" + rev + ".json", new File("openvr/input/wmr_defaults.json"), false);
-        Utils.loadAssetToFile("input/knuckles_defaults" + rev + ".json", new File("openvr/input/knuckles_defaults.json"), false);
-        Utils.loadAssetToFile("input/cosmos_defaults" + rev + ".json", new File("openvr/input/cosmos_defaults.json"), false);
-        Utils.loadAssetToFile("input/tracker_defaults.json", new File("openvr/input/tracker_defaults.json"), false);
+        Utils.unpackAsset("input/vive_defaults" + rev + ".json", "openvr/input/vive_defaults.json", false);
+        Utils.unpackAsset("input/oculus_defaults" + rev + ".json", "openvr/input/oculus_defaults.json", false);
+        Utils.unpackAsset("input/wmr_defaults" + rev + ".json", "openvr/input/wmr_defaults.json", false);
+        Utils.unpackAsset("input/knuckles_defaults" + rev + ".json", "openvr/input/knuckles_defaults.json", false);
+        Utils.unpackAsset("input/cosmos_defaults" + rev + ".json", "openvr/input/cosmos_defaults.json", false);
+        Utils.unpackAsset("input/tracker_defaults.json", "openvr/input/tracker_defaults.json", false);
     }
 
     /**
@@ -993,7 +993,7 @@ public class MCOpenVR extends MCVR {
      */
     private void installApplicationManifest(boolean force) throws RenderConfigException {
         File manifestFile = new File("openvr/vivecraft.vrmanifest");
-        Utils.loadAssetToFile("vivecraft.vrmanifest", manifestFile, true);
+        Utils.unpackAsset("vivecraft.vrmanifest", "openvr/vivecraft.vrmanifest", true);
 
         File customFile = new File("openvr/custom.vrmanifest");
         if (customFile.exists()) {
@@ -1002,8 +1002,8 @@ public class MCOpenVR extends MCVR {
 
         String appKey;
 
-        try {
-            Map<?, ?> map = this.GSON.fromJson(new FileReader(manifestFile), Map.class);
+        try (FileReader fileReader = new FileReader(manifestFile)) {
+            Map<?, ?> map = this.GSON.fromJson(fileReader, Map.class);
             appKey = ((Map<?, ?>) ((List<?>) map.get("applications")).get(0)).get("app_key").toString();
         } catch (Exception e) {
             // TODO: should we abort here?
