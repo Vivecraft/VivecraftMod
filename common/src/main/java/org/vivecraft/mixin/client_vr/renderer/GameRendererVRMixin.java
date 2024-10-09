@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;

@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

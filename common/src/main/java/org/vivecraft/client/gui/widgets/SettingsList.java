@@ -14,7 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 import org.vivecraft.client.gui.framework.GuiVROptionSlider;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;

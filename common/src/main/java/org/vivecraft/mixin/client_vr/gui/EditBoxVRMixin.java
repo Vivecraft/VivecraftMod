@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

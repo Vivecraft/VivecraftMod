@@ -5,6 +5,7 @@ import net.minecraft.world.phys.Vec2;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
+import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 
 public class VROptionLayout {
@@ -28,37 +29,50 @@ public class VROptionLayout {
     Class<? extends Screen> screen;
     BiFunction<GuiVROption, Vec2, Boolean> customHandler;
 
-    public VROptionLayout(VRSettings.VrOptions option, BiFunction<GuiVROption, Vec2, Boolean> handler, Position pos, float row, boolean enabled, String title) {
+    public VROptionLayout(
+        VRSettings.VrOptions option, BiFunction<GuiVROption, Vec2, Boolean> handler, Position pos, float row,
+        boolean enabled, @Nullable String title)
+    {
         this(option, pos, row, enabled, title);
         this.customHandler = handler;
     }
 
-    public VROptionLayout(VRSettings.VrOptions option, Position pos, float row, boolean enabled, String title) {
+    public VROptionLayout(
+        VRSettings.VrOptions option, Position pos, float row, boolean enabled, @Nullable String title)
+    {
         this(pos, row, enabled, title);
         this._option = option;
     }
 
-    public VROptionLayout(Class<? extends Screen> screen, BiFunction<GuiVROption, Vec2, Boolean> handler, Position pos, float row, boolean enabled, String title) {
+    public VROptionLayout(
+        Class<? extends Screen> screen, BiFunction<GuiVROption, Vec2, Boolean> handler, Position pos, float row,
+        boolean enabled, @Nullable String title)
+    {
         this(screen, pos, row, enabled, title);
         this.customHandler = handler;
     }
 
-    public VROptionLayout(Class<? extends Screen> screen, Position pos, float row, boolean enabled, String title) {
+    public VROptionLayout(
+        Class<? extends Screen> screen, Position pos, float row, boolean enabled, @Nullable String title)
+    {
         this(pos, row, enabled, title);
         this.screen = screen;
     }
 
-    public VROptionLayout(BiFunction<GuiVROption, Vec2, Boolean> handler, Position pos, float row, boolean enabled, String title) {
+    public VROptionLayout(
+        BiFunction<GuiVROption, Vec2, Boolean> handler, Position pos, float row, boolean enabled,
+        @Nullable String title)
+    {
         this(pos, row, enabled, title);
         this.customHandler = handler;
     }
 
-    public VROptionLayout(int ordinal, Position pos, float row, boolean enabled, String title) {
+    public VROptionLayout(int ordinal, Position pos, float row, boolean enabled, @Nullable String title) {
         this(pos, row, enabled, title);
         this._ordinal = ordinal;
     }
 
-    public VROptionLayout(Position pos, float row, boolean enabled, String title) {
+    public VROptionLayout(Position pos, float row, boolean enabled, @Nullable String title) {
         this._pos = pos;
         this._row = row;
         this._enabled = enabled;
@@ -80,7 +94,8 @@ public class VROptionLayout {
     }
 
     public String getButtonText() {
-        return this._title.isEmpty() && this._option != null ? ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(this._option) : this._title;
+        return this._title.isEmpty() && this._option != null ?
+            ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(this._option) : this._title;
     }
 
     public VRSettings.VrOptions getOption() {
