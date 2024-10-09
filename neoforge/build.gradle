@@ -40,6 +40,9 @@ dependencies {
     bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
     bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
     bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
+    implementation(include("io.github.llamalad7:mixinextras-neoforge:${rootProject.mixin_extras_version}"))
 }
 
 processResources {

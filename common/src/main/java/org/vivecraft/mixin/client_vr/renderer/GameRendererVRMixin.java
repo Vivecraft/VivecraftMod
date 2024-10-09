@@ -230,7 +230,7 @@ public abstract class GameRendererVRMixin
         }
     }
 
-    @WrapOperation(method = "getProjectionMatrix", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;setPerspective(FFFF)Lorg/joml/Matrix4f;"))
+    @WrapOperation(method = "getProjectionMatrix", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;setPerspective(FFFF)Lorg/joml/Matrix4f;", remap = false), remap = true)
     private Matrix4f vivecraft$customProjectionMatrix(
         Matrix4f instance, float fovy, float aspect, float zNear, float zFar, Operation<Matrix4f> original) {
         if (VRState.vrRunning) {
