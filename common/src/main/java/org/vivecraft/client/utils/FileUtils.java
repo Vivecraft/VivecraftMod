@@ -123,7 +123,7 @@ public class FileUtils {
     }
 
     /**
-     * writes the first line of a text file from the given {@code url}
+     * reads the first line of a text file from the given {@code url}
      * @param url url to the source file
      * @return first line in the source text file
      * @throws IOException if an error occurred connecting to the url
@@ -143,7 +143,7 @@ public class FileUtils {
     }
 
     /**
-     * writes a text file from the given {@code url} and returns a list of all lines
+     * reads a text file from the given {@code url} and returns a list of all lines
      * @param url url to the source file
      * @return List of all lines in the source text file
      * @throws IOException if an error occurred connecting to the url
