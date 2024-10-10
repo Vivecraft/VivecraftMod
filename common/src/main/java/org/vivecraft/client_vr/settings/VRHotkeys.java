@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.utils.LangHelper;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
@@ -311,7 +311,8 @@ public class VRHotkeys {
         dataHolder.vrSettings.vrFixedCamposX = (float) pos.x;
         dataHolder.vrSettings.vrFixedCamposY = (float) pos.y;
         dataHolder.vrSettings.vrFixedCamposZ = (float) pos.z;
-        Quaternion quat = new Quaternion(Utils.convertOVRMatrix(dataHolder.vrPlayer.vrdata_room_pre.getController(controller).getMatrix()));
+        Quaternion quat = new Quaternion(
+            MathUtils.convertOVRMatrix(dataHolder.vrPlayer.vrdata_room_pre.getController(controller).getMatrix()));
         dataHolder.vrSettings.vrFixedCamrotQuat.set(quat);
     }
 
@@ -336,7 +337,7 @@ public class VRHotkeys {
             dataHolder.vrSettings.vrFixedCamposX = startCamposX + (float) deltaPos.x + (offsetRotated.getX() - offset.getX());
             dataHolder.vrSettings.vrFixedCamposY = startCamposY + (float) deltaPos.y + (offsetRotated.getY() - offset.getY());
             dataHolder.vrSettings.vrFixedCamposZ = startCamposZ + (float) deltaPos.z + (offsetRotated.getZ() - offset.getZ());
-            dataHolder.vrSettings.vrFixedCamrotQuat.set(startCamrotQuat.multiply(new Quaternion(Utils.convertOVRMatrix(deltaMatrix))));
+            dataHolder.vrSettings.vrFixedCamrotQuat.set(startCamrotQuat.multiply(new Quaternion(MathUtils.convertOVRMatrix(deltaMatrix))));
         }
     }
 

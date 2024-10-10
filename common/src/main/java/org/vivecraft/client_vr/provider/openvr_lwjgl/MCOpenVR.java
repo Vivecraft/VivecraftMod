@@ -20,6 +20,8 @@ import org.lwjgl.openvr.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.vivecraft.client.VivecraftVRMod;
+import org.vivecraft.client.utils.FileUtils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -349,7 +351,7 @@ public class MCOpenVR extends MCVR {
             if (ClientDataHolderVR.katvr) {
                 try {
                     VRSettings.logger.info("Vivecraft: Waiting for KATVR....");
-                    Utils.unpackFolder("natives/katvr", "openvr/katvr");
+                    FileUtils.unpackFolder("natives/katvr", "openvr/katvr");
                     NativeLibrary.addSearchPath(jkatvr.KATVR_LIBRARY_NAME,
                         new File("openvr/katvr").getAbsolutePath());
                     jkatvr.Init(1);
@@ -368,7 +370,7 @@ public class MCOpenVR extends MCVR {
             if (ClientDataHolderVR.infinadeck) {
                 try {
                     VRSettings.logger.info("Vivecraft: Waiting for Infinadeck....");
-                    Utils.unpackFolder("natives/infinadeck", "openvr/infinadeck");
+                    FileUtils.unpackFolder("natives/infinadeck", "openvr/infinadeck");
                     NativeLibrary.addSearchPath(jinfinadeck.INFINADECK_LIBRARY_NAME,
                         new File("openvr/infinadeck").getAbsolutePath());
 
@@ -674,12 +676,12 @@ public class MCOpenVR extends MCVR {
 
         // write defaults to disk
         String rev = this.dh.vrSettings.reverseHands ? "_reversed" : "";
-        Utils.unpackAsset("input/vive_defaults" + rev + ".json", "openvr/input/vive_defaults.json", false);
-        Utils.unpackAsset("input/oculus_defaults" + rev + ".json", "openvr/input/oculus_defaults.json", false);
-        Utils.unpackAsset("input/wmr_defaults" + rev + ".json", "openvr/input/wmr_defaults.json", false);
-        Utils.unpackAsset("input/knuckles_defaults" + rev + ".json", "openvr/input/knuckles_defaults.json", false);
-        Utils.unpackAsset("input/cosmos_defaults" + rev + ".json", "openvr/input/cosmos_defaults.json", false);
-        Utils.unpackAsset("input/tracker_defaults.json", "openvr/input/tracker_defaults.json", false);
+        FileUtils.unpackAsset("input/vive_defaults" + rev + ".json", "openvr/input/vive_defaults.json", false);
+        FileUtils.unpackAsset("input/oculus_defaults" + rev + ".json", "openvr/input/oculus_defaults.json", false);
+        FileUtils.unpackAsset("input/wmr_defaults" + rev + ".json", "openvr/input/wmr_defaults.json", false);
+        FileUtils.unpackAsset("input/knuckles_defaults" + rev + ".json", "openvr/input/knuckles_defaults.json", false);
+        FileUtils.unpackAsset("input/cosmos_defaults" + rev + ".json", "openvr/input/cosmos_defaults.json", false);
+        FileUtils.unpackAsset("input/tracker_defaults.json", "openvr/input/tracker_defaults.json", false);
     }
 
     /**
@@ -993,7 +995,7 @@ public class MCOpenVR extends MCVR {
      */
     private void installApplicationManifest(boolean force) throws RenderConfigException {
         File manifestFile = new File("openvr/vivecraft.vrmanifest");
-        Utils.unpackAsset("vivecraft.vrmanifest", "openvr/vivecraft.vrmanifest", true);
+        FileUtils.unpackAsset("vivecraft.vrmanifest", "openvr/vivecraft.vrmanifest", true);
 
         File customFile = new File("openvr/custom.vrmanifest");
         if (customFile.exists()) {
@@ -1292,7 +1294,7 @@ public class MCOpenVR extends MCVR {
                         velocity.v(0),
                         velocity.v(1),
                         velocity.v(2));
-                    Utils.Matrix4fCopy(this.poseMatrices[deviceIndex], this.controllerPose[controller]);
+                    MathUtils.Matrix4fCopy(this.poseMatrices[deviceIndex], this.controllerPose[controller]);
                     this.controllerTracking[controller] = true;
                     // controller is tracking, don't execute the code below
                     return;
@@ -1359,7 +1361,7 @@ public class MCOpenVR extends MCVR {
 
         // check headset tracking state
         if (this.hmdTrackedDevicePoses.get(k_unTrackedDeviceIndex_Hmd).bPoseIsValid()) {
-            Utils.Matrix4fCopy(this.poseMatrices[k_unTrackedDeviceIndex_Hmd], this.hmdPose);
+            MathUtils.Matrix4fCopy(this.poseMatrices[k_unTrackedDeviceIndex_Hmd], this.hmdPose);
             this.headIsTracking = true;
         } else {
             this.headIsTracking = false;

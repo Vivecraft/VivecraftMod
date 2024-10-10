@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11C;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.extensions.WindowExtension;
 
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class MirrorNotification {
             ArrayList<String> wrapped = new ArrayList<>();
 
             if (mirrorNotifyText != null) {
-                Utils.wordWrap(mirrorNotifyText, TEXT_WORDWRAP_LEN, wrapped);
+                TextUtils.wordWrap(mirrorNotifyText, TEXT_WORDWRAP_LEN, wrapped);
             }
 
             int column = 1;

@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr;
 
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -182,7 +182,7 @@ public class VRData {
                 arms = arms.reverse();
             }
 
-            arms = Utils.vecLerp(head, arms, 0.7D);
+            arms = MathUtils.vecLerp(head, arms, 0.7D);
             return (float) Math.toDegrees(Math.atan2(-arms.x, arms.z));
         }
     }

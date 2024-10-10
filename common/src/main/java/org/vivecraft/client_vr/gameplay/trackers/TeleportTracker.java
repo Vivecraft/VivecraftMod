@@ -16,7 +16,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.BlockTags;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
@@ -283,8 +283,8 @@ public class TeleportTracker extends Tracker {
 
         // calculate gravity vector for arc
         float gravityAcceleration = 0.098F;
-        Matrix4f rollCounter = Utils.rotationZMatrix((float) Math.toRadians(-euler.getRoll()));
-        Matrix4f gravityTilt = Utils.rotationXMatrix((float) Math.PI * -0.8F);
+        Matrix4f rollCounter = MathUtils.rotationZMatrix((float) Math.toRadians(-euler.getRoll()));
+        Matrix4f gravityTilt = MathUtils.rotationXMatrix((float) Math.PI * -0.8F);
         Matrix4f gravityRotation = Matrix4f.multiply(handRotation, rollCounter);
 
         Vector3 forward = new Vector3(0.0F, 1.0F, 0.0F);

@@ -4,7 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.GuiKeyboard;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
@@ -93,10 +93,10 @@ public class KeyboardHandler {
             float yaw = (float) Math.PI + (float) Math.toRadians(-dh.vrPlayer.vrdata_room_pre.hmd.getYaw());
 
             Rotation_room = org.vivecraft.common.utils.math.Matrix4f.rotationY(yaw);
-            Rotation_room = org.vivecraft.common.utils.math.Matrix4f.multiply(Rotation_room, Utils.rotationXMatrix((float)Math.PI * 0.8f));
+            Rotation_room = org.vivecraft.common.utils.math.Matrix4f.multiply(Rotation_room, MathUtils.rotationXMatrix((float)Math.PI * 0.8f));
         } else if (guiRelative && GuiHandler.guiRotation_room != null) {
             // put the keyboard below the current screen
-            Matrix4f guiRot = Utils.convertOVRMatrix(GuiHandler.guiRotation_room);
+            Matrix4f guiRot = MathUtils.convertOVRMatrix(GuiHandler.guiRotation_room);
             Vec3 guiUp = new Vec3(guiRot.m10, guiRot.m11, guiRot.m12);
             Vec3 guiFwd = (new Vec3(guiRot.m20, guiRot.m21, guiRot.m22)).scale(0.25D * GuiHandler.guiScale);
             guiUp = guiUp.scale(0.8F);
@@ -107,7 +107,7 @@ public class KeyboardHandler {
             Matrix4f.mul(roomRotation, guiRot, roomRotation);
             roomRotation.rotate((float) Math.toRadians(30.0D), new Vector3f(-1.0F, 0.0F, 0.0F));
 
-            Rotation_room = Utils.convertToOVRMatrix(roomRotation);
+            Rotation_room = MathUtils.convertToOVRMatrix(roomRotation);
             Pos_room = new Vec3(Rotation_room.M[0][3], Rotation_room.M[1][3], Rotation_room.M[2][3]);
             Rotation_room.M[0][3] = 0.0F;
             Rotation_room.M[1][3] = 0.0F;

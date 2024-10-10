@@ -22,7 +22,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL43;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.extensions.WindowExtension;
@@ -750,7 +750,7 @@ public abstract class VRRenderer {
                 VRSettings.logger.error("Vivecraft: Shader creation failed:", exception);
                 throw new RenderConfigException(
                     Component.translatable("vivecraft.messages.renderiniterror", this.getName()),
-                    Utils.throwableToComponent(exception));
+                    TextUtils.throwableToComponent(exception));
             }
 
             if (minecraft.screen != null) {

@@ -1,7 +1,7 @@
 package org.vivecraft.client_vr.menuworlds;
 
 import net.minecraft.SharedConstants;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.FileUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
@@ -32,15 +32,15 @@ public class MenuWorldDownloader {
         File file = new File(path);
         file.getParentFile().mkdirs();
         if (file.exists()) {
-            String localSha1 = Utils.getFileChecksum(file, "SHA-1");
-            String remoteSha1 = Utils.httpReadLine(baseUrl + "checksum.php?file=" + path);
+            String localSha1 = FileUtils.getFileChecksum(file, "SHA-1");
+            String remoteSha1 = FileUtils.httpReadLine(baseUrl + "checksum.php?file=" + path);
             if (localSha1.equals(remoteSha1)) {
                 VRSettings.logger.info("Vivecraft: MenuWorlds: SHA-1 matches for {}", path);
                 return;
             }
         }
         VRSettings.logger.info("Vivecraft: MenuWorlds: Downloading world {}", path);
-        Utils.httpReadToFile(baseUrl + path, file);
+        FileUtils.httpReadToFile(baseUrl + path, file);
     }
 
     public static InputStream getRandomWorld() {
@@ -104,7 +104,7 @@ public class MenuWorldDownloader {
 
     private static List<MenuWorldItem> getOfficialWorlds() throws IOException, UncheckedIOException {
         List<MenuWorldItem> list = new ArrayList<>();
-        List<String> resultList = Utils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.VERSION_STRING);
+        List<String> resultList = FileUtils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.VERSION_STRING);
         for (String str : resultList) {
             list.add(new MenuWorldItem("menuworlds/" + str, null));
         }

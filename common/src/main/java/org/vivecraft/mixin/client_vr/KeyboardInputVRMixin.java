@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -130,8 +130,8 @@ public class KeyboardInputVRMixin extends Input {
                 this.leftImpulse += vivecraft$getAxisValue(this.options.keyLeft);
 
                 float deadZone = 0.05F;
-                this.forwardImpulse = Utils.applyDeadzone(this.forwardImpulse, deadZone);
-                this.leftImpulse = Utils.applyDeadzone(this.leftImpulse, deadZone);
+                this.forwardImpulse = MathUtils.applyDeadzone(this.forwardImpulse, deadZone);
+                this.leftImpulse = MathUtils.applyDeadzone(this.leftImpulse, deadZone);
             }
 
             if (setMovement) {

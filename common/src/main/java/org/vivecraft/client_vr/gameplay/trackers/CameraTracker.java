@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.render.RenderPass;
@@ -59,7 +59,7 @@ public class CameraTracker extends Tracker {
                 this.startPosition.x + deltaPos.x + offsetRotated.getX() - offset.getX(),
                 this.startPosition.y + deltaPos.y + offsetRotated.getY() - offset.getY(),
                 this.startPosition.z + deltaPos.z + offsetRotated.getZ() - offset.getZ());
-            this.rotation = this.startRotation.multiply(new Quaternion(Utils.convertOVRMatrix(deltaMatrix)));
+            this.rotation = this.startRotation.multiply(new Quaternion(MathUtils.convertOVRMatrix(deltaMatrix)));
         }
 
         if (this.quickMode && !this.isMoving() && !this.dh.grabScreenShot) {

@@ -16,7 +16,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.QuaternionfHistory;
 import org.vivecraft.client_vr.VRData;
@@ -296,7 +296,7 @@ public abstract class MCVR {
             default -> this.hmdPose;
         };
 
-        Vector3 pos = Utils.convertMatrix4ftoTranslationVector(pose);
+        Vector3 pos = MathUtils.convertMatrix4ftoTranslationVector(pose);
 
         if (this.dh.vrSettings.seated || this.dh.vrSettings.allowStandingOriginOffset) {
             if (this.dh.vr.isHMDTracking()) {
@@ -563,10 +563,10 @@ public abstract class MCVR {
             yaw += 360.0F;
         }
 
-        this.hmdYawTotal += Utils.angleDiff(yaw, this.hmdYawLast);
+        this.hmdYawTotal += MathUtils.angleDiff(yaw, this.hmdYawLast);
         this.hmdYawLast = yaw;
 
-        if (Math.abs(Utils.angleNormalize(this.hmdYawTotal) - this.hmdYawLast) > 1.0F || this.hmdYawTotal > 100000.0F) {
+        if (Math.abs(MathUtils.angleNormalize(this.hmdYawTotal) - this.hmdYawLast) > 1.0F || this.hmdYawTotal > 100000.0F) {
             this.hmdYawTotal = this.hmdYawLast;
             VRSettings.logger.info("Vivecraft: HMD yaw desync/overflow corrected");
         }
@@ -636,7 +636,7 @@ public abstract class MCVR {
             this.handRotation[c].Set3x3(controllerPoseHand);
 
             // grab controller position in tracker space, scaled to minecraft units
-            Vector3 controllerPos = Utils.convertMatrix4ftoTranslationVector(controllerPoseTip);
+            Vector3 controllerPos = MathUtils.convertMatrix4ftoTranslationVector(controllerPoseTip);
             this.aimSource[c] = controllerPos.toVector3d();
             this.controllerHistory[c].add(this.getAimSource(c));
 
@@ -750,7 +750,7 @@ public abstract class MCVR {
             ))
         {
             this.mrMovingCamActive = true;
-            Vector3 thirdControllerPos = Utils.convertMatrix4ftoTranslationVector(this.controllerPose[2]);
+            Vector3 thirdControllerPos = MathUtils.convertMatrix4ftoTranslationVector(this.controllerPose[2]);
             this.aimSource[2] = thirdControllerPos.toVector3d();
         } else {
             this.mrMovingCamActive = false;

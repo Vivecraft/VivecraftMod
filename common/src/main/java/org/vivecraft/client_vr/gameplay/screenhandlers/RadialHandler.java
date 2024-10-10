@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.gui.GuiRadial;
@@ -89,7 +89,7 @@ public class RadialHandler {
         float yaw = (float) (Math.PI + Math.atan2(offset.x, offset.z));
 
         Rotation_room = Matrix4f.rotationY(yaw);
-        Matrix4f tilt = Utils.rotationXMatrix(pitch);
+        Matrix4f tilt = MathUtils.rotationXMatrix(pitch);
         Rotation_room = Matrix4f.multiply(Rotation_room, tilt);
     }
 

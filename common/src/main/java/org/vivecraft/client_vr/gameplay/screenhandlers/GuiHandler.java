@@ -17,7 +17,7 @@ import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.phys.*;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
@@ -454,7 +454,7 @@ public class GuiHandler {
             float pitch = (float) Math.asin((look.getY() / look.length()));
             float yaw = (float) (Math.PI + Math.atan2(look.getX(), look.getZ()));
             guiRotation_room = Matrix4f.rotationY(yaw);
-            Matrix4f tilt = Utils.rotationXMatrix(pitch);
+            Matrix4f tilt = MathUtils.rotationXMatrix(pitch);
             guiRotation_room = Matrix4f.multiply(guiRotation_room, tilt);
         }
 
@@ -522,7 +522,7 @@ public class GuiHandler {
                         Matrix4f out = dh.vr.getAimRotation(1);
                         Matrix4f rot = Matrix4f.rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians);
                         Matrix4f guiRotationPose = Matrix4f.multiply(rot, out);
-                        guirot = Matrix4f.multiply(guiRotationPose, Utils.rotationXMatrix(((float) Math.PI * -0.2F)));
+                        guirot = Matrix4f.multiply(guiRotationPose, MathUtils.rotationXMatrix(((float) Math.PI * -0.2F)));
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY((float) Math.PI * 0.1F * i));
                         scale = 0.58823526F;
 
@@ -537,7 +537,7 @@ public class GuiHandler {
                         Matrix4f rot = Matrix4f.rotationY(dh.vrPlayer.vrdata_world_render.rotation_radians);
                         guirot = Matrix4f.multiply(rot, out);
 
-                        guirot = Matrix4f.multiply(guirot, Utils.rotationZMatrix((float) Math.PI * 0.5F * i));
+                        guirot = Matrix4f.multiply(guirot, MathUtils.rotationZMatrix((float) Math.PI * 0.5F * i));
                         guirot = Matrix4f.multiply(guirot, Matrix4f.rotationY((float) Math.PI * 0.3F * i));
 
                         guipos = RenderHelper.getControllerRenderPos(1);

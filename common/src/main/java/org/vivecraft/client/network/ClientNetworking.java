@@ -24,8 +24,6 @@ import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
-import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
-import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
 

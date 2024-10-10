@@ -20,6 +20,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
@@ -350,8 +351,9 @@ public class PhysicalKeyboard {
             ControllerType controller = ControllerType.values()[c];
             KeyButton key = this.findTouchedKey(controller);
 
+            long milliTime = Utils.milliTime();
             if (key != null) {
-                if (key != this.pressedKey[c] && Utils.milliTime() - this.pressTime[c] >= 150L) {
+                if (key != this.pressedKey[c] && milliTime - this.pressTime[c] >= 150L) {
                     if (this.pressedKey[c] != null) {
                         this.pressedKey[c].unpress();
                         this.pressedKey[c] = null;
@@ -359,18 +361,18 @@ public class PhysicalKeyboard {
 
                     key.press(controller, false);
                     this.pressedKey[c] = key;
-                    this.pressTime[c] = Utils.milliTime();
-                    this.pressRepeatTime[c] = Utils.milliTime();
-                } else if (key == this.pressedKey[c] && Utils.milliTime() - this.pressTime[c] >= 500L &&
-                    Utils.milliTime() - this.pressRepeatTime[c] >= 100L)
+                    this.pressTime[c] = milliTime;
+                    this.pressRepeatTime[c] = milliTime;
+                } else if (key == this.pressedKey[c] && milliTime - this.pressTime[c] >= 500L &&
+                    milliTime - this.pressRepeatTime[c] >= 100L)
                 {
                     key.press(controller, true);
-                    this.pressRepeatTime[c] = Utils.milliTime();
+                    this.pressRepeatTime[c] = milliTime;
                 }
             } else if (this.pressedKey[c] != null) {
                 this.pressedKey[c].unpress();
                 this.pressedKey[c] = null;
-                this.pressTime[c] = Utils.milliTime();
+                this.pressTime[c] = milliTime;
             }
         }
     }
@@ -400,11 +402,11 @@ public class PhysicalKeyboard {
         // Transform the controller into keyboard space
         Matrix4f matrix = new Matrix4f();
         matrix.translate(this.getCenterPos());
-        Matrix4f.mul(matrix, (Matrix4f) Utils.convertOVRMatrix(KeyboardHandler.Rotation_room).invert(), matrix);
-        matrix.translate((Vector3f) Utils.convertToVector3f(KeyboardHandler.Pos_room).negate());
+        Matrix4f.mul(matrix, (Matrix4f) MathUtils.convertOVRMatrix(KeyboardHandler.Rotation_room).invert(), matrix);
+        matrix.translate((Vector3f) MathUtils.convertToVector3f(KeyboardHandler.Pos_room).negate());
 
-        Vec3 pos = Utils.convertToVector3d(Utils.transformVector(matrix,
-            Utils.convertToVector3f(this.dh.vrPlayer.vrdata_room_pre.getController(controller.ordinal()).getPosition()),
+        Vec3 pos = MathUtils.convertToVector3d(MathUtils.transformVector(matrix,
+            MathUtils.convertToVector3f(this.dh.vrPlayer.vrdata_room_pre.getController(controller.ordinal()).getPosition()),
             true));
 
         // Do intersection checks

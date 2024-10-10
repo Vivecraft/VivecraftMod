@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.extensions.SparkParticleExtension;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.common.network.VrPlayerState;
@@ -198,20 +198,20 @@ public class VRPlayersClient {
             lerpRotInfo.reverse = rotInfo.reverse;
             lerpRotInfo.seated = rotInfo.seated;
             lerpRotInfo.hmd = rotInfo.hmd;
-            lerpRotInfo.leftArmPos = Utils.vecLerp(lastRotInfo.leftArmPos, rotInfo.leftArmPos, partialTick);
-            lerpRotInfo.rightArmPos = Utils.vecLerp(lastRotInfo.rightArmPos, rotInfo.rightArmPos, partialTick);
-            lerpRotInfo.Headpos = Utils.vecLerp(lastRotInfo.Headpos, rotInfo.Headpos, partialTick);
+            lerpRotInfo.leftArmPos = MathUtils.vecLerp(lastRotInfo.leftArmPos, rotInfo.leftArmPos, partialTick);
+            lerpRotInfo.rightArmPos = MathUtils.vecLerp(lastRotInfo.rightArmPos, rotInfo.rightArmPos, partialTick);
+            lerpRotInfo.Headpos = MathUtils.vecLerp(lastRotInfo.Headpos, rotInfo.Headpos, partialTick);
             lerpRotInfo.leftArmQuat = rotInfo.leftArmQuat;
             lerpRotInfo.rightArmQuat = rotInfo.rightArmQuat;
             lerpRotInfo.headQuat = rotInfo.headQuat;
 
             Vector3 forward = new Vector3(0.0F, 0.0F, -1.0F);
-            lerpRotInfo.leftArmRot = Utils.vecLerp(lastRotInfo.leftArmRot,
-                Utils.convertToVector3d(lerpRotInfo.leftArmQuat.multiply(forward)), partialTick);
-            lerpRotInfo.rightArmRot = Utils.vecLerp(lastRotInfo.rightArmRot,
-                Utils.convertToVector3d(lerpRotInfo.rightArmQuat.multiply(forward)), partialTick);
-            lerpRotInfo.headRot = Utils.vecLerp(lastRotInfo.headRot,
-                Utils.convertToVector3d(lerpRotInfo.headQuat.multiply(forward)), partialTick);
+            lerpRotInfo.leftArmRot = MathUtils.vecLerp(lastRotInfo.leftArmRot,
+                MathUtils.convertToVector3d(lerpRotInfo.leftArmQuat.multiply(forward)), partialTick);
+            lerpRotInfo.rightArmRot = MathUtils.vecLerp(lastRotInfo.rightArmRot,
+                MathUtils.convertToVector3d(lerpRotInfo.rightArmQuat.multiply(forward)), partialTick);
+            lerpRotInfo.headRot = MathUtils.vecLerp(lastRotInfo.headRot,
+                MathUtils.convertToVector3d(lerpRotInfo.headQuat.multiply(forward)), partialTick);
             lerpRotInfo.heightScale = rotInfo.heightScale;
             lerpRotInfo.worldScale = rotInfo.worldScale;
             return lerpRotInfo;
@@ -285,7 +285,7 @@ public class VRPlayersClient {
                 diff = this.rightArmRot;
             }
 
-            Vec3 avg = Utils.vecLerp(diff, this.headRot, 0.5D);
+            Vec3 avg = MathUtils.vecLerp(diff, this.headRot, 0.5D);
             return Math.atan2(-avg.x, avg.z);
         }
     }

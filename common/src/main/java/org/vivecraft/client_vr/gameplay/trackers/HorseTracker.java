@@ -5,7 +5,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.settings.VRSettings;
@@ -113,7 +113,7 @@ public class HorseTracker extends Tracker {
             this.horse.setYRot((float) (absYaw + (pullR - pullL) * turnSpeed));
         }
 
-        this.horse.yBodyRot = (float) Utils.lerpMod(absYawOffset, absYaw, bodyTurnSpeed, 360.0D);
+        this.horse.yBodyRot = (float) MathUtils.lerpMod(absYawOffset, absYaw, bodyTurnSpeed, 360.0D);
         this.horse.yHeadRot = absYaw;
 
         Vec3 movement = horseRot.multiply(new Vec3(0.0D, 0.0D, this.speedLevel * baseSpeed));

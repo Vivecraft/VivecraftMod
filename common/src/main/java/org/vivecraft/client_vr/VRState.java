@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
@@ -124,7 +124,7 @@ public class VRState {
             } else {
                 Minecraft.getInstance()
                     .setScreen(new ErrorScreen(Component.translatable("vivecraft.messages.vriniterror"),
-                        Utils.throwableToComponent(exception)));
+                        TextUtils.throwableToComponent(exception)));
             }
         }
     }

@@ -58,8 +58,8 @@ import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
 import org.vivecraft.client.gui.screens.UpdateScreen;
 import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client.utils.UpdateChecker;
-import org.vivecraft.client.utils.Utils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRState;
@@ -360,7 +360,7 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
                 if (e instanceof RenderConfigException renderConfigException) {
                     setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
                 } else {
-                    setScreen(new ErrorScreen(Component.translatable("vivecraft.messages.vrrendererror"), Utils.throwableToComponent(e)));
+                    setScreen(new ErrorScreen(Component.translatable("vivecraft.messages.vrrendererror"), TextUtils.throwableToComponent(e)));
                 }
                 return renderLevel;
             } finally {
