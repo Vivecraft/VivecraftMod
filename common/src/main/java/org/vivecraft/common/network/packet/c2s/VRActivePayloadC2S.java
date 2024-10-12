@@ -11,7 +11,7 @@ public record VRActivePayloadC2S(boolean vr) implements VivecraftPayloadC2S {
 
     @Override
     public PayloadIdentifier payloadId() {
-        return PayloadIdentifier.CRAWL;
+        return PayloadIdentifier.IS_VR_ACTIVE;
     }
 
     @Override
