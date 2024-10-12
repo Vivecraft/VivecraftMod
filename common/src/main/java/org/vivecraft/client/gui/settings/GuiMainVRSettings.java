@@ -97,9 +97,21 @@ public class GuiMainVRSettings extends GuiVROptionsBase {
         }
     }
 
+    @Override
+    protected boolean onDoneClicked() {
+        if (this.isConfirm) {
+            this.isConfirm = false;
+            this.reinit = true;
+            return true;
+        }
+        return super.onDoneClicked();
+    }
+
     protected void resetOrigin() {
-        MCVR.get().resetPosition();
-        this.vrSettings.saveOptions();
-        this.minecraft.setScreen(null);
+        if (VRState.vrRunning) {
+            MCVR.get().resetPosition();
+            this.vrSettings.saveOptions();
+            this.minecraft.setScreen(null);
+        }
     }
 }
