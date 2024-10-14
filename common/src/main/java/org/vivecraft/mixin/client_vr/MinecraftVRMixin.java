@@ -544,14 +544,8 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         }
 
         if (VRState.vrRunning) {
-            if (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady()) {
-                if (MethodHolder.isInMenuRoom()) {
-                    ClientDataHolderVR.getInstance().menuWorldRenderer.tick();
-                    // update textures in the menu
-                    if (this.level == null) {
-                        this.textureManager.tick();
-                    }
-                }
+            if (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() && MethodHolder.isInMenuRoom()) {
+                ClientDataHolderVR.getInstance().menuWorldRenderer.tick();
             }
 
             this.profiler.push("vrProcessInputs");
