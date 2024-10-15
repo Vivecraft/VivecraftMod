@@ -302,7 +302,7 @@ public class MCOpenVR extends MCVR {
 
     @Override
     public Vector2f getPlayAreaSize() {
-        if (OpenVR.VRChaperone != null && OpenVR.VRChaperone.GetPlayAreaSize != 0) {
+        if (OpenVR.VRChaperone == null || OpenVR.VRChaperone.GetPlayAreaSize == 0L) {
             return null;
         } else {
             try (MemoryStack stack = MemoryStack.stackPush()) {
