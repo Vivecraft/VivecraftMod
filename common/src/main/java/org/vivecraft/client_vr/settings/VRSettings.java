@@ -532,7 +532,7 @@ public class VRSettings {
         this.loadOptions();
 
         // load external camera config
-        VRHotkeys.loadExternalCameraConfig();
+        VRHotkeys.loadExternalCameraConfig(this);
     }
 
     /**

@@ -118,7 +118,7 @@ public class GuiRenderOpticsSettings extends GuiVROptionsBase {
                 this.reinit = true;
             }
             if (guivroption.getId() == VRSettings.VrOptions.RELOAD_EXTERNAL_CAMERA.ordinal()) {
-                VRHotkeys.loadExternalCameraConfig();
+                VRHotkeys.loadExternalCameraConfig(this.vrSettings);
             }
         }
     }

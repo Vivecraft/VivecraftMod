@@ -389,7 +389,7 @@ public class VRHotkeys {
     /**
      * read camera config file and set the position/rotation
      */
-    public static void loadExternalCameraConfig() {
+    public static void loadExternalCameraConfig(VRSettings vrSettings) {
         File file = new File("ExternalCamera.cfg");
 
         if (file.exists()) {
@@ -418,17 +418,16 @@ public class VRHotkeys {
             }
 
             // Eh just set everything, the fixed pos is overridden by the moving cam anyways
-            ClientDataHolderVR dataHolder = ClientDataHolderVR.getInstance();
-            Quaternion quaternion = new Quaternion(rx, ry, rz, dataHolder.vrSettings.externalCameraAngleOrder);
-            dataHolder.vrSettings.mrMovingCamOffsetX = x;
-            dataHolder.vrSettings.mrMovingCamOffsetY = y;
-            dataHolder.vrSettings.mrMovingCamOffsetZ = z;
-            dataHolder.vrSettings.mrMovingCamOffsetRotQuat.set(quaternion);
-            dataHolder.vrSettings.vrFixedCamposX = x;
-            dataHolder.vrSettings.vrFixedCamposY = y;
-            dataHolder.vrSettings.vrFixedCamposZ = z;
-            dataHolder.vrSettings.vrFixedCamrotQuat.set(quaternion);
-            dataHolder.vrSettings.mixedRealityFov = fov;
+            Quaternion quaternion = new Quaternion(rx, ry, rz, vrSettings.externalCameraAngleOrder);
+            vrSettings.mrMovingCamOffsetX = x;
+            vrSettings.mrMovingCamOffsetY = y;
+            vrSettings.mrMovingCamOffsetZ = z;
+            vrSettings.mrMovingCamOffsetRotQuat.set(quaternion);
+            vrSettings.vrFixedCamposX = x;
+            vrSettings.vrFixedCamposY = y;
+            vrSettings.vrFixedCamposZ = z;
+            vrSettings.vrFixedCamrotQuat.set(quaternion);
+            vrSettings.mixedRealityFov = fov;
         }
     }
 
