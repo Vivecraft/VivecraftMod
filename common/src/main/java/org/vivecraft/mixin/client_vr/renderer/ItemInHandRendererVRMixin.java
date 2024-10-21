@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -121,7 +122,16 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
             }
 
             ItemDisplayContext itemDisplayContext;
-            if ((ClientNetworking.isThirdPersonItems() && !(BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer))) || dh.climbTracker.isClaws(pStack)) {
+
+            // third person transforms for custom model data items, but not spear, shield and crossbow
+            boolean hasCMD = pStack.getComponents().has(DataComponents.CUSTOM_MODEL_DATA) &&
+                rendertype != VivecraftItemRendering.VivecraftItemTransformType.Crossbow &&
+                rendertype != VivecraftItemRendering.VivecraftItemTransformType.Spear &&
+                rendertype != VivecraftItemRendering.VivecraftItemTransformType.Shield;
+
+            boolean isBow = BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer);
+
+            if (((ClientNetworking.isThirdPersonItems() || (hasCMD && ClientNetworking.isThirdPersonItemsCustom())) && !isBow) || dh.climbTracker.isClaws(pStack)) {
                 useLeftHandModelinLeftHand = true; //test
                 VivecraftItemRendering.applyThirdPersonItemTransforms(pMatrixStack, rendertype, mainHand, pPlayer, pEquippedProgress, pPartialTicks, pStack, pHand);
                 itemDisplayContext = mainHand ? ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : (useLeftHandModelinLeftHand ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);
