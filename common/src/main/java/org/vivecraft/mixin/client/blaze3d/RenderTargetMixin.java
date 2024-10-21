@@ -218,13 +218,13 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
         if (keepAspect) {
             if (drawAspect > bufferAspect) {
                 // destination is wider than the buffer
-                float heightAspect = ((float) height / (float) width) * (0.5F - yCropFactor);
+                float heightAspect = (bufferAspect / drawAspect) * (0.5F - yCropFactor);
 
                 yMin = 0.5F - heightAspect;
                 yMax = 0.5F + heightAspect;
             } else {
                 // destination is taller than the buffer
-                float widthAspect = drawAspect * (0.5F - xCropFactor);
+                float widthAspect = (drawAspect / bufferAspect) * (0.5F - xCropFactor);
 
                 xMin = 0.5F - widthAspect;
                 xMax = 0.5F + widthAspect;
