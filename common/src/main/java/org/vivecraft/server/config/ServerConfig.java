@@ -71,6 +71,7 @@ public class ServerConfig {
     public static ConfigBuilder.DoubleValue worldscaleMin;
 
     public static ConfigBuilder.BooleanValue forceThirdPersonItems;
+    public static ConfigBuilder.BooleanValue forceThirdPersonItemsCustom;
 
     public static ConfigBuilder.BooleanValue vrSwitchingEnabled;
 
@@ -357,6 +358,10 @@ public class ServerConfig {
         forceThirdPersonItems = builder
             .push("thirdPersonItems")
             .comment("Forces players to use the raw item position setting")
+            .define(false);
+        forceThirdPersonItemsCustom = builder
+            .push("thirdPersonItemsCustom")
+            .comment("Forces players to use the raw item position setting, only for items with custom model data")
             .define(false);
         // end settingOverrides
         builder.pop();
