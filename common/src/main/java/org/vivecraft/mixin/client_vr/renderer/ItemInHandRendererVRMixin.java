@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -123,7 +124,7 @@ public abstract class ItemInHandRendererVRMixin implements ItemInHandRendererExt
             ItemDisplayContext itemDisplayContext;
 
             // third person transforms for custom model data items, but not spear, shield and crossbow
-            boolean hasCMD = pStack.hasTag() && pStack.getTag().getInt("CustomModelData") != 0 &&
+            boolean hasCMD = pStack.getComponents().has(DataComponents.CUSTOM_MODEL_DATA) &&
                 rendertype != VivecraftItemRendering.VivecraftItemTransformType.Crossbow &&
                 rendertype != VivecraftItemRendering.VivecraftItemTransformType.Spear &&
                 rendertype != VivecraftItemRendering.VivecraftItemTransformType.Shield;
