@@ -103,6 +103,7 @@ public class BowTracker extends Tracker {
 
     public void reset(LocalPlayer player) {
         this.isDrawing = false;
+        this.canDraw = false;
     }
 
     public EntryPoint getEntryPoint() {

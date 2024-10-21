@@ -143,6 +143,17 @@ public class ServerNetworking {
                     packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
                 }
 
+                if (ServerConfig.forceThirdPersonItemsCustom.get()) {
+                    FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
+                    byteBuf.writeUtf("thirdPersonItemsCustom");
+                    byteBuf.writeUtf("" + true);
+
+                    byte[] array = new byte[byteBuf.readableBytes()];
+                    byteBuf.readBytes(array);
+                    byteBuf.release();
+                    packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
+                }
+
                 if (ServerConfig.crawlingEnabled.get()) {
                     packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[0]));
                 }
