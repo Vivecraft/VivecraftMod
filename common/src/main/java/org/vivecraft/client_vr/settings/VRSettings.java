@@ -222,6 +222,8 @@ public class VRSettings {
     public boolean ingameBindingsInGui = false;
     @SettingField(VrOptions.THIRDPERSON_ITEMTRANSFORMS)
     public boolean thirdPersonItems = false;
+    @SettingField(VrOptions.THIRDPERSON_ITEMTRANSFORMS_CUSTOM)
+    public boolean thirdPersonItemsCustom = true;
     //
 
     //Locomotion
@@ -1702,6 +1704,7 @@ public class VRSettings {
         AUTO_SPRINT(false, true), // Auto-sprint
         AUTO_SPRINT_THRESHOLD(true, false, 0.5f, 1f, 0.01f, 2), // Auto-sprint Threshold
         THIRDPERSON_ITEMTRANSFORMS(false, true), // 3rd person items
+        THIRDPERSON_ITEMTRANSFORMS_CUSTOM(false, true), // 3rd person items, for items with custom model data
         BOW_MODE(false, true) { // Roomscale Bow Mode
 
             @Override
@@ -2164,6 +2167,7 @@ public class VRSettings {
             registerSetting(VrOptions.TELEPORT_HORIZ_LIMIT, "teleportLimitHoriz", () -> vrTeleportHorizLimit);
             registerSetting(VrOptions.WORLD_SCALE, "worldScale", () -> worldScale);
             registerSetting(VrOptions.THIRDPERSON_ITEMTRANSFORMS, "thirdPersonItems", () -> thirdPersonItems);
+            registerSetting(VrOptions.THIRDPERSON_ITEMTRANSFORMS_CUSTOM, "thirdPersonItemsCustom", () -> thirdPersonItemsCustom);
         }
 
         private void registerSetting(VrOptions option, String networkName, Supplier<Object> originalValue) {
