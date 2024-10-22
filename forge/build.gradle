@@ -22,6 +22,7 @@ loom {
         mixinConfig "vivecraft.sodium.mixins.json"
         mixinConfig "vivecraft.forge.sodium.mixins.json"
         mixinConfig "vivecraft.iris.mixins.json"
+        mixinConfig "vivecraft.immersiveportals.mixins.json"
         mixinConfig "vivecraft.physicsmod.mixins.json"
         mixinConfig "vivecraft.rei.mixins.json"
         mixinConfig "vivecraft.resolutioncontrol.mixins.json"
