@@ -97,6 +97,7 @@ public class BowTracker extends Tracker {
     public void reset(LocalPlayer player) {
         this.canDraw = false;
         this.isDrawing = false;
+        this.canDraw = false;
     }
 
     @Override

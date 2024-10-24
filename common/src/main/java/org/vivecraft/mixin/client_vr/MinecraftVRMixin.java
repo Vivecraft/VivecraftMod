@@ -410,14 +410,18 @@ public abstract class MinecraftVRMixin implements MinecraftExtension {
         return VRState.vrRunning ? 0L : original;
     }
 
-    @Inject(method = "resizeDisplay", at = @At("HEAD"))
+    @Inject(method = "resizeDisplay", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;"))
     private void vivecraft$restoreVanillaState(CallbackInfo ci) {
         if (VRState.vrInitialized) {
             // restore vanilla post chains before the resize, or it will resize the wrong ones
             if (this.levelRenderer != null) {
                 ((LevelRendererExtension) this.levelRenderer).vivecraft$restoreVanillaPostChains();
             }
-            RenderPassManager.setVanillaRenderPass();
+            if (VRState.vrRunning) {
+                RenderPassManager.setGUIRenderPass();
+            } else {
+                RenderPassManager.setVanillaRenderPass();
+            }
         }
     }
 

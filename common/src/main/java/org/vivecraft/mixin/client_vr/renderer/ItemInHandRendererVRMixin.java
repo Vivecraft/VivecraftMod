@@ -138,10 +138,16 @@ public abstract class ItemInHandRendererVRMixin {
             }
 
             ItemDisplayContext itemDisplayContext;
-            if ((ClientNetworking.isThirdPersonItems() &&
-                !(BowTracker.isBow(itemStack) && dh.bowTracker.isActive((LocalPlayer) player))
-            ) || ClimbTracker.isClaws(itemStack))
-            {
+
+            // third person transforms for custom model data items, but not spear, shield and crossbow
+            boolean hasCMD = pStack.hasTag() && pStack.getTag().getInt("CustomModelData") != 0 &&
+                rendertype != VivecraftItemRendering.VivecraftItemTransformType.Crossbow &&
+                rendertype != VivecraftItemRendering.VivecraftItemTransformType.Spear &&
+                rendertype != VivecraftItemRendering.VivecraftItemTransformType.Shield;
+
+            boolean isBow = BowTracker.isBow(pStack) && dh.bowTracker.isActive((LocalPlayer) pPlayer);
+
+            if (((ClientNetworking.isThirdPersonItems() || (hasCMD && ClientNetworking.isThirdPersonItemsCustom())) && !isBow) || dh.climbTracker.isClaws(pStack)) {
                 useLeftHandModelinLeftHand = true; //test
                 VivecraftItemRendering.applyThirdPersonItemTransforms(poseStack, transformType, mainHand, player, equippedProgress, partialTick, itemStack, hand);
 

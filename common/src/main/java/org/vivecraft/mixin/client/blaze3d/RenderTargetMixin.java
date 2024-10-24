@@ -16,8 +16,6 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
-import java.util.Arrays;
-
 @Mixin(RenderTarget.class)
 public abstract class RenderTargetMixin implements RenderTargetExtension {
 
@@ -123,13 +121,11 @@ public abstract class RenderTargetMixin implements RenderTargetExtension {
             ))
             {
                 // log a limited StackTrace to find the cause, we don't need to spam the log with full StackTraces
-                VRSettings.logger.error(
-                    "Vivecraft: Mismatched RenderTarget size detected, viewport size change was blocked. MainTarget size: {}x{}, RenderTarget size: {}x{}. RenderPass: {}, Stacktrace: {}",
+                VRSettings.logger.error("Vivecraft: Mismatched RenderTarget size detected, viewport size change was blocked. MainTarget size: {}x{}, RenderTarget size: {}x{}. RenderPass: {}, Stacktrace:",
                     Minecraft.getInstance().getMainRenderTarget().width,
                     Minecraft.getInstance().getMainRenderTarget().height,
-                    this.width, this.height, ClientDataHolderVR.getInstance().currentPass, String.join("\n",
-                        Arrays.stream(Thread.currentThread().getStackTrace(), 2, 12).map(Object::toString)
-                            .toArray(String[]::new)));
+                    this.width, this.height, ClientDataHolderVR.getInstance().currentPass,
+                    new RuntimeException());
                 this.vivecraft$loggedSizeError = true;
             }
             return false;
