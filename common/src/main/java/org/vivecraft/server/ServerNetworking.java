@@ -138,19 +138,14 @@ public class ServerNetworking {
 
                 if (ServerConfig.forceThirdPersonItems.get()) {
                     packetConsumer.accept(new SettingOverridePayloadS2C(Map.of(
-                        "thirdPersonItems.min", "true"
+                        "thirdPersonItems", "true"
                     )));
                 }
 
                 if (ServerConfig.forceThirdPersonItemsCustom.get()) {
-                    FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
-                    byteBuf.writeUtf("thirdPersonItemsCustom");
-                    byteBuf.writeUtf("" + true);
-
-                    byte[] array = new byte[byteBuf.readableBytes()];
-                    byteBuf.readBytes(array);
-                    byteBuf.release();
-                    packetConsumer.accept(getVivecraftServerPacket(CommonNetworkHelper.PacketDiscriminators.SETTING_OVERRIDE, array));
+                    packetConsumer.accept(new SettingOverridePayloadS2C(Map.of(
+                        "thirdPersonItemsCustom", "true"
+                    )));
                 }
 
                 if (ServerConfig.crawlingEnabled.get()) {
