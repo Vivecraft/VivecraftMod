@@ -110,12 +110,7 @@ public class Vector2f extends Vector {
     }
 
     public String toString() {
-        String stringbuilder = "Vector2f[" +
-            this.x +
-            ", " +
-            this.y +
-            ']';
-        return stringbuilder;
+        return "Vector2f[%f, %f]".formatted(this.x, this.y);
     }
 
     public final float getX() {

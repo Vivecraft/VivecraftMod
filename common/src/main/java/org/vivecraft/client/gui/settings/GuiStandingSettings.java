@@ -25,10 +25,11 @@ public class GuiStandingSettings extends GuiVROptionsBase {
         })
     };
 
-    public GuiStandingSettings(Screen guiScreen) {
-        super(guiScreen);
+    public GuiStandingSettings(Screen lastScreen) {
+        super(lastScreen);
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.standing";
         super.init(this.locomotionSettings, true);

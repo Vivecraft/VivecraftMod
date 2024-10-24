@@ -34,27 +34,27 @@ public abstract class FishingHookVRMixin extends Entity {
     @Unique
     private boolean vivecraft$wasNibble = false;
 
-    @Inject(at = @At(value = "HEAD"), method = "tick")
+    @Inject(method = "tick", at = @At(value = "HEAD"))
     private void vivecraft$fishhookFeedback(CallbackInfo ci) {
         if (!VRState.vrRunning) {
             return;
         }
         Player player = this.getPlayerOwner();
         if (player != null && player.isLocalPlayer()) {
-            if (biting && !vivecraft$wasBiting) {
+            if (this.biting && !this.vivecraft$wasBiting) {
                 // bite, big feedback
                 MCVR.get().triggerHapticPulse(
                     player.getMainHandItem().getItem() instanceof FishingRodItem ? ControllerType.RIGHT : ControllerType.LEFT,
                     0.005F, 160.0F, 0.5F);
-            } else if (getDeltaMovement().y < -0.01 && !vivecraft$wasNibble) {
+            } else if (getDeltaMovement().y < -0.01 && !this.vivecraft$wasNibble) {
                 // nibble, small feedback
                 MCVR.get().triggerHapticPulse(
                     player.getMainHandItem().getItem() instanceof FishingRodItem ? ControllerType.RIGHT : ControllerType.LEFT,
                     0.0005F, 160.0F, 0.05F);
-                vivecraft$wasNibble = true;
+                this.vivecraft$wasNibble = true;
             }
         }
-        vivecraft$wasBiting = biting;
-        vivecraft$wasNibble = vivecraft$wasNibble && getDeltaMovement().y < 0.0;
+        this.vivecraft$wasBiting = this.biting;
+        this.vivecraft$wasNibble = this.vivecraft$wasNibble && getDeltaMovement().y < 0.0;
     }
 }

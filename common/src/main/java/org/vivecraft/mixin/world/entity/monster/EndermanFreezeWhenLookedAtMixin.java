@@ -1,17 +1,16 @@
 package org.vivecraft.mixin.world.entity.monster;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.EnderMan;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.phys.Vec3;
+import javax.annotation.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.server.ServerVRPlayers;
-import org.vivecraft.server.ServerVivePlayer;
 
 @Mixin(targets = "net.minecraft.world.entity.monster.EnderMan$EndermanFreezeWhenLookedAt")
 public class EndermanFreezeWhenLookedAtMixin {
@@ -19,16 +18,14 @@ public class EndermanFreezeWhenLookedAtMixin {
     @Shadow
     @Nullable
     private LivingEntity target;
-    @Final
-    @Shadow
-    private EnderMan enderman;
 
-    @Inject(at = @At("HEAD"), method = "tick", cancellable = true)
-    public void vivecraft$vrTick(CallbackInfo ci) {
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/control/LookControl;setLookAt(DDD)V"))
+    private void vivecraft$lookAtHead(LookControl instance, double x, double y, double z, Operation<Void> original) {
         if (this.target instanceof ServerPlayer player && ServerVRPlayers.isVRPlayer(player)) {
-            ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);
-            this.enderman.getLookControl().setLookAt(data.getHMDPos(player));
-            ci.cancel();
+            Vec3 hmdPos = ServerVRPlayers.getVivePlayer(player).getHMDPos();
+            original.call(instance, hmdPos.x, hmdPos.y, hmdPos.z);
+        } else {
+            original.call(instance, x, y, z);
         }
     }
 }

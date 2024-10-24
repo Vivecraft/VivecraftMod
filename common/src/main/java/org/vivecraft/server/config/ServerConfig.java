@@ -4,9 +4,13 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.server.ServerNetworking;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +59,7 @@ public class ServerConfig {
     public static ConfigBuilder.BooleanValue pvpNotifyBlockedDamage;
 
     public static ConfigBuilder.BooleanValue climbeyEnabled;
-    public static ConfigBuilder.InListValue<String> climbeyBlockmode;
+    public static ConfigBuilder.EnumValue<ClimbeyBlockmode> climbeyBlockmode;
     public static ConfigBuilder.ListValue<String> climbeyBlocklist;
 
     public static ConfigBuilder.BooleanValue crawlingEnabled;
@@ -96,7 +100,8 @@ public class ServerConfig {
         if (listener == null) {
             listener = (action, path, incorrectValue, correctedValue) -> {
                 if (incorrectValue != null) {
-                    System.out.println("Corrected " + String.join(".", path) + ": was " + incorrectValue + ", is now " + correctedValue);
+                    ServerNetworking.LOGGER.info("Vivecraft: Corrected setting '{}': was '{}', is now '{}'", String.join(".", path),
+                        incorrectValue, correctedValue);
                 }
             };
         }
@@ -174,6 +179,12 @@ public class ServerConfig {
         messagesWelcomeVanilla = builder
             .push("welcomeVanilla")
             .define("%s has joined as a Muggle!");
+
+        messagesLeaveMessage = builder
+            .push("leaveMessage")
+            .define("%s has disconnected from the server!");
+
+        // general death messages
         messagesDeathVR = builder
             .push("deathVR")
             .define("%s died in standing VR!");
@@ -290,11 +301,27 @@ public class ServerConfig {
         climbeyBlockmode = builder
             .push("blockmode")
             .comment("Sets which blocks are climb-able. Options are:\n \"DISABLED\" = List ignored. All blocks are climbable.\n \"WHITELIST\" = Only blocks on the list are climbable.\n \"BLACKLIST\" = All blocks are climbable except those on the list")
-            .defineInList("DISABLED", Arrays.asList("DISABLED", "WHITELIST", "BLACKLIST"));
+            .defineEnum(ClimbeyBlockmode.DISABLED, ClimbeyBlockmode.class);
         climbeyBlocklist = builder
             .push("blocklist")
             .comment("The list of block names for use with include/exclude block mode.")
-            .defineList(Arrays.asList("white_wool", "dirt", "grass_block"), (s) -> s instanceof String && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation((String) s)));
+            .defineList(Arrays.asList("white_wool", "dirt", "grass_block"), (s) -> {
+                boolean valid = true;
+                try {
+                    // check if valid block
+                    Block b = BuiltInRegistries.BLOCK.get(new ResourceLocation((String) s));
+                    if (b == Blocks.AIR) {
+                        valid = false;
+                    }
+                } catch (ResourceLocationException e) {
+                    valid = false;
+                }
+                if (!valid) {
+                    ServerNetworking.LOGGER.error("Vivecraft: Ignoring invalid/unknown block in climbey blocklist: {}", s);
+                }
+                // return true or the whole list would be reset
+                return true;
+            });
         // end climbey
         builder.pop();
 
@@ -375,6 +402,13 @@ public class ServerConfig {
             .define(true);
         // end vrSwitching
         builder.pop();
+
+        // fix any enums that are loaded as strings first
+        for (ConfigBuilder.ConfigValue<?> configValue: builder.getConfigValues()) {
+            if (configValue instanceof ConfigBuilder.EnumValue enumValue) {
+                enumValue.set(enumValue.getEnumValue(enumValue.get()));
+            }
+        }
 
         // if the config is outdated, or is missing keys, re add them
         builder.correct(listener);

@@ -2,7 +2,13 @@ package org.vivecraft.server;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.*;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.blocks.BlockInput;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,12 +24,21 @@ import java.util.concurrent.TimeUnit;
 
 public class ServerUtil {
 
+    /**
+     * scheduler to send delayed messages
+     */
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     static {
+        // shut down the scheduler when the jvm terminates
         Runtime.getRuntime().addShutdownHook(new Thread(scheduler::shutdownNow));
     }
 
+    /**
+     * schedules delayed welcome/kick messages for the give player <br>
+     * the delay is for  the case that the clients VERSION packed isn't received immediately
+     * @param serverPlayer player to send messages for / kick
+     */
     public static void scheduleWelcomeMessageOrKick(ServerPlayer serverPlayer) {
         if (ServerConfig.messagesEnabled.get() ||
             (ServerConfig.vive_only.get() || ServerConfig.vr_only.get())) {
@@ -36,14 +51,13 @@ public class ServerUtil {
                     boolean isOpAndAllowed = ServerConfig.allow_op.get() && serverPlayer.server.getPlayerList().isOp(serverPlayer.getGameProfile());
 
                     // kick non VR players
-                    if (!isOpAndAllowed && ServerConfig.vr_only.get()
-                        && (vivePlayer == null || !vivePlayer.isVR())) {
+                    if (!isOpAndAllowed && ServerConfig.vr_only.get() && (vivePlayer == null || !vivePlayer.isVR())) {
                         String kickMessage = ServerConfig.messagesKickVROnly.get();
                         try {
                             kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
                         } catch (IllegalFormatException e) {
                             // catch errors users might put into the messages, to not crash other stuff
-                            ServerNetworking.LOGGER.error("KickVROnly message '{}' has errors: {}", kickMessage, e.toString());
+                            ServerNetworking.LOGGER.error("Vivecraft: KickVROnly message '{}' has errors: ", kickMessage, e);
                         }
                         serverPlayer.connection.disconnect(Component.literal(kickMessage));
                         return;
@@ -57,7 +71,7 @@ public class ServerUtil {
                             kickMessage = kickMessage.formatted(serverPlayer.getName().getString());
                         } catch (IllegalFormatException e) {
                             // catch errors users might put into the messages, to not crash other stuff
-                            ServerNetworking.LOGGER.error("KickViveOnly message '{}' has errors: {}", kickMessage, e.toString());
+                            ServerNetworking.LOGGER.error("Vivecraft: KickViveOnly message '{}' has errors: ", kickMessage, e);
                         }
                         serverPlayer.connection.disconnect(Component.literal(kickMessage));
                         return;
@@ -82,7 +96,7 @@ public class ServerUtil {
                                 serverPlayer.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(serverPlayer.getName().getString())), false);
                             } catch (IllegalFormatException e) {
                                 // catch errors users might put into the messages, to not crash other stuff
-                                ServerNetworking.LOGGER.error("Welcome message '{}' has errors: {}", message, e.toString());
+                                ServerNetworking.LOGGER.error("Vivecraft: Welcome message '{}' has errors: ", message, e);
                             }
                         }
                     }
@@ -91,6 +105,10 @@ public class ServerUtil {
         }
     }
 
+    /**
+     * notifies the given player for vivecraft updates, if they areOP and the setting is enabled
+     * @param serverPlayer player to notify
+     */
     public static void sendUpdateNotificationIfOP(ServerPlayer serverPlayer) {
         if (ServerConfig.checkForUpdate.get()) {
             // don't send update notifications on singleplayer
@@ -105,17 +123,29 @@ public class ServerUtil {
         }
     }
 
-    public static void registerCommands(CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {
+    /**
+     * registers Vivecraft server commands, to change config settings with commands
+     * @param dispatcher dispatcher to use for registering
+     */
+    public static void registerCommands(CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
+        // reload command
         dispatcher.register(Commands.literal("vivecraft-server-config")
-            .requires(source -> source.hasPermission(4)).then(
-                Commands.literal("reload").executes(context -> {
+            .requires(source -> source.hasPermission(4))
+            .then(Commands.literal("reload")
+                .executes(context -> {
                     ServerConfig.init((action, path, incorrectValue, correctedValue) -> context.getSource()
-                        .sendSystemMessage(Component.literal("Corrected §a[" + String.join("§r.§a", path) + "]§r: was '(" + incorrectValue.getClass().getSimpleName() + ")" + incorrectValue + "', is now '(" + correctedValue.getClass().getSimpleName() + ")" + correctedValue + "'")));
+                        .sendSystemMessage(Component.literal(
+                            "Corrected §a[%s]§r: was '(%s)%s', is now '(%s)%s'".formatted(
+                                String.join("§r.§a", path),
+                                incorrectValue.getClass().getSimpleName(), incorrectValue,
+                                correctedValue.getClass().getSimpleName(), correctedValue
+                            ))));
                     return 1;
                 })
             )
         );
 
+        // register commands for each setting
         for (var setting : ServerConfig.getConfigValues()) {
             Class<?> clazz = setting.get().getClass();
             final ArgumentType<?> argument;
@@ -134,123 +164,147 @@ public class ServerUtil {
                 argument = StringArgumentType.string();
             }
 
+            LiteralArgumentBuilder<CommandSourceStack> baseCommand = Commands.literal(setting.getPath());
+
+            // value set commands
             if (setting instanceof ConfigBuilder.InListValue<?> inListValue) {
-                dispatcher.register(Commands.literal("vivecraft-server-config")
-                    .requires(source -> source.hasPermission(4)).then(
-                        Commands.literal(inListValue.getPath()).then(
-                            Commands.literal("set").then(
-                                Commands.argument(argumentName, argument)
-                                    .suggests((context, builder) -> {
-                                        for (var value : inListValue.getValidValues()) {
-                                            builder.suggest(value.toString());
-                                        }
-                                        return builder.buildFuture();
-                                    })
-                                    .executes(context -> {
-                                        try {
-                                            Object newValue = context.getArgument(argumentName, clazz);
-                                            setting.set(newValue);
-                                            context.getSource().sendSystemMessage(Component.literal("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"));
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                        return 1;
-                                    })
-                            )
-                        )
+                baseCommand.then(Commands.literal("set")
+                    .then(Commands.argument(argumentName, argument)
+                        .suggests((context, builder) -> {
+                            for (var value : inListValue.getValidValues()) {
+                                if (value.toString().toLowerCase().contains(builder.getRemainingLowerCase())) {
+                                    builder.suggest(value.toString());
+                                }
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> {
+                            Object newValue = context.getArgument(argumentName, clazz);
+                            if (inListValue.getValidValues().contains(newValue)) {
+                                setting.set(newValue);
+                                context.getSource().sendSystemMessage(
+                                    Component.literal(
+                                        "set §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)));
+                                return 1;
+                            } else {
+                                throw new CommandSyntaxException(
+                                    CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument(),
+                                    Component.literal("Unsupported value: " + newValue.toString()));
+                            }
+                        })
+                    )
+                );
+            } else if (setting instanceof ConfigBuilder.EnumValue<?> enumValue) {
+                baseCommand.then(Commands.literal("set")
+                    .then(Commands.argument(argumentName, argument)
+                        .suggests((context, builder) -> {
+                            for (var value : enumValue.getValidValues()) {
+                                if (value.toString().toLowerCase().contains(builder.getRemainingLowerCase())) {
+                                    builder.suggest(value.toString());
+                                }
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> {
+                            Object newValue = context.getArgument(argumentName, String.class);
+                            Object newEnumValue = enumValue.getEnumValue(newValue);
+                            if (newEnumValue != null) {
+                                setting.set(newEnumValue);
+                                context.getSource().sendSystemMessage(
+                                    Component.literal(
+                                        "set §a[%s]§r to '%s'".formatted(setting.getPath(), newEnumValue)));
+                                return 1;
+                            } else {
+                                throw new CommandSyntaxException(
+                                    CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument(),
+                                    Component.literal("Unsupported value: " + newValue.toString()));
+                            }
+                        })
                     )
                 );
             } else if (!(setting.get() instanceof List)) {
-                dispatcher.register(Commands.literal("vivecraft-server-config")
-                    .requires(source -> source.hasPermission(4)).then(
-                        Commands.literal(setting.getPath()).then(
-                            Commands.literal("set").then(
-                                Commands.argument(argumentName, argument)
-                                    .executes(context -> {
-                                        try {
-                                            Object newValue = context.getArgument(argumentName, clazz);
-                                            setting.set(newValue);
-                                            context.getSource().sendSystemMessage(Component.literal("set §a[" + setting.getPath() + "]§r to '" + newValue + "'"));
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                        return 1;
-                                    })
-                            )
-                        )
+                baseCommand.then(Commands.literal("set")
+                    .then(Commands.argument(argumentName, argument)
+                        .executes(context -> {
+                            Object newValue = context.getArgument(argumentName, clazz);
+                            setting.set(newValue);
+                            context.getSource().sendSystemMessage(
+                                Component.literal(
+                                    "set §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)));
+                            return 1;
+                        })
                     )
                 );
             } else {
                 ConfigBuilder.ConfigValue<List<? extends String>> listConfig = setting;
-                dispatcher.register(Commands.literal("vivecraft-server-config")
-                    .requires(source -> source.hasPermission(4)).then(
-                        Commands.literal(setting.getPath()).then(
-                            Commands.literal("add").then(
-                                Commands.argument("block", StringArgumentType.greedyString())
-                                    .suggests((context, builder) -> {
-                                        for (var block : BuiltInRegistries.BLOCK.keySet()) {
-                                            builder.suggest(block.toString());
-                                        }
-                                        return builder.buildFuture();
-                                    })
-                                    .executes(context -> {
-                                        String newValue = context.getArgument("block", String.class);
-                                        List list = listConfig.get();
-                                        list.add(newValue);
-                                        listConfig.set(list);
-                                        context.getSource().sendSystemMessage(Component.literal("added '" + newValue + "' to §a[" + setting.getPath() + "]§r"));
-                                        context.getSource().sendSystemMessage(Component.literal("is now '" + setting.get()));
-                                        return 1;
-                                    })
-                            )
-                        )
+                baseCommand.then(Commands.literal("add")
+                    .then(Commands.argument("block", BlockStateArgument.block(buildContext))
+                        .executes(context -> {
+                            try {
+                                String newValue = BuiltInRegistries.BLOCK.getKey(context.getArgument("block", BlockInput.class).getState().getBlock()).toString();
+                                List list = listConfig.get();
+                                list.add(newValue);
+                                listConfig.set(list);
+                                context.getSource().sendSystemMessage(
+                                    Component.literal(
+                                        "added '%s' to §a[%s]§r".formatted(newValue, setting.getPath())));
+                                context.getSource().sendSystemMessage(
+                                    Component.literal("is now '%s'".formatted(setting.get())));
+                                return 1;
+                            } catch (Exception e) {
+                                ServerNetworking.LOGGER.error("Vivecraft: error adding block to list:", e);
+                                return 0;
+                            }
+                        })
                     )
                 );
-                dispatcher.register(Commands.literal("vivecraft-server-config")
-                    .requires(source -> source.hasPermission(4)).then(
-                        Commands.literal(setting.getPath()).then(
-                            Commands.literal("remove").then(
-                                Commands.argument("block", StringArgumentType.greedyString())
-                                    .suggests((context, builder) -> {
-                                        for (String block : listConfig.get()) {
-                                            builder.suggest(block);
-                                        }
-                                        return builder.buildFuture();
-                                    })
-                                    .executes(context -> {
-                                        String newValue = context.getArgument("block", String.class);
-                                        List<? extends String> list = listConfig.get();
-                                        list.remove(newValue);
-                                        listConfig.set(list);
-                                        context.getSource().sendSystemMessage(Component.literal("removed '" + newValue + "' from §a[" + setting.getPath() + "]§r"));
-                                        context.getSource().sendSystemMessage(Component.literal("is now '" + setting.get()));
-                                        return 1;
-                                    })
-                            )
-                        )
+                baseCommand.then(Commands.literal("remove")
+                    .then(Commands.argument("block", StringArgumentType.greedyString())
+                        .suggests((context, builder) -> {
+                            for (String block : listConfig.get()) {
+                                if (block.contains(builder.getRemaining())) {
+                                    builder.suggest(block);
+                                }
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> {
+                            String newValue = context.getArgument("block", String.class);
+                            List<? extends String> list = listConfig.get();
+                            list.remove(newValue);
+                            listConfig.set(list);
+                            context.getSource().sendSystemMessage(
+                                Component.literal("removed '%s' from §a[%s]§r".formatted(
+                                    newValue, setting.getPath())));
+                            context.getSource().sendSystemMessage(
+                                Component.literal("is now '%s'".formatted(setting.get())));
+                            return 1;
+                        })
                     )
                 );
             }
-            dispatcher.register(Commands.literal("vivecraft-server-config")
-                .requires(source -> source.hasPermission(4)).then(
-                    Commands.literal(setting.getPath()).then(
-                        Commands.literal("reset")
-                            .executes(context -> {
-                                Object newValue = setting.reset();
-                                context.getSource().sendSystemMessage(Component.literal("reset §a[" + setting.getPath() + "]§r to '" + newValue + "'"));
-                                return 1;
-                            })
-                    )
-                )
+
+            // reset command
+            baseCommand.then(Commands.literal("reset")
+                .executes(context -> {
+                    Object newValue = setting.reset();
+                    context.getSource().sendSystemMessage(
+                        Component.literal("reset §a[%s]§r to '%s'".formatted(setting.getPath(), newValue)));
+                    return 1;
+                })
             );
+
+            // query command
+            baseCommand.executes(context -> {
+                    context.getSource().sendSystemMessage(
+                        Component.literal("§a[%s]§r is set to '%s'".formatted(setting.getPath(), setting.get())));
+                    return 1;
+                }
+            );
+
             dispatcher.register(Commands.literal("vivecraft-server-config")
-                .requires(source -> source.hasPermission(4)).then(
-                    Commands.literal(setting.getPath())
-                        .executes(context -> {
-                            context.getSource().sendSystemMessage(Component.literal("§a[" + setting.getPath() + "]§r is set to '" + setting.get() + "'"));
-                            return 1;
-                        })
-                )
+                .requires(source -> source.hasPermission(4))
+                .then(baseCommand)
             );
         }
     }

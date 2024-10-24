@@ -4,26 +4,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
+import org.vivecraft.client.Xevents;
 
-public class XeventsImpl {
+public class XeventsImpl implements Xevents {
 
-    public static boolean renderBlockOverlay(Player player, PoseStack mat, BlockState state, BlockPos pos) {
+    public static boolean renderBlockOverlay(
+        Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos)
+    {
         return false;
     }
 
-    public static boolean renderWaterOverlay(Player player, PoseStack mat) {
+    public static boolean renderWaterOverlay(Player player, PoseStack poseStack) {
         return false;
     }
 
-    public static boolean renderFireOverlay(Player player, PoseStack mat) {
+    public static boolean renderFireOverlay(Player player, PoseStack poseStack) {
         return false;
-    }
-
-    public static void onRenderTickStart(float f) {
-
-    }
-
-    public static void onRenderTickEnd(float f) {
-
     }
 }

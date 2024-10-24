@@ -1,11 +1,11 @@
 package org.vivecraft.mixin.client_vr;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
@@ -13,10 +13,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.RadialHandler;
 import org.vivecraft.client_vr.settings.VRHotkeys;
@@ -31,15 +29,15 @@ public class KeyboardHandlerVRMixin {
     @Shadow
     private Minecraft minecraft;
 
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/KeyboardHandler;debugCrashKeyTime:J", ordinal = 0), method = "keyPress", cancellable = true)
-    public void vivecraft$screenHandler(long l, int i, int j, int k, int m, CallbackInfo ci) {
-        if (i == 256 && k == 1) {
+    @Inject(method = "keyPress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/KeyboardHandler;debugCrashKeyTime:J", ordinal = 0), cancellable = true)
+    private void vivecraft$handleVivecraftKeys(long windowPointer, int key, int scanCode, int action, int modifiers, CallbackInfo ci) {
+        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
             if (org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.Showing) {
-                if (ClientDataHolderVR.getInstance().vrSettings.autoCloseKeyboard) {
-                    org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.setOverlayShowing(false);
-                }
+                org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler.setOverlayShowing(false);
+
+                // close chat with the keyboard
                 if (this.minecraft.screen instanceof ChatScreen) {
-                    minecraft.screen.onClose();
+                    this.minecraft.screen.onClose();
                 }
                 ci.cancel();
             }
@@ -50,28 +48,24 @@ public class KeyboardHandlerVRMixin {
             }
         }
 
-        if (VRHotkeys.handleKeyboardInputs(i, j, k, m)) {
+        if (VRHotkeys.handleKeyboardInputs(key, scanCode, action, modifiers)) {
             ci.cancel();
         }
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Screenshot;grab(Ljava/io/File;Lcom/mojang/blaze3d/pipeline/RenderTarget;Ljava/util/function/Consumer;)V"), method = "keyPress")
-    public void vivecraft$noScreenshot(File file, RenderTarget renderTarget, Consumer<Component> consumer) {
+    @WrapOperation(method = "keyPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Screenshot;grab(Ljava/io/File;Lcom/mojang/blaze3d/pipeline/RenderTarget;Ljava/util/function/Consumer;)V"))
+    private void vivecraft$markScreenshot(
+        File gameDirectory, RenderTarget buffer, Consumer<Component> messageConsumer, Operation<Void> original)
+    {
         if (!VRState.vrRunning) {
-            Screenshot.grab(file, renderTarget, consumer);
+            original.call(gameDirectory, buffer, messageConsumer);
         } else {
             ClientDataHolderVR.getInstance().grabScreenShot = true;
         }
     }
 
-    //TODO really bad
-    @Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", ordinal = 2), method = "keyPress")
-    public Screen vivecraft$screenKey(Minecraft instance) {
-        return !MethodHolder.isKeyDown(GLFW.GLFW_KEY_RIGHT_CONTROL) ? instance.screen : null;
-    }
-
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z", ordinal = 1, shift = At.Shift.AFTER), method = "keyPress")
-    public void vivecraft$saveHideGuiOptions(long l, int i, int j, int k, int m, CallbackInfo ci) {
+    @Inject(method = "keyPress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z", ordinal = 1, shift = At.Shift.AFTER))
+    private void vivecraft$saveHideGuiOption(CallbackInfo ci) {
         ClientDataHolderVR.getInstance().vrSettings.saveOptions();
     }
 }

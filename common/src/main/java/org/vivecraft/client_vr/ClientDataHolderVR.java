@@ -8,6 +8,7 @@ import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class ClientDataHolderVR {
@@ -46,36 +47,25 @@ public class ClientDataHolderVR {
     public boolean grabScreenShot = false;
     public String incorrectGarbageCollector = "";
     public long frameIndex = 0L;
+
     public RenderPass currentPass;
+    public boolean isFirstPass;
+
     public int tickCounter;
+
     public float watereffect;
     public float portaleffect;
     public float pumpkineffect;
     public static boolean isfphand;
-    public boolean isFirstPass;
-    long mirroNotifyStart;
-    String mirrorNotifyText;
-    boolean mirrorNotifyClear;
-    long mirroNotifyLen;
+    public VRFirstPersonArmSwing swingType = VRFirstPersonArmSwing.Attack;
 
     // showed chat notifications
     public boolean showedUpdateNotification;
-
 
     public static ClientDataHolderVR getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new ClientDataHolderVR();
         }
         return INSTANCE;
-    }
-
-    public void printChatMessage(String string) {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void print(String string) {
-        string = string.replace("\n", "\n[Minecrift] ");
-        System.out.println("[Minecrift] " + string);
     }
 }

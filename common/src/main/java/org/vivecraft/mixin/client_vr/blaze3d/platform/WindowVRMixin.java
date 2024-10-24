@@ -24,108 +24,84 @@ public abstract class WindowVRMixin implements WindowExtension {
     @Shadow
     private int height;
 
-    // TODO: check if that actually works like that with sodium extras adaptive sync
-    @ModifyVariable(method = "updateVsync", ordinal = 0, at = @At("HEAD"), argsOnly = true)
-    boolean vivecraft$overwriteVsync(boolean v) {
-        if (VRState.vrRunning) {
-            return false;
-        }
-        return v;
+    // TODO: this doesn't disable sodium extras adaptive sync
+    @ModifyVariable(method = "updateVsync", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private boolean vivecraft$overwriteVsync(boolean vsync) {
+        return VRState.vrRunning ? false : vsync;
     }
 
     @Inject(method = "getWidth", at = @At("HEAD"), cancellable = true)
-    void vivecraft$getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
-        if (vivecraft$shouldOverrideSide()) {
-//			if (mcxrGameRenderer.reloadingDepth > 0) {
-//				var swapchain = MCXRPlayClient.OPEN_XR_STATE.session.swapchain;
-//				cir.setReturnValue(swapchain.getRenderWidth());
-//			} else {
-            var mainTarget = Minecraft.getInstance().getMainRenderTarget();
-            cir.setReturnValue(mainTarget.viewWidth);
-//			}
+    private void vivecraft$getVivecraftWidth(CallbackInfoReturnable<Integer> cir) {
+        if (VRState.vrRunning) {
+            cir.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewWidth);
         }
     }
 
     @Inject(method = "getHeight", at = @At("HEAD"), cancellable = true)
-    void vivecraft$getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
-        if (vivecraft$shouldOverrideSide()) {
-//			if (mcxrGameRenderer.reloadingDepth > 0) {
-//				var swapchain = MCXRPlayClient.OPEN_XR_STATE.session.swapchain;
-//				cir.setReturnValue(swapchain.getRenderHeight());
-//			} else {
-            var mainTarget = Minecraft.getInstance().getMainRenderTarget();
-            cir.setReturnValue(mainTarget.viewHeight);
-//			}
+    private void vivecraft$getVivecraftHeight(CallbackInfoReturnable<Integer> cir) {
+        if (VRState.vrRunning) {
+            cir.setReturnValue(Minecraft.getInstance().getMainRenderTarget().viewHeight);
         }
     }
 
     @Inject(method = "getScreenWidth", at = @At("HEAD"), cancellable = true)
-    void vivecraft$getVivecraftScreenWidth(CallbackInfoReturnable<Integer> cir) {
-        if (vivecraft$shouldOverrideSide()) {
+    private void vivecraft$getVivecraftScreenWidth(CallbackInfoReturnable<Integer> cir) {
+        if (VRState.vrRunning) {
             cir.setReturnValue(GuiHandler.guiWidth);
         }
     }
 
     @Inject(method = "getScreenHeight", at = @At("HEAD"), cancellable = true)
-    void vivecraft$getVivecraftScreenHeight(CallbackInfoReturnable<Integer> cir) {
-        if (vivecraft$shouldOverrideSide()) {
+    private void vivecraft$getVivecraftScreenHeight(CallbackInfoReturnable<Integer> cir) {
+        if (VRState.vrRunning) {
             cir.setReturnValue(GuiHandler.guiHeight);
         }
     }
 
 
     @Inject(method = "getGuiScaledHeight", at = @At("HEAD"), cancellable = true)
-    void vivecraft$getScaledHeight(CallbackInfoReturnable<Integer> cir) {
-        if (vivecraft$shouldOverrideSide()) {
+    private void vivecraft$getScaledHeight(CallbackInfoReturnable<Integer> cir) {
+        if (VRState.vrRunning) {
             cir.setReturnValue(
-                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale
-                ? GuiHandler.scaledHeightMax
-                : GuiHandler.scaledHeight);
+                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
+                    GuiHandler.scaledHeightMax : GuiHandler.scaledHeight);
         }
     }
 
     @Inject(method = "getGuiScaledWidth", at = @At("HEAD"), cancellable = true)
-    void vivecraft$getScaledWidth(CallbackInfoReturnable<Integer> cir) {
-        if (vivecraft$shouldOverrideSide()) {
+    private void vivecraft$getScaledWidth(CallbackInfoReturnable<Integer> cir) {
+        if (VRState.vrRunning) {
             cir.setReturnValue(
-                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale
-                ? GuiHandler.scaledWidthMax
-                : GuiHandler.scaledWidth);
+                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
+                    GuiHandler.scaledWidthMax : GuiHandler.scaledWidth);
         }
     }
 
     @Inject(method = "getGuiScale", at = @At("HEAD"), cancellable = true)
-    void vivecraft$getScaleFactor(CallbackInfoReturnable<Double> cir) {
-        if (vivecraft$shouldOverrideSide()) {
+    private void vivecraft$getScaleFactor(CallbackInfoReturnable<Double> cir) {
+        if (VRState.vrRunning) {
             cir.setReturnValue(
-                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale
-                ? (double) GuiHandler.guiScaleFactorMax
-                : (double) GuiHandler.guiScaleFactor);
+                Minecraft.getInstance().screen == null && ClientDataHolderVR.getInstance().vrSettings.hudMaxScale ?
+                    (double) GuiHandler.guiScaleFactorMax : (double) GuiHandler.guiScaleFactor);
         }
     }
 
     @Inject(method = "onResize", at = @At("HEAD"))
-    private void vivecraft$resizeFrameBuffers(long l, int i, int j, CallbackInfo ci) {
+    private void vivecraft$resizeFrameBuffers(CallbackInfo ci) {
         if (VRState.vrInitialized) {
             ClientDataHolderVR.getInstance().vrRenderer.resizeFrameBuffers("Main Window Resized");
         }
     }
 
-    @Unique
-    private boolean vivecraft$shouldOverrideSide() {
-        //MCXR:         return mcxrGameRenderer.overrideWindowSize || (mcxrGameRenderer.isXrMode() && mcxrGameRenderer.reloadingDepth > 0);
-        return VRState.vrRunning;
-    }
-
     @Override
     @Unique
     public int vivecraft$getActualScreenHeight() {
-        return height;
+        return this.height;
     }
 
     @Override
     @Unique
     public int vivecraft$getActualScreenWidth() {
-        return width;
+        return this.width;
     }
 }

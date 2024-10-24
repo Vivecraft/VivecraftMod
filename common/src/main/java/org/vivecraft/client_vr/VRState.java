@@ -1,14 +1,12 @@
 package org.vivecraft.client_vr;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.StringUtils;
-import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFW;
+import org.vivecraft.client.Xplat;
 import org.vivecraft.client.gui.screens.ErrorScreen;
 import org.vivecraft.client.gui.screens.GarbageCollectorScreen;
+import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
@@ -19,15 +17,26 @@ import org.vivecraft.client_xr.render_pass.RenderPassManager;
 import org.vivecraft.mod_compat_vr.ShadersHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 
-import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryManagerMXBean;
 
+/**
+ * this class holds the current VR states and handles starting and stopping VR
+ */
 public class VRState {
 
-    public static boolean vrRunning = false;
+    /**
+     * true when VR is enabled
+     */
     public static boolean vrEnabled = false;
+    /**
+     * true when VR is enabled, and successfully initialized
+     */
     public static boolean vrInitialized = false;
+    /**
+     * true when VR is enabled, successfully initialized and currently active
+     */
+    public static boolean vrRunning = false;
 
     public static void initializeVR() {
         if (vrInitialized) {
@@ -35,36 +44,26 @@ public class VRState {
         }
         try {
             if (OptifineHelper.isOptifineLoaded() && OptifineHelper.isAntialiasing()) {
-                throw new RenderConfigException(Component.translatable("vivecraft.messages.incompatiblesettings").getString(), Component.translatable("vivecraft.messages.optifineaa"));
+                throw new RenderConfigException(
+                    Component.translatable("vivecraft.messages.incompatiblesettings"),
+                    Component.translatable("vivecraft.messages.optifineaa"));
             }
 
-            vrInitialized = true;
             ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
             if (dh.vrSettings.stereoProviderPluginID == VRSettings.VRProvider.OPENVR) {
-                // make sure the lwjgl version is the right one
-                // TODO: move this into the init, does mean all callocs need to be done later
-                // check that the right lwjgl version is loaded that we ship the openvr part of
-                if (!Version.getVersion().startsWith("3.3.2")) {
-                    String suppliedJar = "";
-                    try {
-                        suppliedJar = new File(Version.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
-                    } catch (Exception e) {
-                        VRSettings.logger.error("couldn't check lwjgl source:", e);
-                    }
-
-                    throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", I18n.get("vivecraft.messages.invalidlwjgl", Version.getVersion(), "3.3.2", suppliedJar), "OpenVR_LWJGL"));
-                }
-
                 dh.vr = new MCOpenVR(Minecraft.getInstance(), dh);
             } else {
                 dh.vr = new NullVR(Minecraft.getInstance(), dh);
             }
             if (!dh.vr.init()) {
-                throw new RenderConfigException("VR Init Error", Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus, dh.vr.getName()));
+                throw new RenderConfigException(Component.translatable("vivecraft.messages.vriniterror"),
+                    Component.translatable("vivecraft.messages.rendersetupfailed", dh.vr.initStatus, dh.vr.getName()));
             }
 
             dh.vrRenderer = dh.vr.createVRRenderer();
-            dh.vrRenderer.lastGuiScale = Minecraft.getInstance().options.guiScale().get();
+
+            // everything related to VR is created now
+            vrInitialized = true;
 
             dh.vrRenderer.setupRenderConfiguration();
             RenderPassManager.setVanillaRenderPass();
@@ -87,8 +86,6 @@ public class VRState {
             dh.vrPlayer.registerTracker(dh.crawlTracker);
             dh.vrPlayer.registerTracker(dh.cameraTracker);
 
-            dh.vr.postinit();
-
             dh.menuWorldRenderer = new MenuWorldRenderer();
 
             dh.menuWorldRenderer.init();
@@ -98,14 +95,14 @@ public class VRState {
                 if (garbageCollector.isEmpty()) {
                     garbageCollector = ManagementFactory.getGarbageCollectorMXBeans().get(0).getName();
                 }
-                VRSettings.logger.info("Garbage collector: {}", garbageCollector);
+                VRSettings.logger.info("Vivecraft: Garbage collector: {}", garbageCollector);
 
                 // Fully qualified name here to avoid any ambiguity
                 com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
                 // Might as well log this stuff since we have it, could be useful for technical support
-                VRSettings.logger.info("Available CPU threads: {}", Runtime.getRuntime().availableProcessors());
-                VRSettings.logger.info("Total physical memory: {} GiB", String.format("%.01f", os.getTotalMemorySize() / 1073741824.0F));
-                VRSettings.logger.info("Free physical memory: {} GiB", String.format("%.01f", os.getFreeMemorySize() / 1073741824.0F));
+                VRSettings.logger.info("Vivecraft: Available CPU threads: {}", Runtime.getRuntime().availableProcessors());
+                VRSettings.logger.info("Vivecraft: Total physical memory: {} GiB", String.format("%.01f", os.getTotalMemorySize() / 1073741824.0F));
+                VRSettings.logger.info("Vivecraft: Free physical memory: {} GiB", String.format("%.01f", os.getFreeMemorySize() / 1073741824.0F));
 
                 if (!garbageCollector.startsWith("ZGC") && !ClientDataHolderVR.getInstance().vrSettings.disableGarbageCollectorMessage) {
                     // At least 12 GiB RAM (minus 256 MiB for possible reserved) and 8 CPU threads
@@ -116,27 +113,20 @@ public class VRState {
                     }
                 }
             } catch (Throwable e) {
-                e.printStackTrace();
+                VRSettings.logger.error("Vivecraft: Failed checking GC: ", e);
             }
-        } catch (RenderConfigException renderConfigException) {
-            vrEnabled = false;
+        } catch (Throwable exception) {
+            VRSettings.logger.error("Vivecraft: Failed to initialize VR: ", exception);
             destroyVR(true);
-            renderConfigException.printStackTrace();
-            Minecraft.getInstance().setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
-        } catch (Throwable e) {
-            vrEnabled = false;
-            destroyVR(true);
-            e.printStackTrace();
-            MutableComponent component = Component.literal(e.getClass().getName() + (e.getMessage() == null ? "" : ": " + e.getMessage()));
-            for (StackTraceElement element : e.getStackTrace()) {
-                component.append(Component.literal("\n" + element.toString()));
+            if (exception instanceof RenderConfigException renderConfigException) {
+                Minecraft.getInstance()
+                    .setScreen(new ErrorScreen(renderConfigException.title, renderConfigException.error));
+            } else {
+                Minecraft.getInstance()
+                    .setScreen(new ErrorScreen(Component.translatable("vivecraft.messages.vriniterror"),
+                        TextUtils.throwableToComponent(exception)));
             }
-            Minecraft.getInstance().setScreen(new ErrorScreen("VR Init Error", component));
         }
-    }
-
-    public static void startVR() {
-        GLFW.glfwSwapInterval(0);
     }
 
     public static void destroyVR(boolean disableVRSetting) {
@@ -148,8 +138,8 @@ public class VRState {
         dh.vrPlayer = null;
         if (dh.vrRenderer != null) {
             dh.vrRenderer.destroy();
+            dh.vrRenderer = null;
         }
-        dh.vrRenderer = null;
         if (dh.menuWorldRenderer != null) {
             dh.menuWorldRenderer.completeDestroy();
             dh.menuWorldRenderer = null;
@@ -162,12 +152,8 @@ public class VRState {
             dh.vrSettings.saveOptions();
         }
         // fixes an issue with DH shaders where the depth texture gets stuck
-        if (disableVRSetting) {
+        if (Xplat.isModLoaded("distanthorizons") && disableVRSetting) {
             ShadersHelper.maybeReloadShaders();
         }
-    }
-
-    public static void pauseVR() {
-        //        GLFW.glfwSwapInterval(bl ? 1 : 0);
     }
 }

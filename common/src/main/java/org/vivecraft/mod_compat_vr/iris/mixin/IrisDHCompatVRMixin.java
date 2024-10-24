@@ -16,7 +16,7 @@ import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 @Pseudo
 @Mixin(targets = "net.irisshaders.iris.compat.dh.DHCompat")
 public class IrisDHCompatVRMixin {
-    @Inject(at = @At(value = "RETURN", ordinal = 1), method = "getProjection", remap = false, cancellable = true)
+    @Inject(method = "getProjection", at = @At(value = "RETURN", ordinal = 1), remap = false, cancellable = true)
     private static void vivecraft$correctProjection(CallbackInfoReturnable<Matrix4f> cir) {
         if (!RenderPassType.isVanilla()) {
             if (ClientDataHolderVR.getInstance().currentPass == RenderPass.LEFT ||

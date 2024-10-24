@@ -15,12 +15,12 @@ public class BufferBuilderMixin implements BufferBuilderExtension {
 
     @Override
     public void vivecraft$freeBuffer() {
-        MemoryTrackerAccessor.getAllocator().free(MemoryUtil.memAddress0(buffer));
-        buffer = null;
+        MemoryTrackerAccessor.getAllocator().free(MemoryUtil.memAddress0(this.buffer));
+        this.buffer = null;
     }
 
     @Override
     public int vivecraft$getBufferSize() {
-        return buffer.capacity();
+        return this.buffer.capacity();
     }
 }

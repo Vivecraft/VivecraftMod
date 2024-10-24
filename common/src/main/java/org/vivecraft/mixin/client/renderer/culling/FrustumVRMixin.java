@@ -11,28 +11,11 @@ import org.vivecraft.client_vr.extensions.FrustumExtension;
 public abstract class FrustumVRMixin implements FrustumExtension {
 
     @Shadow
-    private double camX;
-
-    @Shadow
-    private double camY;
-
-    @Shadow
-    private double camZ;
-
-    @Shadow
     protected abstract boolean cubeInFrustum(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
 
     @Override
     @Unique
-    public void vivecraft$setCameraPosition(double var1, double var3, double var5) {
-        this.camX = var1;
-        this.camY = var3;
-        this.camZ = var5;
-    }
-
-    @Override
-    @Unique
-    public boolean vivecraft$isBoundingBoxInFrustum(AABB var1) {
-        return this.cubeInFrustum(var1.minX, var1.minY, var1.minZ, var1.maxX, var1.maxY, var1.maxZ);
+    public boolean vivecraft$isBoundingBoxInFrustum(AABB bb) {
+        return this.cubeInFrustum(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
     }
 }

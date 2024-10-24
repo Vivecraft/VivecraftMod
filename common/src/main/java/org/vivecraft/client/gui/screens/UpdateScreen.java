@@ -17,9 +17,10 @@ public class UpdateScreen extends Screen {
 
     public UpdateScreen() {
         super(Component.translatable("vivecraft.messages.updateTitle"));
-        lastScreen = Minecraft.getInstance().screen;
+        this.lastScreen = Minecraft.getInstance().screen;
     }
 
+    @Override
     protected void init() {
 
         this.addRenderableWidget(new TextScrollWidget(this.width / 2 - 155, 30, 310, this.height - 30 - 60, UpdateChecker.changelog));
@@ -44,14 +45,14 @@ public class UpdateScreen extends Screen {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderBackground(guiGraphics, i, j, f);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
-        super.render(guiGraphics, i, j, f);
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(lastScreen);
+        this.minecraft.setScreen(this.lastScreen);
     }
 }

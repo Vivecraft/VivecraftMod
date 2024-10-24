@@ -30,16 +30,19 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2")
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux")
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos")
-    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos")
+    forgeRuntimeLibrary("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows")
 
     // shadow the natives
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos") { transitive = false }
-    bundle("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos") { transitive = false }
+    bundle("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows") { transitive = false }
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
+    implementation(include("io.github.llamalad7:mixinextras-neoforge:${rootProject.mixin_extras_version}"))
 }
 
 processResources {

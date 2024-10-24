@@ -137,7 +137,7 @@ public class Vector4f extends Vector {
     }
 
     public String toString() {
-        return "Vector4f: " + this.x + " " + this.y + " " + this.z + " " + this.w;
+        return "Vector4f[%f %f %f %f]".formatted( this.x, this.y, this.z, this.w);
     }
 
     public final float getX() {

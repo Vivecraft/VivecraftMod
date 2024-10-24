@@ -27,10 +27,11 @@ public class GuiSeatedOptions extends GuiVROptionsBase {
         })
     };
 
-    public GuiSeatedOptions(Screen guiScreen) {
-        super(guiScreen);
+    public GuiSeatedOptions(Screen lastScreen) {
+        super(lastScreen);
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.seated";
         super.init(this.seatedOptions, true);

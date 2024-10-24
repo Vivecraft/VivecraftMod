@@ -257,6 +257,6 @@ public class Vector3 {
     }
 
     public String toString() {
-        return "(" + String.format("%.2f", this.x) + ", " + String.format("%.2f", this.y) + ", " + String.format("%.2f", this.z) + ")";
+        return "Vector3(%.2f, %.2f, %.2f)". formatted(this.x, this.y, this.z);
     }
 }

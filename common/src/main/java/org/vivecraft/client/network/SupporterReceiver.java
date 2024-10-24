@@ -3,6 +3,7 @@ package org.vivecraft.client.network;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.io.IOUtils;
 import org.vivecraft.client.VRPlayersClient;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.io.IOException;
 import java.net.URL;
@@ -44,14 +45,14 @@ public class SupporterReceiver {
                                     VRPlayersClient.getInstance().setHMD(player.getUUID(), i);
                                 }
                             }
-                        } catch (Exception exception1) {
-                            System.out.println("error with donors txt " + exception1.getMessage());
+                        } catch (Exception e) {
+                            VRSettings.logger.error("Vivecraft: error with supporters txt: {}", user,  e);
                         }
                     }
 
                     cache = userMap;
-                } catch (Exception exception1) {
-                    System.out.println("Error parsing data: " + url + ", " + exception1.getClass().getName() + ": " + exception1.getMessage());
+                } catch (Exception e) {
+                    VRSettings.logger.error("Vivecraft: error parsing supporter data: {}", url, e);
                     downloadFailed = true;
                 }
             } else {
@@ -69,14 +70,14 @@ public class SupporterReceiver {
 
                     if (!downloadStarted) {
                         downloadStarted = true;
-                        String url1 = "https://www.vivecraft.org/patreon/current.txt";
-                        String url2 = "https://raw.githubusercontent.com/Vivecraft/VivecraftSupporters/supporters/supporters.txt";
+                        String ogSupportersUrl = "https://www.vivecraft.org/patreon/current.txt";
+                        String viveModSupportersUrl = "https://raw.githubusercontent.com/Vivecraft/VivecraftSupporters/supporters/supporters.txt";
                         new Thread(() -> {
                             try {
-                                String value1 = IOUtils.toString(new URL(url1), StandardCharsets.UTF_8);
-                                String value2 = IOUtils.toString(new URL(url2), StandardCharsets.UTF_8);
-                                fileDownloadFinished(url1, value1, false);
-                                fileDownloadFinished(url2, value2, true);
+                                String ogSupporters = IOUtils.toString(new URL(ogSupportersUrl), StandardCharsets.UTF_8);
+                                String viveModSupporters = IOUtils.toString(new URL(viveModSupportersUrl), StandardCharsets.UTF_8);
+                                fileDownloadFinished(ogSupportersUrl, ogSupporters, false);
+                                fileDownloadFinished(viveModSupportersUrl, viveModSupporters, true);
                                 synchronized (lock) {
                                     queuedPlayers.clear();
                                 }

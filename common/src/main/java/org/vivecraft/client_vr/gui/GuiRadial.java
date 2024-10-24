@@ -13,12 +13,13 @@ public class GuiRadial extends TwoHandedScreen {
     private boolean isShift = false;
     String[] arr;
 
+    @Override
     public void init() {
-        this.arr = this.dataholder.vrSettings.vrRadialItems;
-        String[] altSet = this.dataholder.vrSettings.vrRadialItemsAlt;
+        this.arr = this.dh.vrSettings.vrRadialItems;
+        String[] altSet = this.dh.vrSettings.vrRadialItemsAlt;
         this.clearWidgets();
 
-        int numButtons = this.dataholder.vrSettings.vrRadialButtons;
+        int numButtons = this.dh.vrSettings.vrRadialButtons;
         int buttonWidthMin = 120;
         // distance from the center, with 14 buttons, move them closer together
         float dist = numButtons * (numButtons >= 14 ? 5F : 5.5F);
@@ -89,8 +90,9 @@ public class GuiRadial extends TwoHandedScreen {
         }
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
-        this.renderBackground(guiGraphics, pMouseX, pMouseY, pPartialTicks);
-        super.render(guiGraphics, 0, 0, pPartialTicks);
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        super.render(guiGraphics, 0, 0, partialTick);
     }
 }

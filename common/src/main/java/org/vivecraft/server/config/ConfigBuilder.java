@@ -2,6 +2,7 @@ package org.vivecraft.server.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
+import com.electronwill.nightconfig.core.EnumGetMethod;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.util.Mth;
 
@@ -28,7 +29,7 @@ public class ConfigBuilder {
      * @return this builder, for chaining commands
      */
     public ConfigBuilder push(String subPath) {
-        stack.add(subPath);
+        this.stack.add(subPath);
         return this;
     }
 
@@ -38,7 +39,7 @@ public class ConfigBuilder {
      * @return this builder, for chaining commands
      */
     public ConfigBuilder pop() {
-        stack.removeLast();
+        this.stack.removeLast();
         return this;
     }
 
@@ -49,20 +50,20 @@ public class ConfigBuilder {
      * @return this builder, for chaining commands
      */
     public ConfigBuilder comment(String comment) {
-        config.setComment(stack.stream().toList(), comment);
+        this.config.setComment(this.stack.stream().toList(), comment);
         return this;
     }
 
     private void addDefaultValueComment(List<String> path, int defaultValue, int min, int max) {
-        String oldComment = config.getComment(path);
-        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
-            + "default: %d, min: %d, max: %d".formatted(defaultValue, min, max));
+        String oldComment = this.config.getComment(path);
+        this.config.setComment(path, (oldComment == null ? "" : oldComment + "\n ") +
+            "default: %d, min: %d, max: %d".formatted(defaultValue, min, max));
     }
 
     private void addDefaultValueComment(List<String> path, double defaultValue, double min, double max) {
-        String oldComment = config.getComment(path);
-        config.setComment(path, (oldComment == null ? "" : oldComment + "\n ")
-            + new Formatter(Locale.US).format("default: %.2f, min: %.2f, max: %.2f", defaultValue, min, max));
+        String oldComment = this.config.getComment(path);
+        this.config.setComment(path, (oldComment == null ? "" : oldComment + "\n ") +
+            new Formatter(Locale.US).format("default: %.2f, min: %.2f, max: %.2f", defaultValue, min, max));
     }
 
     /**
@@ -71,11 +72,11 @@ public class ConfigBuilder {
      * @param listener listener to send correction to
      */
     public void correct(ConfigSpec.CorrectionListener listener) {
-        spec.correct(config, listener);
+        this.spec.correct(this.config, listener);
     }
 
     public List<ConfigValue> getConfigValues() {
-        return configValues;
+        return this.configValues;
     }
 
     // general Settings
@@ -87,12 +88,12 @@ public class ConfigBuilder {
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
     public <T> ConfigValue<T> define(T defaultValue) {
-        List<String> path = stack.stream().toList();
-        spec.define(path, defaultValue);
-        stack.removeLast();
+        List<String> path = this.stack.stream().toList();
+        this.spec.define(path, defaultValue);
+        this.stack.removeLast();
 
-        ConfigValue<T> value = new ConfigValue<>(config, path, defaultValue);
-        configValues.add(value);
+        ConfigValue<T> value = new ConfigValue<>(this.config, path, defaultValue);
+        this.configValues.add(value);
         return value;
     }
 
@@ -105,12 +106,12 @@ public class ConfigBuilder {
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
     public <T extends Comparable<? super T>> ConfigValue<T> defineInRange(T defaultValue, T min, T max) {
-        List<String> path = stack.stream().toList();
-        spec.defineInRange(path, defaultValue, min, max);
-        stack.removeLast();
+        List<String> path = this.stack.stream().toList();
+        this.spec.defineInRange(path, defaultValue, min, max);
+        this.stack.removeLast();
 
-        ConfigValue<T> value = new ConfigValue<>(config, path, defaultValue);
-        configValues.add(value);
+        ConfigValue<T> value = new ConfigValue<>(this.config, path, defaultValue);
+        this.configValues.add(value);
         return value;
     }
 
@@ -122,12 +123,12 @@ public class ConfigBuilder {
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
     public <T> ListValue<T> defineList(List<T> defaultValue, Predicate<Object> validator) {
-        List<String> path = stack.stream().toList();
-        spec.defineList(path, defaultValue, validator);
-        stack.removeLast();
+        List<String> path = this.stack.stream().toList();
+        this.spec.defineList(path, defaultValue, validator);
+        this.stack.removeLast();
 
-        ListValue<T> value = new ListValue<>(config, path, defaultValue);
-        configValues.add(value);
+        ListValue<T> value = new ListValue<>(this.config, path, defaultValue);
+        this.configValues.add(value);
         return value;
     }
 
@@ -139,12 +140,29 @@ public class ConfigBuilder {
      * @return ConfigValue that accesses the setting at the path when calling this method
      */
     public <T> InListValue<T> defineInList(T defaultValue, Collection<? extends T> validValues) {
-        List<String> path = stack.stream().toList();
-        spec.defineInList(path, defaultValue, validValues);
-        stack.removeLast();
+        List<String> path = this.stack.stream().toList();
+        this.spec.defineInList(path, defaultValue, validValues);
+        this.stack.removeLast();
 
-        InListValue<T> value = new InListValue<>(config, path, defaultValue, validValues);
-        configValues.add(value);
+        InListValue<T> value = new InListValue<>(this.config, path, defaultValue, validValues);
+        this.configValues.add(value);
+        return value;
+    }
+
+    /**
+     * defines a setting with the current path, and pops the last path segment
+     *
+     * @param defaultValue default value this setting should have
+     * @return ConfigValue that accesses the setting at the path when calling this method
+     */
+    public <T extends Enum<T>> EnumValue<T> defineEnum(T defaultValue, Class<T> enumClass) {
+        List<String> path = this.stack.stream().toList();
+
+        EnumValue<T> value = new EnumValue<>(this.config, path, defaultValue, enumClass);
+        this.spec.defineInList(path, defaultValue, value.getValidValues());
+        this.stack.removeLast();
+
+        this.configValues.add(value);
         return value;
     }
 
@@ -152,12 +170,12 @@ public class ConfigBuilder {
      * same as {@link #define define(T defaultValue)} but returns a {@link BooleanValue}
      */
     public BooleanValue define(boolean defaultValue) {
-        List<String> path = stack.stream().toList();
-        spec.define(path, defaultValue);
-        stack.removeLast();
+        List<String> path = this.stack.stream().toList();
+        this.spec.define(path, defaultValue);
+        this.stack.removeLast();
 
-        BooleanValue value = new BooleanValue(config, path, defaultValue);
-        configValues.add(value);
+        BooleanValue value = new BooleanValue(this.config, path, defaultValue);
+        this.configValues.add(value);
         return value;
     }
 
@@ -165,12 +183,12 @@ public class ConfigBuilder {
      * same as {@link #define define(T defaultValue)} but returns a {@link StringValue}
      */
     public StringValue define(String defaultValue) {
-        List<String> path = stack.stream().toList();
-        spec.define(path, defaultValue);
-        stack.removeLast();
+        List<String> path = this.stack.stream().toList();
+        this.spec.define(path, defaultValue);
+        this.stack.removeLast();
 
-        StringValue value = new StringValue(config, path, defaultValue);
-        configValues.add(value);
+        StringValue value = new StringValue(this.config, path, defaultValue);
+        this.configValues.add(value);
         return value;
     }
 
@@ -178,13 +196,13 @@ public class ConfigBuilder {
      * same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
      */
     public DoubleValue defineInRange(double defaultValue, double min, double max) {
-        List<String> path = stack.stream().toList();
-        spec.defineInRange(path, defaultValue, min, max);
-        stack.removeLast();
+        List<String> path = this.stack.stream().toList();
+        this.spec.defineInRange(path, defaultValue, min, max);
+        this.stack.removeLast();
         addDefaultValueComment(path, defaultValue, min, max);
 
-        DoubleValue value = new DoubleValue(config, path, defaultValue, min, max);
-        configValues.add(value);
+        DoubleValue value = new DoubleValue(this.config, path, defaultValue, min, max);
+        this.configValues.add(value);
         return value;
     }
 
@@ -192,13 +210,13 @@ public class ConfigBuilder {
      * same as {@link #defineInRange defineInRange(T defaultValue, T min, T max)} but returns a {@link DoubleValue}
      */
     public IntValue defineInRange(int defaultValue, int min, int max) {
-        List<String> path = stack.stream().toList();
-        spec.defineInRange(path, defaultValue, min, max);
-        stack.removeLast();
+        List<String> path = this.stack.stream().toList();
+        this.spec.defineInRange(path, defaultValue, min, max);
+        this.stack.removeLast();
         addDefaultValueComment(path, defaultValue, min, max);
 
-        IntValue value = new IntValue(config, path, defaultValue, min, max);
-        configValues.add(value);
+        IntValue value = new IntValue(this.config, path, defaultValue, min, max);
+        this.configValues.add(value);
         return value;
     }
 
@@ -219,34 +237,38 @@ public class ConfigBuilder {
         }
 
         public T get() {
-            if (cachedValue == null) {
-                cachedValue = config.get(path);
+            if (this.cachedValue == null) {
+                this.cachedValue = this.config.get(this.path);
             }
-            return cachedValue;
+            return this.cachedValue;
         }
 
         public void set(T newValue) {
-            cachedValue = newValue;
-            config.set(path, newValue);
+            this.cachedValue = newValue;
+            this.config.set(this.path, newValue);
         }
 
         public T reset() {
-            config.set(path, defaultValue);
-            cachedValue = defaultValue;
-            return defaultValue;
+            this.config.set(this.path, this.defaultValue);
+            this.cachedValue = this.defaultValue;
+            return this.defaultValue;
+        }
+
+        protected T getDefaultValue() {
+            return this.defaultValue;
         }
 
         public boolean isDefault() {
-            return Objects.equals(get(), defaultValue);
+            return Objects.equals(get(), getDefaultValue());
         }
 
         public String getComment() {
-            String comment = config.getComment(path);
+            String comment = this.config.getComment(this.path);
             return comment != null ? comment : "";
         }
 
         public String getPath() {
-            return String.join(".", path);
+            return String.join(".", this.path);
         }
 
         public Supplier<AbstractWidget> getWidget(int width, int height) {
@@ -296,12 +318,37 @@ public class ConfigBuilder {
         }
 
         public Collection<? extends T> getValidValues() {
-            return validValues;
+            return this.validValues;
         }
 
         @Override
         public Supplier<AbstractWidget> getWidget(int width, int height) {
-            return WidgetBuilder.getCycleWidget(this, width, height);
+            return WidgetBuilder.getCycleWidget(this, getValidValues(), width, height);
+        }
+    }
+
+    public static class EnumValue<T extends Enum<T>> extends ConfigValue<T> {
+        private final Class<T> enumClass;
+        public EnumValue(CommentedConfig config, List<String> path, T defaultValue, Class<T> enumClass) {
+            super(config, path, defaultValue);
+            this.enumClass = enumClass;
+        }
+
+        public T getEnumValue(Object value) {
+            try {
+                return EnumGetMethod.NAME_IGNORECASE.get(value, this.enumClass);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        public Collection<? extends T> getValidValues() {
+            return EnumSet.allOf(this.enumClass);
+        }
+
+        @Override
+        public Supplier<AbstractWidget> getWidget(int width, int height) {
+            return WidgetBuilder.getCycleWidget(this, getValidValues(), width, height);
         }
     }
 
@@ -317,15 +364,15 @@ public class ConfigBuilder {
         }
 
         public E getMin() {
-            return min;
+            return this.min;
         }
 
         public E getMax() {
-            return max;
+            return this.max;
         }
 
         public double normalize() {
-            return Mth.clamp((this.get().doubleValue() - min.doubleValue()) / (max.doubleValue() - min.doubleValue()), 0.0D, 1.0D);
+            return Mth.clamp((this.get().doubleValue() - this.min.doubleValue()) / (this.max.doubleValue() - this.min.doubleValue()), 0.0D, 1.0D);
         }
 
         abstract public void fromNormalized(double value);

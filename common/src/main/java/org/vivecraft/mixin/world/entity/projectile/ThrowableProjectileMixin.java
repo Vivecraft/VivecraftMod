@@ -4,8 +4,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -19,19 +17,18 @@ import org.vivecraft.server.ServerVivePlayer;
 @Mixin(ThrowableProjectile.class)
 public abstract class ThrowableProjectileMixin extends Entity {
 
-    protected ThrowableProjectileMixin(EntityType<? extends Projectile> p_37248_, Level p_37249_) {
-        super(p_37248_, p_37249_);
-        // TODO Auto-generated constructor stub
+    public ThrowableProjectileMixin(EntityType<?> entityType, Level level) {
+        super(entityType, level);
     }
 
-    @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V")
-    public void vivecraft$init(EntityType<? extends ThrowableProjectile> p_37462_, LivingEntity p_37463_, Level p_37464_, CallbackInfo info) {
-        if (p_37463_ instanceof ServerPlayer player) {
+    @Inject(method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;)V", at = @At("TAIL"))
+    private void vivecraft$satToHandPos(EntityType<?> entityType, LivingEntity shooter, Level level, CallbackInfo ci) {
+        if (shooter instanceof ServerPlayer player) {
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);
             if (serverviveplayer != null && serverviveplayer.isVR()) {
-                Vec3 vec3 = serverviveplayer.getControllerPos(serverviveplayer.activeHand, (Player) p_37463_);
-                Vec3 vec31 = serverviveplayer.getControllerDir(serverviveplayer.activeHand).scale(0.6F);
-                this.setPos(vec3.x + vec31.x, vec3.y + vec31.y, vec3.z + vec31.z);
+                Vec3 pos = serverviveplayer.getControllerPos(serverviveplayer.activeHand);
+                Vec3 dir = serverviveplayer.getControllerDir(serverviveplayer.activeHand).scale(0.6F);
+                this.setPos(pos.x + dir.x, pos.y + dir.y, pos.z + dir.z);
             }
         }
     }

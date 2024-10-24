@@ -20,8 +20,8 @@ public class GuiVROptionButton extends Button implements GuiVROption {
         this(id, x, y, 150, 20, option, text, action);
     }
 
-    public GuiVROptionButton(int id, int x, int y, int width, int height, @Nullable VRSettings.VrOptions option, String text, OnPress action) {
-        super(x, y, width, height, Component.translatable(text), action, Button.DEFAULT_NARRATION);
+    public GuiVROptionButton(int id, int x, int y, int width, int height, @Nullable VRSettings.VrOptions option, String text, OnPress onPress) {
+        super(x, y, width, height, Component.translatable(text), onPress, Button.DEFAULT_NARRATION);
         this.id = id;
         this.enumOptions = option;
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
@@ -33,7 +33,7 @@ public class GuiVROptionButton extends Button implements GuiVROption {
 
     @Override
     public int getId() {
-        return id;
+        return this.id;
     }
 
     @Override

@@ -1,0 +1,11 @@
+{
+  "vertex": "passthrough_vr",
+  "fragment": "blit_vr",
+  "attributes": ["Position", "UV0"],
+  "samplers": [
+    {
+      "name": "DiffuseSampler"
+    }
+  ],
+  "uniforms": []
+}

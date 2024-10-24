@@ -29,7 +29,7 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, String text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedChars = Minecraft.getInstance().font.split(Component.literal(text), width - scrollBarWidth * 2);
+        this.formattedChars = Minecraft.getInstance().font.split(Component.literal(text), width - this.scrollBarWidth * 2);
 
         initScroll();
     }
@@ -37,80 +37,80 @@ public class TextScrollWidget extends AbstractWidget {
     public TextScrollWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, Component.literal(""));
 
-        formattedChars = Minecraft.getInstance().font.split(text, width - scrollBarWidth * 2);
+        this.formattedChars = Minecraft.getInstance().font.split(text, width - this.scrollBarWidth * 2);
         initScroll();
     }
 
     private void initScroll() {
 
-        maxLines = (height - 2 - padding + 3) / 12;
-        currentLine = 0;
-        scrollSteps = formattedChars.size() - maxLines;
-        scrollSteps = Math.max(scrollSteps, 0);
-        scrollBarSize = scrollSteps == 0 ? height - 2 : (int) (Math.max(formattedChars.size(), maxLines) / (float) (scrollSteps) * 12);
-        scrollBarOffset = height - scrollBarSize - 2;
+        this.maxLines = (this.height - 2 - this.padding + 3) / 12;
+        this.currentLine = 0;
+        this.scrollSteps = this.formattedChars.size() - this.maxLines;
+        this.scrollSteps = Math.max(this.scrollSteps, 0);
+        this.scrollBarSize = this.scrollSteps == 0 ? this.height - 2 : (int) (Math.max(this.formattedChars.size(), this.maxLines) / (float) (this.scrollSteps) * 12);
+        this.scrollBarOffset = this.height - this.scrollBarSize - 2;
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int x, int y, float f) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         // draw box outline
         guiGraphics.fill(
             getX(),
             getY(),
-            getX() + width,
+            getX() + this.width,
             getY() + this.height,
-            -6250336);
+            0xFFA0A0A0);
         // draw box inside
         guiGraphics.fill(
             getX() + 1,
             getY() + 1,
-            getX() + width - 1,
+            getX() + this.width - 1,
             getY() + this.height - 1,
-            -16777216);
+            0xFF000000);
 
         // draw text
-        for (int line = 0; line + currentLine < formattedChars.size() && line < maxLines; line++) {
-            guiGraphics.drawString(Minecraft.getInstance().font, formattedChars.get(line + currentLine), getX() + padding, getY() + padding + line * 12, 16777215);
+        for (int line = 0; line + this.currentLine < this.formattedChars.size() && line < this.maxLines; line++) {
+            guiGraphics.drawString(Minecraft.getInstance().font, this.formattedChars.get(line + this.currentLine), getX() + this.padding, getY() + this.padding + line * 12, 0xFFFFFF);
         }
 
-        float scrollbarStart = scrollSteps == 0 ? 0 : currentLine / (float) scrollSteps * scrollBarOffset;
+        float scrollbarStart = this.scrollSteps == 0 ? 0 : this.currentLine / (float) this.scrollSteps * this.scrollBarOffset;
 
-        if (isFocused() || isHovered) {
+        if (isFocused() || this.isHovered) {
             // draw scroll bar outline
             guiGraphics.fill(
-                getX() + width - scrollBarWidth - 2,
+                getX() + this.width - this.scrollBarWidth - 2,
                 (int) (getY() + 1 + scrollbarStart),
-                getX() + width - 1,
-                (int) (getY() + 1 + scrollbarStart + scrollBarSize),
+                getX() + this.width - 1,
+                (int) (getY() + 1 + scrollbarStart + this.scrollBarSize),
                 -1);
         }
 
         // draw scroll bar
         guiGraphics.fill(
-            getX() + width - scrollBarWidth - (isFocused() || isHovered ? 1 : 2),
-            (int) (getY() + (isFocused() || isHovered ? 2 : 1) + scrollbarStart),
-            getX() + width - (isFocused() || isHovered ? 2 : 1),
-            (int) (getY() + (isFocused() || isHovered ? 0 : 1) + scrollbarStart + scrollBarSize),
-            -6250336);
+            getX() + this.width - this.scrollBarWidth - (isFocused() || this.isHovered ? 1 : 2),
+            (int) (getY() + (isFocused() || this.isHovered ? 2 : 1) + scrollbarStart),
+            getX() + this.width - (isFocused() || this.isHovered ? 2 : 1),
+            (int) (getY() + (isFocused() || this.isHovered ? 0 : 1) + scrollbarStart + this.scrollBarSize),
+            0xFFA0A0A0);
 
-        renderMouseover(guiGraphics, x, y);
+        renderMouseover(guiGraphics, mouseX, mouseY);
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-
-    }
+    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
     @Override
-    public void onClick(double x, double y) {
-        if (x >= getX() + width - scrollBarWidth && x <= getX() + width && y >= getY() && y <= getY() + height) {
-            scrollDragActive = true;
-            if (maxLines < formattedChars.size()) {
+    public void onClick(double mouseX, double mouseY) {
+        if (mouseX >= getX() + this.width - this.scrollBarWidth && mouseX <= getX() + this.width &&
+            mouseY >= getY() && mouseY <= getY() + this.height)
+        {
+            this.scrollDragActive = true;
+            if (this.maxLines < this.formattedChars.size()) {
                 // update scroll position
-                setCurrentLineFromYPos(y);
+                setCurrentLineFromYPos(mouseY);
             }
-        } else if (this.clicked(x, y)) {
-            Style style = getMouseoverStyle(x, y);
+        } else if (this.clicked(mouseX, mouseY)) {
+            Style style = getMouseoverStyle(mouseX, mouseY);
             if (style != null && style.getClickEvent() != null) {
                 Minecraft.getInstance().screen.handleComponentClicked(style);
             }
@@ -118,34 +118,34 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     @Override
-    public void onRelease(double x, double y) {
-        scrollDragActive = false;
-        super.onRelease(x, y);
+    public void onRelease(double mouseX, double mouseY) {
+        this.scrollDragActive = false;
+        super.onRelease(mouseX, mouseY);
     }
 
     @Override
-    public void onDrag(double x, double y, double xRel, double yRel) {
-        if (visible && active && scrollDragActive) {
-            setCurrentLineFromYPos(y);
+    public void onDrag(double mouseX, double mouseY, double dragX, double dragY) {
+        if (this.visible && this.active && this.scrollDragActive) {
+            setCurrentLineFromYPos(mouseY);
         }
     }
 
-    private void setCurrentLineFromYPos(double y) {
-        if (y < getY() + scrollBarSize * 0.5) {
-            currentLine = 0;
-        } else if (y > getY() + height - scrollBarSize * 0.5) {
-            currentLine = scrollSteps;
+    private void setCurrentLineFromYPos(double mouseY) {
+        if (mouseY < getY() + this.scrollBarSize * 0.5) {
+            this.currentLine = 0;
+        } else if (mouseY > getY() + this.height - this.scrollBarSize * 0.5) {
+            this.currentLine = this.scrollSteps;
         } else {
-            currentLine = (int) ((y - getY() - scrollBarSize * 0.5) / (height - scrollBarSize) * scrollSteps);
+            this.currentLine = (int) ((mouseY - getY() - this.scrollBarSize * 0.5) / (this.height - this.scrollBarSize) * this.scrollSteps);
         }
     }
 
     @Override
-    public boolean mouseScrolled(double x, double y, double scrollAmountX, double scrollAmountY) {
-        if (scrollAmountY < 0.0 && currentLine < scrollSteps) {
-            currentLine++;
-        } else if (scrollAmountY > 0.0 && currentLine > 0) {
-            currentLine--;
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scrollY < 0.0 && this.currentLine < this.scrollSteps) {
+            this.currentLine++;
+        } else if (scrollY > 0.0 && this.currentLine > 0) {
+            this.currentLine--;
         } else {
             // scroll bar on limit, didn't consume the input
             return false;
@@ -154,36 +154,36 @@ public class TextScrollWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean keyPressed(int key, int scancode, int mods) {
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN) {
-            if (mouseScrolled(0, 0, 0, key == GLFW.GLFW_KEY_UP ? 1 : -1)) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_DOWN) {
+            if (mouseScrolled(0, 0, 0, keyCode == GLFW.GLFW_KEY_UP ? 1 : -1)) {
                 return true;
             }
         }
-        return super.keyPressed(key, scancode, mods);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    public Style getMouseoverStyle(double x, double y) {
-        int lineIndex = this.getLineIndex(x, y);
+    public Style getMouseoverStyle(double mouseX, double mouseY) {
+        int lineIndex = this.getLineIndex(mouseX, mouseY);
         if (lineIndex >= 0 && lineIndex < this.formattedChars.size()) {
             FormattedCharSequence line = this.formattedChars.get(lineIndex);
-            return Minecraft.getInstance().font.getSplitter().componentStyleAtWidth(line, Mth.floor(x - this.getX()));
+            return Minecraft.getInstance().font.getSplitter().componentStyleAtWidth(line, Mth.floor(mouseX - this.getX()));
         }
         return null;
     }
 
-    private int getLineIndex(double x, double y) {
-        if (!this.clicked(x, y)) {
+    private int getLineIndex(double mouseX, double mouseY) {
+        if (!this.clicked(mouseX, mouseY)) {
             return -1;
         } else {
-            return (int) ((y - this.getY() - padding * 0.5) / 12.0);
+            return (int) ((mouseY - this.getY() - this.padding * 0.5) / 12.0);
         }
     }
 
-    public void renderMouseover(GuiGraphics guiGraphics, int x, int y) {
-        Style style = this.getMouseoverStyle(x, y);
+    public void renderMouseover(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        Style style = this.getMouseoverStyle(mouseX, mouseY);
         if (style != null && style.getHoverEvent() != null) {
-            guiGraphics.renderComponentHoverEffect(Minecraft.getInstance().font, style, x, y);
+            guiGraphics.renderComponentHoverEffect(Minecraft.getInstance().font, style, mouseX, mouseY);
         }
     }
 }

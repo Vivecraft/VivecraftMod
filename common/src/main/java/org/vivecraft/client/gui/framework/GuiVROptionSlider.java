@@ -36,24 +36,23 @@ public class GuiVROptionSlider extends AbstractSliderButton implements GuiVROpti
 
     @Override
     protected void updateMessage() {
-        this.setMessage(Component.literal(ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(this.enumOptions, valueOnly)));
+        this.setMessage(Component.literal(ClientDataHolderVR.getInstance().vrSettings.getButtonDisplayString(this.enumOptions, this.valueOnly)));
     }
 
     @Override
     protected void applyValue() {
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        double d0 = this.enumOptions.denormalizeValue((float) this.value);
-        dataholder.vrSettings.setOptionFloatValue(this.enumOptions, (float) d0);
+        double fullValue = this.enumOptions.denormalizeValue((float) this.value);
+        dataholder.vrSettings.setOptionFloatValue(this.enumOptions, (float) fullValue);
         // with that keyboard changes don't work, if there are fewer options than pixels
-        InputType inputType = Minecraft.getInstance().getLastInputType();
-        if (inputType == InputType.MOUSE) {
-            this.value = this.enumOptions.normalizeValue((float) d0);
+        if (Minecraft.getInstance().getLastInputType() == InputType.MOUSE) {
+            this.value = this.enumOptions.normalizeValue((float) fullValue);
         }
     }
 
     @Override
     public int getId() {
-        return id;
+        return this.id;
     }
 
     @Override

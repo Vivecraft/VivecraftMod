@@ -6,10 +6,11 @@ import com.sun.jna.NativeLibrary;
 import com.sun.jna.ptr.DoubleByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 public class jinfinadeck implements Library {
     public static final String INFINADECK_LIBRARY_NAME = "InfinadeckAPI.dll";
-    public static final NativeLibrary INFINADECK_NATIVE_LIB = NativeLibrary.getInstance("InfinadeckAPI.dll");
+    public static final NativeLibrary INFINADECK_NATIVE_LIB = NativeLibrary.getInstance(INFINADECK_LIBRARY_NAME);
     static float yaw;
     static float yawOffset;
     static double power;
@@ -62,7 +63,7 @@ public class jinfinadeck implements Library {
             ismoving = GetTreadmillRunState();
             yaw *= 57.296F;
         } catch (Exception exception) {
-            System.out.println("Infinadeck Error: " + exception.getMessage());
+            VRSettings.logger.error("Vivecraft: Infinadeck Error:", exception);
         }
     }
 
@@ -79,11 +80,11 @@ public class jinfinadeck implements Library {
     }
 
     public static float walkDirection() {
-        return (float) direction;
+        return direction;
     }
 
     public static float getSpeed() {
-        return (float) (power / (double) maxpower * (double) (walkDirection() == 1.0F ? mag : bmag));
+        return (float) (power / maxpower * (walkDirection() == 1.0F ? mag : bmag));
     }
 
     static {

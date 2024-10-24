@@ -15,27 +15,34 @@ import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 
+/**
+ * we override the players look direction so the server handles any interactions as if the player looked at the interacted block
+ */
 @Mixin(MultiPlayerGameMode.class)
 public class MultiPlayerGameModeVRMixin {
 
-    @Inject(at = @At("HEAD"), method = "useItem")
-    public void vivecraft$overrideUse(Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
+    @Inject(method = "useItem", at = @At("HEAD"))
+    private void vivecraft$overrideUse(
+        Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir)
+    {
         if (VRState.vrRunning) {
-            ClientNetworking.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, interactionHand.ordinal()));
+            ClientNetworking.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, hand.ordinal()));
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "releaseUsingItem")
-    public void vivecraft$overrideReleaseUse(Player player, CallbackInfo ci) {
+    @Inject(method = "releaseUsingItem", at = @At("HEAD"))
+    private void vivecraft$overrideReleaseUse(Player player, CallbackInfo ci) {
         if (VRState.vrRunning) {
             ClientNetworking.overrideLook(player, ClientDataHolderVR.getInstance().vrPlayer.getRightClickLookOverride(player, player.getUsedItemHand().ordinal()));
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "useItemOn")
-    public void vivecraft$overrideUseOn(LocalPlayer localPlayer, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
+    @Inject(method = "useItemOn", at = @At("HEAD"))
+    private void vivecraft$overrideUseOn(
+        LocalPlayer player, InteractionHand hand, BlockHitResult result, CallbackInfoReturnable<InteractionResult> cir)
+    {
         if (VRState.vrRunning) {
-            ClientNetworking.overrideLook(localPlayer, blockHitResult.getLocation().subtract(localPlayer.getEyePosition(1.0F)).normalize());
+            ClientNetworking.overrideLook(player, result.getLocation().subtract(player.getEyePosition(1.0F)).normalize());
         }
     }
 }

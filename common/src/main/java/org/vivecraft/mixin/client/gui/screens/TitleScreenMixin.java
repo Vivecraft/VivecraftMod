@@ -20,67 +20,75 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
 
-    protected TitleScreenMixin(Component component) {
-        super(component);
-    }
-
     @Unique
     private Button vivecraft$vrModeButton;
     @Unique
     private Button vivecraft$updateButton;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", shift = At.Shift.AFTER, ordinal = 1), method = "createNormalMenuOptions")
-    public void vivecraft$initFullGame(CallbackInfo ci) {
+    protected TitleScreenMixin(Component title) {
+        super(title);
+    }
+
+    /**
+     * injects after the multiplayer button to be in the right spot for the tab navigation
+     */
+    @Inject(method = "createNormalMenuOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", shift = At.Shift.AFTER, ordinal = 1))
+    private void vivecraft$initFullGame(CallbackInfo ci) {
         vivecraft$addVRModeButton();
     }
 
-    @Inject(at = @At("TAIL"), method = "createDemoMenuOptions")
-    public void vivecraft$initDemo(CallbackInfo ci) {
+    @Inject(method = "createDemoMenuOptions", at = @At("TAIL"))
+    private void vivecraft$initDemo(CallbackInfo ci) {
         vivecraft$addVRModeButton();
     }
 
     @Unique
     private void vivecraft$addVRModeButton() {
-
-        vivecraft$vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
+        this.vivecraft$vrModeButton = new Button.Builder(Component.translatable("vivecraft.gui.vr", VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), (button) -> {
             VRState.vrEnabled = !VRState.vrEnabled;
             ClientDataHolderVR.getInstance().vrSettings.vrEnabled = VRState.vrEnabled;
             ClientDataHolderVR.getInstance().vrSettings.saveOptions();
 
-            button.setMessage(Component.translatable("vivecraft.gui.vr", VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
+            button.setMessage(Component.translatable("vivecraft.gui.vr",
+                VRState.vrEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
         })
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 72)
             .build();
-        vivecraft$vrModeButton.visible = ClientDataHolderVR.getInstance().vrSettings.vrToggleButtonEnabled;
+        this.vivecraft$vrModeButton.visible = ClientDataHolderVR.getInstance().vrSettings.vrToggleButtonEnabled;
 
-        this.addRenderableWidget(vivecraft$vrModeButton);
+        this.addRenderableWidget(this.vivecraft$vrModeButton);
 
-        vivecraft$updateButton = new Button.Builder(Component.translatable("vivecraft.gui.update"), (button) -> minecraft.setScreen(new UpdateScreen()))
+        this.vivecraft$updateButton = new Button.Builder(Component.translatable("vivecraft.gui.update"), (button) -> this.minecraft.setScreen(new UpdateScreen()))
             .size(56, 20)
             .pos(this.width / 2 + 104, this.height / 4 + 96)
             .build();
 
-        vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
+        this.vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
-        this.addRenderableWidget(vivecraft$updateButton);
+        this.addRenderableWidget(this.vivecraft$updateButton);
     }
 
-    @Inject(at = @At("TAIL"), method = "render")
-    public void vivecraft$renderToolTip(GuiGraphics guiGraphics, int i, int j, float f, CallbackInfo ci) {
-        vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
+    @Inject(method = "render", at = @At("TAIL"))
+    private void vivecraft$renderToolTip(
+        GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci)
+    {
+        this.vivecraft$updateButton.visible = UpdateChecker.hasUpdate;
 
-        if (vivecraft$vrModeButton.visible && vivecraft$vrModeButton.isMouseOver(i, j)) {
-            guiGraphics.renderTooltip(font, font.split(Component.translatable("vivecraft.options.VR_ENABLED.tooltip"), Math.max(width / 2 - 43, 170)), i, j);
+        if (this.vivecraft$vrModeButton.visible && this.vivecraft$vrModeButton.isMouseOver(mouseX, mouseY)) {
+            guiGraphics.renderTooltip(this.font, this.font.split(Component.translatable("vivecraft.options.VR_ENABLED.tooltip"),
+                Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
         }
         if (VRState.vrInitialized && !VRState.vrRunning) {
             Component hotswitchMessage = Component.translatable("vivecraft.messages.vrhotswitchinginfo");
-            guiGraphics.renderTooltip(font, font.split(hotswitchMessage, 280), width / 2 - 140 - 12, 17);
+            guiGraphics.renderTooltip(this.font, this.font.split(hotswitchMessage, 280), this.width / 2 - 140 - 12, 17);
         }
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), method = "render", index = 1)
-    public float vivecraft$maybeNoPanorama(float alpha) {
-        return VRState.vrRunning && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() || ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama) ? 0.0F : alpha;
+    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V"), index = 1)
+    private float vivecraft$maybeNoPanorama(float alpha) {
+        return VRState.vrRunning && (ClientDataHolderVR.getInstance().menuWorldRenderer.isReady() ||
+            ClientDataHolderVR.getInstance().vrSettings.menuWorldFallbackPanorama
+        ) ? 0.0F : alpha;
     }
 }

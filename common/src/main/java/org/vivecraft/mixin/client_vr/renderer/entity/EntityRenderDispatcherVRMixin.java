@@ -1,12 +1,11 @@
 package org.vivecraft.mixin.client_vr.renderer.entity;
 
-import com.mojang.math.Axis;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
@@ -17,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.extensions.EntityRenderDispatcherVRExtension;
 import org.vivecraft.client_vr.extensions.LevelRendererExtension;
@@ -29,71 +27,53 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Mixin(EntityRenderDispatcher.class)
-public abstract class EntityRenderDispatcherVRMixin implements ResourceManagerReloadListener, EntityRenderDispatcherVRExtension {
+public abstract class EntityRenderDispatcherVRMixin implements EntityRenderDispatcherVRExtension {
 
     @Unique
-    private VRArmRenderer vivecraft$armRenderer;
-    @Unique
-    public final Map<String, VRArmRenderer> vivecraft$armSkinMap = new HashMap<>();
+    private final Map<String, VRArmRenderer> vivecraft$armSkinMap = new HashMap<>();
+
     @Shadow
     public Camera camera;
-    @Shadow
-    private Quaternionf cameraOrientation;
 
-    @Inject(at = @At("HEAD"), method = "cameraOrientation", cancellable = true)
-    public void vivecraft$cameraOrientation(CallbackInfoReturnable<Quaternionf> cir) {
-        if (RenderPassType.isVanilla() || RenderPassType.isGuiOnly()) {
-            cir.setReturnValue(cameraOrientation);
-        } else {
-            Entity entity = ((LevelRendererExtension) Minecraft.getInstance().levelRenderer).vivecraft$getRenderedEntity();
-            if (entity == null) {
-                cir.setReturnValue(this.camera.rotation());
-            } else {
-                Vec3 vec3 = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition();
-                if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
-                    vec3 = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
-                }
-                Vec3 vec31 = entity.position().add(0.0D, entity.getBbHeight() / 2.0F, 0.0D).subtract(vec3).normalize();
-                Quaternionf q = new Quaternionf();
-                q.mul(Axis.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
-                q.mul(Axis.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
-                cir.setReturnValue(q);
-            }
+    @Inject(method = "cameraOrientation", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$cameraOrientation(CallbackInfoReturnable<Quaternionf> cir) {
+        if (RenderPassType.isWorldOnly()) {
+            cir.setReturnValue(this.vivecraft$getVRCameraOrientation(0.5F, 0.0F));
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;"),
-        method = "onResourceManagerReload(Lnet/minecraft/server/packs/resources/ResourceManager;)V", locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    public void vivecraft$reload(ResourceManager resourceManager, CallbackInfo ci, EntityRendererProvider.Context context) {
-        this.vivecraft$armRenderer = new VRArmRenderer(context, false);
-        this.vivecraft$armSkinMap.put("default", this.vivecraft$armRenderer);
+    @Inject(method = "onResourceManagerReload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderers;createPlayerRenderers(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Ljava/util/Map;"))
+    private void vivecraft$reload(ResourceManager resourceManager, CallbackInfo ci, @Local EntityRendererProvider.Context context) {
+        this.vivecraft$armSkinMap.put("default", new VRArmRenderer(context, false));
         this.vivecraft$armSkinMap.put("slim", new VRArmRenderer(context, true));
     }
 
     @Override
     @Unique
-    public Quaternionf vivecraft$getCameraOrientationOffset(float offset) {
-        if (RenderPassType.isVanilla() || RenderPassType.isGuiOnly()) {
-            return cameraOrientation;
+    public Quaternionf vivecraft$getVRCameraOrientation(float scale, float offset) {
+        Entity entity = ((LevelRendererExtension) Minecraft.getInstance().levelRenderer).vivecraft$getRenderedEntity();
+        if (entity == null) {
+            return this.camera.rotation();
         } else {
-            Entity entity = ((LevelRendererExtension) Minecraft.getInstance().levelRenderer).vivecraft$getRenderedEntity();
-            if (entity == null) {
-                return this.camera.rotation();
+            Vec3 source;
+            if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
+                source = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
             } else {
-                Vec3 vec3 = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition();
-                if (ClientDataHolderVR.getInstance().currentPass == RenderPass.THIRD || ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA) {
-                    vec3 = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(ClientDataHolderVR.getInstance().currentPass).getPosition();
-                }
-                Vec3 vec31 = entity.position().add(0.0D, entity.getBbHeight() + offset, 0.0D).subtract(vec3).normalize();
-                Quaternionf q = new Quaternionf();
-                q.mul(Axis.YP.rotationDegrees((float) (-Math.toDegrees(Math.atan2(-vec31.x, vec31.z)))));
-                q.mul(Axis.XP.rotationDegrees((float) (-Math.toDegrees(Math.asin(vec31.y / vec31.length())))));
-                return q;
+                source = ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().getEye(RenderPass.CENTER).getPosition();
             }
+            Vec3 direction = entity.position()
+                .add(0.0D, entity.getBbHeight() * scale + offset, 0.0D)
+                .subtract(source).normalize();
+
+            return new Quaternionf()
+                .rotateY((float) -Math.atan2(-direction.x, direction.z))
+                .rotateX((float) -Math.asin(direction.y / direction.length()));
         }
     }
 
+    @Override
+    @Unique
     public Map<String, VRArmRenderer> vivecraft$getArmSkinMap() {
-        return vivecraft$armSkinMap;
+        return this.vivecraft$armSkinMap;
     }
 }

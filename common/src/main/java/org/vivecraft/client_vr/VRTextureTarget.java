@@ -2,37 +2,50 @@ package org.vivecraft.client_vr;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 
+/**
+ * extension of a regular RenderTarget that sets Vivecraft features on creation
+ */
 public class VRTextureTarget extends RenderTarget {
 
     private final String name;
 
-    public VRTextureTarget(String name, int width, int height, boolean usedepth, boolean onMac, int texid, boolean depthtex, boolean linearFilter, boolean useStencil) {
-        super(usedepth);
+    public VRTextureTarget(String name, int width, int height, boolean useDepth, int texId, boolean linearFilter, boolean mipmaps, boolean useStencil) {
+        super(useDepth);
         this.name = name;
         RenderSystem.assertOnGameThreadOrInit();
-        ((RenderTargetExtension) this).vivecraft$setTextid(texid);
-        ((RenderTargetExtension) this).vivecraft$isLinearFilter(linearFilter);
-        ((RenderTargetExtension) this).vivecraft$setUseStencil(useStencil);
-        this.resize(width, height, onMac);
-        if (useStencil) {
-            Xplat.enableRenderTargetStencil(this);
+        ((RenderTargetExtension) this).vivecraft$setTexId(texId);
+        ((RenderTargetExtension) this).vivecraft$setLinearFilter(linearFilter);
+        ((RenderTargetExtension) this).vivecraft$setMipmaps(mipmaps);
+
+        // need to set this first, because the forge/neoforge stencil enabled does a resize
+        this.viewWidth = width;
+        this.viewHeight = height;
+
+        if (useStencil && !Xplat.enableRenderTargetStencil(this)) {
+            // use our stencil only if the modloader doesn't support it
+            ((RenderTargetExtension) this).vivecraft$setStencil(true);
         }
+        this.resize(width, height, Minecraft.ON_OSX);
+
         this.setClearColor(0, 0, 0, 0);
     }
 
     @Override
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append("\n");
-        if (this.name != null) {
-            stringbuilder.append("Name:   " + this.name).append("\n");
-        }
-        stringbuilder.append("Size:   " + this.viewWidth + " x " + this.viewHeight).append("\n");
-        stringbuilder.append("FB ID:  " + this.frameBufferId).append("\n");
-        stringbuilder.append("Tex ID: " + this.colorTextureId).append("\n");
-        return stringbuilder.toString();
+        return """
+            
+            Vivecraft RenderTarget: %s
+            Size: %s x %s
+            FB ID: %s
+            Tex ID: %s"""
+        .formatted(
+            this.name,
+            this.viewWidth, this.viewHeight,
+            this.frameBufferId,
+            this.colorTextureId);
     }
 }

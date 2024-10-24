@@ -17,54 +17,58 @@ import org.vivecraft.client_vr.render.RenderPass;
 import java.util.UUID;
 
 public class VRPlayerRenderer extends PlayerRenderer {
-    static LayerDefinition VRLayerDef = LayerDefinition.create(VRPlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64);
-    static LayerDefinition VRLayerDef_arms = LayerDefinition.create(VRPlayerModel_WithArms.createMesh(CubeDeformation.NONE, false), 64, 64);
-    static LayerDefinition VRLayerDef_slim = LayerDefinition.create(VRPlayerModel.createMesh(CubeDeformation.NONE, true), 64, 64);
-    static LayerDefinition VRLayerDef_arms_slim = LayerDefinition.create(VRPlayerModel_WithArms.createMesh(CubeDeformation.NONE, true), 64, 64);
+    private static final LayerDefinition VRLayerDef = LayerDefinition.create(VRPlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64);
+    private static final LayerDefinition VRLayerDef_arms = LayerDefinition.create(VRPlayerModel_WithArms.createMesh(CubeDeformation.NONE, false), 64, 64);
+    private static final LayerDefinition VRLayerDef_slim = LayerDefinition.create(VRPlayerModel.createMesh(CubeDeformation.NONE, true), 64, 64);
+    private static final LayerDefinition VRLayerDef_arms_slim = LayerDefinition.create(VRPlayerModel_WithArms.createMesh(CubeDeformation.NONE, true), 64, 64);
 
     public VRPlayerRenderer(EntityRendererProvider.Context context, boolean slim, boolean seated) {
         super(context, slim);
-        model = !slim ?
-                (seated ?
-                 new VRPlayerModel<>(VRLayerDef.bakeRoot(), slim) :
-                 new VRPlayerModel_WithArms<>(VRLayerDef_arms.bakeRoot(), slim)) :
-                (seated ?
-                 new VRPlayerModel<>(VRLayerDef_slim.bakeRoot(), slim) :
-                 new VRPlayerModel_WithArms<>(VRLayerDef_arms_slim.bakeRoot(), slim));
+        this.model = seated ?
+            new VRPlayerModel<>(slim ? VRLayerDef_slim.bakeRoot() : VRLayerDef.bakeRoot(), slim) :
+            new VRPlayerModel_WithArms<>(slim ? VRLayerDef_arms_slim.bakeRoot() : VRLayerDef_arms.bakeRoot(), slim);
 
         this.addLayer(new HMDLayer(this));
     }
 
+    /**
+     * @param renderLayer RenderLayer to check
+     * @return if a layer of the given class is already registered
+     */
     public boolean hasLayerType(RenderLayer<?,?> renderLayer) {
         return this.layers.stream().anyMatch(layer -> layer.getClass() == renderLayer.getClass());
     }
 
     @Override
-    public void render(AbstractClientPlayer entityIn, float pEntityYaw, float pPartialTicks, PoseStack matrixStackIn, MultiBufferSource pBuffer, int pPackedLight) {
+    public void render(AbstractClientPlayer player, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
 
-        VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entityIn.getUUID());
+        poseStack.pushPose();
 
-        if (playermodelcontroller$rotinfo != null) {
-            matrixStackIn.scale(playermodelcontroller$rotinfo.heightScale, playermodelcontroller$rotinfo.heightScale, playermodelcontroller$rotinfo.heightScale);
-            super.render(entityIn, pEntityYaw, pPartialTicks, matrixStackIn, pBuffer, pPackedLight);
-            matrixStackIn.scale(1.0F, 1.0F / playermodelcontroller$rotinfo.heightScale, 1.0F);
+        VRPlayersClient.RotInfo rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(player.getUUID());
+        if (rotInfo != null) {
+            poseStack.scale(rotInfo.heightScale, rotInfo.heightScale, rotInfo.heightScale);
         }
+
+        super.render(player, entityYaw, partialTick, poseStack, buffer, packedLight);
+
+        poseStack.popPose();
     }
 
     @Override
-    public Vec3 getRenderOffset(AbstractClientPlayer pEntity, float pPartialTicks) {
-        //idk why we do this anymore
-        return pEntity.isVisuallySwimming() ? new Vec3(0.0D, -0.125D, 0.0D) : Vec3.ZERO;
-        // return pEntity.isCrouching() ? new Vec3(0.0D, -0.125D, 0.0D) : super.getRenderOffset(pEntity, pPartialTicks);
+    public Vec3 getRenderOffset(AbstractClientPlayer player, float partialTick) {
+        // idk why we do this anymore
+        // this changes the offset to only apply when swimming, instead of crouching
+        return player.isVisuallySwimming() ? new Vec3(0.0D, -0.125D, 0.0D) : Vec3.ZERO;
     }
 
     @Override
-    public void setModelProperties(AbstractClientPlayer pClientPlayer) {
-        super.setModelProperties(pClientPlayer);
+    public void setModelProperties(AbstractClientPlayer player) {
+        super.setModelProperties(player);
 
-        this.getModel().crouching &= !pClientPlayer.isVisuallySwimming();
+        // no crouch hip movement when roomscale crawling
+        this.getModel().crouching &= !player.isVisuallySwimming();
 
-        if (pClientPlayer == Minecraft.getInstance().player && this.getModel() instanceof VRPlayerModel_WithArms<?> armsModel && ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA && ClientDataHolderVR.getInstance().cameraTracker.isQuickMode() && ClientDataHolderVR.getInstance().grabScreenShot) {
+        if (player == Minecraft.getInstance().player && this.getModel() instanceof VRPlayerModel_WithArms<?> armsModel && ClientDataHolderVR.getInstance().currentPass == RenderPass.CAMERA && ClientDataHolderVR.getInstance().cameraTracker.isQuickMode() && ClientDataHolderVR.getInstance().grabScreenShot) {
             // player hands block the camera, so disable them for the screenshot
             armsModel.leftHand.visible = false;
             armsModel.rightHand.visible = false;
@@ -74,14 +78,14 @@ public class VRPlayerRenderer extends PlayerRenderer {
     }
 
     @Override
-    protected void setupRotations(AbstractClientPlayer pEntityLiving, PoseStack pMatrixStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks) {
-        UUID uuid = pEntityLiving.getUUID();
+    protected void setupRotations(AbstractClientPlayer player, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+        UUID uuid = player.getUUID();
         if (ClientDataHolderVR.getInstance().currentPass != RenderPass.GUI && VRPlayersClient.getInstance().isTracked(uuid)) {
-            VRPlayersClient.RotInfo playermodelcontroller$rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(uuid);
-            pRotationYaw = (float) Math.toDegrees(playermodelcontroller$rotinfo.getBodyYawRadians());
+            VRPlayersClient.RotInfo rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(uuid);
+            rotationYaw = (float) Math.toDegrees(rotInfo.getBodyYawRadians());
         }
 
         //vanilla below here
-        super.setupRotations(pEntityLiving, pMatrixStack, pAgeInTicks, pRotationYaw, pPartialTicks);
+        super.setupRotations(player, poseStack, ageInTicks, rotationYaw, partialTick);
     }
 }

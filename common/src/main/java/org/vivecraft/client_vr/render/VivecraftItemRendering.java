@@ -3,7 +3,6 @@ package org.vivecraft.client_vr.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -17,344 +16,404 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
+import org.vivecraft.client_vr.gameplay.trackers.ClimbTracker;
 import org.vivecraft.client_vr.gameplay.trackers.SwingTracker;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 
 public class VivecraftItemRendering {
     private static final ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
 
-    public static VivecraftItemTransformType getTransformType(ItemStack pStack, AbstractClientPlayer pPlayer, ItemRenderer itemRenderer) {
-        VivecraftItemTransformType rendertype = VivecraftItemTransformType.Item;
-        Item item = pStack.getItem();
-        Minecraft minecraft = Minecraft.getInstance();
+    /**
+     * determines how the given ItemStack should be rendered
+     * @param itemStack ItemStack to identify
+     * @param player Player holding the ItemStack
+     * @param itemRenderer ItemRenderer to query the item model from
+     * @return ItemTransformType that specifies how the item should be rendered
+     */
+    public static VivecraftItemTransformType getTransformType(ItemStack itemStack, AbstractClientPlayer player, ItemRenderer itemRenderer) {
+        VivecraftItemTransformType itemTransformType = VivecraftItemTransformType.Item;
+        Item item = itemStack.getItem();
 
-        if (pStack.getUseAnimation() != UseAnim.EAT && pStack.getUseAnimation() != UseAnim.DRINK) {
-            if (item instanceof BlockItem) {
-                Block block = ((BlockItem) item).getBlock();
+        if (itemStack.getUseAnimation() == UseAnim.EAT || itemStack.getUseAnimation() == UseAnim.DRINK) {
+            itemTransformType = VivecraftItemTransformType.Noms;
+        } else if (item instanceof BlockItem) {
+            Block block = ((BlockItem) item).getBlock();
 
-                if (block instanceof TorchBlock) {
-                    rendertype = VivecraftItemTransformType.Block_Stick;
+            if (block instanceof TorchBlock) {
+                itemTransformType = VivecraftItemTransformType.Block_Stick;
+            } else {
+                BakedModel bakedmodel = itemRenderer.getModel(itemStack, player.level(), player, 0);
+
+                if (bakedmodel.isGui3d()) {
+                    itemTransformType = VivecraftItemTransformType.Block_3D;
                 } else {
-                    BakedModel bakedmodel = itemRenderer.getModel(pStack, minecraft.level, minecraft.player, 0);
-
-                    if (bakedmodel.isGui3d()) {
-                        rendertype = VivecraftItemTransformType.Block_3D;
-                    } else {
-                        rendertype = VivecraftItemTransformType.Block_Item;
-                    }
-                }
-            } else if (item instanceof MapItem || pStack.is(ItemTags.VIVECRAFT_MAPS)) {
-                rendertype = VivecraftItemTransformType.Map;
-            } else if (pStack.getUseAnimation() == UseAnim.BOW && !pStack.is(ItemTags.VIVECRAFT_BOW_EXCLUSION)) {
-                rendertype = VivecraftItemTransformType.Bow_Seated;
-
-                if (dh.bowTracker.isActive((LocalPlayer) pPlayer)) {
-                    if (dh.bowTracker.isDrawing) {
-                        rendertype = VivecraftItemTransformType.Bow_Roomscale_Drawing;
-                    } else {
-                        rendertype = VivecraftItemTransformType.Bow_Roomscale;
-                    }
-                }
-            } else if (pStack.getUseAnimation() == UseAnim.TOOT_HORN) {
-                rendertype = VivecraftItemTransformType.Horn;
-            } else if (item instanceof SwordItem || pStack.is(ItemTags.VIVECRAFT_SWORDS)) {
-                rendertype = VivecraftItemTransformType.Sword;
-            } else if (item instanceof ShieldItem || pStack.is(ItemTags.VIVECRAFT_SHIELDS)) {
-                rendertype = VivecraftItemTransformType.Shield;
-            } else if (item instanceof TridentItem || pStack.is(ItemTags.VIVECRAFT_SPEARS)) {
-                rendertype = VivecraftItemTransformType.Spear;
-            } else if (item instanceof CrossbowItem || pStack.is(ItemTags.VIVECRAFT_CROSSBOWS)) {
-                rendertype = VivecraftItemTransformType.Crossbow;
-            } else if (item instanceof CompassItem || item == Items.CLOCK || pStack.is(ItemTags.VIVECRAFT_COMPASSES)) {
-                rendertype = VivecraftItemTransformType.Compass;
-            } else {
-                if (SwingTracker.isTool(item)) {
-                    rendertype = VivecraftItemTransformType.Tool;
-
-                    if (item instanceof FoodOnAStickItem || item instanceof FishingRodItem || pStack.is(ItemTags.VIVECRAFT_FISHING_RODS)) {
-                        rendertype = VivecraftItemTransformType.Tool_Rod;
-                    }
-                } else if (TelescopeTracker.isTelescope(pStack)) {
-                    rendertype = VivecraftItemTransformType.Telescope;
+                    itemTransformType = VivecraftItemTransformType.Block_Item;
                 }
             }
-        } else {
-            rendertype = VivecraftItemTransformType.Noms;
+        } else if (item instanceof MapItem || itemStack.is(ItemTags.VIVECRAFT_MAPS)) {
+            itemTransformType = VivecraftItemTransformType.Map;
+        } else if (itemStack.getUseAnimation() == UseAnim.BOW && !itemStack.is(ItemTags.VIVECRAFT_BOW_EXCLUSION)) {
+            itemTransformType = VivecraftItemTransformType.Bow_Seated;
+
+            if (dh.bowTracker.isActive((LocalPlayer) player)) {
+                if (dh.bowTracker.isDrawing) {
+                    itemTransformType = VivecraftItemTransformType.Bow_Roomscale_Drawing;
+                } else {
+                    itemTransformType = VivecraftItemTransformType.Bow_Roomscale;
+                }
+            }
+        } else if (itemStack.getUseAnimation() == UseAnim.TOOT_HORN) {
+            itemTransformType = VivecraftItemTransformType.Horn;
+        } else if (item instanceof SwordItem || itemStack.is(ItemTags.VIVECRAFT_SWORDS)) {
+            itemTransformType = VivecraftItemTransformType.Sword;
+        } else if (item instanceof ShieldItem || itemStack.is(ItemTags.VIVECRAFT_SHIELDS)) {
+            itemTransformType = VivecraftItemTransformType.Shield;
+        } else if (item instanceof TridentItem || itemStack.is(ItemTags.VIVECRAFT_SPEARS)) {
+            itemTransformType = VivecraftItemTransformType.Spear;
+        } else if (item instanceof CrossbowItem || itemStack.is(ItemTags.VIVECRAFT_CROSSBOWS)) {
+            itemTransformType = VivecraftItemTransformType.Crossbow;
+        } else if (item instanceof CompassItem || item == Items.CLOCK || itemStack.is(ItemTags.VIVECRAFT_COMPASSES)) {
+            itemTransformType = VivecraftItemTransformType.Compass;
+        } else if (SwingTracker.isTool(item)) {
+            itemTransformType = VivecraftItemTransformType.Tool;
+
+            if (item instanceof FoodOnAStickItem || item instanceof FishingRodItem || itemStack.is(ItemTags.VIVECRAFT_FISHING_RODS)) {
+                itemTransformType = VivecraftItemTransformType.Tool_Rod;
+            }
+        } else if (TelescopeTracker.isTelescope(itemStack)) {
+            itemTransformType = VivecraftItemTransformType.Telescope;
         }
-        return rendertype;
+        return itemTransformType;
     }
 
-    public static void applyThirdPersonItemTransforms(PoseStack pMatrixStack, VivecraftItemTransformType rendertype, boolean mainHand, AbstractClientPlayer pPlayer, float pEquippedProgress, float pPartialTicks, ItemStack pStack, InteractionHand pHand) {
-        //all TODO
+    /**
+     * modifies the given poseStack, so that a third person item transform is positioned in the hand
+     * @param poseStack PoseStack to modify
+     * @param itemTransformType itemTransformType of the item
+     * @param mainHand if the item is in the main hand or not
+     * @param player Player holding the item
+     * @param equippedProgress equip progress of the item
+     * @param partialTick current partial tick
+     * @param itemStack ItemStack the player is holding
+     * @param hand which hand the item is held in
+     */
+    public static void applyThirdPersonItemTransforms(PoseStack poseStack, VivecraftItemTransformType itemTransformType, boolean mainHand, AbstractClientPlayer player, float equippedProgress, float partialTick, ItemStack itemStack, InteractionHand hand) {
+        // TODO make this work with stuff by default
         int k = mainHand ? 1 : -1;
-        Minecraft minecraft = Minecraft.getInstance();
-        double scale = 0.525D;
-        double translateX = 0;
-        double translateY = 0.05;
-        double translateZ = 0;
+        // scale so the item is slightly bigger than the hand
+        float scale = 0.525F;
+        float translateX = 0.0F;
+        float translateY = 0.05F;
+        float translateZ = 0.0F;
         boolean useLeftHandModelinLeftHand = false;
 
-        if (dh.climbTracker.isClaws(pStack)) {
-            scale = 0.4D;
-        }
-
-//        pMatrixStack.mulPose(preRotation);
-        pMatrixStack.translate(translateX, translateY, translateZ);
-//        pMatrixStack.mulPose(rotation);
-        pMatrixStack.scale((float) scale, (float) scale, (float) scale);
-    }
-
-
-    public static void applyFirstPersonItemTransforms(PoseStack pMatrixStack, VivecraftItemTransformType rendertype, boolean mainHand, AbstractClientPlayer pPlayer, float pEquippedProgress, float pPartialTicks, ItemStack pStack, InteractionHand pHand) {
-        int k = mainHand ? 1 : -1;
-        Minecraft minecraft = Minecraft.getInstance();
-        double scale = 0.7D;
-        double translateX = -0.05D;
-        double translateY = 0.005D;
-        double translateZ = 0.0D;
-        boolean useLeftHandModelinLeftHand = false;
-
-        double gunAngle = dh.vr.getGunAngle();
-        Quaternionf rotation = Axis.YP.rotationDegrees(0.0F);
-        Quaternionf preRotation = Axis.YP.rotationDegrees(0.0F);
-        rotation.mul(Axis.XP.rotationDegrees((float) (-110.0D + gunAngle)));
-
-        if (rendertype == VivecraftItemTransformType.Bow_Seated) {
-            translateY += -0.1D;
-            translateZ += 0.1D;
-            rotation.mul(Axis.XP.rotationDegrees((float) (90.0D - gunAngle)));
-            scale = 0.7F;
-        } else if (rendertype == VivecraftItemTransformType.Bow_Roomscale) {
-            rotation = Axis.XP.rotationDegrees(0.0F);
-            pMatrixStack.mulPose(Axis.XP.rotationDegrees((float) (-110.0D + gunAngle)));
-            translateY -= 0.25D;
-            translateZ += (double) 0.025F + 0.03D * gunAngle / 40.0D;
-            translateX += -0.0225D;
-            scale = 1.0D;
-        } else if (rendertype == VivecraftItemTransformType.Bow_Roomscale_Drawing) {
-            rotation = Axis.YP.rotationDegrees(0.0F);
-            scale = 1.0D;
-            int i = 0;
-
-            if (dh.vrSettings.reverseShootingEye) {
-                i = 1;
-            }
-
-            Vec3 vec3 = dh.bowTracker.getAimVector();
-            Vec3 vec31 = new Vec3(vec3.x, vec3.y, vec3.z);
-            Vec3 vec32 = dh.vrPlayer.vrdata_world_render.getHand(1).getCustomVector(new Vec3(0.0D, -1.0D, 0.0D));
-            Vec3 vec33 = dh.vrPlayer.vrdata_world_render.getHand(1).getCustomVector(new Vec3(0.0D, 0.0D, -1.0D));
-            vec31.cross(vec32);
-            double d4 = (180D / Math.PI) * Math.acos(vec31.dot(vec32));
-            float f = (float) Math.toDegrees(Math.asin(vec31.y / vec31.length()));
-            float f1 = (float) Math.toDegrees(Math.atan2(vec31.x, vec31.z));
-            Vec3 vec34 = new Vec3(0.0D, 1.0D, 0.0D);
-            Vec3 vec35 = new Vec3(vec31.x, 0.0D, vec31.z);
-            Vec3 vec36 = Vec3.ZERO;
-            double d5 = vec33.dot(vec35);
-
-            if (d5 != 0.0D) {
-                vec36 = vec35.scale(d5);
-            }
-
-            double d6 = 0.0D;
-            Vec3 vec37 = vec33.subtract(vec36).normalize();
-            d6 = vec37.dot(vec34);
-            double d7 = vec35.dot(vec37.cross(vec34));
-            float f2;
-
-            if (d7 < 0.0D) {
-                f2 = -((float) Math.acos(d6));
-            } else {
-                f2 = (float) Math.acos(d6);
-            }
-
-            float f3 = (float) ((180D / Math.PI) * (double) f2);
-
-            if (dh.bowTracker.isCharged()) {
-                long j = Util.getMillis() - dh.bowTracker.startDrawTime;
-                translateX += 0.003D * Math.sin((double) j);
-            }
-
-            pMatrixStack.translate(0.0D, 0.0D, 0.1D);
-            pMatrixStack.last().pose().mul(dh.vrPlayer.vrdata_world_render.getController(1).getMatrix().transposed().toMCMatrix());
-            rotation.mul(Axis.YP.rotationDegrees(f1));
-            rotation.mul(Axis.XP.rotationDegrees(-f));
-            rotation.mul(Axis.ZP.rotationDegrees(-f3));
-            rotation.mul(Axis.ZP.rotationDegrees(180.0F));
-            pMatrixStack.last().pose().rotate(rotation);
-            rotation = Axis.YP.rotationDegrees(0.0F);
-            rotation.mul(Axis.YP.rotationDegrees(180.0F));
-            rotation.mul(Axis.XP.rotationDegrees(160.0F));
-            translateY += 0.1225D;
-            translateX += 0.125D;
-            translateZ += 0.16D;
-        } else if (rendertype == VivecraftItemTransformType.Crossbow) {
-            translateX += 0.01F;
-            translateZ += -0.02F;
-            translateY += -0.02F;
-            scale = 0.5D;
-            rotation = Axis.XP.rotationDegrees(0.0F);
-            rotation.mul(Axis.YP.rotationDegrees(10.0F));
-        } else if (rendertype == VivecraftItemTransformType.Map) {
-            rotation = Axis.XP.rotationDegrees(-45.0F);
-            translateX = 0.0D;
-            translateY = 0.16D;
-            translateZ = -0.075D;
-            scale = 0.75D;
-        } else if (rendertype == VivecraftItemTransformType.Noms) {
-            long l = minecraft.player.getUseItemRemainingTicks();
-            rotation = Axis.ZP.rotationDegrees(180.0F);
-            rotation.mul(Axis.XP.rotationDegrees(-135.0F));
-            translateZ = translateZ + 0.006D * Math.sin((double) l);
-            translateZ = translateZ + (double) 0.02F;
-            translateX += 0.08F;
+        // claws need the actual hand size
+        if (ClimbTracker.isClaws(itemStack)) {
             scale = 0.4F;
-        } else if (rendertype != VivecraftItemTransformType.Item && rendertype != VivecraftItemTransformType.Block_Item) {
-            if (rendertype == VivecraftItemTransformType.Compass) {
+        }
+
+        // poseStack.mulPose(preRotation);
+        poseStack.translate(translateX, translateY, translateZ);
+        // poseStack.mulPose(rotation);
+        poseStack.scale(scale, scale, scale);
+    }
+
+    /**
+     * modifies the given poseStack, so that a first person item transform is positioned in the hand
+     * @param poseStack PoseStack to modify
+     * @param itemTransformType itemTransformType of the item
+     * @param mainHand if the item is in the main hand or not
+     * @param player Player holding the item
+     * @param equippedProgress equip progress of the item
+     * @param partialTick current partial tick
+     * @param itemStack ItemStack the player is holding
+     * @param hand which hand the item is held in
+     */
+    public static void applyFirstPersonItemTransforms(PoseStack poseStack, VivecraftItemTransformType itemTransformType, boolean mainHand, AbstractClientPlayer player, float equippedProgress, float partialTick, ItemStack itemStack, InteractionHand hand) {
+
+        float gunAngle = (float) dh.vr.getGunAngle();
+
+        // defaults
+        float scale = 0.7F;
+        float translateX = -0.05F;
+        float translateY = 0.005F;
+        float translateZ = 0.0F;
+
+        Quaternionf rotation = new Quaternionf();
+        Quaternionf preRotation = new Quaternionf();
+        rotation.mul(Axis.XP.rotationDegrees(-110.0F + gunAngle));
+
+        switch (itemTransformType) {
+            case Bow_Seated -> {
+                rotation.mul(Axis.XP.rotationDegrees(90.0F - gunAngle));
+                translateY += -0.1F;
+                translateZ += 0.1F;
+            }
+            case Bow_Roomscale -> {
+                preRotation.set(rotation);
+                rotation.identity();
+                translateX -= 0.0225F;
+                translateY -= 0.25F;
+                translateZ += 0.025F + 0.03F * gunAngle / 40.0F;
+                scale = 1.0F;
+            }
+            case Bow_Roomscale_Drawing -> {
+                // here there be dragons
+                // reset
+                rotation.identity();
+                scale = 1.0F;
+
+                int bowHand = 1;
+
+                // bow in main hand
+                if (dh.vrSettings.reverseShootingEye) {
+                    bowHand = 0;
+                }
+
+                Vec3 aim = dh.bowTracker.getAimVector();
+
+                Vec3 localBack = dh.vrPlayer.vrdata_world_render.getHand(bowHand)
+                    .getCustomVector(new Vec3(0.0D, 0.0D, -1.0D));
+
+                float aimPitch = (float) Math.toDegrees(Math.asin(aim.y / aim.length()));
+                float yaw = (float) Math.toDegrees(Math.atan2(aim.x, aim.z));
+
+                Vec3 up = new Vec3(0.0D, 1.0D, 0.0D);
+
+                // we want the normal to aim aiming plane, but vertical.
+                Vec3 aimHorizontal = new Vec3(aim.x, 0.0D, aim.z);
+
+                Vec3 pAim2 = Vec3.ZERO;
+                // angle between controller up and aim, just for ortho check
+                double aimProj = localBack.dot(aimHorizontal);
+
+                // check to make sure we aren't holding the bow perfectly straight up.
+                if (aimProj != 0.0D) {
+                    // projection of l_controller_up onto aim vector ... why is there no multiply?
+                    pAim2 = aimHorizontal.scale(aimProj);
+                }
+
+                Vec3 proj = localBack.subtract(pAim2).normalize();
+                // angle between our projection and straight up (the default bow render pos.)
+                double dot = proj.dot(up);
+
+                // angle sign test, negative is left roll
+                double dot2 = aimHorizontal.dot(proj.cross(up));
+
+                float angle;
+                if (dot2 < 0.0D) {
+                    angle = (float) -Math.acos(dot);
+                } else {
+                    angle = (float) Math.acos(dot);
+                }
+
+                // calculate bow model roll.
+                float roll = (180F / (float) Math.PI) * angle;
+
+                if (dh.bowTracker.isCharged()) {
+                    // bow jitter
+                    long j = Util.getMillis() - dh.bowTracker.startDrawTime;
+                    translateX += 0.003F * (float) Math.sin((double) j);
+                }
+
+                poseStack.translate(0.0F, 0.0F, 0.1F);
+                // un-do controller tracking
+                poseStack.last().pose()
+                    .mul(dh.vrPlayer.vrdata_world_render.getController(bowHand).getMatrix().transposed().toMCMatrix());
+
+                // rotate in world coords
+                rotation.mul(Axis.YP.rotationDegrees(yaw));
+                rotation.mul(Axis.XP.rotationDegrees(-aimPitch));
+                rotation.mul(Axis.ZP.rotationDegrees(-roll));
+                rotation.mul(Axis.ZP.rotationDegrees(180.0F));
+
+                poseStack.last().pose().rotate(rotation);
+
+                rotation = Axis.YP.rotationDegrees(180.0F);
+                rotation.mul(Axis.XP.rotationDegrees(160.0F));
+
+                translateX += 0.125F;
+                translateY += 0.1225F;
+                translateZ += 0.16F;
+            }
+            case Crossbow -> {
+                rotation = Axis.YP.rotationDegrees(10.0F);
+                translateX += 0.01F;
+                translateZ -= 0.02F;
+                translateY -= 0.02F;
+                scale = 0.5F;
+            }
+            case Map -> {
+                rotation = Axis.XP.rotationDegrees(-45.0F);
+                translateX = 0.0F;
+                translateY = 0.16F;
+                translateZ = -0.075f;
+                scale = 0.75F;
+            }
+            case Noms -> {
+                rotation = Axis.ZP.rotationDegrees(180.0F);
+                rotation.mul(Axis.XP.rotationDegrees(-135.0F));
+                translateX += 0.08F;
+                // eating jitter
+                translateZ += 0.02F + 0.006F * (float) Math.sin(player.getUseItemRemainingTicks());
+                scale = 0.4F;
+            }
+            case Item, Block_Item -> {
+                rotation = Axis.ZP.rotationDegrees(180.0F);
+                rotation.mul(Axis.XP.rotationDegrees(-135.0F));
+                translateX += 0.08F;
+                translateZ += -0.08F;
+                scale = 0.4F;
+            }
+            case Compass -> {
                 rotation = Axis.YP.rotationDegrees(90.0F);
                 rotation.mul(Axis.XP.rotationDegrees(25.0F));
                 scale = 0.4F;
-            } else if (rendertype == VivecraftItemTransformType.Block_3D) {
-                scale = 0.3F;
-                translateZ += -0.1F;
+            }
+            case Block_3D -> {
                 translateX += 0.05F;
-            } else if (rendertype == VivecraftItemTransformType.Block_Stick) {
-                rotation = Axis.XP.rotationDegrees(0.0F);
-                translateY += -0.105D + 0.06D * gunAngle / 40.0D;
-                translateZ += -0.1F;
-                rotation.mul(Axis.XP.rotationDegrees(-45.0F));
-                rotation.mul(Axis.XP.rotationDegrees((float) gunAngle));
-            } else if (rendertype == VivecraftItemTransformType.Horn) {
+                translateZ -= 0.1F;
                 scale = 0.3F;
-                rotation = Axis.XP.rotationDegrees(0.0F);
-                translateY += -0.105D + 0.06D * gunAngle / 40.0D;
-                translateZ += -0.1F;
-                rotation.mul(Axis.XP.rotationDegrees(-45.0F));
-                rotation.mul(Axis.XP.rotationDegrees((float) gunAngle));
-            } else if (rendertype == VivecraftItemTransformType.Shield) {
-                boolean reverse = dh.vrSettings.reverseHands;
-                if (reverse) {
-                    k *= -1;
+            }
+            case Block_Stick -> {
+                rotation = Axis.XP.rotationDegrees(-45.0F + gunAngle);
+                translateY += -0.105F + 0.06F * gunAngle / 40.0F;
+                translateZ -= 0.1F;
+            }
+            case Horn -> {
+                rotation = Axis.XP.rotationDegrees(-45.0F + gunAngle);
+                translateY += -0.105F + 0.06F * gunAngle / 40.0F;
+                translateZ -= 0.1F;
+                scale = 0.3F;
+            }
+            case Shield -> {
+                int side = mainHand ? 1 : -1;
+                if (dh.vrSettings.reverseHands) {
+                    side *= -1;
                 }
+
                 scale = 0.4F;
 
+                // move so that the gui is not obstructed
                 translateY += 0.18F;
-                //
-                if (k == 1) {
-                    rotation.mul(Axis.XP.rotationDegrees((float) (105.0D - gunAngle)));
+
+                if (side == 1) {
+                    rotation.mul(Axis.XP.rotationDegrees(105.0F - gunAngle));
                     translateX += 0.11F;
                 } else {
-                    rotation.mul(Axis.XP.rotationDegrees((float) (115.0D - gunAngle)));
-                    translateX += -0.015D;
+                    rotation.mul(Axis.XP.rotationDegrees(115.0F - gunAngle));
+                    translateX -= 0.015F;
                 }
-                ////
+
                 translateZ += 0.1F;
 
-                if (pPlayer.isUsingItem() && pPlayer.getUseItemRemainingTicks() > 0 && pPlayer.getUsedItemHand() == pHand) {
-                    rotation.mul(Axis.XP.rotationDegrees(k * 5F));
+                if (player.isUsingItem() && player.getUseItemRemainingTicks() > 0 && player.getUsedItemHand() == hand) {
+                    rotation.mul(Axis.XP.rotationDegrees(side * 5F));
                     rotation.mul(Axis.ZP.rotationDegrees(-5F));
 
-                    if (k == 1) {
-                        translateY += -0.12F;
-                        translateZ += -.1F;
-                        translateX += .04F;
+                    if (side == 1) {
+                        translateX += 0.04F;
+                        translateY -= 0.12F;
+                        translateZ -= 0.1F;
                     } else {
-                        translateY += -0.12F;
-                        translateZ += -.11F;
                         translateX += 0.19F;
+                        translateY -= 0.12F;
+                        translateZ -= 0.11F;
                     }
 
-
-                    ////
-                    if (pPlayer.isBlocking()) {
-                        rotation.mul(Axis.YP.rotationDegrees((float) k * 90.0F));
+                    // use shield animation
+                    if (player.isBlocking()) {
+                        rotation.mul(Axis.YP.rotationDegrees(side * 90.0F));
                     } else {
-                        rotation.mul(Axis.YP.rotationDegrees((1.0F - pEquippedProgress) * (float) k * 90.0F));
+                        rotation.mul(Axis.YP.rotationDegrees((1.0F - equippedProgress) * side * 90.0F));
                     }
-                    ////
                 }
-                ////
-                rotation.mul(Axis.YP.rotationDegrees((float) k * -90.0F));
-            } else if (rendertype == VivecraftItemTransformType.Spear) {
-                rotation = Axis.XP.rotationDegrees(0.0F);
-                translateX += -0.135F;
-                translateZ = translateZ + (double) 0.575F;
+                rotation.mul(Axis.YP.rotationDegrees(side * -90.0F));
+            }
+            case Spear -> {
+                rotation.identity();
+                translateX -= 0.135F;
+                translateZ += 0.575F;
                 scale = 0.6F;
-                float f4 = 0.0F;
-                boolean flag5 = false;
-                int i1 = 0;
 
-                if (pPlayer.isUsingItem() && pPlayer.getUseItemRemainingTicks() > 0 && pPlayer.getUsedItemHand() == pHand) {
-                    flag5 = true;
-                    i1 = EnchantmentHelper.getRiptide(pStack);
+                float progress = 0.0F;
+                boolean charging = false;
+                int riptideLevel = 0;
 
-                    if (i1 <= 0 || i1 > 0 && pPlayer.isInWaterOrRain()) {
-                        f4 = (float) pStack.getUseDuration() - ((float) minecraft.player.getUseItemRemainingTicks() - pPartialTicks + 1.0F);
+                if (player.isUsingItem() && player.getUseItemRemainingTicks() > 0 && player.getUsedItemHand() == hand) {
+                    charging = true;
+                    riptideLevel = EnchantmentHelper.getRiptide(itemStack);
 
-                        if (f4 > 10.0F) {
-                            f4 = 10.0F;
+                    if (riptideLevel <= 0 || player.isInWaterOrRain()) {
+                        progress = itemStack.getUseDuration() - (player.getUseItemRemainingTicks() - partialTick + 1.0F);
 
-                            if (i1 > 0 && pPlayer.isInWaterOrRain()) {
-                                pMatrixStack.mulPose(Axis.ZP.rotationDegrees((float) (-dh.tickCounter * 10 * i1 % 360) - pPartialTicks * 10.0F * (float) i1));
+                        if (progress > TridentItem.THROW_THRESHOLD_TIME) {
+                            float rotationProgress = progress - TridentItem.THROW_THRESHOLD_TIME;
+                            progress = TridentItem.THROW_THRESHOLD_TIME;
+
+                            if (riptideLevel > 0 && player.isInWaterOrRain()) {
+                                // rotation when charged, use item use, to start at 0
+                                poseStack.mulPose(Axis.ZP.rotationDegrees(-rotationProgress * 10.0F * riptideLevel));
                             }
 
+                            // every 4 frames at 90fps equals every 44ms
+                            // TODO: this should not be FPS bound. do it in tick maybe? then it would be every 50ms
                             if (dh.frameIndex % 4L == 0L) {
+                                // haptics when charged
                                 dh.vr.triggerHapticPulse(mainHand ? 0 : 1, 200);
                             }
 
-                            long j1 = Util.getMillis() - dh.bowTracker.startDrawTime;
-                            translateX += 0.003D * Math.sin((double) j1);
+                            // charge jitter
+                            translateX += 0.003F * (float) Math.sin(Util.getMillis());
                         }
                     }
                 }
 
-                if (pPlayer.isAutoSpinAttack()) {
-                    i1 = 5;
-                    translateZ += -0.15F;
-                    pMatrixStack.mulPose(Axis.ZP.rotationDegrees((float) (-dh.tickCounter * 10 * i1 % 360) - pPartialTicks * 10.0F * (float) i1));
-                    flag5 = true;
+                if (player.isAutoSpinAttack()) {
+                    riptideLevel = 5;
+                    translateZ -= 0.15F;
+                    poseStack.mulPose(Axis.ZP.rotationDegrees(
+                        (-dh.tickCounter * 10 * riptideLevel) % 360 - partialTick * 10.0F * riptideLevel));
+                    charging = true;
                 }
 
-                if (!flag5) {
-                    translateY += 0.0D + 0.2D * gunAngle / 40.0D;
-                    rotation.mul(Axis.XP.rotationDegrees((float) gunAngle));
+                if (!charging) {
+                    translateY += 0.2F * gunAngle / 40.0F;
+                    rotation.mul(Axis.XP.rotationDegrees(gunAngle));
                 }
 
                 rotation.mul(Axis.XP.rotationDegrees(-65.0F));
-                translateZ = translateZ + (double) (-0.75F + f4 / 10.0F * 0.25F);
-            } else if (rendertype != VivecraftItemTransformType.Sword) {
-                if (rendertype == VivecraftItemTransformType.Tool_Rod) {
-                    translateZ += -0.15F;
-                    translateY += -0.02D + gunAngle / 40.0D * 0.1D;
-                    translateX += 0.05F;
-                    rotation.mul(Axis.XP.rotationDegrees(40.0F));
-                    scale = 0.8F;
-                } else if (rendertype == VivecraftItemTransformType.Tool) {
-                    if (pStack.getItem() instanceof ArrowItem || pStack.is(ItemTags.VIVECRAFT_ARROWS)) {
-                        preRotation = Axis.ZP.rotationDegrees(-180.0F);
-                        rotation.mul(Axis.XP.rotationDegrees((float) (-gunAngle)));
-                    }
-                } else if (rendertype == VivecraftItemTransformType.Telescope) {
-                    preRotation = Axis.XP.rotationDegrees(0.0F);
-                    rotation = Axis.XP.rotationDegrees(0.0F);
-                    translateZ = 0.0D;
-                    translateY = 0.0D;
-                    translateX = 0.0D;
+                translateZ += -0.75F + progress / 10.0F * 0.25F;
+            }
+            case Tool_Rod -> {
+                rotation.mul(Axis.XP.rotationDegrees(40.0F));
+                translateY += -0.02F + gunAngle / 40.0F * 0.1F;
+                translateX += 0.05F;
+                translateZ -= 0.15F;
+                scale = 0.8F;
+            }
+            case Tool -> {
+                if (itemStack.getItem() instanceof ArrowItem || itemStack.is(ItemTags.VIVECRAFT_ARROWS)) {
+                    preRotation = Axis.ZP.rotationDegrees(-180.0F);
+                    rotation.mul(Axis.XP.rotationDegrees(-gunAngle));
                 }
             }
-        } else {
-            rotation = Axis.ZP.rotationDegrees(180.0F);
-            rotation.mul(Axis.XP.rotationDegrees(-135.0F));
-            scale = 0.4F;
-            translateX += 0.08F;
-            translateZ += -0.08F;
+            case Telescope -> {
+                preRotation.identity();
+                rotation.identity();
+                scale *= 0.625F;
+                translateX = (mainHand ? -0.03F : 0.03F) * scale;
+                translateY = 0.0F;
+                translateZ = -0.1F * scale;
+            }
+            // case Sword -> {}
+            default -> {}
         }
 
-        pMatrixStack.mulPose(preRotation);
-        pMatrixStack.translate(translateX, translateY, translateZ);
-        pMatrixStack.mulPose(rotation);
-        pMatrixStack.scale((float) scale, (float) scale, (float) scale);
+        poseStack.mulPose(preRotation);
+        poseStack.translate(translateX, translateY, translateZ);
+        poseStack.mulPose(rotation);
+        poseStack.scale(scale, scale, scale);
     }
 
     public enum VivecraftItemTransformType {

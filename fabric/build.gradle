@@ -58,14 +58,15 @@ dependencies {
     // commands also needs base
     include(modImplementation(fabricApi.module("fabric-api-base", rootProject.fabric_api_version)))
     include(modImplementation(fabricApi.module("fabric-command-api-v2", rootProject.fabric_api_version)))
+    include(modImplementation(fabricApi.module("fabric-networking-api-v1", rootProject.fabric_api_version)))
 
     include(implementation('com.electronwill.night-config:toml:3.6.6'))
     include(implementation('com.electronwill.night-config:core:3.6.6'))
 
-    include(implementation("org.lwjgl:lwjgl-openvr:3.3.2"))
-    include(implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-linux"))
-    include(implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-macos"))
-    include(implementation("org.lwjgl:lwjgl-openvr:3.3.2:natives-windows"))
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}"))
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux"))
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos"))
+    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows"))
 
 }
 

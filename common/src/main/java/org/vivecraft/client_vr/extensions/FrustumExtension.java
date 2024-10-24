@@ -4,7 +4,10 @@ import net.minecraft.world.phys.AABB;
 
 public interface FrustumExtension {
 
-    void vivecraft$setCameraPosition(double var1, double var3, double var5);
-
-    boolean vivecraft$isBoundingBoxInFrustum(AABB var1);
+    /**
+     * checks if {@code bb} is partially or fully in the frustum
+     * @param bb bounding box to check
+     * @return if the AABB is partially or fully in the frustum
+     */
+    boolean vivecraft$isBoundingBoxInFrustum(AABB bb);
 }

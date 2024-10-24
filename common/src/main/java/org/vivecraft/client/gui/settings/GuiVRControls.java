@@ -22,24 +22,26 @@ public class GuiVRControls extends GuiVROptionsBase {
         new VROptionEntry(VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS)
     };
 
-    public GuiVRControls(Screen par1GuiScreen) {
-        super(par1GuiScreen);
+    public GuiVRControls(Screen lastScreen) {
+        super(lastScreen);
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.controls";
         super.init(controlsSettings, true);
         super.addDefaultButtons();
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
-        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         int middle = 240 / 2 - this.minecraft.font.lineHeight / 2 - 24;
         int lineHeight = this.minecraft.font.lineHeight + 3;
 
-        guiGraphics.drawCenteredString(this.minecraft.font, Component.translatable("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 16777215);
-        guiGraphics.drawCenteredString(this.minecraft.font, Component.translatable("vivecraft.messages.controls.2"), this.width / 2, middle, 16777215);
-        guiGraphics.drawCenteredString(this.minecraft.font, Component.translatable("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 16777215);
+        guiGraphics.drawCenteredString(this.minecraft.font, Component.translatable("vivecraft.messages.controls.1"), this.width / 2, middle - lineHeight, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.minecraft.font, Component.translatable("vivecraft.messages.controls.2"), this.width / 2, middle, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.minecraft.font, Component.translatable("vivecraft.messages.controls.3"), this.width / 2, middle + lineHeight, 0xFFFFFF);
     }
 }

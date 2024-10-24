@@ -25,10 +25,10 @@ public abstract class GuiListScreen extends Screen {
     @Override
     protected void init() {
         clearWidgets();
-        double scrollAmount = list != null ? list.getScrollAmount() : 0.0D;
+        double scrollAmount = this.list != null ? this.list.getScrollAmount() : 0.0D;
 
-        this.list = new SettingsList(this, minecraft, getEntries());
-        list.setScrollAmount(scrollAmount);
+        this.list = new SettingsList(this, this.minecraft, getEntries());
+        this.list.setScrollAmount(scrollAmount);
         this.addWidget(this.list);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, this.height - 27, 200, 20).build());
     }
@@ -37,22 +37,22 @@ public abstract class GuiListScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(lastScreen);
+        this.minecraft.setScreen(this.lastScreen);
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderDirtBackground(guiGraphics);
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        if (reinit) {
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        if (this.reinit) {
             init();
-            reinit = false;
+            this.reinit = false;
         }
-        super.render(guiGraphics, i, j, f);
-        list.render(guiGraphics, i, j, f);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        this.list.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
     }
 }

@@ -6,6 +6,11 @@ package org.vivecraft.client.extensions;
 
 public interface RenderLayerExtension {
 
-    // no "vivecraft$" since that should mimic the method from the "Cloneable" interface
+    /**
+     * clones the object using the basic Object.clone() call
+     * no "vivecraft$" since that should mimic the method from the "Cloneable" interface
+     * @return cloned Object
+     * @throws CloneNotSupportedException shouldn't be thrown, unless the mixin failed
+     */
     Object clone() throws CloneNotSupportedException;
 }

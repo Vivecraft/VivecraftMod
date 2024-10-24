@@ -16,26 +16,20 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.VRPlayersClient;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
 public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerModel<T> {
-    private final boolean slim;
     public ModelPart leftShoulder;
     public ModelPart rightShoulder;
     public ModelPart leftShoulder_sleeve;
     public ModelPart rightShoulder_sleeve;
     public ModelPart leftHand;
     public ModelPart rightHand;
-    VRPlayersClient.RotInfo rotInfo;
-    private boolean laying;
 
     public VRPlayerModel_WithArms(ModelPart modelPart, boolean isSlim) {
         super(modelPart, isSlim);
-        this.slim = isSlim;
         // use left/right arm as shoulders
         this.leftShoulder = modelPart.getChild("left_arm");
         this.rightShoulder = modelPart.getChild("right_arm");
@@ -47,37 +41,37 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
 
         //finger hax
         // some mods remove the base parts
-        if (!leftShoulder.cubes.isEmpty()) {
-            copyUV(leftShoulder.cubes.get(0).polygons[1], leftHand.cubes.get(0).polygons[1]);
-            copyUV(leftShoulder.cubes.get(0).polygons[1], leftHand.cubes.get(0).polygons[0]);
+        if (!this.leftShoulder.cubes.isEmpty()) {
+            copyUV(this.leftShoulder.cubes.get(0).polygons[1], this.leftHand.cubes.get(0).polygons[1]);
+            copyUV(this.leftShoulder.cubes.get(0).polygons[1], this.leftHand.cubes.get(0).polygons[0]);
             if (SodiumHelper.isLoaded()) {
-                SodiumHelper.copyModelCuboidUV(leftShoulder, leftHand, 3, 3);
-                SodiumHelper.copyModelCuboidUV(leftShoulder, leftHand, 3, 2);
+                SodiumHelper.copyModelCuboidUV(this.leftShoulder, this.leftHand, 3, 3);
+                SodiumHelper.copyModelCuboidUV(this.leftShoulder, this.leftHand, 3, 2);
             }
         }
-        if (!rightShoulder.cubes.isEmpty()) {
-            copyUV(rightShoulder.cubes.get(0).polygons[1], this.rightHand.cubes.get(0).polygons[1]);
-            copyUV(rightShoulder.cubes.get(0).polygons[1], this.rightHand.cubes.get(0).polygons[0]);
+        if (!this.rightShoulder.cubes.isEmpty()) {
+            copyUV(this.rightShoulder.cubes.get(0).polygons[1], this.rightHand.cubes.get(0).polygons[1]);
+            copyUV(this.rightShoulder.cubes.get(0).polygons[1], this.rightHand.cubes.get(0).polygons[0]);
             if (SodiumHelper.isLoaded()) {
-                SodiumHelper.copyModelCuboidUV(rightShoulder, rightHand, 3, 3);
-                SodiumHelper.copyModelCuboidUV(rightShoulder, rightHand, 3, 2);
+                SodiumHelper.copyModelCuboidUV(this.rightShoulder, this.rightHand, 3, 3);
+                SodiumHelper.copyModelCuboidUV(this.rightShoulder, this.rightHand, 3, 2);
             }
         }
 
-        if (!rightSleeve.cubes.isEmpty()) {
-            copyUV(rightShoulder_sleeve.cubes.get(0).polygons[1], this.rightSleeve.cubes.get(0).polygons[1]);
-            copyUV(rightShoulder_sleeve.cubes.get(0).polygons[1], this.rightSleeve.cubes.get(0).polygons[0]);
+        if (!this.rightSleeve.cubes.isEmpty()) {
+            copyUV(this.rightShoulder_sleeve.cubes.get(0).polygons[1], this.rightSleeve.cubes.get(0).polygons[1]);
+            copyUV(this.rightShoulder_sleeve.cubes.get(0).polygons[1], this.rightSleeve.cubes.get(0).polygons[0]);
             if (SodiumHelper.isLoaded()) {
-                SodiumHelper.copyModelCuboidUV(rightShoulder_sleeve, rightSleeve, 3, 3);
-                SodiumHelper.copyModelCuboidUV(rightShoulder_sleeve, rightSleeve, 3, 2);
+                SodiumHelper.copyModelCuboidUV(this.rightShoulder_sleeve, this.rightSleeve, 3, 3);
+                SodiumHelper.copyModelCuboidUV(this.rightShoulder_sleeve, this.rightSleeve, 3, 2);
             }
         }
-        if (!leftSleeve.cubes.isEmpty()) {
-            copyUV(leftShoulder_sleeve.cubes.get(0).polygons[1], leftSleeve.cubes.get(0).polygons[1]);
-            copyUV(leftShoulder_sleeve.cubes.get(0).polygons[1], leftSleeve.cubes.get(0).polygons[0]);
+        if (!this.leftSleeve.cubes.isEmpty()) {
+            copyUV(this.leftShoulder_sleeve.cubes.get(0).polygons[1], this.leftSleeve.cubes.get(0).polygons[1]);
+            copyUV(this.leftShoulder_sleeve.cubes.get(0).polygons[1], this.leftSleeve.cubes.get(0).polygons[0]);
             if (SodiumHelper.isLoaded()) {
-                SodiumHelper.copyModelCuboidUV(leftShoulder_sleeve, leftSleeve, 3, 3);
-                SodiumHelper.copyModelCuboidUV(leftShoulder_sleeve, leftSleeve, 3, 2);
+                SodiumHelper.copyModelCuboidUV(this.leftShoulder_sleeve, this.leftSleeve, 3, 3);
+                SodiumHelper.copyModelCuboidUV(this.leftShoulder_sleeve, this.leftSleeve, 3, 2);
             }
         }
     }
@@ -92,59 +86,91 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         }
     }
 
-    public static MeshDefinition createMesh(CubeDeformation p_170826_, boolean p_170827_) {
-        MeshDefinition meshdefinition = VRPlayerModel.createMesh(p_170826_, p_170827_);
-        PartDefinition partdefinition = meshdefinition.getRoot();
+    public static MeshDefinition createMesh(CubeDeformation cubeDeformation, boolean slim) {
+        MeshDefinition meshDefinition = VRPlayerModel.createMesh(cubeDeformation, slim);
+        PartDefinition partDefinition = meshDefinition.getRoot();
 
-        if (p_170827_) {
-            partdefinition.addOrReplaceChild("leftHand", CubeListBuilder.create().texOffs(32, 55).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 55).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("rightHand", CubeListBuilder.create().texOffs(40, 23).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 39).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(-5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("leftShoulder_sleeve", CubeListBuilder.create().texOffs(48, 48).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("rightShoulder_sleeve", CubeListBuilder.create().texOffs(40, 32).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(-5.0F, 2.5F, 0.0F));
+        if (slim) {
+            partDefinition.addOrReplaceChild("leftHand",
+                CubeListBuilder.create().texOffs(32, 55).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, cubeDeformation),
+                PartPose.offset(5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 55)
+                    .addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, cubeDeformation.extend(0.25f)),
+                PartPose.offset(5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("rightHand",
+                CubeListBuilder.create().texOffs(40, 23).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, cubeDeformation),
+                PartPose.offset(-5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 39)
+                    .addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, cubeDeformation.extend(0.25f)),
+                PartPose.offset(-5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("left_arm",
+                CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, cubeDeformation),
+                PartPose.offset(5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("right_arm",
+                CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, cubeDeformation),
+                PartPose.offset(-5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("leftShoulder_sleeve", CubeListBuilder.create().texOffs(48, 48)
+                    .addBox(-1.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, cubeDeformation.extend(0.25f)),
+                PartPose.offset(5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("rightShoulder_sleeve", CubeListBuilder.create().texOffs(40, 32)
+                    .addBox(-2.0F, -2.0F, -2.0F, 3.0F, 5.0F, 4.0F, cubeDeformation.extend(0.25f)),
+                PartPose.offset(-5.0F, 2.5F, 0.0F));
         } else {
-            partdefinition.addOrReplaceChild("leftHand", CubeListBuilder.create().texOffs(32, 55).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 55).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("rightHand", CubeListBuilder.create().texOffs(40, 23).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 39).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(-5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_), PartPose.offset(-5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("leftShoulder_sleeve", CubeListBuilder.create().texOffs(48, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(5.0F, 2.5F, 0.0F));
-            partdefinition.addOrReplaceChild("rightShoulder_sleeve", CubeListBuilder.create().texOffs(40, 32).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, p_170826_.extend(0.25f)), PartPose.offset(-5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("leftHand",
+                CubeListBuilder.create().texOffs(32, 55).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, cubeDeformation),
+                PartPose.offset(5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 55)
+                    .addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, cubeDeformation.extend(0.25f)),
+                PartPose.offset(5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("rightHand",
+                CubeListBuilder.create().texOffs(40, 23).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, cubeDeformation),
+                PartPose.offset(-5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 39)
+                    .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, cubeDeformation.extend(0.25f)),
+                PartPose.offset(-5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("left_arm",
+                CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, cubeDeformation),
+                PartPose.offset(5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("right_arm",
+                CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, cubeDeformation),
+                PartPose.offset(-5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("leftShoulder_sleeve", CubeListBuilder.create().texOffs(48, 48)
+                    .addBox(-1.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, cubeDeformation.extend(0.25f)),
+                PartPose.offset(5.0F, 2.5F, 0.0F));
+            partDefinition.addOrReplaceChild("rightShoulder_sleeve", CubeListBuilder.create().texOffs(40, 32)
+                    .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 5.0F, 4.0F, cubeDeformation.extend(0.25f)),
+                PartPose.offset(-5.0F, 2.5F, 0.0F));
         }
-        return meshdefinition;
+        return meshDefinition;
     }
 
-
+    @Override
     protected Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.body, this.leftHand, this.rightHand, this.leftShoulder, this.rightShoulder, this.leftShoulder_sleeve, this.rightShoulder_sleeve, this.rightLeg, this.leftLeg, this.hat, this.leftPants, this.rightPants, this.leftSleeve, this.rightSleeve, this.jacket);
+        return ImmutableList.of(this.body, this.jacket, this.hat,
+            this.leftHand, this.rightHand, this.leftSleeve, this.rightSleeve,
+            this.leftShoulder, this.rightShoulder, this.leftShoulder_sleeve, this.rightShoulder_sleeve,
+            this.leftLeg, this.rightLeg, this.leftPants, this.rightPants);
     }
 
-    public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
-        super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
-        this.rotInfo = VRPlayersClient.getInstance().getRotationsForPlayer(pEntity.getUUID());
-        VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(pEntity.getUUID());
+    @Override
+    public void setupAnim(T player, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        super.setupAnim(player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
-        if (rotinfo == null) {
+        if (this.rotInfo == null) {
             return;
         }
 
-        double d0 = -1.501F * rotinfo.heightScale;
-        float f = (float) Math.toRadians(pEntity.getYRot());
-        float f1 = (float) Math.atan2(-rotinfo.headRot.x, -rotinfo.headRot.z);
-        float f2 = (float) Math.asin(rotinfo.headRot.y / rotinfo.headRot.length());
-        float f3 = (float) Math.atan2(-rotinfo.leftArmRot.x, -rotinfo.leftArmRot.z);
-        float f4 = (float) Math.asin(rotinfo.leftArmRot.y / rotinfo.leftArmRot.length());
-        float f5 = (float) Math.atan2(-rotinfo.rightArmRot.x, -rotinfo.rightArmRot.z);
-        float f6 = (float) Math.asin(rotinfo.rightArmRot.y / rotinfo.rightArmRot.length());
-        double d1 = rotinfo.getBodyYawRadians();
+        double handsYOffset = -1.501F * this.rotInfo.heightScale;
 
-        this.laying = this.swimAmount > 0.0F || pEntity.isFallFlying() && !pEntity.isAutoSpinAttack();
+        float leftControllerYaw = (float) Math.atan2(-this.rotInfo.leftArmRot.x, -this.rotInfo.leftArmRot.z);
+        float leftControllerPitch = (float) Math.asin(this.rotInfo.leftArmRot.y / this.rotInfo.leftArmRot.length());
+        float rightControllerYaw = (float) Math.atan2(-this.rotInfo.rightArmRot.x, -this.rotInfo.rightArmRot.z);
+        float rightControllerPitch = (float) Math.asin(this.rotInfo.rightArmRot.y / this.rotInfo.rightArmRot.length());
+        double bodyYaw = this.rotInfo.getBodyYawRadians();
 
-        if (!rotinfo.reverse) {
+        this.laying = this.swimAmount > 0.0F || player.isFallFlying() && !player.isAutoSpinAttack();
+
+        if (!this.rotInfo.reverse) {
             this.rightShoulder.setPos(-Mth.cos(this.body.yRot) * 5.0F, this.slim ? 2.5F : 2.0F, Mth.sin(this.body.yRot) * 5.0F);
             this.leftShoulder.setPos(Mth.cos(this.body.yRot) * 5.0F, this.slim ? 2.5F : 2.0F, -Mth.sin(this.body.yRot) * 5.0F);
         } else {
@@ -157,63 +183,71 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
             this.leftShoulder.y += 3.2F;
         }
 
-        Vec3 vec3 = rotinfo.leftArmPos;
-        Vec3 vec32 = rotinfo.rightArmPos;
-        if (Xplat.isModLoaded("pehkui")) {
+        Vec3 leftArmPos = this.rotInfo.leftArmPos;
+        Vec3 rightArmPos = this.rotInfo.rightArmPos;
+        if (PehkuiHelper.isLoaded()) {
             // remove pehkui scale from that, since the whole entity is scaled
-            vec3 = vec3.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getFrameTime()));
-            vec32 = vec32.scale(1.0F / PehkuiHelper.getPlayerScale(pEntity, Minecraft.getInstance().getFrameTime()));
+            leftArmPos = leftArmPos.scale(1.0F / PehkuiHelper.getEntityEyeHeightScale(player, Minecraft.getInstance().getFrameTime()));
+            rightArmPos = rightArmPos.scale(1.0F / PehkuiHelper.getEntityEyeHeightScale(player, Minecraft.getInstance().getFrameTime()));
         }
-        vec3 = vec3.add(0.0D, d0, 0.0D);
-        vec3 = vec3.yRot((float) (-Math.PI + d1));
-        vec3 = vec3.scale(16.0F / rotinfo.heightScale);
-        this.leftHand.setPos((float) (-vec3.x), (float) (-vec3.y), (float) vec3.z);
-        this.leftHand.xRot = (float) ((double) (-f4) + (Math.PI * 1.5D));
-        this.leftHand.yRot = (float) (Math.PI - (double) f3 - d1);
+
+        // Left Arm
+        leftArmPos = leftArmPos.add(0.0D, handsYOffset, 0.0D);
+        leftArmPos = leftArmPos.yRot((float) (-Math.PI + bodyYaw));
+        leftArmPos = leftArmPos.scale(16.0F / this.rotInfo.heightScale);
+        this.leftHand.setPos((float) -leftArmPos.x, (float) -leftArmPos.y, (float) leftArmPos.z);
+        this.leftHand.xRot = -leftControllerPitch + (float) Math.PI * 1.5F;
+        this.leftHand.yRot = (float) (Math.PI - (double) leftControllerYaw - bodyYaw);
         this.leftHand.zRot = 0.0F;
+        if (this.leftArmPose == ArmPose.THROW_SPEAR) {
+            this.leftHand.xRot =  this.leftHand.xRot - (float) Math.PI * 0.5F;
+        }
 
+        // left shoulder
+        Vec3 leftShoulderPos = new Vec3(
+            this.leftShoulder.x + leftArmPos.x,
+            this.leftShoulder.y + leftArmPos.y,
+            this.leftShoulder.z - leftArmPos.z);
 
-        Vec3 vec31 = new Vec3((double) this.leftShoulder.x + vec3.x, (double) this.leftShoulder.y + vec3.y, (double) this.leftShoulder.z - vec3.z);
-        float f7 = (float) Math.atan2(vec31.x, vec31.z);
-        float f8 = (float) ((Math.PI * 1.5D) - Math.asin(vec31.y / vec31.length()));
+        float leftShoulderYaw = (float) Math.atan2(leftShoulderPos.x, leftShoulderPos.z);
+        float leftShoulderPitch = (float) ((Math.PI * 1.5D) - Math.asin(leftShoulderPos.y / leftShoulderPos.length()));
         this.leftShoulder.zRot = 0.0F;
-        this.leftShoulder.xRot = f8;
-        this.leftShoulder.yRot = f7;
-
+        this.leftShoulder.xRot = leftShoulderPitch;
+        this.leftShoulder.yRot = leftShoulderYaw;
         if (this.leftShoulder.yRot > 0.0F) {
             this.leftShoulder.yRot = 0.0F;
         }
 
-        if (this.leftArmPose == ArmPose.THROW_SPEAR) {
-            this.leftHand.xRot = (float) ((double) this.leftHand.xRot - (Math.PI / 2D));
+        // Right arm
+        rightArmPos = rightArmPos.add(0.0D, handsYOffset, 0.0D);
+        rightArmPos = rightArmPos.yRot((float) (-Math.PI + bodyYaw));
+        rightArmPos = rightArmPos.scale(16.0F / this.rotInfo.heightScale);
+        this.rightHand.setPos((float) -rightArmPos.x, (float) -rightArmPos.y, (float) rightArmPos.z);
+        this.rightHand.xRot = -rightControllerPitch + (float) Math.PI * 1.5F;
+        this.rightHand.yRot = (float) (Math.PI - (double) rightControllerYaw - bodyYaw);
+        this.rightHand.zRot = 0.0F;
+        if (this.rightArmPose == ArmPose.THROW_SPEAR) {
+            this.rightHand.xRot = this.rightHand.xRot - (float) Math.PI * 0.5F;
         }
 
-        vec32 = vec32.add(0.0D, d0, 0.0D);
-        vec32 = vec32.yRot((float) (-Math.PI + d1));
-        vec32 = vec32.scale(16.0F / rotinfo.heightScale);
-        this.rightHand.setPos((float) (-vec32.x), -((float) vec32.y), (float) vec32.z);
-        this.rightHand.xRot = (float) ((double) (-f6) + (Math.PI * 1.5D));
-        this.rightHand.yRot = (float) (Math.PI - (double) f5 - d1);
-        this.rightHand.zRot = 0.0F;
+        // Right shoulder
+        Vec3 rightShoulderPos = new Vec3(
+            this.rightShoulder.x + rightArmPos.x,
+            this.rightShoulder.y + rightArmPos.y,
+            this.rightShoulder.z - rightArmPos.z);
 
-        Vec3 vec33 = new Vec3((double) this.rightShoulder.x + vec32.x, (double) this.rightShoulder.y + vec32.y, (double) this.rightShoulder.z - vec32.z);
-        float f9 = (float) Math.atan2(vec33.x, vec33.z);
-        float f10 = (float) ((Math.PI * 1.5D) - Math.asin(vec33.y / vec33.length()));
+        float rightShoulderYaw = (float) Math.atan2(rightShoulderPos.x, rightShoulderPos.z);
+        float rightShoulderPitch = (float) ((Math.PI * 1.5D) - Math.asin(rightShoulderPos.y / rightShoulderPos.length()));
         this.rightShoulder.zRot = 0.0F;
-        this.rightShoulder.xRot = f10;
-        this.rightShoulder.yRot = f9;
-
+        this.rightShoulder.xRot = rightShoulderPitch;
+        this.rightShoulder.yRot = rightShoulderYaw;
         if (this.rightShoulder.yRot < 0.0F) {
             this.rightShoulder.yRot = 0.0F;
         }
 
-        if (this.rightArmPose == ArmPose.THROW_SPEAR) {
-            this.rightHand.xRot = (float) ((double) this.rightHand.xRot - (Math.PI / 2D));
-        }
-
         if (this.laying) {
-            this.rightShoulder.xRot = (float) ((double) this.rightShoulder.xRot - (Math.PI / 2D));
-            this.leftShoulder.xRot = (float) ((double) this.leftShoulder.xRot - (Math.PI / 2D));
+            this.rightShoulder.xRot = this.rightShoulder.xRot - (float) Math.PI * 0.5F;
+            this.leftShoulder.xRot = this.leftShoulder.xRot - (float) Math.PI * 0.5F;
         }
 
         this.leftSleeve.copyFrom(this.leftHand);
@@ -224,67 +258,33 @@ public class VRPlayerModel_WithArms<T extends LivingEntity> extends VRPlayerMode
         this.rightShoulder_sleeve.visible = this.rightSleeve.visible;
     }
 
-    public void setAllVisible(boolean pVisible) {
-        super.setAllVisible(pVisible);
+    @Override
+    public void setAllVisible(boolean visible) {
+        super.setAllVisible(visible);
 
-        this.rightShoulder.visible = pVisible;
-        this.leftShoulder.visible = pVisible;
-        this.rightShoulder_sleeve.visible = pVisible;
-        this.leftShoulder_sleeve.visible = pVisible;
-        this.rightHand.visible = pVisible;
-        this.leftHand.visible = pVisible;
+        this.rightShoulder.visible = visible;
+        this.leftShoulder.visible = visible;
+        this.rightShoulder_sleeve.visible = visible;
+        this.leftShoulder_sleeve.visible = visible;
+        this.rightHand.visible = visible;
+        this.leftHand.visible = visible;
     }
 
-    protected ModelPart getArm(HumanoidArm pSide) {
-        return pSide == HumanoidArm.LEFT ? this.leftHand : this.rightHand;
+    @Override
+    protected ModelPart getArm(HumanoidArm side) {
+        return side == HumanoidArm.LEFT ? this.leftHand : this.rightHand;
     }
 
-    public void translateToHand(HumanoidArm pSide, PoseStack pMatrixStack) {
-        ModelPart modelpart = this.getArm(pSide);
+    @Override
+    public void translateToHand(HumanoidArm side, PoseStack poseStack) {
+        ModelPart modelpart = this.getArm(side);
 
         if (this.laying) {
-            pMatrixStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+            poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
         }
 
-        modelpart.translateAndRotate(pMatrixStack);
-        pMatrixStack.mulPose(Axis.XP.rotation((float) Math.sin((double) this.attackTime * Math.PI)));
-        pMatrixStack.translate(0.0D, -0.5D, 0.0D);
+        modelpart.translateAndRotate(poseStack);
+        poseStack.mulPose(Axis.XP.rotation((float) Math.sin((double) this.attackTime * Math.PI)));
+        poseStack.translate(0.0D, -0.5D, 0.0D);
     }
-
-//	public void renderToBuffer(PoseStack pMatrixStack, VertexConsumer pBuffer, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
-//	{
-//		this.body.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		this.jacket.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		this.leftLeg.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		this.rightLeg.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		this.leftPants.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		this.rightPants.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		pMatrixStack.pushPose();
-//		this.head.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		this.hat.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		this.vrHMD.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//
-//		if (this.seated)
-//		{
-//			this.leftArm.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//			this.rightArm.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		}
-//		else
-//		{
-//			this.leftShoulder.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//			this.rightShoulder.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//
-//			if (this.laying)
-//			{
-//				pMatrixStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
-//			}
-//
-//			this.rightHand.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//			this.leftHand.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		}
-//
-//		this.leftSleeve.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		this.rightSleeve.render(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-//		pMatrixStack.popPose();
-//	}
 }

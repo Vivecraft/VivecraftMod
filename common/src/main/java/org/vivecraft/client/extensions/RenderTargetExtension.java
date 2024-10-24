@@ -1,27 +1,38 @@
 package org.vivecraft.client.extensions;
 
-import net.minecraft.client.renderer.ShaderInstance;
-import org.lwjgl.opengl.GL30;
-
 public interface RenderTargetExtension {
 
-    default void vivecraft$blitToScreen(int i, int viewWidth, int viewHeight, int j, boolean b, float f, float g, boolean c) {
-        vivecraft$blitToScreen(null, i, viewWidth, viewHeight, j, b, f, g, c);
-    }
+    /**
+     * sets the OpenGL texture id to use, if set, it will be used, instead of generating a new one
+     * @param texId texture id to use
+     */
+    void vivecraft$setTexId(int texId);
 
-    void vivecraft$blitToScreen(ShaderInstance instance, int i, int viewWidth, int viewHeight, int j, boolean b, float f, float g, boolean c);
+    /**
+     * sets if a combined depth/stencil should be used
+     * @param stencil if a stencil should be added
+     */
+    void vivecraft$setStencil(boolean stencil);
 
-    default void vivecraft$genMipMaps() {
-        GL30.glGenerateMipmap(3553);
-    }
+    /**
+     * @return if the RenderTarget has a stencil added by vivecraft active
+     */
+    boolean vivecraft$hasStencil();
 
-    void vivecraft$setTextid(int texid);
+    /**
+     * sets if linear filtering should be used, if false or unset will use nearest filtering.
+     * @param linearFilter if linear filtering should be used
+     */
+    void vivecraft$setLinearFilter(boolean linearFilter);
 
-    void vivecraft$setUseStencil(boolean useStencil);
+    /**
+     * sets if mipmaps should be used for sampling
+     * @param mipmaps if mipmaps should be used
+     */
+    void vivecraft$setMipmaps(boolean mipmaps);
 
-    boolean vivecraft$getUseStencil();
-
-    void vivecraft$isLinearFilter(boolean linearFilter);
-
-    void vivecraft$blitFovReduction(ShaderInstance instance, int width, int height);
+    /**
+     * @return if the RenderTarget is set to use mipmaps
+     */
+    boolean vivecraft$hasMipmaps();
 }

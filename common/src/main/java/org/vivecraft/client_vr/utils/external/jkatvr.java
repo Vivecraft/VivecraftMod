@@ -6,10 +6,11 @@ import com.sun.jna.NativeLibrary;
 import com.sun.jna.ptr.DoubleByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 public class jkatvr implements Library {
     public static final String KATVR_LIBRARY_NAME = "WalkerBase.dll";
-    public static final NativeLibrary KATVR_NATIVE_LIB = NativeLibrary.getInstance("WalkerBase.dll");
+    public static final NativeLibrary KATVR_NATIVE_LIB = NativeLibrary.getInstance(KATVR_LIBRARY_NAME);
     static float yaw;
     static float yawOffset;
     static double power;
@@ -37,13 +38,13 @@ public class jkatvr implements Library {
     public static void query() {
         try {
             boolean flag = GetWalkerData(0, y, pow, m, is, fl);
-            yaw = (float) y.getValue();
+            yaw = y.getValue();
             power = pow.getValue();
             direction = -m.getValue();
             ismoving = is.getValue();
             yaw = yaw / 1024.0F * 360.0F;
         } catch (Exception exception) {
-            System.out.println("KATVR Error: " + exception.getMessage());
+            VRSettings.logger.error("Vivecraft: KATVR Error:", exception);
         }
     }
 
@@ -64,7 +65,7 @@ public class jkatvr implements Library {
     }
 
     public static float getSpeed() {
-        return (float) (power / (double) maxpower * (double) (walkDirection() == 1.0F ? mag : bmag));
+        return (float) (power / maxpower * (walkDirection() == 1.0F ? mag : bmag));
     }
 
     static {

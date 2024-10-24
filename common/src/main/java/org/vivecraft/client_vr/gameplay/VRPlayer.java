@@ -10,7 +10,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
@@ -23,10 +22,10 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.client.VivecraftVRMod;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.ItemTags;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.extensions.PlayerExtension;
@@ -41,29 +40,43 @@ import org.vivecraft.common.VRServerPerms;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class VRPlayer {
-    Minecraft mc = Minecraft.getInstance();
-    ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
+    private final Minecraft mc = Minecraft.getInstance();
+    private final ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
+
+    // loop start
+    // just latest polling data, origin = 0,0,0, rotation = 0, scaleXZ = walkMultiplier
     public VRData vrdata_room_pre;
+    // handle server messages
+    // latest polling data but last tick's origin, rotation, scale
     public VRData vrdata_world_pre;
+    // tick here
+    // recalc here in the odd case the walk multiplier changed
     public VRData vrdata_room_post;
+    // this is used for rendering and the server. _render is interpolated between this and _pre.
     public VRData vrdata_world_post;
+    // interpolate here between post and pre
     public VRData vrdata_world_render;
-    ArrayList<Tracker> trackers = new ArrayList<>();
-    public float worldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
-    private float rawWorldScale = ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
+
+    private final ArrayList<Tracker> trackers = new ArrayList<>();
+    public float worldScale = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
+    private float rawWorldScale = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE).getFloat();
     private boolean teleportOverride = false;
     public boolean teleportWarning = false;
     public boolean vrSwitchWarning = false;
     public int chatWarningTimer = -1;
     public Vec3 roomOrigin = new Vec3(0.0D, 0.0D, 0.0D);
+
+    // based on a heuristic of which locomotion type was last used
     private boolean isFreeMoveCurrent = true;
+
+    // for overriding the world scale settings with wonder foods.
     public double wfMode = 0.0D;
     public int wfCount = 0;
+
     public int roomScaleMovementDelay = 0;
-    boolean initdone = false;
+    private boolean initDone = false;
     public boolean onTick;
 
     public void registerTracker(Tracker tracker) {
@@ -71,10 +84,26 @@ public class VRPlayer {
     }
 
     public VRPlayer() {
-        this.vrdata_room_pre = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
-        this.vrdata_room_post = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
-        this.vrdata_world_post = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
-        this.vrdata_world_pre = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
+        this.vrdata_room_pre = new VRData(
+            new Vec3(0.0D, 0.0D, 0.0D),
+            this.dh.vrSettings.walkMultiplier,
+            1.0F,
+            0.0F);
+        this.vrdata_room_post = new VRData(
+            new Vec3(0.0D, 0.0D, 0.0D),
+            this.dh.vrSettings.walkMultiplier,
+            1.0F,
+            0.0F);
+        this.vrdata_world_post = new VRData(
+            new Vec3(0.0D, 0.0D, 0.0D),
+            this.dh.vrSettings.walkMultiplier,
+            1.0F,
+            0.0F);
+        this.vrdata_world_pre = new VRData(
+            new Vec3(0.0D, 0.0D, 0.0D),
+            this.dh.vrSettings.walkMultiplier,
+            1.0F,
+            0.0F);
     }
 
     public VRData getVRDataWorld() {
@@ -86,19 +115,24 @@ public class VRPlayer {
     }
 
     public static Vec3 room_to_world_pos(Vec3 pos, VRData data) {
-        Vec3 vec3 = new Vec3(pos.x * (double) data.worldScale, pos.y * (double) data.worldScale, pos.z * (double) data.worldScale);
-        vec3 = vec3.yRot(data.rotation_radians);
-        return vec3.add(data.origin.x, data.origin.y, data.origin.z);
+        Vec3 out = pos.scale(data.worldScale);
+        out = out.yRot(data.rotation_radians);
+        return out.add(data.origin);
     }
 
     public static Vec3 world_to_room_pos(Vec3 pos, VRData data) {
-        Vec3 vec3 = pos.add(-data.origin.x, -data.origin.y, -data.origin.z);
-        vec3 = new Vec3(vec3.x / (double) data.worldScale, vec3.y / (double) data.worldScale, vec3.z / (double) data.worldScale);
-        return vec3.yRot(-data.rotation_radians);
+        Vec3 out = pos.subtract(data.origin);
+        out = out.scale(1.0F / data.worldScale);
+        return out.yRot(-data.rotation_radians);
     }
 
     public void postPoll() {
-        this.vrdata_room_pre = new VRData(new Vec3(0.0D, 0.0D, 0.0D), this.dh.vrSettings.walkMultiplier, 1.0F, 0.0F);
+        this.vrdata_room_pre = new VRData(
+            new Vec3(0.0D, 0.0D, 0.0D),
+            this.dh.vrSettings.walkMultiplier,
+            1.0F,
+            0.0F);
+
         GuiHandler.processGui();
         KeyboardHandler.processGui();
         RadialHandler.processGui();
@@ -106,28 +140,37 @@ public class VRPlayer {
 
     public void preTick() {
         this.onTick = true;
-        this.vrdata_world_pre = new VRData(this.roomOrigin, this.dh.vrSettings.walkMultiplier, this.worldScale, (float) Math.toRadians(this.dh.vrSettings.worldRotation));
+        this.vrdata_world_pre = new VRData(
+            this.roomOrigin,
+            this.dh.vrSettings.walkMultiplier,
+            this.worldScale,
+            (float) Math.toRadians(this.dh.vrSettings.worldRotation));
 
         VRSettings.ServerOverrides.Setting worldScaleOverride = this.dh.vrSettings.overrides.getSetting(VRSettings.VrOptions.WORLD_SCALE);
 
-        float f = worldScaleOverride.getFloat();
+        // adjust world scale
+        float scaleSetting = worldScaleOverride.getFloat();
 
-        if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom()) {
+        if (MethodHolder.isInMenuRoom()) {
             this.worldScale = 1.0F;
         } else {
             if (this.wfCount > 0 && !this.mc.isPaused()) {
                 if (this.wfCount < 40) {
-                    this.rawWorldScale = (float) ((double) this.rawWorldScale - this.wfMode);
+                    this.rawWorldScale = (float) (this.rawWorldScale - this.wfMode);
 
                     if (this.wfMode > 0.0D) {
-                        if (this.rawWorldScale < f) {
-                            this.rawWorldScale = f;
+                        // go back.
+                        if (this.rawWorldScale < scaleSetting) {
+                            this.rawWorldScale = scaleSetting;
                         }
-                    } else if (this.wfMode < 0.0D && this.rawWorldScale > f) {
-                        this.rawWorldScale = f;
+                    } else if (this.wfMode < 0.0D) {
+                        if (this.rawWorldScale > scaleSetting) {
+                            this.rawWorldScale = scaleSetting;
+                        }
                     }
                 } else {
-                    this.rawWorldScale = (float) ((double) this.rawWorldScale + this.wfMode);
+                    // shrink or grow
+                    this.rawWorldScale = (float) (this.rawWorldScale + this.wfMode);
 
                     // clamp wonder foods to server set worldscale limit to not cheat
                     if (this.wfMode > 0.0D) {
@@ -139,20 +182,20 @@ public class VRPlayer {
                     }
                 }
 
-                --this.wfCount;
+                this.wfCount--;
             } else {
-                this.rawWorldScale = f;
+                this.rawWorldScale = scaleSetting;
             }
 
-            this.worldScale = rawWorldScale;
+            this.worldScale = this.rawWorldScale;
 
-            if (Xplat.isModLoaded("pehkui")) {
+            if (PehkuiHelper.isLoaded()) {
                 // scale world with player size
-                this.worldScale *= PehkuiHelper.getPlayerScale(mc.player, mc.getFrameTime());
+                this.worldScale *= PehkuiHelper.getEntityEyeHeightScale(this.mc.player, this.mc.getFrameTime());
                 // limit scale
                 if (this.worldScale > 100F) {
                     this.worldScale = 100F;
-                } else if (this.worldScale < 0.025F) //minClip + player position indicator offset
+                } else if (this.worldScale < 0.025F) // minClip + player position indicator offset
                 {
                     this.worldScale = 0.025F;
                 }
@@ -182,63 +225,109 @@ public class VRPlayer {
             }
         }
 
-        if (this.dh.vrSettings.seated && !((GameRendererExtension) this.mc.gameRenderer).vivecraft$isInMenuRoom()) {
+        if (this.dh.vrSettings.seated && !MethodHolder.isInMenuRoom()) {
             this.dh.vrSettings.worldRotation = this.dh.vr.seatedRot;
         }
     }
 
     public void postTick() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        VRData vrdata = new VRData(this.vrdata_world_pre.origin, dataholder.vrSettings.walkMultiplier, this.vrdata_world_pre.worldScale, this.vrdata_world_pre.rotation_radians);
-        VRData vrdata1 = new VRData(this.vrdata_world_pre.origin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
-        Vec3 vec3 = vrdata1.hmd.getPosition().subtract(vrdata.hmd.getPosition());
-        this.roomOrigin = this.roomOrigin.subtract(vec3);
-        VRData vrdata2 = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
-        float f = dataholder.vrSettings.worldRotation;
-        float f1 = (float) Math.toDegrees(this.vrdata_world_pre.rotation_radians);
-        this.rotateOriginAround(-f + f1, vrdata2.getHeadPivot());
-        this.vrdata_room_post = new VRData(new Vec3(0.0D, 0.0D, 0.0D), dataholder.vrSettings.walkMultiplier, 1.0F, 0.0F);
-        this.vrdata_world_post = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float) Math.toRadians(dataholder.vrSettings.worldRotation));
-        this.doPermanantLookOverride(minecraft.player, this.vrdata_world_post);
+        // translational position change due only to scale. - move room to fix entity in place during scale changes.
+        VRData tempps = new VRData(
+            this.vrdata_world_pre.origin,
+            this.dh.vrSettings.walkMultiplier,
+            this.vrdata_world_pre.worldScale,
+            this.vrdata_world_pre.rotation_radians);
+        VRData temps = new VRData(
+            this.vrdata_world_pre.origin,
+            this.dh.vrSettings.walkMultiplier,
+            this.worldScale,
+            this.vrdata_world_pre.rotation_radians);
+
+        Vec3 scaleOffset = temps.hmd.getPosition().subtract(tempps.hmd.getPosition());
+        this.roomOrigin = this.roomOrigin.subtract(scaleOffset);
+        //
+
+        // Handle all room translations up to this point and then rotate it around the hmd.
+        VRData temp = new VRData(
+            this.roomOrigin,
+            this.dh.vrSettings.walkMultiplier,
+            this.worldScale,
+            this.vrdata_world_pre.rotation_radians);
+
+        float end = this.dh.vrSettings.worldRotation;
+        float start = (float) Math.toDegrees(this.vrdata_world_pre.rotation_radians);
+        this.rotateOriginAround(-end + start, temp.getHeadPivot());
+        //
+
+        this.vrdata_room_post = new VRData(
+            new Vec3(0.0D, 0.0D, 0.0D),
+            this.dh.vrSettings.walkMultiplier,
+            1.0F,
+            0.0F);
+        this.vrdata_world_post = new VRData(
+            this.roomOrigin,
+            this.dh.vrSettings.walkMultiplier,
+            this.worldScale,
+            (float) Math.toRadians(this.dh.vrSettings.worldRotation));
+
+        // Vivecraft - setup the player entity with the correct view for the logic tick.
+        this.doPermanentLookOverride(this.mc.player, this.vrdata_world_post);
+        //
+
         ClientNetworking.sendVRPlayerPositions(this);
         this.onTick = false;
     }
 
-    public void preRender(float par1) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        float f = this.vrdata_world_post.worldScale * par1 + this.vrdata_world_pre.worldScale * (1.0F - par1);
-        float f1 = this.vrdata_world_post.rotation_radians;
-        float f2 = this.vrdata_world_pre.rotation_radians;
-        float f3 = Math.abs(f1 - f2);
+    public void preRender(float partialTick) {
+        // do some interpolatin'
 
-        if ((double) f3 > Math.PI) {
-            if (f1 > f2) {
-                f2 = (float) ((double) f2 + (Math.PI * 2D));
+        float interpolatedWorldScale =
+            this.vrdata_world_post.worldScale * partialTick + this.vrdata_world_pre.worldScale * (1.0F - partialTick);
+
+        float end = this.vrdata_world_post.rotation_radians;
+        float start = this.vrdata_world_pre.rotation_radians;
+
+        float difference = Math.abs(end - start);
+
+        if (difference > Math.PI) {
+            if (end > start) {
+                start = (float) (start + Math.PI * 2.0D);
             } else {
-                f1 = (float) ((double) f1 + (Math.PI * 2D));
+                end = (float) (end + Math.PI * 2.0D);
             }
         }
 
-        float f4 = f1 * par1 + f2 * (1.0F - par1);
-        Vec3 vec3 = new Vec3(this.vrdata_world_pre.origin.x + (this.vrdata_world_post.origin.x - this.vrdata_world_pre.origin.x) * (double) par1, this.vrdata_world_pre.origin.y + (this.vrdata_world_post.origin.y - this.vrdata_world_pre.origin.y) * (double) par1, this.vrdata_world_pre.origin.z + (this.vrdata_world_post.origin.z - this.vrdata_world_pre.origin.z) * (double) par1);
-        this.vrdata_world_render = new VRData(vec3, dataholder.vrSettings.walkMultiplier, f, f4);
+        float interpolatedWorldRotation_Radians = end * partialTick + start * (1.0F - partialTick);
 
+        Vec3 interPolatedRoomOrigin = new Vec3(
+            this.vrdata_world_pre.origin.x +
+                (this.vrdata_world_post.origin.x - this.vrdata_world_pre.origin.x) * partialTick,
+            this.vrdata_world_pre.origin.y +
+                (this.vrdata_world_post.origin.y - this.vrdata_world_pre.origin.y) * partialTick,
+            this.vrdata_world_pre.origin.z +
+                (this.vrdata_world_post.origin.z - this.vrdata_world_pre.origin.z) * partialTick);
+
+        this.vrdata_world_render = new VRData(
+            interPolatedRoomOrigin,
+            this.dh.vrSettings.walkMultiplier,
+            interpolatedWorldScale,
+            interpolatedWorldRotation_Radians);
+
+        // handle special items
         for (Tracker tracker : this.trackers) {
             if (tracker.getEntryPoint() == Tracker.EntryPoint.SPECIAL_ITEMS) {
-                tracker.idleTick(minecraft.player);
+                tracker.idleTick(this.mc.player);
 
-                if (tracker.isActive(minecraft.player)) {
-                    tracker.doProcess(minecraft.player);
+                if (tracker.isActive(this.mc.player)) {
+                    tracker.doProcess(this.mc.player);
                 } else {
-                    tracker.reset(minecraft.player);
+                    tracker.reset(this.mc.player);
                 }
             }
         }
     }
 
-    public void postRender(float par1) {
+    public void postRender(float partialTick) {
     }
 
     public void setRoomOrigin(double x, double y, double z, boolean reset) {
@@ -249,208 +338,241 @@ public class VRPlayer {
         this.roomOrigin = new Vec3(x, y, z);
     }
 
+    // set room
     public void snapRoomOriginToPlayerEntity(LocalPlayer player, boolean reset, boolean instant) {
-        if (!Thread.currentThread().getName().equals("Server thread")) {
-            if (player != null && player.position() != Vec3.ZERO) {
-                Minecraft minecraft = Minecraft.getInstance();
-                ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-
-                if (dataholder.sneakTracker.sneakCounter <= 0) {
-                    VRData vrdata = this.vrdata_world_pre;
-
-                    if (instant) {
-                        vrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, (float) Math.toRadians(dataholder.vrSettings.worldRotation));
-                    }
-
-                    Vec3 vec3 = vrdata.getHeadPivot().subtract(vrdata.origin);
-                    double d0 = player.getX() - vec3.x;
-                    double d2 = player.getZ() - vec3.z;
-                    double d1 = player.getY() + ((PlayerExtension) player).vivecraft$getRoomYOffsetFromPose();
-                    this.setRoomOrigin(d0, d1, d2, reset);
-                }
-            }
+        if (Thread.currentThread().getName().equals("Server thread") ||
+            player == null || player.position() == Vec3.ZERO ||
+            // avoid relocating the view while roomscale dismounting.
+            this.dh.sneakTracker.sneakCounter > 0)
+        {
+            return;
         }
+        VRData temp = this.vrdata_world_pre;
+
+        if (instant) {
+            temp = new VRData(
+                this.roomOrigin,
+                this.dh.vrSettings.walkMultiplier,
+                this.worldScale,
+                (float) Math.toRadians(this.dh.vrSettings.worldRotation));
+        }
+
+        Vec3 camPos = temp.getHeadPivot().subtract(temp.origin);
+        double x = player.getX() - camPos.x;
+        double y = player.getZ() - camPos.z;
+        double z = player.getY() + ((PlayerExtension) player).vivecraft$getRoomYOffsetFromPose();
+        this.setRoomOrigin(x, z, y, reset);
     }
 
+    // calculate the shortest difference between 2 angles.
     public float rotDiff_Degrees(float start, float end) {
-        double d0 = Math.toRadians(end);
-        double d1 = Math.toRadians(start);
-        return (float) Math.toDegrees(Math.atan2(Math.sin(d0 - d1), Math.cos(d0 - d1)));
+        double x = Math.toRadians(end);
+        double y = Math.toRadians(start);
+        return (float) Math.toDegrees(Math.atan2(Math.sin(x - y), Math.cos(x - y)));
     }
 
     public void rotateOriginAround(float degrees, Vec3 o) {
-        Vec3 vec3 = this.roomOrigin;
-        float f = (float) Math.toRadians(degrees);
+        Vec3 point = this.roomOrigin;
 
-        if (f != 0.0F) {
-            this.setRoomOrigin(Math.cos(f) * (vec3.x - o.x) - Math.sin(f) * (vec3.z - o.z) + o.x, vec3.y, Math.sin(f) * (vec3.x - o.x) + Math.cos(f) * (vec3.z - o.z) + o.z, false);
+        // reverse rotate.
+        float rads = (float) Math.toRadians(degrees);
+
+        if (rads != 0.0F) {
+            this.setRoomOrigin(
+                Math.cos(rads) * (point.x - o.x) - Math.sin(rads) * (point.z - o.z) + o.x,
+                point.y,
+                Math.sin(rads) * (point.x - o.x) + Math.cos(rads) * (point.z - o.z) + o.z,
+                false);
         }
     }
 
-    public void tick(LocalPlayer player, Minecraft mc, RandomSource rand) {
-        if (((PlayerExtension) player).vivecraft$getInitFromServer()) {
-            if (!this.initdone) {
-                System.out.println("<Debug info start>");
-                System.out.println("Room object: " + this);
-                System.out.println("Room origin: " + this.vrdata_world_pre.origin);
-                System.out.println("Hmd position room: " + this.vrdata_room_pre.hmd.getPosition());
-                System.out.println("Hmd position world: " + this.vrdata_world_pre.hmd.getPosition());
-                System.out.println("Hmd Projection Left: " + dh.vrRenderer.eyeproj[0]);
-                System.out.println("Hmd Projection Right: " + dh.vrRenderer.eyeproj[1]);
-                System.out.println("<Debug info end>");
-                this.initdone = true;
-            }
+    public void tick(LocalPlayer player, Minecraft mc) {
+        if (!((PlayerExtension) player).vivecraft$getInitFromServer()) return;
 
-            this.doPlayerMoveInRoom(player);
+        if (!this.initDone) {
+            VRSettings.logger.info("""
+                Vivecraft: <Debug info start>
+                Room object: {}
+                Room origin: {}
+                Hmd position room: {}
+                Hmd position world: {}
+                Hmd Projection Left: {}
+                Hmd Projection Right: {}
+                <Debug info end>
+                """, this,
+                this.vrdata_world_pre.origin,
+                this.vrdata_room_pre.hmd.getPosition(),
+                this.vrdata_world_pre.hmd.getPosition(),
+                this.dh.vrRenderer.eyeProj[0],
+                this.dh.vrRenderer.eyeProj[1]);
+            this.initDone = true;
+        }
 
-            for (Tracker tracker : this.trackers) {
-                if (tracker.getEntryPoint() == Tracker.EntryPoint.LIVING_UPDATE) {
-                    tracker.idleTick(mc.player);
+        this.doPlayerMoveInRoom(player);
 
-                    if (tracker.isActive(mc.player)) {
-                        tracker.doProcess(mc.player);
-                    } else {
-                        tracker.reset(mc.player);
-                    }
+        for (Tracker tracker : this.trackers) {
+            if (tracker.getEntryPoint() == Tracker.EntryPoint.LIVING_UPDATE) {
+                tracker.idleTick(mc.player);
+
+                if (tracker.isActive(mc.player)) {
+                    tracker.doProcess(mc.player);
+                } else {
+                    tracker.reset(mc.player);
                 }
             }
+        }
 
-            if (player.isPassenger()) {
-                Entity entity = mc.player.getVehicle();
+        if (player.isPassenger()) {
+            Entity entity = mc.player.getVehicle();
 
-                if (entity instanceof AbstractHorse abstracthorse) {
-
-                    if (abstracthorse.isControlledByLocalInstance() && abstracthorse.isSaddled() && !dh.horseTracker.isActive(mc.player)) {
-                        abstracthorse.yBodyRot = this.vrdata_world_pre.getBodyYaw();
-                        dh.vehicleTracker.rotationCooldown = 10;
-                    }
-                } else if (entity instanceof Mob mob) {
-
-                    if (mob.isControlledByLocalInstance()) {
-                        mob.yBodyRot = this.vrdata_world_pre.getBodyYaw();
-                        dh.vehicleTracker.rotationCooldown = 10;
-                    }
+            if (entity instanceof AbstractHorse abstracthorse) {
+                if (abstracthorse.isControlledByLocalInstance() &&
+                    abstracthorse.isSaddled() &&
+                    !this.dh.horseTracker.isActive(mc.player))
+                {
+                    abstracthorse.yBodyRot = this.vrdata_world_pre.getBodyYaw();
+                    this.dh.vehicleTracker.rotationCooldown = 10;
+                }
+            } else if (entity instanceof Mob mob) {
+                // pigs and striders.
+                if (mob.isControlledByLocalInstance()) {
+                    mob.yBodyRot = this.vrdata_world_pre.getBodyYaw();
+                    this.dh.vehicleTracker.rotationCooldown = 10;
                 }
             }
         }
     }
 
     public void doPlayerMoveInRoom(LocalPlayer player) {
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
 
         if (this.roomScaleMovementDelay > 0) {
-            --this.roomScaleMovementDelay;
-        } else if (player != null
-            && !player.isShiftKeyDown() //jrbudda : prevent falling off things or walking up blocks while moving in room scale.
-            && !player.isSleeping()
-            && !dataholder.jumpTracker.isjumping()
-            && !dataholder.climbTracker.isGrabbingLadder()
-            && player.isAlive()) {
+            this.roomScaleMovementDelay--;
+            return;
+        } else if (player == null ||
+            // jrbudda : prevent falling off things or walking up blocks while moving in room scale.
+            player.isShiftKeyDown() ||
+            player.isSleeping() ||
+            this.dh.jumpTracker.isjumping() ||
+            this.dh.climbTracker.isGrabbingLadder() ||
+            !player.isAlive())
+        {
+            return;
+        }
 
-            Minecraft minecraft = Minecraft.getInstance();
+        VRData temp = new VRData(
+            this.roomOrigin,
+            this.dh.vrSettings.walkMultiplier,
+            this.worldScale,
+            this.vrdata_world_pre.rotation_radians);
 
-            VRData tempVrdata = new VRData(this.roomOrigin, dataholder.vrSettings.walkMultiplier, this.worldScale, this.vrdata_world_pre.rotation_radians);
+        if (this.dh.vrSettings.realisticDismountEnabled && this.dh.vehicleTracker.canRoomscaleDismount(player)) {
+            Vec3 mountPos = player.getVehicle().position();
+            Vec3 head = temp.getHeadPivot();
+            double distance = Math.sqrt(
+                (head.x - mountPos.x) * (head.x - mountPos.x) + (head.z - mountPos.z) * (head.z - mountPos.z));
 
-            if (dataholder.vrSettings.realisticDismountEnabled && dataholder.vehicleTracker.canRoomscaleDismount(minecraft.player)) {
-                Vec3 mountpos = minecraft.player.getVehicle().position();
-                Vec3 head = tempVrdata.getHeadPivot();
-                double distance = Math.sqrt((head.x - mountpos.x) * (head.x - mountpos.x) + (head.z - mountpos.z) * (head.z - mountpos.z));
+            if (distance > 1.0D) {
+                this.dh.sneakTracker.sneakCounter = 5;
+            }
+            return;
+        }
 
-                if (distance > 1.0D) {
-                    dataholder.sneakTracker.sneakCounter = 5;
+        // move player's X/Z coords as the HMD moves around the room
+        float playerHalfWidth = player.getBbWidth() / 2.0F;
+        float playerHeight = player.getBbHeight();
+
+        // OK this is the first place I've found where we really need to update the VR data before doing this calculation.
+        Vec3 eyePos = temp.getHeadPivot();
+
+        double x = eyePos.x;
+        double y = player.getY();
+        double z = eyePos.z;
+
+        // create bounding box at dest position
+        AABB bb = new AABB(
+            x - playerHalfWidth,
+            y,
+            z - playerHalfWidth,
+            x + playerHalfWidth,
+            y + playerHeight,
+            z + playerHalfWidth);
+
+        Vec3 torso = new Vec3(x, y, z);
+
+        if (this.mc.level.noCollision(player, bb)) {
+            // no collision
+            // don't call setPosition style functions to avoid shifting room origin
+            player.setPosRaw(x, !this.dh.vrSettings.simulateFalling ? y : player.getY(), z);
+            player.setBoundingBox(bb);
+            player.fallDistance = 0.0F;
+        } else if (
+            ((this.dh.vrSettings.walkUpBlocks && ((PlayerExtension) player).vivecraft$getMuhJumpFactor() == 1.0F) ||
+                (this.dh.climbTracker.isGrabbingLadder() && this.dh.vrSettings.realisticClimbEnabled)
+            ) && player.fallDistance == 0.0F)
+        {
+            // collision, test for climbing up a block
+            // is the player significantly inside a block?
+            float climbShrink = player.getDimensions(player.getPose()).width * 0.45F;
+            double shrunkClimbHalfWidth = playerHalfWidth - climbShrink;
+
+            AABB bbClimb = new AABB(
+                torso.x - shrunkClimbHalfWidth,
+                bb.minY,
+                torso.z - shrunkClimbHalfWidth,
+                torso.x + shrunkClimbHalfWidth,
+                bb.maxY,
+                torso.z + shrunkClimbHalfWidth);
+
+            // colliding with a block
+            if (!this.mc.level.noCollision(player, bbClimb)) {
+                int extra = 0;
+
+                if (player.onClimbable() && this.dh.vrSettings.realisticClimbEnabled) {
+                    extra = 6;
                 }
-            } else {
-                // move player's X/Z coords as the HMD moves around the room
-                float playerHalfWidth = player.getBbWidth() / 2.0F;
-                float playerHeight = player.getBbHeight();
-                Vec3 eyePos = tempVrdata.getHeadPivot();
 
-                double x = eyePos.x;
-                double y = player.getY();
-                double z = eyePos.z;
+                for (int i = 0; i <= 10 + extra; i++) {
+                    bb = bb.move(0.0D, 0.1D, 0.0D);
 
-                // create bounding box at dest position
-                AABB bb = new AABB(
-                    x - playerHalfWidth,
-                    y,
-                    z - playerHalfWidth,
-                    x + playerHalfWidth,
-                    y + playerHeight,
-                    z + playerHalfWidth);
+                    if (this.mc.level.noCollision(player, bb)) {
+                        // free spot, move player there
+                        player.setPosRaw(x, bb.minY, z);
+                        player.setBoundingBox(bb);
 
-                Vec3 torso = new Vec3(x, y, z);
+                        Vec3 dest = this.roomOrigin.add(0.0, 0.1F * (i + 1), 0.0);
+                        this.setRoomOrigin(dest.x, dest.y, dest.z, false);
 
-                if (minecraft.level.noCollision(player, bb)) {
-                    // no collision
-                    // don't call setPosition style functions to avoid shifting room origin
-                    player.setPosRaw(x, !dataholder.vrSettings.simulateFalling ? y : player.getY(), z);
-                    player.setBoundingBox(bb);
-                    player.fallDistance = 0.0F;
-                } else if ((
-                    //collision, test for climbing up a block
-                    (dataholder.vrSettings.walkUpBlocks && ((PlayerExtension) player).vivecraft$getMuhJumpFactor() == 1.0F)
-                        || (dataholder.climbTracker.isGrabbingLadder() && dataholder.vrSettings.realisticClimbEnabled)) && player.fallDistance == 0.0F) {
-
-                    // is the player significantly inside a block?
-                    float climbShrink = player.getDimensions(player.getPose()).width * 0.45F;
-                    double shrunkClimbHalfWidth = playerHalfWidth - climbShrink;
-
-                    AABB bbClimb = new AABB(
-                        torso.x - shrunkClimbHalfWidth,
-                        bb.minY,
-                        torso.z - shrunkClimbHalfWidth,
-                        torso.x + shrunkClimbHalfWidth,
-                        bb.maxY,
-                        torso.z + shrunkClimbHalfWidth);
-
-                    // colliding with a block
-                    if (!minecraft.level.noCollision(player, bbClimb)) {
-                        int extra = 0;
-
-                        if (player.onClimbable() && dataholder.vrSettings.realisticClimbEnabled) {
-                            extra = 6;
-                        }
-
-                        for (int i = 0; i <= 10 + extra; ++i) {
-                            bb = bb.move(0.0D, 0.1D, 0.0D);
-
-                            if (minecraft.level.noCollision(player, bb)) {
-                                // free spot, move player there
-                                player.setPosRaw(x, bb.minY, z);
-                                player.setBoundingBox(bb);
-
-                                Vec3 dest = this.roomOrigin.add(0.0, 0.1F * (i + 1), 0.0);
-                                this.setRoomOrigin(dest.x, dest.y, dest.z, false);
-
-                                player.fallDistance = 0.0F;
-                                ((PlayerExtension) minecraft.player).vivecraft$stepSound(BlockPos.containing(player.position()), player.position());
-                                break;
-                            }
-                        }
+                        player.fallDistance = 0.0F;
+                        ((PlayerExtension) player).vivecraft$stepSound(BlockPos.containing(player.position()),
+                            player.position());
+                        break;
                     }
                 }
             }
         }
     }
 
+    // use simple neck modeling to estimate torso location
     public Vec3 getEstimatedTorsoPosition(double x, double y, double z) {
-        Entity entity = Minecraft.getInstance().player;
-        Vec3 vec3 = entity.getLookAngle();
-        Vec3 vec31 = (new Vec3(vec3.x, 0.0D, vec3.z)).normalize();
-        float f = (float) vec3.y * 0.25F;
-        return new Vec3(x + vec31.x * (double) f, y + vec31.y * (double) f, z + vec31.z * (double) f);
+        Entity player = this.mc.player;
+        Vec3 look = player.getLookAngle();
+        Vec3 forward = (new Vec3(look.x, 0.0D, look.z)).normalize();
+        float factor = (float) look.y * 0.25F;
+        return new Vec3(
+            x + forward.x * factor,
+            y + forward.y * factor,
+            z + forward.z * factor);
     }
 
-    public void blockDust(double x, double y, double z, int count, BlockPos bp, BlockState bs, float scale, float velscale) {
-        new Random();
-        Minecraft minecraft = Minecraft.getInstance();
-
-        for (int i = 0; i < count; ++i) {
-            TerrainParticle terrainparticle = new TerrainParticle(minecraft.level, x, y, z, 0.0D, 0.0D, 0.0D, bs);
-            terrainparticle.setPower(velscale);
-            //TODO: check
+    public void blockDust(
+        double x, double y, double z, int count, BlockPos bp, BlockState bs, float scale, float velScale)
+    {
+        for (int i = 0; i < count; i++) {
+            TerrainParticle terrainparticle = new TerrainParticle(this.mc.level, x, y, z, 0.0D, 0.0D, 0.0D, bs);
+            terrainparticle.setPower(velScale);
+            // TODO: check
             // minecraft.particleEngine.add(terrainparticle.init(bp).scale(scale));
-            minecraft.particleEngine.add(terrainparticle.scale(scale));
+            this.mc.particleEngine.add(terrainparticle.scale(scale));
         }
     }
 
@@ -460,13 +582,18 @@ public class VRPlayer {
         }
 
         // during login input can be null, and can cause a weird async crash, if not checked
-        if (this.mc.player.input != null && (this.mc.player.input.forwardImpulse != 0.0F || this.mc.player.input.leftImpulse != 0.0F)) {
+        if (this.mc.player.input != null &&
+            (this.mc.player.input.forwardImpulse != 0.0F || this.mc.player.input.leftImpulse != 0.0F))
+        {
             this.isFreeMoveCurrent = true;
         }
 
         this.updateTeleportKeys();
     }
 
+    /**
+     * Again with the weird logic, see {@link #isTeleportEnabled()}
+     */
     public boolean getFreeMove() {
         if (this.dh.vrSettings.seated) {
             return this.dh.vrSettings.seatedFreeMove || !this.isTeleportEnabled();
@@ -476,92 +603,114 @@ public class VRPlayer {
     }
 
     public String toString() {
-        return "VRPlayer: \r\n \t origin: " + this.roomOrigin + "\r\n \t rotation: " + String.format("%.3f", ClientDataHolderVR.getInstance().vrSettings.worldRotation) + "\r\n \t scale: " + String.format("%.3f", this.worldScale) + "\r\n \t room_pre " + this.vrdata_room_pre + "\r\n \t world_pre " + this.vrdata_world_pre + "\r\n \t world_post " + this.vrdata_world_post + "\r\n \t world_render " + this.vrdata_world_render;
+        return ("""
+            VRPlayer:
+                origin: %s
+                rotation: %.3f
+                scale: %.3f
+                room_pre: %s
+                world_pre: %s
+                world_post: %s
+                world_render: %s"""
+        ).formatted(
+            this.roomOrigin,
+            this.dh.vrSettings.worldRotation,
+            this.worldScale,
+            this.vrdata_room_pre,
+            this.vrdata_world_pre,
+            this.vrdata_world_post,
+            this.vrdata_world_render);
     }
 
     public Vec3 getRightClickLookOverride(Player entity, int c) {
-        Vec3 vec3 = entity.getLookAngle();
+        Vec3 out = entity.getLookAngle();
 
         if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec() != null) {
-            vec3 = entity.getEyePosition(1.0F).subtract(((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec()).normalize().reverse();
+            out = entity.getEyePosition(1.0F)
+                .subtract(((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec())
+                .normalize().reverse(); // backwards
         }
 
-        ItemStack itemstack;
-        label54:
+        ItemStack itemStack = c == 0 ? entity.getMainHandItem() : entity.getOffhandItem();
+
+        if (itemStack.getItem() instanceof SnowballItem ||
+            itemStack.getItem() instanceof EggItem ||
+            itemStack.getItem() instanceof SpawnEggItem ||
+            itemStack.getItem() instanceof PotionItem ||
+            itemStack.getItem() instanceof BowItem ||
+            (itemStack.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(itemStack)) ||
+            itemStack.is(ItemTags.VIVECRAFT_THROW_ITEMS)
+        )
         {
-            itemstack = c == 0 ? entity.getMainHandItem() : entity.getOffhandItem();
+            //use r_hand aim
 
-            if (!(itemstack.getItem() instanceof SnowballItem) && !(itemstack.getItem() instanceof EggItem) && !(itemstack.getItem() instanceof SpawnEggItem) && !(itemstack.getItem() instanceof PotionItem) && !(itemstack.getItem() instanceof BowItem) && !itemstack.is(ItemTags.VIVECRAFT_THROW_ITEMS)) {
-                if (!(itemstack.getItem() instanceof CrossbowItem crossbowitem)) {
-                    break label54;
-                }
+            VRData data = this.dh.vrPlayer.vrdata_world_pre;
+            out = data.getController(c).getDirection();
+            Vec3 aim = this.dh.bowTracker.getAimVector();
 
-                if (!CrossbowItem.isCharged(itemstack)) {
-                    break label54;
-                }
+            if (this.dh.bowTracker.isNotched() && aim != null && aim.lengthSqr() > 0.0D) {
+                out = aim.reverse();
             }
-
-            VRData vrdata = this.dh.vrPlayer.vrdata_world_pre;
-            vec3 = vrdata.getController(c).getDirection();
-            Vec3 vec31 = this.dh.bowTracker.getAimVector();
-
-            if (this.dh.bowTracker.isNotched() && vec31 != null && vec31.lengthSqr() > 0.0D) {
-                vec3 = vec31.reverse();
-            }
-
-            return vec3;
+        } else if (itemStack.getItem() == Items.BUCKET && this.dh.interactTracker.bukkit[c]) {
+            out = entity.getEyePosition(1.0F)
+                .subtract(this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition())
+                .normalize().reverse(); // backwards
         }
 
-        if (itemstack.getItem() == Items.BUCKET && this.dh.interactTracker.bukkit[c]) {
-            vec3 = entity.getEyePosition(1.0F).subtract(this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition()).normalize().reverse();
-        }
-
-        return vec3;
+        return out;
     }
 
-    public void doPermanantLookOverride(LocalPlayer entity, VRData data) {
-        if (entity == null) {
+    public void doPermanentLookOverride(LocalPlayer player, VRData data) {
+        if (player == null) {
             return;
         }
 
+        // This is used for all sorts of things both client and server side.
 
-        if (entity.isPassenger()) {
-            //Server-side movement
-            Vec3 vec3 = VehicleTracker.getSteeringDirection(entity);
+        if (player.isPassenger()) {
+            // Server-side movement
+            // when a passanger make the player look in the vehicle forward direction
+            Vec3 dir = VehicleTracker.getSteeringDirection(player);
 
-            if (vec3 != null) {
-                entity.setXRot((float) Math.toDegrees(Math.asin(-vec3.y / vec3.length())));
-                entity.setYRot((float) Math.toDegrees(Math.atan2(-vec3.x, vec3.z)));
-                entity.setYHeadRot(entity.getYRot());
+            if (dir != null) {
+                player.setXRot((float) Math.toDegrees(Math.asin(-dir.y / dir.length())));
+                player.setYRot((float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+                player.setYHeadRot(player.getYRot());
             }
-        } else if (entity.isBlocking()) {
-            //block direction
-            if (entity.getUsedItemHand() == InteractionHand.MAIN_HAND) {
-                entity.setYRot(data.getController(0).getYaw());
-                entity.setYHeadRot(entity.getYRot());
-                entity.setXRot(-data.getController(0).getPitch());
+        } else if (player.isBlocking()) {
+            // block direction
+            // when blocking, make the player look in the shield hand direction
+            if (player.getUsedItemHand() == InteractionHand.MAIN_HAND) {
+                player.setYRot(data.getController(0).getYaw());
+                player.setYHeadRot(player.getYRot());
+                player.setXRot(-data.getController(0).getPitch());
             } else {
-                entity.setYRot(data.getController(1).getYaw());
-                entity.setYHeadRot(entity.getYRot());
-                entity.setXRot(-data.getController(1).getPitch());
+                player.setYRot(data.getController(1).getYaw());
+                player.setYHeadRot(player.getYRot());
+                player.setXRot(-data.getController(1).getPitch());
             }
-        } else if (entity.isSprinting() && (entity.input.jumping || mc.options.keyJump.isDown()) || entity.isFallFlying() || entity.isSwimming() && entity.zza > 0.0F) {
-            //Server-side movement
-            VRSettings.FreeMove freeMoveType = entity.isFallFlying() && this.dh.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ? this.dh.vrSettings.vrFreeMoveFlyMode : this.dh.vrSettings.vrFreeMoveMode;
-
+        } else if ((player.isSprinting() && (player.input.jumping || this.mc.options.keyJump.isDown())) ||
+            player.isFallFlying() || (player.isSwimming() && player.zza > 0.0F))
+        {
+            // Server-side movement
+            // when swimming/flying adjust player look according to the user setting
+            VRSettings.FreeMove freeMoveType =
+                player.isFallFlying() && this.dh.vrSettings.vrFreeMoveFlyMode != VRSettings.FreeMove.AUTO ?
+                    this.dh.vrSettings.vrFreeMoveFlyMode : this.dh.vrSettings.vrFreeMoveMode;
 
             if (freeMoveType == VRSettings.FreeMove.CONTROLLER) {
-                entity.setYRot(data.getController(1).getYaw());
-                entity.setYHeadRot(entity.getYRot());
-                entity.setXRot(-data.getController(1).getPitch());
+                player.setYRot(data.getController(1).getYaw());
+                player.setYHeadRot(player.getYRot());
+                player.setXRot(-data.getController(1).getPitch());
             } else {
-                entity.setYRot(data.hmd.getYaw());
-                entity.setYHeadRot(entity.getYRot());
-                entity.setXRot(-data.hmd.getPitch());
+                player.setYRot(data.hmd.getYaw());
+                player.setYHeadRot(player.getYRot());
+                player.setXRot(-data.hmd.getPitch());
             }
-        } else if (((GameRendererExtension) mc.gameRenderer).vivecraft$getCrossVec() != null) {
+        } else if (((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec() != null) {
             //Look AT the crosshair by default, most compatible with mods.
-            Vec3 playerToCrosshair = entity.getEyePosition(1).subtract(((GameRendererExtension) mc.gameRenderer).vivecraft$getCrossVec()); //backwards
+            Vec3 playerToCrosshair = player.getEyePosition(1)
+                .subtract(((GameRendererExtension) this.mc.gameRenderer).vivecraft$getCrossVec()); //backwards
             double what = playerToCrosshair.y / playerToCrosshair.length();
             if (what > 1) {
                 what = 1;
@@ -571,27 +720,36 @@ public class VRPlayer {
             }
             float pitch = (float) Math.toDegrees(Math.asin(what));
             float yaw = (float) Math.toDegrees(Math.atan2(playerToCrosshair.x, -playerToCrosshair.z));
-            entity.setXRot(pitch);
-            entity.setYRot(yaw);
-            entity.setYHeadRot(yaw);
+            player.setXRot(pitch);
+            player.setYRot(yaw);
+            player.setYHeadRot(yaw);
         } else {
             //use HMD only if no crosshair hit.
-            entity.setYRot(data.hmd.getYaw());
-            entity.setYHeadRot(entity.getYRot());
-            entity.setXRot(-data.hmd.getPitch());
+            player.setYRot(data.hmd.getYaw());
+            player.setYHeadRot(player.getYRot());
+            player.setXRot(-data.hmd.getPitch());
         }
     }
 
     public Vec3 AimedPointAtDistance(VRData source, int controller, double distance) {
-        Vec3 vec3 = source.getController(controller).getPosition();
-        Vec3 vec31 = source.getController(controller).getDirection();
-        return vec3.add(vec31.x * distance, vec31.y * distance, vec31.z * distance);
+        Vec3 controllerPos = source.getController(controller).getPosition();
+        Vec3 controllerDir = source.getController(controller).getDirection();
+        return controllerPos.add(controllerDir.x * distance, controllerDir.y * distance, controllerDir.z * distance);
     }
 
-    public HitResult rayTraceBlocksVR(VRData source, int controller, double blockReachDistance, boolean p_174822_4_) {
-        Vec3 vec3 = source.getController(controller).getPosition();
-        Vec3 vec31 = this.AimedPointAtDistance(source, controller, blockReachDistance);
-        return this.mc.level.clip(new ClipContext(vec3, vec31, ClipContext.Block.OUTLINE, p_174822_4_ ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, this.mc.player));
+    /**
+     * copy of {@link Entity#pick(double, float, boolean)}, modified to use the given VRData
+     * @param source VRData to base the raytrace off
+     * @param controller controller index to trace from
+     * @param hitDistance distance to trace
+     * @param hitFluids if fluids should be hit
+     * @return hit block or miss
+     */
+    public HitResult rayTraceBlocksVR(VRData source, int controller, double hitDistance, boolean hitFluids) {
+        Vec3 start = source.getController(controller).getPosition();
+        Vec3 end = this.AimedPointAtDistance(source, controller, hitDistance);
+        return this.mc.level.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE,
+            hitFluids ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, this.mc.player));
     }
 
     public boolean isTeleportSupported() {
@@ -602,13 +760,18 @@ public class VRPlayer {
         return this.teleportOverride;
     }
 
+    /**
+     * The logic here is a bit weird, because teleport is actually still enabled even in
+     * seated free move mode. You could use it by simply binding it in the vanilla controls.
+     * However, when free move is forced in standing mode, teleport is outright disabled.
+     */
     public boolean isTeleportEnabled() {
-        boolean flag = !VRServerPerms.INSTANCE.noTeleportClient || this.teleportOverride;
+        boolean enabled = !VRServerPerms.INSTANCE.noTeleportClient || this.teleportOverride;
 
         if (this.dh.vrSettings.seated) {
-            return flag;
+            return enabled;
         } else {
-            return flag && !this.dh.vrSettings.forceStandingFreeMove;
+            return enabled && !this.dh.vrSettings.forceStandingFreeMove;
         }
     }
 

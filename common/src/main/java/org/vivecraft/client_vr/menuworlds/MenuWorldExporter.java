@@ -223,7 +223,7 @@ public class MenuWorldExporter {
         }
 
         if (dataVersion > SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
-            VRSettings.logger.warn("Data version is newer than current, this menu world may not load correctly.");
+            VRSettings.logger.warn("Vivecraft: Menuworld data version is newer than current, this menu world may not load correctly.");
         }
 
         OptionalLong dimFixedTime = OptionalLong.empty();

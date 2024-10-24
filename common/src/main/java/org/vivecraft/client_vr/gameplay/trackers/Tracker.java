@@ -13,9 +13,9 @@ public abstract class Tracker {
         this.dh = dh;
     }
 
-    public abstract boolean isActive(LocalPlayer var1);
+    public abstract boolean isActive(LocalPlayer player);
 
-    public abstract void doProcess(LocalPlayer var1);
+    public abstract void doProcess(LocalPlayer player);
 
     public void reset(LocalPlayer player) {
     }

@@ -8,7 +8,8 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.provider.VRRenderer;
-import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.helpers.RenderHelper;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 public class NullVRStereoRenderer extends VRRenderer {
     public NullVRStereoRenderer(MCVR vr) {
@@ -17,26 +18,18 @@ public class NullVRStereoRenderer extends VRRenderer {
 
     @Override
     public Tuple<Integer, Integer> getRenderTextureSizes() {
-        if (this.resolution != null) {
-            return this.resolution;
-        } else {
+        if (this.resolution == null) {
             this.resolution = new Tuple<>(2048, 2048);
-            System.out.println("NullVR Render Res " + this.resolution.getA() + " x " + this.resolution.getB());
+            VRSettings.logger.info("Vivecraft: NullVR Render Res {}x{}", this.resolution.getA(), this.resolution.getB());
             this.ss = -1.0F;
-            System.out.println("NullVR Supersampling: " + this.ss);
-
-            return this.resolution;
+            VRSettings.logger.info("Vivecraft: NullVR Supersampling: {}", this.ss);
         }
+        return this.resolution;
     }
 
     @Override
-    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
-        return new Matrix4f().setPerspective(90.0F, 1.0F, nearClip, farClip);
-    }
-
-    @Override
-    public String getLastError() {
-        return "";
+    protected Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
+        return new Matrix4f().setPerspective((float) Math.toRadians(110.0F), 1.0F, nearClip, farClip);
     }
 
     @Override
@@ -56,21 +49,15 @@ public class NullVRStereoRenderer extends VRRenderer {
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, null);
         RenderSystem.bindTexture(i);
+        this.lastError = RenderHelper.checkGLError("create VR textures");
     }
 
     @Override
-    public void endFrame() {
-    }
+    public void endFrame() {}
 
     @Override
     public boolean providesStencilMask() {
         return false;
-    }
-
-
-    @Override
-    public float[] getStencilMask(RenderPass eye) {
-        return null;
     }
 
     @Override
@@ -79,18 +66,8 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public boolean isInitialized() {
-        return this.vr.initSuccess;
-    }
-
-    @Override
-    public String getinitError() {
-        return this.vr.initStatus;
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
+    protected void destroyBuffers() {
+        super.destroyBuffers();
         if (this.LeftEyeTextureId > -1) {
             TextureUtil.releaseTextureId(this.LeftEyeTextureId);
             this.LeftEyeTextureId = -1;

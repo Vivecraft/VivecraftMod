@@ -17,21 +17,23 @@ public class GuiTeleportSettings extends GuiVROptionsBase {
         VRSettings.VrOptions.TELEPORT_HORIZ_LIMIT
     };
 
-    public GuiTeleportSettings(Screen guiScreen) {
-        super(guiScreen);
+    public GuiTeleportSettings(Screen lastScreen) {
+        super(lastScreen);
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.teleport";
         super.init(teleportSettings, true);
 
-        if (this.settings.vrLimitedSurvivalTeleport) {
+        if (this.vrSettings.vrLimitedSurvivalTeleport) {
             super.init(limitedTeleportSettings, false);
         }
 
         super.addDefaultButtons();
     }
 
+    @Override
     protected void actionPerformed(AbstractWidget widget) {
         if (widget instanceof GuiVROption guivroption) {
             if (guivroption.getId() == VRSettings.VrOptions.LIMIT_TELEPORT.ordinal()) {

@@ -22,13 +22,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
 import org.vivecraft.client.extensions.RenderLayerExtension;
-import org.vivecraft.client.utils.RenderLayerTypes;
+import org.vivecraft.client.utils.RenderLayerType;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
-import static org.vivecraft.client.utils.RenderLayerTypes.LayerType.*;
 
 /**
  * A hacky way of copying regular PlayerRenderer layers to the VRPlayerRenderers
@@ -47,42 +45,45 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     }
 
     @SuppressWarnings("unchecked")
-    @Inject(at = @At("HEAD"), method = "addLayer")
-    public void vivecraft$copyLayer(RenderLayer<T, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "addLayer", at = @At("HEAD"))
+    private void vivecraft$copyLayer(RenderLayer<T, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {
         // check if the layer gets added from the PlayerRenderer, we don't want to copy, if we add it to the VRPlayerRenderer
         // also check that the VRPlayerRenderers were created, this method also gets called in the constructor,
         // those default Layers already are added to the VRPlayerRenderer there
-        EntityRenderDispatcherExtension renderExtension = (EntityRenderDispatcherExtension) entityRenderDispatcher;
+        EntityRenderDispatcherExtension renderExtension = (EntityRenderDispatcherExtension) this.entityRenderDispatcher;
         if ((Object) this.getClass() == PlayerRenderer.class && !renderExtension.vivecraft$getSkinMapVRSeated().isEmpty()) {
 
             // try to find a suitable constructor, so we can create a new Object without issues
             Constructor<?> constructor = null;
-            RenderLayerTypes.LayerType type = OTHER;
+            RenderLayerType type = RenderLayerType.OTHER;
             for (Constructor<?> c : renderLayer.getClass().getConstructors()) {
-                if (c.getParameterCount() == 1
-                    && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])) {
+                if (c.getParameterCount() == 1 &&
+                    RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0]))
+                {
                     constructor = c;
-                    type = PARENT_ONLY;
+                    type = RenderLayerType.PARENT_ONLY;
                     break;
-                } else if (c.getParameterCount() == 2
-                    && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])
-                    && EntityModelSet.class.isAssignableFrom(c.getParameterTypes()[1])) {
+                } else if (c.getParameterCount() == 2 &&
+                    RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0]) &&
+                    EntityModelSet.class.isAssignableFrom(c.getParameterTypes()[1]))
+                {
                     constructor = c;
-                    type = PARENT_MODELSET;
-                } else if (c.getParameterCount() == 3
-                    && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])
-                    && HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[1])
-                    && HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[2])
-                    && renderLayer instanceof HumanoidArmorLayer) {
+                    type = RenderLayerType.PARENT_MODELSET;
+                } else if (c.getParameterCount() == 3 &&
+                    RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0]) &&
+                    HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[1]) &&
+                    HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[2]) &&
+                    renderLayer instanceof HumanoidArmorLayer)
+                {
                     constructor = c;
-                    type = PARENT_MODEL_MODEL;
+                    type = RenderLayerType.PARENT_MODEL_MODEL;
                 }
             }
 
             // if no suitable constructor was found, use do a basic Object.clone call, and replace the parent of the copy
             if (constructor == null) {
                 // do a hacky clone, and replace parent
-                if (((PlayerModel<?>) model).slim &&
+                if (((PlayerModel<?>) this.model).slim &&
                     !renderExtension.vivecraft$getSkinMapVRSeated().get("slim").hasLayerType(renderLayer)) {
                     vivecraft$addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVRSeated().get("slim"));
                     vivecraft$addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVR().get("slim"));
@@ -92,7 +93,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
                 }
             } else {
                 // make a new instance with the vr model as parent
-                if (((PlayerModel<?>) model).slim &&
+                if (((PlayerModel<?>) this.model).slim &&
                     !renderExtension.vivecraft$getSkinMapVRSeated().get("slim").hasLayerType(renderLayer)) {
                     vivecraft$addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVRSeated().get("slim"));
                     vivecraft$addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVR().get("slim"));
@@ -111,7 +112,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     @Unique
     private void vivecraft$addLayerClone(RenderLayer<T, M> renderLayer, LivingEntityRenderer<T, M> target) {
         try {
-            VRSettings.logger.warn("Copying layer: {} with Object.copy, this could cause issues", renderLayer.getClass());
+            VRSettings.logger.warn("Vivecraft: Copying layer: {} with Object.copy, this could cause issues", renderLayer.getClass());
             RenderLayer<T, M> newLayer = (RenderLayer<T, M>) ((RenderLayerExtension) renderLayer).clone();
             newLayer.renderer = target;
             target.addLayer(newLayer);
@@ -125,14 +126,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
      */
     @SuppressWarnings("unchecked")
     @Unique
-    private void vivecraft$addLayerConstructor(Constructor<?> constructor, RenderLayerTypes.LayerType type, LivingEntityRenderer<T, M> target) {
+    private void vivecraft$addLayerConstructor(Constructor<?> constructor, RenderLayerType type, LivingEntityRenderer<T, M> target) {
         try {
             switch (type) {
                 case PARENT_ONLY -> target.addLayer((RenderLayer<T, M>) constructor.newInstance(target));
                 case PARENT_MODELSET ->
                     target.addLayer((RenderLayer<T, M>) constructor.newInstance(target, Minecraft.getInstance().getEntityModels()));
                 case PARENT_MODEL_MODEL -> {
-                    if (((PlayerModel<?>) model).slim) {
+                    if (((PlayerModel<?>) this.model).slim) {
                         target.addLayer((RenderLayer<T, M>) constructor.newInstance(target,
                             new HumanoidModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_INNER_ARMOR)),
                             new HumanoidModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_OUTER_ARMOR))));

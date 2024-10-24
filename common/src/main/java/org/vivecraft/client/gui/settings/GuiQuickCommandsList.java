@@ -10,25 +10,18 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 
 public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsList.CommandEntry> {
     protected ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-    private final GuiQuickCommandEditor parent;
-    private final Minecraft mc;
 
     public GuiQuickCommandsList(GuiQuickCommandEditor parent, Minecraft mc) {
         super(mc, parent.width, parent.height - 64, 32, 20);
-        this.parent = parent;
-        this.mc = mc;
-        String[] astring = this.dataholder.vrSettings.vrQuickCommands;
-        String s = null;
-        int i = 0;
 
-        for (String s1 : astring) {
-            this.minecraft.font.width(s1);
-            this.addEntry(new CommandEntry(s1, this));
+        for (String command : this.dataholder.vrSettings.vrQuickCommands) {
+            this.minecraft.font.width(command);
+            this.addEntry(new CommandEntry(command, this));
         }
     }
 
     @Override
-    protected void renderSelection(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
+    protected void renderSelection(GuiGraphics guiGraphics, int top, int width, int height, int outerColor, int innerColor) {
     }
 
     public class CommandEntry extends Entry<CommandEntry> {
@@ -36,7 +29,8 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         public final EditBox txt;
 
         private CommandEntry(String command, GuiQuickCommandsList parent) {
-            this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20, Component.literal(""));
+            this.txt = new EditBox(GuiQuickCommandsList.this.minecraft.font, parent.width / 2 - 100, 60, 200, 20,
+                Component.literal(""));
             this.txt.setMaxLength(256);
             this.txt.setValue(command);
             this.btnDelete = new Button.Builder(Component.literal("X"), (p) ->
@@ -50,58 +44,65 @@ public class GuiQuickCommandsList extends ObjectSelectionList<GuiQuickCommandsLi
         }
 
         @Override
-        public void setFocused(boolean bl) {
-            txt.setFocused(bl);
+        public void setFocused(boolean focused) {
+            this.txt.setFocused(focused);
         }
 
-        public boolean mouseClicked(double pMouseX, double p_94738_, int pMouseY) {
-            if (this.btnDelete.mouseClicked(pMouseX, p_94738_, pMouseY)) {
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (this.btnDelete.mouseClicked(mouseX, mouseY, button)) {
                 return true;
             } else {
-                return this.txt.mouseClicked(pMouseX, p_94738_, pMouseY) || super.mouseClicked(pMouseX, p_94738_, pMouseY);
+                return this.txt.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
             }
         }
 
-        public boolean mouseDragged(double pMouseX, double p_94741_, int pMouseY, double p_94743_, double pButton) {
-            if (this.btnDelete.isMouseOver(pMouseX, p_94741_) && this.btnDelete.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton)) {
+        @Override
+        public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+            if (this.btnDelete.isMouseOver(mouseX, mouseY) && this.btnDelete.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
                 return true;
             } else {
-                return (this.txt.isMouseOver(pMouseX, p_94741_) && this.txt.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton)) || super.mouseDragged(pMouseX, p_94741_, pMouseY, p_94743_, pButton);
+                return (this.txt.isMouseOver(mouseX, mouseY) && this.txt.mouseDragged(mouseX, mouseY, button, dragX, dragY)) || super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
             }
         }
 
-        public boolean mouseReleased(double pMouseX, double p_94754_, int pMouseY) {
-            if (this.btnDelete.mouseReleased(pMouseX, p_94754_, pMouseY)) {
+        @Override
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            if (this.btnDelete.mouseReleased(mouseX, mouseY, button)) {
                 return true;
             } else {
-                return this.txt.mouseReleased(pMouseX, p_94754_, pMouseY) || super.mouseReleased(pMouseX, p_94754_, pMouseY);
+                return this.txt.mouseReleased(mouseX, mouseY, button) || super.mouseReleased(mouseX, mouseY, button);
             }
         }
 
-        public boolean mouseScrolled(double x, double y, double scrollAmountX, double scrollAmountY) {
-            if (this.btnDelete.mouseScrolled(x, y, scrollAmountX, scrollAmountY)) {
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+            if (this.btnDelete.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
                 return true;
             } else {
-                return this.txt.mouseScrolled(x, y, scrollAmountX, scrollAmountY) || super.mouseScrolled(x, y, scrollAmountX, scrollAmountY);
+                return this.txt.mouseScrolled(mouseX, mouseY, scrollX, scrollY) || super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
             }
         }
 
-        public boolean charTyped(char pCodePoint, int pModifiers) {
-            return this.txt.isFocused() ? this.txt.charTyped(pCodePoint, pModifiers) : super.charTyped(pCodePoint, pModifiers);
+        @Override
+        public boolean charTyped(char codePoint, int modifiers) {
+            return this.txt.isFocused() ? this.txt.charTyped(codePoint, modifiers) : super.charTyped(codePoint, modifiers);
         }
 
-        public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
-            return this.txt.isFocused() ? this.txt.keyPressed(pKeyCode, pScanCode, pModifiers) : super.keyPressed(pKeyCode, pScanCode, pModifiers);
+        @Override
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            return this.txt.isFocused() ? this.txt.keyPressed(keyCode, scanCode, modifiers) : super.keyPressed(keyCode, scanCode, modifiers);
         }
 
-        public void render(GuiGraphics guiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pIsMouseOver, float pPartialTicks) {
-            this.txt.setX(pLeft);
-            this.txt.setY(pTop);
-            this.txt.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+        @Override
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
+            this.txt.setX(left);
+            this.txt.setY(top);
+            this.txt.render(guiGraphics, mouseX, mouseY, partialTick);
             this.btnDelete.setX(this.txt.getX() + this.txt.getWidth() + 2);
             this.btnDelete.setY(this.txt.getY());
             this.btnDelete.visible = true;
-            this.btnDelete.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+            this.btnDelete.render(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         @Override

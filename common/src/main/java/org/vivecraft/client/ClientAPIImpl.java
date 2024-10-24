@@ -8,8 +8,7 @@ public final class ClientAPIImpl implements VivecraftClientAPI {
 
     public static final ClientAPIImpl INSTANCE = new ClientAPIImpl();
 
-    private ClientAPIImpl() {
-    }
+    private ClientAPIImpl() {}
 
     @Override
     public boolean isVrInitialized() {

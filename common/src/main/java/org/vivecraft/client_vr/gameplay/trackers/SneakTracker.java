@@ -13,31 +13,34 @@ public class SneakTracker extends Tracker {
         super(mc, dh);
     }
 
-    public boolean isActive(LocalPlayer p) {
-        if (ClientDataHolderVR.getInstance().vrSettings.seated) {
+    @Override
+    public boolean isActive(LocalPlayer player) {
+        if (this.dh.vrSettings.seated) {
             return false;
-        } else if (!ClientDataHolderVR.getInstance().vrPlayer.getFreeMove() && !ClientDataHolderVR.getInstance().vrSettings.simulateFalling) {
+        } else if (!this.dh.vrPlayer.getFreeMove() && !this.dh.vrSettings.simulateFalling) {
             return false;
-        } else if (!ClientDataHolderVR.getInstance().vrSettings.realisticSneakEnabled) {
+        } else if (!this.dh.vrSettings.realisticSneakEnabled) {
             return false;
         } else if (this.mc.gameMode == null) {
             return false;
-        } else if (p != null && p.isAlive() && p.onGround()) {
-            return !p.isPassenger();
-        } else {
+        } else if (player == null || !player.isAlive() || !player.onGround()) {
             return false;
+        } else {
+            return !player.isPassenger();
         }
     }
 
+    @Override
     public void reset(LocalPlayer player) {
         this.sneakOverride = false;
     }
 
+    @Override
     public void doProcess(LocalPlayer player) {
         if (!this.mc.isPaused() && this.dh.sneakTracker.sneakCounter > 0) {
-            --this.dh.sneakTracker.sneakCounter;
+            this.dh.sneakTracker.sneakCounter--;
         }
 
-        this.sneakOverride = (double) AutoCalibration.getPlayerHeight() - this.dh.vr.hmdPivotHistory.latest().y > (double) this.dh.vrSettings.sneakThreshold;
+        this.sneakOverride = AutoCalibration.getPlayerHeight() - this.dh.vr.hmdPivotHistory.latest().y > this.dh.vrSettings.sneakThreshold;
     }
 }

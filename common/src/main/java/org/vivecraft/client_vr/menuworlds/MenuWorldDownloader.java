@@ -1,14 +1,11 @@
 package org.vivecraft.client_vr.menuworlds;
 
 import net.minecraft.SharedConstants;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.FileUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,15 +32,15 @@ public class MenuWorldDownloader {
         File file = new File(path);
         file.getParentFile().mkdirs();
         if (file.exists()) {
-            String localSha1 = Utils.getFileChecksum(file, "SHA-1");
-            String remoteSha1 = Utils.httpReadLine(baseUrl + "checksum.php?file=" + path);
+            String localSha1 = FileUtils.getFileChecksum(file, "SHA-1");
+            String remoteSha1 = FileUtils.httpReadLine(baseUrl + "checksum.php?file=" + path);
             if (localSha1.equals(remoteSha1)) {
-                VRSettings.logger.info("MenuWorlds: SHA-1 matches for " + path);
+                VRSettings.logger.info("Vivecraft: MenuWorlds: SHA-1 matches for {}", path);
                 return;
             }
         }
-        VRSettings.logger.info("MenuWorlds: Downloading world " + path);
-        Utils.httpReadToFile(baseUrl + path, file, true);
+        VRSettings.logger.info("Vivecraft: MenuWorlds: Downloading world {}", path);
+        FileUtils.httpReadToFile(baseUrl + path, file);
     }
 
     public static InputStream getRandomWorld() {
@@ -55,7 +52,7 @@ public class MenuWorldDownloader {
             if (settings.menuWorldSelection == VRSettings.MenuWorld.BOTH || settings.menuWorldSelection == VRSettings.MenuWorld.CUSTOM) {
                 worldList.addAll(getCustomWorlds());
             }
-            if (settings.menuWorldSelection == VRSettings.MenuWorld.BOTH || settings.menuWorldSelection == VRSettings.MenuWorld.OFFICIAL || worldList.size() == 0) {
+            if (settings.menuWorldSelection == VRSettings.MenuWorld.BOTH || settings.menuWorldSelection == VRSettings.MenuWorld.OFFICIAL || worldList.isEmpty()) {
                 worldList.addAll(getOfficialWorlds());
             }
 
@@ -64,7 +61,7 @@ public class MenuWorldDownloader {
                 worldList.removeIf(world -> lastWorld.equals(world.path) || (world.file != null && lastWorld.equals(world.file.getPath())));
             }
 
-            if (worldList.size() == 0) {
+            if (worldList.isEmpty()) {
                 return getRandomWorldFallback();
             }
 
@@ -73,12 +70,12 @@ public class MenuWorldDownloader {
                 lastWorld = world.file != null ? world.file.getPath() : world.path;
             }
             return getStreamForWorld(world);
-        } catch (IOException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
+        } catch (IOException | UncheckedIOException | NoSuchAlgorithmException e) {
+            VRSettings.logger.error("Vivecraft: error getting random menuworld:", e);
             try {
                 return getRandomWorldFallback();
             } catch (IOException | NoSuchAlgorithmException e2) {
-                e2.printStackTrace();
+                VRSettings.logger.error("Vivecraft: error getting random menuworld fallback:", e);
                 return null;
             }
         }
@@ -86,11 +83,11 @@ public class MenuWorldDownloader {
 
     private static InputStream getStreamForWorld(MenuWorldItem world) throws IOException, NoSuchAlgorithmException {
         if (world.file != null) {
-            VRSettings.logger.info("MenuWorlds: Using world " + world.file.getName());
+            VRSettings.logger.info("Vivecraft: MenuWorlds: Using world {}", world.file.getName());
             return new FileInputStream(world.file);
         } else if (world.path != null) {
             downloadWorld(world.path);
-            VRSettings.logger.info("MenuWorlds: Using official world " + world.path);
+            VRSettings.logger.info("Vivecraft: MenuWorlds: Using official world {}", world.path);
             return new FileInputStream(world.path);
         } else {
             throw new IllegalArgumentException("File or path must be assigned");
@@ -105,9 +102,9 @@ public class MenuWorldDownloader {
         return new ArrayList<>();
     }
 
-    private static List<MenuWorldItem> getOfficialWorlds() throws IOException {
+    private static List<MenuWorldItem> getOfficialWorlds() throws IOException, UncheckedIOException {
         List<MenuWorldItem> list = new ArrayList<>();
-        List<String> resultList = Utils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.VERSION_STRING);
+        List<String> resultList = FileUtils.httpReadAllLines(baseUrl + "menuworlds_list.php?minver=" + MenuWorldExporter.MIN_VERSION + "&maxver=" + MenuWorldExporter.VERSION + "&mcver=" + SharedConstants.VERSION_STRING);
         for (String str : resultList) {
             list.add(new MenuWorldItem("menuworlds/" + str, null));
         }
@@ -115,7 +112,7 @@ public class MenuWorldDownloader {
     }
 
     private static InputStream getRandomWorldFallback() throws IOException, NoSuchAlgorithmException {
-        VRSettings.logger.info("MenuWorlds: Couldn't find a world, trying random file from directory");
+        VRSettings.logger.info("Vivecraft: MenuWorlds: Couldn't find a world, trying random file from directory");
         File dir = new File("menuworlds");
         if (dir.exists()) {
             MenuWorldItem world = getRandomWorldFromList(getWorldsInDirectory(dir));
@@ -138,7 +135,7 @@ public class MenuWorldDownloader {
     }
 
     private static MenuWorldItem getRandomWorldFromList(List<MenuWorldItem> list) {
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             return list.get(rand.nextInt(list.size()));
         }
         return null;

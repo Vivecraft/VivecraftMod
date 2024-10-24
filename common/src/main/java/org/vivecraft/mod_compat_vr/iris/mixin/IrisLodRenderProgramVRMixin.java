@@ -20,7 +20,7 @@ import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 public class IrisLodRenderProgramVRMixin {
 
     @Group(name = "projection adjust", min = 1, max = 1)
-    @ModifyVariable(at = @At("HEAD"), method = "fillUniformData", ordinal = 0, argsOnly = true, remap = false, expect = 0, require = 0)
+    @ModifyVariable(method = "fillUniformData", at = @At("HEAD"), ordinal = 0, argsOnly = true, remap = false, expect = 0, require = 0)
     private Matrix4fc vivecraft$correctProjectionMat4C(Matrix4fc dhProjection) {
         if (!ShadowRenderingState.areShadowsCurrentlyBeingRendered()) {
             return vivecraft$correctProjection(dhProjection);
@@ -30,7 +30,7 @@ public class IrisLodRenderProgramVRMixin {
     }
 
     @Group(name = "projection adjust", min = 1, max = 1)
-    @ModifyVariable(at = @At("HEAD"), method = "fillUniformData", ordinal = 0, argsOnly = true, remap = false, expect = 0, require = 0)
+    @ModifyVariable(method = "fillUniformData", at = @At("HEAD"), ordinal = 0, argsOnly = true, remap = false, expect = 0, require = 0)
     private Matrix4f vivecraft$correctProjectionMat4(Matrix4f dhProjection) {
         if (!ShadowRenderingState.areShadowsCurrentlyBeingRendered()) {
             // safe to cast since this always returns a Matrix4f when a Matrix4f is put in

@@ -14,32 +14,33 @@ import org.vivecraft.client.VRPlayersClient;
 
 public class HMDLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
-    ResourceLocation DIAMOND_HMD = new ResourceLocation("vivecraft:textures/diamond_hmd.png");
-    ResourceLocation GOLD_HMD = new ResourceLocation("vivecraft:textures/gold_hmd.png");
-    ResourceLocation BLACK_HMD = new ResourceLocation("vivecraft:textures/black_hmd.png");
+    private static final ResourceLocation DIAMOND_HMD = new ResourceLocation("vivecraft:textures/diamond_hmd.png");
+    private static final ResourceLocation GOLD_HMD = new ResourceLocation("vivecraft:textures/gold_hmd.png");
+    private static final ResourceLocation BLACK_HMD = new ResourceLocation("vivecraft:textures/black_hmd.png");
 
-    public HMDLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderLayerParent) {
-        super(renderLayerParent);
+    public HMDLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer) {
+        super(renderer);
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer entity, float f, float g, float h, float j, float k, float l) {
-        if (this.getParentModel().head.visible && this.getParentModel() instanceof VRPlayerModel<?> vrPlayerModel) {
-            VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(entity.getUUID());
-            ResourceLocation hmd;
-            switch (rotinfo.hmd) {
-                default -> hmd = null;
-                case 1 -> hmd = this.BLACK_HMD;
-                case 2 -> hmd = this.GOLD_HMD;
-                case 3, 4 -> hmd = this.DIAMOND_HMD;
-            }
+    public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, AbstractClientPlayer player, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
 
-            if (hmd == null) {
-                return;
-            }
+        // check that the model actually is a vrPlayer model, some mods override the model
+        if (this.getParentModel().head.visible && this.getParentModel() instanceof VRPlayerModel<?> vrPlayerModel) {
+            VRPlayersClient.RotInfo rotinfo = VRPlayersClient.getInstance().getRotationsForPlayer(player.getUUID());
+
+            ResourceLocation hmd = switch (rotinfo.hmd) {
+                case 1 -> BLACK_HMD;
+                case 2 -> GOLD_HMD;
+                case 3, 4 -> DIAMOND_HMD;
+                default -> null;
+            };
+
+            if (hmd == null) return;
+
             poseStack.pushPose();
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(hmd));
-            vrPlayerModel.renderHMDR(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
+            VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.entitySolid(hmd));
+            vrPlayerModel.renderHMD(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
     }

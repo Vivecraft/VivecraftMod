@@ -1,7 +1,7 @@
 package org.vivecraft.common.utils.math;
 
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.MathUtils;
 import org.vivecraft.common.utils.lwjgl.Matrix3f;
 
 @Deprecated
@@ -231,7 +231,7 @@ public class Quaternion {
             return this.multiply(new Quaternion(axis, degrees));
         } else {
             org.vivecraft.common.utils.lwjgl.Matrix4f matrix4f = this.getMatrix();
-            matrix4f.rotate((float) Math.toRadians(degrees), Utils.convertVector(axis.getVector()));
+            matrix4f.rotate((float) Math.toRadians(degrees), MathUtils.convertVector(axis.getVector()));
             return new Quaternion(matrix4f);
         }
     }
@@ -332,6 +332,6 @@ public class Quaternion {
     }
 
     public String toString() {
-        return "Quaternion{w=" + this.w + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z + '}';
+        return "Quaternion{w=%f, x=%f, y=%f, z=%f}".formatted(this.w, this.x, this.y, this.z);
     }
 }

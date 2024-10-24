@@ -2,12 +2,10 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.world.entity.Pose;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.packet.c2s.CrawlPayloadC2S;
 import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
 
 public class CrawlTracker extends Tracker {
@@ -19,6 +17,7 @@ public class CrawlTracker extends Tracker {
         super(mc, dh);
     }
 
+    @Override
     public boolean isActive(LocalPlayer player) {
         if (this.dh.vrSettings.seated) {
             return false;
@@ -37,18 +36,20 @@ public class CrawlTracker extends Tracker {
         }
     }
 
+    @Override
     public void reset(LocalPlayer player) {
         this.crawling = false;
         this.crawlsteresis = false;
         this.updateState(player);
     }
 
+    @Override
     public void doProcess(LocalPlayer player) {
         double scaleMultiplier = 1.0;
-        if (Xplat.isModLoaded("pehkui")) {
-            scaleMultiplier /= PehkuiHelper.getPlayerScale(player, mc.getFrameTime());
+        if (PehkuiHelper.isLoaded()) {
+            scaleMultiplier /= PehkuiHelper.getEntityEyeHeightScale(player, this.mc.getFrameTime());
         }
-        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * (double) this.dh.vrPlayer.worldScale * scaleMultiplier + (double) 0.1F < (double) this.dh.vrSettings.crawlThreshold;
+        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * this.dh.vrPlayer.worldScale * scaleMultiplier + 0.1F < this.dh.vrSettings.crawlThreshold;
         this.updateState(player);
     }
 
@@ -60,10 +61,9 @@ public class CrawlTracker extends Tracker {
             }
 
             if (ClientNetworking.serverAllowsCrawling) {
-                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[]{(byte) (this.crawling ? 1 : 0)});
-
                 if (this.mc.getConnection() != null) {
-                    this.mc.getConnection().send(serverboundcustompayloadpacket);
+                    this.mc.getConnection()
+                        .send(ClientNetworking.createServerPacket(new CrawlPayloadC2S(this.crawling)));
                 }
             }
 

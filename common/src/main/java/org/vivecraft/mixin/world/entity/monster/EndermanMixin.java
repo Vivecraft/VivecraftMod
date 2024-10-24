@@ -1,22 +1,19 @@
 package org.vivecraft.mixin.world.entity.monster;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
@@ -27,32 +24,45 @@ public abstract class EndermanMixin extends Monster {
         super(entityType, level);
     }
 
-    @Inject(at = @At("HEAD"), method = "Lnet/minecraft/world/entity/monster/EnderMan;isLookingAtMe(Lnet/minecraft/world/entity/player/Player;)Z", cancellable = true)
-    public void vivecraft$lookAtVR(Player player, CallbackInfoReturnable<Boolean> cir) {
-        if (ServerVRPlayers.isVRPlayer((ServerPlayer) player)) {
-            cir.setReturnValue(vivecraft$shouldEndermanAttackVRPlayer((EnderMan) (Object) this, (ServerPlayer) player));
+    @WrapOperation(method = "isLookingAtMe", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getViewVector(F)Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 vivecraft$lookDirVR(
+        Player instance, float partialTick, Operation<Vec3> original, @Share("hmdPos") LocalRef<Vec3> hmdPos)
+    {
+        if (instance instanceof ServerPlayer serverPlayer) {
+            ServerVivePlayer serverVivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
+            if (serverVivePlayer != null && serverVivePlayer.isVR()) {
+                hmdPos.set(serverVivePlayer.getHMDPos());
+                return serverVivePlayer.getHMDDir();
+            }
         }
+        return original.call(instance, partialTick);
     }
 
-    @Unique
-    private static boolean vivecraft$shouldEndermanAttackVRPlayer(EnderMan enderman, ServerPlayer player) {
-        ItemStack itemstack = player.getInventory().armor.get(3);
-        if (!itemstack.is(Items.CARVED_PUMPKIN)) { //no enderitem
-            ServerVivePlayer data = ServerVRPlayers.getVivePlayer(player);
-            Vec3 vector3d = data.getHMDDir();
-            Vec3 vector3d1 = new Vec3(enderman.getX() - data.getHMDPos(player).x, enderman.getEyeY() - data.getHMDPos(player).y, enderman.getZ() - data.getHMDPos(player).z);
-            double d0 = vector3d1.length();
-            vector3d1 = vector3d1.normalize();
-            double d1 = vector3d.dot(vector3d1);
-            return d1 > 1.0D - 0.025D / d0 && d0 < 128.0 && vivecraft$canEntityBeSeen(enderman, data.getHMDPos(player));
-        }
-
-        return false;
+    @WrapOperation(method = "isLookingAtMe", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getX()D"))
+    private double vivecraft$headPosX(
+        Player instance, Operation<Double> original, @Share("hmdPos") LocalRef<Vec3> hmdPos)
+    {
+        return hmdPos.get() != null ? hmdPos.get().x : original.call(instance);
     }
 
-    @Unique
-    private static boolean vivecraft$canEntityBeSeen(Entity entity, Vec3 playerEyePos) {
-        Vec3 entityEyePos = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
-        return entity.level().clip(new ClipContext(playerEyePos, entityEyePos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS;
+    @WrapOperation(method = "isLookingAtMe", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEyeY()D"))
+    private double vivecraft$headPosY(
+        Player instance, Operation<Double> original, @Share("hmdPos") LocalRef<Vec3> hmdPos)
+    {
+        return hmdPos.get() != null ? hmdPos.get().y : original.call(instance);
+    }
+
+    @WrapOperation(method = "isLookingAtMe", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getZ()D"))
+    private double vivecraft$headPosZ(
+        Player instance, Operation<Double> original, @Share("hmdPos") LocalRef<Vec3> hmdPos)
+    {
+        return hmdPos.get() != null ? hmdPos.get().z : original.call(instance);
+    }
+
+    @ModifyExpressionValue(method = "isLookingAtMe", at = @At(value = "CONSTANT", args = "doubleValue=0.025"))
+    private double vivecraft$biggerViewCone(double original, @Share("hmdPos") LocalRef<Vec3> hmdPos) {
+        // increase the view cone check from 1.4° to 5.7°, makes it easier to stop enderman,
+        // since it's hard to know where the center of the view is
+        return hmdPos.get() != null ? 0.1 : original;
     }
 }

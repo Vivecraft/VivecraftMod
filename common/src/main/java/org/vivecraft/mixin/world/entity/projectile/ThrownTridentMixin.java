@@ -1,28 +1,27 @@
 package org.vivecraft.mixin.world.entity.projectile;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
 @Mixin(ThrownTrident.class)
 public class ThrownTridentMixin {
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getEyePosition()Lnet/minecraft/world/phys/Vec3;"), method = "tick()V")
-    public Vec3 vivecraft$tick(Entity entity) {
-        Vec3 vec3 = entity.getEyePosition();
-        if (entity instanceof ServerPlayer player) {
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getEyePosition()Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 vivecraft$tridentTargetPos(Entity instance, Operation<Vec3> original) {
+        if (instance instanceof ServerPlayer player) {
             ServerVivePlayer serverviveplayer = ServerVRPlayers.getVivePlayer(player);
             if (serverviveplayer != null && serverviveplayer.isVR()) {
-                vec3 = serverviveplayer.getControllerPos(0, (Player) entity);
+                return serverviveplayer.getControllerPos(0);
             }
         }
-        return vec3;
+        return original.call(instance);
     }
 }

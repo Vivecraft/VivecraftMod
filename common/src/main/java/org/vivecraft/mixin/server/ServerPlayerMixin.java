@@ -1,23 +1,22 @@
 package org.vivecraft.mixin.server;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ItemParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
@@ -31,7 +30,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.mixin.world.entity.PlayerMixin;
 import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
@@ -40,122 +39,97 @@ import org.vivecraft.server.config.ServerConfig;
 import java.util.IllegalFormatException;
 
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerMixin extends Player {
+public abstract class ServerPlayerMixin extends PlayerMixin {
 
     @Shadow
     @Final
     public MinecraftServer server;
 
-    public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
-        super(level, blockPos, f, gameProfile);
+    protected ServerPlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
+        super(entityType, level);
     }
 
-    @Inject(at = @At("TAIL"), method = "initInventoryMenu")
-    public void vivecraft$menu(CallbackInfo ci) {
-        ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
-        if (ServerConfig.vrFun.get() && serverviveplayer != null && serverviveplayer.isVR() && this.random.nextInt(40) == 3) {
-            ItemStack itemstack;
+    @Inject(method = "initInventoryMenu", at = @At("TAIL"))
+    private void vivecraft$addItemEasterEgg(CallbackInfo ci) {
+        // triggers on player respawn and rejoin
+        ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
+        if (ServerConfig.vrFun.get() && serverVivePlayer != null && serverVivePlayer.isVR() &&
+            this.random.nextInt(40) == 3)
+        {
+            ItemStack easterEggItem;
             if (this.random.nextInt(2) == 1) {
-                itemstack = (new ItemStack(Items.PUMPKIN_PIE)).setHoverName(Component.literal("EAT ME"));
+                easterEggItem = new ItemStack(Items.PUMPKIN_PIE)
+                    .setHoverName(Component.literal("EAT ME"));
             } else {
-                itemstack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)
+                easterEggItem = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)
                     .setHoverName(Component.literal("DRINK ME"));
             }
 
-            itemstack.getTag().putInt("HideFlags", 32);
+            easterEggItem.getOrCreateTag().putInt("HideFlags", 32);
 
-            if (this.getInventory().add(itemstack)) {
+            if (this.getInventory().add(easterEggItem)) {
                 this.inventoryMenu.broadcastChanges();
             }
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;tick()V", shift = Shift.AFTER), method = "doTick()V")
-    public void vivecraft$tick(CallbackInfo info) {
+    @Inject(method = "doTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;tick()V", shift = Shift.AFTER))
+    private void vivecraft$overridePose(CallbackInfo ci) {
         ServerVRPlayers.overridePose((ServerPlayer) (Object) this);
     }
 
+    /**
+     * inject into {@link Player#sweepAttack}
+     */
     @Override
-    public void sweepAttack() {
+    protected int vivecraft$modifySweepParticleSpawnPos(
+        ServerLevel instance, ParticleOptions type, double posX, double posY, double posZ, int particleCount,
+        double xOffset, double yOffset, double zOffset, double speed, Operation<Integer> original)
+    {
         ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
-
         if (serverviveplayer != null && serverviveplayer.isVR()) {
-            Vec3 vec3 = serverviveplayer.getControllerDir(0);
-            float f = (float) Math.toDegrees(Math.atan2(vec3.x, -vec3.z));
-            double d0 = -Mth.sin(f * ((float) Math.PI / 180F));
-            double d1 = Mth.cos(f * ((float) Math.PI / 180F));
-            Vec3 vec31 = serverviveplayer.getControllerPos(0, this);
+            // spawn particles at controller, have to assume controller 0
+            Vec3 aim = serverviveplayer.getControllerDir(0);
+            float yaw = (float) Math.atan2(-aim.x, aim.z);
 
-            if (this.level() instanceof ServerLevel) {
-                ((ServerLevel) this.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, vec31.x + d0, vec31.y,
-                    vec31.z + d1, 0, d0, 0.0D, d1, 0.0D);
-            }
+            xOffset = -Mth.sin(yaw);
+            zOffset = Mth.cos(yaw);
+
+            Vec3 pos = serverviveplayer.getControllerPos(0);
+
+            return original.call(instance, type,
+                pos.x + xOffset, pos.y, pos.z + zOffset,
+                particleCount,
+                xOffset, yOffset, zOffset, speed);
         } else {
-            super.sweepAttack();
+            return original.call(instance, type, posX, posY, posZ, particleCount, xOffset, yOffset, zOffset, speed);
         }
     }
 
-    // TODO: this is not needed
-    @Override
-    protected void triggerItemUseEffects(ItemStack pStack, int pCount) {
-        if (!pStack.isEmpty() && this.isUsingItem()) {
-            if (pStack.getUseAnimation() == UseAnim.DRINK) {
-                this.playSound(this.getDrinkingSound(pStack), 0.5F, this.level().random.nextFloat() * 0.1F + 0.9F);
-            }
+    @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z")
+    )
+    private void vivecraft$dropVive(
+        ItemStack droppedItem, boolean dropAround, boolean includeThrowerName, CallbackInfoReturnable<ItemEntity> cir,
+        @Local ItemEntity item)
+    {
+        ServerVivePlayer serverVivePlayer = vivecraft$getVivePlayer();
+        if (!dropAround && serverVivePlayer != null && serverVivePlayer.isVR()) {
+            // spawn item from players hand
+            Vec3 pos = serverVivePlayer.getControllerPos(0);
+            Vec3 aim = serverVivePlayer.getControllerDir(0);
 
-            if (pStack.getUseAnimation() == UseAnim.EAT) {
-                this.vivecraft$addItemParticles(pStack, pCount);
-                this.playSound(this.getEatingSound(pStack), 0.5F + 0.5F * (float) this.random.nextInt(2),
-                    (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-            }
+            // item speed, taken from Player#drop
+            final float speed = 0.3F;
+            item.setDeltaMovement(aim.x * speed, aim.y * speed, aim.z * speed);
+            item.setPos(pos.x + item.getDeltaMovement().x,
+                pos.y + item.getDeltaMovement().y,
+                pos.z + item.getDeltaMovement().z);
         }
     }
 
-    // TODO: this should override "spawnItemParticles", or inject into LivingEntity
-    @Unique
-    private void vivecraft$addItemParticles(ItemStack stack, int count) {
-        ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
-        for (int i = 0; i < count; ++i) {
-            Vec3 vec3 = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
-            vec3 = vec3.xRot(-this.getXRot() * ((float) Math.PI / 180F));
-            vec3 = vec3.yRot(-this.getYRot() * ((float) Math.PI / 180F));
-            double d0 = (double) (-this.random.nextFloat()) * 0.6D - 0.3D;
-            Vec3 vec31 = new Vec3(((double) this.random.nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
-            vec31 = vec31.xRot(-this.getXRot() * ((float) Math.PI / 180F));
-            vec31 = vec31.yRot(-this.getYRot() * ((float) Math.PI / 180F));
-            vec31 = vec31.add(this.getX(), this.getEyeY(), this.getZ());
-            if (serverviveplayer != null && serverviveplayer.isVR()) {
-                InteractionHand interactionhand = this.getUsedItemHand();
-
-                if (interactionhand == InteractionHand.MAIN_HAND) {
-                    vec31 = serverviveplayer.getControllerPos(0, this);
-                } else {
-                    vec31 = serverviveplayer.getControllerPos(1, this);
-                }
-            }
-            this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, stack), vec31.x, vec31.y, vec31.z, vec3.x,
-                vec3.y + 0.05D, vec3.z);
-        }
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z", shift = Shift.BEFORE), method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
-        locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$dropvive(ItemStack p_9085_, boolean dropAround, boolean includeName, CallbackInfoReturnable<ItemEntity> info,
-        ItemEntity itementity) {
-        ServerVivePlayer serverviveplayer = vivecraft$getVivePlayer();
-        if (serverviveplayer != null && serverviveplayer.isVR() && !dropAround) {
-            Vec3 vec3 = serverviveplayer.getControllerPos(0, this);
-            Vec3 vec31 = serverviveplayer.getControllerDir(0);
-            float f = 0.3F;
-            itementity.setDeltaMovement(vec31.x * (double) f, vec31.y * (double) f, vec31.z * (double) f);
-            itementity.setPos(vec3.x() + itementity.getDeltaMovement().x(),
-                vec3.y() + itementity.getDeltaMovement().y(), vec3.z() + itementity.getDeltaMovement().z());
-        }
-    }
-
-    @Inject(at = @At("HEAD"), method = "hurt", cancellable = true)
-    public void vivecraft$checkCanGetHurt(DamageSource damageSource, float f, CallbackInfoReturnable<Boolean> cir) {
-        Entity entity = damageSource.getEntity();
+    @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$checkCanGetHurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        Entity entity = source.getEntity();
         ServerPlayer other = null;
 
         // check if the damage came from another player
@@ -183,22 +157,25 @@ public abstract class ServerPlayerMixin extends Player {
             boolean blockedDamage = false;
             String blockedDamageCase = "";
 
-            if ((!otherVive.isVR() && thisVive.isVR() && thisVive.isSeated())
-                || (!thisVive.isVR() && otherVive.isVR() && otherVive.isSeated())) {
+            if ((!otherVive.isVR() && thisVive.isVR() && thisVive.isSeated()) ||
+                (!thisVive.isVR() && otherVive.isVR() && otherVive.isSeated()))
+            {
                 // nonvr vs Seated
                 if (!ServerConfig.pvpSEATEDVRvsNONVR.get()) {
                     blockedDamage = true;
                     blockedDamageCase = "canceled nonvr vs seated VR damage";
                 }
-            } else if ((!otherVive.isVR() && thisVive.isVR() && !thisVive.isSeated())
-                || (!thisVive.isVR() && otherVive.isVR() && !otherVive.isSeated())) {
+            } else if ((!otherVive.isVR() && thisVive.isVR() && !thisVive.isSeated()) ||
+                (!thisVive.isVR() && otherVive.isVR() && !otherVive.isSeated()))
+            {
                 // nonvr vs Standing
                 if (!ServerConfig.pvpVRvsNONVR.get()) {
                     blockedDamage = true;
                     blockedDamageCase = "canceled nonvr vs standing VR damage";
                 }
-            } else if ((otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated())
-                || (thisVive.isVR() && thisVive.isSeated() && otherVive.isVR() && !otherVive.isSeated())) {
+            } else if ((otherVive.isVR() && otherVive.isSeated() && thisVive.isVR() && !thisVive.isSeated()) ||
+                (thisVive.isVR() && thisVive.isSeated() && otherVive.isVR() && !otherVive.isSeated()))
+            {
                 // Standing vs Seated
                 if (!ServerConfig.pvpVRvsSEATEDVR.get()) {
                     blockedDamage = true;
@@ -226,7 +203,7 @@ public abstract class ServerPlayerMixin extends Player {
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "die")
+    @Inject(method = "die", at = @At("HEAD"))
     private void vivecraft$customDeathMessage(DamageSource damageSource, CallbackInfo ci) {
         // only when enabled
         if (ServerConfig.messagesEnabled.get()) {
@@ -268,7 +245,7 @@ public abstract class ServerPlayerMixin extends Player {
                     this.server.getPlayerList().broadcastSystemMessage(Component.literal(message.formatted(getName().getString(), entity)), false);
                 } catch (IllegalFormatException e) {
                     // catch errors users might put into the messages, to not crash other stuff
-                    ServerNetworking.LOGGER.error("Death message '{}' has errors: {}", message, e.toString());
+                    ServerNetworking.LOGGER.error("Vivecraft: Death message '{}' has errors:", message, e);
                 }
             }
         }

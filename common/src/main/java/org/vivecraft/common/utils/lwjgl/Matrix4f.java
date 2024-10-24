@@ -49,11 +49,17 @@ public class Matrix4f extends Matrix {
     }
 
     public String toString() {
-        String stringbuilder = String.valueOf(this.m00) + ' ' + this.m10 + ' ' + this.m20 + ' ' + this.m30 + '\n' +
-            this.m01 + ' ' + this.m11 + ' ' + this.m21 + ' ' + this.m31 + '\n' +
-            this.m02 + ' ' + this.m12 + ' ' + this.m22 + ' ' + this.m32 + '\n' +
-            this.m03 + ' ' + this.m13 + ' ' + this.m23 + ' ' + this.m33 + '\n';
-        return stringbuilder;
+        return """
+            Matrix4f:
+            %f %f %f %f
+            %f %f %f %f
+            %f %f %f %f
+            %f %f %f %f"""
+            .formatted(
+                this.m00, this.m10, this.m20, this.m30,
+                this.m01, this.m11, this.m21, this.m31,
+                this.m02, this.m12, this.m22, this.m32,
+                this.m03, this.m13, this.m23, this.m33);
     }
 
     public Matrix setIdentity() {

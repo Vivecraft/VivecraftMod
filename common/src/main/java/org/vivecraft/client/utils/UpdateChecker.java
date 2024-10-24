@@ -29,7 +29,7 @@ public class UpdateChecker {
     public static String newestVersion = "";
 
     public static boolean checkForUpdates() {
-        System.out.println("Checking for Vivecraft Updates");
+        VRSettings.logger.info("Vivecraft: Checking for Updates");
 
         char updateType;
         if (Xplat.isDedicatedServer()) {
@@ -54,7 +54,7 @@ public class UpdateChecker {
             conn.connect();
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                VRSettings.logger.error("Error " + conn.getResponseCode() + " fetching Vivecraft updates");
+                VRSettings.logger.error("Vivecraft: Error '{}' fetching updates", conn.getResponseCode());
                 return false;
             }
 
@@ -98,10 +98,10 @@ public class UpdateChecker {
             // no carriage returns please
             changelog = changelog.replaceAll("\\r", "");
             if (hasUpdate) {
-                VRSettings.logger.info("Vivecraft update found: " + newestVersion);
+                VRSettings.logger.info("Vivecraft update found: {}", newestVersion);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            VRSettings.logger.error("Vivecraft: fetching available vivecraft updates: ", e);
         }
         return hasUpdate;
     }
@@ -135,20 +135,20 @@ public class UpdateChecker {
                 String testString = parts[parts.length - 2];
                 // prerelease
                 if (testString.matches("a\\d+.*")) {
-                    alpha = Integer.parseInt(testString.replaceAll("\\D+", ""));
+                    this.alpha = Integer.parseInt(testString.replaceAll("\\D+", ""));
                 } else if (testString.matches("b\\d+.*")) {
-                    beta = Integer.parseInt(testString.replaceAll("\\D+", ""));
+                    this.beta = Integer.parseInt(testString.replaceAll("\\D+", ""));
                 }
                 // if the prerelease string is not just aXX or bXX it's a feature test as well and ranked slightly higher
                 if (!testString.replaceAll("^[ab]\\d+", "").isEmpty()) {
-                    featureTest = true;
+                    this.featureTest = true;
                 }
             }
             String[] ints = parts[viveVersionIndex].split("\\.");
             // remove all letters, since stupid me put a letter in one version
-            major = Integer.parseInt(ints[0].replaceAll("\\D+", ""));
-            minor = Integer.parseInt(ints[1].replaceAll("\\D+", ""));
-            patch = Integer.parseInt(ints[2].replaceAll("\\D+", ""));
+            this.major = Integer.parseInt(ints[0].replaceAll("\\D+", ""));
+            this.minor = Integer.parseInt(ints[1].replaceAll("\\D+", ""));
+            this.patch = Integer.parseInt(ints[2].replaceAll("\\D+", ""));
         }
 
         @Override
@@ -164,9 +164,9 @@ public class UpdateChecker {
 
         public boolean isVersionType(char versionType) {
             return switch (versionType) {
-                case 'r' -> beta == 0 && alpha == 0 && !featureTest;
-                case 'b' -> beta >= 0 && alpha == 0 && !featureTest;
-                case 'a' -> alpha >= 0 && !featureTest;
+                case 'r' -> this.beta == 0 && this.alpha == 0 && !this.featureTest;
+                case 'b' -> this.beta >= 0 && this.alpha == 0 && !this.featureTest;
+                case 'a' -> this.alpha >= 0 && !this.featureTest;
                 default -> false;
             };
         }
@@ -176,13 +176,13 @@ public class UpdateChecker {
             // digit flag
             // major minor patch full release beta alpha feature test
             // 00    00    00    0            00   00    0
-            return (featureTest ? 1L : 0L) +
-                alpha * 10L +
-                beta * 1000L +
-                (alpha + beta == 0 ? 10000L : 0L) +
-                patch * 1000000L +
-                minor * 100000000L +
-                major * 10000000000L;
+            return (this.featureTest ? 1L : 0L) +
+                this.alpha * 10L +
+                this.beta * 1000L +
+                (this.alpha + this.beta == 0 ? 10000L : 0L) +
+                this.patch * 1000000L +
+                this.minor * 100000000L +
+                this.major * 10000000000L;
         }
     }
 }

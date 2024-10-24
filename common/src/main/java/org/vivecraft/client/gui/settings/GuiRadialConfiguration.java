@@ -13,7 +13,7 @@ import org.vivecraft.client.gui.framework.VROptionLayout;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiRadialConfiguration extends GuiVROptionsBase {
-    static VROptionLayout[] options = new VROptionLayout[]{
+    private static final VROptionLayout[] options = new VROptionLayout[]{
         new VROptionLayout(VRSettings.VrOptions.RADIAL_MODE_HOLD, VROptionLayout.Position.POS_LEFT, 0.0F, true, "")
     };
     private String[] arr;
@@ -22,8 +22,8 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
     private GuiRadialItemsList list;
     private boolean isselectmode = false;
 
-    public GuiRadialConfiguration(Screen guiScreen) {
-        super(guiScreen);
+    public GuiRadialConfiguration(Screen lastScreen) {
+        super(lastScreen);
     }
 
     public void setKey(KeyMapping key) {
@@ -39,18 +39,19 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
         this.visibleList = null;
 
         if (!this.isShift) {
-            this.dataholder.vrSettings.vrRadialItems = ArrayUtils.clone(this.arr);
+            this.dataHolder.vrSettings.vrRadialItems = ArrayUtils.clone(this.arr);
         } else {
-            this.dataholder.vrSettings.vrRadialItemsAlt = ArrayUtils.clone(this.arr);
+            this.dataHolder.vrSettings.vrRadialItemsAlt = ArrayUtils.clone(this.arr);
         }
 
-        this.dataholder.vrSettings.saveOptions();
+        this.dataHolder.vrSettings.saveOptions();
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.radialmenu";
         this.list = new GuiRadialItemsList(this, this.minecraft);
-        if (visibleList != null) {
+        if (this.visibleList != null) {
             this.visibleList = this.list;
         }
         this.clearWidgets();
@@ -86,14 +87,14 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
 
             super.init(options, false);
 
-            int numButtons = this.dataholder.vrSettings.vrRadialButtons;
+            int numButtons = this.dataHolder.vrSettings.vrRadialButtons;
             int buttonWidthMin = 120;
             // distance from the center, with 14 buttons, move them closer together
             float dist = numButtons * (numButtons >= 14 ? 5F : 5.5F);
             int centerX = this.width / 2;
             int centerY = this.height / 2;
-            this.arr = ArrayUtils.clone(this.dataholder.vrSettings.vrRadialItems);
-            String[] altSet = ArrayUtils.clone(this.dataholder.vrSettings.vrRadialItemsAlt);
+            this.arr = ArrayUtils.clone(this.dataHolder.vrSettings.vrRadialItems);
+            String[] altSet = ArrayUtils.clone(this.dataHolder.vrSettings.vrRadialItemsAlt);
 
             if (this.isShift) {
                 this.arr = altSet;
@@ -150,12 +151,11 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
             this.addRenderableWidget(
                 new GuiVROptionButton(VRSettings.VrOptions.RADIAL_NUMBER.ordinal(),
                     centerX - 10, centerY, 20, 20,
-                    VRSettings.VrOptions.RADIAL_NUMBER, "" + this.dataholder.vrSettings.vrRadialButtons,
+                    VRSettings.VrOptions.RADIAL_NUMBER, "" + this.dataHolder.vrSettings.vrRadialButtons,
                     (p) -> {
-                        this.dataholder.vrSettings.vrRadialButtons += 2;
-                        if (dataholder.vrSettings.vrRadialButtons >
-                            VRSettings.VrOptions.RADIAL_NUMBER.getValueMax()) {
-                            this.dataholder.vrSettings.vrRadialButtons = (int) VRSettings.VrOptions.RADIAL_NUMBER.getValueMin();
+                        this.dataHolder.vrSettings.vrRadialButtons += 2;
+                        if (this.dataHolder.vrSettings.vrRadialButtons > VRSettings.VrOptions.RADIAL_NUMBER.getValueMax()) {
+                            this.dataHolder.vrSettings.vrRadialButtons = (int) VRSettings.VrOptions.RADIAL_NUMBER.getValueMin();
                         }
                         this.reinit = true;
                     }));
@@ -163,12 +163,14 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
         }
     }
 
+    @Override
     protected void loadDefaults() {
         super.loadDefaults();
-        this.settings.vrRadialItems = this.settings.getRadialItemsDefault();
-        this.settings.vrRadialItemsAlt = this.settings.getRadialItemsAltDefault();
+        this.vrSettings.vrRadialItems = this.vrSettings.getRadialItemsDefault();
+        this.vrSettings.vrRadialItemsAlt = this.vrSettings.getRadialItemsAltDefault();
     }
 
+    @Override
     protected boolean onDoneClicked() {
         if (this.isselectmode) {
             this.isselectmode = false;
@@ -180,21 +182,22 @@ public class GuiRadialConfiguration extends GuiVROptionsBase {
         }
     }
 
-    public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
-        super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         if (this.visibleList == null) {
             guiGraphics.drawCenteredString(this.minecraft.font,
                 Component.translatable("vivecraft.messages.radialmenubind.1"), this.width / 2, this.height - 50,
-                5635925);
+                0x55FF55);
 
             if (this.isShift) {
                 guiGraphics.drawCenteredString(this.minecraft.font,
                     Component.translatable("vivecraft.messages.radialmenubind.2"), this.width / 2, this.height - 36,
-                    13777015);
+                    0xD23877);
                 guiGraphics.drawCenteredString(this.minecraft.font,
                     Component.translatable("vivecraft.messages.radialmenubind.3"), this.width / 2, this.height - 22,
-                    13777015);
+                    0xD23877);
             }
         }
     }

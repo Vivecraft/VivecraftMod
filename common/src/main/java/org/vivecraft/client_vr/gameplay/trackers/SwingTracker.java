@@ -34,54 +34,52 @@ import java.util.List;
 public class SwingTracker extends Tracker {
     private final Vec3[] lastWeaponEndAir = new Vec3[]{new Vec3(0.0D, 0.0D, 0.0D), new Vec3(0.0D, 0.0D, 0.0D)};
     private final boolean[] lastWeaponSolid = new boolean[2];
-    public Vec3[] miningPoint = new Vec3[2];
-    public Vec3[] attackingPoint = new Vec3[2];
-    public Vec3History[] tipHistory = new Vec3History[]{new Vec3History(), new Vec3History()};
-    public boolean[] canact = new boolean[2];
+    public final Vec3[] miningPoint = new Vec3[2];
+    public final Vec3[] attackingPoint = new Vec3[2];
+    public final Vec3History[] tipHistory = new Vec3History[]{new Vec3History(), new Vec3History()};
+    public boolean[] canAct = new boolean[2];
     public int disableSwing = 3;
-    Vec3 forward = new Vec3(0.0D, 0.0D, -1.0D);
-    double speedthresh = 3.0D;
+    private double speedThresh = 3.0D;
+    private final Vec3 forward = new Vec3(0.0D, 0.0D, -1.0D);
 
     public SwingTracker(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh);
     }
 
-    public boolean isActive(LocalPlayer p) {
+    @Override
+    public boolean isActive(LocalPlayer player) {
         if (this.disableSwing > 0) {
-            --this.disableSwing;
+            this.disableSwing--;
             return false;
         } else if (this.mc.gameMode == null) {
             return false;
-        } else if (p == null) {
+        } else if (player == null) {
             return false;
-        } else if (!p.isAlive()) {
+        } else if (!player.isAlive()) {
             return false;
-        } else if (p.isSleeping()) {
+        } else if (player.isSleeping()) {
             return false;
+        } else if (this.mc.screen != null) {
+            return false;
+        } else if (this.dh.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF) {
+            return false;
+        } else if (this.dh.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO) {
+            return !player.isCreative();
+        } else if (this.dh.vrSettings.seated) {
+            return false;
+        } else if (this.dh.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && player.zza > 0.0F) {
+            return false; // don't hit things while RIPing.
+        } else if (player.isBlocking()) {
+            return false; //don't hit things while blocking.
         } else {
-            Minecraft minecraft = Minecraft.getInstance();
-            ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-
-            if (minecraft.screen != null) {
-                return false;
-            } else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.OFF) {
-                return false;
-            } else if (dataholder.vrSettings.weaponCollision == VRSettings.WeaponCollision.AUTO) {
-                return !p.isCreative();
-            } else if (dataholder.vrSettings.seated) {
-                return false;
-            } else {
-                if (dataholder.vrSettings.vrFreeMoveMode == VRSettings.FreeMove.RUN_IN_PLACE && p.zza > 0.0F) {
-                    return false; // don't hit things while RIPing.
-                } else if (p.isBlocking()) {
-                    return false; //don't hit things while blocking.
-                } else {
-                    return !dataholder.jumpTracker.isjumping();
-                }
-            }
+            return !this.dh.jumpTracker.isjumping();
         }
     }
 
+    /**
+     * @param item Item to check
+     * @return if the given {@code item} is a Tool
+     */
     public static boolean isTool(Item item) {
         return item instanceof DiggerItem ||
             item instanceof ArrowItem ||
@@ -100,11 +98,12 @@ public class SwingTracker extends Tracker {
             item.getDefaultInstance().is(ItemTags.VIVECRAFT_TOOLS);
     }
 
+    @Override
     public void doProcess(LocalPlayer player) {
-        this.speedthresh = 3.0D;
+        this.speedThresh = 3.0D;
 
         if (player.isCreative()) {
-            this.speedthresh *= 1.5D;
+            this.speedThresh *= 1.5D;
         }
 
         this.mc.getProfiler().push("updateSwingAttack");
@@ -131,7 +130,7 @@ public class SwingTracker extends Tracker {
                 float entityReachAdd;
 
                 double playerEntityReach = Xplat.getItemEntityReach(3.0, itemstack, c == 0 ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
-                if (Xplat.isModLoaded("bettercombat")) {
+                if (BetterCombatHelper.isLoaded()) {
                     // better combat overrides the player reach
                     playerEntityReach = BetterCombatHelper.getItemRange(playerEntityReach, itemstack);
                 }
@@ -160,17 +159,17 @@ public class SwingTracker extends Tracker {
 
                 this.miningPoint[c] = handPos.add(handDirection.scale(weaponLength));
 
-                //do speed calc in actual room coords
+                // do speed calc in actual room coords
                 Vec3 tip = this.dh.vrPlayer.vrdata_room_pre.getController(c).getPosition().add(this.dh.vrPlayer.vrdata_room_pre.getHand(c).getCustomVector(this.forward).scale(0.3D));
                 this.tipHistory[c].add(tip);
 
                 // at a 0.3m offset on index controllers a speed of 3m/s is an intended smack, 7 m/s is about as high as your arm can go.
                 float speed = (float) this.tipHistory[c].averageSpeed(0.33D);
                 boolean inAnEntity = false;
-                this.canact[c] = (double) speed > this.speedthresh && !this.lastWeaponSolid[c];
+                this.canAct[c] = (double) speed > this.speedThresh && !this.lastWeaponSolid[c];
 
-                //Check EntityCollisions first
-                boolean entityAct = this.canact[c];
+                // Check EntityCollisions first
+                boolean entityAct = this.canAct[c];
 
                 // no hitting around corners, to not trigger anticheat
                 if (entityAct) {
@@ -201,7 +200,7 @@ public class SwingTracker extends Tracker {
                 for (Entity entity : mobs) {
                     if (entity.isPickable() && entity != this.mc.getCameraEntity().getVehicle()) {
                         if (entityAct) {
-                            //Minecraft.getInstance().physicalGuiManager.preClickAction();
+                            // Minecraft.getInstance().physicalGuiManager.preClickAction();
 
                             if (!EpicFightHelper.isLoaded() || !EpicFightHelper.attack()) {
                                 // only attack if epic fight didn't trigger
@@ -230,7 +229,7 @@ public class SwingTracker extends Tracker {
 
                 // block check
                 // don't hit blocks with swords or same time as hitting entity
-                this.canact[c] = this.canact[c] && (!isSword || mineableByItem) && !inAnEntity;
+                this.canAct[c] = this.canAct[c] && (!isSword || mineableByItem) && !inAnEntity;
 
                 // every time end of weapon enters a solid for the first time, trace from our previous air position
                 // and damage the block it collides with...
@@ -247,17 +246,21 @@ public class SwingTracker extends Tracker {
                             blockstate.getBlock() instanceof VineBlock ||
                             blockstate.is(BlockTags.VIVECRAFT_CLIMBABLE));
 
-                    if (blockHit.getType() == HitResult.Type.BLOCK && sameBlock && this.canact[c] && !protectedBlock) {
+                    if (blockHit.getType() == HitResult.Type.BLOCK && sameBlock && this.canAct[c] && !protectedBlock) {
                         int totalHits = 3;
 
                         // roomscale hoe interaction
-                        if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES) || itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) && (
-                            blockstate.getBlock() instanceof CropBlock
-                                || blockstate.getBlock() instanceof StemBlock
-                                || blockstate.getBlock() instanceof AttachedStemBlock
-                                || blockstate.is(BlockTags.VIVECRAFT_CROPS)
+                        if ((item instanceof HoeItem || itemstack.is(ItemTags.VIVECRAFT_HOES) || itemstack.is(ItemTags.VIVECRAFT_SCYTHES)) &&
+                            (blockstate.getBlock() instanceof CropBlock ||
+                                blockstate.getBlock() instanceof StemBlock ||
+                                blockstate.getBlock() instanceof AttachedStemBlock ||
+                                blockstate.is(BlockTags.VIVECRAFT_CROPS) ||
                                 // check if the item can use the block
-                                || item.useOn(new UseOnContext(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit)).shouldSwing())) {
+                                item.useOn(new UseOnContext(player,
+                                    c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND,
+                                    blockHit)).shouldSwing()
+                            ))
+                        {
                             // don't try to break crops with hoes
                             // actually use the item on the block
                             boolean useSuccessful = this.mc.gameMode.useItemOn(player, c == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, blockHit).shouldSwing();
@@ -279,17 +282,17 @@ public class SwingTracker extends Tracker {
                         // roomscale mining
                         else {
                             // faster swings do more damage
-                            totalHits = (int) ((double) totalHits + Math.min((double) speed - this.speedthresh, 4.0D));
+                            totalHits = (int) ((double) totalHits + Math.min((double) speed - this.speedThresh, 4.0D));
                             //this.mc.physicalGuiManager.preClickAction();
 
                             // this will either destroy the block if in creative or set it as the current block.
                             // does nothing in survival if you are already hitting this block.
                             this.mc.gameMode.startDestroyBlock(blockHit.getBlockPos(), blockHit.getDirection());
 
-                            //seems to be the only way to tell it didn't instabreak.
+                            // seems to be the only way to tell it didn't instabreak.
                             if (this.getIsHittingBlock()) {
-                                for (int hit = 0; hit < totalHits; ++hit) {
-                                    //send multiple ticks worth of 'holding left click' to it.
+                                for (int hit = 0; hit < totalHits; hit++) {
+                                    // send multiple ticks worth of 'holding left click' to it.
                                     if (this.mc.gameMode.continueDestroyBlock(blockHit.getBlockPos(), blockHit.getDirection())) {
                                         this.mc.particleEngine.crack(blockHit.getBlockPos(), blockHit.getDirection());
                                     }
@@ -297,12 +300,12 @@ public class SwingTracker extends Tracker {
                                     this.clearBlockHitDelay();
 
                                     if (!this.getIsHittingBlock()) {
-                                        //seems to be the only way to tell if it broke.
+                                        // seems to be the only way to tell if it broke.
                                         break;
                                     }
                                 }
 
-                                Minecraft.getInstance().gameMode.destroyDelay = 0;
+                                this.mc.gameMode.destroyDelay = 0;
                             }
 
                             this.dh.vrPlayer.blockDust(blockHit.getLocation().x, blockHit.getLocation().y, blockHit.getLocation().z, 3 * totalHits, blockpos, blockstate, 0.6F, 1.0F);
@@ -322,7 +325,7 @@ public class SwingTracker extends Tracker {
     }
 
     private boolean getIsHittingBlock() {
-        return Minecraft.getInstance().gameMode.isDestroying();
+        return this.mc.gameMode.isDestroying();
     }
 
     private void clearBlockHitDelay() {
@@ -331,31 +334,40 @@ public class SwingTracker extends Tracker {
         // Minecraft.getInstance().gameMode.blockBreakingCooldown = 1;
     }
 
-    public Vec3 constrain(Vec3 start, Vec3 end) {
+    /**
+     * does a raytrace to find the closest block
+     * @param start start of raytrace
+     * @param end end of raytrace
+     * @return hit position, if a Block was hit, or {@code end} otherwise
+     */
+    private Vec3 constrain(Vec3 start, Vec3 end) {
         BlockHitResult blockhitresult = this.mc.level.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.mc.player));
         return blockhitresult.getType() == HitResult.Type.BLOCK ? blockhitresult.getLocation() : end;
     }
 
-    public static float getItemFade(LocalPlayer p, ItemStack is) {
-        float fade = p.getAttackStrengthScale(0.0F) * 0.75F + 0.25F;
+    /**
+     *
+     * @param player Player that is holding the item
+     * @param itemStack held item
+     * @return the transparency for held items to indicate attack power or sneaking.
+     */
+    public static float getItemFade(LocalPlayer player, ItemStack itemStack) {
+        float fade = player.getAttackStrengthScale(0.0F) * 0.75F + 0.25F;
 
-        if (p.isShiftKeyDown()) {
+        if (player.isShiftKeyDown()) {
             fade = 0.75F;
         }
 
-        boolean[] aboolean = ClientDataHolderVR.getInstance().swingTracker.lastWeaponSolid;
-        Minecraft.getInstance().getItemRenderer();
-
-        if (aboolean[ClientDataHolderVR.ismainhand ? 0 : 1]) {
+        if (ClientDataHolderVR.getInstance().swingTracker.lastWeaponSolid[ClientDataHolderVR.ismainhand ? 0 : 1]) {
             fade -= 0.25F;
         }
 
-        if (is != ItemStack.EMPTY) {
-            if (p.isBlocking() && p.getUseItem() != is) {
+        if (itemStack != ItemStack.EMPTY) {
+            if (player.isBlocking() && player.getUseItem() != itemStack) {
                 fade -= 0.25F;
             }
 
-            if (is.getItem() == Items.SHIELD && !p.isBlocking()) {
+            if (itemStack.getItem() == Items.SHIELD && !player.isBlocking()) {
                 fade -= 0.25F;
             }
         }

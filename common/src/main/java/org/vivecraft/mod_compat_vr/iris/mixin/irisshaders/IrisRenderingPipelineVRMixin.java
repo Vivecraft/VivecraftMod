@@ -1,74 +1,83 @@
 package org.vivecraft.mod_compat_vr.iris.mixin.irisshaders;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.irisshaders.iris.Iris;
-import net.irisshaders.iris.gl.program.ProgramImages;
-import net.irisshaders.iris.gl.program.ProgramSamplers;
 import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
 import net.irisshaders.iris.shaderpack.programs.ProgramSet;
-import net.irisshaders.iris.shaderpack.properties.PackShadowDirectives;
 import net.irisshaders.iris.shadows.ShadowRenderTargets;
-import net.irisshaders.iris.shadows.ShadowRenderer;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.Shadow;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 import org.vivecraft.mod_compat_vr.iris.extensions.PipelineManagerExtension;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 @Pseudo
 @Mixin(IrisRenderingPipeline.class)
 public class IrisRenderingPipelineVRMixin {
+
     @Shadow(remap = false)
     private ShadowRenderTargets shadowRenderTargets;
 
+    // make this mutable, or WrapOperation doesn't work
     @Final
+    @Mutable
     @Shadow(remap = false)
-    private ShadowRenderer shadowRenderer;
+    private Supplier<ShadowRenderTargets> shadowTargetsSupplier;
 
     // store shadowTargets of the first pipeline
     @Inject(method = "<init>", at = @At("TAIL"), remap = false)
     private void vivecraft$storeShadowTargets(ProgramSet par1, CallbackInfo ci) {
         if (((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() == null) {
-            ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$setShadowRenderTargets(shadowRenderTargets);
+            ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$setShadowRenderTargets(this.shadowRenderTargets);
         }
     }
 
-    // return main shadowRenderTargets, instead of own
-    @Group(name = "one shadowRenderTargets", min = 1, max = 1)
-    @Inject(target = @Desc(value = "lambda$new$4", owner = IrisRenderingPipeline.class, ret = ShadowRenderTargets.class, args = PackShadowDirectives.class), at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
-    private void vivecraft$onlyOneShadowTargetSupplier160(CallbackInfoReturnable<ShadowRenderTargets> cir) {
-        if (!RenderPassType.isVanilla() && ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null) {
-            cir.setReturnValue((ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets());
-        }
+    @WrapOperation(method = "<init>", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/irisshaders/iris/pipeline/IrisRenderingPipeline;shadowTargetsSupplier:Ljava/util/function/Supplier;", ordinal = 0), remap = false)
+    private void vivecraft$onlyOneShadowRenderTarget(
+        IrisRenderingPipeline instance, Supplier<ShadowRenderTargets> value, Operation<Void> original)
+    {
+        Supplier<ShadowRenderTargets> wrappedSupplier = () -> {
+            if (!RenderPassType.isVanilla() && this.shadowRenderTargets == null && ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null) {
+                return (ShadowRenderTargets) ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets();
+            } else {
+                return value.get();
+            }
+        };
+        original.call(instance, wrappedSupplier);
     }
 
-    @Inject(method = "shouldDisableVanillaEntityShadows()Z", at = @At("HEAD"), cancellable = true, remap = false)
-    private void vivecraft$shouldDisableEntityShadows(CallbackInfoReturnable<Boolean> cir) {
-        if (!RenderPassType.isVanilla() && (shadowRenderer != null || ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null)) {
-            cir.setReturnValue(true);
-        }
+    @ModifyReturnValue(method = "shouldDisableVanillaEntityShadows()Z", at = @At("RETURN"), remap = false)
+    private boolean vivecraft$shouldDisableEntityShadows(boolean noEntityShadows) {
+        return noEntityShadows || (!RenderPassType.isVanilla() &&
+            ((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets() != null
+        );
     }
 
-    // needed because shadowRenderTargets never gets set for sub pipelines
-    // this should give the own shadow targets, for the main pipeline and renderpass.LEFT,
-    // and for all other piplines the one from renderpass.LEFT
-    @Group(name = "reroute shadowRenderTargets", min = 4, max = 4)
-    @Redirect(target = {
-        @Desc(value = "lambda$new$6", owner = IrisRenderingPipeline.class, ret = ProgramSamplers.class, args = {java.util.function.Supplier.class, int.class}),
-        @Desc(value = "lambda$new$7", owner = IrisRenderingPipeline.class, ret = ProgramImages.class, args = {java.util.function.Supplier.class, int.class}),
-        @Desc(value = "lambda$new$9", owner = IrisRenderingPipeline.class, ret = ProgramSamplers.class, args = int.class),
-        @Desc(value = "lambda$new$11", owner = IrisRenderingPipeline.class, ret = ProgramImages.class, args = int.class)
+    /**
+     * needed because shadowRenderTargets never gets set for sub pipelines
+     * this should give the own shadow targets, for the main pipeline and the first RenderPass,
+     * and for all other pipelines the one from the first RenderPass
+     * no min, because iris 1.8 only has 2, and those might also get removed, and are not needed
+     */
+    @Group(name = "reroute shadowRenderTargets", max = 4)
+    @ModifyArg(method = {
+        "lambda$new$6",
+        "lambda$new$7",
+        "lambda$new$9",
+        "lambda$new$11"
     }, at = @At(value = "INVOKE", target = "Ljava/util/Objects;requireNonNull(Ljava/lang/Object;)Ljava/lang/Object;"), remap = false, expect = 0)
-    private Object vivecraft$rerouteShadowTarget160(Object obj) {
-        if (!RenderPassType.isVanilla()) {
-            return Objects.requireNonNull(Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj));
+    private Object vivecraft$rerouteShadowTarget(Object obj) {
+        // make sure we only change ShadowRenderTargets, since this might also inject into other lambdas
+        if (!RenderPassType.isVanilla() && obj instanceof ShadowRenderTargets || obj == null) {
+            return Objects.requireNonNullElse(((PipelineManagerExtension) Iris.getPipelineManager()).vivecraft$getShadowRenderTargets(), obj);
         } else {
-            return Objects.requireNonNull(obj);
+            return obj;
         }
     }
 }

@@ -15,52 +15,53 @@ public class ModelCuboidMixin implements ModelCuboidExtension {
 
     @Override
     public float[][] vivecraft$getOverrides() {
-        return vivecraft$overrides;
+        return this.vivecraft$overrides;
     }
 
     @Override
     public void vivecraft$addOverrides(int overrideFaceIndex, int sourceFaceIndex, float[][] source) {
-        if (vivecraft$overrides == null) {
-            vivecraft$overrides = new float[6][5];
+        if (this.vivecraft$overrides == null) {
+            this.vivecraft$overrides = new float[6][5];
         }
-        vivecraft$overrides[overrideFaceIndex][0] = 1F;
+        this.vivecraft$overrides[overrideFaceIndex][0] = 1F;
         // order taken from me.jellysquid.mods.sodium.client.render.immediate.model.EntityRenderer.prepareVertices
         switch (sourceFaceIndex) {
-            default -> {
-                vivecraft$overrides[overrideFaceIndex][1] = source[0][1];
-                vivecraft$overrides[overrideFaceIndex][2] = source[1][0];
-                vivecraft$overrides[overrideFaceIndex][3] = source[0][2];
-                vivecraft$overrides[overrideFaceIndex][4] = source[1][1];
-            }
             case 1 -> {
-                vivecraft$overrides[overrideFaceIndex][1] = source[0][2];
-                vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
-                vivecraft$overrides[overrideFaceIndex][3] = source[0][3];
-                vivecraft$overrides[overrideFaceIndex][4] = source[1][0];
+                this.vivecraft$overrides[overrideFaceIndex][1] = source[0][2];
+                this.vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
+                this.vivecraft$overrides[overrideFaceIndex][3] = source[0][3];
+                this.vivecraft$overrides[overrideFaceIndex][4] = source[1][0];
             }
             case 2 -> {
-                vivecraft$overrides[overrideFaceIndex][1] = source[0][1];
-                vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
-                vivecraft$overrides[overrideFaceIndex][3] = source[0][2];
-                vivecraft$overrides[overrideFaceIndex][4] = source[1][2];
+                this.vivecraft$overrides[overrideFaceIndex][1] = source[0][1];
+                this.vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
+                this.vivecraft$overrides[overrideFaceIndex][3] = source[0][2];
+                this.vivecraft$overrides[overrideFaceIndex][4] = source[1][2];
             }
             case 3 -> {
-                vivecraft$overrides[overrideFaceIndex][1] = source[0][4];
-                vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
-                vivecraft$overrides[overrideFaceIndex][3] = source[0][5];
-                vivecraft$overrides[overrideFaceIndex][4] = source[1][2];
+                this.vivecraft$overrides[overrideFaceIndex][1] = source[0][4];
+                this.vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
+                this.vivecraft$overrides[overrideFaceIndex][3] = source[0][5];
+                this.vivecraft$overrides[overrideFaceIndex][4] = source[1][2];
             }
             case 4 -> {
-                vivecraft$overrides[overrideFaceIndex][1] = source[0][2];
-                vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
-                vivecraft$overrides[overrideFaceIndex][3] = source[0][4];
-                vivecraft$overrides[overrideFaceIndex][4] = source[1][2];
+                this.vivecraft$overrides[overrideFaceIndex][1] = source[0][2];
+                this.vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
+                this.vivecraft$overrides[overrideFaceIndex][3] = source[0][4];
+                this.vivecraft$overrides[overrideFaceIndex][4] = source[1][2];
             }
             case 5 -> {
-                vivecraft$overrides[overrideFaceIndex][1] = source[0][0];
-                vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
-                vivecraft$overrides[overrideFaceIndex][3] = source[0][1];
-                vivecraft$overrides[overrideFaceIndex][4] = source[1][2];
+                this.vivecraft$overrides[overrideFaceIndex][1] = source[0][0];
+                this.vivecraft$overrides[overrideFaceIndex][2] = source[1][1];
+                this.vivecraft$overrides[overrideFaceIndex][3] = source[0][1];
+                this.vivecraft$overrides[overrideFaceIndex][4] = source[1][2];
+            }
+            // 0 case
+            default -> {
+                this.vivecraft$overrides[overrideFaceIndex][1] = source[0][1];
+                this.vivecraft$overrides[overrideFaceIndex][2] = source[1][0];
+                this.vivecraft$overrides[overrideFaceIndex][3] = source[0][2];
+                this.vivecraft$overrides[overrideFaceIndex][4] = source[1][1];
             }
         }
     }
