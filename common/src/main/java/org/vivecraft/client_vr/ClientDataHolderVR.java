@@ -62,8 +62,8 @@ public class ClientDataHolderVR {
     public final TeleportTracker teleportTracker;
     public final TelescopeTracker telescopeTracker;
     public final VehicleTracker vehicleTracker;
+    public final HapticTracker hapticTracker = createTracker(HapticTracker::new);
 
-    public HapticTracker hapticTracker = new HapticTracker(Minecraft.getInstance(),this);
     public VRSettings vrSettings;
     public boolean grabScreenShot = false;
     public Screen cachedScreen = null;

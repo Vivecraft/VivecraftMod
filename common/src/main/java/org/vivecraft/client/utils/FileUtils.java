@@ -1,5 +1,6 @@
 package org.vivecraft.client.utils;
 
+import com.google.common.base.Charsets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -50,6 +51,29 @@ public class FileUtils {
         } catch (Exception exception) {
             handleAssetException(exception, sourcePath, required);
         }
+    }
+
+    /**
+     * loads contents of an asset to a String
+     *
+     * @param sourcePath Path to the source file inside the mods assets
+     * @param required   if set and an error occurs, it will not be caught
+     * @return contents of the asset, or {@code null} if there was an error and {@code required} is false
+     */
+    public static String loadAssetToString(String sourcePath, boolean required) {
+        try {
+            Optional<Resource> resource = Minecraft.getInstance().getResourceManager()
+                .getResource(ResourceLocation.fromNamespaceAndPath("vivecraft", sourcePath));
+
+            if (resource.isPresent()) {
+                try (InputStream is = resource.get().open()) {
+                    return IOUtils.toString(is, Charsets.UTF_8);
+                }
+            }
+        } catch (Exception exception) {
+            handleAssetException(exception, sourcePath, required);
+        }
+        return null;
     }
 
     /**

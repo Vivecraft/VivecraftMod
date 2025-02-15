@@ -3,38 +3,37 @@ package org.vivecraft.client_vr.gameplay.trackers;
 import com.bhaptics.haptic.models.PositionType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.network.protocol.game.ClientboundExplodePacket;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.bodylink.Haptics;
 import org.vivecraft.client_vr.bodylink.RiggedBody;
-import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client.utils.Debug;
-import org.vivecraft.common.utils.math.Axis;
-import org.vivecraft.common.utils.math.Quaternion;
+import org.vivecraft.common.utils.MathUtils;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
 
-public class HapticTracker extends Tracker{
-    ArrayList<HapticsModule> modules = new ArrayList<>();
+public class HapticTracker extends Tracker {
 
-    float lastHealth;
-    Random random = new Random();
-    int hungerThreshold = 15;
+    private static final int HUNGER_THRESHOLD = 15;
+    private static final double MAX_EXPLOSION_DIST = 5;
+
+    private final Random random = new Random();
+    private final ArrayList<HapticsModule> modules = new ArrayList<>();
+
+    private float lastHealth;
 
     public HapticTracker(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh);
-        modules.add(new RainModule());
+        this.modules.add(new RainModule());
     }
 
     @Override
@@ -53,22 +52,23 @@ public class HapticTracker extends Tracker{
         Haptics.setLoopState(Haptics.Animations.fire, player.isOnFire());
         Haptics.setLoopState(Haptics.Animations.potion_positive, hasPotionPositive(player));
         Haptics.setLoopState(Haptics.Animations.potion_negative, hasPotionNegative(player));
-        Haptics.setLoopState(Haptics.Animations.low_health, player.getHealth() < thresholdLowHealth && !(player.getHealth() < thresholdCriticalHealth) );
-        Haptics.setLoopState(Haptics.Animations.critical_health, player.getHealth() < thresholdCriticalHealth );
+        Haptics.setLoopState(Haptics.Animations.low_health,
+            player.getHealth() < thresholdLowHealth && !(player.getHealth() < thresholdCriticalHealth));
+        Haptics.setLoopState(Haptics.Animations.critical_health, player.getHealth() < thresholdCriticalHealth);
         Haptics.setLoopState(Haptics.Animations.rain, isInRain(player));
 
-        for (HapticsModule h: modules) {
-            if(h.enabled){
-                h.tick(player);
+        for (HapticsModule module : this.modules) {
+            if (module.enabled) {
+                module.tick(player);
             }
         }
 
-        if(player.getHealth() != lastHealth){
-            float damage = lastHealth - player.getHealth();
-            if(damage > 0){
-                handleHit(null,damage);
+        if (player.getHealth() != this.lastHealth) {
+            float damage = this.lastHealth - player.getHealth();
+            if (damage > 0) {
+                handleHit(null, damage);
             }
-            lastHealth = player.getHealth();
+            this.lastHealth = player.getHealth();
         }
 
         doHunger(player);
@@ -77,137 +77,135 @@ public class HapticTracker extends Tracker{
     }
 
 
-    void doHunger(LocalPlayer player){
-        int food=player.getFoodData().getFoodLevel();
-        if(food < hungerThreshold){
+    private void doHunger(LocalPlayer player) {
+        int food = player.getFoodData().getFoodLevel();
+        if (food < HUNGER_THRESHOLD) {
             float foodPerc = (float) food / 20;
-            if(random.nextInt(20 * 3 + (int)(foodPerc * 30 * 20) ) == 0){
-                Haptics.getAnimation(Haptics.Animations.hunger).playSingle(false,null);
+            if (this.random.nextInt(20 * 3 + (int) (foodPerc * 30 * 20)) == 0) {
+                Haptics.getAnimation(Haptics.Animations.hunger).playSingle(false, null);
             }
         }
     }
 
 
-    boolean hasPotionPositive(LocalPlayer player){
-        for( MobEffectInstance effect : player.getActiveEffects()){
-            if( effect.getEffect().isBeneficial()
-                && !effect.isAmbient() ){
-                return true;
-            }
-        }
-        return false;
-    }
-    boolean hasPotionNegative(LocalPlayer player){
-        for( MobEffectInstance effect : player.getActiveEffects()){
-            if( effect.getEffect().getCategory() == MobEffectCategory.HARMFUL
-                    && !effect.isAmbient() ){
+    private boolean hasPotionPositive(LocalPlayer player) {
+        for (MobEffectInstance effect : player.getActiveEffects()) {
+            if (effect.getEffect().value().isBeneficial()
+                && !effect.isAmbient())
+            {
                 return true;
             }
         }
         return false;
     }
 
-    boolean isInRain(LocalPlayer player){
+    private boolean hasPotionNegative(LocalPlayer player) {
+        return player.getActiveEffects().stream().anyMatch(
+            effect -> effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL && !effect.isAmbient());
+    }
+
+    private boolean isInRain(LocalPlayer player) {
         BlockPos blockpos = player.blockPosition();
-        return player.clientLevel.isRainingAt(blockpos) || player.clientLevel.isRainingAt(new BlockPos(blockpos.getX(), (int)player.getBoundingBox().maxY, blockpos.getZ()));
+        return player.clientLevel.isRainingAt(blockpos) || player.clientLevel.isRainingAt(
+            new BlockPos(blockpos.getX(), (int) player.getBoundingBox().maxY, blockpos.getZ()));
     }
 
-    public void handleExplode(ClientboundExplodePacket packetIn) {
-        double maxExplosionDist = 5;
-        Vec3 exposionPos = new Vec3(packetIn.getX(),packetIn.getY(),packetIn.getZ());
-        double explosionDist = exposionPos.subtract(mc.player.position()).length();
-        if(explosionDist < maxExplosionDist){
-            double distFactor = 1.0 - (explosionDist / maxExplosionDist);
-            Haptics.getAnimation(Haptics.Animations.explosion).playSingle(true,null, distFactor);
+    public void handleExplode(Vec3 explosionPos) {
+        double explosionDist = explosionPos.subtract(this.mc.player.position()).length();
+        if (explosionDist < MAX_EXPLOSION_DIST) {
+            double distFactor = 1.0 - (explosionDist / MAX_EXPLOSION_DIST);
+            Haptics.getAnimation(Haptics.Animations.explosion).playSingle(true, null, distFactor);
         }
     }
 
-    public void handleHit(DamageSource damageSrc, float damageAmount){
+    public void handleHit(DamageSource damageSrc, float damageAmount) {
         //TODO Always generic. Need custom server packet.
-        Vec3 dmgVec = new Vec3(1,0,1).multiply(mc.player.getDeltaMovement().scale(-1.0)).normalize();
-        dmgVec=new Quaternion(Axis.YAW,mc.player.yHeadRot +180).multiply(dmgVec);
+        // TODO this is meant to get the hit direction from the knockback, but knockback is usually sent after health updates so this doesn't really work
+        Vector3f dmgVec = this.mc.player.getDeltaMovement().toVector3f()
+            .mul(-1F)
+            .mul(1, 0, 1) // only horizontal direction
+            .normalize();
+        if (Float.isNaN(dmgVec.x)) {
+            // happens when standing still, just do forward damage then
+            dmgVec.set(0, 0, 1);
+        }
+        dmgVec.rotateY(this.mc.player.yHeadRot * Mth.DEG_TO_RAD + Mth.PI);
 
-        Haptics.getAnimation(Haptics.Animations.generic_hit).playSingle(true,dmgVec);
+        Haptics.getAnimation(Haptics.Animations.generic_hit).playSingle(true, dmgVec);
     }
 
-    public void handleEat(ItemStack itemStack){
-        if(itemStack.isEdible() && itemStack.getItem().getFoodProperties() != null){
-                if(itemStack.getItem().getFoodProperties().getEffects().isEmpty()) {
-                    Haptics.getAnimation(Haptics.Animations.consume).playSingle(true,null);
-                }else{
-                    Haptics.getAnimation(Haptics.Animations.consume_effect).playSingle(true,null);
-                }
+    public void handleEat(ItemStack itemStack) {
+        if (itemStack.get(DataComponents.FOOD) != null && itemStack.get(DataComponents.CONSUMABLE) != null) {
+            if (itemStack.get(DataComponents.CONSUMABLE).onConsumeEffects().isEmpty()) {
+                Haptics.getAnimation(Haptics.Animations.consume).playSingle(true, null);
+            } else {
+                Haptics.getAnimation(Haptics.Animations.consume_effect).playSingle(true, null);
+            }
         }
     }
 
-
-
-    abstract static class HapticsModule{
+    private abstract static class HapticsModule {
         boolean enabled = false;
-        abstract void tick(LocalPlayer player);
 
+        abstract void tick(LocalPlayer player);
     }
 
-    class RainModule extends HapticsModule{
+    private static class RainModule extends HapticsModule {
         // Range: 0 to 1
-        double minAngle = 0;
-        double dropChanceThreshold = 0.2;
+        private static final double MIN_ANGLE = 0;
+        private static final double DROP_CHANCE_THRESHOLD = 0.2;
 
 
         Random random = new Random();
 
         public RainModule() {
             super();
-            enabled = false;
+            this.enabled = false;
         }
 
         @Override
         void tick(LocalPlayer player) {
 
-            if (!player.clientLevel.isRaining())
-                return;
+            if (!player.clientLevel.isRaining()) return;
 
-            boolean isSnow = player.clientLevel.getBiome(player.blockPosition()).value().coldEnoughToSnow(player.blockPosition());
+            boolean isSnow = player.clientLevel.getBiome(player.blockPosition()).value()
+                .coldEnoughToSnow(player.blockPosition(), player.level().getSeaLevel());
 
             // Terminal Velocity of rain in m/s
-            Vec3 rainFall = new Vec3(0,-9,0);
+            Vec3 rainFall = new Vec3(0, -9, 0);
 
             // Add inverse player motion for relative motion
-            rainFall = rainFall.subtract(player.getDeltaMovement());
-
-            Vec3 rainDir = rainFall.normalize();
+            Vector3f rainDir = MathUtils.subtractToVector3f(rainFall, player.getDeltaMovement()).normalize().mul(-1);
 
             ArrayList<RiggedBody.HapticPoint> points = RiggedBody.getInstance().getHapticPoints(PositionType.All);
 
             //Debug d = Debug .get("hapticsrain");
 
-            for(RiggedBody.HapticPoint p : points){
+            for (RiggedBody.HapticPoint p : points) {
                 // Check Occlusion
-                if(!player.clientLevel.isRainingAt(player.blockPosition())){
+                if (!player.clientLevel.isRainingAt(player.blockPosition())) {
                     continue;
                 }
 
-                Vec3 normal = p.getNormal(true);
+                Vector3f normal = p.getNormal(true);
 
                 //d.drawVector("vec:"+p.hashCode(),p.getPosWorld(player), normal, Color.red);
 
-                double exposure = normal.dot(rainDir.reverse());
+                double exposure = normal.dot(rainDir);
 
-                if( exposure < minAngle ){
+                if (exposure < MIN_ANGLE) {
                     // cull backface
                     exposure = 0;
                 }
 
-                double snowFactor = isSnow? 2.0 : 1.0;
+                double snowFactor = isSnow ? 2.0 : 1.0;
 
-                if(Math.abs(random.nextGaussian()) * exposure > dropChanceThreshold * snowFactor) {
+                if (Math.abs(this.random.nextGaussian()) * exposure > DROP_CHANCE_THRESHOLD * snowFactor) {
                     int intensity = 10; // TODO Randomize
                     int duration = 10;
                     p.motor.dot(intensity, duration);
                 }
             }
         }
-
-
     }
 }

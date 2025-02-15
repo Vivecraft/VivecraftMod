@@ -38,7 +38,7 @@ subprojects {
         implementation("com.illposed.osc:javaosc-core:0.9")
 
         // bHaptics Integration
-        implementation ("com.github.bhaptics:tact-java:0.1.4")
+        implementation("com.github.bhaptics:tact-java:0.1.4")
     }
 
     tasks.withType(JavaCompile).configureEach {

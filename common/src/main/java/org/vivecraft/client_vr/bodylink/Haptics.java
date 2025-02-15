@@ -1,40 +1,40 @@
 package org.vivecraft.client_vr.bodylink;
 
 import com.bhaptics.haptic.HapticPlayerImpl;
-import com.bhaptics.haptic.models.*;
-import com.bhaptics.haptic.utils.HapticPlayerCallback;
-import com.bhaptics.haptic.utils.LogUtils;
-import com.bhaptics.haptic.utils.StringUtils;
-import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.lwjgl.system.CallbackI;
-import org.vivecraft.client.utils.Utils;
-import org.vivecraft.common.utils.math.Quaternion;
-import org.vivecraft.common.utils.math.Vector3;
+import com.bhaptics.haptic.models.DotPoint;
+import com.bhaptics.haptic.models.PositionType;
+import com.bhaptics.haptic.models.RotationOption;
+import com.bhaptics.haptic.models.ScaleOption;
+import org.joml.Vector3f;
+import org.vivecraft.client.utils.FileUtils;
+import org.vivecraft.client_vr.settings.VRSettings;
 
-
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class Haptics {
-    static final String appId = "org.vivecraft";
-    static final String appName = "Vivecraft bHaptics Integration";
+    private static final String APP_ID = "org.vivecraft";
+    private static final String APP_NAME = "Vivecraft bHaptics Integration";
+
+    private static final HashMap<String, HapticAnimation> REG_ANIMATIONS = new HashMap<>();
+
+    private static HapticPlayerImpl B_HAPTICS_PLAYER = null;
+    private static boolean CONNECTED;
 
 
     public enum Animations {
 
         explosion(1),
-        fire(2,2500),
+        fire(2, 2500),
         potion_positive(0),
         potion_negative(0),
-        low_health(1,1500),
-        hunger(1,2000),
-        critical_health(1,1000),
+        low_health(1, 1500),
+        hunger(1, 2000),
+        critical_health(1, 1000),
         generic_hit(3),
         zombie_hit(3),
-        rain(1,1500),
+        rain(1, 1500),
         consume(1),
         consume_effect(1);
 
@@ -44,17 +44,16 @@ public class Haptics {
         Animations(int variants) {
             this.variants = variants;
         }
-        Animations(int variants, long durationMillis){
-            this.variants=variants;
-            this.durationMillis=durationMillis;
+
+        Animations(int variants, long durationMillis) {
+            this.variants = variants;
+            this.durationMillis = durationMillis;
         }
     }
 
-    public static class HapticMotor{
-        PositionType positionType;
-        int index;
-        int intensity;
-        int duration;
+    public static class HapticMotor {
+        private final PositionType positionType;
+        private final int index;
 
         public HapticMotor(PositionType positionType, int index) {
             this.positionType = positionType;
@@ -62,164 +61,139 @@ public class Haptics {
         }
 
         public void dot(int intensity, int duration) {
-            this.intensity=intensity;
-            this.duration=duration;
+            if (!CONNECTED) return;
 
-            if(!connected)
-                return;
-            String key = "pos"+positionType.ordinal()+"_index"+index;
+            String key = "pos" + this.positionType.ordinal() + "_index" + this.index;
             //TODO Combine requests
-            DotPoint d = new DotPoint(index,intensity);
+            DotPoint d = new DotPoint(this.index, intensity);
             ArrayList<DotPoint> list = new ArrayList<>();
             list.add(d);
-            bHapticsPlayer.submitDot(key,positionType,list,duration);
+            B_HAPTICS_PLAYER.submitDot(key, this.positionType, list, duration);
         }
 
-        public static void flushBuffered(){
-
-        }
+        public static void flushBuffered() {}
     }
 
-
-    static HashMap<String, HapticAnimation> regAnimations = new HashMap<>();
-
     public static class HapticAnimation {
-        String baseId;
-        int variations;
-        long durationMillis = -1;
-        boolean looping;
-        public boolean isLoop;
-        long startTimeStamp = -1;
+        private String baseId;
+        private int variations;
+        private long durationMillis = -1;
+        private boolean looping;
+        private boolean isLoop;
+        private long startTimeStamp = -1;
 
-        Vec3 loopingVec;
+        private Vector3f loopingVec;
 
         public String getRandomVariant() {
-            return baseId + "_" + (int) (Math.random() * variations);
+            return this.baseId + "_" + (int) (Math.random() * this.variations);
         }
 
-        public void playSingle(boolean layered, Vec3 vec, double scale) {
+        public void playSingle(boolean layered, Vector3f vec, double scale) {
 
-            if(bHapticsPlayer == null){
-                return;
-            }
-            if (!layered && isPlaying())
-                return;
+            if (B_HAPTICS_PLAYER == null) return;
+            if (!layered && isPlaying()) return;
+
             RotationOption rotationOption;
-            Quaternion rot = new Quaternion();
-            if (vec != null && !vec.equals(Vec3.ZERO)) {
-                rot = Quaternion.createFromToVector(new Vector3(0, 0, -1), new Vector3(vec.normalize()));
+            if (vec != null) {
+                rotationOption = new RotationOption(
+                    Math.toDegrees(Math.atan2(vec.x, vec.z)) - 180,
+                    Math.toDegrees(Math.asin(vec.y / vec.length())));
+            } else {
+                rotationOption = new RotationOption(0, 0);
             }
 
-            rotationOption = new RotationOption(rot.toEuler().getYaw(), rot.toEuler().getPitch());
-            ScaleOption scaleOption = new ScaleOption(scale,1);
+            ScaleOption scaleOption = new ScaleOption(scale, 1);
 
             String id = getRandomVariant();
-            startTimeStamp=System.currentTimeMillis();
+            this.startTimeStamp = System.currentTimeMillis();
 
-            bHapticsPlayer.submitRegistered(id, baseId, rotationOption,scaleOption);
+            B_HAPTICS_PLAYER.submitRegistered(id, this.baseId, rotationOption, scaleOption);
             //bHapticsPlayer.submitRegistered(id);
         }
 
-        public void playSingle(boolean layered, Vec3 vec) {
+        public void playSingle(boolean layered, Vector3f vec) {
             playSingle(layered, vec, 1.0);
         }
 
         public void setLooping(boolean looping) {
-            isLoop = true;
+            this.isLoop = true;
             this.looping = looping;
-
         }
 
-        public void setLoopingVec(Vec3 loopingVec) {
+        public void setLoopingVec(Vector3f loopingVec) {
             this.loopingVec = loopingVec;
         }
 
-
         public boolean isPlaying() {
-            if(this.startTimeStamp == -1 || this.durationMillis == -1)
-                return false;
-            else
+            if (this.startTimeStamp == -1 || this.durationMillis == -1) {return false;} else {
                 return System.currentTimeMillis() < this.startTimeStamp + this.durationMillis;
-        }
-
-        public void stopPlaying(){
-            startTimeStamp = -1;
-            bHapticsPlayer.turnOff(baseId);
-        }
-
-        public void tick(){
-            if(!isLoop)
-                return;
-            if (looping && !isPlaying()) {
-                playSingle(false, loopingVec);
-            }else if (!looping && isPlaying()){
-                stopPlaying();
             }
         }
 
+        public void stopPlaying() {
+            this.startTimeStamp = -1;
+            B_HAPTICS_PLAYER.turnOff(this.baseId);
+        }
 
-    }
-
-
-    public static void tick() {
-        if(!isConnected())
-            return;
-        for (HapticAnimation h : regAnimations.values()) {
-            h.tick();
+        public void tick() {
+            if (!this.isLoop) return;
+            if (this.looping && !isPlaying()) {
+                playSingle(false, this.loopingVec);
+            } else if (!this.looping && isPlaying()) {
+                stopPlaying();
+            }
         }
     }
 
-
+    public static void tick() {
+        if (!isConnected()) {return;}
+        for (HapticAnimation h : REG_ANIMATIONS.values()) {
+            h.tick();
+        }
+    }
 
     static void loadAnimationFiles() {
 
         for (Animations animation : Animations.values()) {
             for (int i = 0; i < animation.variants; i++) {
                 String fullId = animation.name() + "_" + i;
-                String content = Utils.loadAssetAsString("tact/" + fullId + ".tact", false);
-                if(content == null){
-                    LogManager.getLogger().warn("Missing .tact file " + fullId + ".tact");
-                }else{
-                    bHapticsPlayer.register(fullId, content);
+                String content = FileUtils.loadAssetToString("tact/" + fullId + ".tact", false);
+                if (content == null) {
+                    VRSettings.LOGGER.warn("Vivecraft: Missing .tact file {}.tact", fullId);
+                } else {
+                    B_HAPTICS_PLAYER.register(fullId, content);
                 }
-
             }
 
             HapticAnimation hp = new HapticAnimation();
             hp.baseId = animation.name();
             hp.variations = animation.variants;
             hp.durationMillis = animation.durationMillis;
-            regAnimations.put(animation.name(), hp);
+            REG_ANIMATIONS.put(animation.name(), hp);
         }
     }
 
-    public static HapticAnimation getAnimation(Animations animation){
-        return regAnimations.get(animation.name());
+    public static HapticAnimation getAnimation(Animations animation) {
+        return REG_ANIMATIONS.get(animation.name());
     }
-
-    private static HapticPlayerImpl bHapticsPlayer = null;
-    private static boolean connected;
 
     public static boolean isConnected() {
-        if (bHapticsPlayer == null)
-            return false;
-        return connected;
+        return B_HAPTICS_PLAYER != null && CONNECTED;
     }
 
-    public static void test(){
+    public static void test() {
         //getAnimation(Animations.explosion).playSingle(true,null);
 
         //bHapticsPlayer.submitRegistered("explosion_0");
-        bHapticsPlayer.submitDot("test", PositionType.VestBack, Arrays.asList(new DotPoint(3, 100)), 200);
+        B_HAPTICS_PLAYER.submitDot("test", PositionType.VestBack, List.of(new DotPoint(3, 100)), 200);
     }
 
     public static void connect() {
-        Logger logger = LogManager.getLogger();
         try {
-            bHapticsPlayer = new HapticPlayerImpl(appId, appName, true, connected -> {
-                Haptics.connected = connected;
+            B_HAPTICS_PLAYER = new HapticPlayerImpl(APP_ID, APP_NAME, true, connected -> {
+                Haptics.CONNECTED = connected;
                 RiggedBody.getInstance().clearHapticPoints();
-                if (connected){
+                if (connected) {
                     loadAnimationFiles();
                     // FIXME detect and add haptic devices
 
@@ -227,30 +201,28 @@ public class Haptics {
                 }
             });
 
-            logger.info("BHaptics library loaded");
+            VRSettings.LOGGER.info("Vivecraft: BHaptics library loaded");
         } catch (Throwable e) {
-            logger.error("BHaptics library not found", e);
+            VRSettings.LOGGER.error("Vivecraft: BHaptics library not found", e);
         }
     }
 
-
-    public static boolean setLoopState(Animations animation, boolean loop){
+    public static boolean setLoopState(Animations animation, boolean loop) {
         HapticAnimation hapticAnimation = getAnimation(animation);
-        if(hapticAnimation == null || hapticAnimation.looping == loop)
-            return false;
+        if (hapticAnimation == null || hapticAnimation.looping == loop) return false;
 
         hapticAnimation.setLooping(loop);
         return true;
     }
+
     public static boolean isPlaying(String id) {
         if (!isConnected()) {
             return false;
         }
-        return regAnimations.get(id).isPlaying();
+        return REG_ANIMATIONS.get(id).isPlaying();
     }
 
-    enum DeviceType{
+    public enum DeviceType {
         None, X40
     }
-
 }

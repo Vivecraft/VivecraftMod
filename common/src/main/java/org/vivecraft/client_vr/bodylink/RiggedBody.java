@@ -1,42 +1,48 @@
 package org.vivecraft.client_vr.bodylink;
 
-
 import com.bhaptics.haptic.models.PositionType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.client_vr.VRData;
 import org.vivecraft.client_vr.settings.AutoCalibration;
-import org.vivecraft.common.utils.math.Axis;
-import org.vivecraft.common.utils.math.Quaternion;
+import org.vivecraft.common.utils.MathUtils;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class RiggedBody{
+public class RiggedBody {
 
-    HashMap<PositionType,List<HapticPoint>> hapticPoints = new HashMap<>();
-    HashMap<AnchorType, BodyAnchor> anchors = new HashMap<>();
+    private static final float USER_THICCNESS = 0.3F;
+
+    private final HashMap<PositionType, List<HapticPoint>> hapticPoints = new HashMap<>();
+    private final HashMap<AnchorType, BodyAnchor> anchors = new HashMap<>();
 
     /**
      * Root bone with coordinates relative to players feet
-     * */
-    Bone rootBone;
-    Bone headBone;
+     */
+    private final Bone rootBone;
+    private final Bone headBone;
 
-    public RiggedBody(){
+    public RiggedBody() {
         // Create Skeleton
 
-        double hmdHeight = AutoCalibration.getPlayerHeight();
+        float hmdHeight = AutoCalibration.getPlayerHeight();
 
-        rootBone = new Bone(null, Vec3.ZERO);
-        headBone = new Bone(rootBone,new Vec3(0, hmdHeight, 0));
+        this.rootBone = new Bone(null, new Vector3f());
+        this.headBone = new Bone(this.rootBone, new Vector3f(0, hmdHeight, 0));
         // TODO: Make complete Rig
 
         // Add tracked devices
-         // TODO need recalibration event
-        BodyAnchor hmdAnchor = new BodyAnchor(new Vec3(0,hmdHeight,0), new Quaternion(), AnchorType.HMD);
-        rootBone.addPoint( hmdAnchor );
-        anchors.put(AnchorType.HMD, hmdAnchor);
+        // TODO need recalibration event
+        BodyAnchor hmdAnchor = new BodyAnchor(new Vector3f(0, hmdHeight, 0), new Quaternionf(), AnchorType.HMD);
+        this.rootBone.addPoint(hmdAnchor);
+        this.anchors.put(AnchorType.HMD, hmdAnchor);
         // TODO Complete Anchor setup
 
         // Add untracked devices
@@ -44,30 +50,33 @@ public class RiggedBody{
         // FIXME detect Suit or other devices and register bodypoints
     }
 
-    public void updatePose(VRData vrData){
+    public void updatePose(VRData vrData) {
         // TODO: update full rig using IK
-        rootBone.currentRotRel = new Quaternion(Axis.YAW, vrData.getBodyYaw());
-        headBone.currentPosRel = vrData.hmd.getPosition().subtract(headBone.basePosition);
-        headBone.currentRotRel = new Quaternion(vrData.hmd.getMatrix());
+        this.rootBone.currentRotRel = new Quaternionf().rotationY(vrData.getBodyYawRad());
+        // TODO: what space should that be in?
+        // it was world space, made it player local for now
+        this.headBone.currentPosRel = MathUtils.subtractToVector3f(vrData.hmd.getPosition(),
+            Minecraft.getInstance().player.position()).sub(this.headBone.basePosition);
+        this.headBone.currentRotRel = vrData.hmd.getMatrix().getNormalizedRotation(new Quaternionf());
 
-        rootBone.updatePoints();
+        this.rootBone.updatePoints();
     }
 
 
     public ArrayList<HapticPoint> getHapticPoints(com.bhaptics.haptic.models.PositionType... type) {
         ArrayList<HapticPoint> matches = new ArrayList<>();
 
-        for (PositionType t: type) {
-            if(t == PositionType.All){
+        for (PositionType t : type) {
+            if (t == PositionType.All) {
                 matches.clear();
-                for(Map.Entry<PositionType, List<HapticPoint>> entry : hapticPoints.entrySet()){
+                for (Map.Entry<PositionType, List<HapticPoint>> entry : this.hapticPoints.entrySet()) {
                     matches.addAll(entry.getValue());
                 }
                 break;
             }
 
-            List<HapticPoint> points = hapticPoints.get(t);
-            if(points != null) {
+            List<HapticPoint> points = this.hapticPoints.get(t);
+            if (points != null) {
                 matches.addAll(points);
             }
         }
@@ -76,18 +85,16 @@ public class RiggedBody{
     }
 
     public void clearHapticPoints() {
-        hapticPoints.clear();
+        this.hapticPoints.clear();
     }
 
-    double userThiccness = 0.3;
-
     public void addHapticPoints(Haptics.DeviceType deviceType) {
-        if(deviceType == Haptics.DeviceType.X40){
-            double dimX = 0.23;
-            double dimY = 0.30;
-            double dimZ = userThiccness;
+        if (deviceType == Haptics.DeviceType.X40) {
+            float dimX = 0.23F;
+            float dimY = 0.30F;
+            float dimZ = USER_THICCNESS;
 
-            double chestCenterOffset = 1.2;
+            float chestCenterOffset = 1.2F;
 
             for (int side = 0; side < 2; side++) {
                 HapticPoint[] points = new HapticPoint[20];
@@ -96,132 +103,125 @@ public class RiggedBody{
 
                 for (int x = 0; x < 4; x++) {
                     for (int y = 0; y < 5; y++) {
-                        double posX = ((double) x / 3) * dimX - dimX * 0.5;
-                        double posY = ((double) x / 4 ) * dimY - dimY * 0.5 + chestCenterOffset;
-                        double posZ = (front? -1 : 1) * dimZ * 0.5;
+                        float posX = (x / 3F) * dimX - dimX * 0.5F;
+                        float posY = (x / 4F) * dimY - dimY * 0.5F + chestCenterOffset;
+                        float posZ = (front ? -1 : 1) * dimZ * 0.5F;
 
                         int index = x + y * 4;
-                        Vec3 posVec = new Vec3(posX, posY, posZ);
-                        Quaternion q = new Quaternion();
+                        Vector3f posVec = new Vector3f(posX, posY, posZ);
+                        Quaternionf q = new Quaternionf();
 
-                        int rotationalIndex = front? x : (7 - x);
-                        q=q.rotate(Axis.YAW, (float) (-90 + (rotationalIndex + 0.5) / 8 * 360),true);
+                        int rotationalIndex = front ? x : (7 - x);
+                        q = q.rotateY(Mth.DEG_TO_RAD * (-90F + (rotationalIndex + 0.5F) / 8F * 360F));
 
-                        q=q.rotate(Axis.PITCH, (float)( 90 - ((y+0.5) / 5) * 180), true );
+                        q = q.rotateX(Mth.DEG_TO_RAD * (90F - ((y + 0.5F) / 5F) * 180F));
 
-                        HapticPoint point = new HapticPoint(posVec,q,new Haptics.HapticMotor(type,index));
-                        point.setAnchor(rootBone, 1.0);
+                        HapticPoint point = new HapticPoint(posVec, q, new Haptics.HapticMotor(type, index));
+                        point.setAnchor(this.rootBone, 1.0);
 
                         points[index] = point;
                     }
                 }
 
-                this.hapticPoints.put(type, new ArrayList(Arrays.asList(points)));
-
+                this.hapticPoints.put(type, new ArrayList<>(Arrays.asList(points)));
             }
-
-
         }
-
     }
 
-    public class Bone{
-        Bone parent;
-        ArrayList<Bone> children = new ArrayList<>();
-        ArrayList<BodyPoint> attachedPoints = new ArrayList<>();
+    public class Bone {
+        private final Bone parent;
+        private final ArrayList<Bone> children = new ArrayList<>();
+        private final ArrayList<BodyPoint> attachedPoints = new ArrayList<>();
 
         /**
          * hinge origin relative to parent bone position
          * in the default Pose
-         * */
-        Vec3 basePosition;
+         */
+        private final Vector3f basePosition;
         /**
          * Current Position relative to parent
          * Coordinate System: OpenGL
-         * */
-        Vec3 currentPosRel;
-        Quaternion currentRotRel;
+         */
+        private Vector3f currentPosRel;
+        private Quaternionf currentRotRel;
 
-        public Bone(@Nullable Bone parent, Vec3 origin) {
+        public Bone(@Nullable Bone parent, Vector3f origin) {
             this.parent = parent;
             this.basePosition = origin;
             this.currentPosRel = origin;
-            this.currentRotRel = new Quaternion();
+            this.currentRotRel = new Quaternionf();
 
-            if(parent != null) {
+            if (parent != null) {
                 parent.children.add(this);
             }
         }
 
-        public void addPoint(BodyPoint point){
-            attachedPoints.add(point);
+        public void addPoint(BodyPoint point) {
+            this.attachedPoints.add(point);
         }
 
-        public Quaternion getAbsRot(){
-            Quaternion totalRot = new Quaternion();
-            if(parent != null){
-                totalRot = parent.getAbsRot();
+        public Quaternionf getAbsRot() {
+            Quaternionf totalRot = new Quaternionf();
+            if (this.parent != null) {
+                totalRot.set(this.parent.getAbsRot());
             }
 
-            return totalRot.multiply(currentRotRel);
+            return totalRot.mul(this.currentRotRel);
         }
 
-        public Vec3 getAbsPos(){
-            Vec3 parentPos = Vec3.ZERO;
-            Quaternion parentRot = new Quaternion();
-            if(parent != null){
-                parentPos = parent.getAbsPos();
-                parentRot = parent.getAbsRot();
+        public Vector3f getAbsPos() {
+            Vector3f parentPos = new Vector3f();
+            Quaternionf parentRot = new Quaternionf();
+            if (this.parent != null) {
+                parentPos.set(this.parent.getAbsPos());
+                parentRot.set(this.parent.getAbsRot());
             }
-            return parentPos.add( parentRot.multiply(currentPosRel) );
+            return parentPos.add(parentRot.transform(this.currentPosRel, new Vector3f()));
         }
 
 
-        public void updatePoints(){
-            for(BodyPoint b: attachedPoints) {
-                b.currentPos = getAbsPos().add( getAbsRot().multiply( b.basePos) );
-                b.currentRot = getAbsRot().multiply(b.baseRot);
+        public void updatePoints() {
+            for (BodyPoint b : this.attachedPoints) {
+                getAbsRot().transform(b.basePos, b.currentPos).add(getAbsPos());
+                getAbsRot().mul(b.baseRot, b.currentRot);
             }
 
-            for(Bone child : children){
+            for (Bone child : this.children) {
                 child.updatePoints();
             }
         }
-
-
     }
 
 
-    abstract class BodyPoint {
+    public abstract class BodyPoint {
 
         /**
          * Absolute position in player space
          * Coordinate System: OpenGL
-         * */
-        public Vec3 currentPos;
+         */
+        public final Vector3f currentPos;
 
         /**
          * Current absolute rotation
-         * */
-        public Quaternion currentRot;
-
+         */
+        public final Quaternionf currentRot;
 
 
         /*** Position relative to parent bone position and rotation in Calibration Pose
          *  Coordinate System: OpenGL
          * */
-        Vec3 basePos;
+        private final Vector3fc basePos;
 
         /*** Position relative to parent  rotation in Calibration Pose
          *  Coordinate System: OpenGL
          * */
-        Quaternion baseRot;
+        private final Quaternionfc baseRot;
 
-        public BodyPoint(Vec3 basePos, Quaternion baseRot){
+        public BodyPoint(Vector3fc basePos, Quaternionfc baseRot) {
             this.basePos = basePos;
             this.baseRot = baseRot;
-            this.currentPos = basePos;
-            this.currentRot = baseRot;
+            this.currentPos = new Vector3f(basePos);
+            this.currentRot = new Quaternionf(baseRot);
         }
 
         abstract boolean isTracked();
@@ -232,12 +232,12 @@ public class RiggedBody{
          * Returns this points forward vector
          * Coordinate System: OpenGL if mc == false
          * Minecraft if mc == true
-         * */
-        public Vec3 getNormal( boolean mc ){
-            Vec3 n= currentRot.multiply(new Vec3(0,0,-1));
-            if(mc){
-                return n.yRot(180f);
-            }else{
+         */
+        public Vector3f getNormal(boolean mc) {
+            Vector3f n = this.currentRot.transform(0, 0, -1, new Vector3f());
+            if (mc) {
+                return n.rotateY(Mth.PI);
+            } else {
                 return n;
             }
         }
@@ -248,11 +248,11 @@ public class RiggedBody{
          */
         public Vec3 getPosWorld(LocalPlayer player) {
             Vec3 playerPos = player.position();
-            Vec3 currentPosMC = new Quaternion(Axis.YAW, 180).multiply(currentPos);
-            return playerPos.add(currentPosMC);
+            Vector3f currentPosMC = this.currentPos.rotateY(Mth.PI, new Vector3f());
+            return playerPos.add(currentPosMC.x, currentPosMC.y, currentPosMC.z);
         }
 
-        public void setAnchor(Bone parent, double attachPos){
+        public void setAnchor(Bone parent, double attachPos) {
             this.parent = parent;
             // FIXME: Attachment at endpoint of bone
             // Need variable length bones
@@ -260,11 +260,10 @@ public class RiggedBody{
     }
 
 
-
     public class HapticPoint extends BodyPoint {
         public Haptics.HapticMotor motor;
 
-        public HapticPoint(Vec3 relPos, Quaternion relRot, Haptics.HapticMotor motor) {
+        public HapticPoint(Vector3f relPos, Quaternionf relRot, Haptics.HapticMotor motor) {
             super(relPos, relRot);
             this.motor = motor;
         }
@@ -273,14 +272,12 @@ public class RiggedBody{
         boolean isTracked() {
             return false;
         }
-
-
     }
 
-    public class BodyAnchor extends BodyPoint{
+    public class BodyAnchor extends BodyPoint {
         AnchorType type;
 
-        public BodyAnchor(Vec3 relPos, Quaternion relRot, AnchorType type) {
+        public BodyAnchor(Vector3f relPos, Quaternionf relRot, AnchorType type) {
             super(relPos, relRot);
             this.type = type;
         }
@@ -297,12 +294,12 @@ public class RiggedBody{
 
 
     public static RiggedBody instance;
-    public static RiggedBody getInstance(){
+
+    public static RiggedBody getInstance() {
         return instance;
     }
+
     static {
         instance = new RiggedBody();
-
     }
-
 }
