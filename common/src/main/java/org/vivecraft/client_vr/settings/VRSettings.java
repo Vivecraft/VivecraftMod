@@ -429,7 +429,9 @@ public class VRSettings {
     @SettingField(VrOptions.RENDER_DEBUG_TRACKERS)
     public boolean renderTrackerPositions = false;
 
-    //
+    // Use OVRMultiview instead of MultiPass Rendering
+    @SettingField(VrOptions.MULTIVIEW)
+    public boolean enableOVRMultiview = false;
 
     // Mixed Reality
     @SettingField(VrOptions.MIXED_REALITY_KEY_COLOR)
@@ -1300,6 +1302,7 @@ public class VRSettings {
                 VRState.VR_ENABLED = ClientDataHolderVR.getInstance().vrSettings.vrEnabled;
             }
         },
+        MULTIVIEW(false, true),
         VR_CLOSE_WITH_RUNTIME(false, true), // closes the game when getting the quit/close event
         VR_REMEMBER_ENABLED(false, true), // restore vr state on startup
         HUD_SCALE(true, false, 0.35f, 2.5f, 0.01f, -1), // Head HUD Size

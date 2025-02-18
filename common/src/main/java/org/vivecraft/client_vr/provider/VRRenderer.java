@@ -152,6 +152,13 @@ public abstract class VRRenderer {
      * @return the right eye rendertarget
      */
     public abstract RenderTarget getRightEyeTarget();
+
+    /**
+     * @return the multiview rendertarget
+     */
+    //TODO: Implement Shader Helper
+    public abstract RenderTarget getMultiviewTarget();
+
     /**
      * gets an array with the vertex info of the stencil mesh, if there is one provided by this renderer
      *
@@ -336,8 +343,12 @@ public abstract class VRRenderer {
         List<RenderPass> passes = new ArrayList<>();
 
         // Always do these for obvious reasons
-        passes.add(RenderPass.LEFT);
-        passes.add(RenderPass.RIGHT);
+        if (!dataholder.vrSettings.enableOVRMultiview) {
+            passes.add(RenderPass.LEFT);
+            passes.add(RenderPass.RIGHT);
+        } else {
+            passes.add(RenderPass.MULTIVIEW);
+        }
 
         // only do these, if the window is not minimized
         if (((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() > 0 &&

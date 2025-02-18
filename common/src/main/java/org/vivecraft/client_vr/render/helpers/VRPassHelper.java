@@ -47,7 +47,9 @@ public class VRPassHelper {
 
         RenderHelper.checkGLError("post game render " + eye);
 
-        if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
+        if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT
+            || DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
+
             // copies the rendered scene to eye tex with fsaa and other postprocessing effects.
             Profiler.get().push("postProcessEye");
             RenderTarget rendertarget = MC.getMainRenderTarget();
@@ -64,12 +66,18 @@ public class VRPassHelper {
 
             if (eye == RenderPass.LEFT) {
                 DATA_HOLDER.vrRenderer.getLeftEyeTarget().bindWrite(true);
-            } else {
+            } else if (eye == RenderPass.RIGHT) {
                 DATA_HOLDER.vrRenderer.getRightEyeTarget().bindWrite(true);
+            } else if (eye == RenderPass.MULTIVIEW) {
+                DATA_HOLDER.vrRenderer.getMultiviewTarget().bindWrite(true);
             }
 
             // do post-processing
-            ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
+            if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
+                ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
+            } else {
+                //TODO: Do Post-Processing for OVRMultiview
+            }
 
             RenderHelper.checkGLError("post overlay" + eye);
             Profiler.get().pop();
@@ -200,7 +208,7 @@ public class VRPassHelper {
             }
 
             switch (renderpass) {
-                case LEFT, RIGHT -> RenderPassManager.setWorldRenderPass(WorldRenderPass.STEREO_XR);
+                case LEFT, RIGHT, MULTIVIEW -> RenderPassManager.setWorldRenderPass(WorldRenderPass.STEREO_XR);
                 case CENTER -> RenderPassManager.setWorldRenderPass(WorldRenderPass.CENTER);
                 case THIRD -> RenderPassManager.setWorldRenderPass(WorldRenderPass.MIXED_REALITY);
                 case SCOPEL -> RenderPassManager.setWorldRenderPass(WorldRenderPass.LEFT_TELESCOPE);
@@ -253,7 +261,7 @@ public class VRPassHelper {
         // use the vanilla target for the mirror
         RenderPassManager.setMirrorRenderPass();
         MC.mainRenderTarget.bindWrite(true);
-        ShaderHelper.drawMirror();
+        //ShaderHelper.drawMirror();
         RenderHelper.checkGLError("post-mirror");
 
         Profiler.get().popPush("Display/Reproject");

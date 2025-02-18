@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.OVRMultiview;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
 
@@ -39,7 +40,7 @@ public class VRTextureTarget extends RenderTarget {
         this.setClearColor(0, 0, 0, 0);
     }
 
-    public VRTextureTarget(String name, int width, int height, int colorId, int index) {
+    public VRTextureTarget(String name, int width, int height, int colorId, int index, boolean isMultiview) {
         super(false);
         this.name = name;
         RenderSystem.assertOnRenderThreadOrInit();
@@ -53,9 +54,16 @@ public class VRTextureTarget extends RenderTarget {
 
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.frameBufferId);
         // unset the old GL_COLOR_ATTACHMENT0
-        GlStateManager._glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL30.GL_TEXTURE_2D, 0,
-            0);
-        GL30.glFramebufferTextureLayer(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, colorId, 0, index);
+
+        if (!isMultiview) {
+            GlStateManager._glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL30.GL_TEXTURE_2D, 0,
+                0);
+            GL30.glFramebufferTextureLayer(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, colorId, 0, index);
+        } else {
+            //TODO: Remove Hardcode
+            OVRMultiview.glFramebufferTextureMultiviewOVR(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, colorId, 0,
+                index, 2);
+        }
 
         // unbind the framebuffer
         this.unbindRead();

@@ -7,6 +7,7 @@ public enum RenderPass {
     LEFT,
     RIGHT,
     CENTER,
+    MULTIVIEW,
     THIRD,
     GUI,
     SCOPER,

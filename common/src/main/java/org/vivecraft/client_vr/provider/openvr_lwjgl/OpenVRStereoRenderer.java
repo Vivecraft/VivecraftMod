@@ -202,6 +202,11 @@ public class OpenVRStereoRenderer extends VRRenderer {
         return this.framebufferEyeRight;
     }
 
+    @Override
+    public RenderTarget getMultiviewTarget() {
+        return null;
+    }
+
     public float[] getStencilMask(RenderPass eye) {
         if (this.hiddenMeshVertices != null && (eye == RenderPass.LEFT || eye == RenderPass.RIGHT)) {
             return eye == RenderPass.LEFT ? this.hiddenMeshVertices[0] : this.hiddenMeshVertices[1];
