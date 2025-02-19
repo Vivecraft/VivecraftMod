@@ -4,6 +4,8 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL42;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
 import org.vivecraft.client_vr.ClientDataHolderVR;
@@ -71,7 +73,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
                     this.multiviewFramebuffers[i] = new VRTextureTarget("Multiview " + i, width, height, openxrImage.image(), 0, true);
                     String multiviewError = RenderHelper.checkGLError("Multiview " + i + " framebuffer setup");
 
-                    if (this.lastError.isEmpty()) { this.lastError = multiviewError; }
+                    if (this.lastError.isEmpty() && !multiviewError.isEmpty()) { this.lastError = multiviewError; }
                 }
             }
         }
@@ -140,7 +142,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public void endFrame() throws RenderConfigException {
+    public void endFrame() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer layers = stack.callocPointer(1);
             int error;

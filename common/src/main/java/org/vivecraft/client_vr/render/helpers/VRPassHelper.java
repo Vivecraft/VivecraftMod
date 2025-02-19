@@ -43,6 +43,11 @@ public class VRPassHelper {
         RenderSystem.enableDepthTest();
 
         // THIS IS WHERE EVERYTHING IS RENDERED
+        if(DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
+            DATA_HOLDER.vrRenderer.getMultiviewTarget().bindWrite(true);
+            ShaderHelper.doMultiview(DATA_HOLDER.vrRenderer.getMultiviewTarget(),
+                deltaTracker.getGameTimeDeltaPartialTick(false));
+        }
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
         RenderHelper.checkGLError("post game render " + eye);
@@ -68,17 +73,12 @@ public class VRPassHelper {
                 DATA_HOLDER.vrRenderer.getLeftEyeTarget().bindWrite(true);
             } else if (eye == RenderPass.RIGHT) {
                 DATA_HOLDER.vrRenderer.getRightEyeTarget().bindWrite(true);
-            } else if (eye == RenderPass.MULTIVIEW) {
+            } else if(DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
                 DATA_HOLDER.vrRenderer.getMultiviewTarget().bindWrite(true);
             }
 
             // do post-processing
-            if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
-                ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
-            } else {
-                //TODO: Do Post-Processing for OVRMultiview
-            }
-
+            ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
             RenderHelper.checkGLError("post overlay" + eye);
             Profiler.get().pop();
         }

@@ -16,7 +16,7 @@ public enum RenderPass {
     MIRROR;
 
     public static boolean isFirstPerson(RenderPass pass) {
-        return pass == LEFT || pass == RIGHT || pass == CENTER;
+        return pass == LEFT || pass == RIGHT || pass == MULTIVIEW || pass == CENTER;
     }
 
     public static boolean isThirdPerson(RenderPass pass) {

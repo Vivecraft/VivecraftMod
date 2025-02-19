@@ -21,6 +21,7 @@ import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.opengl.GL43;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.MirrorNotification;
@@ -236,6 +237,142 @@ public class ShaderHelper {
         VRShaders.POST_PROCESSING_OVERLAY_EYE_UNIFORM.set(eye == RenderPass.LEFT ? 1 : -1);
 
         ShaderHelper.renderFullscreenQuad(VRShaders.POST_PROCESSING_SHADER, source);
+    }
+
+    public static void doMultiview(RenderTarget source, float partialTick) {
+        // only update these once per frame, or the effects are twice as fast
+        // and could be out of sync between the eyes
+
+        // status effects
+        float red = 0.0F;
+        float black = 0.0F;
+        float blue = 0.0F;
+        float time = (float) Util.getMillis() / 1000.0F;
+
+        float pumpkinEffect = 0.0F;
+        float portalEffect = 0.0F;
+
+        if (MC.player != null && MC.level != null) {
+
+            boolean isInWater = ((GameRendererExtension) MC.gameRenderer).vivecraft$isInWater();
+            if (DATA_HOLDER.vrSettings.waterEffect && WAS_IN_WATER != isInWater) {
+                // water state changed, start effect
+                WATER_EFFECT = 2.3F;
+            } else {
+                if (isInWater) {
+                    // slow falloff in water
+                    WATER_EFFECT -= 1F / 120F;
+                } else {
+                    // fast falloff outside water
+                    WATER_EFFECT -= 1F / 60F;
+                }
+
+                if (WATER_EFFECT < 0.0F) {
+                    WATER_EFFECT = 0.0F;
+                }
+            }
+
+            WAS_IN_WATER = isInWater;
+
+            if (IrisHelper.isLoaded() && !IrisHelper.hasWaterEffect()) {
+                WATER_EFFECT = 0.0F;
+            }
+
+            float portalTime = Mth.lerp(partialTick, MC.player.oSpinningEffectIntensity,
+                MC.player.spinningEffectIntensity);
+            if (DATA_HOLDER.vrSettings.portalEffect &&
+                // vanilla check for portal overlay
+                portalTime > 0.0F && !MC.player.hasEffect(MobEffects.CONFUSION))
+            {
+                portalEffect = portalTime;
+            }
+
+            ItemStack itemstack = MC.player.getInventory().getArmor(3);
+
+            if (DATA_HOLDER.vrSettings.pumpkinEffect && itemstack.getItem() == Blocks.CARVED_PUMPKIN.asItem() &&
+                (!itemstack.has(DataComponents.CUSTOM_MODEL_DATA)))
+            {
+                pumpkinEffect = 1.0F;
+            }
+
+            float hurtTimer = (float) MC.player.hurtTime - partialTick;
+            float healthPercent = 1.0F - MC.player.getHealth() / MC.player.getMaxHealth();
+            healthPercent = (healthPercent - 0.5F) * 0.75F;
+
+            if (DATA_HOLDER.vrSettings.hitIndicator && hurtTimer > 0.0F) { // hurt flash
+                hurtTimer = hurtTimer / (float) MC.player.hurtDuration;
+                hurtTimer = healthPercent +
+                    Mth.sin(hurtTimer * hurtTimer * hurtTimer * hurtTimer * Mth.PI) * 0.5F;
+                red = hurtTimer;
+            } else if (DATA_HOLDER.vrSettings.lowHealthIndicator) { // red due to low health
+                red = healthPercent * Mth.abs(Mth.sin((2.5F * time) / (1.0F - healthPercent + 0.1F)));
+
+                if (MC.player.isCreative()) {
+                    red = 0.0F;
+                }
+            }
+
+            float freeze = MC.player.getPercentFrozen();
+            if (DATA_HOLDER.vrSettings.freezeEffect && freeze > 0) {
+                blue = red;
+                blue = Math.max(freeze / 2, blue);
+                red = 0;
+            }
+
+            if (MC.player.isSleeping()) {
+                black = 0.5F + 0.3F * MC.player.getSleepTimer() * 0.01F;
+            }
+
+            if (DATA_HOLDER.vr.isWalkingAbout && black < 0.8F) {
+                black = 0.5F;
+            }
+
+            // fov reduction when moving
+            if (DATA_HOLDER.vrSettings.useFOVReduction && DATA_HOLDER.vrPlayer.getFreeMove()) {
+                if (Math.abs(MC.player.zza) > 0.0F || Math.abs(MC.player.xxa) > 0.0F) {
+                    FOV_REDUCTION = FOV_REDUCTION - 0.05F;
+                } else {
+                    FOV_REDUCTION = FOV_REDUCTION + 0.01F;
+                }
+                FOV_REDUCTION = Mth.clamp(FOV_REDUCTION, DATA_HOLDER.vrSettings.fovReductionMin, 0.8F);
+            } else {
+                FOV_REDUCTION = 1.0F;
+            }
+        } else {
+            WATER_EFFECT = 0.0F;
+            FOV_REDUCTION = 1.0F;
+        }
+
+        if (pumpkinEffect > 0.0F) {
+            VRShaders.MULTIVIEW_FOV_REDUCTION_RADIUS_UNIFORM.set(0.3F);
+            VRShaders.MULTIVIEW_FOV_REDUCTION_BORDER_UNIFORM.set(0.0F);
+        } else {
+            VRShaders.MULTIVIEW_FOV_REDUCTION_RADIUS_UNIFORM.set(FOV_REDUCTION);
+            VRShaders.MULTIVIEW_FOV_REDUCTION_BORDER_UNIFORM.set(0.06F);
+        }
+
+        VRShaders.MULTIVIEW_FOV_REDUCTION_OFFSET_UNIFORM.set(DATA_HOLDER.vrSettings.fovRedutioncOffset);
+
+        VRShaders.MULTIVIEW_OVERLAY_HEALTH_ALPHA_UNiFORM.set(red);
+        VRShaders.MULTIVIEW_OVERLAY_FREEZE_ALPHA_UNiFORM.set(blue);
+        VRShaders.MULTIVIEW_OVERLAY_BLACK_ALPHA_UNIFORM.set(black);
+        VRShaders.MULTIVIEW_OVERLAY_TIME_UNIFORM.set(time);
+        VRShaders.MULTIVIEW_OVERLAY_WATER_AMPLITUDE_UNIFORM.set(WATER_EFFECT);
+        VRShaders.MULTIVIEW_OVERLAY_PORTAL_AMPLITUDE_UNIFORM.set(portalEffect);
+        VRShaders.MULTIVIEW_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM.set(pumpkinEffect);
+
+        float[] mat = new float[32];
+        if(DATA_HOLDER.vrRenderer.eyeProj[0] != null) {
+            DATA_HOLDER.vrRenderer.eyeProj[0].get(mat);
+            DATA_HOLDER.vrRenderer.eyeProj[1].get(mat, 16);
+        }
+
+        VRShaders.MULTIVIEW_MODEL_VIEW_MATRIX_UNIFORM.set(mat);
+
+        // this needs to be set for each eye
+        VRShaders.MULTIVIEW_OVERLAY_EYE_UNIFORM.set(0);
+
+        ShaderHelper.renderFullscreenQuad(VRShaders.MULTIVIEW_SHADER, source);
     }
 
     /**

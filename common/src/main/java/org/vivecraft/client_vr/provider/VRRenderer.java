@@ -805,6 +805,8 @@ public abstract class VRRenderer {
                 RenderHelper.checkGLError("init depth shader");
                 VRShaders.setupFOVReduction();
                 RenderHelper.checkGLError("init FOV shader");
+                VRShaders.setupMultiview();
+                RenderHelper.checkGLError("init Multiview shader");
                 minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
             } catch (Exception exception) {
                 VRSettings.LOGGER.error("Vivecraft: Shader creation failed:", exception);
