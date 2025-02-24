@@ -682,8 +682,13 @@ public abstract class VRRenderer {
             int eyeFBWidth = (int) Math.ceil(eyew * this.renderScale);
             int eyeFBHeight = (int) Math.ceil(eyeh * this.renderScale);
 
-            this.framebufferVrRender = new VRTextureTarget("3D Render", eyeFBWidth, eyeFBHeight, true, -1, true, false,
+            if(VRSettings.INSTANCE.enableOVRMultiview) {
+                this.framebufferVrRender = new VRTextureTarget("3D Render", eyeFBWidth, eyeFBHeight, true, -1, true, false,
                 dataholder.vrSettings.vrUseStencil && StencilHelper.stencilBufferSupported());
+            } else {
+                this.framebufferVrRender = new VRTextureTarget("3D Render", eyeFBWidth, eyeFBHeight, true, -1, true, false,
+                    dataholder.vrSettings.vrUseStencil && StencilHelper.stencilBufferSupported());
+            }
             WorldRenderPass.STEREO_XR = new WorldRenderPass(this.framebufferVrRender);
             VRSettings.LOGGER.info("Vivecraft: {}", this.framebufferVrRender);
             RenderHelper.checkGLError("3D framebuffer setup");
@@ -805,8 +810,6 @@ public abstract class VRRenderer {
                 RenderHelper.checkGLError("init depth shader");
                 VRShaders.setupFOVReduction();
                 RenderHelper.checkGLError("init FOV shader");
-                VRShaders.setupMultiview();
-                RenderHelper.checkGLError("init Multiview shader");
                 minecraft.gameRenderer.checkEntityPostEffect(minecraft.getCameraEntity());
             } catch (Exception exception) {
                 VRSettings.LOGGER.error("Vivecraft: Shader creation failed:", exception);

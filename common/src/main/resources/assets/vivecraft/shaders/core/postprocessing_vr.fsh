@@ -1,7 +1,6 @@
 #version 150 core
 
-uniform sampler2DArray Sampler0;
-uniform int layerIndex;
+uniform sampler2D Sampler0;
 uniform float circle_radius;
 uniform float circle_offset = 0.1;
 uniform float border;
@@ -27,18 +26,18 @@ const float pi = 3.14159265;
 
 void main(){
 
-    vec4 bkg_color = texture(Sampler0, vec3(texCoordinates.st, layerIndex));
+    vec4 bkg_color = texture(Sampler0, texCoordinates.st);
 
     if (portal > 0.0){ //swirly whirly
         float ts = texCoordinates.s;
         vec2 mod_texcoord = texCoordinates.st + vec2(portal * 0.005 * cos(portaltime + 20.0 * ts * pi), portal * 0.005 * sin(portaltime + 30.0 * ts * pi));
-        bkg_color = texture(Sampler0, vec3(mod_texcoord, layerIndex));
+        bkg_color = texture(Sampler0, mod_texcoord);
     }
 
     if (water > 0.0){ //goobly woobly
         float ts = texCoordinates.s;
         vec2 mod_texcoord = texCoordinates.st + vec2(0, water * 0.0010 * sin(portaltime + 10.0 * ts * pi));
-        bkg_color = texture(Sampler0, vec3(mod_texcoord, layerIndex));
+        bkg_color = texture(Sampler0, mod_texcoord);
         vec4 blue = vec4(0, 0, bkg_color.b, 1.0);
         bkg_color  = mix(bkg_color, blue, 0.1);
 

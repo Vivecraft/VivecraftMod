@@ -4,6 +4,7 @@ import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.ShaderDefines;
 import net.minecraft.client.renderer.ShaderProgram;
 import net.minecraft.resources.ResourceLocation;
@@ -43,23 +44,6 @@ public class VRShaders {
     public static AbstractUniform POST_PROCESSING_OVERLAY_TIME_UNIFORM;
     public static AbstractUniform POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM;
     public static AbstractUniform POST_PROCESSING_OVERLAY_EYE_UNIFORM;
-
-    public static ShaderProgram MULTIVIEW_SHADER = new ShaderProgram(
-        ResourceLocation.fromNamespaceAndPath("vivecraft", "core/multiview"),
-        DefaultVertexFormat.POSITION_TEX, ShaderDefines.EMPTY);
-    public static AbstractUniform MULTIVIEW_FOV_REDUCTION_RADIUS_UNIFORM;
-    public static AbstractUniform MULTIVIEW_FOV_REDUCTION_OFFSET_UNIFORM;
-    public static AbstractUniform MULTIVIEW_FOV_REDUCTION_BORDER_UNIFORM;
-    public static AbstractUniform MULTIVIEW_OVERLAY_HEALTH_ALPHA_UNiFORM;
-    public static AbstractUniform MULTIVIEW_OVERLAY_FREEZE_ALPHA_UNiFORM;
-    public static AbstractUniform MULTIVIEW_OVERLAY_WATER_AMPLITUDE_UNIFORM;
-    public static AbstractUniform MULTIVIEW_OVERLAY_PORTAL_AMPLITUDE_UNIFORM;
-    public static AbstractUniform MULTIVIEW_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM;
-    public static AbstractUniform MULTIVIEW_OVERLAY_TIME_UNIFORM;
-    public static AbstractUniform MULTIVIEW_OVERLAY_BLACK_ALPHA_UNIFORM;
-    public static AbstractUniform MULTIVIEW_OVERLAY_EYE_UNIFORM;
-    public static AbstractUniform MULTIVIEW_MODEL_VIEW_MATRIX_UNIFORM;
-    public static AbstractUniform MULTIVIEW_LAYER_INDEX;
 
     // end portal shaders
     public static ShaderProgram RENDERTYPE_END_PORTAL_VR_SHADER = new ShaderProgram(
@@ -101,22 +85,5 @@ public class VRShaders {
         POST_PROCESSING_OVERLAY_EYE_UNIFORM = program.safeGetUniform("eye");
         POST_PROCESSING_OVERLAY_TIME_UNIFORM = program.safeGetUniform("portaltime");
         POST_PROCESSING_OVERLAY_BLACK_ALPHA_UNIFORM = program.safeGetUniform("blackalpha");
-    }
-
-    public static void setupMultiview() {
-        CompiledShaderProgram program = Minecraft.getInstance().getShaderManager().getProgram(MULTIVIEW_SHADER);
-        MULTIVIEW_FOV_REDUCTION_RADIUS_UNIFORM = program.safeGetUniform("circle_radius");
-        MULTIVIEW_FOV_REDUCTION_OFFSET_UNIFORM = program.safeGetUniform("circle_offset");
-        MULTIVIEW_FOV_REDUCTION_BORDER_UNIFORM = program.safeGetUniform("border");
-        MULTIVIEW_OVERLAY_HEALTH_ALPHA_UNiFORM = program.safeGetUniform("redalpha");
-        MULTIVIEW_OVERLAY_FREEZE_ALPHA_UNiFORM = program.safeGetUniform("bluealpha");
-        MULTIVIEW_OVERLAY_WATER_AMPLITUDE_UNIFORM = program.safeGetUniform("water");
-        MULTIVIEW_OVERLAY_PORTAL_AMPLITUDE_UNIFORM = program.safeGetUniform("portal");
-        MULTIVIEW_OVERLAY_PUMPKIN_AMPLITUDE_UNIFORM = program.safeGetUniform("pumpkin");
-        MULTIVIEW_OVERLAY_EYE_UNIFORM = program.safeGetUniform("eye");
-        MULTIVIEW_OVERLAY_TIME_UNIFORM = program.safeGetUniform("portaltime");
-        MULTIVIEW_OVERLAY_BLACK_ALPHA_UNIFORM = program.safeGetUniform("blackalpha");
-        MULTIVIEW_MODEL_VIEW_MATRIX_UNIFORM = program.safeGetUniform("ModelViewMat");
-        MULTIVIEW_LAYER_INDEX = program.safeGetUniform("layerIndex");
     }
 }

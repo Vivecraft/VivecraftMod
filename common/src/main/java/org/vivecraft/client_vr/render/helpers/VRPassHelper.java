@@ -43,21 +43,18 @@ public class VRPassHelper {
         RenderSystem.enableDepthTest();
 
         // THIS IS WHERE EVERYTHING IS RENDERED
-        if(DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
+        if(eye == RenderPass.MULTIVIEW) {
             DATA_HOLDER.vrRenderer.getMultiviewTarget().bindWrite(true);
-            ShaderHelper.doMultiview(DATA_HOLDER.vrRenderer.getMultiviewTarget(),
-                deltaTracker.getGameTimeDeltaPartialTick(false));
         }
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
         RenderHelper.checkGLError("post game render " + eye);
 
-        if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT
-            || DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
+        if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
+            RenderTarget rendertarget = MC.getMainRenderTarget();
 
             // copies the rendered scene to eye tex with fsaa and other postprocessing effects.
             Profiler.get().push("postProcessEye");
-            RenderTarget rendertarget = MC.getMainRenderTarget();
 
             if (DATA_HOLDER.vrSettings.useFsaa) {
                 Profiler.get().push("fsaa");
@@ -73,8 +70,6 @@ public class VRPassHelper {
                 DATA_HOLDER.vrRenderer.getLeftEyeTarget().bindWrite(true);
             } else if (eye == RenderPass.RIGHT) {
                 DATA_HOLDER.vrRenderer.getRightEyeTarget().bindWrite(true);
-            } else if(DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
-                DATA_HOLDER.vrRenderer.getMultiviewTarget().bindWrite(true);
             }
 
             // do post-processing

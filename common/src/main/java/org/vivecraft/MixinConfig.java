@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client_vr.extensions.ClassDependentMixin;
+import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
 import java.io.IOException;
@@ -54,6 +55,10 @@ public class MixinConfig implements IMixinConfigPlugin {
         if (!Xplat.isModLoadedSuccess()) {
             LOGGER.info("Vivecraft: not loading '{}' because mod failed to load completely", mixinClassName);
             return false;
+        }
+
+        if(mixinClassName.endsWith("GlslPreprocessorMixin")) {
+            return VRSettings.INSTANCE.enableOVRMultiview;
         }
 
         // only try to apply mod mixins if the target class was found

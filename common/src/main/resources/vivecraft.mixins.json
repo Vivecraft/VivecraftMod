@@ -43,6 +43,7 @@
     "client_vr.blaze3d.platform.GlStateManagerVRMixin",
     "client_vr.blaze3d.platform.InputConstantsVRMixin",
     "client_vr.blaze3d.platform.WindowVRMixin",
+    "client_vr.blaze3d.shaders.CompiledShaderMixin",
     "client_vr.blaze3d.systems.RenderSystemVRMixin",
     "client_vr.gui.EditBoxVRMixin",
     "client_vr.gui.GuiVRMixin",

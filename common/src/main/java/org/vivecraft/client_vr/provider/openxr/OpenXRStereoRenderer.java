@@ -11,6 +11,7 @@ import org.lwjgl.system.MemoryStack;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.VRRenderer;
+import org.vivecraft.client_vr.render.MultiViewRenderTarget;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 
@@ -22,7 +23,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
     private int swapIndex;
     private VRTextureTarget[] leftFramebuffers;
     private VRTextureTarget[] rightFramebuffers;
-    private VRTextureTarget[] multiviewFramebuffers;
+    private MultiViewRenderTarget[] multiviewFramebuffers;
     private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
     private boolean recalculateProjectionMatrix = true;
 
@@ -54,7 +55,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
                 this.leftFramebuffers = new VRTextureTarget[imageCount];
                 this.rightFramebuffers = new VRTextureTarget[imageCount];
             } else {
-                this.multiviewFramebuffers = new VRTextureTarget[imageCount];
+                this.multiviewFramebuffers = new MultiViewRenderTarget[imageCount];
             }
 
             for (int i = 0; i < imageCount; i++) {
@@ -70,7 +71,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
                         this.lastError = !leftError.isEmpty() ? leftError : rightError;
                     }
                 } else {
-                    this.multiviewFramebuffers[i] = new VRTextureTarget("Multiview " + i, width, height, openxrImage.image(), 0, true);
+                    this.multiviewFramebuffers[i] = new MultiViewRenderTarget(true, width, height, openxrImage.image(), 2);
                     String multiviewError = RenderHelper.checkGLError("Multiview " + i + " framebuffer setup");
 
                     if (this.lastError.isEmpty() && !multiviewError.isEmpty()) { this.lastError = multiviewError; }
@@ -224,7 +225,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
         }
 
         if (this.multiviewFramebuffers != null) {
-            for (VRTextureTarget multiviewFramebuffer : this.multiviewFramebuffers) {
+            for (MultiViewRenderTarget multiviewFramebuffer : this.multiviewFramebuffers) {
                 multiviewFramebuffer.destroyBuffers();
             }
             this.multiviewFramebuffers = null;
