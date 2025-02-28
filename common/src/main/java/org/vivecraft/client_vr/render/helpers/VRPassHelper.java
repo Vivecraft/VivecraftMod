@@ -44,6 +44,7 @@ public class VRPassHelper {
 
         // THIS IS WHERE EVERYTHING IS RENDERED
         if(eye == RenderPass.MULTIVIEW) {
+            DATA_HOLDER.vrRenderer.framebufferVrRender = DATA_HOLDER.vrRenderer.getMultiviewTarget();
             DATA_HOLDER.vrRenderer.getMultiviewTarget().bindWrite(true);
         }
         MC.gameRenderer.render(deltaTracker, renderLevel);
