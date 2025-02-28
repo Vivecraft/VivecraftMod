@@ -129,7 +129,7 @@ public abstract class VRRenderer {
      * @param farClip  far clip plane of the projection matrix
      * @return the projection matrix
      */
-    protected abstract Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip);
+    public abstract Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip);
 
     /**
      * this is the last thing to call after all passes are rendered.
@@ -684,8 +684,7 @@ public abstract class VRRenderer {
             int eyeFBHeight = (int) Math.ceil(eyeh * this.renderScale);
 
             if(VRSettings.INSTANCE.enableOVRMultiview) {
-                this.framebufferVrRender = new VRTextureTarget("3D Render", eyeFBWidth, eyeFBHeight, true, -1, true, false,
-                dataholder.vrSettings.vrUseStencil && StencilHelper.stencilBufferSupported());
+                this.framebufferVrRender = new MultiViewRenderTarget(true, eyeFBWidth, eyeFBHeight, -1, 2);
             } else {
                 this.framebufferVrRender = new VRTextureTarget("3D Render", eyeFBWidth, eyeFBHeight, true, -1, true, false,
                     dataholder.vrSettings.vrUseStencil && StencilHelper.stencilBufferSupported());
@@ -726,21 +725,40 @@ public abstract class VRRenderer {
                 false, -1, false, false, false);
 
             GuiHandler.updateResolution();
-            GuiHandler.GUI_FRAMEBUFFER = new VRTextureTarget("GUI", GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT, true,
-                -1, true, dataholder.vrSettings.guiMipmaps, false);
-            VRSettings.LOGGER.info("Vivecraft: {}", GuiHandler.GUI_FRAMEBUFFER);
-            RenderHelper.checkGLError("GUI framebuffer setup");
+            if(!VRSettings.INSTANCE.enableOVRMultiview) {
+                GuiHandler.GUI_FRAMEBUFFER = new VRTextureTarget("GUI", GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT,
+                    true,
+                    -1, true, dataholder.vrSettings.guiMipmaps, false);
+                VRSettings.LOGGER.info("Vivecraft: {}", GuiHandler.GUI_FRAMEBUFFER);
+                RenderHelper.checkGLError("GUI framebuffer setup");
 
-            KeyboardHandler.FRAMEBUFFER = new VRTextureTarget("Keyboard", GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT,
-                true, -1, true, dataholder.vrSettings.guiMipmaps, false);
-            VRSettings.LOGGER.info("Vivecraft: {}", KeyboardHandler.FRAMEBUFFER);
-            RenderHelper.checkGLError("Keyboard framebuffer setup");
+                KeyboardHandler.FRAMEBUFFER = new VRTextureTarget("Keyboard", GuiHandler.GUI_WIDTH,
+                    GuiHandler.GUI_HEIGHT,
+                    true, -1, true, dataholder.vrSettings.guiMipmaps, false);
+                VRSettings.LOGGER.info("Vivecraft: {}", KeyboardHandler.FRAMEBUFFER);
+                RenderHelper.checkGLError("Keyboard framebuffer setup");
 
-            RadialHandler.FRAMEBUFFER = new VRTextureTarget("Radial Menu", GuiHandler.GUI_WIDTH, GuiHandler.GUI_HEIGHT,
-                true, -1, true, dataholder.vrSettings.guiMipmaps, false);
-            VRSettings.LOGGER.info("Vivecraft: {}", RadialHandler.FRAMEBUFFER);
-            RenderHelper.checkGLError("Radial framebuffer setup");
+                RadialHandler.FRAMEBUFFER = new VRTextureTarget("Radial Menu", GuiHandler.GUI_WIDTH,
+                    GuiHandler.GUI_HEIGHT,
+                    true, -1, true, dataholder.vrSettings.guiMipmaps, false);
+                VRSettings.LOGGER.info("Vivecraft: {}", RadialHandler.FRAMEBUFFER);
+                RenderHelper.checkGLError("Radial framebuffer setup");
+            } else {
+                GuiHandler.GUI_FRAMEBUFFER = new MultiViewRenderTarget(true, GuiHandler.GUI_WIDTH,
+                    GuiHandler.GUI_HEIGHT, -1, 2);
+                VRSettings.LOGGER.info("Vivecraft: {}", GuiHandler.GUI_FRAMEBUFFER);
+                RenderHelper.checkGLError("GUI framebuffer setup");
 
+                KeyboardHandler.FRAMEBUFFER = new MultiViewRenderTarget(true, GuiHandler.GUI_WIDTH,
+                    GuiHandler.GUI_HEIGHT, -1, 2);
+                VRSettings.LOGGER.info("Vivecraft: {}", KeyboardHandler.FRAMEBUFFER);
+                RenderHelper.checkGLError("Keyboard framebuffer setup");
+
+                RadialHandler.FRAMEBUFFER = new MultiViewRenderTarget(true, GuiHandler.GUI_WIDTH,
+                    GuiHandler.GUI_HEIGHT, -1, 2);
+                VRSettings.LOGGER.info("Vivecraft: {}", RadialHandler.FRAMEBUFFER);
+                RenderHelper.checkGLError("Radial framebuffer setup");
+            }
 
             Tuple<Integer, Integer> telescopeSize = getTelescopeTextureSize(eyeFBWidth, eyeFBHeight);
 

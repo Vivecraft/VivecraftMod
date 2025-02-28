@@ -72,6 +72,9 @@ public class RenderHelper {
             return new Matrix4f().rotation(MCVR.get().hmdRotHistory
                 .averageRotation(DATA_HOLDER.vrSettings.displayMirrorCenterSmooth));
         } else {
+            if(renderPass == RenderPass.MULTIVIEW) {
+                return DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getMatrix().transpose();
+            }
             return DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().transpose();
         }
     }
@@ -114,6 +117,9 @@ public class RenderHelper {
                 .rotateY(vrData.rotation_radians);
             return new Vec3(pos.x + vrData.origin.x, pos.y + vrData.origin.y, pos.z + vrData.origin.z);
         } else {
+            if(renderPass == RenderPass.MULTIVIEW) {
+                renderPass = RenderPass.CENTER;
+            }
             return vrData.getEye(renderPass).getPosition();
         }
     }

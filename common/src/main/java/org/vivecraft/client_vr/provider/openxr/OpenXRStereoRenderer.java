@@ -21,9 +21,8 @@ import java.nio.IntBuffer;
 public class OpenXRStereoRenderer extends VRRenderer {
     private final MCOpenXR openxr;
     private int swapIndex;
-    private VRTextureTarget[] leftFramebuffers;
-    private VRTextureTarget[] rightFramebuffers;
-    private MultiViewRenderTarget[] multiviewFramebuffers;
+    private RenderTarget[] leftFramebuffers;
+    private RenderTarget[] rightFramebuffers;
     private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
     private boolean recalculateProjectionMatrix = true;
 
@@ -51,30 +50,19 @@ public class OpenXRStereoRenderer extends VRRenderer {
                 XrSwapchainImageBaseHeader.create(swapchainImageBuffer.address(), swapchainImageBuffer.capacity()));
             this.openxr.logError(error, "xrEnumerateSwapchainImages", "get images");
 
-            if (!ClientDataHolderVR.getInstance().vrSettings.enableOVRMultiview) {
-                this.leftFramebuffers = new VRTextureTarget[imageCount];
-                this.rightFramebuffers = new VRTextureTarget[imageCount];
-            } else {
-                this.multiviewFramebuffers = new MultiViewRenderTarget[imageCount];
-            }
+            this.leftFramebuffers = new VRTextureTarget[imageCount];
+            this.rightFramebuffers = new VRTextureTarget[imageCount];
 
             for (int i = 0; i < imageCount; i++) {
                 XrSwapchainImageOpenGLKHR openxrImage = swapchainImageBuffer.get(i);
 
-                if (!ClientDataHolderVR.getInstance().vrSettings.enableOVRMultiview) {
-                    this.leftFramebuffers[i] = new VRTextureTarget("L Eye " + i, width, height, openxrImage.image(), 0, false);
-                    String leftError = RenderHelper.checkGLError("Left Eye " + i + " framebuffer setup");
-                    this.rightFramebuffers[i] = new VRTextureTarget("R Eye " + i, width, height, openxrImage.image(), 1, false);
-                    String rightError = RenderHelper.checkGLError("Right Eye " + i + " framebuffer setup");
+                this.leftFramebuffers[i] = new VRTextureTarget("L Eye " + i, width, height, openxrImage.image(), 0);
+                String leftError = RenderHelper.checkGLError("Left Eye " + i + " framebuffer setup");
+                this.rightFramebuffers[i] = new VRTextureTarget("R Eye " + i, width, height, openxrImage.image(), 1);
+                String rightError = RenderHelper.checkGLError("Right Eye " + i + " framebuffer setup");
 
-                    if (this.lastError.isEmpty()) {
-                        this.lastError = !leftError.isEmpty() ? leftError : rightError;
-                    }
-                } else {
-                    this.multiviewFramebuffers[i] = new MultiViewRenderTarget(true, width, height, openxrImage.image(), 2);
-                    String multiviewError = RenderHelper.checkGLError("Multiview " + i + " framebuffer setup");
-
-                    if (this.lastError.isEmpty() && !multiviewError.isEmpty()) { this.lastError = multiviewError; }
+                if (this.lastError.isEmpty()) {
+                    this.lastError = !leftError.isEmpty() ? leftError : rightError;
                 }
             }
         }
@@ -193,7 +181,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
     @Override
     public RenderTarget getMultiviewTarget() {
-        return this.multiviewFramebuffers[this.swapIndex];
+        return null;
     }
 
     @Override
@@ -211,24 +199,17 @@ public class OpenXRStereoRenderer extends VRRenderer {
         super.destroy();
 
         if (this.leftFramebuffers != null) {
-            for (VRTextureTarget leftFramebuffer : this.leftFramebuffers) {
+            for (RenderTarget leftFramebuffer : this.leftFramebuffers) {
                 leftFramebuffer.destroyBuffers();
             }
             this.leftFramebuffers = null;
         }
 
         if (this.rightFramebuffers != null) {
-            for (VRTextureTarget rightFramebuffer : this.rightFramebuffers) {
+            for (RenderTarget rightFramebuffer : this.rightFramebuffers) {
                 rightFramebuffer.destroyBuffers();
             }
             this.rightFramebuffers = null;
-        }
-
-        if (this.multiviewFramebuffers != null) {
-            for (MultiViewRenderTarget multiviewFramebuffer : this.multiviewFramebuffers) {
-                multiviewFramebuffer.destroyBuffers();
-            }
-            this.multiviewFramebuffers = null;
         }
     }
 }

@@ -43,15 +43,12 @@ public class VRPassHelper {
         RenderSystem.enableDepthTest();
 
         // THIS IS WHERE EVERYTHING IS RENDERED
-        if(eye == RenderPass.MULTIVIEW) {
-            DATA_HOLDER.vrRenderer.framebufferVrRender = DATA_HOLDER.vrRenderer.getMultiviewTarget();
-            DATA_HOLDER.vrRenderer.getMultiviewTarget().bindWrite(true);
-        }
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
         RenderHelper.checkGLError("post game render " + eye);
 
-        if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
+        if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT
+            || DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
             RenderTarget rendertarget = MC.getMainRenderTarget();
 
             // copies the rendered scene to eye tex with fsaa and other postprocessing effects.
@@ -67,15 +64,19 @@ public class VRPassHelper {
                 Profiler.get().pop();
             }
 
-            if (eye == RenderPass.LEFT) {
-                DATA_HOLDER.vrRenderer.getLeftEyeTarget().bindWrite(true);
-            } else if (eye == RenderPass.RIGHT) {
-                DATA_HOLDER.vrRenderer.getRightEyeTarget().bindWrite(true);
-            }
+            for(int i = 0; i < 2; i++) {
+                if (i == 0) {
+                    eye = RenderPass.LEFT;
+                    DATA_HOLDER.vrRenderer.getLeftEyeTarget().bindWrite(true);
+                } else {
+                    eye = RenderPass.RIGHT;
+                    DATA_HOLDER.vrRenderer.getRightEyeTarget().bindWrite(true);
+                }
 
-            // do post-processing
-            ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
-            RenderHelper.checkGLError("post overlay" + eye);
+                // do post-processing
+                ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
+                RenderHelper.checkGLError("post overlay " + eye);
+            }
             Profiler.get().pop();
         }
 

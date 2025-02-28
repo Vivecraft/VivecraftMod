@@ -23,14 +23,14 @@ public abstract class CompiledShaderProgramVRMixin {
         return Math.max(constant, RenderSystemAccessor.getShaderTextures().length);
     }
 
-    @Inject(method = "apply", at = @At("RETURN"))
+    @Inject(method = "apply", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glUseProgram(I)V"))
     private void vivecraft$apply(CallbackInfo ci) {
         ShaderHelper.doMultiview((CompiledShaderProgram) (Object) this);
     }
 
     @Redirect(method = "setupUniforms", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/CompiledShaderProgram;parseUniformNode(Lnet/minecraft/client/renderer/ShaderProgramConfig$Uniform;)Lcom/mojang/blaze3d/shaders/Uniform;"))
     private Uniform vivecraft$replaceUniform(CompiledShaderProgram instance, ShaderProgramConfig.Uniform uniform) {
-        if(uniform.type().equals("matrix4x4") && uniform.name().equals("ModelViewMat")) {
+        if(uniform.type().equals("matrix4x4") && uniform.name().equals("ProjMat")) {
             int i = Uniform.getTypeFromString(uniform.type());
             int j = 32;
             int k = j > 1 && j <= 4 && i < 8 ? j - 1 : 0;

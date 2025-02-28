@@ -204,9 +204,16 @@ public abstract class GameRendererVRMixin
     {
         if (VRState.VR_RUNNING) {
             zNear = vivecraft$MIN_CLIP_DISTANCE;
+
             if (MethodHolder.isInMenuRoom()) {
                 // use 16 Chunks as minimum, to have no issues with clipping in the menuworld
                 zFar = Math.max(zFar, 1024.0F);
+            }
+
+            if(vivecraft$DATA_HOLDER.vrSettings.enableOVRMultiview) {
+                return instance.mul(vivecraft$DATA_HOLDER.vrRenderer.getProjectionMatrix(
+                    1, zNear, zFar).sub(vivecraft$DATA_HOLDER.vrRenderer.getProjectionMatrix(
+                    0, zNear, zFar)));
             }
 
             if (vivecraft$DATA_HOLDER.currentPass == RenderPass.LEFT ||
@@ -433,6 +440,11 @@ public abstract class GameRendererVRMixin
                     data.getEye(RenderPass.CENTER).getPosition());
                 data.getEye(RenderPass.CENTER).getMatrix().invert().transformPosition(offset);
                 poseStack.translate(-offset.x, -offset.y, -offset.z);
+            } else if (pass == RenderPass.MULTIVIEW) {
+                // apply stereo offset, but screen relative, not world
+                VRData data = vivecraft$DATA_HOLDER.vrPlayer.getVRDataWorld();
+                data.getEye(RenderPass.CENTER).getMatrix().invert();
+                poseStack.translate(-data.getEye(RenderPass.CENTER).getPosition().x, -data.getEye(RenderPass.CENTER).getPosition().y, -data.getEye(RenderPass.CENTER).getPosition().z);
             }
 
             // call the scale with original to allow operation stacking

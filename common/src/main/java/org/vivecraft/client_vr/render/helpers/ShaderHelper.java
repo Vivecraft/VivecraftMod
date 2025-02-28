@@ -19,9 +19,11 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.opengl.GL43;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.render.MirrorNotification;
@@ -56,9 +58,9 @@ public class ShaderHelper {
         CompiledShaderProgram program = Objects.requireNonNull(
             RenderSystem.setShader(instance), "required shader not loaded");
 
-        program.bindSampler("Sampler0", source.getColorTextureId());
         program.apply();
 
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, source.getColorTextureId());
         drawFullscreenQuad(instance.vertexFormat());
 
         program.clear();
@@ -240,15 +242,18 @@ public class ShaderHelper {
     }
 
     public static void doMultiview(CompiledShaderProgram program) {
-        if(program.MODEL_VIEW_MATRIX == null || DATA_HOLDER == null || DATA_HOLDER.vrRenderer == null) {
+        if(program.PROJECTION_MATRIX == null || DATA_HOLDER == null || DATA_HOLDER.vrRenderer == null) {
             return;
         }
 
-        if(DATA_HOLDER.vrRenderer.eyeProj[0] != null) {
+        float zFar = MethodHolder.isInMenuRoom() ? 1024f : MC.gameRenderer.getDepthFar();
+        Matrix4f eyeLeft = DATA_HOLDER.vrRenderer.getProjectionMatrix(0, 0.02f, zFar);
+
+        if(eyeLeft != null) {
             float[] mat = new float[32];
-            DATA_HOLDER.vrRenderer.eyeProj[0].get(mat);
-            DATA_HOLDER.vrRenderer.eyeProj[1].get(mat, 16);
-            program.MODEL_VIEW_MATRIX.set(mat);
+            eyeLeft.get(mat, 16);
+            DATA_HOLDER.vrRenderer.getProjectionMatrix(1, 0.02f, zFar).get(mat);
+            program.PROJECTION_MATRIX.set(mat);
         }
     }
 
