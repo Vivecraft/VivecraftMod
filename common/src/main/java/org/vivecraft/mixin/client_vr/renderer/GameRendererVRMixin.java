@@ -283,16 +283,20 @@ public abstract class GameRendererVRMixin
     private void vivecraft$renderFaceOverlay(
         GameRenderer instance, DeltaTracker deltaTracker, Operation<Void> original)
     {
+        System.out.println("renderFaceOverlay Before");
         original.call(instance, deltaTracker);
         if (VRState.VR_RUNNING && vivecraft$DATA_HOLDER.currentPass != RenderPass.THIRD &&
             vivecraft$DATA_HOLDER.currentPass != RenderPass.CAMERA)
         {
+            System.out.println("renderFaceOverlay During");
             VREffectsHelper.renderFaceOverlay(deltaTracker.getGameTimeDeltaPartialTick(false));
         }
+        System.out.println("renderFaceOverlay After");
     }
 
     @ModifyExpressionValue(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;effectActive:Z"))
     private boolean vivecraft$noEffectInThird(boolean effectActive) {
+        System.out.println("noEffectInThird");
         return effectActive && vivecraft$DATA_HOLDER.currentPass != RenderPass.THIRD;
     }
 
@@ -315,6 +319,7 @@ public abstract class GameRendererVRMixin
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", ordinal = 6), cancellable = true)
     private void vivecraft$mainMenu(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
+        System.out.println("mainMenu");
         if (RenderPassType.isVanilla()) {
             return;
         }
@@ -372,6 +377,7 @@ public abstract class GameRendererVRMixin
 
     @ModifyVariable(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getWindow()Lcom/mojang/blaze3d/platform/Window;", shift = Shift.AFTER, ordinal = 6), ordinal = 0, argsOnly = true)
     private boolean vivecraft$renderGui(boolean renderLevel) {
+        System.out.println("renderGui");
         return RenderPassType.isVanilla() ? renderLevel : this.vivecraft$shouldDrawGui;
     }
 
@@ -379,11 +385,13 @@ public abstract class GameRendererVRMixin
     private boolean vivecraft$noItemActivationAnimationOnGUI(
         GameRenderer instance, GuiGraphics guiGraphics, float partialTick)
     {
+        System.out.println("noItemActivationAnimationOnGUI");
         return RenderPassType.isVanilla();
     }
 
     @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V"))
     private boolean vivecraft$noGUIWithViewOnly(Gui instance, GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+        System.out.println("noGUIWithViewOnly");
         return RenderPassType.isVanilla() || !ClientDataHolderVR.VIEW_ONLY;
     }
 
@@ -454,6 +462,7 @@ public abstract class GameRendererVRMixin
 
     @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;pick(F)V"))
     private void vivecraft$onlyOnePick(GameRenderer instance, float partialTick, Operation<Void> original) {
+        System.out.println("onlyOnePick");
         if (RenderPassType.isVanilla()) {
             original.call(instance, partialTick);
             return;
@@ -478,6 +487,7 @@ public abstract class GameRendererVRMixin
 
     @ModifyVariable(method = "renderLevel", at = @At(value = "STORE"))
     private int vivecraft$reduceNauseaSpeed(int oldVal) {
+        System.out.println("reduceNauseaSpeed");
         if (!RenderPassType.isVanilla()) {
             return oldVal / 5;
         } else {
@@ -487,6 +497,7 @@ public abstract class GameRendererVRMixin
 
     @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;lerp(FFF)F"))
     private float vivecraft$reduceNauseaAffect(float delta, float start, float end, Operation<Float> original) {
+        System.out.println("reduceNauseaAffect");
         if (!RenderPassType.isVanilla()) {
             // scales down the effect from (1,0.65) to (1,0.9)
             return original.call(delta, start, end) * 0.4F;
@@ -497,24 +508,29 @@ public abstract class GameRendererVRMixin
 
     @ModifyArg(at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;rotation(Lorg/joml/Quaternionfc;)Lorg/joml/Matrix4f;", remap = false), method = "renderLevel", index = 0, remap = true)
     public Quaternionfc vivecraft$nullifyCameraRotation(Quaternionfc rotation) {
+        System.out.println("nullifyCameraRotation");
         return RenderPassType.isVanilla() ? rotation : new Quaternionf();
     }
 
     @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;prepareCullFrustum(Lnet/minecraft/world/phys/Vec3;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"), index = 1)
     private Matrix4f vivecraft$applyModelView(Matrix4f matrix) {
+        System.out.println("applyModelView start");
         if (!RenderPassType.isVanilla()) {
             RenderHelper.applyVRModelView(ClientDataHolderVR.getInstance().currentPass, matrix);
         }
+        System.out.println("applyModelView end");
         return matrix;
     }
 
     @ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"))
     private boolean vivecraft$noHandsInVR(boolean renderHand) {
+        System.out.println("noHandsInVR");
         return renderHand && RenderPassType.isVanilla();
     }
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
     private void vivecraft$disableStencil(CallbackInfo ci) {
+        System.out.println("disableStencil");
         if (!RenderPassType.isVanilla()) {
             VREffectsHelper.disableStencilTest();
         }
@@ -522,6 +538,7 @@ public abstract class GameRendererVRMixin
 
     @Inject(method = "renderLevel", at = @At(value = "TAIL"))
     private void vivecraft$restoreRVE(CallbackInfo ci) {
+        System.out.println("restoreRVE");
         if (!RenderPassType.isVanilla()) {
             this.vivecraft$restoreRVEPos(this.minecraft.getCameraEntity());
         }

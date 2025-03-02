@@ -72,6 +72,7 @@ public class RenderHelper {
             return new Matrix4f().rotation(MCVR.get().hmdRotHistory
                 .averageRotation(DATA_HOLDER.vrSettings.displayMirrorCenterSmooth));
         } else {
+            System.out.println("getVRModelView: " + renderPass);
             if(renderPass == RenderPass.MULTIVIEW) {
                 return DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getMatrix().transpose();
             }
