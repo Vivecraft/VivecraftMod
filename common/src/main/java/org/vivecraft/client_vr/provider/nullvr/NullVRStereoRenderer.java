@@ -112,9 +112,6 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public RenderTarget getMultiviewTarget() { return this.framebufferMultiview; }
-
-    @Override
     public float[] getStencilMask(RenderPass eye) {
         return null;
     }

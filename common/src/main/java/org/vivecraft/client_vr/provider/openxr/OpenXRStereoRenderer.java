@@ -180,11 +180,6 @@ public class OpenXRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public RenderTarget getMultiviewTarget() {
-        return null;
-    }
-
-    @Override
     public String getName() {
         return "OpenXR";
     }

@@ -155,12 +155,6 @@ public abstract class VRRenderer {
     public abstract RenderTarget getRightEyeTarget();
 
     /**
-     * @return the multiview rendertarget
-     */
-    //TODO: Implement Shader Helper
-    public abstract RenderTarget getMultiviewTarget();
-
-    /**
      * gets an array with the vertex info of the stencil mesh, if there is one provided by this renderer
      *
      * @param eye which eye the stencil should be for

@@ -5,12 +5,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL42;
-import org.lwjgl.opengl.OVRMultiview;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.RenderTargetExtension;
-
-import java.nio.IntBuffer;
 
 /**
  * extension of a regular RenderTarget that sets Vivecraft features on creation
@@ -50,18 +46,16 @@ public class VRTextureTarget extends RenderTarget {
         this.name = name;
         this.index = index;
         RenderSystem.assertOnRenderThreadOrInit();
-        this.colorTextureId = colorId;
         this.resize(width, height);
         // free the old one when setting a new one
         if (this.colorTextureId != -1) {
             TextureUtil.releaseTextureId(this.colorTextureId);
         }
+        this.colorTextureId = colorId;
 
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.frameBufferId);
         // unset the old GL_COLOR_ATTACHMENT0
-
-        GlStateManager._glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL30.GL_TEXTURE_2D,
-            0,
+        GlStateManager._glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL30.GL_TEXTURE_2D, 0,
             0);
         GL30.glFramebufferTextureLayer(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, colorId, 0, index);
 
