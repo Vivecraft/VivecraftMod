@@ -43,15 +43,12 @@ public class VRPassHelper {
         RenderSystem.enableDepthTest();
 
         // THIS IS WHERE EVERYTHING IS RENDERED
-        System.out.println("Vivecraft: renderSingleView Before gameRenderer.render");
         MC.gameRenderer.render(deltaTracker, renderLevel);
-        System.out.println("Vivecraft: renderSingleView After gameRenderer.render");
 
         RenderHelper.checkGLError("post game render " + eye);
 
         if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT
             || DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
-            System.out.println("Vivecraft: renderSingleView After 1st if");
 
             // copies the rendered scene to eye tex with fsaa and other postprocessing effects.
             Profiler.get().push("postProcessEye");
@@ -66,8 +63,6 @@ public class VRPassHelper {
                 RenderHelper.checkGLError("fsaa " + eye);
                 Profiler.get().pop();
             }
-
-            System.out.println("Vivecraft: renderSingleView After 2nd if");
 
             for(int i = 0; i < 2; i++) {
                 if (i == 0) {
@@ -97,8 +92,6 @@ public class VRPassHelper {
             Profiler.get().pop();
         }
 
-        System.out.println("Vivecraft: renderSingleView After 3rd if");
-
         if (DATA_HOLDER.currentPass == RenderPass.THIRD &&
             DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY &&
             renderLevel && MC.level != null &&
@@ -117,6 +110,8 @@ public class VRPassHelper {
         }
     }
 
+
+
     /**
      * renders all passes, and submits the final frames to the VR runtime
      *
@@ -124,7 +119,6 @@ public class VRPassHelper {
      * @param deltaTracker tracker to get the partial tick from
      */
     public static void renderAndSubmit(boolean renderLevel, DeltaTracker.Timer deltaTracker) {
-        System.out.println("Vivecraft: renderAndSubmit 1");
         // still rendering
         Profiler.get().push("gameRenderer");
         Profiler.get().push("VR guis");
@@ -171,8 +165,6 @@ public class VRPassHelper {
         } catch (IllegalStateException ignore) {
             VRSettings.LOGGER.error("Vivecraft: ModelViewStack was empty!");
         }
-
-        System.out.println("Vivecraft: renderAndSubmit 2");
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps
@@ -227,15 +219,11 @@ public class VRPassHelper {
                 case CAMERA -> RenderPassManager.setWorldRenderPass(WorldRenderPass.CAMERA);
             }
 
-            System.out.println("Vivecraft: renderAndSubmit After Switch");
-
             Profiler.get().push("Eye:" + DATA_HOLDER.currentPass);
             Profiler.get().push("setup");
             MC.mainRenderTarget.bindWrite(true);
             Profiler.get().pop();
-            System.out.println("Vivecraft: renderAndSubmit Before renderSingleView");
             VRPassHelper.renderSingleView(renderpass, deltaTracker, renderLevel);
-            System.out.println("Vivecraft: renderAndSubmit After renderSingleView");
             Profiler.get().pop();
 
             if (DATA_HOLDER.grabScreenShot) {
@@ -270,8 +258,6 @@ public class VRPassHelper {
         // now we are done with rendering
         Profiler.get().pop();
 
-        System.out.println("Vivecraft: renderAndSubmit After Pop");
-
         DATA_HOLDER.vrPlayer.postRender(deltaTracker.getGameTimeDeltaPartialTick(true));
 
         Profiler.get().push("vrMirror");
@@ -290,6 +276,5 @@ public class VRPassHelper {
         }
         Profiler.get().pop();
         RenderHelper.checkGLError("post submit");
-        System.out.println("Vivecraft: renderAndSubmit End");
     }
 }

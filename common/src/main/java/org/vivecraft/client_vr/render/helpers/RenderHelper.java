@@ -72,7 +72,6 @@ public class RenderHelper {
             return new Matrix4f().rotation(MCVR.get().hmdRotHistory
                 .averageRotation(DATA_HOLDER.vrSettings.displayMirrorCenterSmooth));
         } else {
-            System.out.println("getVRModelView: " + renderPass);
             if(renderPass == RenderPass.MULTIVIEW) {
                 return DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getMatrix().transpose();
             }
@@ -287,7 +286,7 @@ public class RenderHelper {
      * @param screen       the Screen to render
      * @param maxGuiScale  if set, renders the screen at max gui scale
      */
-    public static void drawScreen(
+    public static void  drawScreen(
         GuiGraphics guiGraphics, DeltaTracker deltaTracker, Screen screen, boolean maxGuiScale)
     {
         // setup modelview for screen rendering

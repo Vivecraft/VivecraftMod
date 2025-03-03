@@ -30,6 +30,7 @@ public abstract class CompiledShaderProgramVRMixin {
 
     @Redirect(method = "setupUniforms", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/CompiledShaderProgram;parseUniformNode(Lnet/minecraft/client/renderer/ShaderProgramConfig$Uniform;)Lcom/mojang/blaze3d/shaders/Uniform;"))
     private Uniform vivecraft$replaceUniform(CompiledShaderProgram instance, ShaderProgramConfig.Uniform uniform) {
+        System.out.println("CompiledShaderProgramMixin ShaderID: " + instance.getProgramId());
         if(uniform.type().equals("matrix4x4") && uniform.name().equals("ProjMat")) {
             int i = Uniform.getTypeFromString(uniform.type());
             int j = 32;
