@@ -45,7 +45,7 @@ public class VRPassHelper {
         // THIS IS WHERE EVERYTHING IS RENDERED
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
-        RenderHelper.checkGLError("post game render " + eye);
+        //RenderHelper.checkGLError("post game render " + eye);
 
         if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT
             || DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {

@@ -556,7 +556,7 @@ public class VRSettings {
     @SettingField(value = VrOptions.VR_ENABLED, config = "vrEnabled")
     public boolean vrEnabled = false;
     @SettingField(VrOptions.VR_CLOSE_WITH_RUNTIME)
-    public boolean closeWithRuntime = true;
+    public boolean closeWithRuntime = false;
     @SettingField(VrOptions.VR_REMEMBER_ENABLED)
     public boolean rememberVr = true;
     @SettingField(VrOptions.VR_HOTSWITCH)

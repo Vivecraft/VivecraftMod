@@ -242,7 +242,7 @@ public class ShaderHelper {
     }
 
     public static void doMultiview(CompiledShaderProgram program) {
-        if(program.PROJECTION_MATRIX == null || DATA_HOLDER == null || DATA_HOLDER.vrRenderer == null) {
+        if(program.PROJECTION_MATRIX == null || DATA_HOLDER == null || DATA_HOLDER.vrRenderer == null || program.PROJECTION_MATRIX.getCount() < 32) {
             return;
         }
 
