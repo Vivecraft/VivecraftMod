@@ -45,13 +45,6 @@ public class NullVRStereoRenderer extends VRRenderer {
         return new Matrix4f().setPerspective(Mth.DEG_TO_RAD * 110.0F, 1.0F, nearClip, farClip);
     }
 
-    public void createRenderTextureMultiview(int width, int height) {
-        int boundTextureId = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);
-
-        this.framebufferMultiview = new VRTextureTarget("Multiview", width, height, false, this.LeftEyeTextureId, true, false,
-            false);
-    }
-
     @Override
     public void createRenderTexture(int width, int height) {
         int boundTextureId = GlStateManager._getInteger(GL11.GL_TEXTURE_BINDING_2D);

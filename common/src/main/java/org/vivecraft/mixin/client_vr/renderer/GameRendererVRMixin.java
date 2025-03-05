@@ -210,6 +210,11 @@ public abstract class GameRendererVRMixin
                 zFar = Math.max(zFar, 1024.0F);
             }
 
+            if (vivecraft$DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
+                return instance.mul(vivecraft$DATA_HOLDER.vrRenderer.getCachedProjectionMatrix(
+                    RenderPass.LEFT.ordinal(), zNear, zFar));
+            }
+
             if (vivecraft$DATA_HOLDER.currentPass == RenderPass.LEFT ||
                 vivecraft$DATA_HOLDER.currentPass == RenderPass.RIGHT)
             {
