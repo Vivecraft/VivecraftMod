@@ -15,12 +15,14 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.VRSettings;
 
+//TODO: Do NullVR Impl
 public class NullVRStereoRenderer extends VRRenderer {
 
     protected int LeftEyeTextureId = -1;
     protected int RightEyeTextureId = -1;
     public RenderTarget framebufferEyeLeft;
     public RenderTarget framebufferEyeRight;
+    public RenderTarget framebufferMultiview;
 
     public NullVRStereoRenderer(MCVR vr) {
         super(vr);
@@ -39,7 +41,7 @@ public class NullVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    protected Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
+    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
         return new Matrix4f().setPerspective(Mth.DEG_TO_RAD * 110.0F, 1.0F, nearClip, farClip);
     }
 
@@ -102,7 +104,6 @@ public class NullVRStereoRenderer extends VRRenderer {
         return this.framebufferEyeRight;
     }
 
-
     @Override
     public float[] getStencilMask(RenderPass eye) {
         return null;
@@ -126,6 +127,11 @@ public class NullVRStereoRenderer extends VRRenderer {
         if (this.framebufferEyeRight != null) {
             this.framebufferEyeRight.destroyBuffers();
             this.framebufferEyeRight = null;
+        }
+
+        if (this.framebufferMultiview != null) {
+            this.framebufferMultiview.destroyBuffers();
+            this.framebufferMultiview = null;
         }
 
         if (this.LeftEyeTextureId > -1) {

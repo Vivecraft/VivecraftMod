@@ -14,6 +14,7 @@ import org.vivecraft.client.extensions.RenderTargetExtension;
 public class VRTextureTarget extends RenderTarget {
 
     private final String name;
+    public final int index;
 
     public VRTextureTarget(
         String name, int width, int height, boolean useDepth, int texId, boolean linearFilter, boolean mipmaps,
@@ -21,6 +22,7 @@ public class VRTextureTarget extends RenderTarget {
     {
         super(useDepth);
         this.name = name;
+        this.index = 0;
         RenderSystem.assertOnRenderThreadOrInit();
         ((RenderTargetExtension) this).vivecraft$setTexId(texId);
         ((RenderTargetExtension) this).vivecraft$setLinearFilter(linearFilter);
@@ -42,9 +44,9 @@ public class VRTextureTarget extends RenderTarget {
     public VRTextureTarget(String name, int width, int height, int colorId, int index) {
         super(false);
         this.name = name;
+        this.index = index;
         RenderSystem.assertOnRenderThreadOrInit();
         this.resize(width, height);
-
         // free the old one when setting a new one
         if (this.colorTextureId != -1) {
             TextureUtil.releaseTextureId(this.colorTextureId);

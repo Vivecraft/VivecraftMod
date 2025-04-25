@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
+import net.minecraft.Util;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -16,9 +17,13 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderProgram;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -28,13 +33,16 @@ import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRData;
+import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 import org.vivecraft.client_vr.gameplay.trackers.TelescopeTracker;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.render.RenderPass;
+import org.vivecraft.client_vr.render.VRShaders;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.utils.MathUtils;
 import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.shaders.ShadersHelper;
 
 public class RenderHelper {
@@ -64,6 +72,9 @@ public class RenderHelper {
             return new Matrix4f().rotation(MCVR.get().hmdRotHistory
                 .averageRotation(DATA_HOLDER.vrSettings.displayMirrorCenterSmooth));
         } else {
+            if(renderPass == RenderPass.MULTIVIEW) {
+                return DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(RenderPass.CENTER).getMatrix().transpose();
+            }
             return DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().transpose();
         }
     }
@@ -106,6 +117,9 @@ public class RenderHelper {
                 .rotateY(vrData.rotation_radians);
             return new Vec3(pos.x + vrData.origin.x, pos.y + vrData.origin.y, pos.z + vrData.origin.z);
         } else {
+            if(renderPass == RenderPass.MULTIVIEW) {
+                renderPass = RenderPass.CENTER;
+            }
             return vrData.getEye(renderPass).getPosition();
         }
     }
@@ -272,7 +286,7 @@ public class RenderHelper {
      * @param screen       the Screen to render
      * @param maxGuiScale  if set, renders the screen at max gui scale
      */
-    public static void drawScreen(
+    public static void  drawScreen(
         GuiGraphics guiGraphics, DeltaTracker deltaTracker, Screen screen, boolean maxGuiScale)
     {
         // setup modelview for screen rendering

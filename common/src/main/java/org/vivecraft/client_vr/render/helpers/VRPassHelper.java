@@ -45,9 +45,11 @@ public class VRPassHelper {
         // THIS IS WHERE EVERYTHING IS RENDERED
         MC.gameRenderer.render(deltaTracker, renderLevel);
 
-        RenderHelper.checkGLError("post game render " + eye);
+        //RenderHelper.checkGLError("post game render " + eye);
 
-        if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
+        if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT
+            || DATA_HOLDER.currentPass == RenderPass.MULTIVIEW) {
+
             // copies the rendered scene to eye tex with fsaa and other postprocessing effects.
             Profiler.get().push("postProcessEye");
             RenderTarget rendertarget = MC.getMainRenderTarget();
@@ -62,18 +64,22 @@ public class VRPassHelper {
                 Profiler.get().pop();
             }
 
-            if (eye == RenderPass.LEFT) {
-                DATA_HOLDER.vrRenderer.getLeftEyeTarget().bindWrite(true);
-            } else {
-                DATA_HOLDER.vrRenderer.getRightEyeTarget().bindWrite(true);
+            for(int i = 0; i < 2; i++) {
+                if (i == 0) {
+                    eye = RenderPass.LEFT;
+                    DATA_HOLDER.vrRenderer.getLeftEyeTarget().bindWrite(true);
+                } else {
+                    eye = RenderPass.RIGHT;
+                    DATA_HOLDER.vrRenderer.getRightEyeTarget().bindWrite(true);
+                }
+
+                // do post-processing
+                ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
+                RenderHelper.checkGLError("post overlay " + eye);
             }
-
-            // do post-processing
-            ShaderHelper.doVrPostProcess(eye, rendertarget, deltaTracker.getGameTimeDeltaPartialTick(false));
-
-            RenderHelper.checkGLError("post overlay" + eye);
             Profiler.get().pop();
         }
+
 
         if (DATA_HOLDER.currentPass == RenderPass.CAMERA) {
             Profiler.get().push("cameraCopy");
@@ -104,6 +110,8 @@ public class VRPassHelper {
         }
     }
 
+
+
     /**
      * renders all passes, and submits the final frames to the VR runtime
      *
@@ -113,7 +121,6 @@ public class VRPassHelper {
     public static void renderAndSubmit(boolean renderLevel, DeltaTracker.Timer deltaTracker) {
         // still rendering
         Profiler.get().push("gameRenderer");
-
         Profiler.get().push("VR guis");
 
         // some mods mess with the depth mask?
@@ -153,7 +160,11 @@ public class VRPassHelper {
         }
 
         // pop pose that we pushed before the gui
-        RenderSystem.getModelViewStack().popMatrix();
+        try {
+            RenderSystem.getModelViewStack().popMatrix();
+        } catch (IllegalStateException ignore) {
+            VRSettings.LOGGER.error("Vivecraft: ModelViewStack was empty!");
+        }
 
         if (DATA_HOLDER.vrSettings.guiMipmaps) {
             // update mipmaps
@@ -200,7 +211,7 @@ public class VRPassHelper {
             }
 
             switch (renderpass) {
-                case LEFT, RIGHT -> RenderPassManager.setWorldRenderPass(WorldRenderPass.STEREO_XR);
+                case LEFT, RIGHT, MULTIVIEW -> RenderPassManager.setWorldRenderPass(WorldRenderPass.STEREO_XR);
                 case CENTER -> RenderPassManager.setWorldRenderPass(WorldRenderPass.CENTER);
                 case THIRD -> RenderPassManager.setWorldRenderPass(WorldRenderPass.MIXED_REALITY);
                 case SCOPEL -> RenderPassManager.setWorldRenderPass(WorldRenderPass.LEFT_TELESCOPE);

@@ -698,7 +698,7 @@ public class VREffectsHelper {
      */
     private static void renderGuiAndShadow(float partialTick, boolean depthAlways, boolean shadowFirst) {
         if (shadowFirst) {
-            VREffectsHelper.renderVrShadow(partialTick, depthAlways);
+            //VREffectsHelper.renderVrShadow(partialTick, depthAlways);
         }
         if (Minecraft.getInstance().screen != null || !KeyboardHandler.SHOWING) {
             renderGuiLayer(partialTick, depthAlways);

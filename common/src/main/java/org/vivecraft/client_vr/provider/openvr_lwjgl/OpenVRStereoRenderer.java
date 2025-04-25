@@ -84,7 +84,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    protected Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
+    public Matrix4f getProjectionMatrix(int eyeType, float nearClip, float farClip) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (eyeType == VR.EVREye_Eye_Left) {
                 return OpenVRUtil.Matrix4fFromOpenVR(
@@ -201,6 +201,7 @@ public class OpenVRStereoRenderer extends VRRenderer {
     public RenderTarget getRightEyeTarget() {
         return this.framebufferEyeRight;
     }
+
 
     public float[] getStencilMask(RenderPass eye) {
         if (this.hiddenMeshVertices != null && (eye == RenderPass.LEFT || eye == RenderPass.RIGHT)) {

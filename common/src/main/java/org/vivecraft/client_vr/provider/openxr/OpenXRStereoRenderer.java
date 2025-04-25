@@ -4,10 +4,14 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL42;
 import org.lwjgl.openxr.*;
 import org.lwjgl.system.MemoryStack;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRTextureTarget;
 import org.vivecraft.client_vr.provider.VRRenderer;
+import org.vivecraft.client_vr.render.MultiViewRenderTarget;
 import org.vivecraft.client_vr.render.RenderConfigException;
 import org.vivecraft.client_vr.render.helpers.RenderHelper;
 
@@ -17,9 +21,8 @@ import java.nio.IntBuffer;
 public class OpenXRStereoRenderer extends VRRenderer {
     private final MCOpenXR openxr;
     private int swapIndex;
-    private VRTextureTarget[] leftFramebuffers;
-    private VRTextureTarget[] rightFramebuffers;
-    private boolean render;
+    private RenderTarget[] leftFramebuffers;
+    private RenderTarget[] rightFramebuffers;
     private XrCompositionLayerProjectionView.Buffer projectionLayerViews;
     private boolean recalculateProjectionMatrix = true;
 
@@ -52,6 +55,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
 
             for (int i = 0; i < imageCount; i++) {
                 XrSwapchainImageOpenGLKHR openxrImage = swapchainImageBuffer.get(i);
+
                 this.leftFramebuffers[i] = new VRTextureTarget("L Eye " + i, width, height, openxrImage.image(), 0);
                 String leftError = RenderHelper.checkGLError("Left Eye " + i + " framebuffer setup");
                 this.rightFramebuffers[i] = new VRTextureTarget("R Eye " + i, width, height, openxrImage.image(), 1);
@@ -127,7 +131,7 @@ public class OpenXRStereoRenderer extends VRRenderer {
     }
 
     @Override
-    public void endFrame() throws RenderConfigException {
+    public void endFrame() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer layers = stack.callocPointer(1);
             int error;
@@ -190,14 +194,14 @@ public class OpenXRStereoRenderer extends VRRenderer {
         super.destroy();
 
         if (this.leftFramebuffers != null) {
-            for (VRTextureTarget leftFramebuffer : this.leftFramebuffers) {
+            for (RenderTarget leftFramebuffer : this.leftFramebuffers) {
                 leftFramebuffer.destroyBuffers();
             }
             this.leftFramebuffers = null;
         }
 
         if (this.rightFramebuffers != null) {
-            for (VRTextureTarget rightFramebuffer : this.rightFramebuffers) {
+            for (RenderTarget rightFramebuffer : this.rightFramebuffers) {
                 rightFramebuffer.destroyBuffers();
             }
             this.rightFramebuffers = null;
