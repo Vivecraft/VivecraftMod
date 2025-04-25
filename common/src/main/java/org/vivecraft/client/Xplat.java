@@ -43,6 +43,10 @@ public interface Xplat {
         ModLoader(String name) {
             this.name = name;
         }
+
+        public boolean isFabric() {
+            return this == FABRIC || this == QUILT;
+        }
     }
 
     /**
