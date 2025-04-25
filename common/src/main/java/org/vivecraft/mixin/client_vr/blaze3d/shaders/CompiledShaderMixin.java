@@ -25,6 +25,16 @@ public class CompiledShaderMixin {
     @Unique
     private static final Map<Integer, ResourceLocation> SHADER_MAP = new HashMap<>();
 
+    @Unique
+    private static boolean isMinecraftNamespace = SHADER_LOCATION.getNamespace().contains("minecraft");
+    @Unique
+    private static boolean isCoreShader = SHADER_LOCATION.getPath().contains("core/gui")
+        || SHADER_LOCATION.getPath().contains("core/rendertype_text")
+        || SHADER_LOCATION.getPath().contains("core/position_tex_color")
+        || SHADER_LOCATION.getPath().contains("core/position_color");
+    @Unique
+    private static boolean isVivecraftNamespace = SHADER_LOCATION.getNamespace().contains("vivecraft");
+
     @Inject(method = "compile", at = @At("HEAD"))
     private static void getId(
         ResourceLocation shaderId, CompiledShader.Type type, String source, CallbackInfoReturnable<CompiledShader> cir) {
@@ -34,11 +44,7 @@ public class CompiledShaderMixin {
     @Redirect(method = "compile", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;glShaderSource(ILjava/lang/String;)V"))
     private static void onCompile(int i, String source) {
         SHADER_MAP.put(i, SHADER_LOCATION);
-        if ((SHADER_LOCATION.getNamespace().contains("minecraft") && (!SHADER_LOCATION.getPath().contains("core/gui")
-        && !SHADER_LOCATION.getPath().contains("core/rendertype_text")
-        && !SHADER_LOCATION.getPath().contains("core/position_tex_color")
-        && !SHADER_LOCATION.getPath().contains("core/position_color")))
-        || !SHADER_LOCATION.getNamespace().contains("vivecraft")) {
+        if ((isMinecraftNamespace && !isCoreShader) || !isVivecraftNamespace) {
             if(source.contains("ProjMat") && !source.contains("fragColor") && !source.contains("gl_FragColor")) {
                 source = source.replace("#version 150", """
                 #version 330 core
