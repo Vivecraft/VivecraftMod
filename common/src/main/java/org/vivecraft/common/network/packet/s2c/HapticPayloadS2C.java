@@ -34,15 +34,11 @@ public record HapticPayloadS2C(ControllerType controllerType, float durationSeco
     }
 
     public static HapticPayloadS2C read(FriendlyByteBuf buffer) {
-        try {
-            return new HapticPayloadS2C(
-                buffer.readEnum(ControllerType.class),
-                buffer.readFloat(),
-                buffer.readFloat(),
-                buffer.readFloat(),
-                buffer.readFloat());
-        } catch (Exception e) {
-            VRSettings.LOGGER.error("Vivecraft: Failed to execute haptic payload: {}", e.getMessage());
-        }
+        return new HapticPayloadS2C(
+            buffer.readEnum(ControllerType.class),
+            buffer.readFloat(),
+            buffer.readFloat(),
+            buffer.readFloat(),
+            buffer.readFloat());
     }
 }
