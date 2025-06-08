@@ -18,6 +18,8 @@ import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
+import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.CommonDataHolder;
@@ -389,6 +391,12 @@ public class ClientNetworking {
             }
             case DUAL_WIELDING ->
                 ClientNetworking.SERVER_ALLOWS_DUAL_WIELDING = ((DualWieldingPayloadS2C) s2cPayload).allowed();
+            case HAPTIC -> {
+                HapticPayloadS2C packet = (HapticPayloadS2C) s2cPayload;
+
+                MCVR mcvr = MCVR.get();
+                mcvr.triggerHapticPulse(packet.controllerType(), packet.durationSeconds(), packet.frequency(), packet.amplitude(), packet.delaySeconds());
+            }
         }
     }
 }

@@ -9,13 +9,13 @@ import org.vivecraft.common.network.packet.PayloadIdentifier;
 /**
  * sends a haptic request to the player
  *
- * @param controllerByte  id of the controller to trigger on
+ * @param controllerType of the controller to trigger on
  * @param durationSeconds duration in seconds
  * @param frequency       frequency in Hz
  * @param amplitude       strength 0.0 - 1.0
  * @param delaySeconds    delay for when to trigger in seconds
  */
-public record HapticPayloadS2C(byte controllerByte, float durationSeconds, float frequency, float amplitude, float delaySeconds) implements VivecraftPayloadS2C
+public record HapticPayloadS2C(ControllerType controllerType, float durationSeconds, float frequency, float amplitude, float delaySeconds) implements VivecraftPayloadS2C
 {
 
     @Override
@@ -26,7 +26,7 @@ public record HapticPayloadS2C(byte controllerByte, float durationSeconds, float
     @Override
     public void write(FriendlyByteBuf buffer) {
         buffer.writeByte(payloadId().ordinal());
-        buffer.writeByte(this.controllerByte);
+        buffer.writeEnum(this.controllerType);
         buffer.writeFloat(this.durationSeconds);
         buffer.writeFloat(this.frequency);
         buffer.writeFloat(this.amplitude);
@@ -34,29 +34,15 @@ public record HapticPayloadS2C(byte controllerByte, float durationSeconds, float
     }
 
     public static HapticPayloadS2C read(FriendlyByteBuf buffer) {
-        byte controllerByte = buffer.readByte();
-
-        float durationSeconds = buffer.readFloat();
-        float frequency = buffer.readFloat();
-        float amplitude = buffer.readFloat();
-        float delaySeconds = buffer.readFloat();
-
-        // I hate this implementation, there has to be a better way
-        ControllerType controllerType = switch (controllerByte) {
-            case 0:  yield ControllerType.RIGHT;
-            case 1:  yield ControllerType.LEFT;
-            default: yield null;
-        };
-
-        MCVR mcvr = MCVR.get();
-        if (controllerType != null) mcvr.triggerHapticPulse(controllerType, durationSeconds, frequency, amplitude, delaySeconds);
-        else VRSettings.LOGGER.error("Vivecraft: Got unexpected controller identifier on client: {}", controllerByte);
-
-        return new HapticPayloadS2C(
-            controllerByte,
-            durationSeconds,
-            frequency,
-            amplitude,
-            delaySeconds);
+        try {
+            return new HapticPayloadS2C(
+                buffer.readEnum(ControllerType.class),
+                buffer.readFloat(),
+                buffer.readFloat(),
+                buffer.readFloat(),
+                buffer.readFloat());
+        } catch (Exception e) {
+            VRSettings.LOGGER.error("Vivecraft: Failed to execute haptic payload: {}", e.getMessage());
+        }
     }
 }
