@@ -48,6 +48,7 @@ public interface VivecraftPayloadS2C extends VivecraftPayload {
                 case VR_SWITCHING -> VRSwitchingPayloadS2C.read(buffer);
                 case IS_VR_ACTIVE -> VRActivePayloadS2C.read(buffer);
                 case DUAL_WIELDING -> DualWieldingPayloadS2C.read(buffer);
+                case HAPTIC -> HapticPayloadS2C.read(buffer);
                 default -> {
                     VRSettings.LOGGER.error("Vivecraft: Got unexpected payload identifier on client: {}", id);
                     yield UnknownPayloadS2C.read(buffer);
