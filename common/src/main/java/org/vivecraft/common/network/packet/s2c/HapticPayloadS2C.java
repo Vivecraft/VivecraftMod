@@ -4,18 +4,19 @@ import net.minecraft.network.FriendlyByteBuf;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.MCVR;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.network.packet.PayloadIdentifier;
 
 /**
  * sends a haptic request to the player
  *
- * @param controllerType of the controller to trigger on
+ * @param bodyPart        the body part to trigger on
  * @param durationSeconds duration in seconds
  * @param frequency       frequency in Hz
  * @param amplitude       strength 0.0 - 1.0
  * @param delaySeconds    delay for when to trigger in seconds
  */
-public record HapticPayloadS2C(ControllerType controllerType, float durationSeconds, float frequency, float amplitude, float delaySeconds) implements VivecraftPayloadS2C
+public record HapticPayloadS2C(BodyPart bodyPart, float durationSeconds, float frequency, float amplitude, float delaySeconds) implements VivecraftPayloadS2C
 {
 
     @Override
@@ -26,7 +27,7 @@ public record HapticPayloadS2C(ControllerType controllerType, float durationSeco
     @Override
     public void write(FriendlyByteBuf buffer) {
         buffer.writeByte(payloadId().ordinal());
-        buffer.writeEnum(this.controllerType);
+        buffer.writeEnum(this.bodyPart);
         buffer.writeFloat(this.durationSeconds);
         buffer.writeFloat(this.frequency);
         buffer.writeFloat(this.amplitude);
@@ -35,7 +36,7 @@ public record HapticPayloadS2C(ControllerType controllerType, float durationSeco
 
     public static HapticPayloadS2C read(FriendlyByteBuf buffer) {
         return new HapticPayloadS2C(
-            buffer.readEnum(ControllerType.class),
+            buffer.readEnum(BodyPart.class),
             buffer.readFloat(),
             buffer.readFloat(),
             buffer.readFloat(),

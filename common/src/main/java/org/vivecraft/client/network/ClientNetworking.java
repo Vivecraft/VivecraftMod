@@ -31,6 +31,8 @@ import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.network.packet.c2s.*;
 import org.vivecraft.common.network.packet.s2c.*;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -394,8 +396,13 @@ public class ClientNetworking {
             case HAPTIC -> {
                 HapticPayloadS2C packet = (HapticPayloadS2C) s2cPayload;
 
+                // Until all BodyParts support haptics, map main hand and offhand specifically
+                Map<BodyPart, ControllerType> mappedControllers = new HashMap<>();
+                mappedControllers.put(BodyPart.MAIN_HAND, VrPlayerState.create(VRPlayer.get()).leftHanded() ? ControllerType.LEFT : ControllerType.RIGHT);
+                mappedControllers.put(BodyPart.OFF_HAND, VrPlayerState.create(VRPlayer.get()).leftHanded() ? ControllerType.RIGHT : ControllerType.LEFT);
+
                 MCVR mcvr = MCVR.get();
-                mcvr.triggerHapticPulse(packet.controllerType(), packet.durationSeconds(), packet.frequency(), packet.amplitude(), packet.delaySeconds());
+                mcvr.triggerHapticPulse(mappedControllers.get(packet.bodyPart()), packet.durationSeconds(), packet.frequency(), packet.amplitude(), packet.delaySeconds());
             }
         }
     }
