@@ -12,10 +12,15 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.bodylink.Haptics;
 import org.vivecraft.client_vr.bodylink.RiggedBody;
+import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.packet.c2s.DamageDirectionPayloadC2S;
 import org.vivecraft.common.utils.MathUtils;
+import org.vivecraft.common.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -31,6 +36,9 @@ public class HapticTracker extends Tracker {
 
     private float lastHealth;
 
+    private Vector3fc lastHitDirection = null;
+    private float lastVanillaHurtYaw = 0f;
+
     public HapticTracker(Minecraft mc, ClientDataHolderVR dh) {
         super(mc, dh);
         this.modules.add(new RainModule());
@@ -38,13 +46,20 @@ public class HapticTracker extends Tracker {
 
     @Override
     public boolean isActive(LocalPlayer player) {
-        return Haptics.isConnected();
+        return player != null && Haptics.isConnected();
     }
 
     @Override
     public void doProcess(LocalPlayer player) {
         //TODO Find better place for this
-        RiggedBody.getInstance().updatePose(ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld());
+        RiggedBody.getInstance().updatePose(this.dh.vrPlayer.getVRDataWorld());
+
+        if (ClientNetworking.USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_DAMAGE_DIRECTION &&
+            !ClientNetworking.REQUESTED_DAMAGE_DIRECTION)
+        {
+            ClientNetworking.sendServerPacket(new DamageDirectionPayloadC2S());
+            ClientNetworking.REQUESTED_DAMAGE_DIRECTION = true;
+        }
 
         float thresholdLowHealth = 5;
         float thresholdCriticalHealth = 2;
@@ -66,7 +81,7 @@ public class HapticTracker extends Tracker {
         if (player.getHealth() != this.lastHealth) {
             float damage = this.lastHealth - player.getHealth();
             if (damage > 0) {
-                handleHit(null, damage);
+                handleHit(player.getLastDamageSource(), damage);
             }
             this.lastHealth = player.getHealth();
         }
@@ -119,19 +134,38 @@ public class HapticTracker extends Tracker {
     }
 
     public void handleHit(DamageSource damageSrc, float damageAmount) {
-        //TODO Always generic. Need custom server packet.
-        // TODO this is meant to get the hit direction from the knockback, but knockback is usually sent after health updates so this doesn't really work
-        Vector3f dmgVec = this.mc.player.getDeltaMovement().toVector3f()
-            .mul(-1F)
-            .mul(1, 0, 1) // only horizontal direction
-            .normalize();
-        if (Float.isNaN(dmgVec.x)) {
-            // happens when standing still, just do forward damage then
-            dmgVec.set(0, 0, 1);
+        Vector3fc dmgVec = null;
+        if (damageSrc != null) {
+            // use the damage source if available
+            dmgVec = Utils.getDirFromDamageSource(damageSrc, this.mc.player);
         }
-        dmgVec.rotateY(this.mc.player.yHeadRot * Mth.DEG_TO_RAD + Mth.PI);
-
-        Haptics.getAnimation(Haptics.Animations.generic_hit).playSingle(true, dmgVec);
+        if (dmgVec == null || MathUtils.isZero(dmgVec)) {
+            if (this.lastHitDirection != null) {
+                // got a direction from the server plugin
+                dmgVec = this.lastHitDirection;
+            } else if (this.lastVanillaHurtYaw != this.mc.player.getHurtDir()) {
+                // use the vanilla hurt yaw
+                // hurt dir is player local, and doesn't clear for non-directional damage
+                this.lastVanillaHurtYaw = this.mc.player.getHurtDir();
+                dmgVec = new Vector3f(1, 0, 0).rotateY(
+                    (-this.lastVanillaHurtYaw - this.mc.player.getYRot()) * Mth.DEG_TO_RAD);
+            }
+            // else, no direction
+        }
+        // reset server hit
+        this.lastHitDirection = null;
+        if (dmgVec != null && !MathUtils.isZero(dmgVec)) {
+            if (dmgVec.y() == 1F) {
+                Haptics.getAnimation(Haptics.Animations.top_hit).playSingle(true, null);
+            } else if (dmgVec.y() == -1F) {
+                Haptics.getAnimation(Haptics.Animations.bottom_hit).playSingle(true, null);
+            } else {
+                dmgVec = dmgVec.rotateY(this.dh.vrPlayer.getVRDataWorld().getBodyYawRad() + Mth.PI, new Vector3f());
+                Haptics.getAnimation(Haptics.Animations.generic_hit).playSingle(true, dmgVec);
+            }
+        } else {
+            Haptics.getAnimation(Haptics.Animations.all_around_hit).playSingle(true, null);
+        }
     }
 
     public void handleEat(ItemStack itemStack) {
@@ -142,6 +176,10 @@ public class HapticTracker extends Tracker {
                 Haptics.getAnimation(Haptics.Animations.consume_effect).playSingle(true, null);
             }
         }
+    }
+
+    public void setLastHitDirection(Vector3fc lastHitDirection) {
+        this.lastHitDirection = lastHitDirection;
     }
 
     private abstract static class HapticsModule {
@@ -165,7 +203,6 @@ public class HapticTracker extends Tracker {
 
         @Override
         void tick(LocalPlayer player) {
-
             if (!player.clientLevel.isRaining()) return;
 
             boolean isSnow = player.clientLevel.getBiome(player.blockPosition()).value()

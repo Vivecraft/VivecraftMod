@@ -11,7 +11,6 @@ import org.vivecraft.client.utils.TextUtils;
 import org.vivecraft.client_vr.bodylink.Haptics;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
 import org.vivecraft.client_vr.gameplay.trackers.Tracker;
-import org.vivecraft.client_vr.gameplay.trackers.HapticTracker;
 import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 import org.vivecraft.client_vr.provider.nullvr.NullVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;

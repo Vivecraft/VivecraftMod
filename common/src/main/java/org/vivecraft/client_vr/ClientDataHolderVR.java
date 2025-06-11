@@ -62,7 +62,7 @@ public class ClientDataHolderVR {
     public final TeleportTracker teleportTracker;
     public final TelescopeTracker telescopeTracker;
     public final VehicleTracker vehicleTracker;
-    public final HapticTracker hapticTracker = createTracker(HapticTracker::new);
+    public final HapticTracker hapticTracker;
 
     public VRSettings vrSettings;
     public boolean grabScreenShot = false;
@@ -122,6 +122,7 @@ public class ClientDataHolderVR {
         this.teleportTracker = createTracker(TeleportTracker::new);
         this.telescopeTracker = createTracker(TelescopeTracker::new);
         this.vehicleTracker = createTracker(VehicleTracker::new);
+        this.hapticTracker = createTracker(HapticTracker::new);
     }
 
     public static ClientDataHolderVR getInstance() {

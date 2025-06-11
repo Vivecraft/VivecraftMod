@@ -210,6 +210,16 @@ public class MathUtils {
     }
 
     /**
+     * checks if the given vector is a zero vector
+     *
+     * @param vec vector to check
+     * @return if the given vector is a zero vector
+     */
+    public static boolean isZero(Vector3fc vec) {
+        return vec.x() == 0 && vec.y() == 0 && vec.z() == 0;
+    }
+
+    /**
      * adds the give nvector to the translation component, without doing any Matrix multiplication
      *
      * @param matrix      Matrix to alter

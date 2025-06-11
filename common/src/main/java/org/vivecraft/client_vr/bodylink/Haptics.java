@@ -6,18 +6,20 @@ import com.bhaptics.haptic.models.PositionType;
 import com.bhaptics.haptic.models.RotationOption;
 import com.bhaptics.haptic.models.ScaleOption;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.client.utils.FileUtils;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 public class Haptics {
     private static final String APP_ID = "org.vivecraft";
     private static final String APP_NAME = "Vivecraft bHaptics Integration";
 
-    private static final HashMap<String, HapticAnimation> REG_ANIMATIONS = new HashMap<>();
+    private static final Map<Animations, HapticAnimation> REG_ANIMATIONS = new EnumMap<>(Animations.class);
 
     private static HapticPlayerImpl B_HAPTICS_PLAYER = null;
     private static boolean CONNECTED;
@@ -33,16 +35,20 @@ public class Haptics {
         hunger(1, 2000),
         critical_health(1, 1000),
         generic_hit(3),
+        bottom_hit(1),
+        top_hit(1),
+        all_around_hit(1),
         zombie_hit(3),
         rain(1, 1500),
         consume(1),
         consume_effect(1);
 
-        public int variants;
-        public long durationMillis;
+        public final int variants;
+        public final long durationMillis;
 
         Animations(int variants) {
             this.variants = variants;
+            this.durationMillis = 0;
         }
 
         Animations(int variants, long durationMillis) {
@@ -88,7 +94,7 @@ public class Haptics {
             return this.baseId + "_" + (int) (Math.random() * this.variations);
         }
 
-        public void playSingle(boolean layered, Vector3f vec, double scale) {
+        public void playSingle(boolean layered, Vector3fc vec, double scale) {
 
             if (B_HAPTICS_PLAYER == null) return;
             if (!layered && isPlaying()) return;
@@ -96,8 +102,10 @@ public class Haptics {
             RotationOption rotationOption;
             if (vec != null) {
                 rotationOption = new RotationOption(
-                    Math.toDegrees(Math.atan2(vec.x, vec.z)) - 180,
-                    Math.toDegrees(Math.asin(vec.y / vec.length())));
+                    // yaw direction
+                    Math.toDegrees(Math.atan2(vec.x(), vec.z())) - 180,
+                    // vertical offset [-0.5,0.5]
+                    Math.asin(vec.y() / vec.length()) / Math.PI);
             } else {
                 rotationOption = new RotationOption(0, 0);
             }
@@ -111,7 +119,7 @@ public class Haptics {
             //bHapticsPlayer.submitRegistered(id);
         }
 
-        public void playSingle(boolean layered, Vector3f vec) {
+        public void playSingle(boolean layered, Vector3fc vec) {
             playSingle(layered, vec, 1.0);
         }
 
@@ -125,7 +133,9 @@ public class Haptics {
         }
 
         public boolean isPlaying() {
-            if (this.startTimeStamp == -1 || this.durationMillis == -1) {return false;} else {
+            if (this.startTimeStamp == -1 || this.durationMillis == -1) {
+                return false;
+            } else {
                 return System.currentTimeMillis() < this.startTimeStamp + this.durationMillis;
             }
         }
@@ -146,7 +156,7 @@ public class Haptics {
     }
 
     public static void tick() {
-        if (!isConnected()) {return;}
+        if (!isConnected()) return;
         for (HapticAnimation h : REG_ANIMATIONS.values()) {
             h.tick();
         }
@@ -169,12 +179,12 @@ public class Haptics {
             hp.baseId = animation.name();
             hp.variations = animation.variants;
             hp.durationMillis = animation.durationMillis;
-            REG_ANIMATIONS.put(animation.name(), hp);
+            REG_ANIMATIONS.put(animation, hp);
         }
     }
 
     public static HapticAnimation getAnimation(Animations animation) {
-        return REG_ANIMATIONS.get(animation.name());
+        return REG_ANIMATIONS.get(animation);
     }
 
     public static boolean isConnected() {
@@ -215,7 +225,7 @@ public class Haptics {
         return true;
     }
 
-    public static boolean isPlaying(String id) {
+    public static boolean isPlaying(Animations id) {
         if (!isConnected()) {
             return false;
         }

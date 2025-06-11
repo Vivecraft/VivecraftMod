@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client.network.ClientNetworking;
 import org.vivecraft.client.utils.ClientUtils;
+import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler;
 
@@ -65,6 +66,7 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
         ClientNetworking.TELEPORT_WARNING = true;
         ClientNetworking.VR_SWITCHING_WARNING = false;
         ClientNetworking.HEAD_AIM_WARNING = false;
+        ClientNetworking.REQUESTED_DAMAGE_DIRECTION = false;
     }
 
     @Inject(method = "close", at = @At("TAIL"))
@@ -112,6 +114,7 @@ public abstract class ClientPacketListenerVRMixin extends ClientCommonPacketList
     private void vivecraft$markScreenActive(CallbackInfo ci) {
         GuiHandler.GUI_APPEAR_OVER_BLOCK_ACTIVE = true;
     }
+
     @Inject(at = @At("TAIL"), method = "handleExplosion")
     public void vivecraft$handleExplosion(ClientboundExplodePacket clientboundExplodePacket, CallbackInfo ci) {
         ClientDataHolderVR.getInstance().hapticTracker.handleExplode(clientboundExplodePacket.center());

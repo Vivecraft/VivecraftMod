@@ -1,16 +1,20 @@
 package org.vivecraft.common.utils;
 
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3fc;
 
 public class Utils {
 
@@ -70,5 +74,31 @@ public class Utils {
                 .expandTowards(headPos.subtract(entity.position()).scale(inflate));
         }
         return null;
+    }
+
+    /**
+     * calculates the direction the {@code source} DamageSource hit the {@code target} Entity from
+     *
+     * @param source DamageSource to get the direction from
+     * @param target Entity that received the damage
+     * @return the direction the damage came from
+     */
+    public static Vector3fc getDirFromDamageSource(DamageSource source, Entity target) {
+        if (source.getEntity() instanceof FallingBlockEntity) {
+            // damage from above
+            return MathUtils.UP;
+        } else if (source.getSourcePosition() != null) {
+            return MathUtils.subtractToVector3f(source.getSourcePosition(), target.getBoundingBox().getCenter())
+                .normalize();
+        } else if (source.getEntity() != null) {
+            return MathUtils.subtractToVector3f(source.getEntity().position(), target.getBoundingBox().getCenter())
+                .normalize();
+        } else if (source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypeTags.BURN_FROM_STEPPING)) {
+            // damage from the below
+            return MathUtils.DOWN;
+        } else {
+            // no direction
+            return MathUtils.ZERO;
+        }
     }
 }

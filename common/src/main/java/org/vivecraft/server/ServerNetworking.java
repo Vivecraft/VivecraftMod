@@ -239,6 +239,7 @@ public class ServerNetworking {
                     player.setPose(Pose.SWIMMING);
                 }
             }
+            case DAMAGE_DIRECTION -> vivePlayer.wantsDamageDirection = true;
             // legacy support
             case CONTROLLER0DATA, CONTROLLER1DATA, HEADDATA -> {
                 Map<PayloadIdentifier, VivecraftPayloadC2S> playerData;
