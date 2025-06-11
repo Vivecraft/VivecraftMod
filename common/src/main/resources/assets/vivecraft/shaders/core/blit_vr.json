@@ -1,0 +1,10 @@
+{
+  "vertex": "vivecraft:core/passthrough_vr",
+  "fragment": "vivecraft:core/blit_vr",
+  "samplers": [
+    {
+      "name": "DiffuseSampler"
+    }
+  ],
+  "uniforms": []
+}

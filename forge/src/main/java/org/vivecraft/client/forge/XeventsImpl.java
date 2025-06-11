@@ -6,27 +6,22 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
-import net.minecraftforge.event.ForgeEventFactory;
+import org.vivecraft.client.Xevents;
 
-public class XeventsImpl {
+public class XeventsImpl implements Xevents {
 
-    public static boolean renderBlockOverlay(Player player, PoseStack mat, BlockState state, BlockPos pos) {
-        return ForgeHooksClient.renderBlockOverlay(player, mat, RenderBlockScreenEffectEvent.OverlayType.BLOCK, state, pos);
+    public static boolean renderBlockOverlay(
+        Player player, PoseStack poseStack, BlockState blockState, BlockPos blockPos)
+    {
+        return ForgeHooksClient.renderBlockOverlay(player, poseStack, RenderBlockScreenEffectEvent.OverlayType.BLOCK,
+            blockState, blockPos);
     }
 
-    public static boolean renderWaterOverlay(Player player, PoseStack mat) {
-        return ForgeHooksClient.renderWaterOverlay(player, mat);
+    public static boolean renderWaterOverlay(Player player, PoseStack poseStack) {
+        return ForgeHooksClient.renderWaterOverlay(player, poseStack);
     }
 
-    public static boolean renderFireOverlay(Player player, PoseStack mat) {
-        return ForgeHooksClient.renderFireOverlay(player, mat);
-    }
-
-    public static void onRenderTickStart(float f) {
-        ForgeEventFactory.onRenderTickStart(f);
-    }
-
-    public static void onRenderTickEnd(float f) {
-        ForgeEventFactory.onRenderTickEnd(f);
+    public static boolean renderFireOverlay(Player player, PoseStack poseStack) {
+        return ForgeHooksClient.renderFireOverlay(player, poseStack);
     }
 }

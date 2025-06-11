@@ -1,14 +1,17 @@
 package org.vivecraft.fabric.mixin;
 
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Timer;
+import net.minecraft.client.ResourceLoadStateTracker;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.vivecraft.client_vr.ReloadListener;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.render.helpers.VRPassHelper;
 
@@ -17,18 +20,24 @@ public class FabricMinecraftVRMixin {
 
     @Shadow
     @Final
-    private Timer timer;
+    private DeltaTracker.Timer deltaTracker;
 
     @Shadow
-    private volatile boolean pause;
+    @Final
+    private ReloadableResourceManager resourceManager;
 
-    @Shadow
-    private float pausePartialTick;
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/ResourceLoadStateTracker;startReload(Lnet/minecraft/client/ResourceLoadStateTracker$ReloadReason;Ljava/util/List;)V"), index = 0)
+    private ResourceLoadStateTracker.ReloadReason vivecraft$registerReloadListener(
+        ResourceLoadStateTracker.ReloadReason reloadReason)
+    {
+        this.resourceManager.registerReloadListener(new ReloadListener());
+        return reloadReason;
+    }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 4, shift = At.Shift.AFTER), method = "runTick", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void vivecraft$renderVRPassesFabric(boolean renderLevel, CallbackInfo ci, long nanoTime) {
-        if (VRState.vrRunning) {
-            VRPassHelper.renderAndSubmit(renderLevel, nanoTime, this.pause ? this.pausePartialTick : this.timer.partialTick);
+    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 3, shift = At.Shift.AFTER))
+    private void vivecraft$renderVRPassesFabric(boolean renderLevel, CallbackInfo ci) {
+        if (VRState.VR_RUNNING) {
+            VRPassHelper.renderAndSubmit(renderLevel, this.deltaTracker);
         }
     }
 }

@@ -1,24 +1,20 @@
 package org.vivecraft.client.network;
 
-import com.google.common.base.Charsets;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.VRPlayersClient;
+import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.Xplat;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -26,56 +22,68 @@ import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.common.CommonDataHolder;
 import org.vivecraft.common.VRServerPerms;
-import org.vivecraft.common.network.BufferSerializable;
+import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.network.CommonNetworkHelper;
+import org.vivecraft.common.network.FBTMode;
 import org.vivecraft.common.network.VrPlayerState;
-import org.vivecraft.common.network.packets.VivecraftDataPacket;
+import org.vivecraft.common.network.packet.c2s.*;
+import org.vivecraft.common.network.packet.s2c.*;
 
-import java.util.UUID;
+import java.util.Map;
+import java.util.function.Supplier;
 
 public class ClientNetworking {
 
-    public static boolean displayedChatMessage = false;
-    public static boolean displayedChatWarning = false;
-    public static boolean serverWantsData = false;
-    public static boolean serverAllowsClimbey = false;
-    public static boolean serverSupportsDirectTeleport = false;
-    public static boolean serverAllowsCrawling = false;
-    public static boolean serverAllowsVrSwitching = false;
+    public static boolean DISPLAYED_CHAT_MESSAGE = false;
+    public static boolean DISPLAYED_CHAT_WARNING = false;
+    public static boolean DISPLAYED_HEAD_AIM_WARNING = false;
+    public static boolean ABLE_TO_DISPLAY_CHAT_WARNINGS = false;
+
+    public static int CHAT_WARNING_TIMER = -1;
+    public static boolean TELEPORT_WARNING = false;
+    public static boolean VR_SWITCHING_WARNING = false;
+    public static boolean HEAD_AIM_WARNING = false;
+
+    public static boolean SERVER_HAS_VIVECRAFT = false;
+
+    public static boolean SERVER_WANTS_DATA = false;
+    public static boolean SERVER_SUPPORTS_DIRECT_TELEPORT = false;
+    public static boolean SERVER_ALLOWS_CLIMBEY = false;
+    public static boolean SERVER_ALLOWS_CRAWLING = false;
+    public static boolean SERVER_ALLOWS_VR_SWITCHING = false;
+    public static boolean SERVER_ALLOWS_DUAL_WIELDING = false;
+
     // assume a legacy server by default, to not send invalid packets
-    // -1 == legacy server
-    public static int usedNetworkVersion = -1;
-    private static float worldScallast = 0.0F;
-    private static float heightlast = 0.0F;
-    private static float capturedYaw;
-    private static float capturedPitch;
-    private static boolean overrideActive;
+    public static int USED_NETWORK_VERSION = CommonNetworkHelper.NETWORK_VERSION_LEGACY;
+    private static float WORLDSCALE_LAST = 0.0F;
+    private static float HEIGHT_LAST = 0.0F;
+    public static float OVERRIDDEN_YAW;
+    public static float OVERRIDDEN_PITCH;
+    public static boolean OVERRIDE_ACTIVE;
+    public static BodyPart LAST_SENT_BODY_PART = BodyPart.MAIN_HAND;
+    public static boolean IS_LAST_BODY_PART_AIM = false;
 
-    public static boolean needsReset = true;
-
-    public static ServerboundCustomPayloadPacket getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators command, byte[] payload) {
-        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(command, payload));
-    }
-
-    public static ServerboundCustomPayloadPacket createVRActivePacket(boolean vrActive) {
-        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.IS_VR_ACTIVE, new byte[]{(byte) (vrActive ? 1 : 0)}));
-    }
+    public static boolean NEEDS_RESET = true;
 
     public static void resetServerSettings() {
-        worldScallast = 0.0F;
-        heightlast = 0.0F;
-        serverAllowsClimbey = false;
-        serverWantsData = false;
-        serverSupportsDirectTeleport = false;
-        serverAllowsCrawling = false;
-        serverAllowsVrSwitching = false;
-        usedNetworkVersion = -1;
+        WORLDSCALE_LAST = 0.0F;
+        HEIGHT_LAST = 0.0F;
+        SERVER_HAS_VIVECRAFT = false;
+        SERVER_WANTS_DATA = false;
+        SERVER_SUPPORTS_DIRECT_TELEPORT = false;
+        SERVER_ALLOWS_CLIMBEY = false;
+        SERVER_ALLOWS_CRAWLING = false;
+        SERVER_ALLOWS_VR_SWITCHING = false;
+        SERVER_ALLOWS_DUAL_WIELDING = false;
+        USED_NETWORK_VERSION = CommonNetworkHelper.NETWORK_VERSION_LEGACY;
+        LAST_SENT_BODY_PART = BodyPart.MAIN_HAND;
+        IS_LAST_BODY_PART_AIM = false;
 
         // clear VR player data
-        VRPlayersClient.clear();
+        ClientVRPlayers.clear();
         // clear teleport
         VRServerPerms.INSTANCE.setTeleportSupported(false);
-        if (VRState.vrInitialized) {
+        if (VRState.VR_INITIALIZED) {
             ClientDataHolderVR.getInstance().vrPlayer.setTeleportOverride(false);
         }
         // clear server overrides
@@ -83,115 +91,166 @@ public class ClientNetworking {
     }
 
     public static void sendVersionInfo() {
-        //Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(new ChannelRegisterPacket(CommonNetworkHelper.CHANNEL.toString())));
-        Xplat.addNetworkChannel(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL);
         // send version string, with currently running
-        Minecraft.getInstance().getConnection().send(getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.VERSION,
-            (CommonDataHolder.getInstance().versionIdentifier + (VRState.vrRunning ? " VR" : " NONVR")
-                + "\n" + CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION
-                + "\n" + CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION
-            ).getBytes(Charsets.UTF_8)));
+        if (!ClientDataHolderVR.getInstance().completelyDisabled &&
+            Xplat.serverAcceptsPacket(Minecraft.getInstance().getConnection(), CommonNetworkHelper.CHANNEL))
+        {
+            Minecraft.getInstance().getConnection().send(createServerPacket(
+                new VersionPayloadC2S(
+                    CommonDataHolder.getInstance().versionIdentifier,
+                    VRState.VR_RUNNING,
+                    CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION,
+                    CommonNetworkHelper.MIN_SUPPORTED_NETWORK_VERSION)));
+        }
     }
 
     public static void sendVRPlayerPositions(VRPlayer vrPlayer) {
-        var connection = Minecraft.getInstance().getConnection();
-        if (!serverWantsData || connection == null) {
+        if (!SERVER_WANTS_DATA || Minecraft.getInstance().getConnection() == null ||
+            Minecraft.getInstance().getCameraEntity() != Minecraft.getInstance().player)
+        {
             return;
         }
 
         float worldScale = ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_post.worldScale;
 
-        if (worldScale != worldScallast) {
-            ByteBuf bytebuf = Unpooled.buffer();
-            bytebuf.writeFloat(worldScale);
-            byte[] abyte = new byte[bytebuf.readableBytes()];
-            bytebuf.readBytes(abyte);
-            ServerboundCustomPayloadPacket serverboundcustompayloadpacket = getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.WORLDSCALE, abyte);
-            Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
-            worldScallast = worldScale;
+        if (worldScale != WORLDSCALE_LAST) {
+            sendServerPacket(new WorldScalePayloadC2S(worldScale));
+
+            WORLDSCALE_LAST = worldScale;
         }
 
-        float f1 = AutoCalibration.getPlayerHeight();
+        float userHeight = AutoCalibration.getPlayerHeight();
 
-        if (f1 != heightlast) {
-            ByteBuf bytebuf2 = Unpooled.buffer();
-            bytebuf2.writeFloat(f1 / 1.52F);
-            byte[] abyte3 = new byte[bytebuf2.readableBytes()];
-            bytebuf2.readBytes(abyte3);
-            ServerboundCustomPayloadPacket serverboundcustompayloadpacket1 = getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.HEIGHT, abyte3);
-            Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket1);
-            heightlast = f1;
+        if (userHeight != HEIGHT_LAST) {
+            sendServerPacket(new HeightPayloadC2S(userHeight / AutoCalibration.DEFAULT_HEIGHT));
+
+            HEIGHT_LAST = userHeight;
         }
 
         var vrPlayerState = VrPlayerState.create(vrPlayer);
 
-        if (usedNetworkVersion >= 0) {
-            connection.send(createVrPlayerStatePacket(vrPlayerState));
+        if (USED_NETWORK_VERSION != CommonNetworkHelper.NETWORK_VERSION_LEGACY) {
+            sendServerPacket(new VRPlayerStatePayloadC2S(vrPlayerState));
         } else {
-            sendLegacyPackets(connection, vrPlayerState);
+            sendLegacyPackets(vrPlayerState);
         }
-        VRPlayersClient.getInstance().Update(Minecraft.getInstance().player.getGameProfile().getId(), vrPlayerState, worldScale, f1 / 1.52F, true);
-    }
-
-    private static byte[] serializeToArray(BufferSerializable object, byte[] additionalData) {
-        FriendlyByteBuf tempBuffer = new FriendlyByteBuf(Unpooled.buffer());
-        if (additionalData != null) {
-            tempBuffer.writeBytes(additionalData);
+        if (ClientDataHolderVR.getInstance().vrSettings.mainPlayerDataSource != VRSettings.DataSource.SERVER) {
+            ClientVRPlayers.getInstance()
+                .update(Minecraft.getInstance().player.getGameProfile().getId(), vrPlayerState, worldScale,
+                    userHeight / AutoCalibration.DEFAULT_HEIGHT, true);
         }
-        object.serialize(tempBuffer);
-        byte[] buffer = new byte[tempBuffer.readableBytes()];
-        tempBuffer.readBytes(buffer);
-        tempBuffer.release();
-        return buffer;
     }
 
-    public static ServerboundCustomPayloadPacket createVrPlayerStatePacket(VrPlayerState vrPlayerState) {
-        return new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.VR_PLAYER_STATE, serializeToArray(vrPlayerState, null)));
+    /**
+     * Sends the given {@code payload} to the server, but only if the server sent that it has vivecraft
+     *
+     * @param payload Payload to send
+     */
+    public static void sendServerPacket(VivecraftPayloadC2S payload) {
+        if (Minecraft.getInstance().getConnection() != null && SERVER_HAS_VIVECRAFT) {
+            Minecraft.getInstance().getConnection().send(createServerPacket(payload));
+        }
     }
 
-    public static void sendLegacyPackets(ClientPacketListener connection, VrPlayerState vrPlayerState) {
+    public static Packet<?> createServerPacket(VivecraftPayloadC2S payload) {
+        return Xplat.getC2SPacket(payload);
+    }
+
+    public static void sendLegacyPackets(VrPlayerState vrPlayerState) {
         // main controller packet
-        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER0DATA, serializeToArray(vrPlayerState.controller0(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0)}))));
+        sendServerPacket(new LegacyController0DataPayloadC2S(ClientDataHolderVR.getInstance().vrSettings.reverseHands,
+            vrPlayerState.mainHand()));
 
         // offhand controller packet
-        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.CONTROLLER1DATA, serializeToArray(vrPlayerState.controller1(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0)}))));
+        sendServerPacket(new LegacyController1DataPayloadC2S(ClientDataHolderVR.getInstance().vrSettings.reverseHands,
+            vrPlayerState.offHand()));
 
         // hmd packet
-        connection.send(new ServerboundCustomPayloadPacket(new VivecraftDataPacket(CommonNetworkHelper.PacketDiscriminators.HEADDATA, serializeToArray(vrPlayerState.hmd(), new byte[]{(byte) (ClientDataHolderVR.getInstance().vrSettings.seated ? 1 : 0)}))));
+        sendServerPacket(
+            new LegacyHeadDataPayloadC2S(ClientDataHolderVR.getInstance().vrSettings.seated, vrPlayerState.hmd()));
     }
 
+    // ServerSetting override checks
+
     public static boolean isThirdPersonItems() {
-        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS).getBoolean();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(
+            VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS).getBoolean();
     }
 
     public static boolean isThirdPersonItemsCustom() {
-        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS_CUSTOM).getBoolean();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(
+            VRSettings.VrOptions.THIRDPERSON_ITEMTRANSFORMS_CUSTOM).getBoolean();
     }
 
     public static boolean isLimitedSurvivalTeleport() {
-        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.LIMIT_TELEPORT).getBoolean();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.LIMIT_TELEPORT)
+            .getBoolean();
+    }
+
+    public static boolean supportsReversedBow() {
+        // old plugins hardcode the hand order
+        return USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING || !SERVER_HAS_VIVECRAFT;
     }
 
     public static int getTeleportUpLimit() {
-        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_UP_LIMIT).getInt();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_UP_LIMIT)
+            .getInt();
     }
 
     public static int getTeleportDownLimit() {
-        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_DOWN_LIMIT).getInt();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(
+            VRSettings.VrOptions.TELEPORT_DOWN_LIMIT).getInt();
     }
 
     public static int getTeleportHorizLimit() {
-        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(VRSettings.VrOptions.TELEPORT_HORIZ_LIMIT).getInt();
+        return ClientDataHolderVR.getInstance().vrSettings.overrides.getSetting(
+            VRSettings.VrOptions.TELEPORT_HORIZ_LIMIT).getInt();
     }
 
-    public static void sendActiveHand(byte c) {
-        if (serverWantsData) {
-            ServerboundCustomPayloadPacket serverboundcustompayloadpacket = getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.ACTIVEHAND, new byte[]{c});
+    /**
+     * resets the active hand to the main hand
+     */
+    public static void resetActiveBodyPart() {
+        sendActiveBodyPart(BodyPart.MAIN_HAND, false);
+    }
 
-            if (Minecraft.getInstance().getConnection() != null) {
-                Minecraft.getInstance().getConnection().send(serverboundcustompayloadpacket);
+    /**
+     * sets the active BodyPart to the given {@code hand}, accounts for head aim when the hand is not used as aim
+     *
+     * @param hand      Hand to set active
+     * @param useForAim if this hand should be used to aim
+     */
+    public static void sendActiveHand(InteractionHand hand, boolean useForAim) {
+        if (!useForAim && ClientDataHolderVR.getInstance().vrSettings.aimDevice == VRSettings.AimDevice.HMD) {
+            sendActiveBodyPart(BodyPart.HEAD, true);
+        } else {
+            sendActiveBodyPart(BodyPart.fromInteractionHand(hand), useForAim);
+        }
+    }
+
+    /**
+     * sets the active BodyPart to the given {@code bodyPart}
+     *
+     * @param bodyPart  BodyPart to set active
+     * @param useForAim if this bodyPart should be used to aim
+     */
+    public static void sendActiveBodyPart(BodyPart bodyPart, boolean useForAim) {
+        if (SERVER_WANTS_DATA) {
+            if ((USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM && bodyPart == BodyPart.HEAD) ||
+                (USED_NETWORK_VERSION < CommonNetworkHelper.NETWORK_VERSION_DUAL_WIELDING &&
+                    !bodyPart.isValid(FBTMode.ARMS_ONLY)
+                ))
+            {
+                // old plugins only support main and offhand
+                bodyPart = BodyPart.MAIN_HAND;
+            }
+            // only send if the hand is different from last time, don't need to spam packets
+            if (bodyPart != LAST_SENT_BODY_PART) {
+                sendServerPacket(new ActiveBodyPartPayloadC2S(bodyPart, useForAim));
             }
         }
+        LAST_SENT_BODY_PART = bodyPart;
+        IS_LAST_BODY_PART_AIM = useForAim;
     }
 
     public static void overridePose(LocalPlayer player) {
@@ -200,133 +259,136 @@ public class ClientNetworking {
         }
     }
 
-    public static void overrideLook(Player player, Vec3 view) {
-        if (!serverWantsData) {
-            capturedPitch = player.getXRot();
-            capturedYaw = player.getYRot();
-            float f = (float) Math.toDegrees(Math.asin(-view.y / view.length()));
-            float f1 = (float) Math.toDegrees(Math.atan2(-view.x, view.z));
-            ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(f1, f, player.onGround()));
-            overrideActive = true;
-        }
+    public static void overrideLook(Player player, Supplier<Vec3> viewSupplier) {
+        if (SERVER_WANTS_DATA) return; // shouldn't be needed, don't tease the anti-cheat.
+
+        Vec3 view = viewSupplier.get();
+        OVERRIDDEN_PITCH = (float) Math.toDegrees(Math.asin(-view.y / view.length()));
+        OVERRIDDEN_YAW = (float) Math.toDegrees(Math.atan2(-view.x, view.z));
+        ((LocalPlayer) player).connection.send(
+            new ServerboundMovePlayerPacket.Rot(OVERRIDDEN_YAW, OVERRIDDEN_PITCH, player.onGround(),
+                player.horizontalCollision));
+        OVERRIDE_ACTIVE = true;
     }
 
-    public static void restoreLook(Player player) {
-        if (!serverWantsData) {
-            if (overrideActive) {
-                ((LocalPlayer) player).connection.send(new ServerboundMovePlayerPacket.Rot(capturedYaw, capturedPitch, player.onGround()));
-                overrideActive = false;
-            }
-        }
+    public static void restoreLook() {
+        OVERRIDE_ACTIVE = false;
     }
 
-    public static void handlePacket(CommonNetworkHelper.PacketDiscriminators packetID, FriendlyByteBuf buffer) {
+    public static void handlePacket(VivecraftPayloadS2C s2cPayload) {
+        if (s2cPayload instanceof UnknownPayloadS2C) return;
         ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
         Minecraft mc = Minecraft.getInstance();
-        switch (packetID) {
+        switch (s2cPayload.payloadId()) {
             case VERSION -> {
-                String s11 = buffer.readUtf(1024);
+                SERVER_HAS_VIVECRAFT = true;
                 VRServerPerms.INSTANCE.setTeleportSupported(true);
-                if (VRState.vrInitialized) {
-                    dataholder.vrPlayer.teleportWarning = false;
-                    dataholder.vrPlayer.vrSwitchWarning = true;
+                TELEPORT_WARNING = false;
+                VR_SWITCHING_WARNING = true;
+                HEAD_AIM_WARNING = true;
+
+                if (!ClientNetworking.DISPLAYED_CHAT_MESSAGE &&
+                    (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS ||
+                        (dataholder.vrSettings.showServerPluginMessage ==
+                            VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()
+                        )
+                    ))
+                {
+                    ClientNetworking.DISPLAYED_CHAT_MESSAGE = true;
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.serverplugin",
+                        ((VersionPayloadS2C) s2cPayload).version()));
                 }
-                if (!ClientNetworking.displayedChatMessage
-                    && (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.ALWAYS
-                    || (dataholder.vrSettings.showServerPluginMessage == VRSettings.ChatServerPluginMessage.SERVER_ONLY && !Minecraft.getInstance().isLocalServer()))) {
-                    ClientNetworking.displayedChatMessage = true;
-                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.serverplugin", s11));
-                }
-                if (VRState.vrEnabled && dataholder.vrSettings.manualCalibration == -1.0F && !dataholder.vrSettings.seated) {
-                    mc.gui.getChat().addMessage(Component.translatable("vivecraft.messages.calibrateheight"));
+                if (VRState.VR_ENABLED && dataholder.vrSettings.manualCalibration == -1.0F &&
+                    !dataholder.vrSettings.seated)
+                {
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.calibrateheight"));
                 }
             }
             case IS_VR_ACTIVE -> {
-                if (!buffer.readBoolean()) {
-                    VRPlayersClient.getInstance().disableVR(buffer.readUUID());
+                VRActivePayloadS2C packet = (VRActivePayloadS2C) s2cPayload;
+                if (!packet.vr()) {
+                    ClientVRPlayers.getInstance().disableVR(packet.playerID());
                 }
             }
-            case REQUESTDATA -> ClientNetworking.serverWantsData = true;
+            case REQUESTDATA -> ClientNetworking.SERVER_WANTS_DATA = true;
             case CLIMBING -> {
-                ClientNetworking.serverAllowsClimbey = buffer.readBoolean();
-                if (buffer.readableBytes() > 0) {
-                    dataholder.climbTracker.serverblockmode = buffer.readByte();
-                    dataholder.climbTracker.blocklist.clear();
+                ClimbingPayloadS2C packet = (ClimbingPayloadS2C) s2cPayload;
+                ClientNetworking.SERVER_ALLOWS_CLIMBEY = packet.allowed();
+                dataholder.climbTracker.serverBlockmode = packet.blockmode();
+                dataholder.climbTracker.blocklist.clear();
 
-                    while (buffer.readableBytes() > 0) {
-                        String s12 = buffer.readUtf(16384);
-                        Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s12));
-
-                        // if the block is not there AIR is returned
-                        if (block != Blocks.AIR) {
-                            dataholder.climbTracker.blocklist.add(block);
-                        }
+                if (packet.blocks() != null) {
+                    for (String blockId : packet.blocks()) {
+                        BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockId)).ifPresent(block -> {
+                            if (block.value() != Blocks.AIR) {
+                                dataholder.climbTracker.blocklist.add(block.value());
+                            }
+                        });
                     }
                 }
             }
-            case TELEPORT -> ClientNetworking.serverSupportsDirectTeleport = true;
+            case TELEPORT -> ClientNetworking.SERVER_SUPPORTS_DIRECT_TELEPORT = true;
             case UBERPACKET -> {
-                UUID uuid = buffer.readUUID();
-                var vrPlayerState = VrPlayerState.deserialize(buffer);
-                float worldScale = buffer.readFloat();
-                float heightScale = buffer.readFloat();
-                VRPlayersClient.getInstance().Update(uuid, vrPlayerState, worldScale, heightScale);
+                UberPacketPayloadS2C packet = (UberPacketPayloadS2C) s2cPayload;
+                ClientVRPlayers.getInstance()
+                    .update(packet.playerID(), packet.state(), packet.worldScale(), packet.heightScale());
             }
             case SETTING_OVERRIDE -> {
-                while (buffer.readableBytes() > 0) {
-                    String s13 = buffer.readUtf(16384);
-                    String s14 = buffer.readUtf(16384);
-                    String[] astring = s13.split("\\.", 2);
+                for (Map.Entry<String, String> override : ((SettingOverridePayloadS2C) s2cPayload).overrides()
+                    .entrySet()) {
+                    String[] split = override.getKey().split("\\.", 2);
 
-                    if (dataholder.vrSettings.overrides.hasSetting(astring[0])) {
-                        VRSettings.ServerOverrides.Setting vrsettings$serveroverrides$setting = dataholder.vrSettings.overrides.getSetting(astring[0]);
+                    if (dataholder.vrSettings.overrides.hasSetting(split[0])) {
+                        VRSettings.ServerOverrides.Setting setting = dataholder.vrSettings.overrides.getSetting(
+                            split[0]);
 
                         try {
-                            if (astring.length > 1) {
-                                String s15 = astring[1];
-                                switch (s15) {
-                                    case "min":
-                                        vrsettings$serveroverrides$setting.setValueMin(Float.parseFloat(s14));
-                                        break;
-
-                                    case "max":
-                                        vrsettings$serveroverrides$setting.setValueMax(Float.parseFloat(s14));
+                            if (split.length > 1) {
+                                switch (split[1]) {
+                                    case "min" -> setting.setValueMin(Float.parseFloat(override.getValue()));
+                                    case "max" -> setting.setValueMax(Float.parseFloat(override.getValue()));
                                 }
                             } else {
-                                Object object = vrsettings$serveroverrides$setting.getOriginalValue();
+                                Object origValue = setting.getOriginalValue();
 
-                                if (object instanceof Boolean) {
-                                    vrsettings$serveroverrides$setting.setValue(s14.equals("true"));
-                                } else if (!(object instanceof Integer) && !(object instanceof Byte) && !(object instanceof Short)) {
-                                    if (!(object instanceof Float) && !(object instanceof Double)) {
-                                        vrsettings$serveroverrides$setting.setValue(s14);
-                                    } else {
-                                        vrsettings$serveroverrides$setting.setValue(Float.parseFloat(s14));
-                                    }
+                                if (origValue instanceof Boolean) {
+                                    setting.setValue(override.getValue().equals("true"));
+                                } else if (origValue instanceof Integer || origValue instanceof Byte ||
+                                    origValue instanceof Short)
+                                {
+                                    setting.setValue(Integer.parseInt(override.getValue()));
+                                } else if (origValue instanceof Float || origValue instanceof Double) {
+                                    setting.setValue(Float.parseFloat(override.getValue()));
                                 } else {
-                                    vrsettings$serveroverrides$setting.setValue(Integer.parseInt(s14));
+                                    setting.setValue(override.getValue());
                                 }
                             }
 
-                            System.out.println("Server setting override: " + s13 + " = " + s14);
+                            VRSettings.LOGGER.info("Vivecraft: Server setting override: {}={}", override.getKey(),
+                                override.getValue());
                         } catch (Exception exception) {
-                            exception.printStackTrace();
+                            VRSettings.LOGGER.error("Vivecraft: error parsing server setting override: ", exception);
                         }
                     }
                 }
             }
-            case CRAWL -> ClientNetworking.serverAllowsCrawling = true;
-            case NETWORK_VERSION -> // cast to unsigned byte
-                ClientNetworking.usedNetworkVersion = buffer.readByte() & 0xFF;
-            case VR_SWITCHING -> {
-                ClientNetworking.serverAllowsVrSwitching = buffer.readBoolean();
-                if (VRState.vrInitialized) {
-                    if (!ClientNetworking.serverAllowsVrSwitching) {
-                        Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
-                    }
-                    dataholder.vrPlayer.vrSwitchWarning = false;
+            case CRAWL -> ClientNetworking.SERVER_ALLOWS_CRAWLING = true;
+            case NETWORK_VERSION -> {
+                ClientNetworking.USED_NETWORK_VERSION = ((NetworkVersionPayloadS2C) s2cPayload).version();
+
+                if (ClientNetworking.USED_NETWORK_VERSION >= CommonNetworkHelper.NETWORK_VERSION_HEAD_AIM) {
+                    HEAD_AIM_WARNING = false;
                 }
             }
+            case VR_SWITCHING -> {
+                ClientNetworking.SERVER_ALLOWS_VR_SWITCHING = ((VRSwitchingPayloadS2C) s2cPayload).allowed();
+                if (!ClientNetworking.SERVER_ALLOWS_VR_SWITCHING) {
+                    ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.novrhotswitching"));
+                }
+                VR_SWITCHING_WARNING = false;
+            }
+            case DUAL_WIELDING ->
+                ClientNetworking.SERVER_ALLOWS_DUAL_WIELDING = ((DualWieldingPayloadS2C) s2cPayload).allowed();
         }
     }
 }

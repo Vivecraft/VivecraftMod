@@ -1,42 +1,43 @@
 package org.vivecraft.client.gui.settings;
 
 import net.minecraft.client.gui.screens.Screen;
-import org.vivecraft.client.gui.framework.GuiVROptionsBase;
 import org.vivecraft.client.gui.framework.VROptionEntry;
+import org.vivecraft.client.gui.framework.screens.GuiVROptionsBase;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 public class GuiMenuWorldSettings extends GuiVROptionsBase {
     private final VROptionEntry[] miscSettings = new VROptionEntry[]{
         new VROptionEntry(VRSettings.VrOptions.MENU_WORLD_SELECTION),
         new VROptionEntry("vivecraft.gui.menuworld.refresh", (button, mousePos) -> {
-            if (this.dataholder.menuWorldRenderer != null && this.dataholder.menuWorldRenderer.getLevel() != null) {
+            if (this.dataHolder.menuWorldRenderer != null && this.dataHolder.menuWorldRenderer.getLevel() != null) {
                 try {
-                    this.dataholder.menuWorldRenderer.destroy();
-                    this.dataholder.menuWorldRenderer.prepare();
+                    this.dataHolder.menuWorldRenderer.destroy();
+                    this.dataHolder.menuWorldRenderer.prepare();
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    VRSettings.LOGGER.error("Vivecraft: error refreshing menuworld: ", exception);
                 }
             }
             return true;
         }),
         new VROptionEntry(VRSettings.VrOptions.MENU_WORLD_FALLBACK),
         new VROptionEntry("vivecraft.gui.menuworld.loadnew", (button, mousePos) -> {
-            if (this.dataholder.menuWorldRenderer != null) {
+            if (this.dataHolder.menuWorldRenderer != null) {
                 try {
-                    this.dataholder.menuWorldRenderer.destroy();
-                    this.dataholder.menuWorldRenderer.init();
+                    this.dataHolder.menuWorldRenderer.destroy();
+                    this.dataHolder.menuWorldRenderer.init();
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    VRSettings.LOGGER.error("Vivecraft: error loading new menuworld: ", exception);
                 }
             }
             return true;
         })
     };
 
-    public GuiMenuWorldSettings(Screen guiScreen) {
-        super(guiScreen);
+    public GuiMenuWorldSettings(Screen lastScreen) {
+        super(lastScreen);
     }
 
+    @Override
     public void init() {
         this.vrTitle = "vivecraft.options.screen.menuworld";
         super.init(this.miscSettings, true);

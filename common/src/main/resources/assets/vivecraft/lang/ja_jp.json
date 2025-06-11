@@ -406,7 +406,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "警告: クライアントワールドを使用してメニューワールドを保存しています。データが不完全になる場合があるため、メニューワールドの保存はシングルプレイで行うことをお勧めします。",
   "vivecraft.messages.teleportdisabled": "制限された移動が有効になりました（テレポート不可）。",
   "vivecraft.messages.teleportenabled": "制限された移動が無効になりました（テレポート可能）。",
-  "vivecraft.messages.walkupblocks": "ブロックを登る（右Ctrl + B）: %s",
+  "vivecraft.messages.walkupblocks": "ブロックを登る: %s",
   "vivecraft.messages.showaim": "エイムを表示（右Ctrl + 右Shift）: 有効",
   "_comment40": "vivecraft.messages.playerinertia=Player movement inertia (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "移動方法を%sに切り替えました。",

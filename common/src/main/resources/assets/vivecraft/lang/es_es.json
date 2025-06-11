@@ -406,7 +406,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "ADVERTENCIA: Guardando mundo para menú usando un mundo como cliente. Los datos pueden estar incompletos. Se recomienda guardar mundos para el menú en modo un sólo jugador.",
   "vivecraft.messages.teleportdisabled": "Movimiento Restringido activado (sin teletransporte)",
   "vivecraft.messages.teleportenabled": "Movimiento Restringido desactivado (teletransporte permitido)",
-  "vivecraft.messages.walkupblocks": "Subir bloques (Control Dcho.+B): %s",
+  "vivecraft.messages.walkupblocks": "Subir bloques: %s",
   "vivecraft.messages.showaim": "Mostrar objetivo (Control Dcho.+Mayús Dcho): habilitado",
   "_comment51": "vivecraft.messages.playerinertia=Player movement inertia (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "Modo Movimiento cambiado a: %s",

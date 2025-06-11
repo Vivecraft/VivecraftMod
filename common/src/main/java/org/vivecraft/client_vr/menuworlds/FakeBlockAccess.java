@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
@@ -54,7 +54,11 @@ public class FakeBlockAccess implements LevelReader {
     private final BiomeManager biomeManager;
     private final DimensionSpecialEffects dimensionInfo;
 
-    public FakeBlockAccess(int version, long seed, BlockState[] blocks, byte[] skylightmap, byte[] blocklightmap, Biome[] biomemap, short[][] heightmap, int xSize, int ySize, int zSize, int ground, DimensionType dimensionType, boolean isFlat, float rotation, boolean rain, boolean thunder) {
+    public FakeBlockAccess(
+        int version, long seed, BlockState[] blocks, byte[] skylightmap, byte[] blocklightmap, Biome[] biomemap,
+        short[][] heightmap, int xSize, int ySize, int zSize, int ground, DimensionType dimensionType, boolean isFlat,
+        float rotation, boolean rain, boolean thunder)
+    {
         this.version = version;
         this.seed = seed;
         this.blocks = blocks;
@@ -79,16 +83,17 @@ public class FakeBlockAccess implements LevelReader {
         // set the ground to the height of the center block
         BlockPos pos = new BlockPos(0, (int) this.ground, 0);
         BlockState standing = blocks[encodeCoords(pos)];
-        this.ground += Math.max(standing.getCollisionShape(this, pos).max(Direction.Axis.Y), 0.0);
+        this.ground += (float) Math.max(standing.getCollisionShape(this, pos).max(Direction.Axis.Y), 0.0);
         this.effectiveGround = this.ground;
     }
 
     private int encodeCoords(int x, int z) {
-        return z * xSize + x;
+        return z * this.xSize + x;
     }
 
     private int encodeCoords(int x, int y, int z) {
-        return ((y + (int) effectiveGround) * zSize + (z + zSize / 2)) * xSize + (x + xSize / 2);
+        return ((y + (int) this.effectiveGround) * this.zSize + (z + this.zSize / 2)) * this.xSize +
+            (x + this.xSize / 2);
     }
 
     private int encodeCoords(BlockPos pos) {
@@ -96,7 +101,8 @@ public class FakeBlockAccess implements LevelReader {
     }
 
     private boolean checkCoords(int x, int y, int z) {
-        return x >= -xSize / 2 && y >= -(int) effectiveGround && z >= -zSize / 2 && x < xSize / 2 && y < ySize - (int) effectiveGround && z < zSize / 2;
+        return x >= -this.xSize / 2 && y >= -(int) this.effectiveGround && z >= -this.zSize / 2 && x < this.xSize / 2 &&
+            y < this.ySize - (int) this.effectiveGround && z < this.zSize / 2;
     }
 
     private boolean checkCoords(BlockPos pos) {
@@ -104,56 +110,56 @@ public class FakeBlockAccess implements LevelReader {
     }
 
     public float getGround() {
-        return effectiveGround;
+        return this.effectiveGround;
     }
 
     public void setGroundOffset(float offset) {
-        effectiveGround = ground + offset;
+        this.effectiveGround = this.ground + offset;
     }
 
     public int getXSize() {
-        return xSize;
+        return this.xSize;
     }
 
     public int getYSize() {
-        return ySize;
+        return this.ySize;
     }
 
     public int getZSize() {
-        return zSize;
+        return this.zSize;
     }
 
     public long getSeed() {
-        return seed;
+        return this.seed;
     }
 
     public float getRotation() {
-        return rotation;
+        return this.rotation;
     }
 
     public boolean getRain() {
-        return rain;
+        return this.rain;
     }
 
     public boolean getThunder() {
-        return thunder;
+        return this.thunder;
     }
 
     @Override
     public DimensionType dimensionType() {
-        return dimensionType;
+        return this.dimensionType;
     }
 
     public DimensionSpecialEffects getDimensionReaderInfo() {
-        return dimensionInfo;
+        return this.dimensionInfo;
     }
 
     public double getVoidFogYFactor() {
-        return isFlat ? 1.0D : 0.03125D;
+        return this.isFlat ? 1.0D : 0.03125D;
     }
 
     public double getHorizon() {
-        return isFlat ? -effectiveGround : 63.0D - effectiveGround + getMinBuildHeight();
+        return this.isFlat ? -this.effectiveGround : 63.0D - this.effectiveGround + getMinY();
     }
 
     @Override
@@ -162,7 +168,7 @@ public class FakeBlockAccess implements LevelReader {
             return Blocks.BEDROCK.defaultBlockState();
         }
 
-        BlockState state = blocks[encodeCoords(pos)];
+        BlockState state = this.blocks[encodeCoords(pos)];
         return state != null ? state : Blocks.AIR.defaultBlockState();
     }
 
@@ -187,12 +193,14 @@ public class FakeBlockAccess implements LevelReader {
             int k = 0;
             int l = 0;
             int i1 = 0;
-            Cursor3D cursor3D = new Cursor3D(blockPosIn.getX() - i, blockPosIn.getY(), blockPosIn.getZ() - i, blockPosIn.getX() + i, blockPosIn.getY(), blockPosIn.getZ() + i);
+            Cursor3D cursor3D = new Cursor3D(blockPosIn.getX() - i, blockPosIn.getY(), blockPosIn.getZ() - i,
+                blockPosIn.getX() + i, blockPosIn.getY(), blockPosIn.getZ() + i);
             int j1;
 
-            for (BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos(); cursor3D.advance(); i1 += j1 & 255) {
-                blockpos$mutable.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
-                j1 = colorResolverIn.getColor(this.getBiome(blockpos$mutable).value(), blockpos$mutable.getX(), blockpos$mutable.getZ());
+            for (BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos(); cursor3D.advance(); i1 += j1 & 255)
+            {
+                blockPos.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
+                j1 = colorResolverIn.getColor(this.getBiome(blockPos).value(), blockPos.getX(), blockPos.getZ());
                 k += (j1 & 16711680) >> 16;
                 l += (j1 & 65280) >> 8;
             }
@@ -208,9 +216,9 @@ public class FakeBlockAccess implements LevelReader {
         }
 
         if (type == LightLayer.SKY) {
-            return this.dimensionType.hasSkyLight() ? skylightmap[encodeCoords(pos)] : 0;
+            return this.dimensionType.hasSkyLight() ? this.skylightmap[encodeCoords(pos)] : 0;
         } else {
-            return type == LightLayer.BLOCK ? blocklightmap[encodeCoords(pos)] : 0;
+            return type == LightLayer.BLOCK ? this.blocklightmap[encodeCoords(pos)] : 0;
         }
     }
 
@@ -229,8 +237,8 @@ public class FakeBlockAccess implements LevelReader {
             }
             return light;
         } else {
-            int light = (this.dimensionType.hasSkyLight() ? skylightmap[encodeCoords(pos)] : 0) - amount;
-            int blockLight = blocklightmap[encodeCoords(pos)];
+            int light = (this.dimensionType.hasSkyLight() ? this.skylightmap[encodeCoords(pos)] : 0) - amount;
+            int blockLight = this.blocklightmap[encodeCoords(pos)];
 
             if (blockLight > light) {
                 light = blockLight;
@@ -246,24 +254,12 @@ public class FakeBlockAccess implements LevelReader {
         if (!shade) {
             return flag ? 0.9F : 1.0F;
         } else {
-            switch (face) {
-                case DOWN:
-                    return flag ? 0.9F : 0.5F;
-
-                case UP:
-                    return flag ? 0.9F : 1.0F;
-
-                case NORTH:
-                case SOUTH:
-                    return 0.8F;
-
-                case WEST:
-                case EAST:
-                    return 0.6F;
-
-                default:
-                    return 1.0F;
-            }
+            return switch (face) {
+                case DOWN -> flag ? 0.9F : 0.5F;
+                case UP -> flag ? 0.9F : 1.0F;
+                case NORTH, SOUTH -> 0.8F;
+                case WEST, EAST -> 0.6F;
+            };
         }
     }
 
@@ -286,7 +282,7 @@ public class FakeBlockAccess implements LevelReader {
     }
 
     public int getHeightBlocking(int x, int z) {
-        return heightmap[x + xSize / 2][z + zSize / 2] - (int) effectiveGround;
+        return this.heightmap[x + this.xSize / 2][z + this.zSize / 2] - (int) this.effectiveGround;
     }
 
     @Override
@@ -321,15 +317,15 @@ public class FakeBlockAccess implements LevelReader {
 
     @Override
     public Holder<Biome> getNoiseBiome(int x, int y, int z) {
-        int xMoved = x + xSize / 8;
-        int yMoved = y + (int) effectiveGround / 4;
-        int zMoved = z + zSize / 8;
+        int xMoved = x + this.xSize / 8;
+        int yMoved = y + (int) this.effectiveGround / 4;
+        int zMoved = z + this.zSize / 8;
         if (!checkCoords(x * 4, y * 4, z * 4)) {
-            xMoved = Mth.clamp(xMoved, 0, xSize / 4 - 1);
-            yMoved = Mth.clamp(yMoved, 0, (ySize - (int) effectiveGround) / 4 - 1);
-            zMoved = Mth.clamp(zMoved, 0, zSize / 4 - 1);
+            xMoved = Mth.clamp(xMoved, 0, this.xSize / 4 - 1);
+            yMoved = Mth.clamp(yMoved, 0, (this.ySize - (int) this.effectiveGround) / 4 - 1);
+            zMoved = Mth.clamp(zMoved, 0, this.zSize / 4 - 1);
         }
-        return Holder.direct(biomemap[(yMoved * (zSize / 4) + zMoved) * (xSize / 4) + xMoved]);
+        return Holder.direct(this.biomemap[(yMoved * (this.zSize / 4) + zMoved) * (this.xSize / 4) + xMoved]);
     }
 
     @Override
@@ -344,7 +340,7 @@ public class FakeBlockAccess implements LevelReader {
 
     @Override
     public int getSeaLevel() {
-        return (int) (63 - effectiveGround + getMinBuildHeight()); // magic number
+        return (int) (63 - this.effectiveGround + getMinY()); // magic number
     }
 
     @Override
@@ -354,14 +350,13 @@ public class FakeBlockAccess implements LevelReader {
 
     @Override
     public BiomeManager getBiomeManager() {
-        return biomeManager;
+        return this.biomeManager;
     }
 
     @Override
     public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
         return null; // don't need this
     }
-
 
     @Override
     public RegistryAccess registryAccess() {

@@ -13,9 +13,12 @@ import org.vivecraft.client_vr.VRState;
     "de.cheaterpaul.blur.BlurClient"
 })
 public class BlurMixin {
-    @Inject(at = @At("HEAD"), method = "getProgress", cancellable = true, remap = false)
+    /**
+     * removes any menu blur in vr
+     */
+    @Inject(method = "getProgress", at = @At("HEAD"), cancellable = true, remap = false)
     private static void vivecraft$noBlurInVR(CallbackInfoReturnable<Float> cir) {
-        if (VRState.vrRunning) {
+        if (VRState.VR_RUNNING) {
             cir.setReturnValue(0.0F);
         }
     }

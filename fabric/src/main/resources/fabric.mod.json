@@ -31,23 +31,26 @@
   },
   "mixins": [
     "vivecraft.mixins.json",
-    "vivecraft.blur.mixins.json",
+    "vivecraft.fabric.mixins.json",
+    "vivecraft.accessories.mixins.json",
+    "vivecraft.alexmobs.mixins.json",
     "vivecraft.bedrockify.mixins.json",
+    "vivecraft.blur.mixins.json",
+    "vivecraft.cataclysm.mixins.json",
     "vivecraft.dynamicfps.mixins.json",
-    "vivecraft.sodium.mixins.json",
-    "vivecraft.fabric.sodium.mixins.json",
+    "vivecraft.emf.mixins.json",
     "vivecraft.iris.mixins.json",
+    "vivecraft.mca.mixins.json",
     "vivecraft.modmenu.mixins.json",
-    "vivecraft.physicsmod.mixins.json",
     "vivecraft.rei.mixins.json",
     "vivecraft.resolutioncontrol.mixins.json",
     "vivecraft.sereneseasons.mixins.json",
-    "vivecraft.fabric.mixins.json"
+    "vivecraft.sodium.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.14",
-    "minecraft": ["1.20.3", "1.20.4"],
-    "java": ">=17"
+    "fabricloader": ">=0.16.1",
+    "minecraft": ["1.21.4"],
+    "java": ">=21"
   },
   "breaks": {
     "sodium": ["0.4.11+build.25", "0.4.11+build.26"]

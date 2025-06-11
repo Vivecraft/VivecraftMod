@@ -10,7 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Pseudo
 @Mixin(targets = "com.github.L_Ender.cataclysm.client.event.ClientEvent")
 public class ClientEventMixin {
-    @Inject(at = @At("HEAD"), method = "onGetFluidRenderType", remap = false, cancellable = true)
+    /**
+     * menuworld fix
+     */
+    @Inject(method = "onGetFluidRenderType", at = @At("HEAD"), remap = false, cancellable = true)
     private void vivecraft$fixNoPlayer(CallbackInfo ci) {
         if (Minecraft.getInstance().player == null) {
             ci.cancel();

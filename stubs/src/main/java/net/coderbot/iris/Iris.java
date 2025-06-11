@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class Iris {
     @NotNull
-    public static PipelineManager getPipelineManager(){
+    public static PipelineManager getPipelineManager() {
         return null;
     }
 }

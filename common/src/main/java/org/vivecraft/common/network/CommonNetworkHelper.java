@@ -2,58 +2,47 @@ package org.vivecraft.common.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
-import org.vivecraft.common.utils.math.Quaternion;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public class CommonNetworkHelper {
 
-    public static final ResourceLocation CHANNEL = new ResourceLocation("vivecraft:data");
+    public static final ResourceLocation CHANNEL = ResourceLocation.parse("vivecraft:data");
+
+    public static final int NETWORK_VERSION_LEGACY = -1;
+    // adds full body tracker data
+    public static final int NETWORK_VERSION_FBT = 1;
+    // adds dual wielding packet and server logic
+    public static final int NETWORK_VERSION_DUAL_WIELDING = 2;
+    // adds the head as a valid active BodyPart, and adds a useForAim flag
+    public static final int NETWORK_VERSION_HEAD_AIM = 3;
 
     // maximum supported network version
-    public static final int MAX_SUPPORTED_NETWORK_VERSION = 0;
+    public static final int MAX_SUPPORTED_NETWORK_VERSION = NETWORK_VERSION_HEAD_AIM;
     // minimum supported network version
     public static final int MIN_SUPPORTED_NETWORK_VERSION = 0;
 
-    public enum PacketDiscriminators {
-        VERSION,
-        REQUESTDATA,
-        HEADDATA,
-        CONTROLLER0DATA,
-        CONTROLLER1DATA,
-        WORLDSCALE,
-        DRAW,
-        MOVEMODE,
-        UBERPACKET,
-        TELEPORT,
-        CLIMBING,
-        SETTING_OVERRIDE,
-        HEIGHT,
-        ACTIVEHAND,
-        CRAWL,
-        NETWORK_VERSION,
-        VR_SWITCHING,
-        IS_VR_ACTIVE,
-        VR_PLAYER_STATE
+    public static void serializeF(FriendlyByteBuf buffer, Vector3fc vec3) {
+        buffer.writeFloat(vec3.x());
+        buffer.writeFloat(vec3.y());
+        buffer.writeFloat(vec3.z());
     }
 
-    public static void serializeF(FriendlyByteBuf buffer, Vec3 vec3) {
-        buffer.writeFloat((float) vec3.x);
-        buffer.writeFloat((float) vec3.y);
-        buffer.writeFloat((float) vec3.z);
+    public static Vector3fc deserializeFVec3(FriendlyByteBuf buffer) {
+        return new Vector3f(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
     }
 
-    public static void serialize(FriendlyByteBuf buffer, Quaternion quat) {
-        buffer.writeFloat(quat.w);
-        buffer.writeFloat(quat.x);
-        buffer.writeFloat(quat.y);
-        buffer.writeFloat(quat.z);
+    public static void serialize(FriendlyByteBuf buffer, Quaternionfc quat) {
+        buffer.writeFloat(quat.w());
+        buffer.writeFloat(quat.x());
+        buffer.writeFloat(quat.y());
+        buffer.writeFloat(quat.z());
     }
 
-    public static Vec3 deserializeFVec3(FriendlyByteBuf buffer) {
-        return new Vec3(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
-    }
-
-    public static Quaternion deserializeVivecraftQuaternion(FriendlyByteBuf buffer) {
-        return new Quaternion(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+    public static Quaternionf deserializeVivecraftQuaternion(FriendlyByteBuf buffer) {
+        float w = buffer.readFloat();
+        return new Quaternionf(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), w);
     }
 }

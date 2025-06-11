@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#forge:tools/fishing_rods",
+      "required": false
+    },
+    {
+      "id": "#c:tools/fishing_rods",
+      "required": false
+    },
+
+    "minecraft:fishing_rod",
+    "#vivecraft:food_sticks",
+    "#vivecraft:moditems/balkons_weaponsmod/flails"
+  ]
+}

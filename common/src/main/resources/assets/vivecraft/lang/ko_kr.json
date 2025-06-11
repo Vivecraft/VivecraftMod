@@ -406,7 +406,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "경고: 메뉴 세계 저장은 클라이언트 측의 세계를 사용합니다. 데이터가 완전하지 않을 수도 있습니다. 싱글플레이에서 메뉴 세계를 저장하기를 권장합니다.",
   "vivecraft.messages.teleportdisabled": "제한된 움직임이 활성화 되었습니다 (순간이동 불가능)",
   "vivecraft.messages.teleportenabled": "제한된 움직임이 비활성화 되었습니다 (순간이동 허용)",
-  "vivecraft.messages.walkupblocks": "블록 위로 걸어 오르기 (우측 Ctrl + B): %s",
+  "vivecraft.messages.walkupblocks": "블록 위로 걸어 오르기: %s",
   "vivecraft.messages.showaim": "조준 보이기 (우측 Ctrl + 우측 Shift): 활성화",
   "_comment50": "vivecraft.messages.playerinertia=Player movement inertia (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "움직임 모드 변경됨: %s",

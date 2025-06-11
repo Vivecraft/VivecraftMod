@@ -406,7 +406,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "WAARSCHUWING: Menuwereld opslaan met behulp van een clientwereld. Gegevens zijn mogelijk onvolledig. Het is aan te raden om menuwerelden in singleplayer op te slaan.",
   "vivecraft.messages.teleportdisabled": "Beperkte beweging ingeschakeld (geen teleportatie)",
   "vivecraft.messages.teleportenabled": "Beperkte beweging uitgeschakeld (teleporteren toegestaan)",
-  "vivecraft.messages.walkupblocks": "Walk-up blokken (RCTRL + B): %s",
+  "vivecraft.messages.walkupblocks": "Walk-up blokken: %s",
   "vivecraft.messages.showaim": "Doel tonen (RCTRL + RSHIFT): ingeschakeld",
   "_comment54": "vivecraft.messages.playerinertia=Player movement inertia (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "Bewegingsmodus overgeschakeld naar: %s",

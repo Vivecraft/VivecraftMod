@@ -1,7 +1,8 @@
 package org.vivecraft.client_vr.menuworlds;
 
+import com.mojang.blaze3d.buffers.BufferUsage;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -12,15 +13,16 @@ import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -39,14 +41,18 @@ import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.extensions.BufferBuilderExtension;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.extensions.StateHolderExtension;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.mixin.client.renderer.RenderStateShardAccessor;
+import org.vivecraft.mod_compat_vr.iris.IrisHelper;
 import org.vivecraft.mod_compat_vr.optifine.OptifineHelper;
 import org.vivecraft.mod_compat_vr.sodium.SodiumHelper;
 
@@ -57,23 +63,28 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MenuWorldRenderer {
-    private static final ResourceLocation MOON_LOCATION = new ResourceLocation("textures/environment/moon_phases.png");
-    private static final ResourceLocation SUN_LOCATION = new ResourceLocation("textures/environment/sun.png");
-    private static final ResourceLocation CLOUDS_LOCATION = new ResourceLocation("textures/environment/clouds.png");
-    private static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
+    private static final ResourceLocation MOON_LOCATION = ResourceLocation.withDefaultNamespace(
+        "textures/environment/moon_phases.png");
+    private static final ResourceLocation SUN_LOCATION = ResourceLocation.withDefaultNamespace(
+        "textures/environment/sun.png");
+    private static final ResourceLocation CLOUDS_LOCATION = ResourceLocation.withDefaultNamespace(
+        "textures/environment/clouds.png");
+    private static final ResourceLocation END_SKY_LOCATION = ResourceLocation.withDefaultNamespace(
+        "textures/environment/end_sky.png");
 
-    private static final ResourceLocation FORCEFIELD_LOCATION = new ResourceLocation("textures/misc/forcefield.png");
+    private static final ResourceLocation FORCEFIELD_LOCATION = ResourceLocation.withDefaultNamespace(
+        "textures/misc/forcefield.png");
 
-    private static final ResourceLocation RAIN_LOCATION = new ResourceLocation("textures/environment/rain.png");
+    private static final ResourceLocation RAIN_LOCATION = ResourceLocation.withDefaultNamespace(
+        "textures/environment/rain.png");
 
-    private static final ResourceLocation SNOW_LOCATION = new ResourceLocation("textures/environment/snow.png");
+    private static final ResourceLocation SNOW_LOCATION = ResourceLocation.withDefaultNamespace(
+        "textures/environment/snow.png");
 
     private final Minecraft mc;
     private DimensionSpecialEffects dimensionInfo;
     private FakeBlockAccess blockAccess;
-    private final DynamicTexture lightTexture;
-    private final NativeImage lightPixels;
-    private final ResourceLocation lightTextureLocation;
+    private final TextureTarget lightMap;
     private boolean lightmapUpdateNeeded;
     private float blockLightRedFlicker;
     private int waterVisionTime;
@@ -85,19 +96,12 @@ public class MenuWorldRenderer {
     private VertexBuffer starVBO;
     private VertexBuffer skyVBO;
     private VertexBuffer sky2VBO;
-    private VertexBuffer cloudVBO;
     private int renderDistance;
     private int renderDistanceChunks;
     public MenuFogRenderer fogRenderer;
     public Set<TextureAtlasSprite> animatedSprites;
     private final Random rand;
     private boolean ready;
-    private CloudStatus prevCloudsType;
-    private int prevCloudX;
-    private int prevCloudY;
-    private int prevCloudZ;
-    private Vec3 prevCloudColor;
-    private boolean generateClouds = true;
     private int skyFlashTime;
     private float rainLevel;
     private float thunderLevel;
@@ -113,6 +117,7 @@ public class MenuWorldRenderer {
     public Vec3i segmentSize = new Vec3i(64, 64, 64);
 
     private boolean building = false;
+    private boolean reenableShaders = false;
     private long buildStartTime;
     private Map<Pair<RenderType, BlockPos>, BufferBuilder> bufferBuilders;
     private Map<Pair<RenderType, BlockPos>, BlockPos.MutableBlockPos> currentPositions;
@@ -122,13 +127,16 @@ public class MenuWorldRenderer {
     private final Queue<Thread> builderThreads = new ConcurrentLinkedQueue<>();
     private Throwable builderError;
 
-    private static boolean firstRenderDone;
+    private static boolean FIRST_RENDER_DONE;
 
     public MenuWorldRenderer() {
         this.mc = Minecraft.getInstance();
-        this.lightTexture = new DynamicTexture(16, 16, false);
-        this.lightTextureLocation = mc.getTextureManager().register("vivecraft_light_map", this.lightTexture);
-        this.lightPixels = this.lightTexture.getPixels();
+
+        this.lightMap = new TextureTarget(16, 16, false);
+        this.lightMap.setFilterMode(GL11.GL_LINEAR);
+        this.lightMap.setClearColor(1.0F, 1.0F, 1.0F, 1.0F);
+        this.lightMap.clear();
+
         this.fogRenderer = new MenuFogRenderer(this);
         this.rand = new Random();
         this.rand.nextInt(); // toss some bits in the bin
@@ -136,124 +144,129 @@ public class MenuWorldRenderer {
 
     public void init() {
         if (ClientDataHolderVR.getInstance().vrSettings.menuWorldSelection == VRSettings.MenuWorld.NONE) {
-            //VRSettings.logger.info("Main menu worlds disabled.");
+            VRSettings.LOGGER.info("Vivecraft: Main menu worlds disabled.");
             return;
         }
 
         try {
-            VRSettings.logger.info("MenuWorlds: Initializing main menu world renderer...");
+            VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Initializing main menu world renderer...");
             loadRenderers();
-            getWorldTask = CompletableFuture.supplyAsync(() -> {
+            this.getWorldTask = CompletableFuture.supplyAsync(() -> {
                 try (InputStream inputStream = MenuWorldDownloader.getRandomWorld()) {
-                    VRSettings.logger.info("MenuWorlds: Loading world data...");
+                    VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Loading world data...");
                     return inputStream != null ? MenuWorldExporter.loadWorld(inputStream) : null;
                 } catch (Exception e) {
-                    VRSettings.logger.error("Exception thrown when loading main menu world, falling back to old menu room. \n {}", e.getMessage());
-                    e.printStackTrace();
+                    VRSettings.LOGGER.error(
+                        "Vivecraft: Exception thrown when loading main menu world, falling back to old menu room.", e);
                     return null;
                 }
             }, Util.backgroundExecutor());
         } catch (Exception e) {
-            VRSettings.logger.error("Exception thrown when initializing main menu world renderer, falling back to old menu room. \n {}", e.getMessage());
-            e.printStackTrace();
+            VRSettings.LOGGER.error(
+                "Vivecraft: Exception thrown when initializing main menu world renderer, falling back to old menu room.",
+                e);
         }
     }
 
     public void checkTask() {
-        if (getWorldTask == null || !getWorldTask.isDone()) {
+        if (this.getWorldTask == null || !this.getWorldTask.isDone()) {
             return;
         }
 
         try {
-            FakeBlockAccess world = getWorldTask.get();
+            FakeBlockAccess world = this.getWorldTask.get();
             if (world != null) {
                 setWorld(world);
                 prepare();
             } else {
-                VRSettings.logger.warn("Failed to load any main menu world, falling back to old menu room");
+                VRSettings.LOGGER.warn("Vivecraft: Failed to load any main menu world, falling back to old menu room");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            VRSettings.LOGGER.error("Vivecraft: error starting menuworld building:", e);
         } finally {
-            getWorldTask = null;
+            this.getWorldTask = null;
         }
     }
 
-    public void render(PoseStack poseStack) {
+    public void render(Matrix4fStack poseStack) {
 
         // temporarily disable fabulous to render the menu world
-        GraphicsStatus current = mc.options.graphicsMode().get();
+        GraphicsStatus current = this.mc.options.graphicsMode().get();
         if (current == GraphicsStatus.FABULOUS) {
-            mc.options.graphicsMode().set(GraphicsStatus.FANCY);
+            this.mc.options.graphicsMode().set(GraphicsStatus.FANCY);
         }
 
         turnOnLightLayer();
 
-        poseStack.pushPose();
+        poseStack.pushMatrix();
 
-        //rotate World
-        poseStack.mulPose(Axis.YP.rotationDegrees(worldRotation));
+        // rotate World
+        poseStack.rotate(Axis.YP.rotationDegrees(this.worldRotation));
 
-        // small offset to center on source block, and add the partial block offset, this shouldn't be too noticable on the fog
-        poseStack.translate(-0.5, -blockAccess.getGround() + (int) blockAccess.getGround(), -0.5);
+        // small offset to center on source block, and add the partial block offset, this shouldn't be too noticeable on the fog
+        poseStack.translate(-0.5F, -Mth.frac(this.blockAccess.getGround()), -0.5F);
 
         // not sure why this needs to be rotated twice, but it works
-        Vec3 offset = new Vec3(0.5, -blockAccess.getGround() + (int) blockAccess.getGround(), 0.5).yRot(worldRotation * 0.0174533f);
-        Vec3 eyePosition = getEyePos().add(offset).yRot(-worldRotation * 0.0174533f);
+        Vec3 offset = new Vec3(0.5, -Mth.frac(this.blockAccess.getGround()), 0.5)
+            .yRot(this.worldRotation * Mth.DEG_TO_RAD);
+        Vec3 eyePosition = getEyePos().add(offset).yRot(-this.worldRotation * Mth.DEG_TO_RAD);
 
-        fogRenderer.levelFogColor();
+        this.fogRenderer.setupFog(FogRenderer.FogMode.FOG_SKY);
 
         renderSky(poseStack, eyePosition);
 
-        fogRenderer.setupFog(FogRenderer.FogMode.FOG_TERRAIN);
+        this.fogRenderer.setupFog(FogRenderer.FogMode.FOG_TERRAIN);
 
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.enableBlend();
 
-        Matrix4f modelView = poseStack.last().pose();
         Matrix4f projection = RenderSystem.getProjectionMatrix();
 
         RenderSystem.disableBlend();
 
-        renderChunkLayer(RenderType.solid(), modelView, projection);
-        renderChunkLayer(RenderType.cutoutMipped(), modelView, projection);
-        renderChunkLayer(RenderType.cutout(), modelView, projection);
+        renderChunkLayer(RenderType.solid(), poseStack, projection);
+        renderChunkLayer(RenderType.cutoutMipped(), poseStack, projection);
+        renderChunkLayer(RenderType.cutout(), poseStack, projection);
 
         RenderSystem.enableBlend();
 
         float cloudHeight = this.dimensionInfo.getCloudHeight();
         if (OptifineHelper.isOptifineLoaded()) {
-            cloudHeight += OptifineHelper.getCloudHeight() * 128.0;
+            cloudHeight += (float) (OptifineHelper.getCloudHeight() * 128.0);
         }
 
-        if (eyePosition.y + blockAccess.getGround() + blockAccess.getMinBuildHeight() < cloudHeight) {
-            renderClouds(poseStack, eyePosition.x, eyePosition.y + blockAccess.getGround() + blockAccess.getMinBuildHeight(), eyePosition.z);
+        if (eyePosition.y + this.blockAccess.getGround() + this.blockAccess.getMinY() < cloudHeight) {
+            renderClouds(poseStack, eyePosition.x,
+                eyePosition.y + this.blockAccess.getGround() + this.blockAccess.getMinY(),
+                eyePosition.z);
         }
 
-        renderChunkLayer(RenderType.translucent(), modelView, projection);
-        renderChunkLayer(RenderType.tripwire(), modelView, projection);
+        renderChunkLayer(RenderType.translucent(), poseStack, projection);
+        renderChunkLayer(RenderType.tripwire(), poseStack, projection);
 
-        if (eyePosition.y + blockAccess.getGround() + blockAccess.getMinBuildHeight() >= cloudHeight) {
-            renderClouds(poseStack, eyePosition.x, eyePosition.y + blockAccess.getGround() + blockAccess.getMinBuildHeight(), eyePosition.z);
+        if (eyePosition.y + this.blockAccess.getGround() + this.blockAccess.getMinY() >= cloudHeight) {
+            renderClouds(poseStack, eyePosition.x,
+                eyePosition.y + this.blockAccess.getGround() + this.blockAccess.getMinY(),
+                eyePosition.z);
         }
 
         RenderSystem.depthMask(false);
         renderSnowAndRain(poseStack, eyePosition.x, 0, eyePosition.z);
         RenderSystem.depthMask(true);
 
-        poseStack.popPose();
+        poseStack.popMatrix();
         turnOffLightLayer();
-        mc.options.graphicsMode().set(current);
+        this.mc.options.graphicsMode().set(current);
     }
 
     private void renderChunkLayer(RenderType layer, Matrix4f modelView, Matrix4f Projection) {
-        List<VertexBuffer> buffers = vertexBuffers.get(layer);
-        if (buffers.size() == 0) {
+        List<VertexBuffer> buffers = this.vertexBuffers.get(layer);
+        if (buffers.isEmpty()) {
             return;
         }
 
         layer.setupRenderState();
-        ShaderInstance shaderInstance = RenderSystem.getShader();
+        CompiledShaderProgram shaderInstance = RenderSystem.getShader();
         shaderInstance.apply();
         turnOnLightLayer();
         for (VertexBuffer vertexBuffer : buffers) {
@@ -264,131 +277,162 @@ public class MenuWorldRenderer {
     }
 
     public void prepare() {
-        if (vertexBuffers == null && !building) {
-            VRSettings.logger.info("MenuWorlds: Building geometry...");
+        if (this.vertexBuffers == null && !this.building) {
+            VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Building geometry...");
 
             // random offset to make the player fly
-            if (rand.nextInt(1000) == 0) {
-                blockAccess.setGroundOffset(100);
+            if (this.rand.nextInt(1000) == 0) {
+                this.blockAccess.setGroundOffset(100);
             }
-            fastTime = new Random().nextInt(10) == 0;
+            this.fastTime = new Random().nextInt(10) == 0;
 
-            animatedSprites = ConcurrentHashMap.newKeySet();
-            blockCounts = new ConcurrentHashMap<>();
-            renderTimes = new ConcurrentHashMap<>();
+            this.animatedSprites = ConcurrentHashMap.newKeySet();
+            this.blockCounts = new ConcurrentHashMap<>();
+            this.renderTimes = new ConcurrentHashMap<>();
+            if (IrisHelper.isLoaded() && IrisHelper.isShaderActive() && IrisHelper.hasIssuesWithMenuWorld()) {
+                VRSettings.LOGGER.info("Vivecraft: Temporarily disabling shaders to build Menuworld.");
+                this.reenableShaders = true;
+                ClientUtils.addChatMessage(Component.translatable("vivecraft.messages.menuworldshaderdisable"));
+                IrisHelper.setShadersActive(false);
+            }
 
             try {
-                vertexBuffers = new HashMap<>();
-                bufferBuilders = new HashMap<>();
-                currentPositions = new HashMap<>();
+                this.vertexBuffers = new HashMap<>();
+                this.bufferBuilders = new HashMap<>();
+                this.currentPositions = new HashMap<>();
 
                 for (RenderType layer : RenderType.chunkBufferLayers()) {
-                    vertexBuffers.put(layer, new LinkedList<>());
+                    this.vertexBuffers.put(layer, new LinkedList<>());
 
-                    for (int x = -blockAccess.getXSize() / 2; x < blockAccess.getXSize() / 2; x += segmentSize.getX()) {
-                        for (int y = (int) -blockAccess.getGround(); y < blockAccess.getYSize() - (int) blockAccess.getGround(); y += segmentSize.getY()) {
-                            for (int z = -blockAccess.getZSize() / 2; z < blockAccess.getZSize() / 2; z += segmentSize.getZ()) {
+                    for (int x = -this.blockAccess.getXSize() / 2;
+                         x < this.blockAccess.getXSize() / 2; x += this.segmentSize.getX()) {
+                        for (int y = (int) -this.blockAccess.getGround(); y < this.blockAccess.getYSize() -
+                            (int) this.blockAccess.getGround(); y += this.segmentSize.getY()) {
+                            for (int z = -this.blockAccess.getZSize() / 2;
+                                 z < this.blockAccess.getZSize() / 2; z += this.segmentSize.getZ()) {
                                 BlockPos pos = new BlockPos(x, y, z);
                                 Pair<RenderType, BlockPos> pair = Pair.of(layer, pos);
 
-                                BufferBuilder vertBuffer = new BufferBuilder(32768); // yields most efficient memory use for some reason
-                                vertBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+                                // 32768 yields most efficient memory use for some reason
+                                BufferBuilder vertBuffer = new BufferBuilder(new ByteBufferBuilder(32768),
+                                    VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
-                                bufferBuilders.put(pair, vertBuffer);
-                                currentPositions.put(pair, pos.mutable());
+                                this.bufferBuilders.put(pair, vertBuffer);
+                                this.currentPositions.put(pair, pos.mutable());
                             }
                         }
                     }
                 }
             } catch (OutOfMemoryError e) {
-                VRSettings.logger.error("OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?");
+                VRSettings.LOGGER.error(
+                    "Vivecraft: OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?", e);
                 destroy();
                 return;
             }
 
-            buildStartTime = Utils.milliTime();
-            building = true;
+            this.buildStartTime = ClientUtils.milliTime();
+            this.building = true;
         }
     }
 
     public boolean isBuilding() {
-        return building;
+        return this.building;
     }
 
     public void buildNext() {
-        if (!builderFutures.stream().allMatch(CompletableFuture::isDone) || builderError != null) {
+        if (!this.builderFutures.stream().allMatch(CompletableFuture::isDone) || this.builderError != null) {
             return;
         }
-        builderFutures.clear();
+        this.builderFutures.clear();
 
-        if (currentPositions.entrySet().stream().allMatch(entry -> entry.getValue().getY() >= Math.min(segmentSize.getY() + entry.getKey().getRight().getY(), blockAccess.getYSize() - (int) blockAccess.getGround()))) {
+        if (this.currentPositions.entrySet().stream().allMatch(entry -> entry.getValue().getY() >=
+            Math.min(this.segmentSize.getY() + entry.getKey().getRight().getY(),
+                this.blockAccess.getYSize() - (int) this.blockAccess.getGround())))
+        {
             finishBuilding();
             return;
         }
 
-        long startTime = Utils.milliTime();
-        for (var pair : bufferBuilders.keySet()) {
-            if (currentPositions.get(pair).getY() < Math.min(segmentSize.getY() + pair.getRight().getY(), blockAccess.getYSize() - (int) blockAccess.getGround())) {
-                if (firstRenderDone || !SodiumHelper.isLoaded() || !SodiumHelper.hasIssuesWithParallelBlockBuilding()) {
+        long startTime = ClientUtils.milliTime();
+        for (var pair : this.bufferBuilders.keySet()) {
+            if (this.currentPositions.get(pair).getY() < Math.min(this.segmentSize.getY() + pair.getRight().getY(),
+                this.blockAccess.getYSize() - (int) this.blockAccess.getGround()))
+            {
+                if (FIRST_RENDER_DONE || !SodiumHelper.isLoaded() ||
+                    !SodiumHelper.hasIssuesWithParallelBlockBuilding())
+                {
                     // generate the data in parallel
-                    builderFutures.add(CompletableFuture.runAsync(() -> buildGeometry(pair, startTime, renderMaxTime), Util.backgroundExecutor()));
+                    this.builderFutures.add(
+                        CompletableFuture.runAsync(() -> buildGeometry(pair, startTime, this.renderMaxTime),
+                            Util.backgroundExecutor()));
                 } else {
                     // generate first data in series to avoid weird class loading error
-                    buildGeometry(pair, startTime, renderMaxTime);
-                    if (blockCounts.getOrDefault(pair, 0) > 0) {
-                        firstRenderDone = true;
+                    buildGeometry(pair, startTime, this.renderMaxTime);
+                    if (this.blockCounts.getOrDefault(pair, 0) > 0) {
+                        FIRST_RENDER_DONE = true;
                     }
                 }
             }
         }
 
-        CompletableFuture.allOf(builderFutures.toArray(new CompletableFuture[0])).thenRunAsync(this::handleError, Util.backgroundExecutor());
+        CompletableFuture.allOf(this.builderFutures.toArray(new CompletableFuture[0]))
+            .thenRunAsync(this::handleError, Util.backgroundExecutor());
     }
 
     private void buildGeometry(Pair<RenderType, BlockPos> pair, long startTime, int maxTime) {
-        if (Utils.milliTime() - startTime >= maxTime) {
+        if (ClientUtils.milliTime() - startTime >= maxTime) {
             return;
         }
 
         RenderType layer = pair.getLeft();
         BlockPos offset = pair.getRight();
-        builderThreads.add(Thread.currentThread());
-        long realStartTime = Utils.milliTime();
+        this.builderThreads.add(Thread.currentThread());
+        long realStartTime = ClientUtils.milliTime();
 
         try {
             PoseStack thisPose = new PoseStack();
-            int renderDistSquare = (renderDistance + 1) * (renderDistance + 1);
-            BlockRenderDispatcher blockRenderer = mc.getBlockRenderer();
-            BufferBuilder vertBuffer = bufferBuilders.get(pair);
-            BlockPos.MutableBlockPos pos = currentPositions.get(pair);
+            int renderDistSquare = (this.renderDistance + 1) * (this.renderDistance + 1);
+            BlockRenderDispatcher blockRenderer = this.mc.getBlockRenderer();
+            BufferBuilder vertBuffer = this.bufferBuilders.get(pair);
+            BlockPos.MutableBlockPos pos = this.currentPositions.get(pair);
             RandomSource randomSource = RandomSource.create();
 
             int count = 0;
-            while (Utils.milliTime() - startTime < maxTime && pos.getY() < Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int) blockAccess.getGround()) && building) {
+            while (
+                ClientUtils.milliTime() - startTime < maxTime && pos.getY() <
+                    Math.min(this.segmentSize.getY() + offset.getY(),
+                        this.blockAccess.getYSize() - (int) this.blockAccess.getGround()) && this.building) {
                 // only build blocks not obscured by fog
-                if (Mth.abs(pos.getY()) <= renderDistance + 1 && Mth.lengthSquared(pos.getX(), pos.getZ()) <= renderDistSquare) {
-                    BlockState state = blockAccess.getBlockState(pos);
+                if (Mth.abs(pos.getY()) <= this.renderDistance + 1 &&
+                    Mth.lengthSquared(pos.getX(), pos.getZ()) <= renderDistSquare)
+                {
+                    BlockState state = this.blockAccess.getBlockState(pos);
                     if (state != null) {
                         FluidState fluidState = state.getFluidState();
                         if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
-                            for (var sprite : Xplat.getFluidTextures(blockAccess, pos, fluidState)) {
+                            for (var sprite : Xplat.getFluidTextures(this.blockAccess, pos, fluidState)) {
                                 if (sprite != null && sprite.contents().getUniqueFrames().sum() > 1) {
-                                    animatedSprites.add(sprite);
+                                    this.animatedSprites.add(sprite);
                                 }
                             }
-                            blockRenderer.renderLiquid(pos, blockAccess, vertBuffer, state, new FluidStateWrapper(fluidState));
+                            blockRenderer.renderLiquid(pos, this.blockAccess, vertBuffer, state,
+                                new FluidStateWrapper(fluidState));
                             count++;
                         }
 
-                        if (state.getRenderShape() != RenderShape.INVISIBLE && ItemBlockRenderTypes.getChunkRenderType(state) == layer) {
-                            for (var quad : mc.getModelManager().getBlockModelShaper().getBlockModel(state).getQuads(state, null, randomSource)) {
+                        if (state.getRenderShape() != RenderShape.INVISIBLE &&
+                            ItemBlockRenderTypes.getChunkRenderType(state) == layer)
+                        {
+                            for (var quad : this.mc.getModelManager().getBlockModelShaper().getBlockModel(state)
+                                .getQuads(state, null, randomSource)) {
                                 if (quad.getSprite().contents().getUniqueFrames().sum() > 1) {
-                                    animatedSprites.add(quad.getSprite());
+                                    this.animatedSprites.add(quad.getSprite());
                                 }
                             }
                             thisPose.pushPose();
                             thisPose.translate(pos.getX(), pos.getY(), pos.getZ());
-                            blockRenderer.renderBatched(state, pos, blockAccess, thisPose, vertBuffer, true, randomSource);
+                            blockRenderer.renderBatched(state, pos, this.blockAccess, thisPose, vertBuffer, true,
+                                randomSource);
                             count++;
                             thisPose.popPose();
                         }
@@ -397,173 +441,187 @@ public class MenuWorldRenderer {
 
                 // iterate the position
                 pos.setX(pos.getX() + 1);
-                if (pos.getX() >= Math.min(segmentSize.getX() + offset.getX(), blockAccess.getXSize() / 2)) {
+                if (pos.getX() >= Math.min(this.segmentSize.getX() + offset.getX(), this.blockAccess.getXSize() / 2)) {
                     pos.setX(offset.getX());
                     pos.setZ(pos.getZ() + 1);
-                    if (pos.getZ() >= Math.min(segmentSize.getZ() + offset.getZ(), blockAccess.getZSize() / 2)) {
+                    if (pos.getZ() >=
+                        Math.min(this.segmentSize.getZ() + offset.getZ(), this.blockAccess.getZSize() / 2))
+                    {
                         pos.setZ(offset.getZ());
                         pos.setY(pos.getY() + 1);
                     }
                 }
             }
 
-            //VRSettings.logger.info("MenuWorlds: Built segment of " + count + " blocks in " + ((RenderStateShardAccessor)layer).getName() + " layer.");
-            blockCounts.put(pair, blockCounts.getOrDefault(pair, 0) + count);
-            renderTimes.put(pair, renderTimes.getOrDefault(pair, 0L) + (Utils.milliTime() - realStartTime));
+            // VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Built segment of {} blocks in {} layer.", count, ((RenderStateShardAccessor) layer).getName());
+            this.blockCounts.put(pair, this.blockCounts.getOrDefault(pair, 0) + count);
+            this.renderTimes.put(pair,
+                this.renderTimes.getOrDefault(pair, 0L) + (ClientUtils.milliTime() - realStartTime));
 
-            if (pos.getY() >= Math.min(segmentSize.getY() + offset.getY(), blockAccess.getYSize() - (int) blockAccess.getGround())) {
-                VRSettings.logger.debug("MenuWorlds: Built {} blocks on {} layer at {},{},{} in {} ms",
-                    blockCounts.get(pair),
+            if (pos.getY() >= Math.min(this.segmentSize.getY() + offset.getY(),
+                this.blockAccess.getYSize() - (int) this.blockAccess.getGround()))
+            {
+                VRSettings.LOGGER.debug("Vivecraft: MenuWorlds: Built {} blocks on {} layer at {},{},{} in {} ms",
+                    this.blockCounts.get(pair),
                     ((RenderStateShardAccessor) layer).getName(),
                     offset.getX(), offset.getY(), offset.getZ(),
-                    renderTimes.get(pair));
+                    this.renderTimes.get(pair));
             }
         } catch (Throwable e) { // Only effective way of preventing crash on poop computers with low heap size
-            builderError = e;
+            this.builderError = e;
         } finally {
-            builderThreads.remove(Thread.currentThread());
+            this.builderThreads.remove(Thread.currentThread());
         }
     }
 
     private void finishBuilding() {
-        building = false;
+        this.building = false;
 
         // Sort buffers from nearest to furthest
-        var entryList = new ArrayList<>(bufferBuilders.entrySet());
+        var entryList = new ArrayList<>(this.bufferBuilders.entrySet());
         entryList.sort(Comparator.comparing(entry -> entry.getKey().getRight(), (posA, posB) -> {
-            Vec3i center = new Vec3i(segmentSize.getX() / 2, segmentSize.getY() / 2, segmentSize.getZ() / 2);
+            Vec3i center = new Vec3i(this.segmentSize.getX() / 2, this.segmentSize.getY() / 2,
+                this.segmentSize.getZ() / 2);
             double distA = posA.offset(center).distSqr(BlockPos.ZERO);
             double distB = posB.offset(center).distSqr(BlockPos.ZERO);
             return Double.compare(distA, distB);
         }));
 
         int totalMemory = 0, count = 0;
-        for (var entry : entryList) {
-            RenderType layer = entry.getKey().getLeft();
-            BufferBuilder vertBuffer = entry.getValue();
-            if (layer == RenderType.translucent()) {
-                vertBuffer.setQuadSorting(VertexSorting.byDistance(0, Mth.frac(blockAccess.getGround()), 0));
+        try (ByteBufferBuilder builder = new ByteBufferBuilder(32768)) {
+            for (var entry : entryList) {
+                RenderType layer = entry.getKey().getLeft();
+                BufferBuilder bufferBuilder = entry.getValue();
+                MeshData meshData = bufferBuilder.build();
+                if (meshData != null) {
+                    if (layer == RenderType.translucent()) {
+                        meshData.sortQuads(builder,
+                            VertexSorting.byDistance(0, Mth.frac(this.blockAccess.getGround()), 0));
+                    }
+                    uploadGeometry(layer, meshData);
+                    count++;
+                }
+                totalMemory += ((BufferBuilderExtension) bufferBuilder).vivecraft$getBufferSize();
+                ((BufferBuilderExtension) bufferBuilder).vivecraft$freeBuffer();
             }
-            BufferBuilder.RenderedBuffer renderedBuffer = vertBuffer.end();
-            if (!renderedBuffer.isEmpty()) {
-                uploadGeometry(layer, renderedBuffer);
-                count++;
-            }
-            totalMemory += ((BufferBuilderExtension) vertBuffer).vivecraft$getBufferSize();
-            ((BufferBuilderExtension) vertBuffer).vivecraft$freeBuffer();
         }
 
-        bufferBuilders = null;
-        currentPositions = null;
-        ready = true;
-        VRSettings.logger.info("MenuWorlds: Built {} blocks in {} ms ({} ms CPU time)",
-            blockCounts.values().stream().reduce(Integer::sum).orElse(0),
-            Utils.milliTime() - buildStartTime,
-            renderTimes.values().stream().reduce(Long::sum).orElse(0L));
-        VRSettings.logger.info("MenuWorlds: Used {} temporary buffers ({} MiB), uploaded {} non-empty buffers",
+        this.bufferBuilders = null;
+        this.currentPositions = null;
+        this.ready = true;
+        VRSettings.LOGGER.info("Vivecraft: MenuWorlds: Built {} blocks in {} ms ({} ms CPU time)",
+            this.blockCounts.values().stream().reduce(Integer::sum).orElse(0),
+            ClientUtils.milliTime() - this.buildStartTime,
+            this.renderTimes.values().stream().reduce(Long::sum).orElse(0L));
+        VRSettings.LOGGER.info(
+            "Vivecraft: MenuWorlds: Used {} temporary buffers ({} MiB), uploaded {} non-empty buffers",
             entryList.size(),
             totalMemory / 1048576,
             count);
+        if (this.reenableShaders) {
+            this.reenableShaders = false;
+            IrisHelper.setShadersActive(true);
+        }
     }
 
     public boolean isOnBuilderThread() {
-        return builderThreads.contains(Thread.currentThread());
+        return this.builderThreads.contains(Thread.currentThread());
     }
 
     private void handleError() {
-        if (builderError == null) {
+        if (this.builderError == null) {
             return;
         }
-        if (builderError instanceof OutOfMemoryError || builderError.getCause() instanceof OutOfMemoryError) {
-            VRSettings.logger.error("OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?");
+        if (this.builderError instanceof OutOfMemoryError || this.builderError.getCause() instanceof OutOfMemoryError) {
+            VRSettings.LOGGER.error(
+                "Vivecraft: OutOfMemoryError while building main menu world. Low system memory or 32-bit Java?",
+                this.builderError);
         } else {
-            VRSettings.logger.error("Exception thrown when building main menu world, falling back to old menu room. \n {}", builderError.getMessage());
+            VRSettings.LOGGER.error(
+                "Vivecraft: Exception thrown when building main menu world, falling back to old menu room.:",
+                this.builderError);
         }
-        builderError.printStackTrace();
         destroy();
         setWorld(null);
-        builderError = null;
+        this.builderError = null;
     }
 
-    private void uploadGeometry(RenderType layer, BufferBuilder.RenderedBuffer renderedBuffer) {
-        VertexBuffer buffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+    private void uploadGeometry(RenderType layer, MeshData meshData) {
+        VertexBuffer buffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
         buffer.bind();
-        buffer.upload(renderedBuffer);
+        buffer.upload(meshData);
         VertexBuffer.unbind();
-        vertexBuffers.get(layer).add(buffer);
+        this.vertexBuffers.get(layer).add(buffer);
     }
 
     public void cancelBuilding() {
-        building = false;
-        builderFutures.forEach(CompletableFuture::join);
-        builderFutures.clear();
-        if (bufferBuilders != null) {
-            for (BufferBuilder vertBuffer : bufferBuilders.values()) {
+        this.building = false;
+        this.builderFutures.forEach(CompletableFuture::join);
+        this.builderFutures.clear();
+        if (this.bufferBuilders != null) {
+            for (BufferBuilder vertBuffer : this.bufferBuilders.values()) {
                 ((BufferBuilderExtension) vertBuffer).vivecraft$freeBuffer();
             }
-            bufferBuilders = null;
+            this.bufferBuilders = null;
         }
-        currentPositions = null;
+        this.currentPositions = null;
     }
 
     public void destroy() {
         cancelBuilding();
-        if (vertexBuffers != null) {
-            for (List<VertexBuffer> buffers : vertexBuffers.values()) {
+        if (this.vertexBuffers != null) {
+            for (List<VertexBuffer> buffers : this.vertexBuffers.values()) {
                 for (VertexBuffer vertexBuffer : buffers) {
                     if (vertexBuffer != null) {
                         vertexBuffer.close();
                     }
                 }
             }
-            vertexBuffers = null;
+            this.vertexBuffers = null;
         }
-        animatedSprites = null;
-        ready = false;
+        this.animatedSprites = null;
+        this.ready = false;
     }
 
     public void completeDestroy() {
         destroy();
-        if (starVBO != null) {
-            starVBO.close();
+        if (this.starVBO != null) {
+            this.starVBO.close();
         }
-        if (skyVBO != null) {
-            skyVBO.close();
+        if (this.skyVBO != null) {
+            this.skyVBO.close();
         }
-        if (sky2VBO != null) {
-            sky2VBO.close();
+        if (this.sky2VBO != null) {
+            this.sky2VBO.close();
         }
-        if (cloudVBO != null) {
-            cloudVBO.close();
-        }
-        ready = false;
+        this.ready = false;
     }
 
     public void tick() {
-        ticks++;
+        this.ticks++;
         this.updateTorchFlicker();
 
         if (this.areEyesInFluid(FluidTags.WATER)) {
-            int i = 1; //this.isSpectator() ? 10 : 1;
+            int i = 1; // this.isSpectator() ? 10 : 1;
             this.waterVisionTime = Mth.clamp(this.waterVisionTime + i, 0, 600);
         } else if (this.waterVisionTime > 0) {
             this.areEyesInFluid(FluidTags.WATER);
             this.waterVisionTime = Mth.clamp(this.waterVisionTime - 10, 0, 600);
         }
-        if (SodiumHelper.isLoaded() && animatedSprites != null) {
-            for (TextureAtlasSprite sprite : animatedSprites) {
+        if (SodiumHelper.isLoaded() && this.animatedSprites != null) {
+            for (TextureAtlasSprite sprite : this.animatedSprites) {
                 SodiumHelper.markTextureAsActive(sprite);
             }
         }
         if (OptifineHelper.isOptifineLoaded()) {
-            for (TextureAtlasSprite sprite : animatedSprites) {
+            for (TextureAtlasSprite sprite : this.animatedSprites) {
                 OptifineHelper.markTextureAsActive(sprite);
             }
         }
     }
 
     public FakeBlockAccess getLevel() {
-        return blockAccess;
+        return this.blockAccess;
     }
 
     public void setWorld(FakeBlockAccess blockAccess) {
@@ -573,10 +631,10 @@ public class MenuWorldRenderer {
             this.lightmapUpdateNeeded = true;
             this.renderDistance = blockAccess.getXSize() / 2;
             this.renderDistanceChunks = this.renderDistance / 16;
-            rainLevel = blockAccess.getRain() ? 1.0F : 0.0F;
-            thunderLevel = blockAccess.getThunder() ? 1.0F : 0.0F;
+            this.rainLevel = blockAccess.getRain() ? 1.0F : 0.0F;
+            this.thunderLevel = blockAccess.getThunder() ? 1.0F : 0.0F;
 
-            worldRotation = blockAccess.getRotation();
+            this.worldRotation = blockAccess.getRotation();
         }
     }
 
@@ -597,7 +655,7 @@ public class MenuWorldRenderer {
     }
 
     public boolean isReady() {
-        return ready;
+        return this.ready;
     }
 
     // VanillaFix support
@@ -629,97 +687,102 @@ public class MenuWorldRenderer {
     }
     // End VanillaFix support
 
-    public void renderSky(PoseStack poseStack, Vec3 position) {
+    public void renderSky(Matrix4fStack poseStack, Vec3 position) {
         if (this.dimensionInfo.skyType() == DimensionSpecialEffects.SkyType.END) {
             this.renderEndSky(poseStack);
-        } else if (this.dimensionInfo.skyType() == DimensionSpecialEffects.SkyType.NORMAL) {
-            RenderSystem.setShader(GameRenderer::getPositionShader);
-            fogRenderer.setupFog(FogRenderer.FogMode.FOG_SKY);
-            ShaderInstance skyShader = RenderSystem.getShader();
-            //RenderSystem.disableTexture();
+        } else if (this.dimensionInfo.skyType() == DimensionSpecialEffects.SkyType.OVERWORLD) {
+            RenderSystem.setShader(CoreShaders.POSITION);
+            this.fogRenderer.setupFog(FogRenderer.FogMode.FOG_SKY);
+            CompiledShaderProgram skyShader = RenderSystem.getShader();
+            // RenderSystem.disableTexture();
 
             Vec3 skyColor = this.getSkyColor(position);
 
             if (OptifineHelper.isOptifineLoaded()) {
-                skyColor = OptifineHelper.getCustomSkyColor(skyColor, blockAccess, position.x, position.y, position.z);
+                skyColor = OptifineHelper.getCustomSkyColor(skyColor, this.blockAccess, position.x, position.y,
+                    position.z);
             }
 
-            fogRenderer.levelFogColor();
-
-            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
             RenderSystem.depthMask(false);
             RenderSystem.setShaderColor((float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1.0f);
 
 
             if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSkyEnabled()) {
                 this.skyVBO.bind();
-                this.skyVBO.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(), skyShader);
+                this.skyVBO.drawWithShader(poseStack, RenderSystem.getProjectionMatrix(), skyShader);
                 VertexBuffer.unbind();
             }
 
             RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+                GlStateManager.DestFactor.ZERO);
 
-            float[] sunriseColor = this.dimensionInfo.getSunriseColor(this.getTimeOfDay(), 0); // calcSunriseSunsetColors
+            int sunriseColor = 0;
+            try {
+                sunriseColor = this.dimensionInfo.getSunriseOrSunsetColor(
+                    this.getTimeOfDay()); // calcSunriseSunsetColors
+            } catch (Exception ignore) {}
 
-            if (sunriseColor != null && (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled())) {
-                //RenderSystem.disableTexture();
-                RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            if (sunriseColor != 0 && this.dimensionInfo.isSunriseOrSunset(this.getTimeOfDay()) &&
+                (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()))
+            {
+                // RenderSystem.disableTexture();
+                RenderSystem.setShader(CoreShaders.POSITION_COLOR);
                 RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-                poseStack.pushPose();
+                poseStack.pushMatrix();
 
-                poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
-                poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(this.getSunAngle()) < 0.0f ? 180.0f : 0.0f));
-                poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
+                poseStack.rotate(Axis.XP.rotationDegrees(90.0f));
+                poseStack.rotate(Axis.ZP.rotationDegrees(Mth.sin(this.getSunAngle()) < 0.0f ? 180.0f : 0.0f));
+                poseStack.rotate(Axis.ZP.rotationDegrees(90.0f));
 
-                Matrix4f modelView = poseStack.last().pose();
-                bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+                BufferBuilder bufferBuilder = Tesselator.getInstance()
+                    .begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
                 bufferBuilder
-                    .vertex(modelView, 0.0f, 100.0f, 0.0f)
-                    .color(sunriseColor[0], sunriseColor[1], sunriseColor[2], sunriseColor[3])
-                    .endVertex();
+                    .addVertex(poseStack, 0.0f, 100.0f, 0.0f)
+                    .setColor(sunriseColor);
 
                 for (int j = 0; j <= 16; ++j) {
-                    float f6 = (float) j * ((float) Math.PI * 2F) / 16.0F;
+                    float f6 = (float) j * Mth.TWO_PI / 16.0F;
                     float f7 = Mth.sin(f6);
                     float f8 = Mth.cos(f6);
                     bufferBuilder
-                        .vertex(modelView, f7 * 120.0F, f8 * 120.0F, -f8 * 40.0F * sunriseColor[3])
-                        .color(sunriseColor[0], sunriseColor[1], sunriseColor[2], 0.0F)
-                        .endVertex();
+                        .addVertex(poseStack, f7 * 120.0F, f8 * 120.0F, -f8 * 40.0F * ARGB.alphaFloat(sunriseColor))
+                        .setColor(ARGB.transparent(sunriseColor));
                 }
 
-                BufferUploader.drawWithShader(bufferBuilder.end());
-                poseStack.popPose();
+                BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+                poseStack.popMatrix();
             }
 
-            //RenderSystem.enableTexture();
+            // RenderSystem.enableTexture();
 
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-            poseStack.pushPose();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
+                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            poseStack.pushMatrix();
 
             float f10 = 1.0F - getRainLevel();
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, f10);
-            poseStack.mulPose(Axis.YP.rotationDegrees(-90.0f));
-            Matrix4f modelView = poseStack.last().pose();
+            poseStack.rotate(Axis.YP.rotationDegrees(-90.0f));
 
-            //if (OptifineHelper.isOptifineLoaded()) {
+            // if (OptifineHelper.isOptifineLoaded()) {
             // needs a full Level
-            //CustomSky.renderSky(this.world, poseStack, Minecraft.getInstance().getFrameTime());
-            //}
+            // CustomSky.renderSky(this.world, poseStack, ClientUtils.getCurrentPartialTick());
+            // }
 
-            poseStack.mulPose(Axis.XP.rotationDegrees(this.getTimeOfDay() * 360.0f));
+            poseStack.rotate(Axis.XP.rotationDegrees(this.getTimeOfDay() * 360.0f));
 
             float size = 30.0F;
             if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSunMoonEnabled()) {
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                RenderSystem.setShader(CoreShaders.POSITION_TEX);
                 RenderSystem.setShaderTexture(0, SUN_LOCATION);
-                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-                bufferBuilder.vertex(modelView, -size, 100.0F, -size).uv(0.0F, 0.0F).endVertex();
-                bufferBuilder.vertex(modelView, size, 100.0F, -size).uv(1.0F, 0.0F).endVertex();
-                bufferBuilder.vertex(modelView, size, 100.0F, size).uv(1.0F, 1.0F).endVertex();
-                bufferBuilder.vertex(modelView, -size, 100.0F, size).uv(0.0F, 1.0F).endVertex();
-                BufferUploader.drawWithShader(bufferBuilder.end());
+                BufferBuilder bufferBuilder = Tesselator.getInstance()
+                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                bufferBuilder.addVertex(poseStack, -size, 100.0F, -size).setUv(0.0F, 0.0F);
+                bufferBuilder.addVertex(poseStack, size, 100.0F, -size).setUv(1.0F, 0.0F);
+                bufferBuilder.addVertex(poseStack, size, 100.0F, size).setUv(1.0F, 1.0F);
+                bufferBuilder.addVertex(poseStack, -size, 100.0F, size).setUv(0.0F, 1.0F);
+                BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             }
 
             size = 20.0F;
@@ -732,44 +795,48 @@ public class MenuWorldRenderer {
                 float v0 = (float) (i1) / 2.0F;
                 float u1 = (float) (l + 1) / 4.0F;
                 float v1 = (float) (i1 + 1) / 2.0F;
-                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-                bufferBuilder.vertex(modelView, -size, -100.0f, size).uv(u0, v1).endVertex();
-                bufferBuilder.vertex(modelView, size, -100.0f, size).uv(u1, v1).endVertex();
-                bufferBuilder.vertex(modelView, size, -100.0f, -size).uv(u1, v0).endVertex();
-                bufferBuilder.vertex(modelView, -size, -100.0f, -size).uv(u0, v0).endVertex();
-                BufferUploader.drawWithShader(bufferBuilder.end());
+                BufferBuilder bufferBuilder = Tesselator.getInstance()
+                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                bufferBuilder.addVertex(poseStack, -size, -100.0f, size).setUv(u0, v1);
+                bufferBuilder.addVertex(poseStack, size, -100.0f, size).setUv(u1, v1);
+                bufferBuilder.addVertex(poseStack, size, -100.0f, -size).setUv(u1, v0);
+                bufferBuilder.addVertex(poseStack, -size, -100.0f, -size).setUv(u0, v0);
+                BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             }
 
-            //GlStateManager.disableTexture();
+            // GlStateManager.disableTexture();
 
             float starBrightness = this.getStarBrightness() * f10;
 
-            if (starBrightness > 0.0F && (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isStarsEnabled()) /*&& !CustomSky.hasSkyLayers(this.world)*/) {
+            if (starBrightness > 0.0F && (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isStarsEnabled()
+            ) /*&& !CustomSky.hasSkyLayers(this.world)*/)
+            {
                 RenderSystem.setShaderColor(starBrightness, starBrightness, starBrightness, starBrightness);
-                fogRenderer.setupNoFog();
+                this.fogRenderer.setupNoFog();
                 this.starVBO.bind();
-                this.starVBO.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(), GameRenderer.getPositionShader());
+                this.starVBO.drawWithShader(poseStack, RenderSystem.getProjectionMatrix(),
+                    RenderSystem.setShader(CoreShaders.POSITION));
                 VertexBuffer.unbind();
-                fogRenderer.setupFog(FogRenderer.FogMode.FOG_SKY);
+                this.fogRenderer.setupFog(FogRenderer.FogMode.FOG_SKY);
             }
 
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.disableBlend();
             RenderSystem.defaultBlendFunc();
 
-            poseStack.popPose();
-            //RenderSystem.disableTexture();
+            poseStack.popMatrix();
+            // RenderSystem.disableTexture();
 
             double horizonDistance = position.y - this.blockAccess.getHorizon();
 
             if (horizonDistance < 0.0D) {
                 RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
-                poseStack.pushPose();
+                poseStack.pushMatrix();
                 poseStack.translate(0.0f, 12.0f, 0.0f);
                 this.sky2VBO.bind();
-                this.sky2VBO.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(), skyShader);
+                this.sky2VBO.drawWithShader(poseStack, RenderSystem.getProjectionMatrix(), skyShader);
                 VertexBuffer.unbind();
-                poseStack.popPose();
+                poseStack.popMatrix();
             }
 
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -777,28 +844,28 @@ public class MenuWorldRenderer {
         }
     }
 
-    private void renderEndSky(PoseStack poseStack) {
+    private void renderEndSky(Matrix4fStack poseStack) {
         if (!OptifineHelper.isOptifineLoaded() || OptifineHelper.isSkyEnabled()) {
             RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+                GlStateManager.DestFactor.ZERO);
             RenderSystem.depthMask(false);
-            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+            RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
             RenderSystem.setShaderTexture(0, END_SKY_LOCATION);
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder bufferBuilder = tesselator.getBuilder();
 
             for (int i = 0; i < 6; ++i) {
-                poseStack.pushPose();
+                poseStack.pushMatrix();
                 switch (i) {
-                    case 1 -> poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
-                    case 2 -> poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
-                    case 3 -> poseStack.mulPose(Axis.XP.rotationDegrees(180.0f));
-                    case 4 -> poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
-                    case 5 -> poseStack.mulPose(Axis.ZP.rotationDegrees(-90.0f));
+                    case 1 -> poseStack.rotate(Axis.XP.rotationDegrees(90.0f));
+                    case 2 -> poseStack.rotate(Axis.XP.rotationDegrees(-90.0f));
+                    case 3 -> poseStack.rotate(Axis.XP.rotationDegrees(180.0f));
+                    case 4 -> poseStack.rotate(Axis.ZP.rotationDegrees(90.0f));
+                    case 5 -> poseStack.rotate(Axis.ZP.rotationDegrees(-90.0f));
                 }
 
-                Matrix4f modelView = poseStack.last().pose();
-                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                BufferBuilder bufferBuilder = Tesselator.getInstance()
+                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
                 int r = 40;
                 int g = 40;
@@ -811,12 +878,16 @@ public class MenuWorldRenderer {
                     g = (int) (newSkyColor.y * 255.0D);
                     b = (int) (newSkyColor.z * 255.0D);
                 }
-                bufferBuilder.vertex(modelView, -100.0f, -100.0f, -100.0f).uv(0.0f, 0.0f).color(r, g, b, 255).endVertex();
-                bufferBuilder.vertex(modelView, -100.0f, -100.0f, 100.0f).uv(0.0f, 16.0f).color(r, g, b, 255).endVertex();
-                bufferBuilder.vertex(modelView, 100.0f, -100.0f, 100.0f).uv(16.0f, 16.0f).color(r, g, b, 255).endVertex();
-                bufferBuilder.vertex(modelView, 100.0f, -100.0f, -100.0f).uv(16.0f, 0.0f).color(r, g, b, 255).endVertex();
-                tesselator.end();
-                poseStack.popPose();
+                bufferBuilder.addVertex(poseStack, -100.0f, -100.0f, -100.0f)
+                    .setUv(0.0f, 0.0f).setColor(r, g, b, 255);
+                bufferBuilder.addVertex(poseStack, -100.0f, -100.0f, 100.0f)
+                    .setUv(0.0f, 16.0f).setColor(r, g, b, 255);
+                bufferBuilder.addVertex(poseStack, 100.0f, -100.0f, 100.0f)
+                    .setUv(16.0f, 16.0f).setColor(r, g, b, 255);
+                bufferBuilder.addVertex(poseStack, 100.0f, -100.0f, -100.0f)
+                    .setUv(16.0f, 0.0f).setColor(r, g, b, 255);
+                BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+                poseStack.popMatrix();
             }
 
             RenderSystem.depthMask(true);
@@ -824,304 +895,161 @@ public class MenuWorldRenderer {
         }
     }
 
-    public void renderClouds(PoseStack poseStack, double x, double y, double z) {
+    public void renderClouds(Matrix4fStack poseStack, double x, double y, double z) {
         float cloudHeight = this.dimensionInfo.getCloudHeight();
 
         if (!Float.isNaN(cloudHeight) && this.mc.options.getCloudsType() != CloudStatus.OFF) {
-            // setup clouds
-
-            RenderSystem.disableCull();
-            RenderSystem.enableBlend();
-            RenderSystem.enableDepthTest();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.depthMask(true);
-
-            float cloudSizeXZ = 12.0f;
-            float cloudSizeY = 4.0f;
-            double cloudOffset = ((float) ticks + mc.getFrameTime()) * 0.03f;
-            double cloudX = (x + cloudOffset) / 12.0;
-            double cloudY = cloudHeight - y + 0.33;
-            if (OptifineHelper.isOptifineLoaded()) {
-                cloudY = cloudY + OptifineHelper.getCloudHeight() * 128.0;
-            }
-
-            double cloudZ = z / 12.0 + 0.33;
-            cloudX -= Mth.floor(cloudX / 2048.0) * 2048;
-            cloudZ -= Mth.floor(cloudZ / 2048.0) * 2048;
-            float cloudXfract = (float) (cloudX - (double) Mth.floor(cloudX));
-            float cloudYfract = (float) (cloudY / 4.0 - (double) Mth.floor(cloudY / 4.0)) * 4.0f;
-            float cloudZfract = (float) (cloudZ - (double) Mth.floor(cloudZ));
-
-            Vec3 cloudColor = this.getCloudColour();
-            int cloudXfloor = (int) Math.floor(cloudX);
-            int cloudYfloor = (int) Math.floor(cloudY / 4.0);
-            int cloudZfloor = (int) Math.floor(cloudZ);
-            if (cloudXfloor != this.prevCloudX ||
-                cloudYfloor != this.prevCloudY ||
-                cloudZfloor != this.prevCloudZ ||
-                this.mc.options.getCloudsType() != this.prevCloudsType ||
-                this.prevCloudColor.distanceToSqr(cloudColor) > 2.0E-4) {
-                this.prevCloudX = cloudXfloor;
-                this.prevCloudY = cloudYfloor;
-                this.prevCloudZ = cloudZfloor;
-                this.prevCloudColor = cloudColor;
-                this.prevCloudsType = this.mc.options.getCloudsType();
-                this.generateClouds = true;
-            }
-            if (this.generateClouds) {
-                this.generateClouds = false;
-                BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-                if (this.cloudVBO != null) {
-                    this.cloudVBO.close();
-                }
-                this.cloudVBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
-                BufferBuilder.RenderedBuffer renderedBuffer = this.buildClouds(bufferBuilder, cloudX, cloudY, cloudZ, cloudColor);
-                this.cloudVBO.bind();
-                this.cloudVBO.upload(renderedBuffer);
-                VertexBuffer.unbind();
-            }
-
-            // render
-            RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
-            RenderSystem.setShaderTexture(0, CLOUDS_LOCATION);
-            fogRenderer.levelFogColor();
-            poseStack.pushPose();
-            poseStack.scale(12.0f, 1.0f, 12.0f);
-            poseStack.translate(-cloudXfract, cloudYfract, -cloudZfract);
-            if (this.cloudVBO != null) {
-                this.cloudVBO.bind();
-                // probably rendered twice, so only the front faces are there?
-                for (int w = this.prevCloudsType == CloudStatus.FANCY ? 0 : 1; w < 2; ++w) {
-                    if (w == 0) {
-                        RenderSystem.colorMask(false, false, false, false);
-                    } else {
-                        RenderSystem.colorMask(true, true, true, true);
-                    }
-                    this.cloudVBO.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
-                }
-                VertexBuffer.unbind();
-            }
-            poseStack.popPose();
-            RenderSystem.enableCull();
-            RenderSystem.disableBlend();
-            RenderSystem.defaultBlendFunc();
+            // use the LevelRenderer CloudRenderer for the clouds
+            this.mc.levelRenderer.getCloudRenderer()
+                .render(getCloudColour(), this.mc.options.getCloudsType(), cloudHeight + 0.35F, poseStack,
+                    RenderSystem.getProjectionMatrix(), new Vec3(x, y, z),
+                    this.ticks + this.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
         }
     }
 
-    private BufferBuilder.RenderedBuffer buildClouds(BufferBuilder bufferBuilder, double cloudX, double cloudY, double cloudZ, Vec3 cloudColor) {
-        float l = (float) Mth.floor(cloudX) * 0.00390625f;
-        float m = (float) Mth.floor(cloudZ) * 0.00390625f;
-        float redTop = (float) cloudColor.x;
-        float greenTop = (float) cloudColor.y;
-        float blueTop = (float) cloudColor.z;
-        float redX = redTop * 0.9f;
-        float greenX = greenTop * 0.9f;
-        float blueX = blueTop * 0.9f;
-        float redBottom = redTop * 0.7f;
-        float greenBottom = greenTop * 0.7f;
-        float blueBottom = blueTop * 0.7f;
-        float redZ = redTop * 0.8f;
-        float greenZ = greenTop * 0.8f;
-        float blueZ = blueTop * 0.8f;
-        RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-        float z = (float) Math.floor(cloudY / 4.0) * 4.0f;
-        if (this.prevCloudsType == CloudStatus.FANCY) {
-            for (int aa = -3; aa <= 4; ++aa) {
-                for (int ab = -3; ab <= 4; ++ab) {
-                    int ae;
-                    float ac = aa * 8;
-                    float ad = ab * 8;
-                    if (z > -5.0f) {
-                        bufferBuilder.vertex(ac + 0.0f, z + 0.0f, ad + 8.0f).uv((ac + 0.0f) * 0.00390625f + l, (ad + 8.0f) * 0.00390625f + m).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                        bufferBuilder.vertex(ac + 8.0f, z + 0.0f, ad + 8.0f).uv((ac + 8.0f) * 0.00390625f + l, (ad + 8.0f) * 0.00390625f + m).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                        bufferBuilder.vertex(ac + 8.0f, z + 0.0f, ad + 0.0f).uv((ac + 8.0f) * 0.00390625f + l, (ad + 0.0f) * 0.00390625f + m).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                        bufferBuilder.vertex(ac + 0.0f, z + 0.0f, ad + 0.0f).uv((ac + 0.0f) * 0.00390625f + l, (ad + 0.0f) * 0.00390625f + m).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                    }
-                    if (z <= 5.0f) {
-                        bufferBuilder.vertex(ac + 0.0f, z + 4.0f - 9.765625E-4f, ad + 8.0f).uv((ac + 0.0f) * 0.00390625f + l, (ad + 8.0f) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
-                        bufferBuilder.vertex(ac + 8.0f, z + 4.0f - 9.765625E-4f, ad + 8.0f).uv((ac + 8.0f) * 0.00390625f + l, (ad + 8.0f) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
-                        bufferBuilder.vertex(ac + 8.0f, z + 4.0f - 9.765625E-4f, ad + 0.0f).uv((ac + 8.0f) * 0.00390625f + l, (ad + 0.0f) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
-                        bufferBuilder.vertex(ac + 0.0f, z + 4.0f - 9.765625E-4f, ad + 0.0f).uv((ac + 0.0f) * 0.00390625f + l, (ad + 0.0f) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
-                    }
-                    if (aa > -1) {
-                        for (ae = 0; ae < 8; ++ae) {
-                            bufferBuilder.vertex(ac + (float) ae + 0.0f, z + 0.0f, ad + 8.0f).uv((ac + (float) ae + 0.5f) * 0.00390625f + l, (ad + 8.0f) * 0.00390625f + m).color(redX, greenX, blueX, 0.8f).normal(-1.0f, 0.0f, 0.0f).endVertex();
-                            bufferBuilder.vertex(ac + (float) ae + 0.0f, z + 4.0f, ad + 8.0f).uv((ac + (float) ae + 0.5f) * 0.00390625f + l, (ad + 8.0f) * 0.00390625f + m).color(redX, greenX, blueX, 0.8f).normal(-1.0f, 0.0f, 0.0f).endVertex();
-                            bufferBuilder.vertex(ac + (float) ae + 0.0f, z + 4.0f, ad + 0.0f).uv((ac + (float) ae + 0.5f) * 0.00390625f + l, (ad + 0.0f) * 0.00390625f + m).color(redX, greenX, blueX, 0.8f).normal(-1.0f, 0.0f, 0.0f).endVertex();
-                            bufferBuilder.vertex(ac + (float) ae + 0.0f, z + 0.0f, ad + 0.0f).uv((ac + (float) ae + 0.5f) * 0.00390625f + l, (ad + 0.0f) * 0.00390625f + m).color(redX, greenX, blueX, 0.8f).normal(-1.0f, 0.0f, 0.0f).endVertex();
-                        }
-                    }
-                    if (aa <= 1) {
-                        for (ae = 0; ae < 8; ++ae) {
-                            bufferBuilder.vertex(ac + (float) ae + 1.0f - 9.765625E-4f, z + 0.0f, ad + 8.0f).uv((ac + (float) ae + 0.5f) * 0.00390625f + l, (ad + 8.0f) * 0.00390625f + m).color(redX, greenX, blueX, 0.8f).normal(1.0f, 0.0f, 0.0f).endVertex();
-                            bufferBuilder.vertex(ac + (float) ae + 1.0f - 9.765625E-4f, z + 4.0f, ad + 8.0f).uv((ac + (float) ae + 0.5f) * 0.00390625f + l, (ad + 8.0f) * 0.00390625f + m).color(redX, greenX, blueX, 0.8f).normal(1.0f, 0.0f, 0.0f).endVertex();
-                            bufferBuilder.vertex(ac + (float) ae + 1.0f - 9.765625E-4f, z + 4.0f, ad + 0.0f).uv((ac + (float) ae + 0.5f) * 0.00390625f + l, (ad + 0.0f) * 0.00390625f + m).color(redX, greenX, blueX, 0.8f).normal(1.0f, 0.0f, 0.0f).endVertex();
-                            bufferBuilder.vertex(ac + (float) ae + 1.0f - 9.765625E-4f, z + 0.0f, ad + 0.0f).uv((ac + (float) ae + 0.5f) * 0.00390625f + l, (ad + 0.0f) * 0.00390625f + m).color(redX, greenX, blueX, 0.8f).normal(1.0f, 0.0f, 0.0f).endVertex();
-                        }
-                    }
-                    if (ab > -1) {
-                        for (ae = 0; ae < 8; ++ae) {
-                            bufferBuilder.vertex(ac + 0.0f, z + 4.0f, ad + (float) ae + 0.0f).uv((ac + 0.0f) * 0.00390625f + l, (ad + (float) ae + 0.5f) * 0.00390625f + m).color(redZ, greenZ, blueZ, 0.8f).normal(0.0f, 0.0f, -1.0f).endVertex();
-                            bufferBuilder.vertex(ac + 8.0f, z + 4.0f, ad + (float) ae + 0.0f).uv((ac + 8.0f) * 0.00390625f + l, (ad + (float) ae + 0.5f) * 0.00390625f + m).color(redZ, greenZ, blueZ, 0.8f).normal(0.0f, 0.0f, -1.0f).endVertex();
-                            bufferBuilder.vertex(ac + 8.0f, z + 0.0f, ad + (float) ae + 0.0f).uv((ac + 8.0f) * 0.00390625f + l, (ad + (float) ae + 0.5f) * 0.00390625f + m).color(redZ, greenZ, blueZ, 0.8f).normal(0.0f, 0.0f, -1.0f).endVertex();
-                            bufferBuilder.vertex(ac + 0.0f, z + 0.0f, ad + (float) ae + 0.0f).uv((ac + 0.0f) * 0.00390625f + l, (ad + (float) ae + 0.5f) * 0.00390625f + m).color(redZ, greenZ, blueZ, 0.8f).normal(0.0f, 0.0f, -1.0f).endVertex();
-                        }
-                    }
-                    if (ab > 1) {
-                        continue;
-                    }
-                    for (ae = 0; ae < 8; ++ae) {
-                        bufferBuilder.vertex(ac + 0.0f, z + 4.0f, ad + (float) ae + 1.0f - 9.765625E-4f).uv((ac + 0.0f) * 0.00390625f + l, (ad + (float) ae + 0.5f) * 0.00390625f + m).color(redZ, greenZ, blueZ, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-                        bufferBuilder.vertex(ac + 8.0f, z + 4.0f, ad + (float) ae + 1.0f - 9.765625E-4f).uv((ac + 8.0f) * 0.00390625f + l, (ad + (float) ae + 0.5f) * 0.00390625f + m).color(redZ, greenZ, blueZ, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-                        bufferBuilder.vertex(ac + 8.0f, z + 0.0f, ad + (float) ae + 1.0f - 9.765625E-4f).uv((ac + 8.0f) * 0.00390625f + l, (ad + (float) ae + 0.5f) * 0.00390625f + m).color(redZ, greenZ, blueZ, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-                        bufferBuilder.vertex(ac + 0.0f, z + 0.0f, ad + (float) ae + 1.0f - 9.765625E-4f).uv((ac + 0.0f) * 0.00390625f + l, (ad + (float) ae + 0.5f) * 0.00390625f + m).color(redZ, greenZ, blueZ, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-                    }
-                }
-            }
-        } else {
-            boolean aa = true;
-            int ab = 32;
-            for (int af = -32; af < 32; af += 32) {
-                for (int ag = -32; ag < 32; ag += 32) {
-                    bufferBuilder.vertex(af, z, ag + 32).uv((float) (af) * 0.00390625f + l, (float) (ag + 32) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                    bufferBuilder.vertex(af + 32, z, ag + 32).uv((float) (af + 32) * 0.00390625f + l, (float) (ag + 32) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                    bufferBuilder.vertex(af + 32, z, ag).uv((float) (af + 32) * 0.00390625f + l, (float) (ag) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                    bufferBuilder.vertex(af, z, ag).uv((float) (af) * 0.00390625f + l, (float) (ag) * 0.00390625f + m).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
-                }
-            }
-        }
-        return bufferBuilder.end();
-    }
-
-    private void renderSnowAndRain(PoseStack poseStack, double inX, double inY, double inZ) {
+    private void renderSnowAndRain(Matrix4fStack poseStack, double inX, double inY, double inZ) {
         if (getRainLevel() <= 0.0f) {
             return;
         }
 
-        RenderSystem.getModelViewStack().pushPose();
-        RenderSystem.getModelViewStack().mulPoseMatrix(poseStack.last().pose());
-        RenderSystem.applyModelViewMatrix();
+        RenderSystem.getModelViewStack().pushMatrix();
+        RenderSystem.getModelViewStack().mul(poseStack);
 
-        int xFloor = Mth.floor(inX);
-        int yFloor = Mth.floor(inY);
-        int zFloor = Mth.floor(inZ);
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.disableCull();
-        RenderSystem.enableBlend();
-        RenderSystem.enableDepthTest();
-        int rainDistance = 5;
-        if (Minecraft.useFancyGraphics()) {
-            rainDistance = 10;
-        }
-        RenderSystem.depthMask(true);
-        int count = -1;
-        float rainAnimationTime = this.ticks + mc.getFrameTime();
-        RenderSystem.setShader(GameRenderer::getParticleShader);
-        turnOnLightLayer();
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        for (int rainZ = zFloor - rainDistance; rainZ <= zFloor + rainDistance; ++rainZ) {
-            for (int rainX = xFloor - rainDistance; rainX <= xFloor + rainDistance; ++rainX) {
-                int q = (rainZ - zFloor + 16) * 32 + rainX - xFloor + 16;
-                double r = (double) this.rainSizeX[q] * 0.5;
-                double s = (double) this.rainSizeZ[q] * 0.5;
-                mutableBlockPos.set(rainX, inY, rainZ);
-                Biome biome = blockAccess.getBiome(mutableBlockPos).value();
-                if (!biome.hasPrecipitation()) {
-                    continue;
-                }
-
-                int blockingHeight = blockAccess.getHeightBlocking(rainX, rainZ);
-                int lower = Math.max(yFloor - rainDistance, blockingHeight);
-                int upper = Math.max(yFloor + rainDistance, blockingHeight);
-
-                if (lower == upper) {
-                    // no rain
-                    continue;
-                }
-                int rainY = Math.max(blockingHeight, yFloor);
-
-                RandomSource randomSource = RandomSource.create(rainX * rainX * 3121L + rainX * 45238971L ^ rainZ * rainZ * 418711L + rainZ * 13761L);
-                mutableBlockPos.setY(lower);
-                Biome.Precipitation precipitation = biome.getPrecipitationAt(mutableBlockPos);
-                if (precipitation == Biome.Precipitation.NONE) {
-                    continue;
-                }
-
-                mutableBlockPos.setY(rainY);
-
-                double localX = rainX + 0.5;
-                double localZ = rainZ + 0.5;
-                float distance = (float) Math.sqrt(localX * localX + localZ * localZ) / (float) rainDistance;
-                float blend;
-                float xOffset = 0;
-                float yOffset = 0;
-
-                int skyLight = blockAccess.getBrightness(LightLayer.SKY, mutableBlockPos) << 4;
-                int blockLight = blockAccess.getBrightness(LightLayer.BLOCK, mutableBlockPos) << 4;
-
-                if (precipitation == Biome.Precipitation.RAIN) {
-                    if (count != 0) {
-                        if (count >= 0) {
-                            tesselator.end();
-                        }
-                        count = 0;
-                        RenderSystem.setShaderTexture(0, RAIN_LOCATION);
-                        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-                    }
-
-                    blend = ((1.0f - distance * distance) * 0.5f + 0.5f);
-                    int x = this.ticks + rainX * rainX * 3121 + rainX * 45238971 + rainZ * rainZ * 418711 + rainZ * 13761 & 0x1F;
-                    yOffset = -((float) x + mc.getFrameTime()) / 32.0f * (3.0f + randomSource.nextFloat());
-                } else if (precipitation == Biome.Precipitation.SNOW) {
-                    if (count != 1) {
-                        if (count >= 0) {
-                            tesselator.end();
-                        }
-                        count = 1;
-                        RenderSystem.setShaderTexture(0, SNOW_LOCATION);
-                        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-                    }
-
-                    blend = ((1.0f - distance * distance) * 0.3f + 0.5f);
-                    xOffset = (float) (randomSource.nextDouble() + (double) rainAnimationTime * 0.01 * (double) ((float) randomSource.nextGaussian()));
-                    float ae = -((float) (this.ticks & 0x1FF) + mc.getFrameTime()) / 512.0f;
-                    float af = (float) (randomSource.nextDouble() + (double) (rainAnimationTime * (float) randomSource.nextGaussian()) * 0.001);
-                    yOffset = ae + af;
-
-                    //snow is brighter
-                    skyLight = (skyLight * 3 + 240) / 4;
-                    blockLight = (blockLight * 3 + 240) / 4;
-                } else {
-                    continue;
-                }
-                bufferBuilder
-                    .vertex(localX - r, (double) upper - inY, localZ - s)
-                    .uv(0.0f + xOffset, (float) lower * 0.25f + yOffset)
-                    .color(1.0f, 1.0f, 1.0f, blend).uv2(blockLight, skyLight).endVertex();
-                bufferBuilder
-                    .vertex(localX + r, (double) upper - inY, localZ + s)
-                    .uv(1.0f + xOffset, (float) lower * 0.25f + yOffset)
-                    .color(1.0f, 1.0f, 1.0f, blend).uv2(blockLight, skyLight).endVertex();
-                bufferBuilder
-                    .vertex(localX + r, (double) lower - inY, localZ + s)
-                    .uv(1.0f + xOffset, (float) upper * 0.25f + yOffset)
-                    .color(1.0f, 1.0f, 1.0f, blend).uv2(blockLight, skyLight).endVertex();
-                bufferBuilder
-                    .vertex(localX - r, (double) lower - inY, localZ - s)
-                    .uv(0.0f + xOffset, (float) upper * 0.25f + yOffset)
-                    .color(1.0f, 1.0f, 1.0f, blend).uv2(blockLight, skyLight).endVertex();
+        try {
+            int xFloor = Mth.floor(inX);
+            int yFloor = Mth.floor(inY);
+            int zFloor = Mth.floor(inZ);
+            Tesselator tesselator = Tesselator.getInstance();
+            BufferBuilder bufferBuilder = null;
+            RenderSystem.disableCull();
+            RenderSystem.enableBlend();
+            RenderSystem.enableDepthTest();
+            int rainDistance = 5;
+            if (Minecraft.useFancyGraphics()) {
+                rainDistance = 10;
             }
+            RenderSystem.depthMask(true);
+            int count = -1;
+            float rainAnimationTime = this.ticks + ClientUtils.getCurrentPartialTick();
+            RenderSystem.setShader(CoreShaders.PARTICLE);
+            turnOnLightLayer();
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+            for (int rainZ = zFloor - rainDistance; rainZ <= zFloor + rainDistance; ++rainZ) {
+                for (int rainX = xFloor - rainDistance; rainX <= xFloor + rainDistance; ++rainX) {
+                    int q = (rainZ - zFloor + 16) * 32 + rainX - xFloor + 16;
+                    double r = (double) this.rainSizeX[q] * 0.5;
+                    double s = (double) this.rainSizeZ[q] * 0.5;
+                    mutableBlockPos.set(rainX, inY, rainZ);
+                    Biome biome = this.blockAccess.getBiome(mutableBlockPos).value();
+                    if (!biome.hasPrecipitation()) {
+                        continue;
+                    }
+
+                    int blockingHeight = this.blockAccess.getHeightBlocking(rainX, rainZ);
+                    int lower = Math.max(yFloor - rainDistance, blockingHeight);
+                    int upper = Math.max(yFloor + rainDistance, blockingHeight);
+
+                    if (lower == upper) {
+                        // no rain
+                        continue;
+                    }
+                    int rainY = Math.max(blockingHeight, yFloor);
+
+                    RandomSource randomSource = RandomSource.create(
+                        rainX * rainX * 3121L + rainX * 45238971L ^ rainZ * rainZ * 418711L + rainZ * 13761L);
+                    mutableBlockPos.setY(lower);
+                    Biome.Precipitation precipitation = biome.getPrecipitationAt(mutableBlockPos,
+                        this.blockAccess.getSeaLevel());
+                    if (precipitation == Biome.Precipitation.NONE) {
+                        continue;
+                    }
+
+                    mutableBlockPos.setY(rainY);
+
+                    double localX = rainX + 0.5;
+                    double localZ = rainZ + 0.5;
+                    float distance = (float) Math.sqrt(localX * localX + localZ * localZ) / (float) rainDistance;
+                    float blend;
+                    float xOffset = 0;
+                    float yOffset = 0;
+
+                    int skyLight = this.blockAccess.getBrightness(LightLayer.SKY, mutableBlockPos) << 4;
+                    int blockLight = this.blockAccess.getBrightness(LightLayer.BLOCK, mutableBlockPos) << 4;
+
+                    if (precipitation == Biome.Precipitation.RAIN) {
+                        if (count != 0) {
+                            if (count >= 0) {
+                                BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+                            }
+                            count = 0;
+                            RenderSystem.setShaderTexture(0, RAIN_LOCATION);
+                            bufferBuilder = Tesselator.getInstance()
+                                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+                        }
+
+                        blend = ((1.0f - distance * distance) * 0.5f + 0.5f);
+                        int x =
+                            this.ticks + rainX * rainX * 3121 + rainX * 45238971 + rainZ * rainZ * 418711 +
+                                rainZ * 13761 &
+                                0x1F;
+                        yOffset =
+                            -((float) x + ClientUtils.getCurrentPartialTick()) / 32.0f *
+                                (3.0f + randomSource.nextFloat());
+                    } else if (precipitation == Biome.Precipitation.SNOW) {
+                        if (count != 1) {
+                            if (count >= 0) {
+                                BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+                            }
+                            count = 1;
+                            RenderSystem.setShaderTexture(0, SNOW_LOCATION);
+                            bufferBuilder = Tesselator.getInstance()
+                                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+                        }
+
+                        blend = ((1.0f - distance * distance) * 0.3f + 0.5f);
+                        xOffset = (float) (randomSource.nextDouble() +
+                            (double) rainAnimationTime * 0.01 * (double) ((float) randomSource.nextGaussian())
+                        );
+                        float ae = -((float) (this.ticks & 0x1FF) + ClientUtils.getCurrentPartialTick()) / 512.0f;
+                        float af = (float) (randomSource.nextDouble() +
+                            (double) (rainAnimationTime * (float) randomSource.nextGaussian()) * 0.001
+                        );
+                        yOffset = ae + af;
+
+                        // snow is brighter
+                        skyLight = (skyLight * 3 + 240) / 4;
+                        blockLight = (blockLight * 3 + 240) / 4;
+                    } else {
+                        continue;
+                    }
+                    bufferBuilder
+                        .addVertex((float) (localX - r), upper - (float) inY, (float) (localZ - s))
+                        .setUv(0.0f + xOffset, (float) lower * 0.25f + yOffset)
+                        .setColor(1.0f, 1.0f, 1.0f, blend).setUv2(blockLight, skyLight);
+                    bufferBuilder
+                        .addVertex((float) (localX + r), upper - (float) inY, (float) (localZ + s))
+                        .setUv(1.0f + xOffset, (float) lower * 0.25f + yOffset)
+                        .setColor(1.0f, 1.0f, 1.0f, blend).setUv2(blockLight, skyLight);
+                    bufferBuilder
+                        .addVertex((float) (localX + r), lower - (float) inY, (float) (localZ + s))
+                        .setUv(1.0f + xOffset, (float) upper * 0.25f + yOffset)
+                        .setColor(1.0f, 1.0f, 1.0f, blend).setUv2(blockLight, skyLight);
+                    bufferBuilder
+                        .addVertex((float) (localX - r), lower - (float) inY, (float) (localZ - s))
+                        .setUv(0.0f + xOffset, (float) upper * 0.25f + yOffset)
+                        .setColor(1.0f, 1.0f, 1.0f, blend).setUv2(blockLight, skyLight);
+                }
+            }
+            if (count >= 0) {
+                BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+            }
+        } finally {
+            // if any stupid mod messes with level stuff there might be an exception
+            RenderSystem.getModelViewStack().popMatrix();
+            RenderSystem.enableCull();
+            RenderSystem.disableBlend();
+            turnOffLightLayer();
         }
-        if (count >= 0) {
-            tesselator.end();
-        }
-        RenderSystem.getModelViewStack().popPose();
-        RenderSystem.applyModelViewMatrix();
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
-        turnOffLightLayer();
     }
 
     public static int getLightColor(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos) {
@@ -1131,21 +1059,21 @@ public class MenuWorldRenderer {
     }
 
     public float getTimeOfDay() {
-        return this.blockAccess.dimensionType().timeOfDay(time);
+        return this.blockAccess.dimensionType().timeOfDay(this.time);
     }
 
     public float getSunAngle() {
         float dayTime = this.getTimeOfDay();
-        return dayTime * ((float) Math.PI * 2F);
+        return dayTime * Mth.TWO_PI;
     }
 
     public int getMoonPhase() {
-        return this.blockAccess.dimensionType().moonPhase(time);
+        return this.blockAccess.dimensionType().moonPhase(this.time);
     }
 
     public float getSkyDarken() {
         float dayTime = this.getTimeOfDay();
-        float h = 1.0f - (Mth.cos(dayTime * ((float) Math.PI * 2)) * 2.0f + 0.2f);
+        float h = 1.0f - (Mth.cos(dayTime * Mth.TWO_PI) * 2.0f + 0.2f);
         h = Mth.clamp(h, 0.0f, 1.0f);
         h = 1.0f - h;
         h *= 1.0f - this.getRainLevel() * 5.0f / 16.0f;
@@ -1163,7 +1091,7 @@ public class MenuWorldRenderer {
 
     public float getStarBrightness() {
         float f = this.getTimeOfDay();
-        float f1 = 1.0F - (Mth.cos(f * ((float) Math.PI * 2F)) * 2.0F + 0.25F);
+        float f1 = 1.0F - (Mth.cos(f * Mth.TWO_PI) * 2.0F + 0.25F);
         f1 = Mth.clamp(f1, 0.0F, 1.0F);
         return f1 * f1 * 0.5F;
     }
@@ -1173,9 +1101,10 @@ public class MenuWorldRenderer {
 
         Vec3 samplePosition = position.subtract(2.0, 2.0, 2.0).scale(0.25);
 
-        Vec3 skyColor = CubicSampler.gaussianSampleVec3(samplePosition, (i, j, k) -> Vec3.fromRGB24(blockAccess.getBiomeManager().getNoiseBiomeAtQuart(i, j, k).value().getSkyColor()));
+        Vec3 skyColor = CubicSampler.gaussianSampleVec3(samplePosition, (i, j, k) -> Vec3.fromRGB24(
+            this.blockAccess.getBiomeManager().getNoiseBiomeAtQuart(i, j, k).value().getSkyColor()));
 
-        float h = Mth.cos(dayTime * ((float) Math.PI * 2)) * 2.0f + 0.5f;
+        float h = Mth.cos(dayTime * Mth.TWO_PI) * 2.0f + 0.5f;
         h = Mth.clamp(h, 0.0f, 1.0f);
         float skyColorR = (float) skyColor.x * h;
         float skyColorG = (float) skyColor.y * h;
@@ -1197,8 +1126,8 @@ public class MenuWorldRenderer {
             skyColorG = skyColorG * darkening + luminance * (1.0f - darkening);
             skyColorB = skyColorB * darkening + luminance * (1.0f - darkening);
         }
-        if (!mc.options.hideLightningFlash().get() && this.skyFlashTime > 0) {
-            float flash = (float) this.skyFlashTime - mc.getFrameTime();
+        if (!this.mc.options.hideLightningFlash().get() && this.skyFlashTime > 0) {
+            float flash = (float) this.skyFlashTime - ClientUtils.getCurrentPartialTick();
             if (flash > 1.0f) {
                 flash = 1.0f;
             }
@@ -1210,141 +1139,106 @@ public class MenuWorldRenderer {
     }
 
     public Vec3 getFogColor(Vec3 pos) {
-        float f = Mth.clamp(Mth.cos(this.getTimeOfDay() * ((float) Math.PI * 2F)) * 2.0F + 0.5F, 0.0F, 1.0F);
+        float f = Mth.clamp(Mth.cos(this.getTimeOfDay() * Mth.TWO_PI) * 2.0F + 0.5F, 0.0F, 1.0F);
         Vec3 scaledPos = pos.subtract(2.0D, 2.0D, 2.0D).scale(0.25D);
-        return CubicSampler.gaussianSampleVec3(scaledPos, (x, y, z) -> this.dimensionInfo.getBrightnessDependentFogColor(Vec3.fromRGB24(this.blockAccess.getBiomeManager().getNoiseBiomeAtQuart(x, y, z).value().getFogColor()), f));
+        return CubicSampler.gaussianSampleVec3(scaledPos,
+            (x, y, z) -> this.dimensionInfo.getBrightnessDependentFogColor(
+                Vec3.fromRGB24(this.blockAccess.getBiomeManager().getNoiseBiomeAtQuart(x, y, z).value().getFogColor()),
+                f));
     }
 
-    public Vec3 getCloudColour() {
-        float dayTime = this.getTimeOfDay();
-        float f1 = Mth.cos(dayTime * ((float) Math.PI * 2F)) * 2.0F + 0.5F;
-        f1 = Mth.clamp(f1, 0.0F, 1.0F);
-        float r = 1.0F;
-        float g = 1.0F;
-        float b = 1.0F;
+    public int getCloudColour() {
+        int color = -1;
         float rain = this.getRainLevel();
-
         if (rain > 0.0F) {
-            float luma = (r * 0.3F + g * 0.59F + b * 0.11F) * 0.6F;
-            float dark = 1.0F - rain * 0.95F;
-            r = r * dark + luma * (1.0F - dark);
-            g = g * dark + luma * (1.0F - dark);
-            b = b * dark + luma * (1.0F - dark);
+            int j = ARGB.scaleRGB(ARGB.greyscale(color), 0.6F);
+            color = ARGB.lerp(rain * 0.95F, color, j);
         }
 
-        r = r * (f1 * 0.9F + 0.1F);
-        g = g * (f1 * 0.9F + 0.1F);
-        b = b * (f1 * 0.85F + 0.15F);
+        float dayTime = this.getTimeOfDay();
+        float k = Mth.cos(dayTime * ((float) Math.PI * 2F)) * 2.0F + 0.5F;
+        k = Mth.clamp(k, 0.0F, 1.0F);
+        color = ARGB.multiply(color, ARGB.colorFromFloat(1.0F, k * 0.9F + 0.1F, k * 0.9F + 0.1F, k * 0.85F + 0.15F));
         float thunder = this.getThunderLevel();
-
         if (thunder > 0.0F) {
-            float luma = (r * 0.3F + g * 0.59F + b * 0.11F) * 0.2F;
-            float dark = 1.0F - thunder * 0.95F;
-            r = r * dark + luma * (1.0F - dark);
-            g = g * dark + luma * (1.0F - dark);
-            b = b * dark + luma * (1.0F - dark);
+            int greyColor = ARGB.scaleRGB(ARGB.greyscale(color), 0.2F);
+            color = ARGB.lerp(thunder * 0.95F, color, greyColor);
         }
 
-        return new Vec3(r, g, b);
+        return color;
     }
 
     private void generateSky() {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
         if (this.skyVBO != null) {
             this.skyVBO.close();
         }
-        this.skyVBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
-        BufferBuilder.RenderedBuffer renderedBuffer = buildSkyDisc(bufferBuilder, 16.0f);
+        this.skyVBO = new VertexBuffer(BufferUsage.STATIC_WRITE);
         this.skyVBO.bind();
-        this.skyVBO.upload(renderedBuffer);
+        this.skyVBO.upload(buildSkyDisc(Tesselator.getInstance(), 16.0f));
         VertexBuffer.unbind();
     }
 
     private void generateSky2() {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
         if (this.sky2VBO != null) {
             this.sky2VBO.close();
         }
-        this.sky2VBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
-        BufferBuilder.RenderedBuffer renderedBuffer = buildSkyDisc(bufferBuilder, -16.0f);
+        this.sky2VBO = new VertexBuffer(BufferUsage.STATIC_WRITE);
         this.sky2VBO.bind();
-        this.sky2VBO.upload(renderedBuffer);
+        this.sky2VBO.upload(buildSkyDisc(Tesselator.getInstance(), -16.0f));
         VertexBuffer.unbind();
     }
 
-    private static BufferBuilder.RenderedBuffer buildSkyDisc(BufferBuilder bufferBuilder, float posY) {
+    private static MeshData buildSkyDisc(Tesselator tesselator, float posY) {
         float g = Math.signum(posY) * 512.0f;
         float h = 512.0f;
-        RenderSystem.setShader(GameRenderer::getPositionShader);
-        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
-        bufferBuilder.vertex(0.0, posY, 0.0).endVertex();
+        RenderSystem.setShader(CoreShaders.POSITION);
+        BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
+        bufferBuilder.addVertex(0.0F, posY, 0.0F);
         for (int i = -180; i <= 180; i += 45) {
-            bufferBuilder.vertex(g * Mth.cos((float) i * ((float) Math.PI / 180)), posY, 512.0f * Mth.sin((float) i * ((float) Math.PI / 180))).endVertex();
+            bufferBuilder.addVertex(g * Mth.cos((float) i * Mth.DEG_TO_RAD), posY,
+                512.0f * Mth.sin((float) i * Mth.DEG_TO_RAD));
         }
-        return bufferBuilder.end();
+        return bufferBuilder.buildOrThrow();
     }
 
     private void generateStars() {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionShader);
+        RenderSystem.setShader(CoreShaders.POSITION);
         if (this.starVBO != null) {
             this.starVBO.close();
         }
-        this.starVBO = new VertexBuffer(VertexBuffer.Usage.STATIC);
-        BufferBuilder.RenderedBuffer renderedBuffer = this.buildStars(bufferBuilder);
+        this.starVBO = new VertexBuffer(BufferUsage.STATIC_WRITE);
         this.starVBO.bind();
-        this.starVBO.upload(renderedBuffer);
+        this.starVBO.upload(this.buildStars(Tesselator.getInstance()));
         VertexBuffer.unbind();
     }
 
-    private BufferBuilder.RenderedBuffer buildStars(BufferBuilder bufferBuilderIn) {
-        Random random = new Random(10842L);
-        bufferBuilderIn.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+    private MeshData buildStars(Tesselator tesselator) {
+        RandomSource randomSource = RandomSource.create(10842L);
+        BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 
-        for (int i = 0; i < 1500; ++i) {
-            double d0 = random.nextFloat() * 2.0F - 1.0F;
-            double d1 = random.nextFloat() * 2.0F - 1.0F;
-            double d2 = random.nextFloat() * 2.0F - 1.0F;
-            double d3 = 0.15F + random.nextFloat() * 0.1F;
-            double d4 = d0 * d0 + d1 * d1 + d2 * d2;
+        int starCount = 1500;
+        float starDistance = 100.0F;
 
-            if (d4 < 1.0D && d4 > 0.01D) {
-                d4 = 1.0D / Math.sqrt(d4);
-                d0 = d0 * d4;
-                d1 = d1 * d4;
-                d2 = d2 * d4;
-                double d5 = d0 * 100.0D;
-                double d6 = d1 * 100.0D;
-                double d7 = d2 * 100.0D;
-                double d8 = Math.atan2(d0, d2);
-                double d9 = Math.sin(d8);
-                double d10 = Math.cos(d8);
-                double d11 = Math.atan2(Math.sqrt(d0 * d0 + d2 * d2), d1);
-                double d12 = Math.sin(d11);
-                double d13 = Math.cos(d11);
-                double d14 = random.nextDouble() * Math.PI * 2.0D;
-                double d15 = Math.sin(d14);
-                double d16 = Math.cos(d14);
+        for (int i = 0; i < starCount; i++) {
+            Vector3f starPoint = new Vector3f(randomSource.nextFloat(), randomSource.nextFloat(),
+                randomSource.nextFloat()).mul(2.0F).sub(1.0F, 1.0F, 1.0F);
+            float starSize = 0.15F + randomSource.nextFloat() * 0.1F;
+            float distance = starPoint.lengthSquared();
+            if (distance <= 0.010000001F || distance >= 1.0F) continue;
 
-                for (int j = 0; j < 4; ++j) {
-                    double d17 = 0.0D;
-                    double d18 = (double) ((j & 2) - 1) * d3;
-                    double d19 = (double) ((j + 1 & 2) - 1) * d3;
-                    double d20 = 0.0D;
-                    double d21 = d18 * d16 - d19 * d15;
-                    double d22 = d19 * d16 + d18 * d15;
-                    double d23 = d21 * d12 + 0.0D * d13;
-                    double d24 = 0.0D * d12 - d21 * d13;
-                    double d25 = d24 * d9 - d22 * d10;
-                    double d26 = d22 * d9 + d24 * d10;
-                    bufferBuilderIn.vertex(d5 + d25, d6 + d23, d7 + d26).endVertex();
-                }
-            }
+            starPoint = starPoint.normalize(starDistance);
+            float starRotation = (float) (randomSource.nextDouble() * Math.PI * 2.0);
+
+            Quaternionf quaternionf = new Quaternionf()
+                .rotateTo(new Vector3f(0.0F, 0.0F, -1.0F), starPoint)
+                .rotateZ(starRotation);
+
+            bufferBuilder.addVertex(starPoint.add(new Vector3f(starSize, -starSize, 0.0F).rotate(quaternionf)));
+            bufferBuilder.addVertex(starPoint.add(new Vector3f(starSize, starSize, 0.0F).rotate(quaternionf)));
+            bufferBuilder.addVertex(starPoint.add(new Vector3f(-starSize, starSize, 0.0F).rotate(quaternionf)));
+            bufferBuilder.addVertex(starPoint.add(new Vector3f(-starSize, -starSize, 0.0F).rotate(quaternionf)));
         }
-        return bufferBuilderIn.end();
+        return bufferBuilder.buildOrThrow();
     }
 
     public void turnOffLightLayer() {
@@ -1352,10 +1246,7 @@ public class MenuWorldRenderer {
     }
 
     public void turnOnLightLayer() {
-        RenderSystem.setShaderTexture(2, this.lightTextureLocation);
-        mc.getTextureManager().bindForSetup(this.lightTextureLocation);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        RenderSystem.setShaderTexture(2, this.lightMap.getColorTextureId());
     }
 
     public void updateTorchFlicker() {
@@ -1371,7 +1262,7 @@ public class MenuWorldRenderer {
 			{
 				boolean flag = this.client.player.isPotionActive(MobEffects.NIGHT_VISION) || this.client.player.isPotionActive(MobEffects.CONDUIT_POWER);
 
-				if (CustomColors.updateLightmap(world, this.torchFlickerX, this.nativeImage, flag, partialTicks))
+				if (CustomColors.updateLightmap(world, this.torchFlickerX, this.nativeImage, flag, partialTick))
 				{
 					this.dynamicTexture.updateDynamicTexture();
 					this.needsUpdate = false;
@@ -1381,7 +1272,7 @@ public class MenuWorldRenderer {
 			}*/
 
             float skyLight = getSkyDarken();
-            float effectiveSkyLight = skyFlashTime > 0 ? 1.0f : skyLight * 0.95F + 0.05F;
+            float effectiveSkyLight = this.skyFlashTime > 0 ? 1.0f : skyLight * 0.95F + 0.05F;
 
 			/* no darkness effect, we don't have an actual player
 			float darknessScale = this.mc.options.darknessEffectScale().get().floatValue();
@@ -1399,60 +1290,31 @@ public class MenuWorldRenderer {
 
             Vector3f skylightColor = new Vector3f(skyLight, skyLight, 1.0f).lerp(new Vector3f(1.0f, 1.0f, 1.0f), 0.35f);
 
-            Vector3f finalColor = new Vector3f();
-            for (int i = 0; i < 16; ++i) {
-                for (int j = 0; j < 16; ++j) {
-                    float skyBrightness = LightTexture.getBrightness(this.blockAccess.dimensionType(), i) * effectiveSkyLight;
-                    float blockBrightnessRed = LightTexture.getBrightness(this.blockAccess.dimensionType(), j) * (blockLightRedFlicker + 1.5f);
-                    float blockBrightnessGreen = blockBrightnessRed * ((blockBrightnessRed * 0.6f + 0.4f) * 0.6f + 0.4f);
-                    float blockBrightnessBlue = blockBrightnessRed * (blockBrightnessRed * blockBrightnessRed * 0.6f + 0.4f);
+            CompiledShaderProgram compiledShaderProgram = Objects.requireNonNull(
+                RenderSystem.setShader(CoreShaders.LIGHTMAP), "Lightmap shader not loaded");
+            compiledShaderProgram.safeGetUniform("AmbientLightFactor")
+                .set(this.blockAccess.dimensionType().ambientLight());
+            compiledShaderProgram.safeGetUniform("SkyFactor").set(effectiveSkyLight);
+            compiledShaderProgram.safeGetUniform("BlockFactor").set(this.blockLightRedFlicker + 1.5f);
+            compiledShaderProgram.safeGetUniform("UseBrightLightmap").set(0);
+            compiledShaderProgram.safeGetUniform("SkyLightColor").set(skylightColor);
+            compiledShaderProgram.safeGetUniform("NightVisionFactor").set(nightVision);
+            compiledShaderProgram.safeGetUniform("DarknessScale").set(0F);
+            compiledShaderProgram.safeGetUniform("DarkenWorldFactor").set(0F);
+            compiledShaderProgram.safeGetUniform("BrightnessFactor")
+                .set(Math.max(0.0F, this.mc.options.gamma().get().floatValue()));
 
-                    finalColor.set(blockBrightnessRed, blockBrightnessGreen, blockBrightnessBlue);
+            this.lightMap.bindWrite(true);
+            BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator()
+                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLIT_SCREEN);
+            bufferBuilder.addVertex(0.0F, 0.0F, 0.0F);
+            bufferBuilder.addVertex(1.0F, 0.0F, 0.0F);
+            bufferBuilder.addVertex(1.0F, 1.0F, 0.0F);
+            bufferBuilder.addVertex(0.0F, 1.0F, 0.0F);
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+            this.lightMap.unbindWrite();
+            this.mc.mainRenderTarget.bindWrite(true);
 
-                    if (dimensionInfo.forceBrightLightmap()) {
-                        finalColor.lerp(new Vector3f(0.99f, 1.12f, 1.0f), 0.25f);
-                        finalColor.set(Mth.clamp(finalColor.x, 0.0f, 1.0f), Mth.clamp(finalColor.y, 0.0f, 1.0f), Mth.clamp(finalColor.z, 0.0f, 1.0f));
-                    } else {
-                        finalColor.add(new Vector3f(skylightColor).mul(skyBrightness));
-                        finalColor.lerp(new Vector3f(0.75f, 0.75f, 0.75f), 0.04f);
-                        // no darkening from bosses
-//						if (getDarkenWorldAmount() > 0.0f) {
-//							finalColor.lerp(new Vector3f(finalColor).mul(0.7f, 0.6f, 0.6f), getDarkenWorldAmount());
-//						}
-                    }
-
-					/* no night vision, no player
-					if (nightVision > 0.0f && (w = Math.max(finalColor.x(), Math.max(finalColor.y(), finalColor.z()))) < 1.0f) {
-						v = 1.0f / w;
-						vector3f4 = new Vector3f(finalColor).mul(v);
-						finalColor.lerp(vector3f4, nightVision);
-					}
-					*/
-
-                    if (!dimensionInfo.forceBrightLightmap()) {
-						/* no darkness, no player
-						if (effectiveDarknessScale > 0.0f) {
-							finalColor.add(-effectiveDarknessScale, -effectiveDarknessScale, -effectiveDarknessScale);
-						}
-						 */
-                        finalColor.set(Mth.clamp(finalColor.x, 0.0f, 1.0f), Mth.clamp(finalColor.y, 0.0f, 1.0f), Mth.clamp(finalColor.z, 0.0f, 1.0f));
-                    }
-
-                    float gamma = this.mc.options.gamma().get().floatValue();
-                    Vector3f vector3f5 = new Vector3f(this.notGamma(finalColor.x), this.notGamma(finalColor.y), this.notGamma(finalColor.z));
-                    finalColor.lerp(vector3f5, Math.max(0.0f, gamma /*- darknessGamma*/));
-                    finalColor.lerp(new Vector3f(0.75f, 0.75f, 0.75f), 0.04f);
-                    finalColor.set(Mth.clamp(finalColor.x, 0.0f, 1.0f), Mth.clamp(finalColor.y, 0.0f, 1.0f), Mth.clamp(finalColor.z, 0.0f, 1.0f));
-                    finalColor.mul(255.0f);
-
-                    int r = (int) finalColor.x();
-                    int g = (int) finalColor.y();
-                    int b = (int) finalColor.z();
-                    this.lightPixels.setPixelRGBA(j, i, 0xFF000000 | b << 16 | g << 8 | r);
-                }
-            }
-
-            this.lightTexture.upload();
             this.lightmapUpdateNeeded = false;
         }
     }
@@ -1470,21 +1332,23 @@ public class MenuWorldRenderer {
                 return 1.0F;
             } else {
                 float f2 = Mth.clamp((float) this.waterVisionTime / 100.0F, 0.0F, 1.0F);
-                float f3 = (float) this.waterVisionTime < 100.0F ? 0.0F : Mth.clamp(((float) this.waterVisionTime - 100.0F) / 500.0F, 0.0F, 1.0F);
+                float f3 = (float) this.waterVisionTime < 100.0F ? 0.0F :
+                    Mth.clamp(((float) this.waterVisionTime - 100.0F) / 500.0F, 0.0F, 1.0F);
                 return f2 * 0.6F + f3 * 0.39999998F;
             }
         }
     }
 
     public boolean areEyesInFluid(TagKey<Fluid> tagIn) {
-        if (blockAccess == null) {
+        if (this.blockAccess == null) {
             return false;
         }
 
         Vec3 pos = getEyePos();
         BlockPos blockpos = BlockPos.containing(pos);
         FluidState fluidstate = this.blockAccess.getFluidState(blockpos);
-        return isFluidTagged(fluidstate, tagIn) && pos.y < (double) ((float) blockpos.getY() + fluidstate.getAmount() + 0.11111111F);
+        return isFluidTagged(fluidstate, tagIn) &&
+            pos.y < (double) ((float) blockpos.getY() + fluidstate.getAmount() + 0.11111111F);
     }
 
     public Vec3 getEyePos() {
@@ -1527,23 +1391,25 @@ public class MenuWorldRenderer {
             if (fogType == FogType.WATER) {
                 this.updateWaterFog(this.menuWorldRenderer.getLevel());
             } else if (fogType == FogType.LAVA) {
-                fogRed = 0.6F;
-                fogGreen = 0.1F;
-                fogBlue = 0.0F;
+                this.fogRed = 0.6F;
+                this.fogGreen = 0.1F;
+                this.fogBlue = 0.0F;
                 this.biomeChangedTime = -1L;
             } else if (fogType == FogType.POWDER_SNOW) {
-                fogRed = 0.623f;
-                fogGreen = 0.734f;
-                fogBlue = 0.785f;
-                biomeChangedTime = -1L;
+                this.fogRed = 0.623f;
+                this.fogGreen = 0.734f;
+                this.fogBlue = 0.785f;
+                this.biomeChangedTime = -1L;
                 // why is this here?
-                RenderSystem.clearColor(fogRed, fogGreen, fogBlue, 0.0f);
+                RenderSystem.clearColor(this.fogRed, this.fogGreen, this.fogBlue, 0.0f);
             } else {
                 this.updateSurfaceFog();
                 this.biomeChangedTime = -1L;
             }
 
-            float d0 = (float) ((eyePos.y + this.menuWorldRenderer.getLevel().getGround()) * this.menuWorldRenderer.getLevel().getVoidFogYFactor());
+            float d0 = (float) ((eyePos.y + this.menuWorldRenderer.getLevel().getGround()) *
+                this.menuWorldRenderer.getLevel().getVoidFogYFactor()
+            );
 
 			/* no entity available
 			MobEffectFogFunction mobEffectFogFunction = FogRenderer.getPriorityFogFunction(entity, f);
@@ -1558,49 +1424,51 @@ public class MenuWorldRenderer {
                 }
 
                 d0 = d0 * d0;
-                fogRed = fogRed * d0;
-                fogGreen = fogGreen * d0;
-                fogBlue = fogBlue * d0;
+                this.fogRed = this.fogRed * d0;
+                this.fogGreen = this.fogGreen * d0;
+                this.fogBlue = this.fogBlue * d0;
             }
 
             // no boss available
-			/*if (this.gameRenderer.getDarkenWorldAmount(partialTicks) > 0.0F)
+			/*if (this.gameRenderer.getDarkenWorldAmount(partialTick) > 0.0F)
 			{
-				float f = this.gameRenderer.getDarkenWorldAmount(partialTicks);
+				float f = this.gameRenderer.getDarkenWorldAmount(partialTick);
 				fogRed = fogRed * (1.0F - f) + fogRed * 0.7F * f;
 				fogGreen = fogGreen * (1.0F - f) + fogGreen * 0.6F * f;
 				fogBlue = fogBlue * (1.0F - f) + fogBlue * 0.6F * f;
 			}*/
 
-            if (fogType == FogType.WATER && fogRed != 0.0f && fogGreen != 0.0f && fogBlue != 0.0f) {
+            if (fogType == FogType.WATER && this.fogRed != 0.0f && this.fogGreen != 0.0f && this.fogBlue != 0.0f) {
                 float f1 = this.menuWorldRenderer.getWaterVision();
-                float f3 = Math.min(1.0f / fogRed, Math.min(1.0f / fogGreen, 1.0f / fogBlue));
+                float f3 = Math.min(1.0f / this.fogRed, Math.min(1.0f / this.fogGreen, 1.0f / this.fogBlue));
 
-                fogRed = fogRed * (1.0F - f1) + fogRed * f3 * f1;
-                fogGreen = fogGreen * (1.0F - f1) + fogGreen * f3 * f1;
-                fogBlue = fogBlue * (1.0F - f1) + fogBlue * f3 * f1;
+                this.fogRed = this.fogRed * (1.0F - f1) + this.fogRed * f3 * f1;
+                this.fogGreen = this.fogGreen * (1.0F - f1) + this.fogGreen * f3 * f1;
+                this.fogBlue = this.fogBlue * (1.0F - f1) + this.fogBlue * f3 * f1;
             }
 
             if (OptifineHelper.isOptifineLoaded()) {
                 // custom fog colors
                 if (fogType == FogType.WATER) {
-                    Vec3 colUnderwater = OptifineHelper.getCustomUnderwaterColor(menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
+                    Vec3 colUnderwater = OptifineHelper.getCustomUnderwaterColor(this.menuWorldRenderer.blockAccess,
+                        eyePos.x, eyePos.y, eyePos.z);
                     if (colUnderwater != null) {
-                        fogRed = (float) colUnderwater.x;
-                        fogGreen = (float) colUnderwater.y;
-                        fogBlue = (float) colUnderwater.z;
+                        this.fogRed = (float) colUnderwater.x;
+                        this.fogGreen = (float) colUnderwater.y;
+                        this.fogBlue = (float) colUnderwater.z;
                     }
                 } else if (fogType == FogType.LAVA) {
-                    Vec3 colUnderlava = OptifineHelper.getCustomUnderlavaColor(menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
+                    Vec3 colUnderlava = OptifineHelper.getCustomUnderlavaColor(this.menuWorldRenderer.blockAccess,
+                        eyePos.x, eyePos.y, eyePos.z);
                     if (colUnderlava != null) {
-                        fogRed = (float) colUnderlava.x;
-                        fogGreen = (float) colUnderlava.y;
-                        fogBlue = (float) colUnderlava.z;
+                        this.fogRed = (float) colUnderlava.x;
+                        this.fogGreen = (float) colUnderlava.y;
+                        this.fogBlue = (float) colUnderlava.z;
                     }
                 }
             }
 
-            RenderSystem.clearColor(fogRed, fogGreen, fogBlue, 0.0f);
+            RenderSystem.clearColor(this.fogRed, this.fogGreen, this.fogBlue, 0.0f);
         }
 
         private void updateSurfaceFog() {
@@ -1609,101 +1477,121 @@ public class MenuWorldRenderer {
             Vec3 eyePos = this.menuWorldRenderer.getEyePos();
             Vec3 skyColor = this.menuWorldRenderer.getSkyColor(eyePos);
             if (OptifineHelper.isOptifineLoaded()) {
-                if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS)) {
-                    skyColor = OptifineHelper.getCustomSkyColor(skyColor, menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
-                } else if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.END_EFFECTS)) {
+                if (this.menuWorldRenderer.blockAccess.dimensionType().effectsLocation()
+                    .equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS))
+                {
+                    skyColor = OptifineHelper.getCustomSkyColor(skyColor, this.menuWorldRenderer.blockAccess, eyePos.x,
+                        eyePos.y, eyePos.z);
+                } else if (this.menuWorldRenderer.blockAccess.dimensionType().effectsLocation()
+                    .equals(BuiltinDimensionTypes.END_EFFECTS))
+                {
                     skyColor = OptifineHelper.getCustomSkyColorEnd(skyColor);
                 }
             }
-            float f1 = (float) skyColor.x;
-            float f2 = (float) skyColor.y;
-            float f3 = (float) skyColor.z;
+            float skyRed = (float) skyColor.x;
+            float skyGreen = (float) skyColor.y;
+            float skyBlue = (float) skyColor.z;
             Vec3 fogColor = this.menuWorldRenderer.getFogColor(eyePos);
             if (OptifineHelper.isOptifineLoaded()) {
-                if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS)) {
-                    fogColor = OptifineHelper.getCustomFogColor(fogColor, menuWorldRenderer.blockAccess, eyePos.x, eyePos.y, eyePos.z);
-                } else if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.END_EFFECTS)) {
+                if (this.menuWorldRenderer.blockAccess.dimensionType().effectsLocation()
+                    .equals(BuiltinDimensionTypes.OVERWORLD_EFFECTS))
+                {
+                    fogColor = OptifineHelper.getCustomFogColor(fogColor, this.menuWorldRenderer.blockAccess, eyePos.x,
+                        eyePos.y, eyePos.z);
+                } else if (this.menuWorldRenderer.blockAccess.dimensionType().effectsLocation()
+                    .equals(BuiltinDimensionTypes.END_EFFECTS))
+                {
                     fogColor = OptifineHelper.getCustomFogColorEnd(fogColor);
-                } else if (menuWorldRenderer.blockAccess.dimensionType().effectsLocation().equals(BuiltinDimensionTypes.NETHER_EFFECTS)) {
+                } else if (this.menuWorldRenderer.blockAccess.dimensionType().effectsLocation()
+                    .equals(BuiltinDimensionTypes.NETHER_EFFECTS))
+                {
                     fogColor = OptifineHelper.getCustomFogColorNether(fogColor);
                 }
             }
-            fogRed = (float) fogColor.x;
-            fogGreen = (float) fogColor.y;
-            fogBlue = (float) fogColor.z;
+            this.fogRed = (float) fogColor.x;
+            this.fogGreen = (float) fogColor.y;
+            this.fogBlue = (float) fogColor.z;
 
             if (this.menuWorldRenderer.renderDistanceChunks >= 4) {
                 float d0 = Mth.sin(this.menuWorldRenderer.getSunAngle()) > 0.0F ? -1.0F : 1.0F;
-                Vec3 vec3d2 = new Vec3(d0, 0.0F, 0.0F).yRot(0);
-                float f5 = (float) ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getDirection().yRot(menuWorldRenderer.worldRotation).dot(vec3d2);
+                float f5 = ClientDataHolderVR.getInstance().vrPlayer.vrdata_room_post.hmd.getDirection()
+                    .rotateY(-this.menuWorldRenderer.worldRotation * Mth.DEG_TO_RAD).dot(d0, 0, 0);
 
                 if (f5 < 0.0F) {
                     f5 = 0.0F;
                 }
 
-                if (f5 > 0.0F) {
-                    float[] afloat = this.menuWorldRenderer.dimensionInfo.getSunriseColor(this.menuWorldRenderer.getTimeOfDay(), 0);
+                if (f5 > 0.0F &&
+                    this.menuWorldRenderer.dimensionInfo.isSunriseOrSunset(this.menuWorldRenderer.getTimeOfDay()))
+                {
+                    int sunriseColor = 0;
+                    try {
+                        sunriseColor = this.menuWorldRenderer.dimensionInfo.getSunriseOrSunsetColor(
+                            this.menuWorldRenderer.getTimeOfDay());
+                    } catch (Exception ignore) {}
 
-                    if (afloat != null) {
-                        f5 = f5 * afloat[3];
-                        fogRed = fogRed * (1.0F - f5) + afloat[0] * f5;
-                        fogGreen = fogGreen * (1.0F - f5) + afloat[1] * f5;
-                        fogBlue = fogBlue * (1.0F - f5) + afloat[2] * f5;
+                    if (sunriseColor != 0) {
+                        f5 = f5 * ARGB.alphaFloat(sunriseColor);
+                        this.fogRed = this.fogRed * (1.0F - f5) + ARGB.redFloat(sunriseColor) * f5;
+                        this.fogGreen =
+                            this.fogGreen * (1.0F - f5) + ARGB.greenFloat(sunriseColor) * f5;
+                        this.fogBlue = this.fogBlue * (1.0F - f5) + ARGB.blueFloat(sunriseColor) * f5;
                     }
                 }
             }
 
-            fogRed += (f1 - fogRed) * f;
-            fogGreen += (f2 - fogGreen) * f;
-            fogBlue += (f3 - fogBlue) * f;
+            this.fogRed += (skyRed - this.fogRed) * f;
+            this.fogGreen += (skyGreen - this.fogGreen) * f;
+            this.fogBlue += (skyBlue - this.fogBlue) * f;
 
-            float f6 = menuWorldRenderer.getRainLevel();
+            float f6 = this.menuWorldRenderer.getRainLevel();
             if (f6 > 0.0F) {
                 float f4 = 1.0F - f6 * 0.5F;
                 float f8 = 1.0F - f6 * 0.4F;
-                fogRed *= f4;
-                fogGreen *= f4;
-                fogBlue *= f8;
+                this.fogRed *= f4;
+                this.fogGreen *= f4;
+                this.fogBlue *= f8;
             }
 
-            float f7 = menuWorldRenderer.getThunderLevel();
+            float f7 = this.menuWorldRenderer.getThunderLevel();
             if (f7 > 0.0F) {
                 float f9 = 1.0F - f7 * 0.5F;
-                fogRed *= f9;
-                fogGreen *= f9;
-                fogBlue *= f9;
+                this.fogRed *= f9;
+                this.fogGreen *= f9;
+                this.fogBlue *= f9;
             }
-            biomeChangedTime = -1L;
+            this.biomeChangedTime = -1L;
         }
 
         private void updateWaterFog(LevelReader levelIn) {
             long currentTime = Util.getMillis();
-            int waterFogColor = levelIn.getBiome(BlockPos.containing(this.menuWorldRenderer.getEyePos())).value().getWaterFogColor();
+            int waterFogColor = levelIn.getBiome(BlockPos.containing(this.menuWorldRenderer.getEyePos())).value()
+                .getWaterFogColor();
 
             if (this.biomeChangedTime < 0L) {
-                targetBiomeFog = waterFogColor;
-                previousBiomeFog = waterFogColor;
-                biomeChangedTime = currentTime;
+                this.targetBiomeFog = waterFogColor;
+                this.previousBiomeFog = waterFogColor;
+                this.biomeChangedTime = currentTime;
             }
 
-            int k = targetBiomeFog >> 16 & 255;
-            int l = targetBiomeFog >> 8 & 255;
-            int i1 = targetBiomeFog & 255;
-            int j1 = previousBiomeFog >> 16 & 255;
-            int k1 = previousBiomeFog >> 8 & 255;
-            int l1 = previousBiomeFog & 255;
+            int k = this.targetBiomeFog >> 16 & 255;
+            int l = this.targetBiomeFog >> 8 & 255;
+            int i1 = this.targetBiomeFog & 255;
+            int j1 = this.previousBiomeFog >> 16 & 255;
+            int k1 = this.previousBiomeFog >> 8 & 255;
+            int l1 = this.previousBiomeFog & 255;
             float f = Mth.clamp((float) (currentTime - this.biomeChangedTime) / 5000.0F, 0.0F, 1.0F);
 
             float f1 = Mth.lerp(f, j1, k);
             float f2 = Mth.lerp(f, k1, l);
             float f3 = Mth.lerp(f, l1, i1);
-            fogRed = f1 / 255.0F;
-            fogGreen = f2 / 255.0F;
-            fogBlue = f3 / 255.0F;
+            this.fogRed = f1 / 255.0F;
+            this.fogGreen = f2 / 255.0F;
+            this.fogBlue = f3 / 255.0F;
 
-            if (targetBiomeFog != waterFogColor) {
-                targetBiomeFog = waterFogColor;
-                previousBiomeFog = Mth.floor(f1) << 16 | Mth.floor(f2) << 8 | Mth.floor(f3);
+            if (this.targetBiomeFog != waterFogColor) {
+                this.targetBiomeFog = waterFogColor;
+                this.previousBiomeFog = Mth.floor(f1) << 16 | Mth.floor(f2) << 8 | Mth.floor(f3);
                 this.biomeChangedTime = currentTime;
             }
         }
@@ -1724,50 +1612,48 @@ public class MenuWorldRenderer {
                 fogStart = -8.0f;
                 fogEnd = 96.0f;
 
-                Holder<Biome> holder = menuWorldRenderer.blockAccess.getBiome(BlockPos.containing(menuWorldRenderer.getEyePos()));
+                Holder<Biome> holder = this.menuWorldRenderer.blockAccess.getBiome(
+                    BlockPos.containing(this.menuWorldRenderer.getEyePos()));
                 if (holder.is(BiomeTags.HAS_CLOSER_WATER_FOG)) {
                     fogEnd *= 0.85f;
                 }
-                if (fogEnd > menuWorldRenderer.renderDistance) {
-                    fogEnd = menuWorldRenderer.renderDistance;
+                if (fogEnd > this.menuWorldRenderer.renderDistance) {
+                    fogEnd = this.menuWorldRenderer.renderDistance;
                     fogShape = FogShape.CYLINDER;
                 }
-            } else if (menuWorldRenderer.blockAccess.getDimensionReaderInfo().isFoggyAt(0, 0)) {
-                fogStart = menuWorldRenderer.renderDistance * 0.05f;
-                fogEnd = Math.min(menuWorldRenderer.renderDistance, 192.0f) * 0.5f;
+            } else if (this.menuWorldRenderer.blockAccess.getDimensionReaderInfo().isFoggyAt(0, 0)) {
+                fogStart = this.menuWorldRenderer.renderDistance * 0.05f;
+                fogEnd = Math.min(this.menuWorldRenderer.renderDistance, 192.0f) * 0.5f;
             } else if (fogMode == FogRenderer.FogMode.FOG_SKY) {
                 fogStart = 0.0f;
-                fogEnd = menuWorldRenderer.renderDistance;
+                fogEnd = this.menuWorldRenderer.renderDistance;
                 fogShape = FogShape.CYLINDER;
             } else {
-                float h = Mth.clamp(menuWorldRenderer.renderDistance / 10.0f, 4.0f, 64.0f);
-                fogStart = menuWorldRenderer.renderDistance - h;
-                fogEnd = menuWorldRenderer.renderDistance;
+                float h = Mth.clamp(this.menuWorldRenderer.renderDistance / 10.0f, 4.0f, 64.0f);
+                fogStart = this.menuWorldRenderer.renderDistance - h;
+                fogEnd = this.menuWorldRenderer.renderDistance;
                 fogShape = FogShape.CYLINDER;
             }
-            RenderSystem.setShaderFogStart(fogStart);
-            RenderSystem.setShaderFogEnd(fogEnd);
-            RenderSystem.setShaderFogShape(fogShape);
+            RenderSystem.setShaderFog(
+                new FogParameters(fogStart, fogEnd, fogShape, this.fogRed, this.fogGreen, this.fogBlue, 1F));
         }
 
         private FogType getEyeFogType() {
             FogType fogType = FogType.NONE;
-            if (menuWorldRenderer.areEyesInFluid(FluidTags.WATER)) {
+            if (this.menuWorldRenderer.areEyesInFluid(FluidTags.WATER)) {
                 fogType = FogType.WATER;
-            } else if (menuWorldRenderer.areEyesInFluid(FluidTags.LAVA)) {
+            } else if (this.menuWorldRenderer.areEyesInFluid(FluidTags.LAVA)) {
                 fogType = FogType.LAVA;
-            } else if (menuWorldRenderer.blockAccess.getBlockState(BlockPos.containing(menuWorldRenderer.getEyePos())).is(Blocks.POWDER_SNOW)) {
+            } else if (this.menuWorldRenderer.blockAccess.getBlockState(
+                BlockPos.containing(this.menuWorldRenderer.getEyePos())).is(Blocks.POWDER_SNOW))
+            {
                 fogType = FogType.POWDER_SNOW;
             }
             return fogType;
         }
 
         public void setupNoFog() {
-            RenderSystem.setShaderFogStart(Float.MAX_VALUE);
-        }
-
-        public void levelFogColor() {
-            RenderSystem.setShaderFogColor(fogRed, fogGreen, fogBlue);
+            RenderSystem.setShaderFog(FogParameters.NO_FOG);
         }
     }
 
@@ -1776,7 +1662,9 @@ public class MenuWorldRenderer {
 
         @SuppressWarnings("unchecked")
         public FluidStateWrapper(FluidState fluidState) {
-            super(fluidState.getType(), fluidState.getValues(), fluidState.propertiesCodec);
+            // need to do it this way, because FerriteCore changes the field type, which would error on a cast
+            super(fluidState.getType(), null, fluidState.propertiesCodec);
+            ((StateHolderExtension) (this)).vivecraft$setValues(fluidState.getValues());
 
             this.fluidState = fluidState;
         }
@@ -1789,7 +1677,7 @@ public class MenuWorldRenderer {
             } else if (tagIn == FluidTags.LAVA) {
                 return this.getType() == Fluids.LAVA || this.getType() == Fluids.FLOWING_LAVA;
             }
-            return fluidState.is(tagIn);
+            return this.fluidState.is(tagIn);
         }
     }
 }

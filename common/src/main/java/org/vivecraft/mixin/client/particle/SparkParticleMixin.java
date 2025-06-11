@@ -20,16 +20,24 @@ public class SparkParticleMixin implements SparkParticleExtension {
     @Unique
     private UUID vivecraft$playerUUID;
 
-    @Inject(at = @At("HEAD"), method = "render", cancellable = true)
-    private void vivecraft$hideSelfButtSparkles(VertexConsumer vertexConsumer, Camera camera, float f, CallbackInfo ci) {
-        if (!ClientDataHolderVR.getInstance().vrSettings.selfButtSparklesInFirstPerson
-            && camera.getEntity().getUUID().equals(this.vivecraft$playerUUID) && ((!VRState.vrRunning && !camera.isDetached())
-            || (VRState.vrRunning && Stream.of(RenderPass.LEFT, RenderPass.RIGHT, RenderPass.CENTER).anyMatch(pass -> ClientDataHolderVR.getInstance().currentPass == pass)))) {
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$hideSelfButtSparkles(
+        VertexConsumer buffer, Camera camera, float partialTick, CallbackInfo ci)
+    {
+        if (!ClientDataHolderVR.getInstance().vrSettings.selfButtSparklesInFirstPerson &&
+            camera.getEntity().getUUID().equals(this.vivecraft$playerUUID) &&
+            ((!VRState.VR_RUNNING && !camera.isDetached()) || (VRState.VR_RUNNING &&
+                Stream.of(RenderPass.LEFT, RenderPass.RIGHT, RenderPass.CENTER)
+                    .anyMatch(pass -> ClientDataHolderVR.getInstance().currentPass == pass)
+            )
+            ))
+        {
             ci.cancel();
         }
     }
 
     @Override
+    @Unique
     public void vivecraft$setPlayerUUID(UUID playerUUID) {
         this.vivecraft$playerUUID = playerUUID;
     }

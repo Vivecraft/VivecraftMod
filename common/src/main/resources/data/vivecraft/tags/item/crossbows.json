@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:tools/crossbow",
+      "required": false
+    },
+
+    "minecraft:crossbow",
+    {
+      "id": "tetra:modular_crossbow",
+      "required": false
+    }
+  ]
+}

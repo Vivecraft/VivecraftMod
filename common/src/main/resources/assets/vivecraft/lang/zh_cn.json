@@ -406,7 +406,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "警告！正在使用客户端世界渲染器保存主菜单背景世界！数据可能不完整！我们推荐您将主菜单背景世界保存到单人游戏中。",
   "vivecraft.messages.teleportdisabled": "有限移动模式已启用（禁止传送移动）",
   "vivecraft.messages.teleportenabled": "有限移动模式已禁用（允许传送移动）",
-  "vivecraft.messages.walkupblocks": "进入方块（右Ctrl+B）：%s",
+  "vivecraft.messages.walkupblocks": "进入方块：%s",
   "vivecraft.messages.showaim": "显示瞄准位置（右Ctrl+右Shift）：启用",
   "_comment54": "vivecraft.messages.playerinertia=Player movement inertia (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "设置移动模式为：%s",

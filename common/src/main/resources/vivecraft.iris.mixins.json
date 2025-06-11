@@ -6,23 +6,21 @@
   "client": [
     "IrisBeginFrameHack",
     "IrisBlockRenderingSettingsMixin",
+    "IrisCameraUniformsMixin",
     "IrisDHCompatVRMixin",
     "IrisHandRendererVRMixin",
     "IrisLodRenderProgramVRMixin",
     "IrisProgramUniformsMixin",
-    "IrisRenderSystemVRMixin",
     "IrisShadowMatricesMixin",
     "IrisShadowRendererMixin",
-    "coderbot.IrisChunkProgramOverridesMixin",
-    "coderbot.IrisChunkProgramOverridesMixinSodium_0_4_11",
-    "coderbot.IrisChunkProgramOverridesMixinSodium_0_4_9",
-    "coderbot.IrisNewWorldRenderingPipelineVRMixin",
-    "coderbot.IrisPipelineManagerVRMixin",
+    "JcppProcessorVRMixin",
     "irisshaders.IrisChunkProgramOverridesMixin",
     "irisshaders.IrisChunkProgramOverridesMixinSodium_0_5_8",
     "irisshaders.IrisChunkProgramOverridesMixinSodium_0_6",
+    "irisshaders.IrisCommonUniformsMixin",
     "irisshaders.IrisPipelineManagerVRMixin",
-    "irisshaders.IrisRenderingPipelineVRMixin"
+    "irisshaders.IrisRenderingPipelineVRMixin",
+    "irisshaders.IrisStandardMacrosMixin"
   ],
   "minVersion": "0.8.4",
   "mixins": [

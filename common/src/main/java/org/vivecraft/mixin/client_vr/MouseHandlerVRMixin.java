@@ -1,12 +1,17 @@
 package org.vivecraft.mixin.client_vr;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
@@ -23,42 +28,43 @@ public class MouseHandlerVRMixin {
     @Shadow
     private Minecraft minecraft;
 
-    @Redirect(method = "onPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
-    private boolean vivecraft$checkNull(LocalPlayer instance) {
-        return instance != null && instance.isSpectator();
+    @WrapOperation(method = "onPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
+    private boolean vivecraft$checkNull(LocalPlayer instance, Operation<Boolean> original) {
+        return instance != null && original.call(instance);
     }
 
 
-    @Inject(at = @At("HEAD"), method = "turnPlayer", cancellable = true)
-    public void vivecraft$noTurnStanding(CallbackInfo ci) {
-        if (!VRState.vrRunning) {
+    @Inject(method = "turnPlayer", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$noTurnStanding(CallbackInfo ci) {
+        if (!VRState.VR_RUNNING) {
             return;
         }
 
         if (!ClientDataHolderVR.getInstance().vrSettings.seated) {
             // call the tutorial before canceling
-            // head movement
-            // this.minecraft.getTutorial().onMouse(1.0 - MCVR.get().hmdHistory.averagePosition(0.2).subtract(MCVR.get().hmdPivotHistory.averagePosition(0.2)).normalize().dot(MCVR.get().hmdHistory.averagePosition(1.0).subtract(MCVR.get().hmdPivotHistory.averagePosition(1.0)).normalize()),0);
             // controller movement
             int mainController = ClientDataHolderVR.getInstance().vrSettings.reverseHands ? 1 : 0;
-            this.minecraft.getTutorial().onMouse(1.0 - MCVR.get().controllerForwardHistory[mainController].averagePosition(0.2).normalize().dot(MCVR.get().controllerForwardHistory[mainController].averagePosition(1.0).normalize()), 0);
+            float deltaMovement = MCVR.get().controllerForwardHistory[mainController].averagePosition(0.2)
+                .normalize().dot(MCVR.get().controllerForwardHistory[mainController].averagePosition(1.0).normalize());
+
+            this.minecraft.getTutorial().onMouse(1F - deltaMovement, 0);
             ci.cancel();
         }
     }
 
     // cancel after tutorial call
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/Tutorial;onMouse(DD)V", shift = At.Shift.AFTER), method = "turnPlayer", cancellable = true)
-    public void vivecraft$noTurnSeated(CallbackInfo ci) {
-        if (!VRState.vrRunning) {
+    @Inject(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/Tutorial;onMouse(DD)V", shift = At.Shift.AFTER), cancellable = true)
+    private void vivecraft$noTurnSeated(CallbackInfo ci) {
+        if (!VRState.VR_RUNNING) {
             return;
         }
 
         ci.cancel();
     }
 
-    @Inject(at = @At("HEAD"), method = "grabMouse", cancellable = true)
-    public void vivecraft$seated(CallbackInfo ci) {
-        if (!VRState.vrRunning) {
+    @Inject(method = "grabMouse", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$noMouseGrab(CallbackInfo ci) {
+        if (!VRState.VR_RUNNING) {
             return;
         }
 
@@ -68,24 +74,9 @@ public class MouseHandlerVRMixin {
         }
     }
 
-    // we change the screen size different from window size, so need to modify the mouse position on grab/release
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(JIDD)V"), index = 2, method = {"grabMouse", "releaseMouse"})
-    public double vivecraft$modifyXCenter(double x) {
-        return VRState.vrRunning
-               ? (double) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth() / 2
-               : x;
-    }
-
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(JIDD)V"), index = 3, method = {"grabMouse", "releaseMouse"})
-    public double vivecraft$modifyYCenter(double y) {
-        return VRState.vrRunning
-               ? (double) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight() / 2
-               : y;
-    }
-
-    @Inject(at = @At(value = "HEAD"), method = "releaseMouse", cancellable = true)
-    public void vivecraft$grabMouse(CallbackInfo ci) {
-        if (!VRState.vrRunning) {
+    @Inject(method = "releaseMouse", at = @At(value = "HEAD"), cancellable = true)
+    private void vivecraft$noMouseReleaseMovement(CallbackInfo ci) {
+        if (!VRState.VR_RUNNING) {
             return;
         }
 
@@ -95,19 +86,36 @@ public class MouseHandlerVRMixin {
         }
     }
 
+    // we change the screen size different from window size, so need to modify the mouse position on grab/release
+    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(JIDD)V"), index = 2)
+    private double vivecraft$modifyXCenter(double x) {
+        return VRState.VR_RUNNING
+            ? (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenWidth() / 2
+            : x;
+    }
+
+    @ModifyArg(method = {"grabMouse", "releaseMouse"}, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/InputConstants;grabOrReleaseMouse(JIDD)V"), index = 3)
+    private double vivecraft$modifyYCenter(double y) {
+        return VRState.VR_RUNNING
+            ? (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenHeight() / 2
+            : y;
+    }
+
     // we change the screen size different from window size, so adapt move events to the emulated size
-    @ModifyVariable(at = @At(value = "HEAD"), ordinal = 0, method = "onMove", argsOnly = true)
-    public double vivecraft$modifyX(double x) {
-        if (VRState.vrRunning) {
-            x *= GuiHandler.guiWidth / (double) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenWidth();
+    @ModifyVariable(method = "onMove", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
+    private double vivecraft$modifyX(double x) {
+        if (VRState.VR_RUNNING) {
+            x *= GuiHandler.GUI_WIDTH /
+                (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenWidth();
         }
         return x;
     }
 
-    @ModifyVariable(at = @At(value = "HEAD"), ordinal = 1, method = "onMove", argsOnly = true)
-    public double vivecraft$modifyY(double y) {
-        if (VRState.vrRunning) {
-            y *= (double) GuiHandler.guiHeight / (double) ((WindowExtension) (Object) minecraft.getWindow()).vivecraft$getActualScreenHeight();
+    @ModifyVariable(method = "onMove", at = @At(value = "HEAD"), ordinal = 1, argsOnly = true)
+    private double vivecraft$modifyY(double y) {
+        if (VRState.VR_RUNNING) {
+            y *= (double) GuiHandler.GUI_HEIGHT /
+                (double) ((WindowExtension) (Object) this.minecraft.getWindow()).vivecraft$getActualScreenHeight();
         }
         return y;
     }

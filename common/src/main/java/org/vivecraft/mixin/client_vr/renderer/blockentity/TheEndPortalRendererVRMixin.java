@@ -27,7 +27,7 @@ public class TheEndPortalRendererVRMixin {
                 false,
                 false,
                 RenderType.CompositeState.builder()
-                    .setShaderState(new RenderStateShard.ShaderStateShard(VRShaders::getRendertypeEndPortalShaderVR))
+                    .setShaderState(new RenderStateShard.ShaderStateShard(VRShaders.RENDERTYPE_END_PORTAL_VR_SHADER))
                     .setTextureState(
                         RenderStateShard
                             .MultiTextureStateShard
@@ -37,8 +37,8 @@ public class TheEndPortalRendererVRMixin {
                             .build())
                     .createCompositeState(false));
 
-    @Inject(at = @At("HEAD"), method = "renderType", cancellable = true)
-    private void vivecraft$differentShaderInVR(CallbackInfoReturnable<RenderType> cir) {
+    @Inject(method = "renderType", at = @At("HEAD"), cancellable = true)
+    private void vivecraft$VRShaderOverride(CallbackInfoReturnable<RenderType> cir) {
         if (!RenderPassType.isVanilla()) {
             cir.setReturnValue(vivecraft$END_PORTAL_VR);
         }

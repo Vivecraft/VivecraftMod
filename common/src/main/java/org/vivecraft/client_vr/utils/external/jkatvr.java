@@ -6,23 +6,26 @@ import com.sun.jna.NativeLibrary;
 import com.sun.jna.ptr.DoubleByReference;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
+import org.vivecraft.client_vr.settings.VRSettings;
 
 public class jkatvr implements Library {
     public static final String KATVR_LIBRARY_NAME = "WalkerBase.dll";
-    public static final NativeLibrary KATVR_NATIVE_LIB = NativeLibrary.getInstance("WalkerBase.dll");
-    static float yaw;
-    static float yawOffset;
-    static double power;
-    static int direction;
-    static int ismoving;
-    static IntByReference y = new IntByReference();
-    static IntByReference m = new IntByReference();
-    static IntByReference is = new IntByReference();
-    static DoubleByReference pow = new DoubleByReference();
-    static FloatByReference fl = new FloatByReference();
-    static float mag = 0.15F;
-    static float bmag = 0.1F;
-    static float maxpower = 3000.0F;
+    public static final NativeLibrary KATVR_NATIVE_LIB = NativeLibrary.getInstance(KATVR_LIBRARY_NAME);
+
+    private static final float MAG = 0.15F;
+    private static final float B_MAG = 0.1F;
+    private static final float MAX_POWER = 3000.0F;
+
+    private static float YAW;
+    private static float YAW_OFFSET;
+    private static double POWER;
+    private static int DIRECTION;
+    private static int IS_MOVING;
+    private static final IntByReference Y = new IntByReference();
+    private static final IntByReference M = new IntByReference();
+    private static final IntByReference IS = new IntByReference();
+    private static final DoubleByReference POW = new DoubleByReference();
+    private static final FloatByReference FL = new FloatByReference();
 
     public static native void Init(int var0);
 
@@ -32,39 +35,41 @@ public class jkatvr implements Library {
 
     public static native void Halt();
 
-    public static native boolean GetWalkerData(int var0, IntByReference var1, DoubleByReference var2, IntByReference var3, IntByReference var4, FloatByReference var5);
+    public static native boolean GetWalkerData(
+        int var0, IntByReference var1, DoubleByReference var2, IntByReference var3, IntByReference var4,
+        FloatByReference var5);
 
     public static void query() {
         try {
-            boolean flag = GetWalkerData(0, y, pow, m, is, fl);
-            yaw = (float) y.getValue();
-            power = pow.getValue();
-            direction = -m.getValue();
-            ismoving = is.getValue();
-            yaw = yaw / 1024.0F * 360.0F;
+            boolean flag = GetWalkerData(0, Y, POW, M, IS, FL);
+            YAW = Y.getValue();
+            POWER = POW.getValue();
+            DIRECTION = -M.getValue();
+            IS_MOVING = IS.getValue();
+            YAW = YAW / 1024.0F * 360.0F;
         } catch (Exception exception) {
-            System.out.println("KATVR Error: " + exception.getMessage());
+            VRSettings.LOGGER.error("Vivecraft: KATVR Error:", exception);
         }
     }
 
     public static float getYaw() {
-        return yaw - yawOffset;
+        return YAW - YAW_OFFSET;
     }
 
     public static boolean isMoving() {
-        return ismoving == 1;
+        return IS_MOVING == 1;
     }
 
     public static void resetYaw(float offsetDegrees) {
-        yawOffset = offsetDegrees + yaw;
+        YAW_OFFSET = offsetDegrees + YAW;
     }
 
     public static float walkDirection() {
-        return (float) direction;
+        return (float) DIRECTION;
     }
 
     public static float getSpeed() {
-        return (float) (power / (double) maxpower * (double) (walkDirection() == 1.0F ? mag : bmag));
+        return (float) (POWER / MAX_POWER * (walkDirection() == 1.0F ? MAG : B_MAG));
     }
 
     static {

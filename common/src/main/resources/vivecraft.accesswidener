@@ -8,7 +8,6 @@ accessible field net/minecraft/client/model/geom/ModelPart$Cube polygons [Lnet/m
 
 # custom player modle rendering
 accessible field net/minecraft/client/model/PlayerModel slim Z
-extendable method net/minecraft/client/renderer/entity/player/PlayerRenderer setModelProperties (Lnet/minecraft/client/player/AbstractClientPlayer;)V
 
 # modded layer supports
 accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
@@ -65,10 +64,7 @@ accessible method net/minecraft/client/renderer/ItemInHandRenderer renderArmWith
 accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
 
 # to render item activation outside of gamerenderer
-accessible method net/minecraft/client/renderer/GameRenderer renderItemActivationAnimation (IIF)V
-
-# tohave differnt postEffects per pass
-accessible field net/minecraft/client/renderer/GameRenderer postEffect Lnet/minecraft/client/renderer/PostChain;
+accessible method net/minecraft/client/renderer/GameRenderer renderItemActivationAnimation (Lnet/minecraft/client/gui/GuiGraphics;F)V
 
 # to disable destroy delay, on roomscale hitting
 accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyDelay I
@@ -82,6 +78,9 @@ accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/
 
 # to render crosshair
 accessible field net/minecraft/client/gui/Gui CROSSHAIR_SPRITE Lnet/minecraft/resources/ResourceLocation;
+
+# to check for an active tooltip
+accessible field net/minecraft/client/gui/screens/Screen deferredTooltipRendering Lnet/minecraft/client/gui/screens/Screen$DeferredTooltipRendering;
 
 # for menuworlds
 accessible field net/minecraft/client/multiplayer/ClientLevel$ClientLevelData isFlat Z
@@ -100,3 +99,16 @@ accessible method net/minecraft/world/item/BrushItem spawnDustParticles (Lnet/mi
 
 # do not kick climbing players
 accessible field net/minecraft/server/network/ServerGamePacketListenerImpl aboveGroundTickCount I
+
+# to render the camera widget with dispaly
+accessible field net/minecraft/client/renderer/item/ItemStackRenderState layers [Lnet/minecraft/client/renderer/item/ItemStackRenderState$LayerRenderState;
+accessible field net/minecraft/client/renderer/item/ItemStackRenderState$LayerRenderState model Lnet/minecraft/client/resources/model/BakedModel;
+
+# to let the vr transparancy shader fail to compile
+accessible class net/minecraft/client/renderer/ShaderManager$CompilationCache
+accessible field net/minecraft/client/renderer/ShaderManager$CompilationCache programs Ljava/util/Map;
+
+# to have a custom crosshair shader
+accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
+accessible field net/minecraft/client/renderer/RenderStateShard NO_DEPTH_TEST Lnet/minecraft/client/renderer/RenderStateShard$DepthTestStateShard;
+accessible field net/minecraft/client/renderer/RenderStateShard POSITION_TEXTURE_COLOR_SHADER Lnet/minecraft/client/renderer/RenderStateShard$ShaderStateShard;

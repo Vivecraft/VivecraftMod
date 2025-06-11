@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "B",
+    "S"
+  ],
+  "key": {
+    "B": "minecraft:leather_boots",
+    "S": "minecraft:slime_block"
+  },
+  "result": {
+    "id": "minecraft:leather_boots",
+    "count": 1,
+    "components": {
+      "minecraft:unbreakable": {
+        "show_in_tooltip": false
+      },
+      "minecraft:custom_name": "{\"type\": \"translatable\", \"translate\": \"vivecraft.item.jumpboots\", \"fallback\": \"Jump Boots\"}",
+      "minecraft:dyed_color": {
+        "rgb": 9233775,
+        "show_in_tooltip": false
+      }
+    }
+  }
+}

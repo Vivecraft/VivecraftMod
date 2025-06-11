@@ -406,7 +406,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "UWAGA: Zapis świata menu używając świata klienckiego. Dane mogą być niekompletne. Zalecane jest zapisywanie światów menu w trybie jednoosobowym. ",
   "vivecraft.messages.teleportdisabled": "Ograniczony ruch włączony (brak teleportacji)",
   "vivecraft.messages.teleportenabled": "Ograniczony ruch wyłączony (teleportacja dozwolona)",
-  "vivecraft.messages.walkupblocks": "Wchodź na bloki (RCTRL+B): %s",
+  "vivecraft.messages.walkupblocks": "Wchodź na bloki: %s",
   "vivecraft.messages.showaim": "Pokaż cel (RCTRL+RSHIFT): włączone",
   "_comment51": "vivecraft.messages.playerinertia=Player movement inertia (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "Tryb chodzenia zmieniony na: %s",

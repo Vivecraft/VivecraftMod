@@ -12,12 +12,15 @@ import org.vivecraft.client.gui.VivecraftClickEvent;
 @Mixin(Screen.class)
 public abstract class ScreenMixin {
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/ClickEvent;getAction()Lnet/minecraft/network/chat/ClickEvent$Action;", ordinal = 0), method = "handleComponentClicked(Lnet/minecraft/network/chat/Style;)Z", cancellable = true)
-    public void vivecraft$handleVivecraftClickEvents(Style style, CallbackInfoReturnable<Boolean> cir) {
-        if (style.getClickEvent() instanceof VivecraftClickEvent) {
-            VivecraftClickEvent.VivecraftAction action = ((VivecraftClickEvent) style.getClickEvent()).getVivecraftAction();
+    /**
+     * handles {@link VivecraftClickEvent}
+     */
+    @Inject(method = "handleComponentClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/ClickEvent;getAction()Lnet/minecraft/network/chat/ClickEvent$Action;", ordinal = 0), cancellable = true)
+    private void vivecraft$handleVivecraftClickEvents(Style style, CallbackInfoReturnable<Boolean> cir) {
+        if (style.getClickEvent() instanceof VivecraftClickEvent viveEvent) {
+            VivecraftClickEvent.VivecraftAction action = viveEvent.getVivecraftAction();
             if (action == VivecraftClickEvent.VivecraftAction.OPEN_SCREEN) {
-                Minecraft.getInstance().setScreen((Screen) ((VivecraftClickEvent) style.getClickEvent()).getVivecraftValue());
+                Minecraft.getInstance().setScreen((Screen) viveEvent.getVivecraftValue());
                 cir.setReturnValue(true);
             }
         }

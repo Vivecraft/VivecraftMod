@@ -15,9 +15,14 @@ import org.vivecraft.client_vr.VRState;
 @Mixin(DoorBlock.class)
 public class DoorBlockVRMixin {
 
-    @Inject(at = @At("HEAD"), method = "playSound")
-    public void vivecraft$hapticFeedbackOnClose(Entity entity, Level level, BlockPos blockPos, boolean opening, CallbackInfo ci) {
-        if (VRState.vrRunning && !opening && Minecraft.getInstance().player != null && Minecraft.getInstance().player.isAlive() && Minecraft.getInstance().player.blockPosition().distSqr(blockPos) < 25.0D) {
+    @Inject(method = "playSound", at = @At("HEAD"))
+    private void vivecraft$hapticFeedbackOnClose(
+        Entity source, Level level, BlockPos pos, boolean isOpening, CallbackInfo ci)
+    {
+        if (VRState.VR_RUNNING && !isOpening && Minecraft.getInstance().player != null &&
+            Minecraft.getInstance().player.isAlive() &&
+            Minecraft.getInstance().player.blockPosition().distSqr(pos) < 25.0D)
+        {
             ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
         }
     }

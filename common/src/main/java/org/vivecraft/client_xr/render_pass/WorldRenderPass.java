@@ -1,63 +1,59 @@
 package org.vivecraft.client_xr.render_pass;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.PostChain;
-import net.minecraft.resources.ResourceLocation;
-import org.vivecraft.client_vr.VRTextureTarget;
-
-import java.io.IOException;
+import org.vivecraft.client_vr.render.RenderPass;
 
 public class WorldRenderPass implements AutoCloseable {
 
-    private static final Minecraft mc = Minecraft.getInstance();
+    public static WorldRenderPass STEREO_XR;
+    public static WorldRenderPass CENTER;
+    public static WorldRenderPass MIXED_REALITY;
+    public static WorldRenderPass LEFT_TELESCOPE;
+    public static WorldRenderPass RIGHT_TELESCOPE;
+    public static WorldRenderPass CAMERA;
 
-    public static WorldRenderPass stereoXR;
-    public static WorldRenderPass center;
-    public static WorldRenderPass mixedReality;
-    public static WorldRenderPass leftTelescope;
-    public static WorldRenderPass rightTelescope;
-    public static WorldRenderPass camera;
+    public final RenderTarget target;
 
-
-    public final VRTextureTarget target;
-    public final PostChain transparencyChain;
-    public final PostChain outlineChain;
-    public PostChain postEffect = null;
-
-    public WorldRenderPass(VRTextureTarget target) throws IOException {
+    /**
+     * creates a WorldRenderPass that writes to {@code target}
+     *
+     * @param target RenderTarget for this pass
+     */
+    public WorldRenderPass(RenderTarget target) {
         this.target = target;
-        if (Minecraft.useShaderTransparency()) {
-            this.transparencyChain = createPostChain(new ResourceLocation("shaders/post/vrtransparency.json"), this.target);
-        } else {
-            this.transparencyChain = null;
-        }
-        this.outlineChain = createPostChain(new ResourceLocation("shaders/post/entity_outline.json"), this.target);
     }
 
-    public static PostChain createPostChain(ResourceLocation resourceLocation, RenderTarget target) throws IOException {
-        PostChain postchain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), target, resourceLocation);
-        postchain.resize(target.viewWidth, target.viewHeight);
-        return postchain;
+    /**
+     * @param pass RenderPass to get the WorldRenderPass for
+     * @return the WorldRenderPass object corresponding to the given {@code pass}
+     */
+    public static WorldRenderPass getByRenderPass(RenderPass pass) {
+        return switch (pass) {
+            case CENTER -> CENTER;
+            case THIRD -> MIXED_REALITY;
+            case SCOPEL -> LEFT_TELESCOPE;
+            case SCOPER -> RIGHT_TELESCOPE;
+            case CAMERA -> CAMERA;
+            case LEFT, RIGHT -> STEREO_XR;
+            default -> null;
+        };
     }
 
+    /**
+     * resizes the RenderTarget of this pass to the given size
+     *
+     * @param width  new width
+     * @param height new height
+     */
     public void resize(int width, int height) {
-        target.resize(width, height, Minecraft.ON_OSX);
-        outlineChain.resize(width, height);
-        if (transparencyChain != null) {
-            transparencyChain.resize(width, height);
-        }
-        if (postEffect != null) {
-            postEffect.resize(width, height);
-        }
+        this.target.resize(width, height);
     }
 
+    /**
+     * releases all buffers hold by this pass
+     */
     @Override
     public void close() {
         this.target.destroyBuffers();
-        if (this.transparencyChain != null) {
-            this.transparencyChain.close();
-        }
-        this.outlineChain.close();
     }
 }

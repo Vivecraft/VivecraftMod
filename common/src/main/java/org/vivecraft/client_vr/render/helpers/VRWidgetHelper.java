@@ -1,208 +1,249 @@
 package org.vivecraft.client_vr.render.helpers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.vivecraft.client.utils.Utils;
+import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.client_vr.MethodHolder;
 import org.vivecraft.client_vr.extensions.GameRendererExtension;
 import org.vivecraft.client_vr.gameplay.trackers.CameraTracker;
 import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.settings.VRHotkeys;
 import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.common.utils.MathUtils;
 
 import java.util.function.Function;
 
 public class VRWidgetHelper {
-    private static final RandomSource random = RandomSource.create();
-    public static boolean debug = false;
+    private static final Minecraft MC = Minecraft.getInstance();
+    private static final ClientDataHolderVR DATA_HOLDER = ClientDataHolderVR.getInstance();
 
+    private static final RandomSource RANDOM = RandomSource.create();
+    private static final ResourceLocation TRANSPARENT_TEXTURE = ResourceLocation.parse("vivecraft:transparent");
+    private static final ItemStackRenderState ITEM_STACK_RENDER_STATE = new ItemStackRenderState();
+    public static boolean DEBUG = false;
+
+    /**
+     * renders the third person camcorder
+     */
     public static void renderVRThirdPersonCamWidget() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        if (!DATA_HOLDER.vrSettings.mixedRealityRenderCameraModel) return;
+        if (DATA_HOLDER.currentPass == RenderPass.LEFT || DATA_HOLDER.currentPass == RenderPass.RIGHT) {
+            if ((DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY ||
+                DATA_HOLDER.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON
+            ) && (!DATA_HOLDER.vrSettings.displayMirrorUseScreenshotCamera || !DATA_HOLDER.cameraTracker.isVisible()))
+            {
+                float scale = 0.35F;
 
-        if (dataholder.vrSettings.mixedRealityRenderCameraModel) {
-            if ((dataholder.currentPass == RenderPass.LEFT || dataholder.currentPass == RenderPass.RIGHT) &&
-                (dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY || dataholder.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON) &&
-                (!ClientDataHolderVR.getInstance().vrSettings.displayMirrorUseScreenshotCamera || !ClientDataHolderVR.getInstance().cameraTracker.isVisible())) {
-                float f = 0.35F;
-
-                if (dataholder.interactTracker.isInCamera() && !VRHotkeys.isMovingThirdPersonCam()) {
-                    f *= 1.03F;
+                // bigger when interact ready
+                if (DATA_HOLDER.interactTracker.isInCamera() && !VRHotkeys.isMovingThirdPersonCam()) {
+                    scale *= 1.03F;
                 }
 
-                renderVRCameraWidget(-0.748F, -0.438F, -0.06F, f, RenderPass.THIRD, ClientDataHolderVR.thirdPersonCameraModel, ClientDataHolderVR.thirdPersonCameraDisplayModel, () ->
-                {
-                    dataholder.vrRenderer.framebufferMR.bindRead();
-                    RenderSystem.setShaderTexture(0, dataholder.vrRenderer.framebufferMR.getColorTextureId());
-                }, (face) ->
-                {
-                    if (face == Direction.NORTH) {
-                        return DisplayFace.MIRROR;
-                    } else {
-                        return face == Direction.SOUTH ? DisplayFace.NORMAL : DisplayFace.NONE;
-                    }
-                });
+                renderVRCameraWidget(-0.748F, -0.438F, -0.06F, scale, RenderPass.THIRD,
+                    ClientDataHolderVR.THIRD_PERSON_CAMERA_MODEL, ClientDataHolderVR.THIRD_PERSON_CAMERA_DISPLAY_MODEL,
+                    () -> {
+                        DATA_HOLDER.vrRenderer.framebufferMR.bindRead();
+                        RenderSystem.setShaderTexture(0, DATA_HOLDER.vrRenderer.framebufferMR.getColorTextureId());
+                    }, (face) -> {
+                        if (face == Direction.NORTH) {
+                            return DisplayFace.MIRROR;
+                        } else {
+                            return face == Direction.SOUTH ? DisplayFace.NORMAL : DisplayFace.NONE;
+                        }
+                    });
             }
         }
     }
 
+    /**
+     * renders the screenshot camera
+     */
     public static void renderVRHandheldCameraWidget() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
+        if (DATA_HOLDER.currentPass != RenderPass.CAMERA && DATA_HOLDER.cameraTracker.isVisible()) {
+            float scale = 0.25F;
 
-        if (dataholder.currentPass != RenderPass.CAMERA && dataholder.cameraTracker.isVisible()) {
-            float f = 0.25F;
-
-            if (dataholder.interactTracker.isInHandheldCamera() && !dataholder.cameraTracker.isMoving()) {
-                f *= 1.03F;
+            // bigger when interact ready
+            if (DATA_HOLDER.interactTracker.isInHandheldCamera() && !DATA_HOLDER.cameraTracker.isMoving()) {
+                scale *= 1.03F;
             }
 
-            renderVRCameraWidget(-0.5F, -0.25F, -0.22F, f, RenderPass.CAMERA, CameraTracker.cameraModel, CameraTracker.cameraDisplayModel, () ->
-            {
-                if (VREffectsHelper.getNearOpaqueBlock(dataholder.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(), ((GameRendererExtension) minecraft.gameRenderer).vivecraft$getMinClipDistance()) == null) {
-                    dataholder.vrRenderer.cameraFramebuffer.bindRead();
-                    RenderSystem.setShaderTexture(0, dataholder.vrRenderer.cameraFramebuffer.getColorTextureId());
-                } else {
-                    RenderSystem.setShaderTexture(0, new ResourceLocation("vivecraft:textures/black.png"));
-                }
-            }, (face) ->
-            {
-                return face == Direction.SOUTH ? DisplayFace.NORMAL : DisplayFace.NONE;
-            });
+            renderVRCameraWidget(-0.5F, -0.25F, -0.22F, scale, RenderPass.CAMERA,
+                CameraTracker.CAMERA_MODEL, CameraTracker.CAMERA_DISPLAY_MODEL, () -> {
+                    if (VREffectsHelper.getNearOpaqueBlock(
+                        DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(RenderPass.CAMERA).getPosition(),
+                        ((GameRendererExtension) MC.gameRenderer).vivecraft$getMinClipDistance()) == null)
+                    {
+                        DATA_HOLDER.vrRenderer.cameraFramebuffer.bindRead();
+                        RenderSystem.setShaderTexture(0, DATA_HOLDER.vrRenderer.cameraFramebuffer.getColorTextureId());
+                    } else {
+                        RenderSystem.setShaderTexture(0, RenderHelper.BLACK_TEXTURE);
+                    }
+                }, (face) -> face == Direction.SOUTH ? DisplayFace.NORMAL : DisplayFace.NONE);
         }
     }
 
-    public static void renderVRCameraWidget(float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, ModelResourceLocation model, ModelResourceLocation displayModel, Runnable displayBindFunc, Function<Direction, DisplayFace> displayFaceFunc) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientDataHolderVR dataholder = ClientDataHolderVR.getInstance();
-        PoseStack poseStack = RenderSystem.getModelViewStack();
-        poseStack.pushPose();
-        poseStack.setIdentity();
-        RenderHelper.applyVRModelView(dataholder.currentPass, poseStack);
+    /**
+     * renders a camera model with screen
+     *
+     * @param offsetX         model x offset
+     * @param offsetY         model y offset
+     * @param offsetZ         model z offset
+     * @param scale           size of the model
+     * @param renderPass      RenderPass this camera shows, the camera will be placed there
+     * @param model           camera model to render
+     * @param displayModel    model of the display that shows the camera view
+     * @param displayBindFunc function that binds the camera buffer, or something else
+     * @param displayFaceFunc function that specifies if the view should be mirrored, normal or not shown at all
+     */
+    public static void renderVRCameraWidget(
+        float offsetX, float offsetY, float offsetZ, float scale, RenderPass renderPass, ResourceLocation model,
+        ResourceLocation displayModel, Runnable displayBindFunc, Function<Direction, DisplayFace> displayFaceFunc)
+    {
 
-        Vec3 widgetPosition = dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
-        Vec3 eye = RenderHelper.getSmoothCameraPosition(dataholder.currentPass, dataholder.vrPlayer.vrdata_world_render);
-        Vec3 widgetOffset = widgetPosition.subtract(eye);
+        PoseStack poseStack = new PoseStack();
 
+        // model position relative to the view position
+        Vec3 widgetPosition = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition();
+        Vec3 eye = MC.gameRenderer.getMainCamera().getPosition();
+        Vector3f widgetOffset = MathUtils.subtractToVector3f(widgetPosition, eye);
+
+        // orient and scale model
         poseStack.translate(widgetOffset.x, widgetOffset.y, widgetOffset.z);
-        poseStack.mulPoseMatrix(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix());
-        scale = scale * dataholder.vrPlayer.vrdata_world_render.worldScale;
+
+        Matrix4f rotation = DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix();
+        poseStack.last().pose().mul(rotation);
+        poseStack.last().normal().mul(new Matrix3f(rotation));
+
+        scale = scale * DATA_HOLDER.vrPlayer.vrdata_world_render.worldScale;
         poseStack.scale(scale, scale, scale);
 
-        if (debug) {
-            MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
-            RenderHelper.renderDebugAxes(0, 0, 0, 0.08F);
-            MethodHolder.rotateDeg(poseStack, 180.0F, 0.0F, 1.0F, 0.0F);
+        // show orientation
+        if (DEBUG) {
+            DebugRenderHelper.renderLocalAxes(poseStack.last().pose());
         }
 
+        // apply model offset
         poseStack.translate(offsetX, offsetY, offsetZ);
-        RenderSystem.applyModelViewMatrix();
 
-        BlockPos blockpos = BlockPos.containing(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
-        int i = Utils.getCombinedLightWithMin(minecraft.level, blockpos, 0);
+        // lighting for the model
+        BlockPos blockpos = BlockPos.containing(
+            DATA_HOLDER.vrPlayer.vrdata_world_render.getEye(renderPass).getPosition());
+        int combinedLight = ClientUtils.getCombinedLightWithMin(MC.level, blockpos, 0);
 
         RenderSystem.enableDepthTest();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-        if (minecraft.level != null) {
-            RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
+
+        // we use block models, so the camera texture is on the regular block atlas
+        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
+        if (MC.level != null) {
+            RenderSystem.setShader(CoreShaders.RENDERTYPE_ENTITY_CUTOUT_NO_CULL);
         } else {
-            RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+            RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
         }
-        minecraft.gameRenderer.lightTexture().turnOnLightLayer();
+        MC.gameRenderer.lightTexture().turnOnLightLayer();
 
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+        // render camera model
+        BufferBuilder bufferBuilder;
 
-        PoseStack poseStack2 = new PoseStack();
-        RenderHelper.applyVRModelView(dataholder.currentPass, poseStack2);
-        poseStack2.last().pose().identity();
-        poseStack2.last().normal().mul(new Matrix3f(dataholder.vrPlayer.vrdata_world_render.getEye(renderPass).getMatrix().toMCMatrix()));
+        ITEM_STACK_RENDER_STATE.clear();
+        MC.getModelManager().getItemModel(model)
+            .update(ITEM_STACK_RENDER_STATE, ItemStack.EMPTY, MC.getItemModelResolver(), ItemDisplayContext.GROUND,
+                null, null, 0);
 
-        minecraft.getBlockRenderer().getModelRenderer().renderModel(poseStack2.last(), bufferbuilder, null, minecraft.getModelManager().getModel(model), 1.0F, 1.0F, 1.0F, i, OverlayTexture.NO_OVERLAY);
-        tesselator.end();
+        if (!ITEM_STACK_RENDER_STATE.isEmpty() && ITEM_STACK_RENDER_STATE.layers[0].model != null) {
+            bufferBuilder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+            MC.getBlockRenderer().getModelRenderer()
+                .renderModel(poseStack.last(), bufferBuilder, null, ITEM_STACK_RENDER_STATE.layers[0].model, 1.0F, 1.0F,
+                    1.0F, combinedLight, OverlayTexture.NO_OVERLAY);
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        }
 
+        // render camera display
         RenderSystem.disableBlend();
         displayBindFunc.run();
-        RenderSystem.setShader(GameRenderer::getRendertypeEntitySolidShader);
+        RenderSystem.setShader(CoreShaders.RENDERTYPE_ENTITY_SOLID);
 
-        BufferBuilder bufferbuilder1 = tesselator.getBuilder();
-        bufferbuilder1.begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+        ITEM_STACK_RENDER_STATE.clear();
+        MC.getModelManager().getItemModel(displayModel)
+            .update(ITEM_STACK_RENDER_STATE, ItemStack.EMPTY, MC.getItemModelResolver(), ItemDisplayContext.GROUND,
+                null, null, 0);
 
-        for (BakedQuad bakedquad : minecraft.getModelManager().getModel(displayModel).getQuads(null, null, random)) {
-            if (displayFaceFunc.apply(bakedquad.getDirection()) != DisplayFace.NONE && bakedquad.getSprite().contents().name().equals(new ResourceLocation("vivecraft:transparent"))) {
-                int[] vertexList = bakedquad.getVertices();
-                boolean flag = displayFaceFunc.apply(bakedquad.getDirection()) == DisplayFace.MIRROR;
-                // make normals point up, so they are always bright
-                // TODO: might break with shaders?
-                Vector3f normal = poseStack.last().normal().transform(new Vector3f(0.0F, 1.0F, 0.0F));
-                int j = LightTexture.pack(15, 15);
-                int step = vertexList.length / 4;
-                bufferbuilder1.vertex(
-                        Float.intBitsToFloat(vertexList[0]),
-                        Float.intBitsToFloat(vertexList[1]),
-                        Float.intBitsToFloat(vertexList[2]))
-                    .color(1.0F, 1.0F, 1.0F, 1.0F)
-                    .uv(flag ? 1.0F : 0.0F, 1.0F)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY)
-                    .uv2(j)
-                    .normal(normal.x, normal.y, normal.z)
-                    .endVertex();
-                bufferbuilder1.vertex(
-                        Float.intBitsToFloat(vertexList[step]),
-                        Float.intBitsToFloat(vertexList[step + 1]),
-                        Float.intBitsToFloat(vertexList[step + 2]))
-                    .color(1.0F, 1.0F, 1.0F, 1.0F)
-                    .uv(flag ? 1.0F : 0.0F, 0.0F)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY)
-                    .uv2(j)
-                    .normal(normal.x, normal.y, normal.z).endVertex();
-                bufferbuilder1.vertex(
-                        Float.intBitsToFloat(vertexList[step * 2]),
-                        Float.intBitsToFloat(vertexList[step * 2 + 1]),
-                        Float.intBitsToFloat(vertexList[step * 2 + 2]))
-                    .color(1.0F, 1.0F, 1.0F, 1.0F)
-                    .uv(flag ? 0.0F : 1.0F, 0.0F)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY)
-                    .uv2(j)
-                    .normal(normal.x, normal.y, normal.z).endVertex();
-                bufferbuilder1.vertex(
-                        Float.intBitsToFloat(vertexList[step * 3]),
-                        Float.intBitsToFloat(vertexList[step * 3 + 1]),
-                        Float.intBitsToFloat(vertexList[step * 3 + 2]))
-                    .color(1.0F, 1.0F, 1.0F, 1.0F)
-                    .uv(flag ? 0.0F : 1.0F, 1.0F)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY)
-                    .uv2(j)
-                    .normal(normal.x, normal.y, normal.z).endVertex();
+        if (!ITEM_STACK_RENDER_STATE.isEmpty() && ITEM_STACK_RENDER_STATE.layers[0].model != null) {
+            bufferBuilder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
+
+            // need to render this manually, because the uvs in the model are for the atlas texture, and not fullscreen
+            for (BakedQuad bakedquad : ITEM_STACK_RENDER_STATE.layers[0].model.getQuads(null, null, RANDOM)) {
+                if (displayFaceFunc.apply(bakedquad.getDirection()) != DisplayFace.NONE &&
+                    bakedquad.getSprite().contents().name().equals(TRANSPARENT_TEXTURE))
+                {
+                    int[] vertexList = bakedquad.getVertices();
+                    boolean mirrored = displayFaceFunc.apply(bakedquad.getDirection()) == DisplayFace.MIRROR;
+                    int step = vertexList.length / 4;
+                    bufferBuilder.addVertex(
+                            poseStack.last().pose(),
+                            Float.intBitsToFloat(vertexList[0]),
+                            Float.intBitsToFloat(vertexList[1]),
+                            Float.intBitsToFloat(vertexList[2]))
+                        .setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                        .setUv(mirrored ? 1.0F : 0.0F, 1.0F)
+                        .setOverlay(OverlayTexture.NO_OVERLAY)
+                        .setLight(LightTexture.FULL_BRIGHT)
+                        .setNormal(0.0F, 1.0F, 0.0F);
+                    bufferBuilder.addVertex(
+                            poseStack.last().pose(),
+                            Float.intBitsToFloat(vertexList[step]),
+                            Float.intBitsToFloat(vertexList[step + 1]),
+                            Float.intBitsToFloat(vertexList[step + 2]))
+                        .setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                        .setUv(mirrored ? 1.0F : 0.0F, 0.0F)
+                        .setOverlay(OverlayTexture.NO_OVERLAY)
+                        .setLight(LightTexture.FULL_BRIGHT)
+                        .setNormal(0.0F, 1.0F, 0.0F);
+                    bufferBuilder.addVertex(
+                            poseStack.last().pose(),
+                            Float.intBitsToFloat(vertexList[step * 2]),
+                            Float.intBitsToFloat(vertexList[step * 2 + 1]),
+                            Float.intBitsToFloat(vertexList[step * 2 + 2]))
+                        .setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                        .setUv(mirrored ? 0.0F : 1.0F, 0.0F)
+                        .setOverlay(OverlayTexture.NO_OVERLAY)
+                        .setLight(LightTexture.FULL_BRIGHT)
+                        .setNormal(0.0F, 1.0F, 0.0F);
+                    bufferBuilder.addVertex(
+                            poseStack.last().pose(),
+                            Float.intBitsToFloat(vertexList[step * 3]),
+                            Float.intBitsToFloat(vertexList[step * 3 + 1]),
+                            Float.intBitsToFloat(vertexList[step * 3 + 2]))
+                        .setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                        .setUv(mirrored ? 0.0F : 1.0F, 1.0F)
+                        .setOverlay(OverlayTexture.NO_OVERLAY)
+                        .setLight(LightTexture.FULL_BRIGHT)
+                        .setNormal(0.0F, 1.0F, 0.0F);
+                }
             }
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
         }
 
-        tesselator.end();
-        minecraft.gameRenderer.lightTexture().turnOffLightLayer();
+        MC.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.enableBlend();
-        poseStack.popPose();
-        RenderSystem.applyModelViewMatrix();
     }
 
     public enum DisplayFace {

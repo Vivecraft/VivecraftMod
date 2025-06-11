@@ -1,50 +1,43 @@
 package org.vivecraft.neoforge.event;
 
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.vivecraft.client.network.ClientNetworking;
-import org.vivecraft.common.network.CommonNetworkHelper;
-import org.vivecraft.common.network.packets.VivecraftDataPacket;
+import org.vivecraft.common.network.packet.c2s.VivecraftPayloadC2S;
+import org.vivecraft.common.network.packet.s2c.VivecraftPayloadS2C;
 import org.vivecraft.neoforge.Vivecraft;
+import org.vivecraft.neoforge.packet.VivecraftPayloadBiDir;
 import org.vivecraft.server.ServerNetworking;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = Vivecraft.MODID)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = Vivecraft.MODID)
 public class CommonModEvents {
 
     @SubscribeEvent
-    public static void register(RegisterPayloadHandlerEvent event) {
-        final IPayloadRegistrar registrar = event.registrar("vivecraft")
-            .optional();
-        registrar.play(CommonNetworkHelper.CHANNEL,
-            VivecraftDataPacket::new,
+    public static void register(RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar("vivecraft").optional();
+
+        registrar.playBidirectional(VivecraftPayloadBiDir.TYPE,
+            VivecraftPayloadBiDir.CODEC,
             (packet, context) -> {
                 if (context.flow().isClientbound()) {
-                    handleClientVivePacket(packet, context);
+                    handleClientVivePacket(packet.getS2CPayload(), context);
                 } else {
-                    handleServerVivePacket(packet, context);
+                    handleServerVivePacket(packet.getC2SPayload(), context);
                 }
             });
     }
 
-    public static void handleClientVivePacket(VivecraftDataPacket packet, IPayloadContext context) {
-        context.workHandler().execute(() -> {
-            FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(packet.buffer());
-            ClientNetworking.handlePacket(packet.packetid(), buffer);
-            buffer.release();
-        });
+    public static void handleClientVivePacket(VivecraftPayloadS2C packet, IPayloadContext context) {
+        context.enqueueWork(() -> ClientNetworking.handlePacket(packet));
     }
 
-    public static void handleServerVivePacket(VivecraftDataPacket packet, IPayloadContext context) {
-        context.workHandler().execute(() -> {
-            FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer()).writeBytes(packet.buffer());
-            ServerNetworking.handlePacket(packet.packetid(), buffer, (ServerPlayer) context.player().get(), p -> context.replyHandler().send(p.payload()));
-            buffer.release();
-        });
+    public static void handleServerVivePacket(VivecraftPayloadC2S packet, IPayloadContext context) {
+        context.enqueueWork(
+            () -> ServerNetworking.handlePacket(packet, (ServerPlayer) context.player(),
+                p -> context.reply(new VivecraftPayloadBiDir(p))));
     }
 }

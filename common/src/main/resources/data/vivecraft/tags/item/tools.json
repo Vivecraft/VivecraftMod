@@ -1,0 +1,68 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#forge:tools/axes",
+      "required": false
+    },
+    {
+      "id": "#c:axes",
+      "required": false
+    },
+    {
+      "id": "#forge:tools/shovels",
+      "required": false
+    },
+    {
+      "id": "#c:shovels",
+      "required": false
+    },
+
+    "#vivecraft:hoes",
+    "#vivecraft:scythes",
+    "#vivecraft:fishing_rods",
+    "#vivecraft:brushes",
+    "#vivecraft:rods",
+
+    {
+      "id": "#forge:tools/pickaxes",
+      "required": false
+    },
+    {
+      "id": "#c:pickaxes",
+      "required": false
+    },
+    {
+      "id": "#forge:shears",
+      "required": false
+    },
+    {
+      "id": "#c:shears",
+      "required": false
+    },
+    {
+      "id": "#c:tools/shear",
+      "required": false
+    },
+
+    "#minecraft:arrows",
+    "#minecraft:shovels",
+    "#minecraft:axes",
+    "#minecraft:pickaxes",
+
+    "minecraft:flint_and_steel",
+
+    {
+      "id": "#tconstruct:modifiable",
+      "required": false
+    },
+    {
+      "id": "tetra:modular_single",
+      "required": false
+    },
+    {
+      "id": "tetra:modular_double",
+      "required": false
+    }
+  ]
+}

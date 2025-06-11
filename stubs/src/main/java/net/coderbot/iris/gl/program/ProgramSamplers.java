@@ -1,4 +1,3 @@
 package net.coderbot.iris.gl.program;
 
-public interface ProgramSamplers {
-}
+public interface ProgramSamplers {}

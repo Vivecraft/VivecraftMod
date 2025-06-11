@@ -406,7 +406,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "WARNING: Saving menu world using a client world. Data may be incomplete. It is recommended to save menu worlds in singleplayer.",
   "vivecraft.messages.teleportdisabled": "Restricted movement enabled (no teleporting)",
   "vivecraft.messages.teleportenabled": "Restricted movement disabled (teleporting allowed)",
-  "vivecraft.messages.walkupblocks": "Walk up blocks (RCTRL+B): %s",
+  "vivecraft.messages.walkupblocks": "Walk up blocks: %s",
   "vivecraft.messages.showaim": "Show aim (RCTRL+RSHIFT): enabled",
   "_comment54": "vivecraft.messages.playerinertia=Player movement inertia (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "Movement mode switched to: %s",

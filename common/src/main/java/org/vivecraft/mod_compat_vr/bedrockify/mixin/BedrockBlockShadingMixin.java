@@ -13,13 +13,17 @@ import org.vivecraft.client_vr.menuworlds.MenuWorldRenderer;
 @Pseudo
 @Mixin(targets = "me.juancarloscp52.bedrockify.client.features.bedrockShading.BedrockBlockShading")
 public class BedrockBlockShadingMixin {
-    @Inject(at = @At("HEAD"), method = "getBlockShade", cancellable = true, remap = false)
-    private void vivecraft$MenuNetherBlockShade(Direction direction, CallbackInfoReturnable<Float> cir) {
+    /**
+     * menuworld fix
+     */
+    @Inject(method = "getBlockShade", at = @At("HEAD"), cancellable = true, remap = false)
+    private void vivecraft$MenuWorldNetherBlockShade(Direction direction, CallbackInfoReturnable<Float> cir) {
         if (Minecraft.getInstance().player == null && direction == Direction.DOWN) {
             MenuWorldRenderer menuWorldRenderer = ClientDataHolderVR.getInstance().menuWorldRenderer;
             if (menuWorldRenderer != null && menuWorldRenderer.getLevel() != null) {
                 // change brightness based on nether or not
-                cir.setReturnValue(menuWorldRenderer.getLevel().getDimensionReaderInfo().constantAmbientLight() ? 0.9f : 0.87f);
+                cir.setReturnValue(
+                    menuWorldRenderer.getLevel().getDimensionReaderInfo().constantAmbientLight() ? 0.9f : 0.87f);
             }
         }
     }

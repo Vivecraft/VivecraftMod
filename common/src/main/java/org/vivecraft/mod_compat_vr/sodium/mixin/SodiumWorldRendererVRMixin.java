@@ -7,7 +7,9 @@ import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
 
-
+/**
+ * always update chunk graph in VR to prevent missing chunks
+ */
 @Pseudo
 @Mixin(targets = {
     "me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer",
@@ -16,16 +18,14 @@ import org.vivecraft.client_xr.render_pass.RenderPassType;
 public class SodiumWorldRendererVRMixin {
 
     @Group(name = "forceChunkUpdate", min = 1, max = 1)
-    @ModifyVariable(at = @At("STORE"), ordinal = 1, method = "updateChunks", remap = false, expect = 0)
-    public boolean vivecraft$RenderUpdate(boolean b) {
-        // always update chunk graph in VR to prevent missing chunks
-        return !RenderPassType.isVanilla() || b;
+    @ModifyVariable(method = "updateChunks", at = @At("STORE"), ordinal = 1, remap = false, expect = 0)
+    private boolean vivecraft$RenderUpdate(boolean dirty) {
+        return !RenderPassType.isVanilla() || dirty;
     }
 
     @Group(name = "forceChunkUpdate", min = 1, max = 1)
-    @ModifyVariable(at = @At("STORE"), ordinal = 2, method = "setupTerrain", remap = false, expect = 0)
-    public boolean vivecraft$RenderUpdateSodium5(boolean b) {
-        // always update chunk graph in VR to prevent missing chunks
-        return !RenderPassType.isVanilla() || b;
+    @ModifyVariable(method = "setupTerrain", at = @At("STORE"), ordinal = 2, remap = false, expect = 0)
+    private boolean vivecraft$RenderUpdateSodium5(boolean dirty) {
+        return !RenderPassType.isVanilla() || dirty;
     }
 }

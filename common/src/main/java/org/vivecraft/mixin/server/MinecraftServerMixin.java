@@ -20,7 +20,7 @@ import java.util.UUID;
 public class MinecraftServerMixin implements MinecraftServerExt {
 
     @Unique
-    Map<UUID, ServerVivePlayer> vivecraft$playersWithVivecraft = new HashMap<>();
+    private final Map<UUID, ServerVivePlayer> vivecraft$playersWithVivecraft = new HashMap<>();
 
     @Override
     @Unique
@@ -28,11 +28,12 @@ public class MinecraftServerMixin implements MinecraftServerExt {
         return this.vivecraft$playersWithVivecraft;
     }
 
-    @Inject(at = @At("HEAD"), method = "stopServer")
+    @Inject(method = "stopServer", at = @At("HEAD"))
     private void vivecraft$stopExecutor(CallbackInfo ci) {
         if (Xplat.isDedicatedServer()) {
-            ServerNetworking.LOGGER.info("shutting down vivecraft scheduler");
-            ServerUtil.scheduler.shutdownNow();
+            // we need to manually shut this down, because the ShutdownHook sometimes fails to trigger
+            ServerNetworking.LOGGER.info("Vivecraft: shutting down vivecraft scheduler");
+            ServerUtil.SCHEDULER.shutdownNow();
         }
     }
 }

@@ -2,13 +2,12 @@ package org.vivecraft.client_vr.gameplay.trackers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.world.entity.Pose;
-import org.vivecraft.client.Xplat;
 import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client.utils.ClientUtils;
+import org.vivecraft.client.utils.ScaleHelper;
 import org.vivecraft.client_vr.ClientDataHolderVR;
-import org.vivecraft.common.network.CommonNetworkHelper;
-import org.vivecraft.mod_compat_vr.pehkui.PehkuiHelper;
+import org.vivecraft.common.network.packet.c2s.CrawlPayloadC2S;
 
 public class CrawlTracker extends Tracker {
     private boolean wasCrawling;
@@ -19,12 +18,13 @@ public class CrawlTracker extends Tracker {
         super(mc, dh);
     }
 
+    @Override
     public boolean isActive(LocalPlayer player) {
         if (this.dh.vrSettings.seated) {
             return false;
         } else if (!this.dh.vrSettings.allowCrawling) {
             return false;
-        } else if (!ClientNetworking.serverAllowsCrawling) {
+        } else if (!ClientNetworking.SERVER_ALLOWS_CRAWLING) {
             return false;
         } else if (!player.isAlive()) {
             return false;
@@ -37,18 +37,19 @@ public class CrawlTracker extends Tracker {
         }
     }
 
+    @Override
     public void reset(LocalPlayer player) {
         this.crawling = false;
         this.crawlsteresis = false;
         this.updateState(player);
     }
 
+    @Override
     public void doProcess(LocalPlayer player) {
-        double scaleMultiplier = 1.0;
-        if (Xplat.isModLoaded("pehkui")) {
-            scaleMultiplier /= PehkuiHelper.getPlayerScale(player, mc.getFrameTime());
-        }
-        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * (double) this.dh.vrPlayer.worldScale * scaleMultiplier + (double) 0.1F < (double) this.dh.vrSettings.crawlThreshold;
+        float scaledWorldScale = this.dh.vrPlayer.worldScale /
+            ScaleHelper.getEntityEyeHeightScale(player, ClientUtils.getCurrentPartialTick());
+        this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * scaledWorldScale + 0.1F <
+            this.dh.vrSettings.crawlThreshold;
         this.updateState(player);
     }
 
@@ -59,12 +60,8 @@ public class CrawlTracker extends Tracker {
                 this.crawlsteresis = true;
             }
 
-            if (ClientNetworking.serverAllowsCrawling) {
-                ServerboundCustomPayloadPacket serverboundcustompayloadpacket = ClientNetworking.getVivecraftClientPacket(CommonNetworkHelper.PacketDiscriminators.CRAWL, new byte[]{(byte) (this.crawling ? 1 : 0)});
-
-                if (this.mc.getConnection() != null) {
-                    this.mc.getConnection().send(serverboundcustompayloadpacket);
-                }
+            if (ClientNetworking.SERVER_ALLOWS_CRAWLING) {
+                ClientNetworking.sendServerPacket(new CrawlPayloadC2S(this.crawling));
             }
 
             this.wasCrawling = this.crawling;

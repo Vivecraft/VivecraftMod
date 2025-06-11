@@ -1,0 +1,104 @@
+{
+  "targets": {
+    "final": {}
+  },
+  "passes": [
+    {
+      "program": "vivecraft:post/vrtransparency",
+      "inputs": [
+        {
+          "sampler_name": "Main",
+          "target": "minecraft:main"
+        },
+        {
+          "sampler_name": "MainDepth",
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Translucent",
+          "target": "minecraft:translucent"
+        },
+        {
+          "sampler_name": "TranslucentDepth",
+          "target": "minecraft:translucent",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "ItemEntity",
+          "target": "minecraft:item_entity"
+        },
+        {
+          "sampler_name": "ItemEntityDepth",
+          "target": "minecraft:item_entity",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Particles",
+          "target": "minecraft:particles"
+        },
+        {
+          "sampler_name": "ParticlesDepth",
+          "target": "minecraft:particles",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Clouds",
+          "target": "minecraft:clouds"
+        },
+        {
+          "sampler_name": "CloudsDepth",
+          "target": "minecraft:clouds",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Weather",
+          "target": "minecraft:weather"
+        },
+        {
+          "sampler_name": "WeatherDepth",
+          "target": "minecraft:weather",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "VrOccluded",
+          "target": "vivecraft:vroccluded"
+        },
+        {
+          "sampler_name": "VrOccludedDepth",
+          "target": "vivecraft:vroccluded",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "VrUnoccluded",
+          "target": "vivecraft:vrunoccluded"
+        },
+        {
+          "sampler_name": "VrUnoccludedDepth",
+          "target": "vivecraft:vrunoccluded",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "VrHands",
+          "target": "vivecraft:vrhands"
+        },
+        {
+          "sampler_name": "VrHandsDepth",
+          "target": "vivecraft:vrhands",
+          "use_depth_buffer": true
+        }
+      ],
+      "output": "final"
+    },
+    {
+      "program": "minecraft:post/blit",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "final"
+        }
+      ],
+      "output": "minecraft:main"
+    }
+  ]
+}

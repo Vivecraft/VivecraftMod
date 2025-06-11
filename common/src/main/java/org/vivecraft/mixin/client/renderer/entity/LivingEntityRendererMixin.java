@@ -1,43 +1,25 @@
 package org.vivecraft.mixin.client.renderer.entity;
 
-import net.minecraft.client.Minecraft;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.vivecraft.client.extensions.EntityRenderDispatcherExtension;
-import org.vivecraft.client.extensions.RenderLayerExtension;
-import org.vivecraft.client.utils.RenderLayerTypes;
-import org.vivecraft.client_vr.settings.VRSettings;
+import org.vivecraft.client.ClientVRPlayers;
+import org.vivecraft.client.extensions.EntityRenderStateExtension;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-import static org.vivecraft.client.utils.RenderLayerTypes.LayerType.*;
-
-/**
- * A hacky way of copying regular PlayerRenderer layers to the VRPlayerRenderers
- * an alternative would be to add the VRPlayerRenderers to the skin model list,
- * so mods could add it manually, but some mods hardcode only the slim/default model,
- * and that would mean the VRPlayerRenderers would be missing those layers completely
- */
 @Mixin(LivingEntityRenderer.class)
-public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> {
+public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends EntityRenderer<T, S> {
 
     @Shadow
     protected M model;
@@ -46,105 +28,32 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
         super(context);
     }
 
-    @SuppressWarnings("unchecked")
-    @Inject(at = @At("HEAD"), method = "addLayer")
-    public void vivecraft$copyLayer(RenderLayer<T, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {
-        // check if the layer gets added from the PlayerRenderer, we don't want to copy, if we add it to the VRPlayerRenderer
-        // also check that the VRPlayerRenderers were created, this method also gets called in the constructor,
-        // those default Layers already are added to the VRPlayerRenderer there
-        EntityRenderDispatcherExtension renderExtension = (EntityRenderDispatcherExtension) entityRenderDispatcher;
-        if ((Object) this.getClass() == PlayerRenderer.class && !renderExtension.vivecraft$getSkinMapVRSeated().isEmpty()) {
+    @Inject(method = "addLayer", at = @At("HEAD"))
+    protected void vivecraft$onAddLayer(RenderLayer<S, M> renderLayer, CallbackInfoReturnable<Boolean> cir) {}
 
-            // try to find a suitable constructor, so we can create a new Object without issues
-            Constructor<?> constructor = null;
-            RenderLayerTypes.LayerType type = OTHER;
-            for (Constructor<?> c : renderLayer.getClass().getConstructors()) {
-                if (c.getParameterCount() == 1
-                    && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])) {
-                    constructor = c;
-                    type = PARENT_ONLY;
-                    break;
-                } else if (c.getParameterCount() == 2
-                    && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])
-                    && EntityModelSet.class.isAssignableFrom(c.getParameterTypes()[1])) {
-                    constructor = c;
-                    type = PARENT_MODELSET;
-                } else if (c.getParameterCount() == 3
-                    && RenderLayerParent.class.isAssignableFrom(c.getParameterTypes()[0])
-                    && HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[1])
-                    && HumanoidModel.class.isAssignableFrom(c.getParameterTypes()[2])
-                    && renderLayer instanceof HumanoidArmorLayer) {
-                    constructor = c;
-                    type = PARENT_MODEL_MODEL;
-                }
+    @Inject(method = "render(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V", shift = At.Shift.AFTER))
+    private void vivecraft$vrPlayerHeightScale(
+        CallbackInfo ci, @Local(argsOnly = true) LivingEntityRenderState renderState,
+        @Local(argsOnly = true) PoseStack poseStack)
+    {
+        // PoseStack is already pushed before this
+        // need to do this here, because doing it in the VRPlayerRenderer doesn't work,
+        // because forge/neoforge override the render method, and arch can't link that correctly
+        ClientVRPlayers.RotInfo rotInfo = ((EntityRenderStateExtension) renderState).vivecraft$getRotInfo();
+        if (rotInfo != null) {
+            float scale = rotInfo.heightScale;
+            if (((EntityRenderStateExtension) renderState).vivecraft$isFirstPersonPlayer()) {
+                // remove entity scale, since the entity is already scaled by that before
+                scale *= rotInfo.worldScale / ((EntityRenderStateExtension) renderState).vivecraft$getTotalScale();
             }
 
-            // if no suitable constructor was found, use do a basic Object.clone call, and replace the parent of the copy
-            if (constructor == null) {
-                // do a hacky clone, and replace parent
-                if (((PlayerModel<?>) model).slim &&
-                    !renderExtension.vivecraft$getSkinMapVRSeated().get("slim").hasLayerType(renderLayer)) {
-                    vivecraft$addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVRSeated().get("slim"));
-                    vivecraft$addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVR().get("slim"));
-                } else if (!renderExtension.vivecraft$getSkinMapVRSeated().get("default").hasLayerType(renderLayer)) {
-                    vivecraft$addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVRSeated().get("default"));
-                    vivecraft$addLayerClone(renderLayer, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVR().get("default"));
-                }
-            } else {
-                // make a new instance with the vr model as parent
-                if (((PlayerModel<?>) model).slim &&
-                    !renderExtension.vivecraft$getSkinMapVRSeated().get("slim").hasLayerType(renderLayer)) {
-                    vivecraft$addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVRSeated().get("slim"));
-                    vivecraft$addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVR().get("slim"));
-                } else if (!renderExtension.vivecraft$getSkinMapVRSeated().get("default").hasLayerType(renderLayer)) {
-                    vivecraft$addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVRSeated().get("default"));
-                    vivecraft$addLayerConstructor(constructor, type, (LivingEntityRenderer<T, M>) renderExtension.vivecraft$getSkinMapVR().get("default"));
-                }
+            if (renderState.isAutoSpinAttack) {
+                // offset player to head
+                float offset = renderState.xRot / 90F * 0.2F;
+                poseStack.translate(0, rotInfo.headPos.y() + offset, 0);
             }
-        }
-    }
 
-    /**
-     * does a basic Object.clone() copy
-     */
-    @SuppressWarnings("unchecked")
-    @Unique
-    private void vivecraft$addLayerClone(RenderLayer<T, M> renderLayer, LivingEntityRenderer<T, M> target) {
-        try {
-            VRSettings.logger.warn("Copying layer: {} with Object.copy, this could cause issues", renderLayer.getClass());
-            RenderLayer<T, M> newLayer = (RenderLayer<T, M>) ((RenderLayerExtension) renderLayer).clone();
-            newLayer.renderer = target;
-            target.addLayer(newLayer);
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * uses the provided constructor, to create a new RenderLayer Instance
-     */
-    @SuppressWarnings("unchecked")
-    @Unique
-    private void vivecraft$addLayerConstructor(Constructor<?> constructor, RenderLayerTypes.LayerType type, LivingEntityRenderer<T, M> target) {
-        try {
-            switch (type) {
-                case PARENT_ONLY -> target.addLayer((RenderLayer<T, M>) constructor.newInstance(target));
-                case PARENT_MODELSET ->
-                    target.addLayer((RenderLayer<T, M>) constructor.newInstance(target, Minecraft.getInstance().getEntityModels()));
-                case PARENT_MODEL_MODEL -> {
-                    if (((PlayerModel<?>) model).slim) {
-                        target.addLayer((RenderLayer<T, M>) constructor.newInstance(target,
-                            new HumanoidModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_INNER_ARMOR)),
-                            new HumanoidModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM_OUTER_ARMOR))));
-                    } else {
-                        target.addLayer((RenderLayer<T, M>) constructor.newInstance(target,
-                            new HumanoidModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
-                            new HumanoidModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR))));
-                    }
-                }
-            }
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            poseStack.scale(scale, scale, scale);
         }
     }
 }

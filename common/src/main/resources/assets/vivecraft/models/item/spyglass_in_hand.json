@@ -68,10 +68,6 @@
     "ground": {
       "rotation": [90, 0, 0]
     },
-    "gui": {
-      "rotation": [-67.5, 0, 45],
-      "scale": [1.5, 1.5, 1.5]
-    },
     "head": {
       "rotation": [90, 0, 0],
       "translation": [0, 0, -16],

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "E E",
+    "S S"
+  ],
+  "key": {
+    "E": "minecraft:spider_eye",
+    "S": "minecraft:shears"
+  },
+  "result": {
+    "id": "minecraft:shears",
+    "count": 1,
+    "components": {
+      "minecraft:unbreakable": {
+        "show_in_tooltip": false
+      },
+      "minecraft:custom_name": "{\"type\": \"translatable\", \"translate\": \"vivecraft.item.climbclaws\", \"fallback\": \"Climb Claws\"}"
+    }
+  }
+}

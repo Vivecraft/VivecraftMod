@@ -406,7 +406,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "§cATTENTION: Sauvegarde du monde utilisant un monde client. Les données pourraient être incomplètes. Il est recommandé de sauvegarder les mondes pr. le menu principal en solo.",
   "vivecraft.messages.teleportdisabled": "Déplacement restreint activé. (Téléportation interdite)",
   "vivecraft.messages.teleportenabled": "Déplacement non restreint. (Téléportation autorisée)",
-  "vivecraft.messages.walkupblocks": "Marchez sur les blocs (Ctrl droit + B): %s",
+  "vivecraft.messages.walkupblocks": "Marchez sur les blocs: %s",
   "vivecraft.messages.showaim": "Montrer la visée (Ctrl Droit+Maj. droit): activé",
   "_comment51": "vivecraft.messages.playerinertia=Player movement inertia (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "Mode de déplacement changé a: %s",

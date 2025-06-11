@@ -13,16 +13,19 @@ import java.lang.reflect.Method;
 
 public class SodiumHelper {
 
+    private static boolean INITIALIZED = false;
+    private static boolean INIT_FAILED = false;
+
     // use reflection, because sodium changed package in 0.6
-    private static Method SpriteUtil_MarkSpriteActive;
+    private static Method SpriteUtil_markSpriteActive;
 
-    private static boolean hasModelCuboidQuads;
-    private static boolean hasModelCuboidFloats;
-    private static boolean hasCubeModelCuboid;
-    private static Field ModelCuboid_Sodium$cuboids;
-    private static Field ModelCuboid_Quads;
+    private static boolean HAS_MODELCUBOID_QUADS;
+    private static boolean HAS_MODELCUBOID_FLOATS;
+    private static boolean HAS_MODELCUBOID_CUBES;
+    private static Field ModelPart_sodium$cuboids;
+    private static Field ModelCuboid_quads;
 
-    private static Field Cube_Sodium$cuboid;
+    private static Field Cube_sodium$cuboid;
 
     // quad uvs
     private static Field ModelCuboid_u0;
@@ -35,15 +38,17 @@ public class SodiumHelper {
     private static Field ModelCuboid_v1;
     private static Field ModelCuboid_v2;
 
-    private static Field ModelCuboid$Quad_Textures;
-
-    private static boolean initialized = false;
-    private static boolean initFailed = false;
+    private static Field ModelCuboid$Quad_textures;
 
     public static boolean isLoaded() {
         return Xplat.isModLoaded("sodium") || Xplat.isModLoaded("rubidium") || Xplat.isModLoaded("embeddium");
     }
 
+    /**
+     * sodium does some mixins into BlockRenderer, calling it multiple times on first load causes issues with mixin applying multiple times
+     *
+     * @return if blockmodels shouldn't be built in parallel immediately
+     */
     public static boolean hasIssuesWithParallelBlockBuilding() {
         try {
             Class.forName("me.jellysquid.mods.sodium.client.render.immediate.model.BakedModelEncoder");
@@ -53,43 +58,54 @@ public class SodiumHelper {
         }
     }
 
+    /**
+     * marks the given Sprite to be animated in this frame
+     *
+     * @param sprite sprite to mark
+     */
     public static void markTextureAsActive(TextureAtlasSprite sprite) {
         if (init()) {
             try {
                 // SpriteUtil.markSpriteActive(sprite);
-                SpriteUtil_MarkSpriteActive.invoke(null, sprite);
+                SpriteUtil_markSpriteActive.invoke(null, sprite);
             } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                VRSettings.LOGGER.error("Vivecraft: couldn't set Sodium sprite as animated:", e);
             }
         }
     }
 
-// NotFixed
-//    public static void vignette(boolean b) {
-//        SodiumClientMod.options().quality.enableVignette = b;
-//    }
-
+    /**
+     * copies vertex info from one ModelPart face to another
+     *
+     * @param source     source ModelPart to copy from
+     * @param dest       target ModelPart to copy to
+     * @param sourcePoly source face to copy from
+     * @param destPoly   target face to copy to
+     */
     public static void copyModelCuboidUV(ModelPart source, ModelPart dest, int sourcePoly, int destPoly) {
         if (init()) {
-            if (hasModelCuboidQuads) {
-                try {
-                    Object sourceQuad = ((Object[]) ModelCuboid_Quads.get(((Object[]) ModelCuboid_Sodium$cuboids.get(source))[0]))[sourcePoly];
-                    Object destQuad = ((Object[]) ModelCuboid_Quads.get(((Object[]) ModelCuboid_Sodium$cuboids.get(dest))[0]))[destPoly];
+            try {
+                if (HAS_MODELCUBOID_QUADS) {
+                    // ModelCuboid stores the texture info in quads per face
+                    Object sourceQuad = ((Object[]) ModelCuboid_quads.get(
+                        ((Object[]) ModelPart_sodium$cuboids.get(source))[0])
+                    )[sourcePoly];
+                    Object destQuad = ((Object[]) ModelCuboid_quads.get(
+                        ((Object[]) ModelPart_sodium$cuboids.get(dest))[0])
+                    )[destPoly];
 
-                    Vector2f[] sourceTextures = (Vector2f[]) ModelCuboid$Quad_Textures.get(sourceQuad);
-                    Vector2f[] destTextures = (Vector2f[]) ModelCuboid$Quad_Textures.get(destQuad);
+                    Vector2f[] sourceTextures = (Vector2f[]) ModelCuboid$Quad_textures.get(sourceQuad);
+                    Vector2f[] destTextures = (Vector2f[]) ModelCuboid$Quad_textures.get(destQuad);
 
                     for (int i = 0; i < sourceTextures.length; i++) {
                         destTextures[i].x = sourceTextures[i].x;
                         destTextures[i].y = sourceTextures[i].y;
                     }
-                } catch (IllegalAccessException | ClassCastException ignored) {
-                    VRSettings.logger.error("Vivecraft: sodium version has ModelCuboids, but field has wrong type. VR hands will probably look wrong");
-                    hasModelCuboidQuads = false;
-                }
-            } else if (hasModelCuboidFloats) {
-                try {
-                    Object sourceCuboid = hasCubeModelCuboid ? Cube_Sodium$cuboid.get(source.cubes.get(0)) : ((Object[]) ModelCuboid_Sodium$cuboids.get(source))[0];
+                } else if (HAS_MODELCUBOID_FLOATS) {
+                    // ModelCuboid stores the texture info in per cube floats
+                    Object sourceCuboid = HAS_MODELCUBOID_CUBES ? Cube_sodium$cuboid.get(source.cubes.get(0)) :
+                        ((Object[]) ModelPart_sodium$cuboids.get(source))[0];
+
                     float[][] UVs = new float[][]{{
                         (float) ModelCuboid_u0.get(sourceCuboid),
                         (float) ModelCuboid_u1.get(sourceCuboid),
@@ -103,35 +119,50 @@ public class SodiumHelper {
                         (float) ModelCuboid_v2.get(sourceCuboid)
                     }};
 
-                    Object destCuboid = hasCubeModelCuboid ? Cube_Sodium$cuboid.get(dest.cubes.get(0)) : ((Object[]) ModelCuboid_Sodium$cuboids.get(dest))[0];
+                    Object destCuboid = HAS_MODELCUBOID_CUBES ? Cube_sodium$cuboid.get(dest.cubes.get(0)) :
+                        ((Object[]) ModelPart_sodium$cuboids.get(dest))[0];
                     ((ModelCuboidExtension) destCuboid).vivecraft$addOverrides(
                         mapDirection(destPoly),
                         mapDirection(sourcePoly),
                         UVs
                     );
-                } catch (IllegalAccessException | ClassCastException ignored) {
-                    VRSettings.logger.error("Vivecraft: sodium version has ModelCuboids, but field has wrong type. VR hands will probably look wrong");
-                    hasModelCuboidFloats = false;
                 }
+            } catch (IllegalAccessException | ClassCastException e) {
+                VRSettings.LOGGER.error(
+                    "Vivecraft: sodium version has ModelCuboids, but fields are an unexpected type. VR hands will probably look wrong:",
+                    e);
+                HAS_MODELCUBOID_FLOATS = false;
+                HAS_MODELCUBOID_QUADS = false;
             }
         }
     }
 
+    /**
+     * sodium change the internal cube face indices, this maps the pre 0.5 indices to 0.5+ ones
+     *
+     * @param old pre 0.5 face index
+     * @return post 0.5 index
+     */
     private static int mapDirection(int old) {
         return switch (old) {
-            default -> 4;
             case 1 -> 2;
             case 2 -> 0;
             case 3 -> 1;
             case 4 -> 3;
             case 5 -> 5;
+            default -> 4; // 0 case
         };
     }
 
+    /**
+     * initializes all Reflections
+     *
+     * @return if init was successful
+     */
     private static boolean init() {
-        if (initialized) {
+        if (INITIALIZED) {
             // try to softly fail when something went wrong
-            return !initFailed;
+            return !INIT_FAILED;
         }
         try {
             Class<?> spriteUtil = getClassWithAlternative(
@@ -139,7 +170,7 @@ public class SodiumHelper {
                 "net.caffeinemc.mods.sodium.client.render.texture.SpriteUtil"
             );
 
-            SpriteUtil_MarkSpriteActive = spriteUtil.getMethod("markSpriteActive", TextureAtlasSprite.class);
+            SpriteUtil_markSpriteActive = spriteUtil.getMethod("markSpriteActive", TextureAtlasSprite.class);
 
             try {
                 // model
@@ -149,23 +180,26 @@ public class SodiumHelper {
                 );
 
                 try {
-                    ModelCuboid_Sodium$cuboids = ModelPart.class.getDeclaredField("sodium$cuboids");
-                    ModelCuboid_Sodium$cuboids.setAccessible(true);
+                    // all cube cuboids are stored in the ModelPart
+                    ModelPart_sodium$cuboids = ModelPart.class.getDeclaredField("sodium$cuboids");
+                    ModelPart_sodium$cuboids.setAccessible(true);
                 } catch (NoSuchFieldException ignored) {
-                    Cube_Sodium$cuboid = ModelPart.Cube.class.getDeclaredField("sodium$cuboid");
-                    Cube_Sodium$cuboid.setAccessible(true);
-                    hasCubeModelCuboid = true;
-
+                    // cuboid is stored in the Cube directly instead
+                    Cube_sodium$cuboid = ModelPart.Cube.class.getDeclaredField("sodium$cuboid");
+                    Cube_sodium$cuboid.setAccessible(true);
+                    HAS_MODELCUBOID_CUBES = true;
                 }
                 try {
-                    Class<?> cuboidQuad = getClassWithAlternative(
+                    Class<?> ModelCuboid$Quad = getClassWithAlternative(
                         "me.jellysquid.mods.sodium.client.render.immediate.model.ModelCuboid$Quad",
                         "net.caffeinemc.mods.sodium.client.render.immediate.model.ModelCuboid$Quad"
                     );
-                    ModelCuboid_Quads = ModelCuboid.getDeclaredField("quads");
-                    ModelCuboid$Quad_Textures = cuboidQuad.getDeclaredField("textures");
-                    hasModelCuboidQuads = true;
+                    // texture bounds are stored in pre face quads
+                    ModelCuboid_quads = ModelCuboid.getDeclaredField("quads");
+                    ModelCuboid$Quad_textures = ModelCuboid$Quad.getDeclaredField("textures");
+                    HAS_MODELCUBOID_QUADS = true;
                 } catch (ClassNotFoundException noQuads) {
+                    // texture bounds are stored in global UVs instead
                     ModelCuboid_u0 = ModelCuboid.getDeclaredField("u0");
                     ModelCuboid_u1 = ModelCuboid.getDeclaredField("u1");
                     ModelCuboid_u2 = ModelCuboid.getDeclaredField("u2");
@@ -175,20 +209,31 @@ public class SodiumHelper {
                     ModelCuboid_v0 = ModelCuboid.getDeclaredField("v0");
                     ModelCuboid_v1 = ModelCuboid.getDeclaredField("v1");
                     ModelCuboid_v2 = ModelCuboid.getDeclaredField("v2");
-                    hasModelCuboidFloats = true;
+                    HAS_MODELCUBOID_FLOATS = true;
                 }
             } catch (ClassNotFoundException ignored) {
+                // older versions didn't use that so can ignore it
             } catch (NoSuchFieldException e) {
-                VRSettings.logger.error("Vivecraft: sodium version has ModelCuboids, but field was not found. VR hands will probably look wrong");
+                VRSettings.LOGGER.error(
+                    "Vivecraft: sodium version has ModelCuboids, but some fields are not found. VR hands will probably look wrong:",
+                    e);
             }
         } catch (ClassNotFoundException | NoSuchMethodException e) {
-            initFailed = true;
-            VRSettings.logger.error("Vivecraft: Failed to initialize Sodium compat: {}", e.getMessage());
+            INIT_FAILED = true;
+            VRSettings.LOGGER.error("Vivecraft: Failed to initialize Sodium compat:", e);
         }
-        initialized = true;
-        return !initFailed;
+        INITIALIZED = true;
+        return !INIT_FAILED;
     }
 
+    /**
+     * does a class Lookup with an alternative, for convenience, since iris changed packages
+     *
+     * @param class1 first option
+     * @param class2 alternative option
+     * @return found class
+     * @throws ClassNotFoundException if neither class exists
+     */
     private static Class<?> getClassWithAlternative(String class1, String class2) throws ClassNotFoundException {
         try {
             return Class.forName(class1);

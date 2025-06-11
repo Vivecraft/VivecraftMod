@@ -18,7 +18,9 @@ public interface OptionEnum<T extends Enum<T>> {
         }
 
         Class<?> cls = getClass();
-        return "vivecraft.options." + (cls.isAnonymousClass() ? cls.getSuperclass() : cls).getSimpleName().toLowerCase() + "." + name().toLowerCase().replace("_", "");
+        return "vivecraft.options." +
+            (cls.isAnonymousClass() ? cls.getSuperclass() : cls).getSimpleName().toLowerCase() + "." +
+            name().toLowerCase().replace("_", "");
     }
 
     default T getNext() {

@@ -405,7 +405,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "警告：使用用戶端世界儲存選單世界。資料可能不完整。建議在單人遊戲中儲存選單世界。",
   "vivecraft.messages.teleportdisabled": "已啟用受限移動（無法傳送）",
   "vivecraft.messages.teleportenabled": "已停用受限移動（允許傳送）",
-  "vivecraft.messages.walkupblocks": "走上單一方塊（RCTRL+B）：%s",
+  "vivecraft.messages.walkupblocks": "走上單一方塊：%s",
   "vivecraft.messages.showaim": "顯示瞄準（RCTRL+RSHIFT）：已啟用",
   "vivecraft.messages.playerinertia": "玩家移動慣性（RCTRL+I）：%s",
   "vivecraft.messages.movementmodeswitch": "移動模式已切換到：%s",

@@ -406,7 +406,7 @@
   "vivecraft.messages.menuworldexportclientwarning": "ВНИМАНИЕ: Сохранение мира с помощью клиентского мира может быть неполным, что приведет к утрате мира.",
   "vivecraft.messages.teleportdisabled": "Ограниченное движение включено (без телепорта)",
   "vivecraft.messages.teleportenabled": "Ограниченное движение выключено (с телепортом)",
-  "vivecraft.messages.walkupblocks": "Взобраться по блокам (RCTRL+B): %s",
+  "vivecraft.messages.walkupblocks": "Взобраться по блокам: %s",
   "vivecraft.messages.showaim": "Показать цель (RCTRL+RSHIFT): включено",
   "_comment47": "vivecraft.messages.playerinertia=Player movement inertia (RCTRL+I): %s",
   "vivecraft.messages.movementmodeswitch": "Режим движения переключен на: %s",

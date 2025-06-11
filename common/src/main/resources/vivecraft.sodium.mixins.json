@@ -4,11 +4,11 @@
   "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "caffeinemc.EntityRendererMixin",
-    "jellysquid.EntityRendererMixin",
     "ModelCuboidMixin",
     "SodiumLeavesBlockMixin",
-    "SodiumWorldRendererVRMixin"
+    "SodiumWorldRendererVRMixin",
+    "caffeinemc.EntityRendererMixin",
+    "jellysquid.EntityRendererMixin"
   ],
   "minVersion": "0.8.4"
 }

@@ -1,107 +1,183 @@
 package org.vivecraft.server;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.vivecraft.common.network.BodyPart;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.common.utils.MathUtils;
 
 import javax.annotation.Nullable;
 
 public class ServerVivePlayer {
+    // player movement state
     @Nullable
     public VrPlayerState vrPlayerState;
+    // how much the player is drawing the roomscale bow
     public float draw;
     public float worldScale = 1.0F;
     public float heightScale = 1.0F;
-    public byte activeHand = 0;
+    public BodyPart activeBodyPart = BodyPart.MAIN_HAND;
+    public boolean useBodyPartForAim = false;
     public boolean crawling;
+    // if the player has VR active
     private boolean isVR = false;
-    public Vec3 offset = new Vec3(0.0D, 0.0D, 0.0D);
+    // offset set during aimFix to keep the original data positions
+    public Vec3 offset = Vec3.ZERO;
+    // player this data belongs to
     public ServerPlayer player;
-    final Vector3 forward = new Vector3(0.0F, 0.0F, -1.0F);
-
+    // network protocol this player is communicating with
     public int networkVersion = CommonNetworkHelper.MAX_SUPPORTED_NETWORK_VERSION;
 
     public ServerVivePlayer(ServerPlayer player) {
         this.player = player;
     }
 
-    public float getDraw() {
-        return this.draw;
-    }
+    /**
+     * transforms the local {@code direction} vector on BodyPart {@code bodyPart} into world space
+     *
+     * @param bodyPart  BodyPart to get the custom direction on, if not available, will use the MAIN_HAND
+     * @param direction local direction to transform
+     * @return direction in world space
+     */
+    public Vec3 getBodyPartVectorCustom(BodyPart bodyPart, Vector3fc direction) {
+        if (this.vrPlayerState != null) {
+            if (this.isSeated() || !bodyPart.isValid(this.vrPlayerState.fbtMode())) {
+                bodyPart = BodyPart.MAIN_HAND;
+            }
 
-    public Vec3 getControllerVectorCustom(int controller, Vector3 direction) {
-        if (this.isSeated()) {
-            controller = 0;
-        }
-
-        var controllerPose = controller == 0 ? this.vrPlayerState.controller0() : this.vrPlayerState.controller1();
-
-        if (controllerPose != null) {
-            Vector3 vector3 = controllerPose.orientation().multiply(direction);
-            return new Vec3(vector3.getX(), vector3.getY(), vector3.getZ());
+            return new Vec3(
+                this.vrPlayerState.getBodyPartPose(bodyPart).orientation().transform(direction, new Vector3f()));
         } else {
             return this.player.getLookAngle();
         }
     }
 
-    public Vec3 getControllerDir(int controller) {
-        return this.getControllerVectorCustom(controller, this.forward);
+    /**
+     * @param bodyPart BodyPart to get the direction from, if not available, will use the MAIN_HAND
+     * @return forward direction of the given BodyPart
+     */
+    public Vec3 getBodyPartDir(BodyPart bodyPart) {
+        return this.getBodyPartVectorCustom(bodyPart, MathUtils.BACK);
     }
 
+    /**
+     * @param ignoreUseForAim ignores the useBodyPartForAim state when set, and always uses the active BodyPart for the aim
+     * @return the direction the player is aiming, accounts for the roomscale bow
+     */
+    public Vec3 getAimDir(boolean ignoreUseForAim) {
+        if (!this.isSeated() && this.draw > 0.0F) {
+            return this.getBodyPartPos(this.activeBodyPart.opposite())
+                .subtract(this.getBodyPartPos(this.activeBodyPart)).normalize();
+        } else if (ignoreUseForAim || this.useBodyPartForAim) {
+            return this.getBodyPartDir(this.activeBodyPart);
+        } else {
+            return this.getBodyPartDir(BodyPart.MAIN_HAND);
+        }
+    }
+
+    /**
+     * @param ignoreUseForAim ignores the useBodyPartForAim state when set, and always uses the active BodyPart for the aim
+     * @return the position from which the player is aiming
+     */
+    public Vec3 getAimPos(boolean ignoreUseForAim) {
+        if (ignoreUseForAim || this.useBodyPartForAim) {
+            return this.getBodyPartPos(this.activeBodyPart);
+        } else {
+            return this.getBodyPartPos(BodyPart.MAIN_HAND);
+        }
+    }
+
+    /**
+     * @return looking direction of the head
+     */
     public Vec3 getHMDDir() {
         if (this.vrPlayerState != null) {
-            Vector3 vector3 = this.vrPlayerState.hmd().orientation().multiply(this.forward);
-            return new Vec3(vector3.getX(), vector3.getY(), vector3.getZ());
+            return new Vec3(this.vrPlayerState.hmd().orientation().transform(MathUtils.BACK, new Vector3f()));
+        } else {
+            return this.player.getLookAngle();
         }
-        return this.player.getLookAngle();
     }
 
-    public Vec3 getHMDPos(Player player) {
+    /**
+     * @return position of the head, in world space
+     */
+    public Vec3 getHMDPos() {
         if (this.vrPlayerState != null) {
-            return this.vrPlayerState.hmd().position().add(player.position()).add(this.offset);
+            Vector3fc hmdPos = this.vrPlayerState.hmd().position();
+            return this.player.position().add(
+                this.offset.x + hmdPos.x(),
+                this.offset.y + hmdPos.y(),
+                this.offset.z + hmdPos.z());
+        } else {
+            return this.player.position().add(0.0D, 1.62D, 0.0D);
         }
-        return player.position().add(0.0D, 1.62D, 0.0D);
     }
 
-    public Vec3 getControllerPos(int c, Player player, boolean realPosition) {
+    /**
+     * @param bodyPart     BodyPart to get the position for, if not available, will use the MAIN_HAND
+     * @param realPosition if true disables the seated override
+     * @return BodyPart position in world space
+     */
+    public Vec3 getBodyPartPos(BodyPart bodyPart, boolean realPosition) {
         if (this.vrPlayerState != null) {
-
-            // TODO: What the fuck is this nonsense?
-            if (this.isSeated() && !realPosition) {
-                Vec3 vec3 = this.getHMDDir();
-                vec3 = vec3.yRot((float) Math.toRadians(c == 0 ? -35.0D : 35.0D));
-                vec3 = new Vec3(vec3.x, 0.0D, vec3.z);
-                vec3 = vec3.normalize();
-                return this.getHMDPos(player).add(vec3.x * 0.3D * (double) this.worldScale, -0.4D * (double) this.worldScale, vec3.z * 0.3D * (double) this.worldScale);
+            if (!bodyPart.isValid(this.vrPlayerState.fbtMode())) {
+                bodyPart = BodyPart.MAIN_HAND;
             }
 
-            var controllerState = c == 0 ? this.vrPlayerState.controller0() : this.vrPlayerState.controller1();
+            // in seated the realPosition is at the head,
+            // so reconstruct the seated position when wanting the visual position
+            if (this.isSeated() && bodyPart.isHand() && !realPosition) {
+                Vec3 dir = this.getHMDDir();
+                dir = dir.yRot(Mth.DEG_TO_RAD * (bodyPart == BodyPart.MAIN_HAND ? -35.0F : 35.0F));
+                dir = new Vec3(dir.x, 0.0D, dir.z);
+                dir = dir.normalize();
+                return this.getHMDPos().add(
+                    dir.x * 0.3F * this.worldScale,
+                    -0.4F * this.worldScale,
+                    dir.z * 0.3F * this.worldScale);
+            }
 
-            return controllerState.position().add(player.position()).add(this.offset);
+            Vector3fc conPos = this.vrPlayerState.getBodyPartPose(bodyPart).position();
+
+            return this.player.position().add(
+                this.offset.x + conPos.x(),
+                this.offset.y + conPos.y(),
+                this.offset.z + conPos.z());
+        } else {
+            return this.player.position().add(0.0D, 1.62D, 0.0D);
         }
-
-        return player.position().add(0.0D, 1.62D, 0.0D);
     }
 
-    public Vec3 getControllerPos(int c, Player player) {
-        return getControllerPos(c, player, false);
+    /**
+     * @param bodyPart BodyPart to get the position for, if not available, will use the MAIN_HAND
+     * @return BodyPart position in world space
+     */
+    public Vec3 getBodyPartPos(BodyPart bodyPart) {
+        return getBodyPartPos(bodyPart, false);
     }
 
+    /**
+     * @return if the player has VR active
+     */
     public boolean isVR() {
         return this.isVR;
     }
 
+    /**
+     * set VR state of the player
+     */
     public void setVR(boolean vr) {
         this.isVR = vr;
     }
 
+    /**
+     * @return if the player is using seated VR
+     */
     public boolean isSeated() {
-        if (this.vrPlayerState == null) {
-            return false;
-        }
-        return this.vrPlayerState.seated();
+        return this.vrPlayerState != null && this.vrPlayerState.seated();
     }
 }

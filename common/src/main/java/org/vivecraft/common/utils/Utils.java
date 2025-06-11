@@ -14,8 +14,16 @@ import net.minecraft.world.phys.Vec3;
 
 public class Utils {
 
+    /**
+     * estimate the head hitbox of an entity
+     *
+     * @param entity  Entity to get the head hitbox for
+     * @param inflate by how much the hitbox should be enlarged
+     * @return AABB describing the head hit box, or null the entity is unsupported
+     */
     public static AABB getEntityHeadHitbox(Entity entity, double inflate) {
-        if ((entity instanceof Player player && !player.isSwimming()) || // swimming players hitbox is just a box around their butt
+        // swimming players hitbox is just a box around their butt
+        if ((entity instanceof Player player && !player.isSwimming()) ||
             entity instanceof Zombie ||
             entity instanceof AbstractPiglin ||
             entity instanceof AbstractSkeleton ||
@@ -27,22 +35,27 @@ public class Utils {
             entity instanceof AbstractVillager ||
             entity instanceof SnowGolem ||
             entity instanceof Vex ||
-            entity instanceof Strider) {
+            entity instanceof Strider)
+        {
 
-            Vec3 headpos = entity.getEyePosition();
+            Vec3 headPos = entity.getEyePosition();
             double headsize = entity.getBbWidth() * 0.5;
             if (((LivingEntity) entity).isBaby()) {
                 // babies have big heads
                 headsize *= 1.20;
             }
-            return new AABB(headpos.subtract(headsize, headsize - inflate, headsize), headpos.add(headsize, headsize + inflate, headsize)).inflate(inflate);
-        } else if (!(entity instanceof EnderDragon) // no ender dragon, the code doesn't work for it
-            && entity instanceof LivingEntity livingEntity) {
+            return new AABB(
+                headPos.subtract(headsize, headsize - inflate, headsize),
+                headPos.add(headsize, headsize + inflate, headsize))
+                .inflate(inflate);
+        } else if (!(entity instanceof EnderDragon) && // no ender dragon, the code doesn't work for it
+            entity instanceof LivingEntity livingEntity)
+        {
 
-            float yrot = -(livingEntity.yBodyRot) * 0.017453292F;
+            float yRot = -livingEntity.yBodyRot * Mth.DEG_TO_RAD;
             // offset head in entity rotation
-            Vec3 headpos = entity.getEyePosition()
-                .add(new Vec3(Mth.sin(yrot), 0, Mth.cos(yrot))
+            Vec3 headPos = entity.getEyePosition()
+                .add(new Vec3(Mth.sin(yRot), 0, Mth.cos(yRot))
                     .scale(livingEntity.getBbWidth() * 0.5F));
 
             double headsize = livingEntity.getBbWidth() * 0.25;
@@ -50,7 +63,11 @@ public class Utils {
                 // babies have big heads
                 headsize *= 1.5;
             }
-            return new AABB(headpos.subtract(headsize, headsize, headsize), headpos.add(headsize, headsize, headsize)).inflate(inflate * 0.25).expandTowards(headpos.subtract(entity.position()).scale(inflate));
+            return new AABB(
+                headPos.subtract(headsize, headsize, headsize),
+                headPos.add(headsize, headsize, headsize))
+                .inflate(inflate * 0.25)
+                .expandTowards(headPos.subtract(entity.position()).scale(inflate));
         }
         return null;
     }

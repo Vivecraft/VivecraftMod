@@ -1,0 +1,36 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:swords",
+      "required": false
+    },
+    {
+      "id": "#forge:tools/swords",
+      "required": false
+    },
+
+    "#minecraft:swords",
+
+    {
+      "id": "tconstruct:dagger",
+      "required": false
+    },
+    {
+      "id": "tconstruct:sword",
+      "required": false
+    },
+    {
+      "id": "tconstruct:cleaver",
+      "required": false
+    },
+    {
+      "id": "tetra:modular_sword",
+      "required": false
+    },
+
+    "#vivecraft:moditems/mvw_weapons",
+    "#vivecraft:moditems/balkons_weaponsmod/weapons",
+    "#vivecraft:maces"
+  ]
+}

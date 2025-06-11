@@ -1,4 +1,3 @@
 package net.coderbot.iris.shaderpack;
 
-public interface PackShadowDirectives {
-}
+public interface PackShadowDirectives {}

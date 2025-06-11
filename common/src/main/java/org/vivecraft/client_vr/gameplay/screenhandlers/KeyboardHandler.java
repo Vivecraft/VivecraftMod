@@ -2,220 +2,193 @@ package org.vivecraft.client_vr.gameplay.screenhandlers;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
-import org.vivecraft.client.utils.Utils;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
+import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFW;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.gui.GuiKeyboard;
 import org.vivecraft.client_vr.gui.PhysicalKeyboard;
 import org.vivecraft.client_vr.provider.ControllerType;
-import org.vivecraft.common.utils.lwjgl.Matrix4f;
-import org.vivecraft.common.utils.lwjgl.Vector3f;
-import org.vivecraft.common.utils.math.Vector3;
+import org.vivecraft.common.utils.MathUtils;
 
 public class KeyboardHandler {
-    public static Minecraft mc = Minecraft.getInstance();
-    public static ClientDataHolderVR dh = ClientDataHolderVR.getInstance();
-    public static boolean Showing = false;
+    public static final Minecraft MC = Minecraft.getInstance();
+    public static final ClientDataHolderVR DH = ClientDataHolderVR.getInstance();
+
+    public static boolean KEYBOARD_FOR_GUI;
     public static GuiKeyboard UI = new GuiKeyboard();
-    public static PhysicalKeyboard physicalKeyboard = new PhysicalKeyboard();
-    public static Vec3 Pos_room = new Vec3(0.0D, 0.0D, 0.0D);
-    public static org.vivecraft.common.utils.math.Matrix4f Rotation_room = new org.vivecraft.common.utils.math.Matrix4f();
-    private static boolean PointedL;
-    private static boolean PointedR;
-    public static boolean keyboardForGui;
-    public static RenderTarget Framebuffer = null;
-    private static boolean lastPressedClickL;
-    private static boolean lastPressedClickR;
-    private static boolean lastPressedShift;
+    public static RenderTarget FRAMEBUFFER = null;
+    public static PhysicalKeyboard PHYSICAL_KEYBOARD = new PhysicalKeyboard();
+
+    public static Vector3f POS_ROOM = new Vector3f();
+    public static Matrix4f ROTATION_ROOM = new Matrix4f();
+
+    public static boolean SHOWING = false;
+
+    private static boolean POINTED_L;
+    private static boolean POINTED_R;
+
+    private static boolean LAST_PRESSED_CLICK_L;
+    private static boolean LAST_PRESSED_CLICK_R;
+    private static boolean LAST_PRESSED_SHIFT;
 
     public static boolean setOverlayShowing(boolean showingState) {
-        if (ClientDataHolderVR.kiosk) {
-            return false;
-        } else {
-            if (dh.vrSettings.seated) {
-                showingState = false;
-            }
-
-            int i = 1;
-
-            if (showingState) {
-
-                if (dh.vrSettings.physicalKeyboard) {
-                    physicalKeyboard.show();
-                } else {
-                    UI.init(Minecraft.getInstance(), GuiHandler.scaledWidth, GuiHandler.scaledHeight);
-                }
-
-                Showing = true;
-                orientOverlay(mc.screen != null);
-                RadialHandler.setOverlayShowing(false, null);
-
-                if (dh.vrSettings.physicalKeyboard && mc.screen != null) {
-                    GuiHandler.onScreenChanged(mc.screen, mc.screen, false);
-                }
-            } else {
-                Showing = false;
-                if (dh.vrSettings.physicalKeyboard) {
-                    physicalKeyboard.unpressAllKeys();
-                }
-            }
-
-            return Showing;
+        if (DH.kiosk) return false;
+        if (DH.vrSettings.seated) {
+            showingState = false;
         }
+
+        if (showingState) {
+            if (DH.vrSettings.physicalKeyboard) {
+                PHYSICAL_KEYBOARD.show();
+            } else {
+                UI.init(Minecraft.getInstance(), GuiHandler.SCALED_WIDTH_MAX, GuiHandler.SCALED_HEIGHT_MAX);
+            }
+
+            SHOWING = true;
+            orientOverlay(MC.screen != null);
+            RadialHandler.setOverlayShowing(false, null);
+
+            if (DH.vrSettings.physicalKeyboard && MC.screen != null) {
+                GuiHandler.onScreenChanged(MC.screen, MC.screen, false);
+            }
+        } else {
+            SHOWING = false;
+            if (DH.vrSettings.physicalKeyboard) {
+                PHYSICAL_KEYBOARD.unpressAllKeys();
+            }
+        }
+
+        return SHOWING;
     }
 
     public static void processGui() {
-        PointedL = false;
-        PointedR = false;
+        POINTED_L = false;
+        POINTED_R = false;
 
-        if (Showing) {
-            if (!dh.vrSettings.seated) {
-                if (Rotation_room != null) {
-                    if (dh.vrSettings.physicalKeyboard) {
-                        physicalKeyboard.process();
-                    } else {
-                        Vec2 vec2 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, mc.screen, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(1));
-                        Vec2 vec21 = GuiHandler.getTexCoordsForCursor(Pos_room, Rotation_room, mc.screen, GuiHandler.guiScale, dh.vrPlayer.vrdata_room_pre.getController(0));
-                        float f = vec21.x;
-                        float f1 = vec21.y;
+        if (!SHOWING) return;
+        if (DH.vrSettings.seated) return;
+        if (ROTATION_ROOM == null) return;
 
-                        if (!(f < 0.0F) && !(f1 < 0.0F) && !(f > 1.0F) && !(f1 > 1.0F)) {
-                            if (UI.cursorX2 == -1.0F) {
-                                UI.cursorX2 = (float) ((int) (f * (float) GuiHandler.guiWidth));
-                                UI.cursorY2 = (float) ((int) (f1 * (float) GuiHandler.guiHeight));
-                                PointedR = true;
-                            } else {
-                                float f2 = (float) ((int) (f * (float) GuiHandler.guiWidth));
-                                float f3 = (float) ((int) (f1 * (float) GuiHandler.guiHeight));
-                                UI.cursorX2 = UI.cursorX2 * 0.7F + f2 * 0.3F;
-                                UI.cursorY2 = UI.cursorY2 * 0.7F + f3 * 0.3F;
-                                PointedR = true;
-                            }
-                        } else {
-                            UI.cursorX2 = -1.0F;
-                            UI.cursorY2 = -1.0F;
-                            PointedR = false;
-                        }
-
-                        f = vec2.x;
-                        f1 = vec2.y;
-
-                        if (!(f < 0.0F) && !(f1 < 0.0F) && !(f > 1.0F) && !(f1 > 1.0F)) {
-                            if (UI.cursorX1 == -1.0F) {
-                                UI.cursorX1 = (float) ((int) (f * (float) GuiHandler.guiWidth));
-                                UI.cursorY1 = (float) ((int) (f1 * (float) GuiHandler.guiHeight));
-                                PointedL = true;
-                            } else {
-                                float f4 = (float) ((int) (f * (float) GuiHandler.guiWidth));
-                                float f5 = (float) ((int) (f1 * (float) GuiHandler.guiHeight));
-                                UI.cursorX1 = UI.cursorX1 * 0.7F + f4 * 0.3F;
-                                UI.cursorY1 = UI.cursorY1 * 0.7F + f5 * 0.3F;
-                                PointedL = true;
-                            }
-                        } else {
-                            UI.cursorX1 = -1.0F;
-                            UI.cursorY1 = -1.0F;
-                            PointedL = false;
-                        }
-                    }
-                }
-            }
+        if (DH.vrSettings.physicalKeyboard) {
+            PHYSICAL_KEYBOARD.process();
+            // Skip the rest of this
+            return;
         }
+
+        // process cursors
+        POINTED_R = UI.processCursor(POS_ROOM, ROTATION_ROOM, false);
+        POINTED_L = UI.processCursor(POS_ROOM, ROTATION_ROOM, true);
     }
 
     public static void orientOverlay(boolean guiRelative) {
-        keyboardForGui = false;
+        KEYBOARD_FOR_GUI = false;
 
-        if (Showing) {
-            keyboardForGui = guiRelative;
-            Matrix4f matrix4f = new Matrix4f();
+        if (!SHOWING) return;
 
-            if (dh.vrSettings.physicalKeyboard) {
-                Vec3 vec3 = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
-                Vec3 vec31 = new Vec3(0.0D, -0.5D, 0.3D);
-                vec31 = vec31.yRot((float) Math.toRadians(-dh.vrPlayer.vrdata_room_pre.hmd.getYaw()));
-                Pos_room = new Vec3(vec3.x + vec31.x, vec3.y + vec31.y, vec3.z + vec31.z);
-                float f = (float) Math.PI + (float) Math.toRadians(-dh.vrPlayer.vrdata_room_pre.hmd.getYaw());
-                Rotation_room = org.vivecraft.common.utils.math.Matrix4f.rotationY(f);
-                Rotation_room = org.vivecraft.common.utils.math.Matrix4f.multiply(Rotation_room, Utils.rotationXMatrix(2.5132742F));
-            } else if (guiRelative && GuiHandler.guiRotation_room != null) {
-                Matrix4f matrix4f1 = Utils.convertOVRMatrix(GuiHandler.guiRotation_room);
-                Vec3 vec35 = new Vec3(matrix4f1.m10, matrix4f1.m11, matrix4f1.m12);
-                Vec3 vec37 = (new Vec3(matrix4f1.m20, matrix4f1.m21, matrix4f1.m22)).scale(0.25D * GuiHandler.guiScale);
-                vec35 = vec35.scale(0.8F);
-                matrix4f.translate(new Vector3f((float) (GuiHandler.guiPos_room.x - vec35.x), (float) (GuiHandler.guiPos_room.y - vec35.y), (float) (GuiHandler.guiPos_room.z - vec35.z)));
-                matrix4f.translate(new Vector3f((float) vec37.x, (float) vec37.y, (float) vec37.z));
-                Matrix4f.mul(matrix4f, matrix4f1, matrix4f);
-                matrix4f.rotate((float) Math.toRadians(30.0D), new Vector3f(-1.0F, 0.0F, 0.0F));
-                Rotation_room = Utils.convertToOVRMatrix(matrix4f);
-                Pos_room = new Vec3(Rotation_room.M[0][3], Rotation_room.M[1][3], Rotation_room.M[2][3]);
-                Rotation_room.M[0][3] = 0.0F;
-                Rotation_room.M[1][3] = 0.0F;
-                Rotation_room.M[2][3] = 0.0F;
-            } else {
-                Vec3 vec33 = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
-                Vec3 vec34 = new Vec3(0.0D, -0.5D, -2.0D);
-                Vec3 vec36 = dh.vrPlayer.vrdata_room_pre.hmd.getCustomVector(vec34);
-                Pos_room = new Vec3(vec36.x / 2.0D + vec33.x, vec36.y / 2.0D + vec33.y, vec36.z / 2.0D + vec33.z);
-                Vec3 vec32 = dh.vrPlayer.vrdata_room_pre.hmd.getPosition();
-                Vector3 vector3 = new Vector3();
-                vector3.setX((float) (Pos_room.x - vec32.x));
-                vector3.setY((float) (Pos_room.y - vec32.y));
-                vector3.setZ((float) (Pos_room.z - vec32.z));
-                float f1 = (float) Math.asin(vector3.getY() / vector3.length());
-                float f2 = (float) ((double) (float) Math.PI + Math.atan2(vector3.getX(), vector3.getZ()));
-                Rotation_room = org.vivecraft.common.utils.math.Matrix4f.rotationY(f2);
-            }
+        KEYBOARD_FOR_GUI = guiRelative;
+
+        if (DH.vrSettings.physicalKeyboard) {
+            Vector3f pos = DH.vrPlayer.vrdata_room_pre.hmd.getPositionF();
+            Vector3f offset = new Vector3f(0.0F, -0.5F, 0.3F);
+            offset.rotateY(-DH.vrPlayer.vrdata_room_pre.hmd.getYawRad());
+
+            POS_ROOM = pos.add(offset);
+            float yaw = Mth.PI - DH.vrPlayer.vrdata_room_pre.hmd.getYawRad();
+
+            ROTATION_ROOM.rotationY(yaw);
+            ROTATION_ROOM.rotateX(Mth.PI * 0.8f);
+        } else if (guiRelative && GuiHandler.GUI_ROTATION_ROOM != null) {
+            // put the keyboard below the current screen
+            Matrix4fc guiRot = GuiHandler.GUI_ROTATION_ROOM;
+            Vector3f guiUp = guiRot.transformDirection(MathUtils.UP, new Vector3f())
+                .mul(0.8F);
+            Vector3f guiFwd = guiRot.transformDirection(MathUtils.FORWARD, new Vector3f())
+                .mul(0.25F * GuiHandler.GUI_SCALE);
+
+            Matrix4f roomRotation = new Matrix4f();
+            roomRotation.translate(
+                GuiHandler.GUI_POS_ROOM.x - guiUp.x + guiFwd.x,
+                GuiHandler.GUI_POS_ROOM.y - guiUp.y + guiFwd.y,
+                GuiHandler.GUI_POS_ROOM.z - guiUp.z + guiFwd.z);
+
+            roomRotation.mul(guiRot);
+            roomRotation.rotateX(Mth.DEG_TO_RAD * -30.0F);
+
+            ROTATION_ROOM = roomRotation;
+            POS_ROOM = ROTATION_ROOM.getTranslation(POS_ROOM);
+            ROTATION_ROOM.setTranslation(0F, 0F, 0F);
+        } else {
+            // copy from GuiHandler.onScreenChanged for static screens
+            Vector3f offset = new Vector3f(0.0F, -0.5F, -2.0F);
+
+            Vector3f hmdPos = DH.vrPlayer.vrdata_room_pre.hmd.getPositionF();
+            Vector3f look = DH.vrPlayer.vrdata_room_pre.hmd.getCustomVector(offset).mul(0.5F);
+
+            POS_ROOM = look.add(hmdPos, new Vector3f());
+
+            // orient screen
+            float yaw = Mth.PI + (float) Math.atan2(look.x, look.z);
+            ROTATION_ROOM = new Matrix4f().rotationY(yaw);
         }
     }
 
     public static void processBindings() {
-        if (Showing) {
-            if (dh.vrSettings.physicalKeyboard) {
-                physicalKeyboard.processBindings();
-                return;
-            }
+        if (!SHOWING) return;
 
-            double d0 = (double) Math.min(Math.max((int) UI.cursorX1, 0), GuiHandler.guiWidth) * (double) UI.width / (double) GuiHandler.guiWidth;
-            double d1 = (double) Math.min(Math.max((int) UI.cursorY1, 0), GuiHandler.guiHeight) * (double) UI.height / (double) GuiHandler.guiHeight;
+        if (DH.vrSettings.physicalKeyboard) {
+            PHYSICAL_KEYBOARD.processBindings();
+            return;
+        }
 
-            if (PointedL && GuiHandler.keyKeyboardClick.consumeClick(ControllerType.LEFT)) {
-                UI.mouseClicked((int) d0, (int) d1, 0);
-                lastPressedClickL = true;
-            }
+        // scale virtual cursor coords to actual screen coords
+        float uiScaleX = (float) UI.width / (float) GuiHandler.GUI_WIDTH;
+        float uiScaleY = (float) UI.height / (float) GuiHandler.GUI_HEIGHT;
 
-            if (!GuiHandler.keyKeyboardClick.isDown(ControllerType.LEFT) && lastPressedClickL) {
-                UI.mouseReleased((int) d0, (int) d1, 0);
-                lastPressedClickL = false;
-            }
+        int x1 = (int) (Math.min(Math.max((int) UI.cursorX1, 0), GuiHandler.GUI_WIDTH) * uiScaleX);
+        int y1 = (int) (Math.min(Math.max((int) UI.cursorY1, 0), GuiHandler.GUI_HEIGHT) * uiScaleY);
+        int x2 = (int) (Math.min(Math.max((int) UI.cursorX2, 0), GuiHandler.GUI_WIDTH) * uiScaleX);
+        int y2 = (int) (Math.min(Math.max((int) UI.cursorY2, 0), GuiHandler.GUI_HEIGHT) * uiScaleY);
 
-            d0 = (double) Math.min(Math.max((int) UI.cursorX2, 0), GuiHandler.guiWidth) * (double) UI.width / (double) GuiHandler.guiWidth;
-            d1 = (double) Math.min(Math.max((int) UI.cursorY2, 0), GuiHandler.guiHeight) * (double) UI.height / (double) GuiHandler.guiHeight;
+        if (POINTED_L && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.LEFT)) {
+            UI.mouseClicked(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+            LAST_PRESSED_CLICK_L = true;
+        }
 
-            if (PointedR && GuiHandler.keyKeyboardClick.consumeClick(ControllerType.RIGHT)) {
-                UI.mouseClicked((int) d0, (int) d1, 0);
-                lastPressedClickR = true;
-            }
+        if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.LEFT) && LAST_PRESSED_CLICK_L) {
+            UI.mouseReleased(x1, y1, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+            LAST_PRESSED_CLICK_L = false;
+        }
 
-            if (!GuiHandler.keyKeyboardClick.isDown(ControllerType.RIGHT) && lastPressedClickR) {
-                UI.mouseReleased((int) d0, (int) d1, 0);
-                lastPressedClickR = false;
-            }
+        if (POINTED_R && GuiHandler.KEY_KEYBOARD_CLICK.consumeClick(ControllerType.RIGHT)) {
+            UI.mouseClicked(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+            LAST_PRESSED_CLICK_R = true;
+        }
 
-            if (GuiHandler.keyKeyboardShift.consumeClick()) {
-                UI.setShift(true);
-                lastPressedShift = true;
-            }
+        if (!GuiHandler.KEY_KEYBOARD_CLICK.isDown(ControllerType.RIGHT) && LAST_PRESSED_CLICK_R) {
+            UI.mouseReleased(x2, y2, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+            LAST_PRESSED_CLICK_R = false;
+        }
 
-            if (!GuiHandler.keyKeyboardShift.isDown() && lastPressedShift) {
-                UI.setShift(false);
-                lastPressedShift = false;
-            }
+        if (GuiHandler.KEY_KEYBOARD_SHIFT.consumeClick()) {
+            UI.setShift(true);
+            LAST_PRESSED_SHIFT = true;
+        }
+
+        if (!GuiHandler.KEY_KEYBOARD_SHIFT.isDown() && LAST_PRESSED_SHIFT) {
+            UI.setShift(false);
+            LAST_PRESSED_SHIFT = false;
         }
     }
 
+    /**
+     * checks if the given controller points at the keyboard
+     *
+     * @param type controller to check
+     */
     public static boolean isUsingController(ControllerType type) {
-        return type == ControllerType.LEFT ? PointedL : PointedR;
+        return type == ControllerType.LEFT ? POINTED_L : POINTED_R;
     }
 }

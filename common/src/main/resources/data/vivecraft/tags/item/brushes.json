@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:tools/brush",
+      "required": false
+    },
+    "minecraft:brush"
+  ]
+}

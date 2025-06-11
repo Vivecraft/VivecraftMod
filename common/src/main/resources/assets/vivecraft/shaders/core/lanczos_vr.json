@@ -1,0 +1,26 @@
+{
+  "vertex": "vivecraft:core/lanczos_vr",
+  "fragment": "vivecraft:core/lanczos_vr",
+  "samplers": [
+    {
+      "name": "Sampler0"
+    },
+    {
+      "name": "Sampler1"
+    }
+  ],
+  "uniforms": [
+    {
+      "name": "texelWidthOffset",
+      "type": "float",
+      "count": 1,
+      "values": [1.0]
+    },
+    {
+      "name": "texelHeightOffset",
+      "type": "float",
+      "count": 1,
+      "values": [1.0]
+    }
+  ]
+}

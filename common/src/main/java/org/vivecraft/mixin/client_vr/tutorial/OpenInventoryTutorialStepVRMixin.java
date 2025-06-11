@@ -13,14 +13,16 @@ import org.vivecraft.client_vr.provider.MCVR;
 
 @Mixin(OpenInventoryTutorialStep.class)
 public class OpenInventoryTutorialStepVRMixin {
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V"), index = 2, method = "tick")
-    private Component vivecraft$alterDescription(Component component) {
-        if (!VRState.vrRunning) {
-            return component;
+    @ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/TutorialToast;<init>(Lnet/minecraft/client/gui/Font;Lnet/minecraft/client/gui/components/toasts/TutorialToast$Icons;Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;Z)V"), index = 3)
+    private Component vivecraft$alterDescription(Component description) {
+        if (!VRState.VR_RUNNING || ClientDataHolderVR.getInstance().vrSettings.seated) {
+            return description;
         }
-        if (!ClientDataHolderVR.getInstance().vrSettings.seated && MCVR.get().getInputAction(Minecraft.getInstance().options.keyInventory).isActive()) {
-            return Component.translatable("tutorial.open_inventory.description", Component.literal(MCVR.get().getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyInventory).getLastOrigin())).withStyle(ChatFormatting.BOLD));
+        if (MCVR.get().getInputAction(Minecraft.getInstance().options.keyInventory).isActive()) {
+            return Component.translatable("tutorial.open_inventory.description", Component.literal(MCVR.get()
+                    .getOriginName(MCVR.get().getInputAction(Minecraft.getInstance().options.keyInventory).getLastOrigin()))
+                .withStyle(ChatFormatting.BOLD));
         }
-        return component;
+        return description;
     }
 }

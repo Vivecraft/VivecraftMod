@@ -13,16 +13,24 @@ import org.vivecraft.client_vr.VRState;
 @Pseudo
 @Mixin(DynamicFPSMod.class)
 public class DynamicFPSModVRMixin {
-    @Inject(at = @At("HEAD"), method = {"checkForRender()Z", "shouldShowLevels()Z"}, remap = false, cancellable = true)
+
+    /**
+     * do not pause rendering ever in VR
+     */
+    @Inject(method = {"checkForRender()Z", "shouldShowLevels()Z"}, at = @At("HEAD"), remap = false, cancellable = true)
     private static void vivecraft$alwaysRenderVR(CallbackInfoReturnable<Boolean> cir) {
-        if (VRState.vrRunning) {
+        if (VRState.VR_RUNNING) {
             cir.setReturnValue(true);
         }
     }
 
-    @ModifyVariable(at = @At(value = "LOAD", target = "Lorg/vivecraft/mod_compat_vr/dynamicfps/mixin/DynamicFPSModVRMixin;state:Ldynamic_fps/impl/PowerState;"), method = "checkForStateChanges()V", remap = false)
+    /**
+     * focus always, this would lower the audio
+     */
+    // in new versions this is in 0, old versions had it in the unnumbered one
+    @ModifyVariable(method = {"checkForStateChanges0()V", "checkForStateChanges()V"}, at = @At(value = "LOAD", target = "Ldynamic_fps/impl/DynamicFPSMod;state:Ldynamic_fps/impl/PowerState;"), remap = false)
     private static PowerState vivecraft$alwaysFocused(PowerState value) {
         // always focused in VR
-        return VRState.vrRunning ? PowerState.FOCUSED : value;
+        return VRState.VR_RUNNING ? PowerState.FOCUSED : value;
     }
 }

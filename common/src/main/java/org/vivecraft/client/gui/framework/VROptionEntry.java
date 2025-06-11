@@ -1,6 +1,7 @@
 package org.vivecraft.client.gui.framework;
 
 import net.minecraft.world.phys.Vec2;
+import org.vivecraft.client.gui.framework.widgets.GuiVROption;
 import org.vivecraft.client_vr.settings.VRSettings;
 
 import java.util.function.BiFunction;
@@ -25,7 +26,9 @@ public class VROptionEntry {
         this.center = false;
     }
 
-    public VROptionEntry(VRSettings.VrOptions option, BiFunction<GuiVROption, Vec2, Boolean> customHandler, boolean center) {
+    public VROptionEntry(
+        VRSettings.VrOptions option, BiFunction<GuiVROption, Vec2, Boolean> customHandler, boolean center)
+    {
         this.option = option;
         this.title = null;
         this.customHandler = customHandler;

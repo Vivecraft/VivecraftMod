@@ -4,8 +4,6 @@
   "plugin": "org.vivecraft.MixinConfig",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "NeoForgeGameRendererVRMixin",
-    "NeoForgeIngameGuiVRMixin",
     "NeoForgeMinecraftVRMixin",
     "network.NeoForgeOpenContainerVRMixin"
   ],

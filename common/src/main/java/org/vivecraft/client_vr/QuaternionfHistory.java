@@ -2,6 +2,7 @@ package org.vivecraft.client_vr;
 
 import net.minecraft.Util;
 import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -9,58 +10,79 @@ import java.util.List;
 import java.util.ListIterator;
 
 public class QuaternionfHistory {
-    private final int _capacity = 450;
-    private final LinkedList<Entry> _data = new LinkedList<>();
+    private static final int CAPACITY = 450;
+    private final LinkedList<Entry> data = new LinkedList<>();
 
+    /**
+     * adds a new entry with the given quaternion
+     *
+     * @param in quaternion to add
+     */
     public void add(Quaternionf in) {
-        this._data.add(new Entry(in));
+        this.data.add(new Entry(in));
 
-        if (this._data.size() > this._capacity) {
-            this._data.removeFirst();
+        if (this.data.size() > CAPACITY) {
+            this.data.removeFirst();
         }
     }
 
+    /**
+     * clears all quat
+     */
     public void clear() {
-        this._data.clear();
+        this.data.clear();
     }
 
+    /**
+     * @return if the history is empty
+     */
+    public boolean isEmpty() {
+        return this.data.isEmpty();
+    }
+
+    /**
+     * @return the newest Quaternion
+     */
     public Quaternionf latest() {
-        return (this._data.getLast()).data;
+        return this.data.isEmpty() ? new Quaternionf() : this.data.getLast().quat;
     }
 
-    public Quaternionf averageRotation(double seconds) {
-        long i = Util.getMillis();
-        ListIterator<Entry> listiterator = this._data.listIterator(this._data.size());
+    /**
+     * get the average rotation of the last {@code seconds}
+     *
+     * @param seconds time to take the average over
+     * @return average rotation
+     */
+    public Quaternionfc averageRotation(double seconds) {
+        long now = Util.getMillis();
+        ListIterator<Entry> iterator = this.data.listIterator(this.data.size());
         List<Quaternionf> list = new LinkedList<>();
 
-        for (int j = 0; listiterator.hasPrevious(); j++) {
-            Entry entry = listiterator.previous();
+        while (iterator.hasPrevious()) {
+            Entry entry = iterator.previous();
 
-            if ((double) (i - entry.ts) > seconds * 1000.0D) {
+            if (now - entry.ts > seconds * 1000.0D) {
                 break;
             } else {
-                list.add(entry.data);
+                list.add(entry.quat);
             }
         }
 
-        if (list.size() > 0) {
-            Quaternionf quaternionf = new Quaternionf();
+        if (!list.isEmpty()) {
             float[] weights = new float[list.size()];
             Arrays.fill(weights, 1.0F);
-            Quaternionf.slerp(list.toArray(new Quaternionf[]{}), weights, quaternionf);
-
-            return quaternionf;
+            return Quaternionf.slerp(list.toArray(new Quaternionf[]{}), weights, new Quaternionf());
         } else {
             return latest();
         }
     }
 
-    private static class Entry {
-        public long ts = Util.getMillis();
-        public Quaternionf data;
-
-        public Entry(Quaternionf in) {
-            this.data = in;
+    /**
+     * Entry holding a quaternion and timestamp
+     */
+    private record Entry(Quaternionf quat, long ts) {
+        public Entry(Quaternionf quat) {
+            this(quat, Util.getMillis());
         }
     }
 }

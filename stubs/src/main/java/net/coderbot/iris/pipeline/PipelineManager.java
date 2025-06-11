@@ -6,6 +6,5 @@ public class PipelineManager {
     private WorldRenderingPipeline pipeline;
     private final Function<Object, WorldRenderingPipeline> pipelineFactory = null;
 
-    private void resetTextureState() {
-    }
+    private void resetTextureState() {}
 }
