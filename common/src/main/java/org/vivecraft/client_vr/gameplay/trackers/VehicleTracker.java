@@ -53,6 +53,11 @@ public class VehicleTracker implements Tracker {
         this.isRiding = false;
     }
 
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
     public double getVehicleFloor(Entity vehicle, double original) {
 //        if (vehicle instanceof AbstractHorse) {
         return original; // horses are fine.
@@ -275,10 +280,5 @@ public class VehicleTracker implements Tracker {
         return player.zza == 0.0F && player.xxa == 0.0F &&
             player.isPassenger() && player.getVehicle().onGround() &&
             this.dismountCooldown == 0;
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 }

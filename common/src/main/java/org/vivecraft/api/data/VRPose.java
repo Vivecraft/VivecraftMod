@@ -23,7 +23,7 @@ public interface VRPose {
      * @return Body part pose data for the HMD.
      */
     default VRBodyPartData getHMD() {
-        return getBodyPartData(VRBodyPart.HMD);
+        return getBodyPartData(VRBodyPart.HEAD);
     }
 
     /**

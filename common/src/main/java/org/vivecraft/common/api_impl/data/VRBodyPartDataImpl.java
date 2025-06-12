@@ -4,7 +4,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionfc;
 import org.vivecraft.api.data.VRBodyPartData;
 
-public record VRBodyPartDataImpl(Vec3 pos, Vec3 rot, Quaternionfc quaternion) implements VRBodyPartData {
+public record VRBodyPartDataImpl(Vec3 pos, Vec3 dir, Quaternionfc rot) implements VRBodyPartData {
 
     @Override
     public Vec3 getPos() {
@@ -12,35 +12,39 @@ public record VRBodyPartDataImpl(Vec3 pos, Vec3 rot, Quaternionfc quaternion) im
     }
 
     @Override
-    public Vec3 getRot() {
-        return this.rot;
+    public Vec3 getDir() {
+        return this.dir;
     }
 
     @Override
     public double getPitch() {
-        return Math.asin(this.rot.y / this.rot.length());
+        return Math.asin(this.dir.y / this.dir.length());
     }
 
     @Override
     public double getYaw() {
-        return Math.atan2(-this.rot.x, this.rot.z);
+        return Math.atan2(-this.dir.x, this.dir.z);
     }
 
     @Override
     public double getRoll() {
-        return -Math.atan2(2.0F * (this.quaternion.x() * this.quaternion.y() + this.quaternion.w() * this.quaternion.z()),
-            this.quaternion.w() * this.quaternion.w() - this.quaternion.x() * this.quaternion.x() +
-                this.quaternion.y() * this.quaternion.y() -
-                this.quaternion.z() * this.quaternion.z());
+        return -Math.atan2(2.0F * (this.rot.x() * this.rot.y() + this.rot.w() * this.rot.z()),
+            this.rot.w() * this.rot.w() - this.rot.x() * this.rot.x() +
+                this.rot.y() * this.rot.y() -
+                this.rot.z() * this.rot.z());
     }
 
     @Override
-    public Quaternionfc getQuaternion() {
-        return this.quaternion;
+    public Quaternionfc getRotation() {
+        return this.rot;
     }
 
     @Override
     public String toString() {
-        return "Position: " + getPos() + ", Rotation: " + getRot();
+        return """
+            Position: %s
+            Direction: %s
+            Rotation: %s
+            """.formatted(this.pos, this.dir, this.rot);
     }
 }

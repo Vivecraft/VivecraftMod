@@ -117,6 +117,11 @@ public class SwingTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         float speedTreshhold = SPEED_THRESH;
 
@@ -415,11 +420,6 @@ public class SwingTracker implements Tracker {
         ClientNetworking.resetActiveBodyPart();
 
         Profiler.get().pop();
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 
     private boolean getIsHittingBlock() {

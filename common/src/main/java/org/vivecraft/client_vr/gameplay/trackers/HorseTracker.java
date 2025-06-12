@@ -62,6 +62,11 @@ public class HorseTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         this.horse = (Horse) player.getVehicle();
         this.horse.setNoAi(true);
@@ -126,11 +131,6 @@ public class HorseTracker implements Tracker {
 
         Vec3 movement = new Vec3(0.0D, 0.0D, this.speedLevel * BASE_SPEED).yRot(-this.horse.yBodyRot);
         this.horse.setDeltaMovement(movement.x, this.horse.getDeltaMovement().y, movement.z);
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 
     private boolean doBoost() {

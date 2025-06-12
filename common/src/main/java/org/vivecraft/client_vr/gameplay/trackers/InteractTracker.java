@@ -123,6 +123,11 @@ public class InteractTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         if (this.rightClickable == null) {
             // compile a list of blocks that explicitly declare OnBlockActivated (right click)
@@ -275,11 +280,6 @@ public class InteractTracker implements Tracker {
             // because some mods implement interfaces for mod compat, that don't need to be present and
             // those throw a NoClassDefFoundError
         }
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 
     public boolean isInteractActive(int controller) {

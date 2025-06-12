@@ -47,6 +47,18 @@ public class CameraTracker implements Tracker {
     }
 
     @Override
+    public void reset(LocalPlayer player) {
+        this.visible = false;
+        this.quickMode = false;
+        this.stopMoving();
+    }
+
+    @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_FRAME;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         if (this.startControllerPose != null) {
             VRData.VRDevicePose controllerPose = this.dh.vrPlayer.vrdata_world_render.getController(
@@ -76,17 +88,6 @@ public class CameraTracker implements Tracker {
         {
             this.visible = false;
         }
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_FRAME;
-    }
-
-    public void reset(LocalPlayer player) {
-        this.visible = false;
-        this.quickMode = false;
-        this.stopMoving();
     }
 
     public boolean isVisible() {

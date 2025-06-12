@@ -49,17 +49,17 @@ public class CrawlTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         float scaledWorldScale = this.dh.vrPlayer.worldScale /
             ScaleHelper.getEntityEyeHeightScale(player, ClientUtils.getCurrentPartialTick());
         this.crawling = this.dh.vr.hmdPivotHistory.averagePosition(0.2F).y * scaledWorldScale + 0.1F <
             this.dh.vrSettings.crawlThreshold;
         this.updateState(player);
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 
     private void updateState(LocalPlayer player) {

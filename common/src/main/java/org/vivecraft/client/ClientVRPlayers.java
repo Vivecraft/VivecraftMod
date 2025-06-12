@@ -547,6 +547,7 @@ public class ClientVRPlayers {
         public Vector3fc leftElbowPos;
         public Quaternionfc leftElbowQuat;
 
+        // API pose object representing the data of this object
         private VRPose vrPose;
 
         /**

@@ -110,6 +110,11 @@ public class JumpTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         boolean climbeyEquipped = hasClimbeyJumpEquipped(player);
 
@@ -227,10 +232,5 @@ public class JumpTracker implements Tracker {
         {
             player.jumpFromGround();
         }
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 }

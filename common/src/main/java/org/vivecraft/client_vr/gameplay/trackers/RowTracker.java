@@ -60,6 +60,11 @@ public class RowTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         float c0Move = this.dh.vr.controllerHistory[0].averageSpeed(0.5D);
         float c1Move = this.dh.vr.controllerHistory[1].averageSpeed(0.5D);
@@ -85,11 +90,6 @@ public class RowTracker implements Tracker {
         }
 
         // TODO: Backwards paddlin'
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 
     public void doProcessFinaltransmithastofixthis(LocalPlayer player) {

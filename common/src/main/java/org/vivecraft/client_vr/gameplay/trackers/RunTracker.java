@@ -54,6 +54,11 @@ public class RunTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
 
         float c0Move = this.dh.vr.controllerHistory[0].averageSpeed(0.33D);
@@ -89,10 +94,5 @@ public class RunTracker implements Tracker {
         if (this.speed > 1.0F) {
             this.speed = 1.3F;
         }
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 }

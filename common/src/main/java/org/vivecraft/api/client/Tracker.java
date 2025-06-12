@@ -4,6 +4,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.vivecraft.api.VRAPI;
 
+import javax.annotation.Nullable;
+
 /**
  * A tracker is an object that is run for the local player during the game tick or before rendering a frame only if
  * they are in VR. Using trackers are one of the cleanest ways to interact with Vivecraft's data; it's how Vivecraft
@@ -16,22 +18,22 @@ public interface Tracker {
     /**
      * Whether the tracker is active for the local player.
      *
-     * @param player Player being checked if they are active for this tracker instances.
+     * @param player Player being checked if they are active for this tracker instances. Will be {@code null} when not in a world.
      * @return true if the tracker is active for the specified player.
      */
-    boolean isActive(LocalPlayer player);
+    boolean isActive(@Nullable LocalPlayer player);
 
     /**
      * Called for the client player if this tracker is active, which is when {@link #isActive(LocalPlayer)} returns true.
      *
-     * @param player Player to run this tracker for, which is the local player.
+     * @param player Player to run this tracker for, which is the local player. Will be {@code null} when not in a world. Only {@code null} if {@link #isActive(LocalPlayer)} also got {@code null}.
      */
-    void doProcess(LocalPlayer player);
+    void doProcess(@Nullable LocalPlayer player);
 
     /**
-     * The ticking type for this tracker.
-     * If this is PER_FRAME, the tracker is called once with the local player per frame before the frame is rendered.
-     * If this is PER_TICK, the tracker is called once with the local player per game tick during the tick.
+     * The ticking type for this tracker.<br>
+     * If this is {@link TrackerTickType#PER_FRAME}, the tracker is called once with the local player per frame before the frame is rendered.<br>
+     * If this is {@link TrackerTickType#PER_TICK}, the tracker is called once with the local player per game tick during the tick.
      *
      * @return The ticking type this tracker should use.
      */
@@ -40,21 +42,17 @@ public interface Tracker {
     /**
      * Called to reset this tracker's state. This is called whenever {@link #isActive(LocalPlayer)} returns false.
      *
-     * @param player The local player.
+     * @param player The local player. Will be {@code null} when not in a world. Only {@code null} if {@link #isActive(LocalPlayer)} also got {@code null}.
      */
-    default void reset(LocalPlayer player) {
-
-    }
+    default void reset(@Nullable LocalPlayer player) {}
 
     /**
      * Called for the local player, whether the tracker is active or not for them. This runs before
      * {@link #isActive(LocalPlayer)} or {@link #reset(LocalPlayer)}.
      *
-     * @param player Player to do an idle tick for, which is the local player.
+     * @param player Player to do an idle tick for. Will be {@code null} when not in a world.
      */
-    default void idleTick(LocalPlayer player) {
-
-    }
+    default void idleTick(@Nullable LocalPlayer player) {}
 
     /**
      * The timing type used for ticking trackers.

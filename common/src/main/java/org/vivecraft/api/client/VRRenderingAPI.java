@@ -4,6 +4,7 @@ import com.google.common.annotations.Beta;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.vivecraft.client.api_impl.VRRenderingAPIImpl;
 import org.vivecraft.client_vr.render.RenderPass;
 
@@ -55,4 +56,14 @@ public interface VRRenderingAPI {
      */
     @Beta
     void setupRenderingAtHand(InteractionHand hand, PoseStack stack);
+
+    /**
+     * Sets the provided {@link Matrix4f} to render at the position of and with the rotation of the provided
+     * {@link InteractionHand}.
+     *
+     * @param hand   The hand to set the PoseStack to.
+     * @param matrix The PoseStack to be set.
+     */
+    @Beta
+    void setupRenderingAtHand(InteractionHand hand, Matrix4f matrix);
 }

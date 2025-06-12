@@ -136,7 +136,7 @@ public interface VRClientAPI {
     float getWorldScale();
 
     /**
-     * Requests the amount of ticks of history wanted for {@link #getHistoricalVRPoses()}. Any value larger than 200
+     * Requests the number of ticks of history wanted for {@link #getHistoricalVRPoses()}. Any value larger than 200
      * will be capped at 200.
      *
      * @param maxTicksBack The maximum number of ticks of history wanted.

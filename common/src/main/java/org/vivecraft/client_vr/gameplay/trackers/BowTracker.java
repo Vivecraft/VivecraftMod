@@ -118,6 +118,11 @@ public class BowTracker implements Tracker, ItemInUseTracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_FRAME;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         VRData vrData = this.dh.vrPlayer.getVRDataWorld();
 
@@ -287,10 +292,5 @@ public class BowTracker implements Tracker, ItemInUseTracker {
                 this.lastHapStep = 0;
             }
         }
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_FRAME;
     }
 }

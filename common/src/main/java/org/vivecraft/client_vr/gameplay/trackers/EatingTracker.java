@@ -71,6 +71,11 @@ public class EatingTracker implements Tracker, ItemInUseTracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         VRData room_pre = this.dh.vrPlayer.vrdata_room_pre;
         Vector3f hmdPos = room_pre.hmd.getPositionF();
@@ -129,10 +134,5 @@ public class EatingTracker implements Tracker, ItemInUseTracker {
                 this.eating[c] = false;
             }
         }
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 }

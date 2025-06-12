@@ -40,6 +40,11 @@ public class SneakTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         if (!this.mc.isPaused() && this.dh.sneakTracker.sneakCounter > 0) {
             this.dh.sneakTracker.sneakCounter--;
@@ -47,10 +52,5 @@ public class SneakTracker implements Tracker {
 
         this.sneakOverride = AutoCalibration.getPlayerHeight() - this.dh.vr.hmdPivotHistory.latest().y() >
             this.dh.vrSettings.sneakThreshold;
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 }

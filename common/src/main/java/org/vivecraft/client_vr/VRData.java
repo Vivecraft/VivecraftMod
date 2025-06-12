@@ -68,6 +68,7 @@ public class VRData {
     // pose positions get scaled by that
     public float worldScale;
 
+    // API pose object representing the data of this object
     private VRPose vrPose;
 
     public VRData(Vec3 origin, float walkMul, float worldScale, float rotation) {

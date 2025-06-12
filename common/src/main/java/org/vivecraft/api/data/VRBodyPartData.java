@@ -15,9 +15,9 @@ public interface VRBodyPartData {
     Vec3 getPos();
 
     /**
-     * @return The rotation of the body part.
+     * @return The forward direction of the body part.
      */
-    Vec3 getRot();
+    Vec3 getDir();
 
     /**
      * @return The pitch of the body part in radians.
@@ -37,5 +37,5 @@ public interface VRBodyPartData {
     /**
      * @return The quaternion representing the rotation of the body part.
      */
-    Quaternionfc getQuaternion();
+    Quaternionfc getRotation();
 }

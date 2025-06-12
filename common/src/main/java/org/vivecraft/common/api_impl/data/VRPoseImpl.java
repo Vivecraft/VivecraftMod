@@ -22,7 +22,7 @@ public record VRPoseImpl(VRBodyPartData hmd, VRBodyPartData c0, VRBodyPartData c
             throw new IllegalArgumentException("Cannot get a null body part's data!");
         }
         return switch (vrBodyPart) {
-            case HMD -> this.hmd;
+            case HEAD -> this.hmd;
             case MAIN_HAND -> this.c0;
             case OFF_HAND -> this.c1;
             case RIGHT_FOOT -> this.rightFoot;
@@ -42,6 +42,24 @@ public record VRPoseImpl(VRBodyPartData hmd, VRBodyPartData c0, VRBodyPartData c
 
     @Override
     public String toString() {
-        return "HMD: " + getHMD() + "\nController 0: " + getMainHand() + "\nController 1: " + getOffHand();
+        StringBuilder sb = new StringBuilder();
+        sb.append("VRPose:\nHMD: ").append(this.hmd)
+            .append("\nmain hand: ").append(this.c0)
+            .append("\noffhand: ").append(this.c1);
+        if (this.fbtMode != FBTMode.ARMS_ONLY) {
+            sb.append("\nright foot: ").append(this.rightFoot)
+                .append("\nleft foot: ").append(this.leftFoot)
+                .append("\nwaist: ").append(this.waist);
+        }
+        if (this.fbtMode == FBTMode.WITH_JOINTS) {
+            sb.append("\nright knee: ").append(this.rightKnee)
+                .append("\nleft knee: ").append(this.leftKnee)
+                .append("\nright elbow: ").append(this.rightElbow)
+                .append("\nleft elbow: ").append(this.leftElbow);
+        }
+        sb.append("\nseated: ").append(this.isSeated)
+            .append(", leftHanded: ").append(this.isLeftHanded)
+            .append(", fbtMode: ").append(this.fbtMode);
+        return sb.toString();
     }
 }

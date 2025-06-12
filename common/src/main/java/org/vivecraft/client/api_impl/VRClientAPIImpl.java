@@ -1,6 +1,5 @@
 package org.vivecraft.client.api_impl;
 
-import org.jetbrains.annotations.Nullable;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.client.data.VRPoseHistory;
@@ -11,6 +10,8 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
+
+import javax.annotation.Nullable;
 
 public final class VRClientAPIImpl implements VRClientAPI {
 
@@ -78,7 +79,7 @@ public final class VRClientAPIImpl implements VRClientAPI {
         if (!isVRActive()) {
             return null;
         }
-        return ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.asVRPose();
+        return ClientDataHolderVR.getInstance().vrPlayer.getVRDataWorld().asVRPose();
     }
 
     @Override

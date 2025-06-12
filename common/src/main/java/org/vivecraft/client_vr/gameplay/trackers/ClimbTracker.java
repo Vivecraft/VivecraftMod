@@ -190,6 +190,11 @@ public class ClimbTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         boolean[] button = new boolean[2];
         boolean[] allowed = new boolean[2];
@@ -663,11 +668,6 @@ public class ClimbTracker implements Tracker {
                 blockStateBelow.getValue(LadderBlock.FACING) == blockState.getValue(TrapDoorBlock.FACING);
         }
         return false;
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 
     private boolean allowed(BlockState bs) {

@@ -82,6 +82,11 @@ public class TeleportTracker implements Tracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         Random random = new Random();
 
@@ -306,7 +311,7 @@ public class TeleportTracker implements Tracker {
 
                 this.checkAndSetTeleportDestination(player, start, blockhitresult);
 
-                Vec3 diff = this.mc.player.position().subtract(this.movementTeleportDestination);
+                Vec3 diff = player.position().subtract(this.movementTeleportDestination);
 
                 double yDiff = diff.y;
                 this.movementTeleportDistance = diff.length();
@@ -503,10 +508,5 @@ public class TeleportTracker implements Tracker {
                 this.movementTeleportArc[step].y + deltaY * stepProgress,
                 this.movementTeleportArc[step].z + deltaZ * stepProgress);
         }
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 }

@@ -2,11 +2,12 @@ package org.vivecraft.common.api_impl;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
 import org.vivecraft.api.VRAPI;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.server.ServerVRPlayers;
+
+import javax.annotation.Nullable;
 
 public final class VRAPIImpl implements VRAPI {
 
@@ -19,9 +20,9 @@ public final class VRAPIImpl implements VRAPI {
     public boolean isVRPlayer(Player player) {
         if (player instanceof ServerPlayer serverPlayer) {
             return ServerVRPlayers.isVRPlayer(serverPlayer);
+        } else {
+            return ClientVRPlayers.getInstance().isVRPlayer(player);
         }
-
-        return ClientVRPlayers.getInstance().isVRPlayer(player);
     }
 
     @Nullable
@@ -29,11 +30,10 @@ public final class VRAPIImpl implements VRAPI {
     public VRPose getVRPose(Player player) {
         if (!isVRPlayer(player)) {
             return null;
-        }
-        if (player instanceof ServerPlayer serverPlayer) {
+        } else if (player instanceof ServerPlayer serverPlayer) {
             return ServerVRPlayers.getVivePlayer(serverPlayer).asVRPose();
+        } else {
+            return ClientVRPlayers.getInstance().getRotationsForPlayer(player.getUUID()).asVRPose(player.position());
         }
-
-        return ClientVRPlayers.getInstance().getRotationsForPlayer(player.getUUID()).asVRPose(player.position());
     }
 }

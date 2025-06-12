@@ -54,6 +54,11 @@ public class TelescopeTracker implements Tracker, ItemInUseTracker {
     }
 
     @Override
+    public TrackerTickType tickType() {
+        return TrackerTickType.PER_TICK;
+    }
+
+    @Override
     public void doProcess(LocalPlayer player) {
         for (int c = 0; c < 2; c++) {
             if (isTelescope(player.getItemInHand(InteractionHand.values()[c]))) {
@@ -69,11 +74,6 @@ public class TelescopeTracker implements Tracker, ItemInUseTracker {
                 this.viewing[c] = false;
             }
         }
-    }
-
-    @Override
-    public TrackerTickType tickType() {
-        return TrackerTickType.PER_TICK;
     }
 
     /**
