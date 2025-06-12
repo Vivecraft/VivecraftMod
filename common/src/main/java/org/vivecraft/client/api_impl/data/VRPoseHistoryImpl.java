@@ -14,7 +14,8 @@ import java.util.List;
 
 public class VRPoseHistoryImpl implements VRPoseHistory {
 
-    // Holds historical VRPose data. The index into here is simply the number of ticks back that data is.
+    // Holds historical VRPose data. The index into here is simply the number of ticks back that data is, with index
+    // 0 being 0 ticks back.
     private final LinkedList<VRPose> dataQueue = new LinkedList<>();
 
     public VRPoseHistoryImpl() {
@@ -81,7 +82,7 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
         }
         maxTicksBack = getNumTicksBack(maxTicksBack);
         List<Vec3> diffs = new ArrayList<>(maxTicksBack);
-        for (int i = 0; i < maxTicksBack; i++) {
+        for (int i = 0; i <= maxTicksBack; i++) {
             VRBodyPartData newer = this.dataQueue.get(i).getBodyPartData(bodyPart);
             VRBodyPartData older = this.dataQueue.get(i + 1).getBodyPartData(bodyPart);
             if (newer == null || older == null) {
@@ -110,7 +111,7 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
         }
         maxTicksBack = getNumTicksBack(maxTicksBack);
         List<Double> speeds = new ArrayList<>(maxTicksBack);
-        for (int i = 0; i < maxTicksBack; i++) {
+        for (int i = 0; i <= maxTicksBack; i++) {
             VRBodyPartData newer = this.dataQueue.get(i).getBodyPartData(bodyPart);
             VRBodyPartData older = this.dataQueue.get(i + 1).getBodyPartData(bodyPart);
             if (newer == null || older == null) {
@@ -130,12 +131,14 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
         }
         maxTicksBack = getNumTicksBack(maxTicksBack);
         List<Vec3> positions = new ArrayList<>(maxTicksBack);
+        int i = 0;
         for (VRPose pose : this.dataQueue) {
             VRBodyPartData data = pose.getBodyPartData(bodyPart);
             if (data == null) {
                 break;
             }
             positions.add(data.getPos());
+            if (++i >= maxTicksBack) break;
         }
         if (positions.isEmpty()) {
             return null;
