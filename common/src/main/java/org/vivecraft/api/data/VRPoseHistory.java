@@ -9,7 +9,7 @@ public interface VRPoseHistory {
 
     /**
      * @return The amount of ticks worth of history being held. The number returned by this method will never be higher
-     * than the largest valid value set by {@link org.vivecraft.api.client.VRClientAPI#requestTicksOfHistory(int)}, however
+     * than the largest valid value set by the respective call to {@code requestTicksOfHistory(int)}, however
      * can be lower than it.
      */
     int ticksOfHistory();
@@ -22,16 +22,14 @@ public interface VRPoseHistory {
     List<VRPose> getAllHistoricalData() throws IllegalArgumentException;
 
     /**
-     * Gets the pose history {@code ticksBack} ticks back. This will throw an IllegalStateException if the data cannot
-     * be retrieved due to not having enough history.
+     * Gets the pose history {@code ticksBack} ticks back, or null if such data isn't available.
      *
      * @param ticksBack Ticks back to retrieve data.
-     * @return A {@link VRPose} instance from index ticks ago.
-     * @throws IllegalStateException    If ticksBack references a tick that there is not yet data for.
+     * @return A {@link VRPose} instance from index ticks ago, or null if that data isn't available.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than the largest valid value set by
-     *                                  {@link org.vivecraft.api.client.VRClientAPI#requestTicksOfHistory(int)} or less than 0.
+     *                                  the respective call to {@code requestTicksOfHistory(int)} or less than 0.
      */
-    VRPose getHistoricalData(int ticksBack) throws IllegalArgumentException, IllegalStateException;
+    VRPose getHistoricalData(int ticksBack) throws IllegalArgumentException;
 
     /**
      * Gets the net movement between the most recent pose in this instance and the oldest position that can be
@@ -42,7 +40,7 @@ public interface VRPoseHistory {
      * @return The aforementioned net movement. Note that this will return zero change on all axes if only zero ticks
      * can be looked back. Will be null if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than the largest valid value set by
-     *                                  {@link org.vivecraft.api.client.VRClientAPI#requestTicksOfHistory(int)} or less than 0.
+     *                                  the respective call to {@code requestTicksOfHistory(int)} or less than 0.
      */
     @Nullable
     Vec3 netMovement(VRBodyPart bodyPart, int maxTicksBack) throws IllegalArgumentException;
@@ -56,7 +54,7 @@ public interface VRPoseHistory {
      * @return The aforementioned average velocity on each axis. Note that this will return zero velocity on all axes
      * if only zero ticks can be looked back. Will be null if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than the largest valid value set by
-     *                                  {@link org.vivecraft.api.client.VRClientAPI#requestTicksOfHistory(int)} or less than 0.
+     *                                  the respective call to {@code requestTicksOfHistory(int)} or less than 0.
      */
     @Nullable
     Vec3 averageVelocity(VRBodyPart bodyPart, int maxTicksBack) throws IllegalArgumentException;
@@ -70,7 +68,7 @@ public interface VRPoseHistory {
      * @return The aforementioned average speed on each axis. Note that this will return zero speed if only zero ticks
      * can be looked back. Will be 0 if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than the largest valid value set by
-     *                                  {@link org.vivecraft.api.client.VRClientAPI#requestTicksOfHistory(int)} or less than 0.
+     *                                  the respective call to {@code requestTicksOfHistory(int)} or less than 0.
      */
     double averageSpeed(VRBodyPart bodyPart, int maxTicksBack) throws IllegalArgumentException;
 
@@ -83,7 +81,7 @@ public interface VRPoseHistory {
      * @return The aforementioned average position. Note that this will return the current position if only zero ticks
      * can be looked back. Will be null if the body part requested isn't available.
      * @throws IllegalArgumentException Thrown when maxTicksBack is larger than the largest valid value set by
-     *                                  {@link org.vivecraft.api.client.VRClientAPI#requestTicksOfHistory(int)} or less than 0.
+     *                                  the respective call to {@code requestTicksOfHistory(int)} or less than 0.
      */
     @Nullable
     Vec3 averagePosition(VRBodyPart bodyPart, int maxTicksBack) throws IllegalArgumentException;

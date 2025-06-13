@@ -46,12 +46,10 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     }
 
     @Override
-    public VRPose getHistoricalData(int ticksBack) throws IllegalArgumentException, IllegalStateException {
+    public VRPose getHistoricalData(int ticksBack) throws IllegalArgumentException {
         checkTicksBack(ticksBack);
         if (this.dataQueue.size() <= ticksBack) {
-            throw new IllegalStateException(
-                "Cannot retrieve data from " + ticksBack + " ticks ago, when there is only data for up to " +
-                    (this.dataQueue.size() - 1) + " ticks ago.");
+            return null;
         }
         return this.dataQueue.get(ticksBack);
     }
