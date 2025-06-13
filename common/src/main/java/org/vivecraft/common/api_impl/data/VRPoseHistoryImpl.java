@@ -153,7 +153,13 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
 
     private void checkTicksBack(int ticksBack) {
         if (ticksBack < 0 || ticksBack > maxTicksOfHistory()) {
-            throw new IllegalArgumentException("Value must be between 0 and " + maxTicksOfHistory() + ".");
+            // Throw a different exception when no history was requested to help guide mod authors.
+            if (maxTicksOfHistory() == 0) {
+                throw new IllegalArgumentException("No amount of VRPoseHistory was requested. See " +
+                    "requestTicksOfHistory() in VRAPI and VRClientAPI.");
+            } else {
+                throw new IllegalArgumentException("Value must be between 0 and " + maxTicksOfHistory() + ".");
+            }
         }
     }
 
