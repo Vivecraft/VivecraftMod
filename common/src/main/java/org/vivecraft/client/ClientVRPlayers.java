@@ -28,6 +28,7 @@ import org.vivecraft.client_vr.render.helpers.RenderHelper;
 import org.vivecraft.client_vr.settings.AutoCalibration;
 import org.vivecraft.client_vr.settings.VRSettings;
 import org.vivecraft.client_xr.render_pass.RenderPassType;
+import org.vivecraft.common.api_impl.VRAPIImpl;
 import org.vivecraft.common.api_impl.data.VRBodyPartDataImpl;
 import org.vivecraft.common.api_impl.data.VRPoseImpl;
 import org.vivecraft.common.network.VrPlayerState;
@@ -123,6 +124,7 @@ public class ClientVRPlayers {
         this.vivePlayers.remove(player);
         this.vivePlayersLast.remove(player);
         this.vivePlayersReceived.remove(player);
+        VRAPIImpl.INSTANCE.clearPoseHistory(player, true);
     }
 
     public void update(
@@ -193,6 +195,13 @@ public class ClientVRPlayers {
             rotInfo.leftElbowQuat = vrPlayerState.leftElbow().orientation();
         }
 
+        if (!localPlayer) {
+            Player otherPlayer = this.mc.level.getPlayerByUUID(uuid);
+            if (otherPlayer != null) {
+                VRAPIImpl.INSTANCE.addPoseToHistory(uuid, rotInfo.asVRPose(otherPlayer.position()), true);
+            }
+        }
+
         this.vivePlayersReceived.put(uuid, rotInfo);
     }
 
@@ -218,6 +227,7 @@ public class ClientVRPlayers {
                     iterator.remove();
                     this.vivePlayersLast.remove(uuid);
                     this.vivePlayersReceived.remove(uuid);
+                    VRAPIImpl.INSTANCE.clearPoseHistory(uuid, true);
                 }
             }
 

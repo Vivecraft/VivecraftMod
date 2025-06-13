@@ -1,6 +1,7 @@
 package org.vivecraft.api.client;
 
-import org.vivecraft.api.client.data.VRPoseHistory;
+import org.vivecraft.api.VRAPI;
+import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.api_impl.VRClientAPIImpl;
@@ -138,6 +139,9 @@ public interface VRClientAPI {
     /**
      * Requests the number of ticks of history wanted for {@link #getHistoricalVRPoses()}. Any value larger than 200
      * will be capped at 200.
+     * <br>
+     * Requests for the number of ticks for players other than the local player should be made with
+     * {@link VRAPI#requestTicksOfHistory(int)}.
      *
      * @param maxTicksBack The maximum number of ticks of history wanted.
      * @throws IllegalArgumentException If a non-positive number is supplied.
@@ -145,8 +149,12 @@ public interface VRClientAPI {
     void requestTicksOfHistory(int maxTicksBack) throws IllegalArgumentException;
 
     /**
-     * Returns the history of VR poses for the player. One should make one call to {@link #requestTicksOfHistory(int)}
-     * before calling this method to inform Vivecraft of the amount of history to keep.
+     * Returns the history of VR poses for the local player. One should make one call to
+     * {@link #requestTicksOfHistory(int)} before calling this method to inform Vivecraft of the amount of history to
+     * keep for the local player.
+     * <br>
+     * If one wants historical VR poses for other players and/or on the server, use
+     * {@link VRAPI#getHistoricalVRPoses(net.minecraft.world.entity.player.Player)} instead.
      *
      * @return The history of VR poses for the player. Will be null if the player isn't in VR or if
      * {@link #requestTicksOfHistory(int)} has yet to be called.

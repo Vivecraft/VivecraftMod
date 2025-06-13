@@ -2,10 +2,11 @@ package org.vivecraft.client.api_impl;
 
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.VRClientAPI;
-import org.vivecraft.api.client.data.VRPoseHistory;
+import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRPose;
-import org.vivecraft.client.api_impl.data.VRPoseHistoryImpl;
+import org.vivecraft.common.api_impl.VRAPIImpl;
+import org.vivecraft.common.api_impl.data.VRPoseHistoryImpl;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
@@ -16,10 +17,8 @@ import javax.annotation.Nullable;
 public final class VRClientAPIImpl implements VRClientAPI {
 
     public static final VRClientAPIImpl INSTANCE = new VRClientAPIImpl();
-    // If updated, should also update Javadocs in VRClientAPI
-    private static final int MAX_CONFIGURABLE_HISTORY_TICKS = 200;
 
-    private final VRPoseHistoryImpl poseHistory = new VRPoseHistoryImpl();
+    private final VRPoseHistoryImpl poseHistory = new VRPoseHistoryImpl(true);
     private int maxPoseHistorySize = 0;
 
     private VRClientAPIImpl() {
@@ -145,7 +144,7 @@ public final class VRClientAPIImpl implements VRClientAPI {
             throw new IllegalArgumentException("Must call requestTicksOfHistory() with a positive number.");
         }
         this.maxPoseHistorySize = Math.max(this.maxPoseHistorySize,
-            Math.min(maxTicksBack, MAX_CONFIGURABLE_HISTORY_TICKS));
+            Math.min(maxTicksBack, VRAPIImpl.MAX_CONFIGURABLE_HISTORY_TICKS));
     }
 
     @Override

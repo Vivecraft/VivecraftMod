@@ -7,6 +7,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
+import org.vivecraft.common.api_impl.VRAPIImpl;
 import org.vivecraft.common.network.CommonNetworkHelper;
 import org.vivecraft.common.network.VrPlayerState;
 import org.vivecraft.common.utils.MathUtils;
@@ -201,6 +202,7 @@ public class ServerVivePlayer {
     public void setVrPlayerState(VrPlayerState vrPlayerState) {
         this.vrPlayerState = vrPlayerState;
         this.vrPlayerStateAsPose = null;
+        VRAPIImpl.INSTANCE.addPoseToHistory(player.getUUID(), vrPlayerState.asVRPose(player.position()), false);
     }
 
     public VRPose asVRPose() {

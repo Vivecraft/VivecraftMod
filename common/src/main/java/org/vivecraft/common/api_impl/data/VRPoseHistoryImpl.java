@@ -1,12 +1,13 @@
-package org.vivecraft.client.api_impl.data;
+package org.vivecraft.common.api_impl.data;
 
 import net.minecraft.world.phys.Vec3;
 import org.vivecraft.api.client.VRClientAPI;
-import org.vivecraft.api.client.data.VRPoseHistory;
+import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.client.api_impl.VRClientAPIImpl;
+import org.vivecraft.common.api_impl.VRAPIImpl;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -17,8 +18,10 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     // Holds historical VRPose data. The index into here is simply the number of ticks back that data is, with index
     // 0 being 0 ticks back.
     private final LinkedList<VRPose> dataQueue = new LinkedList<>();
+    private boolean isLocalPlayer;
 
-    public VRPoseHistoryImpl() {
+    public VRPoseHistoryImpl(boolean isLocalPlayer) {
+        this.isLocalPlayer = isLocalPlayer;
     }
 
     public void addPose(VRPose pose) {
@@ -171,6 +174,7 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     }
 
     private int maxTicksOfHistory() {
-        return VRClientAPIImpl.INSTANCE.maxPoseHistorySize();
+        return isLocalPlayer ?
+            VRClientAPIImpl.INSTANCE.maxPoseHistorySize() : VRAPIImpl.INSTANCE.maxOtherPoseHistorySize();
     }
 }

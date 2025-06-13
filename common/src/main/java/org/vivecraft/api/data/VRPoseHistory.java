@@ -1,8 +1,6 @@
-package org.vivecraft.api.client.data;
+package org.vivecraft.api.data;
 
 import net.minecraft.world.phys.Vec3;
-import org.vivecraft.api.data.VRBodyPart;
-import org.vivecraft.api.data.VRPose;
 
 import javax.annotation.Nullable;
 import java.util.List;
