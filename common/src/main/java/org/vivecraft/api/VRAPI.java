@@ -1,6 +1,7 @@
 package org.vivecraft.api;
 
 import net.minecraft.world.entity.player.Player;
+import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.common.api_impl.VRAPIImpl;
@@ -61,6 +62,11 @@ public interface VRAPI {
      *     {@link org.vivecraft.api.client.VRClientAPI#requestTicksOfHistory(int)}. One can use
      *     {@link org.vivecraft.api.client.VRClientAPI#getHistoricalVRPoses()} to retrieve that same data.</li>
      * </ul>
+     * <br>
+     * Note that due to the inherent latency of networking, historical VR data for the first two options above
+     * (the server requesting the history for any player or the client requesting history for a player other than the
+     * local player) may be unideal.
+     * {@link org.vivecraft.api.client.VRClientAPI#getHistoricalVRPoses()} is preferred.
      *
      * @return The history of VR poses for the player. Will be null if the player isn't in VR or if
      * {@link #requestTicksOfHistory(int)} has yet to be called.
