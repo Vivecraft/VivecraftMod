@@ -13,8 +13,8 @@ import javax.annotation.Nullable;
  * InteractModules are hand agnostic and are processed on tick.
  * <br>
  * They are sorted by the priority value provided by {@link #getPriority} and their ID on a priority tie.
- * Modules are processed in that fixed sorted order and the first one that returns {@code true} on {@link #isActive} gets the keybind.
- * {@link #isActive} on modules after the active one will <strong>not</strong> be called.
+ * Modules are processed in that fixed sorted order per hand and the first one that returns {@code true} on {@link #isActive} gets the keybind for that hand.
+ * {@link #isActive} on modules after the active one will <strong>not</strong> be called for that hand.
  * <br>
  * The first InteractModule in that order, that returns {@code true} on {@link #isActive} will be the active InteractModule for this tick on the hand.
  */
@@ -48,7 +48,7 @@ public interface InteractModule {
     default void reset(@Nullable LocalPlayer player, InteractionHand hand) {}
 
     /**
-     * This is used to check if the user can use the Interact keybind to interact with the module.
+     * This is used to check if the user can use the Interact keybind on the given {@code hand} to interact with the module.
      *
      * @param player       the local player
      * @param hand         the hand to check for
