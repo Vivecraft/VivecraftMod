@@ -1,8 +1,8 @@
 package org.vivecraft.api;
 
 import net.minecraft.world.entity.player.Player;
-import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.api.data.VRPose;
+import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.common.api_impl.VRAPIImpl;
 
 import javax.annotation.Nullable;

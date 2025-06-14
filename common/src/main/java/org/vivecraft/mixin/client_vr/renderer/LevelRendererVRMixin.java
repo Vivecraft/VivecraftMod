@@ -231,11 +231,9 @@ public abstract class LevelRendererVRMixin implements ResourceManagerReloadListe
         InteractTracker interactTracker = ClientDataHolderVR.getInstance().interactTracker;
 
         for (int c = 0; c < 2; c++) {
-            if (interactTracker.isInteractActive(c) &&
-                (interactTracker.inBlockHit[c] != null || interactTracker.bukkit[c]))
-            {
-                BlockPos blockpos = interactTracker.inBlockHit[c] != null ?
-                    interactTracker.inBlockHit[c].getBlockPos() : BlockPos.containing(
+            if (interactTracker.blockModule.isActive(c)) {
+                BlockPos blockpos = interactTracker.blockModule.inBlockHit[c] != null ?
+                    interactTracker.blockModule.inBlockHit[c].getBlockPos() : BlockPos.containing(
                     ClientDataHolderVR.getInstance().vrPlayer.vrdata_world_render.getController(c).getPosition());
                 BlockState blockstate = this.level.getBlockState(blockpos);
                 if (sort == ItemBlockRenderTypes.getChunkRenderType(blockstate).sortOnUpload()) {

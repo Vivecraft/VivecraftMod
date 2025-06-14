@@ -1,9 +1,9 @@
 package org.vivecraft.api.client;
 
 import org.vivecraft.api.VRAPI;
-import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRPose;
+import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.client.api_impl.VRClientAPIImpl;
 
 import javax.annotation.Nullable;
@@ -28,6 +28,14 @@ public interface VRClientAPI {
      * @param tracker Tracker to register.
      */
     void registerTracker(Tracker tracker);
+
+    /**
+     * Registers the interact module to the list of all interact modules to be run for the local player.
+     * See the documentation for {@link InteractModule} for more information on what an interact modules is.
+     *
+     * @param module InteractModule to register.
+     */
+    void registerInteractModule(InteractModule module);
 
     /**
      * Gets the VR pose representing the player in the room after the most recent poll of VR hardware.

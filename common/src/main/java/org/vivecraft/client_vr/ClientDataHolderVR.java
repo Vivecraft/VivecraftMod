@@ -5,6 +5,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
+import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.api.client.ItemInUseTracker;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.client_vr.gameplay.VRPlayer;
@@ -48,6 +49,8 @@ public class ClientDataHolderVR {
     private final List<Tracker> trackers = new ArrayList<>();
     // list of all trackers that control holding item usage
     private final List<ItemInUseTracker> itemInUseTrackers = new ArrayList<>();
+    // list of all registered interact modules
+    private final List<InteractModule> interactModules = new ArrayList<>();
 
     // our trackers
     public final BackpackTracker backpackTracker;
@@ -173,6 +176,21 @@ public class ClientDataHolderVR {
         if (tracker instanceof ItemInUseTracker itemInUseTracker) {
             this.itemInUseTrackers.add(itemInUseTracker);
         }
+    }
+
+    /**
+     * registers a interact module
+     *
+     * @param module module to register
+     * @throws IllegalArgumentException if the module is already registered
+     */
+    public void registerInteractModule(InteractModule module) throws IllegalArgumentException {
+        if (this.interactModules.contains(module)) {
+            throw new IllegalArgumentException("InteractModule is already added and should not be added again!");
+        }
+        this.interactModules.add(module);
+        this.interactModules.sort(InteractModule::compareTo);
+        this.interactTracker.setModules(this.interactModules);
     }
 
     /**

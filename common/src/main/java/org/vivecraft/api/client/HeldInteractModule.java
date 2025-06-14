@@ -1,0 +1,33 @@
+package org.vivecraft.api.client;
+
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.InteractionHand;
+
+import javax.annotation.Nullable;
+
+/**
+ * Compared to a regular {@link InteractModule}, a HeldInteractModule blocks other modules from using the Interact keybind till it is released/not used anymore.<br>
+ * A HeldInteractModule can be used to drag stuff around. Vivecraft itself uses it to trigger the camera grabbing.
+ */
+public interface HeldInteractModule extends InteractModule {
+
+    /**
+     * Called on tick while this module is active and the Interact keybind is still pressed
+     *
+     * @param player the local player
+     * @param hand   the hand that is holding the Interact keybind
+     * @return {@code true} if this module is still active or {@code false} if the Interact keybind should be released early
+     */
+    default boolean doHoldTick(LocalPlayer player, InteractionHand hand) {
+        return true;
+    }
+
+    /**
+     * Counterpart to {@link InteractModule#processBindingPress(LocalPlayer, InteractionHand)}<br>
+     * This is called when the module was active, and the Interact keybind released.
+     *
+     * @param player the local player, {@code null} if not in a world
+     * @param hand   the hand that released the Interact keybind
+     */
+    void processBindingRelease(@Nullable LocalPlayer player, InteractionHand hand);
+}

@@ -1,16 +1,17 @@
 package org.vivecraft.client.api_impl;
 
+import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.VRClientAPI;
-import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.api.data.FBTMode;
 import org.vivecraft.api.data.VRPose;
-import org.vivecraft.common.api_impl.VRAPIImpl;
-import org.vivecraft.common.api_impl.data.VRPoseHistoryImpl;
+import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
 import org.vivecraft.client_vr.provider.ControllerType;
+import org.vivecraft.common.api_impl.VRAPIImpl;
+import org.vivecraft.common.api_impl.data.VRPoseHistoryImpl;
 
 import javax.annotation.Nullable;
 
@@ -159,6 +160,11 @@ public final class VRClientAPIImpl implements VRClientAPI {
     @Override
     public void registerTracker(Tracker tracker) {
         ClientDataHolderVR.getInstance().registerTracker(tracker);
+    }
+
+    @Override
+    public void registerInteractModule(InteractModule module) {
+        ClientDataHolderVR.getInstance().registerInteractModule(module);
     }
 
     @Override

@@ -44,8 +44,8 @@ public final class VRAPIImpl implements VRAPI {
     }
 
     public void clearAllPoseHistories() {
-        clientPoseHistories.clear();
-        serverPoseHistories.clear();
+        this.clientPoseHistories.clear();
+        this.serverPoseHistories.clear();
     }
 
     public int maxOtherPoseHistorySize() {
@@ -95,6 +95,6 @@ public final class VRAPIImpl implements VRAPI {
     }
 
     private Map<UUID, VRPoseHistoryImpl> getMap(boolean isClientSide) {
-        return isClientSide ? clientPoseHistories : serverPoseHistories;
+        return isClientSide ? this.clientPoseHistories : this.serverPoseHistories;
     }
 }
