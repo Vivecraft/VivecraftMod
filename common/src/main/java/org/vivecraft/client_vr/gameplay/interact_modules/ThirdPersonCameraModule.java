@@ -31,7 +31,7 @@ public class ThirdPersonCameraModule implements HeldInteractModule {
     }
 
     @Override
-    public boolean doProcess(@Nullable LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
+    public boolean isActive(@Nullable LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         if (this.dh.vrSettings.mixedRealityRenderCameraModel &&
             (this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.MIXED_REALITY ||
                 this.dh.vrSettings.displayMirrorMode == VRSettings.MirrorMode.THIRD_PERSON
@@ -53,13 +53,13 @@ public class ThirdPersonCameraModule implements HeldInteractModule {
     }
 
     @Override
-    public boolean processBindingPress(@Nullable LocalPlayer player, InteractionHand hand) {
+    public boolean onPress(@Nullable LocalPlayer player, InteractionHand hand) {
         VRHotkeys.startMovingThirdPersonCam(hand.ordinal(), VRHotkeys.Triggerer.INTERACTION);
         return true;
     }
 
     @Override
-    public void processBindingRelease(@Nullable LocalPlayer player, InteractionHand hand) {
+    public void onRelease(@Nullable LocalPlayer player, InteractionHand hand) {
         if (VRHotkeys.isMovingThirdPersonCam() &&
             VRHotkeys.getMovingThirdPersonCamTriggerer() == VRHotkeys.Triggerer.INTERACTION &&
             VRHotkeys.getMovingThirdPersonCamController() == hand.ordinal())

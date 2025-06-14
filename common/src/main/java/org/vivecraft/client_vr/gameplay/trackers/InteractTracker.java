@@ -14,6 +14,7 @@ import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class InteractTracker implements Tracker {
         setModules(Collections.emptyList());
     }
 
-    public void setModules(List<InteractModule> modules) {
+    public void setModules(Collection<InteractModule> modules) {
         this.modules = new ArrayList<>(this.preAPIModules.size() + modules.size() + this.postAPIModules.size());
         this.modules.addAll(this.preAPIModules);
         this.modules.addAll(modules);
@@ -88,7 +89,7 @@ public class InteractTracker implements Tracker {
 
     private void reset(LocalPlayer player, int c) {
         if (this.activeModules[c] instanceof HeldInteractModule heldModule) {
-            heldModule.processBindingRelease(player, InteractionHand.values()[c]);
+            heldModule.onRelease(player, InteractionHand.values()[c]);
         }
         this.activeModules[c] = null;
         this.modules.forEach(module -> module.reset(player, InteractionHand.values()[c]));
@@ -106,7 +107,7 @@ public class InteractTracker implements Tracker {
         for (int c = 0; c < 2; c++) {
             if (VivecraftVRMod.INSTANCE.keyVRInteract.isDown(ControllerType.values()[c]) &&
                 this.activeModules[c] instanceof HeldInteractModule heldModule &&
-                heldModule.doHoldTick(player, InteractionHand.values()[c]))
+                heldModule.onHoldTick(player, InteractionHand.values()[c]))
             {
                 // don't reevaluate, if the interact is still active
                 continue;
@@ -119,7 +120,7 @@ public class InteractTracker implements Tracker {
             Vec3 handPos = this.dh.vrPlayer.vrdata_world_pre.getController(c).getPosition();
 
             for (InteractModule module : this.modules) {
-                if (module.doProcess(player, InteractionHand.values()[c], handPos)) {
+                if (module.isActive(player, InteractionHand.values()[c], handPos)) {
                     this.activeModules[c] = module;
                     break;
                 }
@@ -162,7 +163,7 @@ public class InteractTracker implements Tracker {
                 this.activeModules[c] != null)
             {
                 InteractionHand hand = InteractionHand.values()[c];
-                if (this.activeModules[c].processBindingPress(this.mc.player, hand)) {
+                if (this.activeModules[c].onPress(this.mc.player, hand)) {
                     if (this.activeModules[c].swingsArm()) {
                         // swing arm on success
                         this.dh.swingType = VRFirstPersonArmSwing.Interact;

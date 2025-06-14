@@ -22,13 +22,13 @@ public class InteractiveHotbarModule implements InteractModule {
     }
 
     @Override
-    public boolean doProcess(LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
+    public boolean isActive(LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         // interactive hotbar is priority 1
         return hand == InteractionHand.MAIN_HAND && this.hotbar >= 0;
     }
 
     @Override
-    public boolean processBindingPress(LocalPlayer player, InteractionHand hand) {
+    public boolean onPress(LocalPlayer player, InteractionHand hand) {
         if (this.hotbar >= 0 && this.hotbar < 9 && player.getInventory().selected != this.hotbar &&
             hand == InteractionHand.MAIN_HAND)
         {

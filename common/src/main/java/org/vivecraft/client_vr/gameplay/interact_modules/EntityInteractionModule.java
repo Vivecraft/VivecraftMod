@@ -38,7 +38,7 @@ public class EntityInteractionModule implements InteractModule {
     }
 
     @Override
-    public boolean doProcess(LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
+    public boolean isActive(LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         if (this.dh.vrSettings.realisticEntityInteractEnabled) {
             Vec3 hmdPos = this.dh.vrPlayer.vrdata_world_pre.getHeadPivot();
             Vector3f handDirection = this.dh.vrPlayer.vrdata_world_pre.getHand(hand.ordinal())
@@ -58,7 +58,7 @@ public class EntityInteractionModule implements InteractModule {
     }
 
     @Override
-    public boolean processBindingPress(LocalPlayer player, InteractionHand hand) {
+    public boolean onPress(LocalPlayer player, InteractionHand hand) {
         return this.mc.gameMode.interactAt(player, this.inEntityHit[hand.ordinal()].getEntity(),
             this.inEntityHit[hand.ordinal()], hand).consumesAction() ||
             this.mc.gameMode.interact(player, this.inEntityHit[hand.ordinal()].getEntity(), hand).consumesAction();

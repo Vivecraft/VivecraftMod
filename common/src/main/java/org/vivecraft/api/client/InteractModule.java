@@ -4,22 +4,28 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
 /**
  * An InteractModule can influence what happens when the user presses the Interact keybind.
- * InteractModules are hand agnostic and are processed on tick.<br>
- * They are sorted by the priority provided by {@link #getPriority} and processed in that order.<br>
- * The first InteractModule in that order, that returns {@code true} on {@link #doProcess} will be the active InteractModule for this tick on the hand.
+ * The Interact keybind is added by Vivecraft and by default bound to the Trigger and Grip of each controller.
+ * InteractModules are hand agnostic and are processed on tick.
+ * <br>
+ * They are sorted by the priority value provided by {@link #getPriority} and their ID on a priority tie.
+ * Modules are processed in that fixed sorted order and the first one that returns {@code true} on {@link #isActive} gets the keybind.
+ * {@link #isActive} on modules after the active one will <strong>not</strong> be called.
+ * <br>
+ * The first InteractModule in that order, that returns {@code true} on {@link #isActive} will be the active InteractModule for this tick on the hand.
  */
-public interface InteractModule extends Comparable<InteractModule> {
+public interface InteractModule {
 
     /**
-     * The priority of a module indicates when it is processed, this can be used to order modules to be processed in a specific order. A lower priority value means it is processed earlier.
+     * The priority value of a module determines when its {@link #isActive} method is called compared to other modules.
+     * Modules are only processed until a modules returns {@code true} on {@link #isActive}, modules after that are not checked.
+     * A lower priority value means it is processed earlier.
      *
-     * @return priority of this module
+     * @return priority value of this module
      */
     default int getPriority() {
         return 1000;
@@ -34,7 +40,7 @@ public interface InteractModule extends Comparable<InteractModule> {
 
     /**
      * Used to reset the module state for the given hand, this is called when the Interact Tracker is not active anymore,
-     * and before {@link #doProcess} is called
+     * and before {@link #isActive} is called
      *
      * @param player the local player, {@code null} if not in a world
      * @param hand   the hand to reset
@@ -42,40 +48,33 @@ public interface InteractModule extends Comparable<InteractModule> {
     default void reset(@Nullable LocalPlayer player, InteractionHand hand) {}
 
     /**
-     * This is used to check if the user can use the Interact keybind at the given position to interact with the module.
+     * This is used to check if the user can use the Interact keybind to interact with the module.
      *
      * @param player       the local player
-     * @param hand         the hand to process for
-     * @param handPosition the world position the {@code hand} is at
+     * @param hand         the hand to check for
+     * @param handPosition the world position the {@code hand} is at, supplied for convenience
      * @return true if this module is active and wants to use the Interact keybind
      */
-    boolean doProcess(LocalPlayer player, InteractionHand hand, Vec3 handPosition);
+    boolean isActive(LocalPlayer player, InteractionHand hand, Vec3 handPosition);
 
     /**
-     * Use this to do an action when the Interact keybind is being pressed.<br>
-     * This is only called when {@link #doProcess} returned true.<br>
-     * If this returns true it will cause a haptic pulse on the provided {@code hand} to indicate success.
+     * Use this to do an action when the Interact keybind is being pressed.
+     * <br>
+     * This is only called when {@link #isActive} returned {@code true} and no other module did so before this one.
      *
      * @param player the local player
      * @param hand   the hand that is pressing the Interact keybind
-     * @return if the interaction was successful
+     * @return if the interaction was successful, will cause haptic feedback when {@code true}
      */
-    boolean processBindingPress(LocalPlayer player, InteractionHand hand);
+    boolean onPress(LocalPlayer player, InteractionHand hand);
 
     /**
      * By default, an interaction causes an armswing, to give the player a visual indicator that the action was successful.
-     * This can be used overridden to prevent that.
+     * This can be overridden to prevent that.
      *
-     * @return if the interaction should cause a hand swing after a successful {@link #processBindingPress} call
+     * @return if the interaction should cause a hand swing after a successful {@link #onPress} call
      */
     default boolean swingsArm() {
         return true;
-    }
-
-    @Override
-    default int compareTo(@NotNull InteractModule o) {
-        return this.getPriority() == o.getPriority() ?
-            this.getId().compareTo(o.getId()) :
-            this.getPriority() - o.getPriority();
     }
 }

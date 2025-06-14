@@ -202,7 +202,8 @@ public class ServerVivePlayer {
     public void setVrPlayerState(VrPlayerState vrPlayerState) {
         this.vrPlayerState = vrPlayerState;
         this.vrPlayerStateAsPose = null;
-        VRAPIImpl.INSTANCE.addPoseToHistory(this.player.getUUID(), vrPlayerState.asVRPose(this.player.position()), false);
+        VRAPIImpl.INSTANCE.addPoseToHistory(this.player.getUUID(), vrPlayerState.asVRPose(this.player.position()),
+            false);
     }
 
     public VRPose asVRPose() {

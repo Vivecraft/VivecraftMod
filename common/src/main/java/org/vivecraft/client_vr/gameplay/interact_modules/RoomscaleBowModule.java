@@ -25,7 +25,7 @@ public class RoomscaleBowModule implements HeldInteractModule {
     }
 
     @Override
-    public boolean doProcess(LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
+    public boolean isActive(LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         // roomscale Bow shooting, only activate for the hand with the arrow
         return this.dh.bowTracker.isNotched() &&
             hand == ((this.dh.vrSettings.reverseShootingEye && ClientNetworking.supportsReversedBow()) ?
@@ -34,13 +34,13 @@ public class RoomscaleBowModule implements HeldInteractModule {
     }
 
     @Override
-    public boolean processBindingPress(LocalPlayer player, InteractionHand hand) {
+    public boolean onPress(LocalPlayer player, InteractionHand hand) {
         // we don't do anything, we just block other modules from doing stuff
         return false;
     }
 
     @Override
-    public void processBindingRelease(@Nullable LocalPlayer player, InteractionHand hand) {
+    public void onRelease(@Nullable LocalPlayer player, InteractionHand hand) {
         // we don't do anything, we just block other modules from doing stuff
     }
 }

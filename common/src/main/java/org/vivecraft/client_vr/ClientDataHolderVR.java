@@ -17,9 +17,7 @@ import org.vivecraft.client_vr.render.RenderPass;
 import org.vivecraft.client_vr.render.VRFirstPersonArmSwing;
 import org.vivecraft.client_vr.settings.VRSettings;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 
 public class ClientDataHolderVR {
@@ -50,7 +48,9 @@ public class ClientDataHolderVR {
     // list of all trackers that control holding item usage
     private final List<ItemInUseTracker> itemInUseTrackers = new ArrayList<>();
     // list of all registered interact modules
-    private final List<InteractModule> interactModules = new ArrayList<>();
+    private final Queue<InteractModule> interactModules = new PriorityQueue<>(
+        (a, b) -> a.getPriority() == b.getPriority() ? a.getId().compareTo(b.getId()) :
+            Integer.compare(a.getPriority(), b.getPriority()));
 
     // our trackers
     public final BackpackTracker backpackTracker;
@@ -185,11 +185,13 @@ public class ClientDataHolderVR {
      * @throws IllegalArgumentException if the module is already registered
      */
     public void registerInteractModule(InteractModule module) throws IllegalArgumentException {
-        if (this.interactModules.contains(module)) {
-            throw new IllegalArgumentException("InteractModule is already added and should not be added again!");
+        if (this.interactModules.contains(module) ||
+            this.interactModules.stream().anyMatch(m -> m.getId().equals(module.getId())))
+        {
+            throw new IllegalArgumentException(
+                "InteractModule '" + module.getId() + "' is already added and should not be added again!");
         }
         this.interactModules.add(module);
-        this.interactModules.sort(InteractModule::compareTo);
         this.interactTracker.setModules(this.interactModules);
     }
 

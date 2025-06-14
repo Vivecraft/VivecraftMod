@@ -28,7 +28,7 @@ public class ScreenshotCameraModule implements HeldInteractModule {
     }
 
     @Override
-    public boolean doProcess(@Nullable LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
+    public boolean isActive(@Nullable LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         if (this.dh.cameraTracker.isVisible() && !this.dh.cameraTracker.isQuickMode()) {
             VRData.VRDevicePose camData = this.dh.vrPlayer.vrdata_world_pre.getEye(RenderPass.CAMERA);
             Vec3 camPos = camData.getPosition();
@@ -44,13 +44,13 @@ public class ScreenshotCameraModule implements HeldInteractModule {
     }
 
     @Override
-    public boolean processBindingPress(@Nullable LocalPlayer player, InteractionHand hand) {
+    public boolean onPress(@Nullable LocalPlayer player, InteractionHand hand) {
         this.dh.cameraTracker.startMoving(hand.ordinal());
         return true;
     }
 
     @Override
-    public void processBindingRelease(@Nullable LocalPlayer player, InteractionHand hand) {
+    public void onRelease(@Nullable LocalPlayer player, InteractionHand hand) {
         if (this.dh.cameraTracker.isMoving() && this.dh.cameraTracker.getMovingController() == hand.ordinal() &&
             !this.dh.cameraTracker.isQuickMode())
         {

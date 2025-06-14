@@ -51,7 +51,7 @@ public class BlockInteractionModule implements InteractModule {
     }
 
     @Override
-    public boolean doProcess(LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
+    public boolean isActive(LocalPlayer player, InteractionHand hand, Vec3 handPosition) {
         if (this.rightClickable == null) {
             // compile a list of blocks that explicitly declare OnBlockActivated (right click)
             this.rightClickable = new HashSet<>();
@@ -93,7 +93,7 @@ public class BlockInteractionModule implements InteractModule {
     }
 
     @Override
-    public boolean processBindingPress(LocalPlayer player, InteractionHand hand) {
+    public boolean onPress(LocalPlayer player, InteractionHand hand) {
         boolean success = false;
         if (this.inBlockHit[hand.ordinal()] != null) {
             // force main hand, since 1.20.5+ only checks no item interactions for the main hand
