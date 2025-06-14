@@ -47,6 +47,8 @@ public interface InteractModule {
 
     /**
      * This is used to check if the user can use the Interact keybind on the given {@code hand} to interact with the module.
+     * <br>
+     * If this returns {@code true} and no module was active in the last tick, it will cause haptic feedback on the {@code hand} to indicate that the user can now use the Interact keybind.
      *
      * @param player       the local player
      * @param hand         the hand to check for
