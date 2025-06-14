@@ -15,8 +15,6 @@ import javax.annotation.Nullable;
  * They are sorted by the priority value provided by {@link #getPriority} and their ID on a priority tie.
  * Modules are processed in that fixed sorted order per hand and the first one that returns {@code true} on {@link #isActive} gets the keybind for that hand.
  * {@link #isActive} on modules after the active one will <strong>not</strong> be called for that hand.
- * <br>
- * The first InteractModule in that order, that returns {@code true} on {@link #isActive} will be the active InteractModule for this tick on the hand.
  */
 public interface InteractModule {
 
