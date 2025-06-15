@@ -11,11 +11,14 @@ import org.vivecraft.client_vr.render.RenderPass;
 /**
  * The main interface for interacting with Vivecraft from rendering code. For other client-side code, one should use
  * {@link VRClientAPI}.
+ *
+ * @since 1.3.0
  */
 public interface VRRenderingAPI {
 
     /**
      * @return The Vivecraft API instance for interacting with Vivecraft's rendering API.
+     * @since 1.3.0
      */
     static VRRenderingAPI instance() {
         return VRRenderingAPIImpl.INSTANCE;
@@ -23,16 +26,19 @@ public interface VRRenderingAPI {
 
     /**
      * @return Whether the current render pass is a vanilla render pass.
+     * @since 1.3.0
      */
     boolean isVanillaRenderPass();
 
     /**
      * @return The current render pass Vivecraft is performing.
+     * @since 1.3.0
      */
     RenderPass getCurrentRenderPass();
 
     /**
      * @return Whether the current render pass is the first one performed for this render cycle.
+     * @since 1.3.0
      */
     boolean isFirstRenderPass();
 
@@ -43,6 +49,7 @@ public interface VRRenderingAPI {
      *
      * @param hand The hand to get the rendering position of.
      * @return The rendering position for the provided hand.
+     * @since 1.3.0
      */
     @Beta
     Vec3 getHandRenderPos(InteractionHand hand);
@@ -53,6 +60,7 @@ public interface VRRenderingAPI {
      *
      * @param hand  The hand to set the PoseStack to.
      * @param stack The PoseStack to be set.
+     * @since 1.3.0
      */
     @Beta
     void setupRenderingAtHand(InteractionHand hand, PoseStack stack);
@@ -63,6 +71,7 @@ public interface VRRenderingAPI {
      *
      * @param hand   The hand to set the PoseStack to.
      * @param matrix The PoseStack to be set.
+     * @since 1.3.0
      */
     @Beta
     void setupRenderingAtHand(InteractionHand hand, Matrix4f matrix);

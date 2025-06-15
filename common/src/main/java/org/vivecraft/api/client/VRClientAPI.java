@@ -12,11 +12,14 @@ import javax.annotation.Nullable;
 /**
  * The main interface for interacting with the local player using Vivecraft from client code. For rendering, one should use
  * {@link VRRenderingAPI}.
+ *
+ * @since 1.3.0
  */
 public interface VRClientAPI {
 
     /**
      * @return The Vivecraft API instance for interacting with Vivecraft's client API.
+     * @since 1.3.0
      */
     static VRClientAPI instance() {
         return VRClientAPIImpl.INSTANCE;
@@ -27,6 +30,7 @@ public interface VRClientAPI {
      * {@link Tracker} for more information on what a tracker is.
      *
      * @param tracker Tracker to register.
+     * @since 1.3.0
      */
     void registerTracker(Tracker tracker);
 
@@ -35,6 +39,7 @@ public interface VRClientAPI {
      * See the documentation for {@link InteractModule} for more information on what an interact modules is.
      *
      * @param module InteractModule to register.
+     * @since 1.3.0
      */
     void registerInteractModule(InteractModule module);
 
@@ -42,6 +47,7 @@ public interface VRClientAPI {
      * Gets the VR pose representing the player in the room after the most recent poll of VR hardware.
      *
      * @return The most up-to-date VR pose representing the player in the room, or null if the local player isn't in VR.
+     * @since 1.3.0
      */
     @Nullable
     VRPose getLatestRoomPose();
@@ -51,6 +57,7 @@ public interface VRClientAPI {
      * Note that this pose is gathered AFTER mod loaders' post-tick events.
      *
      * @return The VR pose representing the player in the room post-tick, or null if the local player isn't in VR.
+     * @since 1.3.0
      */
     @Nullable
     VRPose getPostTickRoomPose();
@@ -61,6 +68,7 @@ public interface VRClientAPI {
      * Note that this pose is gathered BEFORE mod loaders' pre-tick events.
      *
      * @return The VR pose representing the player in world space pre-tick, or null if the local player isn't in VR.
+     * @since 1.3.0
      */
     @Nullable
     VRPose getPreTickWorldPose();
@@ -71,6 +79,7 @@ public interface VRClientAPI {
      * Note that this pose is gathered AFTER mod loaders' post-tick events.
      *
      * @return The VR pose representing the player in Minecraft space post-tick, or null if the local player isn't in VR.
+     * @since 1.3.0
      */
     @Nullable
     VRPose getPostTickWorldPose();
@@ -80,6 +89,7 @@ public interface VRClientAPI {
      *
      * @return The VR pose representing the player in Minecraft space post-tick interpolated for rendering, or null if
      * the local player isn't in VR.
+     * @since 1.3.0
      */
     @Nullable
     VRPose getWorldRenderPose();
@@ -99,6 +109,7 @@ public interface VRClientAPI {
      *                  as a chat notification.
      * @param amplitude The amplitude of the haptic pulse. This should be kept between 0 and 1.
      * @param delay     An amount of time to delay until creating the haptic pulse. The majority of the time, one should use 0 here.
+     * @since 1.3.0
      */
     void triggerHapticPulse(VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay);
 
@@ -113,6 +124,7 @@ public interface VRClientAPI {
      * @param duration The duration of the haptic pulse in seconds. Note that this number is passed to the
      *                 underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
      *                 very short pulses.
+     * @since 1.3.0
      */
     default void triggerHapticPulse(VRBodyPart bodyPart, float duration) {
         triggerHapticPulse(bodyPart, duration, 160F, 1F, 0F);
@@ -120,31 +132,37 @@ public interface VRClientAPI {
 
     /**
      * @return Whether the local player is currently in seated mode.
+     * @since 1.3.0
      */
     boolean isSeated();
 
     /**
      * @return Whether the local player is playing with left-handed controls.
+     * @since 1.3.0
      */
     boolean isLeftHanded();
 
     /**
      * @return The full-body tracking mode currently in-use or some default value if the local player is not in VR.
+     * @since 1.3.0
      */
     FBTMode getFBTMode();
 
     /**
      * @return Whether VR support is initialized.
+     * @since 1.3.0
      */
     boolean isVRInitialized();
 
     /**
      * @return Whether the client is actively in VR.
+     * @since 1.3.0
      */
     boolean isVRActive();
 
     /**
      * @return The currently active world scale.
+     * @since 1.3.0
      */
     float getWorldScale();
 
@@ -157,6 +175,7 @@ public interface VRClientAPI {
      *
      * @param maxTicksBack The maximum number of ticks of history wanted.
      * @throws IllegalArgumentException If a non-positive number is supplied.
+     * @since 1.3.0
      */
     void requestTicksOfHistory(int maxTicksBack) throws IllegalArgumentException;
 
@@ -170,6 +189,7 @@ public interface VRClientAPI {
      *
      * @return The history of VR poses for the player. Will be null if the player isn't in VR or if
      * {@link #requestTicksOfHistory(int)} has yet to be called.
+     * @since 1.3.0
      */
     @Nullable
     VRPoseHistory getHistoricalVRPoses();
@@ -180,6 +200,7 @@ public interface VRClientAPI {
      *
      * @param isNowOpen Whether the keyboard should now be open. If false, the keyboard will attempt to close.
      * @return Whether the keyboard is currently showing after attempting to open/close it.
+     * @since 1.3.0
      */
     boolean setKeyboardState(boolean isNowOpen);
 }

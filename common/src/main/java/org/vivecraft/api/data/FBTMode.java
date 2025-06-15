@@ -2,6 +2,8 @@ package org.vivecraft.api.data;
 
 /**
  * The mode used for full-body tracking, denoting which body parts are being tracked.
+ *
+ * @since 1.3.0
  */
 public enum FBTMode {
     /**
@@ -22,6 +24,7 @@ public enum FBTMode {
      *
      * @param bodyPart The body part to see if data is available for in this mode.
      * @return Whether the provided body part is available in this mode.
+     * @since 1.3.0
      */
     public boolean bodyPartAvailable(VRBodyPart bodyPart) {
         return bodyPart.availableInMode(this);

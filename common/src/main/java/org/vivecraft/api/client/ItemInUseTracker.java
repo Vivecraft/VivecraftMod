@@ -5,6 +5,8 @@ import net.minecraft.client.player.LocalPlayer;
 /**
  * An interface that should be implemented by {@link Tracker}s if they want to take advantage of
  * {@link #itemInUse(LocalPlayer)}.
+ *
+ * @since 1.3.0
  */
 public interface ItemInUseTracker {
 
@@ -15,6 +17,7 @@ public interface ItemInUseTracker {
      *
      * @param player The local player which is running this tracker.
      * @return Whether the item should remain in use.
+     * @since 1.3.0
      */
     boolean itemInUse(LocalPlayer player);
 }

@@ -2,6 +2,11 @@ package org.vivecraft.api.data;
 
 import net.minecraft.world.InteractionHand;
 
+/**
+ * Corresponds to the different tracked device roles that are supported by Vivecraft.
+ *
+ * @since 1.3.0
+ */
 public enum VRBodyPart {
     MAIN_HAND,
     OFF_HAND,
@@ -16,6 +21,7 @@ public enum VRBodyPart {
 
     /**
      * @return the opposite limb
+     * @since 1.3.0
      */
     public VRBodyPart opposite() {
         return switch (this) {
@@ -36,6 +42,7 @@ public enum VRBodyPart {
      *
      * @param hand InteractionHand to convert
      * @return VRBodyPart that corresponds to the given InteractionHand
+     * @since 1.3.0
      */
     public static VRBodyPart fromInteractionHand(InteractionHand hand) {
         return hand == InteractionHand.MAIN_HAND ? MAIN_HAND : OFF_HAND;
@@ -46,6 +53,7 @@ public enum VRBodyPart {
      *
      * @param fbtMode The full-body tracking mode to check.
      * @return Whether this body part has available data in the provided mode.
+     * @since 1.3.0
      */
     public boolean availableInMode(FBTMode fbtMode) {
         return switch (this) {
@@ -57,6 +65,7 @@ public enum VRBodyPart {
 
     /**
      * @return Whether this body part is a foot.
+     * @since 1.3.0
      */
     public boolean isFoot() {
         return this == RIGHT_FOOT || this == LEFT_FOOT;
@@ -64,6 +73,7 @@ public enum VRBodyPart {
 
     /**
      * @return Whether this body part is a hand.
+     * @since 1.3.0
      */
     public boolean isHand() {
         return this == MAIN_HAND || this == OFF_HAND;

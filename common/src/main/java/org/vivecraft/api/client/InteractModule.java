@@ -15,6 +15,8 @@ import javax.annotation.Nullable;
  * They are sorted by the priority value provided by {@link #getPriority} and their ID on a priority tie.
  * Modules are processed in that fixed sorted order per hand and the first one that returns {@code true} on {@link #isActive} gets the keybind for that hand.
  * {@link #isActive} on modules after the active one will <strong>not</strong> be called for that hand.
+ *
+ * @since 1.3.0
  */
 public interface InteractModule {
 
@@ -24,6 +26,7 @@ public interface InteractModule {
      * A lower priority value means it is processed earlier.
      *
      * @return priority value of this module
+     * @since 1.3.0
      */
     default int getPriority() {
         return 1000;
@@ -33,6 +36,7 @@ public interface InteractModule {
      * The ID of this module. This is used to sort on a priority tie, should ideally be of the format "modID":"moduleName".
      *
      * @return The ID of this module.
+     * @since 1.3.0
      */
     ResourceLocation getId();
 
@@ -42,6 +46,7 @@ public interface InteractModule {
      *
      * @param player the local player, {@code null} if not in a world
      * @param hand   the hand to reset
+     * @since 1.3.0
      */
     default void reset(@Nullable LocalPlayer player, InteractionHand hand) {}
 
@@ -54,6 +59,7 @@ public interface InteractModule {
      * @param hand         the hand to check for
      * @param handPosition the world position the {@code hand} is at, supplied for convenience
      * @return true if this module is active and wants to use the Interact keybind
+     * @since 1.3.0
      */
     boolean isActive(LocalPlayer player, InteractionHand hand, Vec3 handPosition);
 
@@ -65,6 +71,7 @@ public interface InteractModule {
      * @param player the local player
      * @param hand   the hand that is pressing the Interact keybind
      * @return if the interaction was successful, will cause haptic feedback when {@code true}
+     * @since 1.3.0
      */
     boolean onPress(LocalPlayer player, InteractionHand hand);
 
@@ -73,6 +80,7 @@ public interface InteractModule {
      * This can be overridden to prevent that.
      *
      * @return if the interaction should cause a hand swing after a successful {@link #onPress} call
+     * @since 1.3.0
      */
     default boolean swingsArm() {
         return true;

@@ -12,11 +12,14 @@ import javax.annotation.Nullable;
 
 /**
  * The main interface for interacting with Vivecraft from common code.
+ *
+ * @since 1.3.0
  */
 public interface VRAPI {
 
     /**
      * @return The Vivecraft API instance for interacting with Vivecraft's common API.
+     * @since 1.3.0
      */
     static VRAPI instance() {
         return VRAPIImpl.INSTANCE;
@@ -27,6 +30,7 @@ public interface VRAPI {
      *
      * @param player The player to check the VR status of.
      * @return true if the player is in VR.
+     * @since 1.3.0
      */
     boolean isVRPlayer(Player player);
 
@@ -36,6 +40,7 @@ public interface VRAPI {
      *
      * @param player Player to get the VR pose of.
      * @return The VR pose for a player, or null if the player isn't in VR or no data has been received for said player.
+     * @since 1.3.0
      */
     @Nullable
     VRPose getVRPose(Player player);
@@ -46,6 +51,7 @@ public interface VRAPI {
      *
      * @param maxTicksBack The maximum number of ticks of history wanted.
      * @throws IllegalArgumentException If a non-positive number is supplied.
+     * @since 1.3.0
      */
     void requestTicksOfHistory(int maxTicksBack) throws IllegalArgumentException;
 
@@ -72,6 +78,7 @@ public interface VRAPI {
      *
      * @return The history of VR poses for the player. Will be null if the player isn't in VR or if
      * {@link #requestTicksOfHistory(int)} has yet to be called.
+     * @since 1.3.0
      */
     @Nullable
     VRPoseHistory getHistoricalVRPoses(Player player);
@@ -93,6 +100,7 @@ public interface VRAPI {
      *                  as a chat notification.
      * @param amplitude The amplitude of the haptic pulse. This should be kept between 0 and 1.
      * @param delay     An amount of time to delay until creating the haptic pulse. The majority of the time, one should use 0 here. This starts counting when the client receives the packet.
+     * @since 1.3.0
      */
     void triggerHapticPulse(
         ServerPlayer player, VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay);
@@ -110,6 +118,7 @@ public interface VRAPI {
      * @param duration The duration of the haptic pulse in seconds. Note that this number is passed to the
      *                 underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
      *                 very short pulses.
+     * @since 1.3.0
      */
     default void triggerHapticPulse(ServerPlayer player, VRBodyPart bodyPart, float duration) {
         triggerHapticPulse(player, bodyPart, duration, 160F, 1F, 0F);
