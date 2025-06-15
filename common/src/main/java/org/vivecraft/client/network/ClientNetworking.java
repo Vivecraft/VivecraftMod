@@ -389,6 +389,18 @@ public class ClientNetworking {
             }
             case DUAL_WIELDING ->
                 ClientNetworking.SERVER_ALLOWS_DUAL_WIELDING = ((DualWieldingPayloadS2C) s2cPayload).allowed();
+            case HAPTIC -> {
+                if (VRState.VR_RUNNING) {
+                    HapticPayloadS2C haptic = ((HapticPayloadS2C) s2cPayload);
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(
+                        haptic.bodyPart(),
+                        haptic.duration(),
+                        haptic.frequency(),
+                        haptic.amplitude(),
+                        haptic.delay()
+                    );
+                }
+            }
         }
     }
 }

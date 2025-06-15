@@ -1,6 +1,9 @@
 package org.vivecraft.api;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import org.vivecraft.api.client.VRClientAPI;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.common.api_impl.VRAPIImpl;
@@ -72,4 +75,38 @@ public interface VRAPI {
      */
     @Nullable
     VRPoseHistory getHistoricalVRPoses(Player player);
+
+    /**
+     * Sends a haptic pulse (vibration/rumble) for the specified VRBodyPart, if possible, to the given player.
+     * To directly trigger a haptic pulse for the local player, use {@link VRClientAPI#triggerHapticPulse}
+     * This function silently fails if called for players not in VR or players who are in seated mode.
+     *
+     * @param player    Player to send the haptic pulse to.
+     * @param bodyPart  The VRBodyPart to trigger a haptic pulse on.
+     * @param duration  The duration of the haptic pulse in seconds. Note that this number is passed to the
+     *                  underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
+     *                  very short pulses.
+     * @param frequency The frequency of the haptic pulse in Hz. 160 Hz is a safe bet for this number, with Vivecraft's codebase
+     *                  using anywhere from 160 Hz for actions such as a bite on a fishing line, to 1000 Hz for things such
+     *                  as a chat notification.
+     * @param amplitude The amplitude of the haptic pulse. This should be kept between 0 and 1.
+     * @param delay     An amount of time to delay until creating the haptic pulse. The majority of the time, one should use 0 here. This starts counting when the client receives the packet.
+     */
+    void triggerHapticPulse(
+        ServerPlayer player, VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay);
+
+    /**
+     * Sends a haptic pulse (vibration/rumble) for the specified VRBodyPart, if possible, to the given player.
+     * To directly trigger a haptic pulse for the local player, use {@link VRClientAPI#triggerHapticPulse}
+     * This function silently fails if called for players not in VR or players who are in seated mode.
+     *
+     * @param player   Player to send the haptic pulse to.
+     * @param bodyPart The VRBodyPart to trigger a haptic pulse on.
+     * @param duration The duration of the haptic pulse in seconds. Note that this number is passed to the
+     *                 underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
+     *                 very short pulses.
+     */
+    default void triggerHapticPulse(ServerPlayer player, VRBodyPart bodyPart, float duration) {
+        triggerHapticPulse(player, bodyPart, duration, 160F, 1F, 0F);
+    }
 }

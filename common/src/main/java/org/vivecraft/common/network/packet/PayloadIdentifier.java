@@ -20,5 +20,6 @@ public enum PayloadIdentifier {
     VR_SWITCHING,
     IS_VR_ACTIVE,
     VR_PLAYER_STATE,
-    DUAL_WIELDING
+    DUAL_WIELDING,
+    HAPTIC
 }

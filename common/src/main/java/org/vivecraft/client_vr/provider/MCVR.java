@@ -16,6 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.*;
 import org.lwjgl.glfw.GLFW;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.client.VivecraftVRMod;
 import org.vivecraft.client.utils.ClientUtils;
 import org.vivecraft.client.utils.LangHelper;
@@ -209,6 +210,24 @@ public abstract class MCVR {
      */
     public void triggerHapticPulse(ControllerType controller, float durationSeconds, float frequency, float amplitude) {
         this.triggerHapticPulse(controller, durationSeconds, frequency, amplitude, 0.0F);
+    }
+
+    /**
+     * triggers a haptic pulse on the give BodyPart, if possible, after the specified delay
+     *
+     * @param bodyPart        BodyPart to trigger on
+     * @param durationSeconds duration in seconds
+     * @param frequency       frequency in Hz
+     * @param amplitude       strength 0.0 - 1.0
+     * @param delaySeconds    delay for when to trigger in seconds
+     */
+    public void triggerHapticPulse(
+        VRBodyPart bodyPart, float durationSeconds, float frequency, float amplitude, float delaySeconds)
+    {
+        // only hands right now
+        if (!bodyPart.isHand()) return;
+        this.triggerHapticPulse(bodyPart == VRBodyPart.MAIN_HAND ? ControllerType.RIGHT : ControllerType.LEFT,
+            durationSeconds, frequency, amplitude, delaySeconds);
     }
 
     /**

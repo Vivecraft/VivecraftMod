@@ -2,6 +2,7 @@ package org.vivecraft.api.client;
 
 import org.vivecraft.api.VRAPI;
 import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.client.api_impl.VRClientAPIImpl;
@@ -9,7 +10,7 @@ import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import javax.annotation.Nullable;
 
 /**
- * The main interface for interacting with Vivecraft from client code. For rendering, one should use
+ * The main interface for interacting with the local player using Vivecraft from client code. For rendering, one should use
  * {@link VRRenderingAPI}.
  */
 public interface VRClientAPI {
@@ -84,34 +85,32 @@ public interface VRClientAPI {
     VRPose getWorldRenderPose();
 
     /**
-     * Causes a haptic pulse (vibration/rumble) for the specified controller.
+     * Causes a haptic pulse (vibration/rumble) for the specified VRBodyPart, if possible.
      * This function silently fails if called for players not in VR or players who are in seated mode.
      *
-     * @param controllerNum The controller number to trigger a haptic pulse. 0 is the main-hand's controller, while 1 is
-     *                      the off-hand's controller.
-     * @param duration      The duration of the haptic pulse in seconds. Note that this number is passed to the
-     *                      underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
-     *                      very short pulses.
-     * @param frequency     The frequency of the haptic pulse in Hz. 160 is a safe bet for this number, with Vivecraft's codebase
-     *                      using anywhere from 160F for actions such as a bite on a fishing line, to 1000F for things such
-     *                      as a chat notification.
-     * @param amplitude     The amplitude of the haptic pulse. This should be kept between 0F and 1F.
-     * @param delay         An amount of time to delay until creating the haptic pulse. The majority of the time, one should use 0F here.
+     * @param bodyPart  The VRBodyPart to trigger a haptic pulse on.
+     * @param duration  The duration of the haptic pulse in seconds. Note that this number is passed to the
+     *                  underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
+     *                  very short pulses.
+     * @param frequency The frequency of the haptic pulse in Hz. 160 Hz is a safe bet for this number, with Vivecraft's codebase
+     *                  using anywhere from 160 Hz for actions such as a bite on a fishing line, to 1000 Hz for things such
+     *                  as a chat notification.
+     * @param amplitude The amplitude of the haptic pulse. This should be kept between 0 and 1.
+     * @param delay     An amount of time to delay until creating the haptic pulse. The majority of the time, one should use 0 here.
      */
-    void triggerHapticPulse(int controllerNum, float duration, float frequency, float amplitude, float delay);
+    void triggerHapticPulse(VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay);
 
     /**
-     * Causes a haptic pulse (vibration/rumble) for the specified controller.
+     * Causes a haptic pulse (vibration/rumble) for the specified VRBodyPart, if possible.
      * This function silently fails if called for players not in VR or players who are in seated mode.
      *
-     * @param controllerNum The controller number to trigger a haptic pulse. 0 is the main-hand's controller, while 1 is
-     *                      the off-hand's controller.
-     * @param duration      The duration of the haptic pulse in seconds. Note that this number is passed to the
-     *                      underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
-     *                      very short pulses.
+     * @param bodyPart The VRBodyPart to trigger a haptic pulse on.
+     * @param duration The duration of the haptic pulse in seconds. Note that this number is passed to the
+     *                 underlying VR API used by Vivecraft, and may act with a shorter length than expected beyond
+     *                 very short pulses.
      */
-    default void triggerHapticPulse(int controllerNum, float duration) {
-        triggerHapticPulse(controllerNum, duration, 160F, 1F, 0F);
+    default void triggerHapticPulse(VRBodyPart bodyPart, float duration) {
+        triggerHapticPulse(bodyPart, duration, 160F, 1F, 0F);
     }
 
     /**

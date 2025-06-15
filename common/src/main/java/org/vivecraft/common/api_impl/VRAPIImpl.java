@@ -3,12 +3,14 @@ package org.vivecraft.common.api_impl;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.vivecraft.api.VRAPI;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.client.ClientVRPlayers;
 import org.vivecraft.client.Xplat;
 import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.common.api_impl.data.VRPoseHistoryImpl;
+import org.vivecraft.server.ServerNetworking;
 import org.vivecraft.server.ServerVRPlayers;
 
 import javax.annotation.Nullable;
@@ -85,7 +87,7 @@ public final class VRAPIImpl implements VRAPI {
     @Override
     @Nullable
     public VRPoseHistory getHistoricalVRPoses(Player player) {
-        if (player.level().isClientSide && player.isLocalPlayer()) {
+        if (player.isLocalPlayer()) {
             return VRClientAPIImpl.INSTANCE.getHistoricalVRPoses();
         } else if (player instanceof ServerPlayer serverPlayer && Xplat.isFakePlayer(serverPlayer)) {
             return null;
@@ -96,5 +98,15 @@ public final class VRAPIImpl implements VRAPI {
 
     private Map<UUID, VRPoseHistoryImpl> getMap(boolean isClientSide) {
         return isClientSide ? this.clientPoseHistories : this.serverPoseHistories;
+    }
+
+    @Override
+    public void triggerHapticPulse(
+        ServerPlayer player, VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay)
+    {
+        if (isVRPlayer(player)) {
+            ServerNetworking.sendHapticToClient(player, bodyPart, duration, frequency,
+                amplitude, delay);
+        }
     }
 }

@@ -300,6 +300,21 @@ public class ServerNetworking {
     }
 
     /**
+     * sends a haptic event to the given player if they are in VR, to be processed on the client
+     */
+    public static void sendHapticToClient(
+        ServerPlayer player, VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay)
+    {
+        ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(player);
+        if (vivePlayer != null && vivePlayer.isVR() &&
+            vivePlayer.networkVersion >= CommonNetworkHelper.NETWORK_VERSION_HAPTIC_PACKET)
+        {
+            vivePlayer.player.connection.send(
+                Xplat.getS2CPacket(new HapticPayloadS2C(bodyPart, duration, frequency, amplitude, delay)));
+        }
+    }
+
+    /**
      * send the players VR data to all other players that can see them
      *
      * @param vivePlayer player to send the VR data for

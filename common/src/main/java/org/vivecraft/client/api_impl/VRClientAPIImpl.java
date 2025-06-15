@@ -4,12 +4,12 @@ import org.vivecraft.api.client.InteractModule;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.data.FBTMode;
+import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 import org.vivecraft.client_vr.VRState;
 import org.vivecraft.client_vr.gameplay.screenhandlers.KeyboardHandler;
-import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.common.api_impl.VRAPIImpl;
 import org.vivecraft.common.api_impl.data.VRPoseHistoryImpl;
 
@@ -83,16 +83,13 @@ public final class VRClientAPIImpl implements VRClientAPI {
     }
 
     @Override
-    public void triggerHapticPulse(int controllerNum, float duration, float frequency, float amplitude, float delay) {
-        if (controllerNum != 0 && controllerNum != 1) {
-            throw new IllegalArgumentException("Can only trigger a haptic pulse for controllers 0 and 1.");
-        }
+    public void triggerHapticPulse(VRBodyPart bodyPart, float duration, float frequency, float amplitude, float delay) {
         if (amplitude < 0F || amplitude > 1F) {
             throw new IllegalArgumentException("The amplitude of a haptic pulse must be between 0 and 1.");
         }
         if (isVRActive() && !isSeated()) {
             ClientDataHolderVR.getInstance().vr.triggerHapticPulse(
-                ControllerType.values()[controllerNum],
+                bodyPart,
                 duration,
                 frequency,
                 amplitude,
