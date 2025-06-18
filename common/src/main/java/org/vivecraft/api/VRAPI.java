@@ -46,38 +46,14 @@ public interface VRAPI {
     VRPose getVRPose(Player player);
 
     /**
-     * Requests the number of ticks of history wanted for {@link #getHistoricalVRPoses(Player)}. Any value larger than 200
-     * will be capped at 200.
-     *
-     * @param maxTicksBack The maximum number of ticks of history wanted.
-     * @throws IllegalArgumentException If a non-positive number is supplied.
-     * @since 1.3.0
-     */
-    void requestTicksOfHistory(int maxTicksBack) throws IllegalArgumentException;
-
-    /**
-     * Returns the history of VR poses for the player. One should make one call to {@link #requestTicksOfHistory(int)}
-     * before calling this method to inform Vivecraft of the amount of history to keep.
+     * Returns the history of VR poses for the player. If one only needs the history for the local player, this can be
+     * more conveniently called using {@link org.vivecraft.api.client.VRClientAPI#getHistoricalVRPoses()}.
      * <br>
-     * This method acts differently depending on the side and player requested:
-     * <ul>
-     *     <li>On the server, this will return the history for the provided player for the ticks requested by
-     *     {@link #requestTicksOfHistory(int)}</li>
-     *     <li>On the client, if requested a player other than the local player, this will return the history for the
-     *     provided player for the ticks requested by {@link #requestTicksOfHistory(int)}</li>
-     *     <li>On the client, if requested by a player that IS the local player, this will return the history for the
-     *     local player for the ticks requested by
-     *     {@link org.vivecraft.api.client.VRClientAPI#requestTicksOfHistory(int)}. One can use
-     *     {@link org.vivecraft.api.client.VRClientAPI#getHistoricalVRPoses()} to retrieve that same data.</li>
-     * </ul>
-     * <br>
-     * Note that due to the inherent latency of networking, historical VR data for the first two options above
-     * (the server requesting the history for any player or the client requesting history for a player other than the
-     * local player) may be unideal.
-     * {@link org.vivecraft.api.client.VRClientAPI#getHistoricalVRPoses()} is preferred.
+     * Note that due to the inherent latency of networking, historical VR data retrieved either by the server or by
+     * the client for a client other than the local player may be unideal.
      *
-     * @return The history of VR poses for the player. Will be null if the player isn't in VR or if
-     * {@link #requestTicksOfHistory(int)} has yet to be called.
+     * @return The history of VR poses for the player. Will be null if the player isn't in VR or if VR-specific data
+     * hasn't been received.
      * @since 1.3.0
      */
     @Nullable

@@ -21,12 +21,10 @@ import java.util.UUID;
 public final class VRAPIImpl implements VRAPI {
 
     public static final VRAPIImpl INSTANCE = new VRAPIImpl();
-    // If updated, should also update Javadocs in VRClientAPI and VRAPI
-    public static final int MAX_CONFIGURABLE_HISTORY_TICKS = 200;
+    public static final int MAX_HISTORY_TICKS = 200;
 
     private final Map<UUID, VRPoseHistoryImpl> clientPoseHistories = new HashMap<>();
     private final Map<UUID, VRPoseHistoryImpl> serverPoseHistories = new HashMap<>();
-    private int maxOtherPoseHistorySize = 0;
 
     private VRAPIImpl() {
     }
@@ -39,7 +37,7 @@ public final class VRAPIImpl implements VRAPI {
         Map<UUID, VRPoseHistoryImpl> poseHistories = this.getMap(isClientSide);
         VRPoseHistoryImpl poseHistory = poseHistories.get(player);
         if (poseHistory == null) {
-            poseHistory = new VRPoseHistoryImpl(false);
+            poseHistory = new VRPoseHistoryImpl();
             poseHistories.put(player, poseHistory);
         }
         poseHistory.addPose(pose);
@@ -48,10 +46,6 @@ public final class VRAPIImpl implements VRAPI {
     public void clearAllPoseHistories() {
         this.clientPoseHistories.clear();
         this.serverPoseHistories.clear();
-    }
-
-    public int maxOtherPoseHistorySize() {
-        return this.maxOtherPoseHistorySize;
     }
 
     @Override
@@ -73,15 +67,6 @@ public final class VRAPIImpl implements VRAPI {
         } else {
             return ClientVRPlayers.getInstance().getRotationsForPlayer(player.getUUID()).asVRPose(player.position());
         }
-    }
-
-    @Override
-    public void requestTicksOfHistory(int maxTicksBack) throws IllegalArgumentException {
-        if (maxTicksBack <= 0) {
-            throw new IllegalArgumentException("Must call requestTicksOfHistory() with a positive number.");
-        }
-        this.maxOtherPoseHistorySize = Math.max(this.maxOtherPoseHistorySize,
-            Math.min(maxTicksBack, VRAPIImpl.MAX_CONFIGURABLE_HISTORY_TICKS));
     }
 
     @Override

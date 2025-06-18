@@ -6,7 +6,6 @@ import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
-import org.vivecraft.client.api_impl.VRClientAPIImpl;
 import org.vivecraft.common.api_impl.VRAPIImpl;
 
 import java.util.ArrayList;
@@ -18,15 +17,13 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     // Holds historical VRPose data. The index into here is simply the number of ticks back that data is, with index
     // 0 being 0 ticks back.
     private final LinkedList<VRPose> dataQueue = new LinkedList<>();
-    private final boolean isLocalPlayer;
 
-    public VRPoseHistoryImpl(boolean isLocalPlayer) {
-        this.isLocalPlayer = isLocalPlayer;
-    }
+    public VRPoseHistoryImpl() {}
 
     public void addPose(VRPose pose) {
         this.dataQueue.addFirst(pose);
-        if (this.dataQueue.size() > maxTicksOfHistory() + 1) {
+        // + 1 here since index 0 is 0 ticks back.
+        if (this.dataQueue.size() > VRAPIImpl.MAX_HISTORY_TICKS + 1) {
             this.dataQueue.removeLast();
         }
     }
@@ -37,11 +34,11 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
 
     @Override
     public int ticksOfHistory() {
-        return this.dataQueue.size();
+        return this.dataQueue.size() - 1;
     }
 
     @Override
-    public List<VRPose> getAllHistoricalData() throws IllegalArgumentException {
+    public List<VRPose> getAllHistoricalData() {
         return List.copyOf(this.dataQueue);
     }
 
@@ -152,14 +149,8 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
     }
 
     private void checkTicksBack(int ticksBack) {
-        if (ticksBack < 0 || ticksBack > maxTicksOfHistory()) {
-            // Throw a different exception when no history was requested to help guide mod authors.
-            if (maxTicksOfHistory() == 0) {
-                throw new IllegalArgumentException("No amount of VRPoseHistory was requested. See " +
-                    "requestTicksOfHistory() in VRAPI and VRClientAPI.");
-            } else {
-                throw new IllegalArgumentException("Value must be between 0 and " + maxTicksOfHistory() + ".");
-            }
+        if (ticksBack < 0 || ticksBack > VRAPIImpl.MAX_HISTORY_TICKS) {
+            throw new IllegalArgumentException("Value must be between 0 and " + VRAPIImpl.MAX_HISTORY_TICKS + ".");
         }
     }
 
@@ -175,10 +166,5 @@ public class VRPoseHistoryImpl implements VRPoseHistory {
         } else {
             return maxTicksBack;
         }
-    }
-
-    private int maxTicksOfHistory() {
-        return this.isLocalPlayer ?
-            VRClientAPIImpl.INSTANCE.maxPoseHistorySize() : VRAPIImpl.INSTANCE.maxOtherPoseHistorySize();
     }
 }

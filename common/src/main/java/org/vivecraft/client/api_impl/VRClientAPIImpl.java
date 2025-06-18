@@ -19,8 +19,7 @@ public final class VRClientAPIImpl implements VRClientAPI {
 
     public static final VRClientAPIImpl INSTANCE = new VRClientAPIImpl();
 
-    private final VRPoseHistoryImpl poseHistory = new VRPoseHistoryImpl(true);
-    private int maxPoseHistorySize = 0;
+    private final VRPoseHistoryImpl poseHistory = new VRPoseHistoryImpl();
 
     private VRClientAPIImpl() {
     }
@@ -31,10 +30,6 @@ public final class VRClientAPIImpl implements VRClientAPI {
 
     public void addPoseToHistory(VRPose pose) {
         this.poseHistory.addPose(pose);
-    }
-
-    public int maxPoseHistorySize() {
-        return this.maxPoseHistorySize;
     }
 
     @Nullable
@@ -137,18 +132,9 @@ public final class VRClientAPIImpl implements VRClientAPI {
     }
 
     @Override
-    public void requestTicksOfHistory(int maxTicksBack) throws IllegalArgumentException {
-        if (maxTicksBack <= 0) {
-            throw new IllegalArgumentException("Must call requestTicksOfHistory() with a positive number.");
-        }
-        this.maxPoseHistorySize = Math.max(this.maxPoseHistorySize,
-            Math.min(maxTicksBack, VRAPIImpl.MAX_CONFIGURABLE_HISTORY_TICKS));
-    }
-
-    @Override
     @Nullable
     public VRPoseHistory getHistoricalVRPoses() {
-        if (!isVRActive() || this.maxPoseHistorySize <= 0) {
+        if (!isVRActive()) {
             return null;
         }
         return this.poseHistory;
