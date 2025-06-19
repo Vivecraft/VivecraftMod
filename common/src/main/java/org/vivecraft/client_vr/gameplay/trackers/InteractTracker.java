@@ -32,8 +32,8 @@ public class InteractTracker implements Tracker {
     private final List<InteractModule> postAPIModules;
 
     private List<InteractModule> modules;
-
-    public final InteractModule[] activeModules = new InteractModule[2];
+    private final InteractModule[] activeModules = new InteractModule[2];
+    private final boolean[] pressed = new boolean[2];
 
     protected Minecraft mc;
     protected ClientDataHolderVR dh;
@@ -88,9 +88,10 @@ public class InteractTracker implements Tracker {
     }
 
     private void reset(LocalPlayer player, int c) {
-        if (this.activeModules[c] instanceof HeldInteractModule heldModule) {
+        if (this.pressed[c] && this.activeModules[c] instanceof HeldInteractModule heldModule) {
             heldModule.onRelease(player, InteractionHand.values()[c]);
         }
+        this.pressed[c] = false;
         this.activeModules[c] = null;
         this.modules.forEach(module -> module.reset(player, InteractionHand.values()[c]));
 
@@ -162,6 +163,7 @@ public class InteractTracker implements Tracker {
             if (VivecraftVRMod.INSTANCE.keyVRInteract.consumeClick(ControllerType.values()[c]) &&
                 this.activeModules[c] != null)
             {
+                this.pressed[c] = true;
                 InteractionHand hand = InteractionHand.values()[c];
                 if (this.activeModules[c].onPress(this.mc.player, hand)) {
                     if (this.activeModules[c].swingsArm()) {
